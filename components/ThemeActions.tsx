@@ -31,7 +31,16 @@ export default function ThemeActions({ themeId, isPro, content, colors, name }: 
       setLoading(true)
       try {
         const res = await fetch('/api/checkout', { method: 'POST' })
-        const data = await res.json()
+        
+        let data;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            data = await res.json();
+        } else {
+             if (!res.ok) throw new Error(`Server error: ${res.status}`);
+             throw new Error('Invalid response');
+        }
+
         if (data.url) {
           window.location.href = data.url
         } else {
@@ -98,7 +107,17 @@ export default function ThemeActions({ themeId, isPro, content, colors, name }: 
             })
         })
         
-        const data = await res.json()
+        let data;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            data = await res.json();
+        } else {
+             // If not JSON (e.g. 405 HTML page or empty), handle gracefully
+             if (!res.ok) {
+                 throw new Error(`Server error: ${res.status} ${res.statusText}`);
+             }
+             throw new Error('Invalid server response (not JSON)');
+        }
         
         if (res.status === 401 || data.error?.includes('No session') || data.error?.includes('session')) {
             const install = confirm(`We need to connect to ${shopDomain} first. Click OK to authorize Zenya.`)
