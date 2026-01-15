@@ -4,6 +4,11 @@ import { DataType } from '@shopify/shopify-api';
 import { prepareThemeZip } from '@/utils/shopify-generator';
 
 export async function POST(req: NextRequest) {
+  // Handle OPTIONS request for CORS if needed (though Next.js usually handles this)
+  if (req.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 200 });
+  }
+
   try {
     const body = await req.json();
     const { shop, themeData } = body;
