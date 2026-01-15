@@ -6,7 +6,14 @@ import { prepareThemeZip } from '@/utils/shopify-generator';
 export async function POST(req: NextRequest) {
   // Handle OPTIONS request for CORS if needed (though Next.js usually handles this)
   if (req.method === 'OPTIONS') {
-    return new NextResponse(null, { status: 200 });
+    return new NextResponse(null, { 
+        status: 200, 
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        } 
+    });
   }
 
   try {
