@@ -1,0 +1,52 @@
+{
+  "name": "zenya-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "shopify": "shopify",
+    "dev:shopify": "concurrently \"npm run dev\" \"shopify app dev\""
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "@shopify/app-bridge-react": "^4.2.8",
+    "@shopify/app-bridge-types": "^0.5.3",
+    "@shopify/shopify-api": "^12.2.0",
+    "@shopify/shopify-app-session-storage-prisma": "^8.0.0",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.44.2",
+    "autoprefixer": "^10.4.19",
+    "cheerio": "^1.0.0",
+    "file-saver": "^2.0.5",
+    "framer-motion": "^11.0.0",
+    "jszip": "^3.10.1",
+    "next": "^14.2.0",
+    "openai": "^4.0.0",
+    "postcss": "^8.4.35",
+    "prisma": "^6.19.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "stripe": "^14.0.0",
+    "tailwindcss": "^3.4.10",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@shopify/app": "^3.58.2",
+    "@shopify/cli": "^3.88.1",
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}

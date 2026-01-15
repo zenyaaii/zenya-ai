@@ -1,0 +1,299 @@
+"use client"
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
+import VolumeBundles from './VolumeBundles'
+import Upsell from './Upsell'
+import TrustBadges from './TrustBadges'
+
+export default function ProductPage({ 
+  primaryColor, 
+  productName = "Premium Bundle", 
+  price = 49.99,
+  images = [],
+  onBack,
+  onAddToCart,
+  content
+}: { 
+  primaryColor: string
+  productName?: string
+  price?: number
+  images?: string[]
+  onBack: () => void
+  onAddToCart: () => void
+  content?: any
+}) {
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [quantity, setQuantity] = useState(1)
+  const [selectedSize, setSelectedSize] = useState('M')
+  const [selectedColor, setSelectedColor] = useState('Black')
+  const [timeLeft, setTimeLeft] = useState(12 * 60 * 60) // 12 hours in seconds
+  const [stockLeft, setStockLeft] = useState(14)
+  const [showSticky, setShowSticky] = useState(false)
+  const [upsellAdded, setUpsellAdded] = useState(false)
+
+  // Scroll listener for sticky bar
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowSticky(window.scrollY > 600)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Countdown Timer Logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev > 0 ? prev - 1 : 0)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    const s = seconds % 60
+    return `${h}h ${m}m ${s}s`
+  }
+
+  // Safe images
+  const safeImages = images.length > 0 ? images : [
+    'https://placehold.co/600x600/e2e8f0/1e293b?text=Product+Image',
+    'https://placehold.co/600x600/f1f5f9/1e293b?text=Side+View',
+    'https://placehold.co/600x600/f8fafc/1e293b?text=Detail+View'
+  ];
+
+  // Calculate total price
+  let totalPrice = 100;
+
+  return (
+    <div className="min-h-screen bg-white pb-20 pt-4 font-sans text-slate-900 lg:pt-10">
+      {/* Sticky Mobile Add To Cart */}
+      <motion.div 
+        initial={{ y: 100 }}
+        animate={{ y: showSticky ? 0 : 100 }}
+        className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white p-4 shadow-xl lg:hidden"
+      >
+        <button 
+          onClick={onAddToCart}
+          className="w-full rounded-full py-3 font-bold text-white shadow-lg"
+          style={{ backgroundColor: primaryColor }}
+        >
+          Add to Cart - ${totalPrice.toFixed(2)}
+        </button>
+      </motion.div>
+
+      <div className="mx-auto max-w-7xl px-4 lg:px-6">
+        {/* Breadcrumb */}
+        <nav className="mb-6 flex items-center text-sm text-slate-500">
+          <button onClick={onBack} className="hover:text-slate-900 hover:underline">Home</button>
+          <span className="mx-2">/</span>
+          <span className="font-medium text-slate-900 line-clamp-1">{productName}</span>
+        </nav>
+
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
+          {/* Left Column: Images (LG: 7 cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-slate-100 lg:rounded-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full w-full"
+                >
+                   <Image 
+                     src={safeImages[selectedImage]} 
+                     alt={productName} 
+                     fill 
+                     className="object-cover" 
+                     priority
+                     sizes="(max-width: 768px) 100vw, 60vw"
+                   />
+                </motion.div>
+              </AnimatePresence>
+              <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm">
+                Sale -50%
+              </div>
+            </div>
+            
+            {/* Thumbnails Grid */}
+            <div className="grid grid-cols-5 gap-3">
+              {safeImages.map((img, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setSelectedImage(i)}
+                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition ${
+                    selectedImage === i ? 'border-slate-900 ring-1 ring-slate-900' : 'border-transparent hover:border-slate-300'
+                  }`}
+                >
+                  <Image src={img} alt={`View ${i}`} fill className="object-cover" sizes="100px" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Product Details (LG: 5 cols) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 h-fit">
+            
+            {/* Title & Rating */}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex text-yellow-400 text-sm">★★★★★</div>
+                <span className="text-sm text-slate-500 underline decoration-slate-300 underline-offset-2">1,234 Reviews</span>
+              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl">{productName}</h1>
+            </div>
+
+            {/* Price */}
+            <div className="mb-6 flex items-end gap-3 border-b border-slate-100 pb-6">
+               <span className="text-4xl font-bold text-slate-900">${price}</span>
+               <span className="mb-1.5 text-xl text-slate-400 line-through">${(price * 2).toFixed(2)}</span>
+               <span className="mb-2 rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">SAVE $50.00</span>
+            </div>
+
+            {/* Scarcity & Urgency */}
+            <div className="mb-8 space-y-3 rounded-lg border border-red-100 bg-red-50 p-4">
+               <div className="flex items-center justify-between text-sm font-bold text-red-800">
+                 <div className="flex items-center gap-2">
+                   <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                   </span>
+                   Only {stockLeft} items left!
+                 </div>
+                 <div>Ends in: {formatTime(timeLeft)}</div>
+               </div>
+               <div className="h-2 w-full overflow-hidden rounded-full bg-red-200">
+                 <div className="h-full rounded-full bg-red-500" style={{ width: `${(stockLeft/50)*100}%` }}></div>
+               </div>
+            </div>
+
+            {/* Selectors */}
+            <div className="space-y-6">
+              {/* Color Swatches */}
+              <div>
+                <span className="mb-3 block text-sm font-bold text-slate-900">Color: <span className="font-normal text-slate-500">{selectedColor}</span></span>
+                <div className="flex flex-wrap gap-3">
+                  {['Black', 'White', 'Navy', 'Red'].map(color => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`h-12 px-6 rounded-lg border-2 text-sm font-medium transition flex items-center justify-center min-w-[80px] ${
+                        selectedColor === color 
+                          ? 'border-slate-900 bg-slate-50 text-slate-900' 
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <VolumeBundles 
+                price={price} 
+                primaryColor={primaryColor} 
+                onChange={setQuantity} 
+              />
+
+              {/* CTA Buttons */}
+              <div className="mt-8 space-y-3">
+                <button 
+                  onClick={onAddToCart}
+                  className="w-full rounded-full py-4 text-lg font-bold text-white shadow-xl transition hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  <span>Add to Cart</span>
+                  <span className="h-1 w-1 rounded-full bg-white opacity-50"></span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </button>
+                
+                <button onClick={onAddToCart} className="relative w-full overflow-hidden rounded-full bg-[#ffc439] py-4 text-lg font-bold text-black shadow-md transition hover:bg-[#ffb800] active:scale-[0.98]">
+                   <span className="relative z-10">Buy with PayPal</span>
+                </button>
+              </div>
+
+              {/* Upsell */}
+              <Upsell 
+                primaryColor={primaryColor} 
+                mainProductImage={safeImages[0]}
+                onAdd={() => setUpsellAdded(true)}
+              />
+
+              {/* Trust Badges */}
+              <TrustBadges />
+
+              {/* Accordions */}
+            <div className="mt-10 divide-y divide-slate-100 border-t border-slate-100">
+              <details className="group py-4" open>
+                 <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-slate-900">
+                   Description
+                   <span className="transition group-open:rotate-180">▼</span>
+                 </summary>
+                 <div className="mt-4 text-sm leading-relaxed text-slate-600 space-y-4">
+                   <p>{content?.solution?.text || `Elevate your lifestyle with the ${productName}. Meticulously crafted for performance and style, this premium item features state-of-the-art materials ensuring durability and comfort.`}</p>
+                   {content?.features ? (
+                     <ul className="list-disc pl-5 space-y-1">
+                       {content.features.map((f: any, i: number) => (
+                         <li key={i}><strong>{f.title}:</strong> {f.desc}</li>
+                       ))}
+                     </ul>
+                   ) : (
+                     <ul className="list-disc pl-5 space-y-1">
+                       <li>Premium Quality Material</li>
+                       <li>Designed for maximum comfort</li>
+                       <li>Long-lasting durability</li>
+                       <li>Modern and sleek aesthetic</li>
+                     </ul>
+                   )}
+                 </div>
+              </details>
+              <details className="group py-4">
+                 <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-slate-900">
+                   Shipping & Delivery
+                   <span className="transition group-open:rotate-180">▼</span>
+                 </summary>
+                 <div className="mt-4 text-sm leading-relaxed text-slate-600">
+                   <p className="mb-2"><strong>Free Worldwide Shipping</strong></p>
+                   <p>All orders are processed within 24-48 hours. Shipping times depend on your location:</p>
+                   <ul className="list-disc pl-5 mt-2 space-y-1">
+                     <li>USA & Canada: 5-8 business days</li>
+                     <li>Europe: 6-10 business days</li>
+                     <li>Rest of World: 8-14 business days</li>
+                   </ul>
+                 </div>
+              </details>
+              <details className="group py-4">
+                 <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-slate-900">
+                   Guarantee
+                   <span className="transition group-open:rotate-180">▼</span>
+                 </summary>
+                 <div className="mt-4 text-sm leading-relaxed text-slate-600">
+                   {content?.guarantee?.text || "We stand by our products with a 1-year comprehensive warranty against manufacturing defects. If you're not happy, we'll make it right."}
+                 </div>
+              </details>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Extra CTA Section */}
+        <div className="mt-20 rounded-2xl bg-slate-50 p-8 text-center md:p-12">
+           <h2 className="mb-4 text-2xl font-bold text-slate-900 md:text-3xl">Why Wait? Upgrade Your Life Today.</h2>
+           <p className="mx-auto mb-8 max-w-xl text-slate-600">Join thousands of satisfied customers who have already made the switch. Limited stock available.</p>
+           <button 
+             onClick={onAddToCart}
+             className="inline-flex items-center justify-center rounded-full px-8 py-4 text-lg font-bold text-white shadow-xl transition hover:scale-105 active:scale-95"
+             style={{ backgroundColor: primaryColor }}
+           >
+             Get Yours Now
+           </button>
+        </div>
+      </div>
+    </div>
+  )
+}

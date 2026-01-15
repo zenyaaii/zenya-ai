@@ -1,0 +1,26 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "63165fc32b2e78d8ed65431eaca6730c"
+name = "Zenya AI"
+application_url = "https://zenyaai.co"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2026-01"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/api/webhooks/shopify"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,read_themes,write_products,write_themes"
+
+[auth]
+redirect_urls = [
+  "https://zenyaai.co/api/shopify/callback",
+  "https://zenyaai.co/api/auth/callback"
+]
