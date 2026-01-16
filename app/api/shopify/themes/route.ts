@@ -3,19 +3,22 @@ import { shopify } from '@/lib/shopify';
 import { DataType } from '@shopify/shopify-api';
 import { prepareThemeZip } from '@/utils/shopify-generator';
 
-export async function POST(req: NextRequest) {
-  // Handle OPTIONS request for CORS if needed (though Next.js usually handles this)
-  if (req.method === 'OPTIONS') {
-    return new NextResponse(null, { 
-        status: 200, 
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        } 
-    });
-  }
+export async function OPTIONS() {
+  return new NextResponse(null, { 
+      status: 200, 
+      headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      } 
+  });
+}
 
+export async function GET() {
+  return NextResponse.json({ message: 'Theme API is working. Use POST to create a theme.' });
+}
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { shop, themeData } = body;
