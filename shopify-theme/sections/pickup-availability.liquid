@@ -1,0 +1,36 @@
+{% comment %}
+  Pickup Availability Section
+  Fetched dynamically via JS when variant changes
+{% endcomment %}
+
+{%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+
+{%- if pick_up_availabilities.size > 0 -%}
+  <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 animate-fade-in">
+    <div class="text-slate-700 mt-0.5">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+    </div>
+    <div class="flex-1">
+      {%- assign closest_location = pick_up_availabilities.first -%}
+      {%- if closest_location.available -%}
+        <p class="font-bold text-slate-900 text-sm mb-0.5">Pickup available at {{ closest_location.location.name }}</p>
+        <p class="text-slate-500 text-xs">{{ closest_location.pick_up_time }}</p>
+      {%- else -%}
+        <p class="font-bold text-slate-900 text-sm mb-0.5">Check availability at nearby stores</p>
+      {%- endif -%}
+      
+      {%- if pick_up_availabilities.size > 1 -%}
+        <button class="text-xs font-bold text-primary hover:underline mt-2">
+          Check {{ pick_up_availabilities.size | minus: 1 }} other stores
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Pickup Availability",
+  "settings": []
+}
+{% endschema %}

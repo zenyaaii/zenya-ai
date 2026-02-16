@@ -1,0 +1,97 @@
+﻿﻿
+<div class="overflow-hidden whitespace-nowrap py-4" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="inline-flex animate-marquee">
+    {% for block in section.blocks %}
+      <span class="text-xl font-bold uppercase tracking-widest mx-4" {{ block.shopify_attributes }}>{{ block.settings.text }}</span>
+    {% endfor %}
+    {% comment %} Duplicate for infinite scroll effect {% endcomment %}
+    {% for block in section.blocks %}
+      <span class="text-xl font-bold uppercase tracking-widest mx-4" aria-hidden="true">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% for block in section.blocks %}
+      <span class="text-xl font-bold uppercase tracking-widest mx-4" aria-hidden="true">{{ block.settings.text }}</span>
+    {% endfor %}
+    {% if section.blocks.size == 0 %}
+       {% for i in (1..10) %}
+        <span class="text-xl font-bold uppercase tracking-widest mx-4">{{ section.settings.text }}</span>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+<style>
+  .animate-marquee { animation: marquee {{ section.settings.speed }}s linear infinite; }
+  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+</style>
+{% schema %}
+{
+    "name":  "Scrolling Text",
+    "settings":  [
+                     {
+                         "type":  "text",
+                         "id":  "text",
+                         "label":  "Default Text (if no blocks)",
+                         "default":  "FREE SHIPPING ON ALL ORDERS â€¢ 30-DAY MONEY BACK GUARANTEE â€¢ 24/7 SUPPORT â€¢ "
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "speed",
+                         "label":  "Speed",
+                         "min":  10,
+                         "max":  60,
+                         "default":  20
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "text_block",
+                       "name":  "Text Block",
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "text",
+                                            "label":  "Text",
+                                            "default":  "Free Shipping"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Scroll",
+                        "blocks":  [
+                                       {
+                                           "type":  "text_block",
+                                           "settings":  {
+                                                            "text":  "Free Shipping"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "text_block",
+                                           "settings":  {
+                                                            "text":  "Sale Now On"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "text_block",
+                                           "settings":  {
+                                                            "text":  "New Arrivals"
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}
+  

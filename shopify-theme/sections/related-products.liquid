@@ -1,0 +1,58 @@
+<div 
+  class="py-12 lg:py-16 border-t border-slate-100"
+  x-data="{
+    loading: true,
+    loaded: false
+  }"
+  x-init="
+    fetch('{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}')
+      .then(response => response.text())
+      .then(text => {
+        const html = new DOMParser().parseFromString(text, 'text/html');
+        const recommendations = html.querySelector('.product-recommendations');
+        if (recommendations && recommendations.innerHTML.trim().length) {
+          $el.querySelector('.product-recommendations').innerHTML = recommendations.innerHTML;
+          loaded = true;
+        }
+        loading = false;
+      })
+  "
+  x-show="loaded"
+  x-cloak
+>
+  <div class="container mx-auto px-4 lg:px-6">
+    <h2 class="text-2xl lg:text-3xl font-extrabold text-slate-900 mb-8">{{ section.settings.heading }}</h2>
+    
+    <div class="product-recommendations grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8">
+      <!-- Products will be injected here -->
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Related Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "You May Also Like"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "Maximum products to show"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Related Products"
+    }
+  ]
+}
+{% endschema %}

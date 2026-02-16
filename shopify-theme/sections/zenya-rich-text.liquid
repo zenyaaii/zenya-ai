@@ -1,0 +1,266 @@
+﻿﻿<div class="relative" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  {% if section.settings.bg_image != blank %}
+    <div class="absolute inset-0 z-0">
+      <img src="{{ section.settings.bg_image | image_url: width: 1600 }}" class="w-full h-full object-cover" loading="lazy">
+      <div class="absolute inset-0 bg-black" style="opacity: {{ section.settings.overlay_opacity }}%;"></div>
+    </div>
+  {% endif %}
+
+  <div class="relative z-10 container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px; text-align: {{ section.settings.align }}">
+    {% if section.settings.title != blank %}
+      <h2 class="font-bold mb-6" style="color: {{ section.settings.heading_color }}; font-size: {{ section.settings.heading_size }}px;">{{ section.settings.title }}</h2>
+    {% endif %}
+    
+    {% if section.settings.show_divider %}
+      <div class="mx-auto mb-8 rounded" style="background-color: {{ section.settings.divider_color }}; width: {{ section.settings.divider_width }}px; height: {{ section.settings.divider_height }}px; {% if section.settings.align == 'left' %} margin-left: 0; {% elsif section.settings.align == 'right' %} margin-right: 0; {% endif %}"></div>
+    {% endif %}
+
+    {% if section.settings.text != blank %}
+      <div class="leading-relaxed prose prose-slate mx-auto" style="color: {{ section.settings.text_color }}; max-width: 100%; font-size: {{ section.settings.text_size }}px;">
+        {{ section.settings.text }}
+      </div>
+    {% endif %}
+    
+    {% if section.settings.cta_text != blank %}
+      <div class="mt-10">
+        <a href="{{ section.settings.cta_url }}" 
+           class="inline-block px-8 py-3.5 font-bold transition duration-300 hover:opacity-90 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" 
+           {% if section.settings.btn_style == 'outline' %}
+             style="border: 2px solid {{ section.settings.btn_bg }}; color: {{ section.settings.btn_bg }}; background: transparent; border-radius: {{ section.settings.btn_radius }}px;"
+           {% else %}
+             style="background-color: {{ section.settings.btn_bg }}; color: {{ section.settings.btn_text }}; border-radius: {{ section.settings.btn_radius }}px;"
+           {% endif %}>
+          {{ section.settings.cta_text }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+    "name":  "Rich Text",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Our Brand Story"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "heading_size",
+                         "label":  "Heading Size",
+                         "options":  [
+                                         {
+                                             "value":  "text-2xl",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "text-3xl",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "text-4xl",
+                                             "label":  "Large"
+                                         },
+                                         {
+                                             "value":  "text-5xl",
+                                             "label":  "Extra Large"
+                                         }
+                                     ],
+                         "default":  "text-3xl"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_divider",
+                         "label":  "Show Divider",
+                         "default":  false
+                     },
+                     {
+                         "type":  "richtext",
+                         "id":  "text",
+                         "label":  "Text",
+                         "default":  "\u003cp\u003eShare information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.\u003c/p\u003e"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "text_size",
+                         "label":  "Text Size",
+                         "options":  [
+                                         {
+                                             "value":  "text-base",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "text-lg",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "text-xl",
+                                             "label":  "Large"
+                                         }
+                                     ],
+                         "default":  "text-lg"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "cta_text",
+                         "label":  "Button Label"
+                     },
+                     {
+                         "type":  "url",
+                         "id":  "cta_url",
+                         "label":  "Button Link"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "btn_radius",
+                         "min":  0,
+                         "max":  50,
+                         "step":  2,
+                         "unit":  "px",
+                         "label":  "Button Corner Radius",
+                         "default":  50
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "align",
+                         "label":  "Alignment",
+                         "options":  [
+                                         {
+                                             "value":  "left",
+                                             "label":  "Left"
+                                         },
+                                         {
+                                             "value":  "center",
+                                             "label":  "Center"
+                                         },
+                                         {
+                                             "value":  "right",
+                                             "label":  "Right"
+                                         }
+                                     ],
+                         "default":  "center"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "container_width",
+                         "min":  400,
+                         "max":  1200,
+                         "step":  50,
+                         "unit":  "px",
+                         "label":  "Container Width",
+                         "default":  800
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "image_picker",
+                         "id":  "bg_image",
+                         "label":  "Background Image"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "overlay_opacity",
+                         "min":  0,
+                         "max":  100,
+                         "step":  5,
+                         "unit":  "%",
+                         "label":  "Image Overlay Opacity",
+                         "default":  50
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "divider_color",
+                         "label":  "Divider Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "btn_style",
+                         "label":  "Button Style",
+                         "options":  [
+                                         {
+                                             "value":  "solid",
+                                             "label":  "Solid"
+                                         },
+                                         {
+                                             "value":  "outline",
+                                             "label":  "Outline"
+                                         }
+                                     ],
+                         "default":  "solid"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "btn_bg",
+                         "label":  "Button Background / Border",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "btn_text",
+                         "label":  "Button Text",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  80
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  80
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Text"
+                    }
+                ]
+}
+{% endschema %}

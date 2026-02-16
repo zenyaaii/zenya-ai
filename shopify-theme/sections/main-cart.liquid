@@ -1,0 +1,135 @@
+
+<div class="py-20 bg-slate-50 min-h-[60vh]">
+  <div class="container mx-auto px-6 max-w-4xl">
+    <h1 class="text-4xl font-extrabold text-slate-900 mb-8 text-center">{{ section.settings.title }}</h1>
+    {% if cart.item_count > 0 %}
+      <form action="{{ routes.cart_url }}" method="post" novalidate class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-6 md:p-8 space-y-8">
+          <div class="space-y-6">
+            {% for item in cart.items %}
+              <div class="flex items-center gap-6 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
+                <div class="w-24 h-24 shrink-0 bg-slate-100 rounded-lg overflow-hidden relative">
+                  {% if item.image %}
+                    <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.title | escape }}" width="200" height="200" class="w-full h-full object-cover">
+                  {% else %}
+                    {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover opacity-50' }}
+                  {% endif %}
+                </div>
+                <div class="flex-1">
+                  <a href="{{ item.url }}" class="font-bold text-slate-900 hover:text-primary transition text-lg">{{ item.product.title }}</a>
+                  {% unless item.product.has_only_default_variant %}
+                    <p class="text-slate-500 text-sm mt-1">{{ item.variant.title }}</p>
+                  {% endunless %}
+
+                  {% if item.selling_plan_allocation %}
+                    <p class="text-slate-500 text-sm mt-1">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                  {% endif %}
+
+                  {% if item.unit_price_measurement %}
+                    <div class="text-xs text-slate-500 mt-1">
+                      {{ item.unit_price | money }} / 
+                      {% if item.unit_price_measurement.reference_value != 1 %}
+                        {{ item.unit_price_measurement.reference_value }}
+                      {% endif %}
+                      {{ item.unit_price_measurement.reference_unit }}
+                    </div>
+                  {% endif %}
+
+                  <div class="mt-2 text-sm text-slate-500">
+                    {{ item.final_price | money }}
+                  </div>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden">
+                    <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}" class="px-3 py-1 hover:bg-slate-50 transition">-</a>
+                    <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" class="w-12 text-center border-none focus:ring-0 p-0 text-sm font-bold">
+                    <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}" class="px-3 py-1 hover:bg-slate-50 transition">+</a>
+                  </div>
+                  <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity=0" class="text-red-500 hover:text-red-700 p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          
+          <div class="border-t border-slate-100 pt-8">
+            {% if section.settings.show_notes %}
+              <div class="mb-6">
+                <label for="CartNote" class="block text-sm font-bold text-slate-900 mb-2">Order Instructions / Notes</label>
+                <textarea name="note" id="CartNote" class="w-full border-slate-200 rounded-lg focus:ring-primary focus:border-primary" rows="4">{{ cart.note }}</textarea>
+              </div>
+            {% endif %}
+            <div class="flex justify-between items-end mb-6">
+              <span class="text-slate-600 font-medium">Subtotal</span>
+              <span class="text-3xl font-extrabold text-slate-900">{{ cart.total_price | money }}</span>
+            </div>
+            <p class="text-slate-500 text-sm mb-8 text-right">Taxes and shipping calculated at checkout</p>
+            <div class="flex flex-col gap-4">
+              <button type="submit" name="checkout" class="w-full py-4 bg-primary text-white font-bold rounded-xl text-lg hover:brightness-110 transition shadow-lg" style="background-color: {{ settings.primary_color }};">Check Out</button>
+              
+              {% if additional_checkout_buttons %}
+                <div class="dynamic-checkout-buttons mt-4">
+                  {{ content_for_additional_checkout_buttons }}
+                </div>
+              {% endif %}
+
+              <a href="{{ routes.all_products_collection_url }}" class="text-center text-slate-600 font-bold hover:text-slate-900 transition">Continue Shopping</a>
+            </div>
+          </div>
+        </div>
+      </form>
+    {% else %}
+      <div class="text-center py-12">
+        <div class="text-6xl mb-6">🛒</div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-4">{{ section.settings.empty_title }}</h2>
+        <p class="text-slate-600 mb-8">{{ section.settings.empty_text }}</p>
+        <a href="{{ routes.all_products_collection_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition hover:opacity-90 hover:scale-105" style="background-color: {{ settings.primary_color }};">
+          {{ section.settings.continue_shopping_label }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Cart",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Your Cart"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_notes",
+      "label": "Show Order Notes",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Empty Cart"
+    },
+    {
+      "type": "text",
+      "id": "empty_title",
+      "label": "Empty Title",
+      "default": "Your cart is empty"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty Text",
+      "default": "Looks like you haven't added anything yet."
+    },
+    {
+      "type": "text",
+      "id": "continue_shopping_label",
+      "label": "Button Label",
+      "default": "Start Shopping"
+    }
+  ]
+}
+{% endschema %}
+  

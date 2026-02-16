@@ -1,0 +1,311 @@
+﻿<div class="py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6" style="max-width: {{ section.settings.width }}px;">
+    {% if section.settings.title != blank %}
+      <h2 class="text-{{ section.settings.heading_alignment }} text-3xl lg:text-4xl font-extrabold mb-12" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+    {% endif %}
+    
+    <div class="space-y-4" x-data="{ active: null }">
+      {% for block in section.blocks %}
+        <div class="transition duration-300 {% if section.settings.enable_boxed_style %}p-6 {{ section.settings.shadow_size }}{% else %}py-4 border-b{% endif %}" 
+             style="border-color: {{ section.settings.border_color }}; 
+                    {% if section.settings.enable_boxed_style %}
+                      background-color: {{ section.settings.item_bg_color }}; 
+                      border-radius: {{ section.settings.item_radius }}px; 
+                      margin-bottom: {{ section.settings.item_spacing }}px;
+                      border-width: {{ section.settings.border_width }}px;
+                      border-style: solid;
+                    {% endif %}">
+          <button 
+            @click="active = (active === {{ forloop.index0 }} ? null : {{ forloop.index0 }})" 
+            class="flex w-full items-center justify-between text-left font-bold focus:outline-none hover:opacity-80 transition"
+            style="color: {{ section.settings.question_color }}"
+          >
+            <span style="font-size: {{ section.settings.question_size }}px;">{{ block.settings.q }}</span>
+            <span class="ml-4 transform transition-transform duration-200 text-2xl" :class="active === {{ forloop.index0 }} ? 'rotate-180' : ''" style="color: {{ section.settings.icon_color }}">
+              {% if section.settings.icon_style == 'plus' %}
+                <span x-show="active !== {{ forloop.index0 }}">+</span>
+                <span x-show="active === {{ forloop.index0 }}">-</span>
+              {% else %}
+                â–¼
+              {% endif %}
+            </span>
+          </button>
+          <div 
+            x-show="active === {{ forloop.index0 }}" 
+            x-collapse 
+            class="mt-4 leading-relaxed"
+            style="color: {{ section.settings.answer_color }}; font-size: {{ section.settings.answer_size }}px;"
+          >
+            {{ block.settings.a }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "FAQ",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Frequently Asked Questions"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "width",
+                         "label":  "Content Width",
+                         "min":  400,
+                         "max":  1600,
+                         "step":  50,
+                         "default":  800,
+                         "unit":  "px"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "heading_alignment",
+                         "label":  "Heading Alignment",
+                         "options":  [
+                                         {
+                                             "value":  "left",
+                                             "label":  "Left"
+                                         },
+                                         {
+                                             "value":  "center",
+                                             "label":  "Center"
+                                         },
+                                         {
+                                             "value":  "right",
+                                             "label":  "Right"
+                                         }
+                                     ],
+                         "default":  "center"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Typography \u0026 Icon"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "question_size",
+                         "label":  "Question Font Size",
+                         "min":  14,
+                         "max":  24,
+                         "step":  1,
+                         "unit":  "px",
+                         "default":  18
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "answer_size",
+                         "label":  "Answer Font Size",
+                         "min":  14,
+                         "max":  20,
+                         "step":  1,
+                         "unit":  "px",
+                         "default":  16
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "icon_style",
+                         "label":  "Icon Style",
+                         "options":  [
+                                         {
+                                             "value":  "arrow",
+                                             "label":  "Arrow (â–¼)"
+                                         },
+                                         {
+                                             "value":  "plus",
+                                             "label":  "Plus/Minus (+/-)"
+                                         }
+                                     ],
+                         "default":  "arrow"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Boxed Style"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "enable_boxed_style",
+                         "label":  "Enable Boxed Items",
+                         "default":  false
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "border_width",
+                         "label":  "Border Width",
+                         "min":  0,
+                         "max":  5,
+                         "step":  1,
+                         "unit":  "px",
+                         "default":  1
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "shadow_size",
+                         "label":  "Shadow Size",
+                         "options":  [
+                                         {
+                                             "value":  "",
+                                             "label":  "None"
+                                         },
+                                         {
+                                             "value":  "shadow-sm",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "shadow-md",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "shadow-lg",
+                                             "label":  "Large"
+                                         },
+                                         {
+                                             "value":  "shadow-xl",
+                                             "label":  "Extra Large"
+                                         }
+                                     ],
+                         "default":  "shadow-sm"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "item_radius",
+                         "label":  "Item Corner Radius",
+                         "min":  0,
+                         "max":  30,
+                         "step":  2,
+                         "unit":  "px",
+                         "default":  8
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "item_spacing",
+                         "label":  "Space Between Items",
+                         "min":  0,
+                         "max":  32,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  16
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "item_bg_color",
+                         "label":  "Item Background (Boxed)",
+                         "default":  "#f8fafc"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "question_color",
+                         "label":  "Question Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "answer_color",
+                         "label":  "Answer Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "icon_color",
+                         "label":  "Icon Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "border_color",
+                         "label":  "Divider/Border Color",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  96
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  96
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "faq",
+                       "name":  "Question",
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "q",
+                                            "label":  "Question",
+                                            "default":  "Question goes here"
+                                        },
+                                        {
+                                            "type":  "textarea",
+                                            "id":  "a",
+                                            "label":  "Answer",
+                                            "default":  "Answer goes here"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "FAQ",
+                        "blocks":  [
+                                       {
+                                           "type":  "faq",
+                                           "settings":  {
+                                                            "q":  "Is it fast?",
+                                                            "a":  "Yes, very."
+                                                        }
+                                       },
+                                       {
+                                           "type":  "faq",
+                                           "settings":  {
+                                                            "q":  "Is it responsive?",
+                                                            "a":  "Yes, fully."
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}

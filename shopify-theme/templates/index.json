@@ -1,0 +1,564 @@
+﻿{
+    "sections":  {
+                     "slideshow":  {
+                                       "type":  "zenya-slideshow",
+                                       "blocks":  {
+                                                      "slide_1":  {
+                                                                      "type":  "slide",
+                                                                      "settings":  {
+                                                                                       "heading":  "Welcome to Zenya",
+                                                                                       "subheading":  "The Future of E-commerce",
+                                                                                       "cta_text":  "Shop Now",
+                                                                                       "btn_style":  "solid",
+                                                                                       "overlay_opacity":  30
+                                                                                   }
+                                                                  },
+                                                      "slide_2":  {
+                                                                      "type":  "slide",
+                                                                      "settings":  {
+                                                                                       "heading":  "New Collection",
+                                                                                       "subheading":  "Discover our latest arrivals",
+                                                                                       "cta_text":  "View Collection",
+                                                                                       "btn_style":  "outline",
+                                                                                       "overlay_opacity":  30
+                                                                                   }
+                                                                  }
+                                                  },
+                                       "block_order":  [
+                                                           "slide_1",
+                                                           "slide_2"
+                                                       ],
+                                       "settings":  {
+                                                        "desktop_height":  "650px",
+                                                        "mobile_height":  "500px",
+                                                        "speed":  5,
+                                                        "arrow_color":  "#ffffff",
+                                                        "dot_color":  "#ffffff"
+                                                    }
+                                   },
+                     "logo_list":  {
+                                       "type":  "zenya-logo-list",
+                                       "blocks":  {
+                                                      "logo_1":  {
+                                                                     "type":  "logo",
+                                                                     "settings":  {
+
+                                                                                  }
+                                                                 },
+                                                      "logo_2":  {
+                                                                     "type":  "logo",
+                                                                     "settings":  {
+
+                                                                                  }
+                                                                 },
+                                                      "logo_3":  {
+                                                                     "type":  "logo",
+                                                                     "settings":  {
+
+                                                                                  }
+                                                                 },
+                                                      "logo_4":  {
+                                                                     "type":  "logo",
+                                                                     "settings":  {
+
+                                                                                  }
+                                                                 }
+                                                  },
+                                       "block_order":  [
+                                                           "logo_1",
+                                                           "logo_2",
+                                                           "logo_3",
+                                                           "logo_4"
+                                                       ],
+                                       "settings":  {
+                                                        "title":  "As Seen In",
+                                                        "logo_opacity":  50,
+                                                        "grayscale":  true,
+                                                        "padding_top":  40,
+                                                        "padding_bottom":  40
+                                                    }
+                                   },
+                     "rich_text":  {
+                                       "type":  "zenya-rich-text",
+                                       "settings":  {
+                                                        "title":  "Our Brand Story",
+                                                        "text":  "\u003cp\u003eShare information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.\u003c/p\u003e",
+                                                        "align":  "center",
+                                                        "container_width":  800,
+                                                        "bg_color":  "#ffffff",
+                                                        "padding_top":  80,
+                                                        "padding_bottom":  80
+                                                    }
+                                   },
+                     "featured_collection":  {
+                                                 "type":  "zenya-featured-collection",
+                                                 "settings":  {
+                                                                  "title":  "Best Sellers",
+                                                                  "limit":  4,
+                                                                  "columns_desktop":  4,
+                                                                  "full_width":  false,
+                                                                  "padding_top":  60,
+                                                                  "padding_bottom":  60
+                                                              }
+                                             },
+                     "scrolling_text":  {
+                                            "type":  "zenya-scrolling-text",
+                                            "blocks":  {
+                                                           "text_1":  {
+                                                                          "type":  "text_block",
+                                                                          "settings":  {
+                                                                                           "text":  "Free Shipping Worldwide"
+                                                                                       }
+                                                                      },
+                                                           "text_2":  {
+                                                                          "type":  "text_block",
+                                                                          "settings":  {
+                                                                                           "text":  "30-Day Money Back Guarantee"
+                                                                                       }
+                                                                      },
+                                                           "text_3":  {
+                                                                          "type":  "text_block",
+                                                                          "settings":  {
+                                                                                           "text":  "Premium Quality"
+                                                                                       }
+                                                                      },
+                                                           "text_4":  {
+                                                                          "type":  "text_block",
+                                                                          "settings":  {
+                                                                                           "text":  "Secure Checkout"
+                                                                                       }
+                                                                      }
+                                                       },
+                                            "block_order":  [
+                                                                "text_1",
+                                                                "text_2",
+                                                                "text_3",
+                                                                "text_4"
+                                                            ],
+                                            "settings":  {
+                                                             "speed":  20,
+                                                             "bg_color":  "#0f172a",
+                                                             "text_color":  "#ffffff"
+                                                         }
+                                        },
+                     "image_with_text":  {
+                                             "type":  "zenya-image-text",
+                                             "settings":  {
+                                                              "layout":  "left",
+                                                              "title":  "Image with Text",
+                                                              "text":  "\u003cp\u003ePair text with an image to focus on your chosen product, collection, or blog post.\u003c/p\u003e",
+                                                              "cta_text":  "Learn More",
+                                                              "button_style":  "solid",
+                                                              "container_width":  1200,
+                                                              "bg_color":  "#f8fafc",
+                                                              "padding_top":  80,
+                                                              "padding_bottom":  80
+                                                          }
+                                         },
+                     "features":  {
+                                      "type":  "zenya-features",
+                                      "blocks":  {
+                                                     "feat_1":  {
+                                                                    "type":  "feature",
+                                                                    "settings":  {
+                                                                                     "title":  "Fast Shipping",
+                                                                                     "desc":  "We ship all orders within 24 hours."
+                                                                                 }
+                                                                },
+                                                     "feat_2":  {
+                                                                    "type":  "feature",
+                                                                    "settings":  {
+                                                                                     "title":  "Secure Payment",
+                                                                                     "desc":  "Your payment information is processed securely."
+                                                                                 }
+                                                                },
+                                                     "feat_3":  {
+                                                                    "type":  "feature",
+                                                                    "settings":  {
+                                                                                     "title":  "Online Support",
+                                                                                     "desc":  "24/7 customer support via chat and email."
+                                                                                 }
+                                                                }
+                                                 },
+                                      "block_order":  [
+                                                          "feat_1",
+                                                          "feat_2",
+                                                          "feat_3"
+                                                      ],
+                                      "settings":  {
+                                                       "title":  "Why Shop With Us",
+                                                       "columns_desktop":  3,
+                                                       "bg_color":  "#ffffff"
+                                                   }
+                                  },
+                     "comparison_table":  {
+                                              "type":  "zenya-comparison",
+                                              "blocks":  {
+                                                             "row_1":  {
+                                                                           "type":  "row",
+                                                                           "settings":  {
+                                                                                            "feature":  "Premium Quality Materials",
+                                                                                            "us_check":  true,
+                                                                                            "them_check":  false
+                                                                                        }
+                                                                       },
+                                                             "row_2":  {
+                                                                           "type":  "row",
+                                                                           "settings":  {
+                                                                                            "feature":  "24/7 Customer Support",
+                                                                                            "us_check":  true,
+                                                                                            "them_check":  false
+                                                                                        }
+                                                                       },
+                                                             "row_3":  {
+                                                                           "type":  "row",
+                                                                           "settings":  {
+                                                                                            "feature":  "30-Day Money Back Guarantee",
+                                                                                            "us_check":  true,
+                                                                                            "them_check":  false
+                                                                                        }
+                                                                       }
+                                                         },
+                                              "block_order":  [
+                                                                  "row_1",
+                                                                  "row_2",
+                                                                  "row_3"
+                                                              ],
+                                              "settings":  {
+                                                               "heading":  "Why Choose Us?",
+                                                               "us_label":  "Zenya",
+                                                               "them_label":  "Others",
+                                                               "container_width":  1000,
+                                                               "bg_color":  "#f8fafc"
+                                                           }
+                                          },
+                     "countdown_banner":  {
+                                              "type":  "zenya-countdown-banner",
+                                              "settings":  {
+                                                               "heading":  "Limited Time Offer",
+                                                               "subheading":  "Get 50% off on all new arrivals. Offer ends soon.",
+                                                               "date":  "2025-12-31",
+                                                               "btn_label":  "Shop Sale",
+                                                               "timer_style":  "cards",
+                                                               "bg_color":  "#000000",
+                                                               "text_color":  "#ffffff",
+                                                               "btn_bg":  "#ffffff",
+                                                               "btn_text":  "#000000"
+                                                           }
+                                          },
+                     "testimonials":  {
+                                          "type":  "zenya-testimonials",
+                                          "blocks":  {
+                                                         "testimonial_1":  {
+                                                                               "type":  "testimonial",
+                                                                               "settings":  {
+                                                                                                "name":  "Alice",
+                                                                                                "text":  "Amazing theme! It\u0027s so easy to customize and looks great on mobile.",
+                                                                                                "location":  "New York, NY",
+                                                                                                "stars":  5
+                                                                                            }
+                                                                           },
+                                                         "testimonial_2":  {
+                                                                               "type":  "testimonial",
+                                                                               "settings":  {
+                                                                                                "name":  "Bob",
+                                                                                                "text":  "Increased my sales by 20% in the first week. Highly recommended!",
+                                                                                                "location":  "Los Angeles, CA",
+                                                                                                "stars":  5
+                                                                                            }
+                                                                           },
+                                                         "testimonial_3":  {
+                                                                               "type":  "testimonial",
+                                                                               "settings":  {
+                                                                                                "name":  "Charlie",
+                                                                                                "text":  "Best investment ever. The support team is also very helpful.",
+                                                                                                "location":  "London, UK",
+                                                                                                "stars":  5
+                                                                                            }
+                                                                           }
+                                                     },
+                                          "block_order":  [
+                                                              "testimonial_1",
+                                                              "testimonial_2",
+                                                              "testimonial_3"
+                                                          ],
+                                          "settings":  {
+                                                           "title":  "What people are saying",
+                                                           "columns_desktop":  3,
+                                                           "bg_color":  "#ffffff",
+                                                           "heading_color":  "#0f172a",
+                                                           "text_color":  "#475569"
+                                                       }
+                                      },
+                     "faq":  {
+                                 "type":  "zenya-faq",
+                                 "blocks":  {
+                                                "faq_1":  {
+                                                              "type":  "faq",
+                                                              "settings":  {
+                                                                               "q":  "Is this theme compatible with Shopify 2.0?",
+                                                                               "a":  "Yes, Zenya is fully compatible with Online Store 2.0 features."
+                                                                           }
+                                                          },
+                                                "faq_2":  {
+                                                              "type":  "faq",
+                                                              "settings":  {
+                                                                               "q":  "Can I customize the colors?",
+                                                                               "a":  "Absolutely! You can customize all colors, fonts, and layout settings in the theme editor."
+                                                                           }
+                                                          },
+                                                "faq_3":  {
+                                                              "type":  "faq",
+                                                              "settings":  {
+                                                                               "q":  "Do you offer support?",
+                                                                               "a":  "Yes, we offer 24/7 support for all our customers."
+                                                                           }
+                                                          }
+                                            },
+                                 "block_order":  [
+                                                     "faq_1",
+                                                     "faq_2",
+                                                     "faq_3"
+                                                 ],
+                                 "settings":  {
+                                                  "title":  "Frequently Asked Questions",
+                                                  "width":  800,
+                                                  "enable_boxed_style":  true
+                                              }
+                             },
+                     "newsletter":  {
+                                        "type":  "zenya-newsletter",
+                                        "settings":  {
+                                                         "title":  "Join Our Community",
+                                                         "text":  "\u003cp\u003eSubscribe for exclusive offers and updates.\u003c/p\u003e",
+                                                         "btn_label":  "Subscribe",
+                                                         "bg_color":  "#0f172a",
+                                                         "heading_color":  "#ffffff",
+                                                         "text_color":  "#cbd5e1"
+                                                     }
+                                    },
+                     "shoppable_image":  {
+                                             "blocks":  {
+                                                            "hotspot_2":  {
+                                                                              "settings":  {
+                                                                                               "left":  70,
+                                                                                               "top":  60
+                                                                                           },
+                                                                              "type":  "hotspot"
+                                                                          },
+                                                            "hotspot_1":  {
+                                                                              "settings":  {
+                                                                                               "left":  40,
+                                                                                               "top":  40
+                                                                                           },
+                                                                              "type":  "hotspot"
+                                                                          }
+                                                        },
+                                             "block_order":  [
+                                                                 "hotspot_1",
+                                                                 "hotspot_2"
+                                                             ],
+                                             "type":  "zenya-shoppable-image",
+                                             "settings":  {
+
+                                                          }
+                                         },
+                     "video_hero":  {
+                                        "settings":  {
+                                                         "cta_url":  "",
+                                                         "heading":  "Cinematic Experience",
+                                                         "cta_text":  "Watch More",
+                                                         "subheading":  "Immerse your customers in your brand story."
+                                                     },
+                                        "type":  "zenya-video-hero"
+                                    },
+                     "blog_posts":  {
+                                        "settings":  {
+                                                         "title":  "Latest News",
+                                                         "columns_desktop":  3,
+                                                         "limit":  3
+                                                     },
+                                        "type":  "zenya-blog-posts"
+                                    },
+                     "trust_badges":  {
+                                          "blocks":  {
+                                                         "badge_2":  {
+                                                                         "settings":  {
+                                                                                          "subtitle":  "Encrypted checkout",
+                                                                                          "title":  "Secure Payment"
+                                                                                      },
+                                                                         "type":  "badge"
+                                                                     },
+                                                         "badge_4":  {
+                                                                         "settings":  {
+                                                                                          "subtitle":  "24/7 assistance",
+                                                                                          "title":  "Support"
+                                                                                      },
+                                                                         "type":  "badge"
+                                                                     },
+                                                         "badge_1":  {
+                                                                         "settings":  {
+                                                                                          "subtitle":  "On all orders",
+                                                                                          "title":  "Free Shipping"
+                                                                                      },
+                                                                         "type":  "badge"
+                                                                     },
+                                                         "badge_3":  {
+                                                                         "settings":  {
+                                                                                          "subtitle":  "30-day guarantee",
+                                                                                          "title":  "Money Back"
+                                                                                      },
+                                                                         "type":  "badge"
+                                                                     }
+                                                     },
+                                          "block_order":  [
+                                                              "badge_1",
+                                                              "badge_2",
+                                                              "badge_3",
+                                                              "badge_4"
+                                                          ],
+                                          "type":  "zenya-trust-badges",
+                                          "settings":  {
+                                                           "columns_desktop":  4
+                                                       }
+                                      },
+                     "multicolumn":  {
+                                         "blocks":  {
+                                                        "col_3":  {
+                                                                      "settings":  {
+                                                                                       "text":  "Hand-crafted excellence.",
+                                                                                       "title":  "Quality"
+                                                                                   },
+                                                                      "type":  "column"
+                                                                  },
+                                                        "col_1":  {
+                                                                      "settings":  {
+                                                                                       "text":  "Eco-friendly materials.",
+                                                                                       "title":  "Sustainable"
+                                                                                   },
+                                                                      "type":  "column"
+                                                                  },
+                                                        "col_2":  {
+                                                                      "settings":  {
+                                                                                       "text":  "Fair labor practices.",
+                                                                                       "title":  "Ethical"
+                                                                                   },
+                                                                      "type":  "column"
+                                                                  }
+                                                    },
+                                         "block_order":  [
+                                                             "col_1",
+                                                             "col_2",
+                                                             "col_3"
+                                                         ],
+                                         "type":  "zenya-multicolumn",
+                                         "settings":  {
+                                                          "columns_desktop":  3,
+                                                          "title":  "Our Values"
+                                                      }
+                                     },
+                     "how_it_works":  {
+                                          "blocks":  {
+                                                         "step_2":  {
+                                                                        "settings":  {
+                                                                                         "text":  "We ship within 24 hours.",
+                                                                                         "title":  "Fast Shipping"
+                                                                                     },
+                                                                        "type":  "step"
+                                                                    },
+                                                         "step_3":  {
+                                                                        "settings":  {
+                                                                                         "text":  "Experience premium quality.",
+                                                                                         "title":  "Enjoy"
+                                                                                     },
+                                                                        "type":  "step"
+                                                                    },
+                                                         "step_1":  {
+                                                                        "settings":  {
+                                                                                         "text":  "Select your favorite items.",
+                                                                                         "title":  "Place Order"
+                                                                                     },
+                                                                        "type":  "step"
+                                                                    }
+                                                     },
+                                          "block_order":  [
+                                                              "step_1",
+                                                              "step_2",
+                                                              "step_3"
+                                                          ],
+                                          "type":  "zenya-how-it-works",
+                                          "settings":  {
+                                                           "heading":  "How It Works"
+                                                       }
+                                      },
+                     "before_after":  {
+                                          "settings":  {
+                                                           "label_after":  "After",
+                                                           "heading":  "See the Difference",
+                                                           "label_before":  "Before"
+                                                       },
+                                          "type":  "zenya-before-after"
+                                      },
+                     "map":  {
+                                 "settings":  {
+                                                  "heading":  "Visit Our Store",
+                                                  "address":  "123 Main St, New York, NY 10001"
+                                              },
+                                 "type":  "zenya-map"
+                             },
+                     "collection_list":  {
+                                             "blocks":  {
+                                                            "col_3":  {
+                                                                          "settings":  {
+
+                                                                                       },
+                                                                          "type":  "collection"
+                                                                      },
+                                                            "col_1":  {
+                                                                          "settings":  {
+
+                                                                                       },
+                                                                          "type":  "collection"
+                                                                      },
+                                                            "col_2":  {
+                                                                          "settings":  {
+
+                                                                                       },
+                                                                          "type":  "collection"
+                                                                      }
+                                                        },
+                                             "block_order":  [
+                                                                 "col_1",
+                                                                 "col_2",
+                                                                 "col_3"
+                                                             ],
+                                             "type":  "zenya-collection-list",
+                                             "settings":  {
+                                                              "title":  "Shop by Category"
+                                                          }
+                                         }
+                 },
+    "order":  [
+                  "slideshow",
+                  "logo_list",
+                  "video_hero",
+                  "rich_text",
+                  "shoppable_image",
+                  "features",
+                  "how_it_works",
+                  "featured_collection",
+                  "multicolumn",
+                  "scrolling_text",
+                  "collection_list",
+                  "image_with_text",
+                  "before_after",
+                  "comparison_table",
+                  "countdown_banner",
+                  "trust_badges",
+                  "testimonials",
+                  "faq",
+                  "blog_posts",
+                  "map",
+                  "newsletter"
+              ]
+}

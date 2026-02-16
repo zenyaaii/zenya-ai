@@ -1,0 +1,248 @@
+{
+  "sections": {
+    "hero_video": {
+      "type": "zenya-video-hero",
+      "settings": {
+        "heading": "Watch Video",
+        "subheading": "See it in action",
+        "cta_text": "Play"
+      }
+    },
+    "scrolling_text": {
+      "type": "zenya-scrolling-text",
+      "blocks": {
+        "text_0": {
+          "type": "text_block",
+          "settings": {
+            "text": "Free Shipping"
+          }
+        },
+        "text_1": {
+          "type": "text_block",
+          "settings": {
+            "text": "Sale Now On"
+          }
+        },
+        "text_2": {
+          "type": "text_block",
+          "settings": {
+            "text": "New Arrivals"
+          }
+        }
+      },
+      "block_order": [
+        "text_0",
+        "text_1",
+        "text_2"
+      ]
+    },
+    "slideshow": {
+      "type": "zenya-slideshow",
+      "blocks": {
+        "slide_0": {
+          "type": "slide",
+          "settings": {
+            "heading": "Slide 1",
+            "subheading": "Sub 1",
+            "cta_text": "Button 1"
+          }
+        }
+      },
+      "block_order": [
+        "slide_0"
+      ]
+    },
+    "rich_text": {
+      "type": "zenya-rich-text",
+      "settings": {
+        "title": "About Us",
+        "text": "We are cool."
+      }
+    },
+    "logo_list": {
+      "type": "zenya-logo-list"
+    },
+    "features": {
+      "type": "zenya-features",
+      "blocks": {
+        "feature_0": {
+          "type": "feature",
+          "settings": {
+            "title": "Fast Shipping",
+            "desc": "Get it tomorrow"
+          }
+        },
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Secure Payment",
+            "desc": "100% Secure"
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "24/7 Support",
+            "desc": "We are here for you"
+          }
+        }
+      },
+      "block_order": [
+        "feature_0",
+        "feature_1",
+        "feature_2"
+      ]
+    },
+    "image_text": {
+      "type": "zenya-image-text",
+      "settings": {
+        "title": "Our Story",
+        "text": "Long story short...",
+        "cta_text": "Read More"
+      }
+    },
+    "shoppable": {
+      "type": "zenya-shoppable-image"
+    },
+    "featured_collection": {
+      "type": "zenya-featured-collection"
+    },
+    "countdown": {
+      "type": "zenya-countdown-banner"
+    },
+    "problem_solution": {
+      "type": "zenya-problem-solution",
+      "settings": {
+        "problem_headline": "Tired of Slow Stores?",
+        "problem_text": "Most stores are slow and ugly.",
+        "solution_headline": "Zenya is Fast",
+        "solution_text": "We optimized everything for speed."
+      }
+    },
+    "comparison": {
+      "type": "zenya-comparison",
+      "blocks": {
+        "comp_0": {
+          "type": "feature_row",
+          "settings": {
+            "feature": "Speed",
+            "us_check": true,
+            "them_check": false
+          }
+        }
+      },
+      "block_order": [
+        "comp_0"
+      ]
+    },
+    "tabs": {
+      "type": "zenya-tabs"
+    },
+    "accordion": {
+      "type": "zenya-accordion"
+    },
+    "timeline": {
+      "type": "zenya-timeline",
+      "blocks": {
+        "timeline_0": {
+          "type": "milestone",
+          "settings": {
+            "year": "2023",
+            "title": "Founded",
+            "text": "We started here"
+          }
+        }
+      },
+      "block_order": [
+        "timeline_0"
+      ]
+    },
+    "map": {
+      "type": "zenya-map"
+    },
+    "multicolumn": {
+      "type": "zenya-multicolumn",
+      "blocks": {
+        "col_0": {
+          "type": "column",
+          "settings": {
+            "title": "Column 1",
+            "text": "Text 1"
+          }
+        }
+      },
+      "block_order": [
+        "col_0"
+      ]
+    },
+    "video": {
+      "type": "zenya-video"
+    },
+    "testimonials": {
+      "type": "zenya-testimonials",
+      "blocks": {
+        "testimonial_0": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Alice",
+            "text": "Amazing theme!",
+            "location": "NY"
+          }
+        },
+        "testimonial_1": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Bob",
+            "text": "Increased my sales",
+            "location": "CA"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_0",
+        "testimonial_1"
+      ]
+    },
+    "contact": {
+      "type": "zenya-contact"
+    },
+    "how_it_works": {
+      "type": "zenya-how-it-works"
+    },
+    "visual_showcase": {
+      "type": "zenya-visual-showcase"
+    },
+    "newsletter": {
+      "type": "zenya-newsletter",
+      "settings": {
+        "heading": "Stay Updated",
+        "text": "Join our list"
+      }
+    }
+  },
+  "order": [
+    "hero_video",
+    "scrolling_text",
+    "visual_showcase",
+    "slideshow",
+    "rich_text",
+    "logo_list",
+    "features",
+    "how_it_works",
+    "image_text",
+    "shoppable",
+    "featured_collection",
+    "countdown",
+    "problem_solution",
+    "comparison",
+    "tabs",
+    "accordion",
+    "timeline",
+    "map",
+    "multicolumn",
+    "video",
+    "testimonials",
+    "contact",
+    "newsletter"
+  ]
+}

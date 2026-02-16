@@ -1,0 +1,185 @@
+﻿﻿
+<div class="py-8" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6">
+    <div class="grid grid-cols-2 md:grid-cols-{{ section.settings.columns_desktop }} gap-4 rounded-xl border p-6 shadow-sm" style="background-color: {{ section.settings.card_bg_color }}; border-color: {{ section.settings.border_color }}; border-radius: {{ section.settings.border_radius }}px;">
+      {% for block in section.blocks %}
+        <div class="flex flex-col items-center text-center">
+          <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full shadow-sm" style="background-color: {{ section.settings.icon_bg_color }}; color: {{ section.settings.icon_color }}">
+            {% if block.settings.custom_icon != blank %}
+              <img src="{{ block.settings.custom_icon | image_url: width: 40 }}" width="20" height="20" alt="{{ block.settings.title }}" class="h-5 w-5 object-contain">
+            {% elsif block.settings.icon_svg != blank %}
+              <div style="width: 20px; height: 20px;">{{ block.settings.icon_svg }}</div>
+            {% else %}
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            {% endif %}
+          </div>
+          <div class="text-xs font-bold">{{ block.settings.title }}</div>
+          {% if block.settings.subtitle != blank %}
+            <div class="text-[10px] opacity-75">{{ block.settings.subtitle }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Trust Badges",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "columns_desktop",
+                         "label":  "Desktop Columns",
+                         "min":  2,
+                         "max":  6,
+                         "step":  1,
+                         "default":  4
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "border_radius",
+                         "label":  "Border Radius",
+                         "min":  0,
+                         "max":  24,
+                         "step":  2,
+                         "unit":  "px",
+                         "default":  12
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#f8fafc"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "card_bg_color",
+                         "label":  "Card/Container Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "border_color",
+                         "label":  "Border Color",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "icon_color",
+                         "label":  "Icon Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "icon_bg_color",
+                         "label":  "Icon Background",
+                         "default":  "#f1f5f9"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "label":  "Padding Top",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  32
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "label":  "Padding Bottom",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  32
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "badge",
+                       "name":  "Badge",
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "title",
+                                            "label":  "Title",
+                                            "default":  "Free Shipping"
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "subtitle",
+                                            "label":  "Subtitle",
+                                            "default":  "On all orders"
+                                        },
+                                        {
+                                            "type":  "html",
+                                            "id":  "icon_svg",
+                                            "label":  "Icon SVG",
+                                            "info":  "Paste SVG code here"
+                                        },
+                                        {
+                                            "type":  "image_picker",
+                                            "id":  "custom_icon",
+                                            "label":  "Custom Icon Image"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Badges",
+                        "blocks":  [
+                                       {
+                                           "type":  "badge",
+                                           "settings":  {
+                                                            "title":  "Free Shipping",
+                                                            "subtitle":  "On all orders"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "badge",
+                                           "settings":  {
+                                                            "title":  "Lifetime Warranty",
+                                                            "subtitle":  "We stand by quality"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "badge",
+                                           "settings":  {
+                                                            "title":  "30-Day Returns",
+                                                            "subtitle":  "Hassle-free"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "badge",
+                                           "settings":  {
+                                                            "title":  "Secure Checkout",
+                                                            "subtitle":  "100% Encrypted"
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}
+

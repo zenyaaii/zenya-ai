@@ -27,33 +27,33 @@ export default function ThemeActions({ themeId, isPro, content, colors, name }: 
   }, [shopParam])
 
   async function handleDownload() {
-    if (!isPro) {
-      setLoading(true)
-      try {
-        const res = await fetch('/api/checkout', { method: 'POST' })
+    // if (!isPro) {
+    //   setLoading(true)
+    //   try {
+    //     const res = await fetch('/api/checkout', { method: 'POST' })
         
-        let data;
-        const contentType = res.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            data = await res.json();
-        } else {
-             if (!res.ok) throw new Error(`Server error: ${res.status}`);
-             throw new Error('Invalid response');
-        }
+    //     let data;
+    //     const contentType = res.headers.get("content-type");
+    //     if (contentType && contentType.includes("application/json")) {
+    //         data = await res.json();
+    //     } else {
+    //          if (!res.ok) throw new Error(`Server error: ${res.status}`);
+    //          throw new Error('Invalid response');
+    //     }
 
-        if (data.url) {
-          window.location.href = data.url
-        } else {
-          alert('Failed to start checkout.')
-        }
-      } catch (e) {
-        console.error(e)
-        alert('Checkout error')
-      } finally {
-        setLoading(false)
-      }
-      return
-    }
+    //     if (data.url) {
+    //       window.location.href = data.url
+    //     } else {
+    //       alert('Failed to start checkout.')
+    //     }
+    //   } catch (e) {
+    //     console.error(e)
+    //     alert('Checkout error')
+    //   } finally {
+    //     setLoading(false)
+    //   }
+    //   return
+    // }
     
     if (!content || !colors || !name) {
       alert('Theme data is incomplete.')
@@ -126,7 +126,10 @@ export default function ThemeActions({ themeId, isPro, content, colors, name }: 
                 window.location.href = `/api/shopify/auth?shop=${shopDomain}`
             }
         } else if (data.success) {
-            alert(`Theme "${name}" published successfully to ${shopDomain}! \n\nCheck your Online Store > Themes library (it will be unpublished).`)
+            const shouldOpen = confirm(`Theme "${name}" published successfully to ${shopDomain}!\n\nCheck your Online Store > Themes library (it will be unpublished).\n\nWould you like to open the store in a new tab to preview it?`)
+            if (shouldOpen) {
+                window.open(`https://${shopDomain}`, '_blank')
+            }
             if (data.warning) {
                 alert('Warning: ' + data.warning)
             }

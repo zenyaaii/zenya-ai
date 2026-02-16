@@ -1,0 +1,71 @@
+<div 
+  class="py-16 bg-white border-t border-slate-100" 
+  x-data="{
+    products: [],
+    loading: true,
+    init() {
+      const seen = JSON.parse(localStorage.getItem('zenya_recently_viewed') || '[]');
+      if (seen.length === 0) {
+        this.loading = false;
+        return;
+      }
+      
+      // Fetch cards
+      Promise.all(seen.slice(0, 4).map(handle => 
+        fetch(window.Shopify.routes.root + 'products/' + handle + '?view=card')
+          .then(res => res.text())
+      )).then(htmls => {
+        this.products = htmls;
+        this.loading = false;
+      });
+    }
+  }"
+  x-show="products.length > 0"
+  x-cloak
+>
+  <div class="container mx-auto px-6">
+    <h2 class="text-2xl font-bold text-slate-900 mb-8">{{ section.settings.heading }}</h2>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <template x-for="html in products">
+        <div x-html="html"></div>
+      </template>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Record current product
+  {% if request.page_type == 'product' %}
+    (function() {
+      const handle = '{{ product.handle }}';
+      let seen = JSON.parse(localStorage.getItem('zenya_recently_viewed') || '[]');
+      // Remove if exists (to move to top)
+      seen = seen.filter(h => h !== handle);
+      // Add to front
+      seen.unshift(handle);
+      // Limit to 10
+      if (seen.length > 10) seen.pop();
+      localStorage.setItem('zenya_recently_viewed', JSON.stringify(seen));
+    })();
+  {% endif %}
+</script>
+
+{% schema %}
+{
+  "name": "Recently Viewed",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Recently Viewed"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Recently Viewed"
+    }
+  ]
+}
+{% endschema %}

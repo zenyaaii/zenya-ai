@@ -1,0 +1,319 @@
+{% paginate collection.products by section.settings.products_per_page %}
+<div class="py-20" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px;">
+    <div class="mb-16" style="text-align: {{ section.settings.header_alignment }}; color: {{ section.settings.text_color }};">
+      <h1 class="text-4xl font-extrabold mb-4" style="color: {{ section.settings.heading_color }}">{{ collection.title }}</h1>
+      {% if section.settings.show_description and collection.description != blank %}
+        <div class="max-w-2xl text-slate-600 prose prose-slate" style="margin-left: {% if section.settings.header_alignment == 'center' %}auto{% else %}0{% endif %}; margin-right: {% if section.settings.header_alignment == 'center' %}auto{% else %}0{% endif %};">
+          {{ collection.description }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Filters/Sorting Stub -->
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Sidebar Filters -->
+      {% if section.settings.enable_filtering %}
+      <aside class="w-full lg:w-64 shrink-0" x-data="{ open: false }">
+        <div class="lg:hidden mb-4">
+          <button @click="open = !open" class="flex items-center gap-2 font-bold border border-slate-300 rounded-lg px-4 py-2 w-full justify-center" style="color: {{ section.settings.heading_color }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            Filters
+          </button>
+        </div>
+        
+        <form class="space-y-8" :class="open ? 'block' : 'hidden lg:block'">
+          {% for filter in collection.filters %}
+            <div class="border-b border-slate-200 pb-6 last:border-0">
+              <h3 class="font-bold mb-4 text-sm uppercase tracking-wide" style="color: {{ section.settings.heading_color }}">{{ filter.label }}</h3>
+              
+              {% case filter.type %}
+                {% when 'list' %}
+                  <ul class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {% for value in filter.values %}
+                      <li class="flex items-center gap-2">
+                        <input type="checkbox" 
+                          name="{{ value.param_name }}" 
+                          value="{{ value.value }}" 
+                          id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                          {% if value.active %}checked{% endif %}
+                          {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                          class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4"
+                          onchange="this.form.submit()"
+                        >
+                        <label for="Filter-{{ filter.label | escape }}-{{ forloop.index }}" class="text-sm flex-1 cursor-pointer {% if value.count == 0 and value.active == false %}opacity-50{% endif %}" style="color: {{ section.settings.text_color }}">
+                          {{ value.label }} <span class="text-xs opacity-70">({{ value.count }})</span>
+                        </label>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                
+                {% when 'price_range' %}
+                  <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color: {{ section.settings.text_color }}">{{ cart.currency.symbol }}</span>
+                      <input type="number" 
+                        name="{{ filter.min_value.param_name }}" 
+                        {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                        placeholder="0"
+                        class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
+                        onchange="this.form.submit()"
+                      >
+                    </div>
+                    <span class="opacity-50" style="color: {{ section.settings.text_color }}">-</span>
+                    <div class="relative flex-1">
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color: {{ section.settings.text_color }}">{{ cart.currency.symbol }}</span>
+                      <input type="number" 
+                        name="{{ filter.max_value.param_name }}" 
+                        {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                        class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
+                        onchange="this.form.submit()"
+                      >
+                    </div>
+                  </div>
+              {% endcase %}
+            </div>
+          {% endfor %}
+          
+          <div class="pt-2 flex flex-col gap-2">
+             <noscript>
+               <button type="submit" class="w-full py-2 bg-slate-900 text-white font-bold rounded hover:opacity-90 transition text-sm">Apply Filters</button>
+             </noscript>
+             <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" class="text-center text-sm underline hover:text-primary" style="color: {{ section.settings.text_color }}">Clear all filters</a>
+          </div>
+        </form>
+      </aside>
+      {% endif %}
+
+      <div class="flex-1">
+        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+          <div class="text-sm" style="color: {{ section.settings.text_color }}">
+            Showing {{ collection.products_count }} products
+          </div>
+          {% if section.settings.enable_sorting %}
+          <div class="flex items-center gap-4">
+             <label for="SortBy" class="sr-only">Sort by</label>
+             <select id="SortBy" class="border-none text-sm font-bold focus:ring-0 cursor-pointer bg-transparent" style="color: {{ section.settings.heading_color }}" onchange="location = this.value;">
+                {% for option in collection.sort_options %}
+                  <option value="?sort_by={{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+                {% endfor %}
+             </select>
+          </div>
+          {% endif %}
+        </div>
+    
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-{{ section.settings.columns_desktop }} gap-x-6 gap-y-10">
+          {% for product in collection.products %}
+            <div class="group">
+              <div class="relative mb-4 overflow-hidden rounded-xl bg-slate-100" style="aspect-ratio: {{ section.settings.image_ratio }};">
+                {% if product.featured_image %}
+                  {% assign img_style = 'object-position: ' | append: product.featured_image.presentation.focal_point %}
+                  {{ product.featured_image | image_tag: class: 'h-full w-full object-cover transition duration-300 group-hover:scale-105', loading: 'lazy', widths: '300, 600', style: img_style }}
+                  <!-- Secondary Image on Hover -->
+                  {% if section.settings.show_secondary_image and product.images[1] %}
+                    {% assign img2_style = 'object-position: ' | append: product.images[1].presentation.focal_point %}
+                    {{ product.images[1] | image_tag: class: 'absolute inset-0 h-full w-full object-cover opacity-0 transition duration-300 group-hover:opacity-100', loading: 'lazy', widths: '300, 600', style: img2_style }}
+                  {% endif %}
+                {% else %}
+                  {{ 'product-1' | placeholder_svg_tag: 'h-full w-full object-cover opacity-50' }}
+                {% endif %}
+                
+                {% if product.compare_at_price > product.price %}
+                  <div class="absolute top-2 left-2 text-white text-xs font-bold px-2 py-1 rounded shadow-sm" style="background-color: {{ settings.sale_badge_color | default: '#ef4444' }};">
+                    SALE
+                  </div>
+                {% endif %}
+                
+                <button class="absolute bottom-4 right-4 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-900 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition duration-300 hover:bg-primary hover:text-white" onclick="window.location.href='{{ product.url }}'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </button>
+              </div>
+              
+              <h3 class="text-sm font-bold mb-1" style="color: {{ section.settings.heading_color }}">
+                <a href="{{ product.url }}" class="hover:text-primary transition">{{ product.title }}</a>
+              </h3>
+              {% if section.settings.show_vendor %}
+                <div class="text-xs mb-1 opacity-70" style="color: {{ section.settings.text_color }}">{{ product.vendor }}</div>
+              {% endif %}
+              <div class="flex items-center gap-2 text-sm">
+                <span class="font-medium" style="color: {{ section.settings.text_color }}">{{ product.price | money }}</span>
+                {% if product.compare_at_price > product.price %}
+                  <span class="line-through text-xs opacity-50" style="color: {{ section.settings.text_color }}">{{ product.compare_at_price | money }}</span>
+                {% endif %}
+              </div>
+              {% if product.selected_or_first_available_variant.unit_price_measurement %}
+                <div class="text-xs text-slate-500 mt-1">
+                  {{ product.selected_or_first_available_variant.unit_price | money }} / 
+                  {% if product.selected_or_first_available_variant.unit_price_measurement.reference_value != 1 %}
+                    {{ product.selected_or_first_available_variant.unit_price_measurement.reference_value }}
+                  {% endif %}
+                  {{ product.selected_or_first_available_variant.unit_price_measurement.reference_unit }}
+                </div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="col-span-full text-center py-12 text-slate-500">
+              No products found in this collection.
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <div class="mt-16 text-center">
+            {{ paginate | default_pagination }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endpaginate %}
+{% schema %}
+{
+  "name": "Collection Page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "default": 16,
+      "label": "Products per page"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3,
+      "label": "Columns on desktop"
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show Description",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Product Card"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image Ratio",
+      "options": [
+        { "value": "1/1", "label": "Square (1:1)" },
+        { "value": "3/4", "label": "Portrait (3:4)" },
+        { "value": "4/3", "label": "Landscape (4:3)" }
+      ],
+      "default": "3/4"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "Show Second Image on Hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show Vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Filtering & Sorting"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "default": true,
+      "label": "Enable filtering"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "default": true,
+      "label": "Enable sorting"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#0f172a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#475569"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ]
+}
+{% endschema %}

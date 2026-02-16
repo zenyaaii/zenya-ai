@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-cart"
+    },
+    "upsell": {
+      "type": "zenya-featured-collection",
+      "settings": {
+        "title": "Don't Forget These"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "upsell"
+  ]
+}

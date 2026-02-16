@@ -1,0 +1,356 @@
+﻿
+<div class="py-12 md:py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px;">
+    {% if section.settings.heading != blank %}
+      <div class="text-center mb-12">
+        <h2 class="font-extrabold mb-4" style="color: {{ section.settings.heading_color }}; font-size: {{ section.settings.heading_size }}px;">{{ section.settings.heading }}</h2>
+      </div>
+    {% endif %}
+
+    <div class="rounded-2xl shadow-xl overflow-hidden border" style="background-color: {{ section.settings.card_bg }}; border-color: {{ section.settings.border_color }}; border-radius: {{ section.settings.corner_radius }}px; border-width: {{ section.settings.border_width }}px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }});">
+      <!-- Header -->
+      <div class="grid grid-cols-[2fr_1fr_1fr] gap-4 p-6 font-extrabold text-center" style="background-color: {{ section.settings.header_bg }}; color: {{ section.settings.header_text_color }}; font-size: {{ section.settings.row_text_size }}px;">
+        <div class="text-left">Feature</div>
+        <div style="opacity: 0.7;">{{ section.settings.them_label }}</div>
+        <div style="color: {{ section.settings.highlight_color }}">{{ section.settings.us_label }}</div>
+      </div>
+
+      <!-- Rows -->
+      {% for block in section.blocks %}
+        <div class="grid grid-cols-[2fr_1fr_1fr] gap-4 p-6 border-b items-center text-center last:border-0 transition" 
+             style="border-color: {{ section.settings.border_color }}; color: {{ section.settings.row_text_color }}; border-bottom-width: {{ section.settings.border_width }}px; font-size: {{ section.settings.row_text_size }}px;">
+          <div class="text-left font-bold">{{ block.settings.feature }}</div>
+          
+          <!-- Them -->
+          <div>
+            {% if block.settings.them_check %}
+              <span class="text-xl" style="color: {{ section.settings.them_check_color }}">
+                {% if section.settings.icon_style == 'check' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 mx-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                {% else %}
+                  {{ section.settings.check_text }}
+                {% endif %}
+              </span>
+            {% else %}
+              <span class="text-xl" style="color: {{ section.settings.them_cross_color }}">
+                {% if section.settings.icon_style == 'check' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 mx-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                {% else %}
+                  {{ section.settings.cross_text }}
+                {% endif %}
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Us -->
+          <div class="-my-4 py-4 rounded-lg" style="background-color: {{ section.settings.highlight_bg_color }}">
+            {% if block.settings.us_check %}
+              <span class="text-2xl" style="color: {{ section.settings.us_check_color }}">
+                 {% if section.settings.icon_style == 'check' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 mx-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                {% else %}
+                  {{ section.settings.check_text }}
+                {% endif %}
+              </span>
+            {% else %}
+              <span class="text-2xl" style="color: {{ section.settings.us_cross_color }}">
+                 {% if section.settings.icon_style == 'check' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-8 h-8 mx-auto"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                {% else %}
+                  {{ section.settings.cross_text }}
+                {% endif %}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Comparison Table",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "heading",
+                         "label":  "Heading",
+                         "default":  "Why Choose Us?"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "heading_size",
+                         "min":  16,
+                         "max":  80,
+                         "step":  2,
+                         "unit":  "px",
+                         "label":  "Heading Size",
+                         "default":  36
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "us_label",
+                         "label":  "Our Brand Label",
+                         "default":  "Zenya Demo Store"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "them_label",
+                         "label":  "Others Label",
+                         "default":  "Others"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "container_width",
+                         "min":  600,
+                         "max":  1600,
+                         "step":  50,
+                         "unit":  "px",
+                         "label":  "Container Width",
+                         "default":  1000
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "corner_radius",
+                         "min":  0,
+                         "max":  40,
+                         "step":  2,
+                         "unit":  "px",
+                         "label":  "Card Corner Radius",
+                         "default":  16
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "border_width",
+                         "min":  0,
+                         "max":  10,
+                         "step":  1,
+                         "unit":  "px",
+                         "label":  "Border Width",
+                         "default":  1
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "shadow_opacity",
+                         "min":  0,
+                         "max":  100,
+                         "step":  5,
+                         "unit":  "%",
+                         "label":  "Shadow Opacity",
+                         "default":  10
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "row_text_size",
+                         "min":  12,
+                         "max":  24,
+                         "step":  1,
+                         "unit":  "px",
+                         "label":  "Row Text Size",
+                         "default":  16
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "icon_style",
+                         "label":  "Icon Style",
+                         "options":  [
+                                         {
+                                             "value":  "check",
+                                             "label":  "Check / Cross Icons"
+                                         },
+                                         {
+                                             "value":  "text",
+                                             "label":  "Custom Text"
+                                         }
+                                     ],
+                         "default":  "check"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "check_text",
+                         "label":  "Custom \u0027Yes\u0027 Text",
+                         "default":  "Yes",
+                         "info":  "Used when Icon Style is \u0027Custom Text\u0027"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "cross_text",
+                         "label":  "Custom \u0027No\u0027 Text",
+                         "default":  "No",
+                         "info":  "Used when Icon Style is \u0027Custom Text\u0027"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Section Background",
+                         "default":  "#f8fafc"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "card_bg",
+                         "label":  "Table Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "header_bg",
+                         "label":  "Header Background",
+                         "default":  "#f1f5f9"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "header_text_color",
+                         "label":  "Header Text Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "row_text_color",
+                         "label":  "Row Text Color",
+                         "default":  "#334155"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "border_color",
+                         "label":  "Border Color",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "highlight_color",
+                         "label":  "Our Brand Text Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "highlight_bg_color",
+                         "label":  "Our Brand Column Background",
+                         "default":  "#eff6ff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "us_check_color",
+                         "label":  "Our Check Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "us_cross_color",
+                         "label":  "Our Cross Color",
+                         "default":  "#ef4444"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "them_check_color",
+                         "label":  "Their Check Color",
+                         "default":  "#22c55e"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "them_cross_color",
+                         "label":  "Their Cross Color",
+                         "default":  "#cbd5e1"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  80
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  80
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "row",
+                       "name":  "Feature Row",
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "feature",
+                                            "label":  "Feature Name",
+                                            "default":  "Premium Quality"
+                                        },
+                                        {
+                                            "type":  "checkbox",
+                                            "id":  "us_check",
+                                            "label":  "We Have It",
+                                            "default":  true
+                                        },
+                                        {
+                                            "type":  "checkbox",
+                                            "id":  "them_check",
+                                            "label":  "They Have It",
+                                            "default":  false
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Comparison",
+                        "blocks":  [
+                                       {
+                                           "type":  "row",
+                                           "settings":  {
+                                                            "feature":  "Premium Quality Materials"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "row",
+                                           "settings":  {
+                                                            "feature":  "24/7 Customer Support"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "row",
+                                           "settings":  {
+                                                            "feature":  "30-Day Money Back Guarantee"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "row",
+                                           "settings":  {
+                                                            "feature":  "Fast \u0026 Free Shipping"
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}
+  

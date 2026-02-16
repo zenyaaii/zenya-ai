@@ -1,0 +1,290 @@
+﻿﻿<div class="py-20" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6 max-w-{{ section.settings.container_width }}">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+      <div class="w-full md:w-auto text-center md:text-left">
+        {% if section.settings.title != blank %}
+          <h2 class="font-bold mb-4 {{ section.settings.heading_size }}" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+        {% endif %}
+      </div>
+      {% if section.settings.show_view_all and section.settings.blog != blank %}
+        <div class="hidden md:block">
+          <a href="{{ blogs[section.settings.blog].url }}" class="font-bold hover:opacity-80 transition" style="color: {{ section.settings.accent_color }}">
+            {{ section.settings.view_all_label }} &rarr;
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="grid grid-cols-{{ section.settings.columns_mobile }} md:grid-cols-{{ section.settings.columns_desktop }} gap-8">
+      {% assign blog = blogs[section.settings.blog] %}
+      {% if blog != blank %}
+        {% for article in blog.articles limit: section.settings.limit %}
+          <a href="{{ article.url }}" class="group block h-full flex flex-col">
+            <div class="relative overflow-hidden rounded-xl mb-5 w-full shadow-sm" style="aspect-ratio: {{ section.settings.image_ratio }}; background-color: {{ section.settings.card_bg }};">
+              {% if article.image %}
+                <img 
+                  src="{{ article.image | image_url: width: 800 }}" 
+                  alt="{{ article.title | escape }}"
+                  class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+              {% else %}
+                 {{ 'image' | placeholder_svg_tag: 'w-full h-full object-cover opacity-50' }}
+              {% endif %}
+            </div>
+            
+            <div class="flex-1 flex flex-col">
+              {% if section.settings.show_date %}
+                <div class="text-xs font-bold uppercase mb-3 tracking-wider" style="color: {{ section.settings.accent_color }}">
+                  {{ article.published_at | date: "%B %d, %Y" }}
+                </div>
+              {% endif %}
+              
+              <h3 class="text-xl font-bold mb-3 transition group-hover:text-opacity-80" style="color: {{ section.settings.heading_color }}">{{ article.title }}</h3>
+              
+              {% if section.settings.show_excerpt %}
+                <p class="line-clamp-3 mb-4 flex-1 leading-relaxed" style="color: {{ section.settings.text_color }}">
+                  {{ article.excerpt_or_content | strip_html | truncatewords: 30 }}
+                </p>
+              {% endif %}
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <!-- Demo Articles -->
+        {% for i in (1..section.settings.limit) %}
+          <div class="group block h-full flex flex-col">
+            <div class="relative overflow-hidden rounded-xl mb-5 w-full bg-slate-100" style="aspect-ratio: {{ section.settings.image_ratio }};">
+               {{ 'image' | placeholder_svg_tag: 'w-full h-full object-cover opacity-50' }}
+            </div>
+            <div class="flex-1 flex flex-col">
+              <div class="text-xs font-bold uppercase mb-3 tracking-wider" style="color: {{ section.settings.accent_color }}">October 24, 2024</div>
+              <h3 class="text-xl font-bold mb-3" style="color: {{ section.settings.heading_color }}">Example Article Title {{ i }}</h3>
+              <p class="line-clamp-3 mb-4 flex-1 leading-relaxed" style="color: {{ section.settings.text_color }}">This is a summary of the article content. It is very interesting and you should read it to learn more about our brand.</p>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+    
+    {% if section.settings.show_view_all %}
+      <div class="mt-10 text-center md:hidden">
+        <a href="{{ blogs[section.settings.blog].url | default: '#' }}" class="inline-block font-bold border-b-2 pb-1" style="color: {{ section.settings.accent_color }}; border-color: {{ section.settings.accent_color }}">
+          {{ section.settings.view_all_label }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+    "name":  "Blog Posts",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Latest News"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "heading_size",
+                         "label":  "Heading Size",
+                         "options":  [
+                                         {
+                                             "value":  "text-2xl",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "text-3xl",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "text-4xl",
+                                             "label":  "Large"
+                                         },
+                                         {
+                                             "value":  "text-5xl",
+                                             "label":  "Extra Large"
+                                         }
+                                     ],
+                         "default":  "text-3xl"
+                     },
+                     {
+                         "type":  "blog",
+                         "id":  "blog",
+                         "label":  "Blog Source"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "limit",
+                         "label":  "Posts to Show",
+                         "min":  2,
+                         "max":  12,
+                         "step":  1,
+                         "default":  3
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_view_all",
+                         "label":  "Show \u0027View All\u0027 Link",
+                         "default":  true
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "view_all_label",
+                         "label":  "View All Label",
+                         "default":  "View all articles"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "container_width",
+                         "label":  "Container Width",
+                         "options":  [
+                                         {
+                                             "value":  "md",
+                                             "label":  "Medium (768px)"
+                                         },
+                                         {
+                                             "value":  "lg",
+                                             "label":  "Large (1024px)"
+                                         },
+                                         {
+                                             "value":  "xl",
+                                             "label":  "Extra Large (1280px)"
+                                         },
+                                         {
+                                             "value":  "2xl",
+                                             "label":  "Full Width (1536px)"
+                                         }
+                                     ],
+                         "default":  "2xl"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "columns_desktop",
+                         "label":  "Desktop Columns",
+                         "min":  2,
+                         "max":  4,
+                         "step":  1,
+                         "default":  3
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "columns_mobile",
+                         "label":  "Mobile Columns",
+                         "options":  [
+                                         {
+                                             "value":  "1",
+                                             "label":  "1 Column"
+                                         },
+                                         {
+                                             "value":  "2",
+                                             "label":  "2 Columns"
+                                         }
+                                     ],
+                         "default":  "1"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "image_ratio",
+                         "label":  "Image Ratio",
+                         "options":  [
+                                         {
+                                             "value":  "16/9",
+                                             "label":  "Landscape"
+                                         },
+                                         {
+                                             "value":  "1/1",
+                                             "label":  "Square"
+                                         },
+                                         {
+                                             "value":  "3/4",
+                                             "label":  "Portrait"
+                                         },
+                                         {
+                                             "value":  "2/1",
+                                             "label":  "Wide"
+                                         }
+                                     ],
+                         "default":  "16/9"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_date",
+                         "label":  "Show Date",
+                         "default":  true
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_excerpt",
+                         "label":  "Show Excerpt",
+                         "default":  true
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "accent_color",
+                         "label":  "Accent Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  80
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  80
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Blogs"
+                    }
+                ]
+}
+{% endschema %}

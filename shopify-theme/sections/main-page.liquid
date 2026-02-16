@@ -1,0 +1,50 @@
+﻿
+<div class="py-20 bg-white min-h-[50vh]">
+  <div class="container mx-auto px-6 {{ section.settings.page_width }}">
+    {% if section.settings.show_title %}
+    <h1 class="text-4xl font-extrabold text-slate-900 mb-8 text-center">{{ page.title }}</h1>
+    {% endif %}
+    <div class="prose prose-lg prose-slate mx-auto text-slate-600">
+      {{ page.content }}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Page",
+    "settings":  [
+                     {
+                         "type":  "select",
+                         "id":  "page_width",
+                         "label":  "Page Width",
+                         "options":  [
+                                         {
+                                             "value":  "max-w-4xl",
+                                             "label":  "Narrow"
+                                         },
+                                         {
+                                             "value":  "max-w-6xl",
+                                             "label":  "Wide"
+                                         },
+                                         {
+                                             "value":  "max-w-full",
+                                             "label":  "Full Width"
+                                         }
+                                     ],
+                         "default":  "max-w-4xl"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_title",
+                         "default":  true,
+                         "label":  "Show page title"
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Page"
+                    }
+                ]
+}
+{% endschema %}
+  

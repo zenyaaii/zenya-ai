@@ -1,0 +1,39 @@
+<div class="complementary-products">
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    <h3 class="font-bold text-slate-900 mb-4">{{ section.settings.heading }}</h3>
+    <div class="space-y-4">
+      {%- for product in recommendations.products -%}
+        <div class="flex gap-4 items-start group">
+          <a href="{{ product.url }}" class="shrink-0 w-20 h-20 rounded-lg bg-slate-50 overflow-hidden border border-slate-100 group-hover:border-primary transition">
+            {{ product.featured_image | image_tag: class: 'w-full h-full object-cover', loading: 'lazy' }}
+          </a>
+          <div class="flex-1 min-w-0">
+            <a href="{{ product.url }}" class="block font-bold text-slate-900 text-sm hover:text-primary transition truncate">{{ product.title }}</a>
+            <div class="text-sm font-medium text-slate-500 mb-2">{{ product.price | money }}</div>
+            
+            {% form 'product', product %}
+              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+              <button type="submit" class="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded hover:bg-primary transition">
+                Add to Cart
+              </button>
+            {% endform %}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Complementary Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pairs Well With"
+    }
+  ]
+}
+{% endschema %}

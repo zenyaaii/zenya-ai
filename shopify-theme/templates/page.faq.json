@@ -1,0 +1,54 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "search": {
+      "type": "zenya-rich-text",
+      "settings": {
+        "title": "Help Center",
+        "text": "Find answers below."
+      }
+    },
+    "accordion": {
+      "type": "zenya-accordion",
+      "blocks": {
+        "q1": {
+          "type": "item",
+          "settings": {
+            "title": "How do I track my order?",
+            "text": "<p>You will receive an email.</p>"
+          }
+        },
+        "q2": {
+          "type": "item",
+          "settings": {
+            "title": "Can I cancel?",
+            "text": "<p>Within 24 hours.</p>"
+          }
+        },
+        "q3": {
+          "type": "item",
+          "settings": {
+            "title": "Do you ship internationally?",
+            "text": "<p>Yes, we do.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3"
+      ]
+    },
+    "contact": {
+      "type": "zenya-contact"
+    }
+  },
+  "order": [
+    "main",
+    "search",
+    "accordion",
+    "contact"
+  ]
+}

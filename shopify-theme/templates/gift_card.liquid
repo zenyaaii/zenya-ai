@@ -1,0 +1,38 @@
+{% layout none %}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <title>{{ shop.name }}</title>
+    <meta name="description" content="Gift card">
+    {{ content_for_header }}
+    <style>
+      body { font-family: sans-serif; text-align: center; padding: 50px; }
+      .gift-card { border: 1px solid #ddd; padding: 20px; border-radius: 10px; max-width: 400px; margin: 0 auto; }
+      .code { font-size: 2em; letter-spacing: 2px; margin: 20px 0; background: #f4f4f4; padding: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="gift-card">
+      <h1>{{ shop.name }}</h1>
+      <h2>{{ gift_card.balance | money }}</h2>
+      <p>Gift Card</p>
+      <div class="code" onclick="this.classList.add('is-selected');">{{ gift_card.code | format_code }}</div>
+      <p>Use this code at checkout to redeem your gift card</p>
+      <a href="{{ shop.url }}">Start Shopping</a>
+    </div>
+    <script>
+      document.querySelector('.code').addEventListener('click', function() {
+        var selection = window.getSelection();
+        var range = document.createRange();
+        range.selectNodeContents(this);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+
+<div class="py-20 bg-slate-50 min-h-[60vh]">
+  <div class="container mx-auto px-6">
+    <h1 class="text-4xl font-extrabold text-slate-900 mb-12 text-center">{{ section.settings.title }}</h1>
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for collection in collections %}
+        <a href="{{ collection.url }}" class="group relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg block">
+          {% if collection.image != blank %}
+            <img 
+              src="{{ collection.image | image_url: width: 800 }}" 
+              width="{{ collection.image.width }}" 
+              height="{{ collection.image.height }}"
+              alt="{{ collection.title }}" 
+              class="h-full w-full object-cover transition duration-500 group-hover:scale-110">
+          {% else %}
+             {{ 'collection-1' | placeholder_svg_tag: 'h-full w-full object-cover bg-slate-200 transition duration-500 group-hover:scale-110' }}
+          {% endif %}
+          <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <h3 class="text-2xl font-bold text-white tracking-wide border-b-2 border-white/0 group-hover:border-white transition-all pb-1">
+              {{ collection.title }}
+            </h3>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Collections List",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "All Collections"
+    }
+  ],
+  "presets": [
+    {
+      "name": "List Collections"
+    }
+  ]
+}
+{% endschema %}
+  

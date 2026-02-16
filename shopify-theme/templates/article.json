@@ -1,0 +1,42 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-article",
+      "blocks": {
+        "featured_image": {
+          "type": "featured_image",
+          "settings": {
+            "height": "h-[500px]",
+            "show_overlay": false
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {
+            "show_meta": true,
+            "show_author": true
+          }
+        },
+        "content": {
+          "type": "content"
+        },
+        "share": {
+          "type": "share"
+        },
+        "back_link": {
+          "type": "back_link"
+        }
+      },
+      "block_order": [
+        "featured_image",
+        "title",
+        "content",
+        "share",
+        "back_link"
+      ]
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,84 @@
+
+<div class="py-20 bg-slate-50 min-h-[60vh]">
+  <div class="container mx-auto px-6 max-w-4xl">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold text-slate-900">Order {{ order.name }}</h1>
+      <a href="{{ routes.account_url }}" class="text-primary font-bold hover:underline">&larr; Back to Account</a>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="md:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden p-6">
+           <div class="mb-4 text-sm text-slate-500">Placed on {{ order.created_at | date: "%B %d, %Y at %I:%M%p" }}</div>
+           {% if order.cancelled %}
+             <div class="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-100">
+               <p class="font-bold">Order Cancelled on {{ order.cancelled_at | date: "%B %d, %Y" }}</p>
+               <p class="text-sm">{{ order.cancel_reason_label }}</p>
+             </div>
+           {% endif %}
+           
+           <table class="w-full text-left">
+             <tbody class="divide-y divide-slate-100">
+               {% for line_item in order.line_items %}
+                 <tr>
+                   <td class="py-4">
+                     <div class="font-bold text-slate-900">{{ line_item.title }}</div>
+                     <div class="text-sm text-slate-500">{{ line_item.sku }}</div>
+                   </td>
+                   <td class="py-4 text-right">
+                     <div class="text-slate-600">{{ line_item.quantity }} x {{ line_item.price | money }}</div>
+                     <div class="font-bold text-slate-900">{{ line_item.final_line_price | money }}</div>
+                   </td>
+                 </tr>
+               {% endfor %}
+             </tbody>
+             <tfoot class="border-t-2 border-slate-100">
+               <tr>
+                 <td class="py-4 font-bold text-slate-600">Subtotal</td>
+                 <td class="py-4 text-right font-bold text-slate-900">{{ order.line_items_subtotal_price | money }}</td>
+               </tr>
+               <tr>
+                 <td class="py-2 text-slate-600">Shipping</td>
+                 <td class="py-2 text-right text-slate-900">{{ order.shipping_price | money }}</td>
+               </tr>
+               <tr>
+                 <td class="py-2 text-slate-600">Tax</td>
+                 <td class="py-2 text-right text-slate-900">{{ order.tax_price | money }}</td>
+               </tr>
+               <tr class="text-xl">
+                 <td class="py-4 font-extrabold text-slate-900">Total</td>
+                 <td class="py-4 text-right font-extrabold text-primary">{{ order.total_price | money }}</td>
+               </tr>
+             </tfoot>
+           </table>
+        </div>
+      </div>
+      
+      <div>
+        <div class="bg-white p-6 rounded-xl shadow-sm space-y-6">
+          <div>
+            <h3 class="font-bold text-slate-900 mb-2">Billing Address</h3>
+            <div class="text-sm text-slate-500">
+              <p>Payment Status: <span class="font-bold text-slate-700">{{ order.financial_status_label }}</span></p>
+              <div class="mt-2">{{ order.billing_address | format_address }}</div>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 mb-2">Shipping Address</h3>
+            <div class="text-sm text-slate-500">
+              <p>Fulfillment Status: <span class="font-bold text-slate-700">{{ order.fulfillment_status_label }}</span></p>
+              <div class="mt-2">{{ order.shipping_address | format_address }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Order",
+  "settings": []
+}
+{% endschema %}
+  

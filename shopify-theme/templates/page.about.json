@@ -1,0 +1,112 @@
+{
+  "sections": {
+    "hero": {
+      "type": "zenya-video-hero",
+      "settings": {
+        "heading": "Our Story",
+        "subheading": "How we started."
+      }
+    },
+    "rich_text": {
+      "type": "zenya-rich-text",
+      "settings": {
+        "title": "Mission",
+        "text": "Our mission is to provide the best products."
+      }
+    },
+    "visual_showcase": {
+      "type": "zenya-visual-showcase",
+      "settings": {
+        "heading": "Craftsmanship",
+        "text": "We pay attention to every detail."
+      }
+    },
+    "how_it_works": {
+      "type": "zenya-how-it-works",
+      "settings": {
+        "heading": "Our Process",
+        "subheading": "From concept to reality."
+      }
+    },
+    "timeline": {
+      "type": "zenya-timeline",
+      "blocks": {
+        "t1": {
+          "type": "milestone",
+          "settings": {
+            "year": "2020",
+            "title": "Founded",
+            "text": "We started in a garage."
+          }
+        },
+        "t2": {
+          "type": "milestone",
+          "settings": {
+            "year": "2022",
+            "title": "Growth",
+            "text": "We expanded to 10 countries."
+          }
+        },
+        "t3": {
+          "type": "milestone",
+          "settings": {
+            "year": "2024",
+            "title": "Future",
+            "text": "The sky is the limit."
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ]
+    },
+    "team": {
+      "type": "zenya-multicolumn",
+      "settings": {
+        "title": "Meet the Team"
+      },
+      "blocks": {
+        "m1": {
+          "type": "column",
+          "settings": {
+            "title": "CEO",
+            "text": "John Doe"
+          }
+        },
+        "m2": {
+          "type": "column",
+          "settings": {
+            "title": "CTO",
+            "text": "Jane Doe"
+          }
+        },
+        "m3": {
+          "type": "column",
+          "settings": {
+            "title": "COO",
+            "text": "Bob Smith"
+          }
+        }
+      },
+      "block_order": [
+        "m1",
+        "m2",
+        "m3"
+      ]
+    },
+    "newsletter": {
+      "type": "zenya-newsletter"
+    }
+  },
+  "order": [
+    "hero",
+    "rich_text",
+    "visual_showcase",
+    "how_it_works",
+    "timeline",
+    "team",
+    "newsletter"
+  ]
+}

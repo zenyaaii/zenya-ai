@@ -1,0 +1,171 @@
+﻿<div style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6" style="max-width: {{ section.settings.width }}px;">
+    <div class="text-center mb-10">
+      {% if section.settings.title != blank %}
+        <h2 class="text-3xl font-bold mb-4" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.text != blank %}
+        <div class="rte text-lg" style="color: {{ section.settings.text_color }}">{{ section.settings.text }}</div>
+      {% endif %}
+    </div>
+
+    {% form 'customer', class: 'flex flex-col sm:flex-row gap-4 max-w-xl mx-auto' %}
+      {% if form.posted_successfully? %}
+        <div class="w-full text-center p-4 rounded-lg bg-green-100 text-green-800 border border-green-200">
+          <p class="font-medium">Thanks for subscribing!</p>
+        </div>
+      {% else %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        
+        <div class="flex-1">
+          <input 
+            type="email" 
+            name="contact[email]" 
+            placeholder="{{ section.settings.placeholder }}" 
+            required 
+            class="w-full px-6 py-3.5 rounded-full focus:outline-none focus:ring-2 transition-shadow"
+            style="background-color: {{ section.settings.input_bg }}; color: {{ section.settings.input_text }}; border: 1px solid {{ section.settings.input_border }}; --tw-ring-color: {{ section.settings.btn_bg }}"
+          >
+          {% if form.errors %}
+             <p class="mt-2 text-red-500 text-sm">{{ form.errors.translated_fields['email'] | capitalize }} {{ form.errors.messages['email'] }}</p>
+          {% endif %}
+        </div>
+
+        <button 
+          type="submit" 
+          class="px-8 py-3.5 rounded-full font-bold whitespace-nowrap transition duration-300 hover:opacity-90 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+          style="background-color: {{ section.settings.btn_bg }}; color: {{ section.settings.btn_text }};"
+        >
+          {{ section.settings.btn_label }}
+        </button>
+      {% endif %}
+    {% endform %}
+  </div>
+</div>
+
+{% schema %}
+{
+    "name":  "Newsletter",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Subscribe to our emails"
+                     },
+                     {
+                         "type":  "richtext",
+                         "id":  "text",
+                         "label":  "Subtext",
+                         "default":  "\u003cp\u003eBe the first to know about new collections and exclusive offers.\u003c/p\u003e"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "placeholder",
+                         "label":  "Placeholder Text",
+                         "default":  "Email address"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "btn_label",
+                         "label":  "Button Label",
+                         "default":  "Subscribe"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#cbd5e1"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "input_bg",
+                         "label":  "Input Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "input_text",
+                         "label":  "Input Text",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "input_border",
+                         "label":  "Input Border",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "btn_bg",
+                         "label":  "Button Background",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "btn_text",
+                         "label":  "Button Text",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "width",
+                         "min":  400,
+                         "max":  1400,
+                         "step":  20,
+                         "unit":  "px",
+                         "label":  "Container Width",
+                         "default":  800
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  80
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  80
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Newsletter"
+                    }
+                ]
+}
+{% endschema %}

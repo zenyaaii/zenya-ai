@@ -1,0 +1,379 @@
+﻿<div x-data="{ active: 0, count: {{ section.blocks.size }}, timer: null }" 
+     x-init="timer = setInterval(() => { active = (active + 1) % count }, {{ section.settings.speed | times: 1000 }})"
+     class="relative w-full overflow-hidden group"
+     style="height: {{ section.settings.desktop_height }};">
+  
+  <!-- Mobile Height Override (via inline style or utility class if possible, using style here for simplicity) -->
+  <style>
+    @media (max-width: 768px) {
+      .relative.w-full.overflow-hidden.group {
+        height: {{ section.settings.mobile_height }} !important;
+      }
+    }
+  </style>
+
+  {% for block in section.blocks %}
+    <div x-show="active === {{ forloop.index0 }}"
+         x-transition:enter="transition ease-out duration-700"
+         x-transition:enter-start="opacity-0 scale-105"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-700 absolute inset-0"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-100"
+         class="absolute inset-0 w-full h-full flex items-center justify-center text-center">
+      
+      <!-- Background Image -->
+      {% if block.settings.image != blank %}
+        <img 
+          src="{{ block.settings.image | image_url: width: 1600 }}" 
+          width="{{ block.settings.image.width }}"
+          height="{{ block.settings.image.height }}"
+          alt="{{ block.settings.image.alt | default: block.settings.heading }}"
+          class="absolute inset-0 w-full h-full object-cover">
+      {% else %}
+        {{ 'lifestyle-' | append: forloop.index | placeholder_svg_tag: 'absolute inset-0 w-full h-full object-cover' }}
+      {% endif %}
+      
+      <!-- Overlay -->
+      <div class="absolute inset-0" style="background-color: {{ block.settings.overlay_color }}; opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }}"></div>
+
+      <!-- Content -->
+      <div class="relative z-10 w-full h-full p-6 md:p-12 flex flex-col" style="
+        justify-content: {{ block.settings.vertical_align }}; 
+        align-items: {{ block.settings.horizontal_align }}; 
+        text-align: {{ block.settings.text_align }};
+      ">
+        <div class="max-w-3xl">
+          {% if block.settings.heading != blank %}
+            <h2 class="font-extrabold text-white mb-4 tracking-tight drop-shadow-md" style="font-size: {{ block.settings.heading_size }}px; line-height: 1.1;">{{ block.settings.heading }}</h2>
+          {% endif %}
+          {% if block.settings.subheading != blank %}
+            <p class="mb-8 drop-shadow" style="font-size: {{ block.settings.subheading_size }}px; color: #f1f5f9;">{{ block.settings.subheading }}</p>
+          {% endif %}
+          {% if block.settings.cta_text != blank %}
+            <a href="{{ block.settings.cta_url }}" class="inline-block px-8 py-4 font-bold transition shadow-lg transform hover:scale-105 {% if block.settings.btn_style == 'outline' %}border-2 hover:bg-white hover:text-black{% else %}hover:opacity-90{% endif %}" style="
+              font-size: {{ block.settings.cta_text_size }}px;
+              {% if block.settings.btn_style == 'outline' %}
+                border-color: {{ block.settings.btn_color }}; color: {{ block.settings.btn_color }}; border-radius: {{ block.settings.btn_radius }}px;
+              {% else %}
+                background-color: {{ block.settings.btn_color }}; color: {{ block.settings.btn_text_color }}; border-radius: {{ block.settings.btn_radius }}px;
+              {% endif %}
+            ">
+              {{ block.settings.cta_text }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <!-- Controls -->
+  {% if section.blocks.size > 1 %}
+    <button @click="active = (active - 1 + count) % count; clearInterval(timer)" 
+            class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition opacity-0 group-hover:opacity-100"
+            style="background-color: {{ section.settings.arrow_bg }}; color: {{ section.settings.arrow_color }};">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+    </button>
+    <button @click="active = (active + 1) % count; clearInterval(timer)" 
+            class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full backdrop-blur-sm transition opacity-0 group-hover:opacity-100"
+            style="background-color: {{ section.settings.arrow_bg }}; color: {{ section.settings.arrow_color }};">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+    </button>
+
+    <!-- Indicators -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
+      {% for block in section.blocks %}
+        <button @click="active = {{ forloop.index0 }}" 
+                class="w-3 h-3 rounded-full transition-all" 
+                :class="active === {{ forloop.index0 }} ? 'scale-125' : 'opacity-50'"
+                style="background-color: {{ section.settings.dot_color }};"></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% schema %}
+{
+    "name":  "Slideshow",
+    "settings":  [
+                     {
+                         "type":  "select",
+                         "id":  "desktop_height",
+                         "label":  "Desktop Height",
+                         "options":  [
+                                         {
+                                             "value":  "500px",
+                                             "label":  "Small (500px)"
+                                         },
+                                         {
+                                             "value":  "650px",
+                                             "label":  "Medium (650px)"
+                                         },
+                                         {
+                                             "value":  "800px",
+                                             "label":  "Large (800px)"
+                                         },
+                                         {
+                                             "value":  "100vh",
+                                             "label":  "Full Screen"
+                                         }
+                                     ],
+                         "default":  "650px"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "mobile_height",
+                         "label":  "Mobile Height",
+                         "options":  [
+                                         {
+                                             "value":  "400px",
+                                             "label":  "Small (400px)"
+                                         },
+                                         {
+                                             "value":  "500px",
+                                             "label":  "Medium (500px)"
+                                         },
+                                         {
+                                             "value":  "600px",
+                                             "label":  "Large (600px)"
+                                         },
+                                         {
+                                             "value":  "100vh",
+                                             "label":  "Full Screen"
+                                         }
+                                     ],
+                         "default":  "500px"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "speed",
+                         "label":  "Autoplay Speed (s)",
+                         "min":  3,
+                         "max":  10,
+                         "default":  5
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Navigation Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "arrow_color",
+                         "label":  "Arrow Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "arrow_bg",
+                         "label":  "Arrow Background",
+                         "default":  "rgba(255, 255, 255, 0.2)"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "dot_color",
+                         "label":  "Dot Indicator Color",
+                         "default":  "#ffffff"
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "slide",
+                       "name":  "Slide",
+                       "settings":  [
+                                        {
+                                            "type":  "image_picker",
+                                            "id":  "image",
+                                            "label":  "Image"
+                                        },
+                                        {
+                                            "type":  "header",
+                                            "content":  "Overlay"
+                                        },
+                                        {
+                                            "type":  "color",
+                                            "id":  "overlay_color",
+                                            "label":  "Overlay Color",
+                                            "default":  "#000000"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "overlay_opacity",
+                                            "label":  "Overlay Opacity",
+                                            "min":  0,
+                                            "max":  90,
+                                            "step":  10,
+                                            "default":  30,
+                                            "unit":  "%"
+                                        },
+                                        {
+                                            "type":  "header",
+                                            "content":  "Layout"
+                                        },
+                                        {
+                                            "type":  "select",
+                                            "id":  "vertical_align",
+                                            "label":  "Vertical Alignment",
+                                            "options":  [
+                                                            {
+                                                                "value":  "flex-start",
+                                                                "label":  "Top"
+                                                            },
+                                                            {
+                                                                "value":  "center",
+                                                                "label":  "Middle"
+                                                            },
+                                                            {
+                                                                "value":  "flex-end",
+                                                                "label":  "Bottom"
+                                                            }
+                                                        ],
+                                            "default":  "center"
+                                        },
+                                        {
+                                            "type":  "select",
+                                            "id":  "horizontal_align",
+                                            "label":  "Horizontal Alignment",
+                                            "options":  [
+                                                            {
+                                                                "value":  "flex-start",
+                                                                "label":  "Left"
+                                                            },
+                                                            {
+                                                                "value":  "center",
+                                                                "label":  "Center"
+                                                            },
+                                                            {
+                                                                "value":  "flex-end",
+                                                                "label":  "Right"
+                                                            }
+                                                        ],
+                                            "default":  "center"
+                                        },
+                                        {
+                                            "type":  "select",
+                                            "id":  "text_align",
+                                            "label":  "Text Alignment",
+                                            "options":  [
+                                                            {
+                                                                "value":  "left",
+                                                                "label":  "Left"
+                                                            },
+                                                            {
+                                                                "value":  "center",
+                                                                "label":  "Center"
+                                                            },
+                                                            {
+                                                                "value":  "right",
+                                                                "label":  "Right"
+                                                            }
+                                                        ],
+                                            "default":  "center"
+                                        },
+                                        {
+                                            "type":  "header",
+                                            "content":  "Content"
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "heading",
+                                            "label":  "Heading",
+                                            "default":  "Welcome to Zenya"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "heading_size",
+                                            "label":  "Heading Size",
+                                            "min":  32,
+                                            "max":  96,
+                                            "step":  4,
+                                            "unit":  "px",
+                                            "default":  64
+                                        },
+                                        {
+                                            "type":  "textarea",
+                                            "id":  "subheading",
+                                            "label":  "Subheading",
+                                            "default":  "The Future of E-commerce"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "subheading_size",
+                                            "label":  "Subheading Size",
+                                            "min":  14,
+                                            "max":  32,
+                                            "step":  1,
+                                            "unit":  "px",
+                                            "default":  20
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "cta_text",
+                                            "label":  "Button Label",
+                                            "default":  "Shop Now"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "cta_text_size",
+                                            "label":  "Button Text Size",
+                                            "min":  12,
+                                            "max":  24,
+                                            "step":  1,
+                                            "unit":  "px",
+                                            "default":  16
+                                        },
+                                        {
+                                            "type":  "url",
+                                            "id":  "cta_url",
+                                            "label":  "Button Link"
+                                        },
+                                        {
+                                            "type":  "header",
+                                            "content":  "Button Styling"
+                                        },
+                                        {
+                                            "type":  "select",
+                                            "id":  "btn_style",
+                                            "label":  "Button Style",
+                                            "options":  [
+                                                            {
+                                                                "value":  "solid",
+                                                                "label":  "Solid"
+                                                            },
+                                                            {
+                                                                "value":  "outline",
+                                                                "label":  "Outline"
+                                                            }
+                                                        ],
+                                            "default":  "solid"
+                                        },
+                                        {
+                                            "type":  "color",
+                                            "id":  "btn_color",
+                                            "label":  "Button Color",
+                                            "default":  "#ffffff"
+                                        },
+                                        {
+                                            "type":  "color",
+                                            "id":  "btn_text_color",
+                                            "label":  "Button Text Color (Solid Only)",
+                                            "default":  "#0f172a"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "btn_radius",
+                                            "label":  "Button Corner Radius",
+                                            "min":  0,
+                                            "max":  40,
+                                            "step":  4,
+                                            "unit":  "px",
+                                            "default":  32
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Slideshow"
+                    }
+                ]
+}
+{% endschema %}

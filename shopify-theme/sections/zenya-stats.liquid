@@ -1,0 +1,88 @@
+﻿
+<section class="py-12" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="container mx-auto px-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-white/10 md:divide-x">
+      {% for block in section.blocks %}
+        <div class="flex flex-col items-center">
+          <div class="text-4xl font-black tracking-tight mb-1">{{ block.settings.value }}</div>
+          <div class="text-sm font-medium uppercase tracking-wider opacity-80">{{ block.settings.label }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+    "name":  "Stats",
+    "settings":  [
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#ffffff"
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "stat",
+                       "name":  "Stat",
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "value",
+                                            "label":  "Value",
+                                            "default":  "10k+"
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "label",
+                                            "label":  "Label",
+                                            "default":  "Happy Customers"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Stats",
+                        "blocks":  [
+                                       {
+                                           "type":  "stat",
+                                           "settings":  {
+                                                            "value":  "10k+",
+                                                            "label":  "Themes Generated"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "stat",
+                                           "settings":  {
+                                                            "value":  "2.5s",
+                                                            "label":  "Avg. Load Time"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "stat",
+                                           "settings":  {
+                                                            "value":  "$40M+",
+                                                            "label":  "Client Revenue"
+                                                        }
+                                       },
+                                       {
+                                           "type":  "stat",
+                                           "settings":  {
+                                                            "value":  "24/7",
+                                                            "label":  "AI Availability"
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}
+  

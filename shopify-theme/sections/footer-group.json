@@ -1,0 +1,47 @@
+{
+  "name": "Footer",
+  "sections": {
+    "footer": {
+      "type": "zenya-footer",
+      "blocks": {
+        "brand": {
+          "type": "brand_information",
+          "settings": {
+            "show_social": true
+          }
+        },
+        "menu_shop": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Shop",
+            "menu": "footer"
+          }
+        },
+        "menu_help": {
+          "type": "link_list",
+          "settings": {
+            "heading": "Support",
+            "menu": "footer"
+          }
+        }
+      },
+      "block_order": [
+        "brand",
+        "menu_shop",
+        "menu_help"
+      ],
+      "settings": {
+        "copyright": "© 2024 Zenya. All rights reserved."
+      }
+    },
+    "newsletter-popup": {
+      "type": "zenya-newsletter-popup",
+      "settings": {
+      }
+    }
+  },
+  "order": [
+    "footer",
+    "newsletter-popup"
+  ]
+}

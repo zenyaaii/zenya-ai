@@ -1,0 +1,161 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+            "show_rating": true
+          }
+        },
+        "price": {
+          "type": "price"
+        },
+        "benefits": {
+          "type": "benefits"
+        },
+        "variant_picker": {
+          "type": "variant_picker"
+        },
+        "size_chart": {
+          "type": "popup",
+          "settings": {
+            "text": "Size Chart"
+          }
+        },
+        "buy_buttons": {
+          "type": "buy_buttons"
+        },
+        "stock": {
+          "type": "stock"
+        },
+        "description": {
+          "type": "description"
+        },
+        "shipping_tab": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping & Returns",
+            "content": "<p>Free shipping on all orders over $50. 30-day return policy.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "benefits",
+        "variant_picker",
+        "size_chart",
+        "buy_buttons",
+        "stock",
+        "description",
+        "shipping_tab"
+      ]
+    },
+    "comparison": {
+      "type": "zenya-comparison"
+    },
+    "features": {
+      "type": "zenya-features",
+      "blocks": {
+        "f1": {
+          "type": "feature",
+          "settings": {
+            "title": "Fast Shipping",
+            "desc": "Free worldwide shipping on all orders."
+          }
+        },
+        "f2": {
+          "type": "feature",
+          "settings": {
+            "title": "2 Year Warranty",
+            "desc": "We stand behind our quality."
+          }
+        },
+        "f3": {
+          "type": "feature",
+          "settings": {
+            "title": "24/7 Support",
+            "desc": "Contact us anytime."
+          }
+        }
+      },
+      "block_order": [
+        "f1",
+        "f2",
+        "f3"
+      ]
+    },
+    "testimonials": {
+      "type": "zenya-testimonials",
+      "blocks": {
+        "testimonial_0": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Alice",
+            "text": "Amazing theme!",
+            "location": "NY"
+          }
+        },
+        "testimonial_1": {
+          "type": "testimonial",
+          "settings": {
+            "name": "Bob",
+            "text": "Increased my sales",
+            "location": "CA"
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_0",
+        "testimonial_1"
+      ]
+    },
+    "faq": {
+      "type": "zenya-faq",
+      "blocks": {
+        "faq_0": {
+          "type": "faq",
+          "settings": {
+            "q": "Is it fast?",
+            "a": "Yes, very."
+          }
+        },
+        "faq_1": {
+          "type": "faq",
+          "settings": {
+            "q": "Is it responsive?",
+            "a": "Yes, fully."
+          }
+        }
+      },
+      "block_order": [
+        "faq_0",
+        "faq_1"
+      ]
+    },
+    "related": {
+      "type": "zenya-featured-collection",
+      "settings": {
+        "title": "You May Also Like"
+      }
+    },
+    "sticky_atc": {
+      "type": "zenya-sticky-atc"
+    },
+    "newsletter": {
+      "type": "zenya-newsletter"
+    }
+  },
+  "order": [
+    "main",
+    "comparison",
+    "features",
+    "testimonials",
+    "faq",
+    "related",
+    "sticky_atc",
+    "newsletter"
+  ]
+}

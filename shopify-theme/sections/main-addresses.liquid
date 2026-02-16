@@ -1,0 +1,66 @@
+
+<div class="py-16 bg-slate-50" x-data="{ newAddress: false }">
+  <div class="container mx-auto px-6 max-w-4xl">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900">Addresses</h1>
+      <div class="flex gap-4">
+        <a href="{{ routes.account_url }}" class="text-slate-500 hover:text-slate-900 font-bold">Back to Account</a>
+        <button @click="newAddress = !newAddress" class="px-6 py-2 rounded-full bg-primary text-white font-bold hover:opacity-90">Add New</button>
+      </div>
+    </div>
+
+    <!-- Add New Form -->
+    <div x-show="newAddress" class="bg-white rounded-2xl p-8 shadow-sm mb-8" x-cloak>
+      <h2 class="text-xl font-bold mb-6">Add a New Address</h2>
+      {% form 'customer_address', customer.new_address %}
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <input type="text" name="address[first_name]" value="{{ form.first_name }}" placeholder="First Name" class="px-4 py-3 rounded-lg border border-slate-300">
+          <input type="text" name="address[last_name]" value="{{ form.last_name }}" placeholder="Last Name" class="px-4 py-3 rounded-lg border border-slate-300">
+        </div>
+        <input type="text" name="address[company]" value="{{ form.company }}" placeholder="Company" class="w-full px-4 py-3 rounded-lg border border-slate-300 mb-4">
+        <input type="text" name="address[address1]" value="{{ form.address1 }}" placeholder="Address 1" class="w-full px-4 py-3 rounded-lg border border-slate-300 mb-4">
+        <input type="text" name="address[address2]" value="{{ form.address2 }}" placeholder="Address 2" class="w-full px-4 py-3 rounded-lg border border-slate-300 mb-4">
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <input type="text" name="address[city]" value="{{ form.city }}" placeholder="City" class="px-4 py-3 rounded-lg border border-slate-300">
+          <input type="text" name="address[country]" value="{{ form.country }}" placeholder="Country" class="px-4 py-3 rounded-lg border border-slate-300">
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <input type="text" name="address[zip]" value="{{ form.zip }}" placeholder="Zip/Postal Code" class="px-4 py-3 rounded-lg border border-slate-300">
+          <input type="text" name="address[phone]" value="{{ form.phone }}" placeholder="Phone" class="px-4 py-3 rounded-lg border border-slate-300">
+        </div>
+        <div class="flex items-center gap-2 mb-6">
+          {{ form.set_as_default_checkbox }}
+          <label for="address_default_address_new">Set as default address</label>
+        </div>
+        <div class="flex gap-4">
+          <button type="submit" class="px-8 py-3 rounded-lg bg-slate-900 text-white font-bold">Add Address</button>
+          <button @click="newAddress = false" type="button" class="px-8 py-3 rounded-lg text-slate-500 font-bold">Cancel</button>
+        </div>
+      {% endform %}
+    </div>
+
+    <!-- List -->
+    <div class="grid md:grid-cols-2 gap-6">
+      {% for address in customer.addresses %}
+        <div class="bg-white rounded-2xl p-8 shadow-sm relative">
+          {% if address == customer.default_address %}
+            <span class="absolute top-4 right-4 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">Default</span>
+          {% endif %}
+          <div class="text-slate-600 leading-relaxed mb-6">
+            {{ address | format_address }}
+          </div>
+          <div class="flex gap-4">
+            <form method="post" action="{{ routes.account_addresses_url }}/{{ address.id }}">
+              <input type="hidden" name="_method" value="delete">
+              <button type="submit" class="text-red-500 font-bold text-sm hover:underline">Delete</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{ "name": "Addresses", "settings": [] }
+{% endschema %}
+  

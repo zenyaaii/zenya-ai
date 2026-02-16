@@ -12,6 +12,19 @@ import VisualShowcase from './theme/VisualShowcase'
 import Testimonials from './theme/Testimonials'
 import FAQ from './theme/FAQ'
 import Guarantee from './theme/Guarantee'
+import RichText from './theme/RichText'
+import ImageText from './theme/ImageText'
+import Multicolumn from './theme/Multicolumn'
+import Newsletter from './theme/Newsletter'
+import FeaturedCollection from './theme/FeaturedCollection'
+import CartDrawer from './theme/CartDrawer'
+import ScrollingText from './theme/ScrollingText'
+import Slideshow from './theme/Slideshow'
+import LogoList from './theme/LogoList'
+import VideoHero from './theme/VideoHero'
+import TrustBadges from './theme/TrustBadges'
+import VolumeBundles from './theme/VolumeBundles'
+import Upsell from './theme/Upsell'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useState, useEffect } from 'react'
 
@@ -48,6 +61,7 @@ export default function ThemePreview({
 }: ThemePreviewProps) {
   const [showSticky, setShowSticky] = useState(false)
   const [currentView, setCurrentView] = useState<'home' | 'product' | 'catalog'>('home')
+  const [isCartOpen, setIsCartOpen] = useState(false)
   const { scrollY } = useScroll()
 
   useEffect(() => {
@@ -132,6 +146,64 @@ export default function ThemePreview({
     days: content?.guarantee?.days || defaultGuarantee.days
   }
 
+  // --- New Sections Content with Fallbacks ---
+
+  const defaultRichText = {
+    title: `About ${name}`,
+    text: `We are ${name}, a brand dedicated to quality and innovation. Our journey began with a simple mission: to create products that make a difference in your life. We believe in sustainable practices, ethical sourcing, and putting our customers first.`
+  }
+
+  const richTextContent = {
+    title: content?.rich_text?.title || defaultRichText.title,
+    text: content?.rich_text?.text || defaultRichText.text
+  }
+
+  const defaultImageText = {
+    title: "Crafted for Excellence",
+    text: "Every detail is meticulously designed to ensure superior performance and durability. We don't just make products; we craft experiences that last a lifetime.",
+    cta: "Learn More"
+  }
+
+  const imageTextContent = {
+    title: content?.image_text?.title || defaultImageText.title,
+    text: content?.image_text?.text || defaultImageText.text,
+    cta: content?.image_text?.cta || defaultImageText.cta
+  }
+
+  const defaultMulticolumn = [
+    { title: "Eco-Friendly", text: "Sustainably sourced materials that are kind to the planet." },
+    { title: "Ethically Made", text: "Fair wages and safe working conditions for all our makers." },
+    { title: "Community Focused", text: "A portion of every sale goes back to supporting local communities." }
+  ]
+
+  const multicolumnContent = content?.multicolumn?.length > 0 ? content.multicolumn : defaultMulticolumn
+
+  const defaultNewsletter = {
+    heading: "Join Our Community",
+    text: "Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals."
+  }
+
+  const newsletterContent = {
+    heading: content?.newsletter?.heading || defaultNewsletter.heading,
+    text: content?.newsletter?.text || defaultNewsletter.text
+  }
+
+  // Mega Pack Content Fallbacks
+  const scrollingTextContent = content?.scrolling_text || [
+    "Free Shipping Worldwide", "30-Day Money Back Guarantee", "Premium Quality Materials", "24/7 Customer Support"
+  ]
+
+  const slideshowContent = content?.slideshow || [
+    { heading: `Welcome to ${name}`, subheading: "Discover the best products for your lifestyle", cta: "Shop Collection" },
+    { heading: "New Arrivals", subheading: "Check out the latest trends and styles", cta: "View All" }
+  ]
+
+  const videoHeroContent = content?.video_hero || {
+    heading: "Experience the Difference",
+    subheading: "Watch our product in action and see why thousands love it.",
+    cta: "Shop Now"
+  }
+
   const safeContent = {
     hero: heroContent,
     features: featuresContent,
@@ -139,10 +211,20 @@ export default function ThemePreview({
     solution: solutionContent,
     testimonials: testimonialsContent,
     faq: faqContent,
-    guarantee: guaranteeContent
+    guarantee: guaranteeContent,
+    rich_text: richTextContent,
+    image_text: imageTextContent,
+    multicolumn: multicolumnContent,
+    newsletter: newsletterContent,
+    scrolling_text: scrollingTextContent,
+    slideshow: slideshowContent,
+    video_hero: videoHeroContent
   }
 
   const safeShopName = shopName || name
+  
+  // Robust image fallback
+  const safeImages = images && images.length > 0 ? images : ['https://placehold.co/600x600/e2e8f0/64748b?text=No+Image']
 
   return (
     <div className="relative bg-white font-sans text-slate-900">
@@ -152,7 +234,7 @@ export default function ThemePreview({
         name={safeShopName} 
         primaryColor={primaryColor} 
         onNavigate={(view) => setCurrentView(view)} 
-        onOpenCart={() => alert('Cart feature coming soon!')}
+        onOpenCart={() => setIsCartOpen(true)}
       />
 
       {currentView === 'home' && (
@@ -172,44 +254,52 @@ export default function ThemePreview({
             </button>
           </motion.div>
 
+          <ScrollingText 
+            texts={safeContent.scrolling_text}
+            primaryColor={primaryColor}
+          />
+          
+          {/* Show Slideshow OR Hero based on preference (showing both for preview) */}
+          <Slideshow 
+             slides={safeContent.slideshow}
+             primaryColor={primaryColor}
+          />
+
           <Hero 
             headline={safeContent.hero.headline}
             subheadline={safeContent.hero.subheadline}
             cta={safeContent.hero.cta}
-            image={images[0]}
+            image={safeImages[0]}
             primaryColor={primaryColor}
             onShopNow={() => setCurrentView('product')}
           />
 
-          {/* Brands / Social Proof Strip */}
-          <div className="border-y border-slate-100 bg-slate-50 py-8">
-             <div className="mx-auto max-w-7xl px-6 text-center">
-               <p className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Trusted by 10,000+ Customers</p>
-               <div className="flex flex-wrap items-center justify-center gap-8 opacity-50 grayscale md:gap-16">
-                 {/* Dummy Logos */}
-                 {['Forbes', 'TechCrunch', 'GQ', 'Vogue'].map(brand => (
-                   <span key={brand} className="text-xl font-black text-slate-800">{brand}</span>
-                 ))}
-               </div>
-             </div>
-          </div>
+          <LogoList 
+            title="As Seen On"
+            logos={["Forbes", "TechCrunch", "GQ", "Vogue", "Wired", "Inc."]}
+          />
 
           <ProblemSolution 
             problem={safeContent.problem}
             solution={safeContent.solution}
-            problemImage={images[1] || images[0]}
-            solutionImage={images[2] || images[0]}
+            problemImage={safeImages[1] || safeImages[0]}
+            solutionImage={safeImages[2] || safeImages[0]}
             secondaryColor={secondaryColor}
           />
 
-          <HowItWorks primaryColor={primaryColor} />
-
-          <div id="features">
-            <Features 
-              features={safeContent.features}
+          <VideoHero 
+              heading={safeContent.video_hero.heading}
+              subheading={safeContent.video_hero.subheading}
+              cta={safeContent.video_hero.cta}
               primaryColor={primaryColor}
             />
-          </div>
+            
+            <HowItWorks primaryColor={primaryColor} />
+
+            <Features 
+              features={safeContent.features} 
+              primaryColor={primaryColor}
+            />
 
           <ComparisonTable 
             productName={name}
@@ -217,8 +307,27 @@ export default function ThemePreview({
             primaryColor={primaryColor}
           />
 
+          <FeaturedCollection 
+            title="Best Sellers"
+            primaryColor={primaryColor}
+          />
+
+          <ImageText 
+            title={safeContent.image_text.title}
+            text={safeContent.image_text.text}
+            image={safeImages[1] || safeImages[0]}
+            ctaText={safeContent.image_text.cta}
+            primaryColor={primaryColor}
+            layout="left"
+          />
+
+          <Multicolumn 
+            title="Our Values"
+            columns={safeContent.multicolumn}
+          />
+
           <VisualShowcase 
-            image={images[3] || images[0]}
+            image={safeImages[3] || safeImages[0]}
             primaryColor={primaryColor}
             onShopNow={() => setCurrentView('product')}
           />
@@ -229,6 +338,11 @@ export default function ThemePreview({
               primaryColor={primaryColor}
             />
           </div>
+
+          <RichText 
+            title={safeContent.rich_text.title}
+            text={safeContent.rich_text.text}
+          />
 
           <div id="faq">
             <FAQ 
@@ -241,13 +355,40 @@ export default function ThemePreview({
             guarantee={safeContent.guarantee}
             primaryColor={primaryColor}
           />
+
+          <div className="mx-auto max-w-lg px-6 mb-16">
+            <VolumeBundles 
+              price={price} 
+              originalPrice={originalPrice}
+              primaryColor={primaryColor} 
+              onChange={() => {}} 
+            />
+          </div>
+
+          <div className="mx-auto max-w-lg px-6 mb-16">
+             <Upsell 
+               primaryColor={primaryColor} 
+               mainProductImage={safeImages[0]}
+               onAdd={() => alert('Upsell added!')}
+             />
+          </div>
+
+          <div className="mx-auto max-w-7xl px-6 mb-16">
+            <TrustBadges />
+          </div>
+
+          <Newsletter 
+            heading={safeContent.newsletter.heading}
+            text={safeContent.newsletter.text}
+            primaryColor={primaryColor}
+          />
         </>
       )}
 
       {currentView === 'product' && (
         <ProductPage 
           primaryColor={primaryColor} 
-          images={images} 
+          images={safeImages} 
           productName={name}
           price={price}
           originalPrice={originalPrice}
@@ -324,6 +465,14 @@ export default function ThemePreview({
           </div>
         </div>
       </footer>
+      <CartDrawer 
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        productName={safeContent.hero.headline}
+        price={price}
+        image={safeImages[0]}
+        primaryColor={primaryColor}
+      />
     </div>
   )
 }

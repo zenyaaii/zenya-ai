@@ -1,0 +1,683 @@
+﻿
+<div class="py-10 lg:py-20 bg-white" id="MainProduct-{{ section.id }}" 
+  x-data="{ 
+  selectedQuantity: 1,
+  
+  // Variant Logic
+  variants: [
+    {% for variant in product.variants %}
+      {
+        id: {{ variant.id }},
+        title: {{ variant.title | json }},
+        price: {{ variant.price }},
+        compare_at_price: {{ variant.compare_at_price | default: 'null' }},
+        featured_media: {{ variant.featured_media | json }},
+        options: {{ variant.options | json }},
+        unit_price: {{ variant.unit_price | default: 'null' }},
+        unit_price_measurement: {{ variant.unit_price_measurement | json }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ],
+  optionNames: {{ product.options | json | escape }},
+  options: {
+    {% for option in product.options_with_values %}
+      {{ option.name | json | escape }}: {{ option.selected_value | json | escape }}{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  },
+  currentVariantId: {{ product.selected_or_first_available_variant.id }},
+  currentPrice: {{ product.selected_or_first_available_variant.price }},
+  currentComparePrice: {{ product.selected_or_first_available_variant.compare_at_price | default: 'null' }},
+  currentMediaId: {{ product.selected_or_first_available_variant.featured_media.id | default: product.featured_media.id | default: 'null' }},
+  stock: 14,
+  timeLeft: 43200,
+  isStickyVisible: false,
+  visitors: 24,
+  
+  // Computed Properties
+  get variant() {
+    return this.variants.find(v => {
+      return v.options.every((opt, index) => {
+        const optionName = this.optionNames[index];
+        return this.options[optionName] === opt;
+      });
+    }) || this.variants[0];
+  },
+
+  updateVariant() {
+    const matched = this.variants.find(v => {
+      // Create array of selected values in correct order
+      const selectedValues = [];
+      {% for option in product.options %}
+        selectedValues.push(this.options[{{ option | json | escape }}]);
+      {% endfor %}
+      
+      return v.options.every((val, i) => val === selectedValues[i]);
+    });
+
+    if (matched) {
+      this.currentVariantId = matched.id;
+      this.currentPrice = matched.price;
+      this.currentComparePrice = matched.compare_at_price;
+      if (matched.featured_media) {
+        this.currentMediaId = matched.featured_media.id;
+      }
+      
+      // Update URL without reload
+      const url = new URL(window.location);
+      url.searchParams.set('variant', matched.id);
+      window.history.replaceState({}, '', url);
+
+      // Fetch Pickup Availability
+      fetch(`/?section_id=pickup-availability&variant=${matched.id}`)
+        .then(r => r.text())
+        .then(t => {
+          const p = new DOMParser().parseFromString(t, 'text/html');
+          const c = document.getElementById('pickup-availability-container');
+          const s = p.querySelector('.shopify-section');
+          if (c && s) c.innerHTML = s.innerHTML;
+        });
+    }
+  },
+
+  get discount() {
+    if (this.selectedQuantity === 2) return 15;
+    if (this.selectedQuantity === 3) return 25;
+    return 0;
+  },
+  
+  get totalPrice() {
+    let total = this.currentPrice * this.selectedQuantity;
+    if (this.discount > 0) {
+      total = total * (1 - (this.discount / 100));
+    }
+    return (total / 100).toFixed(2);
+  },
+
+  get savings() {
+    let regular = this.currentPrice * this.selectedQuantity;
+    let discounted = regular * (1 - (this.discount / 100));
+    return ((regular - discounted) / 100).toFixed(2);
+  },
+
+  formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h}h ${m}m ${s}s`;
+  },
+
+  formatMoney(cents) {
+    return '{{ cart.currency.symbol }}' + (cents / 100).toFixed(2);
+  },
+  
+  init() {
+    setInterval(() => {
+      if(this.timeLeft > 0) this.timeLeft--;
+    }, 1000);
+    window.addEventListener('scroll', () => {
+      const atcButton = document.getElementById('main-atc-button');
+      if (atcButton) {
+        const rect = atcButton.getBoundingClientRect();
+        this.isStickyVisible = rect.top < 0;
+      }
+    });
+    // Live Visitor Counter Logic
+    setInterval(() => {
+      const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
+      this.visitors = Math.min(Math.max(this.visitors + change, 12), 45);
+    }, 4000);
+  }
+}">
+  
+  <!-- Sticky Add To Cart Bar -->
+  {% if section.settings.sticky_atc %}
+  <div 
+    x-show="isStickyVisible" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="translate-y-full opacity-0"
+    x-transition:enter-end="translate-y-0 opacity-100"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="translate-y-0 opacity-100"
+    x-transition:leave-end="translate-y-full opacity-0"
+    class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-4 z-50 lg:hidden"
+    style="display: none;"
+  >
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex-1">
+        <div class="text-xs text-slate-500 font-medium">Total Price</div>
+        <div class="font-bold text-slate-900 text-lg">{{ cart.currency.symbol }}<span x-text="totalPrice"></span></div>
+      </div>
+      <button 
+        @click="document.getElementById('main-atc-button').click()"
+        class="flex-1 bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition text-sm uppercase tracking-wide"
+        style="background-color: {{ settings.primary_color }}"
+      >
+        Add To Cart
+      </button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="container mx-auto px-4 lg:px-6">
+    <div class="grid gap-10 lg:grid-cols-12 lg:gap-16">
+      
+      <!-- Left: Images -->
+      <div class="lg:col-span-7">
+        <!-- Mobile: Horizontal Scroll (Snap) -->
+        <div class="flex overflow-x-auto snap-x snap-mandatory gap-4 -mx-4 px-4 pb-4 lg:hidden scrollbar-hide">
+          {% if product.media.size > 0 %}
+            {% for media in product.media %}
+              <div class="snap-center shrink-0 w-[85vw] relative aspect-square rounded-xl bg-slate-100 overflow-hidden shadow-sm">
+                {% case media.media_type %}
+                  {% when 'image' %}
+                    {% assign img_style = 'object-position: ' | append: media.presentation.focal_point %}
+                    {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'lazy', widths: '400, 600, 800', style: img_style }}
+                  {% when 'video' %}
+                    {{ media | video_tag: class: 'h-full w-full object-cover', controls: true, image_size: '800x' }}
+                  {% when 'external_video' %}
+                    {{ media | external_video_tag: class: 'h-full w-full object-cover' }}
+                  {% when 'model' %}
+                    {{ media | model_viewer_tag: class: 'h-full w-full object-cover', reveal: 'interaction', image_size: '800x' }}
+                {% endcase %}
+                {% if forloop.first and product.compare_at_price > product.price %}
+                  <div class="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm">
+                    Sale
+                  </div>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+             <div class="snap-center shrink-0 w-[85vw] relative aspect-square rounded-xl bg-slate-100 overflow-hidden shadow-sm">
+                <img 
+                  src="{{ product.featured_image | image_url: width: 800 }}" 
+                  width="{{ product.featured_image.width }}" 
+                  height="{{ product.featured_image.height }}"
+                  alt="{{ product.title }}" 
+                  class="h-full w-full object-cover">
+             </div>
+          {% endif %}
+        </div>
+
+        <!-- Desktop: Main + Thumbnails -->
+        <div class="hidden lg:block space-y-4">
+          {% if product.media.size > 0 %}
+            <div class="relative aspect-square w-full overflow-hidden rounded-2xl bg-slate-100 shadow-sm">
+              {% for media in product.media %}
+                <div x-show="currentMediaId === {{ media.id }}" x-cloak class="h-full w-full">
+                   {% case media.media_type %}
+                    {% when 'image' %}
+                      {% assign img_style = 'object-position: ' | append: media.presentation.focal_point %}
+                      {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'eager', widths: '500, 1000, 1500', style: img_style }}
+                    {% when 'video' %}
+                      {{ media | video_tag: class: 'h-full w-full object-cover', controls: true, image_size: '1000x' }}
+                    {% when 'external_video' %}
+                      {{ media | external_video_tag: class: 'h-full w-full object-cover' }}
+                    {% when 'model' %}
+                      {{ media | model_viewer_tag: class: 'h-full w-full object-cover', reveal: 'interaction', image_size: '1000x' }}
+                   {% endcase %}
+                </div>
+              {% endfor %}
+              
+              <div x-show="currentComparePrice > currentPrice" class="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm z-10">
+                Sale
+              </div>
+            </div>
+            <div class="grid grid-cols-6 gap-3">
+              {% for media in product.media %}
+                <button 
+                  @click="currentMediaId = {{ media.id }}"
+                  class="relative aspect-square overflow-hidden rounded-lg border-2 transition hover:border-slate-300 focus:ring-2 focus:ring-primary"
+                  :class="currentMediaId === {{ media.id }} ? 'border-primary' : 'border-transparent'"
+                >
+                  {{ media | image_tag: class: 'h-full w-full object-cover', widths: '100, 200' }}
+                  {% if media.media_type == 'video' or media.media_type == 'external_video' %}
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                  {% elsif media.media_type == 'model' %}
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/20 text-white">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    </div>
+                  {% endif %}
+                </button>
+              {% endfor %}
+            </div>
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'w-full h-full bg-slate-100' }}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right: Info -->
+      <div class="lg:col-span-5">
+        <div class="lg:sticky lg:top-24 h-fit">
+          <div class="mb-4">
+            <div class="flex flex-wrap items-center gap-3 mb-2">
+              <div class="flex items-center gap-1">
+                <div class="flex text-yellow-400 text-sm">★★★★★</div>
+                <span class="text-xs font-bold text-slate-700">4.9/5</span>
+              </div>
+              <span class="text-xs text-slate-400">|</span>
+              <span class="text-xs text-slate-500 underline decoration-slate-300 underline-offset-2">{{ section.settings.review_count }}</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 lg:text-4xl">{{ product.title }}</h1>
+            
+            <!-- Benefit Row (Icons) -->
+            <div class="flex items-center gap-4 mt-3 text-xs font-medium text-slate-600">
+              <div class="flex items-center gap-1.5">
+                <div class="p-1 rounded-full bg-green-100 text-green-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                In Stock Ready to Ship
+              </div>
+              <div class="flex items-center gap-1.5">
+                <div class="p-1 rounded-full bg-blue-100 text-blue-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                1-Year Warranty
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6 border-b border-slate-100 pb-6">
+            <div class="flex items-end gap-3">
+              <span class="text-4xl font-bold text-slate-900" x-text="formatMoney(currentPrice)">{{ product.price | money }}</span>
+              <span x-show="currentComparePrice > currentPrice" class="mb-1.5 text-xl text-slate-400 line-through" x-text="formatMoney(currentComparePrice)">{{ product.compare_at_price | money }}</span>
+              <span x-show="currentComparePrice > currentPrice" class="mb-2 rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">SAVE <span x-text="formatMoney(currentComparePrice - currentPrice)"></span></span>
+            </div>
+            <!-- Unit Price -->
+            <div class="text-sm text-slate-500 mt-1" x-show="variant.unit_price_measurement" x-cloak>
+               <span x-text="formatMoney(variant.unit_price)"></span>
+               <span>/</span>
+               <span x-text="variant.unit_price_measurement.reference_value != 1 ? variant.unit_price_measurement.reference_value : ''"></span>
+               <span x-text="variant.unit_price_measurement.reference_unit"></span>
+            </div>
+          </div>
+
+          {% if section.settings.show_stock %}
+            <div class="mb-8 space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 relative overflow-hidden">
+               <!-- Live Visitor Counter -->
+               <div class="absolute top-2 right-2 flex items-center gap-1.5 bg-white/80 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-slate-600 shadow-sm">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span x-text="visitors"></span> viewing now
+               </div>
+
+              <div class="flex items-center justify-between text-sm font-bold text-red-800 pt-2">
+                <div class="flex items-center gap-2">
+                  <span class="relative flex h-2 w-2">
+                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                     <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  Only <span x-text="stock"></span> items left!
+                </div>
+                <div>Ends in: <span x-text="formatTime(timeLeft)" class="tabular-nums"></span></div>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-red-200">
+                <div class="h-full rounded-full bg-red-500 transition-all duration-1000" :style="'width: ' + (stock/50)*100 + '%'"></div>
+              </div>
+            </div>
+          {% endif %}
+
+          {% form 'product', product %}
+            <input type="hidden" name="id" :value="currentVariantId">
+            <input type="hidden" name="quantity" :value="selectedQuantity">
+
+            <!-- Shop Pay Installments -->
+            <div class="mt-4">
+              {{ form | payment_terms }}
+            </div>
+
+            <!-- Variant Selectors -->
+            {% unless product.has_only_default_variant %}
+              <div class="space-y-4 mb-6">
+                {% for option in product.options_with_values %}
+                  <div>
+                    <label class="block text-sm font-bold text-slate-900 mb-2">{{ option.name }}</label>
+                    <div class="flex flex-wrap gap-2">
+                      {% for value in option.values %}
+                        <button 
+                          type="button"
+                          @click="options['{{ option.name }}'] = '{{ value }}'; updateVariant()"
+                          class="px-4 py-2 rounded-full border text-sm font-bold transition-all"
+                          :class="options['{{ option.name }}'] === '{{ value }}' ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'"
+                        >
+                          {{ value }}
+                        </button>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endunless %}
+
+            <!-- Volume Bundles Widget -->
+            <div class="my-6 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-slate-900">Select Quantity</span>
+                <span class="text-xs font-medium text-red-600 animate-pulse">
+                  ًں”¥ High demand
+                </span>
+              </div>
+
+              <div class="space-y-3">
+                <!-- Option 1 -->
+                <div 
+                  @click="selectedQuantity = 1"
+                  class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                  :class="selectedQuantity === 1 ? 'bg-slate-50 border-primary shadow-md ring-1 ring-primary' : 'bg-white border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors"
+                        :class="selectedQuantity === 1 ? 'border-primary bg-primary' : 'border-slate-300 bg-transparent'"
+                      >
+                        <div x-show="selectedQuantity === 1" class="h-2.5 w-2.5 rounded-full bg-white"></div>
+                      </div>
+                      <div>
+                        <div class="font-bold text-slate-900 text-base">Buy 1</div>
+                        <div class="text-xs text-slate-500">Standard Price</div>
+                      </div>
+                    </div>
+                    <div class="font-bold text-slate-900 text-lg" x-text="formatMoney(currentPrice)">{{ product.price | money }}</div>
+                  </div>
+                </div>
+
+                <!-- Option 2 -->
+                <div 
+                  @click="selectedQuantity = 2"
+                  class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                  :class="selectedQuantity === 2 ? 'bg-slate-50 border-primary shadow-md ring-1 ring-primary' : 'bg-white border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-bold text-white shadow-sm rounded-full bg-primary uppercase tracking-wide">
+                    Most Popular
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors"
+                        :class="selectedQuantity === 2 ? 'border-primary bg-primary' : 'border-slate-300 bg-transparent'"
+                      >
+                        <div x-show="selectedQuantity === 2" class="h-2.5 w-2.5 rounded-full bg-white"></div>
+                      </div>
+                      <div>
+                        <div class="font-bold text-slate-900 text-base">Buy 2</div>
+                        <div class="text-xs font-bold text-green-600">Save 15% OFF</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-bold text-slate-900 text-lg" x-text="formatMoney(currentPrice * 2 * 0.85)"></div>
+                      <div class="text-xs text-slate-400 line-through" x-text="formatMoney(currentPrice * 2)"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Option 3 -->
+                <div 
+                  @click="selectedQuantity = 3"
+                  class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                  :class="selectedQuantity === 3 ? 'bg-slate-50 border-primary shadow-md ring-1 ring-primary' : 'bg-white border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-bold text-white shadow-sm rounded-full bg-red-500 uppercase tracking-wide">
+                    Best Value
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors"
+                        :class="selectedQuantity === 3 ? 'border-primary bg-primary' : 'border-slate-300 bg-transparent'"
+                      >
+                        <div x-show="selectedQuantity === 3" class="h-2.5 w-2.5 rounded-full bg-white"></div>
+                      </div>
+                      <div>
+                        <div class="font-bold text-slate-900 text-base">Buy 3</div>
+                        <div class="text-xs font-bold text-green-600">Save 25% OFF</div>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-bold text-slate-900 text-lg" x-text="formatMoney(currentPrice * 3 * 0.75)"></div>
+                      <div class="text-xs text-slate-400 line-through" x-text="formatMoney(currentPrice * 3)"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              id="main-atc-button"
+              type="submit" 
+              class="w-full rounded-full py-4 text-xl font-bold text-white shadow-xl transition hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 bg-primary mt-6 mb-4"
+            >
+              <span>Add to Cart</span>
+              <span class="text-sm opacity-90 font-normal">- <span x-text="savings > 0 ? 'Save ' + '{{ cart.currency.symbol }}' + savings : ''"></span></span>
+            </button>
+            
+            <div class="mt-4 mb-4 dynamic-checkout-buttons">
+              {{ form | payment_terms }}
+              {{ form | payment_button }}
+            </div>
+            
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when '@app' -%}
+                  {% render block %}
+                {%- when 'pickup_availability' -%}
+                  <div id="pickup-availability-container" class="mb-6">
+                    {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+                    {%- if pick_up_availabilities.size > 0 -%}
+                      <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <div class="text-slate-700 mt-0.5">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                        <div class="flex-1">
+                          {%- assign closest_location = pick_up_availabilities.first -%}
+                          {%- if closest_location.available -%}
+                            <p class="font-bold text-slate-900 text-sm mb-0.5">Pickup available at {{ closest_location.location.name }}</p>
+                            <p class="text-slate-500 text-xs">{{ closest_location.pick_up_time }}</p>
+                          {%- else -%}
+                            <p class="font-bold text-slate-900 text-sm mb-0.5">Check availability at nearby stores</p>
+                          {%- endif -%}
+                          {%- if pick_up_availabilities.size > 1 -%}
+                            <button class="text-xs font-bold text-primary hover:underline mt-2">
+                              Check {{ pick_up_availabilities.size | minus: 1 }} other stores
+                            </button>
+                          {%- endif -%}
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  </div>
+
+                {%- when 'complementary' -%}
+                  <div 
+                    class="complementary-products-container mb-6"
+                    x-data="{ loaded: false }"
+                    x-init="
+                      fetch('{{ routes.product_recommendations_url }}?section_id=complementary-products&product_id={{ product.id }}&limit={{ block.settings.product_list_limit }}&intent=complementary')
+                        .then(r => r.text())
+                        .then(t => {
+                          const html = new DOMParser().parseFromString(t, 'text/html');
+                          const content = html.querySelector('.complementary-products');
+                          if (content && content.innerHTML.trim().length) {
+                             $el.innerHTML = content.innerHTML;
+                             loaded = true;
+                          }
+                        })
+                    "
+                    x-show="loaded"
+                    x-cloak
+                  ></div>
+                {%- when 'custom_liquid' -%}
+                  {{ block.settings.custom_liquid }}
+              {%- endcase -%}
+            {%- endfor -%}
+            
+            <!-- Trust Badges -->
+            <div class="grid grid-cols-3 gap-2 text-center text-[10px] text-slate-500 font-medium mb-6">
+              <div class="flex flex-col items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>SSL Secure</span>
+              </div>
+              <div class="flex flex-col items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>Tracked Shipping</span>
+              </div>
+              <div class="flex flex-col items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Money Back</span>
+              </div>
+            </div>
+
+            <!-- Accordions -->
+            <div class="divide-y divide-slate-100 border-t border-slate-100" x-data="{ active: 'desc' }">
+              <!-- Description -->
+              <div class="py-3">
+                <button 
+                  type="button"
+                  @click="active = active === 'desc' ? null : 'desc'" 
+                  class="flex w-full cursor-pointer items-center justify-between text-sm font-bold text-slate-900 hover:text-primary transition"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Description
+                  </span>
+                  <span class="transition transform duration-200" :class="active === 'desc' ? 'rotate-180' : ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </span>
+                </button>
+                <div x-show="active === 'desc'" x-collapse class="mt-3 text-sm leading-relaxed text-slate-600 prose prose-sm max-w-none">
+                  {{ product.description }}
+                </div>
+              </div>
+              
+              <!-- Shipping -->
+              <div class="py-3">
+                <button 
+                  type="button"
+                  @click="active = active === 'ship' ? null : 'ship'" 
+                  class="flex w-full cursor-pointer items-center justify-between text-sm font-bold text-slate-900 hover:text-primary transition"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2" ry="2"></rect><line x1="16" y1="8" x2="20" y2="8"></line><line x1="16" y1="16" x2="23" y2="16"></line><rect x="1" y="3" width="15" height="13" rx="2" ry="2"></rect></svg>
+                    Shipping & Returns
+                  </span>
+                  <span class="transition transform duration-200" :class="active === 'ship' ? 'rotate-180' : ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </span>
+                </button>
+                <div x-show="active === 'ship'" x-collapse class="mt-3 text-sm leading-relaxed text-slate-600">
+                  <p class="mb-2"><strong>Free Worldwide Shipping</strong></p>
+                  <p>All orders are processed within 24-48 hours. Shipping times depend on your location, generally taking 7-12 business days.</p>
+                </div>
+              </div>
+
+              <!-- Guarantee -->
+              <div class="py-3">
+                <button 
+                  type="button"
+                  @click="active = active === 'guarantee' ? null : 'guarantee'" 
+                  class="flex w-full cursor-pointer items-center justify-between text-sm font-bold text-slate-900 hover:text-primary transition"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    Our Guarantee
+                  </span>
+                  <span class="transition transform duration-200" :class="active === 'guarantee' ? 'rotate-180' : ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </span>
+                </button>
+                <div x-show="active === 'guarantee'" x-collapse class="mt-3 text-sm leading-relaxed text-slate-600">
+                  {{ section.settings.guarantee_text }}
+                </div>
+              </div>
+            </div>
+          {% endform %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+    "name":  "Product Page",
+    "settings":  [
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_stock",
+                         "label":  "Show Stock Counter",
+                         "default":  true
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "review_count",
+                         "label":  "Review Count Text",
+                         "default":  "1,234 Reviews"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "guarantee_text",
+                         "label":  "Guarantee Text",
+                         "default":  "No questions asked"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "sticky_atc",
+                         "label":  "Show Sticky Add To Cart",
+                         "default":  true
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "@app"
+                   },
+                   {
+                       "type":  "pickup_availability",
+                       "name":  "Pickup Availability",
+                       "limit":  1,
+                       "settings":  [
+
+                                    ]
+                   },
+                   {
+                       "type":  "complementary",
+                       "name":  "Complementary Products",
+                       "limit":  1,
+                       "settings":  [
+                                        {
+                                            "type":  "range",
+                                            "id":  "product_list_limit",
+                                            "min":  1,
+                                            "max":  10,
+                                            "step":  1,
+                                            "label":  "Maximum products to show",
+                                            "default":  3
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "heading",
+                                            "label":  "Heading",
+                                            "default":  "Pairs Well With"
+                                        }
+                                    ]
+                   },
+                   {
+                       "type":  "custom_liquid",
+                       "name":  "Custom Liquid",
+                       "settings":  [
+                                        {
+                                            "type":  "liquid",
+                                            "id":  "custom_liquid",
+                                            "label":  "Custom Liquid"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Product"
+                    }
+                ]
+}
+{% endschema %}
+  

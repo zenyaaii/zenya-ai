@@ -1,0 +1,109 @@
+{
+  "name": "Landing Page",
+  "wrapper": "landing",
+  "sections": {
+    "hero": {
+      "type": "zenya-hero",
+      "settings": {
+        "heading": "Welcome to Our Special Offer",
+        "subheading": "Limited time only. Don't miss out.",
+        "button_text": "Get Started",
+        "image_position": "right"
+      }
+    },
+    "features": {
+      "type": "zenya-features",
+      "blocks": {
+        "feature_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Exclusive Deal",
+            "desc": "Only available on this page."
+          }
+        },
+        "feature_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Fast Shipping",
+            "desc": "Get it delivered tomorrow."
+          }
+        },
+        "feature_3": {
+          "type": "feature",
+          "settings": {
+            "title": "Satisfaction Guaranteed",
+            "desc": "Love it or your money back."
+          }
+        }
+      },
+      "block_order": [
+        "feature_1",
+        "feature_2",
+        "feature_3"
+      ],
+      "settings": {
+        "heading": "Why Choose Us"
+      }
+    },
+    "scrolling_text": {
+      "type": "zenya-scrolling-text",
+      "blocks": {
+        "text_1": {
+          "type": "text_block",
+          "settings": {
+            "text": "Limited Time Offer"
+          }
+        },
+        "text_2": {
+          "type": "text_block",
+          "settings": {
+            "text": "Shop Now"
+          }
+        },
+        "text_3": {
+          "type": "text_block",
+          "settings": {
+            "text": "Don't Miss Out"
+          }
+        }
+      },
+      "block_order": [
+        "text_1",
+        "text_2",
+        "text_3"
+      ]
+    },
+    "faq": {
+      "type": "zenya-faq",
+      "blocks": {
+        "faq_1": {
+          "type": "question",
+          "settings": {
+            "question": "Is this offer real?",
+            "answer": "Yes, absolutely!"
+          }
+        },
+        "faq_2": {
+          "type": "question",
+          "settings": {
+            "question": "Can I return it?",
+            "answer": "Yes, we have a 30-day return policy."
+          }
+        }
+      },
+      "block_order": [
+        "faq_1",
+        "faq_2"
+      ],
+      "settings": {
+        "heading": "Frequently Asked Questions"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "features",
+    "scrolling_text",
+    "faq"
+  ]
+}

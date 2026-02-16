@@ -1,0 +1,93 @@
+﻿﻿
+<div class="py-24 bg-white">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl font-bold text-slate-900 mb-4">{{ section.settings.heading }}</h2>
+      <p class="text-slate-600">{{ section.settings.subheading }}</p>
+    </div>
+
+    <div class="grid gap-8 md:grid-cols-3 relative">
+      <!-- Connector Line (Desktop) -->
+      <div class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-slate-100 -z-10"></div>
+
+      {% for block in section.blocks %}
+        <div class="flex flex-col items-center text-center bg-white">
+          <div class="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-xl border-4 border-slate-50 text-primary" style="color: {{ settings.primary_color }};">
+            <span class="text-2xl font-bold">{{ forloop.index }}</span>
+          </div>
+          <h3 class="mb-2 text-xl font-bold text-slate-900">{{ block.settings.title }}</h3>
+          <p class="max-w-xs text-sm text-slate-500">{{ block.settings.text }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Zenya Steps",
+    "settings":  [
+                     {
+                         "type":  "text",
+                         "id":  "heading",
+                         "label":  "Heading",
+                         "default":  "How It Works"
+                     },
+                     {
+                         "type":  "textarea",
+                         "id":  "subheading",
+                         "label":  "Subheading",
+                         "default":  "Simple, fast, and hassle-free process."
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "step",
+                       "name":  "Step",
+                       "limit":  3,
+                       "settings":  [
+                                        {
+                                            "type":  "text",
+                                            "id":  "title",
+                                            "label":  "Title",
+                                            "default":  "Step Title"
+                                        },
+                                        {
+                                            "type":  "textarea",
+                                            "id":  "text",
+                                            "label":  "Description",
+                                            "default":  "Step description."
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Steps",
+                        "blocks":  [
+                                       {
+                                           "type":  "step",
+                                           "settings":  {
+                                                            "title":  "Place Your Order",
+                                                            "text":  "Select your preferred options."
+                                                        }
+                                       },
+                                       {
+                                           "type":  "step",
+                                           "settings":  {
+                                                            "title":  "We Ship Fast",
+                                                            "text":  "Ships within 24 hours."
+                                                        }
+                                       },
+                                       {
+                                           "type":  "step",
+                                           "settings":  {
+                                                            "title":  "Enjoy",
+                                                            "text":  "Experience quality."
+                                                        }
+                                       }
+                                   ]
+                    }
+                ]
+}
+{% endschema %}
+  

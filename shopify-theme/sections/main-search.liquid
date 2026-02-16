@@ -1,0 +1,190 @@
+
+{% paginate search.results by 16 %}
+<div class="py-20 bg-white min-h-[60vh]">
+  <div class="container mx-auto px-6">
+    <div class="max-w-3xl mx-auto text-center mb-16">
+      <h1 class="text-4xl font-extrabold text-slate-900 mb-8">Search Results</h1>
+      <form action="{{ routes.search_url }}" method="get" role="search" class="relative">
+        <input
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="Search for products..."
+          class="w-full px-6 py-4 rounded-full border-2 border-slate-200 focus:border-primary focus:ring-primary text-lg"
+        >
+        <input type="hidden" name="type" value="product">
+        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-slate-100 rounded-full hover:bg-primary hover:text-white transition">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </form>
+    </div>
+
+    {% if search.performed %}
+      <div class="mb-8 text-center text-slate-500">
+        {% if search.results_count == 0 %}
+          <p>No results found for "{{ search.terms }}". Check the spelling or try a different keyword.</p>
+        {% else %}
+          <p>Showing {{ search.results_count }} results for "{{ search.terms }}"</p>
+        {% endif %}
+      </div>
+
+      <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Filters -->
+        <aside class="w-full lg:w-64 shrink-0" x-data="{ open: false }">
+          {% if search.filters != empty %}
+            <div class="lg:hidden mb-4">
+              <button @click="open = !open" class="flex items-center gap-2 font-bold text-slate-900 border border-slate-300 rounded-lg px-4 py-2 w-full justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                Filters
+              </button>
+            </div>
+            
+            <form class="space-y-8" :class="open ? 'block' : 'hidden lg:block'">
+              <input type="hidden" name="q" value="{{ search.terms | escape }}">
+              <input type="hidden" name="type" value="product">
+              
+              {% for filter in search.filters %}
+                <div class="border-b border-slate-200 pb-6 last:border-0">
+                  <h3 class="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wide">{{ filter.label }}</h3>
+                  
+                  {% case filter.type %}
+                    {% when 'list' %}
+                      <ul class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                        {% for value in filter.values %}
+                          <li class="flex items-center gap-2">
+                            <input type="checkbox" 
+                              name="{{ value.param_name }}" 
+                              value="{{ value.value }}" 
+                              id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                              {% if value.active %}checked{% endif %}
+                              {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                              class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4"
+                              onchange="this.form.submit()"
+                            >
+                            <label for="Filter-{{ filter.label | escape }}-{{ forloop.index }}" class="text-sm text-slate-600 flex-1 cursor-pointer {% if value.count == 0 and value.active == false %}opacity-50{% endif %}">
+                              {{ value.label }} <span class="text-slate-400 text-xs">({{ value.count }})</span>
+                            </label>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    
+                    {% when 'price_range' %}
+                      <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">{{ cart.currency.symbol }}</span>
+                          <input type="number" 
+                            name="{{ filter.min_value.param_name }}" 
+                            {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                            placeholder="0"
+                            class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
+                            onchange="this.form.submit()"
+                          >
+                        </div>
+                        <span class="text-slate-400">-</span>
+                        <div class="relative flex-1">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">{{ cart.currency.symbol }}</span>
+                          <input type="number" 
+                            name="{{ filter.max_value.param_name }}" 
+                            {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                            placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                            class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
+                            onchange="this.form.submit()"
+                          >
+                        </div>
+                      </div>
+                  {% endcase %}
+                </div>
+              {% endfor %}
+              
+              <div class="pt-2 flex flex-col gap-2">
+                 <noscript>
+                   <button type="submit" class="w-full py-2 bg-slate-900 text-white font-bold rounded hover:opacity-90 transition text-sm">Apply Filters</button>
+                 </noscript>
+                 <a href="{{ routes.search_url }}?q={{ search.terms | escape }}&type=product" class="text-center text-sm text-slate-500 underline hover:text-primary">Clear all filters</a>
+              </div>
+            </form>
+          {% endif %}
+        </aside>
+
+        <div class="flex-1">
+          {% if search.results_count > 0 %}
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+               <div class="text-sm text-slate-500">
+                 <!-- Optional: Sorting could go here -->
+               </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-10">
+              {% for item in search.results %}
+                {% if item.object_type == 'product' %}
+                  <div class="group">
+                    <div class="relative aspect-[3/4] mb-4 overflow-hidden rounded-xl bg-slate-100">
+                      {% if item.featured_image %}
+                        {% assign img_style = 'object-position: ' | append: item.featured_image.presentation.focal_point %}
+                        {{ item.featured_image | image_tag: class: 'h-full w-full object-cover transition duration-300 group-hover:scale-105', loading: 'lazy', widths: '300, 600', style: img_style }}
+                      {% else %}
+                        {{ 'product-1' | placeholder_svg_tag: 'h-full w-full object-cover opacity-50' }}
+                      {% endif %}
+                      
+                      {% if item.compare_at_price > item.price %}
+                        <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
+                          SALE
+                        </div>
+                      {% endif %}
+                      
+                      <button class="absolute bottom-4 right-4 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-900 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition duration-300 hover:bg-primary hover:text-white" onclick="window.location.href='{{ item.url }}'">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                      </button>
+                    </div>
+                    
+                    <h3 class="text-sm font-bold text-slate-900 mb-1">
+                      <a href="{{ item.url }}" class="hover:text-primary transition">{{ item.title }}</a>
+                    </h3>
+                    <div class="flex items-center gap-2 text-sm">
+                      <span class="font-medium text-slate-900">{{ item.price | money }}</span>
+                      {% if item.compare_at_price > item.price %}
+                        <span class="text-slate-400 line-through text-xs">{{ item.compare_at_price | money }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if paginate.pages > 1 %}
+        <div class="mt-16 text-center">
+          {{ paginate | default_pagination }}
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endpaginate %}
+{% schema %}
+{
+  "name": "Search Page",
+  "settings": [
+    {
+      "type": "range",
+      "id": "results_per_page",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "default": 16,
+      "label": "Results per page"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "label": "Columns on desktop"
+    }
+  ]
+}
+{% endschema %}

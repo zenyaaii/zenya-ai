@@ -9,12 +9,19 @@ import { saveAs } from 'file-saver'
 export default function DraftPreviewPage() {
   const [theme, setTheme] = useState<any>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     // Load draft from localStorage
     const draft = localStorage.getItem('zenya_draft_theme')
     if (draft) {
-      setTheme(JSON.parse(draft))
+      try {
+        setTheme(JSON.parse(draft))
+      } catch (e) {
+        setError('Invalid draft data found.')
+      }
+    } else {
+      setError('No draft found. Please generate a theme first.')
     }
   }, [])
 
@@ -30,6 +37,15 @@ export default function DraftPreviewPage() {
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-4 p-8 text-center">
+        <div className="text-xl font-bold text-red-500">{error}</div>
+        <p className="text-gray-600">Please go back and try generating the theme again.</p>
+      </div>
+    )
   }
 
   if (!theme) return <div className="flex h-screen items-center justify-center text-muted">Loading draft...</div>

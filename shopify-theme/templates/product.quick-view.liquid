@@ -1,0 +1,60 @@
+{% layout none %}
+<div class="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+  <button @click="quickViewOpen = false" class="absolute top-4 right-4 z-10 p-2 bg-white/80 rounded-full hover:bg-slate-100 transition">
+    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+  </button>
+  
+  <!-- Gallery -->
+  <div class="bg-slate-50 p-6 flex items-center justify-center">
+    <img src="{{ product.featured_image | image_url: width: 800 }}" class="w-full h-auto object-contain rounded-lg shadow-sm">
+  </div>
+
+  <!-- Info -->
+  <div class="p-8 flex flex-col justify-center overflow-y-auto max-h-[80vh]">
+    <h2 class="text-2xl font-bold text-slate-900 mb-2">{{ product.title }}</h2>
+    <div class="text-xl font-bold text-primary mb-4" style="color: {{ settings.primary_color }};">{{ product.price | money }}</div>
+    
+    <div class="prose prose-sm text-slate-600 mb-6">
+      {{ product.description | strip_html | truncatewords: 30 }}
+    </div>
+
+    {% form 'product', product %}
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      
+      <div class="space-y-4">
+        {% unless product.has_only_default_variant %}
+          {% for option in product.options_with_values %}
+            <div>
+              <label class="block text-sm font-bold text-slate-900 mb-2">{{ option.name }}</label>
+              <div class="flex flex-wrap gap-2">
+                {% for value in option.values %}
+                  <label class="cursor-pointer">
+                    <input type="radio" name="option-{{ option.position }}" value="{{ value | escape }}" class="peer sr-only">
+                    <div class="px-4 py-2 border border-slate-200 rounded-lg peer-checked:border-primary peer-checked:bg-primary/5 hover:border-slate-300 transition text-sm">
+                      {{ value }}
+                    </div>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        {% endunless %}
+
+        <div class="pt-4">
+          <button 
+            type="submit" 
+            name="add" 
+            class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:opacity-90 transition transform hover:scale-[1.02]"
+            style="background-color: {{ settings.primary_color }};"
+          >
+            Add to Cart
+          </button>
+        </div>
+        
+        <div class="text-center">
+          <a href="{{ product.url }}" class="text-sm font-bold text-slate-500 hover:text-primary hover:underline">View Full Details →</a>
+        </div>
+      </div>
+    {% endform %}
+  </div>
+</div>

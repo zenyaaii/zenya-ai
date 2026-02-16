@@ -1,0 +1,87 @@
+
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ page_title }}</title>
+
+    {% if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {% endif %}
+
+    {% if page_image %}
+      <meta property="og:image" content="{{ page_image | image_url: width: 1200 }}">
+      <meta property="og:image:secure_url" content="{{ page_image | image_url: width: 1200 }}">
+      <meta property="og:image:width" content="{{ page_image.width }}">
+      <meta property="og:image:height" content="{{ page_image.height }}">
+    {% endif %}
+
+    {{ content_for_header }}
+    
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+
+    <!-- Tailwind CSS (Bundled) -->
+    <script>
+      // Suppress Tailwind CDN warning
+      (function() {
+        var originalWarn = console.warn;
+        console.warn = function(...args) {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+          originalWarn.apply(console, args);
+        };
+      })();
+    </script>
+    <script src="{{ 'tailwind.js' | asset_url }}" defer></script>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '{{ settings.primary_color }}',
+              secondary: '{{ settings.secondary_color }}',
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Alpine.js (Bundled) -->
+    <script defer src="{{ 'alpine.js' | asset_url }}"></script>
+
+    <style>
+      [x-cloak] { display: none !important; }
+      body { font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900">
+    <a class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-md z-50" href="#MainContent">
+      Skip to content
+    </a>
+    {% sections 'header-group' %}
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+    {% sections 'footer-group' %}
+    
+    <!-- Global Quick View Modal -->
+    <div 
+      x-data="{ quickViewOpen: false, quickViewHtml: '' }" 
+      @open-quick-view.window="
+        quickViewOpen = true; 
+        quickViewHtml = '<div class=\'p-8 text-center\'><div class=\'animate-spin h-8 w-8 mx-auto border-4 border-primary border-t-transparent rounded-full\'></div></div>';
+        fetch(window.Shopify.routes.root + 'products/' + $event.detail.handle + '?view=quick-view')
+          .then(r => r.text())
+          .then(html => quickViewHtml = html)
+      "
+      x-show="quickViewOpen"
+      class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      x-cloak
+    >
+      <div @click.away="quickViewOpen = false" x-html="quickViewHtml" class="contents"></div>
+    </div>
+  </body>
+</html>
+  

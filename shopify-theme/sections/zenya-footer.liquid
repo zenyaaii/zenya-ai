@@ -1,0 +1,271 @@
+<footer class="py-12 border-t border-slate-800" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="container mx-auto px-6">
+    <div class="grid gap-8 md:grid-cols-{{ section.blocks.size | default: 4 }} mb-12">
+      {% for block in section.blocks %}
+        <div class="col-span-1" {{ block.shopify_attributes }}>
+          {% case block.type %}
+            {% when 'brand_information' %}
+              <div class="flex flex-col gap-4">
+                {% if block.settings.logo != blank %}
+                  {{ block.settings.logo | image_url: width: block.settings.logo_width | image_tag: class: 'h-auto', style: 'max-width: 100%;' }}
+                {% else %}
+                  <h3 class="text-2xl font-extrabold tracking-tight">{{ shop.name }}</h3>
+                {% endif %}
+                
+                {% if block.settings.text != blank %}
+                  <div class="text-slate-400 text-sm">
+                    {{ block.settings.text }}
+                  </div>
+                {% endif %}
+
+                {% if block.settings.show_social %}
+                  {% render 'social-icons', class: 'flex gap-4 mt-4' %}
+                {% endif %}
+              </div>
+
+            {% when 'link_list' %}
+              <div>
+                <h4 class="font-bold mb-4">{{ block.settings.heading | default: linklists[block.settings.menu].title }}</h4>
+                <ul class="space-y-2 text-sm text-slate-400">
+                  {% for link in linklists[block.settings.menu].links %}
+                    <li><a href="{{ link.url }}" class="hover:text-primary transition">{{ link.title }}</a></li>
+                  {% else %}
+                    {% for i in (1..3) %}
+                      <li><a href="#" class="hover:text-primary transition">Menu Item {{ i }}</a></li>
+                    {% endfor %}
+                  {% endfor %}
+                </ul>
+              </div>
+
+            {% when 'text' %}
+              <div>
+                <h4 class="font-bold mb-4">{{ block.settings.heading }}</h4>
+                <div class="text-slate-400 text-sm prose prose-invert">
+                  {{ block.settings.text }}
+                </div>
+              </div>
+
+            {% when 'newsletter' %}
+              <div>
+                <h4 class="font-bold mb-4">{{ block.settings.heading }}</h4>
+                <div class="text-slate-400 text-sm mb-4">{{ block.settings.text }}</div>
+                {% form 'customer', class: 'flex flex-col gap-2' %}
+                  <input type="hidden" name="contact[tags]" value="newsletter">
+                  <div class="flex">
+                    <input type="email" name="contact[email]" class="w-full bg-slate-800 border-slate-700 text-white rounded-l px-3 py-2 focus:ring-primary focus:border-primary" placeholder="Email address" required>
+                    <button type="submit" class="bg-primary text-white px-4 py-2 rounded-r hover:bg-primary/90 transition">Subscribe</button>
+                  </div>
+                  {% if form.posted_successfully? %}
+                    <p class="text-green-400 text-sm mt-2">Thanks for subscribing!</p>
+                  {% endif %}
+                {% endform %}
+              </div>
+          {% endcase %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex flex-col gap-4">
+        <div class="text-slate-500 text-sm">
+          {{ section.settings.copyright | replace: '%year%', 'now' | date: '%Y' | replace: '%shop_name%', shop.name }}
+        </div>
+        {% if section.settings.show_payment_icons %}
+          <div class="flex items-center gap-3 opacity-75 grayscale hover:grayscale-0 transition">
+            {% for type in shop.enabled_payment_types %}
+              <div class="h-8 bg-white rounded px-2 flex items-center">
+                {{ type | payment_type_svg_tag: class: 'h-5' }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Localization -->
+      {% if section.settings.enable_country_selector or section.settings.enable_language_selector %}
+        <div>
+          {% form 'localization' %}
+            <div class="flex flex-wrap gap-2">
+              {% if section.settings.enable_country_selector and localization.available_countries.size > 1 %}
+                <select name="country_code" class="bg-slate-800 text-white text-sm border-slate-700 rounded focus:ring-primary">
+                  {% for country in localization.available_countries %}
+                    <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                      {{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+              {% if section.settings.enable_language_selector and localization.available_languages.size > 1 %}
+                <select name="language_code" class="bg-slate-800 text-white text-sm border-slate-700 rounded focus:ring-primary">
+                  {% for language in localization.available_languages %}
+                    <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
+                      {{ language.endonym_name | capitalize }}
+                    </option>
+                  {% endfor %}
+                </select>
+              {% endif %}
+              <button type="submit" class="sr-only">Update</button>
+            </div>
+          {% endform %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#1e293b"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "copyright",
+      "label": "Copyright Text",
+      "default": "© %year% %shop_name%. All rights reserved."
+    },
+    {
+      "type": "header",
+      "content": "Payment Icons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show Payment Icons",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Localization"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_country_selector",
+      "label": "Enable Country Selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "label": "Enable Language Selector",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand_information",
+      "name": "Brand Information",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "logo",
+          "label": "Logo"
+        },
+        {
+          "type": "range",
+          "id": "logo_width",
+          "min": 50,
+          "max": 300,
+          "step": 10,
+          "default": 150,
+          "unit": "px",
+          "label": "Logo Width"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Premium quality products designed for your lifestyle.</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_social",
+          "label": "Show Social Media Icons",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "link_list",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Defaults to menu title"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "default": "footer"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "About Us"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Share store details, promotions, or brand content with your customers.</p>"
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Subscribe"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Get the latest updates."
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      {
+        "type": "brand_information"
+      },
+      {
+        "type": "link_list"
+      },
+      {
+        "type": "link_list"
+      }
+    ]
+  },
+  "enabled_on": {
+    "groups": ["footer"]
+  }
+}
+{% endschema %}

@@ -1,0 +1,27 @@
+{
+  "name": "Header",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {
+        "show_announcement": true,
+        "announcement_text": "🔥 Free Shipping on Orders Over $50!"
+      }
+    },
+    "header": {
+      "type": "zenya-header",
+      "settings": {
+        "shop_name": "Zenya Store"
+      }
+    },
+    "cart-drawer": {
+      "type": "zenya-cart-drawer",
+      "settings": {}
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header",
+    "cart-drawer"
+  ]
+}

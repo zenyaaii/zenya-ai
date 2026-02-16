@@ -17,7 +17,7 @@ export default function Upsell({
     name: "Premium Protection Case",
     price: 14.99,
     originalPrice: 29.99,
-    image: "https://placehold.co/400x400/e2e8f0/1e293b?text=Case"
+    image: "https://images.unsplash.com/photo-1541140532154-b024d705b909?q=80&w=400&auto=format&fit=crop"
   }
 
   const handleAdd = () => {

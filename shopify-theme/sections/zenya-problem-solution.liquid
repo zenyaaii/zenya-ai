@@ -1,0 +1,245 @@
+﻿﻿
+<div style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="mx-auto px-6 grid gap-12 lg:gap-16 lg:grid-cols-2 items-center" style="max-width: {{ section.settings.container_width }}px;">
+    
+    <!-- Text Column -->
+    <div class="space-y-8 {% if section.settings.layout == 'right' %}lg:order-2{% endif %}">
+      
+      <!-- Problem Box -->
+      <div class="p-8 rounded-2xl border-l-4 transition hover:-translate-y-1 hover:shadow-lg" 
+           style="background-color: {{ section.settings.problem_bg }}; border-color: {{ section.settings.problem_accent }};">
+        <h3 class="font-bold uppercase tracking-wider text-xs mb-2" style="color: {{ section.settings.problem_accent }};">{{ section.settings.problem_label }}</h3>
+        <h2 class="text-2xl font-bold mb-4" style="color: {{ section.settings.problem_text_color }};">{{ section.settings.problem_headline }}</h2>
+        <p class="leading-relaxed" style="color: {{ section.settings.problem_text_color | color_modify: 'alpha', 0.8 }};">{{ section.settings.problem_text }}</p>
+      </div>
+
+      <!-- Solution Box -->
+      <div class="p-8 rounded-2xl border-l-4 transition hover:-translate-y-1 hover:shadow-lg"
+           style="background-color: {{ section.settings.solution_bg }}; border-color: {{ section.settings.solution_accent }};">
+        <h3 class="font-bold uppercase tracking-wider text-xs mb-2" style="color: {{ section.settings.solution_accent }};">{{ section.settings.solution_label }}</h3>
+        <h2 class="text-2xl font-bold mb-4" style="color: {{ section.settings.solution_text_color }};">{{ section.settings.solution_headline }}</h2>
+        <p class="leading-relaxed" style="color: {{ section.settings.solution_text_color | color_modify: 'alpha', 0.8 }};">{{ section.settings.solution_text }}</p>
+      </div>
+
+    </div>
+
+    <!-- Image Column -->
+    <div class="{% if section.settings.layout == 'right' %}lg:order-1{% endif %}">
+      {% if section.settings.image != blank %}
+        <img 
+          src="{{ section.settings.image | image_url: width: 1000 }}" 
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
+          alt="Problem Solution" 
+          class="w-full shadow-2xl object-cover transition duration-700 hover:scale-[1.02]"
+          style="border-radius: {{ section.settings.image_radius }}px; aspect-ratio: {{ section.settings.image_ratio }};">
+      {% else %}
+        <div class="w-full bg-slate-100 flex items-center justify-center text-slate-300"
+             style="border-radius: {{ section.settings.image_radius }}px; aspect-ratio: {{ section.settings.image_ratio }};">
+          {{ 'product-2' | placeholder_svg_tag: 'w-1/2 h-1/2 opacity-50' }}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Problem/Solution",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "layout",
+                         "label":  "Text Position",
+                         "options":  [
+                                         {
+                                             "value":  "left",
+                                             "label":  "Left"
+                                         },
+                                         {
+                                             "value":  "right",
+                                             "label":  "Right"
+                                         }
+                                     ],
+                         "default":  "left"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "container_width",
+                         "min":  800,
+                         "max":  1600,
+                         "step":  50,
+                         "unit":  "px",
+                         "label":  "Container Width",
+                         "default":  1200
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Problem Section"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "problem_label",
+                         "label":  "Label",
+                         "default":  "The Problem"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "problem_headline",
+                         "label":  "Headline",
+                         "default":  "Tired of Slow Stores?"
+                     },
+                     {
+                         "type":  "textarea",
+                         "id":  "problem_text",
+                         "label":  "Text",
+                         "default":  "Most stores are slow and ugly."
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "problem_bg",
+                         "label":  "Background",
+                         "default":  "#fef2f2"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "problem_accent",
+                         "label":  "Accent Color",
+                         "default":  "#ef4444"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "problem_text_color",
+                         "label":  "Text Color",
+                         "default":  "#1e293b"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Solution Section"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "solution_label",
+                         "label":  "Label",
+                         "default":  "The Solution"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "solution_headline",
+                         "label":  "Headline",
+                         "default":  "Zenya is Fast"
+                     },
+                     {
+                         "type":  "textarea",
+                         "id":  "solution_text",
+                         "label":  "Text",
+                         "default":  "We optimized everything for speed."
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "solution_bg",
+                         "label":  "Background",
+                         "default":  "#f0fdf4"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "solution_accent",
+                         "label":  "Accent Color",
+                         "default":  "#22c55e"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "solution_text_color",
+                         "label":  "Text Color",
+                         "default":  "#1e293b"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Image"
+                     },
+                     {
+                         "type":  "image_picker",
+                         "id":  "image",
+                         "label":  "Side Image"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "image_ratio",
+                         "label":  "Image Ratio",
+                         "options":  [
+                                         {
+                                             "value":  "auto",
+                                             "label":  "Adapt to image"
+                                         },
+                                         {
+                                             "value":  "1/1",
+                                             "label":  "Square"
+                                         },
+                                         {
+                                             "value":  "3/4",
+                                             "label":  "Portrait"
+                                         },
+                                         {
+                                             "value":  "4/3",
+                                             "label":  "Landscape"
+                                         }
+                                     ],
+                         "default":  "1/1"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "image_radius",
+                         "min":  0,
+                         "max":  40,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Corner Radius",
+                         "default":  16
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Section Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Section Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  96
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  96
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Solution"
+                    }
+                ]
+}
+{% endschema %}
+  

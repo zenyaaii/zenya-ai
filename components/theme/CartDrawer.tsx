@@ -98,6 +98,7 @@ export default function CartDrawer({
                   <span className="text-slate-900">${price}</span>
                 </div>
                 <button 
+                  onClick={() => window.location.href = '/demo-full/checkout'}
                   className="w-full rounded-full py-4 text-lg font-bold text-white shadow-lg transition hover:opacity-90 active:scale-[0.98]"
                   style={{ backgroundColor: primaryColor }}
                 >

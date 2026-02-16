@@ -1,0 +1,143 @@
+﻿﻿
+<div class="py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px;">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+      <p style="color: {{ section.settings.text_color }}">{{ section.settings.text }}</p>
+    </div>
+    {% form 'contact', class: 'space-y-6' %}
+      {% if form.posted_successfully? %}
+        <div class="p-4 bg-green-50 text-green-700 rounded-lg text-center font-bold">Thanks for contacting us! We'll get back to you shortly.</div>
+      {% elsif form.errors %}
+        <div class="p-4 bg-red-50 text-red-700 rounded-lg text-center font-bold">Please check the form for errors.</div>
+      {% endif %}
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label for="ContactFormName" class="text-sm font-bold" style="color: {{ section.settings.heading_color }}">Name</label>
+          <input type="text" id="ContactFormName" name="contact[name]" class="w-full px-4 py-3 rounded-lg border outline-none transition focus:ring-2 focus:ring-opacity-50" style="background-color: {{ section.settings.input_bg }}; border-color: {{ section.settings.input_border }}; color: {{ section.settings.text_color }}; --tw-ring-color: {{ section.settings.button_bg }}" placeholder="Your Name" required>
+        </div>
+        <div class="space-y-2">
+          <label for="ContactFormEmail" class="text-sm font-bold" style="color: {{ section.settings.heading_color }}">Email</label>
+          <input type="email" id="ContactFormEmail" name="contact[email]" class="w-full px-4 py-3 rounded-lg border outline-none transition focus:ring-2 focus:ring-opacity-50" style="background-color: {{ section.settings.input_bg }}; border-color: {{ section.settings.input_border }}; color: {{ section.settings.text_color }}; --tw-ring-color: {{ section.settings.button_bg }}" placeholder="email@example.com" required>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <label for="ContactFormMessage" class="text-sm font-bold" style="color: {{ section.settings.heading_color }}">Message</label>
+        <textarea rows="5" id="ContactFormMessage" name="contact[body]" class="w-full px-4 py-3 rounded-lg border outline-none transition focus:ring-2 focus:ring-opacity-50" style="background-color: {{ section.settings.input_bg }}; border-color: {{ section.settings.input_border }}; color: {{ section.settings.text_color }}; --tw-ring-color: {{ section.settings.button_bg }}" placeholder="How can we help?" required></textarea>
+      </div>
+      <button type="submit" class="w-full py-4 rounded-full font-bold shadow-lg hover:opacity-90 transition transform active:scale-95" style="background-color: {{ section.settings.button_bg }}; color: {{ section.settings.button_text }};">
+        Send Message
+      </button>
+    {% endform %}
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Contact Form",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Get in Touch"
+                     },
+                     {
+                         "type":  "textarea",
+                         "id":  "text",
+                         "label":  "Text",
+                         "default":  "Have a question? We\u0027re here to help."
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "container_width",
+                         "min":  600,
+                         "max":  1200,
+                         "step":  50,
+                         "unit":  "px",
+                         "label":  "Container Width",
+                         "default":  800
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  96
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  96
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "input_bg",
+                         "label":  "Input Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "input_border",
+                         "label":  "Input Border",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "button_bg",
+                         "label":  "Button Background",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "button_text",
+                         "label":  "Button Text",
+                         "default":  "#ffffff"
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Contact"
+                    }
+                ]
+}
+{% endschema %}
+  

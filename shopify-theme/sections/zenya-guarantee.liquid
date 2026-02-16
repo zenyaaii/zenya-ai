@@ -1,0 +1,278 @@
+﻿
+<div class="py-12 md:py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6 max-w-{{ section.settings.container_width }}">
+    <div class="p-8 md:p-12 rounded-3xl shadow-xl border transition duration-300 hover:shadow-2xl" 
+         style="background-color: {{ section.settings.card_bg_color }}; border-color: {{ section.settings.border_color }}; border-radius: {{ section.settings.border_radius }}px;">
+      
+      <div class="mb-6 flex justify-center">
+        <div class="flex items-center justify-center rounded-full" 
+             style="width: {{ section.settings.icon_size }}px; height: {{ section.settings.icon_size }}px; background-color: {{ section.settings.icon_bg_color }}; color: {{ section.settings.icon_color }}; font-size: {{ section.settings.icon_size | divided_by: 2 }}px;">
+          {% if section.settings.custom_icon != blank %}
+            <img src="{{ section.settings.custom_icon | image_url: width: 100 }}" alt="{{ section.settings.title }}" class="object-contain" style="width: 60%; height: 60%;">
+          {% elsif section.settings.icon_svg != blank %}
+             <div style="width: 50%; height: 50%;">{{ section.settings.icon_svg }}</div>
+          {% else %}
+            <span>ًں›،ï¸ڈ</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <h2 class="font-bold mb-4 text-center {{ section.settings.heading_size }}" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+      <p class="leading-relaxed text-center mx-auto {{ section.settings.text_size }}" style="color: {{ section.settings.text_color }}; max-width: 65ch;">{{ section.settings.text }}</p>
+      
+      {% if section.settings.show_button and section.settings.button_text != blank %}
+        <div class="mt-8 text-center">
+          <a href="{{ section.settings.button_url }}" class="inline-block px-8 py-3 rounded-full font-bold transition hover:opacity-90"
+             style="background-color: {{ section.settings.button_bg_color }}; color: {{ section.settings.button_text_color }}">
+            {{ section.settings.button_text }}
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+    "name":  "Guarantee",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "30-Day Money Back Guarantee"
+                     },
+                     {
+                         "type":  "textarea",
+                         "id":  "text",
+                         "label":  "Text",
+                         "default":  "We stand by our products. If you are not completely satisfied with your purchase, let us know within 30 days and we will refund you, no questions asked."
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Icon"
+                     },
+                     {
+                         "type":  "image_picker",
+                         "id":  "custom_icon",
+                         "label":  "Custom Icon Image"
+                     },
+                     {
+                         "type":  "html",
+                         "id":  "icon_svg",
+                         "label":  "Custom SVG Icon",
+                         "info":  "Paste SVG code here to replace the default emoji"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "icon_size",
+                         "min":  40,
+                         "max":  120,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Icon Box Size",
+                         "default":  80
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Button"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "show_button",
+                         "label":  "Show Button",
+                         "default":  false
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "button_text",
+                         "label":  "Button Label",
+                         "default":  "Learn More"
+                     },
+                     {
+                         "type":  "url",
+                         "id":  "button_url",
+                         "label":  "Button Link"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Typography"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "heading_size",
+                         "label":  "Heading Size",
+                         "options":  [
+                                         {
+                                             "value":  "text-xl",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "text-2xl",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "text-3xl",
+                                             "label":  "Large"
+                                         },
+                                         {
+                                             "value":  "text-4xl",
+                                             "label":  "Extra Large"
+                                         }
+                                     ],
+                         "default":  "text-2xl"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "text_size",
+                         "label":  "Text Size",
+                         "options":  [
+                                         {
+                                             "value":  "text-sm",
+                                             "label":  "Small"
+                                         },
+                                         {
+                                             "value":  "text-base",
+                                             "label":  "Medium"
+                                         },
+                                         {
+                                             "value":  "text-lg",
+                                             "label":  "Large"
+                                         }
+                                     ],
+                         "default":  "text-base"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Section Background",
+                         "default":  "#f8fafc"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "card_bg_color",
+                         "label":  "Card Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "border_color",
+                         "label":  "Card Border",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "icon_bg_color",
+                         "label":  "Icon Background",
+                         "default":  "#f1f5f9"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "icon_color",
+                         "label":  "Icon Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "button_bg_color",
+                         "label":  "Button Background",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "button_text_color",
+                         "label":  "Button Text",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "container_width",
+                         "label":  "Container Width",
+                         "options":  [
+                                         {
+                                             "value":  "sm",
+                                             "label":  "Small (640px)"
+                                         },
+                                         {
+                                             "value":  "md",
+                                             "label":  "Medium (768px)"
+                                         },
+                                         {
+                                             "value":  "lg",
+                                             "label":  "Large (1024px)"
+                                         },
+                                         {
+                                             "value":  "xl",
+                                             "label":  "Extra Large (1280px)"
+                                         },
+                                         {
+                                             "value":  "2xl",
+                                             "label":  "Full Width (1536px)"
+                                         }
+                                     ],
+                         "default":  "2xl"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "border_radius",
+                         "min":  0,
+                         "max":  40,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Card Border Radius",
+                         "default":  24
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  128,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  64
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  128,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  64
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Guarantee"
+                    }
+                ]
+}
+{% endschema %}
+  

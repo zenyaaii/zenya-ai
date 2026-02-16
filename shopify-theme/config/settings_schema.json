@@ -1,0 +1,102 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Zenya Pro Theme",
+    "theme_version": "1.0.0",
+    "theme_author": "Zenya AI",
+    "theme_documentation_url": "https://zenya.ai",
+    "theme_support_url": "https://zenya.ai"
+  },
+  {
+    "name": "Checkout",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Banner"
+      },
+      {
+        "type": "image_picker",
+        "id": "theme_checkout_logo",
+        "label": "Logo"
+      },
+      {
+        "type": "range",
+        "id": "theme_checkout_logo_size",
+        "label": "Logo size",
+        "min": 0,
+        "max": 200,
+        "step": 5,
+        "default": 100,
+        "unit": "px"
+      },
+      {
+        "type": "image_picker",
+        "id": "theme_checkout_banner",
+        "label": "Background Image"
+      },
+      {
+        "type": "header",
+        "content": "Colors"
+      },
+      {
+        "type": "color",
+        "id": "theme_checkout_accent_color",
+        "label": "Accents",
+        "default": "#3b82f6"
+      },
+      {
+        "type": "color",
+        "id": "theme_checkout_button_color",
+        "label": "Buttons",
+        "default": "#3b82f6"
+      },
+      {
+        "type": "color",
+        "id": "theme_checkout_error_color",
+        "label": "Errors",
+        "default": "#ef4444"
+      },
+      {
+        "type": "header",
+        "content": "Typography"
+      },
+      {
+        "type": "select",
+        "id": "theme_checkout_headings_font",
+        "label": "Headings",
+        "options": [
+          {
+            "value": "system",
+            "label": "System"
+          },
+          {
+            "value": "serif",
+            "label": "Serif"
+          },
+          {
+            "value": "sans-serif",
+            "label": "Sans-serif"
+          }
+        ],
+        "default": "sans-serif"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "primary_color",
+        "label": "Primary Color",
+        "default": "#3b82f6"
+      },
+      {
+        "type": "color",
+        "id": "secondary_color",
+        "label": "Secondary Color",
+        "default": "#1e293b"
+      }
+    ]
+  }
+]

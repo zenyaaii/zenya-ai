@@ -1,0 +1,221 @@
+
+<div x-data="{ 
+  open: false,
+  loading: false,
+  updateCart() {
+    this.loading = true;
+    fetch('/?section_id=zenya-cart-drawer')
+      .then(r => r.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('#CartDrawerContent').innerHTML;
+        document.querySelector('#CartDrawerContent').innerHTML = newContent;
+        this.loading = false;
+      })
+      .catch(() => this.loading = false);
+  }
+}" 
+@toggle-cart.window="open = !open" 
+@cart-updated.window="open = true; updateCart()"
+class="relative z-50" 
+role="dialog" 
+aria-modal="true">
+
+  <div x-show="open" 
+       x-transition:enter="ease-in-out duration-500" 
+       x-transition:enter-start="opacity-0" 
+       x-transition:enter-end="opacity-100" 
+       x-transition:leave="ease-in-out duration-500" 
+       x-transition:leave-start="opacity-100" 
+       x-transition:leave-end="opacity-0" 
+       class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" 
+       @click="open = false"
+       x-cloak></div>
+
+  <div class="fixed inset-0 overflow-hidden" x-show="open" x-cloak style="pointer-events: none;">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-0 sm:pl-10">
+        <div x-show="open"
+             x-transition:enter="transform transition ease-in-out duration-500 sm:duration-700"
+             x-transition:enter-start="translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transform transition ease-in-out duration-500 sm:duration-700"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="translate-x-full"
+             class="pointer-events-auto w-screen max-w-md"
+             style="pointer-events: auto;">
+             
+          <div class="flex h-full flex-col bg-white shadow-xl relative">
+            
+            <!-- Close Button -->
+            <button @click="open = false" class="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-gray-500">
+               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- Loading Overlay -->
+            <div x-show="loading" class="absolute inset-0 bg-white/50 z-20 flex items-center justify-center" x-transition>
+               <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+            </div>
+
+            <div id="CartDrawerContent" class="flex flex-col h-full">
+              <!-- Header -->
+              <div class="px-6 py-4 border-b border-gray-100">
+                <h2 class="text-xl font-bold text-gray-900">Your Cart ({{ cart.item_count }})</h2>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 overflow-y-auto px-6 py-6">
+                 {% if cart.item_count > 0 %}
+                    
+                    <!-- Free Shipping Bar -->
+                    {% assign free_shipping_threshold = section.settings.free_shipping_threshold %}
+                    {% assign cart_total = cart.total_price %}
+                    {% assign progress = cart_total | times: 100 | divided_by: free_shipping_threshold %}
+                    {% if progress > 100 %}{% assign progress = 100 %}{% endif %}
+                    {% assign left_to_spend = free_shipping_threshold | minus: cart_total %}
+
+                    <div class="mb-8">
+                      {% if left_to_spend > 0 %}
+                        <p class="text-sm text-gray-600 mb-2">You are <span class="font-bold text-black">{{ left_to_spend | money }}</span> away from <span class="font-bold text-green-600">Free Shipping</span>!</p>
+                      {% else %}
+                        <p class="text-sm text-green-600 font-bold mb-2">🎉 You've unlocked Free Shipping!</p>
+                      {% endif %}
+                      <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-black transition-all duration-1000" style="width: {{ progress }}%; background-color: {{ settings.primary_color }};"></div>
+                      </div>
+                    </div>
+
+                    <!-- Cart Items -->
+                    <div class="space-y-6">
+                      {% for item in cart.items %}
+                        <div class="flex gap-4">
+                          <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
+                            <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.title }}" width="200" height="200" class="h-full w-full object-cover object-center">
+                          </div>
+
+                          <div class="flex flex-1 flex-col">
+                            <div>
+                              <div class="flex justify-between text-base font-medium text-gray-900">
+                                <h3><a href="{{ item.url }}">{{ item.product.title }}</a></h3>
+                                <p class="ml-4">{{ item.final_line_price | money }}</p>
+                              </div>
+                              <p class="mt-1 text-sm text-gray-500">{{ item.variant.title }}</p>
+                            </div>
+                            <div class="flex flex-1 items-end justify-between text-sm">
+                               <div class="flex items-center border border-gray-300 rounded">
+                                  <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}" class="px-2 py-1 hover:bg-gray-100" @click.prevent="fetch('{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}').then(() => $dispatch('cart-updated'))">-</a>
+                                  <span class="px-2 font-medium">{{ item.quantity }}</span>
+                                  <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}" class="px-2 py-1 hover:bg-gray-100" @click.prevent="fetch('{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}').then(() => $dispatch('cart-updated'))">+</a>
+                               </div>
+                               <button type="button" class="font-medium text-red-500 hover:text-red-600" @click.prevent="fetch('{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity=0').then(() => $dispatch('cart-updated'))">Remove</button>
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                 {% else %}
+                    <div class="text-center py-12">
+                       <div class="text-4xl mb-4">🛒</div>
+                       <p class="text-gray-500 mb-6">Your cart is empty.</p>
+                       <button @click="open = false" class="inline-block px-6 py-3 rounded-full bg-black text-white font-bold hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">Continue Shopping</button>
+                    </div>
+                 {% endif %}
+
+                 <!-- Upsells (Only if cart is not empty or always? Usually better if not empty, but can be always) -->
+                 {% if section.settings.show_upsells and section.settings.upsell_collection != blank %}
+                    <div class="mt-12 pt-8 border-t border-gray-100">
+                       <h3 class="font-bold text-gray-900 mb-4">You Might Also Like</h3>
+                       <div class="space-y-4">
+                          {% for product in collections[section.settings.upsell_collection].products limit: 3 %}
+                             <div class="flex gap-4 items-center bg-gray-50 p-3 rounded-lg">
+                                <img src="{{ product.featured_image | image_url: width: 100 }}" width="100" height="100" class="w-16 h-16 object-cover rounded-md" alt="{{ product.title }}">
+                                <div class="flex-1 min-w-0">
+                                   <h4 class="font-medium text-sm text-gray-900 truncate">{{ product.title }}</h4>
+                                   <p class="text-sm text-gray-500">{{ product.price | money }}</p>
+                                </div>
+                                {% form 'product', product %}
+                                  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                                  <button type="submit" class="text-xs font-bold bg-white border border-gray-300 rounded px-3 py-1 hover:bg-gray-100 transition" @click.prevent="
+                                    fetch('{{ routes.cart_add_url }}.js', { 
+                                      method: 'POST', 
+                                      headers: { 'Content-Type': 'application/json' }, 
+                                      body: JSON.stringify({ items: [{ id: {{ product.selected_or_first_available_variant.id }}, quantity: 1 }] }) 
+                                    }).then(() => $dispatch('cart-updated'))
+                                  ">Add</button>
+                                {% endform %}
+                             </div>
+                          {% endfor %}
+                       </div>
+                    </div>
+                 {% endif %}
+              </div>
+
+              <!-- Footer -->
+              {% if cart.item_count > 0 %}
+              <div class="border-t border-gray-200 px-6 py-6 bg-gray-50">
+                <div class="flex justify-between text-base font-medium text-gray-900 mb-4">
+                  <p>Subtotal</p>
+                  <p>{{ cart.total_price | money }}</p>
+                </div>
+                <p class="mt-0.5 text-sm text-gray-500 mb-6">{{ section.settings.custom_message }}</p>
+                
+                <form action="{{ routes.cart_url }}" method="post">
+                   <button type="submit" name="checkout" class="w-full flex items-center justify-center rounded-full border border-transparent px-6 py-4 text-base font-bold text-white shadow-sm hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">
+                     Checkout • {{ cart.total_price | money }}
+                   </button>
+                </form>
+
+                <div class="mt-6 flex justify-center gap-2 opacity-60 grayscale">
+                   {% for type in shop.enabled_payment_types %}
+                     {{ type | payment_type_svg_tag: class: 'h-6' }}
+                   {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Cart Drawer",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_upsells",
+      "label": "Show Upsells",
+      "default": true
+    },
+    {
+      "type": "collection",
+      "id": "upsell_collection",
+      "label": "Upsell Collection"
+    },
+    {
+      "type": "number",
+      "id": "free_shipping_threshold",
+      "label": "Free Shipping Threshold (Cents)",
+      "default": 10000
+    },
+    {
+      "type": "text",
+      "id": "custom_message",
+      "label": "Custom Message",
+      "default": "Tax included. Shipping calculated at checkout."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cart Drawer"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}
+  

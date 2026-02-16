@@ -1,0 +1,303 @@
+﻿﻿<div class="py-20" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container mx-auto px-6">
+    {% if section.settings.title != blank %}
+      <h2 class="text-3xl font-bold mb-12 text-{{ section.settings.align }}" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
+    {% endif %}
+    
+    <div class="grid md:grid-cols-{{ section.settings.columns_desktop }} grid-cols-{{ section.settings.columns_mobile }} text-{{ section.settings.align }}" style="gap: {{ section.settings.gap }}px;">
+      {% for block in section.blocks %}
+        <div class="transition duration-300 {% if section.settings.enable_card_style %}p-6 border hover:shadow-lg{% else %}space-y-4{% endif %}" style="{% if section.settings.enable_card_style %}background-color: {{ section.settings.card_bg_color }}; border-color: {{ section.settings.card_border_color }}; border-radius: {{ section.settings.card_radius }}px;{% endif %}">
+          <div class="w-full aspect-[{{ section.settings.image_ratio }}] bg-slate-100 overflow-hidden mb-4 relative" style="border-radius: {{ section.settings.image_radius }}px;">
+            {% if block.settings.image != blank %}
+              <img 
+                src="{{ block.settings.image | image_url: width: 600 }}" 
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.height }}"
+                alt="{{ block.settings.title }}"
+                class="w-full h-full object-cover">
+            {% else %}
+              {{ 'image' | placeholder_svg_tag: 'w-full h-full object-cover opacity-50' }}
+            {% endif %}
+          </div>
+          <h3 class="font-bold mb-2" style="color: {{ section.settings.heading_color }}; font-size: {{ section.settings.heading_size }}px;">{{ block.settings.title }}</h3>
+          <p class="leading-relaxed mb-4" style="color: {{ section.settings.text_color }}">{{ block.settings.text }}</p>
+          {% if block.settings.link_label != blank %}
+             {% if section.settings.link_style == 'button' %}
+               <a href="{{ block.settings.link }}" class="inline-flex items-center justify-center rounded-full px-6 py-2 font-bold transition hover:opacity-90" style="background-color: {{ section.settings.accent_color }}; color: #ffffff;">
+                 {{ block.settings.link_label }}
+               </a>
+             {% else %}
+               <a href="{{ block.settings.link }}" class="inline-block font-bold hover:underline" style="color: {{ section.settings.accent_color }}">
+                 {{ block.settings.link_label }} &rarr;
+               </a>
+             {% endif %}
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Multi-Column",
+    "settings":  [
+                     {
+                         "type":  "header",
+                         "content":  "Content"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "title",
+                         "label":  "Heading",
+                         "default":  "Our Process"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Layout"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "align",
+                         "label":  "Alignment",
+                         "options":  [
+                                         {
+                                             "value":  "left",
+                                             "label":  "Left"
+                                         },
+                                         {
+                                             "value":  "center",
+                                             "label":  "Center"
+                                         }
+                                     ],
+                         "default":  "center"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "columns_desktop",
+                         "label":  "Desktop Columns",
+                         "min":  2,
+                         "max":  4,
+                         "step":  1,
+                         "default":  3
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "columns_mobile",
+                         "label":  "Mobile Columns",
+                         "options":  [
+                                         {
+                                             "value":  "1",
+                                             "label":  "1 Column"
+                                         },
+                                         {
+                                             "value":  "2",
+                                             "label":  "2 Columns"
+                                         }
+                                     ],
+                         "default":  "1"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "gap",
+                         "label":  "Grid Gap",
+                         "min":  16,
+                         "max":  64,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  32
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Card Styling"
+                     },
+                     {
+                         "type":  "checkbox",
+                         "id":  "enable_card_style",
+                         "label":  "Enable Card Style",
+                         "default":  false
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "card_radius",
+                         "label":  "Card Corner Radius",
+                         "min":  0,
+                         "max":  40,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  16
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Image \u0026 Content"
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "image_ratio",
+                         "label":  "Image Ratio",
+                         "options":  [
+                                         {
+                                             "value":  "1/1",
+                                             "label":  "Square"
+                                         },
+                                         {
+                                             "value":  "4/3",
+                                             "label":  "Landscape"
+                                         },
+                                         {
+                                             "value":  "3/4",
+                                             "label":  "Portrait"
+                                         },
+                                         {
+                                             "value":  "16/9",
+                                             "label":  "Wide"
+                                         },
+                                         {
+                                             "value":  "auto",
+                                             "label":  "Auto"
+                                         }
+                                     ],
+                         "default":  "4/3"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "image_radius",
+                         "label":  "Image Corner Radius",
+                         "min":  0,
+                         "max":  40,
+                         "step":  4,
+                         "unit":  "px",
+                         "default":  12
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "heading_size",
+                         "label":  "Heading Size",
+                         "min":  16,
+                         "max":  40,
+                         "step":  2,
+                         "unit":  "px",
+                         "default":  20
+                     },
+                     {
+                         "type":  "select",
+                         "id":  "link_style",
+                         "label":  "Link Style",
+                         "options":  [
+                                         {
+                                             "value":  "link",
+                                             "label":  "Text Link"
+                                         },
+                                         {
+                                             "value":  "button",
+                                             "label":  "Button"
+                                         }
+                                     ],
+                         "default":  "link"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Colors"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "bg_color",
+                         "label":  "Background Color",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "card_bg_color",
+                         "label":  "Card Background",
+                         "default":  "#ffffff"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "card_border_color",
+                         "label":  "Card Border",
+                         "default":  "#e2e8f0"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "heading_color",
+                         "label":  "Heading Color",
+                         "default":  "#0f172a"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "text_color",
+                         "label":  "Text Color",
+                         "default":  "#475569"
+                     },
+                     {
+                         "type":  "color",
+                         "id":  "accent_color",
+                         "label":  "Accent Color",
+                         "default":  "#3b82f6"
+                     },
+                     {
+                         "type":  "header",
+                         "content":  "Spacing"
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_top",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Top",
+                         "default":  80
+                     },
+                     {
+                         "type":  "range",
+                         "id":  "padding_bottom",
+                         "min":  0,
+                         "max":  100,
+                         "step":  4,
+                         "unit":  "px",
+                         "label":  "Padding Bottom",
+                         "default":  80
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "column",
+                       "name":  "Column",
+                       "settings":  [
+                                        {
+                                            "type":  "image_picker",
+                                            "id":  "image",
+                                            "label":  "Image"
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "title",
+                                            "label":  "Title",
+                                            "default":  "Feature"
+                                        },
+                                        {
+                                            "type":  "textarea",
+                                            "id":  "text",
+                                            "label":  "Text",
+                                            "default":  "Description of this feature or step."
+                                        },
+                                        {
+                                            "type":  "text",
+                                            "id":  "link_label",
+                                            "label":  "Link Label"
+                                        },
+                                        {
+                                            "type":  "url",
+                                            "id":  "link",
+                                            "label":  "Link"
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Columns"
+                    }
+                ]
+}
+{% endschema %}

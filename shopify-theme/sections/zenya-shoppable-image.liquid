@@ -1,0 +1,88 @@
+﻿<div class="relative w-full aspect-[4/3] md:aspect-[21/9] bg-slate-100 overflow-hidden group">
+  {% if section.settings.image != blank %}
+    <img 
+      src="{{ section.settings.image | image_url: width: 2000 }}" 
+      width="{{ section.settings.image.width }}" 
+      height="{{ section.settings.image.height }}"
+      alt=""
+      class="absolute inset-0 w-full h-full object-cover">
+  {% else %}
+    {{ 'collection-1' | placeholder_svg_tag: 'absolute inset-0 w-full h-full object-cover opacity-50' }}
+  {% endif %}
+
+  {% for block in section.blocks %}
+    <div class="absolute w-8 h-8 -ml-4 -mt-4 bg-white rounded-full shadow-lg cursor-pointer hover:scale-110 transition z-10 flex items-center justify-center group/hotspot"
+         style="top: {{ block.settings.top }}%; left: {{ block.settings.left }}%;">
+      <span class="w-3 h-3 bg-primary rounded-full animate-ping absolute"></span>
+      <span class="w-3 h-3 bg-primary rounded-full relative"></span>
+      
+      <!-- Tooltip -->
+      <div class="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-48 bg-white p-3 rounded-lg shadow-xl opacity-0 invisible group-hover/hotspot:opacity-100 group-hover/hotspot:visible transition-all duration-300 transform translate-y-2 group-hover/hotspot:translate-y-0">
+        {% assign product = all_products[block.settings.product] %}
+        {% if product != blank %}
+          <div class="aspect-square bg-slate-100 rounded mb-2 overflow-hidden">
+            <img 
+              src="{{ product.featured_image | image_url: width: 200 }}" 
+              width="{{ product.featured_image.width }}" 
+              height="{{ product.featured_image.height }}"
+              alt="{{ product.title | escape }}"
+              class="w-full h-full object-cover">
+          </div>
+          <div class="font-bold text-sm text-slate-900 mb-1">{{ product.title }}</div>
+          <div class="text-xs text-slate-600 mb-2">{{ product.price | money }}</div>
+          <a href="{{ product.url }}" class="block w-full text-center bg-primary text-white text-xs font-bold py-1.5 rounded hover:bg-primary-dark transition">View</a>
+        {% else %}
+          <div class="font-bold text-sm text-slate-900">Select Product</div>
+        {% endif %}
+        <div class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% schema %}
+{
+    "name":  "Shoppable Image",
+    "settings":  [
+                     {
+                         "type":  "image_picker",
+                         "id":  "image",
+                         "label":  "Main Image"
+                     }
+                 ],
+    "blocks":  [
+                   {
+                       "type":  "hotspot",
+                       "name":  "Product Hotspot",
+                       "settings":  [
+                                        {
+                                            "type":  "product",
+                                            "id":  "product",
+                                            "label":  "Product"
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "top",
+                                            "label":  "Top Position (%)",
+                                            "min":  0,
+                                            "max":  100,
+                                            "default":  50
+                                        },
+                                        {
+                                            "type":  "range",
+                                            "id":  "left",
+                                            "label":  "Left Position (%)",
+                                            "min":  0,
+                                            "max":  100,
+                                            "default":  50
+                                        }
+                                    ]
+                   }
+               ],
+    "presets":  [
+                    {
+                        "name":  "Shoppable"
+                    }
+                ]
+}
+{% endschema %}
+  

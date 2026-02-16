@@ -1,0 +1,256 @@
+<div class="relative py-12 md:py-24 text-center overflow-hidden" 
+     style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+     x-data="{ 
+       timeLeft: 0,
+       endDate: new Date('{{ section.settings.date }}').getTime(),
+       init() {
+         this.update();
+         setInterval(() => this.update(), 1000);
+       },
+       update() {
+         const now = new Date().getTime();
+         this.timeLeft = Math.max(0, Math.floor((this.endDate - now) / 1000));
+       },
+       format(t) {
+         const d = Math.floor(t / 86400) || 0;
+         const h = Math.floor((t % 86400) / 3600) || 0;
+         const m = Math.floor((t % 3600) / 60) || 0;
+         const s = (t % 60) || 0;
+         return { d, h, m, s };
+       }
+     }">
+  
+  {% if section.settings.bg_image != blank %}
+    <div class="absolute inset-0 z-0">
+      <img src="{{ section.settings.bg_image | image_url: width: 1600 }}" class="w-full h-full object-cover" loading="lazy">
+      <div class="absolute inset-0 bg-black" style="opacity: {{ section.settings.overlay_opacity }}%;"></div>
+    </div>
+  {% endif %}
+
+  <div class="relative z-10 container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px;">
+    {% if section.settings.heading != blank %}
+      <h2 class="font-black uppercase tracking-widest mb-6" style="font-size: {{ section.settings.heading_size }}px;">{{ section.settings.heading }}</h2>
+    {% endif %}
+    
+    {% if section.settings.subheading != blank %}
+      <p class="mb-8 opacity-90 max-w-2xl mx-auto" style="font-size: {{ section.settings.subheading_size }}px;">{{ section.settings.subheading }}</p>
+    {% endif %}
+
+    <div class="flex flex-wrap justify-center gap-4 md:gap-8 font-mono mb-10">
+      {% assign timer_bg = section.settings.timer_bg %}
+      {% assign timer_text = section.settings.timer_text %}
+      
+      {% assign units = 'Days,Hours,Minutes,Seconds' | split: ',' %}
+      {% for unit in units %}
+        {% assign unit_down = unit | downcase %}
+        {% assign unit_key = unit | slice: 0 | downcase %}
+        
+        <div class="flex flex-col items-center justify-center p-4 rounded-xl min-w-[100px] md:min-w-[120px] transition-all"
+             {% if section.settings.timer_style == 'cards' %}
+               style="background-color: {{ timer_bg }}; color: {{ timer_text }}; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"
+             {% elsif section.settings.timer_style == 'circles' %}
+               style="border: 2px solid {{ timer_bg }}; border-radius: 50%; width: 120px; height: 120px;"
+             {% endif %}>
+          <span class="font-bold leading-none" style="font-size: {{ section.settings.timer_size }}px;" x-text="format(timeLeft).{{ unit_key }}">00</span>
+          <span class="text-xs uppercase opacity-75 mt-1">{{ unit }}</span>
+        </div>
+
+        {% unless forloop.last %}
+          {% if section.settings.timer_style == 'plain' %}
+            <div class="font-bold opacity-50 self-start mt-2" style="font-size: {{ section.settings.timer_size }}px;">:</div>
+          {% endif %}
+        {% endunless %}
+      {% endfor %}
+    </div>
+
+    {% if section.settings.btn_label != blank %}
+      <a href="{{ section.settings.btn_link }}" 
+         class="inline-block px-8 py-4 font-bold transition duration-300 hover:scale-105 shadow-lg"
+         style="background-color: {{ section.settings.btn_bg }}; color: {{ section.settings.btn_text }}; border-radius: {{ section.settings.btn_radius }}px; font-size: {{ section.settings.btn_text_size }}px;">
+        {{ section.settings.btn_label }}
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Countdown Banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Flash Sale Ends In"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading Size",
+      "default": 40
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Don't miss out on these exclusive offers. Limited time only."
+    },
+    {
+      "type": "range",
+      "id": "subheading_size",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Subheading Size",
+      "default": 18
+    },
+    {
+      "type": "text",
+      "id": "date",
+      "label": "End Date (YYYY-MM-DD)",
+      "default": "2025-12-31"
+    },
+    {
+      "type": "text",
+      "id": "btn_label",
+      "label": "Button Label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "btn_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "timer_style",
+      "label": "Timer Style",
+      "options": [
+        { "value": "plain", "label": "Plain Text" },
+        { "value": "cards", "label": "Cards" },
+        { "value": "circles", "label": "Circles" }
+      ],
+      "default": "plain"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#dc2626"
+    },
+    {
+      "type": "image_picker",
+      "id": "bg_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Image Overlay Opacity",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "timer_bg",
+      "label": "Timer Card/Border Color",
+      "default": "#ffffff",
+      "info": "Used for Cards background or Circle border"
+    },
+    {
+      "type": "color",
+      "id": "timer_text",
+      "label": "Timer Text Color (Cards)",
+      "default": "#dc2626",
+      "info": "Used for text inside Cards"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "#dc2626"
+    },
+    {
+      "type": "range",
+      "id": "btn_radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Button Corner Radius",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "btn_text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Text Size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Banner"
+    }
+  ]
+}
+{% endschema %}
+  

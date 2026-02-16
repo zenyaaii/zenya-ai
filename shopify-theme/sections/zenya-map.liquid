@@ -1,0 +1,42 @@
+﻿
+<div class="py-0 bg-slate-100 relative h-96">
+  <div class="absolute inset-0 grayscale">
+    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q={{ section.settings.address | url_encode }}&t=&z=13&ie=UTF8&iwloc=&output=embed"></iframe>
+  </div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-xl shadow-2xl text-center max-w-sm w-full mx-4">
+    <h3 class="text-xl font-bold text-slate-900 mb-2">{{ section.settings.heading }}</h3>
+    <p class="text-slate-600">{{ section.settings.address }}</p>
+    <a href="https://maps.google.com/maps?q={{ section.settings.address | url_encode }}" target="_blank" class="inline-block mt-4 text-primary font-bold hover:underline">Get Directions â†’</a>
+  </div>
+</div>
+{% schema %}
+{
+    "name":  "Map",
+    "settings":  [
+                     {
+                         "type":  "text",
+                         "id":  "heading",
+                         "label":  "Heading",
+                         "default":  "Visit Our Store"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "address",
+                         "label":  "Address",
+                         "default":  "123 Main St, New York, NY 10001"
+                     },
+                     {
+                         "type":  "text",
+                         "id":  "map_api_key",
+                         "label":  "Google Maps API Key (Optional)",
+                         "info":  "Leave blank to use iframe embed"
+                     }
+                 ],
+    "presets":  [
+                    {
+                        "name":  "Map"
+                    }
+                ]
+}
+{% endschema %}
+  

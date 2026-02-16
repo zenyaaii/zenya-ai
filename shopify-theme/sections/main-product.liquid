@@ -1,0 +1,766 @@
+
+<div x-data="{ 
+  selectedVariantId: {{ product.selected_or_first_available_variant.id }},
+  currentPrice: {{ product.selected_or_first_available_variant.price }},
+  comparePrice: {{ product.selected_or_first_available_variant.compare_at_price | default: 'null' }},
+  currentImage: '{{ product.featured_image | image_url }}',
+  scrolled: false,
+  quantity: 1,
+  stockLeft: 14,
+  options: {
+    {% for option in product.options_with_values %}
+      '{{ option.name | escape }}': '{{ option.selected_value | escape }}'{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  },
+  optionNames: {{ product.options | json }},
+  variants: [
+    {% for variant in product.variants %}
+      {
+        id: {{ variant.id }},
+        title: {{ variant.title | json }},
+        price: {{ variant.price }},
+        compare_at_price: {{ variant.compare_at_price | default: 'null' }},
+        image: {{ variant.featured_image | image_url | json }},
+        options: {{ variant.options | json }},
+        available: {{ variant.available }}
+      }{% unless forloop.last %},{% endunless %}
+    {% endfor %}
+  ],
+  updateVariant() {
+    const matched = this.variants.find(v => {
+      return this.optionNames.every((name, i) => {
+        return v.options[i] === this.options[name];
+      });
+    });
+    
+    if (matched) {
+      this.selectedVariantId = matched.id;
+      this.currentPrice = matched.price;
+      this.comparePrice = matched.compare_at_price;
+      if (matched.image && matched.image !== '') {
+        this.currentImage = matched.image;
+      }
+      // Update URL
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('variant', matched.id);
+      window.history.replaceState({}, '', newUrl);
+    }
+  },
+  formatMoney(cents) {
+      return '$' + (cents / 100).toFixed(2);
+  }
+  }" 
+@scroll.window="scrolled = (window.pageYOffset > 500)"
+class="pb-20" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+
+  <!-- Breadcrumbs -->
+  {% if section.settings.show_breadcrumbs %}
+    <div class="container mx-auto px-6 py-4 text-sm text-slate-500">
+      <a href="{{ routes.root_url }}" class="hover:text-primary">Home</a> / <span class="text-slate-900">{{ product.title }}</span>
+    </div>
+  {% endif %}
+
+  <div class="container mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-20" style="max-width: {{ section.settings.container_width }}px;">
+    
+    <!-- Gallery (Fixed) -->
+    <div class="space-y-4 {% if section.settings.gallery_position == 'right' %}lg:order-2{% endif %}">
+      <div class="aspect-[1/1] rounded-2xl overflow-hidden bg-slate-100 relative group">
+        <img
+              :src="currentImage"
+              width="{{ product.featured_image.width }}"
+              height="{{ product.featured_image.height }}"
+              alt="{{ product.title | escape }}"
+              class="w-full h-full object-cover transition duration-500 group-hover:scale-105">
+        <template x-if="comparePrice > currentPrice">
+          <div class="absolute top-4 left-4 bg-red-500 text-white font-bold px-3 py-1 rounded-full text-sm shadow-md">
+            SALE
+          </div>
+        </template>
+      </div>
+      <div class="grid grid-cols-4 gap-4">
+        {% for media in product.media %}
+          <div @click="currentImage = '{{ media | image_url }}'" class="aspect-square rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-primary transition bg-slate-50">
+            <img 
+              src="{{ media | image_url: width: 200 }}" 
+              width="{{ media.width }}" 
+              height="{{ media.height }}"
+              alt="{{ media.alt | escape }}"
+              class="w-full h-full object-cover">
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Info (Blocks) -->
+    <div class="space-y-8">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when '@app' %}
+            {% render block %}
+
+          {% when 'title' %}
+            <div {{ block.shopify_attributes }} style="text-align: {{ block.settings.alignment }}">
+              {% if block.settings.show_rating %}
+                <div class="flex items-center gap-2 mb-2" style="justify-content: {{ block.settings.alignment }}">
+                  <div class="flex text-yellow-400 text-sm">★★★★★</div>
+                  <span class="text-slate-500 text-sm">({{ block.settings.review_count }} Reviews)</span>
+                </div>
+              {% endif %}
+              <h1 class="font-extrabold tracking-tight mb-4" style="font-size: {{ block.settings.heading_size }}px; color: {{ block.settings.heading_color }}">{{ product.title }}</h1>
+            </div>
+
+          {% when 'price' %}
+            <div class="flex items-end gap-4" {{ block.shopify_attributes }} style="justify-content: {{ block.settings.alignment }}">
+              <span class="font-bold" style="font-size: {{ block.settings.price_size }}px; color: {{ block.settings.price_color }}" x-text="formatMoney(currentPrice)">{{ product.price | money }}</span>
+              <template x-if="comparePrice > currentPrice">
+                <span class="text-xl text-slate-400 line-through mb-1" x-text="formatMoney(comparePrice)">{{ product.compare_at_price | money }}</span>
+              </template>
+            </div>
+
+          {% when 'text' %}
+            <div class="prose prose-sm text-slate-600" {{ block.shopify_attributes }}>
+              {{ block.settings.text }}
+            </div>
+
+          {% when 'benefits' %}
+            <div class="flex flex-wrap gap-4 py-4 border-y border-slate-100" {{ block.shopify_attributes }} style="color: {{ block.settings.text_color }}">
+              {% if block.settings.benefit_1 != blank %}
+                <div class="flex items-center gap-2 text-sm font-bold">
+                  <span class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: {{ block.settings.icon_bg }}; color: {{ block.settings.icon_color }}">🚚</span>
+                  {{ block.settings.benefit_1 }}
+                </div>
+              {% endif %}
+              {% if block.settings.benefit_2 != blank %}
+                <div class="flex items-center gap-2 text-sm font-bold">
+                  <span class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: {{ block.settings.icon_bg }}; color: {{ block.settings.icon_color }}">🛡️</span>
+                  {{ block.settings.benefit_2 }}
+                </div>
+              {% endif %}
+              {% if block.settings.benefit_3 != blank %}
+                <div class="flex items-center gap-2 text-sm font-bold">
+                  <span class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: {{ block.settings.icon_bg }}; color: {{ block.settings.icon_color }}">🔒</span>
+                  {{ block.settings.benefit_3 }}
+                </div>
+              {% endif %}
+            </div>
+
+          {% when 'stock' %}
+            <div class="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 animate-pulse" 
+                 style="background-color: {{ block.settings.bg_color }}; color: {{ block.settings.text_color }}" 
+                 {{ block.shopify_attributes }}>
+              <span>🔥</span> Only <span x-text="stockLeft"></span> items left in stock!
+            </div>
+
+          {% when 'variant_picker' %}
+            {% unless product.has_only_default_variant %}
+              <div class="space-y-4" {{ block.shopify_attributes }}>
+                {% for option in product.options_with_values %}
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <label class="block text-sm font-bold text-slate-900">{{ option.name }}</label>
+                      {% if block.settings.enable_size_chart and option.name == 'Size' %}
+                         <!-- Size Chart Trigger Placeholder -->
+                      {% endif %}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      {% for value in option.values %}
+                        <button 
+                          @click="options['{{ option.name | escape }}'] = '{{ value | escape }}'; updateVariant()"
+                          :class="options['{{ option.name | escape }}'] === '{{ value | escape }}' ? 'ring-1' : 'border-slate-200 hover:border-slate-400'"
+                          :style="options['{{ option.name | escape }}'] === '{{ value | escape }}' ? 'background-color: {{ block.settings.selected_bg }}; border-color: {{ block.settings.selected_border }}; color: {{ block.settings.selected_border }}; ring-color: {{ block.settings.selected_border }}' : ''"
+                          class="px-4 py-2 rounded border transition text-sm font-medium relative"
+                        >
+                          {{ value }}
+                        </button>
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endunless %}
+
+          {% when 'popup' %}
+            <div class="my-4" {{ block.shopify_attributes }}>
+              {% render 'size-chart', block: block %}
+            </div>
+
+          {% when 'volume_bundles' %}
+             <div class="my-6 space-y-3" {{ block.shopify_attributes }} style="--border-color: {{ block.settings.border_color }}; --selected-border: {{ block.settings.selected_border }}; --badge-bg: {{ block.settings.badge_bg }}; --badge-text: {{ block.settings.badge_text }}">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold" style="color: var(--selected-border)">Select Quantity</span>
+                <span class="text-xs font-medium text-red-600 animate-pulse">🔥 High demand</span>
+              </div>
+              <div class="space-y-3">
+                <!-- Buy 1 -->
+                <div @click="quantity = 1" 
+                     class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                     :style="quantity === 1 ? 'border-color: var(--selected-border); background-color: #f8fafc' : 'border-color: var(--border-color); background-color: #ffffff'">
+                   <div class="flex items-center justify-between">
+                     <div class="flex items-center gap-3">
+                       <div class="flex h-5 w-5 items-center justify-center rounded-full border" 
+                            :style="quantity === 1 ? 'border-color: transparent; background-color: var(--selected-border)' : 'border-color: var(--border-color)'">
+                         <div x-show="quantity === 1" class="h-2 w-2 rounded-full bg-white"></div>
+                       </div>
+                       <div class="font-bold" style="color: var(--selected-border)">Buy 1</div>
+                     </div>
+                     <div class="font-bold" style="color: var(--selected-border)" x-text="formatMoney(currentPrice)"></div>
+                   </div>
+                </div>
+                <!-- Buy 2 -->
+                <div @click="quantity = 2" 
+                     class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                     :style="quantity === 2 ? 'border-color: var(--selected-border); background-color: #f8fafc' : 'border-color: var(--border-color); background-color: #ffffff'">
+                   <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-xs font-bold shadow-sm rounded-full" style="background-color: var(--badge-bg); color: var(--badge-text)">MOST POPULAR</div>
+                   <div class="flex items-center justify-between">
+                     <div class="flex items-center gap-3">
+                       <div class="flex h-5 w-5 items-center justify-center rounded-full border" 
+                            :style="quantity === 2 ? 'border-color: transparent; background-color: var(--selected-border)' : 'border-color: var(--border-color)'">
+                         <div x-show="quantity === 2" class="h-2 w-2 rounded-full bg-white"></div>
+                       </div>
+                       <div>
+                         <div class="font-bold" style="color: var(--selected-border)">Buy 2</div>
+                         <div class="text-xs text-slate-500" x-text="formatMoney(currentPrice * 0.85) + '/each'"></div>
+                       </div>
+                     </div>
+                     <div class="text-right">
+                       <div class="font-bold" style="color: var(--selected-border)" x-text="formatMoney(currentPrice * 2 * 0.85)"></div>
+                       <div class="text-xs font-bold text-green-600">Save 15%</div>
+                     </div>
+                   </div>
+                </div>
+                <!-- Buy 3 -->
+                <div @click="quantity = 3" 
+                     class="relative cursor-pointer rounded-xl border-2 p-4 transition-all"
+                     :style="quantity === 3 ? 'border-color: var(--selected-border); background-color: #f8fafc' : 'border-color: var(--border-color); background-color: #ffffff'">
+                   <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-xs font-bold text-white shadow-sm rounded-full bg-red-500">BEST VALUE</div>
+                   <div class="flex items-center justify-between">
+                     <div class="flex items-center gap-3">
+                       <div class="flex h-5 w-5 items-center justify-center rounded-full border" 
+                            :style="quantity === 3 ? 'border-color: transparent; background-color: var(--selected-border)' : 'border-color: var(--border-color)'">
+                         <div x-show="quantity === 3" class="h-2 w-2 rounded-full bg-white"></div>
+                       </div>
+                       <div>
+                         <div class="font-bold" style="color: var(--selected-border)">Buy 3</div>
+                         <div class="text-xs text-slate-500" x-text="formatMoney(currentPrice * 0.75) + '/each'"></div>
+                       </div>
+                     </div>
+                     <div class="text-right">
+                       <div class="font-bold" style="color: var(--selected-border)" x-text="formatMoney(currentPrice * 3 * 0.75)"></div>
+                       <div class="text-xs font-bold text-green-600">Save 25%</div>
+                     </div>
+                   </div>
+                </div>
+              </div>
+            </div>
+
+          {% when 'buy_buttons' %}
+            <div {{ block.shopify_attributes }}>
+              {% form 'product', product %}
+                <input type="hidden" name="id" :value="selectedVariantId">
+                <input type="hidden" name="quantity" x-model="quantity">
+                <div class="space-y-4">
+                  <button type="submit" name="add" 
+                          class="py-5 rounded-full text-xl font-bold shadow-xl hover:opacity-90 transition transform hover:scale-[1.02] active:scale-[0.98]" 
+                          :class="{ 'w-full': {{ block.settings.full_width | default: true }}, 'px-12': !{{ block.settings.full_width | default: true }} }"
+                          style="background-color: {{ block.settings.button_bg }}; color: {{ block.settings.button_text }};">
+                    <span x-text="'Add to Cart - ' + formatMoney(currentPrice * quantity * (quantity === 1 ? 1 : (quantity === 2 ? 0.85 : 0.75)))">Add to Cart</span>
+                  </button>
+                  
+                  {% if block.settings.show_security_badges %}
+                    <div class="text-center text-xs text-slate-500 flex justify-center gap-4">
+                      <span>🔒 SSL Secure Checkout</span>
+                      <span>⚡ Fast Shipping</span>
+                    </div>
+                  {% endif %}
+                </div>
+              {% endform %}
+            </div>
+
+          {% when 'upsell' %}
+            {% if block.settings.upsell_product != blank %}
+              {% assign upsell = all_products[block.settings.upsell_product] %}
+              {% if upsell != blank %}
+                <div class="mt-8 rounded-xl border border-dashed p-4" x-data="{ added: false }" {{ block.shopify_attributes }} style="background-color: {{ block.settings.bg_color }}; border-color: {{ block.settings.border_color }}">
+                  <h3 class="mb-4 text-sm font-bold uppercase tracking-wide" style="color: {{ block.settings.text_color | default: '#0f172a' }}">Frequently Bought Together</h3>
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                      <div class="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        <img src="{{ product.featured_image | image_url: width: 100 }}" width="100" height="100" class="h-full w-full object-cover">
+                      </div>
+                      <span class="text-slate-400 font-bold">+</span>
+                      <div class="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        <img src="{{ upsell.featured_image | image_url: width: 100 }}" width="100" height="100" class="h-full w-full object-cover">
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-sm font-medium line-clamp-1" style="color: {{ block.settings.text_color | default: '#0f172a' }}">{{ upsell.title }}</div>
+                      <div class="font-bold text-red-600">{{ upsell.price | money }}</div>
+                    </div>
+                    <button 
+                      @click="
+                        fetch(window.Shopify.routes.root + 'cart/add.js', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ items: [{ id: {{ upsell.first_available_variant.id }}, quantity: 1 }] })
+                        }).then(() => { added = true; document.dispatchEvent(new CustomEvent('open-cart')); });
+                      "
+                      class="shrink-0 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90"
+                      style="background-color: {{ settings.primary_color }};"
+                      x-text="added ? 'Added!' : 'Add +'"
+                      :disabled="added"
+                    >
+                    </button>
+                  </div>
+                  <div class="mt-3 text-xs text-slate-500">
+                    <span class="text-green-600 font-bold">✓ Free Shipping</span> applied to this bundle
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+
+          {% when 'description' %}
+            <div class="border border-slate-200 rounded-xl overflow-hidden mt-6" x-data="{ open: {{ block.settings.open_by_default | default: true }} }" {{ block.shopify_attributes }}>
+              <button @click="open = !open" class="w-full flex items-center justify-between p-4 bg-slate-50 font-bold text-slate-900">
+                <span>{{ block.settings.title | default: 'Description' }}</span>
+                <span x-text="open ? '−' : '+'" class="text-xl"></span>
+              </button>
+              <div x-show="open" x-collapse class="p-4 text-slate-600 leading-relaxed prose prose-slate">
+                {{ product.description }}
+              </div>
+            </div>
+
+          {% when 'collapsible_tab' %}
+            <div class="border border-slate-200 rounded-xl overflow-hidden mt-4" x-data="{ open: false }" {{ block.shopify_attributes }}>
+              <button @click="open = !open" class="w-full flex items-center justify-between p-4 bg-slate-50 font-bold text-slate-900">
+                <span>{{ block.settings.heading | default: block.settings.page.title }}</span>
+                <span x-text="open ? '−' : '+'" class="text-xl"></span>
+              </button>
+              <div x-show="open" x-collapse class="p-4 text-slate-600 leading-relaxed">
+                {{ block.settings.content }}
+                {{ block.settings.page.content }}
+              </div>
+            </div>
+
+          {% when 'custom_liquid' %}
+            <div {{ block.shopify_attributes }}>
+              {{ block.settings.custom_liquid }}
+            </div>
+
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Page",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Width",
+      "default": 1200
+    },
+    {
+      "type": "select",
+      "id": "gallery_position",
+      "label": "Gallery Position (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumbs",
+      "label": "Show Breadcrumbs",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_rating",
+          "default": true,
+          "label": "Show Rating"
+        },
+        {
+          "type": "number",
+          "id": "review_count",
+          "default": 124,
+          "label": "Review Count"
+        },
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "range",
+          "id": "heading_size",
+          "label": "Heading Size",
+          "min": 20,
+          "max": 60,
+          "step": 2,
+          "unit": "px",
+          "default": 36
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Heading Color",
+          "default": "#0f172a"
+        }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "options": [
+            { "value": "flex-start", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "flex-end", "label": "Right" }
+          ],
+          "default": "flex-start"
+        },
+        {
+          "type": "range",
+          "id": "price_size",
+          "label": "Price Size",
+          "min": 16,
+          "max": 48,
+          "step": 2,
+          "unit": "px",
+          "default": 30
+        },
+        {
+          "type": "color",
+          "id": "price_color",
+          "label": "Price Color",
+          "default": "#0f172a"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        }
+      ]
+    },
+    {
+      "type": "benefits",
+      "name": "Benefits Row",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "benefit_1",
+          "label": "Benefit 1",
+          "default": "Free Shipping"
+        },
+        {
+          "type": "text",
+          "id": "benefit_2",
+          "label": "Benefit 2",
+          "default": "30-Day Returns"
+        },
+        {
+          "type": "text",
+          "id": "benefit_3",
+          "label": "Benefit 3",
+          "default": "Secure Checkout"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#334155"
+        },
+        {
+          "type": "color",
+          "id": "icon_bg",
+          "label": "Icon Background",
+          "default": "#f1f5f9"
+        },
+        {
+          "type": "color",
+          "id": "icon_color",
+          "label": "Icon Color",
+          "default": "#475569"
+        }
+      ]
+    },
+    {
+      "type": "stock",
+      "name": "Stock Counter",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "threshold",
+          "label": "Low Stock Threshold",
+          "min": 1,
+          "max": 50,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#991b1b"
+        },
+        {
+          "type": "color",
+          "id": "bg_color",
+          "label": "Background Color",
+          "default": "#fef2f2"
+        }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant Picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "color",
+          "id": "selected_bg",
+          "label": "Selected Option Background",
+          "default": "#f8fafc"
+        },
+        {
+          "type": "color",
+          "id": "selected_border",
+          "label": "Selected Option Border",
+          "default": "#0f172a"
+        }
+      ]
+    },
+    {
+      "type": "volume_bundles",
+      "name": "Volume Bundles",
+      "limit": 1,
+      "settings": [
+        {
+           "type": "color",
+           "id": "border_color",
+           "label": "Border Color",
+           "default": "#e2e8f0"
+        },
+        {
+           "type": "color",
+           "id": "selected_border",
+           "label": "Selected Border Color",
+           "default": "#0f172a"
+        },
+        {
+           "type": "color",
+           "id": "badge_bg",
+           "label": "Badge Background",
+           "default": "#0f172a"
+        },
+        {
+           "type": "color",
+           "id": "badge_text",
+           "label": "Badge Text",
+           "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy Buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "full_width",
+          "label": "Full Width Button",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_security_badges",
+          "label": "Show Security Badges",
+          "default": true
+        },
+        {
+           "type": "color",
+           "id": "button_bg",
+           "label": "Button Background",
+           "default": "#3b82f6"
+        },
+        {
+           "type": "color",
+           "id": "button_text",
+           "label": "Button Text",
+           "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "upsell",
+      "name": "Upsell",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "product",
+          "id": "upsell_product",
+          "label": "Upsell Product"
+        },
+        {
+           "type": "color",
+           "id": "bg_color",
+           "label": "Background Color",
+           "default": "#f8fafc"
+        },
+        {
+           "type": "color",
+           "id": "border_color",
+           "label": "Border Color",
+           "default": "#e2e8f0"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Description"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_by_default",
+          "label": "Open by Default",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "collapsible_tab",
+      "name": "Collapsible Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "info": "Include a heading that explains the content."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Row content"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Row content from page"
+        }
+      ]
+    },
+    {
+      "type": "popup",
+      "name": "Pop-up",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Link label",
+          "default": "Size Chart"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page"
+        }
+      ]
+    },
+    {
+      "type": "custom_liquid",
+      "name": "Custom Liquid",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "custom_liquid",
+          "label": "Custom Liquid"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

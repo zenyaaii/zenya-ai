@@ -1,0 +1,13 @@
+{
+  "current": "Zenya Pro Theme",
+  "presets": {
+    "Zenya Pro Theme": {
+      "primary_color": "#3b82f6",
+      "secondary_color": "#1e293b",
+      "theme_checkout_accent_color": "#3b82f6",
+      "theme_checkout_button_color": "#3b82f6",
+      "theme_checkout_error_color": "#ef4444",
+      "theme_checkout_headings_font": "sans-serif"
+    }
+  }
+}

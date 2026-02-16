@@ -1,0 +1,59 @@
+
+<div class="relative h-screen w-full overflow-hidden bg-black">
+  {% if section.settings.video != blank %}
+    {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, class: 'absolute inset-0 w-full h-full object-cover opacity-60' }}
+  {% else %}
+    <div class="absolute inset-0 bg-slate-900 opacity-60"></div>
+  {% endif %}
+  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
+    <h1 class="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter drop-shadow-lg">{{ section.settings.heading }}</h1>
+    <p class="text-xl md:text-2xl text-slate-200 mb-10 max-w-2xl drop-shadow">{{ section.settings.subheading }}</p>
+    {% if section.settings.cta_text != blank %}
+      <a href="{{ section.settings.cta_url }}" class="px-10 py-5 bg-white text-black font-bold text-lg rounded-full hover:bg-slate-200 transition transform hover:scale-105 shadow-xl">
+        {{ section.settings.cta_text }}
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Video Hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL (MP4)",
+      "info": "Direct link to MP4 file"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Cinematic Experience"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Immerse your customers in your brand story."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Label",
+      "default": "Watch More"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Hero"
+    }
+  ]
+}
+{% endschema %}
+  

@@ -1,0 +1,132 @@
+
+<article class="py-20 bg-white min-h-[60vh]">
+  {% for block in section.blocks %}
+    {% case block.type %}
+      {% when 'featured_image' %}
+        {% if article.image %}
+          <div class="w-full {{ block.settings.height }} mb-12 relative overflow-hidden" {{ block.shopify_attributes }}>
+            <img src="{{ article.image | image_url: width: 1600 }}" width="{{ article.image.width }}" height="{{ article.image.height }}" alt="{{ article.title }}" class="w-full h-full object-cover">
+            {% if block.settings.show_overlay %}
+              <div class="absolute inset-0 bg-black/40"></div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+      {% when 'title' %}
+        <div class="container mx-auto px-6 text-center mb-12" {{ block.shopify_attributes }}>
+          <h1 class="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-4">{{ article.title }}</h1>
+          {% if block.settings.show_meta %}
+            <div class="flex items-center justify-center gap-4 text-sm font-medium text-slate-500">
+              {% if block.settings.show_author %}
+                <span>{{ article.author }}</span>
+                <span>&bull;</span>
+              {% endif %}
+              <span>{{ article.published_at | date: "%B %d, %Y" }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+      {% when 'content' %}
+        <div class="container mx-auto px-6 max-w-3xl" {{ block.shopify_attributes }}>
+          <div class="prose prose-lg prose-slate mx-auto">
+            {{ article.content }}
+          </div>
+        </div>
+
+      {% when 'share' %}
+        <div class="container mx-auto px-6 max-w-3xl mt-8" {{ block.shopify_attributes }}>
+           <div class="flex items-center justify-center gap-4">
+             <span class="text-sm font-bold text-slate-900">Share:</span>
+             <!-- Simple Share Links -->
+             <a href="https://www.facebook.com/sharer.php?u={{ shop.url | append: article.url }}" target="_blank" class="text-slate-500 hover:text-blue-600">Facebook</a>
+             <a href="https://twitter.com/share?url={{ shop.url | append: article.url }}&text={{ article.title }}" target="_blank" class="text-slate-500 hover:text-blue-400">Twitter</a>
+             <a href="mailto:?subject={{ article.title }}&body={{ shop.url | append: article.url }}" class="text-slate-500 hover:text-slate-900">Email</a>
+           </div>
+        </div>
+
+      {% when 'back_link' %}
+        <div class="container mx-auto px-6 max-w-3xl mt-12 pt-8 border-t border-slate-200 text-center" {{ block.shopify_attributes }}>
+          <a href="{{ blog.url }}" class="text-primary font-bold hover:underline">&larr; Back to Blog</a>
+        </div>
+    {% endcase %}
+  {% endfor %}
+</article>
+
+{% schema %}
+{
+  "name": "Article Page",
+  "blocks": [
+    {
+      "type": "featured_image",
+      "name": "Featured Image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "height",
+          "label": "Image Height",
+          "options": [
+            { "value": "h-[300px]", "label": "Small" },
+            { "value": "h-[400px]", "label": "Medium" },
+            { "value": "h-[500px]", "label": "Large" },
+            { "value": "h-[600px]", "label": "Extra Large" }
+          ],
+          "default": "h-[500px]"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_overlay",
+          "label": "Show Dark Overlay",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "Title & Meta",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_meta",
+          "label": "Show Date/Author",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_author",
+          "label": "Show Author",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "Content",
+      "limit": 1
+    },
+    {
+      "type": "share",
+      "name": "Share Buttons",
+      "limit": 1
+    },
+    {
+      "type": "back_link",
+      "name": "Back Link",
+      "limit": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "Default Article",
+      "blocks": [
+        { "type": "featured_image" },
+        { "type": "title" },
+        { "type": "content" },
+        { "type": "share" },
+        { "type": "back_link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

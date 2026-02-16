@@ -1,0 +1,40 @@
+
+<div class="py-20 bg-slate-50 min-h-[60vh] flex items-center justify-center">
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <h1 class="text-3xl font-bold text-center mb-8 text-slate-900">Create Account</h1>
+    {% form 'create_customer' %}
+      {{ form.errors | default_errors }}
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="FirstName" class="block text-sm font-bold text-slate-700 mb-1">First Name</label>
+            <input type="text" name="customer[first_name]" id="FirstName" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent">
+          </div>
+          <div>
+            <label for="LastName" class="block text-sm font-bold text-slate-700 mb-1">Last Name</label>
+            <input type="text" name="customer[last_name]" id="LastName" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent">
+          </div>
+        </div>
+        <div>
+          <label for="Email" class="block text-sm font-bold text-slate-700 mb-1">Email</label>
+          <input type="email" name="customer[email]" id="Email" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent">
+        </div>
+        <div>
+          <label for="CreatePassword" class="block text-sm font-bold text-slate-700 mb-1">Password</label>
+          <input type="password" name="customer[password]" id="CreatePassword" class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-transparent">
+        </div>
+        <button type="submit" class="w-full py-3 bg-primary text-white font-bold rounded-lg hover:brightness-110 transition" style="background-color: {{ settings.primary_color }};">Create</button>
+      </div>
+      <div class="mt-6 text-center text-sm text-slate-500">
+        <a href="{{ routes.account_login_url }}" class="text-primary hover:underline">Already have an account? Login</a>
+      </div>
+    {% endform %}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Register",
+  "settings": []
+}
+{% endschema %}
+  

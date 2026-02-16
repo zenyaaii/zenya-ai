@@ -1,0 +1,45 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "contact_form": {
+      "type": "zenya-contact"
+    },
+    "map": {
+      "type": "zenya-map"
+    },
+    "faq": {
+      "type": "zenya-accordion",
+      "settings": {
+        "title": "Common Questions"
+      },
+      "blocks": {
+        "q1": {
+          "type": "item",
+          "settings": {
+            "title": "Shipping Time?",
+            "text": "<p>3-5 Business Days.</p>"
+          }
+        },
+        "q2": {
+          "type": "item",
+          "settings": {
+            "title": "Returns?",
+            "text": "<p>30 Days Free Returns.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2"
+      ]
+    }
+  },
+  "order": [
+    "main",
+    "contact_form",
+    "map",
+    "faq"
+  ]
+}
