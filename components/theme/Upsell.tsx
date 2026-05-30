@@ -1,19 +1,22 @@
 'use client'
 import { useState } from 'react'
-import Image from 'next/image'
 
 export default function Upsell({ 
   primaryColor,
   mainProductImage,
-  onAdd
+  onAdd,
+  heading = 'Frequently Bought Together',
+  product,
 }: { 
   primaryColor: string
   mainProductImage: string
   onAdd: () => void
+  heading?: string
+  product?: { name: string; price: number; originalPrice: number; image: string }
 }) {
   const [added, setAdded] = useState(false)
 
-  const upsellProduct = {
+  const upsellProduct = product || {
     name: "Premium Protection Case",
     price: 14.99,
     originalPrice: 29.99,
@@ -30,18 +33,30 @@ export default function Upsell({
   return (
     <div className="mt-8 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
       <h3 className="mb-4 text-sm font-bold text-slate-900 uppercase tracking-wide">
-        Frequently Bought Together
+        {heading}
       </h3>
       
       <div className="flex items-center gap-4">
         {/* Images */}
         <div className="flex items-center gap-2">
           <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-200 bg-white">
-            <Image src={mainProductImage} alt="Main" fill className="object-cover" />
+            <img
+              src={mainProductImage}
+              alt="Main"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <span className="text-slate-400 font-bold">+</span>
           <div className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-200 bg-white">
-            <Image src={upsellProduct.image} alt="Upsell" fill className="object-cover" />
+            <img
+              src={upsellProduct.image}
+              alt="Upsell"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </div>
 

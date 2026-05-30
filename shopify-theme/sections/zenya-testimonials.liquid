@@ -1,4 +1,4 @@
-﻿<div class="py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+<div class="py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="container mx-auto px-6" style="max-width: {{ section.settings.container_width }}px;">
     {% if section.settings.title != blank %}
       <h2 class="text-center font-extrabold mb-16 {{ section.settings.heading_size }}" style="color: {{ section.settings.heading_color }}">{{ section.settings.title }}</h2>
@@ -25,7 +25,7 @@
           <!-- Author -->
           <div class="flex items-center gap-4 mt-auto">
             {% if block.settings.image != blank %}
-              <img src="{{ block.settings.image | image_url: width: 100, height: 100, crop: 'center' }}" alt="{{ block.settings.name }}" class="object-cover border-2 rounded-full" style="border-color: {{ section.settings.card_border_color }}; width: {{ section.settings.author_image_size }}px; height: {{ section.settings.author_image_size }}px;">
+              <img src="{{ block.settings.image | image_url: width: 100, height: 100, crop: 'center' }}" width="100" height="100" alt="{{ block.settings.name }}" class="object-cover border-2 rounded-full" style="border-color: {{ section.settings.card_border_color }}; width: {{ section.settings.author_image_size }}px; height: {{ section.settings.author_image_size }}px;">
             {% else %}
                <div class="rounded-full flex items-center justify-center font-bold text-lg uppercase" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.heading_color }}; width: {{ section.settings.author_image_size }}px; height: {{ section.settings.author_image_size }}px;">
                  {{ block.settings.name | slice: 0 }}

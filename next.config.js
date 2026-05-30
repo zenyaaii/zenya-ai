@@ -1,11 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  eslint: {
+    // Build speed optimization for CI/Vercel; lint remains available via npm run lint
+    ignoreDuringBuilds: true,
+  },
   images: {
+    unoptimized: true,
     remotePatterns: [
-      { protocol: 'https', hostname: '**' },
-      { protocol: 'http', hostname: '**' }
-    ]
+      { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdn.shopify.com' },
+      { protocol: 'https', hostname: 'ae01.alicdn.com' },
+      { protocol: 'https', hostname: '**' }
+    ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   async headers() {
     return [
@@ -23,10 +34,18 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;"
+            value: "frame-ancestors 'self' https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;"
           }
         ]
       }
+    ]
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/app/api/webhooks/:path*',
+        destination: '/api/webhooks/:path*',
+      },
     ]
   }
 }

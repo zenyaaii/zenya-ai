@@ -24,6 +24,14 @@ export default function Testimonials({
 
         <div className="grid gap-6 md:grid-cols-3">
           {testimonials.map((t, i) => (
+            (() => {
+              const safeName = typeof (t as any)?.name === 'string' ? (t as any).name.trim() : ''
+              const safeText = typeof (t as any)?.text === 'string' ? (t as any).text.trim() : ''
+              const safeLocation = typeof (t as any)?.location === 'string' ? (t as any).location.trim() : ''
+              const ratingRaw = Number((t as any)?.rating)
+              const safeRating = Number.isFinite(ratingRaw) ? Math.max(1, Math.min(5, Math.round(ratingRaw))) : 5
+              const initial = safeName.charAt(0) || '✓'
+              return (
             <motion.div 
               key={i}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -37,28 +45,30 @@ export default function Testimonials({
               </div>
               
               <div className="flex gap-1 mb-6 text-yellow-400 text-sm">
-                {[...Array(t.rating || 5)].map((_, i) => (
+                {[...Array(safeRating)].map((_, i) => (
                   <span key={i}>★</span>
                 ))}
               </div>
               
               <p className="mb-8 text-lg leading-relaxed text-slate-300 italic">
-                &ldquo;{t.text}&rdquo;
+                &ldquo;{safeText}&rdquo;
               </p>
               
               <div className="flex items-center gap-4 border-t border-slate-700/50 pt-6">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center font-bold text-slate-300 shadow-inner">
-                  {t.name.charAt(0)}
+                  {initial}
                 </div>
                 <div>
                   <div className="font-bold text-white flex items-center gap-2">
-                    {t.name}
+                    {safeName || 'Verified Buyer'}
                     <span className="text-[10px] bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full border border-green-800">Verified</span>
                   </div>
-                  <div className="text-xs text-slate-500">{t.location || 'Verified Buyer'}</div>
+                  <div className="text-xs text-slate-500">{safeLocation || 'Verified Buyer'}</div>
                 </div>
               </div>
             </motion.div>
+              )
+            })()
           ))}
         </div>
       </div>

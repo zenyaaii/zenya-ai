@@ -52,11 +52,49 @@
     <script defer src="{{ 'alpine.js' | asset_url }}"></script>
 
     <style>
+      :root {
+        --zenya-primary: {{ settings.primary_color | default: '#3b82f6' }};
+        --zenya-secondary: {{ settings.secondary_color | default: '#1e293b' }};
+        --zenya-bg: {{ settings.background_color | default: '#f8fafc' }};
+        --zenya-surface: {{ settings.surface_color | default: '#ffffff' }};
+        --zenya-text: {{ settings.text_color | default: '#0f172a' }};
+        --zenya-muted: {{ settings.muted_text_color | default: '#475569' }};
+        --zenya-radius: {{ settings.radius_scale | default: 14 }}px;
+      }
+
       [x-cloak] { display: none !important; }
-      body { font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        background: var(--zenya-bg);
+        color: var(--zenya-text);
+      }
+
+      .container {
+        width: min(100% - 2rem, 1280px);
+      }
+
+      .zenya-card {
+        background: var(--zenya-surface);
+        border-radius: var(--zenya-radius);
+      }
+
+      button,
+      [type='submit'],
+      [type='button'],
+      .btn {
+        border-radius: calc(var(--zenya-radius) * 0.85);
+      }
+
+      input,
+      select,
+      textarea {
+        border-radius: calc(var(--zenya-radius) * 0.7);
+      }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-900">
+  <body>
     <a class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-white px-4 py-2 rounded-md z-50" href="#MainContent">
       Skip to content
     </a>

@@ -70,9 +70,9 @@ export async function updateSession(request: NextRequest) {
 
   await supabase.auth.getUser()
 
-  // Allow Shopify embedding
+  // Allow Shopify embedding and self-embedding for previews
   response.headers.delete('X-Frame-Options')
-  response.headers.set('Content-Security-Policy', "frame-ancestors https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;")
+  response.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;")
 
   return response
 }

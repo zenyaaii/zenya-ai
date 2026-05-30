@@ -37,7 +37,7 @@ const colors = { primary: "#3b82f6", secondary: "#1e293b" };
 async function run() {
   console.log("Generating theme...");
   try {
-    const zip = await prepareThemeZip("Zenya Theme", content, colors) as any;
+    const zip = await prepareThemeZip("Zenya Theme", content as any, colors) as any;
     
     // Check if generateAsync exists (it should since it's JSZip)
     if (zip.generateAsync) {

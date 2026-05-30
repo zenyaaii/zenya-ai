@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 export default function Hero({ 
   headline, 
@@ -65,12 +64,12 @@ export default function Hero({
             className="relative"
           >
             <div className="relative aspect-square overflow-hidden rounded-3xl bg-slate-100 shadow-2xl">
-              <Image 
-                src={image} 
-                alt="Product Hero" 
-                fill 
-                className="object-cover"
-                priority
+              <img
+                src={image}
+                alt="Product Hero"
+                className="h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
               />
             </div>
             {/* Float Element */}

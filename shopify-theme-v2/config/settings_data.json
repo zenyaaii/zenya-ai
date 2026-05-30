@@ -1,0 +1,14 @@
+{
+  "current": "Zenya Nova",
+  "presets": {
+    "Zenya Nova": {
+      "brand_name": "Zenya",
+      "color_primary": "#4f46e5",
+      "color_accent": "#0ea5e9",
+      "color_bg": "#f6f8ff",
+      "color_surface": "#ffffff",
+      "color_text": "#0f172a",
+      "radius_global": 16
+    }
+  }
+}

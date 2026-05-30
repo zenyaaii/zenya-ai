@@ -29,7 +29,7 @@ export default function DraftPreviewPage() {
     if (!theme) return
     setIsGenerating(true)
     try {
-      const blob = await generateShopifyTheme(theme.productName, theme.content, { primary: theme.primaryColor, secondary: theme.secondaryColor })
+      const blob = await generateShopifyTheme(theme.productName, theme.content, { primary: theme.primaryColor, secondary: theme.secondaryColor }, theme.images || [])
       saveAs(blob, `${theme.productName.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`)
     } catch (e) {
       console.error(e)

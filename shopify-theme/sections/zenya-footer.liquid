@@ -1,115 +1,102 @@
-<footer class="py-12 border-t border-slate-800" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
-  <div class="container mx-auto px-6">
-    <div class="grid gap-8 md:grid-cols-{{ section.blocks.size | default: 4 }} mb-12">
+<footer class="relative border-t border-slate-200/70" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent"></div>
+  <div class="container mx-auto px-4 py-12 md:px-6">
+    <div class="mb-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {% for block in section.blocks %}
-        <div class="col-span-1" {{ block.shopify_attributes }}>
+        <div class="zenya-card border border-slate-200/70 p-5" {{ block.shopify_attributes }}>
           {% case block.type %}
             {% when 'brand_information' %}
-              <div class="flex flex-col gap-4">
-                {% if block.settings.logo != blank %}
-                  {{ block.settings.logo | image_url: width: block.settings.logo_width | image_tag: class: 'h-auto', style: 'max-width: 100%;' }}
-                {% else %}
-                  <h3 class="text-2xl font-extrabold tracking-tight">{{ shop.name }}</h3>
-                {% endif %}
-                
-                {% if block.settings.text != blank %}
-                  <div class="text-slate-400 text-sm">
-                    {{ block.settings.text }}
-                  </div>
-                {% endif %}
-
-                {% if block.settings.show_social %}
-                  {% render 'social-icons', class: 'flex gap-4 mt-4' %}
-                {% endif %}
-              </div>
+              {% if block.settings.logo != blank %}
+                {{ block.settings.logo | image_url: width: block.settings.logo_width | image_tag: class: 'h-auto mb-4', style: 'max-width: 100%;', alt: shop.name }}
+              {% else %}
+                <h3 class="mb-3 text-lg font-extrabold text-slate-900">{{ shop.name }}</h3>
+              {% endif %}
+              {% if block.settings.text != blank %}
+                <div class="text-sm leading-relaxed text-slate-600">{{ block.settings.text }}</div>
+              {% endif %}
+              {% if block.settings.show_social %}
+                <div class="mt-4 text-sm text-slate-600">
+                  {% render 'social-icons', class: 'flex flex-wrap gap-3' %}
+                </div>
+              {% endif %}
 
             {% when 'link_list' %}
-              <div>
-                <h4 class="font-bold mb-4">{{ block.settings.heading | default: linklists[block.settings.menu].title }}</h4>
-                <ul class="space-y-2 text-sm text-slate-400">
-                  {% for link in linklists[block.settings.menu].links %}
-                    <li><a href="{{ link.url }}" class="hover:text-primary transition">{{ link.title }}</a></li>
-                  {% else %}
-                    {% for i in (1..3) %}
-                      <li><a href="#" class="hover:text-primary transition">Menu Item {{ i }}</a></li>
-                    {% endfor %}
-                  {% endfor %}
-                </ul>
-              </div>
+              <h4 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-900">{{ block.settings.heading | default: linklists[block.settings.menu].title }}</h4>
+              <ul class="space-y-2 text-sm text-slate-600">
+                {% for link in linklists[block.settings.menu].links %}
+                  <li><a href="{{ link.url }}" class="transition hover:text-[var(--zenya-primary)]">{{ link.title }}</a></li>
+                {% else %}
+                  <li><a href="#" class="transition hover:text-[var(--zenya-primary)]">Menu Item 1</a></li>
+                  <li><a href="#" class="transition hover:text-[var(--zenya-primary)]">Menu Item 2</a></li>
+                {% endfor %}
+              </ul>
 
             {% when 'text' %}
-              <div>
-                <h4 class="font-bold mb-4">{{ block.settings.heading }}</h4>
-                <div class="text-slate-400 text-sm prose prose-invert">
-                  {{ block.settings.text }}
-                </div>
-              </div>
+              <h4 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-900">{{ block.settings.heading }}</h4>
+              <div class="prose prose-sm max-w-none text-slate-600">{{ block.settings.text }}</div>
 
             {% when 'newsletter' %}
-              <div>
-                <h4 class="font-bold mb-4">{{ block.settings.heading }}</h4>
-                <div class="text-slate-400 text-sm mb-4">{{ block.settings.text }}</div>
-                {% form 'customer', class: 'flex flex-col gap-2' %}
-                  <input type="hidden" name="contact[tags]" value="newsletter">
-                  <div class="flex">
-                    <input type="email" name="contact[email]" class="w-full bg-slate-800 border-slate-700 text-white rounded-l px-3 py-2 focus:ring-primary focus:border-primary" placeholder="Email address" required>
-                    <button type="submit" class="bg-primary text-white px-4 py-2 rounded-r hover:bg-primary/90 transition">Subscribe</button>
-                  </div>
-                  {% if form.posted_successfully? %}
-                    <p class="text-green-400 text-sm mt-2">Thanks for subscribing!</p>
-                  {% endif %}
-                {% endform %}
-              </div>
+              <h4 class="mb-2 text-sm font-bold uppercase tracking-wide text-slate-900">{{ block.settings.heading }}</h4>
+              <p class="mb-4 text-sm text-slate-600">{{ block.settings.text }}</p>
+              {% form 'customer', class: 'space-y-2' %}
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <label class="sr-only" for="footer-newsletter-email">Email address</label>
+                <input id="footer-newsletter-email" type="email" name="contact[email]" required placeholder="Email address" class="w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:border-[var(--zenya-primary)] focus:ring-[var(--zenya-primary)]">
+                <button type="submit" class="w-full rounded-full px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90" style="background: {{ settings.primary_color }};">Subscribe</button>
+                {% if form.posted_successfully? %}
+                  <p class="text-xs font-semibold text-emerald-700">Thanks for subscribing.</p>
+                {% endif %}
+              {% endform %}
           {% endcase %}
         </div>
       {% endfor %}
     </div>
 
-    <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex flex-col gap-4">
-        <div class="text-slate-500 text-sm">
-          {{ section.settings.copyright | replace: '%year%', 'now' | date: '%Y' | replace: '%shop_name%', shop.name }}
-        </div>
-        {% if section.settings.show_payment_icons %}
-          <div class="flex items-center gap-3 opacity-75 grayscale hover:grayscale-0 transition">
-            {% for type in shop.enabled_payment_types %}
-              <div class="h-8 bg-white rounded px-2 flex items-center">
-                {{ type | payment_type_svg_tag: class: 'h-5' }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
+    <div class="flex flex-col gap-4 border-t border-slate-200/80 pt-6 md:flex-row md:items-center md:justify-between">
+      <div class="text-xs text-slate-500">
+        {{ section.settings.copyright | replace: '%year%', 'now' | date: '%Y' | replace: '%shop_name%', shop.name }}
       </div>
 
-      <!-- Localization -->
-      {% if section.settings.enable_country_selector or section.settings.enable_language_selector %}
-        <div>
-          {% form 'localization' %}
-            <div class="flex flex-wrap gap-2">
-              {% if section.settings.enable_country_selector and localization.available_countries.size > 1 %}
-                <select name="country_code" class="bg-slate-800 text-white text-sm border-slate-700 rounded focus:ring-primary">
-                  {% for country in localization.available_countries %}
-                    <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
-                      {{ country.name }} ({{ country.currency.iso_code }} {{ country.currency.symbol }})
-                    </option>
-                  {% endfor %}
-                </select>
-              {% endif %}
-              {% if section.settings.enable_language_selector and localization.available_languages.size > 1 %}
-                <select name="language_code" class="bg-slate-800 text-white text-sm border-slate-700 rounded focus:ring-primary">
-                  {% for language in localization.available_languages %}
-                    <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
-                      {{ language.endonym_name | capitalize }}
-                    </option>
-                  {% endfor %}
-                </select>
-              {% endif %}
-              <button type="submit" class="sr-only">Update</button>
+      {% if section.settings.show_payment_icons %}
+        <div class="flex flex-wrap items-center gap-2">
+          {% for type in shop.enabled_payment_types %}
+            <div class="rounded-md border border-slate-200 bg-white px-2 py-1">
+              {{ type | payment_type_svg_tag: class: 'h-4' }}
             </div>
-          {% endform %}
+          {% endfor %}
         </div>
       {% endif %}
     </div>
+
+    {% if section.settings.enable_country_selector or section.settings.enable_language_selector %}
+      <div class="mt-4">
+        {% form 'localization' %}
+          <div class="flex flex-wrap items-center gap-2">
+            {% if section.settings.enable_country_selector and localization.available_countries.size > 1 %}
+              <label class="sr-only" for="footer-country">Country</label>
+              <select id="footer-country" name="country_code" class="rounded-full border border-slate-300 bg-white px-3 py-2 text-xs">
+                {% for country in localization.available_countries %}
+                  <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                    {{ country.name }} ({{ country.currency.iso_code }})
+                  </option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            {% if section.settings.enable_language_selector and localization.available_languages.size > 1 %}
+              <label class="sr-only" for="footer-language">Language</label>
+              <select id="footer-language" name="language_code" class="rounded-full border border-slate-300 bg-white px-3 py-2 text-xs">
+                {% for language in localization.available_languages %}
+                  <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
+                    {{ language.endonym_name | capitalize }}
+                  </option>
+                {% endfor %}
+              </select>
+            {% endif %}
+            <button type="submit" class="rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">Update</button>
+          </div>
+        {% endform %}
+      </div>
+    {% endif %}
   </div>
 </footer>
 
@@ -121,13 +108,13 @@
       "type": "color",
       "id": "bg_color",
       "label": "Background Color",
-      "default": "#1e293b"
+      "default": "#f8fafc"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text Color",
-      "default": "#ffffff"
+      "default": "#0f172a"
     },
     {
       "type": "text",
@@ -253,15 +240,9 @@
   ],
   "default": {
     "blocks": [
-      {
-        "type": "brand_information"
-      },
-      {
-        "type": "link_list"
-      },
-      {
-        "type": "link_list"
-      }
+      { "type": "brand_information" },
+      { "type": "link_list" },
+      { "type": "link_list" }
     ]
   },
   "enabled_on": {

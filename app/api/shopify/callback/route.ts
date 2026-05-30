@@ -23,9 +23,23 @@ export async function GET(req: NextRequest) {
       ? `https://${process.env.VERCEL_URL}` 
       : (process.env.SHOPIFY_APP_URL || req.nextUrl.origin);
 
-    const appUrl = `${baseUrl}/shopify?shop=${session.shop}&host=${host}`;
-    
-    return NextResponse.redirect(appUrl);
+    const returnToCookie = req.cookies.get('zenya_return_to')?.value;
+    const target = new URL(returnToCookie && returnToCookie.startsWith('/') ? returnToCookie : '/shopify', baseUrl);
+    if (session?.shop && !target.searchParams.get('shop')) target.searchParams.set('shop', session.shop);
+    if (host && !target.searchParams.get('host')) target.searchParams.set('host', host);
+
+    const res = NextResponse.redirect(target.toString());
+    if (returnToCookie) {
+      res.cookies.set('zenya_return_to', '', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 0,
+      });
+    }
+
+    return res;
   } catch (error) {
     console.error('Shopify Callback Error:', error);
     return NextResponse.json({ error: 'Auth callback failed', details: String(error) }, { status: 500 });

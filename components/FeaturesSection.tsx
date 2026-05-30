@@ -1,98 +1,117 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import FeatureCard from './FeatureCard'
+import {
+  Palette,
+  Zap,
+  PenTool,
+  ShoppingBag,
+  ShieldCheck,
+  Layers,
+  type LucideIcon,
+} from 'lucide-react'
 
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+type Feature = {
+  icon: LucideIcon
+  title: string
+  desc: string
+  color: string
 }
 
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-}
+const FEATURES: Feature[] = [
+  {
+    icon: Palette,
+    title: 'Polished by design',
+    desc: 'Editorial typography, restrained color, premium spacing — applied automatically across every section.',
+    color: '#5e6ad2',
+  },
+  {
+    icon: Zap,
+    title: 'Live in minutes',
+    desc: 'Pick a template → share your brief or paste a URL → a complete site is written, designed, and previewed. Faster than a coffee break.',
+    color: '#d97706',
+  },
+  {
+    icon: PenTool,
+    title: 'AI copy with taste',
+    desc: 'Headlines, FAQs, menus, testimonials — written specifically for your business. No generic AI clichés, no filler.',
+    color: '#27a644',
+  },
+  {
+    icon: ShoppingBag,
+    title: 'Shopify when you need it',
+    desc: 'The Storefront template exports a full Shopify OS 2.0 theme ZIP — sections, blocks, settings_schema, ready to upload.',
+    color: '#5e6ad2',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Built for outcomes',
+    desc: 'Every template includes the trust-building sections, social proof, and clear CTAs the business type actually needs.',
+    color: '#d97706',
+  },
+  {
+    icon: Layers,
+    title: '8 templates, more coming',
+    desc: 'Restaurant, lookbook, SaaS landing, brand story, wellness, catalog, services, and one-product Shopify. New templates launching monthly.',
+    color: '#27a644',
+  },
+]
 
 export default function FeaturesSection() {
   return (
-    <section className="relative overflow-hidden py-24">
-      {/* Background Gradient Mesh */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-surface to-background" />
-      
+    <section className="relative py-28 border-b border-token">
       <div className="mx-auto max-w-6xl px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center"
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-14 max-w-xl"
         >
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-            Why Zenya?
-          </div>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Everything you need to <span className="text-primary">ship fast</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-            From product scrape to persuasive content and polished preview, in one flow.
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            Why Zenya
           </p>
+          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            Everything you need to{' '}
+            <span className="gradient-text">ship fast.</span>
+          </h2>
         </motion.div>
-        
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3"
-        >
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>} 
-              title="Polished design" 
-              desc="Clean layouts, modern typography, and trust-building sections automatically applied." 
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>} 
-              title="Fast setup" 
-              desc="Paste a link, pick images, choose colors, preview instantly. No coding required." 
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>} 
-              title="AI content" 
-              desc="Persuasive, credible copy tailored for one-product stores generated in seconds." 
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>} 
-              title="Secure payments" 
-              desc="Stripe-powered checkout integration and webhook status updates included." 
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>} 
-              title="Conversion-focused" 
-              desc="Benefits, testimonials, FAQs, guarantee, and shipping details structured to sell." 
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <FeatureCard 
-              icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>} 
-              title="Ready to publish" 
-              desc="Preview your theme, export the code, and launch your store immediately." 
-            />
-          </motion.div>
-        </motion.div>
+
+        {/* Grid */}
+        <div className="grid gap-px overflow-hidden rounded-xl border border-token md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f, i) => {
+            const Icon = f.icon
+            return (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="group relative bg-white p-6 transition-colors duration-150 hover:bg-[#faf8f3]"
+              >
+                {/* Icon */}
+                <div
+                  className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105"
+                  style={{ background: `${f.color}10`, border: `1px solid ${f.color}20`, color: f.color }}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={1.75} />
+                </div>
+
+                <h3 className="mb-1.5 text-[14px] font-[590] text-foreground">{f.title}</h3>
+                <p className="text-[13.5px] leading-[1.6] text-muted">{f.desc}</p>
+
+                {/* Top accent line on hover */}
+                <div
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                  style={{ background: f.color }}
+                />
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

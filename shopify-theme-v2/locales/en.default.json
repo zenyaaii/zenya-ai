@@ -1,0 +1,9 @@
+{
+  "general": {
+    "404": {
+      "title": "Page not found",
+      "subtext": "The page you requested was not found.",
+      "link": "Continue shopping"
+    }
+  }
+}

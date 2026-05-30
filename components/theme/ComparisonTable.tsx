@@ -4,26 +4,42 @@ import { motion } from 'framer-motion'
 export default function ComparisonTable({ 
   productName, 
   shopName,
-  primaryColor 
+  primaryColor,
+  heading = 'Why Choose Us?',
+  subheading = 'See how we stack up against the competition.',
+  features: providedFeatures,
 }: { 
   productName: string
   shopName?: string
   primaryColor: string 
+  heading?: string
+  subheading?: string
+  features?: { name: string; us: boolean; them: boolean }[]
 }) {
-  const features = [
-    { name: "Premium Quality Materials", us: true, them: false },
-    { name: "24/7 Customer Support", us: true, them: false },
-    { name: "30-Day Money Back Guarantee", us: true, them: false },
-    { name: "Fast & Free Shipping", us: true, them: false },
-    { name: "Eco-Friendly Packaging", us: true, them: false },
-  ]
+  const features =
+    Array.isArray(providedFeatures) && providedFeatures.length
+      ? providedFeatures
+          .map((f) => ({
+            name: typeof f?.name === 'string' ? f.name : '',
+            us: Boolean((f as any)?.us),
+            them: Boolean((f as any)?.them),
+          }))
+          .filter((f) => f.name.trim())
+          .slice(0, 6)
+      : [
+          { name: 'Premium Quality Materials', us: true, them: false },
+          { name: '24/7 Customer Support', us: true, them: false },
+          { name: '30-Day Money Back Guarantee', us: true, them: false },
+          { name: 'Fast & Free Shipping', us: true, them: false },
+          { name: 'Eco-Friendly Packaging', us: true, them: false },
+        ]
 
   return (
     <section className="py-20 bg-slate-50">
       <div className="container mx-auto px-6 max-w-4xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Why Choose Us?</h2>
-          <p className="text-slate-600">See how we stack up against the competition.</p>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">{heading}</h2>
+          <p className="text-slate-600">{subheading}</p>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">

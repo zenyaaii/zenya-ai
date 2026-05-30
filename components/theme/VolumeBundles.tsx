@@ -6,19 +6,29 @@ export default function VolumeBundles({
   price, 
   originalPrice,
   primaryColor, 
-  onChange 
+  onChange,
+  heading = 'Select Quantity',
+  badgeText = '🔥 High demand',
+  label_buy_1 = 'Standard',
+  label_buy_2 = 'Most Popular',
+  label_buy_3 = 'Best Value',
 }: { 
   price: number
   originalPrice?: number
   primaryColor: string
   onChange: (qty: number) => void
+  heading?: string
+  badgeText?: string
+  label_buy_1?: string
+  label_buy_2?: string
+  label_buy_3?: string
 }) {
   const [selected, setSelected] = useState(2) // Default to Buy 2
 
   const options = [
-    { qty: 1, discount: 0, label: 'Standard' },
-    { qty: 2, discount: 15, label: 'Most Popular' },
-    { qty: 3, discount: 25, label: 'Best Value' },
+    { qty: 1, discount: 0, label: label_buy_1 },
+    { qty: 2, discount: 15, label: label_buy_2 },
+    { qty: 3, discount: 25, label: label_buy_3 },
   ]
 
   const handleSelect = (qty: number) => {
@@ -29,9 +39,9 @@ export default function VolumeBundles({
   return (
     <div className="my-6 space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-bold text-slate-900">Select Quantity</span>
+        <span className="text-sm font-bold text-slate-900">{heading}</span>
         <span className="text-xs font-medium text-red-600 animate-pulse">
-          🔥 High demand
+          {badgeText}
         </span>
       </div>
 

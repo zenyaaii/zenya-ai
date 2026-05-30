@@ -1,8 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
-import ThemePreview from '@/components/ThemePreview'
 import ThemeActions from '@/components/ThemeActions'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import FullScreenPreview from '@/components/FullScreenPreview';
 
 export default async function PreviewPage({ 
   params, 
@@ -38,7 +38,7 @@ export default async function PreviewPage({
   }
 
   return (
-    <main className="min-h-screen pb-24 md:pb-10">
+    <main className="min-h-screen bg-gray-50 pb-24 md:pb-10">
       <div className="sticky top-0 z-10 border-b border-token bg-elevated/80 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-4">
@@ -54,18 +54,22 @@ export default async function PreviewPage({
                 content={theme.content}
                 colors={{ primary: theme.primary_color, secondary: theme.secondary_color }}
                 name={theme.product_name}
+                images={theme.images || []}
+                price={theme.content?.price}
+                originalPrice={theme.content?.originalPrice}
+                description={theme.content?.hero?.subheadline}
               />
             </Suspense>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <ThemePreview 
+      <div className="mx-auto max-w-[1400px] px-6 py-10">
+        <FullScreenPreview 
           name={theme.product_name} 
           images={theme.images || []} 
-          primaryColor={theme.primary_color} 
-          secondaryColor={theme.secondary_color} 
+          primary={theme.primary_color} 
+          secondary={theme.secondary_color} 
           content={theme.content} 
           price={theme.content?.price}
           originalPrice={theme.content?.originalPrice}
@@ -81,6 +85,10 @@ export default async function PreviewPage({
             content={theme.content}
             colors={{ primary: theme.primary_color, secondary: theme.secondary_color }}
             name={theme.product_name}
+            images={theme.images || []}
+            price={theme.content?.price}
+            originalPrice={theme.content?.originalPrice}
+            description={theme.content?.hero?.subheadline}
           />
         </Suspense>
       </div>

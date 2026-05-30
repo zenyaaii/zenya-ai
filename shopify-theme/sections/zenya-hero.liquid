@@ -1,288 +1,300 @@
-﻿<div class="relative" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
-  <div class="{% if section.settings.full_width %}w-full px-4 md:px-8{% else %}container mx-auto px-6{% endif %} grid gap-12 lg:grid-cols-2 lg:gap-16 items-center" 
-       style="{% unless section.settings.full_width %}max-width: {{ section.settings.container_width }}px;{% endunless %}">
-    <div class="{% if section.settings.image_position == 'left' %}lg:order-2{% endif %} text-{{ section.settings.text_alignment }}">
-      <h1 class="font-extrabold tracking-tight leading-none mb-6" style="color: {{ section.settings.heading_color }}; font-size: {{ section.settings.heading_size }}px; line-height: 1.1;">{{ section.settings.headline }}</h1>
-      <p class="mb-8 leading-relaxed" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.subheadline_size }}px;">{{ section.settings.subheadline }}</p>
-      <a href="{{ section.settings.cta_link | default: routes.all_products_collection_url }}" 
-         class="inline-flex items-center justify-center px-8 py-4 text-lg font-bold shadow-xl transition hover:opacity-90 hover:scale-105 active:scale-95" 
-         style="border-radius: {{ section.settings.button_radius }}px; 
-                {% if section.settings.button_style == 'outline' %}
-                  border: 2px solid {{ section.settings.button_bg_color }}; color: {{ section.settings.button_bg_color }}; background: transparent;
-                {% else %}
-                  background-color: {{ section.settings.button_bg_color }}; color: {{ section.settings.button_text_color }};
-                {% endif %}">
-        {{ section.settings.cta }}
-      </a>
-    </div>
-    <div class="{% if section.settings.image_position == 'left' %}lg:order-1{% endif %}">
-      {% if section.settings.image != blank %}
-        <img 
-          src="{{ section.settings.image | image_url: width: 1200 }}" 
-          width="{{ section.settings.image.width }}"
-          height="{{ section.settings.image.height }}"
-          alt="{{ section.settings.headline }}" 
-          class="w-full shadow-2xl object-cover"
-          style="border-radius: {{ section.settings.image_radius }}px; aspect-ratio: {{ section.settings.image_ratio }};">
-      {% else %}
-        <div class="w-full bg-slate-100 flex items-center justify-center text-slate-400" style="border-radius: {{ section.settings.image_radius }}px; aspect-ratio: {{ section.settings.image_ratio }};">
-          {{ 'image' | placeholder_svg_tag: 'w-1/2 h-1/2 opacity-20' }}
+<section
+  class="relative overflow-hidden"
+  style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="pointer-events-none absolute inset-0 opacity-40">
+    <div class="absolute -top-20 -left-10 h-72 w-72 rounded-full blur-3xl" style="background: {{ settings.primary_color }};"></div>
+    <div class="absolute -bottom-24 right-0 h-80 w-80 rounded-full blur-3xl" style="background: {{ settings.secondary_color }};"></div>
+  </div>
+
+  <div
+    class="{% if section.settings.full_width %}w-full px-4 md:px-8{% else %}container mx-auto px-4 md:px-6{% endif %} relative z-10"
+    style="{% unless section.settings.full_width %}max-width: {{ section.settings.container_width }}px;{% endunless %}"
+  >
+    <div class="grid items-center gap-8 rounded-[calc(var(--zenya-radius)+10px)] border border-white/40 bg-white/60 p-5 backdrop-blur-sm md:p-8 lg:grid-cols-2 lg:gap-12 lg:p-10">
+      <div class="{% if section.settings.image_position == 'left' %}lg:order-2{% endif %} text-{{ section.settings.text_alignment }}">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+          <span class="h-2 w-2 rounded-full" style="background: {{ settings.primary_color }};"></span>
+          New Season Drop
         </div>
-      {% endif %}
+
+        <h1
+          class="mb-4 font-extrabold tracking-tight"
+          style="color: {{ section.settings.heading_color }}; font-size: {{ section.settings.heading_size }}px; line-height: 1.05;"
+        >
+          {{ section.settings.headline }}
+        </h1>
+
+        <p class="mb-6 max-w-xl leading-relaxed" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.subheadline_size }}px;">
+          {{ section.settings.subheadline }}
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 {% if section.settings.text_alignment == 'center' %}justify-center{% elsif section.settings.text_alignment == 'right' %}justify-end{% endif %}">
+          <a
+            href="{{ section.settings.cta_link | default: routes.all_products_collection_url }}"
+            class="inline-flex items-center justify-center px-6 py-3 text-base font-bold shadow-lg transition hover:-translate-y-0.5 hover:opacity-95"
+            style="border-radius: {{ section.settings.button_radius }}px; {% if section.settings.button_style == 'outline' %}border: 2px solid {{ section.settings.button_bg_color }}; color: {{ section.settings.button_bg_color }}; background: transparent;{% else %}background: {{ section.settings.button_bg_color }}; color: {{ section.settings.button_text_color }};{% endif %}"
+          >
+            {{ section.settings.cta }}
+          </a>
+          <a href="{{ routes.all_products_collection_url }}" class="inline-flex items-center justify-center rounded-full border border-slate-300/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400">
+            Explore Catalog
+          </a>
+        </div>
+
+        <div class="mt-7 grid max-w-lg grid-cols-3 gap-3 text-left">
+          <div class="zenya-card border border-slate-200/70 p-3">
+            <p class="text-xs text-slate-500">Trusted by</p>
+            <p class="text-lg font-bold text-slate-900">12k+</p>
+          </div>
+          <div class="zenya-card border border-slate-200/70 p-3">
+            <p class="text-xs text-slate-500">Avg. Rating</p>
+            <p class="text-lg font-bold text-slate-900">4.9/5</p>
+          </div>
+          <div class="zenya-card border border-slate-200/70 p-3">
+            <p class="text-xs text-slate-500">Returns</p>
+            <p class="text-lg font-bold text-slate-900">30 Days</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="{% if section.settings.image_position == 'left' %}lg:order-1{% endif %}">
+        <div class="relative overflow-hidden border border-white/60 bg-white/60 p-2 shadow-2xl" style="border-radius: {{ section.settings.image_radius }}px;">
+          {% if section.settings.image != blank %}
+            <img
+              src="{{ section.settings.image | image_url: width: 1400 }}"
+              width="{{ section.settings.image.width }}"
+              height="{{ section.settings.image.height }}"
+              alt="{{ section.settings.headline | escape }}"
+              class="w-full object-cover"
+              style="border-radius: {{ section.settings.image_radius | minus: 4 }}px; aspect-ratio: {{ section.settings.image_ratio }};"
+            >
+          {% else %}
+            <div class="flex w-full items-center justify-center bg-slate-100 text-slate-400" style="aspect-ratio: {{ section.settings.image_ratio }}; border-radius: {{ section.settings.image_radius | minus: 4 }}px;">
+              {{ 'image' | placeholder_svg_tag: 'w-1/2 h-1/2 opacity-20' }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
+
 {% schema %}
 {
-    "name":  "Hero",
-    "settings":  [
-                     {
-                         "type":  "header",
-                         "content":  "Content"
-                     },
-                     {
-                         "type":  "text",
-                         "id":  "headline",
-                         "label":  "Headline",
-                         "default":  "Welcome to Zenya"
-                     },
-                     {
-                         "type":  "textarea",
-                         "id":  "subheadline",
-                         "label":  "Subheadline",
-                         "default":  "The Future of E-commerce"
-                     },
-                     {
-                         "type":  "text",
-                         "id":  "cta",
-                         "label":  "Button Text",
-                         "default":  "Shop Now"
-                     },
-                     {
-                         "type":  "url",
-                         "id":  "cta_link",
-                         "label":  "Button Link"
-                     },
-                     {
-                         "type":  "image_picker",
-                         "id":  "image",
-                         "label":  "Image"
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Layout"
-                     },
-                     {
-                         "type":  "checkbox",
-                         "id":  "full_width",
-                         "label":  "Full Width Container",
-                         "default":  false
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "container_width",
-                         "min":  800,
-                         "max":  1600,
-                         "step":  50,
-                         "unit":  "px",
-                         "label":  "Container Width (if not full width)",
-                         "default":  1200
-                     },
-                     {
-                         "type":  "select",
-                         "id":  "image_position",
-                         "label":  "Image Position (Desktop)",
-                         "options":  [
-                                         {
-                                             "value":  "left",
-                                             "label":  "Left"
-                                         },
-                                         {
-                                             "value":  "right",
-                                             "label":  "Right"
-                                         }
-                                     ],
-                         "default":  "right"
-                     },
-                     {
-                         "type":  "select",
-                         "id":  "text_alignment",
-                         "label":  "Text Alignment",
-                         "options":  [
-                                         {
-                                             "value":  "left",
-                                             "label":  "Left"
-                                         },
-                                         {
-                                             "value":  "center",
-                                             "label":  "Center"
-                                         },
-                                         {
-                                             "value":  "right",
-                                             "label":  "Right"
-                                         }
-                                     ],
-                         "default":  "left"
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Image Styling"
-                     },
-                     {
-                         "type":  "select",
-                         "id":  "image_ratio",
-                         "label":  "Image Aspect Ratio",
-                         "options":  [
-                                         {
-                                             "value":  "auto",
-                                             "label":  "Auto"
-                                         },
-                                         {
-                                             "value":  "1/1",
-                                             "label":  "Square"
-                                         },
-                                         {
-                                             "value":  "4/3",
-                                             "label":  "Landscape"
-                                         },
-                                         {
-                                             "value":  "3/4",
-                                             "label":  "Portrait"
-                                         },
-                                         {
-                                             "value":  "16/9",
-                                             "label":  "Wide"
-                                         }
-                                     ],
-                         "default":  "auto"
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "image_radius",
-                         "label":  "Image Corner Radius",
-                         "min":  0,
-                         "max":  40,
-                         "step":  4,
-                         "unit":  "px",
-                         "default":  16
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Button Styling"
-                     },
-                     {
-                         "type":  "select",
-                         "id":  "button_style",
-                         "label":  "Button Style",
-                         "options":  [
-                                         {
-                                             "value":  "solid",
-                                             "label":  "Solid"
-                                         },
-                                         {
-                                             "value":  "outline",
-                                             "label":  "Outline"
-                                         }
-                                     ],
-                         "default":  "solid"
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "button_radius",
-                         "label":  "Button Corner Radius",
-                         "min":  0,
-                         "max":  50,
-                         "step":  2,
-                         "unit":  "px",
-                         "default":  50
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Typography"
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "heading_size",
-                         "label":  "Heading Size",
-                         "min":  32,
-                         "max":  96,
-                         "step":  4,
-                         "unit":  "px",
-                         "default":  60
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "subheadline_size",
-                         "label":  "Subheadline Size",
-                         "min":  16,
-                         "max":  40,
-                         "step":  2,
-                         "unit":  "px",
-                         "default":  20
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Colors"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "bg_color",
-                         "label":  "Background Color",
-                         "default":  "#ffffff"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "heading_color",
-                         "label":  "Heading Color",
-                         "default":  "#0f172a"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "text_color",
-                         "label":  "Text Color",
-                         "default":  "#475569"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "button_bg_color",
-                         "label":  "Button Background",
-                         "default":  "#3b82f6"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "button_text_color",
-                         "label":  "Button Text",
-                         "default":  "#ffffff"
-                     },
-                     {
-                         "type":  "header",
-                         "content":  "Spacing"
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "padding_top",
-                         "min":  0,
-                         "max":  100,
-                         "step":  4,
-                         "unit":  "px",
-                         "label":  "Padding Top",
-                         "default":  80
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "padding_bottom",
-                         "min":  0,
-                         "max":  100,
-                         "step":  4,
-                         "unit":  "px",
-                         "label":  "Padding Bottom",
-                         "default":  80
-                     }
-                 ],
-    "presets":  [
-                    {
-                        "name":  "Hero"
-                    }
-                ]
+  "name": "Hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Welcome to Zenya"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "The Future of E-commerce"
+    },
+    {
+      "type": "text",
+      "id": "cta",
+      "label": "Button Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full Width Container",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 800,
+      "max": 1600,
+      "step": 50,
+      "unit": "px",
+      "label": "Container Width (if not full width)",
+      "default": 1200
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image Position (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Image Styling"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        { "value": "auto", "label": "Auto" },
+        { "value": "1/1", "label": "Square" },
+        { "value": "4/3", "label": "Landscape" },
+        { "value": "3/4", "label": "Portrait" },
+        { "value": "16/9", "label": "Wide" }
+      ],
+      "default": "4/3"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image Corner Radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button Style",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Button Corner Radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading Size",
+      "min": 32,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "subheadline_size",
+      "label": "Subheadline Size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#f8fafc"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#0f172a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#475569"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button Background",
+      "default": "#3b82f6"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 84
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 84
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero"
+    }
+  ]
 }
 {% endschema %}

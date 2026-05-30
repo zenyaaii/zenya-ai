@@ -4,10 +4,20 @@ import { useState } from 'react'
 export default function CatalogPage({ 
   primaryColor, 
   productName,
+  headline = 'All Products',
+  subheadline,
+  filterHelp,
+  whyBuyHeading,
+  whyBuyPoints,
   onProductClick 
 }: { 
   primaryColor: string
   productName: string
+  headline?: string
+  subheadline?: string
+  filterHelp?: string
+  whyBuyHeading?: string
+  whyBuyPoints?: string[]
   onProductClick: () => void 
 }) {
   const [sort, setSort] = useState('featured')
@@ -15,11 +25,20 @@ export default function CatalogPage({
   return (
     <div className="min-h-screen bg-white pb-20 pt-10 font-sans text-slate-900">
       <div className="mx-auto max-w-7xl px-6">
-        <h1 className="mb-8 text-4xl font-extrabold tracking-tight text-slate-900">All Products</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">{headline}</h1>
+          {subheadline ? <p className="mt-2 text-slate-600 max-w-2xl">{subheadline}</p> : null}
+        </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">
           {/* Sidebar Filters */}
           <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
+            {filterHelp ? (
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="font-bold text-slate-900 mb-1">Quick tip</div>
+                <div>{filterHelp}</div>
+              </div>
+            ) : null}
             <div>
               <h3 className="mb-4 font-bold text-slate-900">Availability</h3>
               <div className="space-y-2">
@@ -51,6 +70,17 @@ export default function CatalogPage({
                 </label>
               </div>
             </div>
+
+            {Array.isArray(whyBuyPoints) && whyBuyPoints.length ? (
+              <div className="border-t border-slate-100 pt-8">
+                <h3 className="mb-4 font-bold text-slate-900">{whyBuyHeading || 'Why buy from us'}</h3>
+                <ul className="space-y-2 text-sm text-slate-600 list-disc pl-5">
+                  {whyBuyPoints.slice(0, 3).map((p, i) => (
+                    <li key={i}>{p}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
           {/* Product Grid */}

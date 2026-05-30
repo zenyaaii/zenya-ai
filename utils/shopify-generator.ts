@@ -1,5 +1,7 @@
 import JSZip from 'jszip'
 import { ALPINE_JS, TAILWIND_JS } from './static-assets'
+import { generateShopifyThemeV2, type NovaThemeContent } from './shopify-generator-v2'
+import { generateShopifyThemeV3OneProduct } from './shopify-generator-v3'
 
 type ThemeContent = {
   _strategy?: {
@@ -41,9 +43,65 @@ type ThemeContent = {
   trust_badges?: { heading: string }
   accordion?: { title: string; content: string }[]
   tabs?: { title: string; content: string }[]
+
+  // Cross-page generation
+  collection_page?: {
+    headline: string
+    subheadline: string
+    filter_help: string
+    why_buy_heading: string
+    why_buy_points: string[]
+  }
+  cart_drawer?: {
+    headline: string
+    free_shipping_before: string
+    free_shipping_after: string
+    secure_line: string
+    reassurance_lines: string[]
+    checkout_cta: string
+  }
+  cart_page?: {
+    headline: string
+    subheadline: string
+    order_summary_heading: string
+    checkout_cta: string
+    empty_headline: string
+    empty_subheadline: string
+  }
+  pages?: {
+    about?: {
+      hero_heading: string
+      hero_subheading: string
+      mission_title: string
+      mission_text: string
+      craftsmanship_heading: string
+      craftsmanship_text: string
+      process_heading: string
+      process_subheading: string
+    }
+    contact?: {
+      faq_heading: string
+      faq_items: { q: string; a: string }[]
+    }
+    faq?: {
+      title: string
+      intro: string
+      items: { q: string; a: string }[]
+    }
+  }
+  policies?: {
+    shipping?: { title: string; bullets: string[] }
+    returns?: { title: string; bullets: string[] }
+  }
+  seo?: {
+    homepage?: { title: string; description: string }
+    product?: { title: string; description: string }
+    collection?: { title: string; description: string }
+    og?: { title: string; description: string }
+  }
 }
 
-export function prepareThemeZip(name: string, content: ThemeContent, colors: { primary: string; secondary: string }) {
+export function prepareThemeZip(name: string, content: ThemeContent, colors: { primary: string; secondary: string }, images: string[] = []): JSZip {
   const zip = new JSZip()
   const safeShopName = content.shopName || name
 
@@ -86,21 +144,47 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
       ]
     },
     {
+      "name": "Actions",
+      "settings": [
+        { "type": "text", "id": "primary_cta_text", "label": "Primary CTA (Homepage)", "default": content.hero.cta },
+        { "type": "text", "id": "add_to_cart_label", "label": "Add to Cart Button", "default": "Add to Cart" },
+        { "type": "text", "id": "quick_add_label", "label": "Quick Add Button", "default": "Add" },
+        { "type": "text", "id": "checkout_label", "label": "Checkout Button", "default": content.cart_drawer?.checkout_cta || "Checkout Now" },
+        { "type": "text", "id": "continue_shopping_label", "label": "Continue Shopping", "default": "Continue Shopping" },
+        { "type": "text", "id": "start_shopping_label", "label": "Start Shopping", "default": "Start Shopping" }
+      ]
+    },
+    {
       "name": "Colors",
       "settings": [
         { "type": "color", "id": "primary_color", "label": "Primary Color", "default": colors.primary },
         { "type": "color", "id": "secondary_color", "label": "Secondary Color", "default": colors.secondary }
+      ]
+    },
+    {
+      "name": "Motion",
+      "settings": [
+        { "type": "checkbox", "id": "motion_enabled", "label": "Enable Animations", "default": true },
+        { "type": "range", "id": "motion_strength", "label": "Animation Intensity", "min": 0, "max": 100, "step": 5, "default": 65 }
       ]
     }
   ]
   zip.folder('config')?.file('settings_schema.json', JSON.stringify(settingsSchema, null, 2))
   
   const settingsData = {
-    "current": "Zenya Pro Theme",
+    "current": "Zenya Theme",
     "presets": {
-      "Zenya Pro Theme": {
+      "Zenya Theme": {
         "primary_color": colors.primary,
         "secondary_color": colors.secondary,
+        "motion_enabled": true,
+        "motion_strength": 65,
+        "primary_cta_text": content.hero.cta,
+        "add_to_cart_label": "Add to Cart",
+        "quick_add_label": "Add",
+        "checkout_label": content.cart_drawer?.checkout_cta || "Checkout Now",
+        "continue_shopping_label": "Continue Shopping",
+        "start_shopping_label": "Start Shopping",
         "theme_checkout_accent_color": colors.primary,
         "theme_checkout_button_color": colors.primary,
         "theme_checkout_error_color": "#ef4444",
@@ -124,11 +208,21 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
   // 1.2 Header Section
   const headerSchema = {
     name: "Header",
+    enabled_on: { groups: ["header"] },
     settings: [
+      { type: "image_picker", id: "logo", label: "Logo" },
+      { type: "range", id: "logo_width", label: "Logo Width", min: 80, max: 240, step: 10, default: 140, unit: "px" },
       { type: "text", id: "shop_name", label: "Shop Name", default: safeShopName },
       { type: "link_list", id: "menu", label: "Menu", default: "main-menu" },
       { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" },
       { type: "color", id: "text_color", label: "Text Color", default: "#0f172a" },
+      { type: "checkbox", id: "sticky_header", label: "Sticky Header", default: true },
+      { type: "checkbox", id: "show_search", label: "Show Search", default: true },
+      { type: "checkbox", id: "show_cart", label: "Show Cart", default: true },
+      { type: "header", content: "Header CTA" },
+      { type: "checkbox", id: "show_cta", label: "Show CTA Button", default: true },
+      { type: "text", id: "cta_label", label: "CTA Label", default: content.hero.cta },
+      { type: "url", id: "cta_link", label: "CTA Link" },
       { type: "header", content: "Announcement Bar" },
       { type: "checkbox", id: "show_announcement", label: "Show Announcement", default: true },
       { type: "text", id: "announcement_text", label: "Announcement Text", default: content.countdown?.heading || "🔥 Free Shipping on Orders Over $50!" },
@@ -148,7 +242,7 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
 
   <!-- Search Overlay -->
   <div 
-    x-show="searchOpen" 
+    x-show="searchOpen && section.settings.show_search" 
     x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0 scale-95"
     x-transition:enter-end="opacity-100 scale-100"
@@ -210,11 +304,15 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
     </div>
   </div>
 
-  <div class="border-b border-slate-200 py-4 relative" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="border-b border-slate-200 py-4 relative {% if section.settings.sticky_header %}sticky top-0 z-40{% endif %}" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
     <div class="container mx-auto flex items-center justify-between px-6">
       <div class="text-2xl font-extrabold tracking-tight z-20">
         <a href="{{ routes.root_url }}" class="no-underline hover:opacity-80 transition" style="color: inherit;">
-          {{ section.settings.shop_name }}
+          {% if section.settings.logo != blank %}
+            {{ section.settings.logo | image_url: width: 480 | image_tag: class: 'h-auto', style: 'max-width: ' | append: section.settings.logo_width | append: 'px;' }}
+          {% else %}
+            {{ section.settings.shop_name }}
+          {% endif %}
         </a>
       </div>
       
@@ -228,30 +326,48 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
         {% endfor %}
 
         <!-- Search Trigger -->
-        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="hover:text-primary transition">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
+        {% if section.settings.show_search %}
+          <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="hover:text-primary transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        {% endif %}
 
-          <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="hover:text-primary transition flex items-center gap-1" style="color: inherit;">
+        {% if section.settings.show_cart %}
+          <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="relative hover:text-primary transition flex items-center gap-1" style="color: inherit;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             {% if cart.item_count > 0 %}
               <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full absolute -top-1 -right-2">{{ cart.item_count }}</span>
             {% endif %}
           </a>
+        {% endif %}
+
+        {% assign header_cta_link = section.settings.cta_link %}
+        {% if header_cta_link == blank %}
+          {% assign header_cta_link = routes.all_products_collection_url %}
+        {% endif %}
+        {% if section.settings.show_cta %}
+          <a href="{{ header_cta_link }}" class="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]" style="background-color: {{ settings.primary_color }};">
+            {{ section.settings.cta_label | default: settings.primary_cta_text }}
+          </a>
+        {% endif %}
         </div>
       </nav>
 
       <!-- Mobile Menu Button -->
       <div class="md:hidden z-20 flex items-center gap-4">
-        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
-        <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="relative hover:text-primary transition" style="color: inherit;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          {% if cart.item_count > 0 %}
-            <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full absolute -top-1 -right-2">{{ cart.item_count }}</span>
-          {% endif %}
-        </a>
+        {% if section.settings.show_search %}
+          <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
+        {% endif %}
+        {% if section.settings.show_cart %}
+          <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="relative hover:text-primary transition" style="color: inherit;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            {% if cart.item_count > 0 %}
+              <span class="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full absolute -top-1 -right-2">{{ cart.item_count }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
         <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 focus:outline-none">
           <span x-show="!mobileMenuOpen" class="text-2xl">☰</span>
           <span x-show="mobileMenuOpen" class="text-2xl" x-cloak>✕</span>
@@ -279,12 +395,19 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
           <a href="{{ routes.root_url }}" class="hover:text-primary transition" style="color: inherit;">Home</a>
           <a href="{{ routes.all_products_collection_url }}" class="hover:text-primary transition" style="color: inherit;">Shop</a>
         {% endfor %}
-        <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart'); mobileMenuOpen = false" class="hover:text-primary transition flex items-center gap-2" style="color: inherit;">
-          Cart
-          {% if cart.item_count > 0 %}
-            <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ cart.item_count }}</span>
-          {% endif %}
-        </a>
+        {% if section.settings.show_cart %}
+          <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart'); mobileMenuOpen = false" class="hover:text-primary transition flex items-center gap-2" style="color: inherit;">
+            Cart
+            {% if cart.item_count > 0 %}
+              <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ cart.item_count }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
+        {% if section.settings.show_cta %}
+          <a href="{{ header_cta_link }}" class="mt-2 inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]" style="background-color: {{ settings.primary_color }};">
+            {{ section.settings.cta_label | default: settings.primary_cta_text }}
+          </a>
+        {% endif %}
       </nav>
     </div>
   </div>
@@ -298,9 +421,11 @@ ${JSON.stringify(headerSchema, null, 2)}
   // 1.3 Footer Section
   const footerSchema = {
     name: "Footer",
+    enabled_on: { groups: ["footer"] },
     settings: [
       { type: "color", id: "bg_color", label: "Background", default: "#0f172a" },
       { type: "color", id: "text_color", label: "Text", default: "#ffffff" },
+      { type: "textarea", id: "tagline", label: "Tagline", default: "Premium quality products designed for your lifestyle. We stand behind everything we sell with our industry-leading guarantee." },
       { type: "text", id: "copyright", label: "Copyright Text", default: "© 2024 Zenya. All rights reserved." },
       { type: "link_list", id: "menu_1", label: "First Menu", default: "footer" },
       { type: "link_list", id: "menu_2", label: "Second Menu", default: "main-menu" },
@@ -318,9 +443,11 @@ ${JSON.stringify(headerSchema, null, 2)}
       <!-- Brand -->
       <div class="col-span-1 md:col-span-2">
         <h3 class="text-2xl font-extrabold mb-4 tracking-tight">{{ shop.name }}</h3>
-        <p class="text-slate-400 max-w-sm mb-6">
-          Premium quality products designed for your lifestyle. We stand behind everything we sell with our industry-leading guarantee.
-        </p>
+        {% if section.settings.tagline != blank %}
+          <p class="text-slate-400 max-w-sm mb-6 whitespace-pre-line">
+            {{ section.settings.tagline }}
+          </p>
+        {% endif %}
         <!-- Socials (Stub) -->
         <div class="flex gap-4">
           {% if section.settings.facebook_url != blank %}
@@ -482,7 +609,7 @@ ${JSON.stringify(footerSchema, null, 2)}
       <p>Gift Card</p>
       <div class="code" onclick="this.classList.add('is-selected');">{{ gift_card.code | format_code }}</div>
       <p>Use this code at checkout to redeem your gift card</p>
-      <a href="{{ shop.url }}">Start Shopping</a>
+      <a href="{{ shop.url }}">{{ settings.start_shopping_label }}</a>
     </div>
     <script>
       document.querySelector('.code').addEventListener('click', function() {
@@ -505,7 +632,12 @@ ${JSON.stringify(footerSchema, null, 2)}
       { type: "checkbox", id: "show_upsells", label: "Show Upsells", default: true },
       { type: "collection", id: "upsell_collection", label: "Upsell Collection" },
       { type: "number", id: "free_shipping_threshold", label: "Free Shipping Threshold (Cents)", default: 10000 },
-      { type: "text", id: "custom_message", label: "Custom Message", default: "Tax included. Shipping calculated at checkout." }
+      { type: "text", id: "free_shipping_before", label: "Free Shipping (Before)", default: content.cart_drawer?.free_shipping_before || "You are {amount} away from Free Shipping!" },
+      { type: "text", id: "free_shipping_after", label: "Free Shipping (After)", default: content.cart_drawer?.free_shipping_after || "🎉 You've unlocked Free Shipping!" },
+      { type: "text", id: "custom_message", label: "Custom Message", default: content.cart_drawer?.secure_line || "Tax included. Shipping calculated at checkout." },
+      { type: "text", id: "reassurance_1", label: "Reassurance Line 1", default: content.cart_drawer?.reassurance_lines?.[0] || "30-day returns" },
+      { type: "text", id: "reassurance_2", label: "Reassurance Line 2", default: content.cart_drawer?.reassurance_lines?.[1] || "Fast support" },
+      { type: "text", id: "reassurance_3", label: "Reassurance Line 3", default: content.cart_drawer?.reassurance_lines?.[2] || "Tracked delivery" }
     ],
     presets: [{ name: "Zenya Cart Drawer" }]
   }
@@ -586,12 +718,16 @@ aria-modal="true">
                     {% assign progress = cart_total | times: 100 | divided_by: free_shipping_threshold %}
                     {% if progress > 100 %}{% assign progress = 100 %}{% endif %}
                     {% assign left_to_spend = free_shipping_threshold | minus: cart_total %}
+                    {% assign left_to_spend_money = left_to_spend | money %}
+                    {% assign amount_token = '{' | append: 'amount' | append: '}' %}
 
                     <div class="mb-8">
                       {% if left_to_spend > 0 %}
-                        <p class="text-sm text-gray-600 mb-2">You are <span class="font-bold text-black">{{ left_to_spend | money }}</span> away from <span class="font-bold text-green-600">Free Shipping</span>!</p>
+                        <p class="text-sm text-gray-600 mb-2">
+                          {{ section.settings.free_shipping_before | replace: amount_token, left_to_spend_money }}
+                        </p>
                       {% else %}
-                        <p class="text-sm text-green-600 font-bold mb-2">🎉 You've unlocked Free Shipping!</p>
+                        <p class="text-sm text-green-600 font-bold mb-2">{{ section.settings.free_shipping_after }}</p>
                       {% endif %}
                       <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                         <div class="h-full bg-black transition-all duration-1000" style="width: {{ progress }}%; background-color: {{ settings.primary_color }};"></div>
@@ -630,7 +766,7 @@ aria-modal="true">
                     <div class="text-center py-12">
                        <div class="text-4xl mb-4">🛒</div>
                        <p class="text-gray-500 mb-6">Your cart is empty.</p>
-                       <button @click="open = false" class="inline-block px-6 py-3 rounded-full bg-black text-white font-bold hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">Continue Shopping</button>
+                       <button @click="open = false" class="inline-block px-6 py-3 rounded-full bg-black text-white font-bold hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">{{ settings.continue_shopping_label }}</button>
                     </div>
                  {% endif %}
 
@@ -654,7 +790,7 @@ aria-modal="true">
                                       headers: { 'Content-Type': 'application/json' }, 
                                       body: JSON.stringify({ items: [{ id: {{ product.selected_or_first_available_variant.id }}, quantity: 1 }] }) 
                                     }).then(() => $dispatch('cart-updated'))
-                                  ">Add</button>
+                                  ">{{ settings.quick_add_label }}</button>
                                 {% endform %}
                              </div>
                           {% endfor %}
@@ -671,10 +807,15 @@ aria-modal="true">
                   <p>{{ cart.total_price | money }}</p>
                 </div>
                 <p class="mt-0.5 text-sm text-gray-500 mb-6">{{ section.settings.custom_message }}</p>
+                <div class="text-xs text-gray-500 text-center space-y-1 mb-6">
+                  {% if section.settings.reassurance_1 != blank %}<div>{{ section.settings.reassurance_1 }}</div>{% endif %}
+                  {% if section.settings.reassurance_2 != blank %}<div>{{ section.settings.reassurance_2 }}</div>{% endif %}
+                  {% if section.settings.reassurance_3 != blank %}<div>{{ section.settings.reassurance_3 }}</div>{% endif %}
+                </div>
                 
                 <form action="{{ routes.cart_url }}" method="post">
                    <button type="submit" name="checkout" class="w-full flex items-center justify-center rounded-full border border-transparent px-6 py-4 text-base font-bold text-white shadow-sm hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">
-                     Checkout • {{ cart.total_price | money }}
+                     {{ settings.checkout_label | default: 'Checkout' }} • {{ cart.total_price | money }}
                    </button>
                 </form>
 
@@ -744,6 +885,34 @@ ${JSON.stringify(cartDrawerSchema, null, 2)}
     <style>
       [x-cloak] { display: none !important; }
       body { font-family: system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+      .zenya-motion { will-change: transform, opacity; }
+      @media (prefers-reduced-motion: reduce) {
+        .zenya-motion { animation: none !important; transition: none !important; }
+      }
+      @keyframes zenyaFloat {
+        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(40px, -30px, 0) scale(1.06); }
+      }
+      @keyframes zenyaFloatReverse {
+        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+        50% { transform: translate3d(-34px, 28px, 0) scale(1.05); }
+      }
+      @keyframes zenyaGradientShift {
+        0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: .22; }
+        50% { transform: translate3d(0, -18px, 0) scale(1.04); opacity: .28; }
+      }
+      .zenya-blob {
+        position: absolute;
+        width: 32rem;
+        height: 32rem;
+        border-radius: 9999px;
+        filter: blur(46px);
+        opacity: .24;
+        mix-blend-mode: multiply;
+      }
+      .zenya-blob--a { top: -14rem; left: -14rem; animation: zenyaFloat 10s ease-in-out infinite; }
+      .zenya-blob--b { bottom: -16rem; right: -16rem; animation: zenyaFloatReverse 11s ease-in-out infinite; }
+      .zenya-gradient-sheen { animation: zenyaGradientShift 9s ease-in-out infinite; }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-900">
@@ -776,38 +945,60 @@ ${JSON.stringify(cartDrawerSchema, null, 2)}
       { type: "textarea", id: "subheadline", label: "Subheadline", default: content.hero.subheadline },
       { type: "text", id: "cta", label: "Button Text", default: content.hero.cta },
       { type: "url", id: "cta_link", label: "Button Link" },
-      { type: "image_picker", id: "image", label: "Image" }
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: true },
+      { type: "image_picker", id: "image", label: "Image" },
+      { type: "product", id: "product", label: "Product (For Image Fallback)" },
+      { type: "text", id: "external_image_url", label: "External Image URL (Fallback)" },
+      { type: "header", content: "Social Proof Badge" },
+      { type: "checkbox", id: "show_social_proof", label: "Show Badge", default: true },
+      { type: "textarea", id: "social_proof_text", label: "Badge Text", default: "Trusted by 10k+ happy customers" }
     ],
     presets: [{ name: "Zenya Hero" }]
   }
   const heroLiquid = `
-<div class="bg-white py-20 lg:py-32">
-  <div class="container mx-auto px-6 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+<div class="relative overflow-hidden bg-white py-20 lg:py-28">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.primary_color }}, transparent 70%); animation-duration: {{ 16 | minus: settings.motion_strength | at_least: 8 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.secondary_color }}, transparent 70%); animation-duration: {{ 18 | minus: settings.motion_strength | at_least: 9 }}s;"></div>
+      <div class="absolute inset-0 zenya-gradient-sheen zenya-motion" style="background: radial-gradient(circle at 20% 10%, {{ settings.secondary_color }}, transparent 55%), radial-gradient(circle at 90% 60%, {{ settings.primary_color }}, transparent 55%);"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center relative">
     <div>
       <h1 class="text-4xl lg:text-6xl font-extrabold tracking-tight leading-none mb-6 text-slate-900">{{ section.settings.headline }}</h1>
       <p class="text-xl text-slate-600 mb-8 leading-relaxed">{{ section.settings.subheadline }}</p>
-      <a href="{{ section.settings.cta_link | default: routes.all_products_collection_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-4 text-lg font-bold text-white shadow-xl transition hover:opacity-90 hover:scale-105 active:scale-95" style="background-color: {{ settings.primary_color }};">
-        {{ section.settings.cta }}
+      {% assign hero_link = section.settings.cta_link %}
+      {% if hero_link == blank and section.settings.product != blank %}
+        {% assign hero_link = all_products[section.settings.product].url %}
+      {% endif %}
+      {% if hero_link == blank %}
+        {% assign hero_link = routes.all_products_collection_url %}
+      {% endif %}
+      <a href="{{ hero_link }}" class="inline-flex items-center justify-center rounded-full px-8 py-4 text-lg font-bold text-white shadow-xl transition hover:opacity-90 hover:scale-105 active:scale-95" style="background-color: {{ settings.primary_color }};">
+        {{ section.settings.cta | default: settings.primary_cta_text }}
       </a>
     </div>
     <div class="relative">
       {% if section.settings.image != blank %}
         {{ section.settings.image | image_url: width: 1000 | image_tag: class: 'w-full rounded-3xl shadow-2xl object-cover aspect-[4/3]' }}
+      {% elsif all_products[section.settings.product].featured_image != blank %}
+        {{ all_products[section.settings.product].featured_image | image_url: width: 1000 | image_tag: class: 'w-full rounded-3xl shadow-2xl object-cover aspect-[4/3]' }}
+      {% elsif section.settings.external_image_url != blank %}
+        <img src="{{ section.settings.external_image_url }}" class="w-full rounded-3xl shadow-2xl object-cover aspect-[4/3]" alt="{{ section.settings.headline }}">
       {% else %}
         {{ 'lifestyle-1' | placeholder_svg_tag: 'w-full rounded-3xl bg-slate-100 shadow-2xl aspect-[4/3]' }}
       {% endif %}
-      
-      <!-- Social Proof Badge -->
-      <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3 animate-bounce" style="animation-duration: 3s;">
-        <div class="flex -space-x-2">
-          <div class="h-8 w-8 rounded-full bg-slate-200 border-2 border-white"></div>
-          <div class="h-8 w-8 rounded-full bg-slate-300 border-2 border-white"></div>
-          <div class="h-8 w-8 rounded-full bg-slate-400 border-2 border-white"></div>
+      {% if section.settings.show_social_proof %}
+        <div class="absolute -bottom-6 -left-6 bg-white/90 backdrop-blur p-4 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-3 zenya-motion" {% if settings.motion_enabled %}style="animation: zenyaFloat 8s ease-in-out infinite;"{% endif %}>
+          <div class="flex -space-x-2">
+            <div class="h-8 w-8 rounded-full bg-slate-200 border-2 border-white"></div>
+            <div class="h-8 w-8 rounded-full bg-slate-300 border-2 border-white"></div>
+            <div class="h-8 w-8 rounded-full bg-slate-400 border-2 border-white"></div>
+          </div>
+          <div class="text-xs font-bold text-slate-900 leading-tight whitespace-pre-line">{{ section.settings.social_proof_text }}</div>
         </div>
-        <div class="text-xs font-bold text-slate-900">
-          Trusted by 10k+<br>Happy Customers
-        </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -817,9 +1008,112 @@ ${JSON.stringify(heroSchema, null, 2)}
   `
   zip.folder('sections')?.file('zenya-hero.liquid', heroLiquid)
 
+  const featuredProductSchema = {
+    name: "Featured Product",
+    settings: [
+      { type: "product", id: "product", label: "Product" },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: true },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" },
+      { type: "text", id: "kicker", label: "Kicker", default: "Best Seller" },
+      { type: "text", id: "headline", label: "Headline", default: "Everything you need. Nothing you don’t." },
+      { type: "textarea", id: "subheadline", label: "Subheadline", default: "A clean, one-product section with price, benefits, and a strong Add to Cart." },
+      { type: "text", id: "bullet_1", label: "Bullet 1", default: "Fast shipping with tracking" },
+      { type: "text", id: "bullet_2", label: "Bullet 2", default: "30-day returns" },
+      { type: "text", id: "bullet_3", label: "Bullet 3", default: "Secure checkout" },
+      { type: "text", id: "support_line", label: "Support Line", default: "Need help? We respond fast." },
+    ],
+    presets: [{ name: "Zenya Featured Product" }],
+  }
+
+  const featuredProductLiquid = `
+<div class="relative overflow-hidden py-20" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.secondary_color }}, transparent 70%); opacity: .14; animation-duration: {{ 20 | minus: settings.motion_strength | at_least: 10 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.primary_color }}, transparent 70%); opacity: .12; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="absolute inset-0 zenya-gradient-sheen zenya-motion" style="background: radial-gradient(circle at 10% 20%, {{ settings.primary_color }}, transparent 55%), radial-gradient(circle at 90% 80%, {{ settings.secondary_color }}, transparent 55%); opacity: .12;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 max-w-6xl relative">
+    {% assign fp = all_products[section.settings.product] %}
+    {% if fp == blank %}
+      {% assign fp = collections.all.products.first %}
+    {% endif %}
+    {% if fp != blank %}
+      <div class="grid gap-10 lg:grid-cols-2 lg:gap-16 items-center">
+        <div class="relative">
+          <div class="absolute -top-3 left-6 inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+            {{ section.settings.kicker }}
+          </div>
+          <div class="relative overflow-hidden rounded-3xl bg-slate-100 shadow-2xl">
+            {% if fp.featured_image %}
+              <img src="{{ fp.featured_image | image_url: width: 1200 }}" width="{{ fp.featured_image.width }}" height="{{ fp.featured_image.height }}" alt="{{ fp.title | escape }}" class="w-full h-full object-cover aspect-[4/3]">
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'w-full h-full bg-slate-100 aspect-[4/3]' }}
+            {% endif %}
+            {% if fp.compare_at_price > fp.price %}
+              <div class="absolute top-5 left-5 rounded-full bg-red-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+                Sale
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div>
+          <h2 class="text-3xl lg:text-5xl font-extrabold tracking-tight text-slate-900 mb-4">
+            {{ section.settings.headline }}
+          </h2>
+          {% if section.settings.subheadline != blank %}
+            <p class="text-lg text-slate-600 mb-6 leading-relaxed">{{ section.settings.subheadline }}</p>
+          {% endif %}
+
+          <div class="flex items-end gap-3 mb-6">
+            <div class="text-3xl font-extrabold text-slate-900">{{ fp.price | money }}</div>
+            {% if fp.compare_at_price > fp.price %}
+              <div class="text-slate-400 line-through mb-1">{{ fp.compare_at_price | money }}</div>
+            {% endif %}
+          </div>
+
+          <div class="space-y-2 mb-8">
+            {% if section.settings.bullet_1 != blank %}<div class="flex items-start gap-2 text-slate-700"><span class="mt-1 text-green-600">✓</span><span>{{ section.settings.bullet_1 }}</span></div>{% endif %}
+            {% if section.settings.bullet_2 != blank %}<div class="flex items-start gap-2 text-slate-700"><span class="mt-1 text-green-600">✓</span><span>{{ section.settings.bullet_2 }}</span></div>{% endif %}
+            {% if section.settings.bullet_3 != blank %}<div class="flex items-start gap-2 text-slate-700"><span class="mt-1 text-green-600">✓</span><span>{{ section.settings.bullet_3 }}</span></div>{% endif %}
+          </div>
+
+          {% form 'product', fp %}
+            <input type="hidden" name="id" value="{{ fp.selected_or_first_available_variant.id }}">
+            <button type="submit" class="w-full rounded-full py-4 text-lg font-bold text-white shadow-xl transition hover:opacity-90 active:scale-[0.98]" style="background-color: {{ settings.primary_color }};">
+              {{ settings.add_to_cart_label }}
+            </button>
+          {% endform %}
+
+          {% if section.settings.support_line != blank %}
+            <div class="mt-4 text-sm text-slate-500 text-center">{{ section.settings.support_line }}</div>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-600">
+        Add a product to your store, then select it in this section’s settings.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% schema %}
+${JSON.stringify(featuredProductSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-featured-product.liquid', featuredProductLiquid)
+
   // Features (Grid)
   const featuresSchema = {
     name: "Features",
+    settings: [
+      { type: "text", id: "heading", label: "Heading", default: "Why it works" },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "Clear benefits that matter day one." },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#f8fafc" }
+    ],
     blocks: [
       {
         type: "feature",
@@ -846,13 +1140,24 @@ ${JSON.stringify(heroSchema, null, 2)}
     ]
   }
   const featuresLiquid = `
-<div class="bg-slate-50 py-24">
-  <div class="container mx-auto px-6">
+<div class="relative overflow-hidden py-24" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.secondary_color }}, transparent 70%); opacity: .14; animation-duration: {{ 20 | minus: settings.motion_strength | at_least: 10 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.primary_color }}, transparent 70%); opacity: .12; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 relative">
+    <div class="mx-auto mb-12 max-w-3xl text-center">
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">{{ section.settings.heading }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p class="text-slate-600">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
     <div class="grid gap-8 md:grid-cols-3">
       {% for block in section.blocks %}
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition group">
-          <div class="h-12 w-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
-            <!-- Simple Icon Placeholder based on name -->
+        <div class="bg-white/90 backdrop-blur p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-lg transition transform hover:-translate-y-1 group">
+          <div class="h-12 w-12 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110" style="background: color-mix(in srgb, {{ settings.primary_color }} 12%, white); color: {{ settings.primary_color }};">
             <span class="font-bold text-xl">
               {% case block.settings.icon %}
                 {% when 'shield' %}🛡️
@@ -880,25 +1185,34 @@ ${JSON.stringify(featuresSchema, null, 2)}
   const problemSolutionSchema = {
     name: "Problem/Solution",
     settings: [
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "text", id: "problem_label", label: "Problem Label", default: "The Problem" },
       { type: "text", id: "problem_headline", label: "Problem Headline", default: content.problem.headline },
       { type: "textarea", id: "problem_text", label: "Problem Text", default: content.problem.text },
+      { type: "text", id: "solution_label", label: "Solution Label", default: "The Solution" },
       { type: "text", id: "solution_headline", label: "Solution Headline", default: content.solution.headline },
       { type: "textarea", id: "solution_text", label: "Solution Text", default: content.solution.text },
-      { type: "image_picker", id: "image", label: "Image" }
+      { type: "image_picker", id: "image", label: "Image" },
+      { type: "text", id: "external_image_url", label: "External Image URL (Fallback)" }
     ],
     presets: [{ name: "Zenya Problem/Solution" }]
   }
   const problemSolutionLiquid = `
-<div class="bg-white py-24">
-  <div class="container mx-auto px-6 grid gap-16 lg:grid-cols-2 items-center">
+<div class="relative overflow-hidden bg-white py-24">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="absolute inset-0 zenya-gradient-sheen zenya-motion" style="background: radial-gradient(circle at 10% 20%, {{ settings.primary_color }}, transparent 55%), radial-gradient(circle at 90% 80%, {{ settings.secondary_color }}, transparent 55%); opacity: .12;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 grid gap-16 lg:grid-cols-2 items-center relative">
     <div class="space-y-8">
-      <div class="p-8 bg-red-50 rounded-2xl border-l-4 border-red-500">
-        <h3 class="text-red-700 font-bold uppercase tracking-wider text-xs mb-2">The Problem</h3>
+      <div class="p-8 rounded-3xl border border-slate-100 bg-slate-50">
+        <h3 class="text-slate-700 font-bold uppercase tracking-wider text-xs mb-2">{{ section.settings.problem_label }}</h3>
         <h2 class="text-2xl font-bold text-slate-900 mb-4">{{ section.settings.problem_headline }}</h2>
         <p class="text-slate-600 leading-relaxed">{{ section.settings.problem_text }}</p>
       </div>
-      <div class="p-8 bg-green-50 rounded-2xl border-l-4 border-green-500">
-        <h3 class="text-green-700 font-bold uppercase tracking-wider text-xs mb-2">The Solution</h3>
+      <div class="p-8 rounded-3xl border border-slate-100 bg-white shadow-sm">
+        <h3 class="font-bold uppercase tracking-wider text-xs mb-2" style="color: {{ settings.primary_color }};">{{ section.settings.solution_label }}</h3>
         <h2 class="text-2xl font-bold text-slate-900 mb-4">{{ section.settings.solution_headline }}</h2>
         <p class="text-slate-600 leading-relaxed">{{ section.settings.solution_text }}</p>
       </div>
@@ -911,6 +1225,8 @@ ${JSON.stringify(featuresSchema, null, 2)}
           height="{{ section.settings.image.height }}"
           alt="Problem Solution" 
           class="w-full rounded-2xl shadow-2xl">
+      {% elsif section.settings.external_image_url != blank %}
+        <img src="{{ section.settings.external_image_url }}" class="w-full rounded-2xl shadow-2xl" alt="Solution">
       {% else %}
         {{ 'product-2' | placeholder_svg_tag: 'w-full rounded-2xl bg-slate-100' }}
       {% endif %}
@@ -927,7 +1243,10 @@ ${JSON.stringify(problemSolutionSchema, null, 2)}
   const testimonialsSchema = {
     name: "Testimonials",
     settings: [
-      { type: "text", id: "heading", label: "Heading", default: content.stats?.[0]?.value ? "What people are saying" : "Real Results" }
+      { type: "text", id: "heading", label: "Heading", default: content.stats?.[0]?.value ? "What people are saying" : "Real Results" },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "Real reviews from real customers." },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" }
     ],
     blocks: [
       {
@@ -955,24 +1274,35 @@ ${JSON.stringify(problemSolutionSchema, null, 2)}
     ]
   }
   const testimonialsLiquid = `
-<div class="bg-slate-900 text-white py-24">
-  <div class="container mx-auto px-6">
-    <h2 class="text-center text-3xl lg:text-4xl font-extrabold mb-16">{{ section.settings.heading }}</h2>
+<div class="relative overflow-hidden py-24" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.primary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.secondary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 24 | minus: settings.motion_strength | at_least: 12 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 relative">
+    <div class="mx-auto mb-14 max-w-3xl text-center">
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">{{ section.settings.heading }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p class="text-slate-600">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
     <div class="grid gap-8 md:grid-cols-3">
       {% for block in section.blocks %}
-        <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 hover:bg-slate-750 transition">
-          <div class="text-yellow-400 mb-4 text-lg flex gap-1">
+        <div class="bg-white/90 backdrop-blur p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg transition transform hover:-translate-y-1">
+          <div class="mb-4 text-lg flex gap-1" style="color: {{ settings.secondary_color }};">
             <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
-          <p class="mb-6 leading-relaxed text-slate-300 italic">"{{ block.settings.text }}"</p>
+          <p class="mb-6 leading-relaxed text-slate-700">“{{ block.settings.text }}”</p>
           <div class="flex items-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-slate-600 flex items-center justify-center text-xs font-bold text-slate-300">
+            <div class="h-10 w-10 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm" style="background-color: {{ settings.primary_color }};">
               {{ block.settings.name | slice: 0, 1 }}
             </div>
             <div>
-              <div class="font-bold text-white">{{ block.settings.name }}</div>
-              <div class="text-sm text-slate-400 flex items-center gap-1">
-                <span class="text-green-400">✓</span> {{ block.settings.location }}
+              <div class="font-bold text-slate-900">{{ block.settings.name }}</div>
+              <div class="text-sm text-slate-500 flex items-center gap-1">
+                <span style="color: {{ settings.primary_color }};">✓</span> {{ block.settings.location }}
               </div>
             </div>
           </div>
@@ -990,6 +1320,10 @@ ${JSON.stringify(testimonialsSchema, null, 2)}
   // FAQ
   const faqSchema = {
     name: "FAQ",
+    settings: [
+      { type: "text", id: "heading", label: "Heading", default: "Frequently Asked Questions" },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "Quick answers to the most common questions." }
+    ],
     blocks: [
       {
         type: "faq",
@@ -1016,10 +1350,15 @@ ${JSON.stringify(testimonialsSchema, null, 2)}
   const faqLiquid = `
 <div class="bg-white py-24">
   <div class="container mx-auto px-6 max-w-3xl">
-    <h2 class="text-center text-3xl lg:text-4xl font-extrabold mb-12">Frequently Asked Questions</h2>
+    <div class="text-center mb-12">
+      <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-3">{{ section.settings.heading }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p class="text-slate-600">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
     <div class="space-y-4" x-data="{ active: null }">
       {% for block in section.blocks %}
-        <div class="border-b border-slate-200 py-4">
+        <div class="rounded-2xl border border-slate-100 bg-slate-50 px-6 py-5">
           <button 
             @click="active = (active === {{ forloop.index0 }} ? null : {{ forloop.index0 }})" 
             class="flex w-full items-center justify-between text-left font-bold text-slate-900 focus:outline-none"
@@ -1049,16 +1388,24 @@ ${JSON.stringify(faqSchema, null, 2)}
   const guaranteeSchema = {
     name: "Guarantee",
     settings: [
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#f8fafc" },
+      { type: "text", id: "icon", label: "Icon (Emoji)", default: "🛡️" },
       { type: "text", id: "title", label: "Title", default: content.guarantee.title },
       { type: "textarea", id: "text", label: "Text", default: content.guarantee.text }
     ],
     presets: [{ name: "Zenya Guarantee" }]
   }
   const guaranteeLiquid = `
-<div class="bg-slate-50 py-24 text-center">
-  <div class="container mx-auto px-6 max-w-2xl">
-    <div class="bg-white p-12 rounded-3xl shadow-xl border border-slate-100">
-      <div class="text-6xl mb-6">🛡️</div>
+<div class="relative overflow-hidden py-24 text-center" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="absolute inset-0 zenya-gradient-sheen zenya-motion" style="background: radial-gradient(circle at 20% 20%, {{ settings.secondary_color }}, transparent 55%), radial-gradient(circle at 80% 70%, {{ settings.primary_color }}, transparent 55%); opacity: .10;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 max-w-2xl relative">
+    <div class="bg-white/90 backdrop-blur p-12 rounded-3xl shadow-xl border border-slate-100">
+      <div class="text-6xl mb-6">{{ section.settings.icon }}</div>
       <h2 class="text-2xl font-bold mb-4 text-slate-900">{{ section.settings.title }}</h2>
       <p class="text-slate-600 leading-relaxed">{{ section.settings.text }}</p>
     </div>
@@ -1079,71 +1426,50 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
     order.push(key)
   }
 
-  if (content.scrolling_text && content.scrolling_text.length > 0) {
-    addSection("scrolling_text", {
-      "type": "zenya-scrolling-text",
-      "blocks": content.scrolling_text.reduce((acc, text, i) => ({
-        ...acc,
-        [`text_${i}`]: { "type": "text_block", "settings": { "text": text } }
-      }), {}),
-      "block_order": content.scrolling_text.map((_, i) => `text_${i}`)
-    })
-  }
-
-  if (content.slideshow && content.slideshow.length > 0) {
-    addSection("slideshow", {
-      "type": "zenya-slideshow",
-      "blocks": content.slideshow.reduce((acc, slide, i) => ({
-        ...acc,
-        [`slide_${i}`]: {
-          "type": "slide",
-          "settings": {
-            "heading": slide.heading,
-            "subheading": slide.subheading,
-            "cta_text": slide.cta
-          }
-        }
-      }), {}),
-      "block_order": content.slideshow.map((_, i) => `slide_${i}`)
-    })
-  }
-
   addSection("hero", {
     "type": "zenya-hero",
     "settings": {
       "headline": content.hero.headline,
       "subheadline": content.hero.subheadline,
-      "cta": content.hero.cta
+      "cta": content.hero.cta,
+      "external_image_url": images[0] || ""
     }
   })
 
-  addSection("logo_list", { 
-    "type": "zenya-logo-list",
-    "settings": { "title": content.logo_list?.heading || "Featured In" }
-  })
-
-  addSection("problem_solution", {
-    "type": "zenya-problem-solution",
+  addSection("featured_product", {
+    "type": "zenya-featured-product",
     "settings": {
-      "problem_headline": content.problem.headline,
-      "problem_text": content.problem.text,
-      "solution_headline": content.solution.headline,
-      "solution_text": content.solution.text
+      "enable_bg_motion": true,
+      "kicker": "Limited Offer",
+      "headline": content.hero.headline,
+      "subheadline": content.hero.subheadline,
+      "bullet_1": "Fast shipping with tracking",
+      "bullet_2": "30-day returns",
+      "bullet_3": "Secure checkout",
+      "support_line": "Questions? We respond fast."
     }
   })
 
-  // Video Hero (Optional -> Default)
-  addSection("video_hero", {
-    "type": "zenya-video-hero",
+  addSection("trust_badges", {
+    "type": "zenya-trust-badges",
     "settings": {
-      "heading": content.video_hero?.heading || "Experience the Difference",
-      "subheading": content.video_hero?.subheading || "Watch our product in action.",
-      "cta_text": content.video_hero?.cta || "Shop Now"
-    }
+      "heading": content.trust_badges?.heading || "Shop with Confidence"
+    },
+    "blocks": {
+      "badge_0": { "type": "badge", "settings": { "title": "Free Shipping", "subtext": "On all orders", "icon": "box" } },
+      "badge_1": { "type": "badge", "settings": { "title": "30-Day Returns", "subtext": "Hassle-free", "icon": "check" } },
+      "badge_2": { "type": "badge", "settings": { "title": "Secure Checkout", "subtext": "Encrypted", "icon": "lock" } },
+      "badge_3": { "type": "badge", "settings": { "title": "Fast Support", "subtext": "We respond fast", "icon": "chat" } }
+    },
+    "block_order": ["badge_0", "badge_1", "badge_2", "badge_3"]
   })
 
   addSection("features", {
     "type": "zenya-features",
+    "settings": {
+      "heading": `Why ${name} works`,
+      "subheading": "Clear benefits that matter day one."
+    },
     "blocks": (content.features || []).reduce((acc, f, i) => ({
       ...acc,
       [`feature_${i}`]: {
@@ -1156,6 +1482,17 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
       }
     }), {}),
     "block_order": (content.features || []).map((_, i) => `feature_${i}`)
+  })
+
+  addSection("problem_solution", {
+    "type": "zenya-problem-solution",
+    "settings": {
+      "problem_headline": content.problem.headline,
+      "problem_text": content.problem.text,
+      "solution_headline": content.solution.headline,
+      "solution_text": content.solution.text,
+      "external_image_url": images[1] || images[0] || ""
+    }
   })
 
   // Comparison Table (Optional -> Default)
@@ -1186,49 +1523,6 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
     "block_order": comparisonData.map((_, i) => `comp_${i}`)
   })
 
-  addSection("featured_collection", {
-    "type": "zenya-featured-collection",
-    "settings": {
-      "title": "Best Sellers",
-      "limit": 4
-    }
-  })
-
-  // Image with Text (Optional -> Default)
-  addSection("image_text", {
-    "type": "zenya-image-text",
-    "settings": {
-      "title": content.image_text?.title || "Our Story",
-      "text": content.image_text?.text || "We started with a simple idea: to make the best product in the world.",
-      "cta_text": content.image_text?.cta || "Learn More"
-    }
-  })
-
-  // Multicolumn (Optional -> Default)
-  const multicolumnData = (content.multicolumn && content.multicolumn.length > 0)
-    ? content.multicolumn
-    : [
-        { title: "Eco-Friendly", text: "We use sustainable materials." },
-        { title: "Ethical", text: "Fair wages for all workers." },
-        { title: "Charity", text: "1% of profits go to charity." }
-      ]
-
-  addSection("multicolumn", {
-    "type": "zenya-multicolumn",
-    "settings": { "title": "Why People Love Us" },
-    "blocks": multicolumnData.reduce((acc, col, i) => ({
-      ...acc,
-      [`col_${i}`]: {
-        "type": "column",
-        "settings": {
-          "title": col.title,
-          "text": col.text
-        }
-      }
-    }), {}),
-    "block_order": multicolumnData.map((_, i) => `col_${i}`)
-  })
-
   addSection("testimonials", {
     "type": "zenya-testimonials",
     "blocks": (content.testimonials || []).reduce((acc, t, i) => ({
@@ -1243,15 +1537,6 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
       }
     }), {}),
     "block_order": (content.testimonials || []).map((_, i) => `testimonial_${i}`)
-  })
-
-  // Rich Text (Optional -> Default)
-  addSection("rich_text", {
-    "type": "zenya-rich-text",
-    "settings": {
-      "title": content.rich_text?.title || "About Our Brand",
-      "text": content.rich_text?.text || "We are passionate about creating products that improve your life."
-    }
   })
 
   addSection("faq", {
@@ -1281,16 +1566,8 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
   addSection("newsletter", {
     "type": "zenya-newsletter",
     "settings": {
-      "heading": content.newsletter?.title || "Join Our Newsletter",
+      "title": content.newsletter?.title || "Join Our Newsletter",
       "text": content.newsletter?.text || "Subscribe for updates and exclusive offers."
-    }
-  })
-
-  // Trust Badges (Dynamic)
-  addSection("trust_badges", {
-    "type": "zenya-trust-badges",
-    "settings": {
-      "heading": content.trust_badges?.heading || "Shop with Confidence"
     }
   })
 
@@ -1298,45 +1575,66 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
     name: "Trust Badges",
     settings: [
       { type: "text", id: "heading", label: "Heading", default: content.trust_badges?.heading || "Shop with Confidence" },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
       { type: "color", id: "bg_color", label: "Background Color", default: "#f8fafc" },
       { type: "color", id: "text_color", label: "Text Color", default: "#0f172a" }
+    ],
+    blocks: [
+      {
+        type: "badge",
+        name: "Badge",
+        settings: [
+          { type: "text", id: "title", label: "Title", default: "Free Shipping" },
+          { type: "text", id: "subtext", label: "Subtext", default: "On all orders" },
+          { type: "select", id: "icon", label: "Icon", default: "box", "options": [
+            { "value": "box", "label": "Box" },
+            { "value": "check", "label": "Check" },
+            { "value": "lock", "label": "Lock" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "refresh", "label": "Refresh" },
+            { "value": "shield", "label": "Shield" }
+          ]}
+        ]
+      }
     ],
     presets: [{ name: "Zenya Trust Badges" }]
   }
   const trustBadgesLiquid = `
-<div class="py-8" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
-  <div class="container mx-auto px-6">
-    <div class="grid grid-cols-2 gap-4 rounded-xl border border-slate-100 bg-white p-6 sm:grid-cols-4 shadow-sm">
-      <div class="col-span-full mb-4 text-center">
-        <h3 class="text-sm font-bold uppercase tracking-wider opacity-75">{{ section.settings.heading }}</h3>
+<div class="relative overflow-hidden py-10" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.primary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.secondary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 24 | minus: settings.motion_strength | at_least: 12 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 relative">
+    <div class="rounded-3xl border border-slate-100 bg-white/90 backdrop-blur p-6 shadow-sm">
+      <div class="mb-5 text-center">
+        <h3 class="text-sm font-bold uppercase tracking-wider opacity-80">{{ section.settings.heading }}</h3>
       </div>
-      <div class="flex flex-col items-center text-center">
-        <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-900 shadow-sm">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-        </div>
-        <div class="text-xs font-bold">Free Shipping</div>
-        <div class="text-[10px] opacity-75">On all orders</div>
-      </div>
-      <div class="flex flex-col items-center text-center">
-        <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-900 shadow-sm">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-        </div>
-        <div class="text-xs font-bold">Lifetime Warranty</div>
-        <div class="text-[10px] opacity-75">We stand by quality</div>
-      </div>
-      <div class="flex flex-col items-center text-center">
-        <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-900 shadow-sm">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-        </div>
-        <div class="text-xs font-bold">30-Day Returns</div>
-        <div class="text-[10px] opacity-75">Hassle-free</div>
-      </div>
-      <div class="flex flex-col items-center text-center">
-        <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-900 shadow-sm">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-        </div>
-        <div class="text-xs font-bold">Secure Checkout</div>
-        <div class="text-[10px] opacity-75">100% Encrypted</div>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {% for block in section.blocks %}
+          <div class="flex flex-col items-center text-center rounded-2xl border border-slate-100 bg-white p-4">
+            <div class="mb-2 flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm" style="background: color-mix(in srgb, {{ settings.primary_color }} 10%, white); color: {{ settings.primary_color }};">
+              {% case block.settings.icon %}
+                {% when 'lock' %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                {% when 'check' %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {% when 'refresh' %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                {% when 'chat' %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.8L3 20l1.2-3A7.7 7.7 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                {% when 'shield' %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z" /></svg>
+                {% else %}
+                  <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+              {% endcase %}
+            </div>
+            <div class="text-xs font-bold text-slate-900">{{ block.settings.title }}</div>
+            <div class="text-[10px] text-slate-500">{{ block.settings.subtext }}</div>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -1346,14 +1644,6 @@ ${JSON.stringify(trustBadgesSchema, null, 2)}
 {% endschema %}
 `
   zip.folder('sections')?.file('zenya-trust-badges.liquid', trustBadgesLiquid)
-
-  // Upsell Section (Dynamic)
-  addSection("upsell", {
-    "type": "zenya-upsell",
-    "settings": {
-      "heading": content.upsell?.heading || "Frequently Bought Together"
-    }
-  })
 
   const upsellSchema = {
     name: "Upsell",
@@ -1431,24 +1721,6 @@ ${JSON.stringify(upsellSchema, null, 2)}
 {% endschema %}
   `
   zip.folder('sections')?.file('zenya-upsell.liquid', upsellLiquid)
-
-  // Volume Bundles Section (Dynamic)
-  addSection("volume_bundles", {
-    "type": "zenya-volume-bundles",
-    "settings": {
-      "heading": content.volume_bundles?.heading || "Buy More, Save More"
-    }
-  })
-
-  // Visual Showcase (Dynamic)
-  addSection("visual_showcase", {
-    "type": "zenya-visual-showcase",
-    "settings": {
-      "heading": content.visual_showcase?.heading || "Experience Perfection",
-      "text": content.visual_showcase?.subheading || "Don't settle for less. Join thousands of satisfied customers who have upgraded their lifestyle.",
-      "cta_text": "Get Yours Today"
-    }
-  })
 
   const volumeBundlesSchema = {
     name: "Volume Bundles",
@@ -1573,7 +1845,7 @@ ${JSON.stringify(upsellSchema, null, 2)}
               class="w-full rounded-full py-4 text-xl font-bold text-white shadow-xl transition hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 bg-primary mt-6 mb-4"
               style="background-color: {{ section.settings.primary_color }}"
             >
-              <span>Add to Cart</span>
+              <span>{{ settings.add_to_cart_label }}</span>
             </button>
         </form>
 
@@ -1799,7 +2071,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
         class="flex-1 bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition text-sm uppercase tracking-wide"
         style="background-color: {{ settings.primary_color }}"
       >
-        Add To Cart
+        {{ settings.add_to_cart_label }}
       </button>
     </div>
   </div>
@@ -1817,7 +2089,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
               <div class="snap-center shrink-0 w-[85vw] relative aspect-square rounded-xl bg-slate-100 overflow-hidden shadow-sm">
                 {% case media.media_type %}
                   {% when 'image' %}
-                    {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'lazy', widths: '400, 600, 800', style: 'object-position: {{ media.presentation.focal_point }}' }}
+                    {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'lazy', widths: '400, 600, 800' }}
                   {% when 'video' %}
                     {{ media | video_tag: class: 'h-full w-full object-cover', controls: true, image_size: '800x' }}
                   {% when 'external_video' %}
@@ -1852,7 +2124,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
                 <div x-show="currentMediaId === {{ media.id }}" x-cloak class="h-full w-full">
                    {% case media.media_type %}
                     {% when 'image' %}
-                      {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'eager', widths: '500, 1000, 1500', style: 'object-position: {{ media.presentation.focal_point }}' }}
+                      {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'eager', widths: '500, 1000, 1500' }}
                     {% when 'video' %}
                       {{ media | video_tag: class: 'h-full w-full object-cover', controls: true, image_size: '1000x' }}
                     {% when 'external_video' %}
@@ -2079,7 +2351,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
               type="submit" 
               class="w-full rounded-full py-4 text-xl font-bold text-white shadow-xl transition hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 bg-primary mt-6 mb-4"
             >
-              <span>Add to Cart</span>
+              <span>{{ settings.add_to_cart_label }}</span>
               <span class="text-sm opacity-90 font-normal">- <span x-text="savings > 0 ? 'Save ' + '{{ cart.currency.symbol }}' + savings : ''"></span></span>
             </button>
             
@@ -2262,29 +2534,96 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
   `
   zip.folder('sections')?.file('zenya-product.liquid', mainProductLiquid)
 
-  // Product Template
+  // Product Template — all blocks populated with AI-generated content
+  const productFeatureBlocks = Object.fromEntries(
+    (content.features || []).map((f, i) => [`pf${i + 1}`, { type: 'feature', settings: { title: f.title, desc: f.desc } }])
+  )
+  const productHowItWorksBlocks = Object.fromEntries(
+    (content.how_it_works || []).map((s, i) => [`hiw${i + 1}`, { type: 'step', settings: { title: s.title, text: s.text } }])
+  )
+  const productComparisonBlocks = Object.fromEntries(
+    (content.comparison || []).map((c, i) => [`cmp${i + 1}`, { type: 'row', settings: { feature: c.feature, us_check: c.us, them_check: c.them } }])
+  )
+  const productTestimonialBlocks = Object.fromEntries(
+    (content.testimonials || []).map((t, i) => [`rev${i + 1}`, { type: 'testimonial', settings: { name: t.name, text: t.text, location: t.location, stars: t.rating } }])
+  )
+  const productFaqBlocks = Object.fromEntries(
+    (content.faq || []).map((q, i) => [`pfaq${i + 1}`, { type: 'faq', settings: { q: q.q, a: q.a } }])
+  )
+
   const productJson = {
     "sections": {
       "main": {
         "type": "zenya-product",
+        "settings": { "show_stock": true, "sticky_atc": true }
+      },
+      "trust_badges": {
+        "type": "zenya-trust-badges",
+        "settings": { "heading": content.trust_badges?.heading || "Shop with Confidence" }
+      },
+      "features": {
+        "type": "zenya-features",
+        "blocks": productFeatureBlocks,
+        "block_order": Object.keys(productFeatureBlocks)
+      },
+      "volume_bundles": {
+        "type": "zenya-volume-bundles",
+        "settings": { "heading": content.volume_bundles?.heading || "Buy More, Save More" }
+      },
+      "before_after": {
+        "type": "zenya-before-after",
         "settings": {
-          "show_stock": true,
-          "sticky_atc": true
+          "heading": content.before_after?.heading || "See the Difference",
+          "label_before": content.before_after?.label_before || "Before",
+          "label_after": content.before_after?.label_after || "After"
+        }
+      },
+      "how_it_works": {
+        "type": "zenya-how-it-works",
+        "settings": {
+          "heading": (content as any).how_it_works_section?.heading || "How It Works",
+          "subheading": (content as any).how_it_works_section?.subheading || "Simple steps. Real results."
+        },
+        "blocks": productHowItWorksBlocks,
+        "block_order": Object.keys(productHowItWorksBlocks)
+      },
+      "comparison": {
+        "type": "zenya-comparison",
+        "settings": { "heading": "Why Choose Us?" },
+        "blocks": productComparisonBlocks,
+        "block_order": Object.keys(productComparisonBlocks)
+      },
+      "reviews": {
+        "type": "zenya-testimonials",
+        "settings": { "title": "Customer Reviews" },
+        "blocks": productTestimonialBlocks,
+        "block_order": Object.keys(productTestimonialBlocks)
+      },
+      "faq": {
+        "type": "zenya-faq",
+        "blocks": productFaqBlocks,
+        "block_order": Object.keys(productFaqBlocks)
+      },
+      "guarantee": {
+        "type": "zenya-guarantee",
+        "settings": {
+          "title": content.guarantee?.title || "Our Promise",
+          "text": content.guarantee?.text || "Satisfaction guaranteed."
+        }
+      },
+      "newsletter": {
+        "type": "zenya-newsletter",
+        "settings": {
+          "title": content.newsletter?.title || "Get offers first",
+          "text": content.newsletter?.text || "Subscribe for updates and exclusive deals."
         }
       },
       "recommendations": {
         "type": "zenya-featured-collection",
         "settings": { "title": "You May Also Like" }
-      },
-      "reviews": {
-        "type": "zenya-testimonials",
-        "settings": { "title": "Customer Reviews" }
-      },
-      "faq": {
-        "type": "zenya-faq"
       }
     },
-    "order": ["main", "recommendations", "reviews", "faq"]
+    "order": ["main", "trust_badges", "features", "volume_bundles", "before_after", "how_it_works", "comparison", "reviews", "faq", "guarantee", "newsletter", "recommendations"]
   }
   zip.folder('templates')?.file('product.json', JSON.stringify(productJson, null, 2))
 
@@ -2355,14 +2694,47 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
   `
   zip.folder('sections')?.file('main-collection.liquid', mainCollectionLiquid)
 
+  const collectionTrustBadgesRaw: { title: string; desc: string }[] = (content as any).trust_badges?.badges || []
+  const collectionTrustBlocks = Object.fromEntries(
+    collectionTrustBadgesRaw.map((b, i) => [`ctb${i + 1}`, { type: 'badge', settings: { title: b.title, subtitle: b.desc } }])
+  )
+  const collectionTestimonialBlocks = Object.fromEntries(
+    (content.testimonials || []).slice(0, 3).map((t, i) => [`ctr${i + 1}`, { type: 'testimonial', settings: { name: t.name, text: t.text, location: t.location, stars: t.rating } }])
+  )
+
   const collectionJson = {
     "sections": {
-      "banner": { "type": "zenya-hero", "settings": { "headline": "Shop Our Collection", "subheadline": "Browse our premium selection.", "cta": "Scroll Down" }},
+      "banner": {
+        "type": "zenya-hero",
+        "settings": {
+          "headline": content.collection_page?.headline || "Shop Our Collection",
+          "subheadline": content.collection_page?.subheadline || "Browse our premium selection.",
+          "cta": content.hero.cta || "Shop Now"
+        }
+      },
       "main": { "type": "main-collection" },
+      "trust_badges": {
+        "type": "zenya-trust-badges",
+        "settings": { "heading": content.trust_badges?.heading || "Shop with Confidence" },
+        "blocks": collectionTrustBlocks,
+        "block_order": Object.keys(collectionTrustBlocks)
+      },
+      "reviews": {
+        "type": "zenya-testimonials",
+        "settings": { "title": "What Customers Are Saying" },
+        "blocks": collectionTestimonialBlocks,
+        "block_order": Object.keys(collectionTestimonialBlocks)
+      },
       "featured_collection": { "type": "zenya-featured-collection", "settings": { "title": "Best Sellers" } },
-      "newsletter": { "type": "zenya-newsletter" }
+      "newsletter": {
+        "type": "zenya-newsletter",
+        "settings": {
+          "title": content.newsletter?.title || "Join Our Community",
+          "text": content.newsletter?.text || "Get exclusive deals and early access."
+        }
+      }
     },
-    "order": ["banner", "main", "featured_collection", "newsletter"]
+    "order": ["banner", "main", "trust_badges", "reviews", "featured_collection", "newsletter"]
   }
   zip.folder('templates')?.file('collection.json', JSON.stringify(collectionJson, null, 2))
 
@@ -2375,7 +2747,14 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
     settings: [
       { type: "number", id: "free_shipping_threshold", label: "Free Shipping Threshold (Cents)", default: 10000 },
       { type: "checkbox", id: "show_upsells", label: "Show Upsells", default: true },
-      { type: "collection", id: "upsell_collection", label: "Upsell Collection" }
+      { type: "collection", id: "upsell_collection", label: "Upsell Collection" },
+      { type: "text", id: "free_shipping_before", label: "Free Shipping (Before)", default: content.cart_drawer?.free_shipping_before || "You are {amount} away from Free Shipping!" },
+      { type: "text", id: "free_shipping_after", label: "Free Shipping (After)", default: content.cart_drawer?.free_shipping_after || "🎉 You've unlocked Free Shipping!" },
+      { type: "text", id: "secure_line", label: "Secure Line", default: content.cart_drawer?.secure_line || "🔒 SSL Encrypted Payment" },
+      { type: "text", id: "returns_line", label: "Returns Line", default: content.cart_drawer?.reassurance_lines?.[0] || "↩️ 30-Day Money Back Guarantee" },
+      { type: "text", id: "headline", label: "Page Headline", default: content.cart_page?.headline || "Your Cart" },
+      { type: "text", id: "empty_headline", label: "Empty Cart Headline", default: content.cart_page?.empty_headline || "Your cart is empty" },
+      { type: "text", id: "empty_subheadline", label: "Empty Cart Subheadline", default: content.cart_page?.empty_subheadline || "Looks like you haven't added anything yet." }
     ],
     presets: [{ name: "Zenya Cart Main" }]
   }
@@ -2383,7 +2762,7 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
   const mainCartLiquid = `
 <div class="py-20 bg-slate-50 min-h-[60vh]">
   <div class="container mx-auto px-6 max-w-6xl">
-    <h1 class="text-3xl font-extrabold text-slate-900 mb-8 text-center">Your Cart</h1>
+    <h1 class="text-3xl font-extrabold text-slate-900 mb-8 text-center">{{ section.settings.headline }}</h1>
     
     {% if cart.item_count > 0 %}
       <div class="flex flex-col lg:flex-row gap-12 items-start">
@@ -2396,15 +2775,17 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
           {% assign progress = cart_total | times: 100 | divided_by: free_shipping_threshold %}
           {% if progress > 100 %}{% assign progress = 100 %}{% endif %}
           {% assign left_to_spend = free_shipping_threshold | minus: cart_total %}
+          {% assign left_to_spend_money = left_to_spend | money %}
+          {% assign amount_token = '{' | append: 'amount' | append: '}' %}
 
           <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-6">
             {% if left_to_spend > 0 %}
               <p class="text-center text-slate-900 font-bold mb-3">
-                You are <span class="text-primary">{{ left_to_spend | money }}</span> away from <span class="font-extrabold">Free Shipping</span>!
+                {{ section.settings.free_shipping_before | replace: amount_token, left_to_spend_money }}
               </p>
             {% else %}
               <p class="text-center text-green-600 font-bold mb-3">
-                🎉 You've unlocked <span class="font-extrabold">Free Shipping</span>!
+                {{ section.settings.free_shipping_after }}
               </p>
             {% endif %}
             <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -2458,7 +2839,7 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
                            <p class="text-slate-500 text-sm mb-2">{{ product.price | money }}</p>
                            {% form 'product', product %}
                               <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-                              <button type="submit" class="text-xs font-bold bg-slate-900 text-white rounded px-4 py-2 hover:opacity-90 transition">Add to Cart</button>
+                              <button type="submit" class="text-xs font-bold bg-slate-900 text-white rounded px-4 py-2 hover:opacity-90 transition">{{ settings.quick_add_label }}</button>
                            {% endform %}
                         </div>
                      </div>
@@ -2492,7 +2873,7 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
               <div class="grid gap-4">
                 <form action="{{ routes.cart_url }}" method="post">
                    <button type="submit" name="checkout" class="w-full py-4 rounded-full text-xl font-bold text-white shadow-lg hover:opacity-90 transition transform hover:scale-[1.02]" style="background-color: {{ settings.primary_color }};">
-                     Checkout Now
+                     {{ settings.checkout_label | default: 'Checkout' }}
                    </button>
                 </form>
                 
@@ -2506,8 +2887,8 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
                 </div>
                 
                 <div class="text-center space-y-2 text-sm text-slate-500">
-                   <p>🔒 SSL Encrypted Payment</p>
-                   <p>↩️ 30-Day Money Back Guarantee</p>
+                   <p>{{ section.settings.secure_line }}</p>
+                   <p>{{ section.settings.returns_line }}</p>
                 </div>
               </div>
            </div>
@@ -2517,9 +2898,9 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
     {% else %}
       <div class="text-center py-20 bg-white rounded-3xl shadow-sm border border-slate-100">
         <div class="text-6xl mb-6">🛒</div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-4">Your cart is empty</h2>
-        <p class="text-slate-500 mb-8">Looks like you haven't added anything yet.</p>
-        <a href="{{ routes.root_url }}" class="inline-block px-8 py-3 rounded-full bg-slate-900 text-white font-bold hover:opacity-90 transition">Start Shopping</a>
+        <h2 class="text-2xl font-bold text-slate-900 mb-4">{{ section.settings.empty_headline }}</h2>
+        <p class="text-slate-500 mb-8">{{ section.settings.empty_subheadline }}</p>
+        <a href="{{ routes.root_url }}" class="inline-block px-8 py-3 rounded-full bg-slate-900 text-white font-bold hover:opacity-90 transition">{{ settings.start_shopping_label }}</a>
       </div>
     {% endif %}
   </div>
@@ -2556,7 +2937,7 @@ ${JSON.stringify(mainCartSchema, null, 2)}
     <h1 class="text-6xl font-extrabold text-slate-900 mb-6">{{ section.settings.heading }}</h1>
     <p class="text-xl text-slate-600 mb-8">{{ section.settings.subtext }}</p>
     <a href="{{ routes.root_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-3 text-base font-bold text-white shadow-lg transition hover:opacity-90" style="background-color: {{ settings.primary_color }};">
-      Back to Home
+      {{ settings.start_shopping_label }}
     </a>
   </div>
 </div>
@@ -2567,77 +2948,156 @@ ${JSON.stringify(main404Schema, null, 2)}
   zip.folder('sections')?.file('main-404.liquid', main404Liquid)
   zip.folder('templates')?.file('404.json', JSON.stringify({ sections: { main: { type: "main-404" } }, order: ["main"] }, null, 2))
 
-  // 7.2.1 About Page
+  // 7.2.1 About Page — AI-generated content throughout
+  const aboutTimelineContent = (content.timeline || []).length >= 2 ? content.timeline! : [
+    { year: "Year 1", title: "The Idea", text: "The seed was planted." },
+    { year: "Year 2", title: "Built with Purpose", text: "We turned the concept into reality." },
+    { year: "Year 3", title: "Growing Together", text: "Thousands of happy customers worldwide." }
+  ]
+  const aboutTimelineBlocks = Object.fromEntries(
+    aboutTimelineContent.map((t, i) => [`abt${i + 1}`, { type: 'milestone', settings: { year: t.year, title: t.title, text: t.text } }])
+  )
+  const aboutHowItWorksBlocks = Object.fromEntries(
+    (content.how_it_works || []).map((s, i) => [`abthiw${i + 1}`, { type: 'step', settings: { title: s.title, text: s.text } }])
+  )
+  const aboutTestimonialBlocks = Object.fromEntries(
+    (content.testimonials || []).map((t, i) => [`abtr${i + 1}`, { type: 'testimonial', settings: { name: t.name, text: t.text, location: t.location, stars: t.rating } }])
+  )
+  const aboutValueBlocks = Object.fromEntries(
+    (content.multicolumn || []).map((m, i) => [`abtm${i + 1}`, { type: 'column', settings: { title: m.title, text: m.text } }])
+  )
+
   const aboutJson = {
     "sections": {
-      "hero": { "type": "zenya-video-hero", "settings": { "heading": "Our Story", "subheading": "How we started." } },
-      "rich_text": { "type": "zenya-rich-text", "settings": { "title": "Mission", "text": "Our mission is to provide the best products." } },
-      "visual_showcase": { "type": "zenya-visual-showcase", "settings": { "heading": "Craftsmanship", "text": "We pay attention to every detail." } },
-      "how_it_works": { "type": "zenya-how-it-works", "settings": { "heading": "Our Process", "subheading": "From concept to reality." } },
-      "timeline": { 
+      "hero": { "type": "zenya-hero", "settings": { "headline": content.pages?.about?.hero_heading || "Our Story", "subheadline": content.pages?.about?.hero_subheading || "Built on passion, delivered with care." } },
+      "rich_text": { "type": "zenya-rich-text", "settings": { "title": content.pages?.about?.mission_title || "Our Mission", "text": content.pages?.about?.mission_text || "We exist to create products that solve real problems." } },
+      "values": {
+        "type": "zenya-multicolumn",
+        "settings": { "title": content.pages?.about?.craftsmanship_heading || "What We Stand For" },
+        "blocks": aboutValueBlocks,
+        "block_order": Object.keys(aboutValueBlocks)
+      },
+      "how_it_works": {
+        "type": "zenya-how-it-works",
+        "settings": { "heading": content.pages?.about?.process_heading || "Our Process", "subheading": content.pages?.about?.process_subheading || "Thoughtful design. Quality delivery." },
+        "blocks": aboutHowItWorksBlocks,
+        "block_order": Object.keys(aboutHowItWorksBlocks)
+      },
+      "timeline": {
         "type": "zenya-timeline",
-        "blocks": {
-          "t1": { "type": "milestone", "settings": { "year": "2020", "title": "Founded", "text": "We started in a garage." } },
-          "t2": { "type": "milestone", "settings": { "year": "2022", "title": "Growth", "text": "We expanded to 10 countries." } },
-          "t3": { "type": "milestone", "settings": { "year": "2024", "title": "Future", "text": "The sky is the limit." } }
-        },
-        "block_order": ["t1", "t2", "t3"]
+        "blocks": aboutTimelineBlocks,
+        "block_order": Object.keys(aboutTimelineBlocks)
       },
-      "team": { 
-        "type": "zenya-multicolumn", 
-        "settings": { "title": "Meet the Team" },
-        "blocks": {
-          "m1": { "type": "column", "settings": { "title": "CEO", "text": "John Doe" } },
-          "m2": { "type": "column", "settings": { "title": "CTO", "text": "Jane Doe" } },
-          "m3": { "type": "column", "settings": { "title": "COO", "text": "Bob Smith" } }
-        },
-        "block_order": ["m1", "m2", "m3"]
+      "testimonials": {
+        "type": "zenya-testimonials",
+        "settings": { "title": "What Our Customers Say" },
+        "blocks": aboutTestimonialBlocks,
+        "block_order": Object.keys(aboutTestimonialBlocks)
       },
-      "newsletter": { "type": "zenya-newsletter" }
+      "stats": { "type": "zenya-stats" },
+      "newsletter": {
+        "type": "zenya-newsletter",
+        "settings": {
+          "title": content.newsletter?.title || "Stay in the Loop",
+          "text": content.newsletter?.text || "Get exclusive updates and early access."
+        }
+      }
     },
-    "order": ["hero", "rich_text", "visual_showcase", "how_it_works", "timeline", "team", "newsletter"]
+    "order": ["hero", "rich_text", "values", "how_it_works", "timeline", "testimonials", "stats", "newsletter"]
   }
   zip.folder('templates')?.file('page.about.json', JSON.stringify(aboutJson, null, 2))
 
-  // 7.2.2 Contact Page
+  // 7.2.2 Contact Page — AI-generated FAQ items
+  const contactFaqItems = (content.pages?.contact?.faq_items || []).length >= 2
+    ? content.pages!.contact!.faq_items!
+    : [
+        { q: "How fast is shipping?", a: content.faq?.find(f => /ship/i.test(f.q))?.a || "Most orders ship within 24-48 hours with tracking." },
+        { q: "What is your return policy?", a: content.guarantee?.text || "30-day hassle-free returns. No questions asked." }
+      ]
+  const contactFaqBlocks = Object.fromEntries(
+    contactFaqItems.map((q, i) => [`cfq${i + 1}`, { type: 'item', settings: { title: q.q, text: `<p>${q.a}</p>` } }])
+  )
+
   const contactJson = {
     "sections": {
-      "main": { "type": "main-page" },
+      "intro": {
+        "type": "zenya-rich-text",
+        "settings": {
+          "title": content.contact?.heading || "Get in Touch",
+          "text": content.contact?.subheading || "We'd love to hear from you. Our team is here to help."
+        }
+      },
       "contact_form": { "type": "zenya-contact" },
-      "map": { "type": "zenya-map" },
-      "faq": { 
-        "type": "zenya-accordion", 
-        "settings": { "title": "Common Questions" },
-        "blocks": {
-          "q1": { "type": "item", "settings": { "title": "Shipping Time?", "text": "<p>3-5 Business Days.</p>" } },
-          "q2": { "type": "item", "settings": { "title": "Returns?", "text": "<p>30 Days Free Returns.</p>" } }
-        },
-        "block_order": ["q1", "q2"]
+      "faq": {
+        "type": "zenya-accordion",
+        "settings": { "title": content.pages?.contact?.faq_heading || "Common Questions" },
+        "blocks": contactFaqBlocks,
+        "block_order": Object.keys(contactFaqBlocks)
       }
     },
-    "order": ["main", "contact_form", "map", "faq"]
+    "order": ["intro", "contact_form", "faq"]
   }
   zip.folder('templates')?.file('page.contact.json', JSON.stringify(contactJson, null, 2))
 
-  // 7.2.3 FAQ Page
+  // 7.2.3 FAQ Page — all AI-generated FAQ items
+  const faqPageItems = [
+    ...(content.pages?.faq?.items || []),
+    ...(content.faq || [])
+  ].filter((v, i, arr) => arr.findIndex(x => x.q === v.q) === i).slice(0, 8)
+
+  const faqPageBlocks = Object.fromEntries(
+    faqPageItems.map((q, i) => [`fpi${i + 1}`, { type: 'item', settings: { title: q.q, text: `<p>${q.a}</p>` } }])
+  )
+
   const faqJson = {
     "sections": {
       "main": { "type": "main-page" },
-      "search": { "type": "zenya-rich-text", "settings": { "title": "Help Center", "text": "Find answers below." } },
-      "accordion": { 
+      "intro": { "type": "zenya-rich-text", "settings": { "title": content.pages?.faq?.title || "Help Center", "text": content.pages?.faq?.intro || "Find the answers you need below." } },
+      "accordion": {
         "type": "zenya-accordion",
-        "blocks": {
-          "q1": { "type": "item", "settings": { "title": "How do I track my order?", "text": "<p>You will receive an email.</p>" } },
-          "q2": { "type": "item", "settings": { "title": "Can I cancel?", "text": "<p>Within 24 hours.</p>" } },
-          "q3": { "type": "item", "settings": { "title": "Do you ship internationally?", "text": "<p>Yes, we do.</p>" } }
-        },
-        "block_order": ["q1", "q2", "q3"]
+        "blocks": faqPageBlocks,
+        "block_order": Object.keys(faqPageBlocks)
       },
       "contact": { "type": "zenya-contact" }
     },
-    "order": ["main", "search", "accordion", "contact"]
+    "order": ["main", "intro", "accordion", "contact"]
   }
   zip.folder('templates')?.file('page.faq.json', JSON.stringify(faqJson, null, 2))
+
+  // 7.2.4 Shipping & Returns Pages (template-only content)
+  const shippingPolicyJson = {
+    "sections": {
+      "main": { "type": "main-page" },
+      "policy": {
+        "type": "zenya-accordion",
+        "settings": { "title": content.policies?.shipping?.title || "Shipping Policy" },
+        "blocks": (content.policies?.shipping?.bullets || ["Fast processing", "Tracked delivery", "Support if anything goes wrong"]).reduce((acc: any, t: string, i: number) => {
+          acc[`b${i + 1}`] = { "type": "item", "settings": { "title": `•`, "text": `<p>${t}</p>` } }
+          return acc
+        }, {}),
+        "block_order": (content.policies?.shipping?.bullets || ["Fast processing", "Tracked delivery", "Support if anything goes wrong"]).map((_: any, i: number) => `b${i + 1}`)
+      }
+    },
+    "order": ["main", "policy"]
+  }
+  zip.folder('templates')?.file('page.shipping.json', JSON.stringify(shippingPolicyJson, null, 2))
+
+  const returnsPolicyJson = {
+    "sections": {
+      "main": { "type": "main-page" },
+      "policy": {
+        "type": "zenya-accordion",
+        "settings": { "title": content.policies?.returns?.title || "Returns & Refunds" },
+        "blocks": (content.policies?.returns?.bullets || ["30-day returns", "Simple process", "Fast help from support"]).reduce((acc: any, t: string, i: number) => {
+          acc[`b${i + 1}`] = { "type": "item", "settings": { "title": `•`, "text": `<p>${t}</p>` } }
+          return acc
+        }, {}),
+        "block_order": (content.policies?.returns?.bullets || ["30-day returns", "Simple process", "Fast help from support"]).map((_: any, i: number) => `b${i + 1}`)
+      }
+    },
+    "order": ["main", "policy"]
+  }
+  zip.folder('templates')?.file('page.returns.json', JSON.stringify(returnsPolicyJson, null, 2))
 
   // 7.6 List Collections Page
   const mainListCollectionsSchema = {
@@ -3117,21 +3577,30 @@ ${JSON.stringify(imageTextSchema, null, 2)}
   const newsletterSchema = {
     name: "Newsletter",
     settings: [
-      { type: "text", id: "title", label: "Heading", default: "Subscribe to our emails" },
-      { type: "textarea", id: "text", label: "Subtext", default: "Be the first to know about new collections and exclusive offers." }
+      { type: "text", id: "title", label: "Heading", default: content.newsletter?.title || "Join the list" },
+      { type: "textarea", id: "text", label: "Subtext", default: content.newsletter?.text || "Get launches, deals, and tips. No spam." },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "text", id: "button_label", label: "Button Label", default: "Subscribe" },
+      { type: "text", id: "email_placeholder", label: "Email Placeholder", default: "Email address" }
     ],
     presets: [{ name: "Zenya Newsletter" }]
   }
   const newsletterLiquid = `
-<div class="py-24 bg-slate-900 text-white text-center">
-  <div class="container mx-auto px-6 max-w-2xl">
-    <h2 class="text-3xl font-bold mb-4">{{ section.settings.title }}</h2>
+<div class="relative overflow-hidden py-24 text-center bg-slate-900 text-white">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.primary_color }}, transparent 70%); opacity: .16; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.secondary_color }}, transparent 70%); opacity: .16; animation-duration: {{ 24 | minus: settings.motion_strength | at_least: 12 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 max-w-2xl relative">
+    <h2 class="text-3xl font-extrabold mb-4">{{ section.settings.title }}</h2>
     <p class="text-slate-300 mb-8">{{ section.settings.text }}</p>
     {% form 'customer', class: 'flex flex-col sm:flex-row gap-4' %}
       <input type="hidden" name="contact[tags]" value="newsletter">
-      <input type="email" name="contact[email]" placeholder="Email address" required class="flex-1 px-6 py-3 rounded-full text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary">
-      <button type="submit" class="px-8 py-3 rounded-full font-bold bg-white text-slate-900 hover:bg-slate-100 transition">
-        Subscribe
+      <input type="email" name="contact[email]" placeholder="{{ section.settings.email_placeholder }}" required class="flex-1 px-6 py-3 rounded-full text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary">
+      <button type="submit" class="px-8 py-3 rounded-full font-bold text-white shadow-lg hover:opacity-90 transition" style="background-color: {{ settings.primary_color }};">
+        {{ section.settings.button_label }}
       </button>
     {% endform %}
   </div>
@@ -4457,7 +4926,7 @@ ${JSON.stringify(timelineSchema, null, 2)}
         class="flex-1 bg-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:brightness-110 transition text-sm uppercase tracking-wide"
         style="background-color: {{ settings.primary_color }}"
       >
-        Add To Cart
+        {{ settings.add_to_cart_label }}
       </button>
     </div>
   </div>
@@ -4475,7 +4944,7 @@ ${JSON.stringify(timelineSchema, null, 2)}
               <div class="snap-center shrink-0 w-[85vw] relative aspect-square rounded-xl bg-slate-100 overflow-hidden shadow-sm">
                 {% case media.media_type %}
                   {% when 'image' %}
-                    {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'lazy', widths: '400, 600, 800', style: 'object-position: {{ media.presentation.focal_point }}' }}
+                    {{ media | image_tag: class: 'h-full w-full object-cover', loading: 'lazy', widths: '400, 600, 800' }}
                   {% when 'video' %}
                     {{ media | video_tag: class: 'h-full w-full object-cover', controls: true, image_size: '800x' }}
                   {% when 'external_video' %}
@@ -4740,7 +5209,7 @@ ${JSON.stringify(timelineSchema, null, 2)}
               type="submit" 
               class="w-full rounded-full py-4 text-xl font-bold text-white shadow-xl transition hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2 bg-primary mt-6 mb-4"
             >
-              <span>Add to Cart</span>
+              <span>{{ settings.add_to_cart_label }}</span>
               <span class="text-sm opacity-90 font-normal">- <span x-text="savings > 0 ? 'Save ' + '{{ cart.currency.symbol }}' + savings : ''"></span></span>
             </button>
             
@@ -4961,9 +5430,7 @@ ${JSON.stringify(productSchema, null, 2)}
             
             {% form 'product', product %}
               <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-              <button type="submit" class="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded hover:bg-primary transition">
-                Add to Cart
-              </button>
+              <button type="submit" class="text-xs font-bold bg-slate-900 text-white px-3 py-1.5 rounded hover:bg-primary transition">{{ settings.quick_add_label }}</button>
             {% endform %}
           </div>
         </div>
@@ -4994,7 +5461,9 @@ ${JSON.stringify(productSchema, null, 2)}
     settings: [
       { type: "text", id: "heading", label: "Heading", default: "Why Choose Us?" },
       { type: "text", id: "us_label", label: "Our Brand Label", default: safeShopName },
-      { type: "text", id: "them_label", label: "Others Label", default: "Others" }
+      { type: "text", id: "them_label", label: "Others Label", default: "Others" },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#f8fafc" }
     ],
     blocks: [
       {
@@ -5021,36 +5490,38 @@ ${JSON.stringify(productSchema, null, 2)}
   }
 
   const comparisonLiquid = `
-<div class="py-24 bg-slate-50">
-  <div class="container mx-auto px-6 max-w-4xl">
+<div class="relative overflow-hidden py-24" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.secondary_color }}, transparent 70%); opacity: .12; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.primary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 24 | minus: settings.motion_strength | at_least: 12 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 max-w-4xl relative">
     <div class="text-center mb-12">
       <h2 class="text-3xl lg:text-4xl font-extrabold mb-4 text-slate-900">{{ section.settings.heading }}</h2>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-      <!-- Header -->
+    <div class="bg-white/90 backdrop-blur rounded-3xl shadow-xl overflow-hidden border border-slate-200">
       <div class="grid grid-cols-[2fr_1fr_1fr] gap-4 p-6 bg-slate-100 font-extrabold text-center text-sm lg:text-base">
         <div class="text-left text-slate-900">Feature</div>
         <div class="text-slate-500">{{ section.settings.them_label }}</div>
         <div class="text-primary">{{ section.settings.us_label }}</div>
       </div>
 
-      <!-- Rows -->
       {% for block in section.blocks %}
         <div class="grid grid-cols-[2fr_1fr_1fr] gap-4 p-6 border-b border-slate-100 items-center text-center last:border-0 hover:bg-slate-50 transition">
           <div class="text-left font-bold text-slate-700 text-sm lg:text-base">{{ block.settings.feature }}</div>
           
-          <!-- Them -->
           <div>
             {% if block.settings.them_check %}
-              <span class="text-green-500 text-xl">✔</span>
+              <span class="text-green-600 text-xl">✔</span>
             {% else %}
               <span class="text-slate-300 text-xl">✘</span>
             {% endif %}
           </div>
 
-          <!-- Us -->
-          <div class="bg-green-50 -my-4 py-4 rounded-lg">
+          <div class="bg-white -my-4 py-4 rounded-2xl border border-slate-100 shadow-sm">
             {% if block.settings.us_check %}
               <span class="text-primary text-2xl">✔</span>
             {% else %}
@@ -5073,15 +5544,53 @@ ${JSON.stringify(comparisonSchema, null, 2)}
     "sections": {
       "main": { "type": "zenya-product" },
       "pickup_availability": { "type": "pickup-availability" },
+      "trust_badges": {
+        "type": "zenya-trust-badges",
+        "settings": { "heading": content.trust_badges?.heading || "Shop with Confidence" }
+      },
+      "volume_bundles": {
+        "type": "zenya-volume-bundles",
+        "settings": { "heading": content.volume_bundles?.heading || "Buy More, Save More" }
+      },
+      "before_after": {
+        "type": "zenya-before-after",
+        "settings": {
+          "heading": content.before_after?.heading || "See the Difference",
+          "label_before": content.before_after?.label_before || "Before",
+          "label_after": content.before_after?.label_after || "After"
+        }
+      },
+      "how_it_works": {
+        "type": "zenya-how-it-works",
+        "settings": { "heading": "How it works" },
+        "blocks": (content.how_it_works || []).reduce((acc, s, i) => ({
+          ...acc,
+          [`step_${i}`]: {
+            "type": "step",
+            "settings": { "title": s.title, "text": s.text }
+          }
+        }), {}),
+        "block_order": (content.how_it_works || []).map((_, i) => `step_${i}`)
+      },
       "comparison": { "type": "zenya-comparison" },
       "features": { 
         "type": "zenya-features",
-        "blocks": {
-          "f1": { "type": "feature", "settings": { "title": "Fast Shipping", "desc": "Free worldwide shipping on all orders." } },
-          "f2": { "type": "feature", "settings": { "title": "2 Year Warranty", "desc": "We stand behind our quality." } },
-          "f3": { "type": "feature", "settings": { "title": "24/7 Support", "desc": "Contact us anytime." } }
+        "settings": {
+          "heading": `Why ${name} works`,
+          "subheading": "Clear benefits that matter day one."
         },
-        "block_order": ["f1", "f2", "f3"]
+        "blocks": (content.features || []).reduce((acc, f, i) => ({
+          ...acc,
+          [`feature_${i}`]: {
+            "type": "feature",
+            "settings": {
+              "title": f.title,
+              "desc": f.desc,
+              "icon": f.icon || "star"
+            }
+          }
+        }), {}),
+        "block_order": (content.features || []).map((_, i) => `feature_${i}`)
       },
       "testimonials": {
         "type": "zenya-testimonials",
@@ -5112,11 +5621,24 @@ ${JSON.stringify(comparisonSchema, null, 2)}
         }), {}),
         "block_order": content.faq.map((_, i) => `faq_${i}`)
       },
+      "guarantee": {
+        "type": "zenya-guarantee",
+        "settings": {
+          "title": content.guarantee?.title || "Our Promise",
+          "text": content.guarantee?.text || "Satisfaction guaranteed."
+        }
+      },
       "related": { "type": "related-products" },
       "complementary": { "type": "complementary-products" },
-      "newsletter": { "type": "zenya-newsletter" }
+      "newsletter": {
+        "type": "zenya-newsletter",
+        "settings": {
+          "title": content.newsletter?.title || "Get offers first",
+          "text": content.newsletter?.text || "Subscribe for updates and exclusive deals."
+        }
+      }
     },
-    "order": ["main", "pickup_availability", "comparison", "features", "testimonials", "faq", "related", "complementary", "newsletter"]
+    "order": ["main", "trust_badges", "volume_bundles", "before_after", "how_it_works", "features", "comparison", "testimonials", "faq", "guarantee", "newsletter", "complementary", "related"]
   }
   zip.folder('templates')?.file('product.json', JSON.stringify(zenyaProductJson, null, 2))
 
@@ -5781,264 +6303,6 @@ ${JSON.stringify(orderSchema, null, 2)}
   zip.folder('templates')?.file('customers/order.json', JSON.stringify({ "sections": { "main": { "type": "main-order" } }, "order": ["main"] }, null, 2))
 
   // ==========================================
-  // 15. CART PAGE
-  // ==========================================
-  const cartSchema = { "name": "Cart", "settings": [] }
-  const cartLiquid = `
-<div class="py-20 bg-slate-50 min-h-[60vh]">
-  <div class="container mx-auto px-6 max-w-4xl">
-    <h1 class="text-4xl font-extrabold text-slate-900 mb-8 text-center">Your Cart</h1>
-    {% if cart.item_count > 0 %}
-      <form action="{{ routes.cart_url }}" method="post" novalidate class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="p-6 md:p-8 space-y-8">
-          <div class="space-y-6">
-            {% for item in cart.items %}
-              <div class="flex items-center gap-6 pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                <div class="w-24 h-24 shrink-0 bg-slate-100 rounded-lg overflow-hidden relative">
-                  {% if item.image %}
-                    <img src="{{ item.image | image_url: width: 200 }}" alt="{{ item.title | escape }}" width="200" height="200" class="w-full h-full object-cover">
-                  {% else %}
-                    {{ 'product-1' | placeholder_svg_tag: 'w-full h-full object-cover opacity-50' }}
-                  {% endif %}
-                </div>
-                <div class="flex-1">
-                  <a href="{{ item.url }}" class="font-bold text-slate-900 hover:text-primary transition text-lg">{{ item.product.title }}</a>
-                  {% unless item.product.has_only_default_variant %}
-                    <p class="text-slate-500 text-sm mt-1">{{ item.variant.title }}</p>
-                  {% endunless %}
-                  <div class="mt-2 text-sm text-slate-500">
-                    {{ item.final_price | money }}
-                  </div>
-                </div>
-                <div class="flex items-center gap-4">
-                  <div class="flex items-center border border-slate-200 rounded-lg overflow-hidden">
-                    <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | minus: 1 }}" class="px-3 py-1 hover:bg-slate-50 transition">-</a>
-                    <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" class="w-12 text-center border-none focus:ring-0 p-0 text-sm font-bold">
-                    <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity={{ item.quantity | plus: 1 }}" class="px-3 py-1 hover:bg-slate-50 transition">+</a>
-                  </div>
-                  <a href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity=0" class="text-red-500 hover:text-red-700 p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  </a>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-          
-          <div class="border-t border-slate-100 pt-8">
-            <div class="flex justify-between items-end mb-6">
-              <span class="text-slate-600 font-medium">Subtotal</span>
-              <span class="text-3xl font-extrabold text-slate-900">{{ cart.total_price | money }}</span>
-            </div>
-            <p class="text-slate-500 text-sm mb-8 text-right">Taxes and shipping calculated at checkout</p>
-            <div class="flex flex-col gap-4">
-              <button type="submit" name="checkout" class="w-full py-4 bg-primary text-white font-bold rounded-xl text-lg hover:brightness-110 transition shadow-lg" style="background-color: {{ settings.primary_color }};">Check Out</button>
-              
-              {% if additional_checkout_buttons %}
-                <div class="dynamic-checkout-buttons mt-4">
-                  {{ content_for_additional_checkout_buttons }}
-                </div>
-              {% endif %}
-
-              <a href="{{ routes.all_products_collection_url }}" class="text-center text-slate-600 font-bold hover:text-slate-900 transition">Continue Shopping</a>
-            </div>
-          </div>
-        </div>
-      </form>
-    {% else %}
-      <div class="text-center py-12">
-        <div class="text-6xl mb-6">🛒</div>
-        <h2 class="text-2xl font-bold text-slate-900 mb-4">Your cart is empty</h2>
-        <p class="text-slate-600 mb-8">Looks like you haven't added anything yet.</p>
-        <a href="{{ routes.all_products_collection_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition hover:opacity-90 hover:scale-105" style="background-color: {{ settings.primary_color }};">
-          Start Shopping
-        </a>
-      </div>
-    {% endif %}
-  </div>
-</div>
-{% schema %}
-${JSON.stringify(cartSchema, null, 2)}
-{% endschema %}
-  `
-  zip.folder('sections')?.file('main-cart.liquid', cartLiquid)
-  zip.folder('templates')?.file('cart.json', JSON.stringify({ sections: { main: { type: "main-cart" }, upsell: { type: "zenya-featured-collection", settings: { title: "Don't Forget These" } } }, order: ["main", "upsell"] }, null, 2))
-
-  // ==========================================
-  // 16. COLLECTION PAGE
-  // ==========================================
-  const collectionSchema = { "name": "Collection Page", "settings": [] }
-  const collectionLiquid = `
-{% paginate collection.products by 16 %}
-<div class="py-20 bg-white">
-  <div class="container mx-auto px-6">
-    <div class="text-center mb-16">
-      <h1 class="text-4xl font-extrabold text-slate-900 mb-4">{{ collection.title }}</h1>
-      {% if collection.description != blank %}
-        <div class="max-w-2xl mx-auto text-slate-600 prose prose-slate">
-          {{ collection.description }}
-        </div>
-      {% endif %}
-    </div>
-
-    <!-- Filters/Sorting Stub -->
-    <div class="flex flex-col lg:flex-row gap-8">
-      <!-- Sidebar Filters -->
-      <aside class="w-full lg:w-64 shrink-0" x-data="{ open: false }">
-        <div class="lg:hidden mb-4">
-          <button @click="open = !open" class="flex items-center gap-2 font-bold text-slate-900 border border-slate-300 rounded-lg px-4 py-2 w-full justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-            Filters
-          </button>
-        </div>
-        
-        <form class="space-y-8" :class="open ? 'block' : 'hidden lg:block'">
-          {% for filter in collection.filters %}
-            <div class="border-b border-slate-200 pb-6 last:border-0">
-              <h3 class="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wide">{{ filter.label }}</h3>
-              
-              {% case filter.type %}
-                {% when 'list' %}
-                  <ul class="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                    {% for value in filter.values %}
-                      <li class="flex items-center gap-2">
-                        <input type="checkbox" 
-                          name="{{ value.param_name }}" 
-                          value="{{ value.value }}" 
-                          id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
-                          {% if value.active %}checked{% endif %}
-                          {% if value.count == 0 and value.active == false %}disabled{% endif %}
-                          class="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4"
-                          onchange="this.form.submit()"
-                        >
-                        <label for="Filter-{{ filter.label | escape }}-{{ forloop.index }}" class="text-sm text-slate-600 flex-1 cursor-pointer {% if value.count == 0 and value.active == false %}opacity-50{% endif %}">
-                          {{ value.label }} <span class="text-slate-400 text-xs">({{ value.count }})</span>
-                        </label>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                
-                {% when 'price_range' %}
-                  <div class="flex items-center gap-2">
-                    <div class="relative flex-1">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">{{ cart.currency.symbol }}</span>
-                      <input type="number" 
-                        name="{{ filter.min_value.param_name }}" 
-                        {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
-                        placeholder="0"
-                        class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
-                        onchange="this.form.submit()"
-                      >
-                    </div>
-                    <span class="text-slate-400">-</span>
-                    <div class="relative flex-1">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">{{ cart.currency.symbol }}</span>
-                      <input type="number" 
-                        name="{{ filter.max_value.param_name }}" 
-                        {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
-                        placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
-                        class="w-full pl-6 pr-2 py-2 border border-slate-200 rounded text-sm focus:ring-primary focus:border-primary"
-                        onchange="this.form.submit()"
-                      >
-                    </div>
-                  </div>
-              {% endcase %}
-            </div>
-          {% endfor %}
-          
-          <div class="pt-2 flex flex-col gap-2">
-             <noscript>
-               <button type="submit" class="w-full py-2 bg-slate-900 text-white font-bold rounded hover:opacity-90 transition text-sm">Apply Filters</button>
-             </noscript>
-             <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" class="text-center text-sm text-slate-500 underline hover:text-primary">Clear all filters</a>
-          </div>
-        </form>
-      </aside>
-
-      <div class="flex-1">
-        <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
-          <div class="text-sm text-slate-500">
-            Showing {{ collection.products_count }} products
-          </div>
-          <div class="flex items-center gap-4">
-             <label for="SortBy" class="sr-only">Sort by</label>
-             <select id="SortBy" class="border-none text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer bg-transparent" onchange="location = this.value;">
-                {% for option in collection.sort_options %}
-                  <option value="?sort_by={{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
-                {% endfor %}
-             </select>
-          </div>
-        </div>
-    
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-x-6 gap-y-10">
-          {% for product in collection.products %}
-        <div class="group">
-          <div class="relative aspect-[3/4] mb-4 overflow-hidden rounded-xl bg-slate-100">
-            {% if product.featured_image %}
-              <img 
-                src="{{ product.featured_image | image_url: width: 600 }}" 
-                alt="{{ product.featured_image.alt | escape }}"
-                width="{{ product.featured_image.width }}"
-                height="{{ product.featured_image.height }}"
-                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-              >
-              <!-- Secondary Image on Hover -->
-              {% if product.images[1] %}
-                <img 
-                  src="{{ product.images[1] | image_url: width: 600 }}" 
-                  alt="{{ product.images[1].alt | escape }}"
-                  width="{{ product.images[1].width }}"
-                  height="{{ product.images[1].height }}"
-                  class="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-300 group-hover:opacity-100"
-                >
-              {% endif %}
-            {% else %}
-              {{ 'product-1' | placeholder_svg_tag: 'h-full w-full object-cover opacity-50' }}
-            {% endif %}
-            
-            {% if product.compare_at_price > product.price %}
-              <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
-                SALE
-              </div>
-            {% endif %}
-            
-            <button class="absolute bottom-4 right-4 h-10 w-10 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-900 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition duration-300 hover:bg-primary hover:text-white" onclick="window.location.href='{{ product.url }}'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-            </button>
-          </div>
-          
-          <h3 class="text-sm font-bold text-slate-900 mb-1">
-            <a href="{{ product.url }}" class="hover:text-primary transition">{{ product.title }}</a>
-          </h3>
-          <div class="flex items-center gap-2 text-sm">
-            <span class="font-medium text-slate-900">{{ product.price | money }}</span>
-            {% if product.compare_at_price > product.price %}
-              <span class="text-slate-400 line-through text-xs">{{ product.compare_at_price | money }}</span>
-            {% endif %}
-          </div>
-        </div>
-      {% else %}
-        <div class="col-span-full text-center py-12 text-slate-500">
-          No products found in this collection.
-        </div>
-      {% endfor %}
-    </div>
-
-    {% if paginate.pages > 1 %}
-      <div class="mt-16 text-center">
-        {{ paginate | default_pagination }}
-      </div>
-    {% endif %}
-  </div>
-</div>
-{% endpaginate %}
-{% schema %}
-${JSON.stringify(collectionSchema, null, 2)}
-{% endschema %}
-  `
-  zip.folder('sections')?.file('main-collection.liquid', collectionLiquid)
-  zip.folder('templates')?.file('collection.json', JSON.stringify({ "sections": { "main": { "type": "main-collection" } }, "order": ["main"] }, null, 2))
-
-  // ==========================================
   // 17. 404 PAGE
   // ==========================================
   {
@@ -6049,9 +6313,7 @@ ${JSON.stringify(collectionSchema, null, 2)}
     <div class="text-9xl mb-4">🤷‍♂️</div>
     <h1 class="text-4xl font-extrabold text-slate-900 mb-4">Page Not Found</h1>
     <p class="text-slate-600 mb-8 max-w-md mx-auto">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-    <a href="{{ routes.root_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition hover:opacity-90 hover:scale-105" style="background-color: {{ settings.primary_color }};">
-      Back to Home
-    </a>
+    <a href="{{ routes.root_url }}" class="inline-flex items-center justify-center rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition hover:opacity-90 hover:scale-105" style="background-color: {{ settings.primary_color }};">{{ settings.start_shopping_label }}</a>
   </div>
 </div>
 {% schema %}
@@ -6149,12 +6411,1034 @@ ${JSON.stringify(searchSchema, null, 2)}
   zip.folder('sections')?.file('main-search.liquid', searchLiquid)
   }
 
-
+  const mustHaveFiles = [
+    'layout/theme.liquid',
+    'config/settings_schema.json',
+    'config/settings_data.json',
+    'sections/header-group.json',
+    'sections/footer-group.json',
+    'sections/zenya-header.liquid',
+    'sections/zenya-footer.liquid',
+    'sections/zenya-features.liquid',
+    'templates/index.json',
+    'templates/product.json',
+    'templates/cart.json',
+    'templates/collection.json',
+  ]
+  const missing = mustHaveFiles.filter((p) => !zip.file(p))
+  if (missing.length) {
+    throw new Error(`Theme build missing files: ${missing.join(', ')}`)
+  }
 
   return zip
 }
 
-export async function generateShopifyTheme(name: string, content: ThemeContent, colors: { primary: string; secondary: string }) {
-  const zip = await prepareThemeZip(name, content, colors)
-  return await zip.generateAsync({ type: 'blob' })
+export function prepareThemeZipFromZero(name: string, content: ThemeContent, colors: { primary: string; secondary: string }, images: string[] = []): JSZip {
+  const zip = new JSZip()
+  const safeShopName = content.shopName || name
+
+  const settingsSchema = [
+    {
+      "name": "theme_info",
+      "theme_name": "Zenya Nova",
+      "theme_version": "2.0.0",
+      "theme_author": "Zenya AI",
+      "theme_documentation_url": "https://zenya.ai",
+      "theme_support_url": "https://zenya.ai"
+    },
+    {
+      "name": "Design",
+      "settings": [
+        { "type": "header", "content": "Brand" },
+        { "type": "text", "id": "brand_name", "label": "Brand Name", "default": safeShopName },
+        { "type": "color", "id": "primary_color", "label": "Primary Color", "default": colors.primary },
+        { "type": "color", "id": "secondary_color", "label": "Secondary Color", "default": colors.secondary },
+        { "type": "header", "content": "Typography" },
+        { "type": "select", "id": "font_style", "label": "Font Style", "default": "system", "options": [
+          { "value": "system", "label": "System" },
+          { "value": "serif", "label": "Serif" }
+        ]},
+        { "type": "header", "content": "Motion" },
+        { "type": "checkbox", "id": "motion_enabled", "label": "Enable Animations", "default": true },
+        { "type": "range", "id": "motion_strength", "label": "Animation Intensity", "min": 0, "max": 100, "step": 5, "default": 65 }
+      ]
+    },
+    {
+      "name": "Actions",
+      "settings": [
+        { "type": "text", "id": "add_to_cart_label", "label": "Add to Cart Label", "default": "Add to Cart" },
+        { "type": "text", "id": "checkout_label", "label": "Checkout Label", "default": content.cart_drawer?.checkout_cta || "Checkout" }
+      ]
+    }
+  ]
+  zip.folder('config')?.file('settings_schema.json', JSON.stringify(settingsSchema, null, 2))
+
+  const settingsData = {
+    "current": "Zenya Nova",
+    "presets": {
+      "Zenya Nova": {
+        "brand_name": safeShopName,
+        "primary_color": colors.primary,
+        "secondary_color": colors.secondary,
+        "font_style": "system",
+        "motion_enabled": true,
+        "motion_strength": 65,
+        "add_to_cart_label": "Add to Cart",
+        "checkout_label": content.cart_drawer?.checkout_cta || "Checkout"
+      }
+    }
+  }
+  zip.folder('config')?.file('settings_data.json', JSON.stringify(settingsData, null, 2))
+
+  zip.folder('locales')?.file(
+    'en.default.json',
+    JSON.stringify(
+      {
+        general: {
+          password_page: {
+            login_form_heading: 'Enter store using password',
+            login_password_button: 'Enter using password',
+          },
+        },
+      },
+      null,
+      2
+    )
+  )
+
+  zip.folder('assets')?.file('alpine.js', ALPINE_JS)
+  zip.folder('assets')?.file('tailwind.js', TAILWIND_JS)
+
+  const layout = `
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>{{ page_title }}</title>
+    {{ content_for_header }}
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+    <script defer src="{{ 'tailwind.js' | asset_url }}"></script>
+    <script>
+      window.tailwind = window.tailwind || {};
+      window.tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '{{ settings.primary_color }}',
+              secondary: '{{ settings.secondary_color }}',
+            }
+          }
+        }
+      }
+    </script>
+    <script defer src="{{ 'alpine.js' | asset_url }}"></script>
+    <style>
+      [x-cloak] { display: none !important; }
+      body {
+        font-family: {% if settings.font_style == 'serif' %}ui-serif, Georgia, Cambria, "Times New Roman", Times, serif{% else %}system-ui, -apple-system, sans-serif{% endif %};
+        -webkit-font-smoothing: antialiased;
+        background: #f8fafc;
+        color: #0f172a;
+      }
+      .zenya-motion { will-change: transform, opacity; }
+      @media (prefers-reduced-motion: reduce) { .zenya-motion { animation: none !important; transition: none !important; } }
+      @keyframes zenyaFloat { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(40px, -30px, 0) scale(1.06); } }
+      @keyframes zenyaFloatReverse { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(-34px, 28px, 0) scale(1.05); } }
+      @keyframes zenyaGradientShift { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: .22; } 50% { transform: translate3d(0, -18px, 0) scale(1.04); opacity: .28; } }
+      .zenya-blob { position: absolute; width: 32rem; height: 32rem; border-radius: 9999px; filter: blur(46px); opacity: .22; mix-blend-mode: multiply; }
+      .zenya-blob--a { top: -14rem; left: -14rem; animation: zenyaFloat 10s ease-in-out infinite; }
+      .zenya-blob--b { bottom: -16rem; right: -16rem; animation: zenyaFloatReverse 11s ease-in-out infinite; }
+      .zenya-sheen { animation: zenyaGradientShift 9s ease-in-out infinite; }
+    </style>
+  </head>
+  <body>
+    {% sections 'header-group' %}
+    <main id="MainContent" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+    {% sections 'footer-group' %}
+  </body>
+</html>
+  `
+  zip.folder('layout')?.file('theme.liquid', layout)
+
+  const headerGroup = {
+    name: "Header",
+    sections: { header: { type: "zenya-nova-header", settings: {} } },
+    order: ["header"]
+  }
+  zip.folder('sections')?.file('header-group.json', JSON.stringify(headerGroup, null, 2))
+
+  const footerGroup = {
+    name: "Footer",
+    sections: { footer: { type: "zenya-nova-footer", settings: {} } },
+    order: ["footer"]
+  }
+  zip.folder('sections')?.file('footer-group.json', JSON.stringify(footerGroup, null, 2))
+
+  const novaHeaderSchema = {
+    name: "Nova Header",
+    enabled_on: { groups: ["header"] },
+    settings: [
+      { type: "image_picker", id: "logo", label: "Logo" },
+      { type: "range", id: "logo_width", label: "Logo Width", min: 80, max: 220, step: 10, default: 140, unit: "px" },
+      { type: "link_list", id: "menu", label: "Menu", default: "main-menu" },
+      { type: "checkbox", id: "sticky", label: "Sticky Header", default: true },
+      { type: "header", content: "Announcement" },
+      { type: "checkbox", id: "show_announcement", label: "Show Announcement", default: true },
+      { type: "text", id: "announcement_text", label: "Announcement Text", default: content.countdown?.heading || "Free shipping today • Limited stock" },
+      { type: "url", id: "announcement_link", label: "Announcement Link" },
+      { type: "header", content: "CTA" },
+      { type: "checkbox", id: "show_cta", label: "Show CTA", default: true },
+      { type: "text", id: "cta_label", label: "CTA Label", default: content.hero.cta },
+      { type: "url", id: "cta_link", label: "CTA Link" }
+    ],
+    presets: [{ name: "Zenya Nova Header" }]
+  }
+
+  const novaHeaderLiquid = `
+<header class="bg-white/80 backdrop-blur border-b border-slate-200 {% if section.settings.sticky %}sticky top-0 z-40{% endif %}">
+  {% if section.settings.show_announcement %}
+    {% assign ann_link = section.settings.announcement_link %}
+    <div class="px-4 py-2 text-center text-xs font-bold uppercase tracking-wider" style="background: {{ settings.primary_color }}; color: white;">
+      {% if ann_link != blank %}
+        <a href="{{ ann_link }}" class="underline decoration-white/40 hover:decoration-white transition">{{ section.settings.announcement_text }}</a>
+      {% else %}
+        {{ section.settings.announcement_text }}
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-6">
+    <div class="flex items-center gap-3">
+      <a href="{{ routes.root_url }}" class="no-underline text-slate-900 font-extrabold tracking-tight text-xl">
+        {% if section.settings.logo != blank %}
+          {{ section.settings.logo | image_url: width: 480 | image_tag: class: 'h-auto', style: 'max-width: ' | append: section.settings.logo_width | append: 'px;' }}
+        {% else %}
+          {{ settings.brand_name | default: shop.name }}
+        {% endif %}
+      </a>
+    </div>
+
+    <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-700">
+      {% for link in linklists[section.settings.menu].links %}
+        <a href="{{ link.url }}" class="hover:text-primary transition">{{ link.title }}</a>
+      {% else %}
+        <a href="{{ routes.root_url }}" class="hover:text-primary transition">Home</a>
+        <a href="{{ routes.all_products_collection_url }}" class="hover:text-primary transition">Shop</a>
+      {% endfor %}
+    </nav>
+
+    <div class="flex items-center gap-3">
+      {% assign cta_href = section.settings.cta_link %}
+      {% if cta_href == blank %}{% assign cta_href = routes.all_products_collection_url %}{% endif %}
+      {% if section.settings.show_cta %}
+        <a href="{{ cta_href }}" class="hidden sm:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]" style="background: {{ settings.primary_color }};">
+          {{ section.settings.cta_label }}
+        </a>
+      {% endif %}
+      <a href="{{ routes.cart_url }}" class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-slate-100 hover:bg-slate-200 transition" aria-label="Cart">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      </a>
+    </div>
+  </div>
+</header>
+{% schema %}
+${JSON.stringify(novaHeaderSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-header.liquid', novaHeaderLiquid)
+
+  const novaFooterSchema = {
+    name: "Nova Footer",
+    enabled_on: { groups: ["footer"] },
+    settings: [
+      { type: "textarea", id: "tagline", label: "Tagline", default: "Built for conversion. Designed for trust. Made to scale." },
+      { type: "link_list", id: "menu_1", label: "Menu 1", default: "footer" },
+      { type: "link_list", id: "menu_2", label: "Menu 2", default: "main-menu" },
+      { type: "text", id: "copyright", label: "Copyright", default: `© ${new Date().getFullYear()} ${safeShopName}. All rights reserved.` }
+    ],
+    presets: [{ name: "Zenya Nova Footer" }]
+  }
+
+  const novaFooterLiquid = `
+<footer class="bg-slate-950 text-white">
+  <div class="container mx-auto px-6 py-14">
+    <div class="grid gap-10 md:grid-cols-4">
+      <div class="md:col-span-2">
+        <div class="text-2xl font-extrabold tracking-tight mb-3">{{ settings.brand_name | default: shop.name }}</div>
+        <div class="text-slate-300 max-w-md whitespace-pre-line">{{ section.settings.tagline }}</div>
+        <div class="mt-6 flex flex-wrap gap-2 opacity-90">
+          {% for type in shop.enabled_payment_types %}
+            <div class="h-9 bg-white rounded px-2 flex items-center">
+              {{ type | payment_type_svg_tag: class: 'h-5' }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <div class="font-bold mb-3">{{ linklists[section.settings.menu_1].title | default: 'Shop' }}</div>
+        <ul class="space-y-2 text-sm text-slate-300">
+          {% for link in linklists[section.settings.menu_1].links %}
+            <li><a class="hover:text-white transition" href="{{ link.url }}">{{ link.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div>
+        <div class="font-bold mb-3">{{ linklists[section.settings.menu_2].title | default: 'Support' }}</div>
+        <ul class="space-y-2 text-sm text-slate-300">
+          {% for link in linklists[section.settings.menu_2].links %}
+            <li><a class="hover:text-white transition" href="{{ link.url }}">{{ link.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 pt-8 border-t border-white/10 text-sm text-slate-400 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+      <div>{{ section.settings.copyright }}</div>
+      <div class="flex gap-4">
+        <a class="hover:text-white transition" href="{{ routes.privacy_policy_url | default: routes.root_url }}">Privacy</a>
+        <a class="hover:text-white transition" href="{{ routes.terms_of_service_url | default: routes.root_url }}">Terms</a>
+      </div>
+    </div>
+  </div>
+</footer>
+{% schema %}
+${JSON.stringify(novaFooterSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-footer.liquid', novaFooterLiquid)
+
+  const novaHeroSchema = {
+    name: "Nova Hero",
+    settings: [
+      { type: "text", id: "headline", label: "Headline", default: content.hero.headline },
+      { type: "textarea", id: "subheadline", label: "Subheadline", default: content.hero.subheadline },
+      { type: "text", id: "cta_label", label: "CTA Label", default: content.hero.cta },
+      { type: "url", id: "cta_link", label: "CTA Link" },
+      { type: "image_picker", id: "image", label: "Image" },
+      { type: "text", id: "external_image_url", label: "External Image URL (Fallback)", default: images[0] || "" },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: true },
+      { type: "textarea", id: "badge_text", label: "Badge Text", default: "Trusted by 10k+ customers" }
+    ],
+    presets: [{ name: "Zenya Nova Hero" }]
+  }
+
+  const novaHeroLiquid = `
+<section class="relative overflow-hidden bg-white">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.primary_color }}, transparent 70%); animation-duration: {{ 16 | minus: settings.motion_strength | at_least: 8 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.secondary_color }}, transparent 70%); animation-duration: {{ 18 | minus: settings.motion_strength | at_least: 9 }}s;"></div>
+      <div class="absolute inset-0 zenya-sheen zenya-motion" style="background: radial-gradient(circle at 20% 10%, {{ settings.secondary_color }}, transparent 55%), radial-gradient(circle at 90% 60%, {{ settings.primary_color }}, transparent 55%);"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 py-20 lg:py-28 grid gap-14 lg:grid-cols-2 items-center relative">
+    <div>
+      <div class="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-extrabold uppercase tracking-wider mb-6">
+        <span class="h-2 w-2 rounded-full bg-green-400"></span>
+        <span>{{ section.settings.badge_text }}</span>
+      </div>
+      <h1 class="text-4xl lg:text-6xl font-extrabold tracking-tight leading-[1.02] text-slate-900">{{ section.settings.headline }}</h1>
+      <p class="mt-6 text-lg lg:text-xl text-slate-600 leading-relaxed max-w-xl">{{ section.settings.subheadline }}</p>
+      {% assign hero_link = section.settings.cta_link %}
+      {% if hero_link == blank %}{% assign hero_link = routes.all_products_collection_url %}{% endif %}
+      <div class="mt-10 flex flex-wrap items-center gap-4">
+        <a href="{{ hero_link }}" class="inline-flex items-center justify-center rounded-full px-8 py-4 text-base font-extrabold text-white shadow-xl transition hover:opacity-90 active:scale-[0.98]" style="background: {{ settings.primary_color }};">
+          {{ section.settings.cta_label }}
+        </a>
+        <a href="#zenya-nova-proof" class="inline-flex items-center justify-center rounded-full px-8 py-4 text-base font-bold text-slate-900 bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition">
+          See results
+        </a>
+      </div>
+      <div class="mt-10 grid grid-cols-3 gap-3 max-w-md text-xs text-slate-700">
+        <div class="rounded-2xl bg-white/80 backdrop-blur border border-slate-100 p-4 shadow-sm">
+          <div class="font-extrabold text-slate-900 text-sm">Fast</div>
+          <div class="opacity-80">Shipping</div>
+        </div>
+        <div class="rounded-2xl bg-white/80 backdrop-blur border border-slate-100 p-4 shadow-sm">
+          <div class="font-extrabold text-slate-900 text-sm">30-day</div>
+          <div class="opacity-80">Returns</div>
+        </div>
+        <div class="rounded-2xl bg-white/80 backdrop-blur border border-slate-100 p-4 shadow-sm">
+          <div class="font-extrabold text-slate-900 text-sm">Secure</div>
+          <div class="opacity-80">Checkout</div>
+        </div>
+      </div>
+    </div>
+    <div class="relative">
+      <div class="relative overflow-hidden rounded-[2rem] bg-slate-100 shadow-2xl border border-slate-200">
+        {% if section.settings.image != blank %}
+          {{ section.settings.image | image_url: width: 1400 | image_tag: class: 'w-full object-cover aspect-[4/3]' }}
+        {% elsif section.settings.external_image_url != blank %}
+          <img src="{{ section.settings.external_image_url }}" class="w-full object-cover aspect-[4/3]" alt="{{ section.settings.headline }}">
+        {% else %}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'w-full bg-slate-100 aspect-[4/3]' }}
+        {% endif %}
+      </div>
+      <div class="absolute -bottom-6 -left-6 rounded-3xl bg-white/90 backdrop-blur border border-slate-100 shadow-lg p-5 zenya-motion" {% if settings.motion_enabled %}style="animation: zenyaFloat 8s ease-in-out infinite;"{% endif %}>
+        <div class="text-xs font-extrabold text-slate-900">Live support</div>
+        <div class="text-xs text-slate-600 mt-1">We respond fast and help you pick the right option.</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaHeroSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-hero.liquid', novaHeroLiquid)
+
+  const novaBenefitsSchema = {
+    name: "Nova Benefits",
+    settings: [
+      { type: "text", id: "heading", label: "Heading", default: `Why ${name} works` },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "Clean benefits, fast scanning, strong trust." },
+      { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: false },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" }
+    ],
+    blocks: [
+      {
+        type: "benefit",
+        name: "Benefit",
+        settings: [
+          { type: "text", id: "title", label: "Title", default: "Premium build" },
+          { type: "textarea", id: "text", label: "Text", default: "Designed to look and feel expensive." },
+          { type: "select", id: "icon", label: "Icon", default: "sparkle", options: [
+            { value: "sparkle", label: "Sparkle" },
+            { value: "shield", label: "Shield" },
+            { value: "truck", label: "Truck" },
+            { value: "leaf", label: "Leaf" }
+          ]}
+        ]
+      }
+    ],
+    presets: [{ name: "Zenya Nova Benefits" }]
+  }
+
+  const novaBenefitsLiquid = `
+<section class="relative overflow-hidden py-20" style="background-color: {{ section.settings.bg_color }};">
+  {% if settings.motion_enabled and section.settings.enable_bg_motion %}
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="zenya-blob zenya-blob--a zenya-motion" style="background: radial-gradient(circle at 30% 30%, {{ settings.secondary_color }}, transparent 70%); opacity: .12; animation-duration: {{ 22 | minus: settings.motion_strength | at_least: 11 }}s;"></div>
+      <div class="zenya-blob zenya-blob--b zenya-motion" style="background: radial-gradient(circle at 70% 70%, {{ settings.primary_color }}, transparent 70%); opacity: .10; animation-duration: {{ 24 | minus: settings.motion_strength | at_least: 12 }}s;"></div>
+    </div>
+  {% endif %}
+  <div class="container mx-auto px-6 relative">
+    <div class="mx-auto mb-12 max-w-3xl text-center">
+      <h2 class="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">{{ section.settings.heading }}</h2>
+      <p class="mt-3 text-slate-600">{{ section.settings.subheading }}</p>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for block in section.blocks %}
+        <div class="rounded-3xl bg-white border border-slate-100 shadow-sm p-8 hover:shadow-md transition">
+          <div class="h-12 w-12 rounded-2xl flex items-center justify-center mb-6" style="background: color-mix(in srgb, {{ settings.primary_color }} 14%, white); color: {{ settings.primary_color }};">
+            {% case block.settings.icon %}
+              {% when 'truck' %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 104 0m-4 0a2 2 0 104 0m-4 0H7a4 4 0 01-4-4V5a2 2 0 012-2h8a2 2 0 012 2v8a4 4 0 01-4 4H9zm8 0h2a2 2 0 002-2v-3a2 2 0 00-.586-1.414l-2-2A2 2 0 0016.828 8H15v9z"/></svg>
+              {% when 'shield' %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 4v6c0 5-3.5 9.4-8 11-4.5-1.6-8-6-8-11V7l8-4z"/></svg>
+              {% when 'leaf' %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 21c8 0 14-6 14-14V3h-4C7 3 1 9 1 17v4h4z"/></svg>
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"/></svg>
+            {% endcase %}
+          </div>
+          <div class="text-xl font-extrabold text-slate-900">{{ block.settings.title }}</div>
+          <div class="mt-2 text-sm text-slate-600 leading-relaxed">{{ block.settings.text }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaBenefitsSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-benefits.liquid', novaBenefitsLiquid)
+
+  const novaProofSchema = {
+    name: "Nova Social Proof",
+    settings: [
+      { type: "text", id: "heading", label: "Heading", default: "Real people. Real results." },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "UGC-style quotes that build trust fast." },
+      { type: "color", id: "bg_color", label: "Background Color", default: "#0f172a" }
+    ],
+    blocks: [
+      {
+        type: "quote",
+        name: "Quote",
+        settings: [
+          { type: "text", id: "name", label: "Name", default: "Alex M." },
+          { type: "text", id: "meta", label: "Meta", default: "Verified buyer" },
+          { type: "range", id: "rating", label: "Rating", min: 1, max: 5, step: 1, default: 5 },
+          { type: "textarea", id: "text", label: "Text", default: "Looks premium and works perfectly." },
+          { type: "image_picker", id: "image", label: "Image (Optional)" }
+        ]
+      }
+    ],
+    presets: [{ name: "Zenya Nova Social Proof" }]
+  }
+
+  const novaProofLiquid = `
+<section class="py-24" id="zenya-nova-proof" style="background-color: {{ section.settings.bg_color }};">
+  <div class="container mx-auto px-6">
+    <div class="mx-auto mb-12 max-w-3xl text-center">
+      <h2 class="text-3xl lg:text-4xl font-extrabold tracking-tight text-white">{{ section.settings.heading }}</h2>
+      <p class="mt-3 text-slate-300">{{ section.settings.subheading }}</p>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for block in section.blocks %}
+        <div class="rounded-3xl bg-white/5 backdrop-blur border border-white/10 p-8 hover:bg-white/10 transition">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-yellow-300 text-sm tracking-wide">
+              {% for i in (1..block.settings.rating) %}★{% endfor %}
+            </div>
+            <div class="text-xs text-slate-300">{{ block.settings.meta }}</div>
+          </div>
+          <div class="text-slate-100 font-semibold leading-relaxed">&ldquo;{{ block.settings.text }}&rdquo;</div>
+          <div class="mt-6 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-white/10 overflow-hidden flex items-center justify-center text-xs font-bold text-white">
+              {% if block.settings.image != blank %}
+                {{ block.settings.image | image_url: width: 120 | image_tag: class: 'h-full w-full object-cover' }}
+              {% else %}
+                {{ block.settings.name | slice: 0, 1 }}
+              {% endif %}
+            </div>
+            <div>
+              <div class="text-white font-bold">{{ block.settings.name }}</div>
+              <div class="text-xs text-slate-300">Verified purchase</div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaProofSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-social-proof.liquid', novaProofLiquid)
+
+  const novaFaqSchema = {
+    name: "Nova FAQ",
+    settings: [
+      { type: "text", id: "heading", label: "Heading", default: "FAQ" },
+      { type: "textarea", id: "subheading", label: "Subheading", default: "Everything you need to know before you buy." }
+    ],
+    blocks: [
+      {
+        type: "faq",
+        name: "FAQ Item",
+        settings: [
+          { type: "text", id: "q", label: "Question", default: "How long does shipping take?" },
+          { type: "textarea", id: "a", label: "Answer", default: "Shipping usually takes 3–5 business days." }
+        ]
+      }
+    ],
+    presets: [{ name: "Zenya Nova FAQ" }]
+  }
+
+  const novaFaqLiquid = `
+<section class="py-24 bg-white">
+  <div class="container mx-auto px-6 max-w-4xl">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">{{ section.settings.heading }}</h2>
+      <p class="mt-3 text-slate-600">{{ section.settings.subheading }}</p>
+    </div>
+    <div class="space-y-4" x-data="{ active: 0 }">
+      {% for block in section.blocks %}
+        <div class="rounded-3xl border border-slate-100 bg-slate-50 px-6 py-5">
+          <button @click="active = (active === {{ forloop.index0 }} ? null : {{ forloop.index0 }})" class="flex w-full items-center justify-between text-left font-extrabold text-slate-900">
+            <span class="text-lg">{{ block.settings.q }}</span>
+            <span class="ml-4 transform transition-transform duration-200" :class="active === {{ forloop.index0 }} ? 'rotate-180' : ''">▼</span>
+          </button>
+          <div 
+            x-show="active === {{ forloop.index0 }}" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 -translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-1"
+            class="mt-4 text-slate-600 leading-relaxed"
+            x-cloak
+          >
+            {{ block.settings.a }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaFaqSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-faq.liquid', novaFaqLiquid)
+
+  const novaGuaranteeSchema = {
+    name: "Nova Guarantee",
+    settings: [
+      { type: "text", id: "title", label: "Title", default: content.guarantee?.title || "Risk-Free Guarantee" },
+      { type: "textarea", id: "text", label: "Text", default: content.guarantee?.text || "Try it risk-free. If you don’t love it, we’ll refund you." },
+      { type: "text", id: "icon", label: "Icon", default: "🛡️" }
+    ],
+    presets: [{ name: "Zenya Nova Guarantee" }]
+  }
+
+  const novaGuaranteeLiquid = `
+<section class="py-24 bg-slate-50">
+  <div class="container mx-auto px-6 max-w-3xl text-center">
+    <div class="rounded-[2rem] bg-white border border-slate-100 shadow-xl p-12">
+      <div class="text-6xl mb-6">{{ section.settings.icon }}</div>
+      <h2 class="text-3xl font-extrabold text-slate-900">{{ section.settings.title }}</h2>
+      <p class="mt-4 text-slate-600 leading-relaxed">{{ section.settings.text }}</p>
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaGuaranteeSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-guarantee.liquid', novaGuaranteeLiquid)
+
+  const novaNewsletterSchema = {
+    name: "Nova Newsletter",
+    settings: [
+      { type: "text", id: "title", label: "Title", default: content.newsletter?.title || "Get deals before anyone else" },
+      { type: "textarea", id: "text", label: "Text", default: content.newsletter?.text || "Subscribe for drops, discounts, and product updates." },
+      { type: "text", id: "placeholder", label: "Email Placeholder", default: "Enter your email" },
+      { type: "text", id: "button_text", label: "Button Text", default: "Subscribe" }
+    ],
+    presets: [{ name: "Zenya Nova Newsletter" }]
+  }
+
+  const novaNewsletterLiquid = `
+<section class="py-20 bg-white">
+  <div class="container mx-auto px-6 max-w-2xl text-center">
+    <div class="rounded-[2rem] border border-slate-100 bg-slate-50 p-10 shadow-sm">
+      <h2 class="text-3xl font-extrabold text-slate-900">{{ section.settings.title }}</h2>
+      <p class="mt-3 text-slate-600">{{ section.settings.text }}</p>
+      <form method="post" action="/contact#contact_form" accept-charset="UTF-8" class="mt-8">
+        <input type="hidden" name="form_type" value="customer">
+        <input type="hidden" name="utf8" value="✓">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="email" name="contact[email]" class="w-full rounded-full border border-slate-200 px-5 py-4 text-base focus:border-primary focus:ring-primary" placeholder="{{ section.settings.placeholder }}" required>
+          <button type="submit" class="rounded-full px-8 py-4 text-base font-extrabold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]" style="background: {{ settings.primary_color }};">
+            {{ section.settings.button_text }}
+          </button>
+        </div>
+      </form>
+      <div class="mt-4 text-xs text-slate-500">No spam. Unsubscribe anytime.</div>
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(novaNewsletterSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('zenya-nova-newsletter.liquid', novaNewsletterLiquid)
+
+  const mainProductSchema = {
+    name: "Main Product",
+    settings: [
+      { type: "checkbox", id: "show_trust", label: "Show Trust Row", default: true },
+      { type: "text", id: "trust_text", label: "Trust Text", default: "Secure checkout • Fast shipping • Easy returns" }
+    ],
+    presets: [{ name: "Zenya Nova Product" }]
+  }
+
+  const mainProductLiquid = `
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-10 lg:py-16">
+    <div class="grid gap-10 lg:grid-cols-2 lg:gap-16 items-start">
+      <div class="rounded-[2rem] overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
+        {% if product.featured_image %}
+          {{ product.featured_image | image_url: width: 1400 | image_tag: class: 'w-full object-cover aspect-square' }}
+        {% else %}
+          {{ 'product-1' | placeholder_svg_tag: 'w-full aspect-square bg-slate-100' }}
+        {% endif %}
+      </div>
+      <div>
+        <h1 class="text-3xl lg:text-5xl font-extrabold tracking-tight text-slate-900">{{ product.title }}</h1>
+        <div class="mt-5 flex items-end gap-3">
+          <div class="text-3xl font-extrabold text-slate-900">{{ product.selected_or_first_available_variant.price | money }}</div>
+          {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
+            <div class="text-slate-400 line-through mb-1">{{ product.selected_or_first_available_variant.compare_at_price | money }}</div>
+          {% endif %}
+        </div>
+        {% if product.description != blank %}
+          <div class="mt-6 text-slate-600 leading-relaxed">{{ product.description }}</div>
+        {% endif %}
+        {% form 'product', product, class: 'mt-8 space-y-4' %}
+          {% if product.variants.size > 1 %}
+            <div>
+              <label class="block text-sm font-bold text-slate-900 mb-2">Choose an option</label>
+              <select name="id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base focus:border-primary focus:ring-primary">
+                {% for variant in product.variants %}
+                  <option value="{{ variant.id }}" {% if variant.id == product.selected_or_first_available_variant.id %}selected{% endif %}>
+                    {{ variant.title }} — {{ variant.price | money }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% else %}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {% endif %}
+          <div class="flex items-center gap-3">
+            <input type="number" name="quantity" value="1" min="1" class="w-24 rounded-2xl border border-slate-200 px-4 py-3 text-base">
+            <button type="submit" class="flex-1 rounded-full px-8 py-4 text-base font-extrabold text-white shadow-xl transition hover:opacity-90 active:scale-[0.98]" style="background: {{ settings.primary_color }};">
+              {{ settings.add_to_cart_label | default: 'Add to Cart' }}
+            </button>
+          </div>
+        {% endform %}
+        {% if section.settings.show_trust %}
+          <div class="mt-6 rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 text-sm text-slate-700">
+            {{ section.settings.trust_text }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(mainProductSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-product.liquid', mainProductLiquid)
+
+  const mainCartSchema = {
+    name: "Main Cart",
+    settings: [],
+    presets: [{ name: "Zenya Nova Cart" }]
+  }
+
+  const mainCartLiquid = `
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-12">
+    <h1 class="text-3xl font-extrabold text-slate-900">Your cart</h1>
+    {% if cart.item_count == 0 %}
+      <div class="mt-8 rounded-3xl border border-slate-100 bg-slate-50 p-10 text-center">
+        <div class="text-slate-600">Your cart is empty.</div>
+        <a class="mt-6 inline-flex rounded-full px-8 py-4 font-extrabold text-white shadow-sm transition hover:opacity-90" style="background: {{ settings.primary_color }};" href="{{ routes.all_products_collection_url }}">
+          Continue shopping
+        </a>
+      </div>
+    {% else %}
+      <form action="{{ routes.cart_url }}" method="post" class="mt-8 grid gap-8 lg:grid-cols-3 items-start">
+        <div class="lg:col-span-2 space-y-4">
+          {% for item in cart.items %}
+            <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm flex gap-5">
+              <div class="h-24 w-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                {% if item.image %}
+                  <img src="{{ item.image | image_url: width: 240 }}" alt="{{ item.product.title | escape }}" class="h-full w-full object-cover">
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                  <div>
+                    <a href="{{ item.url }}" class="font-extrabold text-slate-900 hover:text-primary transition">{{ item.product.title }}</a>
+                    <div class="text-sm text-slate-500">{{ item.variant.title }}</div>
+                  </div>
+                  <div class="font-extrabold text-slate-900">{{ item.final_line_price | money }}</div>
+                </div>
+                <div class="mt-4 flex items-center justify-between gap-4">
+                  <input class="w-28 rounded-2xl border border-slate-200 px-4 py-2" type="number" name="updates[]" value="{{ item.quantity }}" min="0">
+                  <a class="text-sm font-bold text-red-600 hover:underline" href="{{ routes.cart_change_url }}?line={{ forloop.index }}&quantity=0">Remove</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="rounded-3xl border border-slate-100 bg-slate-50 p-8 shadow-sm">
+          <div class="flex items-center justify-between text-slate-900 font-extrabold">
+            <div>Subtotal</div>
+            <div>{{ cart.total_price | money }}</div>
+          </div>
+          <button class="mt-6 w-full rounded-full px-8 py-4 text-base font-extrabold text-white shadow-xl transition hover:opacity-90 active:scale-[0.98]" style="background: {{ settings.primary_color }};" type="submit" name="checkout">
+            {{ settings.checkout_label | default: 'Checkout' }}
+          </button>
+          <button class="mt-3 w-full rounded-full px-8 py-4 text-base font-bold text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 transition" type="submit">
+            Update cart
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(mainCartSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-cart.liquid', mainCartLiquid)
+
+  const mainCollectionSchema = {
+    name: "Main Collection",
+    settings: [],
+    presets: [{ name: "Zenya Nova Collection" }]
+  }
+
+  const mainCollectionLiquid = `
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-12">
+    <div class="flex items-end justify-between gap-6">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900">{{ collection.title }}</h1>
+        {% if collection.description != blank %}
+          <div class="mt-2 text-slate-600">{{ collection.description }}</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="mt-10 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {% for product in collection.products %}
+        <a href="{{ product.url }}" class="group rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-sm hover:shadow-md transition">
+          <div class="aspect-[4/5] bg-slate-100 overflow-hidden">
+            {% if product.featured_image %}
+              <img src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.title | escape }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'h-full w-full object-cover opacity-50' }}
+            {% endif %}
+          </div>
+          <div class="p-4">
+            <div class="font-extrabold text-slate-900 text-sm">{{ product.title }}</div>
+            <div class="mt-2 flex items-center gap-2 text-sm">
+              <div class="font-bold text-slate-900">{{ product.price | money }}</div>
+              {% if product.compare_at_price > product.price %}
+                <div class="text-slate-400 line-through text-xs">{{ product.compare_at_price | money }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(mainCollectionSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-collection.liquid', mainCollectionLiquid)
+
+  const mainPageSchema = { name: "Main Page", settings: [], presets: [{ name: "Zenya Nova Page" }] }
+  const mainPageLiquid = `
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-14 max-w-3xl">
+    <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">{{ page.title }}</h1>
+    <div class="prose prose-slate mt-8 max-w-none">{{ page.content }}</div>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(mainPageSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-page.liquid', mainPageLiquid)
+
+  const main404Schema = { name: "Main 404", settings: [], presets: [{ name: "Zenya Nova 404" }] }
+  const main404Liquid = `
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-20 text-center">
+    <div class="text-6xl mb-6">404</div>
+    <h1 class="text-3xl font-extrabold text-slate-900">Page not found</h1>
+    <p class="mt-3 text-slate-600">The page you’re looking for doesn’t exist.</p>
+    <a href="{{ routes.root_url }}" class="mt-8 inline-flex rounded-full px-8 py-4 font-extrabold text-white shadow-sm transition hover:opacity-90" style="background: {{ settings.primary_color }};">
+      Back to home
+    </a>
+  </div>
+</section>
+{% schema %}
+${JSON.stringify(main404Schema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-404.liquid', main404Liquid)
+
+  const mainSearchSchema = { name: "Main Search", settings: [], presets: [{ name: "Zenya Nova Search" }] }
+  const mainSearchLiquid = `
+{% paginate search.results by 24 %}
+<section class="bg-white">
+  <div class="container mx-auto px-6 py-12">
+    <h1 class="text-3xl font-extrabold text-slate-900">Search</h1>
+    <form action="{{ routes.search_url }}" method="get" class="mt-6 relative max-w-2xl">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Search products..." class="w-full rounded-full border border-slate-200 px-6 py-4 text-base focus:border-primary focus:ring-primary">
+      <input type="hidden" name="type" value="product">
+      <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-slate-100 rounded-full hover:bg-primary hover:text-white transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </button>
+    </form>
+    {% if search.performed %}
+      <div class="mt-10 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {% for item in search.results %}
+          {% if item.object_type == 'product' %}
+            <a href="{{ item.url }}" class="group rounded-3xl border border-slate-100 bg-white overflow-hidden shadow-sm hover:shadow-md transition">
+              <div class="aspect-[4/5] bg-slate-100 overflow-hidden">
+                {% if item.featured_image %}
+                  <img src="{{ item.featured_image | image_url: width: 900 }}" alt="{{ item.title | escape }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                {% else %}
+                  {{ 'product-1' | placeholder_svg_tag: 'h-full w-full object-cover opacity-50' }}
+                {% endif %}
+              </div>
+              <div class="p-4">
+                <div class="font-extrabold text-slate-900 text-sm">{{ item.title }}</div>
+                <div class="mt-2 flex items-center gap-2 text-sm">
+                  <div class="font-bold text-slate-900">{{ item.price | money }}</div>
+                </div>
+              </div>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% if paginate.pages > 1 %}
+      <div class="mt-16 text-center">
+        {{ paginate | default_pagination }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endpaginate %}
+{% schema %}
+${JSON.stringify(mainSearchSchema, null, 2)}
+{% endschema %}
+  `
+  zip.folder('sections')?.file('main-search.liquid', mainSearchLiquid)
+
+  const indexSections: any = {}
+  const indexOrder: string[] = []
+  const add = (id: string, section: any) => {
+    indexSections[id] = section
+    indexOrder.push(id)
+  }
+
+  add("hero", { type: "zenya-nova-hero", settings: { headline: content.hero.headline, subheadline: content.hero.subheadline, cta_label: content.hero.cta, external_image_url: images[0] || "" } })
+  add("benefits", {
+    type: "zenya-nova-benefits",
+    settings: { heading: `Why ${name} works`, subheading: "Clear benefits that matter day one." },
+    blocks: (content.features || []).slice(0, 6).reduce((acc, f, i) => ({
+      ...acc,
+      [`benefit_${i}`]: { type: "benefit", settings: { title: f.title, text: f.desc, icon: f.icon || "sparkle" } }
+    }), {}),
+    block_order: (content.features || []).slice(0, 6).map((_, i) => `benefit_${i}`)
+  })
+
+  add("proof", {
+    type: "zenya-nova-social-proof",
+    settings: { heading: "Real people. Real results.", subheading: "Quick proof that makes buyers feel safe." },
+    blocks: (content.testimonials || []).slice(0, 6).reduce((acc, t, i) => ({
+      ...acc,
+      [`quote_${i}`]: { type: "quote", settings: { name: t.name, meta: t.location || "Verified buyer", rating: t.rating || 5, text: t.text } }
+    }), {}),
+    block_order: (content.testimonials || []).slice(0, 6).map((_, i) => `quote_${i}`)
+  })
+
+  add("faq", {
+    type: "zenya-nova-faq",
+    settings: { heading: "FAQ", subheading: "Everything you need to know." },
+    blocks: (content.faq || []).slice(0, 8).reduce((acc, f, i) => ({
+      ...acc,
+      [`faq_${i}`]: { type: "faq", settings: { q: f.q, a: f.a } }
+    }), {}),
+    block_order: (content.faq || []).slice(0, 8).map((_, i) => `faq_${i}`)
+  })
+
+  add("guarantee", { type: "zenya-nova-guarantee", settings: { title: content.guarantee?.title || content.guarantee?.days ? `${content.guarantee.days}-Day Guarantee` : "Risk-Free Guarantee", text: content.guarantee?.text || "Try it risk-free." } })
+  add("newsletter", { type: "zenya-nova-newsletter", settings: { title: content.newsletter?.title || "Get deals before anyone else", text: content.newsletter?.text || "Subscribe for drops and discounts." } })
+
+  zip.folder('templates')?.file('index.json', JSON.stringify({ sections: indexSections, order: indexOrder }, null, 2))
+
+  zip.folder('templates')?.file('product.json', JSON.stringify({ sections: { main: { type: "main-product", settings: {} } }, order: ["main"] }, null, 2))
+  zip.folder('templates')?.file('collection.json', JSON.stringify({ sections: { main: { type: "main-collection", settings: {} } }, order: ["main"] }, null, 2))
+  zip.folder('templates')?.file('cart.json', JSON.stringify({ sections: { main: { type: "main-cart", settings: {} } }, order: ["main"] }, null, 2))
+  zip.folder('templates')?.file('search.json', JSON.stringify({ sections: { main: { type: "main-search", settings: {} } }, order: ["main"] }, null, 2))
+  zip.folder('templates')?.file('page.json', JSON.stringify({ sections: { main: { type: "main-page", settings: {} } }, order: ["main"] }, null, 2))
+  zip.folder('templates')?.file('404.json', JSON.stringify({ sections: { main: { type: "main-404", settings: {} } }, order: ["main"] }, null, 2))
+
+  const mustHaveFiles = [
+    'layout/theme.liquid',
+    'config/settings_schema.json',
+    'config/settings_data.json',
+    'sections/header-group.json',
+    'sections/footer-group.json',
+    'sections/zenya-nova-header.liquid',
+    'sections/zenya-nova-footer.liquid',
+    'sections/zenya-nova-hero.liquid',
+    'sections/zenya-nova-benefits.liquid',
+    'sections/zenya-nova-social-proof.liquid',
+    'sections/zenya-nova-faq.liquid',
+    'sections/zenya-nova-guarantee.liquid',
+    'sections/zenya-nova-newsletter.liquid',
+    'sections/main-product.liquid',
+    'sections/main-cart.liquid',
+    'sections/main-collection.liquid',
+    'templates/index.json',
+    'templates/product.json',
+    'templates/cart.json',
+    'templates/collection.json',
+  ]
+  const missing = mustHaveFiles.filter((p) => !zip.file(p))
+  if (missing.length) throw new Error(`Theme build missing files: ${missing.join(', ')}`)
+
+  return zip
+}
+
+
+function mapLegacyContentToV2(name: string, content: ThemeContent): Partial<NovaThemeContent> {
+  const mapped: Partial<NovaThemeContent> & {
+    stylePreset?: string
+    websiteStyle?: string
+    _preview?: { stylePreset?: string; sectionStyles?: Record<string, string>; websiteStyle?: string }
+  } = {
+    brand: {
+      name: content.shopName || name,
+      tagline: content.solution?.text || content.problem?.text || ''
+    },
+    hero: {
+      heading: content.hero?.headline || `Welcome to ${name}`,
+      subheading: content.hero?.subheadline || '',
+      primaryLabel: content.hero?.cta || 'Shop now',
+      secondaryLabel: 'Learn more'
+    },
+    highlights: (content.features || []).slice(0, 6).map((f) => ({
+      title: f.title,
+      text: f.desc
+    })),
+    testimonials: (content.testimonials || []).slice(0, 6).map((t) => ({
+      name: t.name,
+      text: t.text
+    })),
+    faq: (content.faq || []).slice(0, 8).map((f) => ({
+      question: f.q,
+      answer: f.a
+    })),
+    product: {
+      reassurance:
+        content.guarantee?.text ||
+        content.cart_drawer?.secure_line ||
+        'Secure checkout, tracked shipping, and simple returns.'
+    }
+  }
+
+  const raw = content as any
+  if (typeof raw?.stylePreset === 'string') mapped.stylePreset = raw.stylePreset
+  if (typeof raw?.websiteStyle === 'string') mapped.websiteStyle = raw.websiteStyle
+  if (raw?._preview) {
+    mapped._preview = {
+      stylePreset: typeof raw._preview.stylePreset === 'string' ? raw._preview.stylePreset : undefined,
+      sectionStyles: raw._preview.sectionStyles && typeof raw._preview.sectionStyles === 'object'
+        ? raw._preview.sectionStyles
+        : undefined,
+      websiteStyle: typeof raw._preview.websiteStyle === 'string' ? raw._preview.websiteStyle : undefined
+    }
+  }
+
+  return mapped as Partial<NovaThemeContent>
+}
+
+export async function generateShopifyTheme(name: string, content: ThemeContent, colors: { primary: string; secondary: string }, images: string[] = []) {
+  const _images = images
+  // Uses V3 Engine now!
+  return generateShopifyThemeV3OneProduct(mapLegacyContentToV2(name, content), {
+    primary: colors.primary,
+    accent: colors.secondary
+  })
 }

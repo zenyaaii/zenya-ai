@@ -2,17 +2,30 @@ import { Session } from '@shopify/shopify-api';
 import fs from 'fs';
 import path from 'path';
 
-const SESSION_DIR = path.join(process.cwd(), '.shopify_sessions');
+function getSessionDir() {
+  if (process.env.SHOPIFY_SESSION_DIR) return process.env.SHOPIFY_SESSION_DIR;
+  if (process.env.VERCEL) return path.join('/tmp', '.shopify_sessions');
+  return path.join(process.cwd(), '.shopify_sessions');
+}
 
-if (!fs.existsSync(SESSION_DIR)) {
-  fs.mkdirSync(SESSION_DIR);
+function ensureSessionDir(sessionDir: string) {
+  try {
+    if (!fs.existsSync(sessionDir)) {
+      fs.mkdirSync(sessionDir, { recursive: true });
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export class FileSessionStorage {
   async storeSession(session: Session): Promise<boolean> {
     try {
+      const sessionDir = getSessionDir();
+      if (!ensureSessionDir(sessionDir)) return false;
       fs.writeFileSync(
-        path.join(SESSION_DIR, `${session.id}.json`),
+        path.join(sessionDir, `${session.id}.json`),
         JSON.stringify(session.toObject(), null, 2),
         'utf8'
       );
@@ -25,7 +38,9 @@ export class FileSessionStorage {
 
   async loadSession(id: string): Promise<Session | undefined> {
     try {
-      const filePath = path.join(SESSION_DIR, `${id}.json`);
+      const sessionDir = getSessionDir();
+      if (!ensureSessionDir(sessionDir)) return undefined;
+      const filePath = path.join(sessionDir, `${id}.json`);
       if (fs.existsSync(filePath)) {
         const content = fs.readFileSync(filePath, 'utf8');
         const sessionObj = JSON.parse(content);
@@ -39,7 +54,9 @@ export class FileSessionStorage {
 
   async deleteSession(id: string): Promise<boolean> {
     try {
-      const filePath = path.join(SESSION_DIR, `${id}.json`);
+      const sessionDir = getSessionDir();
+      if (!ensureSessionDir(sessionDir)) return false;
+      const filePath = path.join(sessionDir, `${id}.json`);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
         return true;
@@ -63,10 +80,12 @@ export class FileSessionStorage {
   async findSessionsByShop(shop: string): Promise<Session[]> {
     const sessions: Session[] = [];
     try {
-      const files = fs.readdirSync(SESSION_DIR);
+      const sessionDir = getSessionDir();
+      if (!ensureSessionDir(sessionDir)) return sessions;
+      const files = fs.readdirSync(sessionDir);
       for (const file of files) {
         if (file.endsWith('.json')) {
-          const content = fs.readFileSync(path.join(SESSION_DIR, file), 'utf8');
+          const content = fs.readFileSync(path.join(sessionDir, file), 'utf8');
           const sessionObj = JSON.parse(content);
           if (sessionObj.shop === shop) {
             sessions.push(new Session(sessionObj));

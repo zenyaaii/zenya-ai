@@ -96,6 +96,40 @@
         "id": "secondary_color",
         "label": "Secondary Color",
         "default": "#1e293b"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Background Color",
+        "default": "#f8fafc"
+      },
+      {
+        "type": "color",
+        "id": "surface_color",
+        "label": "Surface Color",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text Color",
+        "default": "#0f172a"
+      },
+      {
+        "type": "color",
+        "id": "muted_text_color",
+        "label": "Muted Text Color",
+        "default": "#475569"
+      },
+      {
+        "type": "range",
+        "id": "radius_scale",
+        "label": "Global Corner Radius",
+        "min": 0,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "default": 14
       }
     ]
   }

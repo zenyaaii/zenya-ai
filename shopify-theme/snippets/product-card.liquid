@@ -18,6 +18,9 @@
       {% if product.images[1] %}
         <img 
           src="{{ product.images[1] | image_url: width: 600 }}" 
+          width="{{ product.images[1].width }}"
+          height="{{ product.images[1].height }}"
+          alt="{{ product.title }}"
           class="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-500 group-hover:opacity-100"
         >
       {% endif %}

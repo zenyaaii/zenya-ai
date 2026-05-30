@@ -22,7 +22,7 @@
   
   {% if section.settings.bg_image != blank %}
     <div class="absolute inset-0 z-0">
-      <img src="{{ section.settings.bg_image | image_url: width: 1600 }}" class="w-full h-full object-cover" loading="lazy">
+      <img src="{{ section.settings.bg_image | image_url: width: 1600 }}" width="{{ section.settings.bg_image.width }}" height="{{ section.settings.bg_image.height }}" alt="{{ section.settings.heading | escape }}" class="w-full h-full object-cover" loading="lazy">
       <div class="absolute inset-0 bg-black" style="opacity: {{ section.settings.overlay_opacity }}%;"></div>
     </div>
   {% endif %}
@@ -42,7 +42,6 @@
       
       {% assign units = 'Days,Hours,Minutes,Seconds' | split: ',' %}
       {% for unit in units %}
-        {% assign unit_down = unit | downcase %}
         {% assign unit_key = unit | slice: 0 | downcase %}
         
         <div class="flex flex-col items-center justify-center p-4 rounded-xl min-w-[100px] md:min-w-[120px] transition-all"

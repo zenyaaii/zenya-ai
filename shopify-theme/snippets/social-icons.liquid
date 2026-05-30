@@ -1,0 +1,15 @@
+{% assign social_class = class | default: 'flex gap-3' %}
+<div class="{{ social_class }}">
+  {% if settings.social_facebook_link != blank %}
+    <a href="{{ settings.social_facebook_link }}" rel="nofollow noopener" target="_blank" aria-label="Facebook" class="hover:opacity-80 transition">Facebook</a>
+  {% endif %}
+  {% if settings.social_instagram_link != blank %}
+    <a href="{{ settings.social_instagram_link }}" rel="nofollow noopener" target="_blank" aria-label="Instagram" class="hover:opacity-80 transition">Instagram</a>
+  {% endif %}
+  {% if settings.social_youtube_link != blank %}
+    <a href="{{ settings.social_youtube_link }}" rel="nofollow noopener" target="_blank" aria-label="YouTube" class="hover:opacity-80 transition">YouTube</a>
+  {% endif %}
+  {% if settings.social_tiktok_link != blank %}
+    <a href="{{ settings.social_tiktok_link }}" rel="nofollow noopener" target="_blank" aria-label="TikTok" class="hover:opacity-80 transition">TikTok</a>
+  {% endif %}
+</div>

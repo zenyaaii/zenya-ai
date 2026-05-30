@@ -1,0 +1,21 @@
+<footer class="container" style="padding: 2rem 0;">
+  <div class="card" style="padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem;">
+    <p style="margin: 0; color: #64748b; font-size: .9rem;">&copy; {{ 'now' | date: '%Y' }} {{ settings.brand_name | default: shop.name }}. All rights reserved.</p>
+    <div style="display: flex; gap: .7rem; font-size: .9rem;">
+      {% for link in linklists[section.settings.footer_menu].links %}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {% else %}
+        <a href="{{ routes.search_url }}">Search</a>
+      {% endfor %}
+    </div>
+  </div>
+</footer>
+{% schema %}
+{
+  "name": "Nova Footer",
+  "enabled_on": { "groups": ["footer"] },
+  "settings": [
+    { "type": "link_list", "id": "footer_menu", "label": "Footer menu", "default": "footer" }
+  ]
+}
+{% endschema %}

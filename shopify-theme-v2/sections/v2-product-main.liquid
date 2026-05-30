@@ -1,0 +1,29 @@
+﻿﻿﻿﻿﻿﻿<section class="container" style="padding: 1rem 0 2rem;">
+  <div class="grid lg-2" style="align-items:start;">
+    <div class="card" style="padding:.7rem;">
+      {% if product.featured_image %}
+        <img src="{{ product.featured_image | image_url: width: 1400 }}" width="{{ product.featured_image.width }}" height="{{ product.featured_image.height }}" alt="{{ product.title | escape }}" style="width:100%; height:auto; border-radius:12px; display:block;">
+      {% else %}
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% endif %}
+    </div>
+    <div class="card" style="padding:1rem;">
+      <h1 style="margin:.2rem 0 1rem; font-size:2rem;">{{ product.title }}</h1>
+      <p style="margin:0 0 1rem; color:#475569;">{{ product.description | strip_html | truncate: 160 }}</p>
+      {% form 'product', product %}
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <button class="btn btn-primary" type="submit" style="width:100%;">Add to cart - {{ product.selected_or_first_available_variant.price | money }}</button>
+      {% endform %}
+      <p style="font-size:.85rem; color:#64748b; margin:.8rem 0 0;">{{ section.settings.reassurance_text }}</p>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Nova Product",
+  "settings": [
+    { "type": "text", "id": "reassurance_text", "label": "Reassurance", "default": "Secure checkout, tracked shipping, and simple returns." }
+  ],
+  "presets": [{ "name": "Nova Product" }]
+}
+{% endschema %}

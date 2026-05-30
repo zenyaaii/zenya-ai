@@ -1,0 +1,35 @@
+﻿﻿﻿﻿﻿﻿<section class="container" style="padding: 2rem 0 1rem;">
+  <div class="grid lg-2" style="align-items:center;">
+    <div>
+      <p style="font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:#64748b; margin:0 0 .5rem;">New Base Theme</p>
+      <h1 style="font-size: clamp(2rem, 4vw, 3.4rem); line-height:1.05; margin:.2rem 0 1rem;">{{ section.settings.heading }}</h1>
+      <p style="font-size:1.05rem; color:#475569; max-width:56ch; margin:0 0 1.25rem;">{{ section.settings.subheading }}</p>
+      <div style="display:flex; gap:.7rem; flex-wrap:wrap;">
+        <a class="btn btn-primary" href="{{ section.settings.primary_url }}">{{ section.settings.primary_label }}</a>
+        <a class="btn btn-secondary" href="{{ section.settings.secondary_url }}">{{ section.settings.secondary_label }}</a>
+      </div>
+    </div>
+    <div class="card" style="padding:.5rem; overflow:hidden;">
+      {% if section.settings.image != blank %}
+        <img src="{{ section.settings.image | image_url: width: 1400 }}" width="{{ section.settings.image.width }}" height="{{ section.settings.image.height }}" alt="{{ section.settings.heading | escape }}" style="width:100%; height:auto; border-radius:12px; display:block;">
+      {% else %}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Nova Hero",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "A premium modern storefront from scratch" },
+    { "type": "textarea", "id": "subheading", "label": "Subheading", "default": "Built for conversion, performance, and clean editing inside Shopify." },
+    { "type": "text", "id": "primary_label", "label": "Primary Button", "default": "Shop now" },
+    { "type": "url", "id": "primary_url", "label": "Primary URL" },
+    { "type": "text", "id": "secondary_label", "label": "Secondary Button", "default": "Learn more" },
+    { "type": "url", "id": "secondary_url", "label": "Secondary URL" },
+    { "type": "image_picker", "id": "image", "label": "Image" }
+  ],
+  "presets": [{ "name": "Nova Hero" }]
+}
+{% endschema %}

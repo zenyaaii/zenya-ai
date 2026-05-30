@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 export default function ProblemSolution({ 
   problem, 
@@ -29,7 +28,13 @@ export default function ProblemSolution({
                ❌ The Old Way
              </div>
              {/* Use problem image, fallback to grayscale if it's the same as solution */}
-             <Image src={problemImage} alt="Problem" fill className="object-cover grayscale contrast-125 sepia-[.3]" />
+             <img
+               src={problemImage}
+               alt="Problem"
+               className="h-full w-full object-cover grayscale contrast-125 sepia-[.3]"
+               loading="lazy"
+               decoding="async"
+             />
              <div className="absolute inset-0 bg-red-900/10 mix-blend-multiply" />
           </motion.div>
           
@@ -80,7 +85,13 @@ export default function ProblemSolution({
              <div className="absolute top-4 right-4 z-10 rounded-full bg-green-600/90 px-4 py-1 text-sm font-bold text-white backdrop-blur-sm">
                ✅ The New Way
              </div>
-             <Image src={solutionImage} alt="Solution" fill className="object-cover" />
+             <img
+               src={solutionImage}
+               alt="Solution"
+               className="h-full w-full object-cover"
+               loading="lazy"
+               decoding="async"
+             />
           </motion.div>
         </div>
       </div>

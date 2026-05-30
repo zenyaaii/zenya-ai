@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { generateShopifyTheme } from '@/utils/shopify-generator';
+import { saveAs } from 'file-saver';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -24,8 +26,7 @@ function DashboardContent() {
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
 
-  // Install State
-  const [installingId, setInstallingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -84,42 +85,22 @@ function DashboardContent() {
     }
   }
 
-  async function handleInstall(theme: any) {
-    if (!shop) {
-      alert('Shop parameter missing.');
-      return;
-    }
-    
-    // Check if Pro (this logic should ideally be on backend, but we can check subscription here if we loaded it)
-    // For now, let's assume the API checks it or we let them try.
-    
-    setInstallingId(theme.id);
+  async function handleDownload(theme: any) {
+    setDownloadingId(theme.id);
     try {
-        const res = await fetch('/api/shopify/themes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                shop: shop,
-                themeData: {
-                    productName: theme.product_name,
-                    content: theme.content,
-                    colors: theme.colors
-                }
-            })
-        });
-        
-        const data = await res.json();
-        
-        if (data.success) {
-            alert(`Theme "${theme.product_name}" installed successfully!`);
-        } else {
-            alert('Failed: ' + (data.error || 'Unknown error'));
-        }
+      const blob = await generateShopifyTheme(
+        theme.product_name,
+        theme.content,
+        theme.colors,
+        theme.images || []
+      );
+      const fileName = `${String(theme.product_name || 'zenya-theme').toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`;
+      saveAs(blob, fileName);
     } catch (e) {
-        console.error(e);
-        alert('Installation failed.');
+      console.error(e);
+      alert('Download failed.');
     } finally {
-        setInstallingId(null);
+      setDownloadingId(null);
     }
   }
 
@@ -196,7 +177,7 @@ function DashboardContent() {
         <div className="mb-12 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Your Themes</h1>
-            <p className="mt-2 text-gray-600">Manage and install your AI-generated themes.</p>
+            <p className="mt-2 text-gray-600">Manage and download your AI-generated themes.</p>
           </div>
           <Link 
             href={`/shopify/new${queryString}`} 
@@ -236,11 +217,11 @@ function DashboardContent() {
                         Preview
                     </Link>
                     <button 
-                        onClick={() => handleInstall(t)}
-                        disabled={installingId === t.id}
+                        onClick={() => handleDownload(t)}
+                        disabled={downloadingId === t.id}
                         className="flex-1 rounded-lg bg-black px-4 py-2 text-center text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
                     >
-                        {installingId === t.id ? '...' : 'Install'}
+                        {downloadingId === t.id ? '...' : 'Download'}
                     </button>
                   </div>
                 </div>

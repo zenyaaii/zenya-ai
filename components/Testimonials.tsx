@@ -1,79 +1,119 @@
 'use client'
 
-import Image from 'next/image'
 import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-const items = [
-  { name: 'Alex M.', text: 'Launched in a weekend — the copy and sections are spot on.' },
-  { name: 'Sara L.', text: 'Looks truly professional and it helped our conversions.' },
-  { name: 'Kenji P.', text: 'Love the speed. Scrape, pick, preview — done.' }
+type Testimonial = {
+  name: string
+  role: string
+  text: string
+  /** Brand accent for the avatar — matches the relevant business-type tint where possible. */
+  color: string
+}
+
+const TESTIMONIALS: Testimonial[] = [
+  {
+    name: 'Alex M.',
+    role: 'One-product brand · Berlin',
+    text: "Launched in a weekend. The Storefront export landed in Shopify clean — sections, blocks, settings, all there.",
+    color: '#5e6ad2',
+  },
+  {
+    name: 'Élodie M.',
+    role: 'Chef · Maison Lumière, NYC',
+    text: "The Maison template made our menu finally feel like the room. Reservations went up the first month — no agency involved.",
+    color: '#c8a96a',
+  },
+  {
+    name: 'Priya N.',
+    role: 'Founder · Atlas user, Singapore',
+    text: "Atlas for our SaaS landing saved us weeks of dev. The copy AI wrote actually understood our pricing tiers — that surprised me.",
+    color: '#5e6ad2',
+  },
+  {
+    name: 'Maya R.',
+    role: 'Apparel brand · London',
+    text: "The Lookbook template is stunning. Customers constantly ask who designed our site. Worth the subscription on the first sale.",
+    color: '#1c1c1c',
+  },
+  {
+    name: 'Sara L.',
+    role: 'Wellness studio · Austin',
+    text: "I expected basic. I got a Wellness template that handles treatments, instructors, and gift cards out of the box. We were booking within a day.",
+    color: '#14b8a6',
+  },
+  {
+    name: 'Carlos T.',
+    role: 'Local services · Madrid',
+    text: "The Trade template nailed the quote-request flow. I tried three other AI builders before this — none came close.",
+    color: '#f59e0b',
+  },
 ]
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2
-    }
-  }
-}
-
-const card = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 50 } }
-}
 
 export default function Testimonials() {
   return (
-    <section className="relative overflow-hidden py-24 bg-surface/30">
+    <section className="relative py-28 border-b border-token">
       <div className="mx-auto max-w-6xl px-6">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-14"
         >
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
             Testimonials
-          </div>
-          <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Trusted by one-product sellers
-          </h2>
-          <p className="mt-4 text-lg text-muted">
-            Real results from real store owners who shipped faster with Zenya.
           </p>
+          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            Trusted by{' '}
+            <span className="gradient-text">2,400+ founders &amp; operators.</span>
+          </h2>
         </motion.div>
-        
-        <motion.div 
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid gap-8 md:grid-cols-3"
-        >
-          {items.map((t, i) => (
-            <motion.div variants={card} key={t.name} className="relative rounded-2xl border border-token bg-elevated p-8 shadow-soft-sm transition duration-300 hover:-translate-y-1 hover:shadow-soft-lg">
+
+        {/* Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {TESTIMONIALS.map((t, i) => (
+            <motion.div
+              key={t.name}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-24px' }}
+              transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+              className={cn(
+                'group rounded-xl border border-token bg-white p-5 transition-colors duration-150',
+                'hover:bg-[#faf8f3]'
+              )}
+            >
               {/* Stars */}
-              <div className="flex gap-1 text-yellow-400 mb-4">
-                {[1,2,3,4,5].map(s => <span key={s}>★</span>)}
+              <div className="mb-4 flex gap-0.5">
+                {Array(5).fill(0).map((_, si) => (
+                  <Star key={si} className="h-3.5 w-3.5" fill="#d97706" stroke="none" />
+                ))}
               </div>
-              
-              <p className="text-foreground leading-relaxed mb-6">&quot;{t.text}&quot;</p>
-              
-              <div className="flex items-center gap-4 border-t border-token pt-4 mt-auto">
-                <div className="relative h-10 w-10 overflow-hidden rounded-full ring-2 ring-surface">
-                  <Image src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(t.name)}`} alt="" fill className="object-cover" />
+
+              {/* Quote */}
+              <p className="mb-5 text-[14px] leading-[1.65] text-foreground">
+                &ldquo;{t.text}&rdquo;
+              </p>
+
+              {/* Author */}
+              <div className="flex items-center gap-2.5 border-t border-[#f0ede6] pt-4">
+                <div
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                  style={{ background: t.color }}
+                >
+                  {t.name[0]}
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-foreground">{t.name}</div>
-                  <div className="text-xs text-muted">Verified User</div>
+                  <div className="text-[13px] font-[590] text-foreground">{t.name}</div>
+                  <div className="text-[12px] text-muted">{t.role}</div>
                 </div>
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

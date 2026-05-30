@@ -8,6 +8,8 @@
           {% if section.settings.image != blank %}
             <img 
               src="{{ section.settings.image | image_url: width: 1200 }}" 
+              width="1200"
+              height="900"
               alt="{{ section.settings.title }}" 
               class="w-full transition duration-500 group-hover:scale-[1.02]"
               style="border-radius: {{ section.settings.image_radius }}px; aspect-ratio: {{ section.settings.image_ratio }}; object-fit: cover; border: {{ section.settings.border_width }}px solid {{ section.settings.border_color }}; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }});">

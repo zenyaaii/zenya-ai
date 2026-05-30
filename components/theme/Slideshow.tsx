@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Slideshow({ 
@@ -35,12 +34,12 @@ export default function Slideshow({
         >
           {/* Background Image (Mock) */}
           <div className="absolute inset-0 opacity-50">
-             <Image 
+             <img
                src={slides[current].image || `https://images.unsplash.com/photo-1558317374-a309d244678e?q=80&w=1920&auto=format&fit=crop`}
                alt={slides[current].heading}
-               fill
-               className="object-cover"
-               priority
+               className="h-full w-full object-cover"
+               loading="eager"
+               decoding="async"
              />
           </div>
           <div className="absolute inset-0 bg-black/40" />

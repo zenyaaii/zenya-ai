@@ -1,0 +1,23 @@
+{{ 'zenya-product-builder.css' | asset_url | stylesheet_tag }}
+
+{% assign design_value = product.metafields.zenya.design.value %}
+
+<div class="zenya-product-builder" data-zenya-design="{{ design_value | json | escape }}">
+  {% if request.design_mode and design_value == blank %}
+    <div class="zenya-product-builder__placeholder">
+      <div class="zenya-product-builder__placeholder-title">Zenya</div>
+      <div class="zenya-product-builder__placeholder-text">Generate this product in the Zenya app to render your landing content here.</div>
+    </div>
+  {% endif %}
+</div>
+
+<script src="{{ 'zenya-product-builder.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Zenya product builder",
+  "target": "section",
+  "templates": ["product"],
+  "settings": []
+}
+{% endschema %}

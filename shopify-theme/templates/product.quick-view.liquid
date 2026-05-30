@@ -6,7 +6,7 @@
   
   <!-- Gallery -->
   <div class="bg-slate-50 p-6 flex items-center justify-center">
-    <img src="{{ product.featured_image | image_url: width: 800 }}" class="w-full h-auto object-contain rounded-lg shadow-sm">
+    <img src="{{ product.featured_image | image_url: width: 800 }}" width="{{ product.featured_image.width }}" height="{{ product.featured_image.height }}" alt="{{ product.title | escape }}" class="w-full h-auto object-contain rounded-lg shadow-sm">
   </div>
 
   <!-- Info -->

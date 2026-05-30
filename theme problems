@@ -1,0 +1,119 @@
+An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.12.11%22%2C%22message%22%3A15%2C%22args%22%3A%5B%22features%22%2C%22Shop%22%2C%22either%20ensure%20all%20objects%20of%20type%20ShopFeatures%20have%20an%20ID%20or%20a%20custom%20merge%20function%2C%20or%20%22%2C%22Shop.features%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22ShopFeatures%5C%22%2C%5Cn%20%20%5C%22hasGlobalEClassicApp%5C%22%3A%20false%2C%5Cn%20%20%5C%22hasGlobalEApp%5C%22%3A%20false%2C%5Cn%20%20%5C%22giftCards%5C%22%3A%20true%2C%5Cn%20%20%5C%22productProtection%5C%22%3A%20false%2C%5Cn%20%20%5C%22checkoutLiquidConfigurationEligible%5C%22%3A%20false%2C%5Cn%20%20%5C%22blogContentGenerationEnabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22pageContentGenerationEnabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22customDataTaxonomyEnabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22themePreviewEnabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22wooMagicThemeImportEnabled%5C%22%3A%20false%2C%5Cn%20%20%5C%22wixMagicThemeImportEnabled%5C%22%3A%20false%2C%5Cn%20%20%5C%22wordpressMagicThemeImportEnabled%5C%22%3A%20false%2C%5Cn%20%20%5C%22magicThemeImportEnabled%5C%22%3A%20false%2C%5Cn%20%20%5C%22sidekickEnabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22marketsHome%5C%22%3A%20true%5Cn%7D%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22ShopFeatures%5C%22%2C%5Cn%20%20%5C%22b2bEnabled%5C%22%3A%20true%5Cn%7D%22%5D%7D
+console.warn @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this warning
+main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.12.11%22%2C%22message%22%3A15%2C%22args%22%3A%5B%22plan%22%2C%22Shop%22%2C%22either%20ensure%20all%20objects%20of%20type%20ShopPlan%20have%20an%20ID%20or%20a%20custom%20merge%20function%2C%20or%20%22%2C%22Shop.plan%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22ShopPlan%5C%22%2C%5Cn%20%20%5C%22name%5C%22%3A%20%5C%22shopify_plus%5C%22%2C%5Cn%20%20%5C%22shopifyPlus%5C%22%3A%20true%5Cn%7D%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22ShopPlan%5C%22%2C%5Cn%20%20%5C%22name%5C%22%3A%20%5C%22shopify_plus%5C%22%2C%5Cn%20%20%5C%22trial%5C%22%3A%20false%5Cn%7D%22%5D%7D
+console.warn @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this warning
+main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.12.11%22%2C%22message%22%3A15%2C%22args%22%3A%5B%22passwordProtection%22%2C%22OnlineStore%22%2C%22either%20ensure%20all%20objects%20of%20type%20OnlineStorePasswordProtection%20have%20an%20ID%20or%20a%20custom%20merge%20function%2C%20or%20%22%2C%22OnlineStore.passwordProtection%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22OnlineStorePasswordProtection%5C%22%2C%5Cn%20%20%5C%22enabled%5C%22%3A%20true%2C%5Cn%20%20%5C%22permanentStorefrontPasswordPage%5C%22%3A%20true%5Cn%7D%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22OnlineStorePasswordProtection%5C%22%2C%5Cn%20%20%5C%22enabled%5C%22%3A%20true%5Cn%7D%22%5D%7D
+console.warn @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this warning
+main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.12.11%22%2C%22message%22%3A15%2C%22args%22%3A%5B%22entitlements%22%2C%22Shop%22%2C%22either%20ensure%20all%20objects%20of%20type%20EntitlementsType%20have%20an%20ID%20or%20a%20custom%20merge%20function%2C%20or%20%22%2C%22Shop.entitlements%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22EntitlementsType%5C%22%2C%5Cn%20%20%5C%22markets%5C%22%3A%20%7B%5Cn%20%20%20%20%5C%22__typename%5C%22%3A%20%5C%22MarketsType%5C%22%2C%5Cn%20%20%20%20%5C%22themes%5C%22%3A%20%7B%5Cn%20%20%20%20%20%20%5C%22__typename%5C%22%3A%20%5C%22MarketsThemesEntitlement%5C%22%2C%5Cn%20%20%20%20%20%20%5C%22enabled%5C%22%3A%20true%5Cn%20%20%20%20%7D%5Cn%20%20%7D%5Cn%7D%22%2C%22%7B%5Cn%20%20%5C%22__typename%5C%22%3A%20%5C%22EntitlementsType%5C%22%2C%5Cn%20%20%5C%22checkoutExtensibility%5C%22%3A%20%5C%22FULL%5C%22%5Cn%7D%22%5D%7D
+console.warn @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-320dc4a7.js:2 A router only supports one blocker at a time
+console.warn @ main-320dc4a7.js:2Understand this warning
+main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6 An error occurred! For more details, see the full error text at https://go.apollo.dev/c/err#%7B%22version%22%3A%223.12.11%22%2C%22message%22%3A15%2C%22args%22%3A%5B%22presences%22%2C%22Query%22%2C%22%22%2C%22Query.presences%22%2C%22%7B%5Cn%20%20%5C%220%5C%22%3A%20%7B%5Cn%20%20%20%20%5C%22__typename%5C%22%3A%20%5C%22Presence%5C%22%2C%5Cn%20%20%20%20%5C%22user%5C%22%3A%20121174458683%2C%5Cn%20%20%20%20%5C%22dirty%5C%22%3A%20false%2C%5Cn%20%20%20%20%5C%22status%5C%22%3A%20%5C%22ONLINE%5C%22%2C%5Cn%20%20%20%20%5C%22url%5C%22%3A%20%5C%22%2Fstore%2Fzenya-3275%2Fthemes%2F181172830523%2Feditor%5C%22%2C%5Cn%20%20%20%20%5C%22lastSeenAt%5C%22%3A%20%5C%222026-01-29T19%3A21%3A44.237460749Z%5C%22%5Cn%20%20%7D%2C%5Cn%20%20%5C%221%5C%22%3A%20%7B%5Cn%20%20%20%20%5C%22__typename%5C%22%3A%20%5C%22Presence%5C%22%2C%5Cn%20%20%20%20%5C%22user%5C%22%3A%20121174458683%2C%5Cn%20%20%20%20%5C%22dirty%5C%22%3A%20false%2C%5Cn%20%20%20%20%5C%22status%5C%22%3A%20%5C%22IDLE%5C%22%2C%5Cn%20%20%20%20%5C%22url%5C%22%3A%20%5C%22%2Fstore%2Fzenya-3275%2Fthemes%2F181159952699%2Feditor%5C%22%2C%5Cn%20%20%20%20%5C%22lastSeenAt%5C%22%3A%20%5C%222026-01-29T18%3A55%3A49.253488681Z%5C%22%5Cn%20%20%7D%5Cn%7D%22%2C%22%7B%5Cn%20%20%5C%220%5C%22%3A%20%7B%5Cn%20%20%20%20%5C%22__typename%5C%22%3A%20%5C%22Presence%5C%22%2C%5Cn%20%20%20%20%5C%22user%5C%22%3A%20121174458683%2C%5Cn%20%20%20%20%5C%22dirty%5C%22%3A%20false%2C%5Cn%20%20%20%20%5C%22status%5C%22%3A%20%5C%22ONLINE%5C%22%2C%5Cn%20%20%20%20%5C%22url%5C%22%3A%20%5C%22%2Fstore%2Fzenya-3275%2Fthemes%2F181172830523%2Feditor%5C%22%2C%5Cn%20%20%20%20%5C%22lastSeenAt%5C%22%3A%20%5C%222026-01-29T19%3A21%3A44.237460749Z%5C%22%5Cn%20%20%7D%5Cn%7D%22%5D%7D
+console.warn @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this warning
+otlp-http-production.shopifysvc.com/v1/metrics:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+otlp-http-production.shopifysvc.com/v1/metrics:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6 Suppressed error exporting metrics: TypeError: Failed to fetch
+    at app-bridge.js:1:12364
+console.error @ main-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.js:6Understand this error
+main-320dc4a7.js:2 using deprecated parameters for the initialization function; pass a single object instead
+console.warn @ main-320dc4a7.js:2Understand this warning
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+Framing 'https://zenya-3275.myshopify.com/' violates the following Content Security Policy directive: "frame-ancestors 'none'". The request has been blocked.
+Understand this error
+zenya-3275.myshopify.com/?oseid=KKgcVN6AFSgiu4cpZPwbUVBK:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+ [WebPixelsManager] Prevented from executing in the Theme Editor
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+ [WebPixelsManager] Prevented from executing in the Theme Editor
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+?oseid=KKgcVN6AFSgiu4cpZPwbUVBK&source=visualPreviewInitialLoad:1  Failed to load resource: the server responded with a status of 404 ()Understand this error
+b1d2a099fw23dfb22ep557258f5m7a2edbaem.js:1 [WebPixelsManager] Prevented from executing in the Theme Editor
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute width: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ cdn.shopify.com/shop…3fd.1.index.js:1714Understand this error
+async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714 Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-modules-52d4d20edcc34347fe4cd90251fb305d8c6cf3fd.1.index.js:1714Understand this error
+ Error: <svg> attribute height: Expected length, "var(--p-height-5…".
+Et @ async-storefront-mod…3fd.1.index.js:1714Understand this error

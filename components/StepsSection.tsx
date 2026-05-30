@@ -1,74 +1,120 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { LayoutTemplate, PenLine, Rocket } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-const steps = [
+const STEPS = [
   {
     num: '01',
-    title: 'Paste Product URL',
-    desc: 'Simply copy the link to your product from AliExpress, Amazon, or Shopify.',
-    icon: (
-      <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      </svg>
-    )
+    icon: LayoutTemplate,
+    title: 'Pick your template',
+    desc: 'Eight to choose from — restaurant, lookbook, SaaS landing, brand story, wellness, catalog, services, or one-product Shopify.',
+    color: '#5e6ad2',
   },
   {
     num: '02',
-    title: 'AI Magic Happens',
-    desc: 'Our AI analyzes the product, writes persuasive copy, and designs a high-converting layout.',
-    icon: (
-      <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-      </svg>
-    )
+    icon: PenLine,
+    title: 'Share a brief or paste a URL',
+    desc: 'Most templates take a short form — your menu, services, hours, etc. The one-product Shopify path just needs a product URL. Either way, AI takes it from there.',
+    color: '#d97706',
   },
   {
     num: '03',
-    title: 'Launch & Sell',
-    desc: 'Review your theme, make quick tweaks, and export the code to your store.',
-    icon: (
-      <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    )
-  }
-]
+    icon: Rocket,
+    title: 'Go live, instantly',
+    desc: 'Get a hosted preview site you can ship today — or download a full Shopify OS 2.0 theme ZIP. Everything is editable.',
+    color: '#27a644',
+  },
+] as const
 
 export default function StepsSection() {
   return (
-    <section className="py-24 bg-surface relative overflow-hidden">
-       {/* Connecting Line (Desktop) */}
-      <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-y-12" />
-
-      <div className="max-w-6xl mx-auto px-6 relative">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-extrabold text-foreground sm:text-4xl">
-            From URL to Store in <span className="text-primary">3 Steps</span>
+    <section className="relative py-28 border-b border-token">
+      <div className="mx-auto max-w-6xl px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-20 text-center"
+        >
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            How it works
+          </p>
+          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            From idea to live website in{' '}
+            <span className="gradient-text">three steps.</span>
           </h2>
+        </motion.div>
+
+        {/* Steps */}
+        <div className="relative grid gap-px md:grid-cols-3">
+          {/* Connecting line (desktop) */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] top-10 hidden h-px md:block"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(94,106,210,0.3), rgba(217,119,6,0.3), rgba(39,166,68,0.3))',
+            }}
+          />
+
+          {STEPS.map((step, i) => {
+            const Icon = step.icon
+            return (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.48, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className={cn(
+                  'relative flex flex-col px-6 md:items-center md:text-center',
+                  i > 0 && 'border-l border-token'
+                )}
+              >
+                {/* Step number */}
+                <div className="relative mb-6 flex-shrink-0">
+                  <div
+                    className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background"
+                    style={{
+                      background: `${step.color}12`,
+                      border: `1px solid ${step.color}25`,
+                      color: step.color,
+                    }}
+                  >
+                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  </div>
+                  {/* Ghost number */}
+                  <div
+                    aria-hidden
+                    className="absolute -left-3 -top-6 select-none text-[80px] font-[800] leading-none opacity-[0.035]"
+                    style={{ color: step.color }}
+                  >
+                    {step.num}
+                  </div>
+                </div>
+
+                <h3 className="mb-2 text-[16px] font-[590] text-foreground">{step.title}</h3>
+                <p className="max-w-sm text-[14px] leading-relaxed text-muted">{step.desc}</p>
+              </motion.div>
+            )
+          })}
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((step, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.2 }}
-              className="relative flex flex-col items-center text-center p-6 bg-elevated rounded-2xl border border-token shadow-soft-sm z-10"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 text-primary rotate-3 transition-transform group-hover:rotate-6">
-                {step.icon}
-              </div>
-              <div className="absolute -top-4 -right-4 text-6xl font-black text-surface-200/50 select-none z-0">
-                {step.num}
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 z-10">{step.title}</h3>
-              <p className="text-muted z-10">{step.desc}</p>
-            </motion.div>
-          ))}
-        </div>
+        {/* Subtle footnote about the two flows */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+          className="mx-auto mt-16 max-w-2xl text-center text-[12.5px] text-muted"
+        >
+          The one-product <strong className="font-[590] text-foreground">Storefront</strong> template exports
+          as a Shopify OS&nbsp;2.0 theme ZIP. The other seven ship as live, hosted sites on the Zenya domain.
+        </motion.p>
       </div>
     </section>
   )

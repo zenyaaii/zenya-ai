@@ -1,7 +1,16 @@
+import { Suspense } from 'react'
 import ThemePreview from '@/components/ThemePreview'
 import ThemeActions from '@/components/ThemeActions'
 
 export default function DemoFullPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DemoFullContent />
+    </Suspense>
+  )
+}
+
+function DemoFullContent() {
   const mockContent = {
     hero: {
       headline: "The Last Vacuum You'll Ever Need",

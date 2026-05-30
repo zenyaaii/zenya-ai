@@ -1,0 +1,22 @@
+﻿﻿﻿﻿﻿﻿<header class="card" style="margin: 1rem auto; width:min(1200px,100% - 2rem); padding: .75rem 1rem;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+    <a href="{{ routes.root_url }}" style="font-weight:800; font-size:1.2rem;">{{ settings.brand_name | default: shop.name }}</a>
+    <nav style="display:flex; gap:1rem; font-weight:600;">
+      {% for link in linklists[section.settings.menu].links %}
+        <a href="{{ link.url }}">{{ link.title }}</a>
+      {% else %}
+        <a href="{{ routes.root_url }}">Home</a>
+        <a href="{{ routes.all_products_collection_url }}">Shop</a>
+      {% endfor %}
+    </nav>
+  </div>
+</header>
+{% schema %}
+{
+  "name": "Nova Header",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "Menu", "default": "main-menu" }
+  ]
+}
+{% endschema %}

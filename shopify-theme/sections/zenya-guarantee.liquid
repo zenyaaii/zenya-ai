@@ -1,4 +1,4 @@
-﻿
+
 <div class="py-12 md:py-24" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="container mx-auto px-6 max-w-{{ section.settings.container_width }}">
     <div class="p-8 md:p-12 rounded-3xl shadow-xl border transition duration-300 hover:shadow-2xl" 
@@ -8,7 +8,7 @@
         <div class="flex items-center justify-center rounded-full" 
              style="width: {{ section.settings.icon_size }}px; height: {{ section.settings.icon_size }}px; background-color: {{ section.settings.icon_bg_color }}; color: {{ section.settings.icon_color }}; font-size: {{ section.settings.icon_size | divided_by: 2 }}px;">
           {% if section.settings.custom_icon != blank %}
-            <img src="{{ section.settings.custom_icon | image_url: width: 100 }}" alt="{{ section.settings.title }}" class="object-contain" style="width: 60%; height: 60%;">
+            <img src="{{ section.settings.custom_icon | image_url: width: 100 }}" width="{{ section.settings.custom_icon.width }}" height="{{ section.settings.custom_icon.height }}" alt="{{ section.settings.title }}" class="object-contain" style="width: 60%; height: 60%;">
           {% elsif section.settings.icon_svg != blank %}
              <div style="width: 50%; height: 50%;">{{ section.settings.icon_svg }}</div>
           {% else %}

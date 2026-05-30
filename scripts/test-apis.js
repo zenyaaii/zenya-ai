@@ -46,12 +46,18 @@ async function runTests() {
   console.log('2️⃣  Testing /api/generate-content...');
   const genRes = await fetchJson('/api/generate-content', {
     method: 'POST',
-    body: JSON.stringify({ name: 'Test Product', audience: 'Everyone' }),
+    body: JSON.stringify({
+      name: 'Test Product',
+      audience: 'Everyone',
+      productUrl: 'https://example.com/product',
+      price: 49.99,
+      originalPrice: 99.99,
+    }),
   });
 
-  if (genRes.status === 200 && genRes.data.headline) {
+  if (genRes.status === 200 && genRes.data?.hero?.headline) {
     console.log('✅ Generate API: Working (200 OK)');
-    console.log('   Headline:', genRes.data.headline);
+    console.log('   Headline:', genRes.data.hero.headline);
   } else {
     console.log('❌ Generate API: Failed', genRes);
   }

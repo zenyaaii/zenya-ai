@@ -1,84 +1,37 @@
-﻿<div x-data="{ mobileMenuOpen: false, searchOpen: false, searchQuery: '', searchResults: [], loading: false, performSearch() { if (this.searchQuery.length < 2) { this.searchResults = []; return; } this.loading = true; fetch(`/search/suggest.json?q=${this.searchQuery}&resources[type]=product&resources[limit]=5`).then(r => r.json()).then(data => { this.searchResults = data.resources.results.products || []; }).catch(e => console.error(e)).finally(() => this.loading = false); } }">
+<header
+  class="sticky top-0 z-40 border-b border-slate-200/70 backdrop-blur"
+  style="background: color-mix(in srgb, {{ section.settings.bg_color }} 92%, white 8%); color: {{ section.settings.text_color }};"
+  x-data="{
+    mobileMenuOpen: false,
+    searchOpen: false,
+    searchQuery: '',
+    searchResults: [],
+    loading: false,
+    performSearch() {
+      if (this.searchQuery.length < 2) {
+        this.searchResults = [];
+        return;
+      }
+      this.loading = true;
+      fetch(`/search/suggest.json?q=${this.searchQuery}&resources[type]=product&resources[limit]=5`)
+        .then((r) => r.json())
+        .then((data) => { this.searchResults = data.resources.results.products || []; })
+        .catch(() => { this.searchResults = []; })
+        .finally(() => { this.loading = false; });
+    }
+  }"
+>
+  <div class="container mx-auto px-4 md:px-6">
+    <div class="flex h-16 items-center justify-between gap-4 md:h-20">
+      <a href="{{ routes.root_url }}" class="shrink-0 no-underline transition hover:opacity-90" style="color: inherit;">
+        {% if section.settings.logo != blank %}
+          {{ section.settings.logo | image_url: width: section.settings.logo_width | image_tag: class: 'h-auto', style: 'max-width: 100%;', loading: 'eager', alt: shop.name }}
+        {% else %}
+          <span class="text-xl font-extrabold tracking-tight md:text-2xl">{{ section.settings.shop_name | default: shop.name }}</span>
+        {% endif %}
+      </a>
 
-
-  <!-- Search Overlay -->
-  <div 
-    x-show="searchOpen" 
-    x-transition:enter="transition ease-out duration-200"
-    x-transition:enter-start="opacity-0 scale-95"
-    x-transition:enter-end="opacity-100 scale-100"
-    x-transition:leave="transition ease-in duration-150"
-    x-transition:leave-start="opacity-100 scale-100"
-    x-transition:leave-end="opacity-0 scale-95"
-    class="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/50 backdrop-blur-sm"
-    x-cloak
-  >
-    <div @click.away="searchOpen = false" class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
-      <div class="p-4 border-b border-slate-100 flex items-center gap-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input 
-          x-ref="searchInput"
-          type="text" 
-          x-model="searchQuery" 
-          @input.debounce.300ms="performSearch()"
-          placeholder="Search for products..." 
-          class="flex-1 border-none focus:ring-0 text-lg placeholder:text-slate-400 font-medium"
-        >
-        <button @click="searchOpen = false" class="p-2 text-slate-400 hover:text-slate-600">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      
-      <div class="max-h-[60vh] overflow-y-auto p-4">
-        <div x-show="loading" class="text-center py-8 text-slate-500">
-          <svg class="animate-spin h-8 w-8 mx-auto text-primary mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Searching...
-        </div>
-
-        <div x-show="!loading && searchQuery.length >= 2 && searchResults.length === 0" class="text-center py-8 text-slate-500">
-          No results found for "<span x-text="searchQuery"></span>"
-        </div>
-
-        <div x-show="!loading && searchResults.length > 0" class="grid gap-4">
-          <template x-for="product in searchResults" :key="product.id">
-            <a :href="product.url" class="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition group">
-              <div class="h-16 w-16 bg-slate-100 rounded-lg overflow-hidden shrink-0">
-                <img :src="product.featured_image.url" :alt="product.title" class="h-full w-full object-cover group-hover:scale-105 transition">
-              </div>
-              <div>
-                <h4 class="font-bold text-slate-900 group-hover:text-primary transition" x-text="product.title"></h4>
-                <p class="text-sm text-slate-500" x-text="'{{ cart.currency.symbol }}' + product.price"></p>
-              </div>
-            </a>
-          </template>
-          
-          <div class="pt-4 border-t border-slate-100 text-center">
-            <a :href="'{{ routes.search_url }}?q=' + searchQuery" class="text-primary font-bold hover:underline">
-              View all results
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="border-b border-slate-200 py-4 relative" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
-    <div class="container mx-auto flex items-center justify-between px-6">
-      <div class="text-2xl font-extrabold tracking-tight z-20">
-        <a href="{{ routes.root_url }}" class="no-underline hover:opacity-80 transition block" style="color: inherit;">
-          {% if section.settings.logo != blank %}
-            {{ section.settings.logo | image_url: width: section.settings.logo_width | image_tag: class: 'h-auto', style: 'max-width: 100%;', loading: 'eager', alt: shop.name }}
-          {% else %}
-            {{ section.settings.shop_name | default: shop.name }}
-          {% endif %}
-        </a>
-      </div>
-      
-      <!-- Desktop Nav -->
-      <nav class="hidden md:flex items-center gap-8 font-medium">
+      <nav class="hidden items-center gap-7 text-sm font-semibold md:flex">
         {% for link in linklists[section.settings.menu].links %}
           {% assign mega_menu_block = nil %}
           {% for block in section.blocks %}
@@ -88,252 +41,232 @@
             {% endif %}
           {% endfor %}
 
-          <div class="relative group" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
-            <a href="{{ link.url }}" class="flex items-center gap-1 hover:text-primary transition py-4" style="color: inherit;">
+          <div class="group relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+            <a href="{{ link.url }}" class="inline-flex items-center gap-1 py-2 transition hover:opacity-80" style="color: inherit;">
               {{ link.title }}
               {% if link.links != blank or mega_menu_block != nil %}
-                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <svg class="h-4 w-4 transition group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9 6 6 6-6"></path>
+                </svg>
               {% endif %}
             </a>
 
             {% if mega_menu_block != nil %}
-              <!-- Mega Menu -->
-              <div 
+              <div
                 x-show="open"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 translate-y-2"
-                x-transition:enter-end="opacity-100 translate-y-0"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100 translate-y-0"
-                x-transition:leave-end="opacity-0 translate-y-2"
-                class="absolute top-full left-0 w-screen -ml-[calc((100vw-100%)/2)] bg-white border-t border-slate-100 shadow-xl z-50 py-8"
+                x-transition
                 x-cloak
+                class="absolute left-1/2 top-full z-50 w-[min(980px,92vw)] -translate-x-1/2 rounded-[calc(var(--zenya-radius)+6px)] border border-slate-200 bg-white p-6 shadow-2xl"
               >
-                <div class="container mx-auto px-6 grid grid-cols-12 gap-8">
-                  <!-- Navigation Columns -->
-                  <div class="col-span-8 grid grid-cols-3 gap-8">
+                <div class="grid grid-cols-12 gap-6">
+                  <div class="col-span-8 grid grid-cols-2 gap-5">
                     {% if link.links != blank %}
                       {% for child_link in link.links %}
                         <div>
-                          <a href="{{ child_link.url }}" class="font-bold text-slate-900 mb-4 block hover:text-primary">{{ child_link.title }}</a>
-                          <ul class="space-y-2">
+                          <a href="{{ child_link.url }}" class="mb-2 block text-sm font-bold text-slate-900 hover:text-[var(--zenya-primary)]">{{ child_link.title }}</a>
+                          <ul class="space-y-1 text-sm text-slate-600">
                             {% for grandchild_link in child_link.links %}
-                              <li><a href="{{ grandchild_link.url }}" class="text-slate-500 hover:text-primary text-sm">{{ grandchild_link.title }}</a></li>
+                              <li><a href="{{ grandchild_link.url }}" class="hover:text-[var(--zenya-primary)]">{{ grandchild_link.title }}</a></li>
                             {% endfor %}
                           </ul>
                         </div>
                       {% endfor %}
-                    {% else %}
-                       <div class="col-span-3 text-slate-400 italic">Configure nested menu items in Shopify Navigation to see links here.</div>
                     {% endif %}
                   </div>
-                  
-                  <!-- Promo Images -->
-                  <div class="col-span-4 grid grid-cols-2 gap-4">
+                  <div class="col-span-4 grid grid-cols-1 gap-3">
                     {% if mega_menu_block.settings.promo_image_1 %}
-                      <a href="{{ mega_menu_block.settings.promo_url_1 }}" class="group/promo block relative overflow-hidden rounded-lg aspect-square">
-                        <img src="{{ mega_menu_block.settings.promo_image_1 | image_url: width: 400 }}" class="w-full h-full object-cover transition duration-500 group-hover/promo:scale-110">
-                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                          <span class="text-white font-bold text-lg">{{ mega_menu_block.settings.promo_text_1 }}</span>
-                        </div>
+                      <a href="{{ mega_menu_block.settings.promo_url_1 }}" class="group block overflow-hidden rounded-xl border border-slate-200">
+                        <img src="{{ mega_menu_block.settings.promo_image_1 | image_url: width: 480 }}" width="480" height="320" alt="{{ mega_menu_block.settings.promo_text_1 | escape }}" class="h-28 w-full object-cover transition duration-500 group-hover:scale-105">
+                        <div class="p-3 text-sm font-semibold text-slate-800">{{ mega_menu_block.settings.promo_text_1 }}</div>
                       </a>
                     {% endif %}
                     {% if mega_menu_block.settings.promo_image_2 %}
-                      <a href="{{ mega_menu_block.settings.promo_url_2 }}" class="group/promo block relative overflow-hidden rounded-lg aspect-square">
-                        <img src="{{ mega_menu_block.settings.promo_image_2 | image_url: width: 400 }}" class="w-full h-full object-cover transition duration-500 group-hover/promo:scale-110">
-                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
-                          <span class="text-white font-bold text-lg">{{ mega_menu_block.settings.promo_text_2 }}</span>
-                        </div>
+                      <a href="{{ mega_menu_block.settings.promo_url_2 }}" class="group block overflow-hidden rounded-xl border border-slate-200">
+                        <img src="{{ mega_menu_block.settings.promo_image_2 | image_url: width: 480 }}" width="480" height="320" alt="{{ mega_menu_block.settings.promo_text_2 | escape }}" class="h-28 w-full object-cover transition duration-500 group-hover:scale-105">
+                        <div class="p-3 text-sm font-semibold text-slate-800">{{ mega_menu_block.settings.promo_text_2 }}</div>
                       </a>
                     {% endif %}
                   </div>
                 </div>
               </div>
             {% elsif link.links != blank %}
-              <!-- Standard Dropdown -->
-              <div 
-                x-show="open"
-                x-transition
-                class="absolute top-full left-0 w-64 bg-white border border-slate-100 shadow-xl rounded-xl z-50 p-2"
-                x-cloak
-              >
+              <div x-show="open" x-transition x-cloak class="absolute left-0 top-full z-50 mt-1 w-60 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
                 {% for child_link in link.links %}
-                  <div class="group/sub relative" x-data="{ subOpen: false }" @mouseenter="subOpen = true" @mouseleave="subOpen = false">
-                     <a href="{{ child_link.url }}" class="flex items-center justify-between px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary rounded-lg">
-                       {{ child_link.title }}
-                       {% if child_link.links != blank %}
-                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                       {% endif %}
-                     </a>
-                     {% if child_link.links != blank %}
-                       <div x-show="subOpen" class="absolute left-full top-0 w-48 bg-white border border-slate-100 shadow-xl rounded-xl p-2 ml-1">
-                          {% for grandchild_link in child_link.links %}
-                            <a href="{{ grandchild_link.url }}" class="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary rounded-lg">{{ grandchild_link.title }}</a>
-                          {% endfor %}
-                       </div>
-                     {% endif %}
-                  </div>
+                  <a href="{{ child_link.url }}" class="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-[var(--zenya-primary)]">{{ child_link.title }}</a>
                 {% endfor %}
               </div>
             {% endif %}
           </div>
         {% else %}
-          <a href="{{ routes.root_url }}" class="hover:text-primary transition" style="color: inherit;">Home</a>
-          <a href="{{ routes.all_products_collection_url }}" class="hover:text-primary transition" style="color: inherit;">Shop</a>
+          <a href="{{ routes.root_url }}">Home</a>
+          <a href="{{ routes.all_products_collection_url }}">Shop</a>
         {% endfor %}
-
-        <!-- Search Trigger -->
-        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="hover:text-primary transition">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </button>
-
-        <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="hover:text-primary transition flex items-center gap-1" style="color: inherit;">
-          Cart
-          {% if cart.item_count > 0 %}
-            <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ cart.item_count }}</span>
-          {% endif %}
-        </a>
       </nav>
 
-      <!-- Mobile Menu Button -->
-      <div class="md:hidden z-20 flex items-center gap-4">
-        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <div class="hidden items-center gap-2 md:flex">
+        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="rounded-full border border-slate-200 p-2 text-slate-700 transition hover:border-slate-300">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
         </button>
-        <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 focus:outline-none">
-          <span x-show="!mobileMenuOpen" class="text-2xl">âک°</span>
-          <span x-show="mobileMenuOpen" class="text-2xl" x-cloak>âœ•</span>
+        <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart')" class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300">
+          Cart
+          {% if cart.item_count > 0 %}
+            <span class="rounded-full px-2 py-0.5 text-xs font-bold text-white" style="background: {{ settings.primary_color }};">{{ cart.item_count }}</span>
+          {% endif %}
+        </a>
+      </div>
+
+      <div class="flex items-center gap-2 md:hidden">
+        <button @click="searchOpen = true; $nextTick(() => $refs.searchInput.focus())" class="rounded-full border border-slate-200 p-2">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        </button>
+        <button @click="mobileMenuOpen = !mobileMenuOpen" class="rounded-full border border-slate-200 p-2">
+          <svg x-show="!mobileMenuOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" x-cloak><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          <svg x-show="mobileMenuOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" x-cloak><path d="m6 6 12 12M18 6 6 18"></path></svg>
         </button>
       </div>
     </div>
+  </div>
 
-    <!-- Mobile Nav Overlay -->
-    <div 
-      x-show="mobileMenuOpen" 
-      x-transition:enter="transition ease-out duration-200"
-      x-transition:enter-start="opacity-0 -translate-y-4"
-      x-transition:enter-end="opacity-100 translate-y-0"
-      x-transition:leave="transition ease-in duration-150"
-      x-transition:leave-start="opacity-100 translate-y-0"
-      x-transition:leave-end="opacity-0 -translate-y-4"
-      class="absolute top-full left-0 w-full shadow-xl border-b border-slate-100 md:hidden z-10"
-      style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};"
-      x-cloak
-    >
-      <nav class="flex flex-col p-6 space-y-4 font-medium text-lg">
-        {% for link in linklists[section.settings.menu].links %}
-          <a href="{{ link.url }}" class="hover:text-primary transition" style="color: inherit;">{{ link.title }}</a>
-        {% else %}
-          <a href="{{ routes.root_url }}" class="hover:text-primary transition" style="color: inherit;">Home</a>
-          <a href="{{ routes.all_products_collection_url }}" class="hover:text-primary transition" style="color: inherit;">Shop</a>
-        {% endfor %}
-        <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart'); mobileMenuOpen = false" class="hover:text-primary transition flex items-center gap-2" style="color: inherit;">
-          Cart
-          {% if cart.item_count > 0 %}
-            <span class="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ cart.item_count }}</span>
-          {% endif %}
-        </a>
-      </nav>
+  <div x-show="mobileMenuOpen" x-transition x-cloak class="border-t border-slate-200 bg-white/95 md:hidden">
+    <nav class="container mx-auto grid gap-1 px-4 py-4 text-sm font-semibold text-slate-700">
+      {% for link in linklists[section.settings.menu].links %}
+        <a href="{{ link.url }}" class="rounded-lg px-3 py-2 hover:bg-slate-50">{{ link.title }}</a>
+      {% else %}
+        <a href="{{ routes.root_url }}" class="rounded-lg px-3 py-2 hover:bg-slate-50">Home</a>
+        <a href="{{ routes.all_products_collection_url }}" class="rounded-lg px-3 py-2 hover:bg-slate-50">Shop</a>
+      {% endfor %}
+      <a href="{{ routes.cart_url }}" @click.prevent="$dispatch('toggle-cart'); mobileMenuOpen = false" class="rounded-lg px-3 py-2 hover:bg-slate-50">Cart</a>
+    </nav>
+  </div>
+
+  <div x-show="searchOpen" x-cloak class="fixed inset-0 z-50 bg-black/50 p-4 backdrop-blur-sm">
+    <div @click.away="searchOpen = false" class="mx-auto mt-20 w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div class="flex items-center gap-3 border-b border-slate-200 px-4 py-3">
+        <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+        <input
+          x-ref="searchInput"
+          type="text"
+          x-model="searchQuery"
+          @input.debounce.300ms="performSearch()"
+          placeholder="Search products..."
+          class="w-full border-none text-base focus:ring-0"
+        >
+        <button @click="searchOpen = false" class="rounded-full p-1 text-slate-400 hover:bg-slate-100">X</button>
+      </div>
+      <div class="max-h-[60vh] overflow-y-auto p-4">
+        <p x-show="loading" class="py-8 text-center text-sm text-slate-500">Searching...</p>
+        <p x-show="!loading && searchQuery.length >= 2 && searchResults.length === 0" class="py-8 text-center text-sm text-slate-500">No matching products.</p>
+        <div x-show="!loading && searchResults.length > 0" class="space-y-2">
+          <template x-for="result in searchResults" :key="result.id">
+            <a :href="result.url" class="flex items-center gap-3 rounded-xl p-2 hover:bg-slate-50">
+              <img :src="result.featured_image.url" :alt="result.title" width="56" height="56" class="h-14 w-14 rounded-lg object-cover">
+              <div>
+                <p class="text-sm font-semibold text-slate-900" x-text="result.title"></p>
+                <p class="text-xs text-slate-500" x-text="'{{ cart.currency.symbol }}' + result.price"></p>
+              </div>
+            </a>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</header>
+
 {% schema %}
 {
-    "name":  "Header",
-    "settings":  [
-                     {
-                         "type":  "text",
-                         "id":  "shop_name",
-                         "label":  "Shop Name",
-                         "default":  "Zenya Demo Store"
-                     },
-                     {
-                         "type":  "image_picker",
-                         "id":  "logo",
-                         "label":  "Logo Image"
-                     },
-                     {
-                         "type":  "range",
-                         "id":  "logo_width",
-                         "min":  50,
-                         "max":  300,
-                         "step":  5,
-                         "unit":  "px",
-                         "label":  "Logo Width",
-                         "default":  120
-                     },
-                     {
-                         "type":  "link_list",
-                         "id":  "menu",
-                         "label":  "Menu",
-                         "default":  "main-menu"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "bg_color",
-                         "label":  "Background Color",
-                         "default":  "#ffffff"
-                     },
-                     {
-                         "type":  "color",
-                         "id":  "text_color",
-                         "label":  "Text Color",
-                         "default":  "#0f172a"
-                     }
-                 ],
-    "blocks":  [
-                   {
-                       "type":  "mega_menu",
-                       "name":  "Mega Menu",
-                       "settings":  [
-                                        {
-                                            "type":  "text",
-                                            "id":  "trigger_link_title",
-                                            "label":  "Trigger Link Title",
-                                            "info":  "Must match a top-level menu item exactly (e.g., \u0027Shop\u0027)."
-                                        },
-                                        {
-                                            "type":  "image_picker",
-                                            "id":  "promo_image_1",
-                                            "label":  "Promo Image 1"
-                                        },
-                                        {
-                                            "type":  "text",
-                                            "id":  "promo_text_1",
-                                            "label":  "Promo Text 1"
-                                        },
-                                        {
-                                            "type":  "url",
-                                            "id":  "promo_url_1",
-                                            "label":  "Promo Link 1"
-                                        },
-                                        {
-                                            "type":  "image_picker",
-                                            "id":  "promo_image_2",
-                                            "label":  "Promo Image 2"
-                                        },
-                                        {
-                                            "type":  "text",
-                                            "id":  "promo_text_2",
-                                            "label":  "Promo Text 2"
-                                        },
-                                        {
-                                            "type":  "url",
-                                            "id":  "promo_url_2",
-                                            "label":  "Promo Link 2"
-                                        }
-                                    ]
-                   }
-               ],
-    "presets":  [
-                    {
-                        "name":  "Header"
-                    }
-                ],
-    "enabled_on":  {
-                       "groups":  [
-                                      "header"
-                                  ]
-                   }
+  "name": "Header",
+  "settings": [
+    {
+      "type": "text",
+      "id": "shop_name",
+      "label": "Shop Name",
+      "default": "Zenya Demo Store"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo Image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 300,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo Width",
+      "default": 120
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#0f172a"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu",
+      "name": "Mega Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "trigger_link_title",
+          "label": "Trigger Link Title",
+          "info": "Must match a top-level menu item exactly (e.g., Shop)."
+        },
+        {
+          "type": "image_picker",
+          "id": "promo_image_1",
+          "label": "Promo Image 1"
+        },
+        {
+          "type": "text",
+          "id": "promo_text_1",
+          "label": "Promo Text 1"
+        },
+        {
+          "type": "url",
+          "id": "promo_url_1",
+          "label": "Promo Link 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "promo_image_2",
+          "label": "Promo Image 2"
+        },
+        {
+          "type": "text",
+          "id": "promo_text_2",
+          "label": "Promo Text 2"
+        },
+        {
+          "type": "url",
+          "id": "promo_url_2",
+          "label": "Promo Link 2"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header"
+    }
+  ],
+  "enabled_on": {
+    "groups": ["header"]
+  }
 }
 {% endschema %}

@@ -1,4 +1,4 @@
-﻿<div class="relative overflow-hidden" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<div class="relative overflow-hidden" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
   <div class="container mx-auto px-6 text-center">
     {% if section.settings.heading != blank %}
       <h2 class="text-3xl font-bold mb-8" style="color: {{ section.settings.heading_color }}">{{ section.settings.heading }}</h2>
@@ -9,7 +9,7 @@
       {% comment %} Cover Image {% endcomment %}
       {% if section.settings.cover != blank %}
         <div x-show="!playing" class="absolute inset-0 z-10 cursor-pointer group" @click="playing = true">
-          <img src="{{ section.settings.cover | image_url: width: 1600 }}" alt="{{ section.settings.heading }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+          <img src="{{ section.settings.cover | image_url: width: 1600 }}" width="1600" height="900" alt="{{ section.settings.heading }}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
           <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition">
             <div class="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center pl-1 shadow-lg group-hover:scale-110 transition duration-300">
                <svg class="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
