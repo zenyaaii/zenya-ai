@@ -38,3 +38,7 @@ zenya-theme-test*
 report.txt
 utils/alpine.js
 utils/tailwind.js
+
+# typescript incremental-compile cache (local only)
+tsconfig.tsbuildinfo
+*.tsbuildinfo
