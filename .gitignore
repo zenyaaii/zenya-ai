@@ -42,3 +42,9 @@ utils/tailwind.js
 # typescript incremental-compile cache (local only)
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+
+# Claude Code workspace state (session-specific)
+.claude/
+
+# Local scratch / reference checkouts (e.g. tmp-open-design, tmp-v3-theme-check)
+tmp-*/
