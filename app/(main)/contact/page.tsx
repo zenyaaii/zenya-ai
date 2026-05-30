@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -55,7 +55,21 @@ const CHANNELS: { label: string; value: string; href: string; icon: LucideIcon }
   { label: 'GitHub', value: 'zenyaai',          href: '#',                       icon: GithubIcon },
 ]
 
+/**
+ * Default export wraps the form in <Suspense> because `useSearchParams()` in
+ * Next.js 14 App Router bails out of static rendering unless the consumer is
+ * inside a Suspense boundary. The fallback is `null` since the page chrome
+ * itself doesn't need a skeleton.
+ */
 export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageInner />
+    </Suspense>
+  )
+}
+
+function ContactPageInner() {
   const search = useSearchParams()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

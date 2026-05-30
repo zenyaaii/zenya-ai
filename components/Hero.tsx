@@ -14,6 +14,7 @@ import {
   Leaf,
   ShoppingBag,
   Star,
+  type LucideIcon,
 } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import CursorGlow from '@/components/marketing/CursorGlow'
@@ -27,7 +28,7 @@ const fade = (delay = 0) => ({
 })
 
 /** Icon per business type — shown in the in-hero template picker mockup. */
-const TYPE_ICON: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
+const TYPE_ICON: Record<string, LucideIcon> = {
   one_product: ShoppingBag,
   restaurant:  Utensils,
   atlas:       LayoutDashboard,
