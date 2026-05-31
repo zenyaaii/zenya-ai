@@ -35,12 +35,13 @@ export const COMPANY = {
   KVK_NUMBER: '42070030',
   VAT_NUMBER: 'Pending registration (BTW)',       // Update once BTW arrives
 
-  // Address — Musannef's registered business address. Pending values to be
-  // supplied by the operator; placeholders fall back to "address pending".
-  ADDRESS_LINE_1: '{{ADDRESS_LINE_1}}',
+  // Address — Musannef's registered KvK address. Only the postcode is
+  // disclosed publicly; the full street is available via the KvK public
+  // register using the KvK number, or on written request to privacy@.
+  ADDRESS_LINE_1: '',
   ADDRESS_LINE_2: '',
-  POSTAL_CODE: '{{POSTAL_CODE}}',
-  CITY: '{{CITY}}',
+  POSTAL_CODE: '7776 BA',
+  CITY: '',
 
   // Contact — using personal Outlook mailbox until a real support@ mailbox is set up.
   SUPPORT_EMAIL: 'zenyaai@outlook.com',
@@ -62,11 +63,14 @@ export const COMPANY = {
 } as const
 
 export const formatAddress = () => {
-  const parts = [
-    COMPANY.ADDRESS_LINE_1,
-    COMPANY.ADDRESS_LINE_2,
-    `${COMPANY.POSTAL_CODE} ${COMPANY.CITY}`.trim(),
-    COMPANY.COUNTRY,
-  ].filter((p) => p && !p.includes('{{'))
-  return parts.length ? parts.join(', ') : `${COMPANY.COUNTRY} (address pending)`
+  const all: string[] = [
+    String(COMPANY.ADDRESS_LINE_1),
+    String(COMPANY.ADDRESS_LINE_2),
+  ]
+  const street = all.filter((p) => p && !p.includes('{{')).join(', ')
+  const cityLine = `${COMPANY.POSTAL_CODE} ${COMPANY.CITY}`.trim()
+  const parts: string[] = [street, cityLine, String(COMPANY.COUNTRY)].filter(
+    (p) => p.length > 0
+  )
+  return parts.join(', ')
 }

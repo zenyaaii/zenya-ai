@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [dark, setDark] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [confirmText, setConfirmText] = useState('')
 
@@ -32,6 +33,26 @@ export default function SettingsPage() {
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
     localStorage.setItem('zenya_theme', next ? 'dark' : 'light')
+  }
+
+  async function openPortal() {
+    setPortalLoading(true)
+    try {
+      const res = await fetch('/api/account/portal', { method: 'POST' })
+      const j = await res.json()
+      if (!res.ok || !j.url) {
+        // 409 = user never subscribed; nudge them to /pricing instead
+        if (res.status === 409) {
+          window.location.href = '/dashboard'
+          return
+        }
+        throw new Error(j.message || j.details || 'Could not open billing portal')
+      }
+      window.location.href = j.url
+    } catch (e: any) {
+      alert(e.message || 'Could not open billing portal')
+      setPortalLoading(false)
+    }
   }
 
   async function exportData() {
@@ -99,14 +120,13 @@ export default function SettingsPage() {
           <p className="text-sm text-muted">
             Manage your billing, change your payment method, view invoices, or cancel — all from the secure Stripe customer portal.
           </p>
-          <a
-            href="https://billing.stripe.com/p/login/test_28o9Cy4eU5x52ZWdQQ"
-            target="_blank"
-            rel="noopener"
-            className="mt-3 inline-flex w-fit items-center gap-2 rounded-md border border-token bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-black/5"
+          <button
+            onClick={openPortal}
+            disabled={portalLoading}
+            className="mt-3 inline-flex w-fit items-center gap-2 rounded-md border border-token bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-black/5 disabled:opacity-60"
           >
-            Manage subscription →
-          </a>
+            {portalLoading ? 'Opening portal…' : 'Manage subscription →'}
+          </button>
           <p className="mt-2 text-xs text-muted">
             See our <Link href="/refund" className="underline">Refund Policy</Link> for cancellation details.
           </p>
