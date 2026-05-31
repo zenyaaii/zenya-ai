@@ -42,7 +42,7 @@ function LoginForm() {
       if (mode === 'forgot') {
         if (!validateEmail(email)) throw new Error('Please enter a valid email address.')
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
         })
         if (error) throw error
         setStatus({ type: 'success', message: 'Password reset link sent! Check your email.' })
