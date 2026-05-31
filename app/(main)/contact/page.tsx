@@ -50,7 +50,7 @@ const TOPIC_SUCCESS: Record<Topic, string> = {
 }
 
 const CHANNELS: { label: string; value: string; href: string; icon: LucideIcon }[] = [
-  { label: 'Email',  value: 'support@zenya.ai', href: 'mailto:support@zenya.ai', icon: Mail       },
+  { label: 'Email',  value: 'support@zenyaai.co', href: 'mailto:support@zenyaai.co', icon: Mail       },
   { label: 'X',      value: '@zenyaai',         href: '#',                       icon: XIcon      },
   { label: 'GitHub', value: 'zenyaai',          href: '#',                       icon: GithubIcon },
 ]
@@ -88,10 +88,23 @@ function ContactPageInner() {
     e.preventDefault()
     if (!email || !message || submitting) return
     setSubmitting(true)
-    // Visual-only delay — real backend wiring is out of scope for this rebuild.
-    await new Promise((r) => setTimeout(r, 700))
-    setSubmitting(false)
-    setSent(true)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name, email, topic, message }),
+      })
+      // Even if the backend isn't fully wired (e.g. Resend not configured),
+      // we treat 200 as success and surface anything else as the topic-specific
+      // copy. The route currently logs to console + returns 200.
+      if (!res.ok) throw new Error('Could not deliver — please email us directly.')
+      setSent(true)
+    } catch (err: any) {
+      // Show the error inline instead of the success state.
+      alert(err.message || 'Something went wrong; please email support@zenyaai.co directly.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function reset() {

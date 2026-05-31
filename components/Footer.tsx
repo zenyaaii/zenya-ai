@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { X as XIcon, Heart, ArrowUpRight } from 'lucide-react'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
+import { openConsent } from '@/components/CookieConsent'
 
 /**
  * GitHub mark — inlined because lucide-react v1+ removed brand icons.
@@ -41,8 +42,11 @@ const PRODUCT = [
 ]
 
 const LEGAL = [
-  { href: '/privacy', label: 'Privacy' },
-  { href: '/terms',   label: 'Terms'   },
+  { href: '/privacy',        label: 'Privacy'        },
+  { href: '/terms',          label: 'Terms'          },
+  { href: '/cookies',        label: 'Cookies'        },
+  { href: '/refund',         label: 'Refund'         },
+  { href: '/subprocessors',  label: 'Subprocessors'  },
 ]
 
 const SOCIALS = [
@@ -88,7 +92,7 @@ export default function Footer() {
             </p>
 
             <div className="mt-5 flex flex-wrap gap-1.5">
-              {['SSL Secured', 'SOC 2 Ready', 'GDPR Aligned'].map((badge) => (
+              {['HTTPS', 'GDPR-compliant', 'EU-hosted DB'].map((badge) => (
                 <span
                   key={badge}
                   className="inline-flex items-center rounded-full border border-token bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted"
@@ -193,13 +197,23 @@ export default function Footer() {
         {/* ── Bottom bar ── */}
         <div className="mt-14 flex flex-col gap-3 border-t border-token pt-6 md:flex-row md:items-center md:justify-between">
           <p className="text-[12.5px] text-muted">
-            © {new Date().getFullYear()} Zenya AI, Inc. All rights reserved.
+            © {new Date().getFullYear()} Zenya. Operated as a Dutch eenmanszaak.
+            All rights reserved.
           </p>
-          <p className="inline-flex items-center gap-1.5 text-[12.5px] text-muted">
-            Built with
-            <Heart className="h-3.5 w-3.5 text-[#dc2626]" aria-hidden fill="currentColor" />
-            for makers, founders, and teams worldwide.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted">
+            <button
+              onClick={openConsent}
+              className="transition-colors hover:text-foreground"
+            >
+              Cookie preferences
+            </button>
+            <span aria-hidden>·</span>
+            <span className="inline-flex items-center gap-1.5">
+              Built with
+              <Heart className="h-3.5 w-3.5 text-[#dc2626]" aria-hidden fill="currentColor" />
+              in the EU.
+            </span>
+          </div>
         </div>
       </div>
     </footer>

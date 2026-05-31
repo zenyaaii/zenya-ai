@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import AIDisclosure from '@/components/AIDisclosure'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -74,6 +75,8 @@ export default function DashboardPage() {
           <span>+</span> Create New Theme
         </Link>
       </div>
+
+      <AIDisclosure variant="banner" className="mt-6" />
 
       {loading ? (
         <div className="mt-12 text-center text-muted">Loading your themes...</div>

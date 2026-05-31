@@ -14,6 +14,7 @@ function LoginForm() {
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -57,12 +58,19 @@ function LoginForm() {
         if (!fullName) throw new Error('Please enter your full name.')
         if (!validateEmail(email)) throw new Error('Please enter a valid email address.')
         if (!validatePassword(password)) throw new Error('Password must be at least 6 characters.')
+        if (!acceptTerms) throw new Error('Please accept the Terms of Service and Privacy Policy to continue.')
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}`,
-            data: { full_name: fullName },
+            // Record consent timestamp + version on the auth user so we can
+            // prove acceptance later (GDPR Art. 7(1)).
+            data: {
+              full_name: fullName,
+              consent_terms_v: '1',
+              consent_terms_at: new Date().toISOString(),
+            },
           },
         })
         if (error) throw error
@@ -221,10 +229,53 @@ function LoginForm() {
           )}
         </AnimatePresence>
 
+        {/* ToS / Privacy consent (signup only) */}
+        <AnimatePresence>
+          {mode === 'signup' && (
+            <motion.label
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex cursor-pointer items-start gap-2.5 overflow-hidden text-xs leading-relaxed"
+              style={{ color: '#8b8aad' }}
+            >
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[#7c3aed]"
+                style={{ accentColor: '#7c3aed' }}
+              />
+              <span>
+                I agree to the{' '}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="font-semibold underline"
+                  style={{ color: '#a78bfa' }}
+                >
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="font-semibold underline"
+                  style={{ color: '#a78bfa' }}
+                >
+                  Privacy Policy
+                </Link>
+                , and I consent to immediate access to the Service (waiving the
+                14-day withdrawal right for content I generate).
+              </span>
+            </motion.label>
+          )}
+        </AnimatePresence>
+
         {/* Submit */}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (mode === 'signup' && !acceptTerms)}
           className="w-full rounded-full py-4 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
           style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', boxShadow: '0 0 24px -4px rgba(124,58,237,0.55)' }}
         >

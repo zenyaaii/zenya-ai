@@ -77,6 +77,10 @@ create policy "Users can insert own themes." on themes for insert with check (au
 create policy "Users can delete own themes." on themes for delete using (auth.uid() = user_id);
 create policy "Public view for published themes." on themes for select using (is_published = true);
 
+-- Indexes for hot paths
+create index if not exists themes_user_id_idx on themes(user_id);
+create index if not exists themes_created_at_idx on themes(created_at desc);
+
 
 -- ==========================================
 -- 4. SUBSCRIPTIONS (Plans & Payments)
@@ -104,6 +108,64 @@ alter table subscriptions enable row level security;
 
 -- RLS Policies
 create policy "Users can view own subscription." on subscriptions for select using (auth.uid() = user_id);
+
+-- Indexes for hot paths
+create index if not exists subscriptions_user_id_idx on subscriptions(user_id);
+create index if not exists subscriptions_status_idx on subscriptions(status);
+create index if not exists subscriptions_stripe_customer_id_idx on subscriptions(stripe_customer_id);
+
+
+-- ==========================================
+-- 4b. STRIPE CUSTOMERS (user_id <-> Stripe customer mapping)
+-- ==========================================
+create table if not exists stripe_customers (
+  customer_id text primary key,        -- Stripe customer id (cus_*)
+  email text not null,
+  user_id uuid references auth.users on delete cascade, -- nullable so we can still record customers that came in webhook-first
+  updated_at timestamp with time zone not null default now()
+);
+
+alter table stripe_customers enable row level security;
+-- No RLS policies on purpose: only the service role (webhooks) should read/write.
+
+create index if not exists stripe_customers_user_id_idx on stripe_customers(user_id);
+
+
+-- ==========================================
+-- 4c. STRIPE EVENTS (webhook idempotency log)
+-- ==========================================
+create table if not exists stripe_events (
+  id text primary key,                 -- Stripe event id (evt_*)
+  type text not null,
+  payload jsonb not null,
+  processed boolean not null default false,
+  created_at timestamp with time zone not null default now()
+);
+
+alter table stripe_events enable row level security;
+-- No RLS policies on purpose: webhook-only via service role.
+
+create index if not exists stripe_events_type_idx on stripe_events(type);
+create index if not exists stripe_events_created_at_idx on stripe_events(created_at desc);
+
+
+-- ==========================================
+-- 4d. SHOPIFY SESSION (managed by @shopify/shopify-app-session-storage-prisma)
+-- The Prisma model lives in prisma/schema.prisma; this is here for reference
+-- only so the SQL file matches the live schema. The table is created on first
+-- boot by ensurePrismaSessionTable() in lib/shopify.ts.
+-- ==========================================
+-- create table if not exists "Session" (
+--   id text primary key,
+--   shop text not null,
+--   state text not null,
+--   "isOnline" boolean not null default false,
+--   scope text,
+--   expires timestamp(3),
+--   "accessToken" text not null,
+--   "userId" bigint
+-- );
+-- create index if not exists "Session_shop_idx" on "Session"(shop);
 
 
 -- ==========================================

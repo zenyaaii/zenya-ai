@@ -38,32 +38,50 @@ export async function POST(req: NextRequest) {
           }
         : null);
     
+    // Require a Shopify App Bridge session token. Without this anyone who
+    // knows a shop domain could publish products to a shop that ever installed
+    // the app.
     const authorization = req.headers.get('authorization') || '';
-    const bearer = authorization.startsWith('Bearer ') ? authorization.slice('Bearer '.length).trim() : '';
-    if (bearer) {
-      try {
-        const payload = await shopify.session.decodeSessionToken(bearer);
-        const dest = typeof payload?.dest === 'string' ? payload.dest : '';
-        const tokenShop = dest.replace(/^https?:\/\//, '').replace(/\/$/, '');
-        if (tokenShop) {
-          if (!shop) shop = tokenShop;
-          if (shop && tokenShop && shop !== tokenShop) {
-            return NextResponse.json(
-              { error: 'Shop mismatch', code: 'SHOP_MISMATCH' },
-              { status: 401 }
-            );
-          }
-        }
-      } catch (e: any) {
+    const bearer = authorization.startsWith('Bearer ')
+      ? authorization.slice('Bearer '.length).trim()
+      : '';
+    if (!bearer) {
+      return NextResponse.json(
+        {
+          error: 'Missing session token. Open the app inside Shopify Admin so App Bridge can mint a token.',
+          code: 'MISSING_SESSION_TOKEN',
+          authUrl: shop ? `/api/shopify/auth?shop=${encodeURIComponent(shop)}` : undefined,
+        },
+        { status: 401 }
+      );
+    }
+
+    try {
+      const payload = await shopify.session.decodeSessionToken(bearer);
+      const dest = typeof payload?.dest === 'string' ? payload.dest : '';
+      const tokenShop = dest.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      if (!tokenShop) {
         return NextResponse.json(
-          {
-            error: 'Invalid session token. Please reconnect the app.',
-            code: 'INVALID_SESSION_TOKEN',
-            authUrl: shop ? `/api/shopify/auth?shop=${encodeURIComponent(shop)}` : undefined,
-          },
+          { error: 'Session token missing dest', code: 'INVALID_SESSION_TOKEN' },
           { status: 401 }
         );
       }
+      if (!shop) shop = tokenShop;
+      if (shop !== tokenShop) {
+        return NextResponse.json(
+          { error: 'Shop mismatch', code: 'SHOP_MISMATCH' },
+          { status: 401 }
+        );
+      }
+    } catch (e: any) {
+      return NextResponse.json(
+        {
+          error: 'Invalid session token. Please reconnect the app.',
+          code: 'INVALID_SESSION_TOKEN',
+          authUrl: shop ? `/api/shopify/auth?shop=${encodeURIComponent(shop)}` : undefined,
+        },
+        { status: 401 }
+      );
     }
 
     if (!shop) {
