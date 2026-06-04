@@ -1,0 +1,116 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Zenya//Business Operations Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Zenya Business Operations
+X-WR-CALDESC:Tax filings, Stripe reviews, and operational reminders for Zenya
+X-WR-TIMEZONE:Europe/Amsterdam
+
+BEGIN:VEVENT
+UID:btw-filing-window-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20260701T080000Z
+DTEND:20260701T083000Z
+SUMMARY:File BTW (Dutch VAT) for last quarter
+DESCRIPTION:Quarter just ended. Time to file BTW for the prior 3 months.\n\nSteps (10-15 min):\n1. Stripe Dashboard -> Tax -> Reports -> download the quarter report\n2. Open mijn.belastingdienst.nl -> BTW-aangifte\n3. Copy numbers from Stripe report:\n   - Total taxable revenue (per country if EU OSS)\n   - BTW collected\n   - Refundable BTW (any business expenses you paid VAT on)\n4. Submit and pay via iDEAL\n\nDeadline: end of this month.
+LOCATION:https://dashboard.stripe.com/tax/reports
+RRULE:FREQ=YEARLY;BYMONTH=1,4,7,10;BYMONTHDAY=1
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:File BTW - quarterly filing window opens today
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+UID:btw-filing-deadline-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20260731T080000Z
+DTEND:20260731T083000Z
+SUMMARY:BTW DEADLINE - file today if not done
+DESCRIPTION:Last day to submit BTW return for the prior quarter.\n\nLate filing in NL = automatic fine (minimum 68 euros) plus interest on any BTW owed. Do not miss this.\n\nIf you have already filed: ignore.\nIf not: stop everything and file at mijn.belastingdienst.nl now.
+LOCATION:https://mijn.belastingdienst.nl
+RRULE:FREQ=YEARLY;BYMONTH=1,4,7,10;BYMONTHDAY=-1
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:BTW deadline in 3 days
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:BTW deadline TODAY
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+UID:income-tax-ib-window-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20270301T080000Z
+DTEND:20270301T083000Z
+SUMMARY:Income tax (IB) filing window opens
+DESCRIPTION:Dutch income tax (Inkomstenbelasting) filing window for the previous tax year is now open. Deadline is May 1.\n\nFor sole traders / ZZP:\n- Complete IB-aangifte at mijn.belastingdienst.nl\n- Gather: Stripe annual revenue report, business expenses, BTW totals, KvK info\n- Consider zelfstandigenaftrek and startersaftrek deductions if eligible\n\nIf using a boekhouder/accountant: send them your books now.
+LOCATION:https://mijn.belastingdienst.nl
+RRULE:FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=1
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:IB filing window open - start gathering documents
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+UID:income-tax-ib-deadline-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20270501T080000Z
+DTEND:20270501T083000Z
+SUMMARY:Income tax (IB) DEADLINE
+DESCRIPTION:Last day to file Dutch income tax (IB) for the previous year without an extension.\n\nIf you cannot file today: request uitstel (extension) immediately at mijn.belastingdienst.nl - this is free and automatic if requested before the deadline.
+LOCATION:https://mijn.belastingdienst.nl
+RRULE:FREQ=YEARLY;BYMONTH=5;BYMONTHDAY=1
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P14D
+DESCRIPTION:IB deadline in 2 weeks
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P3D
+DESCRIPTION:IB deadline in 3 days
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+UID:stripe-monthly-review-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20260701T070000Z
+DTEND:20260701T073000Z
+SUMMARY:Stripe monthly review (5 min)
+DESCRIPTION:Quick monthly health check on the payments business.\n\nChecklist:\n- Stripe -> Payments -> Disputes (RESPOND within 7 days or auto-lose)\n- Stripe -> Payouts (verify last month's bank arrivals)\n- Stripe -> Revenue (compare vs prior month - any churn?)\n- Stripe -> Radar (review blocked payments for false positives)\n- Supabase -> profiles (count is_subscribed=true vs Stripe paid count - they should match)
+LOCATION:https://dashboard.stripe.com
+RRULE:FREQ=MONTHLY;BYMONTHDAY=1
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:Stripe monthly review
+END:VALARM
+END:VEVENT
+
+BEGIN:VEVENT
+UID:kvk-annual-check-zenya@zenyaai.co
+DTSTAMP:20260604T180000Z
+DTSTART:20270115T090000Z
+DTEND:20270115T093000Z
+SUMMARY:KvK annual check - update business info if needed
+DESCRIPTION:Annual reminder to review your Chamber of Commerce (KvK) registration.\n\nCheck:\n- Business address still correct\n- Activities (SBI codes) still match what you actually do\n- Contact email/phone up to date\n\nNo annual fee for ZZP/eenmanszaak but keeping info current is required.
+LOCATION:https://www.kvk.nl/inschrijven-en-wijzigen
+RRULE:FREQ=YEARLY;BYMONTH=1;BYMONTHDAY=15
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:PT0S
+DESCRIPTION:KvK annual review
+END:VALARM
+END:VEVENT
+
+END:VCALENDAR

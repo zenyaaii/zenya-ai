@@ -31,11 +31,11 @@ export default async function CheckoutPage() {
   // Skip the Stripe round-trip if the user already paid.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_subscribed')
+    .select('is_pro')
     .eq('id', user.id)
     .maybeSingle()
 
-  if (profile?.is_subscribed) {
+  if (profile?.is_pro) {
     redirect('/dashboard?already_pro=1')
   }
 

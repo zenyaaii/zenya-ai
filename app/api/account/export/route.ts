@@ -16,14 +16,11 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const [profile, themes, subs, scrapes, brand, segmentation, feedback] = await Promise.all([
+  const [profile, themes, purchases, scrapes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
     supabase.from('themes').select('*').eq('user_id', user.id),
-    supabase.from('subscriptions').select('*').eq('user_id', user.id),
+    supabase.from('purchases').select('*').eq('user_id', user.id),
     supabase.from('scrape_history').select('*').eq('user_id', user.id),
-    supabase.from('brand_assets').select('*').eq('user_id', user.id),
-    supabase.from('user_segmentation').select('*').eq('user_id', user.id),
-    supabase.from('theme_feedback').select('*').eq('user_id', user.id),
   ])
 
   const dump = {
@@ -37,11 +34,8 @@ export async function GET(_req: NextRequest) {
     },
     profile: profile.data,
     themes: themes.data,
-    subscriptions: subs.data,
+    purchases: purchases.data,
     scrape_history: scrapes.data,
-    brand_assets: brand.data,
-    user_segmentation: segmentation.data,
-    theme_feedback: feedback.data,
   }
 
   return new NextResponse(JSON.stringify(dump, null, 2), {

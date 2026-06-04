@@ -11,17 +11,20 @@ export async function GET(_req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ status: 'guest' })
 
-    // `subscriptions` table is keyed on user_id (see supabase_schema.sql).
-    // Pick the most recent row in case there's more than one.
     const { data } = await supabase
-      .from('subscriptions')
-      .select('status')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
+      .from('profiles')
+      .select('plan, is_pro, trial_themes_limit, trial_themes_used')
+      .eq('id', user.id)
       .maybeSingle()
 
-    return NextResponse.json({ status: data?.status || 'free' })
+    return NextResponse.json({
+      status: data?.is_pro ? 'pro' : 'free',
+      plan: data?.plan || 'free',
+      trial_remaining: Math.max(
+        0,
+        (data?.trial_themes_limit ?? 3) - (data?.trial_themes_used ?? 0)
+      ),
+    })
   } catch {
     return NextResponse.json({ status: 'free' })
   }

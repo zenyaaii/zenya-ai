@@ -197,22 +197,19 @@ export default function NewThemePage() {
         return
       }
 
-      // Check limits
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'trialing'])
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_pro, trial_themes_limit, trial_themes_used')
+        .eq('id', user.id)
         .maybeSingle()
-        
-      const isPro = !!sub
 
-      if (!isPro) {
-        const { count } = await supabase.from('themes').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-        if ((count || 0) >= 3) {
-          alert('You have reached your free theme limit (3 themes). Please upgrade to continue.')
-          router.push('/pricing')
-        }
+      const isPro = !!profile?.is_pro
+      const used = profile?.trial_themes_used ?? 0
+      const limit = profile?.trial_themes_limit ?? 3
+
+      if (!isPro && used >= limit) {
+        alert(`You've used all ${limit} free generations. Upgrade to Pro for unlimited.`)
+        router.push('/pricing')
       }
       setCheckingAuth(false)
     }
