@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { createOneTimeCheckoutSession } from '@/lib/checkout'
+import { createCheckoutSession, type PlanId } from '@/lib/checkout'
 import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -14,29 +14,43 @@ function getOrigin() {
   return `${proto}://${host}`
 }
 
-export default async function CheckoutPage() {
+function parsePlan(raw: string | string[] | undefined): PlanId {
+  const v = Array.isArray(raw) ? raw[0] : raw
+  return v === 'hosting' ? 'hosting' : 'onetime'
+}
+
+export default async function CheckoutPage({
+  searchParams,
+}: {
+  searchParams: { plan?: string }
+}) {
+  const plan = parsePlan(searchParams.plan)
+
   const supabase = createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login?mode=signup&next=/checkout')
+    redirect(`/login?mode=signup&next=/checkout?plan=${plan}`)
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
     return <CheckoutError message="Payments aren't configured yet. STRIPE_SECRET_KEY is missing." />
   }
 
-  // Skip the Stripe round-trip if the user already paid.
+  // Skip the Stripe round-trip if the user already has what this plan would give them.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_pro')
+    .select('is_pro, has_hosting, plan')
     .eq('id', user.id)
     .maybeSingle()
 
-  if (profile?.is_pro) {
+  if (plan === 'onetime' && profile?.is_pro) {
     redirect('/dashboard?already_pro=1')
+  }
+  if (plan === 'hosting' && profile?.has_hosting) {
+    redirect('/dashboard?already_hosting=1')
   }
 
   const h = headers()
@@ -44,7 +58,8 @@ export default async function CheckoutPage() {
   const origin = getOrigin()
 
   try {
-    const session = await createOneTimeCheckoutSession({
+    const session = await createCheckoutSession({
+      plan,
       userId: user.id,
       email: user.email,
       country,
@@ -57,8 +72,6 @@ export default async function CheckoutPage() {
 
     redirect(session.url)
   } catch (e: any) {
-    // Next.js implements redirect() by throwing — re-throw so the redirect
-    // propagates instead of being swallowed as a generic error.
     if (e?.digest?.startsWith?.('NEXT_REDIRECT')) throw e
     return <CheckoutError message={`Stripe error: ${e.message}`} />
   }

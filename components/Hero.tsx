@@ -96,10 +96,10 @@ export default function Hero() {
             {...fade(0.12)}
             className="mx-auto mt-6 max-w-2xl text-[17px] leading-[1.65] text-muted"
           >
-            Restaurant, lookbook, SaaS landing, brand story, wellness studio,
-            catalog, local services, or a one-product Shopify store — pick a
-            template, share a brief, and Zenya writes the copy and builds the page.
-            Live in minutes.
+            Restaurant, fashion lookbook, SaaS landing, brand story, wellness
+            studio, multi-product catalog, local trades, or a Shopify storefront
+            — pick a template, share a brief, and Zenya writes the copy and
+            ships the site. $9.99 lifetime or $19.99/mo with full hosting.
           </motion.p>
 
           {/* CTAs */}

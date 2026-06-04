@@ -9,67 +9,76 @@ import { cn } from '@/lib/utils'
 
 const FAQS = [
   {
-    q: 'Is this really a one-time payment?',
-    a: "Yes. Pay $9.99 (or €9.99 in Europe, VAT included) once and Zenya Pro is yours for life. No subscription, no renewals, no surprise charges.",
+    q: 'What’s the difference between the one-time plan and the hosting plan?',
+    a: 'The one-time $9.99 unlocks unlimited AI generations and exports — for the two e-commerce templates (Storefront, Collective) you connect or upload to your Shopify store; for the other templates you download the project ZIP and host wherever you like. The $19.99/month hosting plan adds Zenya hosting for the brochure templates (live URL, custom domain, no Zenya badge) plus everything in the one-time plan, billed monthly.',
   },
   {
-    q: 'What happens to my websites long-term?',
-    a: "Your sites stay live and your exported code (Storefront ZIP) is yours forever, with or without an account. Pro unlocks unlimited new generations.",
+    q: 'Is the one-time payment really one-time?',
+    a: 'Yes. Pay $9.99 (or €9.99 in Europe, VAT included) once and the generator is yours for life. No renewal. Lifetime access to unlimited AI generations and exports.',
+  },
+  {
+    q: 'What does Zenya hosting include?',
+    a: 'A live site at zenya.app/s/your-slug for any brochure template (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison), one connected custom domain (like mycoolstore.com), automatic SSL, fast CDN delivery, and removal of the “Made with Zenya” footer. E-commerce templates (Storefront, Collective) are not Zenya-hosted — they go to Shopify.',
+  },
+  {
+    q: 'Can I cancel the hosting plan?',
+    a: 'Yes, any time from your dashboard. Hosting stays active until the end of the current billing month, then your site stops resolving. Themes and exports you’ve generated stay in your account.',
   },
   {
     q: 'Do you offer a refund policy?',
-    a: "We offer a 14-day money-back guarantee. If Zenya Pro doesn't deliver, just reach out to our support team — no questions asked.",
+    a: 'Yes. 14-day money-back guarantee on the one-time plan, and you can cancel the hosting plan at any time. See the full Refund Policy for details.',
   },
   {
-    q: 'Can I use templates for client projects?',
-    a: 'Yes. Zenya Pro lets you use any generated website for both personal and commercial projects, including client work.',
-  },
-  {
-    q: 'Which templates can I export as code?',
-    a: "Only the Storefront template exports as a downloadable Shopify OS 2.0 theme ZIP (sections, blocks, settings_schema, the works). The other seven business templates — Maison, Atlas, Lookbook, Collective, Studio, Trade, and Wellness — ship as live hosted sites on the Zenya domain. We're working on broader export options.",
-  },
-  {
-    q: 'How is this different from a website builder?',
-    a: "Most builders give you a blank canvas. Zenya gives you a fully-written, fully-designed site that already understands your business type — restaurant menus, SaaS pricing tiers, treatment lists, lookbook galleries. You spend time editing, not building from zero.",
+    q: 'Which templates work where?',
+    a: 'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify (Shopify handles cart, checkout, products, payments). The other seven templates — Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison — are brochure/showcase sites that Zenya can host directly.',
   },
 ] as const
 
 const COMPARE = [
-  { feature: 'Price',             zenya: '$9.99 once',    other: '$29+/mo',    agency: '$2,000+' },
-  { feature: 'Setup Time',        zenya: 'Under 60 sec',  other: 'Minutes',    agency: 'Weeks'   },
-  { feature: 'Templates Live',    zenya: '8 templates',   other: '1–2',        agency: 'Custom'  },
-  { feature: 'Code Ownership',    zenya: 'Storefront ZIP', other: 'Locked in', agency: 'Yes'     },
-  { feature: 'Platform Lock-in',  zenya: 'None',          other: 'High',       agency: 'None'    },
-  { feature: 'Free Plan',         zenya: 'Forever free',  other: 'Trial only', agency: 'No'      },
-  { feature: 'AI Customization',  zenya: 'Advanced',      other: 'Standard',   agency: 'Manual'  },
+  { feature: 'Price',                zenya: '$9.99 once / $19.99 mo', other: '$29+/mo', agency: '$2,000+' },
+  { feature: 'Setup Time',           zenya: 'Under 60 sec',           other: 'Minutes', agency: 'Weeks' },
+  { feature: 'Templates',            zenya: '8 templates',            other: '1–2', agency: 'Custom' },
+  { feature: 'Hosting included',     zenya: 'On $19.99 plan',         other: 'On most',  agency: 'You arrange' },
+  { feature: 'Custom domain',        zenya: 'On $19.99 plan',         other: 'On most',  agency: 'Yes' },
+  { feature: 'Shopify export',       zenya: 'On both paid',           other: 'Rare',     agency: 'Custom' },
+  { feature: 'Platform lock-in',     zenya: 'None',                   other: 'High',     agency: 'None' },
 ] as const
 
 const FREE_FEATURES = [
-  '3 AI websites total',
+  '3 AI generations total',
   'All 8 templates available',
-  'Live preview mode',
+  'Preview your site at zenya.app',
   'Basic customization',
   'Community support',
 ]
 
-const PRO_FEATURES = [
-  'Unlimited AI websites',
+const ONETIME_FEATURES = [
+  'Unlimited AI generations',
   'All 8 premium templates',
-  'Shopify OS 2.0 ZIP export (Storefront)',
+  'Shopify OS 2.0 ZIP (Storefront + Collective)',
+  'Static export ZIP (other templates)',
   'Priority AI generation',
-  'Remove Zenya branding',
   'Priority support',
   'Early access to new templates',
+]
+
+const HOSTING_FEATURES = [
+  'Everything in One-time, plus:',
+  'Zenya hosts your brochure sites',
+  '1 connected custom domain',
+  'Automatic SSL + CDN delivery',
+  'Remove the “Made with Zenya” badge',
+  'Site analytics in your dashboard',
+  'Edit content anytime via AI prompts',
 ]
 
 export default function PricingPage() {
   return (
     <main className="relative">
-      {/* Fixed cream + indigo aurora wash behind the long scroll */}
       <AuroraBackground fixed intensity={0.7} />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-6 pb-32 pt-20">
-        {/* ── Header ── */}
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-32 pt-20">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,36 +92,36 @@ export default function PricingPage() {
             Start free.{' '}
             <span className="gradient-text">Scale when ready.</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-lg text-[17px] leading-[1.65] text-muted">
-            No hidden fees, no lock-in. Eight templates on every plan. Pay only when you need more.
+          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.65] text-muted">
+            One AI generator, three ways to launch. Free to try. Pay once for the generator, or subscribe for full Zenya hosting.
           </p>
         </motion.div>
 
-        {/* ── Pricing cards ── */}
-        <div className="mx-auto mb-24 grid max-w-3xl gap-5 md:grid-cols-2">
-          {/* Starter */}
+        {/* Pricing cards — three plans */}
+        <div className="mx-auto mb-24 grid max-w-5xl gap-5 md:grid-cols-3">
+          {/* Free */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
             className="relative flex flex-col rounded-xl border border-token bg-white p-7 shadow-soft-sm"
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                Starter
+                Free
               </p>
               <div className="mb-2 flex items-baseline gap-1">
-                <span className="text-[46px] font-[590] leading-none tracking-[-1.5px] text-foreground">$0</span>
+                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$0</span>
                 <span className="text-[15px] text-muted">/forever</span>
               </div>
-              <p className="text-[13.5px] text-muted">Perfect for exploring Zenya&apos;s capabilities.</p>
+              <p className="text-[13.5px] text-muted">Try Zenya. See what AI can build.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
               {FREE_FEATURES.map((feat) => (
                 <li key={feat} className="flex items-start gap-2.5">
                   <CheckChip color="#5f5f5d" />
-                  <span className="text-[13.5px] text-muted">{feat}</span>
+                  <span className="text-[13px] text-muted">{feat}</span>
                 </li>
               ))}
             </ul>
@@ -128,18 +137,17 @@ export default function PricingPage() {
             </Link>
           </motion.div>
 
-          {/* Pro */}
+          {/* One-time */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
             className="relative flex flex-col rounded-xl bg-white p-7"
             style={{
               border: '1px solid #5e6ad2',
               boxShadow: '0 0 0 1px #5e6ad2, 0 8px 24px rgba(94,106,210,0.16)',
             }}
           >
-            {/* Most Popular badge */}
             <div
               className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-[11px] font-semibold text-white whitespace-nowrap"
               style={{
@@ -152,30 +160,28 @@ export default function PricingPage() {
 
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-                Pro
+                One-time
               </p>
               <div className="mb-2 flex items-baseline gap-1">
-                <span
-                  className="text-[46px] font-[590] leading-none tracking-[-1.5px] gradient-text"
-                >
+                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] gradient-text">
                   $9.99
                 </span>
-                <span className="text-[15px] text-muted">once · lifetime</span>
+                <span className="text-[15px] text-muted">once</span>
               </div>
-              <p className="text-[13.5px] text-muted">One payment. Lifetime Pro. €9.99 in Europe, VAT included.</p>
+              <p className="text-[13.5px] text-muted">Lifetime generator. Export anywhere.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
-              {PRO_FEATURES.map((feat) => (
+              {ONETIME_FEATURES.map((feat) => (
                 <li key={feat} className="flex items-start gap-2.5">
                   <CheckChip color="#5e6ad2" />
-                  <span className="text-[13.5px] font-medium text-foreground">{feat}</span>
+                  <span className="text-[13px] font-medium text-foreground">{feat}</span>
                 </li>
               ))}
             </ul>
 
             <Link
-              href="/checkout"
+              href="/checkout?plan=onetime"
               className={cn(
                 'group inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-[14px] font-semibold text-white transition-all duration-150',
                 'btn-shadow-primary hover:opacity-90 active:scale-[0.99]'
@@ -188,9 +194,52 @@ export default function PricingPage() {
               One-time payment · 14-day money-back guarantee
             </p>
           </motion.div>
+
+          {/* Hosting */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="relative flex flex-col rounded-xl border border-token bg-white p-7 shadow-soft-sm"
+          >
+            <div className="mb-6">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+                Hosting
+              </p>
+              <div className="mb-2 flex items-baseline gap-1">
+                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$19.99</span>
+                <span className="text-[15px] text-muted">/month</span>
+              </div>
+              <p className="text-[13.5px] text-muted">We host. You point your domain. Done.</p>
+            </div>
+
+            <ul className="mb-7 flex-1 space-y-3">
+              {HOSTING_FEATURES.map((feat) => (
+                <li key={feat} className="flex items-start gap-2.5">
+                  <CheckChip color="#5e6ad2" />
+                  <span className="text-[13px] text-foreground">{feat}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Link
+              href="/checkout?plan=hosting"
+              className={cn(
+                'group inline-flex w-full items-center justify-center gap-2 rounded-md border border-token bg-white py-3 text-[14px] font-semibold text-foreground transition-all duration-150',
+                'hover:bg-black/5 active:scale-[0.99]'
+              )}
+              style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
+            >
+              Start Hosting
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+            </Link>
+            <p className="mt-2.5 text-center text-[12px] text-muted">
+              Cancel anytime · Site stays live until end of month
+            </p>
+          </motion.div>
         </div>
 
-        {/* ── Comparison table ── */}
+        {/* Comparison table */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -206,7 +255,7 @@ export default function PricingPage() {
               Why Zenya?
             </h2>
             <p className="mt-2 text-[15px] text-muted">
-              See how we stack up against other AI builders and agencies.
+              How we stack up against generic AI builders and traditional agencies.
             </p>
           </div>
 
@@ -253,7 +302,7 @@ export default function PricingPage() {
           </div>
         </motion.div>
 
-        {/* ── FAQ (Radix Accordion) ── */}
+        {/* FAQ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -312,10 +361,6 @@ export default function PricingPage() {
   )
 }
 
-/**
- * Small visual checkmark chip. The shadcn-style "circle with check inside"
- * pattern but using our color tokens.
- */
 function CheckChip({ color }: { color: string }) {
   return (
     <div

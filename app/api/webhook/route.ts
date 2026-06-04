@@ -16,8 +16,29 @@ function admin() {
   )
 }
 
+type Admin = ReturnType<typeof admin>
+
+function toIsoOrNull(unix: number | null | undefined): string | null {
+  if (!unix || !Number.isFinite(unix)) return null
+  return new Date(unix * 1000).toISOString()
+}
+
+async function logEvent(
+  supabase: Admin,
+  userId: string | null,
+  eventType: string,
+  metadata: Record<string, unknown> = {}
+) {
+  if (!userId) return
+  await supabase.from('activity_logs').insert({
+    user_id: userId,
+    event_type: eventType,
+    metadata: metadata as any,
+  })
+}
+
 async function linkStripeCustomer(
-  supabase: ReturnType<typeof admin>,
+  supabase: Admin,
   customerId: string,
   email: string | null,
   userId: string | null
@@ -31,26 +52,13 @@ async function linkStripeCustomer(
     )
 }
 
-async function logEvent(
-  supabase: ReturnType<typeof admin>,
-  userId: string | null,
-  eventType: string,
-  metadata: Record<string, unknown> = {}
-) {
-  if (!userId) return
-  await supabase.from('activity_logs').insert({
-    user_id: userId,
-    event_type: eventType,
-    metadata: metadata as any,
-  })
-}
+// ---------- one-time payment ----------------------------------------------
 
-async function recordPurchase(
-  supabase: ReturnType<typeof admin>,
+async function recordOneTimePurchase(
+  supabase: Admin,
   session: Stripe.Checkout.Session,
   userId: string
 ) {
-  // Pull the line item price for the canonical price_id.
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     expand: ['data.price'],
     limit: 1,
@@ -63,11 +71,9 @@ async function recordPurchase(
   const customerId = typeof session.customer === 'string' ? session.customer : null
   const paymentIntentId =
     typeof session.payment_intent === 'string' ? session.payment_intent : null
-
   const taxAmount = session.total_details?.amount_tax ?? 0
   const country = session.customer_details?.address?.country || null
 
-  // Insert purchase (idempotent on stripe_checkout_session_id).
   const { error: purchaseErr } = await supabase.from('purchases').upsert(
     {
       user_id: userId,
@@ -87,11 +93,23 @@ async function recordPurchase(
   )
   if (purchaseErr) throw purchaseErr
 
-  // Flip the user to Pro on their profile (cached flag the UI reads).
-  const { error: profErr } = await supabase
+  // pro_onetime only upgrades free users — don't downgrade an admin or a
+  // hosting subscriber back to pro_onetime.
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('plan, has_hosting')
+    .eq('id', userId)
+    .maybeSingle()
+
+  const newPlan =
+    existing?.plan === 'admin' || existing?.has_hosting
+      ? existing.plan
+      : 'pro_onetime'
+
+  await supabase
     .from('profiles')
     .update({
-      plan: 'pro_lifetime',
+      plan: newPlan,
       is_pro: true,
       pro_purchased_at: new Date().toISOString(),
       pro_amount_cents: session.amount_total ?? 0,
@@ -100,9 +118,9 @@ async function recordPurchase(
       stripe_customer_id: customerId,
     })
     .eq('id', userId)
-  if (profErr) throw profErr
 
   await logEvent(supabase, userId, 'purchase.completed', {
+    plan: 'onetime',
     session_id: session.id,
     amount_cents: session.amount_total,
     currency: session.currency,
@@ -110,10 +128,112 @@ async function recordPurchase(
   })
 }
 
-async function recordRefund(
-  supabase: ReturnType<typeof admin>,
-  charge: Stripe.Charge
+// ---------- hosting subscription ------------------------------------------
+
+async function upsertHostingSubscription(
+  supabase: Admin,
+  sub: Stripe.Subscription,
+  userIdHint?: string | null
 ) {
+  let userId =
+    userIdHint ||
+    (sub.metadata?.user_id as string | undefined) ||
+    null
+
+  if (!userId && typeof sub.customer === 'string') {
+    const { data } = await supabase
+      .from('stripe_customers')
+      .select('user_id')
+      .eq('customer_id', sub.customer)
+      .maybeSingle()
+    userId = data?.user_id || null
+  }
+
+  if (!userId) {
+    console.warn('[webhook] hosting sub with no resolvable user_id', sub.id)
+    return
+  }
+
+  const item = sub.items?.data?.[0]
+  const price = item?.price
+  const customerId = typeof sub.customer === 'string' ? sub.customer : null
+
+  const row = {
+    id: sub.id,
+    user_id: userId,
+    stripe_customer_id: customerId,
+    stripe_price_id: price?.id || null,
+    status: sub.status,
+    currency: (price?.currency || 'usd').toLowerCase(),
+    amount_cents: price?.unit_amount ?? 0,
+    interval: price?.recurring?.interval || 'month',
+    interval_count: price?.recurring?.interval_count ?? 1,
+    current_period_start: toIsoOrNull((sub as any).current_period_start),
+    current_period_end: toIsoOrNull((sub as any).current_period_end),
+    cancel_at_period_end: !!sub.cancel_at_period_end,
+    cancel_at: toIsoOrNull(sub.cancel_at as number | null),
+    canceled_at: toIsoOrNull(sub.canceled_at as number | null),
+    ended_at: toIsoOrNull(sub.ended_at as number | null),
+    trial_start: toIsoOrNull(sub.trial_start as number | null),
+    trial_end: toIsoOrNull(sub.trial_end as number | null),
+    raw_payload: sub as any,
+  }
+
+  const { error } = await supabase
+    .from('hosting_subscriptions')
+    .upsert(row, { onConflict: 'id' })
+  if (error) throw error
+
+  // Mirror the boolean has_hosting onto profile for fast UI checks.
+  const active = ['active', 'trialing', 'past_due'].includes(sub.status)
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('plan, is_pro')
+    .eq('id', userId)
+    .maybeSingle()
+
+  const updates: Record<string, unknown> = {
+    has_hosting: active,
+    hosting_subscription_id: sub.id,
+    hosting_status: sub.status,
+    hosting_current_period_end: row.current_period_end,
+    hosting_canceled_at: row.canceled_at,
+    stripe_customer_id: customerId,
+  }
+
+  if (active) {
+    updates.hosting_started_at = existing && (existing as any).hosting_started_at
+      ? (existing as any).hosting_started_at
+      : new Date().toISOString()
+    // Upgrade plan label unless this is an admin.
+    if (existing?.plan !== 'admin') {
+      updates.plan = 'pro_hosting'
+      updates.is_pro = true
+    }
+  } else if (existing?.plan === 'pro_hosting') {
+    // Sub ended → drop the hosting label. Keep is_pro=true if they ever paid
+    // the one-time (they still own that), otherwise back to free.
+    const { data: hadOneTime } = await supabase
+      .from('purchases')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'paid')
+      .limit(1)
+      .maybeSingle()
+    updates.plan = hadOneTime ? 'pro_onetime' : 'free'
+    updates.is_pro = !!hadOneTime
+  }
+
+  await supabase.from('profiles').update(updates).eq('id', userId)
+
+  await logEvent(supabase, userId, `hosting_subscription.${sub.status}`, {
+    subscription_id: sub.id,
+    cancel_at_period_end: sub.cancel_at_period_end,
+    current_period_end: row.current_period_end,
+  })
+}
+
+async function recordRefund(supabase: Admin, charge: Stripe.Charge) {
   const paymentIntentId =
     typeof charge.payment_intent === 'string' ? charge.payment_intent : null
   if (!paymentIntentId) return
@@ -131,17 +251,27 @@ async function recordRefund(
     .update({ status: 'refunded', refunded_at: new Date().toISOString() })
     .eq('id', purchase.id)
 
-  // Revoke Pro access on refund.
-  await supabase
+  // Only drop them off Pro if they have nothing else granting it.
+  const { data: prof } = await supabase
     .from('profiles')
-    .update({ plan: 'free', is_pro: false })
+    .select('has_hosting, plan')
     .eq('id', purchase.user_id)
+    .maybeSingle()
+
+  if (!prof?.has_hosting && prof?.plan !== 'admin') {
+    await supabase
+      .from('profiles')
+      .update({ plan: 'free', is_pro: false })
+      .eq('id', purchase.user_id)
+  }
 
   await logEvent(supabase, purchase.user_id, 'purchase.refunded', {
     charge_id: charge.id,
     payment_intent_id: paymentIntentId,
   })
 }
+
+// ---------- POST handler --------------------------------------------------
 
 export async function POST(req: NextRequest) {
   const sig = req.headers.get('stripe-signature') || ''
@@ -161,7 +291,7 @@ export async function POST(req: NextRequest) {
 
   const supabase = admin()
 
-  // Idempotency: refuse to re-process the same Stripe event id twice.
+  // Idempotency.
   const { data: existing } = await supabase
     .from('stripe_events')
     .select('id, processed')
@@ -171,7 +301,6 @@ export async function POST(req: NextRequest) {
   if (existing?.processed) {
     return NextResponse.json({ ok: true, idempotent: true })
   }
-
   if (!existing) {
     await supabase
       .from('stripe_events')
@@ -183,18 +312,27 @@ export async function POST(req: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         const userId = (session.client_reference_id as string | null) || null
-        const customerId = typeof session.customer === 'string' ? session.customer : null
-        const email = session.customer_details?.email || session.customer_email || null
+        const customerId =
+          typeof session.customer === 'string' ? session.customer : null
+        const email =
+          session.customer_details?.email || session.customer_email || null
 
         if (customerId) await linkStripeCustomer(supabase, customerId, email, userId)
 
-        if (
-          session.mode === 'payment' &&
-          session.payment_status === 'paid' &&
-          userId
-        ) {
-          await recordPurchase(supabase, session, userId)
+        if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
+          await recordOneTimePurchase(supabase, session, userId)
+        } else if (session.mode === 'subscription' && typeof session.subscription === 'string') {
+          const sub = await stripe.subscriptions.retrieve(session.subscription)
+          await upsertHostingSubscription(supabase, sub, userId)
         }
+        break
+      }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object as Stripe.Subscription
+        await upsertHostingSubscription(supabase, sub)
         break
       }
 
@@ -215,6 +353,17 @@ export async function POST(req: NextRequest) {
         await recordRefund(supabase, charge)
         break
       }
+
+      case 'invoice.payment_failed':
+      case 'invoice.payment_succeeded': {
+        const inv = event.data.object as Stripe.Invoice
+        const subId = (inv as any).subscription
+        if (typeof subId === 'string') {
+          const sub = await stripe.subscriptions.retrieve(subId)
+          await upsertHostingSubscription(supabase, sub)
+        }
+        break
+      }
     }
 
     await supabase
@@ -228,7 +377,6 @@ export async function POST(req: NextRequest) {
       .from('stripe_events')
       .update({ error: err?.message || String(err) })
       .eq('id', event.id)
-    // Leave processed=false so Stripe's retries can recover.
     return NextResponse.json({ error: 'processing_error', details: err?.message }, { status: 500 })
   }
 }

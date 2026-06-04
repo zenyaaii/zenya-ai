@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOneTimeCheckoutSession } from '@/lib/checkout'
+import { createCheckoutSession, type PlanId } from '@/lib/checkout'
 import { createClient } from '@/utils/supabase/server'
+
+function parsePlan(raw: unknown): PlanId {
+  return raw === 'hosting' ? 'hosting' : 'onetime'
+}
 
 export async function POST(req: NextRequest) {
   const supabase = createClient()
@@ -16,16 +20,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: origin + '/dashboard?demo_success=true' })
   }
 
+  let plan: PlanId = 'onetime'
+  try {
+    const body = await req.json().catch(() => ({}))
+    plan = parsePlan(body?.plan)
+  } catch {
+    // empty body — default to one-time
+  }
+
   const country = req.headers.get('x-vercel-ip-country') || null
 
   try {
-    const session = await createOneTimeCheckoutSession({
+    const session = await createCheckoutSession({
+      plan,
       userId: user.id,
       email: user.email,
       country,
       origin,
     })
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: session.url, plan })
   } catch (e: any) {
     console.error('Stripe checkout creation failed:', e)
     return NextResponse.json({ error: 'stripe_checkout_error', details: e.message }, { status: 500 })
