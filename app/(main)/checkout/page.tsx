@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { stripe } from '@/lib/stripe'
+import { createOneTimeCheckoutSession } from '@/lib/checkout'
 import { createClient } from '@/utils/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -12,26 +12,6 @@ function getOrigin() {
   const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3000'
   const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https')
   return `${proto}://${host}`
-}
-
-async function resolvePriceId(): Promise<string | { error: string }> {
-  const explicit =
-    process.env.STRIPE_PRICE_ID ||
-    process.env.STRIPE_PRICE_ID_BIMONTHLY ||
-    ''
-  if (explicit) return explicit
-
-  const productId = process.env.STRIPE_PRODUCT_ID || ''
-  if (!productId) return { error: 'No STRIPE_PRICE_ID or STRIPE_PRODUCT_ID configured.' }
-
-  try {
-    const prices = await stripe.prices.list({ product: productId, active: true, limit: 100 })
-    const recurring = prices.data.find((p) => p.recurring)
-    if (!recurring) return { error: 'No active recurring price found on the product.' }
-    return recurring.id
-  } catch (e: any) {
-    return { error: `Stripe price lookup failed: ${e.message}` }
-  }
 }
 
 export default async function CheckoutPage() {
@@ -48,24 +28,27 @@ export default async function CheckoutPage() {
     return <CheckoutError message="Payments aren't configured yet. STRIPE_SECRET_KEY is missing." />
   }
 
-  const priceOrError = await resolvePriceId()
-  if (typeof priceOrError !== 'string') {
-    return <CheckoutError message={priceOrError.error} />
+  // Skip the Stripe round-trip if the user already paid.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_subscribed')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profile?.is_subscribed) {
+    redirect('/dashboard?already_pro=1')
   }
 
+  const h = headers()
+  const country = h.get('x-vercel-ip-country') || null
   const origin = getOrigin()
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      client_reference_id: user.id,
-      customer_email: user.email,
-      line_items: [{ price: priceOrError, quantity: 1 }],
-      allow_promotion_codes: true,
-      billing_address_collection: 'auto',
-      subscription_data: { trial_period_days: 14 },
-      success_url: `${origin}/dashboard?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/pricing?checkout=cancelled`,
+    const session = await createOneTimeCheckoutSession({
+      userId: user.id,
+      email: user.email,
+      country,
+      origin,
     })
 
     if (!session.url) {
@@ -74,8 +57,8 @@ export default async function CheckoutPage() {
 
     redirect(session.url)
   } catch (e: any) {
-    // Next.js uses a thrown redirect under the hood — re-throw so the
-    // redirect propagates instead of being caught as a generic error.
+    // Next.js implements redirect() by throwing — re-throw so the redirect
+    // propagates instead of being swallowed as a generic error.
     if (e?.digest?.startsWith?.('NEXT_REDIRECT')) throw e
     return <CheckoutError message={`Stripe error: ${e.message}`} />
   }

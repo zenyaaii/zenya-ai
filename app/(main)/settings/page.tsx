@@ -115,20 +115,20 @@ export default function SettingsPage() {
           </p>
         </Card>
 
-        {/* Subscription */}
-        <Card title="Subscription">
+        {/* Billing */}
+        <Card title="Billing & invoices">
           <p className="text-sm text-muted">
-            Manage your billing, change your payment method, view invoices, or cancel — all from the secure Stripe customer portal.
+            Zenya Pro is a one-time purchase — there&rsquo;s nothing to cancel. Use the secure Stripe portal to download your invoice or update payment details if you ever buy something else from us.
           </p>
           <button
             onClick={openPortal}
             disabled={portalLoading}
             className="mt-3 inline-flex w-fit items-center gap-2 rounded-md border border-token bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-black/5 disabled:opacity-60"
           >
-            {portalLoading ? 'Opening portal…' : 'Manage subscription →'}
+            {portalLoading ? 'Opening portal…' : 'Open Stripe portal →'}
           </button>
           <p className="mt-2 text-xs text-muted">
-            See our <Link href="/refund" className="underline">Refund Policy</Link> for cancellation details.
+            See our <Link href="/refund" className="underline">Refund Policy</Link> for refund details.
           </p>
         </Card>
 

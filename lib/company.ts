@@ -54,8 +54,8 @@ export const COMPANY = {
   APP_URL: 'https://zenyaai.co',
 
   // Pricing
-  PRICE_DISPLAY: '$4.99 every 2 months',
-  TRIAL_DAYS: 14,
+  PRICE_DISPLAY: '$9.99 one-time (€9.99 in Europe)',
+  TRIAL_DAYS: 0,
   CURRENCY: 'USD',
 
   // Maintenance

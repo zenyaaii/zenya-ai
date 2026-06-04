@@ -78,7 +78,7 @@ export default async function OpenGraphImage() {
             zenyaai.co
           </div>
           <div>·</div>
-          <div>$4.99 every 2 months · 14-day free trial</div>
+          <div>$9.99 once · Lifetime Pro</div>
         </div>
       </div>
     ),

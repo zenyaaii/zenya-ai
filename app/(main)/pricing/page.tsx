@@ -9,12 +9,12 @@ import { cn } from '@/lib/utils'
 
 const FAQS = [
   {
-    q: 'Can I cancel my subscription anytime?',
-    a: "Yes, absolutely. Cancel from your dashboard at any time. You'll retain access until the end of your billing period — no charge afterward.",
+    q: 'Is this really a one-time payment?',
+    a: "Yes. Pay $9.99 (or €9.99 in Europe, VAT included) once and Zenya Pro is yours for life. No subscription, no renewals, no surprise charges.",
   },
   {
-    q: 'What happens to my websites if I cancel?',
-    a: "Your sites stay live and your exported code (if any) is yours forever. You won't be able to create new AI sites until you resubscribe.",
+    q: 'What happens to my websites long-term?',
+    a: "Your sites stay live and your exported code (Storefront ZIP) is yours forever, with or without an account. Pro unlocks unlimited new generations.",
   },
   {
     q: 'Do you offer a refund policy?',
@@ -35,7 +35,7 @@ const FAQS = [
 ] as const
 
 const COMPARE = [
-  { feature: 'Monthly Cost',      zenya: '$4.99',         other: '$29+',       agency: '$2,000+' },
+  { feature: 'Price',             zenya: '$9.99 once',    other: '$29+/mo',    agency: '$2,000+' },
   { feature: 'Setup Time',        zenya: 'Under 60 sec',  other: 'Minutes',    agency: 'Weeks'   },
   { feature: 'Templates Live',    zenya: '8 templates',   other: '1–2',        agency: 'Custom'  },
   { feature: 'Code Ownership',    zenya: 'Storefront ZIP', other: 'Locked in', agency: 'Yes'     },
@@ -158,11 +158,11 @@ export default function PricingPage() {
                 <span
                   className="text-[46px] font-[590] leading-none tracking-[-1.5px] gradient-text"
                 >
-                  $4.99
+                  $9.99
                 </span>
-                <span className="text-[15px] text-muted">/month</span>
+                <span className="text-[15px] text-muted">once · lifetime</span>
               </div>
-              <p className="text-[13.5px] text-muted">For serious founders ready to scale.</p>
+              <p className="text-[13.5px] text-muted">One payment. Lifetime Pro. €9.99 in Europe, VAT included.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
@@ -181,11 +181,11 @@ export default function PricingPage() {
                 'btn-shadow-primary hover:opacity-90 active:scale-[0.99]'
               )}
             >
-              Start 14-Day Free Trial
+              Get Lifetime Access
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <p className="mt-2.5 text-center text-[12px] text-muted">
-              Cancel anytime · No questions asked
+              One-time payment · 14-day money-back guarantee
             </p>
           </motion.div>
         </div>

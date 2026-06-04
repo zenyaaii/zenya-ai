@@ -138,6 +138,15 @@ export async function POST(req: NextRequest) {
 
         if (customerId) await linkStripeCustomer(supabase, customerId, email, userId)
 
+        // One-time payment path: lifetime Pro access. Stripe sends
+        // payment_status=paid the moment the charge succeeds — anything
+        // else (unpaid, no_payment_required) means we shouldn't unlock yet.
+        if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
+          await supabase.from('profiles').update({ is_subscribed: true }).eq('id', userId)
+        }
+
+        // Legacy subscription path (kept harmless in case any older sessions
+        // still complete during a transition window).
         if (typeof session.subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(session.subscription)
           await upsertSubscriptionFromStripe(supabase, sub, userId)

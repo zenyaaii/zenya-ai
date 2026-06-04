@@ -28,7 +28,7 @@ export default function TermsOfService() {
         <li>&ldquo;<strong>We</strong>&rdquo;, &ldquo;<strong>us</strong>&rdquo;, &ldquo;<strong>our</strong>&rdquo; — {COMPANY.LEGAL_NAME}.</li>
         <li>&ldquo;<strong>You</strong>&rdquo;, &ldquo;<strong>your</strong>&rdquo; — the individual or entity using the Service.</li>
         <li>&ldquo;<strong>Generated Content</strong>&rdquo; — themes, copy, images, and other output the Service produces from your inputs.</li>
-        <li>&ldquo;<strong>Subscription</strong>&rdquo; — the paid plan you purchase to access premium features.</li>
+        <li>&ldquo;<strong>Pro</strong>&rdquo; — the one-time paid licence you purchase to access premium features for the lifetime of your account.</li>
       </ul>
 
       <h2>2. Eligibility</h2>
@@ -74,17 +74,16 @@ export default function TermsOfService() {
         refund.
       </p>
 
-      <h2>6. Subscription, Billing &amp; Trials</h2>
+      <h2>6. Pricing &amp; Billing</h2>
       <ul>
         <li><strong>Free tier:</strong> up to 3 themes per account.</li>
-        <li><strong>Pro:</strong> {COMPANY.PRICE_DISPLAY} (in {COMPANY.CURRENCY}), billed automatically via Stripe.</li>
-        <li><strong>Free trial:</strong> {COMPANY.TRIAL_DAYS} days. You may cancel before the trial ends to avoid being charged.</li>
-        <li>The subscription renews automatically at the end of each billing period unless cancelled before renewal.</li>
-        <li>You can cancel at any time from your Stripe customer portal or by emailing us. Cancellation takes effect at the end of the current paid period; you retain access until then.</li>
-        <li>All fees are exclusive of applicable VAT/sales tax, which we charge where required.</li>
-        <li>Payment is processed by Stripe. By subscribing, you also agree to{' '}
+        <li><strong>Pro:</strong> {COMPANY.PRICE_DISPLAY} — a single one-time payment that unlocks lifetime Pro access on your account. No subscription, no auto-renewal.</li>
+        <li>Currency is selected by your country: USD outside the EEA/UK, EUR inside the EEA/UK.</li>
+        <li>The displayed price is VAT-inclusive where applicable. Stripe Tax calculates and itemises any BTW / VAT / sales tax on the receipt.</li>
+        <li>Payment is processed by Stripe. By purchasing, you also agree to{' '}
           <a href="https://stripe.com/legal/consumer" target="_blank" rel="noopener">Stripe&rsquo;s Terms</a>.
         </li>
+        <li>We may change the price of future purchases at any time, but anything you have already paid for is not affected.</li>
       </ul>
 
       <h2>7. Refunds &amp; Right of Withdrawal</h2>

@@ -27,14 +27,13 @@ export default function DashboardPage() {
         setThemes(j.themes || [])
       }
 
-      const { data: sub } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'trialing'])
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_subscribed')
+        .eq('id', user.id)
         .maybeSingle()
-        
-      if (sub) {
+
+      if (profile?.is_subscribed) {
         setPlan('active')
       }
       
@@ -58,11 +57,11 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Dashboard</h1>
           <div className="mt-2 flex items-center gap-3">
             <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${plan === 'active' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'}`}>
-              {plan === 'active' ? 'Pro Plan' : 'Free Plan'}
+              {plan === 'active' ? 'Pro (Lifetime)' : 'Free Plan'}
             </div>
             {plan !== 'active' && (
               <button onClick={subscribe} disabled={subLoading} className="text-sm font-medium text-primary hover:underline">
-                {subLoading ? '...' : 'Upgrade to Pro'}
+                {subLoading ? '...' : 'Get Lifetime Pro'}
               </button>
             )}
           </div>
