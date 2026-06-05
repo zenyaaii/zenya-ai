@@ -20,6 +20,7 @@ type Theme = {
 const HOSTABLE_TYPES = new Set([
   'restaurant', 'atlas', 'lookbook', 'wellness', 'studio', 'services',
 ])
+const SHOPIFY_TYPES = new Set(['one_product', 'storefront', 'collective'])
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -115,12 +116,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Link
-          href="/theme/new"
-          className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 hover:shadow-xl"
-        >
-          <span>+</span> Create New Theme
-        </Link>
+        <div className="flex items-center gap-3">
+          {plan === 'admin' && (
+            <Link
+              href="/dashboard/analytics"
+              className="rounded-full border border-token bg-white px-4 py-2 text-xs font-semibold text-foreground hover:bg-black/5"
+            >
+              Analytics
+            </Link>
+          )}
+          <Link
+            href="/theme/new"
+            className="flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 hover:shadow-xl"
+          >
+            <span>+</span> Create New Theme
+          </Link>
+        </div>
       </div>
 
       <AIDisclosure variant="banner" className="mt-6" />
@@ -212,6 +223,13 @@ export default function DashboardPage() {
                           Publish to Zenya
                         </button>
                       )
+                    ) : SHOPIFY_TYPES.has(bt) ? (
+                      <a
+                        href={`/api/themes/${t.id}/export-shopify`}
+                        className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+                      >
+                        Download Shopify ZIP
+                      </a>
                     ) : (
                       <span className="text-[11px] uppercase tracking-wider text-muted">
                         Ships to Shopify

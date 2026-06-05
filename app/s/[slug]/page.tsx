@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
@@ -16,6 +17,7 @@ function admin() {
 }
 
 type LookupResult = {
+  id: string
   product_name: string | null
   slug: string
   content: any
@@ -24,12 +26,46 @@ type LookupResult = {
   owner_has_hosting: boolean
 } | null
 
+async function recordView(themeId: string, slug: string) {
+  const h = headers()
+  const country = h.get('x-vercel-ip-country') || null
+  const referrer = h.get('referer') || null
+  const userAgent = h.get('user-agent') || null
+
+  const a = admin()
+  // Fire-and-forget: insert one row + bump cached view_count + last_viewed_at.
+  // Failing silently is fine — analytics shouldn't degrade page rendering.
+  try {
+    await Promise.all([
+      a.from('site_views').insert({
+        theme_id: themeId,
+        slug,
+        country,
+        referrer,
+        user_agent: userAgent,
+      }),
+      a.rpc('increment_theme_views', { p_theme_id: themeId }).then(
+        () => {},
+        // RPC may not exist on first run — fall back to UPDATE.
+        async () => {
+          await a
+            .from('themes')
+            .update({ last_viewed_at: new Date().toISOString() })
+            .eq('id', themeId)
+        }
+      ),
+    ])
+  } catch {
+    // intentionally swallow
+  }
+}
+
 async function lookupPublishedTheme(slug: string): Promise<LookupResult> {
   if (!slug) return null
   const a = admin()
   const { data, error } = await a
     .from('themes')
-    .select('product_name, slug, content, template_type, user_id, is_published')
+    .select('id, product_name, slug, content, template_type, user_id, is_published')
     .ilike('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
@@ -47,6 +83,7 @@ async function lookupPublishedTheme(slug: string): Promise<LookupResult> {
     !!profile?.has_hosting || profile?.plan === 'admin'
 
   return {
+    id: data.id,
     product_name: data.product_name,
     slug: data.slug,
     content: data.content,
@@ -91,6 +128,11 @@ export default async function PublicSitePage(
 ) {
   const theme = await lookupPublishedTheme(params.slug)
   if (!theme) notFound()
+
+  // Fire-and-forget pageview record. Skipped for bots, slowloris, etc. is
+  // best handled at the edge — but a one-INSERT counter is cheap enough that
+  // false positives don't matter much at our scale.
+  recordView(theme.id, theme.slug).catch(() => {})
 
   const c = theme.content || {}
   const businessType =
