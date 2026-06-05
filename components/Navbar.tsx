@@ -99,8 +99,13 @@ export default function Navbar() {
       <div className="mx-auto max-w-6xl px-6 py-3.5">
         <div className="flex items-center justify-between">
 
-          {/* ── Brand ── */}
-          <Link href="/" className="group flex items-center gap-2.5">
+          {/* ── Brand — logged-in users land in the dashboard;
+                 guests stay on the marketing site ── */}
+          <Link
+            href={user ? '/dashboard' : '/'}
+            className="group flex items-center gap-2.5"
+            aria-label={user ? 'Go to dashboard' : 'Zenya home'}
+          >
             <div
               className="relative h-7 w-7 overflow-hidden rounded-lg transition-transform duration-200 group-hover:scale-[1.04]"
               style={{

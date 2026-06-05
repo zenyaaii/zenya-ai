@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
 export default function ResetPasswordPage() {
@@ -54,74 +56,65 @@ export default function ResetPasswordPage() {
     }, 1200)
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    borderRadius: '0.875rem',
-    border: '1px solid rgba(255,255,255,0.1)',
-    background: 'rgba(255,255,255,0.04)',
-    padding: '0.875rem 1.25rem',
-    color: '#f1f0ff',
-    fontSize: '0.9rem',
-    outline: 'none',
-    transition: 'border-color 0.2s, box-shadow 0.2s',
-  }
+  const inputClass =
+    'w-full rounded-lg border border-token bg-white px-4 py-3 text-[14px] text-foreground placeholder:text-muted ' +
+    'outline-none transition-shadow duration-150 ' +
+    'focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]'
 
   return (
     <main className="relative flex min-h-[calc(100vh-68px)] items-center justify-center px-6 py-16">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="aurora-orb-1 absolute -top-32 left-1/4 h-80 w-80 rounded-full opacity-25"
-          style={{ background: 'radial-gradient(circle,#7c3aed,transparent 70%)', filter: 'blur(80px)' }}
-        />
-        <div
-          className="aurora-orb-2 absolute -bottom-20 right-1/4 h-64 w-64 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle,#06b6d4,transparent 70%)', filter: 'blur(80px)' }}
-        />
-        <div className="absolute inset-0 dot-grid opacity-25" />
-      </div>
-
       <div
-        className="w-full max-w-md"
+        className="w-full max-w-md rounded-2xl bg-surface p-8 sm:p-10"
         style={{
-          borderRadius: '1.5rem',
-          border: '1px solid rgba(139,92,246,0.2)',
-          background: 'rgba(13,13,26,0.9)',
-          backdropFilter: 'blur(40px)',
-          boxShadow: '0 40px 120px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(139,92,246,0.08)',
-          padding: '2.5rem',
+          border: '1px solid #e5e2d9',
+          boxShadow:
+            '0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 40px -12px rgba(28,28,28,0.10), 0 0 0 1px rgba(94,106,210,0.04)',
         }}
       >
-        <div className="text-center mb-8">
+        {/* Logo + header */}
+        <div className="text-center mb-7">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="h-8 w-8 rounded-xl" style={{ background: 'linear-gradient(135deg,#7c3aed,#06b6d4)' }} />
-            <span className="text-lg font-black gradient-text">Zenya</span>
+            <div
+              className="relative h-7 w-7 overflow-hidden rounded-lg"
+              style={{
+                background: '#5e6ad2',
+                boxShadow:
+                  'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
+              }}
+            >
+              <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">Zenya</span>
           </Link>
-          <h1 className="text-2xl font-black mb-2" style={{ color: '#f1f0ff', letterSpacing: '-0.02em' }}>
+          <h1 className="text-[26px] font-semibold tracking-tight text-foreground mb-1.5" style={{ letterSpacing: '-0.02em' }}>
             Set a new password
           </h1>
-          <p className="text-sm" style={{ color: '#8b8aad' }}>
+          <p className="text-[13.5px] text-muted">
             Choose a strong password you haven&apos;t used before.
           </p>
         </div>
 
         {checking ? (
-          <div className="h-32 rounded-2xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+          <div className="h-32 animate-pulse rounded-lg" style={{ background: 'rgba(28,28,28,0.04)' }} />
         ) : !hasSession ? (
           <div
-            className="rounded-xl p-4 text-center text-sm"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#fca5a5' }}
+            className="rounded-lg p-4 text-center text-[13.5px] font-medium"
+            style={{
+              background: 'rgba(220,38,38,0.06)',
+              border: '1px solid rgba(220,38,38,0.20)',
+              color: '#b91c1c',
+            }}
           >
             <p>This reset link is invalid or has expired.</p>
             <Link
               href="/login?mode=forgot"
-              className="mt-3 inline-block font-semibold underline"
-              style={{ color: '#a78bfa' }}
+              className="mt-3 inline-block font-semibold text-primary underline underline-offset-2"
             >
               Request a new reset link →
             </Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             <div className="relative">
               <label htmlFor="password" className="sr-only">New password</label>
               <input
@@ -132,24 +125,15 @@ export default function ResetPasswordPage() {
                 placeholder="New password"
                 autoComplete="new-password"
                 required
-                style={{ ...inputStyle, paddingRight: '3rem' }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(139,92,246,0.5)'
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.1)'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
+                className={inputClass + ' pr-12'}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: '#5e5d7a' }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:bg-[rgba(28,28,28,0.05)] hover:text-foreground"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {showPassword ? '🙈' : '👁'}
+                {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
               </button>
             </div>
 
@@ -163,17 +147,24 @@ export default function ResetPasswordPage() {
                 placeholder="Confirm new password"
                 autoComplete="new-password"
                 required
-                style={inputStyle}
+                className={inputClass}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full py-4 text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-              style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', boxShadow: '0 0 24px -4px rgba(124,58,237,0.55)' }}
+              className="mt-1 w-full rounded-md bg-primary px-4 py-3 text-[14px] font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 btn-shadow-primary"
             >
-              {loading ? 'Saving…' : 'Update password'}
+              {loading ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Saving…
+                </span>
+              ) : 'Update password'}
             </button>
 
             <AnimatePresence>
@@ -182,11 +173,11 @@ export default function ResetPasswordPage() {
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="rounded-xl p-4 text-center text-sm font-medium"
+                  className="rounded-lg p-3 text-center text-[13px] font-medium"
                   style={{
-                    background: status.type === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-                    border: `1px solid ${status.type === 'success' ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)'}`,
-                    color: status.type === 'success' ? '#22c55e' : '#ef4444',
+                    background: status.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(220,38,38,0.06)',
+                    border: `1px solid ${status.type === 'success' ? 'rgba(34,197,94,0.25)' : 'rgba(220,38,38,0.20)'}`,
+                    color: status.type === 'success' ? '#15803d' : '#b91c1c',
                   }}
                 >
                   {status.message}
