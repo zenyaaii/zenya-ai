@@ -548,9 +548,29 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
                   <motion.div
                     key={i}
                     variants={staggerChild}
-                    className="flex items-baseline gap-5 pb-7 border-b"
+                    className="flex items-start gap-5 pb-7 border-b"
                     style={{ borderColor: 'var(--rb-border)' }}
                   >
+                    {/* Optional uploaded item image — square thumb, refined,
+                        preserves the existing Maison layout */}
+                    {item.image && (
+                      <div
+                        className="hidden flex-shrink-0 overflow-hidden sm:block"
+                        style={{
+                          width: 76,
+                          height: 76,
+                          borderRadius: 6,
+                          border: `1px solid var(--rb-border)`,
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
                     <div className="flex-1">
                       <div className="flex items-baseline gap-3 mb-1.5">
                         <h4

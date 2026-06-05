@@ -36,7 +36,8 @@ export const restaurantInputSchema = z.object({
                 name: z.string().min(2).max(80),
                 description: z.string().max(220).optional(),
                 price: z.string().min(1).max(30),
-                badge: z.string().max(20).optional()
+                badge: z.string().max(20).optional(),
+                image_url: z.string().url().max(800).optional()
               })
             )
             .min(1)

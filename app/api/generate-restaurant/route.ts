@@ -216,7 +216,9 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
           ? item.description
           : aiDescMap.get(`${cat.name}::${item.name}`) || `${cat.name.toLowerCase()} · ${input.brand.cuisine.toLowerCase()}`,
       price: item.price,
-      badge: item.badge
+      badge: item.badge,
+      // Pass through user-uploaded item image so the renderer can show a thumb.
+      image: (item as any).image_url || undefined
     }))
   }))
 

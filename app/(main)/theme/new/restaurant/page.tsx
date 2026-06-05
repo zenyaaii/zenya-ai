@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import type { RestaurantInput } from '@/utils/restaurant/input'
+import ImageUploadField from '@/components/ImageUploadField'
 
 type Hour = RestaurantInput['location']['hours'][number]
 
@@ -17,6 +18,15 @@ const DEFAULT_HOURS: Hour[] = [
   { day: 'saturday', label: 'Saturday', open: '5:30pm', close: '11:00pm' },
   { day: 'sunday', label: 'Sunday', open: '5:00pm', close: '9:30pm' }
 ]
+
+type MenuItem = {
+  id: string
+  name: string
+  description: string
+  price: string
+  badge: string
+  image_url: string
+}
 
 type Form = {
   brand_name: string
@@ -32,26 +42,30 @@ type Form = {
     id: string
     name: string
     description: string
-    items: Array<{ id: string; name: string; description: string; price: string; badge: string }>
+    items: MenuItem[]
   }>
   story_brief: string
   chef_name: string
   chef_title: string
   chef_bio_brief: string
-  reservation_provider: RestaurantInput['reservations']['provider_type']
-  reservation_value: string
+  // Single field — auto-detected to a provider + value at submit time
+  booking: string
   reservation_note: string
   hero_image_url: string
   chef_photo_url: string
   accent_image_url: string
-  gallery_image_urls: string
-  signature_dish_image_urls: string
+  gallery_image_urls: string[]
+  signature_dish_image_urls: string[]
   press_outlets: string
   style_preset: RestaurantInput['style_preset']
 }
 
 function newId() {
   return Math.random().toString(36).slice(2, 9)
+}
+
+function emptyItem(): MenuItem {
+  return { id: newId(), name: '', description: '', price: '', badge: '', image_url: '' }
 }
 
 const INITIAL_FORM: Form = {
@@ -64,47 +78,54 @@ const INITIAL_FORM: Form = {
   email: '',
   map_link: '',
   hours: DEFAULT_HOURS,
+  // Lean default: one category with one item. User can leave it at one or
+  // add more — both work now.
   categories: [
-    {
-      id: newId(),
-      name: 'Starters',
-      description: '',
-      items: [{ id: newId(), name: '', description: '', price: '', badge: '' }]
-    },
-    {
-      id: newId(),
-      name: 'Mains',
-      description: '',
-      items: [{ id: newId(), name: '', description: '', price: '', badge: '' }]
-    },
-    {
-      id: newId(),
-      name: 'Desserts',
-      description: '',
-      items: [{ id: newId(), name: '', description: '', price: '', badge: '' }]
-    }
+    { id: newId(), name: 'Menu', description: '', items: [emptyItem()] },
   ],
   story_brief: '',
   chef_name: '',
   chef_title: '',
   chef_bio_brief: '',
-  reservation_provider: 'resy',
-  reservation_value: '',
+  booking: '',
   reservation_note: '',
   hero_image_url: '',
   chef_photo_url: '',
   accent_image_url: '',
-  gallery_image_urls: '',
-  signature_dish_image_urls: '',
+  gallery_image_urls: [],
+  signature_dish_image_urls: [],
   press_outlets: '',
-  style_preset: 'onyx'
+  style_preset: 'onyx',
+}
+
+/**
+ * Detect reservation provider from a single free-text input.
+ * - Resy / OpenTable / SevenRooms URL → that provider
+ * - Any other URL → 'resy' (just a link; renderer treats it as a button)
+ * - Phone-shaped string → 'phone'
+ * - Empty → 'form' (Maison's built-in contact-form path)
+ */
+function detectBooking(raw: string): {
+  type: RestaurantInput['reservations']['provider_type']
+  value?: string
+} {
+  const v = raw.trim()
+  if (!v) return { type: 'form' }
+  const lower = v.toLowerCase()
+  if (lower.includes('resy.com'))       return { type: 'resy', value: v }
+  if (lower.includes('opentable.com'))  return { type: 'opentable', value: v }
+  if (lower.includes('sevenrooms.com')) return { type: 'sevenrooms', value: v }
+  if (/^https?:\/\//i.test(v))          return { type: 'resy', value: v }
+  // very loose phone match: 6+ digits across the whole string, ignoring spaces
+  const digits = v.replace(/\D/g, '')
+  if (digits.length >= 6) return { type: 'phone', value: v }
+  return { type: 'form' }
 }
 
 export default function RestaurantWizardPage() {
   const router = useRouter()
   const supabase = createClient()
   const [authReady, setAuthReady] = useState(false)
-  const [user, setUser] = useState<any>(null)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -118,13 +139,10 @@ export default function RestaurantWizardPage() {
         router.push('/login?mode=signup&next=/theme/new/restaurant')
         return
       }
-      setUser(user)
       setAuthReady(true)
     }
     check()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [router, supabase])
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
@@ -134,7 +152,7 @@ export default function RestaurantWizardPage() {
   function updateHour(idx: number, patch: Partial<Hour>) {
     setForm((prev) => ({
       ...prev,
-      hours: prev.hours.map((h, i) => (i === idx ? { ...h, ...patch } : h))
+      hours: prev.hours.map((h, i) => (i === idx ? { ...h, ...patch } : h)),
     }))
   }
 
@@ -143,93 +161,102 @@ export default function RestaurantWizardPage() {
       ...prev,
       categories: [
         ...prev.categories,
-        { id: newId(), name: '', description: '', items: [{ id: newId(), name: '', description: '', price: '', badge: '' }] }
-      ]
+        { id: newId(), name: '', description: '', items: [emptyItem()] },
+      ],
     }))
   }
-
   function removeCategory(catId: string) {
-    setForm((prev) => ({ ...prev, categories: prev.categories.filter((c) => c.id !== catId) }))
+    setForm((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((c) => c.id !== catId),
+    }))
   }
-
   function updateCategory(catId: string, patch: Partial<{ name: string; description: string }>) {
     setForm((prev) => ({
       ...prev,
-      categories: prev.categories.map((c) => (c.id === catId ? { ...c, ...patch } : c))
+      categories: prev.categories.map((c) => (c.id === catId ? { ...c, ...patch } : c)),
     }))
   }
-
   function addItem(catId: string) {
     setForm((prev) => ({
       ...prev,
       categories: prev.categories.map((c) =>
-        c.id === catId
-          ? { ...c, items: [...c.items, { id: newId(), name: '', description: '', price: '', badge: '' }] }
-          : c
-      )
+        c.id === catId ? { ...c, items: [...c.items, emptyItem()] } : c
+      ),
     }))
   }
-
   function removeItem(catId: string, itemId: string) {
     setForm((prev) => ({
       ...prev,
       categories: prev.categories.map((c) =>
         c.id === catId ? { ...c, items: c.items.filter((i) => i.id !== itemId) } : c
-      )
+      ),
     }))
   }
-
-  function updateItem(catId: string, itemId: string, patch: Partial<{ name: string; description: string; price: string; badge: string }>) {
+  function updateItem(catId: string, itemId: string, patch: Partial<MenuItem>) {
     setForm((prev) => ({
       ...prev,
       categories: prev.categories.map((c) =>
         c.id === catId
           ? { ...c, items: c.items.map((i) => (i.id === itemId ? { ...i, ...patch } : i)) }
           : c
-      )
+      ),
     }))
+  }
+  function setGalleryAt(idx: number, url: string) {
+    setForm((prev) => {
+      const next = [...prev.gallery_image_urls]
+      if (url) next[idx] = url
+      else next.splice(idx, 1)
+      return { ...prev, gallery_image_urls: next.filter(Boolean) }
+    })
+  }
+  function setSignatureAt(idx: number, url: string) {
+    setForm((prev) => {
+      const next = [...prev.signature_dish_image_urls]
+      if (url) next[idx] = url
+      else next.splice(idx, 1)
+      return { ...prev, signature_dish_image_urls: next.filter(Boolean) }
+    })
   }
 
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'Please enter the restaurant name.'
-    if (form.cuisine.trim().length < 2) return 'Please enter the cuisine type.'
-    if (form.city.trim().length < 2) return 'Please enter the city.'
-    if (form.address.trim().length < 4) return 'Please enter the full address.'
-    if (form.phone.trim().length < 4) return 'Please enter a contact phone number.'
+    if (form.cuisine.trim().length < 2)    return 'Please enter the cuisine type.'
+    if (form.city.trim().length < 2)       return 'Please enter the city.'
+    if (form.address.trim().length < 4)    return 'Please enter the full address.'
+    if (form.phone.trim().length < 4)      return 'Please enter a contact phone number.'
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Please enter a valid email address.'
-    if (form.story_brief.trim().length < 10) return 'Tell us a sentence or two about the restaurant story.'
-    const validCats = form.categories.filter((c) => c.name.trim().length >= 2)
-    if (validCats.length === 0) return 'Add at least one menu category.'
-    let totalItems = 0
-    for (const cat of validCats) {
+    if (form.story_brief.trim().length < 10) {
+      return 'Tell us a sentence or two about the restaurant story.'
+    }
+    // Relaxed: just need ONE valid menu item to generate.
+    let validItems = 0
+    for (const cat of form.categories) {
+      if (cat.name.trim().length < 2) continue
       for (const item of cat.items) {
-        if (item.name.trim().length >= 2 && item.price.trim().length >= 1) totalItems++
+        if (item.name.trim().length >= 2 && item.price.trim().length >= 1) validItems++
       }
     }
-    if (totalItems < 4) return 'Add at least 4 menu items so we can generate a real menu.'
+    if (validItems < 1) return 'Add at least one menu item with a name and a price.'
     return null
   }
 
   function buildPayload(): RestaurantInput {
-    const splitUrls = (s: string) =>
-      s
-        .split(/\s+|,/)
-        .map((u) => u.trim())
-        .filter((u) => /^https?:\/\//.test(u))
-
+    const detected = detectBooking(form.booking)
     return {
       brand: {
         name: form.brand_name.trim(),
         cuisine: form.cuisine.trim(),
         city: form.city.trim(),
-        neighborhood: form.neighborhood.trim() || undefined
+        neighborhood: form.neighborhood.trim() || undefined,
       },
       location: {
         address: form.address.trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
         map_link: form.map_link.trim() || undefined,
-        hours: form.hours
+        hours: form.hours,
       },
       menu: {
         categories: form.categories
@@ -243,35 +270,33 @@ export default function RestaurantWizardPage() {
                 name: i.name.trim(),
                 description: i.description.trim() || undefined,
                 price: i.price.trim(),
-                badge: i.badge.trim() || undefined
-              }))
+                badge: i.badge.trim() || undefined,
+                image_url: i.image_url.trim() || undefined,
+              })),
           }))
-          .filter((c) => c.items.length > 0)
+          .filter((c) => c.items.length > 0),
       },
       story: {
         brief: form.story_brief.trim(),
         chef_name: form.chef_name.trim() || undefined,
         chef_title: form.chef_title.trim() || undefined,
-        chef_bio_brief: form.chef_bio_brief.trim() || undefined
+        chef_bio_brief: form.chef_bio_brief.trim() || undefined,
       },
       reservations: {
-        provider_type: form.reservation_provider,
-        provider_value: form.reservation_value.trim() || undefined,
-        note: form.reservation_note.trim() || undefined
+        provider_type: detected.type,
+        provider_value: detected.value || undefined,
+        note: form.reservation_note.trim() || undefined,
       },
       visuals: {
         hero_image_url: form.hero_image_url.trim() || undefined,
         chef_photo_url: form.chef_photo_url.trim() || undefined,
         accent_image_url: form.accent_image_url.trim() || undefined,
-        gallery_image_urls: splitUrls(form.gallery_image_urls),
-        signature_dish_image_urls: splitUrls(form.signature_dish_image_urls)
+        gallery_image_urls: form.gallery_image_urls.filter(Boolean),
+        signature_dish_image_urls: form.signature_dish_image_urls.filter(Boolean),
       },
       press_outlets: form.press_outlets
-        .split(/[\n,]/)
-        .map((s) => s.trim())
-        .filter((s) => s.length >= 2)
-        .slice(0, 8),
-      style_preset: form.style_preset
+        .split(/[\n,]/).map((s) => s.trim()).filter((s) => s.length >= 2).slice(0, 8),
+      style_preset: form.style_preset,
     }
   }
 
@@ -290,7 +315,7 @@ export default function RestaurantWizardPage() {
       const genRes = await fetch('/api/generate-restaurant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
       if (!genRes.ok || !genJson?.content) {
@@ -312,9 +337,9 @@ export default function RestaurantWizardPage() {
             business_type: 'restaurant',
             style_preset: form.style_preset,
             restaurant: content,
-            input: payload
-          }
-        })
+            input: payload,
+          },
+        }),
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) {
@@ -358,7 +383,7 @@ export default function RestaurantWizardPage() {
             Tell us about your restaurant.
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
-            The more specific you are, the better the AI can write copy that sounds like you. Required fields are marked. Everything else is optional but recommended.
+            Only a few fields are required — the rest is optional. Even one menu item is enough to generate. AI fills in any gaps.
           </p>
         </div>
 
@@ -478,7 +503,7 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Section: Menu */}
-        <Section title="The menu" subtitle="At least 4 items across one or more categories. Descriptions are optional — AI will polish or generate them.">
+        <Section title="The menu" subtitle="Even one item is enough. Add an image to any item — it shows next to the name on your live site.">
           <div className="space-y-5">
             {form.categories.map((cat) => (
               <div key={cat.id} className="rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
@@ -487,15 +512,17 @@ export default function RestaurantWizardPage() {
                     className={inputCls + ' flex-1 font-semibold'}
                     value={cat.name}
                     onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
-                    placeholder="Category name (Starters, Mains…)"
+                    placeholder="Category name (Menu, Mains, Desserts…)"
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeCategory(cat.id)}
-                    className="rounded-full border border-token bg-surface px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-red-300 hover:text-red-600"
-                  >
-                    Remove
-                  </button>
+                  {form.categories.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeCategory(cat.id)}
+                      className="rounded-full border border-token bg-surface px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-red-300 hover:text-red-600"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
                 <input
                   className={inputCls + ' mb-4 text-sm'}
@@ -503,21 +530,42 @@ export default function RestaurantWizardPage() {
                   onChange={(e) => updateCategory(cat.id, { description: e.target.value })}
                   placeholder="Optional category note (e.g. 'To begin slowly.')"
                 />
-                <div className="space-y-3">
+
+                <div className="space-y-4">
                   {cat.items.map((item) => (
-                    <div key={item.id} className="grid gap-2 sm:grid-cols-[1.2fr_1.8fr_100px_90px_auto]">
-                      <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="Item name" />
-                      <input className={inputCls + ' py-2 text-sm'} value={item.description} onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })} placeholder="Short description (optional)" />
-                      <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24" />
-                      <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="Badge" />
-                      <button
-                        type="button"
-                        onClick={() => removeItem(cat.id, item.id)}
-                        className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
-                        aria-label="Remove item"
-                      >
-                        ✕
-                      </button>
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-1 gap-3 rounded-xl border border-token bg-surface/40 p-4 sm:grid-cols-[100px_1fr]"
+                    >
+                      {/* Per-item image upload */}
+                      <ImageUploadField
+                        value={item.image_url}
+                        onChange={(url) => updateItem(cat.id, item.id, { image_url: url })}
+                        aspect="thumb"
+                      />
+                      <div className="space-y-2">
+                        <div className="grid gap-2 sm:grid-cols-[1.5fr_90px_90px_auto]">
+                          <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="Item name (required)" />
+                          <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24" />
+                          <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="Badge" />
+                          {cat.items.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeItem(cat.id, item.id)}
+                              className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
+                              aria-label="Remove item"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          className={inputCls + ' py-2 text-sm'}
+                          value={item.description}
+                          onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })}
+                          placeholder="Short description (optional — AI will polish)"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -568,56 +616,85 @@ export default function RestaurantWizardPage() {
           </div>
         </Section>
 
-        {/* Section: Reservations */}
-        <Section title="Reservations" subtitle="How guests book a table.">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Reservation provider" required>
-              <select className={inputCls} value={form.reservation_provider} onChange={(e) => update('reservation_provider', e.target.value as RestaurantInput['reservations']['provider_type'])}>
-                <option value="resy">Resy</option>
-                <option value="opentable">OpenTable</option>
-                <option value="sevenrooms">SevenRooms</option>
-                <option value="phone">Phone only</option>
-                <option value="form">Contact form</option>
-              </select>
-            </Field>
-            <Field label={form.reservation_provider === 'phone' ? 'Reservation phone number' : form.reservation_provider === 'form' ? 'No URL needed' : 'Booking page URL'}>
-              <input
-                className={inputCls}
-                value={form.reservation_value}
-                onChange={(e) => update('reservation_value', e.target.value)}
-                placeholder={form.reservation_provider === 'phone' ? '+1 (212) 555-0140' : 'https://resy.com/cities/ny/your-restaurant'}
-                disabled={form.reservation_provider === 'form'}
-              />
-            </Field>
-            <Field label="Booking note (optional)" className="sm:col-span-2">
-              <textarea
-                className={inputCls + ' min-h-[80px] resize-y'}
-                value={form.reservation_note}
-                onChange={(e) => update('reservation_note', e.target.value)}
-                placeholder="e.g. 'For private dining or 8+, please write to events@...'"
-              />
-            </Field>
-          </div>
+        {/* Section: Reservations — single input, auto-detected */}
+        <Section
+          title="Reservations"
+          subtitle="Paste your Resy / OpenTable / SevenRooms link, a phone number, or leave blank. We figure it out."
+        >
+          <Field label="Booking URL or phone (optional)">
+            <input
+              className={inputCls}
+              value={form.booking}
+              onChange={(e) => update('booking', e.target.value)}
+              placeholder="https://resy.com/cities/ny/your-restaurant  ·  or  ·  +1 (212) 555-0140"
+            />
+          </Field>
+          <Field label="Booking note (optional)" className="mt-4">
+            <textarea
+              className={inputCls + ' min-h-[80px] resize-y'}
+              value={form.reservation_note}
+              onChange={(e) => update('reservation_note', e.target.value)}
+              placeholder="e.g. 'For private dining or 8+, please write to events@...'"
+            />
+          </Field>
         </Section>
 
-        {/* Section: Visuals */}
-        <Section title="Visuals" subtitle="Paste image URLs. If you skip these, AI uses tasteful defaults you can swap later.">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Hero image URL" className="sm:col-span-2">
-              <input className={inputCls} value={form.hero_image_url} onChange={(e) => update('hero_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Chef photo URL">
-              <input className={inputCls} value={form.chef_photo_url} onChange={(e) => update('chef_photo_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Story accent image URL">
-              <input className={inputCls} value={form.accent_image_url} onChange={(e) => update('accent_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Gallery image URLs (one per line, max 8)" className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[100px] resize-y'} value={form.gallery_image_urls} onChange={(e) => update('gallery_image_urls', e.target.value)} placeholder="https://...\nhttps://..." />
-            </Field>
-            <Field label="Signature dish image URLs (one per line, max 4)" className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[100px] resize-y'} value={form.signature_dish_image_urls} onChange={(e) => update('signature_dish_image_urls', e.target.value)} placeholder="https://...\nhttps://..." />
-            </Field>
+        {/* Section: Visuals — uploads everywhere */}
+        <Section title="Visuals" subtitle="Upload your own photos. Skip any and AI uses tasteful defaults.">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <ImageUploadField
+              label="Hero image"
+              value={form.hero_image_url}
+              onChange={(url) => update('hero_image_url', url)}
+              aspect="wide"
+              helper="Big image at the top of your page."
+              className="sm:col-span-2"
+            />
+            <ImageUploadField
+              label="Chef photo"
+              value={form.chef_photo_url}
+              onChange={(url) => update('chef_photo_url', url)}
+              aspect="square"
+            />
+            <ImageUploadField
+              label="Story accent image"
+              value={form.accent_image_url}
+              onChange={(url) => update('accent_image_url', url)}
+              aspect="square"
+              helper="Shows next to the chef story."
+            />
+
+            <div className="sm:col-span-2">
+              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+                Gallery (up to 8)
+              </label>
+              <div className="grid gap-3 sm:grid-cols-4">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <ImageUploadField
+                    key={`g-${i}`}
+                    value={form.gallery_image_urls[i] || ''}
+                    onChange={(url) => setGalleryAt(i, url)}
+                    aspect="square"
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+                Signature dish photos (up to 4)
+              </label>
+              <div className="grid gap-3 sm:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <ImageUploadField
+                    key={`s-${i}`}
+                    value={form.signature_dish_image_urls[i] || ''}
+                    onChange={(url) => setSignatureAt(i, url)}
+                    aspect="square"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </Section>
 
@@ -627,7 +704,7 @@ export default function RestaurantWizardPage() {
             className={inputCls + ' min-h-[100px] resize-y'}
             value={form.press_outlets}
             onChange={(e) => update('press_outlets', e.target.value)}
-            placeholder="The New York Times\nMichelin Guide\nEater 38"
+            placeholder={'The New York Times\nMichelin Guide\nEater 38'}
           />
         </Section>
 
