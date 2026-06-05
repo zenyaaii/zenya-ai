@@ -28,62 +28,74 @@ type Template = {
   buildHref: string
 }
 
+// All fields below mirror the canonical /themes page (the single source of
+// truth for template metadata in the marketing surface). If you rename a
+// template, change a demo URL, or swap a cover photo, update /themes first
+// and then mirror here — don't drift.
 const TEMPLATES: Template[] = [
+  {
+    id: 'restaurant',
+    name: 'Maison',
+    gradient: 'linear-gradient(135deg, #1a1410 0%, #0a0a0c 100%)',
+    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=600&q=75',
+    demoHref: '/demo/restaurant',
+    buildHref: '/theme/new?type=restaurant',
+  },
   {
     id: 'one_product',
     name: 'Storefront',
     gradient: 'linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%)',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=75',
     demoHref: '/demo',
     buildHref: '/theme/new',
-  },
-  {
-    id: 'collective',
-    name: 'Collective',
-    gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
-    demoHref: '/demo/collective',
-    buildHref: '/theme/new/collective',
-  },
-  {
-    id: 'restaurant',
-    name: 'Restaurant',
-    gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)',
-    demoHref: '/demo/restaurant',
-    buildHref: '/theme/new?type=restaurant',
   },
   {
     id: 'atlas',
     name: 'Atlas',
     gradient: 'linear-gradient(135deg, #4338ca 0%, #818cf8 100%)',
+    image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=75',
     demoHref: '/demo/atlas',
-    buildHref: '/theme/new?type=atlas',
+    buildHref: '/theme/new/atlas',
   },
   {
-    id: 'lookbook',
-    name: 'Lookbook',
-    gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
-    demoHref: '/demo/lookbook',
-    buildHref: '/theme/new?type=lookbook',
+    id: 'services',
+    name: 'Trade',
+    gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=75',
+    demoHref: '/demo/services',
+    buildHref: '/theme/new?type=services',
+  },
+  {
+    id: 'collective',
+    name: 'Collective',
+    gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=75',
+    demoHref: '/demo/collective',
+    buildHref: '/theme/new/collective',
   },
   {
     id: 'studio',
     name: 'Studio',
     gradient: 'linear-gradient(135deg, #1c1c1c 0%, #4a4a4a 100%)',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=75',
     demoHref: '/demo/studio',
-    buildHref: '/theme/new?type=studio',
+    buildHref: '/theme/new/studio',
+  },
+  {
+    id: 'lookbook',
+    name: 'Lookbook',
+    gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=75',
+    demoHref: '/demo/lookbook',
+    buildHref: '/theme/new/lookbook',
   },
   {
     id: 'wellness',
     name: 'Wellness',
     gradient: 'linear-gradient(135deg, #15803d 0%, #86efac 100%)',
+    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=75',
     demoHref: '/demo/wellness',
     buildHref: '/theme/new?type=wellness',
-  },
-  {
-    id: 'services',
-    name: 'Trade',
-    gradient: 'linear-gradient(135deg, #c2410c 0%, #fb923c 100%)',
-    demoHref: '/demo/services',
-    buildHref: '/theme/new?type=services',
   },
 ]
 
@@ -312,9 +324,12 @@ function TemplatePreviewModal({
           </button>
         </div>
 
-        {/* The "box" — a curated taste of the template. Real markup, loads
-            instantly. The "Full preview" button below opens the heavy
-            /demo/{template} page in a new tab if the user wants more. */}
+        {/* The "box" — always the curated taste of the template. Real
+            markup, loads instantly. The "Full preview" button below opens
+            the heavy /demo/{template} page in a new tab if the user wants
+            more. We deliberately do NOT show template.image here — that
+            field is for the card on the homepage; the box gets the
+            designed teaser. */}
         <div
           className="overflow-hidden rounded-2xl"
           style={{
@@ -323,16 +338,7 @@ function TemplatePreviewModal({
             boxShadow: '0 8px 24px rgba(28,28,28,0.10) inset',
           }}
         >
-          {template.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={template.image}
-              alt={template.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <TemplateTeaser id={template.id as any} />
-          )}
+          <TemplateTeaser id={template.id as any} />
         </div>
 
         {/* Two buttons under the box */}
