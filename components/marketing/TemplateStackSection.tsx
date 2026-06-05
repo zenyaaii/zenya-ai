@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { TemplateTeaser } from './TemplateTeasers'
 
 /**
  * Inspired by Shopify's "Customizable themes" homepage section —
@@ -324,22 +323,11 @@ function TemplatePreviewModal({
           </button>
         </div>
 
-        {/* The "box" — always the curated taste of the template. Real
-            markup, loads instantly. The "Full preview" button below opens
-            the heavy /demo/{template} page in a new tab if the user wants
-            more. We deliberately do NOT show template.image here — that
-            field is for the card on the homepage; the box gets the
-            designed teaser. */}
-        <div
-          className="overflow-hidden rounded-2xl"
-          style={{
-            aspectRatio: '16 / 10',
-            border: '1px solid rgba(28,28,28,0.08)',
-            boxShadow: '0 8px 24px rgba(28,28,28,0.10) inset',
-          }}
-        >
-          <TemplateTeaser id={template.id as any} />
-        </div>
+        {/* The "box" — a miniaturized live render of the real demo
+            landing page, served via a scaled iframe. What the user sees
+            here is what they get if they click Full preview. */}
+        <ScaledDemoPreview template={template} />
+
 
         {/* Two buttons under the box */}
         <div className="mt-5 flex gap-3">
@@ -359,5 +347,109 @@ function TemplatePreviewModal({
         </div>
       </motion.div>
     </motion.div>
+  )
+}
+
+/* ----------------------------------------------------------------------- */
+
+/**
+ * Scaled iframe of the real /demo/{template} page.
+ *
+ * The iframe renders the page at a desktop viewport (1440×900) and the
+ * outer wrapper scales it down 50% to fit the modal box. So the user sees
+ * exactly what the full landing page looks like, just miniaturized — not
+ * a hand-drawn approximation.
+ *
+ * pointer-events: none on the iframe so we don't trap mouse / scroll
+ * inside it. The whole box is wrapped in an anchor that opens the full
+ * demo in a new tab — clicking the preview IS clicking "Full preview".
+ */
+function ScaledDemoPreview({ template }: { template: Template }) {
+  const [loaded, setLoaded] = useState(false)
+
+  // Reset the loaded flag when the template changes (modal reopens
+  // for a different card).
+  useEffect(() => {
+    setLoaded(false)
+  }, [template.id])
+
+  return (
+    <a
+      href={template.demoHref}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`Open ${template.name} full preview in a new tab`}
+      title="Click to open full preview"
+      className="group relative block overflow-hidden rounded-2xl bg-white"
+      style={{
+        aspectRatio: '16 / 10',
+        border: '1px solid rgba(28,28,28,0.08)',
+        boxShadow: '0 8px 24px rgba(28,28,28,0.10) inset',
+      }}
+    >
+      {/* The scaled iframe — 2× the box, transform: scale(0.5) brings it
+          back. We render at 1440×900 internally so the demo's responsive
+          breakpoints all fire at desktop and the page looks like itself. */}
+      <iframe
+        key={template.id}
+        src={template.demoHref}
+        title={`${template.name} live preview`}
+        loading="lazy"
+        scrolling="no"
+        onLoad={() => setLoaded(true)}
+        style={{
+          width: '1440px',
+          height: '900px',
+          border: 'none',
+          background: 'white',
+          transformOrigin: 'top left',
+          transform: 'scale(0.5)',
+          pointerEvents: 'none',
+          // Sit absolute so the scaled overflow is clipped by the parent.
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+      />
+
+      {/* Shimmer until the iframe fires onLoad. Most demos pop within
+          ~1s on warm cache; first cold click can take 2-3s. */}
+      {!loaded && (
+        <div
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(120deg, #f4f1ea 0%, #ffffff 40%, #f4f1ea 80%)',
+            backgroundSize: '200% 100%',
+            animation: 'zenya-shimmer 1.6s ease-in-out infinite',
+          }}
+        >
+          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
+            Loading preview…
+          </div>
+          <style>{`
+            @keyframes zenya-shimmer {
+              0%   { background-position: 200% 0%; }
+              100% { background-position: -100% 0%; }
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Subtle hover veil → "click to open full preview" affordance */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        style={{
+          background:
+            'linear-gradient(180deg, transparent 60%, rgba(15,15,18,0.55) 100%)',
+        }}
+      >
+        <span className="rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold text-foreground shadow-sm">
+          Open full preview ↗
+        </span>
+      </div>
+    </a>
   )
 }
