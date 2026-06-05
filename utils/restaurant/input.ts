@@ -1,11 +1,29 @@
 import { z } from 'zod'
 
+/** What kind of place is it? Drives AI copy tone + (later) image picks. */
+export const RESTAURANT_TYPE_VALUES = [
+  'fine_dining',
+  'bistro',
+  'cafe',
+  'coffee_takeaway',
+  'bakery',
+  'pizzeria',
+  'bar',
+  'brunch',
+  'cafeteria',
+  'food_truck',
+  'dessert',
+  'other',
+] as const
+export type RestaurantTypeId = typeof RESTAURANT_TYPE_VALUES[number]
+
 export const restaurantInputSchema = z.object({
   brand: z.object({
     name: z.string().min(2).max(80),
     cuisine: z.string().min(2).max(60),
     city: z.string().min(2).max(60),
-    neighborhood: z.string().max(60).optional()
+    neighborhood: z.string().max(60).optional(),
+    restaurant_type: z.enum(RESTAURANT_TYPE_VALUES).optional(),
   }),
   location: z.object({
     address: z.string().min(4).max(200),

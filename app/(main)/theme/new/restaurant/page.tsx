@@ -4,8 +4,24 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
-import type { RestaurantInput } from '@/utils/restaurant/input'
+import type { RestaurantInput, RestaurantTypeId } from '@/utils/restaurant/input'
 import ImageUploadField from '@/components/ImageUploadField'
+
+/** Restaurant type chips — drives AI copy tone. Optional. */
+const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
+  { id: 'fine_dining',     label: 'Fine dining',         icon: '🍷' },
+  { id: 'bistro',          label: 'Bistro',              icon: '🥖' },
+  { id: 'cafe',            label: 'Café',                icon: '☕' },
+  { id: 'coffee_takeaway', label: 'Coffee · Takeaway',   icon: '🥤' },
+  { id: 'bakery',          label: 'Bakery',              icon: '🥐' },
+  { id: 'pizzeria',        label: 'Pizzeria',            icon: '🍕' },
+  { id: 'bar',             label: 'Bar · Wine bar',      icon: '🍸' },
+  { id: 'brunch',          label: 'Brunch · All-day',    icon: '🥞' },
+  { id: 'cafeteria',       label: 'Cafeteria · Canteen', icon: '🍱' },
+  { id: 'food_truck',      label: 'Food truck',          icon: '🚚' },
+  { id: 'dessert',         label: 'Patisserie · Dessert', icon: '🍰' },
+  { id: 'other',           label: 'Other',               icon: '🍽️' },
+]
 
 type Hour = RestaurantInput['location']['hours'][number]
 
@@ -33,6 +49,7 @@ type Form = {
   cuisine: string
   city: string
   neighborhood: string
+  restaurant_type: RestaurantTypeId | ''
   address: string
   phone: string
   email: string
@@ -73,6 +90,7 @@ const INITIAL_FORM: Form = {
   cuisine: '',
   city: '',
   neighborhood: '',
+  restaurant_type: '',
   address: '',
   phone: '',
   email: '',
@@ -250,6 +268,7 @@ export default function RestaurantWizardPage() {
         cuisine: form.cuisine.trim(),
         city: form.city.trim(),
         neighborhood: form.neighborhood.trim() || undefined,
+        restaurant_type: form.restaurant_type || undefined,
       },
       location: {
         address: form.address.trim(),
@@ -408,6 +427,38 @@ export default function RestaurantWizardPage() {
             <Field label="Neighborhood">
               <input className={inputCls} value={form.neighborhood} onChange={(e) => update('neighborhood', e.target.value)} placeholder="West Village" />
             </Field>
+          </div>
+
+          {/* What kind of place is it? Drives AI copy tone — café gets
+              lighter, morning-energy copy; fine dining is precise and
+              quiet; a food truck is direct and punchy. */}
+          <div className="mt-6">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              What kind of place is it? <span className="text-muted/60">· optional</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {RESTAURANT_TYPES.map((t) => {
+                const selected = form.restaurant_type === t.id
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => update('restaurant_type', selected ? '' : t.id)}
+                    className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition ${
+                      selected
+                        ? 'border-foreground bg-foreground text-white shadow-sm'
+                        : 'border-token bg-surface text-foreground hover:border-foreground/40'
+                    }`}
+                  >
+                    <span className="text-[14px] leading-none">{t.icon}</span>
+                    {t.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="mt-2 text-[11.5px] text-muted">
+              Helps the AI write copy that matches the energy of your place. Skip if nothing fits.
+            </p>
           </div>
         </Section>
 
@@ -640,7 +691,30 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Section: Visuals — uploads everywhere */}
-        <Section title="Visuals" subtitle="Upload your own photos. Skip any and AI uses tasteful defaults.">
+        <Section title="Visuals" subtitle="Upload your own photos. Or skip — we've got you.">
+          {/* Reassurance banner — explicit: no photos? not a problem. */}
+          <div
+            className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-elevated/60 p-4 backdrop-blur-md"
+            style={{ background: 'rgba(94,106,210,0.06)', borderColor: 'rgba(94,106,210,0.25)' }}
+          >
+            <div
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-[18px]"
+              style={{ background: 'rgba(94,106,210,0.12)' }}
+            >
+              ✨
+            </div>
+            <div className="text-[13px] leading-[1.55] text-foreground">
+              <strong>No photos? Don&rsquo;t worry.</strong>{' '}
+              <span className="text-muted">
+                Leave any image slot empty and we&rsquo;ll fill it with beautiful,
+                royalty-free photos from Unsplash that match your{' '}
+                {form.restaurant_type
+                  ? <span className="font-medium text-foreground">{RESTAURANT_TYPES.find((t) => t.id === form.restaurant_type)?.label.toLowerCase()}</span>
+                  : 'restaurant type'}
+                . You can always come back and replace them later.
+              </span>
+            </div>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <ImageUploadField
               label="Hero image"

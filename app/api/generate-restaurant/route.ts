@@ -80,9 +80,27 @@ function buildPrompt(input: RestaurantInput) {
     return `${r.provider_type.toUpperCase()} reservations${r.provider_value ? `: ${r.provider_value}` : ''}`
   })()
 
+  const restaurantType = (input.brand as any).restaurant_type as string | undefined
+  const toneByType: Record<string, string> = {
+    fine_dining:     'quiet, confident, sensory, editorial — restaurant criticism, not marketing copy. Long sentences are welcome. Mention sourcing, technique, the room.',
+    bistro:          'warm, casual, generous — neighbourhood-bistro voice. Plainspoken, a little playful, full plates and real people.',
+    cafe:            'morning-energy, light, welcoming — soft and inviting. Mention the room, the regulars, the smell of coffee.',
+    coffee_takeaway: 'direct, modern, energetic — efficiency, good beans, fast. Short sentences. No nostalgia.',
+    bakery:          'warm, artisanal, sensory — flour, butter, hands-on craft. Time-honoured but not stuffy.',
+    pizzeria:        'honest, family-style, traditional — straightforward and proud. Mention the oven, the dough, the people behind the counter.',
+    bar:             'intimate, evocative, atmospheric — dim light, good company, well-made drinks. A little nocturnal.',
+    brunch:          'bright, social, easy — leisurely weekends, sunlight, no rush.',
+    cafeteria:       'honest, fast, fair — fresh food, no fuss, good prices, real people at the counter.',
+    food_truck:      'punchy, direct, fun — street-food authenticity. Short lines. A little attitude.',
+    dessert:         'delicate, sweet, indulgent — small pleasures, beautiful plating, careful technique.',
+    other:           'quiet, confident, sensory, editorial — never salesy, never generic.',
+  }
+  const tone = restaurantType ? (toneByType[restaurantType] || toneByType.other) : toneByType.other
+
   return `RESTAURANT BRIEF
 Name: ${input.brand.name}
-Cuisine: ${input.brand.cuisine}
+Cuisine: ${input.brand.cuisine}${restaurantType ? `
+Type of place: ${restaurantType.replace(/_/g, ' ')}` : ''}
 City: ${input.brand.city}${input.brand.neighborhood ? ` (${input.brand.neighborhood})` : ''}
 Address: ${input.location.address}
 
@@ -101,7 +119,8 @@ ${input.reservations.note ? `Reservation note: ${input.reservations.note}` : ''}
 Press outlets mentioned: ${(input.press_outlets || []).join(', ') || 'N/A'}
 
 WRITING DIRECTION
-You are writing copy for a fine-dining restaurant website. The tone is quiet, confident, sensory, and editorial — never salesy, never generic. Think of restaurant criticism, not marketing copy.
+Tone for this place: ${tone}
+Never write generic restaurant marketing copy. Mirror the energy of the type above.
 
 Hard rules:
 - Headlines: 4–10 words. Quiet, evocative, specific.
