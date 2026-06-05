@@ -140,14 +140,54 @@ function detectBooking(raw: string): {
   return { type: 'form' }
 }
 
+/**
+ * localStorage draft key for the restaurant form. Scoped per user so
+ * different signed-in users don't see each other's drafts on shared
+ * devices. Versioned ("v2") so we can bump when the Form shape
+ * changes incompatibly.
+ */
+const DRAFT_KEY_PREFIX = 'zenya:restaurant-form:v2:'
+
+function loadDraft(userId: string): Form | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY_PREFIX + userId)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    // Light shape check — if the saved blob lacks the categories array
+    // we treat it as junk and start fresh rather than crash.
+    if (parsed && Array.isArray(parsed.categories) && Array.isArray(parsed.hours)) {
+      return parsed as Form
+    }
+  } catch {}
+  return null
+}
+
+function saveDraft(userId: string, form: Form) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(DRAFT_KEY_PREFIX + userId, JSON.stringify(form))
+  } catch {
+    // QuotaExceeded etc. — silently drop. Only impact is back-nav loses state.
+  }
+}
+
+function clearDraft(userId: string) {
+  if (typeof window === 'undefined') return
+  try { localStorage.removeItem(DRAFT_KEY_PREFIX + userId) } catch {}
+}
+
 export default function RestaurantWizardPage() {
   const router = useRouter()
   const supabase = createClient()
   const [authReady, setAuthReady] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
+  const [restoredDraft, setRestoredDraft] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // ── Auth + draft restore ────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
     async function check() {
@@ -157,11 +197,24 @@ export default function RestaurantWizardPage() {
         router.push('/login?mode=signup&next=/theme/new/restaurant')
         return
       }
+      setUserId(user.id)
+      // Try to restore a prior in-progress draft for this user.
+      const draft = loadDraft(user.id)
+      if (draft) {
+        setForm(draft)
+        setRestoredDraft(true)
+      }
       setAuthReady(true)
     }
     check()
     return () => { cancelled = true }
   }, [router, supabase])
+
+  // ── Persist on every change ─────────────────────────────────────────
+  useEffect(() => {
+    if (!authReady || !userId) return
+    saveDraft(userId, form)
+  }, [authReady, userId, form])
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -319,6 +372,20 @@ export default function RestaurantWizardPage() {
     }
   }
 
+  // ── Counts (used by the confirm step + per-row badges) ───────────────
+  const counts = (() => {
+    let total = 0
+    let valid = 0
+    for (const cat of form.categories) {
+      if (cat.name.trim().length < 2) continue
+      for (const item of cat.items) {
+        total++
+        if (item.name.trim().length >= 2 && item.price.trim().length >= 1) valid++
+      }
+    }
+    return { total, valid, dropped: total - valid }
+  })()
+
   async function handleGenerate() {
     setError(null)
     const err = validate()
@@ -326,6 +393,13 @@ export default function RestaurantWizardPage() {
       setError(err)
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
+    }
+    // If we'll silently drop any rows, surface that to the user.
+    if (counts.dropped > 0) {
+      const ok = window.confirm(
+        `${counts.dropped} of your ${counts.total} menu items will be skipped because they're missing a name or a price.\n\nGenerate anyway?`
+      )
+      if (!ok) return
     }
     setLoading(true)
     try {
@@ -373,11 +447,23 @@ export default function RestaurantWizardPage() {
       if (!saveRes.ok || !saveJson?.id) {
         throw new Error(saveJson?.error || 'Save failed')
       }
+      // Keep the draft in localStorage so the user can come back and
+      // tweak / regenerate — we don't clear it until they explicitly
+      // hit "Start fresh".
       router.push(`/preview/restaurant/${saveJson.id}`)
     } catch (e: any) {
       setError(e?.message || 'Something went wrong while generating your site.')
       setLoading(false)
     }
+  }
+
+  function startFresh() {
+    if (!confirm('Clear this form and start over? Your draft will be deleted.')) return
+    if (userId) clearDraft(userId)
+    setForm(INITIAL_FORM)
+    setRestoredDraft(false)
+    setError(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   if (!authReady) {
@@ -405,6 +491,22 @@ export default function RestaurantWizardPage() {
             Only a few fields are required — the rest is optional. Even one menu item is enough to generate. AI fills in any gaps.
           </p>
         </div>
+
+        {restoredDraft && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-[rgba(94,106,210,0.06)] p-4 text-sm text-foreground backdrop-blur">
+            <div>
+              <strong>We saved your draft.</strong>{' '}
+              <span className="text-muted">Picking up where you left off.</span>
+            </div>
+            <button
+              type="button"
+              onClick={startFresh}
+              className="rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-muted hover:bg-black/5"
+            >
+              Start fresh
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="mb-8 rounded-2xl border border-red-300 bg-red-50/80 p-4 text-sm text-red-800 backdrop-blur">
@@ -583,42 +685,65 @@ export default function RestaurantWizardPage() {
                 />
 
                 <div className="space-y-4">
-                  {cat.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="grid grid-cols-1 gap-3 rounded-xl border border-token bg-surface/40 p-4 sm:grid-cols-[100px_1fr]"
-                    >
-                      {/* Per-item image upload */}
-                      <ImageUploadField
-                        value={item.image_url}
-                        onChange={(url) => updateItem(cat.id, item.id, { image_url: url })}
-                        aspect="thumb"
-                      />
-                      <div className="space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-[1.5fr_90px_90px_auto]">
-                          <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="Item name (required)" />
-                          <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24" />
-                          <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="Badge" />
-                          {cat.items.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeItem(cat.id, item.id)}
-                              className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
-                              aria-label="Remove item"
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </div>
-                        <input
-                          className={inputCls + ' py-2 text-sm'}
-                          value={item.description}
-                          onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })}
-                          placeholder="Short description (optional — AI will polish)"
+                  {cat.items.map((item) => {
+                    const itemValid =
+                      item.name.trim().length >= 2 && item.price.trim().length >= 1
+                    return (
+                      <div
+                        key={item.id}
+                        className="grid grid-cols-1 gap-3 rounded-xl border bg-surface/40 p-4 sm:grid-cols-[100px_1fr]"
+                        style={{
+                          borderColor: itemValid
+                            ? 'rgba(21,128,61,0.25)'
+                            : 'rgba(217,119,6,0.30)',
+                        }}
+                      >
+                        {/* Per-item image upload */}
+                        <ImageUploadField
+                          value={item.image_url}
+                          onChange={(url) => updateItem(cat.id, item.id, { image_url: url })}
+                          aspect="thumb"
                         />
+                        <div className="space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-[1.5fr_90px_90px_auto]">
+                            <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="Item name (required)" />
+                            <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24 (required)" />
+                            <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="Badge" />
+                            {cat.items.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeItem(cat.id, item.id)}
+                                className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
+                                aria-label="Remove item"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            className={inputCls + ' py-2 text-sm'}
+                            value={item.description}
+                            onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })}
+                            placeholder="Short description (optional — AI will polish)"
+                          />
+                          {/* Status — explicit so users see why an item may not save */}
+                          <div className="flex items-center gap-1.5 text-[11px] font-medium">
+                            {itemValid ? (
+                              <span className="inline-flex items-center gap-1 text-[#15803d]">
+                                <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#15803d]" />
+                                Will be saved
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[#b45309]">
+                                <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#b45309]" />
+                                Needs both <strong className="font-semibold">name</strong> and <strong className="font-semibold">price</strong> to save
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
                 <button
                   type="button"
