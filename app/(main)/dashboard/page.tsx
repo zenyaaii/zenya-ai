@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import AIDisclosure from '@/components/AIDisclosure'
 import PublishSiteModal from '@/components/PublishSiteModal'
+import AddDomainModal from '@/components/AddDomainModal'
+import DomainsList from '@/components/DomainsList'
 
 type Theme = {
   id: string
@@ -28,6 +30,7 @@ export default function DashboardPage() {
   const [plan, setPlan] = useState<'free' | 'pro_onetime' | 'pro_hosting' | 'admin'>('free')
   const [hasHosting, setHasHosting] = useState(false)
   const [publishingTheme, setPublishingTheme] = useState<Theme | null>(null)
+  const [domainTheme, setDomainTheme] = useState<Theme | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -185,12 +188,22 @@ export default function DashboardPage() {
                     </Link>
                     {isHostable ? (
                       t.is_published ? (
-                        <button
-                          onClick={() => unpublish(t)}
-                          className="rounded-md border border-token px-3 py-1.5 text-xs font-medium text-muted hover:bg-black/5"
-                        >
-                          Unpublish
-                        </button>
+                        <>
+                          <button
+                            onClick={() => unpublish(t)}
+                            className="rounded-md border border-token px-3 py-1.5 text-xs font-medium text-muted hover:bg-black/5"
+                          >
+                            Unpublish
+                          </button>
+                          {hasHosting && (
+                            <button
+                              onClick={() => setDomainTheme(t)}
+                              className="rounded-md border border-token px-3 py-1.5 text-xs font-medium text-primary hover:bg-black/5"
+                            >
+                              + Domain
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <button
                           onClick={() => setPublishingTheme(t)}
@@ -205,6 +218,10 @@ export default function DashboardPage() {
                       </span>
                     )}
                   </div>
+
+                  {t.is_published && hasHosting && (
+                    <DomainsList themeId={t.id} />
+                  )}
                 </div>
               </div>
             )
@@ -221,6 +238,16 @@ export default function DashboardPage() {
             refreshThemeRow(publishingTheme.id, { slug, is_published: true })
             // Light "you're live" feedback. Real toast goes in Phase 2b.
             alert(`Live: ${url}`)
+          }}
+        />
+      )}
+
+      {domainTheme && (
+        <AddDomainModal
+          themeId={domainTheme.id}
+          onClose={() => setDomainTheme(null)}
+          onAdded={() => {
+            // DomainsList will pick up the new row on its next poll/load.
           }}
         />
       )}
