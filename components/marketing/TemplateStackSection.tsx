@@ -1,0 +1,365 @@
+'use client'
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+
+/**
+ * Inspired by Shopify's "Customizable themes" homepage section —
+ * a 3D fan/stack of theme cards that animates in as you scroll to it.
+ * Click a card → preview box opens with two CTAs (Build / Live view).
+ *
+ * The 8 cards are placeholders: a colored gradient + the template name.
+ * Drop screenshots into `image` per template when ready and the
+ * gradient falls away automatically.
+ */
+
+type Template = {
+  id: string                    // business_type used by the wizard + demo routes
+  name: string
+  /** Optional screenshot URL — when set, replaces the gradient placeholder. */
+  image?: string
+  /** Accent gradient for the placeholder card. */
+  gradient: string
+  /** Pre-existing public demo route for the "Live view" button. */
+  demoHref: string
+  /** Where the "Build" button goes — wizard for that template. */
+  buildHref: string
+}
+
+const TEMPLATES: Template[] = [
+  {
+    id: 'one_product',
+    name: 'Storefront',
+    gradient: 'linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%)',
+    demoHref: '/demo',
+    buildHref: '/theme/new',
+  },
+  {
+    id: 'collective',
+    name: 'Collective',
+    gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
+    demoHref: '/demo/collective',
+    buildHref: '/theme/new/collective',
+  },
+  {
+    id: 'restaurant',
+    name: 'Restaurant',
+    gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)',
+    demoHref: '/demo/restaurant',
+    buildHref: '/theme/new?type=restaurant',
+  },
+  {
+    id: 'atlas',
+    name: 'Atlas',
+    gradient: 'linear-gradient(135deg, #4338ca 0%, #818cf8 100%)',
+    demoHref: '/demo/atlas',
+    buildHref: '/theme/new?type=atlas',
+  },
+  {
+    id: 'lookbook',
+    name: 'Lookbook',
+    gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
+    demoHref: '/demo/lookbook',
+    buildHref: '/theme/new?type=lookbook',
+  },
+  {
+    id: 'studio',
+    name: 'Studio',
+    gradient: 'linear-gradient(135deg, #1c1c1c 0%, #4a4a4a 100%)',
+    demoHref: '/demo/studio',
+    buildHref: '/theme/new?type=studio',
+  },
+  {
+    id: 'wellness',
+    name: 'Wellness',
+    gradient: 'linear-gradient(135deg, #15803d 0%, #86efac 100%)',
+    demoHref: '/demo/wellness',
+    buildHref: '/theme/new?type=wellness',
+  },
+  {
+    id: 'services',
+    name: 'Trade',
+    gradient: 'linear-gradient(135deg, #c2410c 0%, #fb923c 100%)',
+    demoHref: '/demo/services',
+    buildHref: '/theme/new?type=services',
+  },
+]
+
+/** Symmetric fan positions for desktop. 8 cards: 4 left, 4 right of center. */
+const FAN_POSITIONS = [
+  { x: -360, y: 80,  rotate: -22 },
+  { x: -240, y: 38,  rotate: -14 },
+  { x: -120, y: 12,  rotate:  -7 },
+  { x:  -30, y:  0,  rotate:  -2 },
+  { x:   30, y:  0,  rotate:   2 },
+  { x:  120, y: 12,  rotate:   7 },
+  { x:  240, y: 38,  rotate:  14 },
+  { x:  360, y: 80,  rotate:  22 },
+] as const
+
+const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
+export default function TemplateStackSection() {
+  const [active, setActive] = useState<Template | null>(null)
+
+  return (
+    <section
+      aria-labelledby="template-stack-heading"
+      className="relative overflow-hidden bg-background py-24 sm:py-32"
+    >
+      {/* Soft tint behind the stack */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-[600px] -translate-y-1/2"
+        style={{
+          background:
+            'radial-gradient(60% 60% at 50% 40%, rgba(94,106,210,0.10), transparent 70%)',
+        }}
+      />
+
+      <div className="mx-auto max-w-6xl px-6 text-center">
+        <motion.h2
+          id="template-stack-heading"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6, ease: EASE_OUT }}
+          className="text-[36px] font-[590] tracking-[-1.2px] text-foreground sm:text-[52px] sm:tracking-[-2px]"
+        >
+          Customizable templates
+        </motion.h2>
+      </div>
+
+      {/* Desktop fan */}
+      <div className="relative mx-auto mt-16 hidden h-[440px] max-w-6xl items-end justify-center px-6 md:flex">
+        {TEMPLATES.map((t, i) => {
+          const pos = FAN_POSITIONS[i]
+          return (
+            <motion.button
+              key={t.id}
+              type="button"
+              onClick={() => setActive(t)}
+              aria-label={`Preview ${t.name} template`}
+              className="group absolute bottom-0 cursor-pointer focus:outline-none"
+              style={{ transformOrigin: 'bottom center' }}
+              initial={{ x: 0, y: 30, rotate: 0, opacity: 0, scale: 0.7 }}
+              whileInView={{
+                x: pos.x,
+                y: pos.y,
+                rotate: pos.rotate,
+                opacity: 1,
+                scale: 1,
+              }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{
+                duration: 0.85,
+                ease: EASE_OUT,
+                delay: 0.05 * Math.abs(i - TEMPLATES.length / 2 + 0.5),
+              }}
+              whileHover={{
+                y: pos.y - 18,
+                scale: 1.04,
+                rotate: pos.rotate * 0.4,
+                transition: { duration: 0.25, ease: EASE_OUT },
+              }}
+            >
+              <TemplateCard template={t} size="lg" />
+            </motion.button>
+          )
+        })}
+      </div>
+
+      {/* Mobile grid fallback — the fan would just be cramped junk on
+          phones. Show a clean 2-col grid instead. */}
+      <div className="mx-auto mt-12 grid max-w-md grid-cols-2 gap-4 px-6 md:hidden">
+        {TEMPLATES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setActive(t)}
+            className="block focus:outline-none"
+          >
+            <TemplateCard template={t} size="sm" />
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {active && (
+          <TemplatePreviewModal
+            template={active}
+            onClose={() => setActive(null)}
+          />
+        )}
+      </AnimatePresence>
+    </section>
+  )
+}
+
+/* ----------------------------------------------------------------------- */
+
+function TemplateCard({ template, size }: { template: Template; size: 'lg' | 'sm' }) {
+  const dims =
+    size === 'lg'
+      ? { width: 220, height: 290 }
+      : { width: '100%', height: 200 }
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl bg-white"
+      style={{
+        width: dims.width,
+        height: dims.height,
+        boxShadow:
+          '0 24px 60px -20px rgba(28,28,28,0.32), 0 0 0 1px rgba(28,28,28,0.04)',
+      }}
+    >
+      {/* Browser chrome */}
+      <div
+        className="flex h-7 items-center gap-1.5 border-b px-3"
+        style={{ background: '#f7f4ed', borderColor: 'rgba(28,28,28,0.06)' }}
+      >
+        <span className="h-2 w-2 rounded-full" style={{ background: '#fb7185' }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: '#fbbf24' }} />
+        <span className="h-2 w-2 rounded-full" style={{ background: '#34d399' }} />
+      </div>
+
+      {/* Body — screenshot if provided, gradient placeholder otherwise */}
+      {template.image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={template.image}
+          alt={template.name}
+          className="h-full w-full object-cover"
+          style={{ height: 'calc(100% - 28px)' }}
+        />
+      ) : (
+        <div
+          className="flex h-full w-full flex-col items-center justify-center text-white"
+          style={{
+            background: template.gradient,
+            height: 'calc(100% - 28px)',
+          }}
+        >
+          <div className="text-[10px] font-semibold uppercase tracking-[0.25em] opacity-70">
+            Zenya
+          </div>
+          <div className="mt-1 text-lg font-bold tracking-tight">{template.name}</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ----------------------------------------------------------------------- */
+
+function TemplatePreviewModal({
+  template,
+  onClose,
+}: {
+  template: Template
+  onClose: () => void
+}) {
+  return (
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${template.name} preview`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 70,
+        background: 'rgba(15,15,18,0.65)',
+        backdropFilter: 'blur(8px)',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 16,
+      }}
+    >
+      <motion.div
+        initial={{ y: 30, opacity: 0, scale: 0.96 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 20, opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.35, ease: EASE_OUT }}
+        style={{
+          width: '100%', maxWidth: 720,
+          background: 'white',
+          borderRadius: 20,
+          padding: 24,
+          boxShadow: '0 30px 90px rgba(0,0,0,0.45)',
+        }}
+      >
+        {/* Close (top-right) */}
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
+            {template.name}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close preview"
+            className="rounded-full p-1.5 text-muted hover:bg-black/5"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18" />
+              <path d="M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* The "box" — the preview frame itself */}
+        <div
+          className="overflow-hidden rounded-2xl"
+          style={{
+            aspectRatio: '16 / 10',
+            border: '1px solid rgba(28,28,28,0.08)',
+            boxShadow: '0 8px 24px rgba(28,28,28,0.10) inset',
+          }}
+        >
+          {template.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={template.image}
+              alt={template.name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div
+              className="flex h-full w-full flex-col items-center justify-center text-white"
+              style={{ background: template.gradient }}
+            >
+              <div className="text-xs font-semibold uppercase tracking-[0.3em] opacity-70">
+                Zenya · Preview
+              </div>
+              <div className="mt-2 text-3xl font-bold tracking-tight">{template.name}</div>
+              <div className="mt-3 text-xs uppercase tracking-[0.2em] opacity-60">
+                Screenshot coming soon
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Two buttons under the box */}
+        <div className="mt-5 flex gap-3">
+          <Link
+            href={template.buildHref}
+            className="flex-1 rounded-xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.99]"
+          >
+            Build
+          </Link>
+          <Link
+            href={template.demoHref}
+            target="_blank"
+            className="flex-1 rounded-xl border border-token bg-white py-3 text-center text-sm font-semibold text-foreground transition hover:bg-black/5 active:scale-[0.99]"
+          >
+            Live view
+          </Link>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}

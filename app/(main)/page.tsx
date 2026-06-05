@@ -7,6 +7,7 @@ import StatsSection from "@/components/StatsSection"
 import ShowcaseSection from "@/components/ShowcaseSection"
 import Testimonials from "@/components/Testimonials"
 import CTA from "@/components/CTA"
+import TemplateStackSection from "@/components/marketing/TemplateStackSection"
 
 export default function Page() {
   return (
@@ -14,6 +15,9 @@ export default function Page() {
       <Hero />
       <Logos />
       <StepsSection />
+      {/* Shopify-style fanned templates section. Animates in on scroll,
+          click any card to open a preview box with Build / Live view CTAs. */}
+      <TemplateStackSection />
       <ShowcaseSection />
       <StatsSection />
       <FeaturesSection />
