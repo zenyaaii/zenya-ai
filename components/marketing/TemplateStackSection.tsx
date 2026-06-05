@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { TemplateTeaser } from './TemplateTeasers'
 
 /**
  * Inspired by Shopify's "Customizable themes" homepage section —
@@ -311,7 +312,9 @@ function TemplatePreviewModal({
           </button>
         </div>
 
-        {/* The "box" — the preview frame itself */}
+        {/* The "box" — a curated taste of the template. Real markup, loads
+            instantly. The "Full preview" button below opens the heavy
+            /demo/{template} page in a new tab if the user wants more. */}
         <div
           className="overflow-hidden rounded-2xl"
           style={{
@@ -328,18 +331,7 @@ function TemplatePreviewModal({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div
-              className="flex h-full w-full flex-col items-center justify-center text-white"
-              style={{ background: template.gradient }}
-            >
-              <div className="text-xs font-semibold uppercase tracking-[0.3em] opacity-70">
-                Zenya · Preview
-              </div>
-              <div className="mt-2 text-3xl font-bold tracking-tight">{template.name}</div>
-              <div className="mt-3 text-xs uppercase tracking-[0.2em] opacity-60">
-                Screenshot coming soon
-              </div>
-            </div>
+            <TemplateTeaser id={template.id as any} />
           )}
         </div>
 
@@ -356,7 +348,7 @@ function TemplatePreviewModal({
             target="_blank"
             className="flex-1 rounded-xl border border-token bg-white py-3 text-center text-sm font-semibold text-foreground transition hover:bg-black/5 active:scale-[0.99]"
           >
-            Live view
+            Full preview →
           </Link>
         </div>
       </motion.div>
