@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { COLLECTIVE_PRESETS } from '@/utils/collective/presets'
 import type { CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveStylePresetId } from '@/utils/collective/types'
+import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -203,6 +204,12 @@ export default function CollectiveWizardPage() {
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             Build a curated multi-brand store.
           </h1>
+          <ShopifyAffiliateCallout
+            placement="theme_new_ecom_picker"
+            variant="banner"
+            className="mt-6"
+          />
+
           <p className="mt-3 max-w-2xl text-muted">
             Tell us about your catalog and Zenya generates a luxury multi-brand storefront — hero, collections, new arrivals, bestsellers, brand story, testimonials, and newsletter.
           </p>

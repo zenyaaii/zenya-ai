@@ -7,6 +7,7 @@ import AIDisclosure from '@/components/AIDisclosure'
 import PublishSiteModal from '@/components/PublishSiteModal'
 import AddDomainModal from '@/components/AddDomainModal'
 import DomainsList from '@/components/DomainsList'
+import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout'
 
 type Theme = {
   id: string
@@ -244,6 +245,15 @@ export default function DashboardPage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Shopify affiliate callout — only show when the user has at least
+          one e-commerce template, since that's when they actually need a
+          Shopify store. */}
+      {!loading && themes.some((t) => SHOPIFY_TYPES.has(((t as any).content?.business_type || t.template_type || ''))) && (
+        <div className="mt-10">
+          <ShopifyAffiliateCallout placement="dashboard_post_export" />
         </div>
       )}
 

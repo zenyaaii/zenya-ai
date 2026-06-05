@@ -10,6 +10,7 @@ import ThemePreview from '@/components/ThemePreview';
 import ProductPage from '@/components/theme/ProductPage';
 import StoreNavbar from '@/components/theme/StoreNavbar';
 import MobilePreview from '@/components/wizard/MobilePreview';
+import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout';
 
 type StylePresetId = 'clean_light' | 'bold_gradient' | 'luxury_dark'
 type WebsiteStyleId = 'one_product' | 'catalog_store' | 'brand_story'
@@ -405,6 +406,12 @@ export default function NewThemePage() {
         </div>
         <StepProgress step={step} total={3} />
       </div>
+
+      <ShopifyAffiliateCallout
+        placement="theme_new_ecom_picker"
+        variant="banner"
+        className="mb-6"
+      />
 
       <div className="rounded-2xl border border-token bg-elevated p-8 shadow-soft-md">
         {step === 1 && (

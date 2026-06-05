@@ -6,6 +6,7 @@ import * as Accordion from '@radix-ui/react-accordion'
 import { Check, ChevronDown, ArrowRight } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
+import { affiliateClickHref } from '@/lib/affiliate'
 
 const FAQS = [
   {
@@ -30,7 +31,7 @@ const FAQS = [
   },
   {
     q: 'Which templates work where?',
-    a: 'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify (Shopify handles cart, checkout, products, payments). The other seven templates — Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison — are brochure/showcase sites that Zenya can host directly.',
+    a: 'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify (Shopify handles cart, checkout, products, payments). Don\'t have a Shopify store yet? You can start a free trial through our affiliate link below. The other six templates — Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison — are brochure/showcase sites that Zenya can host directly on the $19.99/mo plan.',
   },
 ] as const
 
@@ -355,6 +356,34 @@ export default function PricingPage() {
               </Accordion.Item>
             ))}
           </Accordion.Root>
+        </motion.div>
+
+        {/* Shopify affiliate footer — sits below the FAQ as the natural
+            "I just decided I want Storefront / Collective — what do I do
+            about Shopify?" exit point. */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto mt-12 max-w-2xl"
+        >
+          <div className="rounded-xl border border-token bg-white px-5 py-4 text-center">
+            <p className="text-[13.5px] text-foreground">
+              Building a Storefront or Collective site and don’t have Shopify yet?{' '}
+              <a
+                href={affiliateClickHref('pricing_faq')}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                className="font-semibold text-[#008060] underline underline-offset-2 hover:opacity-80"
+              >
+                Start a free Shopify trial →
+              </a>
+            </p>
+            <p className="mt-1 text-[11px] text-muted">
+              Affiliate link — Zenya earns a small commission, no extra cost to you.
+            </p>
+          </div>
         </motion.div>
       </div>
     </main>

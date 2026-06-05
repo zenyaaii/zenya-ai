@@ -25,7 +25,7 @@ const MAX_METADATA_BYTES = 4_000 // ~4KB JSON per event
 const ALLOWED_PREFIXES = [
   'theme.', 'checkout.', 'purchase.', 'hosting_subscription.', 'domain.',
   'auth.', 'dashboard.', 'settings.', 'pricing.', 'preview.', 'scrape.',
-  'page.',
+  'page.', 'affiliate.',
 ]
 
 function isAllowed(eventType: string): boolean {
