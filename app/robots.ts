@@ -5,9 +5,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
-        // Keep auth & API routes out of indexes — they're either useless to
-        // crawlers (JSON) or potentially confusing (auth screens).
+        // /s/ is the published-sites namespace and should be crawled. Auth +
+        // API + preview routes stay out.
+        allow: ['/', '/s/'],
         disallow: [
           '/api/',
           '/auth/',
