@@ -86,6 +86,16 @@ export default function RestaurantPreviewPage() {
           <span className="font-semibold">{name}</span>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
+          {/* Lightweight editor — text + visibility + social links. The
+              user stays on the preview side of the app and saves to the
+              theme directly. */}
+          <Link
+            href={`/preview/restaurant/${params.id}/edit`}
+            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
+          >
+            Edit content
+          </Link>
+          {/* Full regenerate path — wizard with localStorage draft. */}
           <Link
             href={`/theme/new/restaurant`}
             className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"

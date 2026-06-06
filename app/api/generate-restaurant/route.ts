@@ -345,7 +345,10 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     gallery: {
       heading: String(ai?.gallery?.heading || mock.gallery.heading),
       subheading: String(ai?.gallery?.subheading || mock.gallery.subheading),
-      images: galleryImages
+      images: galleryImages,
+      // Truth-in-photography note for the live site: was the gallery
+      // filled from the venue's own uploads, or from Unsplash fallbacks?
+      attribution: galleryUrls.length > 0 ? 'from_venue' : 'from_unsplash',
     },
     hours_location: {
       heading: String(ai?.hours_location?.heading || 'Find us.'),
@@ -410,7 +413,12 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
         ai?.seo?.title || `${input.brand.name} · ${input.brand.cuisine} · ${input.brand.city}`
       ),
       description: String(ai?.seo?.description || mock.seo.description)
-    }
+    },
+    // Editor fields — start with everything visible + empty social links.
+    // The editor populates these later; the renderer treats them as
+    // optional and defaults to "all visible".
+    hidden_sections: [],
+    social_links: {},
   }
 
   return content

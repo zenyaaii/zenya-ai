@@ -105,6 +105,15 @@ export type RestaurantContent = {
     heading: string
     subheading: string
     images: RestaurantGalleryImage[]
+    /**
+     * Where the gallery images came from. Drives the small attribution
+     * note under the gallery on the live site:
+     *   from_venue   → "Photography by the venue."
+     *   from_unsplash → "Photography sourced from Unsplash."
+     * Set by the generator based on whether the user provided uploads.
+     * Editable from the editor.
+     */
+    attribution?: 'from_venue' | 'from_unsplash'
   }
   hours_location: {
     heading: string
@@ -150,4 +159,56 @@ export type RestaurantContent = {
     title: string
     description: string
   }
+
+  /**
+   * Sections the owner has hidden in the editor. The renderer checks
+   * this list at the start of each toggleable section and skips render
+   * when present. Always-on sections (brand, footer) are never listed.
+   */
+  hidden_sections?: RestaurantSectionKey[]
+
+  /**
+   * Social media URLs the owner wants in the footer. Empty strings or
+   * missing keys = don't render the icon. If every value is empty, the
+   * whole social bar disappears.
+   */
+  social_links?: {
+    instagram?: string
+    facebook?: string
+    tiktok?: string
+    whatsapp?: string
+    youtube?: string
+    website?: string
+  }
+}
+
+/**
+ * Sections users can show/hide from the editor. Keep this list in sync
+ * with the RestaurantContent fields above.
+ */
+export type RestaurantSectionKey =
+  | 'hero'
+  | 'story'
+  | 'signature_dishes'
+  | 'menu'
+  | 'gallery'
+  | 'hours_location'
+  | 'reservations'
+  | 'reviews'
+  | 'press'
+  | 'newsletter'
+  | 'faq'
+
+export const RESTAURANT_SECTION_LABELS: Record<RestaurantSectionKey, string> = {
+  hero:             'Hero',
+  story:            'Our story',
+  signature_dishes: 'Signature dishes',
+  menu:             'Menu',
+  gallery:          'Gallery',
+  hours_location:   'Hours & location',
+  reservations:     'Reservations',
+  reviews:          'Reviews',
+  press:            'Press',
+  newsletter:       'Newsletter',
+  faq:              'FAQ',
 }

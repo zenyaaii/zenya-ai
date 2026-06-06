@@ -88,29 +88,39 @@ export default function RestaurantPreview({ content, presetId = 'onyx', classNam
       <TopBar content={content} isDark={isDark} />
       <NavBar content={content} isDark={isDark} view={view} setView={setView} />
 
-      {view === 'home' && (
-        <>
-          <Hero content={content} isDark={isDark} />
-          <SignatureDishes content={content} isDark={isDark} />
-          <Press content={content} isDark={isDark} />
-          <Newsletter content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'menu' && <Menu content={content} isDark={isDark} />}
-      {view === 'gallery' && <Gallery content={content} isDark={isDark} />}
-      {view === 'visit' && (
-        <>
-          <HoursLocation content={content} isDark={isDark} />
-          <Reservations content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'about' && <Story content={content} isDark={isDark} />}
-      {view === 'reviews' && (
-        <>
-          <Reviews content={content} isDark={isDark} />
-          <FAQ content={content} isDark={isDark} />
-        </>
-      )}
+      {/* hidden_sections is set by the editor; every toggleable section
+          checks the set before rendering. Always-on (brand, footer)
+          ignore the list. */}
+      {(() => {
+        const hidden = new Set(content.hidden_sections || [])
+        return (
+          <>
+            {view === 'home' && (
+              <>
+                {!hidden.has('hero') && <Hero content={content} isDark={isDark} />}
+                {!hidden.has('signature_dishes') && <SignatureDishes content={content} isDark={isDark} />}
+                {!hidden.has('press') && <Press content={content} isDark={isDark} />}
+                {!hidden.has('newsletter') && <Newsletter content={content} isDark={isDark} />}
+              </>
+            )}
+            {view === 'menu' && !hidden.has('menu') && <Menu content={content} isDark={isDark} />}
+            {view === 'gallery' && !hidden.has('gallery') && <Gallery content={content} isDark={isDark} />}
+            {view === 'visit' && (
+              <>
+                {!hidden.has('hours_location') && <HoursLocation content={content} isDark={isDark} />}
+                {!hidden.has('reservations') && <Reservations content={content} isDark={isDark} />}
+              </>
+            )}
+            {view === 'about' && !hidden.has('story') && <Story content={content} isDark={isDark} />}
+            {view === 'reviews' && (
+              <>
+                {!hidden.has('reviews') && <Reviews content={content} isDark={isDark} />}
+                {!hidden.has('faq') && <FAQ content={content} isDark={isDark} />}
+              </>
+            )}
+          </>
+        )
+      })()}
 
       <Footer content={content} isDark={isDark} />
     </div>
@@ -652,6 +662,17 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
             )
           })}
         </motion.div>
+        {/* Attribution — honest about where the photos came from. */}
+        {content.gallery.attribution && (
+          <p
+            className="mt-8 text-center text-xs uppercase tracking-[0.25em]"
+            style={{ color: 'var(--rb-muted)' }}
+          >
+            {content.gallery.attribution === 'from_venue'
+              ? 'Photography by the venue.'
+              : 'Photography sourced from Unsplash.'}
+          </p>
+        )}
       </Container>
     </section>
   )
@@ -1002,6 +1023,17 @@ function FAQ({ content, isDark }: { content: RestaurantContent; isDark: boolean 
   )
 }
 
+/**
+ * WhatsApp links: accept either a full https://wa.me/... URL (use as-is)
+ * or a raw phone number (auto-wrap into wa.me).
+ */
+function normaliseWhatsapp(v: string): string {
+  const trimmed = v.trim()
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  const digits = trimmed.replace(/\D/g, '')
+  return digits ? `https://wa.me/${digits}` : '#'
+}
+
 function Footer({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   return (
     <footer className="pt-20 pb-10 border-t" style={{ borderColor: 'var(--rb-border)' }}>
@@ -1034,12 +1066,49 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
               Connect
             </p>
             <div className="space-y-1.5 text-sm">
-              <a href="#" className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                Instagram
-              </a>
-              <a href="#" className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                Newsletter
-              </a>
+              {/* Editor-driven social links — only show what the owner
+                  actually provided. If they added none, only the press
+                  email shows below. */}
+              {content.social_links && (
+                <>
+                  {content.social_links.instagram && (
+                    <a href={content.social_links.instagram} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      Instagram
+                    </a>
+                  )}
+                  {content.social_links.facebook && (
+                    <a href={content.social_links.facebook} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      Facebook
+                    </a>
+                  )}
+                  {content.social_links.tiktok && (
+                    <a href={content.social_links.tiktok} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      TikTok
+                    </a>
+                  )}
+                  {content.social_links.youtube && (
+                    <a href={content.social_links.youtube} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      YouTube
+                    </a>
+                  )}
+                  {content.social_links.whatsapp && (
+                    <a href={normaliseWhatsapp(content.social_links.whatsapp)} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      WhatsApp
+                    </a>
+                  )}
+                  {content.social_links.website && (
+                    <a href={content.social_links.website} target="_blank" rel="noopener noreferrer"
+                       className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+                      Website
+                    </a>
+                  )}
+                </>
+              )}
               <a href={`mailto:${content.hours_location.email}`} className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
                 Press inquiries
               </a>
