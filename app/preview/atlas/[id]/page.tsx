@@ -13,6 +13,8 @@ export default function AtlasPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<AtlasContent | null>(null)
   const [presetId, setPresetId] = useState<string>('orbit')
+  const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('SaaS App')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +43,8 @@ export default function AtlasPreviewPage() {
 
       setContent(stored.atlas as AtlasContent)
       setPresetId(stored.style_preset || 'orbit')
+      setTypographyPreset(stored.typography_preset || undefined)
+      setColorOverrides(stored.color_overrides || undefined)
       setName(data.product_name || 'SaaS App')
       setLoading(false)
     }
@@ -81,10 +85,10 @@ export default function AtlasPreviewPage() {
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
           <Link
-            href="/theme/new/atlas"
-            className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
+            href={`/preview/atlas/${params.id}/edit`}
+            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
           >
-            Edit details
+            Open editor
           </Link>
           <Link
             href="/dashboard"
@@ -94,7 +98,12 @@ export default function AtlasPreviewPage() {
           </Link>
         </div>
       </div>
-      <AtlasPreview content={content} presetId={presetId} />
+      <AtlasPreview
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </div>
   )
 }

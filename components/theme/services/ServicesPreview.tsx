@@ -4,11 +4,16 @@ import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { ServiceContent } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
+import { getTypographyPreset } from '@/utils/theme-editor-typography'
 
 type Props = {
   content: ServiceContent
   presetId?: string
   className?: string
+  colorOverrides?: Record<string, string>
+  typographyPreset?: string
+  view?: string
+  onViewChange?: (v: string) => void
 }
 
 type ServiceView = 'home' | 'services' | 'about' | 'process' | 'contact'
@@ -20,11 +25,29 @@ const reveal = {
   transition: { duration: 0.45, ease: 'easeOut' as const }
 }
 
-export default function ServicesPreview({ content, presetId = 'cobalt', className }: Props) {
+export default function ServicesPreview({
+  content,
+  presetId = 'cobalt',
+  className,
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = getServicePreset(presetId)
-  const colors = preset.colors
+  const colors = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset.colors, colorOverrides]
+  )
+  const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
+  const headingFont = typo?.heading_font ?? preset.heading_font
+  const bodyFont    = typo?.body_font    ?? preset.body_font
   const isDark = preset.id === 'graphite'
-  const [view, setView] = useState<ServiceView>('home')
+  const [internalView, setInternalView] = useState<ServiceView>('home')
+  const view = (controlledView as ServiceView) || internalView
+  const setView = (v: ServiceView) => {
+    if (onViewChange) onViewChange(v); else setInternalView(v)
+  }
 
   const cssVars = useMemo(
     () =>
@@ -36,10 +59,10 @@ export default function ServicesPreview({ content, presetId = 'cobalt', classNam
         '--sv-text': colors.text,
         '--sv-muted': colors.muted,
         '--sv-border': colors.border,
-        '--sv-heading-font': preset.heading_font,
-        '--sv-body-font': preset.body_font
+        '--sv-heading-font': headingFont,
+        '--sv-body-font': bodyFont,
       }) as React.CSSProperties,
-    [colors, preset]
+    [colors, headingFont, bodyFont]
   )
 
   return (

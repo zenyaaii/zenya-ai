@@ -323,12 +323,15 @@ export default function SiteCard({
   )
 }
 
-/* Restaurant has a real per-section editor — others currently route to the
- * preview (which itself surfaces an "Edit details" link back to /theme/new
- * for full regeneration). Centralising it here keeps the Sites grid and
- * the list-view row in sync. */
+/* Every brochure theme has its own /edit route built on the shared
+ * ThemeEditor shell. E-commerce themes (collective / one_product /
+ * storefront) ship via Shopify and don't have an in-app editor, so they
+ * fall through to the storefront preview. */
+const BROCHURE_TYPES = new Set([
+  'restaurant', 'atlas', 'lookbook', 'wellness', 'studio', 'services',
+])
 function editUrlFor(id: string, businessType: string): string {
-  if (businessType === 'restaurant') return `/preview/restaurant/${id}/edit`
+  if (BROCHURE_TYPES.has(businessType)) return `/preview/${businessType}/${id}/edit`
   return `/preview/${id}`
 }
 

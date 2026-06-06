@@ -483,10 +483,10 @@ function SiteRow({
   )
 }
 
+const BROCHURE_TYPES = new Set([
+  'restaurant', 'atlas', 'lookbook', 'wellness', 'studio', 'services',
+])
 function editUrlFor(id: string, bt: string): string {
-  // Restaurant ships with a real per-section editor today; everything else
-  // sends the user to the preview surface which links onward to /theme/new
-  // for full regeneration.
-  if (bt === 'restaurant') return `/preview/restaurant/${id}/edit`
+  if (BROCHURE_TYPES.has(bt)) return `/preview/${bt}/${id}/edit`
   return `/preview/${id}`
 }

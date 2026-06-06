@@ -139,6 +139,10 @@ export default async function PublicSitePage(
     (typeof c === 'object' && (c as any).business_type) || theme.template_type
   const presetId =
     (typeof c === 'object' && (c as any).style_preset) || undefined
+  const typographyPreset =
+    (typeof c === 'object' && (c as any).typography_preset) || undefined
+  const colorOverrides =
+    (typeof c === 'object' && (c as any).color_overrides) || undefined
   const templateContent =
     (typeof c === 'object' && (c as any)[businessType]) || c
 
@@ -148,6 +152,8 @@ export default async function PublicSitePage(
         businessType={businessType}
         content={templateContent}
         presetId={presetId}
+        typographyPreset={typographyPreset}
+        colorOverrides={colorOverrides}
         productName={theme.product_name || undefined}
       />
       <MadeWithZenya hide={theme.owner_has_hosting} />

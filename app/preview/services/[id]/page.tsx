@@ -13,6 +13,8 @@ export default function ServicesPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<ServiceContent | null>(null)
   const [presetId, setPresetId] = useState<string>('cobalt')
+  const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('Local service')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -46,6 +48,8 @@ export default function ServicesPreviewPage() {
 
       setContent(stored.services as ServiceContent)
       setPresetId(stored.style_preset || 'cobalt')
+      setTypographyPreset(stored.typography_preset || undefined)
+      setColorOverrides(stored.color_overrides || undefined)
       setName(data.product_name || 'Local service')
       setLoading(false)
     }
@@ -86,15 +90,20 @@ export default function ServicesPreviewPage() {
           <span className="font-semibold">{name}</span>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
-          <Link href="/theme/new/services" className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80">
-            Edit details
+          <Link href={`/preview/services/${params.id}/edit`} className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105">
+            Open editor
           </Link>
           <Link href="/dashboard" className="rounded-full bg-sky-400 px-4 py-2 text-xs font-bold text-slate-950 transition hover:scale-105">
             Dashboard
           </Link>
         </div>
       </div>
-      <ServicesPreview content={content} presetId={presetId} />
+      <ServicesPreview
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </div>
   )
 }

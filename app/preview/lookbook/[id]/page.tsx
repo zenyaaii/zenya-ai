@@ -13,6 +13,8 @@ export default function LookbookPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<LookbookContent | null>(null)
   const [presetId, setPresetId] = useState<string>('noir')
+  const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('Fashion Brand')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +43,8 @@ export default function LookbookPreviewPage() {
 
       setContent(stored.lookbook as LookbookContent)
       setPresetId(stored.style_preset || 'noir')
+      setTypographyPreset(stored.typography_preset || undefined)
+      setColorOverrides(stored.color_overrides || undefined)
       setName(data.product_name || 'Fashion Brand')
       setLoading(false)
     }
@@ -81,20 +85,25 @@ export default function LookbookPreviewPage() {
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
           <Link
-            href="/theme/new/lookbook"
-            className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
+            href={`/preview/lookbook/${params.id}/edit`}
+            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
           >
-            Edit details
+            Open editor
           </Link>
           <Link
             href="/dashboard"
-            className="rounded-full bg-white px-4 py-2 text-xs font-bold text-black transition hover:scale-105"
+            className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-bold text-white transition hover:bg-black/80"
           >
             Dashboard
           </Link>
         </div>
       </div>
-      <LookbookPreview content={content} presetId={presetId} />
+      <LookbookPreview
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </div>
   )
 }

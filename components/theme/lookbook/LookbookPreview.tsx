@@ -4,11 +4,20 @@ import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import type { LookbookContent, LookbookReview } from '@/utils/lookbook/types'
 import { getLookbookPreset } from '@/utils/lookbook/presets'
+import {
+  TYPOGRAPHY_PRESETS,
+  buildGoogleFontsUrl,
+  getTypographyPreset,
+} from '@/utils/theme-editor-typography'
 
 type Props = {
   content: LookbookContent
   presetId?: string
   className?: string
+  colorOverrides?: Record<string, string>
+  typographyPreset?: string
+  view?: string
+  onViewChange?: (v: string) => void
 }
 
 type Colors = ReturnType<typeof getLookbookPreset>['colors']
@@ -615,43 +624,59 @@ function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: L
 }
 
 // ─── Root ──────────────────────────────────────────────────────────────────────
-export default function LookbookPreview({ content, presetId = 'noir', className = '' }: Props) {
+export default function LookbookPreview({
+  content,
+  presetId = 'noir',
+  className = '',
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = useMemo(() => getLookbookPreset(presetId), [presetId])
-  const { colors } = preset
-  const [view, setView] = useState<LookbookView>('home')
+  const colors = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset.colors, colorOverrides]
+  )
+  const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
+  const headingFont = typo?.heading_font ?? preset.heading_font
+  const bodyFont    = typo?.body_font    ?? preset.body_font
+
+  const [internalView, setInternalView] = useState<LookbookView>('home')
+  const view = (controlledView as LookbookView) || internalView
+  const setView = (v: LookbookView) => {
+    if (onViewChange) onViewChange(v); else setInternalView(v)
+  }
 
   return (
     <div className={`min-h-screen ${className}`} style={{ background: colors.background, color: colors.text }}>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-      />
-      <DropBanner content={content} colors={colors} bodyFont={preset.body_font} />
-      <LookbookNav content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} view={view} setView={setView} />
+      <link rel="stylesheet" href={buildGoogleFontsUrl(TYPOGRAPHY_PRESETS)} />
+      <DropBanner content={content} colors={colors} bodyFont={bodyFont} />
+      <LookbookNav content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} view={view} setView={setView} />
 
       {view === 'home' && (
         <>
-          <LookbookHero content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
-          <LookbookBestsellers content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
-          <LookbookTestimonials content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
-          <LookbookNewsletter content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
+          <LookbookHero content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <LookbookBestsellers content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <LookbookTestimonials content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <LookbookNewsletter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
         </>
       )}
       {view === 'shop' && (
         <>
-          <LookbookBestsellers content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
-          <SizeGuideStrip colors={colors} bodyFont={preset.body_font} />
+          <LookbookBestsellers content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <SizeGuideStrip colors={colors} bodyFont={bodyFont} />
         </>
       )}
-      {view === 'lookbook' && <LookbookGrid content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />}
+      {view === 'lookbook' && <LookbookGrid content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />}
       {view === 'about' && (
         <>
-          <LookbookStory content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
-          <LookbookPress content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
+          <LookbookStory content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <LookbookPress content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
         </>
       )}
 
-      <LookbookFooter content={content} colors={colors} headingFont={preset.heading_font} bodyFont={preset.body_font} />
+      <LookbookFooter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
     </div>
   )
 }

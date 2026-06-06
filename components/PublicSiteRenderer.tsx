@@ -16,6 +16,10 @@ type Props = {
   content: any            // per-template shape; each Preview enforces its own
   presetId?: string
   productName?: string
+  /** Wrapper-level color overrides (forwarded from the wrapper content). */
+  colorOverrides?: Record<string, string>
+  /** Wrapper-level typography preset id. */
+  typographyPreset?: string
 }
 
 const TEMPLATE_KEY: Record<string, string> = {
@@ -31,13 +35,15 @@ export default function PublicSiteRenderer({
   businessType,
   content,
   presetId,
+  colorOverrides,
+  typographyPreset,
 }: Props) {
   const key = TEMPLATE_KEY[businessType]
   if (!key) {
     return <UnsupportedTemplate businessType={businessType} />
   }
 
-  // Each preview takes the same loose Props shape: { content, presetId? }
+  // Each preview takes a loose Props shape: { content, presetId?, colorOverrides?, typographyPreset? }
   const Component: ComponentType<any> = (
     {
       restaurant: RestaurantPreview,
@@ -51,7 +57,12 @@ export default function PublicSiteRenderer({
 
   return (
     <Suspense fallback={<LoadingShell />}>
-      <Component content={content} presetId={presetId} />
+      <Component
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </Suspense>
   )
 }

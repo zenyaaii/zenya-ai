@@ -10,11 +10,16 @@ import type {
   StudioPressItem
 } from '@/utils/studio/types'
 import { getStudioPreset } from '@/utils/studio/presets'
+import { getTypographyPreset } from '@/utils/theme-editor-typography'
 
 type Props = {
   content: StudioContent
   presetId?: string
   className?: string
+  colorOverrides?: Record<string, string>
+  typographyPreset?: string
+  view?: string
+  onViewChange?: (v: string) => void
 }
 
 type StudioView = 'home' | 'about' | 'process' | 'team' | 'contact'
@@ -87,13 +92,33 @@ const FOUNDER_IMG = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2
 const PROCESS_IMG = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80'
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
-export default function StudioPreview({ content, presetId, className = '' }: Props) {
+export default function StudioPreview({
+  content,
+  presetId,
+  className = '',
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = useMemo(() => getStudioPreset(presetId ?? 'ink'), [presetId])
-  const { colors } = preset
-  const fonts = { heading: preset.heading_font, body: preset.body_font, display: preset.display_font }
+  const colors = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset.colors, colorOverrides]
+  )
+  const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
+  const fonts = {
+    heading: typo?.heading_font ?? preset.heading_font,
+    body:    typo?.body_font    ?? preset.body_font,
+    display: preset.display_font,
+  }
   const [navOpen, setNavOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [view, setView] = useState<StudioView>('home')
+  const [internalView, setInternalView] = useState<StudioView>('home')
+  const view = (controlledView as StudioView) || internalView
+  const setView = (v: StudioView) => {
+    if (onViewChange) onViewChange(v); else setInternalView(v)
+  }
   const rm = useReducedMotion()
 
   return (

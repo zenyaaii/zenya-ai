@@ -4,11 +4,22 @@ import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import type { AtlasContent, AtlasTestimonial, AtlasFaqItem, AtlasPricingTier, AtlasIntegration } from '@/utils/atlas/types'
 import { getAtlasPreset } from '@/utils/atlas/presets'
+import {
+  TYPOGRAPHY_PRESETS,
+  buildGoogleFontsUrl,
+  getTypographyPreset,
+} from '@/utils/theme-editor-typography'
 
 type Props = {
   content: AtlasContent
   presetId?: string
   className?: string
+  /** Wrapper-level color overrides — per-key takes precedence over the preset. */
+  colorOverrides?: Record<string, string>
+  /** Wrapper-level typography preset id. */
+  typographyPreset?: string
+  view?: string
+  onViewChange?: (v: string) => void
 }
 
 type AtlasView = 'home' | 'features' | 'pricing' | 'integrations' | 'docs'
@@ -757,48 +768,66 @@ function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors:
 }
 
 // ─── Root ──────────────────────────────────────────────────────────────────────
-export default function AtlasPreview({ content, presetId = 'orbit', className = '' }: Props) {
+export default function AtlasPreview({
+  content,
+  presetId = 'orbit',
+  className = '',
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = useMemo(() => getAtlasPreset(presetId), [presetId])
-  const { colors } = preset
-  const [view, setView] = useState<AtlasView>('home')
+  // Merge per-key colour overrides on top of the preset palette.
+  const colors = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset.colors, colorOverrides]
+  )
+  // Typography preset (optional) overrides the preset's heading + body fonts.
+  const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
+  const headingFont = typo?.heading_font ?? preset.heading_font
+  const bodyFont    = typo?.body_font    ?? preset.body_font
+
+  const [internalView, setInternalView] = useState<AtlasView>('home')
+  const view = (controlledView as AtlasView) || internalView
+  const setView = (v: AtlasView) => {
+    if (onViewChange) onViewChange(v); else setInternalView(v)
+  }
 
   return (
     <div
       className={`min-h-screen ${className}`}
-      style={{ background: colors.background, fontFamily: preset.body_font, color: colors.text }}
+      style={{ background: colors.background, fontFamily: bodyFont, color: colors.text }}
     >
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-      />
-      <AtlasNav content={content} colors={colors} font={preset.heading_font} view={view} setView={setView} />
+      <link rel="stylesheet" href={buildGoogleFontsUrl(TYPOGRAPHY_PRESETS)} />
+      <AtlasNav content={content} colors={colors} font={headingFont} view={view} setView={setView} />
 
       {view === 'home' && (
         <>
-          <AtlasHero content={content} colors={colors} font={preset.heading_font} />
-          <AtlasTrustBar content={content} colors={colors} font={preset.body_font} />
-          <AtlasHowItWorks content={content} colors={colors} font={preset.body_font} />
-          <AtlasTestimonials content={content} colors={colors} font={preset.body_font} />
-          <AtlasCta content={content} colors={colors} font={preset.body_font} />
+          <AtlasHero content={content} colors={colors} font={headingFont} />
+          <AtlasTrustBar content={content} colors={colors} font={bodyFont} />
+          <AtlasHowItWorks content={content} colors={colors} font={bodyFont} />
+          <AtlasTestimonials content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} />
         </>
       )}
       {view === 'features' && (
         <>
-          <AtlasFeatures content={content} colors={colors} font={preset.body_font} />
-          <AtlasSecurity content={content} colors={colors} font={preset.body_font} />
-          <AtlasIntegrations content={content} colors={colors} font={preset.body_font} />
+          <AtlasFeatures content={content} colors={colors} font={bodyFont} />
+          <AtlasSecurity content={content} colors={colors} font={bodyFont} />
+          <AtlasIntegrations content={content} colors={colors} font={bodyFont} />
         </>
       )}
-      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={preset.body_font} />}
-      {view === 'integrations' && <AtlasIntegrations content={content} colors={colors} font={preset.body_font} />}
+      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={bodyFont} />}
+      {view === 'integrations' && <AtlasIntegrations content={content} colors={colors} font={bodyFont} />}
       {view === 'docs' && (
         <>
-          <AtlasFaq content={content} colors={colors} font={preset.body_font} />
-          <AtlasCta content={content} colors={colors} font={preset.body_font} />
+          <AtlasFaq content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} />
         </>
       )}
 
-      <AtlasFooter content={content} colors={colors} font={preset.body_font} />
+      <AtlasFooter content={content} colors={colors} font={bodyFont} />
     </div>
   )
 }

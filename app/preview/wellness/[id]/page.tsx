@@ -13,6 +13,8 @@ export default function WellnessPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<WellnessContent | null>(null)
   const [presetId, setPresetId] = useState<string>('zen')
+  const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('Wellness Studio')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +43,8 @@ export default function WellnessPreviewPage() {
 
       setContent(stored.wellness as WellnessContent)
       setPresetId(stored.style_preset || 'zen')
+      setTypographyPreset(stored.typography_preset || undefined)
+      setColorOverrides(stored.color_overrides || undefined)
       setName(data.product_name || 'Wellness Studio')
       setLoading(false)
     }
@@ -80,15 +84,20 @@ export default function WellnessPreviewPage() {
           <span className="font-semibold">{name}</span>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
-          <Link href="/theme/new/wellness" className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80">
-            Edit details
+          <Link href={`/preview/wellness/${params.id}/edit`} className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105">
+            Open editor
           </Link>
           <Link href="/dashboard" className="rounded-full bg-teal-400 px-4 py-2 text-xs font-bold text-stone-950 transition hover:scale-105">
             Dashboard
           </Link>
         </div>
       </div>
-      <WellnessPreview content={content} presetId={presetId} />
+      <WellnessPreview
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </div>
   )
 }

@@ -4,11 +4,16 @@ import { useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import type { WellnessContent, WellnessTreatment, WellnessTeamMember, WellnessTestimonial, WellnessFaqItem } from '@/utils/wellness/types'
 import { getWellnessPreset } from '@/utils/wellness/presets'
+import { getTypographyPreset } from '@/utils/theme-editor-typography'
 
 type Props = {
   content: WellnessContent
   presetId?: string
   className?: string
+  colorOverrides?: Record<string, string>
+  typographyPreset?: string
+  view?: string
+  onViewChange?: (v: string) => void
 }
 
 type WellnessView = 'home' | 'treatments' | 'team' | 'space' | 'about' | 'contact'
@@ -86,10 +91,29 @@ function MultilineHeadline({ text, className, style }: { text: string; className
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────
-export default function WellnessPreview({ content, presetId = 'zen', className }: Props) {
+export default function WellnessPreview({
+  content,
+  presetId = 'zen',
+  className,
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = getWellnessPreset(presetId)
-  const colors = preset.colors
-  const [view, setView] = useState<WellnessView>('home')
+  const colors = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset.colors, colorOverrides]
+  )
+  const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
+  const headingFont = typo?.heading_font ?? preset.heading_font
+  const bodyFont    = typo?.body_font    ?? preset.body_font
+
+  const [internalView, setInternalView] = useState<WellnessView>('home')
+  const view = (controlledView as WellnessView) || internalView
+  const setView = (v: WellnessView) => {
+    if (onViewChange) onViewChange(v); else setInternalView(v)
+  }
 
   const cssVars = useMemo(() => ({
     '--wl-primary': colors.primary,
@@ -100,9 +124,9 @@ export default function WellnessPreview({ content, presetId = 'zen', className }
     '--wl-muted': colors.muted,
     '--wl-border': colors.border,
     '--wl-overlay': colors.overlay,
-    '--wl-heading': preset.heading_font,
-    '--wl-body': preset.body_font
-  }) as React.CSSProperties, [colors, preset])
+    '--wl-heading': headingFont,
+    '--wl-body': bodyFont,
+  }) as React.CSSProperties, [colors, headingFont, bodyFont])
 
   const isDark = presetId === 'noir'
 

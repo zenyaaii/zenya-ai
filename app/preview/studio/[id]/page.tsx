@@ -13,6 +13,8 @@ export default function StudioPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<StudioContent | null>(null)
   const [presetId, setPresetId] = useState<string>('ink')
+  const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('Brand Story')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -41,6 +43,8 @@ export default function StudioPreviewPage() {
 
       setContent(stored.studio as StudioContent)
       setPresetId(stored.style_preset || 'ink')
+      setTypographyPreset(stored.typography_preset || undefined)
+      setColorOverrides(stored.color_overrides || undefined)
       setName(data.product_name || 'Brand Story')
       setLoading(false)
     }
@@ -90,26 +94,31 @@ export default function StudioPreviewPage() {
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
           <Link
-            href="/theme/new/studio"
-            className="rounded-full px-4 py-2 text-xs font-semibold backdrop-blur-md transition"
+            href={`/preview/studio/${params.id}/edit`}
+            className="rounded-full px-4 py-2 text-xs font-semibold backdrop-blur-md transition hover:scale-105"
+            style={{ background: isDark ? 'white' : '#0a0a0a', color: isDark ? '#0a0a0a' : 'white' }}
+          >
+            Open editor
+          </Link>
+          <Link
+            href="/dashboard"
+            className="rounded-full px-4 py-2 text-xs font-bold backdrop-blur-md transition"
             style={{
               background: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)',
               border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
               color: isDark ? 'white' : '#1a1a1a'
             }}
           >
-            Edit details
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full px-4 py-2 text-xs font-bold transition hover:scale-105"
-            style={{ background: isDark ? 'white' : '#0a0a0a', color: isDark ? '#0a0a0a' : 'white' }}
-          >
             Dashboard
           </Link>
         </div>
       </div>
-      <StudioPreview content={content} presetId={presetId} />
+      <StudioPreview
+        content={content}
+        presetId={presetId}
+        colorOverrides={colorOverrides}
+        typographyPreset={typographyPreset}
+      />
     </div>
   )
 }
