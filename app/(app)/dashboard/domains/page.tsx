@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   Globe, Plus, ExternalLink, RefreshCw, AlertCircle,
-  CheckCircle2, Clock, Trash2, Lock,
+  CheckCircle2, Clock, Trash2, Lock, Search, ArrowRight,
+  Sparkles,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import AddDomainModal from '@/components/AddDomainModal'
@@ -28,12 +29,21 @@ type Theme = {
   is_published?: boolean
 }
 
+type SearchResult = {
+  domain: string
+  available: boolean
+  premium?: boolean
+  price_cents?: number
+  currency?: string
+  message?: string
+}
+
 const STATUS: Record<DomainRow['status'], {
   label: string; tint: string; ring: string; fg: string; icon: typeof Globe
 }> = {
   pending_dns: { label: 'Waiting on DNS', tint: 'rgba(217,119,6,0.10)', ring: 'rgba(217,119,6,0.30)', fg: '#b45309', icon: Clock },
   pending_ssl: { label: 'Issuing SSL…',  tint: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2', icon: Clock },
-  live:        { label: '🔒 Live',        tint: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d', icon: CheckCircle2 },
+  live:        { label: 'Live · SSL on',  tint: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d', icon: CheckCircle2 },
   error:       { label: 'Error',          tint: 'rgba(220,38,38,0.10)',  ring: 'rgba(220,38,38,0.30)',  fg: '#b91c1c', icon: AlertCircle },
   removed:     { label: 'Removed',        tint: 'rgba(0,0,0,0.05)',      ring: 'rgba(0,0,0,0.15)',      fg: '#6b6b6b', icon: Trash2 },
 }
@@ -47,6 +57,12 @@ export default function DomainsPage() {
   const [loading, setLoading] = useState(true)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [adding, setAdding] = useState<string | null>(null) // theme_id to add for
+
+  // Domain-availability search
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [results, setResults] = useState<SearchResult[] | null>(null)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -95,6 +111,27 @@ export default function DomainsPage() {
     try { await fetch(`/api/domains/${id}`, { method: 'DELETE' }); await load() } finally { setBusyId(null) }
   }
 
+  async function search() {
+    const q = query.trim()
+    if (!q) return
+    setSearching(true)
+    setSearchError(null)
+    setResults(null)
+    try {
+      const r = await fetch(`/api/domains/search?q=${encodeURIComponent(q)}`)
+      const j = await r.json()
+      if (!r.ok) {
+        setSearchError(j.message || j.error || 'Could not search domains.')
+        return
+      }
+      setResults(j.results || [])
+    } catch (e: any) {
+      setSearchError(e?.message || 'Network error')
+    } finally {
+      setSearching(false)
+    }
+  }
+
   // Eligible themes — published + hostable
   const eligibleThemes = useMemo(() => {
     return Object.values(themes).filter((t) => t.is_published && t.slug)
@@ -106,7 +143,7 @@ export default function DomainsPage() {
         <div>
           <h1 className="text-[24px] font-bold tracking-tight text-foreground">Domains</h1>
           <p className="mt-1 text-[13px] text-muted">
-            Connect a custom domain to any of your published Zenya-hosted sites. SSL is automatic.
+            Connect a custom domain you already own, or search for a new one. SSL is automatic.
           </p>
         </div>
         {eligibleThemes.length > 0 && hasHosting && (
@@ -116,7 +153,7 @@ export default function DomainsPage() {
             className="rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
             style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
           >
-            <option value="">+ Add domain to…</option>
+            <option value="">+ Connect a domain you own…</option>
             {eligibleThemes.map((t) => (
               <option key={t.id} value={t.id}>{t.product_name}</option>
             ))}
@@ -140,6 +177,111 @@ export default function DomainsPage() {
           </Link>
         </div>
       )}
+
+      {/* ── Find a domain — availability + price via Vercel registrar API ─ */}
+      <section className="mb-8 rounded-2xl border border-token bg-white p-5">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
+          <h2 className="text-[14px] font-semibold text-foreground">Find a new domain</h2>
+        </div>
+        <p className="mt-1 text-[12.5px] text-muted">
+          Type a name and we’ll check what’s available right now. Buy it at any registrar (GoDaddy, Namecheap, Porkbun, Cloudflare…) and come back to connect it.
+        </p>
+
+        <form
+          onSubmit={(e) => { e.preventDefault(); search() }}
+          className="mt-4 flex flex-wrap items-center gap-2"
+        >
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="mycoolstore  or  mycoolstore.com"
+              className="w-full rounded-full border border-token bg-surface py-2 pl-9 pr-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={searching || !query.trim()}
+            className="inline-flex items-center gap-1 rounded-full bg-foreground px-4 py-2 text-[12.5px] font-semibold text-white disabled:opacity-50"
+          >
+            {searching ? 'Checking…' : 'Check availability'}
+          </button>
+        </form>
+
+        {searchError && (
+          <div className="mt-3 rounded-md border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+            {searchError}
+          </div>
+        )}
+
+        {results && results.length > 0 && (
+          <div className="mt-4 overflow-hidden rounded-lg border border-token">
+            <table className="w-full text-left text-[12.5px]">
+              <thead className="bg-[#fafaf7]">
+                <tr>
+                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Domain</th>
+                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Status</th>
+                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Price (yr)</th>
+                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((r) => (
+                  <tr key={r.domain} className="border-t border-token">
+                    <td className="px-3 py-2 font-mono text-foreground">{r.domain}</td>
+                    <td className="px-3 py-2">
+                      {r.available ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]">
+                          <CheckCircle2 className="h-3 w-3" /> Available
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
+                          Taken
+                        </span>
+                      )}
+                      {r.premium && (
+                        <span className="ml-1 rounded-full bg-[rgba(200,169,106,0.16)] px-1.5 py-0.5 text-[10px] font-semibold text-[#9b6f00]">Premium</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted">
+                      {r.price_cents != null
+                        ? `$${(r.price_cents / 100).toFixed(2)}`
+                        : '—'}
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      {r.available ? (
+                        <a
+                          href={`https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(r.domain)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white"
+                        >
+                          Buy now <ArrowRight className="h-3 w-3" />
+                        </a>
+                      ) : (
+                        <span className="text-[11.5px] text-muted">already owned?</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="border-t border-token bg-[#fafaf7] px-3 py-2 text-[11.5px] text-muted">
+              Once you own it, come back here and click <strong className="text-foreground">Connect a domain you own…</strong> at the top right.
+            </div>
+          </div>
+        )}
+        {results && results.length === 0 && (
+          <div className="mt-3 text-[12.5px] text-muted">No results.</div>
+        )}
+      </section>
+
+      {/* ── Connected domains ─────────────────────────────────────────── */}
+      <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">
+        Your connected domains
+      </h2>
 
       {loading ? (
         <div className="space-y-2">
@@ -224,12 +366,11 @@ function EmptyState({ hasHosting, hasEligible, onAdd }: { hasHosting: boolean; h
       {hasHosting && hasEligible ? (
         <>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-            Point your domain at Zenya — we add it to the hosting layer, you add two DNS records,
-            SSL issues automatically.
+            Point a domain you own at Zenya — add two DNS records, we issue SSL automatically.
           </p>
           <button onClick={onAdd} className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-primary/25">
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Add your first domain
+            Connect your first domain
           </button>
         </>
       ) : !hasHosting ? (

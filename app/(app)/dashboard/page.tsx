@@ -35,6 +35,12 @@ type Theme = {
   content?: any
 }
 
+type AnalyticsSummary = {
+  totals: { views_7d: number; views_30d: number; lifetime_views: number; live_domains: number }
+  series: Array<{ date: string; views: number }>
+  per_site: Array<{ id: string; product_name: string; slug: string | null; views_30d: number; lifetime_views: number; is_published: boolean }>
+}
+
 const PLAN_LABEL: Record<Plan, string> = {
   free:        'Free Plan',
   pro_onetime: 'Pro · Lifetime',
@@ -56,6 +62,7 @@ export default function DashboardHomePage() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [themes, setThemes] = useState<Theme[]>([])
+  const [analytics, setAnalytics] = useState<AnalyticsSummary | null>(null)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -65,16 +72,18 @@ export default function DashboardHomePage() {
       return
     }
     setUser(user)
-    const [{ data: profileRow }, themesRes] = await Promise.all([
+    const [{ data: profileRow }, themesRes, analyticsRes] = await Promise.all([
       supabase
         .from('profiles')
         .select('plan, is_pro, has_hosting, trial_themes_limit, trial_themes_used, hosting_status, hosting_current_period_end, full_name, email')
         .eq('id', user.id)
         .maybeSingle(),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
+      fetch('/api/analytics').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
     setProfile((profileRow as unknown as Profile) || null)
     setThemes((themesRes?.themes as Theme[]) || [])
+    setAnalytics((analyticsRes as AnalyticsSummary) || null)
     setLoading(false)
   }, [router, supabase])
 
@@ -120,6 +129,12 @@ export default function DashboardHomePage() {
         <StatTile label="Live sites"   value={loading ? '—' : liveCount}     sub={liveCount > 0 ? 'live on zenya.app' : 'publish one to get started'} icon={Globe} />
         <StatTile label="Pageviews"    value={loading ? '—' : totalViews.toLocaleString()} sub="lifetime" icon={Eye} />
         <PlanCard plan={plan} trialRemaining={trialRemaining} trialLimit={trialLimit} hostingEnd={profile?.hosting_current_period_end} />
+      </section>
+
+      {/* Analytics quick-look — pulled live from /api/analytics */}
+      <section className="mt-7 grid gap-4 sm:grid-cols-2">
+        <TrafficCard analytics={analytics} loading={loading} />
+        <TopSiteCard analytics={analytics} loading={loading} />
       </section>
 
       {/* Two-column layout */}
@@ -379,6 +394,97 @@ function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan })
           <ArrowRight className="h-3 w-3 text-muted" />
         </Link>
       </div>
+    </div>
+  )
+}
+
+function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | null; loading: boolean }) {
+  const series = analytics?.series ?? []
+  const views7 = analytics?.totals.views_7d ?? 0
+  const views30 = analytics?.totals.views_30d ?? 0
+  const maxV = Math.max(1, ...series.map((s) => s.views))
+  return (
+    <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="flex items-baseline justify-between">
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Pageviews · last 30 days</div>
+        <Link href="/dashboard/analytics" className="text-[11.5px] font-medium text-primary hover:underline">
+          Open analytics →
+        </Link>
+      </div>
+      <div className="mt-2 flex items-end gap-3">
+        <div className="text-[28px] font-bold tracking-tight text-foreground tabular-nums">
+          {loading ? '—' : views30.toLocaleString()}
+        </div>
+        <div className="pb-1.5 text-[11.5px] text-muted">
+          {views7 > 0 ? `${views7.toLocaleString()} this week` : 'no views this week'}
+        </div>
+      </div>
+      {/* Sparkline */}
+      <div
+        className="mt-3 grid items-end gap-px"
+        style={{ gridTemplateColumns: `repeat(${Math.max(series.length, 1)}, minmax(0, 1fr))`, height: 56 }}
+      >
+        {(series.length > 0 ? series : Array.from({ length: 30 }, () => ({ date: '', views: 0 }))).map((s, i) => {
+          const h = (s.views / maxV) * 52
+          return (
+            <div key={i} className="flex h-full items-end justify-center">
+              <div
+                className="w-full rounded-t-[2px]"
+                style={{
+                  height: `${Math.max(2, h)}px`,
+                  background: s.views === 0 ? 'rgba(28,28,28,0.06)' : '#5e6ad2',
+                }}
+              />
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | null; loading: boolean }) {
+  const top = analytics?.per_site.slice(0, 3) ?? []
+  const liveDomains = analytics?.totals.live_domains ?? 0
+  return (
+    <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="flex items-baseline justify-between">
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Top performing sites</div>
+        <span className="text-[11.5px] text-muted">{liveDomains > 0 ? `${liveDomains} custom domain${liveDomains === 1 ? '' : 's'}` : 'last 30 days'}</span>
+      </div>
+      {loading ? (
+        <div className="mt-3 space-y-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-9 animate-pulse rounded-md bg-[rgba(28,28,28,0.04)]" />
+          ))}
+        </div>
+      ) : top.length === 0 ? (
+        <div className="mt-4 py-2 text-[12.5px] text-muted">
+          No pageviews yet. Publish a site to start collecting traffic.
+        </div>
+      ) : (
+        <ul className="mt-3 space-y-1.5">
+          {top.map((s, i) => {
+            const max = top[0].views_30d || top[0].lifetime_views || 1
+            const v = s.views_30d || s.lifetime_views
+            const pct = Math.max(4, Math.round((v / max) * 100))
+            return (
+              <li key={s.id} className="rounded-md px-1 py-1">
+                <div className="flex items-baseline justify-between text-[12.5px]">
+                  <span className="truncate font-medium text-foreground">
+                    <span className="mr-1.5 inline-block w-4 text-right text-muted tabular-nums">{i + 1}.</span>
+                    {s.product_name}
+                  </span>
+                  <span className="tabular-nums text-muted">{v.toLocaleString()}</span>
+                </div>
+                <div className="mt-1 h-1 overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }

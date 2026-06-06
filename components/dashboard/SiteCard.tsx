@@ -213,6 +213,14 @@ export default function SiteCard({
         {/* Action row — sticks to bottom */}
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
           <Link
+            href={editUrlFor(theme.id, businessType)}
+            className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+            title="Edit content"
+          >
+            <Edit3 className="mr-1 inline-block h-3 w-3" strokeWidth={2.25} />
+            Edit
+          </Link>
+          <Link
             href={`/preview/${theme.id}`}
             className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
           >
@@ -270,7 +278,7 @@ export default function SiteCard({
             </Link>
           )}
 
-          {/* Overflow menu — for unpublish + edit (TODO: delete) */}
+          {/* Overflow menu — unpublish only (Edit is now a top-level action) */}
           {publishedHere && (
             <div className="relative ml-auto">
               <button
@@ -296,13 +304,6 @@ export default function SiteCard({
                       className="absolute right-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
                       style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
                     >
-                      <Link
-                        href={`/preview/${theme.id}`}
-                        className="flex items-center gap-2 rounded-md px-2.5 py-2 text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
-                      >
-                        <Edit3 className="h-3 w-3" strokeWidth={2.25} />
-                        Edit theme
-                      </Link>
                       <button
                         onClick={() => { setMenuOpen(false); onUnpublish() }}
                         className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
@@ -320,6 +321,15 @@ export default function SiteCard({
       </div>
     </motion.div>
   )
+}
+
+/* Restaurant has a real per-section editor — others currently route to the
+ * preview (which itself surfaces an "Edit details" link back to /theme/new
+ * for full regeneration). Centralising it here keeps the Sites grid and
+ * the list-view row in sync. */
+function editUrlFor(id: string, businessType: string): string {
+  if (businessType === 'restaurant') return `/preview/restaurant/${id}/edit`
+  return `/preview/${id}`
 }
 
 /* -------------------------- StatusPill ---------------------------------- */

@@ -134,6 +134,56 @@ export async function removeProjectDomain(domain: string): Promise<void> {
   )
 }
 
+// -------- Availability / pricing (for the "search for a domain" UI) ------
+
+export type DomainAvailability = {
+  domain: string
+  available: boolean
+  premium?: boolean
+  /** Annual price in USD cents when available. Undefined if Vercel doesn't price it. */
+  price_cents?: number
+  /** ISO currency code, almost always "usd" for Vercel. */
+  currency?: string
+  /** Vercel reply when the lookup couldn't be performed. */
+  message?: string
+}
+
+export async function checkDomainAvailability(domain: string): Promise<DomainAvailability> {
+  const { token, teamId } = env()
+  try {
+    const status = await vercelFetch<{ available: boolean; premium?: boolean }>(
+      `/v4/domains/status?name=${encodeURIComponent(domain)}${teamId ? `&teamId=${teamId}` : ''}`,
+      { method: 'GET', token }
+    )
+    let price_cents: number | undefined
+    let currency: string | undefined
+    if (status.available) {
+      const priced = await vercelFetch<{ price: number; period: number }>(
+        `/v4/domains/price?name=${encodeURIComponent(domain)}${teamId ? `&teamId=${teamId}` : ''}`,
+        { method: 'GET', token }
+      ).catch(() => null)
+      if (priced && typeof priced.price === 'number') {
+        // Vercel returns price as full USD dollars (e.g. 19.99), not cents.
+        price_cents = Math.round(priced.price * 100)
+        currency = 'usd'
+      }
+    }
+    return {
+      domain,
+      available: !!status.available,
+      premium:   !!status.premium,
+      price_cents,
+      currency,
+    }
+  } catch (e: any) {
+    return {
+      domain,
+      available: false,
+      message: e?.message || 'lookup failed',
+    }
+  }
+}
+
 // -------- High-level status helper ---------------------------------------
 
 export type DomainStatus =

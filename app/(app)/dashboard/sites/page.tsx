@@ -5,14 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
-  Sparkles,
-  Plus,
-  CreditCard,
-  Settings as SettingsIcon,
-  BarChart3,
-  ArrowRight,
-  Globe,
-  CheckCircle2,
+  Sparkles, Plus, Search, LayoutGrid, List,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import AIDisclosure from '@/components/AIDisclosure'
@@ -30,57 +23,35 @@ type Profile = {
   plan: Plan
   is_pro: boolean
   has_hosting: boolean
-  trial_themes_limit: number
-  trial_themes_used: number
-  hosting_status: string | null
-  hosting_current_period_end: string | null
-  full_name?: string | null
-  email?: string | null
 }
 
 type Filter = 'all' | 'drafts' | 'live' | 'shopify'
+type ViewMode = 'grid' | 'list'
 
-const PLAN_LABEL: Record<Plan, string> = {
-  free:         'Free Plan',
-  pro_onetime:  'Pro · Lifetime',
-  pro_hosting:  'Pro · Hosting',
-  admin:        'Admin',
-}
-
-const PLAN_TINT: Record<Plan, { bg: string; ring: string; fg: string }> = {
-  free:         { bg: 'rgba(28,28,28,0.06)',   ring: 'rgba(28,28,28,0.18)',  fg: '#6b6b6b' },
-  pro_onetime:  { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
-  pro_hosting:  { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
-  admin:        { bg: 'rgba(200,169,106,0.16)', ring: 'rgba(200,169,106,0.45)', fg: '#9b6f00' },
-}
-
-export default function DashboardPage() {
+export default function SitesPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [themes, setThemes] = useState<SiteTheme[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('all')
+  const [view, setView] = useState<ViewMode>('grid')
+  const [query, setQuery] = useState('')
   const [publishingTheme, setPublishingTheme] = useState<SiteTheme | null>(null)
   const [domainTheme, setDomainTheme] = useState<SiteTheme | null>(null)
 
   const loadAll = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      router.push('/login?next=/dashboard')
+      router.push('/login?next=/dashboard/sites')
       return
     }
-    setUser(user)
 
     const [{ data: profileRow }, themesRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select(
-          'plan, is_pro, has_hosting, trial_themes_limit, trial_themes_used, ' +
-          'hosting_status, hosting_current_period_end, full_name, email'
-        )
+        .select('plan, is_pro, has_hosting')
         .eq('id', user.id)
         .maybeSingle(),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
@@ -103,193 +74,155 @@ export default function DashboardPage() {
     if (r.ok) refreshTheme(theme.id, { is_published: false })
   }
 
-  // ── Derived ─────────────────────────────────────────────────────────────
   const plan: Plan = profile?.plan || 'free'
   const isPro = !!profile?.is_pro || plan === 'admin'
   const hasHosting = !!profile?.has_hosting || plan === 'admin'
-  const trialLimit = profile?.trial_themes_limit ?? 3
-  const trialUsed = profile?.trial_themes_used ?? 0
-  const trialRemaining = Math.max(0, trialLimit - trialUsed)
 
-  const liveCount = useMemo(
-    () => themes.filter((t) => t.is_published && t.slug).length,
-    [themes]
-  )
-  const totalViews = useMemo(
-    () => themes.reduce((s, t) => s + (t.view_count ?? 0), 0),
-    [themes]
-  )
-  const hasEcom = useMemo(
-    () =>
-      themes.some((t) => {
-        const bt =
-          (t.content && typeof t.content === 'object' && (t.content as any).business_type) ||
-          t.template_type
-        return SHOPIFY_TYPES.has(bt)
-      }),
-    [themes]
-  )
+  const counts = useMemo(() => {
+    const live    = themes.filter((t) => t.is_published && t.slug).length
+    const drafts  = themes.filter((t) => {
+      const bt = (t.content && (t.content as any).business_type) || t.template_type
+      return HOSTABLE_TYPES.has(bt) && !t.is_published
+    }).length
+    const shopify = themes.filter((t) => {
+      const bt = (t.content && (t.content as any).business_type) || t.template_type
+      return SHOPIFY_TYPES.has(bt)
+    }).length
+    return { all: themes.length, live, drafts, shopify }
+  }, [themes])
+
+  const hasEcom = counts.shopify > 0
 
   const visible = useMemo(() => {
+    const q = query.trim().toLowerCase()
     return themes.filter((t) => {
       const bt =
         (t.content && typeof t.content === 'object' && (t.content as any).business_type) ||
         t.template_type
-      if (filter === 'live')    return t.is_published && t.slug
-      if (filter === 'drafts')  return HOSTABLE_TYPES.has(bt) && !t.is_published
-      if (filter === 'shopify') return SHOPIFY_TYPES.has(bt)
+      if (filter === 'live'    && !(t.is_published && t.slug)) return false
+      if (filter === 'drafts'  && !(HOSTABLE_TYPES.has(bt) && !t.is_published)) return false
+      if (filter === 'shopify' && !SHOPIFY_TYPES.has(bt)) return false
+      if (q) {
+        const haystack = `${t.product_name || ''} ${bt || ''} ${t.slug || ''}`.toLowerCase()
+        if (!haystack.includes(q)) return false
+      }
       return true
     })
-  }, [themes, filter])
+  }, [themes, filter, query])
 
-  const firstName =
-    profile?.full_name?.split(' ')?.[0] ||
-    user?.user_metadata?.full_name?.split(' ')?.[0] ||
-    (user?.email ? user.email.split('@')[0] : 'there')
-
-  // ── Render ──────────────────────────────────────────────────────────────
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10">
-      {/* ── Welcome bar ─────────────────────────────────────────────────── */}
-      <motion.section
+    <main className="mx-auto max-w-7xl px-6 py-8">
+      {/* ── Header ───────────────────────────────────────────────────────── */}
+      <motion.header
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-col items-start justify-between gap-4 border-b border-token pb-8 sm:flex-row sm:items-center"
+        className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
       >
         <div>
-          <h1 className="text-[28px] font-bold tracking-tight text-foreground sm:text-[32px]">
-            {loading ? 'Welcome back…' : `Welcome back, ${firstName}`}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <PlanBadge plan={plan} />
-            {profile?.email && (
-              <span className="text-[12.5px] text-muted">· {profile.email}</span>
-            )}
-          </div>
+          <h1 className="text-[24px] font-bold tracking-tight text-foreground">Your sites</h1>
+          <p className="mt-1 text-[13px] text-muted">
+            {loading
+              ? 'Loading…'
+              : counts.all === 0
+                ? 'Generate your first site to see it here.'
+                : `${counts.all} site${counts.all === 1 ? '' : 's'} · ${counts.live} live · ${counts.drafts} draft${counts.drafts === 1 ? '' : 's'}${counts.shopify ? ` · ${counts.shopify} Shopify` : ''}`}
+          </p>
         </div>
-
         <div className="flex items-center gap-2">
-          {plan === 'admin' && (
-            <Link
-              href="/dashboard/analytics"
-              className="hidden items-center gap-1.5 rounded-full border border-token bg-white px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
-            >
-              <BarChart3 className="h-3.5 w-3.5" strokeWidth={2} />
-              Analytics
-            </Link>
-          )}
+          <Link
+            href="/themes"
+            className="hidden items-center gap-1.5 rounded-full border border-token bg-white px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
+          >
+            Browse templates
+          </Link>
           <Link
             href="/theme/new"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
           >
-            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             New site
           </Link>
         </div>
-      </motion.section>
+      </motion.header>
 
-      {/* ── Plan / stats row ────────────────────────────────────────────── */}
-      {!loading && (
-        <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <PlanCard
-            plan={plan}
-            trialRemaining={trialRemaining}
-            trialLimit={trialLimit}
-            hostingEnd={profile?.hosting_current_period_end}
-          />
-          <StatTile
-            label="Total sites"
-            value={themes.length}
-            sublabel={liveCount > 0 ? `${liveCount} live` : 'none live yet'}
-          />
-          <StatTile
-            label="Pageviews"
-            value={totalViews.toLocaleString()}
-            sublabel="lifetime"
-          />
-          <StatTile
-            label={plan === 'free' ? 'Trial generations' : 'Generations'}
-            value={plan === 'free' ? `${trialRemaining}/${trialLimit}` : 'Unlimited'}
-            sublabel={plan === 'free' ? 'used in trial' : ''}
-            highlight={plan === 'free' && trialRemaining === 0}
-          />
+      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
+      {counts.all > 0 && (
+        <section className="mt-5 flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[180px] max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search sites"
+              className="w-full rounded-full border border-token bg-white py-1.5 pl-9 pr-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+            />
+          </div>
+
+          <div className="inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
+            <FilterPill v="all"     cur={filter} onClick={setFilter}>All <Pill n={counts.all} /></FilterPill>
+            <FilterPill v="live"    cur={filter} onClick={setFilter}>Live <Pill n={counts.live} /></FilterPill>
+            <FilterPill v="drafts"  cur={filter} onClick={setFilter}>Drafts <Pill n={counts.drafts} /></FilterPill>
+            {counts.shopify > 0 && (
+              <FilterPill v="shopify" cur={filter} onClick={setFilter}>Shopify <Pill n={counts.shopify} /></FilterPill>
+            )}
+          </div>
+
+          <div className="ml-auto inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
+            <ViewBtn cur={view} v="grid" onClick={setView} title="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ViewBtn>
+            <ViewBtn cur={view} v="list" onClick={setView} title="List view"><List className="h-3.5 w-3.5" /></ViewBtn>
+          </div>
         </section>
       )}
 
       <AIDisclosure variant="banner" className="mt-6" />
 
-      {/* ── Sites section ───────────────────────────────────────────────── */}
-      <section className="mt-12">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h2 className="text-[22px] font-bold tracking-tight text-foreground">
-            Your sites
-          </h2>
-          {themes.length > 0 && (
-            <div className="inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
-              <FilterPill v="all"     cur={filter} onClick={setFilter}>All</FilterPill>
-              <FilterPill v="drafts"  cur={filter} onClick={setFilter}>Drafts</FilterPill>
-              <FilterPill v="live"    cur={filter} onClick={setFilter}>Live</FilterPill>
-              <FilterPill v="shopify" cur={filter} onClick={setFilter}>Shopify</FilterPill>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6">
-          {loading ? (
-            <SitesGridSkeleton />
-          ) : themes.length === 0 ? (
-            <EmptyState />
-          ) : visible.length === 0 ? (
-            <FilteredEmpty filter={filter} onReset={() => setFilter('all')} />
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((t) => (
-                <SiteCard
-                  key={t.id}
-                  theme={t}
-                  hasHosting={hasHosting}
-                  isPro={isPro}
-                  onPublish={() => setPublishingTheme(t)}
-                  onAddDomain={() => setDomainTheme(t)}
-                  onUnpublish={() => unpublishTheme(t)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+      {/* ── Grid / list ──────────────────────────────────────────────────── */}
+      <section className="mt-6">
+        {loading ? (
+          <SitesGridSkeleton />
+        ) : themes.length === 0 ? (
+          <EmptyState />
+        ) : visible.length === 0 ? (
+          <FilteredEmpty filter={filter} query={query} onReset={() => { setFilter('all'); setQuery('') }} />
+        ) : view === 'grid' ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((t) => (
+              <SiteCard
+                key={t.id}
+                theme={t}
+                hasHosting={hasHosting}
+                isPro={isPro}
+                onPublish={() => setPublishingTheme(t)}
+                onAddDomain={() => setDomainTheme(t)}
+                onUnpublish={() => unpublishTheme(t)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-token bg-white">
+            {visible.map((t, i) => (
+              <SiteRow
+                key={t.id}
+                theme={t}
+                isFirst={i === 0}
+                hasHosting={hasHosting}
+                isPro={isPro}
+                onPublish={() => setPublishingTheme(t)}
+                onAddDomain={() => setDomainTheme(t)}
+                onUnpublish={() => unpublishTheme(t)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* ── Affiliate callout — only when user has e-com themes ─────────── */}
+      {/* ── Shopify affiliate callout when relevant ──────────────────────── */}
       {!loading && hasEcom && (
         <section className="mt-12">
           <ShopifyAffiliateCallout placement="dashboard_post_export" />
         </section>
       )}
-
-      {/* ── Quick links footer ──────────────────────────────────────────── */}
-      <section className="mt-16 border-t border-token pt-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 text-[13px] text-muted">
-          <div className="flex flex-wrap items-center gap-5">
-            <Link href="/settings" className="inline-flex items-center gap-1.5 hover:text-foreground">
-              <SettingsIcon className="h-3.5 w-3.5" strokeWidth={2} />
-              Settings
-            </Link>
-            {(plan === 'pro_hosting' || plan === 'pro_onetime') && (
-              <BillingPortalLink />
-            )}
-            {plan === 'admin' && (
-              <Link href="/dashboard/analytics" className="inline-flex items-center gap-1.5 hover:text-foreground">
-                <BarChart3 className="h-3.5 w-3.5" strokeWidth={2} />
-                Analytics
-              </Link>
-            )}
-          </div>
-          <div className="text-[11.5px] text-muted">
-            Signed in as <span className="font-medium text-foreground">{user?.email}</span>
-          </div>
-        </div>
-      </section>
 
       {/* ── Modals ──────────────────────────────────────────────────────── */}
       {publishingTheme && (
@@ -315,136 +248,8 @@ export default function DashboardPage() {
 }
 
 /* ──────────────────────────────────────────────────────────────────────── */
-/* Subcomponents                                                            */
+/* Tiny pieces                                                              */
 /* ──────────────────────────────────────────────────────────────────────── */
-
-function PlanBadge({ plan }: { plan: Plan }) {
-  const tint = PLAN_TINT[plan]
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold uppercase tracking-[0.08em]"
-      style={{ background: tint.bg, color: tint.fg, border: `1px solid ${tint.ring}` }}
-    >
-      {plan !== 'free' && <Sparkles className="h-3 w-3" strokeWidth={2.5} />}
-      {PLAN_LABEL[plan]}
-    </span>
-  )
-}
-
-function PlanCard({
-  plan,
-  trialRemaining,
-  trialLimit,
-  hostingEnd,
-}: {
-  plan: Plan
-  trialRemaining: number
-  trialLimit: number
-  hostingEnd: string | null | undefined
-}) {
-  if (plan === 'pro_hosting') {
-    const renews = hostingEnd ? new Date(hostingEnd) : null
-    const formatted = renews
-      ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-      : '—'
-    return (
-      <div className="rounded-2xl border border-token bg-white p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
-          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
-          Hosting active
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-          $19.99 / month
-        </div>
-        <div className="mt-1 text-[12.5px] text-muted">Renews {formatted}</div>
-      </div>
-    )
-  }
-  if (plan === 'pro_onetime') {
-    return (
-      <div className="rounded-2xl border border-token bg-white p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          Pro Lifetime
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-          Unlimited generations
-        </div>
-        <Link
-          href="/checkout?plan=hosting"
-          className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline"
-        >
-          Add hosting · $19.99/mo
-          <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-        </Link>
-      </div>
-    )
-  }
-  if (plan === 'admin') {
-    return (
-      <div className="rounded-2xl border border-token bg-white p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#9b6f00]">
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          Admin
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-          All features unlocked
-        </div>
-        <div className="mt-1 text-[12.5px] text-muted">Hosting + lifetime included</div>
-      </div>
-    )
-  }
-  // free
-  const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
-  return (
-    <div className="rounded-2xl border border-token bg-white p-5">
-      <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-        Free Plan
-      </div>
-      <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-        {trialRemaining > 0
-          ? `${trialRemaining} of ${trialLimit} generations left`
-          : 'Trial used'}
-      </div>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#5e6ad2' }}
-        />
-      </div>
-      <Link
-        href="/checkout?plan=onetime"
-        className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline"
-      >
-        Get Pro · $9.99 once
-        <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-      </Link>
-    </div>
-  )
-}
-
-function StatTile({
-  label,
-  value,
-  sublabel,
-  highlight = false,
-}: {
-  label: string
-  value: number | string
-  sublabel?: string
-  highlight?: boolean
-}) {
-  return (
-    <div
-      className="rounded-2xl border border-token bg-white p-5"
-      style={highlight ? { background: 'rgba(220,38,38,0.04)', borderColor: 'rgba(220,38,38,0.20)' } : undefined}
-    >
-      <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
-      <div className="mt-1.5 text-[22px] font-bold tracking-tight text-foreground">{value}</div>
-      {sublabel && <div className="mt-1 text-[12.5px] text-muted">{sublabel}</div>}
-    </div>
-  )
-}
 
 function FilterPill({
   v, cur, onClick, children,
@@ -459,12 +264,45 @@ function FilterPill({
     <button
       onClick={() => onClick(v)}
       className={
-        'rounded-full px-3 py-1 text-[12px] font-semibold transition-colors ' +
+        'flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors ' +
         (active ? 'bg-foreground text-white' : 'text-muted hover:text-foreground')
       }
     >
       {children}
     </button>
+  )
+}
+
+function ViewBtn({
+  v, cur, onClick, children, title,
+}: {
+  v: ViewMode
+  cur: ViewMode
+  onClick: (v: ViewMode) => void
+  children: React.ReactNode
+  title: string
+}) {
+  const active = v === cur
+  return (
+    <button
+      onClick={() => onClick(v)}
+      title={title}
+      aria-pressed={active}
+      className={
+        'rounded-full px-2 py-1 transition-colors ' +
+        (active ? 'bg-foreground text-white' : 'text-muted hover:text-foreground')
+      }
+    >
+      {children}
+    </button>
+  )
+}
+
+function Pill({ n }: { n: number }) {
+  return (
+    <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[10px] font-bold text-muted">
+      {n}
+    </span>
   )
 }
 
@@ -540,49 +378,115 @@ function EmptyState() {
   )
 }
 
-function FilteredEmpty({ filter, onReset }: { filter: Filter; onReset: () => void }) {
+function FilteredEmpty({
+  filter, query, onReset,
+}: { filter: Filter; query: string; onReset: () => void }) {
   const labels: Record<Filter, string> = {
-    all: 'any sites',
+    all: 'sites',
     drafts: 'draft sites',
     live: 'published sites',
     shopify: 'Shopify sites',
   }
   return (
     <div className="rounded-2xl border border-dashed border-token p-10 text-center">
-      <p className="text-[14px] text-muted">No {labels[filter]} yet.</p>
+      <p className="text-[14px] text-muted">
+        No {labels[filter]} match{query ? ` “${query}”` : ' the current filter'}.
+      </p>
       <button
         onClick={onReset}
         className="mt-3 text-[13px] font-medium text-primary hover:underline"
       >
-        Show all sites
+        Clear filters
       </button>
     </div>
   )
 }
 
-/* Wrapped Stripe Customer Portal link — does the fetch + redirect so the
-   user never sees a blank tab. */
-function BillingPortalLink() {
-  const [busy, setBusy] = useState(false)
+/* ─── List-view row — denser alt layout ─────────────────────────────────── */
+
+function SiteRow({
+  theme, isFirst, hasHosting, isPro, onPublish, onAddDomain, onUnpublish,
+}: {
+  theme: SiteTheme
+  isFirst: boolean
+  hasHosting: boolean
+  isPro: boolean
+  onPublish: () => void
+  onAddDomain: () => void
+  onUnpublish: () => void
+}) {
+  const bt =
+    (theme.content && typeof theme.content === 'object' && (theme.content as any).business_type) ||
+    theme.template_type ||
+    'storefront'
+  const isHostable = HOSTABLE_TYPES.has(bt)
+  const isEcom = SHOPIFY_TYPES.has(bt)
+  const live = !!theme.is_published && !!theme.slug
+
   return (
-    <button
-      onClick={async () => {
-        if (busy) return
-        setBusy(true)
-        try {
-          const r = await fetch('/api/account/portal', { method: 'POST' })
-          if (r.ok) {
-            const { url } = await r.json()
-            if (url) window.location.href = url
-          }
-        } finally {
-          setBusy(false)
-        }
-      }}
-      className="inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-foreground"
-    >
-      <CreditCard className="h-3.5 w-3.5" strokeWidth={2} />
-      {busy ? 'Opening portal…' : 'Manage billing'}
-    </button>
+    <div className={'flex flex-wrap items-center justify-between gap-3 px-5 py-3 ' + (isFirst ? '' : 'border-t border-token')}>
+      <div className="flex min-w-0 items-center gap-3">
+        <div
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[11px] font-bold uppercase"
+          style={{ background: live ? 'rgba(21,128,61,0.10)' : isEcom ? 'rgba(94,106,210,0.10)' : 'rgba(217,119,6,0.10)', color: live ? '#15803d' : isEcom ? '#5e6ad2' : '#b45309' }}
+        >
+          {(theme.product_name || '?').slice(0, 1)}
+        </div>
+        <div className="min-w-0">
+          <div className="truncate text-[13.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</div>
+          <div className="truncate text-[11.5px] text-muted">
+            {live ? `zenyaai.co/s/${theme.slug}` : bt + (isEcom ? ' · Shopify' : ' · draft')}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <Link
+          href={editUrlFor(theme.id, bt)}
+          className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+        >
+          Edit
+        </Link>
+        <Link
+          href={`/preview/${theme.id}`}
+          className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+        >
+          Preview
+        </Link>
+        {isHostable && hasHosting && !live && (
+          <button onClick={onPublish} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
+            Publish
+          </button>
+        )}
+        {isHostable && live && hasHosting && (
+          <button onClick={onAddDomain} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
+            Add domain
+          </button>
+        )}
+        {isEcom && isPro && (
+          <a
+            href={`/api/themes/${theme.id}/export-shopify`}
+            className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white"
+          >
+            Shopify ZIP
+          </a>
+        )}
+        {live && (
+          <button
+            onClick={onUnpublish}
+            className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5"
+          >
+            Unpublish
+          </button>
+        )}
+      </div>
+    </div>
   )
+}
+
+function editUrlFor(id: string, bt: string): string {
+  // Restaurant ships with a real per-section editor today; everything else
+  // sends the user to the preview surface which links onward to /theme/new
+  // for full regeneration.
+  if (bt === 'restaurant') return `/preview/restaurant/${id}/edit`
+  return `/preview/${id}`
 }

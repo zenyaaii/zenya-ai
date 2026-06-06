@@ -1,185 +1,372 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
+import {
+  BarChart3, Eye, Folder, Globe, TrendingUp, RefreshCw,
+  ArrowUpRight, ExternalLink,
+} from 'lucide-react'
 
 type Analytics = {
   generated_at: string
-  window_days: number
-  totals: { users: number; themes: number; published_themes: number; live_domains: number }
-  plan_breakdown: Record<string, number>
-  purchases: { count_paid: number; count_refunded: number; gross_revenue_cents: number }
-  hosting: { active_count: number; mrr_cents: number; churned_30d: number }
-  pageviews_30d: number
-  event_counts_30d: Record<string, number>
-  series: Array<{ date: string; generated: number; published: number; purchased: number; viewed: number }>
-  recent_events: Array<{ event_type: string; created_at: string; metadata: any }>
+  totals: {
+    themes: number
+    published_themes: number
+    live_domains: number
+    lifetime_views: number
+    views_30d: number
+    views_7d: number
+  }
+  series: Array<{ date: string; views: number }>
+  per_site: Array<{
+    id: string
+    product_name: string
+    slug: string | null
+    is_published: boolean
+    template_type: string
+    lifetime_views: number
+    views_30d: number
+    last_viewed_at: string | null
+    created_at: string
+  }>
+  top_referrers: Array<{ name: string; count: number }>
+  top_countries: Array<{ name: string; count: number }>
 }
 
-export default function AdminAnalyticsPage() {
+export default function AnalyticsPage() {
   const [data, setData] = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
-    fetch('/api/admin/analytics')
-      .then(async (r) => {
-        if (r.status === 403) {
-          setError('Admin-only. Your account does not have plan=admin.')
-          return
-        }
-        if (!r.ok) {
-          setError(`Failed to load (${r.status})`)
-          return
-        }
-        setData(await r.json())
-      })
-      .catch((e) => setError(e?.message || 'Failed to load'))
-      .finally(() => setLoading(false))
-  }, [])
+  async function load(silent = false) {
+    if (silent) setRefreshing(true)
+    try {
+      const r = await fetch('/api/analytics', { cache: 'no-store' })
+      if (!r.ok) {
+        setError(`Failed to load analytics (${r.status})`)
+        return
+      }
+      setData(await r.json())
+      setError(null)
+    } catch (e: any) {
+      setError(e?.message || 'Failed to load')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }
+  useEffect(() => { load() }, [])
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-6xl px-6 py-12 text-sm text-muted">Loading analytics…</main>
-    )
-  }
-  if (error) {
-    return (
-      <main className="mx-auto max-w-6xl px-6 py-12">
-        <Link href="/dashboard" className="text-sm text-muted hover:underline">← Dashboard</Link>
-        <div className="mt-6 rounded-lg border border-token bg-white p-6 text-sm text-foreground">
-          {error}
+      <div className="mx-auto max-w-7xl px-6 py-8">
+        <SkeletonHeader />
+        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => <SkeletonTile key={i} />)}
         </div>
-      </main>
+        <div className="mt-8 h-64 animate-pulse rounded-2xl border border-token bg-white" />
+      </div>
     )
   }
-  if (!data) return null
+  if (error || !data) {
+    return (
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="rounded-2xl border border-token bg-white p-8 text-center">
+          <BarChart3 className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
+          <h2 className="mt-3 text-[16px] font-semibold text-foreground">Couldn’t load analytics</h2>
+          <p className="mt-1 text-[13px] text-muted">{error || 'Something went wrong.'}</p>
+          <button
+            onClick={() => { setLoading(true); load() }}
+            className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[12.5px] font-semibold text-white"
+          >
+            <RefreshCw className="h-3 w-3" /> Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
-  const maxSeries = Math.max(
-    1,
-    ...data.series.flatMap((s) => [s.generated, s.published, s.purchased])
-  )
+  const t = data.totals
+  const maxSeries = Math.max(1, ...data.series.map((s) => s.views))
+  const hasAnyViews = t.lifetime_views > 0 || t.views_30d > 0
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
-      <div className="flex items-baseline justify-between border-b border-token pb-4">
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <motion.header
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
+      >
         <div>
-          <Link href="/dashboard" className="text-xs text-muted hover:underline">← Dashboard</Link>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">Analytics</h1>
-          <p className="mt-1 text-xs text-muted">Last 30 days · regenerated on load</p>
+          <h1 className="text-[24px] font-bold tracking-tight text-foreground">Analytics</h1>
+          <p className="mt-1 text-[13px] text-muted">
+            Pageviews and traffic across all of your live Zenya sites · last 30 days.
+          </p>
         </div>
         <button
-          onClick={() => window.location.reload()}
-          className="rounded-md border border-token px-3 py-1.5 text-xs font-medium text-muted hover:bg-black/5"
+          onClick={() => load(true)}
+          disabled={refreshing}
+          className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted hover:bg-black/5"
         >
-          Refresh
+          <RefreshCw className={'h-3 w-3 ' + (refreshing ? 'animate-spin' : '')} />
+          {refreshing ? 'Refreshing…' : 'Refresh'}
         </button>
-      </div>
+      </motion.header>
 
-      {/* Headline numbers */}
-      <section className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Stat label="Total users"       value={data.totals.users} />
-        <Stat label="Themes generated"  value={data.totals.themes} />
-        <Stat label="Published sites"   value={data.totals.published_themes} />
-        <Stat label="Live custom domains" value={data.totals.live_domains} />
+      {/* Headline tiles */}
+      <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Tile label="Pageviews (7d)" value={t.views_7d.toLocaleString()} sub={t.views_7d > 0 ? 'last 7 days' : 'no views yet'} icon={Eye} accent="#5e6ad2" />
+        <Tile label="Pageviews (30d)" value={t.views_30d.toLocaleString()} sub="last 30 days" icon={TrendingUp} accent="#15803d" />
+        <Tile label="Total sites" value={t.themes.toLocaleString()} sub={`${t.published_themes} live · ${t.live_domains} custom domain${t.live_domains === 1 ? '' : 's'}`} icon={Folder} accent="#c8a96a" />
+        <Tile label="Lifetime views" value={t.lifetime_views.toLocaleString()} sub="across all sites" icon={Globe} accent="#9b6f00" />
       </section>
 
-      {/* Revenue */}
-      <section className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <Stat
-          label="30-day gross"
-          value={`$${(data.purchases.gross_revenue_cents / 100).toFixed(2)}`}
-          sub={`${data.purchases.count_paid} paid · ${data.purchases.count_refunded} refunded`}
-        />
-        <Stat
-          label="Hosting MRR"
-          value={`$${(data.hosting.mrr_cents / 100).toFixed(2)}/mo`}
-          sub={`${data.hosting.active_count} active · ${data.hosting.churned_30d} churned (30d)`}
-        />
-        <Stat label="Pageviews (30d)" value={data.pageviews_30d.toLocaleString()} />
-      </section>
-
-      {/* Plan breakdown */}
-      <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">Plan breakdown</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {Object.entries(data.plan_breakdown).map(([plan, n]) => (
-            <span key={plan} className="rounded-full border border-token bg-white px-3 py-1 text-xs font-medium text-foreground">
-              {plan}: <span className="text-primary">{n}</span>
-            </span>
-          ))}
+      {/* Chart */}
+      <section className="mt-8">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Daily pageviews</h2>
+          <span className="text-[11.5px] text-muted">last 30 days</span>
         </div>
-      </section>
-
-      {/* Time series — simple bars */}
-      <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">Daily funnel (30 days)</h2>
-        <div className="mt-3 grid grid-cols-30 gap-px overflow-x-auto rounded-lg border border-token bg-white p-4" style={{ gridTemplateColumns: `repeat(${data.series.length}, minmax(18px, 1fr))` }}>
-          {data.series.map((s) => (
-            <div key={s.date} className="flex flex-col items-center" title={`${s.date}\ngenerated: ${s.generated}\npublished: ${s.published}\npurchased: ${s.purchased}`}>
-              <div style={{ height: 80, display: 'flex', alignItems: 'flex-end', gap: 1 }}>
-                <div title={`generated ${s.generated}`} style={{ width: 4, height: `${(s.generated / maxSeries) * 80}px`, background: '#5e6ad2' }} />
-                <div title={`published ${s.published}`} style={{ width: 4, height: `${(s.published / maxSeries) * 80}px`, background: '#15803d' }} />
-                <div title={`purchased ${s.purchased}`} style={{ width: 4, height: `${(s.purchased / maxSeries) * 80}px`, background: '#c8a96a' }} />
+        <div className="rounded-2xl border border-token bg-white p-5">
+          {hasAnyViews ? (
+            <>
+              <div
+                className="grid items-end gap-px overflow-hidden"
+                style={{ gridTemplateColumns: `repeat(${data.series.length}, minmax(0, 1fr))`, height: 180 }}
+              >
+                {data.series.map((s) => {
+                  const h = (s.views / maxSeries) * 160
+                  return (
+                    <div key={s.date} className="group relative flex items-end justify-center">
+                      <div
+                        className="w-full rounded-t-sm transition-colors"
+                        style={{
+                          height: `${Math.max(2, h)}px`,
+                          background:
+                            s.views === 0
+                              ? 'rgba(28,28,28,0.06)'
+                              : 'linear-gradient(180deg, #5e6ad2 0%, #4a55b8 100%)',
+                        }}
+                        title={`${s.date}: ${s.views} views`}
+                      />
+                    </div>
+                  )
+                })}
               </div>
-              <div className="mt-1 text-[9px] text-muted">{s.date.slice(5)}</div>
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex gap-4 text-xs text-muted">
-          <span><span className="inline-block h-2 w-2 rounded-sm" style={{ background: '#5e6ad2' }} /> generated</span>
-          <span><span className="inline-block h-2 w-2 rounded-sm" style={{ background: '#15803d' }} /> published</span>
-          <span><span className="inline-block h-2 w-2 rounded-sm" style={{ background: '#c8a96a' }} /> purchased</span>
+              <div className="mt-3 flex justify-between text-[10.5px] text-muted">
+                <span>{data.series[0]?.date.slice(5)}</span>
+                <span>{data.series[Math.floor(data.series.length / 2)]?.date.slice(5)}</span>
+                <span>{data.series[data.series.length - 1]?.date.slice(5)}</span>
+              </div>
+            </>
+          ) : (
+            <EmptyChartHint />
+          )}
         </div>
       </section>
 
-      {/* Event counts */}
+      {/* Per-site breakdown */}
       <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">Event counts (30d)</h2>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {Object.entries(data.event_counts_30d).sort(([, a], [, b]) => b - a).map(([type, n]) => (
-            <div key={type} className="flex items-center justify-between rounded-md border border-token bg-white px-3 py-2 text-xs">
-              <code className="text-foreground">{type}</code>
-              <span className="font-semibold text-primary">{n}</span>
-            </div>
-          ))}
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Per-site breakdown</h2>
+          <Link href="/dashboard/sites" className="text-[12px] font-medium text-primary hover:underline">
+            Manage sites →
+          </Link>
         </div>
+        {data.per_site.length === 0 ? (
+          <EmptyState
+            title="No sites yet"
+            body="Build a site, publish it to Zenya, and we’ll start tracking pageviews here."
+            cta={{ href: '/theme/new', label: 'Create your first site' }}
+          />
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-token bg-white">
+            <table className="w-full text-left text-[13px]">
+              <thead className="bg-[#fafaf7]">
+                <tr>
+                  <th className="px-4 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Site</th>
+                  <th className="px-4 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Views (30d)</th>
+                  <th className="px-4 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Lifetime</th>
+                  <th className="px-4 py-2.5 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.per_site.map((s) => (
+                  <tr key={s.id} className="border-t border-token">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[rgba(94,106,210,0.10)]">
+                          <Folder className="h-3.5 w-3.5 text-primary" strokeWidth={2} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-foreground">{s.product_name}</div>
+                          <div className="truncate text-[11.5px] text-muted">
+                            {s.is_published && s.slug ? `zenyaai.co/s/${s.slug}` : `${s.template_type} · draft`}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums text-foreground">{s.views_30d.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-muted">{s.lifetime_views.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right">
+                      {s.is_published && s.slug ? (
+                        <a
+                          href={`/s/${s.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]"
+                        >
+                          Live <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ) : (
+                        <span className="inline-flex rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]">
+                          Draft
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
-      {/* Recent events */}
-      <section className="mt-10 pb-12">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">Recent activity (latest 50)</h2>
-        <div className="mt-3 overflow-hidden rounded-lg border border-token bg-white">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-surface">
-              <tr>
-                <th className="px-3 py-2 font-semibold text-muted">Time</th>
-                <th className="px-3 py-2 font-semibold text-muted">Event</th>
-                <th className="px-3 py-2 font-semibold text-muted">Metadata</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recent_events.map((e, i) => (
-                <tr key={i} className="border-t border-token">
-                  <td className="px-3 py-2 text-muted">{new Date(e.created_at).toLocaleString()}</td>
-                  <td className="px-3 py-2"><code>{e.event_type}</code></td>
-                  <td className="px-3 py-2 max-w-md truncate text-muted">{JSON.stringify(e.metadata)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Top referrers + countries */}
+      <section className="mt-10 grid gap-5 lg:grid-cols-2">
+        <Card title="Top referrers" empty="No traffic sources yet">
+          {data.top_referrers.length > 0 && (
+            <BarList items={data.top_referrers} />
+          )}
+        </Card>
+        <Card title="Top countries" empty="No country data yet">
+          {data.top_countries.length > 0 && (
+            <BarList items={data.top_countries} />
+          )}
+        </Card>
       </section>
-    </main>
+
+      <p className="mt-10 text-center text-[11.5px] text-muted">
+        Generated {new Date(data.generated_at).toLocaleString()} · pulled live from Supabase
+      </p>
+    </div>
   )
 }
 
-function Stat({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
+/* ─── tiny subcomponents ────────────────────────────────────────────────── */
+
+function Tile({
+  label, value, sub, icon: Icon, accent,
+}: {
+  label: string
+  value: string
+  sub?: string
+  icon: typeof Folder
+  accent: string
+}) {
   return (
-    <div className="rounded-lg border border-token bg-white p-4">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</div>
-      <div className="mt-2 text-2xl font-bold text-foreground">{value}</div>
-      {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-2xl border border-token bg-white p-5"
+    >
+      <div className="flex items-start justify-between">
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
+        <div className="flex h-7 w-7 items-center justify-center rounded-md" style={{ background: `${accent}1a` }}>
+          <Icon className="h-3.5 w-3.5" strokeWidth={2} style={{ color: accent }} />
+        </div>
+      </div>
+      <div className="mt-2 text-[24px] font-bold tracking-tight text-foreground tabular-nums">{value}</div>
+      {sub && <div className="mt-1 text-[12px] text-muted">{sub}</div>}
+    </motion.div>
+  )
+}
+
+function Card({ title, empty, children }: { title: string; empty: string; children: React.ReactNode }) {
+  const hasChildren = !!(children && Array.isArray(children) ? children.length : children)
+  return (
+    <div className="rounded-2xl border border-token bg-white p-5">
+      <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
+      <div className="mt-3">
+        {hasChildren ? children : (
+          <div className="py-6 text-center text-[12.5px] text-muted">{empty}</div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function BarList({ items }: { items: Array<{ name: string; count: number }> }) {
+  const max = Math.max(1, ...items.map((i) => i.count))
+  return (
+    <ul className="space-y-2">
+      {items.map((i) => (
+        <li key={i.name} className="text-[12.5px]">
+          <div className="flex items-baseline justify-between">
+            <span className="truncate font-medium text-foreground">{i.name}</span>
+            <span className="tabular-nums text-muted">{i.count}</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${(i.count / max) * 100}%` }} />
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function EmptyChartHint() {
+  return (
+    <div className="grid place-items-center py-10 text-center">
+      <div className="rounded-full bg-[rgba(94,106,210,0.10)] p-3">
+        <BarChart3 className="h-6 w-6 text-primary" strokeWidth={1.75} />
+      </div>
+      <p className="mt-3 max-w-xs text-[12.5px] text-muted">
+        No pageviews yet. Once a visitor lands on a live site, you’ll see the daily curve fill in here.
+      </p>
+    </div>
+  )
+}
+
+function EmptyState({
+  title, body, cta,
+}: { title: string; body: string; cta?: { href: string; label: string } }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-token bg-white p-10 text-center">
+      <h3 className="text-[16px] font-semibold text-foreground">{title}</h3>
+      <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">{body}</p>
+      {cta && (
+        <Link
+          href={cta.href}
+          className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white"
+        >
+          {cta.label}
+          <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      )}
+    </div>
+  )
+}
+
+function SkeletonHeader() {
+  return (
+    <div className="border-b border-token pb-5">
+      <div className="h-6 w-32 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
+      <div className="mt-2 h-3 w-72 animate-pulse rounded bg-[rgba(28,28,28,0.04)]" />
+    </div>
+  )
+}
+
+function SkeletonTile() {
+  return (
+    <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="h-2.5 w-20 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
+      <div className="mt-3 h-6 w-24 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
+      <div className="mt-2 h-2.5 w-28 animate-pulse rounded bg-[rgba(28,28,28,0.04)]" />
     </div>
   )
 }
