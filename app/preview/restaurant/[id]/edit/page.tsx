@@ -7,14 +7,30 @@ import {
   ArrowLeft, Eye, EyeOff, Save, Check, Type, Image as ImageIcon,
   AtSign, Globe, MessageCircle, MapPin, Calendar, Mail, FileText,
   Star, Newspaper, ChevronDown, ChevronRight, Palette, Home as HomeIcon,
+  Upload, Trash2, Plus, RotateCcw,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import RestaurantPreview, { type RestaurantView } from '@/components/theme/restaurant/RestaurantPreview'
-import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
+import { RESTAURANT_PRESETS, getRestaurantPreset } from '@/utils/restaurant/presets'
+import {
+  TYPOGRAPHY_PRESETS,
+  TYPOGRAPHY_MOODS,
+  DEFAULT_TYPOGRAPHY_PRESET_ID,
+  getTypographyPreset,
+} from '@/utils/restaurant/typography'
 import type {
   RestaurantContent,
   RestaurantSectionKey,
   RestaurantStylePresetId,
+  RestaurantColors,
+  RestaurantMenuItem,
+  RestaurantMenuCategory,
+  RestaurantSignatureDish,
+  RestaurantGalleryImage,
+  RestaurantTestimonial,
+  RestaurantPressItem,
+  RestaurantFaqItem,
+  RestaurantHours,
 } from '@/utils/restaurant/types'
 import { RESTAURANT_SECTION_LABELS } from '@/utils/restaurant/types'
 
@@ -31,6 +47,7 @@ type SelectionKey =
   | 'social'
   | 'gallery_attribution'
   | 'style_preset'
+  | 'typography_preset'
 
 type PageDef = {
   view: RestaurantView
@@ -63,7 +80,8 @@ const SECTION_ICONS: Record<RestaurantSectionKey, typeof HomeIcon> = {
 }
 
 const GLOBAL_ITEMS: { key: SelectionKey; label: string; icon: typeof HomeIcon }[] = [
-  { key: 'style_preset',         label: 'Style preset',        icon: Palette },
+  { key: 'style_preset',         label: 'Colors & palette',    icon: Palette },
+  { key: 'typography_preset',    label: 'Typography',          icon: Type },
   { key: 'footer_text',          label: 'Footer text',         icon: Type },
   { key: 'social',               label: 'Social links',        icon: AtSign },
   { key: 'gallery_attribution',  label: 'Gallery attribution', icon: ImageIcon },
@@ -530,7 +548,8 @@ function RightPanel({
     selected === 'footer_text' ? 'Footer text' :
     selected === 'social' ? 'Social links' :
     selected === 'gallery_attribution' ? 'Gallery attribution' :
-    selected === 'style_preset' ? 'Style preset' :
+    selected === 'style_preset' ? 'Colors & palette' :
+    selected === 'typography_preset' ? 'Typography' :
     RESTAURANT_SECTION_LABELS[selected as RestaurantSectionKey] || selected
 
   return (
@@ -548,16 +567,26 @@ function RightPanel({
         {selected === 'story' && <StoryFields content={content} patchContent={patchContent} />}
         {selected === 'menu' && <MenuFields content={content} patchContent={patchContent} />}
         {selected === 'gallery' && <GalleryFields content={content} patchContent={patchContent} />}
+        {selected === 'signature_dishes' && <SignatureDishesFields content={content} patchContent={patchContent} />}
         {selected === 'hours_location' && <HoursLocationFields content={content} patchContent={patchContent} />}
         {selected === 'reservations' && <ReservationsFields content={content} patchContent={patchContent} />}
+        {selected === 'reviews' && <ReviewsFields content={content} patchContent={patchContent} />}
+        {selected === 'press' && <PressFields content={content} patchContent={patchContent} />}
+        {selected === 'faq' && <FaqFields content={content} patchContent={patchContent} />}
         {selected === 'newsletter' && <NewsletterFields content={content} patchContent={patchContent} />}
         {selected === 'footer_text' && <FooterTextFields content={content} patchContent={patchContent} />}
         {selected === 'social' && <SocialFields content={content} patchContent={patchContent} />}
         {selected === 'gallery_attribution' && <GalleryAttributionFields content={content} patchContent={patchContent} />}
-        {selected === 'style_preset' && <StylePresetFields presetId={presetId} onPresetChange={onPresetChange} />}
-        {(selected === 'signature_dishes' || selected === 'reviews' ||
-          selected === 'press' || selected === 'faq') && (
-          <RegenerateNotice label={headerLabel} />
+        {selected === 'style_preset' && (
+          <StylePresetFields
+            presetId={presetId}
+            onPresetChange={onPresetChange}
+            content={content}
+            patchContent={patchContent}
+          />
+        )}
+        {selected === 'typography_preset' && (
+          <TypographyPresetFields content={content} patchContent={patchContent} />
         )}
       </div>
     </aside>
@@ -582,6 +611,12 @@ function HeroFields({ content, patchContent }: FieldProps) {
       <FieldTextArea label="Subheadline" value={h.subheadline} onChange={(v) => patchContent((c) => ({ ...c, hero: { ...c.hero, subheadline: v } }))} />
       <FieldText label="Primary CTA"    value={h.primary_cta}   onChange={(v) => patchContent((c) => ({ ...c, hero: { ...c.hero, primary_cta: v } }))} />
       <FieldText label="Secondary CTA"  value={h.secondary_cta} onChange={(v) => patchContent((c) => ({ ...c, hero: { ...c.hero, secondary_cta: v } }))} />
+      <FieldImage
+        label="Hero image"
+        value={h.image}
+        onChange={(v) => patchContent((c) => ({ ...c, hero: { ...c.hero, image: v } }))}
+        hint="Background image behind the hero. Wide landscape works best."
+      />
     </>
   )
 }
@@ -595,34 +630,274 @@ function StoryFields({ content, patchContent }: FieldProps) {
       <FieldText label="Chef name"  value={s.chef_name || ''}  onChange={(v) => patchContent((c) => ({ ...c, story: { ...c.story, chef_name: v } }))} />
       <FieldText label="Chef title" value={s.chef_title || ''} onChange={(v) => patchContent((c) => ({ ...c, story: { ...c.story, chef_title: v } }))} />
       <FieldTextArea label="Chef bio (short)" rows={3} value={s.chef_bio || ''} onChange={(v) => patchContent((c) => ({ ...c, story: { ...c.story, chef_bio: v } }))} />
+      <FieldImage
+        label="Chef photo"
+        value={s.chef_photo || ''}
+        onChange={(v) => patchContent((c) => ({ ...c, story: { ...c.story, chef_photo: v } }))}
+      />
+      <FieldImage
+        label="Accent image (optional)"
+        value={s.accent_image || ''}
+        onChange={(v) => patchContent((c) => ({ ...c, story: { ...c.story, accent_image: v } }))}
+        hint="Smaller image shown next to the story copy."
+      />
     </>
   )
 }
 
 function MenuFields({ content, patchContent }: FieldProps) {
   const m = content.menu
+
+  function setCategories(next: RestaurantMenuCategory[]) {
+    patchContent((c) => ({ ...c, menu: { ...c.menu, categories: next } }))
+  }
+  function updateCategory(idx: number, patch: Partial<RestaurantMenuCategory>) {
+    setCategories(m.categories.map((cat, i) => (i === idx ? { ...cat, ...patch } : cat)))
+  }
+  function removeCategory(idx: number) {
+    if (!confirm(`Remove the "${m.categories[idx].name}" category and its items?`)) return
+    setCategories(m.categories.filter((_, i) => i !== idx))
+  }
+  function addCategory() {
+    setCategories([
+      ...m.categories,
+      { id: `cat-${Date.now()}`, name: 'New section', description: '', items: [] },
+    ])
+  }
+  function updateItem(catIdx: number, itemIdx: number, patch: Partial<RestaurantMenuItem>) {
+    const cat = m.categories[catIdx]
+    const items = cat.items.map((it, i) => (i === itemIdx ? { ...it, ...patch } : it))
+    updateCategory(catIdx, { items })
+  }
+  function removeItem(catIdx: number, itemIdx: number) {
+    const cat = m.categories[catIdx]
+    if (!confirm(`Remove "${cat.items[itemIdx].name}" from ${cat.name}?`)) return
+    updateCategory(catIdx, { items: cat.items.filter((_, i) => i !== itemIdx) })
+  }
+  function addItem(catIdx: number) {
+    const cat = m.categories[catIdx]
+    updateCategory(catIdx, {
+      items: [...cat.items, { name: 'New item', description: '', price: '$0' }],
+    })
+  }
+
   return (
     <>
-      <FieldText label="Heading"    value={m.heading}    onChange={(v) => patchContent((c) => ({ ...c, menu: { ...c.menu, heading: v } }))} />
+      <FieldText    label="Heading"    value={m.heading}    onChange={(v) => patchContent((c) => ({ ...c, menu: { ...c.menu, heading: v } }))} />
       <FieldTextArea label="Subheading" value={m.subheading} onChange={(v) => patchContent((c) => ({ ...c, menu: { ...c.menu, subheading: v } }))} />
-      <SmallNote>Menu items aren’t editable here yet. Use <strong>Edit details</strong> to change items, prices, or photos.</SmallNote>
+
+      <SectionLabel>Categories</SectionLabel>
+      <div className="space-y-3">
+        {m.categories.map((cat, ci) => (
+          <Collapsible key={cat.id || ci} title={cat.name || 'Untitled'} defaultOpen={ci === 0}>
+            <FieldText  label="Category name" value={cat.name} onChange={(v) => updateCategory(ci, { name: v })} />
+            <FieldText  label="Description (optional)" value={cat.description || ''} onChange={(v) => updateCategory(ci, { description: v })} />
+
+            <div className="mt-3 space-y-2">
+              {cat.items.map((it, ii) => (
+                <div key={ii} className="rounded-md border border-token bg-white px-2.5 py-2">
+                  <div className="grid grid-cols-[1fr_auto] gap-2">
+                    <input
+                      value={it.name}
+                      onChange={(e) => updateItem(ci, ii, { name: e.target.value })}
+                      placeholder="Dish name"
+                      className="rounded-md border border-token bg-white px-2 py-1 text-[12.5px] outline-none focus:border-primary"
+                    />
+                    <input
+                      value={it.price}
+                      onChange={(e) => updateItem(ci, ii, { price: e.target.value })}
+                      placeholder="$0"
+                      className="w-20 rounded-md border border-token bg-white px-2 py-1 text-[12.5px] outline-none focus:border-primary"
+                    />
+                  </div>
+                  <textarea
+                    value={it.description}
+                    onChange={(e) => updateItem(ci, ii, { description: e.target.value })}
+                    placeholder="Short description"
+                    rows={2}
+                    className="mt-1.5 w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
+                  />
+                  <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                    <input
+                      value={it.badge || ''}
+                      onChange={(e) => updateItem(ci, ii, { badge: e.target.value })}
+                      placeholder="Badge (e.g. New)"
+                      className="rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeItem(ci, ii)}
+                      className="rounded-md border border-token bg-white px-2 py-1 text-[11.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+                    >
+                      <Trash2 className="inline-block h-3 w-3" /> Remove
+                    </button>
+                  </div>
+                  <div className="mt-1.5">
+                    <InlineImage
+                      label="Item photo (optional)"
+                      value={it.image || ''}
+                      onChange={(v) => updateItem(ci, ii, { image: v })}
+                    />
+                  </div>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addItem(ci)}
+                className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-1.5 text-[12px] font-medium text-muted hover:text-foreground"
+              >
+                <Plus className="h-3 w-3" /> Add item
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => removeCategory(ci)}
+              className="mt-3 inline-flex items-center gap-1 text-[11.5px] text-[#b91c1c] hover:underline"
+            >
+              <Trash2 className="h-3 w-3" /> Remove category
+            </button>
+          </Collapsible>
+        ))}
+        <button
+          type="button"
+          onClick={addCategory}
+          className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]"
+        >
+          <Plus className="h-3 w-3" /> Add menu category
+        </button>
+      </div>
     </>
   )
 }
 
 function GalleryFields({ content, patchContent }: FieldProps) {
   const g = content.gallery
+  function setImages(next: RestaurantGalleryImage[]) {
+    patchContent((c) => ({ ...c, gallery: { ...c.gallery, images: next } }))
+  }
+  function updateImage(idx: number, patch: Partial<RestaurantGalleryImage>) {
+    setImages(g.images.map((img, i) => (i === idx ? { ...img, ...patch } : img)))
+  }
+  function removeImage(idx: number) {
+    setImages(g.images.filter((_, i) => i !== idx))
+  }
+  function move(idx: number, dir: -1 | 1) {
+    const next = [...g.images]
+    const target = idx + dir
+    if (target < 0 || target >= next.length) return
+    ;[next[idx], next[target]] = [next[target], next[idx]]
+    setImages(next)
+  }
+  function addImage(url: string) {
+    setImages([...(g.images || []), { url, alt: '' }])
+  }
+
   return (
     <>
-      <FieldText label="Heading"    value={g.heading}    onChange={(v) => patchContent((c) => ({ ...c, gallery: { ...c.gallery, heading: v } }))} />
+      <FieldText    label="Heading"    value={g.heading}    onChange={(v) => patchContent((c) => ({ ...c, gallery: { ...c.gallery, heading: v } }))} />
       <FieldTextArea label="Subheading" value={g.subheading} onChange={(v) => patchContent((c) => ({ ...c, gallery: { ...c.gallery, subheading: v } }))} />
-      <SmallNote>Gallery photos aren’t editable here yet. Use <strong>Edit details</strong> to swap images.</SmallNote>
+
+      <SectionLabel>Photos ({g.images.length})</SectionLabel>
+      <div className="space-y-2">
+        {g.images.map((img, i) => (
+          <div key={i} className="flex gap-2 rounded-md border border-token bg-white p-2">
+            {img.url ? (
+              <img src={img.url} alt={img.alt || ''} className="h-14 w-14 flex-shrink-0 rounded-md object-cover" />
+            ) : (
+              <div className="grid h-14 w-14 flex-shrink-0 place-items-center rounded-md bg-surface text-muted">
+                <ImageIcon className="h-4 w-4" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1 space-y-1">
+              <input
+                value={img.url}
+                onChange={(e) => updateImage(i, { url: e.target.value })}
+                placeholder="https://… or upload"
+                className="w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
+              />
+              <input
+                value={img.alt || ''}
+                onChange={(e) => updateImage(i, { alt: e.target.value })}
+                placeholder="Alt text"
+                className="w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
+              />
+              <div className="flex items-center gap-1">
+                <UploadButton onUploaded={(url) => updateImage(i, { url })} small />
+                <button type="button" onClick={() => move(i, -1)} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↑</button>
+                <button type="button" onClick={() => move(i, 1)} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↓</button>
+                <button type="button" onClick={() => removeImage(i)} className="ml-auto rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]">
+                  <Trash2 className="inline-block h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="rounded-md border border-dashed border-token bg-white p-2">
+          <UploadButton
+            label={g.images.length === 0 ? 'Upload your first photo' : 'Add photo'}
+            onUploaded={(url) => addImage(url)}
+          />
+        </div>
+      </div>
+    </>
+  )
+}
+
+function SignatureDishesFields({ content, patchContent }: FieldProps) {
+  const dishes = content.signature_dishes || []
+  function setDishes(next: RestaurantSignatureDish[]) {
+    patchContent((c) => ({ ...c, signature_dishes: next }))
+  }
+  function update(idx: number, patch: Partial<RestaurantSignatureDish>) {
+    setDishes(dishes.map((d, i) => (i === idx ? { ...d, ...patch } : d)))
+  }
+  function remove(idx: number) {
+    if (!confirm(`Remove "${dishes[idx].name}"?`)) return
+    setDishes(dishes.filter((_, i) => i !== idx))
+  }
+  function add() {
+    setDishes([...dishes, { name: 'New dish', description: '', price: '$0', image: '' }])
+  }
+
+  return (
+    <>
+      <SmallNote>The 3-6 dishes that show up on the homepage and signal the cuisine.</SmallNote>
+      <div className="space-y-2">
+        {dishes.map((d, i) => (
+          <Collapsible key={i} title={d.name || `Dish ${i + 1}`}>
+            <FieldText label="Name" value={d.name} onChange={(v) => update(i, { name: v })} />
+            <FieldTextArea label="Description" rows={2} value={d.description} onChange={(v) => update(i, { description: v })} />
+            <FieldText label="Price" value={d.price} onChange={(v) => update(i, { price: v })} />
+            <FieldImage label="Dish photo" value={d.image} onChange={(v) => update(i, { image: v })} />
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="mt-2 inline-flex items-center gap-1 text-[11.5px] text-[#b91c1c] hover:underline"
+            >
+              <Trash2 className="h-3 w-3" /> Remove dish
+            </button>
+          </Collapsible>
+        ))}
+        <button
+          type="button"
+          onClick={add}
+          className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]"
+        >
+          <Plus className="h-3 w-3" /> Add signature dish
+        </button>
+      </div>
     </>
   )
 }
 
 function HoursLocationFields({ content, patchContent }: FieldProps) {
   const h = content.hours_location
+  function updateDay(idx: number, patch: Partial<RestaurantHours>) {
+    const next = h.hours.map((d, i) => (i === idx ? { ...d, ...patch } : d))
+    patchContent((c) => ({ ...c, hours_location: { ...c.hours_location, hours: next } }))
+  }
   return (
     <>
       <FieldText label="Heading"    value={h.heading}    onChange={(v) => patchContent((c) => ({ ...c, hours_location: { ...c.hours_location, heading: v } }))} />
@@ -631,7 +906,47 @@ function HoursLocationFields({ content, patchContent }: FieldProps) {
       <FieldText label="Phone"    value={h.phone}    onChange={(v) => patchContent((c) => ({ ...c, hours_location: { ...c.hours_location, phone: v } }))} />
       <FieldText label="Email"    value={h.email}    onChange={(v) => patchContent((c) => ({ ...c, hours_location: { ...c.hours_location, email: v } }))} />
       <FieldText label="Map link" value={h.map_link || ''} onChange={(v) => patchContent((c) => ({ ...c, hours_location: { ...c.hours_location, map_link: v } }))} />
-      <SmallNote>Edit the daily hours from <strong>Edit details</strong>.</SmallNote>
+
+      <SectionLabel>Hours</SectionLabel>
+      <div className="space-y-1">
+        {h.hours.map((d, i) => (
+          <div key={d.day + i} className="flex items-center gap-1.5 rounded-md border border-token bg-white px-2 py-1.5 text-[12px]">
+            <input
+              value={d.label}
+              onChange={(e) => updateDay(i, { label: e.target.value })}
+              placeholder="Mon"
+              className="w-16 rounded border border-token bg-white px-1.5 py-0.5 outline-none focus:border-primary"
+            />
+            {d.closed ? (
+              <span className="flex-1 text-center text-muted">Closed</span>
+            ) : (
+              <>
+                <input
+                  value={d.open}
+                  onChange={(e) => updateDay(i, { open: e.target.value })}
+                  placeholder="6 pm"
+                  className="w-20 rounded border border-token bg-white px-1.5 py-0.5 outline-none focus:border-primary"
+                />
+                <span className="text-muted">–</span>
+                <input
+                  value={d.close}
+                  onChange={(e) => updateDay(i, { close: e.target.value })}
+                  placeholder="11 pm"
+                  className="w-20 rounded border border-token bg-white px-1.5 py-0.5 outline-none focus:border-primary"
+                />
+              </>
+            )}
+            <label className="ml-auto inline-flex cursor-pointer items-center gap-1 text-[11px] text-muted">
+              <input
+                type="checkbox"
+                checked={!!d.closed}
+                onChange={(e) => updateDay(i, { closed: e.target.checked })}
+              />
+              Closed
+            </label>
+          </div>
+        ))}
+      </div>
     </>
   )
 }
@@ -655,6 +970,128 @@ function NewsletterFields({ content, patchContent }: FieldProps) {
       <FieldText label="Heading"    value={n.heading}    onChange={(v) => patchContent((c) => ({ ...c, newsletter: { ...c.newsletter, heading: v } }))} />
       <FieldTextArea label="Subheading" value={n.subheading} onChange={(v) => patchContent((c) => ({ ...c, newsletter: { ...c.newsletter, subheading: v } }))} />
       <FieldText label="Button label" value={n.button_label} onChange={(v) => patchContent((c) => ({ ...c, newsletter: { ...c.newsletter, button_label: v } }))} />
+    </>
+  )
+}
+
+function ReviewsFields({ content, patchContent }: FieldProps) {
+  const r = content.reviews
+  function setItems(next: RestaurantTestimonial[]) {
+    patchContent((c) => ({ ...c, reviews: { ...c.reviews, testimonials: next } }))
+  }
+  function update(idx: number, patch: Partial<RestaurantTestimonial>) {
+    setItems(r.testimonials.map((t, i) => (i === idx ? { ...t, ...patch } : t)))
+  }
+  function remove(idx: number) {
+    if (!confirm('Remove this review?')) return
+    setItems(r.testimonials.filter((_, i) => i !== idx))
+  }
+  function add() {
+    setItems([...r.testimonials, { name: 'Diner', text: 'Wonderful evening.', rating: 5, source: '' }])
+  }
+
+  return (
+    <>
+      <FieldText    label="Heading"    value={r.heading}    onChange={(v) => patchContent((c) => ({ ...c, reviews: { ...c.reviews, heading: v } }))} />
+      <FieldTextArea label="Subheading" value={r.subheading} onChange={(v) => patchContent((c) => ({ ...c, reviews: { ...c.reviews, subheading: v } }))} />
+      <div className="grid grid-cols-2 gap-2">
+        <FieldText label="Overall rating" value={String(r.overall_rating)} onChange={(v) => patchContent((c) => ({ ...c, reviews: { ...c.reviews, overall_rating: Number(v) || 0 } }))} />
+        <FieldText label="Review count" value={r.review_count} onChange={(v) => patchContent((c) => ({ ...c, reviews: { ...c.reviews, review_count: v } }))} />
+      </div>
+
+      <SectionLabel>Testimonials</SectionLabel>
+      <div className="space-y-2">
+        {r.testimonials.map((t, i) => (
+          <Collapsible key={i} title={t.name || `Review ${i + 1}`}>
+            <FieldText label="Reviewer name" value={t.name} onChange={(v) => update(i, { name: v })} />
+            <FieldTextArea label="Quote" rows={3} value={t.text} onChange={(v) => update(i, { text: v })} />
+            <div className="grid grid-cols-2 gap-2">
+              <FieldText label="Source (optional)" value={t.source || ''} onChange={(v) => update(i, { source: v })} placeholder="Yelp" />
+              <FieldText label="Rating (1-5)" value={String(t.rating)} onChange={(v) => update(i, { rating: Math.max(1, Math.min(5, Number(v) || 5)) })} />
+            </div>
+            <button type="button" onClick={() => remove(i)} className="mt-2 inline-flex items-center gap-1 text-[11.5px] text-[#b91c1c] hover:underline">
+              <Trash2 className="h-3 w-3" /> Remove
+            </button>
+          </Collapsible>
+        ))}
+        <button type="button" onClick={add} className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]">
+          <Plus className="h-3 w-3" /> Add testimonial
+        </button>
+      </div>
+    </>
+  )
+}
+
+function PressFields({ content, patchContent }: FieldProps) {
+  const p = content.press
+  function setItems(next: RestaurantPressItem[]) {
+    patchContent((c) => ({ ...c, press: { ...c.press, items: next } }))
+  }
+  function update(idx: number, patch: Partial<RestaurantPressItem>) {
+    setItems(p.items.map((it, i) => (i === idx ? { ...it, ...patch } : it)))
+  }
+  function remove(idx: number) {
+    if (!confirm('Remove this press mention?')) return
+    setItems(p.items.filter((_, i) => i !== idx))
+  }
+  function add() {
+    setItems([...p.items, { outlet: 'Outlet', quote: '' }])
+  }
+  return (
+    <>
+      <FieldText label="Heading" value={p.heading} onChange={(v) => patchContent((c) => ({ ...c, press: { ...c.press, heading: v } }))} />
+      <SectionLabel>Press mentions</SectionLabel>
+      <div className="space-y-2">
+        {p.items.map((it, i) => (
+          <div key={i} className="rounded-md border border-token bg-white p-2.5">
+            <FieldText label="Outlet" value={it.outlet} onChange={(v) => update(i, { outlet: v })} />
+            <FieldTextArea label="Quote (optional)" rows={2} value={it.quote || ''} onChange={(v) => update(i, { quote: v })} />
+            <button type="button" onClick={() => remove(i)} className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] text-[#b91c1c] hover:underline">
+              <Trash2 className="h-3 w-3" /> Remove
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={add} className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]">
+          <Plus className="h-3 w-3" /> Add press mention
+        </button>
+      </div>
+    </>
+  )
+}
+
+function FaqFields({ content, patchContent }: FieldProps) {
+  const f = content.faq
+  function setItems(next: RestaurantFaqItem[]) {
+    patchContent((c) => ({ ...c, faq: { ...c.faq, items: next } }))
+  }
+  function update(idx: number, patch: Partial<RestaurantFaqItem>) {
+    setItems(f.items.map((it, i) => (i === idx ? { ...it, ...patch } : it)))
+  }
+  function remove(idx: number) {
+    if (!confirm('Remove this FAQ?')) return
+    setItems(f.items.filter((_, i) => i !== idx))
+  }
+  function add() {
+    setItems([...f.items, { q: 'New question?', a: 'Answer.' }])
+  }
+  return (
+    <>
+      <FieldText label="Heading" value={f.heading} onChange={(v) => patchContent((c) => ({ ...c, faq: { ...c.faq, heading: v } }))} />
+      <SectionLabel>FAQ items</SectionLabel>
+      <div className="space-y-2">
+        {f.items.map((it, i) => (
+          <div key={i} className="rounded-md border border-token bg-white p-2.5">
+            <FieldText label="Question" value={it.q} onChange={(v) => update(i, { q: v })} />
+            <FieldTextArea label="Answer" rows={3} value={it.a} onChange={(v) => update(i, { a: v })} />
+            <button type="button" onClick={() => remove(i)} className="mt-1.5 inline-flex items-center gap-1 text-[11.5px] text-[#b91c1c] hover:underline">
+              <Trash2 className="h-3 w-3" /> Remove
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={add} className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]">
+          <Plus className="h-3 w-3" /> Add FAQ
+        </button>
+      </div>
     </>
   )
 }
@@ -705,15 +1142,33 @@ function GalleryAttributionFields({ content, patchContent }: FieldProps) {
 }
 
 function StylePresetFields({
-  presetId, onPresetChange,
+  presetId, onPresetChange, content, patchContent,
 }: {
   presetId: RestaurantStylePresetId
   onPresetChange: (p: RestaurantStylePresetId) => void
+  content: RestaurantContent
+  patchContent: (u: (c: RestaurantContent) => RestaurantContent) => void
 }) {
+  const overrides = content.color_overrides || {}
+  const basePreset = getRestaurantPreset(presetId)
+  const merged: RestaurantColors = { ...basePreset.colors, ...overrides }
+
+  function setOverride(key: keyof RestaurantColors, value: string | undefined) {
+    patchContent((c) => {
+      const next = { ...(c.color_overrides || {}) }
+      if (value === undefined || value === '') delete next[key]
+      else next[key] = value
+      return { ...c, color_overrides: Object.keys(next).length ? next : undefined }
+    })
+  }
+  function resetOverrides() {
+    patchContent((c) => ({ ...c, color_overrides: undefined }))
+  }
+
   return (
     <>
       <SmallNote>
-        Switching presets changes the whole site’s palette + typography. Try a few — the preview reflows immediately.
+        Pick one of the four recommended palettes, then customise any colour. Reset reverts to the preset.
       </SmallNote>
       <div className="grid grid-cols-2 gap-2">
         {RESTAURANT_PRESETS.map((p) => {
@@ -749,23 +1204,353 @@ function StylePresetFields({
           )
         })}
       </div>
+
+      <SectionLabel>Custom colors</SectionLabel>
+      <div className="space-y-1.5">
+        {(['primary', 'accent', 'background', 'surface', 'text', 'muted', 'border'] as Array<keyof RestaurantColors>).map((k) => (
+          <ColorRow
+            key={k}
+            label={COLOR_LABELS[k]}
+            value={merged[k]}
+            overridden={overrides[k] != null}
+            onChange={(v) => setOverride(k, v)}
+            onReset={() => setOverride(k, undefined)}
+          />
+        ))}
+      </div>
+
+      {Object.keys(overrides).length > 0 && (
+        <button
+          type="button"
+          onClick={resetOverrides}
+          className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
+        >
+          <RotateCcw className="h-3 w-3" /> Reset all colours to preset
+        </button>
+      )}
     </>
   )
 }
 
-function RegenerateNotice({ label }: { label: string }) {
+const COLOR_LABELS: Record<keyof RestaurantColors, string> = {
+  primary:    'Primary',
+  accent:     'Accent · highlight',
+  background: 'Background',
+  surface:    'Surface · cards',
+  text:       'Text',
+  muted:      'Muted text',
+  border:     'Border',
+}
+
+function ColorRow({
+  label, value, overridden, onChange, onReset,
+}: {
+  label: string
+  value: string
+  overridden: boolean
+  onChange: (v: string) => void
+  onReset: () => void
+}) {
+  // <input type="color"> needs #RRGGBB. Token like 'rgba(...)' shows the
+  // preview swatch but disables the picker for that row.
+  const isHex = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(value)
   return (
-    <div className="rounded-lg border border-token bg-surface px-3 py-3 text-[12.5px] leading-[1.55] text-muted">
-      <strong className="text-foreground">{label}</strong> content was generated by AI from the
-      details you entered. To change it, click <strong>Edit details</strong> on the preview and
-      re-generate.
+    <div className="flex items-center gap-2 rounded-md border border-token bg-white px-2 py-1.5">
+      <span
+        className="h-6 w-6 flex-shrink-0 rounded border border-token"
+        style={{ background: value }}
+        aria-hidden
+      />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold text-foreground">{label}</span>
+          {overridden && <span className="rounded bg-primary/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wider text-primary">custom</span>}
+        </div>
+        <div className="mt-0.5 flex items-center gap-1">
+          {isHex && (
+            <input
+              type="color"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="h-5 w-5 cursor-pointer rounded border border-token bg-white"
+              aria-label={`${label} color`}
+            />
+          )}
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="flex-1 rounded border border-token bg-white px-1.5 py-0.5 font-mono text-[11px] outline-none focus:border-primary"
+          />
+        </div>
+      </div>
+      {overridden && (
+        <button
+          type="button"
+          onClick={onReset}
+          title="Revert to preset"
+          className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5"
+        >
+          <RotateCcw className="h-3 w-3" />
+        </button>
+      )}
     </div>
+  )
+}
+
+function TypographyPresetFields({ content, patchContent }: FieldProps) {
+  const currentId = content.typography_preset || ''
+  const [moodFilter, setMoodFilter] = useState<'all' | typeof TYPOGRAPHY_MOODS[number]>('all')
+
+  function pick(id: string | null) {
+    patchContent((c) => ({ ...c, typography_preset: id || undefined }))
+  }
+
+  const presets = moodFilter === 'all'
+    ? TYPOGRAPHY_PRESETS
+    : TYPOGRAPHY_PRESETS.filter((p) => p.mood === moodFilter)
+
+  return (
+    <>
+      <SmallNote>
+        Pick a font pair. Headings + body update everywhere on the site. Clear to fall back to the colour preset’s fonts.
+      </SmallNote>
+
+      <div className="flex flex-wrap gap-1">
+        <MoodChip active={moodFilter === 'all'} onClick={() => setMoodFilter('all')}>All</MoodChip>
+        {TYPOGRAPHY_MOODS.map((m) => (
+          <MoodChip key={m} active={moodFilter === m} onClick={() => setMoodFilter(m)}>{m}</MoodChip>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-1.5">
+        {presets.map((p) => {
+          const selected = currentId === p.id
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => pick(p.id)}
+              className={
+                'relative w-full rounded-lg border-2 px-3 py-2.5 text-left transition ' +
+                (selected ? 'border-foreground bg-[rgba(28,28,28,0.03)]' : 'border-token bg-white hover:border-foreground/40')
+              }
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span
+                  className="text-[18px] leading-tight text-foreground"
+                  style={{
+                    fontFamily: p.heading_font,
+                    fontWeight: p.heading_weight ?? 600,
+                    letterSpacing: p.heading_tracking ?? '-0.02em',
+                  }}
+                >
+                  {p.name}
+                </span>
+                <span className="rounded bg-[rgba(28,28,28,0.04)] px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-muted">
+                  {p.mood}
+                </span>
+              </div>
+              <div
+                className="mt-1 text-[11.5px] text-muted"
+                style={{ fontFamily: p.body_font }}
+              >
+                {p.vibe}
+              </div>
+              {selected && (
+                <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
+                  Active
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {currentId && (
+        <button
+          type="button"
+          onClick={() => pick(null)}
+          className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
+        >
+          <RotateCcw className="h-3 w-3" /> Use preset’s default fonts
+        </button>
+      )}
+    </>
+  )
+}
+
+function MoodChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        'rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider transition ' +
+        (active ? 'bg-foreground text-white' : 'bg-[rgba(28,28,28,0.06)] text-muted hover:text-foreground')
+      }
+    >
+      {children}
+    </button>
   )
 }
 
 /* ─────────────────────────────────────────────────────────────────────── *
  * Reusable inputs                                                          *
  * ─────────────────────────────────────────────────────────────────────── */
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="pt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+      {children}
+    </div>
+  )
+}
+
+function Collapsible({
+  title, defaultOpen = false, children,
+}: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="rounded-lg border border-token bg-white">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left"
+      >
+        {open ? <ChevronDown className="h-3.5 w-3.5 text-muted" /> : <ChevronRight className="h-3.5 w-3.5 text-muted" />}
+        <span className="truncate text-[13px] font-medium text-foreground">{title}</span>
+      </button>
+      {open && (
+        <div className="space-y-2 border-t border-token px-2.5 py-2.5">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function FieldImage({
+  label, value, onChange, hint,
+}: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+        {value && (
+          <button type="button" onClick={() => onChange('')} className="text-[10.5px] text-[#b91c1c] hover:underline">
+            Clear
+          </button>
+        )}
+      </div>
+      {value ? (
+        <div className="mb-1.5 overflow-hidden rounded-md border border-token">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={value} alt={label} className="block h-32 w-full object-cover" />
+        </div>
+      ) : (
+        <div className="mb-1.5 grid h-24 place-items-center rounded-md border border-dashed border-token bg-surface text-muted">
+          <span className="text-[11.5px]">No image yet</span>
+        </div>
+      )}
+      <div className="flex items-center gap-1.5">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Paste URL"
+          className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
+        />
+        <UploadButton small onUploaded={(url) => onChange(url)} />
+      </div>
+      {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
+    </div>
+  )
+}
+
+function InlineImage({
+  label, value, onChange,
+}: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      {value ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={value} alt={label} className="h-10 w-10 rounded-md border border-token object-cover" />
+      ) : (
+        <div className="grid h-10 w-10 place-items-center rounded-md border border-dashed border-token text-muted">
+          <ImageIcon className="h-3.5 w-3.5" />
+        </div>
+      )}
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={label}
+        className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
+      />
+      <UploadButton small onUploaded={(url) => onChange(url)} />
+      {value && (
+        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="Clear">
+          <Trash2 className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  )
+}
+
+function UploadButton({
+  label = 'Upload', small = false, onUploaded,
+}: { label?: string; small?: boolean; onUploaded: (url: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  async function pick() { inputRef.current?.click() }
+
+  async function handleFile(file: File) {
+    setBusy(true); setErr(null)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const r = await fetch('/api/upload', { method: 'POST', body: form })
+      const j = await r.json()
+      if (!r.ok) throw new Error(j.message || j.error || 'Upload failed')
+      onUploaded(j.url)
+    } catch (e: any) {
+      setErr(e?.message || 'Upload failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={pick}
+        disabled={busy}
+        className={
+          (small
+            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5 '
+            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5 ') +
+          (busy ? 'opacity-60' : '')
+        }
+      >
+        <Upload className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} strokeWidth={2.25} />
+        {busy ? 'Uploading…' : label}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) handleFile(f)
+          e.target.value = ''
+        }}
+      />
+      {err && <span className="text-[11px] text-[#b91c1c]">{err}</span>}
+    </div>
+  )
+}
 
 function FieldText({ label, value, onChange, placeholder }: {
   label: string; value: string; onChange: (v: string) => void; placeholder?: string

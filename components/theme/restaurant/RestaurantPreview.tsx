@@ -14,6 +14,11 @@ import type {
   RestaurantReservationProvider
 } from '@/utils/restaurant/types'
 import { getRestaurantPreset } from '@/utils/restaurant/presets'
+import {
+  TYPOGRAPHY_PRESETS,
+  buildGoogleFontsUrl,
+  getTypographyPreset,
+} from '@/utils/restaurant/typography'
 
 export type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
 
@@ -65,7 +70,22 @@ export default function RestaurantPreview({
   onViewChange,
 }: Props) {
   const preset = getRestaurantPreset(presetId)
-  const c = preset.colors
+  // Color overrides land on top of the preset palette, key-by-key.
+  const c = { ...preset.colors, ...(content.color_overrides || {}) }
+  // Typography preset is independent of color preset. If the user hasn't
+  // picked one we keep using the color preset's heading/body fonts so
+  // legacy sites don't visually shift.
+  const typoPreset = content.typography_preset
+    ? getTypographyPreset(content.typography_preset)
+    : null
+
+  const headingFont   = typoPreset?.heading_font   ?? preset.heading_font
+  const bodyFont      = typoPreset?.body_font      ?? preset.body_font
+  const headingWeight = typoPreset?.heading_weight ?? 500
+  const headingTrack  = typoPreset?.heading_tracking ?? '-0.02em'
+  const headingLead   = typoPreset?.heading_leading  ?? 1.04
+  const bodyWeight    = typoPreset?.body_weight    ?? 400
+
   const [internalView, setInternalView] = useState<RestaurantView>('home')
   const view = controlledView ?? internalView
   const setView = onViewChange ?? setInternalView
@@ -80,10 +100,14 @@ export default function RestaurantPreview({
         '--rb-text': c.text,
         '--rb-muted': c.muted,
         '--rb-border': c.border,
-        '--rb-heading-font': preset.heading_font,
-        '--rb-body-font': preset.body_font
+        '--rb-heading-font': headingFont,
+        '--rb-body-font': bodyFont,
+        '--rb-heading-weight': String(headingWeight),
+        '--rb-heading-tracking': headingTrack,
+        '--rb-heading-leading': String(headingLead),
+        '--rb-body-weight': String(bodyWeight),
       }) as React.CSSProperties,
-    [c, preset]
+    [c, headingFont, bodyFont, headingWeight, headingTrack, headingLead, bodyWeight]
   )
 
   const isDark = preset.id === 'onyx'
@@ -143,11 +167,10 @@ export default function RestaurantPreview({
 }
 
 function FontPreload() {
+  // One stylesheet covering every typography preset's families. Google's
+  // font sharding means unused families don't actually download.
   return (
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
-    />
+    <link rel="stylesheet" href={buildGoogleFontsUrl(TYPOGRAPHY_PRESETS)} />
   )
 }
 
@@ -174,7 +197,12 @@ function Heading({
   return (
     <h2
       className={`${sizes[size]} ${className}`}
-      style={{ fontFamily: 'var(--rb-heading-font)', lineHeight: 1.04, letterSpacing: '-0.02em', fontWeight: 500 }}
+      style={{
+        fontFamily: 'var(--rb-heading-font)',
+        lineHeight: 'var(--rb-heading-leading, 1.04)',
+        letterSpacing: 'var(--rb-heading-tracking, -0.02em)',
+        fontWeight: 'var(--rb-heading-weight, 500)' as any,
+      }}
     >
       {children}
     </h2>

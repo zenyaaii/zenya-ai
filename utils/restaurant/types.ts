@@ -180,6 +180,19 @@ export type RestaurantContent = {
     youtube?: string
     website?: string
   }
+
+  /**
+   * Typography preset id picked from utils/restaurant/typography.ts.
+   * Independent from the colour preset (style_preset). When absent the
+   * preview falls back to the color preset's heading/body fonts.
+   */
+  typography_preset?: string
+
+  /**
+   * Per-token colour overrides layered on top of the colour preset.
+   * Any missing key falls back to the preset's value.
+   */
+  color_overrides?: Partial<RestaurantColors>
 }
 
 /**
