@@ -15,13 +15,20 @@ import type {
 } from '@/utils/restaurant/types'
 import { getRestaurantPreset } from '@/utils/restaurant/presets'
 
+export type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
+
 type Props = {
   content: RestaurantContent
   presetId?: string
   className?: string
+  /**
+   * Controlled view — when provided, parent owns which page is shown
+   * and is notified of nav clicks via onViewChange. When omitted, the
+   * component manages its own view state (legacy behaviour).
+   */
+  view?: RestaurantView
+  onViewChange?: (v: RestaurantView) => void
 }
-
-type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
 
 // Motion-Driven design system (per ui-ux-pro-max): ease-out entrances, 300-500ms,
 // transform/opacity only, 30-50ms stagger, and full prefers-reduced-motion respect.
@@ -50,10 +57,18 @@ function useMotionKit() {
   return { reduce, reveal, staggerParent, staggerChild, viewport }
 }
 
-export default function RestaurantPreview({ content, presetId = 'onyx', className }: Props) {
+export default function RestaurantPreview({
+  content,
+  presetId = 'onyx',
+  className,
+  view: controlledView,
+  onViewChange,
+}: Props) {
   const preset = getRestaurantPreset(presetId)
   const c = preset.colors
-  const [view, setView] = useState<RestaurantView>('home')
+  const [internalView, setInternalView] = useState<RestaurantView>('home')
+  const view = controlledView ?? internalView
+  const setView = onViewChange ?? setInternalView
 
   const cssVars = useMemo(
     () =>
@@ -314,7 +329,7 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
   const contentOpacity = useTransform(scrollYProgress, [0, 0.85], [1, reduce ? 1 : 0])
 
   return (
-    <section ref={ref} id="top" className="relative overflow-hidden">
+    <section ref={ref} id="top" data-section="hero" className="relative overflow-hidden">
       <motion.div className="absolute inset-0" style={{ y: imageY, scale: imageScale }}>
         <img src={content.hero.image} alt="" className="w-full h-full object-cover" style={{ filter: isDark ? 'brightness(0.55)' : 'brightness(0.78)' }} />
         <div
@@ -388,7 +403,7 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
 function Story({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { reveal, viewport } = useMotionKit()
   return (
-    <section id="story" className="py-24 md:py-36">
+    <section id="story" data-section="story" className="py-24 md:py-36">
       <Container>
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           <Reveal className="lg:col-span-7 order-2 lg:order-1">
@@ -453,7 +468,7 @@ function Story({ content, isDark }: { content: RestaurantContent; isDark: boolea
 function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
   return (
-    <section className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
+    <section data-section="signature_dishes" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
           <Eyebrow className="mb-5">Signature</Eyebrow>
@@ -507,7 +522,7 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
   const current = cats.find((c) => c.id === active) || cats[0]
 
   return (
-    <section id="menu" className="py-24 md:py-36">
+    <section id="menu" data-section="menu" className="py-24 md:py-36">
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <Eyebrow className="mb-5">{content.menu.heading}</Eyebrow>
@@ -629,7 +644,7 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
   const { staggerParent, staggerChild, viewport } = useMotionKit()
   const imgs = content.gallery.images.slice(0, 6)
   return (
-    <section id="gallery" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
+    <section id="gallery" data-section="gallery" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
           <Eyebrow className="mb-5">Gallery</Eyebrow>
@@ -680,7 +695,7 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
 
 function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   return (
-    <section id="visit" className="py-24 md:py-36">
+    <section id="visit" data-section="hours_location" className="py-24 md:py-36">
       <Container>
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
           <Reveal className="lg:col-span-5">
@@ -773,7 +788,7 @@ function reservationHref(p: RestaurantReservationProvider) {
 function Reservations({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const r = content.reservations
   return (
-    <section id="reservations" className="py-24 md:py-32 relative overflow-hidden">
+    <section id="reservations" data-section="reservations" className="py-24 md:py-32 relative overflow-hidden">
       <div
         className="absolute inset-0"
         style={{
@@ -818,7 +833,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
   const { staggerParent, staggerChild, viewport } = useMotionKit()
   const r = content.reviews
   return (
-    <section className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
+    <section data-section="reviews" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
           <Eyebrow className="mb-5">Reviews</Eyebrow>
@@ -888,7 +903,7 @@ function Stars({ rating, small = false }: { rating: number; small?: boolean }) {
 function Press({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
   return (
-    <section className="py-20 md:py-28">
+    <section data-section="press" className="py-20 md:py-28">
       <Container>
         <Reveal className="text-center mb-12">
           <Eyebrow className="mb-3">As seen in</Eyebrow>
@@ -922,7 +937,7 @@ function Press({ content, isDark }: { content: RestaurantContent; isDark: boolea
 
 function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   return (
-    <section className="py-24 md:py-32" style={{ background: isDark ? 'rgba(200,169,106,0.06)' : 'rgba(0,0,0,0.04)' }}>
+    <section data-section="newsletter" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(200,169,106,0.06)' : 'rgba(0,0,0,0.04)' }}>
       <Container>
         <Reveal className="max-w-2xl mx-auto text-center">
           <Eyebrow className="mb-5">Newsletter</Eyebrow>
@@ -965,7 +980,7 @@ function FAQ({ content, isDark }: { content: RestaurantContent; isDark: boolean 
   const { reduce } = useMotionKit()
   const [open, setOpen] = useState<number | null>(0)
   return (
-    <section className="py-24 md:py-32">
+    <section data-section="faq" className="py-24 md:py-32">
       <Container>
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16">
           <Reveal className="lg:col-span-4">
