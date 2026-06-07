@@ -192,6 +192,16 @@ async function upsertHostingSubscription(
     .eq('id', userId)
     .maybeSingle()
 
+  // Admin is a permanent entitlement — never let Stripe sub churn flip
+  // their has_hosting/plan/is_pro flags. Audit-row already written above.
+  if (existing?.plan === 'admin') {
+    await logEvent(supabase, userId, `hosting_subscription.${sub.status}.admin_skip`, {
+      subscription_id: sub.id,
+      status: sub.status,
+    })
+    return
+  }
+
   const updates: Record<string, unknown> = {
     has_hosting: active,
     hosting_subscription_id: sub.id,

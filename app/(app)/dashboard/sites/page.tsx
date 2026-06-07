@@ -75,8 +75,11 @@ export default function SitesPage() {
   }
 
   const plan: Plan = profile?.plan || 'free'
-  const isPro = !!profile?.is_pro || plan === 'admin'
-  const hasHosting = !!profile?.has_hosting || plan === 'admin'
+  const isPro = !!profile?.is_pro || plan === 'admin' || plan === 'pro_onetime' || plan === 'pro_hosting'
+  // Belt-and-suspenders: trust plan first, then the cached flag. If a
+  // Stripe webhook ever races the column out of sync, the user still sees
+  // the entitlement they paid for.
+  const hasHosting = plan === 'admin' || plan === 'pro_hosting' || !!profile?.has_hosting
 
   const counts = useMemo(() => {
     const live    = themes.filter((t) => t.is_published && t.slug).length
