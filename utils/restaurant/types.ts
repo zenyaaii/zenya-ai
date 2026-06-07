@@ -193,6 +193,13 @@ export type RestaurantContent = {
    * Any missing key falls back to the preset's value.
    */
   color_overrides?: Partial<RestaurantColors>
+
+  /**
+   * Per-section text-size + alignment overrides. Keyed by section panel id
+   * (e.g. "hero", "menu"). Empty/missing sections fall back to defaults.
+   * Applied via [data-section] CSS scoping in the preview.
+   */
+  section_styles?: Record<string, { text_scale?: number; text_align?: 'left' | 'center' | 'right' }>
 }
 
 /**

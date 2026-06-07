@@ -45,5 +45,25 @@ export async function GET(req: NextRequest) {
   }
 
   const results = await Promise.all(valid.map((d) => checkDomainAvailability(d)))
+
+  // If every lookup failed for the same reason (e.g. missing VERCEL_API_TOKEN
+  // or an upstream auth error), don't silently show a row of yellow pills —
+  // surface it as a server error so the operator sees what to fix.
+  const allFailed = results.length > 0 && results.every((r) => r.available === null)
+  if (allFailed) {
+    const first = results[0]
+    console.error('[/api/domains/search] all lookups failed:', {
+      code: first.error_code, message: first.message,
+    })
+    return NextResponse.json(
+      {
+        error: first.error_code || 'lookup_failed',
+        message: first.message || 'Domain availability lookup is currently unavailable.',
+        results,
+      },
+      { status: 502 }
+    )
+  }
+
   return NextResponse.json({ query: q, results })
 }

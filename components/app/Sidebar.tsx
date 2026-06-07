@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
-  Home, Folder, BarChart3, Users, Search, Globe,
+  Home, Folder, BarChart3, Users, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -28,6 +28,7 @@ const NAV: NavGroup[] = [
     items: [
       { href: '/dashboard',            label: 'Home',       icon: Home },
       { href: '/dashboard/sites',      label: 'Sites',      icon: Folder },
+      { href: '/dashboard/gallery',    label: 'Gallery',    icon: ImageIcon },
       { href: '/dashboard/analytics',  label: 'Analytics',  icon: BarChart3 },
       { href: '/dashboard/visitors',   label: 'Visitors',   icon: Users, pill: 'Soon' },
       { href: '/dashboard/seo',        label: 'SEO',        icon: Search },

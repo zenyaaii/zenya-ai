@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import AtlasPreview from '@/components/theme/atlas/AtlasPreview'
 import type { AtlasContent } from '@/utils/atlas/types'
+import { sectionStylesToCss, type SectionStyles } from '@/utils/theme-editor-types'
 
 export default function AtlasPreviewPage() {
   const params = useParams<{ id: string }>()
@@ -15,6 +16,7 @@ export default function AtlasPreviewPage() {
   const [presetId, setPresetId] = useState<string>('orbit')
   const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
   const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
+  const [sectionStyles, setSectionStyles] = useState<SectionStyles | undefined>(undefined)
   const [name, setName] = useState<string>('SaaS App')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,6 +47,7 @@ export default function AtlasPreviewPage() {
       setPresetId(stored.style_preset || 'orbit')
       setTypographyPreset(stored.typography_preset || undefined)
       setColorOverrides(stored.color_overrides || undefined)
+      setSectionStyles(stored.section_styles || undefined)
       setName(data.product_name || 'SaaS App')
       setLoading(false)
     }
@@ -98,6 +101,12 @@ export default function AtlasPreviewPage() {
           </Link>
         </div>
       </div>
+      {sectionStyles && Object.keys(sectionStyles).length > 0 && (
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
+        />
+      )}
       <AtlasPreview
         content={content}
         presetId={presetId}

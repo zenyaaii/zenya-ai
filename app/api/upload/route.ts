@@ -100,11 +100,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'no_public_url' }, { status: 500 })
   }
 
+  // Record in the user's gallery so it shows up in the picker. Best-effort —
+  // a failure here doesn't break the upload, the URL is still returned.
+  const { data: row } = await a
+    .from('gallery_images')
+    .upsert(
+      {
+        user_id: user.id,
+        url: pub.publicUrl,
+        path,
+        name: (file as any).name || null,
+        mime: type,
+        bytes: file.size,
+        source: 'upload',
+      },
+      { onConflict: 'user_id,url', ignoreDuplicates: false },
+    )
+    .select('id')
+    .single()
+
   return NextResponse.json({
     ok: true,
     url: pub.publicUrl,
     path,
     type,
     size: file.size,
+    gallery_id: row?.id ?? null,
   })
 }

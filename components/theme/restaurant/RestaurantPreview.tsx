@@ -705,17 +705,6 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
             )
           })}
         </motion.div>
-        {/* Attribution — honest about where the photos came from. */}
-        {content.gallery.attribution && (
-          <p
-            className="mt-8 text-center text-xs uppercase tracking-[0.25em]"
-            style={{ color: 'var(--rb-muted)' }}
-          >
-            {content.gallery.attribution === 'from_venue'
-              ? 'Photography by the venue.'
-              : 'Photography sourced from Unsplash.'}
-          </p>
-        )}
       </Container>
     </section>
   )

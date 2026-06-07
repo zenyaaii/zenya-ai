@@ -138,18 +138,31 @@ export async function removeProjectDomain(domain: string): Promise<void> {
 
 export type DomainAvailability = {
   domain: string
-  available: boolean
+  /** true = available to register, false = registered by someone, null = lookup failed (don't show as "taken"). */
+  available: boolean | null
   premium?: boolean
   /** Annual price in USD cents when available. Undefined if Vercel doesn't price it. */
   price_cents?: number
   /** ISO currency code, almost always "usd" for Vercel. */
   currency?: string
-  /** Vercel reply when the lookup couldn't be performed. */
+  /** Set when available === null — explains why the lookup couldn't run. */
   message?: string
+  /** Set when available === null — the upstream HTTP/error code from Vercel. */
+  error_code?: string
 }
 
 export async function checkDomainAvailability(domain: string): Promise<DomainAvailability> {
-  const { token, teamId } = env()
+  let token: string, teamId: string | undefined
+  try {
+    ({ token, teamId } = env())
+  } catch (e: any) {
+    return {
+      domain,
+      available: null,
+      message: e?.message || 'Domain lookup is not configured on this server.',
+      error_code: e?.code || 'missing_env',
+    }
+  }
   try {
     const status = await vercelFetch<{ available: boolean; premium?: boolean }>(
       `/v4/domains/status?name=${encodeURIComponent(domain)}${teamId ? `&teamId=${teamId}` : ''}`,
@@ -176,10 +189,13 @@ export async function checkDomainAvailability(domain: string): Promise<DomainAva
       currency,
     }
   } catch (e: any) {
+    // Don't pretend it's taken — the user has no way to tell that apart from
+    // a real registration. Surface the error so the UI can show "Couldn't check".
     return {
       domain,
-      available: false,
+      available: null,
       message: e?.message || 'lookup failed',
+      error_code: e?.code || (typeof e?.status === 'number' ? `http_${e.status}` : 'unknown'),
     }
   }
 }

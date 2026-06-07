@@ -253,7 +253,7 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
   const revealMock = useFadeUp(0.35)
 
   return (
-    <section className="relative overflow-hidden px-6 py-20 md:py-28" style={{ fontFamily: font }}>
+    <section data-section="hero" className="relative overflow-hidden px-6 py-20 md:py-28" style={{ fontFamily: font }}>
       {/* Glow orb */}
       <div
         className="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/4 rounded-full opacity-30 blur-3xl"
@@ -321,7 +321,7 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
 // ─── Trust bar ─────────────────────────────────────────────────────────────────
 function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="border-y px-6 py-8" style={{ borderColor: colors.border, fontFamily: font }}>
+    <section data-section="trust_bar" className="border-y px-6 py-8" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
         <p className="mb-5 text-center text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: colors.muted }}>
           {content.trust_bar.label}
@@ -345,7 +345,7 @@ function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; color
 // ─── Features ──────────────────────────────────────────────────────────────────
 function AtlasFeatures({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ fontFamily: font }}>
+    <section data-section="features" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...useReveal(0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
@@ -407,7 +407,7 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
 // ─── How it works ──────────────────────────────────────────────────────────────
 function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
+    <section data-section="how_it_works" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
         <motion.div {...useReveal(0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
@@ -461,7 +461,7 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
 // ─── Pricing ───────────────────────────────────────────────────────────────────
 function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ fontFamily: font }}>
+    <section data-section="pricing" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...useReveal(0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
@@ -540,7 +540,7 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
 // ─── Integrations ──────────────────────────────────────────────────────────────
 function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
+    <section data-section="integrations" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
         <motion.div {...useReveal(0)} className="mb-14">
           <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
@@ -580,7 +580,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ fontFamily: font }}>
+    <section data-section="testimonials" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...useReveal(0)} className="mb-14 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
@@ -626,7 +626,7 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
 // ─── Security strip ────────────────────────────────────────────────────────────
 function AtlasSecurity({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="border-y px-6 py-10" style={{ borderColor: colors.border, fontFamily: font }}>
+    <section data-section="security" className="border-y px-6 py-10" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
         <p className="mb-6 text-sm font-bold" style={{ color: colors.muted }}>{content.security.heading}</p>
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -654,7 +654,7 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
+    <section data-section="faq" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-3xl">
         <motion.h2 {...useReveal(0)} className="mb-10 text-center text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
           {content.faq.heading}
@@ -706,7 +706,7 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
 // ─── CTA section ───────────────────────────────────────────────────────────────
 function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <section className="px-6 py-24" style={{ fontFamily: font }}>
+    <section data-section="cta" className="px-6 py-24" style={{ fontFamily: font }}>
       <motion.div
         {...useReveal(0)}
         className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl p-12 text-center"
@@ -741,7 +741,7 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   return (
-    <footer className="border-t px-6 py-12" style={{ borderColor: colors.border, fontFamily: font }}>
+    <footer data-section="footer" className="border-t px-6 py-12" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
           <div>

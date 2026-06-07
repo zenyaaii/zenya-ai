@@ -10,6 +10,13 @@ import {
   Upload, Trash2, Plus, RotateCcw,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
+import GalleryPicker from '@/components/editor/GalleryPicker'
+import ClickToEditOverlay from '@/components/editor/ClickToEditOverlay'
+import {
+  SECTION_TEXT_SCALES, sectionStylesToCss,
+  type SectionStyle, type SectionStyles, type SectionTextAlign,
+} from '@/utils/theme-editor-types'
+import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 import RestaurantPreview, { type RestaurantView } from '@/components/theme/restaurant/RestaurantPreview'
 import { RESTAURANT_PRESETS, getRestaurantPreset } from '@/utils/restaurant/presets'
 import {
@@ -45,7 +52,6 @@ type SelectionKey =
   | RestaurantSectionKey
   | 'footer_text'
   | 'social'
-  | 'gallery_attribution'
   | 'style_preset'
   | 'typography_preset'
 
@@ -84,7 +90,6 @@ const GLOBAL_ITEMS: { key: SelectionKey; label: string; icon: typeof HomeIcon }[
   { key: 'typography_preset',    label: 'Typography',          icon: Type },
   { key: 'footer_text',          label: 'Footer text',         icon: Type },
   { key: 'social',               label: 'Social links',        icon: AtSign },
-  { key: 'gallery_attribution',  label: 'Gallery attribution', icon: ImageIcon },
 ]
 
 type Status = 'idle' | 'saving' | 'saved' | 'error'
@@ -303,6 +308,12 @@ export default function RestaurantEditorPage() {
           className="flex-1 overflow-y-auto"
           style={{ background: '#0a0a0c', scrollbarWidth: 'thin' }}
         >
+          {content.section_styles && Object.keys(content.section_styles).length > 0 && (
+            <style
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: sectionStylesToCss(content.section_styles) }}
+            />
+          )}
           <RestaurantPreview
             content={content}
             presetId={presetId}
@@ -316,6 +327,14 @@ export default function RestaurantEditorPage() {
                 if (first) setSelected(first)
               }
             }}
+          />
+          <ClickToEditOverlay
+            containerRef={previewRef}
+            onPick={(panelId) => setSelected(panelId as SelectionKey)}
+            panelToView={Object.fromEntries(
+              PAGES.flatMap((p) => p.sections.map((s) => [s, p.view]))
+            )}
+            onViewChange={(v) => setView(v as RestaurantView)}
           />
         </main>
 
@@ -547,7 +566,6 @@ function RightPanel({
   const headerLabel =
     selected === 'footer_text' ? 'Footer text' :
     selected === 'social' ? 'Social links' :
-    selected === 'gallery_attribution' ? 'Gallery attribution' :
     selected === 'style_preset' ? 'Colors & palette' :
     selected === 'typography_preset' ? 'Typography' :
     RESTAURANT_SECTION_LABELS[selected as RestaurantSectionKey] || selected
@@ -563,6 +581,14 @@ function RightPanel({
       </div>
 
       <div className="space-y-4 px-4 py-4">
+        {SECTION_ICONS[selected as RestaurantSectionKey] && (
+          <SectionStyleHeader
+            panelId={selected}
+            value={content.section_styles?.[selected]}
+            onPatch={(p) => patchSectionStyle(content, patchContent, selected, p)}
+            onClear={() => clearSectionStyle(content, patchContent, selected)}
+          />
+        )}
         {selected === 'hero' && <HeroFields content={content} patchContent={patchContent} />}
         {selected === 'story' && <StoryFields content={content} patchContent={patchContent} />}
         {selected === 'menu' && <MenuFields content={content} patchContent={patchContent} />}
@@ -576,7 +602,6 @@ function RightPanel({
         {selected === 'newsletter' && <NewsletterFields content={content} patchContent={patchContent} />}
         {selected === 'footer_text' && <FooterTextFields content={content} patchContent={patchContent} />}
         {selected === 'social' && <SocialFields content={content} patchContent={patchContent} />}
-        {selected === 'gallery_attribution' && <GalleryAttributionFields content={content} patchContent={patchContent} />}
         {selected === 'style_preset' && (
           <StylePresetFields
             presetId={presetId}
@@ -771,6 +796,70 @@ function MenuFields({ content, patchContent }: FieldProps) {
   )
 }
 
+function PhotoRow({
+  img, onPick, onAlt, onUp, onDown, onRemove,
+}: {
+  img: RestaurantGalleryImage
+  onPick: (url: string) => void
+  onAlt: (alt: string) => void
+  onUp: () => void
+  onDown: () => void
+  onRemove: () => void
+}) {
+  const [pickerOpen, setPickerOpen] = useState(false)
+  return (
+    <div className="flex gap-2 rounded-md border border-token bg-white p-2">
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        className="group relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-md border border-token bg-surface transition hover:border-primary"
+        title={img.url ? 'Click to change' : 'Choose image'}
+      >
+        {img.url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={img.url} alt={img.alt || ''} className="h-full w-full object-cover" />
+        ) : (
+          <span className="grid h-full w-full place-items-center text-muted">
+            <ImageIcon className="h-4 w-4" />
+          </span>
+        )}
+        <span className="absolute inset-x-0 bottom-0 bg-black/55 text-center text-[9px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+          Change
+        </span>
+      </button>
+      <div className="min-w-0 flex-1 space-y-1">
+        <input
+          value={img.alt || ''}
+          onChange={(e) => onAlt(e.target.value)}
+          placeholder="Alt text"
+          className="w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
+        />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5"
+          >
+            <Upload className="h-3 w-3" strokeWidth={2.25} />
+            Upload
+          </button>
+          <button type="button" onClick={onUp} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↑</button>
+          <button type="button" onClick={onDown} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↓</button>
+          <button type="button" onClick={onRemove} className="ml-auto rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]">
+            <Trash2 className="inline-block h-3 w-3" />
+          </button>
+        </div>
+      </div>
+      <GalleryPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={onPick}
+        currentUrl={img.url || undefined}
+      />
+    </div>
+  )
+}
+
 function GalleryFields({ content, patchContent }: FieldProps) {
   const g = content.gallery
   function setImages(next: RestaurantGalleryImage[]) {
@@ -801,42 +890,20 @@ function GalleryFields({ content, patchContent }: FieldProps) {
       <SectionLabel>Photos ({g.images.length})</SectionLabel>
       <div className="space-y-2">
         {g.images.map((img, i) => (
-          <div key={i} className="flex gap-2 rounded-md border border-token bg-white p-2">
-            {img.url ? (
-              <img src={img.url} alt={img.alt || ''} className="h-14 w-14 flex-shrink-0 rounded-md object-cover" />
-            ) : (
-              <div className="grid h-14 w-14 flex-shrink-0 place-items-center rounded-md bg-surface text-muted">
-                <ImageIcon className="h-4 w-4" />
-              </div>
-            )}
-            <div className="min-w-0 flex-1 space-y-1">
-              <input
-                value={img.url}
-                onChange={(e) => updateImage(i, { url: e.target.value })}
-                placeholder="https://… or upload"
-                className="w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
-              />
-              <input
-                value={img.alt || ''}
-                onChange={(e) => updateImage(i, { alt: e.target.value })}
-                placeholder="Alt text"
-                className="w-full rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary"
-              />
-              <div className="flex items-center gap-1">
-                <UploadButton onUploaded={(url) => updateImage(i, { url })} small />
-                <button type="button" onClick={() => move(i, -1)} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↑</button>
-                <button type="button" onClick={() => move(i, 1)} className="rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-muted hover:bg-black/5">↓</button>
-                <button type="button" onClick={() => removeImage(i)} className="ml-auto rounded border border-token bg-white px-1.5 py-0.5 text-[11px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]">
-                  <Trash2 className="inline-block h-3 w-3" />
-                </button>
-              </div>
-            </div>
-          </div>
+          <PhotoRow
+            key={i}
+            img={img}
+            onPick={(url) => updateImage(i, { url })}
+            onAlt={(alt) => updateImage(i, { alt })}
+            onUp={() => move(i, -1)}
+            onDown={() => move(i, 1)}
+            onRemove={() => removeImage(i)}
+          />
         ))}
 
         <div className="rounded-md border border-dashed border-token bg-white p-2">
           <UploadButton
-            label={g.images.length === 0 ? 'Upload your first photo' : 'Add photo'}
+            label={g.images.length === 0 ? 'Add your first photo' : 'Add photo'}
             onUploaded={(url) => addImage(url)}
           />
         </div>
@@ -1119,24 +1186,6 @@ function SocialFields({ content, patchContent }: FieldProps) {
       <FieldText label="WhatsApp"          value={s.whatsapp  || ''} onChange={set('whatsapp')}  placeholder="https://wa.me/… or +1 212 555 0140" />
       <FieldText label="YouTube URL"       value={s.youtube   || ''} onChange={set('youtube')}   placeholder="https://youtube.com/@…" />
       <FieldText label="Website / other"   value={s.website   || ''} onChange={set('website')}   placeholder="https://yourwebsite.com" />
-    </>
-  )
-}
-
-function GalleryAttributionFields({ content, patchContent }: FieldProps) {
-  const current = content.gallery.attribution || 'from_unsplash'
-  function set(value: 'from_venue' | 'from_unsplash') {
-    patchContent((c) => ({ ...c, gallery: { ...c.gallery, attribution: value } }))
-  }
-  return (
-    <>
-      <SmallNote>The small note shown under your photo gallery on the live site.</SmallNote>
-      <RadioRow checked={current === 'from_venue'} onClick={() => set('from_venue')}
-        label='"Photography by the venue."'
-        hint="Choose this if the gallery photos are your own." />
-      <RadioRow checked={current === 'from_unsplash'} onClick={() => set('from_unsplash')}
-        label='"Photography sourced from Unsplash."'
-        hint="Choose this if you used stock images. Honest and clear." />
     </>
   )
 }
@@ -1432,6 +1481,7 @@ function Collapsible({
 function FieldImage({
   label, value, onChange, hint,
 }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  const [open, setOpen] = useState(false)
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
@@ -1443,25 +1493,45 @@ function FieldImage({
         )}
       </div>
       {value ? (
-        <div className="mb-1.5 overflow-hidden rounded-md border border-token">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="group mb-1.5 block w-full overflow-hidden rounded-md border border-token transition hover:border-primary"
+          title="Click to change"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt={label} className="block h-32 w-full object-cover" />
-        </div>
+          <span className="block bg-black/60 px-2 py-1 text-center text-[10.5px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+            Click to change
+          </span>
+        </button>
       ) : (
-        <div className="mb-1.5 grid h-24 place-items-center rounded-md border border-dashed border-token bg-surface text-muted">
-          <span className="text-[11.5px]">No image yet</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mb-1.5 grid h-24 w-full place-items-center rounded-md border border-dashed border-token bg-surface text-muted transition hover:border-primary hover:text-primary"
+        >
+          <div className="flex flex-col items-center gap-1">
+            <Upload className="h-4 w-4" strokeWidth={2} />
+            <span className="text-[11.5px] font-medium">Choose image</span>
+          </div>
+        </button>
       )}
-      <div className="flex items-center gap-1.5">
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste URL"
-          className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
-        />
-        <UploadButton small onUploaded={(url) => onChange(url)} />
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+      >
+        <ImageIcon className="h-3 w-3" strokeWidth={2.25} />
+        {value ? 'Change image' : 'Open gallery'}
+      </button>
       {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
+      <GalleryPicker
+        open={open}
+        onClose={() => setOpen(false)}
+        onPick={(url) => onChange(url)}
+        currentUrl={value || undefined}
+      />
     </div>
   )
 }
@@ -1469,28 +1539,43 @@ function FieldImage({
 function InlineImage({
   label, value, onChange,
 }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
   return (
     <div className="flex items-center gap-2">
-      {value ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={value} alt={label} className="h-10 w-10 rounded-md border border-token object-cover" />
-      ) : (
-        <div className="grid h-10 w-10 place-items-center rounded-md border border-dashed border-token text-muted">
-          <ImageIcon className="h-3.5 w-3.5" />
-        </div>
-      )}
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={label}
-        className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
-      />
-      <UploadButton small onUploaded={(url) => onChange(url)} />
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="group relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-token bg-white transition hover:border-primary"
+        title={value ? 'Click to change' : 'Choose image'}
+      >
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt={label} className="h-full w-full object-cover" />
+        ) : (
+          <span className="grid h-full w-full place-items-center text-muted">
+            <ImageIcon className="h-3.5 w-3.5" />
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex min-w-0 flex-1 items-center justify-between gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+      >
+        <span className="truncate text-left text-muted">{value ? 'Image set' : label}</span>
+        <Upload className="h-3 w-3 flex-shrink-0 text-muted" strokeWidth={2.25} />
+      </button>
       {value && (
         <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="Clear">
           <Trash2 className="h-3 w-3" />
         </button>
       )}
+      <GalleryPicker
+        open={open}
+        onClose={() => setOpen(false)}
+        onPick={(url) => onChange(url)}
+        currentUrl={value || undefined}
+      />
     </div>
   )
 }
@@ -1498,57 +1583,23 @@ function InlineImage({
 function UploadButton({
   label = 'Upload', small = false, onUploaded,
 }: { label?: string; small?: boolean; onUploaded: (url: string) => void }) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-
-  async function pick() { inputRef.current?.click() }
-
-  async function handleFile(file: File) {
-    setBusy(true); setErr(null)
-    try {
-      const form = new FormData()
-      form.append('file', file)
-      const r = await fetch('/api/upload', { method: 'POST', body: form })
-      const j = await r.json()
-      if (!r.ok) throw new Error(j.message || j.error || 'Upload failed')
-      onUploaded(j.url)
-    } catch (e: any) {
-      setErr(e?.message || 'Upload failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
+  const [open, setOpen] = useState(false)
   return (
-    <div className="inline-flex items-center gap-1.5">
+    <>
       <button
         type="button"
-        onClick={pick}
-        disabled={busy}
+        onClick={() => setOpen(true)}
         className={
-          (small
-            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5 '
-            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5 ') +
-          (busy ? 'opacity-60' : '')
+          small
+            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5'
+            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5'
         }
       >
         <Upload className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} strokeWidth={2.25} />
-        {busy ? 'Uploading…' : label}
+        {label}
       </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) handleFile(f)
-          e.target.value = ''
-        }}
-      />
-      {err && <span className="text-[11px] text-[#b91c1c]">{err}</span>}
-    </div>
+      <GalleryPicker open={open} onClose={() => setOpen(false)} onPick={(url) => onUploaded(url)} />
+    </>
   )
 }
 
@@ -1621,5 +1672,112 @@ function CenteredMessage({ children }: { children: React.ReactNode }) {
     <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-24 text-center">
       {children}
     </main>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────── *
+ * Per-section text size + alignment header                                *
+ * Shown above each section's editor fields so the user can dial up        *
+ * text size / shift alignment without leaving the panel.                  *
+ * ─────────────────────────────────────────────────────────────────────── */
+
+function patchSectionStyle(
+  content: RestaurantContent,
+  patchContent: (u: (c: RestaurantContent) => RestaurantContent) => void,
+  panelId: string,
+  patch: Partial<SectionStyle>,
+) {
+  patchContent((c) => {
+    const cur: SectionStyles = { ...(c.section_styles || {}) }
+    const merged: SectionStyle = { ...(cur[panelId] || {}), ...patch }
+    if (merged.text_scale == null || merged.text_scale === 1) delete merged.text_scale
+    if (!merged.text_align || merged.text_align === 'left') delete merged.text_align
+    if (Object.keys(merged).length === 0) {
+      delete cur[panelId]
+    } else {
+      cur[panelId] = merged
+    }
+    return { ...c, section_styles: Object.keys(cur).length ? cur : undefined }
+  })
+}
+
+function clearSectionStyle(
+  content: RestaurantContent,
+  patchContent: (u: (c: RestaurantContent) => RestaurantContent) => void,
+  panelId: string,
+) {
+  patchContent((c) => {
+    if (!c.section_styles?.[panelId]) return c
+    const cur = { ...c.section_styles }
+    delete cur[panelId]
+    return { ...c, section_styles: Object.keys(cur).length ? cur : undefined }
+  })
+}
+
+function SectionStyleHeader({
+  panelId, value, onPatch, onClear,
+}: {
+  panelId: string
+  value?: SectionStyle
+  onPatch: (p: Partial<SectionStyle>) => void
+  onClear: () => void
+}) {
+  const activeScale = value?.text_scale ?? 1
+  const activeAlign: SectionTextAlign = value?.text_align ?? 'left'
+  const hasOverride = !!(value && (value.text_scale != null || value.text_align != null))
+
+  return (
+    <div className="rounded-lg border border-token bg-[rgba(94,106,210,0.04)] p-2.5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Section style</span>
+        {hasOverride && (
+          <button type="button" onClick={onClear} className="text-[10.5px] font-medium text-muted hover:text-foreground">
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center gap-1.5">
+        <span className="text-[10.5px] text-muted">Size</span>
+        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+          {SECTION_TEXT_SCALES.map((s) => {
+            const selected = Math.abs(activeScale - s.value) < 0.01
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => onPatch({ text_scale: s.value === 1 ? undefined : s.value })}
+                className={'flex-1 rounded text-[11px] font-semibold transition ' + (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')}
+                style={{ padding: '3px 0' }}
+                title={`Text size ${s.label}`}
+              >{s.label}</button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <span className="text-[10.5px] text-muted">Align</span>
+        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+          {([{ id: 'left' as const, Icon: AlignLeft }, { id: 'center' as const, Icon: AlignCenter }, { id: 'right' as const, Icon: AlignRight }]).map(({ id, Icon }) => {
+            const selected = activeAlign === id
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onPatch({ text_align: id === 'left' ? undefined : id })}
+                className={'flex flex-1 items-center justify-center rounded transition ' + (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')}
+                style={{ padding: '4px 0' }}
+                title={`Align ${id}`}
+              ><Icon className="h-3 w-3" strokeWidth={2.25} /></button>
+            )
+          })}
+        </div>
+      </div>
+
+      <p className="mt-2 text-[10.5px] leading-snug text-muted/80">
+        Applies to the <strong className="font-semibold text-foreground">{panelId}</strong> section.
+      </p>
+    </div>
   )
 }

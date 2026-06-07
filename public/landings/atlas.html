@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1440" />
+<title>Atlas — SaaS landing</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  .gradient-text { background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .glow { box-shadow: 0 0 80px -10px rgba(99,102,241,0.45); }
+</style>
+</head>
+<body class="bg-[#0a0a0c] text-white">
+
+<!-- Nav -->
+<nav class="border-b border-white/10">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+    <div class="flex items-center gap-2 text-base font-black">
+      <span class="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-xs">A</span>
+      Atlas
+    </div>
+    <div class="hidden gap-7 text-sm text-white/70 md:flex">
+      <a>Features</a><a>Pricing</a><a>Integrations</a><a>Docs</a>
+    </div>
+    <button class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-black">Get started</button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="relative overflow-hidden px-6 py-24 text-center">
+  <div class="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/4 rounded-full bg-indigo-500/30 blur-3xl"></div>
+  <div class="relative mx-auto max-w-4xl">
+    <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold text-white/80">
+      <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400"></span> v4.2 — now with AI workflows
+    </span>
+    <h1 class="mt-6 text-5xl font-black leading-[1.05] sm:text-6xl md:text-7xl">
+      Ship faster with the<br /><span class="gradient-text">all-in-one platform</span>
+    </h1>
+    <p class="mx-auto mt-6 max-w-2xl text-lg text-white/65">
+      Atlas gives your team one place to plan, build, and ship — with automation, analytics, and AI baked in from day one.
+    </p>
+    <div class="mt-9 flex flex-wrap justify-center gap-3">
+      <button class="rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-8 py-3.5 text-sm font-black text-white glow">Start free trial →</button>
+      <button class="rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-bold text-white">Watch demo</button>
+    </div>
+    <p class="mt-5 text-xs text-white/50">No credit card. 14-day free trial. 4.9★ on G2.</p>
+  </div>
+
+  <!-- Mock dashboard -->
+  <div class="relative mx-auto mt-14 max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-1 shadow-2xl glow">
+    <div class="rounded-xl bg-[#111114] p-5">
+      <div class="flex items-center gap-2 border-b border-white/10 pb-3">
+        <span class="h-2.5 w-2.5 rounded-full bg-red-400/80"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></span>
+        <span class="h-2.5 w-2.5 rounded-full bg-green-400/80"></span>
+        <span class="ml-3 text-xs text-white/50">app.atlas.com / dashboard</span>
+      </div>
+      <div class="grid grid-cols-4 gap-3 pt-5 text-left">
+        <div class="col-span-1 space-y-1.5">
+          <div class="rounded-md bg-white/10 px-2.5 py-2 text-xs text-white/80">Overview</div>
+          <div class="px-2.5 py-2 text-xs text-white/50">Projects</div>
+          <div class="px-2.5 py-2 text-xs text-white/50">Members</div>
+          <div class="px-2.5 py-2 text-xs text-white/50">Billing</div>
+        </div>
+        <div class="col-span-3 grid grid-cols-3 gap-3">
+          <div class="rounded-lg bg-white/5 p-4"><div class="text-xs text-white/50">Active users</div><div class="mt-2 text-2xl font-black">12.4k</div><div class="text-xs text-green-400">+18% wow</div></div>
+          <div class="rounded-lg bg-white/5 p-4"><div class="text-xs text-white/50">MRR</div><div class="mt-2 text-2xl font-black">$84,210</div><div class="text-xs text-green-400">+9.4%</div></div>
+          <div class="rounded-lg bg-white/5 p-4"><div class="text-xs text-white/50">NPS</div><div class="mt-2 text-2xl font-black">72</div><div class="text-xs text-green-400">+4</div></div>
+          <div class="col-span-3 h-32 rounded-lg bg-gradient-to-tr from-indigo-500/20 via-fuchsia-500/10 to-transparent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust bar -->
+<section class="border-y border-white/10 px-6 py-8">
+  <p class="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-white/40">Powering 12,000+ teams worldwide</p>
+  <div class="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-12 gap-y-2 text-base font-black text-white/45">
+    <span>VERCEL</span><span>STRIPE</span><span>LINEAR</span><span>NOTION</span><span>FIGMA</span><span>POSTHOG</span>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="px-6 py-24">
+  <div class="mx-auto max-w-6xl">
+    <div class="mb-14 text-center">
+      <span class="text-xs font-bold uppercase tracking-[0.2em] text-indigo-400">Everything you need</span>
+      <h2 class="mt-3 text-4xl font-black md:text-5xl">One platform. Every workflow.</h2>
+    </div>
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-7">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-indigo-500/20 text-indigo-400">⚡</div>
+        <h3 class="mt-4 text-lg font-bold">AI workflows</h3>
+        <p class="mt-2 text-sm text-white/60">Build, test, and deploy AI agents without leaving your project board.</p>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-7">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-fuchsia-500/20 text-fuchsia-400">📊</div>
+        <h3 class="mt-4 text-lg font-bold">Realtime analytics</h3>
+        <p class="mt-2 text-sm text-white/60">Live dashboards out of the box. Track activation, retention, revenue.</p>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-7">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-pink-500/20 text-pink-400">🔒</div>
+        <h3 class="mt-4 text-lg font-bold">Enterprise security</h3>
+        <p class="mt-2 text-sm text-white/60">SOC2 Type II, SSO, RBAC, audit logs. SOC ready from day one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="px-6 py-24">
+  <div class="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/15 via-fuchsia-500/10 to-transparent p-14 text-center">
+    <h2 class="text-4xl font-black md:text-5xl">Ready to ship faster?</h2>
+    <p class="mx-auto mt-4 max-w-xl text-white/65">Join 12,000+ teams already running on Atlas.</p>
+    <button class="mt-7 rounded-full bg-white px-8 py-3.5 text-sm font-black text-black">Start free trial →</button>
+  </div>
+</section>
+
+<footer class="border-t border-white/10 px-6 py-10 text-center text-xs text-white/40">© 2026 Atlas. All rights reserved.</footer>
+
+</body>
+</html>

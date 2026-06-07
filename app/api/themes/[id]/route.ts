@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { extractImageUrls } from '@/lib/extract-image-urls'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,6 +31,28 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
   if (error) return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
   if (!data)  return NextResponse.json({ error: 'not_found' }, { status: 404 })
+
+  // Idempotent gallery top-up: every image the theme references gets
+  // upserted into the user's gallery so old themes (created before the
+  // auto-seed) and any race-with-POST cases are covered. Fire-and-forget.
+  try {
+    const urls = extractImageUrls((data as any).content)
+    if (urls.length > 0) {
+      const rows = urls.map((url) => ({
+        user_id: user.id,
+        url,
+        source: 'theme' as const,
+      }))
+      admin()
+        .from('gallery_images')
+        .upsert(rows, { onConflict: 'user_id,url', ignoreDuplicates: true })
+        .then(({ error: e }) => {
+          if (e) console.error('[themes GET] gallery top-up failed:', e.message)
+        })
+    }
+  } catch (e) {
+    console.error('[themes GET] gallery top-up threw:', e)
+  }
 
   return NextResponse.json({ theme: data })
 }

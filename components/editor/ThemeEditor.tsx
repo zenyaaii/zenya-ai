@@ -24,15 +24,18 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Save, Check, Palette, Type as TypeIcon, RotateCcw, Settings,
+  AlignLeft, AlignCenter, AlignRight,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import {
   FieldText, FieldTextArea, FieldNumber, FieldImage, SectionLabel,
   SmallNote, Collapsible, AddRowButton, StringList, ColorRow, MoodChip,
 } from './EditorFields'
+import ClickToEditOverlay from './ClickToEditOverlay'
 import {
-  getPath, setPath,
+  getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES,
   type EditorConfig, type EditorFieldDef, type EditorPanel,
+  type SectionStyles, type SectionStyle, type SectionTextAlign,
 } from '@/utils/theme-editor-types'
 import {
   TYPOGRAPHY_PRESETS, TYPOGRAPHY_MOODS,
@@ -45,6 +48,9 @@ export type PreviewProps = {
   presetId: string
   colorOverrides?: Record<string, string>
   typographyPreset?: string
+  /** Per-section text scale + alignment. Themes opt in by tagging section
+   *  roots with `data-section="<panelId>"`. */
+  sectionStyles?: SectionStyles
   view?: string
   onViewChange?: (v: string) => void
 }
@@ -75,6 +81,7 @@ export default function ThemeEditor({
   const [presetId, setPresetId] = useState<string>(config.defaultPresetId)
   const [typographyPreset, setTypographyPreset] = useState<string>('')
   const [colorOverrides, setColorOverrides] = useState<Record<string, string>>({})
+  const [sectionStyles, setSectionStyles] = useState<SectionStyles>({})
 
   const [original, setOriginal] = useState<string>('')
 
@@ -110,12 +117,14 @@ export default function ThemeEditor({
       const nextPreset = c.style_preset || config.defaultPresetId
       const nextTypo = c.typography_preset || ''
       const nextOverrides = (c.color_overrides as Record<string, string>) || {}
+      const nextSections = (c.section_styles as SectionStyles) || {}
 
       setContent(nextContent)
       setPresetId(nextPreset)
       setTypographyPreset(nextTypo)
       setColorOverrides(nextOverrides)
-      setOriginal(snapshot(nextContent, nextPreset, nextTypo, nextOverrides))
+      setSectionStyles(nextSections)
+      setOriginal(snapshot(nextContent, nextPreset, nextTypo, nextOverrides, nextSections))
       setLoading(false)
     }
     load()
@@ -125,8 +134,8 @@ export default function ThemeEditor({
   // ── Dirty detection + save ──────────────────────────────────────────
   const dirty = useMemo(() => {
     if (!content) return false
-    return snapshot(content, presetId, typographyPreset, colorOverrides) !== original
-  }, [content, presetId, typographyPreset, colorOverrides, original])
+    return snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles) !== original
+  }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, original])
 
   useEffect(() => {
     if (!dirty) return
@@ -142,12 +151,14 @@ export default function ThemeEditor({
       const getRes = await fetch(`/api/themes/${themeId}`)
       const getJson = await getRes.json()
       const fullContent = (getJson?.theme?.content as any) || {}
+      const cleanSections = pruneSectionStyles(sectionStyles)
       const nextContent = {
         ...fullContent,
         [config.contentKey]: content,
         style_preset: presetId,
         typography_preset: typographyPreset || undefined,
         color_overrides: Object.keys(colorOverrides).length ? colorOverrides : undefined,
+        section_styles: Object.keys(cleanSections).length ? cleanSections : undefined,
       }
       const r = await fetch(`/api/themes/${themeId}`, {
         method: 'PATCH',
@@ -158,14 +169,14 @@ export default function ThemeEditor({
         const j = await r.json().catch(() => ({}))
         throw new Error(j?.message || j?.error || `Save failed (${r.status})`)
       }
-      setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides))
+      setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles))
       setStatus('saved')
       setTimeout(() => setStatus('idle'), 1800)
     } catch (e: any) {
       setStatus('error')
       setError(e?.message || 'Save failed.')
     }
-  }, [content, presetId, typographyPreset, colorOverrides, themeId, config.contentKey])
+  }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey])
 
   // Cmd+S
   useEffect(() => {
@@ -192,6 +203,31 @@ export default function ThemeEditor({
     })
   }
   function resetOverrides() { setColorOverrides({}) }
+
+  function patchSectionStyle(panelId: string, patch: Partial<SectionStyle>) {
+    setSectionStyles((cur) => {
+      const next = { ...cur }
+      const cur1 = { ...(next[panelId] || {}), ...patch }
+      // Strip empty values so we don't persist no-ops.
+      if (cur1.text_scale == null || cur1.text_scale === 1) delete cur1.text_scale
+      if (!cur1.text_align) delete cur1.text_align
+      if (Object.keys(cur1).length === 0) {
+        delete next[panelId]
+      } else {
+        next[panelId] = cur1
+      }
+      return next
+    })
+  }
+
+  function clearSectionStyle(panelId: string) {
+    setSectionStyles((cur) => {
+      if (!(panelId in cur)) return cur
+      const next = { ...cur }
+      delete next[panelId]
+      return next
+    })
+  }
 
   // ── Render gates ─────────────────────────────────────────────────────
   if (loading) {
@@ -365,12 +401,30 @@ export default function ThemeEditor({
           className="flex-1 overflow-y-auto"
           style={{ background: '#0a0a0c' }}
         >
+          {/* Per-section text scale + alignment. Themes opt in by tagging
+              section roots with data-section="<panelId>". Themes that
+              haven't been retrofitted simply ignore this. */}
+          {Object.keys(sectionStyles).length > 0 && (
+            <style
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
+            />
+          )}
           <Preview
             content={content}
             presetId={presetId}
             colorOverrides={colorOverrides}
             typographyPreset={typographyPreset || undefined}
+            sectionStyles={sectionStyles}
             view={view}
+            onViewChange={(v) => setView(v)}
+          />
+          <ClickToEditOverlay
+            containerRef={previewRef}
+            onPick={setSelected}
+            panelToView={Object.fromEntries(
+              config.panels.filter((p) => p.page).map((p) => [p.id, p.page as string])
+            )}
             onViewChange={(v) => setView(v)}
           />
         </main>
@@ -402,11 +456,19 @@ export default function ThemeEditor({
                 onChange={setTypographyPreset}
               />
             ) : activePanel ? (
-              <FieldsRenderer
-                fields={activePanel.fields}
-                content={content}
-                patchPath={patchPath}
-              />
+              <>
+                <SectionStyleHeader
+                  panelId={activePanel.id}
+                  value={sectionStyles[activePanel.id]}
+                  onPatch={(p) => patchSectionStyle(activePanel.id, p)}
+                  onClear={() => clearSectionStyle(activePanel.id)}
+                />
+                <FieldsRenderer
+                  fields={activePanel.fields}
+                  content={content}
+                  patchPath={patchPath}
+                />
+              </>
             ) : (
               <SmallNote>Select a section on the left to start editing.</SmallNote>
             )}
@@ -713,6 +775,126 @@ function StatusPill({ status, dirty }: { status: Status; dirty: boolean }) {
   return <span className="text-[12px] font-medium text-muted">{dirty ? 'Unsaved changes' : 'All saved'}</span>
 }
 
-function snapshot(content: any, preset: string, typography: string, overrides: Record<string, string>) {
-  return JSON.stringify({ content, preset, typography, overrides })
+function snapshot(
+  content: any,
+  preset: string,
+  typography: string,
+  overrides: Record<string, string>,
+  sections: SectionStyles,
+) {
+  return JSON.stringify({ content, preset, typography, overrides, sections })
+}
+
+function pruneSectionStyles(s: SectionStyles): SectionStyles {
+  const out: SectionStyles = {}
+  for (const [k, v] of Object.entries(s)) {
+    const next: SectionStyle = {}
+    if (typeof v.text_scale === 'number' && v.text_scale > 0 && v.text_scale !== 1) {
+      next.text_scale = v.text_scale
+    }
+    if (v.text_align && v.text_align !== 'left') {
+      next.text_align = v.text_align
+    }
+    if (Object.keys(next).length > 0) out[k] = next
+  }
+  return out
+}
+
+/* ── Per-section text size + alignment header ─────────────────────────── *
+ * Shown at the top of every section panel. Lets the user dial up the     *
+ * text size for that section and shift the alignment without leaving     *
+ * the panel. Themes opt in by tagging section roots with                 *
+ * data-section="<panelId>"; themes that haven't been retrofitted just    *
+ * ignore the overrides.                                                  *
+ * ────────────────────────────────────────────────────────────────────── */
+
+function SectionStyleHeader({
+  panelId, value, onPatch, onClear,
+}: {
+  panelId: string
+  value?: SectionStyle
+  onPatch: (p: Partial<SectionStyle>) => void
+  onClear: () => void
+}) {
+  const activeScale = value?.text_scale ?? 1
+  const activeAlign: SectionTextAlign = value?.text_align ?? 'left'
+  const hasOverride = (value && (value.text_scale != null || value.text_align != null)) || false
+
+  return (
+    <div className="rounded-lg border border-token bg-[rgba(94,106,210,0.04)] p-2.5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
+          Section style
+        </span>
+        {hasOverride && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-[10.5px] font-medium text-muted hover:text-foreground"
+            title="Reset this section"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center gap-1.5">
+        <span className="text-[10.5px] text-muted">Size</span>
+        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+          {SECTION_TEXT_SCALES.map((s) => {
+            const selected = Math.abs(activeScale - s.value) < 0.01
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => onPatch({ text_scale: s.value === 1 ? undefined : s.value })}
+                className={
+                  'flex-1 rounded text-[11px] font-semibold transition ' +
+                  (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
+                }
+                style={{ padding: '3px 0' }}
+                title={`Text size ${s.label}`}
+              >
+                {s.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="mt-1.5 flex items-center gap-1.5">
+        <span className="text-[10.5px] text-muted">Align</span>
+        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+          {(
+            [
+              { id: 'left' as const,   Icon: AlignLeft   },
+              { id: 'center' as const, Icon: AlignCenter },
+              { id: 'right' as const,  Icon: AlignRight  },
+            ]
+          ).map(({ id, Icon }) => {
+            const selected = activeAlign === id
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onPatch({ text_align: id === 'left' ? undefined : id })}
+                className={
+                  'flex flex-1 items-center justify-center rounded transition ' +
+                  (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
+                }
+                style={{ padding: '4px 0' }}
+                title={`Align ${id}`}
+              >
+                <Icon className="h-3 w-3" strokeWidth={2.25} />
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <p className="mt-2 text-[10.5px] leading-snug text-muted/80">
+        Applies to the <strong className="font-semibold text-foreground">{panelId}</strong> section.
+      </p>
+    </div>
+  )
 }

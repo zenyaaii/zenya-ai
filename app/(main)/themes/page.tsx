@@ -102,7 +102,7 @@ const THEMES: ThemeCard[] = [
     presets: 4,
     sections: 13,
     demoHref: '/demo/services',
-    createHref: '/theme/new?type=services',
+    createHref: '/theme/new/services',
     icon: Wrench,
   },
   {
@@ -158,8 +158,22 @@ const THEMES: ThemeCard[] = [
     presets: 3,
     sections: 12,
     demoHref: '/demo/wellness',
-    createHref: '/theme/new?type=wellness',
+    createHref: '/theme/new/wellness',
     icon: Leaf,
+  },
+  {
+    id: 'restaurant',
+    name: 'Restaurant',
+    tagline: 'Restaurant · Café · Bar',
+    description:
+      'Mouth-watering template for restaurants, cafés, and bars. Hero with reservation CTA, menu, story, gallery, hours, contact, and press strip.',
+    cover:
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80',
+    presets: 4,
+    sections: 13,
+    demoHref: '/demo/restaurant',
+    createHref: '/theme/new/restaurant',
+    icon: Utensils,
   },
 ]
 

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
+import { sectionStylesToCss } from '@/utils/theme-editor-types'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -143,11 +144,19 @@ export default async function PublicSitePage(
     (typeof c === 'object' && (c as any).typography_preset) || undefined
   const colorOverrides =
     (typeof c === 'object' && (c as any).color_overrides) || undefined
+  const sectionStyles =
+    (typeof c === 'object' && (c as any).section_styles) || undefined
   const templateContent =
     (typeof c === 'object' && (c as any)[businessType]) || c
 
   return (
     <>
+      {sectionStyles && Object.keys(sectionStyles).length > 0 && (
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
+        />
+      )}
       <PublicSiteRenderer
         businessType={businessType}
         content={templateContent}

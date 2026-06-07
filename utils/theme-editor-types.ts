@@ -109,4 +109,66 @@ export type WrapperStyleState = {
   style_preset?: string
   typography_preset?: string
   color_overrides?: ColorOverrides
+  section_styles?: SectionStyles
+}
+
+/* ────────────────────────────────────────────────────────────────────── *
+ * Per-section style overrides — text scale + alignment.                  *
+ *                                                                        *
+ * Themes opt into these by putting `data-section="<panelId>"` on each    *
+ * top-level section element. The editor injects a scoped <style> block   *
+ * with rules like:                                                       *
+ *   [data-section="hero"] { font-size: 1.15em; text-align: center; }     *
+ * so themes that haven't been retrofitted simply don't apply them.       *
+ * ────────────────────────────────────────────────────────────────────── */
+
+export type SectionTextAlign = 'left' | 'center' | 'right'
+
+export type SectionStyle = {
+  /** 0.85 / 1.0 / 1.15 / 1.3 — applied as `font-size: <scale>em` on the section root. */
+  text_scale?: number
+  /** Default body text alignment for the section. */
+  text_align?: SectionTextAlign
+}
+
+export type SectionStyles = Record<string, SectionStyle>
+
+export const SECTION_TEXT_SCALES: Array<{ id: string; label: string; value: number }> = [
+  { id: 'sm', label: 'S',  value: 0.85 },
+  { id: 'md', label: 'M',  value: 1.0  },
+  { id: 'lg', label: 'L',  value: 1.15 },
+  { id: 'xl', label: 'XL', value: 1.3  },
+]
+
+export function sectionStylesToCss(styles?: SectionStyles): string {
+  if (!styles) return ''
+  const rules: string[] = []
+  // Targets every text-bearing tag inside a section. We use a `:where()`
+  // pseudo-class to keep specificity flat; the !important still wins.
+  const TEXT_SELECTOR =
+    ':where(h1,h2,h3,h4,h5,h6,p,span,a,li,blockquote,strong,em,b,i,small,label,button)'
+
+  for (const [panelId, s] of Object.entries(styles)) {
+    if (!panelId) continue
+    const sel = `[data-section="${panelId.replace(/"/g, '\\"')}"]`
+
+    // Text scale: use CSS `zoom` on the section root. Unlike font-size:em,
+    // zoom scales the absolute Tailwind text-{size} classes (rem-based),
+    // so the user actually sees the size change. Supported in every modern
+    // browser including Safari 12+ and Firefox 126+.
+    if (typeof s.text_scale === 'number' && s.text_scale > 0 && s.text_scale !== 1) {
+      rules.push(`${sel}{zoom:${s.text_scale}}`)
+    }
+
+    // Alignment: setting text-align on the section root alone gets overridden
+    // by descendant utilities (text-left, text-center, mx-auto-on-flex, etc.).
+    // Apply it with !important on every text-bearing descendant so the user's
+    // choice actually takes effect.
+    if (s.text_align) {
+      rules.push(
+        `${sel},${sel} ${TEXT_SELECTOR}{text-align:${s.text_align} !important}`
+      )
+    }
+  }
+  return rules.join('\n')
 }

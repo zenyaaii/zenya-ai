@@ -31,11 +31,13 @@ type Theme = {
 
 type SearchResult = {
   domain: string
-  available: boolean
+  /** true = available, false = registered, null = lookup failed (don't render as "taken"). */
+  available: boolean | null
   premium?: boolean
   price_cents?: number
   currency?: string
   message?: string
+  error_code?: string
 }
 
 const STATUS: Record<DomainRow['status'], {
@@ -232,13 +234,20 @@ export default function DomainsPage() {
                   <tr key={r.domain} className="border-t border-token">
                     <td className="px-3 py-2 font-mono text-foreground">{r.domain}</td>
                     <td className="px-3 py-2">
-                      {r.available ? (
+                      {r.available === true ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]">
                           <CheckCircle2 className="h-3 w-3" /> Available
                         </span>
-                      ) : (
+                      ) : r.available === false ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
                           Taken
+                        </span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
+                          title={r.message || 'Lookup failed'}
+                        >
+                          <AlertCircle className="h-3 w-3" /> Couldn’t check
                         </span>
                       )}
                       {r.premium && (
@@ -251,7 +260,7 @@ export default function DomainsPage() {
                         : '—'}
                     </td>
                     <td className="px-3 py-2 text-right">
-                      {r.available ? (
+                      {r.available === true ? (
                         <a
                           href={`https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(r.domain)}`}
                           target="_blank"
@@ -260,8 +269,10 @@ export default function DomainsPage() {
                         >
                           Buy now <ArrowRight className="h-3 w-3" />
                         </a>
+                      ) : r.available === false ? (
+                        <span className="text-[11.5px] text-muted">Already taken</span>
                       ) : (
-                        <span className="text-[11.5px] text-muted">already owned?</span>
+                        <span className="text-[11.5px] text-[#b45309]" title={r.message || ''}>Try again</span>
                       )}
                     </td>
                   </tr>

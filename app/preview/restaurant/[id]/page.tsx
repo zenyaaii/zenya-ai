@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import RestaurantPreview from '@/components/theme/restaurant/RestaurantPreview'
+import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import type { RestaurantContent } from '@/utils/restaurant/types'
 
 export default function RestaurantPreviewPage() {
@@ -105,6 +106,12 @@ export default function RestaurantPreviewPage() {
         </div>
       </div>
 
+      {content.section_styles && Object.keys(content.section_styles).length > 0 && (
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: sectionStylesToCss(content.section_styles) }}
+        />
+      )}
       <RestaurantPreview content={content} presetId={presetId} />
     </div>
   )

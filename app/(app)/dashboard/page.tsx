@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Sparkles, Plus, ArrowRight, Globe, CheckCircle2, Folder,
-  BarChart3, Eye, ExternalLink,
+  BarChart3, Eye, ExternalLink, Image as ImageIcon,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -383,6 +383,13 @@ function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan })
           <span className="inline-flex items-center gap-2">
             <Globe className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
             Manage domains
+          </span>
+          <ArrowRight className="h-3 w-3 text-muted" />
+        </Link>
+        <Link href="/dashboard/gallery" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
+          <span className="inline-flex items-center gap-2">
+            <ImageIcon className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+            Open my gallery
           </span>
           <ArrowRight className="h-3 w-3 text-muted" />
         </Link>

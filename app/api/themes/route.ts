@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { themeCreateSchema } from '@/utils/validators'
+import { extractImageUrls } from '@/lib/extract-image-urls'
 
 function admin() {
   return createAdminClient(
@@ -75,6 +76,28 @@ export async function POST(req: NextRequest) {
       image_count: (parsed.data.images || []).length,
     } as any,
   }).then(() => {})
+
+  // Seed the user's gallery with every image referenced in the new theme so
+  // they appear in the picker for re-use. Fire-and-forget — failure here
+  // shouldn't block theme creation.
+  try {
+    const urls = extractImageUrls(parsed.data.content)
+    if (urls.length > 0) {
+      const rows = urls.map((url) => ({
+        user_id: user.id,
+        url,
+        source: 'theme' as const,
+      }))
+      admin()
+        .from('gallery_images')
+        .upsert(rows, { onConflict: 'user_id,url', ignoreDuplicates: true })
+        .then(({ error: e }) => {
+          if (e) console.error('[themes POST] gallery seed failed:', e.message)
+        })
+    }
+  } catch (e) {
+    console.error('[themes POST] gallery seed threw:', e)
+  }
 
   return NextResponse.json({ id: data.id })
 }

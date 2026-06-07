@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronRight, ImageIcon, Plus, RotateCcw, Trash2,
   Upload,
 } from 'lucide-react'
+import GalleryPicker from './GalleryPicker'
 
 /* ────────────────────────────────────────────────────────────────────── *
  * Shared editor field components — used by every theme's editor.        *
@@ -134,6 +135,7 @@ export function AddRowButton({ label, onClick }: { label: string; onClick: () =>
 export function FieldImage({
   label, value, onChange, hint,
 }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  const [pickerOpen, setPickerOpen] = useState(false)
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
@@ -145,25 +147,47 @@ export function FieldImage({
         )}
       </div>
       {value ? (
-        <div className="mb-1.5 overflow-hidden rounded-md border border-token">
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="group mb-1.5 block w-full overflow-hidden rounded-md border border-token transition hover:border-primary"
+          title="Click to change"
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt={label} className="block h-32 w-full object-cover" />
-        </div>
+          <span className="block bg-black/60 px-2 py-1 text-center text-[10.5px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+            Click to change
+          </span>
+        </button>
       ) : (
-        <div className="mb-1.5 grid h-24 place-items-center rounded-md border border-dashed border-token bg-surface text-muted">
-          <span className="text-[11.5px]">No image yet</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="mb-1.5 grid h-24 w-full place-items-center rounded-md border border-dashed border-token bg-surface text-muted transition hover:border-primary hover:text-primary"
+        >
+          <div className="flex flex-col items-center gap-1">
+            <Upload className="h-4 w-4" strokeWidth={2} />
+            <span className="text-[11.5px] font-medium">Choose image</span>
+          </div>
+        </button>
       )}
       <div className="flex items-center gap-1.5">
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Paste URL"
-          className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
-        />
-        <UploadButton small onUploaded={(url) => onChange(url)} />
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+        >
+          <ImageIcon className="h-3 w-3" strokeWidth={2.25} />
+          {value ? 'Change image' : 'Open gallery'}
+        </button>
       </div>
       {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
+      <GalleryPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={(url) => onChange(url)}
+        currentUrl={value || undefined}
+      />
     </div>
   )
 }
@@ -171,86 +195,74 @@ export function FieldImage({
 export function InlineImage({
   label, value, onChange,
 }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [pickerOpen, setPickerOpen] = useState(false)
   return (
     <div className="flex items-center gap-2">
-      {value ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={value} alt={label} className="h-10 w-10 rounded-md border border-token object-cover" />
-      ) : (
-        <div className="grid h-10 w-10 place-items-center rounded-md border border-dashed border-token text-muted">
-          <ImageIcon className="h-3.5 w-3.5" />
-        </div>
-      )}
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={label}
-        className="min-w-0 flex-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] outline-none focus:border-primary"
-      />
-      <UploadButton small onUploaded={(url) => onChange(url)} />
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        className="group relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-token bg-white transition hover:border-primary"
+        title={value ? 'Click to change' : 'Choose image'}
+      >
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt={label} className="h-full w-full object-cover" />
+        ) : (
+          <span className="grid h-full w-full place-items-center text-muted">
+            <ImageIcon className="h-3.5 w-3.5" />
+          </span>
+        )}
+      </button>
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        className="inline-flex min-w-0 flex-1 items-center justify-between gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+      >
+        <span className="truncate text-left text-muted">{value ? truncateUrl(value) : label}</span>
+        <Upload className="h-3 w-3 flex-shrink-0 text-muted" strokeWidth={2.25} />
+      </button>
       {value && (
         <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="Clear">
           <Trash2 className="h-3 w-3" />
         </button>
       )}
+      <GalleryPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={(url) => onChange(url)}
+        currentUrl={value || undefined}
+      />
     </div>
   )
 }
 
+function truncateUrl(u: string): string {
+  if (u.length <= 36) return u
+  const last = u.split('/').pop() || ''
+  return last.length <= 36 ? last : `…${last.slice(-32)}`
+}
+
+/** Legacy export — kept for back-compat with any caller still using it. */
 export function UploadButton({
   label = 'Upload', small = false, onUploaded,
 }: { label?: string; small?: boolean; onUploaded: (url: string) => void }) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-
-  async function pick() { inputRef.current?.click() }
-
-  async function handleFile(file: File) {
-    setBusy(true); setErr(null)
-    try {
-      const form = new FormData()
-      form.append('file', file)
-      const r = await fetch('/api/upload', { method: 'POST', body: form })
-      const j = await r.json()
-      if (!r.ok) throw new Error(j.message || j.error || 'Upload failed')
-      onUploaded(j.url)
-    } catch (e: any) {
-      setErr(e?.message || 'Upload failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
+  const [open, setOpen] = useState(false)
   return (
-    <div className="inline-flex items-center gap-1.5">
+    <>
       <button
         type="button"
-        onClick={pick}
-        disabled={busy}
+        onClick={() => setOpen(true)}
         className={
-          (small
-            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5 '
-            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5 ') +
-          (busy ? 'opacity-60' : '')
+          small
+            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5'
+            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5'
         }
       >
         <Upload className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} strokeWidth={2.25} />
-        {busy ? 'Uploading…' : label}
+        {label}
       </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0]
-          if (f) handleFile(f)
-          e.target.value = ''
-        }}
-      />
-      {err && <span className="text-[11px] text-[#b91c1c]">{err}</span>}
-    </div>
+      <GalleryPicker open={open} onClose={() => setOpen(false)} onPick={(url) => onUploaded(url)} />
+    </>
   )
 }
 
