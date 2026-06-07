@@ -33,6 +33,18 @@ type Props = {
    */
   view?: RestaurantView
   onViewChange?: (v: RestaurantView) => void
+  /**
+   * Shared-editor pass-through props. Accepted for compatibility with
+   * the schema-driven ThemeEditor's PreviewProps. Color overrides and
+   * typography are already read off `content.color_overrides` /
+   * `content.typography_preset` inside this component, so receiving
+   * them as separate props is a no-op for now. Section styles are
+   * applied via the editor's injected <style> block (data-section
+   * scoping); this component just needs to accept the prop.
+   */
+  colorOverrides?: Record<string, string>
+  typographyPreset?: string
+  sectionStyles?: Record<string, { text_scale?: number; text_align?: 'left' | 'center' | 'right' }>
 }
 
 // Motion-Driven design system (per ui-ux-pro-max): ease-out entrances, 300-500ms,
