@@ -14,13 +14,17 @@ export const lookbookInputSchema = z.object({
     name: z.string().min(2),
     price: z.string().optional(),
     category: z.string().optional()
-  })).min(3).max(8),
+  })).min(1).max(8),
   brand_story: z.string().min(20).optional(),
   sustainability_focus: z.boolean().default(false),
   press_features: z.string().optional(),
   social_proof: z.object({
     review_count: z.string().optional(),
     review_rating: z.number().optional()
+  }).optional(),
+  visuals: z.object({
+    hero_image_url: z.string().url().optional(),
+    gallery_image_urls: z.array(z.string().url()).max(8).optional()
   }).optional(),
   style_preset: z.enum(['noir', 'blush', 'earth', 'void']).default('noir')
 })

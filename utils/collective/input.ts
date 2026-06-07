@@ -6,11 +6,11 @@ export const collectiveInputSchema = z.object({
     tagline: z.string().min(5),
     description: z.string().min(10)
   }),
-  categories: z.array(z.string()).min(2).max(8),
+  categories: z.array(z.string()).min(1).max(8),
   collections: z.array(z.object({
     name: z.string().min(2),
     tagline: z.string().optional()
-  })).min(2).max(6),
+  })).min(1).max(6),
   price_range: z.object({
     min: z.string().optional(),
     max: z.string().optional(),

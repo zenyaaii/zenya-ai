@@ -27,10 +27,10 @@ export const serviceInputSchema = z.object({
         badge: z.string().max(24).optional()
       })
     )
-    .min(3)
+    .min(1)
     .max(12),
-  areas_served: z.array(z.string().min(2).max(60)).min(2).max(12),
-  differentiators: z.array(z.string().min(4).max(120)).min(3).max(8),
+  areas_served: z.array(z.string().min(2).max(60)).max(12).optional().default([]),
+  differentiators: z.array(z.string().min(4).max(120)).max(8).optional().default([]),
   story: z.object({
     brief: z.string().min(20).max(900),
     owner_title: z.string().max(80).optional(),

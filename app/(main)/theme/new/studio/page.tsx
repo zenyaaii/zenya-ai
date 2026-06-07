@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { STUDIO_PRESETS } from '@/utils/studio/presets'
 import type { StudioInput } from '@/utils/studio/input'
 import type { StudioStylePresetId } from '@/utils/studio/types'
+import DevFillButton from '@/components/DevFillButton'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -30,6 +31,36 @@ type Form = {
   repeat_rate: string
   avg_rating: string
   style_preset: StudioStylePresetId
+}
+
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'Marlowe & Co',
+    brand_tagline: 'Made by hand. Meant to last.',
+    brand_category: 'Artisan Homeware',
+    brand_founded: '2017',
+    mission: 'We are building an argument against the disposable — one handmade object at a time. Every piece is made to live in a house for decades, not seasons.',
+    founder_story: 'Marlowe started in a one-bedroom flat in Lisbon when our co-founder Aoife inherited her grandmother\'s ceramics studio. The first 200 pieces sold out from her Instagram in a weekend. Eight years later we still work with the same kiln, the same potters, and the same rule: if it isn\'t worth keeping, we don\'t make it.',
+    values: [
+      { id: uid(), title: 'Slow on purpose', description: 'We refuse to release more than four collections a year. Things take time because things take time.' },
+      { id: uid(), title: 'Honest sourcing', description: 'Every material traces back to a named workshop, kiln, or mill. No mystery supply chains.' },
+      { id: uid(), title: 'Made to outlast us', description: 'We design objects you fix instead of replace. We sell spare parts forever.' },
+    ],
+    process_description: 'Every piece takes weeks to make. We visit every workshop, inspect every batch, and reject anything that isn\'t perfect. There is no factory floor — there is a kiln in Alentejo, a small mill in Yorkshire, and a tiny atelier in Kyoto.',
+    process_steps: 'Source, Design, Make, Inspect, Pack, Ship',
+    team_size: '9 people across Lisbon, Yorkshire, and Kyoto',
+    press_features: 'The New York Times, Wallpaper*, Monocle, Vogue Living, Cereal',
+    milestones: [
+      { id: uid(), year: '2017', event: 'First collection launched from a Lisbon flat' },
+      { id: uid(), year: '2019', event: 'Opened the Alentejo kiln workshop' },
+      { id: uid(), year: '2022', event: 'Featured in Wallpaper\'s Design 100' },
+      { id: uid(), year: '2024', event: '40,000th object in a home' },
+    ],
+    customer_count: '42,000+ objects in homes',
+    repeat_rate: '82%',
+    avg_rating: '4.97★',
+    style_preset: 'ink',
+  }
 }
 
 const INITIAL_FORM: Form = {
@@ -217,6 +248,7 @@ export default function StudioWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-stone-500">Studio · Brand story theme</p>

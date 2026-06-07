@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import type { RestaurantInput, RestaurantTypeId } from '@/utils/restaurant/input'
 import ImageUploadField from '@/components/ImageUploadField'
+import DevFillButton from '@/components/DevFillButton'
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
@@ -83,6 +84,70 @@ function newId() {
 
 function emptyItem(): MenuItem {
   return { id: newId(), name: '', description: '', price: '', badge: '', image_url: '' }
+}
+
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'Maison Lumière',
+    cuisine: 'Modern French',
+    city: 'New York',
+    neighborhood: 'West Village',
+    restaurant_type: 'fine_dining',
+    address: '24 Cornelia Street, New York, NY 10014',
+    phone: '+1 (212) 555-0140',
+    email: 'reservations@maisonlumiere.com',
+    map_link: 'https://maps.google.com/?q=24+Cornelia+St+New+York',
+    hours: [
+      { day: 'monday', label: 'Monday', open: '', close: '', closed: true },
+      { day: 'tuesday', label: 'Tuesday', open: '5:30pm', close: '10:00pm' },
+      { day: 'wednesday', label: 'Wednesday', open: '5:30pm', close: '10:00pm' },
+      { day: 'thursday', label: 'Thursday', open: '5:30pm', close: '10:00pm' },
+      { day: 'friday', label: 'Friday', open: '5:30pm', close: '11:00pm' },
+      { day: 'saturday', label: 'Saturday', open: '5:30pm', close: '11:00pm' },
+      { day: 'sunday', label: 'Sunday', open: '5:00pm', close: '9:30pm' },
+    ],
+    categories: [
+      {
+        id: newId(),
+        name: 'To begin',
+        description: 'Small things, slow openings.',
+        items: [
+          { id: newId(), name: 'Oysters · Mignonette', description: 'Half dozen, shucked to order.', price: '$24', badge: '', image_url: '' },
+          { id: newId(), name: 'Beef tartare', description: 'Hand-cut, smoked yolk, sourdough toast.', price: '$22', badge: 'Signature', image_url: '' },
+        ],
+      },
+      {
+        id: newId(),
+        name: 'Mains',
+        description: '',
+        items: [
+          { id: newId(), name: 'Duck à l’orange', description: 'Aged 21 days, glazed in bitter orange.', price: '$42', badge: '', image_url: '' },
+          { id: newId(), name: 'Whole roasted branzino', description: 'Salt-crusted, lemon, fennel oil.', price: '$48', badge: '', image_url: '' },
+        ],
+      },
+      {
+        id: newId(),
+        name: 'Desserts',
+        description: '',
+        items: [
+          { id: newId(), name: 'Île flottante', description: 'Vanilla custard, almond praline.', price: '$14', badge: '', image_url: '' },
+        ],
+      },
+    ],
+    story_brief: 'Maison Lumière opened in 2019 in a narrow West Village townhouse. Chef Élodie Marchand spent ten years between Paris and Burgundy before bringing her precise, ingredient-led cooking to New York. The room is candlelit, the wine list is short and personal, the music is jazz on vinyl.',
+    chef_name: 'Élodie Marchand',
+    chef_title: 'Chef · Proprietor',
+    chef_bio_brief: 'Trained at L’Arpège in Paris and Maison Pic in Valence. Believes the best dish is the one that tastes like itself.',
+    booking: 'https://resy.com/cities/ny/maison-lumiere',
+    reservation_note: 'For private dining or parties of 8+, please write to events@maisonlumiere.com.',
+    hero_image_url: '',
+    chef_photo_url: '',
+    accent_image_url: '',
+    gallery_image_urls: [],
+    signature_dish_image_urls: [],
+    press_outlets: 'The New York Times\nMichelin Guide\nEater 38\nBon Appétit',
+    style_preset: 'onyx',
+  }
 }
 
 const INITIAL_FORM: Form = {
@@ -481,6 +546,7 @@ export default function RestaurantWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/50 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <div className="mb-10">
           <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Restaurant theme · Maison</p>

@@ -11,7 +11,7 @@ export const atlasInputSchema = z.object({
   features: z.array(z.object({
     title: z.string().min(2),
     description: z.string().optional()
-  })).min(3).max(6),
+  })).min(1).max(6),
   integrations: z.array(z.string()).optional(),
   pricing: z.object({
     free_tier: z.boolean().default(true),

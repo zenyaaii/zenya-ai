@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { ATLAS_PRESETS } from '@/utils/atlas/presets'
 import type { AtlasInput } from '@/utils/atlas/input'
 import type { AtlasStylePresetId } from '@/utils/atlas/types'
+import DevFillButton from '@/components/DevFillButton'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -30,6 +31,32 @@ type Form = {
   style_preset: AtlasStylePresetId
 }
 
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'Streamline',
+    brand_tagline: 'The project tool your team will actually use.',
+    brand_category: 'Project Management',
+    target_audience: 'Product teams at Series A–C startups, 10–80 people, shipping weekly.',
+    problem_solved: 'Teams waste hours rewriting status updates in Slack, Jira, and Linear. Streamline pulls every signal — commits, PRs, design files — into one timeline so PMs stop chasing and engineers stop translating.',
+    features: [
+      { id: uid(), title: 'AI-powered roadmap', description: 'Drag-and-drop planning that pulls real velocity from Git history.' },
+      { id: uid(), title: 'Real-time changelog', description: 'Every merged PR auto-categorized into a customer-facing release note.' },
+      { id: uid(), title: 'Slack-native standups', description: 'Async standups inside threads — no extra app to open.' },
+      { id: uid(), title: 'Sprint health score', description: 'A single number that tells you if this sprint is in trouble before retro.' },
+      { id: uid(), title: 'Cross-team dependencies', description: 'See who is blocking whom, automatically, across teams and repos.' },
+    ],
+    integrations: 'Slack, GitHub, Figma, Notion, Linear, Vercel, Sentry',
+    free_tier: true,
+    pro_price: '$49/month per user',
+    enterprise: true,
+    user_count: '4,200+ teams',
+    review_rating: '4.9',
+    review_count: '620+ reviews',
+    notable_customers: 'Vercel, Stripe, Notion, Linear, Anthropic',
+    style_preset: 'orbit',
+  }
+}
+
 const INITIAL_FORM: Form = {
   brand_name: '',
   brand_tagline: '',
@@ -37,8 +64,6 @@ const INITIAL_FORM: Form = {
   target_audience: '',
   problem_solved: '',
   features: [
-    { id: uid(), title: '', description: '' },
-    { id: uid(), title: '', description: '' },
     { id: uid(), title: '', description: '' }
   ],
   integrations: '',
@@ -96,7 +121,7 @@ export default function AtlasWizardPage() {
     setForm((prev) => ({ ...prev, features: [...prev.features, { id: uid(), title: '', description: '' }] }))
   }
   function removeFeature(id: string) {
-    if (form.features.length <= 3) return
+    if (form.features.length <= 1) return
     setForm((prev) => ({ ...prev, features: prev.features.filter((f) => f.id !== id) }))
   }
 
@@ -107,7 +132,7 @@ export default function AtlasWizardPage() {
     if (form.target_audience.trim().length < 10) return 'Describe your target audience (at least 10 characters).'
     if (form.problem_solved.trim().length < 10) return 'Describe the main problem you solve (at least 10 characters).'
     const validFeatures = form.features.filter((f) => f.title.trim().length >= 2)
-    if (validFeatures.length < 3) return 'Add at least 3 features so the theme feels complete.'
+    if (validFeatures.length < 1) return 'Add at least one feature to generate the site.'
     return null
   }
 
@@ -203,6 +228,7 @@ export default function AtlasWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-indigo-600">Atlas · SaaS theme</p>
@@ -283,7 +309,7 @@ export default function AtlasWizardPage() {
               <h2 className="text-xl font-black text-foreground">2. Key features</h2>
               <span className="text-sm text-muted">{form.features.filter((f) => f.title.trim()).length}/6 features</span>
             </div>
-            <p className="mb-5 text-sm text-muted">Add 3–6 features. The AI will expand descriptions and add icons automatically.</p>
+            <p className="mb-5 text-sm text-muted">Even one feature is enough — add up to 6. The more you add, the richer the page feels. AI will expand descriptions and add icons automatically.</p>
             <div className="space-y-3">
               {form.features.map((feat, i) => (
                 <div key={feat.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
@@ -302,7 +328,7 @@ export default function AtlasWizardPage() {
                   <button
                     type="button"
                     onClick={() => removeFeature(feat.id)}
-                    disabled={form.features.length <= 3}
+                    disabled={form.features.length <= 1}
                     className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30"
                   >
                     ×

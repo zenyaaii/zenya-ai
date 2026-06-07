@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { SERVICE_PRESETS } from '@/utils/services/presets'
 import type { ServiceInput } from '@/utils/services/input'
+import ImageUploadField from '@/components/ImageUploadField'
+import DevFillButton from '@/components/DevFillButton'
 
 type Form = {
   brand_name: string
@@ -31,7 +33,7 @@ type Form = {
   team_image_url: string
   before_image_url: string
   after_image_url: string
-  gallery_image_urls: string
+  gallery_image_urls: string[]
   review_rating: string
   review_count: string
   licenses: string
@@ -42,6 +44,45 @@ type Form = {
 
 function newId() {
   return Math.random().toString(36).slice(2, 9)
+}
+
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'Northline Home Services',
+    category: 'Plumbing & HVAC',
+    city: 'Austin',
+    region: 'Texas',
+    owner_name: 'Daniel Hart',
+    years_in_business: '12 years',
+    phone: '+1 (512) 555-0187',
+    email: 'hello@northlinehome.com',
+    address: '1204 W 6th St, Austin, TX 78703',
+    booking_url: 'https://book.northlinehome.com',
+    emergency_service: true,
+    availability: 'Mon–Sat, 8am–6pm',
+    response_time: 'Same-day response in most service areas',
+    services: [
+      { id: newId(), name: 'Emergency Leak Repair', description: 'Burst pipes and water-line emergencies handled within 2 hours, day or night.', price_from: 'From $129', badge: '24/7' },
+      { id: newId(), name: 'Water Heater Install', description: 'Tankless and traditional installs with a 10-year warranty.', price_from: 'From $1,490', badge: 'Most popular' },
+      { id: newId(), name: 'HVAC Tune-Up', description: '21-point spring or fall inspection so your system runs at peak efficiency.', price_from: 'From $89', badge: 'Seasonal' },
+    ],
+    areas_served: 'Downtown Austin\nWest Lake Hills\nBee Cave\nCedar Park\nRound Rock',
+    differentiators: 'Upfront flat-rate pricing — no surprises\nLicensed master plumbers and EPA-certified techs\nSame-day service across central Austin\n2-year workmanship guarantee',
+    story_brief: "Northline started in 2013 out of a single van in East Austin. Daniel grew up fixing things on his dad's job sites — the rule was always 'leave it cleaner than you found it.' Twelve years later, that's still our standard. We show up on time, quote flat rates, and treat every house like it's our own.",
+    owner_title: 'Founder & Master Plumber',
+    quote_seed: "Honest pricing and clean work — that's the whole job.",
+    hero_image_url: '',
+    team_image_url: '',
+    before_image_url: '',
+    after_image_url: '',
+    gallery_image_urls: [],
+    review_rating: '4.9',
+    review_count: '320+',
+    licenses: 'Texas Master Plumber #M-39817\nEPA 608 Certified',
+    guarantees: '2-year workmanship guarantee\n100% satisfaction or we redo it',
+    promo_offer: 'Free inspection with any installation quote',
+    style_preset: 'cobalt',
+  }
 }
 
 const INITIAL_FORM: Form = {
@@ -59,8 +100,6 @@ const INITIAL_FORM: Form = {
   availability: 'Mon-Sat, 8am-6pm',
   response_time: 'Same-day response in most service areas',
   services: [
-    { id: newId(), name: '', description: '', price_from: '', badge: '' },
-    { id: newId(), name: '', description: '', price_from: '', badge: '' },
     { id: newId(), name: '', description: '', price_from: '', badge: '' }
   ],
   areas_served: '',
@@ -72,7 +111,7 @@ const INITIAL_FORM: Form = {
   team_image_url: '',
   before_image_url: '',
   after_image_url: '',
-  gallery_image_urls: '',
+  gallery_image_urls: [],
   review_rating: '4.9',
   review_count: '200+',
   licenses: '',
@@ -139,6 +178,15 @@ export default function ServicesWizardPage() {
     }))
   }
 
+  function setGalleryAt(idx: number, url: string) {
+    setForm((prev) => {
+      const next = [...prev.gallery_image_urls]
+      if (url) next[idx] = url
+      else next.splice(idx, 1)
+      return { ...prev, gallery_image_urls: next.filter(Boolean) }
+    })
+  }
+
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'Please enter the business name.'
     if (form.category.trim().length < 2) return 'Please enter the service category.'
@@ -148,13 +196,7 @@ export default function ServicesWizardPage() {
     if (form.story_brief.trim().length < 20) return 'Tell us a bit more about the business story.'
 
     const validServices = form.services.filter((service) => service.name.trim().length >= 2)
-    if (validServices.length < 3) return 'Add at least 3 services so the theme feels complete.'
-
-    const areas = splitLines(form.areas_served)
-    if (areas.length < 2) return 'Add at least 2 areas served.'
-
-    const differentiators = splitLines(form.differentiators)
-    if (differentiators.length < 3) return 'Add at least 3 differentiators or trust points.'
+    if (validServices.length < 1) return 'Add at least one service to generate the site.'
 
     return null
   }
@@ -198,7 +240,7 @@ export default function ServicesWizardPage() {
         team_image_url: form.team_image_url.trim() || undefined,
         before_image_url: form.before_image_url.trim() || undefined,
         after_image_url: form.after_image_url.trim() || undefined,
-        gallery_image_urls: splitLines(form.gallery_image_urls).filter((url) => /^https?:\/\//.test(url)).slice(0, 8)
+        gallery_image_urls: form.gallery_image_urls.filter((url) => /^https?:\/\//.test(url)).slice(0, 8)
       },
       social_proof: {
         review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
@@ -283,6 +325,7 @@ export default function ServicesWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/50 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-10">
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700">Local services theme · Trade</p>
@@ -350,15 +393,17 @@ export default function ServicesWizardPage() {
           </label>
         </Section>
 
-        <Section title="Services" subtitle="Add at least 3 services. We will turn these into a complete services section.">
+        <Section title="Services" subtitle="Even one service is enough. Add more if you offer them — we'll turn them into a complete services section.">
           <div className="space-y-5">
             {form.services.map((service, index) => (
               <div key={service.id} className="rounded-3xl border border-token bg-elevated/60 p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-sm font-bold uppercase tracking-[0.24em] text-muted">Service 0{index + 1}</p>
-                  <button type="button" onClick={() => removeService(service.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-600">
-                    Remove
-                  </button>
+                  {form.services.length > 1 && (
+                    <button type="button" onClick={() => removeService(service.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-600">
+                      Remove
+                    </button>
+                  )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input className={inputCls} value={service.name} onChange={(e) => updateService(service.id, { name: e.target.value })} placeholder="Service name" />
@@ -374,12 +419,12 @@ export default function ServicesWizardPage() {
           </div>
         </Section>
 
-        <Section title="Service area and trust" subtitle="These answers shape the proof, CTA, and area-served sections.">
+        <Section title="Service area and trust" subtitle="All optional — the more you add, the richer the site feels.">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Areas served" required className="sm:col-span-2">
+            <Field label="Areas served (optional — more = better)" className="sm:col-span-2">
               <textarea className={inputCls + ' min-h-[110px] resize-y'} value={form.areas_served} onChange={(e) => update('areas_served', e.target.value)} placeholder="One per line&#10;Downtown Austin&#10;West Lake Hills&#10;Bee Cave" />
             </Field>
-            <Field label="Differentiators / trust points" required className="sm:col-span-2">
+            <Field label="Differentiators / trust points (optional — more = better)" className="sm:col-span-2">
               <textarea className={inputCls + ' min-h-[120px] resize-y'} value={form.differentiators} onChange={(e) => update('differentiators', e.target.value)} placeholder="One per line&#10;Upfront pricing&#10;Licensed and insured&#10;Clean work and fast follow-up" />
             </Field>
             <Field label="Licenses / certifications">
@@ -414,23 +459,65 @@ export default function ServicesWizardPage() {
           </div>
         </Section>
 
-        <Section title="Visual assets" subtitle="Optional image URLs. If you skip these, the preview still gets usable fallback imagery.">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Hero image URL" className="sm:col-span-2">
-              <input className={inputCls} value={form.hero_image_url} onChange={(e) => update('hero_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Team image URL">
-              <input className={inputCls} value={form.team_image_url} onChange={(e) => update('team_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Before image URL">
-              <input className={inputCls} value={form.before_image_url} onChange={(e) => update('before_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="After image URL">
-              <input className={inputCls} value={form.after_image_url} onChange={(e) => update('after_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Gallery image URLs" className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[100px] resize-y'} value={form.gallery_image_urls} onChange={(e) => update('gallery_image_urls', e.target.value)} placeholder="One URL per line" />
-            </Field>
+        <Section title="Visual assets" subtitle="Upload your own photos. Skip any slot and we'll fill it with beautiful fallback imagery.">
+          <div
+            className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-elevated/60 p-4 backdrop-blur-md"
+            style={{ background: 'rgba(14,165,233,0.06)', borderColor: 'rgba(14,165,233,0.25)' }}
+          >
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-[18px]" style={{ background: 'rgba(14,165,233,0.12)' }}>
+              ✨
+            </div>
+            <div className="text-[13px] leading-[1.55] text-foreground">
+              <strong>Anything you upload here lands in your gallery too,</strong>{' '}
+              <span className="text-muted">
+                so you can reuse it later when editing your site. No image is no problem — leave a slot empty and we'll drop in a high-quality fallback.
+              </span>
+            </div>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <ImageUploadField
+              label="Hero image"
+              value={form.hero_image_url}
+              onChange={(url) => update('hero_image_url', url)}
+              aspect="wide"
+              helper="Big image at the top of your page."
+              className="sm:col-span-2"
+            />
+            <ImageUploadField
+              label="Team photo"
+              value={form.team_image_url}
+              onChange={(url) => update('team_image_url', url)}
+              aspect="square"
+            />
+            <ImageUploadField
+              label="Before"
+              value={form.before_image_url}
+              onChange={(url) => update('before_image_url', url)}
+              aspect="square"
+              helper="Used in the before/after comparison."
+            />
+            <ImageUploadField
+              label="After"
+              value={form.after_image_url}
+              onChange={(url) => update('after_image_url', url)}
+              aspect="square"
+              helper="Used in the before/after comparison."
+            />
+            <div className="sm:col-span-2">
+              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+                Gallery (up to 8)
+              </label>
+              <div className="grid gap-3 sm:grid-cols-4">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <ImageUploadField
+                    key={`g-${i}`}
+                    value={form.gallery_image_urls[i] || ''}
+                    onChange={(url) => setGalleryAt(i, url)}
+                    aspect="square"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </Section>
 

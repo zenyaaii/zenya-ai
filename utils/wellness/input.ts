@@ -33,7 +33,7 @@ export const wellnessInputSchema = z.object({
     hours: z.string().optional(),
     cancellation_policy: z.string().optional()
   }),
-  treatments: z.array(treatmentSchema).min(3),
+  treatments: z.array(treatmentSchema).min(1),
   team: z.array(teamMemberSchema).optional().default([]),
   philosophy: z.object({
     brief: z.string().min(20),

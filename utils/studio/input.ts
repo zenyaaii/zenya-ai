@@ -15,7 +15,7 @@ export const studioInputSchema = z.object({
   })).min(1).max(5),
   process: z.object({
     description: z.string().optional(),
-    steps: z.array(z.string()).min(2).max(6).optional()
+    steps: z.array(z.string()).min(1).max(6).optional()
   }).optional(),
   team_size: z.string().optional(),
   press_features: z.string().optional(),

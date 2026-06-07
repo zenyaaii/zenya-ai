@@ -8,6 +8,7 @@ import { COLLECTIVE_PRESETS } from '@/utils/collective/presets'
 import type { CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveStylePresetId } from '@/utils/collective/types'
 import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout'
+import DevFillButton from '@/components/DevFillButton'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -32,6 +33,32 @@ type Form = {
   style_preset: CollectiveStylePresetId
 }
 
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'REALM',
+    brand_tagline: 'Curated for the life well lived.',
+    brand_description: 'A multi-brand storefront for home, wardrobe, and wellness. 400 products, every one tested in our own studio before it goes live. We buy what we\'d buy again.',
+    categories: 'Home & Living, Fashion & Apparel, Beauty & Skincare, Wellness, Kitchen & Dining',
+    curation_story: 'We don\'t accept submissions. Twice a year our team visits 200+ studios, mills, and labs across Europe, Japan, and Mexico. If a piece doesn\'t survive six months of personal use, it doesn\'t make the floor.',
+    collections: [
+      { id: uid(), name: 'The Living Room', tagline: 'Objects you live around.' },
+      { id: uid(), name: 'Daily Wardrobe', tagline: 'A small wardrobe, well-edited.' },
+      { id: uid(), name: 'Bath & Body', tagline: 'For the slow hours.' },
+      { id: uid(), name: 'The Kitchen', tagline: 'Tools that earn their place.' },
+    ],
+    price_min: '$45',
+    price_max: '$895',
+    price_avg: '$185',
+    sustainability: true,
+    shipping_perks: 'Free shipping over $150 · 3–5 day delivery',
+    returns_policy: '14-day free returns, no questions',
+    customer_count: '28,000+ households',
+    review_count: '6,800+ reviews',
+    review_rating: '4.9',
+    style_preset: 'jade',
+  }
+}
+
 const INITIAL_FORM: Form = {
   brand_name: '',
   brand_tagline: '',
@@ -39,8 +66,6 @@ const INITIAL_FORM: Form = {
   categories: '',
   curation_story: '',
   collections: [
-    { id: uid(), name: '', tagline: '' },
-    { id: uid(), name: '', tagline: '' },
     { id: uid(), name: '', tagline: '' }
   ],
   price_min: '',
@@ -98,7 +123,7 @@ export default function CollectiveWizardPage() {
     setForm((prev) => ({ ...prev, collections: [...prev.collections, { id: uid(), name: '', tagline: '' }] }))
   }
   function removeCollection(id: string) {
-    if (form.collections.length <= 2) return
+    if (form.collections.length <= 1) return
     setForm((prev) => ({ ...prev, collections: prev.collections.filter((c) => c.id !== id) }))
   }
 
@@ -108,7 +133,7 @@ export default function CollectiveWizardPage() {
     if (form.brand_description.trim().length < 10) return 'Describe your store (at least 10 characters).'
     if (form.categories.trim().length < 2) return 'Enter at least one product category.'
     const validCols = form.collections.filter((c) => c.name.trim().length >= 2)
-    if (validCols.length < 2) return 'Add at least 2 collections.'
+    if (validCols.length < 1) return 'Add at least one collection to generate the store.'
     return null
   }
 
@@ -198,6 +223,7 @@ export default function CollectiveWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-600">Collective · Catalog theme</p>
@@ -298,7 +324,7 @@ export default function CollectiveWizardPage() {
               <h2 className="text-xl font-black text-foreground">2. Collections</h2>
               <span className="text-sm text-muted">{form.collections.filter(c => c.name.trim()).length}/6</span>
             </div>
-            <p className="mb-5 text-sm text-muted">Name 2–6 curated collections. The AI will write taglines and build product grids automatically.</p>
+            <p className="mb-5 text-sm text-muted">Even one collection is enough — add up to 6. The more you add, the richer the storefront feels. AI will write taglines and build product grids automatically.</p>
             <div className="space-y-3">
               {form.collections.map((col, i) => (
                 <div key={col.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
@@ -317,7 +343,7 @@ export default function CollectiveWizardPage() {
                   <button
                     type="button"
                     onClick={() => removeCollection(col.id)}
-                    disabled={form.collections.length <= 2}
+                    disabled={form.collections.length <= 1}
                     className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30"
                   >
                     ×

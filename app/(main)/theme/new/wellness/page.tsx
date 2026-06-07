@@ -6,11 +6,33 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
 import type { WellnessInput } from '@/utils/wellness/input'
+import ImageUploadField from '@/components/ImageUploadField'
+import DevFillButton from '@/components/DevFillButton'
 
 type Treatment = { id: string; name: string; category: string; duration: string; price: string; description: string; badge: string }
 type TeamMember = { id: string; name: string; title: string; specialty: string; bio: string; image_url: string }
+type StudioHour = { day: string; label: string; open: string; close: string; closed?: boolean }
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
+
+const DEFAULT_STUDIO_HOURS: StudioHour[] = [
+  { day: 'monday', label: 'Monday', open: '9:00am', close: '8:00pm' },
+  { day: 'tuesday', label: 'Tuesday', open: '9:00am', close: '8:00pm' },
+  { day: 'wednesday', label: 'Wednesday', open: '9:00am', close: '8:00pm' },
+  { day: 'thursday', label: 'Thursday', open: '9:00am', close: '8:00pm' },
+  { day: 'friday', label: 'Friday', open: '9:00am', close: '8:00pm' },
+  { day: 'saturday', label: 'Saturday', open: '9:00am', close: '6:00pm' },
+  { day: 'sunday', label: 'Sunday', open: '10:00am', close: '5:00pm' }
+]
+
+function formatHours(hours: StudioHour[]): string {
+  const parts = hours.map((h) => {
+    if (h.closed) return `${h.label.slice(0, 3)} Closed`
+    if (!h.open && !h.close) return ''
+    return `${h.label.slice(0, 3)} ${h.open}–${h.close}`
+  }).filter(Boolean)
+  return parts.join(' · ')
+}
 
 type Form = {
   brand_name: string
@@ -22,7 +44,7 @@ type Form = {
   email: string
   address: string
   booking_url: string
-  hours: string
+  hours: StudioHour[]
   cancellation_policy: string
   philosophy_brief: string
   philosophy_approach: string
@@ -31,10 +53,53 @@ type Form = {
   review_count: string
   certifications: string
   hero_image_url: string
-  space_image_urls: string
+  space_image_urls: string[]
   treatments: Treatment[]
   team: TeamMember[]
   style_preset: WellnessInput['style_preset']
+}
+
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'Sōla Wellness Studio',
+    brand_type: 'Holistic Spa & Yoga',
+    city: 'Austin',
+    region: 'Texas',
+    founded_year: '2018',
+    phone: '+1 (512) 555-0182',
+    email: 'hello@solawellness.com',
+    address: '2210 South Lamar Blvd, Austin, TX 78704',
+    booking_url: 'https://book.solawellness.com',
+    hours: [
+      { day: 'monday', label: 'Monday', open: '9:00am', close: '8:00pm' },
+      { day: 'tuesday', label: 'Tuesday', open: '9:00am', close: '8:00pm' },
+      { day: 'wednesday', label: 'Wednesday', open: '9:00am', close: '8:00pm' },
+      { day: 'thursday', label: 'Thursday', open: '9:00am', close: '8:00pm' },
+      { day: 'friday', label: 'Friday', open: '9:00am', close: '9:00pm' },
+      { day: 'saturday', label: 'Saturday', open: '9:00am', close: '6:00pm' },
+      { day: 'sunday', label: 'Sunday', open: '10:00am', close: '5:00pm' },
+    ],
+    cancellation_policy: '24 hours notice required, otherwise 50% fee.',
+    philosophy_brief: 'Sōla is a quiet refuge in South Austin built around one idea: rest is a skill, not a luxury. We blend Eastern and Western practices — bodywork, breath, plant medicine — without the wellness theatre. Treatments are unhurried, the music is low, and there is always tea.',
+    philosophy_approach: 'Integrative, trauma-informed, low-intervention',
+    amenities: 'Infrared sauna\nPrivate treatment rooms\nTea lounge\nFloat pod\nCold plunge\nMeditation garden',
+    review_rating: '4.9',
+    review_count: '480+',
+    certifications: 'ABMP, AMTA, 500hr RYT, IAYT',
+    hero_image_url: '',
+    space_image_urls: [],
+    treatments: [
+      { id: uid(), name: 'Deep Tissue Massage', category: 'Massage', duration: '60 min', price: 'From $145', description: 'Slow, sustained pressure to release the patterns the week left behind.', badge: 'Most popular' },
+      { id: uid(), name: 'Signature Sōla Facial', category: 'Facial', duration: '75 min', price: 'From $180', description: 'Lymphatic massage, gua sha, and plant serums tailored to your skin that day.', badge: 'Signature' },
+      { id: uid(), name: 'Restorative Yoga · Private', category: 'Yoga', duration: '60 min', price: 'From $120', description: 'Held postures, breathwork, and bolsters — for nervous systems that need a rest.', badge: '' },
+      { id: uid(), name: 'Float Therapy', category: 'Float', duration: '60 min', price: '$95', description: '1,000 lb of Epsom salt in body-temperature water. Stillness with no input.', badge: 'New' },
+    ],
+    team: [
+      { id: uid(), name: 'Maya Lin', title: 'Founder · Lead Therapist', specialty: 'Deep tissue · Prenatal · Reiki', bio: 'Twelve years of bodywork between Kyoto, Lisbon, and Austin. Believes the body knows.', image_url: '' },
+      { id: uid(), name: 'Daniel Ortega', title: 'Senior Esthetician', specialty: 'Gua sha · Sensitive skin · Acne', bio: 'Trained in Paris and Seoul. Approaches skin like a quiet conversation.', image_url: '' },
+    ],
+    style_preset: 'zen',
+  }
 }
 
 const INITIAL_FORM: Form = {
@@ -47,7 +112,7 @@ const INITIAL_FORM: Form = {
   email: '',
   address: '',
   booking_url: '',
-  hours: 'Mon–Sat 9am–8pm · Sun 10am–5pm',
+  hours: DEFAULT_STUDIO_HOURS,
   cancellation_policy: '24 hours notice required',
   philosophy_brief: '',
   philosophy_approach: '',
@@ -56,11 +121,9 @@ const INITIAL_FORM: Form = {
   review_count: '100+',
   certifications: '',
   hero_image_url: '',
-  space_image_urls: '',
+  space_image_urls: [],
   treatments: [
-    { id: uid(), name: '', category: 'Massage', duration: '60 min', price: '', description: '', badge: '' },
-    { id: uid(), name: '', category: 'Facial', duration: '60 min', price: '', description: '', badge: '' },
-    { id: uid(), name: '', category: 'Yoga', duration: '60 min', price: '', description: '', badge: '' }
+    { id: uid(), name: '', category: 'Massage', duration: '60 min', price: '', description: '', badge: '' }
   ],
   team: [],
   style_preset: 'zen'
@@ -98,6 +161,22 @@ export default function WellnessWizardPage() {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  function updateHour(idx: number, patch: Partial<StudioHour>) {
+    setForm((prev) => ({
+      ...prev,
+      hours: prev.hours.map((h, i) => (i === idx ? { ...h, ...patch } : h))
+    }))
+  }
+
+  function setSpaceAt(idx: number, url: string) {
+    setForm((prev) => {
+      const next = [...prev.space_image_urls]
+      if (url) next[idx] = url
+      else next.splice(idx, 1)
+      return { ...prev, space_image_urls: next.filter(Boolean) }
+    })
+  }
+
   function updateTreatment(id: string, patch: Partial<Treatment>) {
     setForm((prev) => ({ ...prev, treatments: prev.treatments.map((t) => t.id === id ? { ...t, ...patch } : t) }))
   }
@@ -126,7 +205,7 @@ export default function WellnessWizardPage() {
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Please enter a valid email.'
     if (form.philosophy_brief.trim().length < 20) return 'Tell us more about the studio philosophy or story (at least 20 characters).'
     const valid = form.treatments.filter((t) => t.name.trim().length >= 2)
-    if (valid.length < 3) return 'Add at least 3 treatments so the theme feels complete.'
+    if (valid.length < 1) return 'Add at least one treatment to generate the site.'
     return null
   }
 
@@ -144,7 +223,7 @@ export default function WellnessWizardPage() {
         email: form.email.trim(),
         address: form.address.trim() || undefined,
         booking_url: form.booking_url.trim() || undefined,
-        hours: form.hours.trim() || undefined,
+        hours: formatHours(form.hours) || undefined,
         cancellation_policy: form.cancellation_policy.trim() || undefined
       },
       treatments: form.treatments
@@ -178,7 +257,7 @@ export default function WellnessWizardPage() {
       },
       visuals: {
         hero_image_url: /^https?:\/\//.test(form.hero_image_url) ? form.hero_image_url.trim() : undefined,
-        space_image_urls: form.space_image_urls.trim() || undefined
+        space_image_urls: form.space_image_urls.filter(Boolean).join('\n') || undefined
       },
       style_preset: form.style_preset
     }
@@ -205,7 +284,7 @@ export default function WellnessWizardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productName: form.brand_name.trim(),
-          images: [],
+          images: form.space_image_urls.filter(Boolean),
           primaryColor: preset.colors.primary,
           secondaryColor: preset.colors.accent,
           content: {
@@ -243,6 +322,7 @@ export default function WellnessWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-teal-700">Wellness Studio theme</p>
@@ -293,28 +373,61 @@ export default function WellnessWizardPage() {
             <Field label="Address">
               <input className={inputCls} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="2210 South Lamar Blvd, Austin TX" />
             </Field>
-            <Field label="Online booking URL">
-              <input className={inputCls} value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://mindbodyonline.com/..." />
+            <Field label="Online booking URL (optional)">
+              <input className={inputCls} value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://mindbodyonline.com/... — leave blank if you don't have one" />
             </Field>
-            <Field label="Studio hours">
-              <input className={inputCls} value={form.hours} onChange={(e) => update('hours', e.target.value)} placeholder="Mon–Sat 9am–8pm · Sun 10am–5pm" />
-            </Field>
-            <Field label="Cancellation policy">
+            <Field label="Cancellation policy" className="sm:col-span-2">
               <input className={inputCls} value={form.cancellation_policy} onChange={(e) => update('cancellation_policy', e.target.value)} placeholder="24 hours notice required" />
             </Field>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
+            <p className="mb-1 text-xs uppercase tracking-[0.22em] text-muted">Studio hours</p>
+            <p className="mb-4 text-xs text-muted/80">Set the open / close times for each day. Tick "Closed" for days you're shut.</p>
+            <div className="divide-y divide-token">
+              {form.hours.map((h, idx) => (
+                <div key={h.day} className="grid grid-cols-[110px_1fr_1fr_80px] items-center gap-3 py-3">
+                  <span className="text-sm font-medium text-foreground">{h.label}</span>
+                  <input
+                    className={inputCls + ' py-2'}
+                    placeholder="9:00am"
+                    value={h.open}
+                    onChange={(e) => updateHour(idx, { open: e.target.value })}
+                    disabled={h.closed}
+                  />
+                  <input
+                    className={inputCls + ' py-2'}
+                    placeholder="8:00pm"
+                    value={h.close}
+                    onChange={(e) => updateHour(idx, { close: e.target.value })}
+                    disabled={h.closed}
+                  />
+                  <label className="flex items-center justify-end gap-2 text-xs text-muted">
+                    <input
+                      type="checkbox"
+                      checked={!!h.closed}
+                      onChange={(e) => updateHour(idx, { closed: e.target.checked, ...(e.target.checked ? { open: '', close: '' } : {}) })}
+                    />
+                    Closed
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
         </Section>
 
         {/* Treatments */}
-        <Section title="Treatments & services" subtitle="Add at least 3 treatments. Include duration and price where possible.">
+        <Section title="Treatments & services" subtitle="Even one treatment is enough. Include duration and price where possible.">
           <div className="space-y-5">
             {form.treatments.map((t, index) => (
               <div key={t.id} className="rounded-3xl border border-token bg-elevated/60 p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted">Treatment {String(index + 1).padStart(2, '0')}</p>
-                  <button type="button" onClick={() => removeTreatment(t.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-500">
-                    Remove
-                  </button>
+                  {form.treatments.length > 1 && (
+                    <button type="button" onClick={() => removeTreatment(t.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-500">
+                      Remove
+                    </button>
+                  )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input className={inputCls} value={t.name} onChange={(e) => updateTreatment(t.id, { name: e.target.value })} placeholder="Treatment name (e.g. Deep Tissue Massage)" />
@@ -394,14 +507,30 @@ export default function WellnessWizardPage() {
         </Section>
 
         {/* Visuals */}
-        <Section title="Visual assets" subtitle="Optional image URLs. Leave blank and the preview will use beautiful fallback photography.">
-          <div className="grid gap-4">
-            <Field label="Hero / main image URL" className="sm:col-span-2">
-              <input className={inputCls} value={form.hero_image_url} onChange={(e) => update('hero_image_url', e.target.value)} placeholder="https://..." />
-            </Field>
-            <Field label="Studio / space photos (one URL per line)">
-              <textarea className={inputCls + ' min-h-[110px] resize-y'} value={form.space_image_urls} onChange={(e) => update('space_image_urls', e.target.value)} placeholder="One URL per line" />
-            </Field>
+        <Section title="Visual assets" subtitle="Upload your own photos. Anything you upload here lands in your gallery for reuse later. Skip a slot and we'll fill it with beautiful fallback photography.">
+          <div className="grid gap-5">
+            <ImageUploadField
+              label="Hero / main image"
+              value={form.hero_image_url}
+              onChange={(url) => update('hero_image_url', url)}
+              aspect="wide"
+              helper="Big image at the top of your page."
+            />
+            <div>
+              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+                Studio / space photos (up to 8)
+              </label>
+              <div className="grid gap-3 sm:grid-cols-4">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <ImageUploadField
+                    key={`sp-${i}`}
+                    value={form.space_image_urls[i] || ''}
+                    onChange={(url) => setSpaceAt(i, url)}
+                    aspect="square"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </Section>
 

@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { LOOKBOOK_PRESETS } from '@/utils/lookbook/presets'
 import type { LookbookStylePresetId } from '@/utils/lookbook/types'
+import ImageUploadField from '@/components/ImageUploadField'
+import DevFillButton from '@/components/DevFillButton'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -25,6 +27,8 @@ type Form = {
   press_features: string
   review_rating: string
   review_count: string
+  hero_image_url: string
+  gallery_image_urls: string[]
   style_preset: LookbookStylePresetId
 }
 
@@ -36,6 +40,32 @@ const CATEGORY_OPTIONS = [
 
 const PRODUCT_CATEGORIES = ['Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Knitwear', 'Accessories', 'Shoes', 'Bags', 'Swimwear', 'Activewear', 'Other']
 
+function buildSampleForm(): Form {
+  return {
+    brand_name: 'VELA',
+    brand_tagline: 'Wear what matters.',
+    brand_category: 'Contemporary Women\'s',
+    style_direction: 'Minimal European luxury. Think The Row meets Reformation — clean lines, natural fabrics, timeless not trendy. Palette is warm neutrals, ivory, deep forest green.',
+    target_customer: 'Professional women 28–45 who value quality over quantity and want a wardrobe of fewer, better pieces.',
+    collection_name: 'The Cortège Edit',
+    collection_season: 'SS25',
+    products: [
+      { id: uid(), name: 'Silk Slip Dress · Ivory', price: '$345', category: 'Dresses' },
+      { id: uid(), name: 'Linen Tailored Trouser', price: '$245', category: 'Bottoms' },
+      { id: uid(), name: 'Wool Crepe Blazer', price: '$595', category: 'Outerwear' },
+      { id: uid(), name: 'Cashmere Crew', price: '$285', category: 'Knitwear' },
+    ],
+    brand_story: 'VELA started in 2021 with one question: why is the considered, well-made wardrobe still so rare? We work directly with small mills in Portugal and Italy, ship from a single studio in Lisbon, and never run sales — the price is the price.',
+    sustainability_focus: true,
+    press_features: 'Vogue, Harper\'s Bazaar, The Cut, Refinery29',
+    review_rating: '4.9',
+    review_count: '2,400+ reviews',
+    hero_image_url: '',
+    gallery_image_urls: [],
+    style_preset: 'noir',
+  }
+}
+
 const INITIAL_FORM: Form = {
   brand_name: '',
   brand_tagline: '',
@@ -45,15 +75,15 @@ const INITIAL_FORM: Form = {
   collection_name: '',
   collection_season: 'SS25',
   products: [
-    { id: uid(), name: '', price: '', category: 'Dresses' },
-    { id: uid(), name: '', price: '', category: 'Tops' },
-    { id: uid(), name: '', price: '', category: 'Bottoms' }
+    { id: uid(), name: '', price: '', category: 'Dresses' }
   ],
   brand_story: '',
   sustainability_focus: false,
   press_features: '',
   review_rating: '4.9',
   review_count: '',
+  hero_image_url: '',
+  gallery_image_urls: [],
   style_preset: 'noir'
 }
 
@@ -94,8 +124,16 @@ export default function LookbookWizardPage() {
     setForm((p) => ({ ...p, products: [...p.products, { id: uid(), name: '', price: '', category: 'Other' }] }))
   }
   function removeProduct(id: string) {
-    if (form.products.length <= 3) return
+    if (form.products.length <= 1) return
     setForm((p) => ({ ...p, products: p.products.filter((pr) => pr.id !== id) }))
+  }
+  function setGalleryAt(idx: number, url: string) {
+    setForm((p) => {
+      const next = [...p.gallery_image_urls]
+      if (url) next[idx] = url
+      else next.splice(idx, 1)
+      return { ...p, gallery_image_urls: next.filter(Boolean) }
+    })
   }
 
   function validate(): string | null {
@@ -105,7 +143,7 @@ export default function LookbookWizardPage() {
     if (form.style_direction.trim().length < 10) return 'Describe your style direction (at least 10 characters).'
     if (form.target_customer.trim().length < 10) return 'Describe your target customer (at least 10 characters).'
     const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
-    if (validProducts.length < 3) return 'Add at least 3 products to populate the lookbook.'
+    if (validProducts.length < 1) return 'Add at least one product to populate the lookbook.'
     return null
   }
 
@@ -139,6 +177,10 @@ export default function LookbookWizardPage() {
           review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
           review_count: form.review_count.trim() || undefined
         },
+        visuals: {
+          hero_image_url: form.hero_image_url.trim() || undefined,
+          gallery_image_urls: form.gallery_image_urls.filter(Boolean).slice(0, 8)
+        },
         style_preset: form.style_preset
       }
 
@@ -156,7 +198,7 @@ export default function LookbookWizardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productName: form.brand_name.trim(),
-          images: [],
+          images: form.gallery_image_urls.filter(Boolean),
           primaryColor: preset.colors.primary,
           secondaryColor: preset.colors.accent,
           content: {
@@ -191,6 +233,7 @@ export default function LookbookWizardPage() {
       </div>
       <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-2xl" />
 
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sm} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-stone-500">Lookbook · Fashion theme</p>
@@ -267,7 +310,7 @@ export default function LookbookWizardPage() {
               <h2 className="text-xl font-black text-foreground">3. Products</h2>
               <span className="text-sm text-muted">{form.products.filter((p) => p.name.trim()).length}/8</span>
             </div>
-            <p className="mb-5 text-sm text-muted">Add 3–8 products. These will appear in the lookbook and bestsellers grid.</p>
+            <p className="mb-5 text-sm text-muted">Even one product is enough — add up to 8. These will appear in the lookbook and bestsellers grid.</p>
             <div className="space-y-3">
               {form.products.map((product, i) => (
                 <div key={product.id} className="grid gap-3 sm:grid-cols-[2fr_1fr_1.2fr_auto]">
@@ -276,7 +319,7 @@ export default function LookbookWizardPage() {
                   <select value={product.category} onChange={(e) => updateProduct(product.id, { category: e.target.value })} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
                     {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <button type="button" onClick={() => removeProduct(product.id)} disabled={form.products.length <= 3} className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30">×</button>
+                  <button type="button" onClick={() => removeProduct(product.id)} disabled={form.products.length <= 1} className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30">×</button>
                 </div>
               ))}
             </div>
@@ -287,9 +330,37 @@ export default function LookbookWizardPage() {
             )}
           </motion.section>
 
+          {/* ── Visual assets ──────────────────────────────────── */}
+          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+            <h2 className="mb-2 text-xl font-black text-foreground">4. Visual assets</h2>
+            <p className="mb-5 text-sm text-muted">Upload your editorial and product shots — they'll appear in your lookbook and also land in your gallery for reuse later. Skip any slot and we'll fill it with a curated fallback.</p>
+            <div className="grid gap-5">
+              <ImageUploadField
+                label="Hero image"
+                value={form.hero_image_url}
+                onChange={(url) => update('hero_image_url', url)}
+                aspect="wide"
+                helper="The big image at the top of the page."
+              />
+              <div>
+                <label className="mb-2 block text-sm font-bold text-foreground">Lookbook gallery (up to 8)</label>
+                <div className="grid gap-3 sm:grid-cols-4">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <ImageUploadField
+                      key={`lg-${i}`}
+                      value={form.gallery_image_urls[i] || ''}
+                      onChange={(url) => setGalleryAt(i, url)}
+                      aspect="square"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
           {/* ── Social proof & Press ───────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">4. Credibility</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">5. Credibility</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-bold text-foreground">Review count</label>
@@ -317,7 +388,7 @@ export default function LookbookWizardPage() {
 
           {/* ── Style preset ───────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. Visual style</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">6. Visual style</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {LOOKBOOK_PRESETS.map((preset) => {
                 const selected = form.style_preset === preset.id
