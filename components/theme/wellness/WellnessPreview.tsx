@@ -227,7 +227,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
 function HeroSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = useReducedMotion()
   return (
-    <section className="relative min-h-[90vh] overflow-hidden flex items-center">
+    <section data-section="hero" className="relative min-h-[90vh] overflow-hidden flex items-center">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
         <img src={content.hero.image} alt="Studio" className="h-full w-full object-cover" />
@@ -330,6 +330,7 @@ function HeroSection({ content, isDark }: { content: WellnessContent; isDark: bo
 function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   return (
     <div
+      data-section="trust_bar"
       className="overflow-hidden py-4"
       style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-primary)', borderBottom: '1px solid var(--wl-border)' }}
     >
@@ -353,7 +354,7 @@ function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boole
 // ─── Philosophy ───────────────────────────────────────────────────────────────
 function PhilosophySection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   return (
-    <section className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
+    <section data-section="philosophy" className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-16 text-center">
@@ -398,7 +399,7 @@ function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDa
   const filtered = activeCategory === 'All' ? content.treatments.items : content.treatments.items.filter((t) => t.category === activeCategory)
 
   return (
-    <section id="treatments" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
+    <section id="treatments" data-section="treatments" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
           <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
@@ -499,7 +500,7 @@ function TreatmentCard({ treatment: t, index, isDark }: { treatment: WellnessTre
 // ─── Journey ──────────────────────────────────────────────────────────────────
 function JourneySection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   return (
-    <section className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-primary)' }}>
+    <section data-section="journey" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-primary)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
           <motion.h2 {...useReveal()} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: isDark ? 'var(--wl-text)' : '#fff' }}>
@@ -539,7 +540,7 @@ function JourneySection({ content, isDark }: { content: WellnessContent; isDark:
 function TeamSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   if (!content.team.members.length) return null
   return (
-    <section className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
+    <section data-section="team" className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
           <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
@@ -601,7 +602,7 @@ function TeamCard({ member, index, isDark }: { member: WellnessTeamMember; index
 function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const [imgs] = useState(content.space.images)
   return (
-    <section className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
+    <section data-section="space" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end">
           <div>
@@ -655,7 +656,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   return (
-    <section className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-bg)' }}>
+    <section data-section="testimonials" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
           <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
@@ -714,7 +715,7 @@ function TestimonialCard({ testimonial: t, index, isDark }: { testimonial: Welln
 // ─── Booking CTA ──────────────────────────────────────────────────────────────
 function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   return (
-    <section className="relative overflow-hidden px-8 py-28">
+    <section data-section="booking_cta" className="relative overflow-hidden px-8 py-28">
       <div className="absolute inset-0 z-0">
         <img src={content.booking_cta.image} alt="Book" className="h-full w-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
@@ -751,7 +752,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
 function FaqSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <section className="px-8 py-24" style={{ background: 'var(--wl-surface)' }}>
+    <section data-section="faq" className="px-8 py-24" style={{ background: 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-3xl">
         <div className="mb-14 text-center">
           <motion.h2 {...useReveal()} className="text-4xl font-light" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>

@@ -245,7 +245,7 @@ function NavBar({ content, isDark, view, setView }: { content: ServiceContent; i
 
 function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="top" className="relative overflow-hidden">
+    <section id="top" data-section="hero" className="relative overflow-hidden">
       <div className="absolute inset-0">
         <img
           src={content.hero.image}
@@ -298,7 +298,7 @@ function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean })
 
 function TrustBar({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section className="border-y py-5" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.7)' }}>
+    <section data-section="trust_bar" className="border-y py-5" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.7)' }}>
       <Container className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
         {content.trust_bar.items.map((item) => (
           <div key={item} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm" style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-text)' }}>
@@ -313,7 +313,7 @@ function TrustBar({ content, isDark }: { content: ServiceContent; isDark: boolea
 
 function ServicesSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="services" className="py-24 md:py-28">
+    <section id="services" data-section="services" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Services</Eyebrow>
@@ -354,7 +354,7 @@ function ServicesSection({ content, isDark }: { content: ServiceContent; isDark:
 
 function StorySection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.55)' }}>
+    <section data-section="story" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.55)' }}>
       <Container>
         <motion.div {...reveal} className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="relative overflow-hidden rounded-[34px]">
@@ -384,7 +384,7 @@ function StorySection({ content, isDark }: { content: ServiceContent; isDark: bo
 
 function ProofSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="proof" className="py-24 md:py-28">
+    <section id="proof" data-section="proof" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Why choose us</Eyebrow>
@@ -407,7 +407,7 @@ function ProofSection({ content, isDark }: { content: ServiceContent; isDark: bo
 
 function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
+    <section data-section="before_after" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Results</Eyebrow>
@@ -448,7 +448,7 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
 
 function ProcessSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section className="py-24 md:py-28">
+    <section data-section="process" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Process</Eyebrow>
@@ -471,7 +471,7 @@ function ProcessSection({ content, isDark }: { content: ServiceContent; isDark: 
 
 function AreasSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="areas" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
+    <section id="areas" data-section="areas" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
@@ -504,7 +504,7 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
 
 function OfferSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="quote" className="py-24 md:py-28">
+    <section id="quote" data-section="offer" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <div className="rounded-[36px] p-8 md:p-10" style={{ ...surfaceCard(isDark), background: isDark ? 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,255,255,0.05))' : 'linear-gradient(135deg, rgba(34,199,242,0.14), rgba(255,255,255,0.95))' }}>
@@ -544,7 +544,7 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
 
 function TestimonialsSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section id="reviews" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
+    <section id="reviews" data-section="testimonials" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Reviews</Eyebrow>
@@ -580,7 +580,7 @@ function FaqSection({ content, isDark }: { content: ServiceContent; isDark: bool
   const [open, setOpen] = useState(0)
 
   return (
-    <section id="faq" className="py-24 md:py-28">
+    <section id="faq" data-section="faq" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr]">
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
@@ -613,7 +613,7 @@ function FaqSection({ content, isDark }: { content: ServiceContent; isDark: bool
 
 function GallerySection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   return (
-    <section className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
+    <section data-section="gallery" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
           <Eyebrow>Gallery</Eyebrow>

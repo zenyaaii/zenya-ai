@@ -138,6 +138,7 @@ function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; c
   if (!visible) return null
   return (
     <div
+      data-section="drop_banner"
       className="relative z-40 flex items-center justify-center gap-4 px-6 py-3 text-center text-xs font-semibold"
       style={{ background: colors.badge, color: colors.badgeText, fontFamily: bodyFont }}
     >
@@ -153,7 +154,7 @@ function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; c
 // ─── Hero ──────────────────────────────────────────────────────────────────────
 function LookbookHero({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   return (
-    <section className="relative flex h-screen min-h-[600px] items-end overflow-hidden">
+    <section data-section="hero" className="relative flex h-screen min-h-[600px] items-end overflow-hidden">
       {/* Full-bleed image */}
       <img
         src={HERO_IMAGES[0]}
@@ -219,7 +220,7 @@ function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: Loo
   const looks = content.lookbook.looks.slice(0, 6)
 
   return (
-    <section className="px-6 py-20 md:px-12 md:py-28" style={{ background: colors.background, fontFamily: bodyFont }}>
+    <section data-section="lookbook_section" className="px-6 py-20 md:px-12 md:py-28" style={{ background: colors.background, fontFamily: bodyFont }}>
       <motion.div {...useReveal(0)} className="mb-14 text-center">
         <p className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.35em]" style={{ color: colors.muted }}>{content.lookbook.eyebrow}</p>
         <h2 className="text-5xl font-black tracking-tight md:text-6xl" style={{ fontFamily: headingFont, color: colors.text }}>
@@ -301,7 +302,7 @@ function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { conte
   const products = content.bestsellers.products.slice(0, 8)
 
   return (
-    <section className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
+    <section data-section="bestsellers" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
       <motion.div {...useReveal(0)} className="mb-12 flex items-end justify-between">
         <div>
           <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.3em]" style={{ color: colors.muted }}>{content.bestsellers.eyebrow}</p>
@@ -380,7 +381,7 @@ function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
 // ─── Brand Story ───────────────────────────────────────────────────────────────
 function LookbookStory({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   return (
-    <section className="overflow-hidden" style={{ background: colors.background, fontFamily: bodyFont }}>
+    <section data-section="brand_story" className="overflow-hidden" style={{ background: colors.background, fontFamily: bodyFont }}>
       <div className="grid md:grid-cols-2">
         {/* Image side */}
         <div className="relative h-[480px] md:h-auto">
@@ -421,7 +422,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
 // ─── Press ─────────────────────────────────────────────────────────────────────
 function LookbookPress({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   return (
-    <section className="border-y px-8 py-10" style={{ borderColor: colors.border, background: colors.surfaceAlt, fontFamily: bodyFont }}>
+    <section data-section="press" className="border-y px-8 py-10" style={{ borderColor: colors.border, background: colors.surfaceAlt, fontFamily: bodyFont }}>
       <div className="mx-auto max-w-5xl">
         <p className="mb-7 text-center text-[0.65rem] font-bold uppercase tracking-[0.32em]" style={{ color: colors.muted }}>
           {content.press.heading}
@@ -445,7 +446,7 @@ function LookbookPress({ content, colors, headingFont, bodyFont }: { content: Lo
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function LookbookTestimonials({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   return (
-    <section className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.background, fontFamily: bodyFont }}>
+    <section data-section="testimonials" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.background, fontFamily: bodyFont }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...useReveal(0)} className="mb-14 text-center">
           <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.32em]" style={{ color: colors.muted }}>{content.testimonials.eyebrow}</p>
@@ -528,7 +529,7 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
   const [submitted, setSubmitted] = useState(false)
 
   return (
-    <section className="relative overflow-hidden py-24" style={{ fontFamily: bodyFont }}>
+    <section data-section="newsletter" className="relative overflow-hidden py-24" style={{ fontFamily: bodyFont }}>
       {/* Background image with overlay */}
       <img
         src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=80"

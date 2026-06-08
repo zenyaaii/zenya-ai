@@ -188,7 +188,7 @@ export default function StudioPreview({
       </AnimatePresence>
 
       {/* ── HERO MANIFESTO ───────────────────────────────────────────────────── */}
-      {view === 'home' && <section className="relative flex min-h-[90vh] flex-col justify-end overflow-hidden px-8 pb-24 pt-32 md:px-12">
+      {view === 'home' && <section data-section="hero" className="relative flex min-h-[90vh] flex-col justify-end overflow-hidden px-8 pb-24 pt-32 md:px-12">
         {/* Background image with overlay */}
         <div className="absolute inset-0">
           <img src={HERO_IMG} alt="" className="h-full w-full object-cover" style={{ opacity: 0.15 }} />
@@ -241,7 +241,7 @@ export default function StudioPreview({
       </section>}
 
       {/* ── MISSION STATEMENT ────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'about') && <section className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
+      {(view === 'home' || view === 'about') && <section data-section="mission" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
         <div className="mx-auto max-w-5xl">
           <Rule color={colors.border} className="mb-16" />
           <div className="grid gap-16 md:grid-cols-[1fr_2fr]">
@@ -266,7 +266,7 @@ export default function StudioPreview({
 
       {/* ── FOUNDER LETTER ───────────────────────────────────────────────────── */}
       {view === 'about' && content.founder_letter && (
-        <section className="px-8 py-28 md:px-12">
+        <section data-section="founder_letter" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-16 md:grid-cols-[5fr_4fr] md:items-start">
               {/* Letter */}
@@ -313,7 +313,7 @@ export default function StudioPreview({
 
       {/* ── TIMELINE ─────────────────────────────────────────────────────────── */}
       {view === 'about' && content.timeline && (
-        <section className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
+        <section data-section="timeline" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16 grid md:grid-cols-[1fr_2fr]" {...useReveal(0)}>
               <Eyebrow text={content.timeline.eyebrow} colors={colors} fonts={fonts} />
@@ -377,7 +377,7 @@ export default function StudioPreview({
 
       {/* ── VALUES ───────────────────────────────────────────────────────────── */}
       {view === 'about' && content.values && (
-        <section className="px-8 py-28 md:px-12">
+        <section data-section="values" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...useReveal(0)}>
               <Eyebrow text={content.values.eyebrow} colors={colors} fonts={fonts} />
@@ -427,7 +427,7 @@ export default function StudioPreview({
 
       {/* ── PROCESS ──────────────────────────────────────────────────────────── */}
       {(view === 'process' || view === 'home') && content.process && (
-        <section className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
+        <section data-section="process" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 grid gap-12 md:grid-cols-2 md:items-end">
               <motion.div {...useReveal(0)}>
@@ -488,7 +488,7 @@ export default function StudioPreview({
 
       {/* ── TEAM ─────────────────────────────────────────────────────────────── */}
       {view === 'team' && content.team && (
-        <section className="px-8 py-28 md:px-12">
+        <section data-section="team" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...useReveal(0)}>
               <Eyebrow text={content.team.eyebrow} colors={colors} fonts={fonts} />
@@ -539,7 +539,7 @@ export default function StudioPreview({
 
       {/* ── PRESS ────────────────────────────────────────────────────────────── */}
       {(view === 'home' || view === 'about') && content.press && (
-        <section className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
+        <section data-section="press" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...useReveal(0)}>
               <Rule color={colors.border} className="mb-10" />
@@ -588,7 +588,7 @@ export default function StudioPreview({
 
       {/* ── COMMUNITY STATS ──────────────────────────────────────────────────── */}
       {(view === 'home' || view === 'contact') && content.community && (
-        <section className="px-8 py-28 md:px-12">
+        <section data-section="community" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...useReveal(0)}>
               <Eyebrow text={content.community.eyebrow} colors={colors} fonts={fonts} />
@@ -633,6 +633,7 @@ export default function StudioPreview({
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
       {(view === 'home' || view === 'contact') && content.cta && (
         <section
+          data-section="cta"
           className="px-8 py-36 md:px-12"
           style={{ background: colors.accent === '#0a0a0a' ? colors.surfaceAlt : colors.accent === '#c9a84c' ? colors.gradient : colors.surfaceAlt }}
         >
