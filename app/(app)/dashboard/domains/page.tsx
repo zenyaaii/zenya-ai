@@ -29,6 +29,17 @@ type Theme = {
   is_published?: boolean
 }
 
+type DomainPurchase = {
+  id: string
+  domain: string
+  status: 'pending_payment' | 'paid' | 'registering' | 'active' | 'failed' | 'refunded'
+  years: number
+  expires_at: string | null
+  retail_usd_charged: number | null
+  theme_id: string | null
+  created_at: string
+}
+
 type SearchResult = {
   domain: string
   /** true = available, false = registered, null = lookup failed (don't render as "taken"). */
@@ -73,15 +84,19 @@ export default function DomainsPage() {
   /** Which theme to attach the purchased domain to. Empty = "decide later". */
   const [buyForThemeId, setBuyForThemeId] = useState<string>('')
   const [buying, setBuying] = useState<string | null>(null) // domain string mid-checkout
+  const [renewing, setRenewing] = useState<string | null>(null) // purchase_id mid-checkout
+  /** Lookup: domain string → domain_purchases row owned by current user. */
+  const [purchases, setPurchases] = useState<Record<string, DomainPurchase>>({})
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const [profileRes, domainsRes, themesRes] = await Promise.all([
+    const [profileRes, domainsRes, themesRes, purchasesRes] = await Promise.all([
       supabase.from('profiles').select('plan, has_hosting').eq('id', user.id).maybeSingle(),
       fetch('/api/domains').then((r) => (r.ok ? r.json() : { domains: [] })),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
+      fetch('/api/domains/purchase').then((r) => (r.ok ? r.json() : { purchases: [] })),
     ])
 
     const profile = profileRes.data as any
@@ -91,6 +106,9 @@ export default function DomainsPage() {
     const map: Record<string, Theme> = {}
     for (const t of (themesRes.themes || [])) map[t.id] = t
     setThemes(map)
+    const pmap: Record<string, DomainPurchase> = {}
+    for (const p of (purchasesRes.purchases || [])) pmap[(p as DomainPurchase).domain] = p
+    setPurchases(pmap)
     setLoading(false)
   }, [supabase])
 
@@ -176,6 +194,31 @@ export default function DomainsPage() {
       setSearchError(e?.message || 'Network error')
     } finally {
       setBuying(null)
+    }
+  }
+
+  /**
+   * Send the user to Stripe Checkout to extend an active domain.
+   * Webhook bumps expires_at by the years they pay for.
+   */
+  async function renew(purchaseId: string, domain: string, years = 1) {
+    setRenewing(purchaseId)
+    try {
+      const r = await fetch('/api/domains/renew', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purchase_id: purchaseId, years }),
+      })
+      const j = await r.json()
+      if (!r.ok || !j?.url) {
+        alert(j?.message || j?.error || `Could not renew ${domain}.`)
+        return
+      }
+      window.location.href = j.url
+    } catch (e: any) {
+      alert(`Network error: ${e?.message || e}`)
+    } finally {
+      setRenewing(null)
     }
   }
 
@@ -410,6 +453,32 @@ export default function DomainsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Renew CTA — only for domains we sold the user (matched
+                      by domain string), and only when expiry is < 60d
+                      away. Hides for domains attached via "Connect a
+                      domain you own" flow. */}
+                  {(() => {
+                    const p = purchases[d.domain]
+                    if (!p || p.status !== 'active' || !p.expires_at) return null
+                    const days = Math.round(
+                      (new Date(p.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                    )
+                    if (days > 60) return null
+                    const urgent = days <= 7
+                    return (
+                      <button
+                        onClick={() => renew(p.id, p.domain)}
+                        disabled={renewing === p.id}
+                        className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-50"
+                        style={{ background: urgent ? '#b45309' : '#5e6ad2' }}
+                        title={days < 0 ? `Expired ${-days}d ago` : `Expires in ${days} day${days === 1 ? '' : 's'}`}
+                      >
+                        {renewing === p.id
+                          ? 'Loading…'
+                          : `Renew · ${days < 0 ? 'expired' : `${days}d`}`}
+                      </button>
+                    )
+                  })()}
                   {d.status === 'live' && (
                     <a href={`https://${d.domain}`} target="_blank" rel="noreferrer"
                        className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">

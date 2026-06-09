@@ -7,6 +7,29 @@ import { checkDomain, retailPrice, PorkbunError } from '@/lib/porkbun'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+/**
+ * GET /api/domains/purchase
+ * Returns the caller's own domain_purchases rows so the dashboard can
+ * surface expiry + Renew buttons inline with the existing domains
+ * list. Only the fields needed for that UI — no Stripe IDs.
+ */
+export async function GET() {
+  const supabase = createUserClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const { data, error } = await supabase
+    .from('domain_purchases')
+    .select('id, domain, status, years, expires_at, retail_usd_charged, theme_id, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return NextResponse.json({ error: 'db_error', details: error.message }, { status: 500 })
+  }
+  return NextResponse.json({ purchases: data || [] })
+}
+
 const HOSTNAME = /^(?=.{4,253}$)(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/i
 
 function admin() {

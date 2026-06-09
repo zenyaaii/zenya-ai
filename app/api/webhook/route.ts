@@ -458,6 +458,73 @@ async function fulfillDomainPurchase(
   })
 }
 
+/**
+ * Handle a paid renewal session. Bumps the existing domain_purchases
+ * row's expires_at by N years and updates retail/wholesale totals.
+ *
+ * Doesn't call any Porkbun renew endpoint — Porkbun's public JSON API
+ * doesn't expose one. The Porkbun-side renewal is handled by their
+ * auto-renew (which we leave on by default for every Zenya-managed
+ * domain). When auto-renew fires, it'll debit our balance at wholesale
+ * — by which point we've already collected this retail charge.
+ */
+async function fulfillDomainRenewal(
+  supabase: Admin,
+  session: Stripe.Checkout.Session,
+  meta: { domain_purchase_id: string; domain: string; years: string }
+) {
+  const purchaseId = meta.domain_purchase_id
+  const years = Math.max(1, Math.min(10, Number(meta.years) || 1))
+  const paymentIntentId =
+    typeof session.payment_intent === 'string' ? session.payment_intent : null
+  const amountUsd = (session.amount_total ?? 0) / 100
+
+  const { data: existing } = await supabase
+    .from('domain_purchases')
+    .select('id, user_id, domain, status, expires_at, retail_usd_charged, wholesale_usd')
+    .eq('id', purchaseId)
+    .maybeSingle()
+
+  if (!existing) {
+    console.error('[webhook] renewal: purchase row missing for', purchaseId)
+    return
+  }
+
+  // Bump expiry from whichever is later — today, or the current
+  // expires_at — so renewing 60 days early adds a full year on top
+  // instead of resetting the clock.
+  const baseTime = Math.max(
+    Date.now(),
+    existing.expires_at ? new Date(existing.expires_at as any).getTime() : 0
+  )
+  const newExpiry = new Date(baseTime)
+  newExpiry.setUTCFullYear(newExpiry.getUTCFullYear() + years)
+
+  const wholesaleAdded = Number((session.metadata?.wholesale_usd as string) || '0') || 0
+  const retailAdded = Number((session.metadata?.retail_usd as string) || '0') || amountUsd
+
+  await supabase
+    .from('domain_purchases')
+    .update({
+      expires_at: newExpiry.toISOString(),
+      retail_usd_charged: +((Number(existing.retail_usd_charged) || 0) + retailAdded).toFixed(2),
+      wholesale_usd: +((Number(existing.wholesale_usd) || 0) + wholesaleAdded).toFixed(2),
+      // Renewing brings a failed/refunded row back to life only if
+      // explicitly intended; we just leave the status untouched here
+      // for the common active → active case.
+    })
+    .eq('id', purchaseId)
+
+  await logEvent(supabase, existing.user_id, 'domain_purchase.renewed', {
+    purchase_id: purchaseId,
+    domain: existing.domain,
+    years,
+    new_expires_at: newExpiry.toISOString(),
+    payment_intent_id: paymentIntentId,
+    retail_added_usd: retailAdded,
+  })
+}
+
 // ---------- POST handler --------------------------------------------------
 
 export async function POST(req: NextRequest) {
@@ -522,6 +589,16 @@ export async function POST(req: NextRequest) {
             domain: (session.metadata?.domain as string) || '',
             years: (session.metadata?.years as string) || '1',
             theme_id: (session.metadata?.theme_id as string) || '',
+          })
+        } else if (
+          session.mode === 'payment' &&
+          session.payment_status === 'paid' &&
+          purchaseType === 'domain_renew'
+        ) {
+          await fulfillDomainRenewal(supabase, session, {
+            domain_purchase_id: (session.metadata?.domain_purchase_id as string) || '',
+            domain: (session.metadata?.domain as string) || '',
+            years: (session.metadata?.years as string) || '1',
           })
         } else if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
           await recordOneTimePurchase(supabase, session, userId)
