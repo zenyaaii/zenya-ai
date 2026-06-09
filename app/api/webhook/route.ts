@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
+import { registerDomain, createDnsRecord, PorkbunError } from '@/lib/porkbun'
+import { addDomainToProject } from '@/lib/vercel-domains'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -281,6 +283,153 @@ async function recordRefund(supabase: Admin, charge: Stripe.Charge) {
   })
 }
 
+// ---------- domain purchase (Porkbun + Vercel) ----------------------------
+
+const VERCEL_APEX_A = '76.76.21.21'
+const VERCEL_CNAME_TARGET = 'cname.vercel-dns.com'
+
+/**
+ * Run the post-payment side of a domain purchase:
+ *   1. Mark domain_purchases row as `registering`.
+ *   2. Register the domain at Porkbun (debits our Porkbun balance).
+ *   3. Add the A record at Porkbun so Vercel can verify ownership.
+ *   4. Add a www CNAME so visitors hitting either form land safely.
+ *   5. Attach the domain to the Vercel project so SSL provisions.
+ *   6. Insert into the existing `domains` table so it shows up in the
+ *      user's site card immediately.
+ *   7. Flip the row to `active` (or `failed` with the error message).
+ *
+ * Each step swallows its own error into the row so a partial failure
+ * (e.g. registered ok, attach failed) leaves a clear breadcrumb. Stripe
+ * already kept the money — we surface the error to the operator via
+ * domain_purchases.error_message instead of throwing the webhook 500.
+ */
+async function fulfillDomainPurchase(
+  supabase: Admin,
+  session: Stripe.Checkout.Session,
+  meta: { domain_purchase_id: string; user_id: string; domain: string; years: string; theme_id: string }
+) {
+  const purchaseId = meta.domain_purchase_id
+  const domain = meta.domain.toLowerCase()
+  const years = Math.max(1, Math.min(10, Number(meta.years) || 1))
+  const themeId = meta.theme_id && meta.theme_id.length > 0 ? meta.theme_id : null
+  const paymentIntentId =
+    typeof session.payment_intent === 'string' ? session.payment_intent : null
+
+  // Idempotency at the domain level — if the row is already active,
+  // bail. (Stripe retries the same event sometimes.)
+  const { data: existing } = await supabase
+    .from('domain_purchases')
+    .select('id, status')
+    .eq('id', purchaseId)
+    .maybeSingle()
+
+  if (!existing) {
+    console.error('[webhook] domain purchase row missing for', purchaseId)
+    return
+  }
+  if (existing.status === 'active') {
+    return
+  }
+
+  await supabase
+    .from('domain_purchases')
+    .update({
+      status: 'registering',
+      stripe_payment_intent_id: paymentIntentId,
+    })
+    .eq('id', purchaseId)
+
+  // 1. Register at Porkbun.
+  try {
+    await registerDomain({ domain, years })
+  } catch (e: any) {
+    const err = e as PorkbunError
+    await supabase
+      .from('domain_purchases')
+      .update({
+        status: 'failed',
+        error_message: `porkbun_register: ${err.message}`,
+      })
+      .eq('id', purchaseId)
+    await logEvent(supabase, meta.user_id, 'domain_purchase.register_failed', {
+      domain, purchase_id: purchaseId, error: err.message,
+    })
+    return
+  }
+
+  // 2. DNS records at Porkbun → point at Vercel.
+  //    Errors here are recoverable — domain is registered, we just
+  //    need the DNS later. Surface but don't abort the attach.
+  const dnsErrors: string[] = []
+  try {
+    await createDnsRecord(domain, { name: '', type: 'A', content: VERCEL_APEX_A, ttl: 600 })
+  } catch (e: any) {
+    dnsErrors.push(`A: ${e?.message || e}`)
+  }
+  try {
+    await createDnsRecord(domain, { name: 'www', type: 'CNAME', content: VERCEL_CNAME_TARGET, ttl: 600 })
+  } catch (e: any) {
+    dnsErrors.push(`CNAME www: ${e?.message || e}`)
+  }
+
+  // 3. Attach to Vercel project so SSL provisions.
+  let vercelDomainId: string | null = null
+  try {
+    const v = await addDomainToProject(domain)
+    vercelDomainId = v?.name || null
+  } catch (e: any) {
+    await supabase
+      .from('domain_purchases')
+      .update({
+        status: 'failed',
+        error_message: `vercel_attach: ${e?.message || e}${dnsErrors.length ? ` | dns: ${dnsErrors.join('; ')}` : ''}`,
+      })
+      .eq('id', purchaseId)
+    await logEvent(supabase, meta.user_id, 'domain_purchase.vercel_attach_failed', {
+      domain, purchase_id: purchaseId, error: e?.message,
+    })
+    return
+  }
+
+  // 4. Record in the existing `domains` table so SiteCard / DomainsList
+  //    pick it up. Use upsert so a retry doesn't duplicate the row.
+  if (themeId) {
+    await supabase.from('domains').upsert(
+      {
+        user_id: meta.user_id,
+        theme_id: themeId,
+        domain,
+        vercel_domain_id: vercelDomainId,
+        status: 'pending_ssl',
+      },
+      { onConflict: 'domain' }
+    )
+  }
+
+  // 5. Compute expiry and flip to active.
+  const expiresAt = new Date()
+  expiresAt.setUTCFullYear(expiresAt.getUTCFullYear() + years)
+
+  await supabase
+    .from('domain_purchases')
+    .update({
+      status: 'active',
+      registered_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+      error_message: dnsErrors.length ? `dns_partial: ${dnsErrors.join('; ')}` : null,
+    })
+    .eq('id', purchaseId)
+
+  await logEvent(supabase, meta.user_id, 'domain_purchase.completed', {
+    domain,
+    purchase_id: purchaseId,
+    years,
+    theme_id: themeId,
+    vercel_domain_id: vercelDomainId,
+  })
+}
+
 // ---------- POST handler --------------------------------------------------
 
 export async function POST(req: NextRequest) {
@@ -329,7 +478,24 @@ export async function POST(req: NextRequest) {
 
         if (customerId) await linkStripeCustomer(supabase, customerId, email, userId)
 
-        if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
+        // Branch: a domain registration runs through the same Stripe
+        // Checkout endpoint as a one-time pro purchase. We tell them
+        // apart by metadata.purchase_type — set in /api/domains/purchase.
+        const purchaseType = (session.metadata?.purchase_type as string | undefined) || ''
+
+        if (
+          session.mode === 'payment' &&
+          session.payment_status === 'paid' &&
+          purchaseType === 'domain'
+        ) {
+          await fulfillDomainPurchase(supabase, session, {
+            domain_purchase_id: (session.metadata?.domain_purchase_id as string) || '',
+            user_id: (session.metadata?.user_id as string) || userId || '',
+            domain: (session.metadata?.domain as string) || '',
+            years: (session.metadata?.years as string) || '1',
+            theme_id: (session.metadata?.theme_id as string) || '',
+          })
+        } else if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
           await recordOneTimePurchase(supabase, session, userId)
         } else if (session.mode === 'subscription' && typeof session.subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(session.subscription)

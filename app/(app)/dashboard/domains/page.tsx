@@ -34,8 +34,13 @@ type SearchResult = {
   /** true = available, false = registered, null = lookup failed (don't render as "taken"). */
   available: boolean | null
   premium?: boolean
-  price_cents?: number
-  currency?: string
+  /** Wholesale first-year USD price from Porkbun (informational; we charge retail). */
+  wholesale_usd_year?: number | null
+  /** Wholesale renewal USD/year — shown so users see year-2+ cost upfront. */
+  renewal_wholesale_usd_year?: number | null
+  /** Retail USD/year — wholesale + our markup. This is what we charge. */
+  retail_usd_year?: number | null
+  first_year_promo?: boolean
   message?: string
   error_code?: string
 }
@@ -65,6 +70,9 @@ export default function DomainsPage() {
   const [searching, setSearching] = useState(false)
   const [results, setResults] = useState<SearchResult[] | null>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
+  /** Which theme to attach the purchased domain to. Empty = "decide later". */
+  const [buyForThemeId, setBuyForThemeId] = useState<string>('')
+  const [buying, setBuying] = useState<string | null>(null) // domain string mid-checkout
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -134,6 +142,43 @@ export default function DomainsPage() {
     }
   }
 
+  /**
+   * Send the user to Stripe Checkout for this domain. The webhook
+   * registers it at Porkbun, attaches it to Vercel, and (if a theme
+   * was selected) wires it to that site's slug. Domain shows up under
+   * "Your connected domains" within a couple of minutes after payment.
+   */
+  async function buy(domain: string) {
+    if (!hasHosting) {
+      // Custom domains need the hosting plan — push them to upgrade
+      // instead of failing silently mid-checkout.
+      window.location.href = '/checkout?plan=hosting'
+      return
+    }
+    setBuying(domain)
+    try {
+      const r = await fetch('/api/domains/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain,
+          theme_id: buyForThemeId || null,
+          years: 1,
+        }),
+      })
+      const j = await r.json()
+      if (!r.ok || !j?.url) {
+        setSearchError(j?.message || j?.error || 'Could not start checkout.')
+        return
+      }
+      window.location.href = j.url
+    } catch (e: any) {
+      setSearchError(e?.message || 'Network error')
+    } finally {
+      setBuying(null)
+    }
+  }
+
   // Eligible themes — published + hostable
   const eligibleThemes = useMemo(() => {
     return Object.values(themes).filter((t) => t.is_published && t.slug)
@@ -187,7 +232,7 @@ export default function DomainsPage() {
           <h2 className="text-[14px] font-semibold text-foreground">Find a new domain</h2>
         </div>
         <p className="mt-1 text-[12.5px] text-muted">
-          Type a name and we’ll check what’s available right now. Buy it at any registrar (GoDaddy, Namecheap, Porkbun, Cloudflare…) and come back to connect it.
+          Type a name, see what’s available, and buy it in one click — registration, DNS, and SSL are wired up for you automatically.
         </p>
 
         <form
@@ -220,67 +265,94 @@ export default function DomainsPage() {
 
         {results && results.length > 0 && (
           <div className="mt-4 overflow-hidden rounded-lg border border-token">
+            {/* If the user owns multiple eligible sites, let them pick
+                which one the domain attaches to BEFORE clicking Buy.
+                Empty value means "decide later" — they can connect it
+                from the regular "Connect a domain you own" flow once it
+                lands in their account. */}
+            {eligibleThemes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 border-b border-token bg-[#fafaf7] px-3 py-2 text-[12px] text-muted">
+                <span>Attach to:</span>
+                <select
+                  value={buyForThemeId}
+                  onChange={(e) => setBuyForThemeId(e.target.value)}
+                  className="rounded-md border border-token bg-white px-2 py-1 text-[12px] text-foreground outline-none focus:border-primary"
+                >
+                  <option value="">Decide after purchase</option>
+                  {eligibleThemes.map((t) => (
+                    <option key={t.id} value={t.id}>{t.product_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <table className="w-full text-left text-[12.5px]">
               <thead className="bg-[#fafaf7]">
                 <tr>
                   <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Domain</th>
                   <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Status</th>
-                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Price (yr)</th>
+                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Price / yr</th>
                   <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted"></th>
                 </tr>
               </thead>
               <tbody>
-                {results.map((r) => (
-                  <tr key={r.domain} className="border-t border-token">
-                    <td className="px-3 py-2 font-mono text-foreground">{r.domain}</td>
-                    <td className="px-3 py-2">
-                      {r.available === true ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]">
-                          <CheckCircle2 className="h-3 w-3" /> Available
-                        </span>
-                      ) : r.available === false ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
-                          Taken
-                        </span>
-                      ) : (
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
-                          title={r.message || 'Lookup failed'}
-                        >
-                          <AlertCircle className="h-3 w-3" /> Couldn’t check
-                        </span>
-                      )}
-                      {r.premium && (
-                        <span className="ml-1 rounded-full bg-[rgba(200,169,106,0.16)] px-1.5 py-0.5 text-[10px] font-semibold text-[#9b6f00]">Premium</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-muted">
-                      {r.price_cents != null
-                        ? `$${(r.price_cents / 100).toFixed(2)}`
-                        : '—'}
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {r.available === true ? (
-                        <a
-                          href={`https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(r.domain)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white"
-                        >
-                          Buy now <ArrowRight className="h-3 w-3" />
-                        </a>
-                      ) : r.available === false ? (
-                        <span className="text-[11.5px] text-muted">Already taken</span>
-                      ) : (
-                        <span className="text-[11.5px] text-[#b45309]" title={r.message || ''}>Try again</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {results.map((r) => {
+                  const isPending = buying === r.domain
+                  return (
+                    <tr key={r.domain} className="border-t border-token">
+                      <td className="px-3 py-2 font-mono text-foreground">{r.domain}</td>
+                      <td className="px-3 py-2">
+                        {r.available === true ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]">
+                            <CheckCircle2 className="h-3 w-3" /> Available
+                          </span>
+                        ) : r.available === false ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
+                            Taken
+                          </span>
+                        ) : (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
+                            title={r.message || 'Lookup failed'}
+                          >
+                            <AlertCircle className="h-3 w-3" /> Couldn’t check
+                          </span>
+                        )}
+                        {r.premium && (
+                          <span className="ml-1 rounded-full bg-[rgba(200,169,106,0.16)] px-1.5 py-0.5 text-[10px] font-semibold text-[#9b6f00]">Premium</span>
+                        )}
+                        {r.first_year_promo && (
+                          <span className="ml-1 rounded-full bg-[rgba(94,106,210,0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-primary" title={`Renews at higher price after year 1`}>
+                            1st-yr deal
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums text-foreground">
+                        {r.retail_usd_year != null
+                          ? `$${r.retail_usd_year.toFixed(2)}`
+                          : '—'}
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {r.available === true ? (
+                          <button
+                            onClick={() => buy(r.domain)}
+                            disabled={isPending}
+                            className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                          >
+                            {isPending ? 'Loading…' : <>Buy now <ArrowRight className="h-3 w-3" /></>}
+                          </button>
+                        ) : r.available === false ? (
+                          <span className="text-[11.5px] text-muted">Already taken</span>
+                        ) : (
+                          <span className="text-[11.5px] text-[#b45309]" title={r.message || ''}>Try again</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
             <div className="border-t border-token bg-[#fafaf7] px-3 py-2 text-[11.5px] text-muted">
-              Once you own it, come back here and click <strong className="text-foreground">Connect a domain you own…</strong> at the top right.
+              Buying a domain through Zenya wires it up automatically — registration, DNS, and SSL. No manual records to copy.
             </div>
           </div>
         )}
