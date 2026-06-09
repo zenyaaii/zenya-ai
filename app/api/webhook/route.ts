@@ -340,20 +340,48 @@ async function fulfillDomainPurchase(
     })
     .eq('id', purchaseId)
 
-  // 1. Register at Porkbun.
+  // 1. Register at Porkbun. If this fails (insufficient funds, premium
+  //    mismatch, registry rejection), the user has already paid — so
+  //    we auto-refund and write the failure into the row. No human in
+  //    the loop for the unhappy path.
   try {
     await registerDomain({ domain, years })
   } catch (e: any) {
     const err = e as PorkbunError
+    let refundIssued = false
+    let refundError: string | null = null
+    if (paymentIntentId) {
+      try {
+        await stripe.refunds.create({
+          payment_intent: paymentIntentId,
+          reason: 'requested_by_customer',
+          metadata: {
+            purchase_type: 'domain',
+            domain_purchase_id: purchaseId,
+            domain,
+            auto_refund_reason: 'porkbun_register_failed',
+          },
+        })
+        refundIssued = true
+      } catch (re: any) {
+        refundError = re?.message || String(re)
+      }
+    }
     await supabase
       .from('domain_purchases')
       .update({
-        status: 'failed',
-        error_message: `porkbun_register: ${err.message}`,
+        status: refundIssued ? 'refunded' : 'failed',
+        error_message:
+          `porkbun_register: ${err.message}` +
+          (refundIssued ? ' · auto-refunded' :
+           refundError ? ` · refund failed: ${refundError}` : ''),
       })
       .eq('id', purchaseId)
     await logEvent(supabase, meta.user_id, 'domain_purchase.register_failed', {
-      domain, purchase_id: purchaseId, error: err.message,
+      domain, purchase_id: purchaseId,
+      error: err.message,
+      auto_refunded: refundIssued,
+      refund_error: refundError,
     })
     return
   }
