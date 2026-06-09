@@ -1,5 +1,6 @@
 import {
   Sparkles, Shirt, Star, Mail, Image as ImageIcon, Phone, Newspaper, Heart,
+  Home as HomeIcon, ShoppingBag, BookOpen,
 } from 'lucide-react'
 import { LOOKBOOK_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -26,6 +27,13 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
   colorPresets:    LOOKBOOK_PRESETS,
   colorTokens:     TOKENS,
 
+  pages: [
+    { id: 'home',     label: 'Home',     icon: HomeIcon },
+    { id: 'shop',     label: 'Shop',     icon: ShoppingBag },
+    { id: 'lookbook', label: 'Lookbook', icon: ImageIcon },
+    { id: 'about',    label: 'About',    icon: BookOpen },
+  ],
+
   panels: [
     {
       id: 'brand', label: 'Brand', icon: Sparkles,
@@ -36,7 +44,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'hero', label: 'Hero', icon: Sparkles,
+      id: 'hero', label: 'Hero', icon: Sparkles, page: 'home',
       fields: [
         { type: 'text',     path: 'hero.eyebrow',       label: 'Eyebrow' },
         { type: 'textarea', path: 'hero.headline',      label: 'Headline', rows: 2 },
@@ -55,7 +63,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'lookbook_section', label: 'Lookbook', icon: ImageIcon,
+      id: 'lookbook_section', label: 'Lookbook', icon: ImageIcon, page: 'lookbook',
       fields: [
         { type: 'text',     path: 'lookbook.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'lookbook.heading',    label: 'Heading', rows: 2 },
@@ -73,7 +81,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'bestsellers', label: 'Bestsellers', icon: Shirt,
+      id: 'bestsellers', label: 'Bestsellers', icon: Shirt, page: 'home',
       fields: [
         { type: 'text',     path: 'bestsellers.eyebrow', label: 'Eyebrow' },
         { type: 'textarea', path: 'bestsellers.heading', label: 'Heading', rows: 2 },
@@ -92,7 +100,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'brand_story', label: 'Brand story', icon: Heart,
+      id: 'brand_story', label: 'Brand story', icon: Heart, page: 'about',
       fields: [
         { type: 'text',     path: 'brand_story.eyebrow', label: 'Eyebrow' },
         { type: 'textarea', path: 'brand_story.heading', label: 'Heading', rows: 2 },
@@ -110,14 +118,14 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'press', label: 'Press', icon: Newspaper,
+      id: 'press', label: 'Press', icon: Newspaper, page: 'about',
       fields: [
         { type: 'text',    path: 'press.heading',      label: 'Heading' },
         { type: 'strings', path: 'press.publications', label: 'Publications', addLabel: 'Add publication' },
       ],
     },
     {
-      id: 'testimonials', label: 'Reviews', icon: Star,
+      id: 'testimonials', label: 'Reviews', icon: Star, page: 'home',
       fields: [
         { type: 'text',     path: 'testimonials.eyebrow',        label: 'Eyebrow' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
@@ -137,7 +145,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'newsletter', label: 'Newsletter', icon: Mail,
+      id: 'newsletter', label: 'Newsletter', icon: Mail, page: 'home',
       fields: [
         { type: 'text',     path: 'newsletter.eyebrow',     label: 'Eyebrow' },
         { type: 'textarea', path: 'newsletter.heading',     label: 'Heading', rows: 2 },

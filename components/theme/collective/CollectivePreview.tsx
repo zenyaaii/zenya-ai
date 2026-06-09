@@ -14,8 +14,11 @@ type Props = {
 type CollectiveView = 'home' | 'collections' | 'arrivals' | 'about'
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
-function useReveal(delay = 0) {
-  const rm = useReducedMotion()
+// Plain functions (not hooks!) so they can be called safely inside .map()
+// callbacks and conditional `view === '…'` branches without violating the
+// rules of hooks. Every component that uses them calls `useReducedMotion()`
+// once at the top to get `rm`, then threads it through.
+function revealAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 40 },
     whileInView: rm ? {} : { opacity: 1, y: 0 },
@@ -24,8 +27,7 @@ function useReveal(delay = 0) {
   }
 }
 
-function useFadeUp(delay = 0) {
-  const rm = useReducedMotion()
+function fadeUpAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 20 },
     animate: rm ? {} : { opacity: 1, y: 0 },
@@ -320,7 +322,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
   const fonts = { heading: preset.heading_font, body: preset.body_font }
   const [navOpen, setNavOpen] = useState(false)
   const [view, setView] = useState<CollectiveView>('home')
-  const rm = useReducedMotion()
+  const rm = !!useReducedMotion()
 
   const isLight = colors.background.startsWith('#f') || colors.background.startsWith('#fa')
 
@@ -397,7 +399,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           <motion.span
             className="mb-6 inline-block rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
             style={{ borderColor: colors.borderGlass, background: colors.surfaceGlass, color: colors.muted, backdropFilter: 'blur(8px)', fontFamily: fonts.body }}
-            {...useFadeUp(0.1)}
+            {...fadeUpAnim(rm,0.1)}
           >
             {content.hero.eyebrow}
           </motion.span>
@@ -405,7 +407,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           <motion.h1
             className="mx-auto mb-6 max-w-3xl text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl"
             style={{ fontFamily: fonts.heading, color: colors.text }}
-            {...useFadeUp(0.2)}
+            {...fadeUpAnim(rm,0.2)}
           >
             <Headline text={content.hero.headline} />
           </motion.h1>
@@ -413,12 +415,12 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           <motion.p
             className="mx-auto mb-10 max-w-xl text-lg leading-relaxed"
             style={{ color: colors.muted, fontFamily: fonts.body }}
-            {...useFadeUp(0.3)}
+            {...fadeUpAnim(rm,0.3)}
           >
             {content.hero.subheadline}
           </motion.p>
 
-          <motion.div className="flex flex-wrap items-center justify-center gap-4" {...useFadeUp(0.4)}>
+          <motion.div className="flex flex-wrap items-center justify-center gap-4" {...fadeUpAnim(rm,0.4)}>
             <button
               className="rounded-2xl px-8 py-4 text-sm font-semibold tracking-wide shadow-lg transition-all hover:-translate-y-0.5"
               style={{ background: colors.primary, color: colors.textInverse, boxShadow: `0 8px 32px -8px ${colors.glowPrimary}`, fontFamily: fonts.body }}
@@ -434,7 +436,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           </motion.div>
 
           {content.hero.badge && (
-            <motion.p className="mt-6 text-xs" style={{ color: colors.muted, fontFamily: fonts.body }} {...useFadeUp(0.5)}>
+            <motion.p className="mt-6 text-xs" style={{ color: colors.muted, fontFamily: fonts.body }} {...fadeUpAnim(rm,0.5)}>
               ✓ {content.hero.badge}
             </motion.p>
           )}
@@ -467,7 +469,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {(view === 'home' || view === 'collections') && content.collections && (
         <section className="px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
-            <motion.div className="mb-14 max-w-xl" {...useReveal(0)}>
+            <motion.div className="mb-14 max-w-xl" {...revealAnim(rm,0)}>
               <span className="mb-3 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
                 {content.collections.eyebrow}
               </span>
@@ -504,7 +506,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {(view === 'collections' || view === 'arrivals') && content.new_arrivals && (
         <section className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-6xl">
-            <motion.div className="mb-12 flex items-end justify-between" {...useReveal(0)}>
+            <motion.div className="mb-12 flex items-end justify-between" {...revealAnim(rm,0)}>
               <div>
                 <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
                   {content.new_arrivals.eyebrow}
@@ -534,7 +536,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
         <AuroraBackground colors={colors} className="px-6 py-28 md:px-10">
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-16 md:grid-cols-2 md:items-center">
-              <motion.div {...useReveal(0)}>
+              <motion.div {...revealAnim(rm,0)}>
                 <span className="mb-4 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
                   {content.brand_promise.eyebrow}
                 </span>
@@ -542,7 +544,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                   <Headline text={content.brand_promise.headline} />
                 </h2>
               </motion.div>
-              <motion.div {...useReveal(0.15)}>
+              <motion.div {...revealAnim(rm,0.15)}>
                 <p className="mb-8 text-lg leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {content.brand_promise.body}
                 </p>
@@ -564,7 +566,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {(view === 'home' || view === 'arrivals') && content.bestsellers && (
         <section className="px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
-            <motion.div className="mb-12 max-w-xl" {...useReveal(0)}>
+            <motion.div className="mb-12 max-w-xl" {...revealAnim(rm,0)}>
               <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
                 {content.bestsellers.eyebrow}
               </span>
@@ -613,7 +615,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {(view === 'home' || view === 'about') && content.testimonials && (
         <section className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-6xl">
-            <motion.div className="mb-12 text-center" {...useReveal(0)}>
+            <motion.div className="mb-12 text-center" {...revealAnim(rm,0)}>
               <span className="mb-3 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
                 {content.testimonials.eyebrow}
               </span>
@@ -647,7 +649,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {/* ── NEWSLETTER ───────────────────────────────────────────────────────── */}
       {view === 'home' && content.newsletter && (
         <AuroraBackground colors={colors} className="px-6 py-28 md:px-10">
-          <motion.div className="mx-auto max-w-xl text-center" {...useReveal(0)}>
+          <motion.div className="mx-auto max-w-xl text-center" {...revealAnim(rm,0)}>
             <span className="mb-4 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
               {content.newsletter.eyebrow}
             </span>

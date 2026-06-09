@@ -34,7 +34,7 @@ import {
 import ClickToEditOverlay from './ClickToEditOverlay'
 import {
   getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES,
-  type EditorConfig, type EditorFieldDef, type EditorPanel,
+  type EditorConfig, type EditorFieldDef, type EditorPage, type EditorPanel,
   type SectionStyles, type SectionStyle, type SectionTextAlign,
 } from '@/utils/theme-editor-types'
 import {
@@ -190,6 +190,17 @@ export default function ThemeEditor({
     return () => window.removeEventListener('keydown', onKey)
   }, [dirty, status, save])
 
+  // When the user switches pages, the currently selected section may no
+  // longer belong to the new page. Re-pick the first visible section so the
+  // right rail never shows a section that isn't in the left rail.
+  useEffect(() => {
+    if (selected === '__style__' || selected === '__typography__') return
+    if (config.globalPanels.some((p) => p.id === selected)) return
+    const visiblePanels = config.panels.filter((p) => !p.page || p.page === view)
+    if (visiblePanels.some((p) => p.id === selected)) return
+    if (visiblePanels.length > 0) setSelected(visiblePanels[0].id)
+  }, [view, selected, config.panels, config.globalPanels])
+
   // ── Helpers ──────────────────────────────────────────────────────────
   function patchPath(path: string, value: any) {
     setContent((c: any) => setPath(c, path, value))
@@ -261,22 +272,31 @@ export default function ThemeEditor({
     <div className="flex h-screen flex-col overflow-hidden bg-surface">
       {/* Top bar */}
       <header
-        className="flex h-14 flex-shrink-0 items-center justify-between border-b border-token bg-white px-4"
+        className="flex h-14 flex-shrink-0 items-center justify-between gap-3 border-b border-token bg-white px-4"
         style={{ boxShadow: '0 1px 0 #f0ede6' }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <Link
             href={backHref}
-            className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
+            className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
             <ArrowLeft className="h-3 w-3" strokeWidth={2.25} />
             Back to preview
           </Link>
-          <span className="hidden text-[13px] text-muted sm:inline">
+          <span className="hidden truncate text-[13px] text-muted sm:inline">
             Editing <strong className="font-semibold text-foreground">{themeName}</strong>
           </span>
         </div>
-        <div className="flex items-center gap-3">
+
+        {config.pages && config.pages.length > 0 && (
+          <PageSwitcher
+            pages={config.pages}
+            view={view}
+            onChange={(v) => setView(v)}
+          />
+        )}
+
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
           <StatusPill status={status} dirty={dirty} />
           <span className="hidden text-[11px] text-muted/70 sm:inline">
             <kbd className="rounded border border-token bg-surface px-1 py-px text-[10px]">⌘S</kbd> to save
@@ -284,7 +304,7 @@ export default function ThemeEditor({
           <button
             onClick={save}
             disabled={!dirty || status === 'saving'}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+            className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <Save className="h-3 w-3" strokeWidth={2.5} />
             Save
@@ -296,34 +316,15 @@ export default function ThemeEditor({
       <div className="hidden flex-1 overflow-hidden lg:flex">
         {/* Left rail */}
         <aside className="w-64 flex-shrink-0 overflow-y-auto border-r border-token bg-white">
-          {config.pages && config.pages.length > 0 && (
-            <div className="border-b border-token px-3 py-3">
-              <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">Pages</div>
-              <div className="space-y-0.5">
-                {config.pages.map((p) => {
-                  const Icon = p.icon
-                  const active = view === p.id
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setView(p.id)}
-                      className={
-                        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition ' +
-                        (active ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.03] hover:text-foreground')
-                      }
-                    >
-                      <Icon className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={2} />
-                      <span className="flex-1 text-[13px] font-medium">{p.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           <div className="border-b border-token px-3 py-3">
-            <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">Sections</div>
+            <div className="flex items-baseline justify-between px-1.5 pb-1.5">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">Sections</span>
+              {config.pages && config.pages.length > 0 && (
+                <span className="text-[10px] text-muted/60">
+                  {config.pages.find((p) => p.id === view)?.label || ''}
+                </span>
+              )}
+            </div>
             <div className="space-y-0.5">
               {config.panels
                 .filter((p) => !p.page || p.page === view)
@@ -398,7 +399,7 @@ export default function ThemeEditor({
         {/* Live preview */}
         <main
           ref={previewRef}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto overflow-x-hidden"
           style={{ background: '#0a0a0c' }}
         >
           {/* Per-section text scale + alignment. Themes opt in by tagging
@@ -759,6 +760,47 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
         </button>
       )}
     </>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────────── *
+ * Page switcher — top-bar control for multi-page themes.                  *
+ * Pages live in the URL of the rendered theme, so they're not "sections"  *
+ * the user edits — they're the high-level page the editor is currently    *
+ * focused on. We keep them out of the left rail and surface them here so  *
+ * the user always knows which page they're editing.                       *
+ * ────────────────────────────────────────────────────────────────────── */
+function PageSwitcher({
+  pages, view, onChange,
+}: {
+  pages: EditorPage[]
+  view: string
+  onChange: (id: string) => void
+}) {
+  return (
+    <div className="hidden min-w-0 max-w-full flex-shrink items-center gap-0.5 overflow-x-auto rounded-full border border-token bg-surface/60 p-0.5 md:flex">
+      {pages.map((p) => {
+        const Icon = p.icon
+        const active = view === p.id
+        return (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onChange(p.id)}
+            className={
+              'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium transition ' +
+              (active
+                ? 'bg-foreground text-white shadow-sm'
+                : 'text-muted hover:bg-black/[0.04] hover:text-foreground')
+            }
+            title={`Edit ${p.label} page`}
+          >
+            <Icon className="h-3 w-3" strokeWidth={2.25} />
+            {p.label}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 

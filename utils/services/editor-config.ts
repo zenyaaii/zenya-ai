@@ -1,6 +1,6 @@
 import {
   Sparkles, Wrench, Star, MapPin, Phone, Award, HelpCircle, Image as ImageIcon,
-  Quote,
+  Quote, Home as HomeIcon, BookOpen, Workflow,
 } from 'lucide-react'
 import { SERVICE_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -23,6 +23,14 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
   colorPresets:    SERVICE_PRESETS,
   colorTokens:     TOKENS,
 
+  pages: [
+    { id: 'home',     label: 'Home',     icon: HomeIcon },
+    { id: 'services', label: 'Services', icon: Wrench },
+    { id: 'about',    label: 'About',    icon: BookOpen },
+    { id: 'process',  label: 'Process',  icon: Workflow },
+    { id: 'contact',  label: 'Contact',  icon: Phone },
+  ],
+
   panels: [
     {
       id: 'brand', label: 'Business', icon: Sparkles,
@@ -36,7 +44,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'hero', label: 'Hero', icon: Sparkles,
+      id: 'hero', label: 'Hero', icon: Sparkles, page: 'home',
       fields: [
         { type: 'text',     path: 'hero.eyebrow',       label: 'Eyebrow' },
         { type: 'textarea', path: 'hero.headline',      label: 'Headline', rows: 2 },
@@ -56,13 +64,13 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'trust_bar', label: 'Trust bar', icon: Star,
+      id: 'trust_bar', label: 'Trust bar', icon: Star, page: 'home',
       fields: [
         { type: 'strings', path: 'trust_bar.items', label: 'Trust items', addLabel: 'Add item' },
       ],
     },
     {
-      id: 'services', label: 'Services', icon: Wrench,
+      id: 'services', label: 'Services', icon: Wrench, page: 'services',
       fields: [
         { type: 'textarea', path: 'services.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'services.subheading', label: 'Subheading', rows: 2 },
@@ -80,7 +88,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'story', label: 'Story', icon: Quote,
+      id: 'story', label: 'Story', icon: Quote, page: 'about',
       fields: [
         { type: 'text',     path: 'story.eyebrow',     label: 'Eyebrow' },
         { type: 'textarea', path: 'story.heading',     label: 'Heading', rows: 2 },
@@ -92,7 +100,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'proof', label: 'Proof', icon: Award,
+      id: 'proof', label: 'Proof', icon: Award, page: 'services',
       fields: [
         { type: 'textarea', path: 'proof.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'proof.subheading', label: 'Subheading', rows: 2 },
@@ -108,7 +116,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'before_after', label: 'Before / after', icon: ImageIcon,
+      id: 'before_after', label: 'Before / after', icon: ImageIcon, page: 'services',
       fields: [
         { type: 'textarea', path: 'before_after.heading',      label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'before_after.subheading',   label: 'Subheading', rows: 2 },
@@ -120,7 +128,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'process', label: 'Process', icon: Award,
+      id: 'process', label: 'Process', icon: Award, page: 'process',
       fields: [
         { type: 'textarea', path: 'process.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'process.subheading', label: 'Subheading', rows: 2 },
@@ -137,7 +145,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'areas', label: 'Areas served', icon: MapPin,
+      id: 'areas', label: 'Areas served', icon: MapPin, page: 'contact',
       fields: [
         { type: 'textarea', path: 'areas.heading',       label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'areas.subheading',    label: 'Subheading', rows: 2 },
@@ -147,7 +155,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'offer', label: 'Offer', icon: Sparkles,
+      id: 'offer', label: 'Offer', icon: Sparkles, page: 'home',
       fields: [
         { type: 'text',     path: 'offer.badge',      label: 'Badge' },
         { type: 'textarea', path: 'offer.heading',    label: 'Heading', rows: 2 },
@@ -157,7 +165,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'testimonials', label: 'Testimonials', icon: Star,
+      id: 'testimonials', label: 'Testimonials', icon: Star, page: 'home',
       fields: [
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'Subheading', rows: 2 },
@@ -177,7 +185,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'gallery', label: 'Gallery', icon: ImageIcon,
+      id: 'gallery', label: 'Gallery', icon: ImageIcon, page: 'services',
       fields: [
         { type: 'text', path: 'gallery.heading', label: 'Heading' },
         {
@@ -192,7 +200,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'faq', label: 'FAQ', icon: HelpCircle,
+      id: 'faq', label: 'FAQ', icon: HelpCircle, page: 'contact',
       fields: [
         { type: 'text', path: 'faq.heading', label: 'Heading' },
         {
@@ -207,7 +215,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'final_cta', label: 'Final CTA', icon: Sparkles,
+      id: 'final_cta', label: 'Final CTA', icon: Sparkles, page: 'home',
       fields: [
         { type: 'textarea', path: 'final_cta.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'final_cta.subheading',     label: 'Subheading', rows: 2 },

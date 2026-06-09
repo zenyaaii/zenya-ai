@@ -23,6 +23,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import DomainsList from '@/components/DomainsList'
+import { themePreview, themePreviewFallback, hasLocalThemePreview } from '@/lib/theme-previews'
 
 export type SiteTheme = {
   id: string
@@ -105,6 +106,7 @@ export default function SiteCard({
   const Icon = TEMPLATE_ICON[businessType] || ShoppingBag
   const label = TEMPLATE_LABEL[businessType] || businessType
   const tint = TEMPLATE_TINT[businessType] || TEMPLATE_TINT.one_product
+  const hasPreview = hasLocalThemePreview(businessType)
 
   return (
     <motion.div
@@ -114,46 +116,78 @@ export default function SiteCard({
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white transition-all duration-200 hover:-translate-y-0.5"
       style={{ boxShadow: '0 1px 0 #f0ede6, 0 8px 24px -16px rgba(28,28,28,0.10)' }}
     >
-      {/* Top — visual + status overlay */}
-      <div
-        className="relative flex aspect-[16/9] items-center justify-center overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${tint.bg} 0%, white 80%)`,
-        }}
-      >
-        {/* Subtle dot grid */}
+      {/* Top — visual + status overlay. Themes with a captured preview
+          show the screenshot; everything else falls back to the icon-
+          on-tinted-gradient placeholder. */}
+      {hasPreview ? (
+        <div className="relative aspect-[16/9] overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={themePreview(businessType)}
+            alt={`${label} preview`}
+            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+            onError={(e) => {
+              const fb = themePreviewFallback(businessType)
+              if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+            }}
+          />
+          {/* Accent stripe at top for brand cue */}
+          <div className="absolute left-0 top-0 h-1 w-full" style={{ background: tint.fg }} />
+          {/* Subtle bottom fade so the title chip below reads clean */}
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-white/40"
+          />
+          {/* Status pill — top right */}
+          <div className="absolute right-3 top-3">
+            <StatusPill
+              isPublished={!!publishedHere}
+              isDraft={!publishedHere && isHostable}
+              isEcom={isEcom}
+            />
+          </div>
+        </div>
+      ) : (
         <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-50"
+          className="relative flex aspect-[16/9] items-center justify-center overflow-hidden"
           style={{
-            backgroundImage:
-              'radial-gradient(circle, rgba(28,28,28,0.08) 1px, transparent 1px)',
-            backgroundSize: '14px 14px',
-            maskImage: 'radial-gradient(circle at 50% 60%, black, transparent 75%)',
-          }}
-        />
-
-        {/* Icon medallion */}
-        <div
-          className="relative flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
-          style={{
-            background: 'white',
-            color: tint.fg,
-            boxShadow: `0 8px 24px -8px ${tint.ring}, 0 0 0 1px ${tint.ring} inset`,
+            background: `linear-gradient(135deg, ${tint.bg} 0%, white 80%)`,
           }}
         >
-          <Icon className="h-6 w-6" strokeWidth={1.75} />
-        </div>
-
-        {/* Status pill — top right */}
-        <div className="absolute right-3 top-3">
-          <StatusPill
-            isPublished={!!publishedHere}
-            isDraft={!publishedHere && isHostable}
-            isEcom={isEcom}
+          {/* Subtle dot grid */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-50"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle, rgba(28,28,28,0.08) 1px, transparent 1px)',
+              backgroundSize: '14px 14px',
+              maskImage: 'radial-gradient(circle at 50% 60%, black, transparent 75%)',
+            }}
           />
+
+          {/* Icon medallion */}
+          <div
+            className="relative flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+            style={{
+              background: 'white',
+              color: tint.fg,
+              boxShadow: `0 8px 24px -8px ${tint.ring}, 0 0 0 1px ${tint.ring} inset`,
+            }}
+          >
+            <Icon className="h-6 w-6" strokeWidth={1.75} />
+          </div>
+
+          {/* Status pill — top right */}
+          <div className="absolute right-3 top-3">
+            <StatusPill
+              isPublished={!!publishedHere}
+              isDraft={!publishedHere && isHostable}
+              isEcom={isEcom}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">

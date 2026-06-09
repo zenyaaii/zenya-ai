@@ -105,6 +105,27 @@
     background: rgba(94,106,210,0.15);
     color: #1c1c1c;
   }
+
+  /* ── Sane text-wrapping default ──
+     Long unbroken strings (URLs, pasted IDs, "wwwwww" from a user
+     mashing the keyboard) should wrap inside their container instead
+     of blowing out the layout. `overflow-wrap: anywhere` is a no-op
+     for normal text — it only kicks in when wrapping is necessary
+     to prevent overflow, so this is safe to apply broadly. */
+  p, h1, h2, h3, h4, h5, h6,
+  li, dt, dd, blockquote, figcaption,
+  th, td, a, button, label, summary, span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Flex children that contain text need `min-width: 0` so the
+     overflow-wrap above is actually allowed to shrink them. Without
+     this, a flex item defaults to `min-width: auto` (≈ content width)
+     and refuses to shrink below its longest unbreakable token. */
+  input, textarea {
+    min-width: 0;
+  }
 }
 
 @layer utilities {

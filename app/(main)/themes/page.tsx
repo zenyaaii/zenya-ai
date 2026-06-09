@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { auroraTints, BUSINESS_TYPE_ORDER, type AuroraTint } from '@/lib/aurora-tints'
+import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
 import { cn } from '@/lib/utils'
 
 type ThemeCard = {
@@ -54,8 +55,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Fine dining · Restaurant',
     description:
       'Editorial fine-dining website for restaurants, tasting rooms, and chef counters. Tabbed menu, gallery, reservations, hours, and press wall — fully responsive.',
-    cover:
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('restaurant'),
     presets: 4,
     sections: 13,
     demoHref: '/demo/restaurant',
@@ -69,8 +69,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'One-product · Dropshipping',
     description:
       'Conversion-first single-product Shopify theme. Hero funnel, sticky add-to-cart, bundles, comparison, FAQ, urgency, and a fully designed product page. Exports as a Shopify OS 2.0 ZIP.',
-    cover:
-      'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('one_product'),
     presets: 3,
     sections: 24,
     demoHref: '/demo',
@@ -83,8 +82,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'SaaS · Software',
     description:
       'Modern software landing template. Product hero, feature grid, pricing tiers, integrations, security trust strip, and demo CTA.',
-    cover:
-      'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('atlas'),
     presets: 4,
     sections: 12,
     demoHref: '/demo/atlas',
@@ -97,8 +95,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Local services · Trades',
     description:
       'For plumbers, salons, cleaners, home services, and agencies. Premium hero, services, proof, before-after, areas served, reviews, FAQ, and quote-request flow.',
-    cover:
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('services'),
     presets: 4,
     sections: 13,
     demoHref: '/demo/services',
@@ -111,8 +108,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Catalog · Multi-product',
     description:
       'Luxury multi-brand storefront with aurora-lit hero, curated collection grid, new arrivals, bestsellers, brand promise, testimonials, and newsletter.',
-    cover:
-      'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('collective'),
     presets: 4,
     sections: 10,
     demoHref: '/demo/collective',
@@ -125,8 +121,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Brand story · Editorial',
     description:
       'Editorial brand story page with giant display type, founder letter, timeline, values, process, team, press wall, and community stats.',
-    cover:
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('studio'),
     presets: 4,
     sections: 12,
     demoHref: '/demo/studio',
@@ -139,8 +134,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Fashion · Apparel',
     description:
       'High-end fashion template with full-bleed editorial lookbook, drop banner, bestsellers grid, brand story, press wall, reviews, and newsletter.',
-    cover:
-      'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('lookbook'),
     presets: 4,
     sections: 11,
     demoHref: '/demo/lookbook',
@@ -153,8 +147,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Spa · Wellness · Studio',
     description:
       'Calming template for spas, yoga studios, and wellness brands. Treatment menu, booking, instructors, schedules, gift cards.',
-    cover:
-      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('wellness'),
     presets: 3,
     sections: 12,
     demoHref: '/demo/wellness',
@@ -167,8 +160,7 @@ const THEMES: ThemeCard[] = [
     tagline: 'Restaurant · Café · Bar',
     description:
       'Mouth-watering template for restaurants, cafés, and bars. Hero with reservation CTA, menu, story, gallery, hours, contact, and press strip.',
-    cover:
-      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80',
+    cover: themePreview('restaurant'),
     presets: 4,
     sections: 13,
     demoHref: '/demo/restaurant',
@@ -293,6 +285,10 @@ function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
             src={theme.cover}
             alt={theme.name}
             className="absolute inset-0 h-full w-full object-cover"
+            onError={(e) => {
+              const fb = themePreviewFallback(theme.id)
+              if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
           <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
@@ -410,6 +406,10 @@ function ThemeGridCard({
           src={theme.cover}
           alt={theme.name}
           className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+          onError={(e) => {
+            const fb = themePreviewFallback(theme.id)
+            if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+          }}
         />
         <div
           className="absolute inset-0"

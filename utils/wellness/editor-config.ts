@@ -1,6 +1,6 @@
 import {
   Sparkles, Leaf, Hand, Users, Star, HelpCircle, Mail, Phone, Image as ImageIcon,
-  Calendar,
+  Calendar, Home as HomeIcon, Info,
 } from 'lucide-react'
 import { WELLNESS_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -24,6 +24,15 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
   colorPresets:    WELLNESS_PRESETS,
   colorTokens:     TOKENS,
 
+  pages: [
+    { id: 'home',       label: 'Home',       icon: HomeIcon },
+    { id: 'treatments', label: 'Treatments', icon: Hand },
+    { id: 'team',       label: 'Team',       icon: Users },
+    { id: 'space',      label: 'Space',      icon: ImageIcon },
+    { id: 'about',      label: 'About',      icon: Info },
+    { id: 'contact',    label: 'Contact',    icon: Phone },
+  ],
+
   panels: [
     {
       id: 'brand', label: 'Brand', icon: Sparkles,
@@ -36,7 +45,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'hero', label: 'Hero', icon: Sparkles,
+      id: 'hero', label: 'Hero', icon: Sparkles, page: 'home',
       fields: [
         { type: 'text',     path: 'hero.eyebrow',       label: 'Eyebrow' },
         { type: 'textarea', path: 'hero.headline',      label: 'Headline', rows: 2 },
@@ -48,13 +57,13 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'trust_bar', label: 'Trust bar', icon: Star,
+      id: 'trust_bar', label: 'Trust bar', icon: Star, page: 'home',
       fields: [
         { type: 'strings', path: 'trust_bar.items', label: 'Trust items', addLabel: 'Add item' },
       ],
     },
     {
-      id: 'philosophy', label: 'Philosophy', icon: Leaf,
+      id: 'philosophy', label: 'Philosophy', icon: Leaf, page: 'home',
       fields: [
         { type: 'text',     path: 'philosophy.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'philosophy.heading',    label: 'Heading', rows: 2 },
@@ -72,7 +81,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'treatments', label: 'Treatments', icon: Hand,
+      id: 'treatments', label: 'Treatments', icon: Hand, page: 'treatments',
       fields: [
         { type: 'textarea', path: 'treatments.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'treatments.subheading', label: 'Subheading', rows: 2 },
@@ -92,7 +101,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'journey', label: 'Journey', icon: Sparkles,
+      id: 'journey', label: 'Journey', icon: Sparkles, page: 'treatments',
       fields: [
         { type: 'textarea', path: 'journey.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'journey.subheading', label: 'Subheading', rows: 2 },
@@ -109,7 +118,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'team', label: 'Team', icon: Users,
+      id: 'team', label: 'Team', icon: Users, page: 'team',
       fields: [
         { type: 'textarea', path: 'team.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'team.subheading', label: 'Subheading', rows: 2 },
@@ -128,7 +137,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'space', label: 'The space', icon: ImageIcon,
+      id: 'space', label: 'The space', icon: ImageIcon, page: 'space',
       fields: [
         { type: 'textarea', path: 'space.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'space.subheading', label: 'Subheading', rows: 2 },
@@ -145,7 +154,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'testimonials', label: 'Testimonials', icon: Star,
+      id: 'testimonials', label: 'Testimonials', icon: Star, page: 'home',
       fields: [
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'Subheading', rows: 2 },
@@ -165,7 +174,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'booking_cta', label: 'Booking CTA', icon: Calendar,
+      id: 'booking_cta', label: 'Booking CTA', icon: Calendar, page: 'home',
       fields: [
         { type: 'text',     path: 'booking_cta.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'booking_cta.heading',    label: 'Heading', rows: 2 },
@@ -176,7 +185,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'faq', label: 'FAQ', icon: HelpCircle,
+      id: 'faq', label: 'FAQ', icon: HelpCircle, page: 'contact',
       fields: [
         { type: 'text', path: 'faq.heading', label: 'Heading' },
         {

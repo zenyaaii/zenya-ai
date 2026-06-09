@@ -25,8 +25,11 @@ type Props = {
 type AtlasView = 'home' | 'features' | 'pricing' | 'integrations' | 'docs'
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
-function useReveal(delay = 0) {
-  const rm = useReducedMotion()
+// Plain functions (not hooks!) so they can be called safely inside .map()
+// callbacks and conditional `view === '…'` branches without violating the
+// rules of hooks. Every component that uses them calls `useReducedMotion()`
+// once at the top to get `rm`, then threads it through.
+function revealAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 32 },
     whileInView: rm ? {} : { opacity: 1, y: 0 },
@@ -35,8 +38,7 @@ function useReveal(delay = 0) {
   }
 }
 
-function useFadeUp(delay = 0) {
-  const rm = useReducedMotion()
+function fadeUpAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 16 },
     animate: rm ? {} : { opacity: 1, y: 0 },
@@ -247,10 +249,11 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
 function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
-  const reveal = useFadeUp(0)
-  const revealSub = useFadeUp(0.12)
-  const revealCtas = useFadeUp(0.22)
-  const revealMock = useFadeUp(0.35)
+  const rm = !!useReducedMotion()
+  const reveal = fadeUpAnim(rm, 0)
+  const revealSub = fadeUpAnim(rm, 0.12)
+  const revealCtas = fadeUpAnim(rm, 0.22)
+  const revealMock = fadeUpAnim(rm, 0.35)
 
   return (
     <section data-section="hero" className="relative overflow-hidden px-6 py-20 md:py-28" style={{ fontFamily: font }}>
@@ -344,10 +347,11 @@ function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; color
 
 // ─── Features ──────────────────────────────────────────────────────────────────
 function AtlasFeatures({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="features" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
-        <motion.div {...useReveal(0)} className="mb-16 text-center">
+        <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
             {content.features.eyebrow}
           </p>
@@ -363,7 +367,7 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
           {content.features.items.map((feature, i) => (
             <motion.div
               key={i}
-              {...useReveal(0.05 * i)}
+              {...revealAnim(rm,0.05 * i)}
               className="group relative overflow-hidden rounded-2xl border p-6 transition hover:-translate-y-1"
               style={{
                 background: colors.surface,
@@ -406,10 +410,11 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
 
 // ─── How it works ──────────────────────────────────────────────────────────────
 function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="how_it_works" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
-        <motion.div {...useReveal(0)} className="mb-16 text-center">
+        <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
             {content.how_it_works.eyebrow}
           </p>
@@ -429,7 +434,7 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
           />
 
           {content.how_it_works.steps.map((step, i) => (
-            <motion.div key={i} {...useReveal(0.1 * i)} className="relative text-center">
+            <motion.div key={i} {...revealAnim(rm,0.1 * i)} className="relative text-center">
               {/* Step number bubble */}
               <div
                 className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border-2 text-2xl font-black"
@@ -460,10 +465,11 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
 
 // ─── Pricing ───────────────────────────────────────────────────────────────────
 function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="pricing" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
-        <motion.div {...useReveal(0)} className="mb-16 text-center">
+        <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
             {content.pricing.eyebrow}
           </p>
@@ -484,9 +490,10 @@ function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors
 }
 
 function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: ReturnType<typeof getAtlasPreset>['colors']; delay: number }) {
+  const rm = !!useReducedMotion()
   return (
     <motion.div
-      {...useReveal(delay)}
+      {...revealAnim(rm,delay)}
       className="relative overflow-hidden rounded-2xl border p-8 transition hover:-translate-y-1"
       style={{
         background: tier.highlighted ? colors.primary : colors.surface,
@@ -539,10 +546,11 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
 
 // ─── Integrations ──────────────────────────────────────────────────────────────
 function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="integrations" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
-        <motion.div {...useReveal(0)} className="mb-14">
+        <motion.div {...revealAnim(rm,0)} className="mb-14">
           <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.integrations.heading} />
           </h2>
@@ -553,7 +561,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
           {content.integrations.items.map((item, i) => (
             <motion.div
               key={i}
-              {...useReveal(0.04 * i)}
+              {...revealAnim(rm,0.04 * i)}
               className="group flex flex-col items-center gap-2 rounded-2xl border p-4 transition hover:-translate-y-1 hover:shadow-lg"
               style={{ background: colors.surface, borderColor: colors.border }}
             >
@@ -569,7 +577,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
           ))}
         </div>
 
-        <motion.p {...useReveal(0.3)} className="mt-8 text-sm" style={{ color: colors.muted }}>
+        <motion.p {...revealAnim(rm,0.3)} className="mt-8 text-sm" style={{ color: colors.muted }}>
           + 68 more integrations via Zapier and native API
         </motion.p>
       </div>
@@ -579,10 +587,11 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
 
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="testimonials" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
-        <motion.div {...useReveal(0)} className="mb-14 text-center">
+        <motion.div {...revealAnim(rm,0)} className="mb-14 text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
             {content.testimonials.eyebrow}
           </p>
@@ -595,7 +604,7 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
           {content.testimonials.items.map((item, i) => (
             <motion.div
               key={i}
-              {...useReveal(0.08 * i)}
+              {...revealAnim(rm,0.08 * i)}
               className="flex flex-col rounded-2xl border p-7"
               style={{ background: colors.surface, borderColor: colors.border }}
             >
@@ -651,19 +660,20 @@ function AtlasSecurity({ content, colors, font }: { content: AtlasContent; color
 
 // ─── FAQ ───────────────────────────────────────────────────────────────────────
 function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
 
   return (
     <section data-section="faq" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-3xl">
-        <motion.h2 {...useReveal(0)} className="mb-10 text-center text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+        <motion.h2 {...revealAnim(rm,0)} className="mb-10 text-center text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
           {content.faq.heading}
         </motion.h2>
         <div className="space-y-3">
           {content.faq.items.map((item, i) => (
             <motion.div
               key={i}
-              {...useReveal(0.05 * i)}
+              {...revealAnim(rm,0.05 * i)}
               className="overflow-hidden rounded-2xl border"
               style={{ background: colors.surface, borderColor: colors.border }}
             >
@@ -705,10 +715,11 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
 
 // ─── CTA section ───────────────────────────────────────────────────────────────
 function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="cta" className="px-6 py-24" style={{ fontFamily: font }}>
       <motion.div
-        {...useReveal(0)}
+        {...revealAnim(rm,0)}
         className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl p-12 text-center"
         style={{ background: colors.gradient }}
       >

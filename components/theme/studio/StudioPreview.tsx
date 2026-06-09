@@ -25,8 +25,12 @@ type Props = {
 type StudioView = 'home' | 'about' | 'process' | 'team' | 'contact'
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
-function useReveal(delay = 0) {
-  const rm = useReducedMotion()
+// These are *not* React hooks. They take the reduced-motion flag as a
+// parameter so call sites can safely use them inside .map() callbacks and
+// conditional `view === '…'` branches — neither of which is safe for a real
+// hook. Every component that uses them calls `useReducedMotion()` once at
+// the top to get `rm`, then threads it through.
+function revealAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 48 },
     whileInView: rm ? {} : { opacity: 1, y: 0 },
@@ -35,8 +39,7 @@ function useReveal(delay = 0) {
   }
 }
 
-function useFadeIn(delay = 0) {
-  const rm = useReducedMotion()
+function fadeInAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0 },
     animate: rm ? {} : { opacity: 1 },
@@ -44,8 +47,7 @@ function useFadeIn(delay = 0) {
   }
 }
 
-function useSlideIn(delay = 0, from: 'left' | 'right' = 'left') {
-  const rm = useReducedMotion()
+function slideInAnim(rm: boolean, delay = 0, from: 'left' | 'right' = 'left') {
   return {
     initial: rm ? {} : { opacity: 0, x: from === 'left' ? -40 : 40 },
     whileInView: rm ? {} : { opacity: 1, x: 0 },
@@ -119,7 +121,7 @@ export default function StudioPreview({
   const setView = (v: StudioView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
-  const rm = useReducedMotion()
+  const rm = !!useReducedMotion()
 
   return (
     <div className={`relative min-h-screen ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
@@ -197,7 +199,7 @@ export default function StudioPreview({
 
         {/* Giant manifesto */}
         <div className="relative z-10 mx-auto w-full max-w-6xl">
-          <motion.div {...useFadeIn(0.15)}>
+          <motion.div {...fadeInAnim(rm,0.15)}>
             <Eyebrow text={content.hero.eyebrow} colors={colors} fonts={fonts} />
           </motion.div>
 
@@ -210,12 +212,12 @@ export default function StudioPreview({
               fontSize: 'clamp(3.5rem, 10vw, 11rem)',
               letterSpacing: '-0.02em'
             }}
-            {...useFadeIn(0.3)}
+            {...fadeInAnim(rm,0.3)}
           >
             <ML text={content.hero.manifesto} />
           </motion.h1>
 
-          <motion.div className="mt-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between" {...useFadeIn(0.5)}>
+          <motion.div className="mt-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between" {...fadeInAnim(rm,0.5)}>
             <p
               className="max-w-lg text-lg leading-relaxed"
               style={{ color: colors.muted, fontFamily: fonts.body }}
@@ -245,10 +247,10 @@ export default function StudioPreview({
         <div className="mx-auto max-w-5xl">
           <Rule color={colors.border} className="mb-16" />
           <div className="grid gap-16 md:grid-cols-[1fr_2fr]">
-            <motion.div {...useSlideIn(0, 'left')}>
+            <motion.div {...slideInAnim(rm,0, 'left')}>
               <Eyebrow text="Our mission" colors={colors} fonts={fonts} />
             </motion.div>
-            <motion.div {...useSlideIn(0.15, 'right')}>
+            <motion.div {...slideInAnim(rm,0.15, 'right')}>
               <p
                 className="text-2xl font-medium italic leading-relaxed md:text-3xl"
                 style={{ fontFamily: fonts.heading, color: colors.text, fontStyle: 'italic' }}
@@ -270,7 +272,7 @@ export default function StudioPreview({
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-16 md:grid-cols-[5fr_4fr] md:items-start">
               {/* Letter */}
-              <motion.div {...useReveal(0)}>
+              <motion.div {...revealAnim(rm,0)}>
                 <Eyebrow text={content.founder_letter.eyebrow} colors={colors} fonts={fonts} />
                 <h2
                   className="mt-6 text-4xl font-semibold leading-tight md:text-5xl"
@@ -298,7 +300,7 @@ export default function StudioPreview({
               {/* Founder image */}
               <motion.div
                 className="relative aspect-[3/4] overflow-hidden rounded-2xl"
-                {...useReveal(0.2)}
+                {...revealAnim(rm,0.2)}
               >
                 <img src={FOUNDER_IMG} alt="Founder" className="h-full w-full object-cover" style={{ filter: 'grayscale(30%)' }} />
                 <div
@@ -315,7 +317,7 @@ export default function StudioPreview({
       {view === 'about' && content.timeline && (
         <section data-section="timeline" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
-            <motion.div className="mb-16 grid md:grid-cols-[1fr_2fr]" {...useReveal(0)}>
+            <motion.div className="mb-16 grid md:grid-cols-[1fr_2fr]" {...revealAnim(rm,0)}>
               <Eyebrow text={content.timeline.eyebrow} colors={colors} fonts={fonts} />
               <h2
                 className="mt-4 text-4xl font-semibold leading-tight md:mt-0 md:text-5xl"
@@ -379,7 +381,7 @@ export default function StudioPreview({
       {view === 'about' && content.values && (
         <section data-section="values" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <motion.div className="mb-16" {...useReveal(0)}>
+            <motion.div className="mb-16" {...revealAnim(rm,0)}>
               <Eyebrow text={content.values.eyebrow} colors={colors} fonts={fonts} />
               <h2
                 className="mt-6 text-4xl font-semibold leading-tight md:text-5xl"
@@ -430,7 +432,7 @@ export default function StudioPreview({
         <section data-section="process" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 grid gap-12 md:grid-cols-2 md:items-end">
-              <motion.div {...useReveal(0)}>
+              <motion.div {...revealAnim(rm,0)}>
                 <Eyebrow text={content.process.eyebrow} colors={colors} fonts={fonts} />
                 <h2
                   className="mt-6 text-4xl font-semibold leading-tight md:text-5xl"
@@ -439,7 +441,7 @@ export default function StudioPreview({
                   {content.process.heading}
                 </h2>
               </motion.div>
-              <motion.div {...useReveal(0.15)}>
+              <motion.div {...revealAnim(rm,0.15)}>
                 <p className="text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {content.process.body}
                 </p>
@@ -474,7 +476,7 @@ export default function StudioPreview({
             </div>
 
             {/* Process image */}
-            <motion.div className="mt-12 overflow-hidden rounded-2xl" {...useReveal(0.2)}>
+            <motion.div className="mt-12 overflow-hidden rounded-2xl" {...revealAnim(rm,0.2)}>
               <img
                 src={PROCESS_IMG}
                 alt="Process"
@@ -490,7 +492,7 @@ export default function StudioPreview({
       {view === 'team' && content.team && (
         <section data-section="team" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <motion.div className="mb-16" {...useReveal(0)}>
+            <motion.div className="mb-16" {...revealAnim(rm,0)}>
               <Eyebrow text={content.team.eyebrow} colors={colors} fonts={fonts} />
               <h2
                 className="mt-6 text-4xl font-semibold leading-tight md:text-5xl"
@@ -541,7 +543,7 @@ export default function StudioPreview({
       {(view === 'home' || view === 'about') && content.press && (
         <section data-section="press" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
-            <motion.div className="mb-16" {...useReveal(0)}>
+            <motion.div className="mb-16" {...revealAnim(rm,0)}>
               <Rule color={colors.border} className="mb-10" />
               <h2
                 className="text-3xl font-semibold italic"
@@ -590,7 +592,7 @@ export default function StudioPreview({
       {(view === 'home' || view === 'contact') && content.community && (
         <section data-section="community" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <motion.div className="mb-16" {...useReveal(0)}>
+            <motion.div className="mb-16" {...revealAnim(rm,0)}>
               <Eyebrow text={content.community.eyebrow} colors={colors} fonts={fonts} />
               <h2
                 className="mt-6 text-4xl font-semibold leading-tight md:text-5xl"
@@ -637,7 +639,7 @@ export default function StudioPreview({
           className="px-8 py-36 md:px-12"
           style={{ background: colors.accent === '#0a0a0a' ? colors.surfaceAlt : colors.accent === '#c9a84c' ? colors.gradient : colors.surfaceAlt }}
         >
-          <motion.div className="mx-auto max-w-3xl text-center" {...useReveal(0)}>
+          <motion.div className="mx-auto max-w-3xl text-center" {...revealAnim(rm,0)}>
             <Eyebrow text={content.cta.eyebrow} colors={{ ...colors, muted: colors.accent === '#0a0a0a' ? colors.muted : `${colors.background}99` }} fonts={fonts} />
             <h2
               className="mt-8 leading-[0.95] tracking-tight"

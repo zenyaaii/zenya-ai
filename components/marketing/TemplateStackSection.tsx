@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
 
 /**
  * Inspired by Shopify's "Customizable themes" homepage section —
@@ -36,7 +37,7 @@ const TEMPLATES: Template[] = [
     id: 'restaurant',
     name: 'Maison',
     gradient: 'linear-gradient(135deg, #1a1410 0%, #0a0a0c 100%)',
-    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('restaurant'),
     demoHref: '/demo/restaurant',
     buildHref: '/theme/new?type=restaurant',
   },
@@ -44,7 +45,7 @@ const TEMPLATES: Template[] = [
     id: 'one_product',
     name: 'Storefront',
     gradient: 'linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%)',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('one_product'),
     demoHref: '/demo',
     buildHref: '/theme/new',
   },
@@ -52,7 +53,7 @@ const TEMPLATES: Template[] = [
     id: 'atlas',
     name: 'Atlas',
     gradient: 'linear-gradient(135deg, #4338ca 0%, #818cf8 100%)',
-    image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('atlas'),
     demoHref: '/demo/atlas',
     buildHref: '/theme/new/atlas',
   },
@@ -60,7 +61,7 @@ const TEMPLATES: Template[] = [
     id: 'services',
     name: 'Trade',
     gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('services'),
     demoHref: '/demo/services',
     buildHref: '/theme/new?type=services',
   },
@@ -68,7 +69,7 @@ const TEMPLATES: Template[] = [
     id: 'collective',
     name: 'Collective',
     gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('collective'),
     demoHref: '/demo/collective',
     buildHref: '/theme/new/collective',
   },
@@ -76,7 +77,7 @@ const TEMPLATES: Template[] = [
     id: 'studio',
     name: 'Studio',
     gradient: 'linear-gradient(135deg, #1c1c1c 0%, #4a4a4a 100%)',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('studio'),
     demoHref: '/demo/studio',
     buildHref: '/theme/new/studio',
   },
@@ -84,7 +85,7 @@ const TEMPLATES: Template[] = [
     id: 'lookbook',
     name: 'Lookbook',
     gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
-    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('lookbook'),
     demoHref: '/demo/lookbook',
     buildHref: '/theme/new/lookbook',
   },
@@ -92,7 +93,7 @@ const TEMPLATES: Template[] = [
     id: 'wellness',
     name: 'Wellness',
     gradient: 'linear-gradient(135deg, #15803d 0%, #86efac 100%)',
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=600&q=75',
+    image: themePreview('wellness'),
     demoHref: '/demo/wellness',
     buildHref: '/theme/new?type=wellness',
   },
@@ -245,6 +246,10 @@ function TemplateCard({ template, size }: { template: Template; size: 'lg' | 'sm
           alt={template.name}
           className="h-full w-full object-cover"
           style={{ height: 'calc(100% - 28px)' }}
+          onError={(e) => {
+            const fb = themePreviewFallback(template.id)
+            if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+          }}
         />
       ) : (
         <div

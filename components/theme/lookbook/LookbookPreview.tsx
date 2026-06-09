@@ -24,8 +24,12 @@ type Colors = ReturnType<typeof getLookbookPreset>['colors']
 type LookbookView = 'home' | 'shop' | 'lookbook' | 'about'
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
-function useReveal(delay = 0) {
-  const rm = useReducedMotion()
+// These are *not* React hooks even though they look like them. They take the
+// reduced-motion flag as a parameter so call sites can safely use them inside
+// .map() callbacks, conditional branches, and per-view JSX — none of which is
+// safe for an actual hook. Every component that uses them calls
+// `useReducedMotion()` once at the top to get `rm`, then threads it through.
+function revealAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 28 },
     whileInView: rm ? {} : { opacity: 1, y: 0 },
@@ -34,8 +38,7 @@ function useReveal(delay = 0) {
   }
 }
 
-function useFade(delay = 0) {
-  const rm = useReducedMotion()
+function fadeAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0 },
     animate: rm ? {} : { opacity: 1 },
@@ -153,6 +156,7 @@ function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; c
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
 function LookbookHero({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="hero" className="relative flex h-screen min-h-[600px] items-end overflow-hidden">
       {/* Full-bleed image */}
@@ -167,7 +171,7 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
       {/* Badge top right */}
       {content.hero.badge && (
         <motion.div
-          {...useFade(0.4)}
+          {...fadeAnim(rm,0.4)}
           className="absolute right-8 top-24 rounded-full border px-4 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white"
           style={{ borderColor: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
         >
@@ -177,17 +181,17 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
 
       {/* Text content */}
       <div className="relative z-10 w-full px-8 pb-16 md:px-16 md:pb-20">
-        <motion.p {...useFade(0.1)} className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-white/70" style={{ fontFamily: bodyFont }}>
+        <motion.p {...fadeAnim(rm,0.1)} className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-white/70" style={{ fontFamily: bodyFont }}>
           {content.hero.eyebrow}
         </motion.p>
         <motion.h1
-          {...useFade(0.2)}
+          {...fadeAnim(rm,0.2)}
           className="mb-6 max-w-3xl text-5xl font-black leading-[1.04] tracking-tight text-white sm:text-6xl md:text-8xl"
           style={{ fontFamily: headingFont }}
         >
           <Headline text={content.hero.headline} />
         </motion.h1>
-        <motion.div {...useFade(0.35)} className="flex flex-wrap gap-3">
+        <motion.div {...fadeAnim(rm,0.35)} className="flex flex-wrap gap-3">
           <button
             className="rounded-full px-8 py-3.5 text-sm font-black uppercase tracking-wider text-white transition hover:scale-105"
             style={{ background: colors.primary, letterSpacing: '0.12em' }}
@@ -205,7 +209,7 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
 
       {/* Scroll hint */}
       <motion.div
-        {...useFade(0.6)}
+        {...fadeAnim(rm,0.6)}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
         <div className="h-10 w-px animate-pulse" style={{ background: 'rgba(255,255,255,0.4)' }} />
@@ -217,11 +221,12 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
 
 // ─── Lookbook Grid ─────────────────────────────────────────────────────────────
 function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   const looks = content.lookbook.looks.slice(0, 6)
 
   return (
     <section data-section="lookbook_section" className="px-6 py-20 md:px-12 md:py-28" style={{ background: colors.background, fontFamily: bodyFont }}>
-      <motion.div {...useReveal(0)} className="mb-14 text-center">
+      <motion.div {...revealAnim(rm,0)} className="mb-14 text-center">
         <p className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.35em]" style={{ color: colors.muted }}>{content.lookbook.eyebrow}</p>
         <h2 className="text-5xl font-black tracking-tight md:text-6xl" style={{ fontFamily: headingFont, color: colors.text }}>
           <Headline text={content.lookbook.heading} />
@@ -258,10 +263,11 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
   tall?: boolean
   delay?: number
 }) {
+  const rm = !!useReducedMotion()
   const [hovered, setHovered] = useState(false)
   return (
     <motion.div
-      {...useReveal(delay)}
+      {...revealAnim(rm,delay)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={`group relative overflow-hidden ${tall ? 'h-[520px] md:h-[680px]' : 'h-[260px] md:h-[320px]'}`}
@@ -299,11 +305,12 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
 
 // ─── Bestsellers ───────────────────────────────────────────────────────────────
 function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   const products = content.bestsellers.products.slice(0, 8)
 
   return (
     <section data-section="bestsellers" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
-      <motion.div {...useReveal(0)} className="mb-12 flex items-end justify-between">
+      <motion.div {...revealAnim(rm,0)} className="mb-12 flex items-end justify-between">
         <div>
           <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.3em]" style={{ color: colors.muted }}>{content.bestsellers.eyebrow}</p>
           <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ fontFamily: headingFont, color: colors.text }}>
@@ -331,9 +338,10 @@ function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
   headingFont: string
   delay?: number
 }) {
+  const rm = !!useReducedMotion()
   const [hovered, setHovered] = useState(false)
   return (
-    <motion.div {...useReveal(delay)} className="group cursor-pointer">
+    <motion.div {...revealAnim(rm,delay)} className="group cursor-pointer">
       <div
         className="relative mb-3 overflow-hidden"
         style={{ aspectRatio: '3/4' }}
@@ -380,6 +388,7 @@ function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
 
 // ─── Brand Story ───────────────────────────────────────────────────────────────
 function LookbookStory({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="brand_story" className="overflow-hidden" style={{ background: colors.background, fontFamily: bodyFont }}>
       <div className="grid md:grid-cols-2">
@@ -393,7 +402,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
         </div>
 
         {/* Text side */}
-        <motion.div {...useReveal(0.1)} className="flex flex-col justify-center px-8 py-16 md:px-14 md:py-20">
+        <motion.div {...revealAnim(rm,0.1)} className="flex flex-col justify-center px-8 py-16 md:px-14 md:py-20">
           <p className="mb-4 text-[0.65rem] font-bold uppercase tracking-[0.3em]" style={{ color: colors.muted }}>
             {content.brand_story.eyebrow}
           </p>
@@ -404,7 +413,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
 
           <div className="space-y-6">
             {content.brand_story.values.map((val, i) => (
-              <motion.div key={i} {...useReveal(0.1 + 0.08 * i)} className="flex items-start gap-4">
+              <motion.div key={i} {...revealAnim(rm,0.1 + 0.08 * i)} className="flex items-start gap-4">
                 <span className="mt-0.5 text-lg" style={{ color: colors.accent }}>{val.icon}</span>
                 <div>
                   <p className="text-sm font-black" style={{ color: colors.text }}>{val.title}</p>
@@ -445,10 +454,11 @@ function LookbookPress({ content, colors, headingFont, bodyFont }: { content: Lo
 
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function LookbookTestimonials({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="testimonials" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.background, fontFamily: bodyFont }}>
       <div className="mx-auto max-w-6xl">
-        <motion.div {...useReveal(0)} className="mb-14 text-center">
+        <motion.div {...revealAnim(rm,0)} className="mb-14 text-center">
           <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.32em]" style={{ color: colors.muted }}>{content.testimonials.eyebrow}</p>
           <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ fontFamily: headingFont, color: colors.text }}>
             {content.testimonials.heading}
@@ -472,9 +482,10 @@ function LookbookTestimonials({ content, colors, headingFont, bodyFont }: { cont
 }
 
 function ReviewCard({ review, colors, headingFont, delay = 0 }: { review: LookbookReview; colors: Colors; headingFont: string; delay?: number }) {
+  const rm = !!useReducedMotion()
   return (
     <motion.div
-      {...useReveal(delay)}
+      {...revealAnim(rm,delay)}
       className="flex flex-col rounded-2xl border p-7"
       style={{ background: colors.surface, borderColor: colors.border }}
     >
@@ -525,6 +536,7 @@ function SizeGuideStrip({ colors, bodyFont }: { colors: Colors; bodyFont: string
 
 // ─── Newsletter ────────────────────────────────────────────────────────────────
 function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  const rm = !!useReducedMotion()
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
@@ -538,7 +550,7 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
       />
       <div className="absolute inset-0" style={{ background: colors.overlay }} />
 
-      <motion.div {...useReveal(0)} className="relative z-10 mx-auto max-w-lg px-6 text-center">
+      <motion.div {...revealAnim(rm,0)} className="relative z-10 mx-auto max-w-lg px-6 text-center">
         <p className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.35em] text-white/60">{content.newsletter.eyebrow}</p>
         <h2 className="mb-3 text-4xl font-black text-white md:text-5xl" style={{ fontFamily: headingFont }}>
           <Headline text={content.newsletter.heading} />

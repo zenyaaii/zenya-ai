@@ -19,8 +19,11 @@ type Props = {
 type WellnessView = 'home' | 'treatments' | 'team' | 'space' | 'about' | 'contact'
 
 // ─── Motion primitives ────────────────────────────────────────────────────────
-function useReveal(delay = 0) {
-  const rm = useReducedMotion()
+// Plain functions (not hooks!) so they can be called safely inside .map()
+// callbacks and conditional `view === '…'` branches without violating the
+// rules of hooks. Every component that uses them calls `useReducedMotion()`
+// once at the top to get `rm`, then threads it through.
+function revealAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0, y: 28 },
     whileInView: rm ? {} : { opacity: 1, y: 0 },
@@ -29,8 +32,7 @@ function useReveal(delay = 0) {
   }
 }
 
-function useFade(delay = 0) {
-  const rm = useReducedMotion()
+function fadeAnim(rm: boolean, delay = 0) {
   return {
     initial: rm ? {} : { opacity: 0 },
     whileInView: rm ? {} : { opacity: 1 },
@@ -328,6 +330,7 @@ function HeroSection({ content, isDark }: { content: WellnessContent; isDark: bo
 
 // ─── Trust Bar ────────────────────────────────────────────────────────────────
 function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <div
       data-section="trust_bar"
@@ -338,7 +341,7 @@ function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boole
         {content.trust_bar.items.map((item, i) => (
           <motion.div
             key={i}
-            {...useFade(i * 0.08)}
+            {...fadeAnim(rm,i * 0.08)}
             className="flex items-center gap-2.5 text-xs uppercase tracking-[0.2em]"
             style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.85)' }}
           >
@@ -353,19 +356,20 @@ function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boole
 
 // ─── Philosophy ───────────────────────────────────────────────────────────────
 function PhilosophySection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="philosophy" className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-16 text-center">
-          <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
             {content.philosophy.eyebrow}
           </motion.p>
-          <motion.h2 {...useReveal(0.1)} className="text-4xl font-light leading-[1.15] sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          <motion.h2 {...revealAnim(rm,0.1)} className="text-4xl font-light leading-[1.15] sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             <MultilineHeadline text={content.philosophy.heading} />
           </motion.h2>
           <OrnamentDivider color="var(--wl-accent)" />
-          <motion.p {...useReveal(0.2)} className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed" style={{ color: 'var(--wl-muted)' }}>
+          <motion.p {...revealAnim(rm,0.2)} className="mx-auto mt-4 max-w-xl text-base font-light leading-relaxed" style={{ color: 'var(--wl-muted)' }}>
             {content.philosophy.subheading}
           </motion.p>
         </div>
@@ -375,7 +379,7 @@ function PhilosophySection({ content, isDark }: { content: WellnessContent; isDa
           {content.philosophy.pillars.map((pillar, i) => (
             <motion.div
               key={i}
-              {...useReveal(i * 0.1)}
+              {...revealAnim(rm,i * 0.1)}
               className="rounded-3xl border p-8 text-center"
               style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}
             >
@@ -394,6 +398,7 @@ function PhilosophySection({ content, isDark }: { content: WellnessContent; isDa
 
 // ─── Treatments ───────────────────────────────────────────────────────────────
 function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   const [activeCategory, setActiveCategory] = useState<string>('All')
   const categories = ['All', ...Array.from(new Set(content.treatments.items.map((t) => t.category).filter(Boolean)))]
   const filtered = activeCategory === 'All' ? content.treatments.items : content.treatments.items.filter((t) => t.category === activeCategory)
@@ -402,21 +407,21 @@ function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDa
     <section id="treatments" data-section="treatments" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
-          <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
             What we offer
           </motion.p>
-          <motion.h2 {...useReveal(0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.treatments.heading}
           </motion.h2>
           <OrnamentDivider color="var(--wl-accent)" />
-          <motion.p {...useReveal(0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
+          <motion.p {...revealAnim(rm,0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
             {content.treatments.subheading}
           </motion.p>
         </div>
 
         {/* Category filter */}
         {categories.length > 2 && (
-          <motion.div {...useFade(0.2)} className="mb-10 flex flex-wrap justify-center gap-2">
+          <motion.div {...fadeAnim(rm,0.2)} className="mb-10 flex flex-wrap justify-center gap-2">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -446,9 +451,10 @@ function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDa
 }
 
 function TreatmentCard({ treatment: t, index, isDark }: { treatment: WellnessTreatment; index: number; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <motion.div
-      {...useReveal(index * 0.07)}
+      {...revealAnim(rm,index * 0.07)}
       whileHover={{ y: -4, transition: { duration: 0.25 } }}
       className="group relative flex flex-col overflow-hidden rounded-3xl border"
       style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.04)' : 'var(--wl-bg)' }}
@@ -499,21 +505,22 @@ function TreatmentCard({ treatment: t, index, isDark }: { treatment: WellnessTre
 
 // ─── Journey ──────────────────────────────────────────────────────────────────
 function JourneySection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="journey" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-primary)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
-          <motion.h2 {...useReveal()} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: isDark ? 'var(--wl-text)' : '#fff' }}>
+          <motion.h2 {...revealAnim(rm,)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: isDark ? 'var(--wl-text)' : '#fff' }}>
             {content.journey.heading}
           </motion.h2>
           <OrnamentDivider color={isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)'} />
-          <motion.p {...useReveal(0.1)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
+          <motion.p {...revealAnim(rm,0.1)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
             {content.journey.subheading}
           </motion.p>
         </div>
         <div className="grid gap-8 sm:grid-cols-3">
           {content.journey.steps.map((step, i) => (
-            <motion.div key={i} {...useReveal(i * 0.1)} className="relative text-center">
+            <motion.div key={i} {...revealAnim(rm,i * 0.1)} className="relative text-center">
               {/* Connector line */}
               {i < content.journey.steps.length - 1 && (
                 <div className="absolute left-[calc(50%+2.5rem)] top-6 hidden h-px w-[calc(100%-5rem)] sm:block" style={{ background: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.2)' }} />
@@ -538,19 +545,20 @@ function JourneySection({ content, isDark }: { content: WellnessContent; isDark:
 
 // ─── Team ─────────────────────────────────────────────────────────────────────
 function TeamSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   if (!content.team.members.length) return null
   return (
     <section data-section="team" className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
-          <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
             The people behind the practice
           </motion.p>
-          <motion.h2 {...useReveal(0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.team.heading}
           </motion.h2>
           <OrnamentDivider color="var(--wl-accent)" />
-          <motion.p {...useReveal(0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
+          <motion.p {...revealAnim(rm,0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
             {content.team.subheading}
           </motion.p>
         </div>
@@ -565,9 +573,10 @@ function TeamSection({ content, isDark }: { content: WellnessContent; isDark: bo
 }
 
 function TeamCard({ member, index, isDark }: { member: WellnessTeamMember; index: number; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <motion.div
-      {...useReveal(index * 0.1)}
+      {...revealAnim(rm,index * 0.1)}
       className="group overflow-hidden rounded-3xl border"
       style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}
     >
@@ -600,25 +609,26 @@ function TeamCard({ member, index, isDark }: { member: WellnessTeamMember; index
 
 // ─── Space / Gallery ──────────────────────────────────────────────────────────
 function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   const [imgs] = useState(content.space.images)
   return (
     <section data-section="space" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end">
           <div>
-            <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+            <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
               The environment
             </motion.p>
-            <motion.h2 {...useReveal(0.08)} className="text-4xl font-light leading-snug sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+            <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light leading-snug sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
               {content.space.heading}
             </motion.h2>
             <OrnamentDivider color="var(--wl-accent)" />
-            <motion.p {...useReveal(0.18)} className="mt-4 text-base font-light leading-relaxed" style={{ color: 'var(--wl-muted)' }}>
+            <motion.p {...revealAnim(rm,0.18)} className="mt-4 text-base font-light leading-relaxed" style={{ color: 'var(--wl-muted)' }}>
               {content.space.subheading}
             </motion.p>
           </div>
           {/* Amenities */}
-          <motion.div {...useReveal(0.22)} className="grid grid-cols-2 gap-3">
+          <motion.div {...revealAnim(rm,0.22)} className="grid grid-cols-2 gap-3">
             {content.space.amenities.map((a, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-2xl border p-3"
                 style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--wl-bg)' }}>
@@ -633,7 +643,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
         {imgs.length >= 4 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {imgs.slice(0, 4).map((img, i) => (
-              <motion.div key={i} {...useReveal(i * 0.08)} className={`relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}
+              <motion.div key={i} {...revealAnim(rm,i * 0.08)} className={`relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}
                 style={{ aspectRatio: i === 0 ? '4/3' : '1/1' }}>
                 <img src={img.url} alt={img.alt || `Studio ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
               </motion.div>
@@ -642,7 +652,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {imgs.map((img, i) => (
-              <motion.div key={i} {...useReveal(i * 0.1)} className="overflow-hidden rounded-2xl" style={{ aspectRatio: '4/3' }}>
+              <motion.div key={i} {...revealAnim(rm,i * 0.1)} className="overflow-hidden rounded-2xl" style={{ aspectRatio: '4/3' }}>
                 <img src={img.url} alt={img.alt || `Studio ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
               </motion.div>
             ))}
@@ -655,23 +665,24 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="testimonials" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
-          <motion.p {...useFade()} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
             Client stories
           </motion.p>
-          <motion.h2 {...useReveal(0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.testimonials.heading}
           </motion.h2>
           <OrnamentDivider color="var(--wl-accent)" />
-          <motion.p {...useReveal(0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
+          <motion.p {...revealAnim(rm,0.18)} className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>
             {content.testimonials.subheading}
           </motion.p>
 
           {/* Rating badge */}
-          <motion.div {...useReveal(0.26)} className="mt-8 inline-flex items-center gap-3 rounded-full border px-6 py-3"
+          <motion.div {...revealAnim(rm,0.26)} className="mt-8 inline-flex items-center gap-3 rounded-full border px-6 py-3"
             style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}>
             <Stars rating={5} color="var(--wl-accent)" />
             <span className="text-sm font-semibold" style={{ color: 'var(--wl-text)' }}>{content.testimonials.average_rating.toFixed(1)}</span>
@@ -690,9 +701,10 @@ function TestimonialsSection({ content, isDark }: { content: WellnessContent; is
 }
 
 function TestimonialCard({ testimonial: t, index, isDark }: { testimonial: WellnessTestimonial; index: number; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <motion.div
-      {...useReveal(index * 0.1)}
+      {...revealAnim(rm,index * 0.1)}
       className="relative flex flex-col rounded-3xl border p-7"
       style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}
     >
@@ -714,6 +726,7 @@ function TestimonialCard({ testimonial: t, index, isDark }: { testimonial: Welln
 
 // ─── Booking CTA ──────────────────────────────────────────────────────────────
 function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
     <section data-section="booking_cta" className="relative overflow-hidden px-8 py-28">
       <div className="absolute inset-0 z-0">
@@ -721,17 +734,17 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
       </div>
       <div className="relative z-10 mx-auto max-w-3xl text-center">
-        <motion.p {...useFade()} className="mb-4 text-xs uppercase tracking-[0.35em] text-white/60">
+        <motion.p {...fadeAnim(rm,)} className="mb-4 text-xs uppercase tracking-[0.35em] text-white/60">
           {content.booking_cta.eyebrow}
         </motion.p>
-        <motion.h2 {...useReveal(0.1)} className="text-5xl font-light leading-[1.1] text-white sm:text-6xl" style={{ fontFamily: 'var(--wl-heading)' }}>
+        <motion.h2 {...revealAnim(rm,0.1)} className="text-5xl font-light leading-[1.1] text-white sm:text-6xl" style={{ fontFamily: 'var(--wl-heading)' }}>
           {content.booking_cta.heading}
         </motion.h2>
         <OrnamentDivider color="rgba(255,255,255,0.4)" />
-        <motion.p {...useReveal(0.2)} className="mx-auto mt-5 max-w-lg text-base font-light text-white/75">
+        <motion.p {...revealAnim(rm,0.2)} className="mx-auto mt-5 max-w-lg text-base font-light text-white/75">
           {content.booking_cta.subheading}
         </motion.p>
-        <motion.div {...useReveal(0.3)} className="mt-10 flex flex-col items-center gap-4">
+        <motion.div {...revealAnim(rm,0.3)} className="mt-10 flex flex-col items-center gap-4">
           <motion.a
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
@@ -750,12 +763,13 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────
 function FaqSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
   return (
     <section data-section="faq" className="px-8 py-24" style={{ background: 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-3xl">
         <div className="mb-14 text-center">
-          <motion.h2 {...useReveal()} className="text-4xl font-light" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          <motion.h2 {...revealAnim(rm,)} className="text-4xl font-light" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.faq.heading}
           </motion.h2>
           <OrnamentDivider color="var(--wl-accent)" />
@@ -771,8 +785,9 @@ function FaqSection({ content, isDark }: { content: WellnessContent; isDark: boo
 }
 
 function FaqItem({ item, index, open, onToggle, isDark }: { item: WellnessFaqItem; index: number; open: boolean; onToggle: () => void; isDark: boolean }) {
+  const rm = !!useReducedMotion()
   return (
-    <motion.div {...useFade(index * 0.05)} className="overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--wl-bg)' }}>
+    <motion.div {...fadeAnim(rm,index * 0.05)} className="overflow-hidden rounded-2xl border" style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--wl-bg)' }}>
       <button onClick={onToggle} className="flex w-full items-center justify-between p-5 text-left transition hover:opacity-80">
         <span className="pr-6 text-sm font-medium" style={{ color: 'var(--wl-text)' }}>{item.q}</span>
         <motion.span animate={{ rotate: open ? 45 : 0 }} transition={{ duration: 0.22 }} className="shrink-0 text-xl font-light" style={{ color: 'var(--wl-accent)' }}>

@@ -1,5 +1,6 @@
 import {
   Sparkles, Mail, Newspaper, Users, Award, Quote, Clock,
+  Home as HomeIcon, BookOpen, Workflow, Phone,
 } from 'lucide-react'
 import { STUDIO_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -24,6 +25,14 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
   colorPresets:    STUDIO_PRESETS,
   colorTokens:     TOKENS,
 
+  pages: [
+    { id: 'home',    label: 'Home',    icon: HomeIcon },
+    { id: 'about',   label: 'Story',   icon: BookOpen },
+    { id: 'process', label: 'Process', icon: Workflow },
+    { id: 'team',    label: 'Team',    icon: Users },
+    { id: 'contact', label: 'Contact', icon: Phone },
+  ],
+
   panels: [
     {
       id: 'brand', label: 'Brand', icon: Sparkles,
@@ -35,7 +44,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'hero', label: 'Hero', icon: Sparkles,
+      id: 'hero', label: 'Hero', icon: Sparkles, page: 'home',
       fields: [
         { type: 'text',     path: 'hero.eyebrow',       label: 'Eyebrow' },
         { type: 'textarea', path: 'hero.manifesto',     label: 'Manifesto', rows: 4 },
@@ -45,14 +54,14 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'mission', label: 'Mission', icon: Sparkles,
+      id: 'mission', label: 'Mission', icon: Sparkles, page: 'home',
       fields: [
         { type: 'textarea', path: 'mission.statement',   label: 'Statement', rows: 3 },
         { type: 'textarea', path: 'mission.elaboration', label: 'Elaboration', rows: 5 },
       ],
     },
     {
-      id: 'founder_letter', label: 'Founder letter', icon: Quote,
+      id: 'founder_letter', label: 'Founder letter', icon: Quote, page: 'about',
       fields: [
         { type: 'text', path: 'founder_letter.eyebrow',         label: 'Eyebrow' },
         { type: 'text', path: 'founder_letter.heading',         label: 'Heading' },
@@ -62,7 +71,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'timeline', label: 'Timeline', icon: Clock,
+      id: 'timeline', label: 'Timeline', icon: Clock, page: 'about',
       fields: [
         { type: 'text',     path: 'timeline.eyebrow', label: 'Eyebrow' },
         { type: 'textarea', path: 'timeline.heading', label: 'Heading', rows: 2 },
@@ -79,7 +88,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'values', label: 'Values', icon: Award,
+      id: 'values', label: 'Values', icon: Award, page: 'about',
       fields: [
         { type: 'text',     path: 'values.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'values.heading',    label: 'Heading', rows: 2 },
@@ -97,7 +106,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'process', label: 'Process', icon: Award,
+      id: 'process', label: 'Process', icon: Award, page: 'process',
       fields: [
         { type: 'text',     path: 'process.eyebrow', label: 'Eyebrow' },
         { type: 'textarea', path: 'process.heading', label: 'Heading', rows: 2 },
@@ -114,7 +123,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'team', label: 'Team', icon: Users,
+      id: 'team', label: 'Team', icon: Users, page: 'team',
       fields: [
         { type: 'text',     path: 'team.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'team.heading',    label: 'Heading', rows: 2 },
@@ -133,7 +142,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'press', label: 'Press', icon: Newspaper,
+      id: 'press', label: 'Press', icon: Newspaper, page: 'home',
       fields: [
         { type: 'text', path: 'press.heading', label: 'Heading' },
         {
@@ -149,7 +158,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'community', label: 'Community', icon: Users,
+      id: 'community', label: 'Community', icon: Users, page: 'contact',
       fields: [
         { type: 'text',     path: 'community.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'community.heading',    label: 'Heading', rows: 2 },
@@ -166,7 +175,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'cta', label: 'Final CTA', icon: Sparkles,
+      id: 'cta', label: 'Final CTA', icon: Sparkles, page: 'contact',
       fields: [
         { type: 'text',     path: 'cta.eyebrow',       label: 'Eyebrow' },
         { type: 'textarea', path: 'cta.heading',       label: 'Heading', rows: 2 },

@@ -11,6 +11,7 @@ import ProductPage from '@/components/theme/ProductPage';
 import StoreNavbar from '@/components/theme/StoreNavbar';
 import MobilePreview from '@/components/wizard/MobilePreview';
 import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout';
+import { themePreview } from '@/lib/theme-previews';
 
 type StylePresetId = 'clean_light' | 'bold_gradient' | 'luxury_dark'
 type WebsiteStyleId = 'one_product' | 'catalog_store' | 'brand_story'
@@ -807,7 +808,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Menu, reservations, hours, gallery, story. Maison · fine-dining template.',
     accent: '#c8a96a',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('restaurant')
   },
   {
     id: 'one_product',
@@ -816,7 +817,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'High-converting one-product funnel with bundles, urgency, and trust blocks.',
     accent: '#6366f1',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('one_product')
   },
   {
     id: 'saas',
@@ -825,7 +826,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Features, pricing tiers, integrations, and demo CTA. Atlas template — built for modern SaaS products.',
     accent: '#6366f1',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('atlas')
   },
   {
     id: 'services',
@@ -834,7 +835,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Premium local-service site with services, proof, before/after, areas served, reviews, and quote flow.',
     accent: '#f59e0b',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('services')
   },
   {
     id: 'collective',
@@ -843,7 +844,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Luxury aurora-lit catalog with curated collections, bestsellers, new arrivals, brand story, and newsletter. Collective template.',
     accent: '#10b981',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('collective')
   },
   {
     id: 'studio',
@@ -852,7 +853,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Premium editorial brand page with giant display type, founder letter, timeline, values, press wall, and community stats. Studio template.',
     accent: '#0a0a0a',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('studio')
   },
   {
     id: 'lookbook',
@@ -861,7 +862,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Full-bleed editorial lookbook, bestsellers grid, brand story, press wall, reviews, and newsletter.',
     accent: '#0a0a0a',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('lookbook')
   },
   {
     id: 'wellness',
@@ -870,7 +871,7 @@ const BUSINESS_TYPES: BusinessTypeOption[] = [
     description: 'Treatment menu, practitioner profiles, gallery, testimonials, and booking flow.',
     accent: '#14b8a6',
     status: 'live',
-    cover: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80'
+    cover: themePreview('wellness')
   }
 ]
 
