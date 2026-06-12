@@ -187,7 +187,10 @@ export default function NewThemePage() {
     } else if (t === 'studio' || t === 'brand-story' || t === 'editorial') {
       router.replace('/theme/new/studio')
     } else if (t === 'one_product' || t === 'one-product') {
-      setBusinessType('one_product')
+      // The legacy one-product wizard is being replaced by the new
+      // URL-driven dropshipping builder at /build. Bounce there so
+      // anyone landing on the old link gets the new flow.
+      router.replace('/build')
     }
   }, [router])
 
@@ -239,7 +242,7 @@ export default function NewThemePage() {
       } else if (t === 'studio' || t === 'brand-story') {
         router.push('/theme/new/studio')
       } else if (t === 'one_product') {
-        setBusinessType('one_product')
+        router.push('/build')
       } else {
         alert('This business type is coming soon. We will email you when it launches.')
       }
