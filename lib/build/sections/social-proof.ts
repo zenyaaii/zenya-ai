@@ -115,7 +115,7 @@ export const socialProofSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-press': () => `<section class="ds-press">
+  'ds-press': () => `<section class="ds-press" id="press">
   <div class="ds-container">
     <h2 class="ds-press__title">{{ section.settings.title }}</h2>
     <div class="ds-press__grid">
@@ -219,7 +219,7 @@ export const socialProofSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-ugc-gallery': () => `<section class="ds-ugc">
+  'ds-ugc-gallery': () => `<section class="ds-ugc" id="customer-photos">
   <div class="ds-container">
     <div class="ds-ugc__head">
       <div>

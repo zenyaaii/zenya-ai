@@ -52,6 +52,89 @@ function isProductJsonLdType(t: any) {
   return false
 }
 
+/* ── AliExpress review scraping ──────────────────────────────────────
+ * The public feedback endpoint returns structured JSON: real reviewer
+ * names, countries, star ratings, review text (with translations), and
+ * photo URLs. These seed the theme's review/UGC sections with real
+ * social proof instead of invented copy.
+ */
+type ScrapedReview = {
+  name: string
+  country?: string
+  rating: number
+  text: string
+  photos?: string[]
+  date?: string
+}
+
+function aliexpressProductId(url: string): string | null {
+  const m =
+    url.match(/\/item\/(?:[^/]*\/)?(\d{6,})\.html/) ||
+    url.match(/[?&]productId=(\d{6,})/) ||
+    url.match(/\/i\/(\d{6,})/)
+  return m ? m[1] : null
+}
+
+function absolutize(u: string): string {
+  const s = String(u || '').trim()
+  if (!s) return ''
+  if (s.startsWith('//')) return `https:${s}`
+  if (s.startsWith('http://')) return s.replace('http://', 'https://')
+  return s
+}
+
+async function fetchAliexpressReviews(
+  productId: string,
+  headers: Record<string, string>,
+): Promise<{ reviews: ScrapedReview[]; stats: { average: number; count: number } | null }> {
+  const reviews: ScrapedReview[] = []
+  let stats: { average: number; count: number } | null = null
+  for (let page = 1; page <= 3 && reviews.length < 40; page++) {
+    const endpoint =
+      `https://feedback.aliexpress.com/pc/searchEvaluation.do?productId=${productId}` +
+      `&lang=en_US&country=US&page=${page}&pageSize=20&filter=all&sort=complex_default`
+    let json: any = null
+    try {
+      const res = await fetch(endpoint, { headers, signal: AbortSignal.timeout(8000) })
+      if (!res.ok) break
+      json = await res.json()
+    } catch {
+      break
+    }
+    const data = json?.data
+    if (!data) break
+    if (!stats) {
+      const st = data.productEvaluationStatistic
+      const avg = Number(st?.evarageStar ?? st?.averageStar)
+      const count = Number(st?.totalNum)
+      if (Number.isFinite(avg) && avg > 0 && Number.isFinite(count) && count > 0) {
+        stats = { average: Math.min(5, avg), count }
+      }
+    }
+    const list: any[] = Array.isArray(data.evaViewList) ? data.evaViewList : []
+    if (!list.length) break
+    for (const ev of list) {
+      const rawText = normalizeText(ev?.buyerTranslationFeedback || ev?.buyerFeedback || '')
+      const rating = Math.round(Number(ev?.buyerEval) / 20) || 0
+      if (!rawText || rawText.length < 8 || rating < 1) continue
+      const photos = (Array.isArray(ev?.images) ? ev.images : [])
+        .map((i: any) => absolutize(String(i)))
+        .filter((u: string) => /^https:\/\//.test(u))
+        .slice(0, 4)
+      reviews.push({
+        name: normalizeText(ev?.buyerName || '') || 'AliExpress buyer',
+        country: normalizeText(ev?.buyerCountry || '') || undefined,
+        rating: Math.min(5, rating),
+        text: rawText.slice(0, 600),
+        photos: photos.length ? photos : undefined,
+        date: normalizeText(ev?.evalDate || '') || undefined,
+      })
+      if (reviews.length >= 40) break
+    }
+  }
+  return { reviews, stats }
+}
+
 function normalizeImageUrl(src: string, baseUrl: string) {
   const s = String(src || '').trim()
   if (!s) return ''
@@ -480,7 +563,26 @@ export async function POST(req: NextRequest) {
   const scrapedPrice = uniquePrices.length ? uniquePrices[0] : null
   const scrapedOriginalPrice = uniquePrices.length >= 2 ? uniquePrices[uniquePrices.length - 1] : null
 
+  // Real reviews (AliExpress): never let a review failure sink the
+  // product scrape — reviews are a bonus, not a requirement.
+  let reviews: ScrapedReview[] = []
+  let reviewStats: { average: number; count: number } | null = null
+  if (url.includes('aliexpress')) {
+    const pid = aliexpressProductId(url)
+    if (pid) {
+      try {
+        const r = await fetchAliexpressReviews(pid, headers)
+        reviews = r.reviews
+        reviewStats = r.stats
+      } catch {
+        /* reviews unavailable — theme falls back to placeholder copy */
+      }
+    }
+  }
+
   return NextResponse.json({
+    reviews,
+    reviewStats,
     name: pageTitle || h1 || 'Product',
     description: metaDescription || ldDesc || longDescription || '',
     images: cleanImages,

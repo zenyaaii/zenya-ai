@@ -12,9 +12,20 @@ import { createClient } from '@/utils/supabase/client'
 import {
   PALETTES, VIBE_LABELS, getPalette, type Palette, type PaletteVibe,
 } from '@/lib/build/palettes'
+import { collectClaims, type ThemeClaim } from '@/lib/build/seed'
+import type { BuildConfig } from '@/lib/build/theme-generator'
 import PhoneMockup from '@/components/build/PhoneMockup'
 
 type Step = 1 | 2 | 3 | 4
+
+type ScrapedReview = {
+  name: string
+  country?: string
+  rating: number
+  text: string
+  photos?: string[]
+  date?: string
+}
 
 type Scraped = {
   name: string
@@ -27,6 +38,9 @@ type Scraped = {
     specs?: Record<string, string>
     longDescription?: string
   } | null
+  /** Real reviews pulled from the source listing (AliExpress). */
+  reviews?: ScrapedReview[]
+  reviewStats?: { average: number; count: number } | null
 }
 
 const STEP_LABELS: Record<Step, { name: string; sub: string }> = {
@@ -113,6 +127,8 @@ export default function BuildPage() {
         price: typeof j.price === 'number' ? j.price : null,
         originalPrice: typeof j.originalPrice === 'number' ? j.originalPrice : null,
         productFacts: j.productFacts || null,
+        reviews: Array.isArray(j.reviews) ? j.reviews : [],
+        reviewStats: j.reviewStats || null,
       }
       setScraped(s)
       setProductName(s.name)
@@ -199,6 +215,8 @@ export default function BuildPage() {
           description: scraped?.description || '',
           highlights: scraped?.productFacts?.highlights || [],
           sourceUrl: url,
+          reviews: scraped?.reviews || [],
+          reviewStats: scraped?.reviewStats || null,
         }),
       })
       if (!r.ok) {
@@ -328,6 +346,8 @@ export default function BuildPage() {
             originalPrice={Number(originalPrice) || 0}
             images={selectedImages}
             heroImage={selectedImages[0]}
+            reviews={scraped?.reviews || []}
+            reviewStats={scraped?.reviewStats || null}
             generating={generating}
             generateMsg={generateMsg}
             onBack={() => setStep(3)}
@@ -928,7 +948,7 @@ function PaletteTile({
 
 function GenerateStep({
   productName, storeName, palette, price, originalPrice, images, heroImage,
-  generating, generateMsg, onBack, onGenerate, onGoDashboard,
+  reviews, reviewStats, generating, generateMsg, onBack, onGenerate, onGoDashboard,
 }: {
   productName: string
   storeName: string
@@ -937,6 +957,8 @@ function GenerateStep({
   originalPrice: number
   images: string[]
   heroImage?: string
+  reviews: ScrapedReview[]
+  reviewStats: { average: number; count: number } | null
   generating: boolean
   generateMsg: string | null
   onBack: () => void
@@ -944,6 +966,8 @@ function GenerateStep({
   onGoDashboard: () => void
 }) {
   const downloaded = generateMsg === 'downloaded'
+  const realReviewCount = reviews.filter((r) => r.text && r.text.length >= 8).length
+  const realPhotoCount = reviews.reduce((a, r) => a + (r.photos?.length || 0), 0)
 
   return (
     <div className="space-y-6">
@@ -976,6 +1000,13 @@ function GenerateStep({
                 </div>
                 <div className="mt-2 text-[18px] font-bold text-foreground">{productName || 'Untitled product'}</div>
                 <div className="mt-1 text-[13px] text-muted">in <strong className="text-foreground">{storeName || 'your store'}</strong></div>
+                {realReviewCount >= 3 && (
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
+                    <Check className="h-3 w-3" />
+                    {realReviewCount} real reviews imported{realPhotoCount > 0 ? ` · ${realPhotoCount} customer photos` : ''}
+                    {reviewStats ? ` · ${reviewStats.average.toFixed(1)}★ from ${reviewStats.count.toLocaleString()} ratings` : ''}
+                  </div>
+                )}
                 <div className="mt-3 flex items-baseline gap-2">
                   <div className="text-[22px] font-bold" style={{ color: palette.primary }}>${price.toFixed(2)}</div>
                   {originalPrice > price && (
@@ -1045,6 +1076,10 @@ function GenerateStep({
         </div>
       </div>
 
+      {/* Honesty check — everything the AI invented that the merchant
+          must verify before launch. Always visible at this step. */}
+      <ClaimsPanel reviews={reviews} reviewStats={reviewStats} />
+
       {/* Generate CTA (pre-download only) */}
       {!downloaded && (
         <div className="rounded-3xl border border-token bg-white p-8">
@@ -1105,6 +1140,80 @@ function GenerateStep({
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ─── Honesty check panel ──────────────────────────────────────────── */
+
+function ClaimsPanel({
+  reviews, reviewStats,
+}: {
+  reviews: ScrapedReview[]
+  reviewStats: { average: number; count: number } | null
+}) {
+  const [open, setOpen] = useState(false)
+  // collectClaims only reads the review fields — the rest of the config
+  // doesn't change which claims are raised.
+  const claims: ThemeClaim[] = useMemo(
+    () => collectClaims({ reviews, reviewStats: reviewStats || undefined } as unknown as BuildConfig),
+    [reviews, reviewStats],
+  )
+  const high = claims.filter((c) => c.severity === 'high')
+  const medium = claims.filter((c) => c.severity === 'medium')
+
+  return (
+    <div className="rounded-2xl border border-[rgba(217,119,6,0.25)] bg-[rgba(217,119,6,0.04)] p-5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 text-left"
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(217,119,6,0.12)]">
+            <AlertCircle className="h-4.5 w-4.5 text-[#d97706]" />
+          </div>
+          <div>
+            <div className="text-[14px] font-bold text-foreground">
+              Honesty check — what the AI invented
+            </div>
+            <div className="mt-0.5 text-[12px] text-muted">
+              {high.length} must-fix · {medium.length} to verify before launch. Stock counts, buyer names,
+              press quotes — things only you can make true.
+            </div>
+          </div>
+        </div>
+        <span className="flex-shrink-0 rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-foreground">
+          {open ? 'Hide' : 'Review'}
+        </span>
+      </button>
+
+      {open && (
+        <ul className="mt-4 space-y-2.5">
+          {[...high, ...medium].map((cl) => (
+            <li key={cl.id} className="rounded-xl border border-token bg-white p-3.5">
+              <div className="flex items-start gap-2.5">
+                <span
+                  className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
+                    cl.severity === 'high' ? 'bg-[#dc2626]' : 'bg-[#d97706]'
+                  }`}
+                  aria-label={cl.severity === 'high' ? 'Must fix' : 'Verify'}
+                />
+                <div className="min-w-0">
+                  <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
+                  <div className="mt-0.5 text-[13px] font-semibold text-foreground">{cl.claim}</div>
+                  <div className="mt-1 text-[12.5px] leading-relaxed text-muted">{cl.why}</div>
+                  <div className="mt-1.5 text-[12.5px] font-medium text-foreground">→ {cl.fix}</div>
+                </div>
+              </div>
+            </li>
+          ))}
+          <li className="px-1 pt-1 text-[11.5px] text-muted">
+            This list also ships inside the theme as a checklist in README.md.
+          </li>
+        </ul>
+      )}
     </div>
   )
 }

@@ -131,7 +131,7 @@ export const storytellingSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-founder-story': () => `<section class="ds-founder">
+  'ds-founder-story': () => `<section class="ds-founder" id="our-story">
   <div class="ds-container ds-founder__grid">
     <div class="ds-founder__media">
       {%- if section.settings.image != blank -%}
@@ -454,7 +454,7 @@ export const storytellingSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-how-it-works': () => `<section class="ds-how">
+  'ds-how-it-works': () => `<section class="ds-how" id="how-it-works">
   <div class="ds-container">
     <h2 class="ds-how__title">{{ section.settings.title }}</h2>
     <div class="ds-how__grid">

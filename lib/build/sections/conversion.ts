@@ -117,6 +117,13 @@ export const conversionSections: SectionMap = {
       </div>
       <div class="ds-recent__check">✓</div>
     </div>
+    <script type="application/json" data-ds-recent-data>
+      [
+        {%- for block in section.blocks -%}
+          { "name": {{ block.settings.name | json }}, "action": {{ block.settings.action | json }}, "product": {{ block.settings.product | json }}, "location": {{ block.settings.location | json }} }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    </script>
   </div>
 </section>
 <style>
@@ -167,10 +174,10 @@ export const conversionSections: SectionMap = {
 {%- assign remaining = threshold_cents | minus: cart.total_price -%}
 {%- assign percent = cart.total_price | times: 100 | divided_by: threshold_cents -%}
 {%- if percent > 100 -%}{%- assign percent = 100 -%}{%- endif -%}
-<section class="ds-ship-bar">
+<section class="ds-ship-bar" data-ds-shipbar data-threshold-cents="{{ threshold_cents }}">
   <div class="ds-container">
     <div class="ds-ship-bar__inner">
-      <div class="ds-ship-bar__copy">
+      <div class="ds-ship-bar__copy" data-ds-shipbar-copy aria-live="polite">
         {%- if remaining > 0 -%}
           You're <strong>{{ remaining | money }}</strong> away from free shipping 🚚
         {%- else -%}
@@ -178,7 +185,7 @@ export const conversionSections: SectionMap = {
         {%- endif -%}
       </div>
       <div class="ds-ship-bar__track">
-        <div class="ds-ship-bar__fill" style="width: {{ percent }}%"></div>
+        <div class="ds-ship-bar__fill" data-ds-shipbar-fill style="width: {{ percent }}%"></div>
       </div>
     </div>
   </div>
@@ -204,7 +211,7 @@ export const conversionSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-guarantee': () => `<section class="ds-guarantee">
+  'ds-guarantee': () => `<section class="ds-guarantee" id="guarantee">
   <div class="ds-container ds-guarantee__inner">
     <div class="ds-guarantee__badge">
       <div class="ds-guarantee__seal">{{ section.settings.seal_text }}</div>

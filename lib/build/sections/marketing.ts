@@ -717,27 +717,40 @@ export const marketingSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-cart-upsell': () => `<section class="ds-cup">
-  <div class="ds-container">
-    <h2 class="ds-cup__title">{{ section.settings.title }}</h2>
-    <div class="ds-cup__row">
-      {%- for block in section.blocks -%}
-        <div class="ds-cup__card" {{ block.shopify_attributes }}>
-          {%- if block.settings.image != blank -%}
-            {{ block.settings.image | image_url: width: 240 | image_tag: alt: block.settings.name, loading: 'lazy' }}
-          {%- elsif block.settings.image_url != blank -%}
-            <img src="{{ block.settings.image_url }}" alt="{{ block.settings.name | escape }}" width="240" height="240" loading="lazy">
+  'ds-cart-upsell': () => `{%- comment -%}
+  Real-product recommender: shows store products that aren't in the cart
+  yet, with one-tap AJAX add. Renders nothing when there's nothing real
+  to recommend — no fake companion items.
+{%- endcomment -%}
+{%- assign in_cart = cart.items | map: 'product_id' -%}
+{%- capture cup_cards -%}
+  {%- assign shown = 0 -%}
+  {%- for prod in collections.all.products limit: 8 -%}
+    {%- unless in_cart contains prod.id -%}
+      {%- if shown < 3 and prod.available -%}
+        <div class="ds-cup__card">
+          {%- if prod.featured_image -%}
+            <a href="{{ prod.url }}">{{ prod.featured_image | image_url: width: 240 | image_tag: alt: prod.title, loading: 'lazy' }}</a>
           {%- endif -%}
           <div class="ds-cup__body">
-            <div class="ds-cup__name">{{ block.settings.name }}</div>
-            <div class="ds-cup__price">{{ block.settings.price }}</div>
-            <a href="{{ block.settings.url | default: '#' }}" class="ds-btn ds-btn-sm">Add</a>
+            <a class="ds-cup__name" href="{{ prod.url }}">{{ prod.title }}</a>
+            <div class="ds-cup__price">{{ prod.price | money }}</div>
+            <button type="button" class="ds-btn ds-btn-sm" data-ds-upsell-add data-variant-id="{{ prod.selected_or_first_available_variant.id }}">Add</button>
           </div>
         </div>
-      {%- endfor -%}
-    </div>
+        {%- assign shown = shown | plus: 1 -%}
+      {%- endif -%}
+    {%- endunless -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- if cup_cards contains 'ds-cup__card' -%}
+<section class="ds-cup">
+  <div class="ds-container">
+    <h2 class="ds-cup__title">{{ section.settings.title }}</h2>
+    <div class="ds-cup__row">{{ cup_cards }}</div>
   </div>
 </section>
+{%- endif -%}
 <style>
   .ds-cup { padding: 2.5rem 0; }
   .ds-cup__title { font-size: clamp(1.2rem, 2.5vw, 1.6rem); margin: 0 0 1.2rem; }
@@ -745,8 +758,9 @@ export const marketingSections: SectionMap = {
   .ds-cup__card { display: flex; gap: .75rem; padding: .75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); align-items: center; }
   .ds-cup__card img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; flex-shrink: 0; }
   .ds-cup__body { flex: 1; min-width: 0; }
-  .ds-cup__name { font-weight: 700; font-size: .9rem; }
+  .ds-cup__name { font-weight: 700; font-size: .9rem; color: var(--color-fg); text-decoration: none; display: block; }
   .ds-cup__price { color: var(--color-primary); font-weight: 800; font-size: .9rem; margin: .25rem 0 .5rem; }
+  .ds-cup__card .ds-btn[disabled] { opacity: .6; cursor: wait; }
   @media (max-width: 720px) { .ds-cup__row { grid-template-columns: 1fr; } }
 </style>
 {% schema %}
@@ -754,27 +768,10 @@ export const marketingSections: SectionMap = {
   "name": "Cart upsell",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "title", "label": "Title", "default": "Pair it with…" }
+    { "type": "paragraph", "content": "Automatically recommends store products that aren't in the cart yet. Hidden when there's nothing to recommend." },
+    { "type": "text", "id": "title", "label": "Title", "default": "You may also like" }
   ],
-  "blocks": [
-    {
-      "type": "item",
-      "name": "Item",
-      "settings": [
-        { "type": "image_picker", "id": "image", "label": "Image" },
-        { "type": "text", "id": "image_url", "label": "Or image URL (external)" },
-        { "type": "text", "id": "name",  "label": "Name",  "default": "Companion" },
-        { "type": "text", "id": "price", "label": "Price", "default": "$19.99" },
-        { "type": "url",  "id": "url",   "label": "URL" }
-      ]
-    }
-  ],
-  "max_blocks": 6,
-  "presets": [{ "name": "Cart upsell", "blocks": [
-      { "type": "item", "settings": { "name": "Travel case", "price": "$19.99" } },
-      { "type": "item", "settings": { "name": "Refill pack", "price": "$14.99" } },
-      { "type": "item", "settings": { "name": "Bundle save", "price": "$29.99" } }
-    ] }]
+  "presets": [{ "name": "Cart upsell" }]
 }
 {% endschema %}
 `,

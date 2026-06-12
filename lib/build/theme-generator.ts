@@ -28,7 +28,23 @@
  * generated theme for the merchant-facing summary.
  */
 
-import { buildTemplate } from './seed'
+import { buildTemplate, collectClaims } from './seed'
+
+/** A real product review scraped from the source listing. */
+export type ProductReview = {
+  /** Reviewer display name as shown on the source site. */
+  name: string
+  /** Buyer country code or name, e.g. "US". */
+  country?: string
+  /** Star rating 1-5. */
+  rating: number
+  /** Review text. */
+  text: string
+  /** Absolute photo URLs attached to the review. */
+  photos?: string[]
+  /** Review date if available (display only). */
+  date?: string
+}
 
 export type BuildConfig = {
   /** The product name the merchant chose / generated. */
@@ -63,6 +79,11 @@ export type BuildConfig = {
   highlights?: string[]
   /** Optional source URL — recorded in README for the merchant. */
   sourceUrl?: string
+  /** Real reviews scraped from the source listing. When present, the
+   *  review/UGC/star sections seed from these instead of invented copy. */
+  reviews?: ProductReview[]
+  /** Aggregate review stats from the source listing. */
+  reviewStats?: { average: number; count: number }
 }
 
 export type ThemeFiles = Record<string, string>
@@ -138,6 +159,7 @@ function fileLayout(_c: BuildConfig): string {
       {{ content_for_layout }}
     </main>
     {% sections 'footer-group' %}
+    <script>window.dsMoneyFormat = {{ shop.money_format | json }};</script>
     <script src="{{ 'theme.js' | asset_url }}" defer></script>
   </body>
 </html>
@@ -597,7 +619,18 @@ function sectionFooter(_c: BuildConfig): string {
               {%- assign lines = block.settings.links | newline_to_br | split: '<br />' -%}
               {%- for line in lines -%}
                 {%- assign t = line | strip -%}
-                {%- if t != blank -%}<li><a href="#">{{ t }}</a></li>{%- endif -%}
+                {%- if t != blank -%}
+                  {%- assign parts = t | split: '|' -%}
+                  {%- assign label = parts[0] | strip -%}
+                  {%- assign href = parts[1] | strip -%}
+                  {%- if href == 'mailto:' -%}
+                    <li><a href="mailto:{{ shop.email }}">{{ label }}</a></li>
+                  {%- elsif href != blank -%}
+                    <li><a href="{{ href }}">{{ label }}</a></li>
+                  {%- else -%}
+                    <li><a href="{{ routes.root_url }}">{{ label }}</a></li>
+                  {%- endif -%}
+                {%- endif -%}
               {%- endfor -%}
             </ul>
           </div>
@@ -657,7 +690,7 @@ function sectionFooter(_c: BuildConfig): string {
       "name": "Link column",
       "settings": [
         { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
-        { "type": "textarea", "id": "links", "label": "Links (one per line)", "default": "Bestsellers\\nNew arrivals\\nBundle deals" }
+        { "type": "textarea", "id": "links", "label": "Links — one per line, Label|URL", "default": "Bestsellers|/collections/all\\nBundle deals|/#bundle" }
       ]
     },
     {
@@ -673,8 +706,8 @@ function sectionFooter(_c: BuildConfig): string {
   "max_blocks": 5,
   "default": {
     "blocks": [
-      { "type": "column", "settings": { "heading": "Shop", "links": "Bestsellers\\nNew arrivals\\nBundle deals" } },
-      { "type": "column", "settings": { "heading": "Help", "links": "Shipping\\nReturns\\nContact" } },
+      { "type": "column", "settings": { "heading": "Shop", "links": "Bestsellers|/collections/all\\nBundle deals|/#bundle" } },
+      { "type": "column", "settings": { "heading": "Help", "links": "FAQ|/#faq\\nReturns|/#guarantee\\nContact us|mailto:" } },
       { "type": "newsletter", "settings": {} }
     ]
   }
@@ -772,6 +805,9 @@ function sectionProductMain(c: BuildConfig): string {
   // so the page still looks right.
   return `{%- liquid
   assign p = product
+  if p == blank or p.id == blank
+    assign p = collections.all.products.first
+  endif
   assign use_real = false
   if p != blank and p.id != blank
     assign use_real = true
@@ -887,10 +923,16 @@ function sectionProductMain(c: BuildConfig): string {
           </div>
           {{ form | payment_button }}
         {% endform %}
+        <div class="ds-product__payments" aria-label="Accepted payment methods">
+          {%- for type in shop.enabled_payment_types limit: 7 -%}
+            {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
+          {%- endfor -%}
+          <span class="ds-product__payments-note">Secure 256-bit encrypted checkout</span>
+        </div>
       {%- else -%}
         <div class="ds-product__form">
-          <a href="{{ routes.cart_url }}" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">Add to cart</a>
-          <p class="ds-product__placeholder-note">Connect your product in Shopify to enable checkout.</p>
+          <a href="#bundle" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">Add to cart</a>
+          <p class="ds-product__placeholder-note">Add your product in Shopify admin to enable live checkout — this button activates automatically.</p>
         </div>
       {%- endif -%}
 
@@ -938,6 +980,9 @@ function sectionProductMain(c: BuildConfig): string {
   .ds-product__qty input { width: 48px; text-align: center; border: 0; padding: .85rem 0; font-size: 1rem; background: var(--color-surface); color: var(--color-fg); }
   .ds-product__atc { flex: 1; }
   .ds-product__placeholder-note { color: var(--color-muted); font-size: .8rem; }
+  .ds-product__payments { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-top: .25rem; }
+  .ds-product__payments .ds-pay-icon { height: 22px; width: auto; border-radius: 3px; }
+  .ds-product__payments-note { font-size: .72rem; color: var(--color-muted); margin-left: .35rem; }
   .ds-product__trust { list-style: none; padding: 0; margin: 1.4rem 0 0; display: grid; gap: .5rem; }
   .ds-product__trust li { display: flex; gap: .5rem; align-items: center; font-size: .9rem; color: var(--color-fg); }
   .ds-product__trust svg { color: #16a34a; }
@@ -991,7 +1036,13 @@ function sectionBundle(c: BuildConfig): string {
   const single = moneyCents(c.salePrice)
   const twoFree = moneyCents(c.salePrice * 2)
   const threeFree = moneyCents(c.salePrice * 3)
-  return `<section class="ds-bundle">
+  return `{%- liquid
+  assign bp = product
+  if bp == blank or bp.id == blank
+    assign bp = collections.all.products.first
+  endif
+-%}
+<section id="bundle" class="ds-bundle" data-ds-bundle>
   <div class="ds-container">
     <div class="ds-bundle__head">
       <span class="ds-bundle__eyebrow">{{ section.settings.eyebrow }}</span>
@@ -1003,7 +1054,7 @@ function sectionBundle(c: BuildConfig): string {
           {%- if block.settings.featured -%}
             <div class="ds-bundle__ribbon">{{ block.settings.ribbon }}</div>
           {%- endif -%}
-          <input type="radio" name="bundle" {% if block.settings.featured %}checked{% endif %}>
+          <input type="radio" name="bundle-{{ section.id }}" data-ds-bundle-option data-units="{{ block.settings.units | default: 1 }}" data-price="{{ block.settings.price | escape }}" {% if block.settings.featured %}checked{% endif %}>
           <div class="ds-bundle__qty">{{ block.settings.qty }}</div>
           <div class="ds-bundle__name">{{ block.settings.name }}</div>
           <div class="ds-bundle__price">{{ block.settings.price }}</div>
@@ -1013,7 +1064,12 @@ function sectionBundle(c: BuildConfig): string {
         </label>
       {%- endfor -%}
     </div>
-    <a href="#product" class="ds-btn ds-btn-primary ds-btn-lg ds-bundle__cta">{{ section.settings.cta }}</a>
+    {%- if bp != blank and bp.id != blank -%}
+      <button type="button" class="ds-btn ds-btn-primary ds-btn-lg ds-bundle__cta" data-ds-bundle-add data-variant-id="{{ bp.selected_or_first_available_variant.id }}" data-label="{{ section.settings.cta | escape }}">{{ section.settings.cta }}</button>
+    {%- else -%}
+      <a href="#product" class="ds-btn ds-btn-primary ds-btn-lg ds-bundle__cta">{{ section.settings.cta }}</a>
+    {%- endif -%}
+    <p class="ds-bundle__note">{{ section.settings.note }}</p>
   </div>
 </section>
 <style>
@@ -1031,7 +1087,9 @@ function sectionBundle(c: BuildConfig): string {
   .ds-bundle__name { font-weight: 700; color: var(--color-fg); font-size: .98rem; }
   .ds-bundle__price { font-size: 1.2rem; font-weight: 800; color: var(--color-primary); }
   .ds-bundle__sub { font-size: .78rem; color: var(--color-muted); }
-  .ds-bundle__cta { display: block; margin: 2rem auto 0; max-width: 320px; }
+  .ds-bundle__cta { display: block; margin: 2rem auto 0; max-width: 360px; width: 100%; }
+  .ds-bundle__cta[disabled] { opacity: .6; cursor: wait; }
+  .ds-bundle__note { text-align: center; color: var(--color-muted); font-size: .8rem; margin: .8rem 0 0; }
   @media (max-width: 720px) {
     .ds-bundle__grid { grid-template-columns: 1fr; }
   }
@@ -1041,9 +1099,11 @@ function sectionBundle(c: BuildConfig): string {
   "name": "Bundle",
   "tag": "section",
   "settings": [
+    { "type": "paragraph", "content": "The button adds the selected quantity of your store's product straight to the cart." },
     { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Save more, get more" },
     { "type": "text", "id": "title", "label": "Title", "default": "Pick your bundle" },
-    { "type": "text", "id": "cta",   "label": "CTA",   "default": "Continue to cart" }
+    { "type": "text", "id": "cta",   "label": "CTA",   "default": "Continue to cart" },
+    { "type": "text", "id": "note",  "label": "Note under CTA", "default": "Free shipping over $50 · 30-day money-back guarantee" }
   ],
   "blocks": [
     {
@@ -1051,6 +1111,7 @@ function sectionBundle(c: BuildConfig): string {
       "name": "Tier",
       "settings": [
         { "type": "text", "id": "qty",   "label": "Quantity headline", "default": "1×" },
+        { "type": "number", "id": "units", "label": "Units added to cart", "default": 1 },
         { "type": "text", "id": "name",  "label": "Tier name", "default": "Single" },
         { "type": "text", "id": "price", "label": "Price label", "default": "${j(`$${(single / 100).toFixed(2)}`)}" },
         { "type": "text", "id": "subtext", "label": "Sub-text", "default": "Try it out" },
@@ -1061,9 +1122,9 @@ function sectionBundle(c: BuildConfig): string {
   ],
   "max_blocks": 4,
   "presets": [{ "name": "Bundle", "blocks": [
-      { "type": "tier", "settings": { "qty": "1×", "name": "Single", "price": "${j(`$${(single / 100).toFixed(2)}`)}", "subtext": "Try it out" } },
-      { "type": "tier", "settings": { "qty": "2× + 1 free", "name": "Best value", "price": "${j(`$${(twoFree / 100).toFixed(2)}`)}", "subtext": "${j(`Save vs $${(threeFree / 100).toFixed(2)}`)}", "featured": true, "ribbon": "Most popular" } },
-      { "type": "tier", "settings": { "qty": "3× + 2 free", "name": "Bulk", "price": "${j(`$${((single * 3) / 100).toFixed(2)}`)}", "subtext": "Stock the shelf" } }
+      { "type": "tier", "settings": { "qty": "1×", "units": 1, "name": "Single", "price": "${j(`$${(single / 100).toFixed(2)}`)}", "subtext": "Try it out" } },
+      { "type": "tier", "settings": { "qty": "2× + 1 free", "units": 2, "name": "Best value", "price": "${j(`$${(twoFree / 100).toFixed(2)}`)}", "subtext": "${j(`Save vs $${(threeFree / 100).toFixed(2)}`)}", "featured": true, "ribbon": "Most popular" } },
+      { "type": "tier", "settings": { "qty": "3× + 2 free", "units": 3, "name": "Bulk", "price": "${j(`$${((single * 3) / 100).toFixed(2)}`)}", "subtext": "Stock the shelf" } }
     ] }]
 }
 {% endschema %}
@@ -1199,7 +1260,7 @@ function sectionComparison(c: BuildConfig): string {
 }
 
 function sectionReviews(_c: BuildConfig): string {
-  return `<section class="ds-reviews">
+  return `<section class="ds-reviews" id="reviews">
   <div class="ds-container">
     <div class="ds-reviews__head">
       <h2 class="ds-reviews__title">{{ section.settings.title }}</h2>
@@ -1212,10 +1273,11 @@ function sectionReviews(_c: BuildConfig): string {
     <div class="ds-reviews__grid">
       {%- for block in section.blocks -%}
         <article class="ds-reviews__card" {{ block.shopify_attributes }}>
-          <div class="ds-stars">★★★★★</div>
+          {%- assign r = block.settings.rating | default: 5 | at_least: 1 | at_most: 5 -%}
+          <div class="ds-stars" aria-label="{{ r }} out of 5 stars">{{ '★★★★★' | slice: 0, r }}<span class="ds-stars--off">{{ '★★★★★' | slice: r, 5 }}</span></div>
           <h3 class="ds-reviews__quote">{{ block.settings.headline }}</h3>
           <p class="ds-reviews__body">{{ block.settings.body }}</p>
-          <div class="ds-reviews__author">{{ block.settings.author }} <span>· {{ block.settings.location }}</span></div>
+          <div class="ds-reviews__author">{{ block.settings.author }}{%- if block.settings.location != blank -%} <span>· {{ block.settings.location }}</span>{%- endif -%}{%- if block.settings.verified -%} <span class="ds-reviews__verified">✓ Verified buyer</span>{%- endif -%}</div>
         </article>
       {%- endfor -%}
     </div>
@@ -1234,6 +1296,8 @@ function sectionReviews(_c: BuildConfig): string {
   .ds-reviews__body { color: var(--color-muted); font-size: .92rem; line-height: 1.5; margin: 0 0 1rem; }
   .ds-reviews__author { font-size: .82rem; color: var(--color-fg); font-weight: 700; }
   .ds-reviews__author span { font-weight: 400; color: var(--color-muted); }
+  .ds-stars--off { opacity: .25; }
+  .ds-reviews__verified { color: #16a34a !important; font-size: .75rem; }
   @media (max-width: 880px) {
     .ds-reviews__grid { grid-template-columns: 1fr; }
   }
@@ -1252,10 +1316,12 @@ function sectionReviews(_c: BuildConfig): string {
       "type": "review",
       "name": "Review",
       "settings": [
+        { "type": "range", "id": "rating", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
         { "type": "text", "id": "headline", "label": "Headline" },
         { "type": "textarea", "id": "body", "label": "Body" },
         { "type": "text", "id": "author", "label": "Author" },
-        { "type": "text", "id": "location", "label": "Location" }
+        { "type": "text", "id": "location", "label": "Location" },
+        { "type": "checkbox", "id": "verified", "label": "Show verified-buyer badge" }
       ]
     }
   ],
@@ -1271,7 +1337,7 @@ function sectionReviews(_c: BuildConfig): string {
 }
 
 function sectionFaq(_c: BuildConfig): string {
-  return `<section class="ds-faq">
+  return `<section class="ds-faq" id="faq">
   <div class="ds-container ds-faq__inner">
     <h2 class="ds-faq__title">{{ section.settings.title }}</h2>
     <div class="ds-faq__list">
@@ -1334,7 +1400,7 @@ function sectionCta(_c: BuildConfig): string {
   <div class="ds-container ds-cta__inner">
     <h2 class="ds-cta__title">{{ section.settings.title }}</h2>
     <p class="ds-cta__sub">{{ section.settings.subtitle }}</p>
-    <a href="#product" class="ds-btn ds-btn-on-primary ds-btn-xl">{{ section.settings.cta }}</a>
+    <a href="{{ section.settings.cta_url | default: '/#product' }}" class="ds-btn ds-btn-on-primary ds-btn-xl">{{ section.settings.cta }}</a>
   </div>
 </section>
 <style>
@@ -1349,7 +1415,8 @@ function sectionCta(_c: BuildConfig): string {
   "settings": [
     { "type": "text", "id": "title",    "label": "Title",    "default": "Get yours before the next restock" },
     { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Free shipping over $50. 30-day returns. Real humans on email." },
-    { "type": "text", "id": "cta",      "label": "CTA",      "default": "Add to cart" }
+    { "type": "text", "id": "cta",      "label": "CTA",      "default": "Add to cart" },
+    { "type": "text", "id": "cta_url",  "label": "CTA link", "default": "/#product" }
   ],
   "presets": [{ "name": "Final CTA" }]
 }
@@ -1361,6 +1428,9 @@ function sectionStickyAtc(c: BuildConfig): string {
   const fallbackPriceCents = moneyCents(c.salePrice)
   return `{%- liquid
   assign p = product
+  if p == blank or p.id == blank
+    assign p = collections.all.products.first
+  endif
   assign use_real = false
   if p != blank and p.id != blank
     assign use_real = true
@@ -1424,61 +1494,159 @@ function sectionStickyAtc(c: BuildConfig): string {
 }
 
 function sectionCart(_c: BuildConfig): string {
-  return `<section class="ds-cart-page">
+  // AJAX cart page: quantity steppers and remove-line hit /cart/change.js
+  // and re-paint prices from the JSON response — no full-page reloads.
+  // The "add one more" nudge re-adds the first line's variant. All the
+  // wiring lives in theme.js, keyed off data-ds-cart-* attributes.
+  return `<section class="ds-cart-page" data-ds-cart>
   <div class="ds-container">
-    <h1>{{ 'general.cart.title' | t }}</h1>
-    {%- if cart.item_count > 0 -%}
-      <form action="{{ routes.cart_url }}" method="post" novalidate>
-        <ul class="ds-cart__list">
-          {%- for item in cart.items -%}
-            <li class="ds-cart__item">
-              {{ item.image | image_url: width: 160 | image_tag: alt: item.title, loading: 'lazy' }}
-              <div class="ds-cart__info">
-                <div class="ds-cart__name">{{ item.product.title }}</div>
-                {%- unless item.product.has_only_default_variant -%}
-                  <div class="ds-cart__variant">{{ item.variant.title }}</div>
-                {%- endunless -%}
-                <div class="ds-cart__price">{{ item.final_line_price | money }}</div>
+    <h1 class="ds-cart__title">{{ 'general.cart.title' | t }} <span class="ds-cart__countpill" data-ds-cart-count-pill {% if cart.item_count == 0 %}hidden{% endif %}><span data-ds-cart-count>{{ cart.item_count }}</span> items</span></h1>
+    <div data-ds-cart-filled {% if cart.item_count == 0 %}hidden{% endif %}>
+      <div class="ds-cart__layout">
+        <div>
+          <ul class="ds-cart__list" data-ds-cart-lines>
+            {%- for item in cart.items -%}
+              <li class="ds-cart__item" data-ds-cart-line="{{ forloop.index }}">
+                <a href="{{ item.url }}" class="ds-cart__media">
+                  {{ item.image | image_url: width: 160 | image_tag: alt: item.title, loading: 'lazy' }}
+                </a>
+                <div class="ds-cart__info">
+                  <div class="ds-cart__name">{{ item.product.title }}</div>
+                  {%- unless item.product.has_only_default_variant -%}
+                    <div class="ds-cart__variant">{{ item.variant.title }}</div>
+                  {%- endunless -%}
+                  <div class="ds-cart__price" data-ds-line-price>{{ item.final_line_price | money }}</div>
+                  {%- if item.original_line_price > item.final_line_price -%}
+                    <div class="ds-cart__was">{{ item.original_line_price | money }}</div>
+                  {%- endif -%}
+                </div>
+                <div class="ds-cart__controls">
+                  <div class="ds-cart__qty" data-ds-cart-qty>
+                    <button type="button" class="ds-qty-btn" data-ds-cart-step="-1" aria-label="Decrease quantity">−</button>
+                    <span class="ds-cart__qty-num" data-ds-cart-qty-num>{{ item.quantity }}</span>
+                    <button type="button" class="ds-qty-btn" data-ds-cart-step="1" aria-label="Increase quantity">+</button>
+                  </div>
+                  <button type="button" class="ds-cart__remove" data-ds-cart-remove aria-label="Remove {{ item.product.title | escape }}">Remove</button>
+                </div>
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {%- if section.settings.show_addmore and cart.item_count > 0 -%}
+            {%- assign first_item = cart.items | first -%}
+            <div class="ds-cart__nudge" data-ds-cart-nudge>
+              <div class="ds-cart__nudge-copy">
+                <strong>{{ section.settings.addmore_title }}</strong>
+                <span>{{ section.settings.addmore_sub }}</span>
               </div>
-              <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" aria-label="Quantity">
-            </li>
-          {%- endfor -%}
-        </ul>
-        <div class="ds-cart__foot">
-          <div>
-            <div class="ds-cart__label">{{ 'general.cart.subtotal' | t }}</div>
-            <div class="ds-cart__total">{{ cart.total_price | money }}</div>
-          </div>
-          <div class="ds-cart__actions">
-            <button type="submit" name="update" class="ds-btn">Update</button>
-            <button type="submit" name="checkout" class="ds-btn ds-btn-primary">{{ 'general.cart.checkout' | t }}</button>
-          </div>
+              <button type="button" class="ds-btn ds-btn-sm" data-ds-cart-add-more data-variant-id="{{ first_item.variant_id }}">+ Add one more</button>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.show_note -%}
+            <label class="ds-cart__note">
+              <span>Order note (optional)</span>
+              <textarea name="note" rows="2" placeholder="Gift message, delivery instructions…" data-ds-cart-note>{{ cart.note }}</textarea>
+            </label>
+          {%- endif -%}
         </div>
-      </form>
-    {%- else -%}
-      <p>{{ 'general.cart.empty' | t }}</p>
-      <a href="{{ routes.root_url }}" class="ds-btn ds-btn-primary">Continue shopping</a>
-    {%- endif -%}
+
+        <aside class="ds-cart__summary">
+          <div class="ds-cart__summary-card">
+            <div class="ds-cart__row">
+              <span>{{ 'general.cart.subtotal' | t }}</span>
+              <strong data-ds-cart-subtotal>{{ cart.total_price | money }}</strong>
+            </div>
+            <div class="ds-cart__row ds-cart__row--muted" data-ds-cart-savings {% if cart.total_discount <= 0 %}hidden{% endif %}>
+              <span>You saved</span>
+              <strong data-ds-cart-savings-amount>{{ cart.total_discount | money }}</strong>
+            </div>
+            <div class="ds-cart__row ds-cart__row--muted">
+              <span>Shipping</span>
+              <span>Calculated at checkout</span>
+            </div>
+            <form action="{{ routes.cart_url }}" method="post" novalidate>
+              <button type="submit" name="checkout" class="ds-btn ds-btn-primary ds-btn-xl ds-cart__checkout">{{ 'general.cart.checkout' | t }} · <span data-ds-cart-subtotal>{{ cart.total_price | money }}</span></button>
+            </form>
+            <div class="ds-cart__payments" aria-label="Accepted payment methods">
+              {%- for type in shop.enabled_payment_types limit: 7 -%}
+                {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
+              {%- endfor -%}
+            </div>
+            <ul class="ds-cart__assurance">
+              <li>🔒 Secure 256-bit encrypted checkout</li>
+              <li>↩️ 30-day money-back guarantee</li>
+              <li>🚚 Tracked shipping with live updates</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="ds-cart__empty" data-ds-cart-empty {% if cart.item_count > 0 %}hidden{% endif %}>
+      <div class="ds-cart__empty-icon">🛒</div>
+      <h2>{{ section.settings.empty_title }}</h2>
+      <p>{{ section.settings.empty_sub }}</p>
+      <a href="/#product" class="ds-btn ds-btn-primary ds-btn-lg">{{ section.settings.empty_cta }}</a>
+    </div>
   </div>
 </section>
 <style>
-  .ds-cart-page { padding: 3rem 0; }
-  .ds-cart__list { list-style: none; padding: 0; display: grid; gap: 1rem; margin: 2rem 0; }
-  .ds-cart__item { display: grid; grid-template-columns: 96px 1fr 80px; gap: 1rem; padding: 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); align-items: center; }
-  .ds-cart__item img { width: 96px; height: 96px; object-fit: cover; border-radius: calc(var(--radius) * .5); }
+  .ds-cart-page { padding: 3rem 0 4rem; }
+  .ds-cart__title { display: flex; align-items: center; gap: .75rem; font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 1.5rem; }
+  .ds-cart__countpill { font-size: .8rem; font-weight: 700; background: var(--color-surface); border: 1px solid var(--color-border); padding: .25rem .7rem; border-radius: 999px; color: var(--color-muted); }
+  .ds-cart__layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem; align-items: start; }
+  .ds-cart__list { list-style: none; padding: 0; display: grid; gap: 1rem; margin: 0; }
+  .ds-cart__item { display: grid; grid-template-columns: 96px 1fr auto; gap: 1rem; padding: 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); align-items: center; transition: opacity .2s; }
+  .ds-cart__item.is-busy { opacity: .55; pointer-events: none; }
+  .ds-cart__media img { width: 96px; height: 96px; object-fit: cover; border-radius: calc(var(--radius) * .5); display: block; }
   .ds-cart__name { font-weight: 700; }
   .ds-cart__variant { color: var(--color-muted); font-size: .85rem; }
-  .ds-cart__price { font-weight: 700; color: var(--color-primary); }
-  .ds-cart__foot { display: flex; justify-content: space-between; gap: 1rem; padding: 1.2rem 0; border-top: 1px solid var(--color-border); margin-top: 1.5rem; }
-  .ds-cart__label { font-size: .8rem; color: var(--color-muted); text-transform: uppercase; letter-spacing: .1em; }
-  .ds-cart__total { font-size: 1.6rem; font-weight: 800; color: var(--color-fg); }
-  .ds-cart__actions { display: flex; gap: .6rem; align-items: center; }
+  .ds-cart__price { font-weight: 700; color: var(--color-primary); margin-top: .25rem; }
+  .ds-cart__was { color: var(--color-muted); text-decoration: line-through; font-size: .8rem; }
+  .ds-cart__controls { display: grid; gap: .5rem; justify-items: end; }
+  .ds-cart__qty { display: inline-flex; align-items: center; border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; background: var(--color-bg); }
+  .ds-cart__qty-num { min-width: 36px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ds-cart__remove { background: none; border: 0; color: var(--color-muted); font-size: .78rem; cursor: pointer; text-decoration: underline; padding: 0; }
+  .ds-cart__remove:hover { color: var(--color-fg); }
+  .ds-cart__nudge { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; padding: .9rem 1.1rem; border: 1.5px dashed var(--color-primary); border-radius: var(--radius); background: color-mix(in srgb, var(--color-primary) 5%, transparent); }
+  .ds-cart__nudge-copy { display: grid; gap: 2px; font-size: .9rem; }
+  .ds-cart__nudge-copy span { color: var(--color-muted); font-size: .82rem; }
+  .ds-cart__note { display: grid; gap: .4rem; margin-top: 1.25rem; font-size: .85rem; color: var(--color-muted); }
+  .ds-cart__note textarea { padding: .65rem .8rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); color: var(--color-fg); font: inherit; resize: vertical; }
+  .ds-cart__summary-card { position: sticky; top: 84px; padding: 1.4rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); display: grid; gap: .8rem; }
+  .ds-cart__row { display: flex; justify-content: space-between; font-size: .95rem; }
+  .ds-cart__row strong { font-size: 1.05rem; }
+  .ds-cart__row--muted { color: var(--color-muted); font-size: .85rem; }
+  .ds-cart__checkout { width: 100%; }
+  .ds-cart__payments { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center; }
+  .ds-cart__payments .ds-pay-icon { height: 22px; width: auto; border-radius: 3px; }
+  .ds-cart__assurance { list-style: none; padding: .4rem 0 0; margin: 0; display: grid; gap: .35rem; font-size: .8rem; color: var(--color-muted); border-top: 1px solid var(--color-border); }
+  .ds-cart__empty { text-align: center; padding: 4rem 0; }
+  .ds-cart__empty-icon { font-size: 2.6rem; margin-bottom: .75rem; }
+  .ds-cart__empty h2 { margin: 0 0 .4rem; }
+  .ds-cart__empty p { color: var(--color-muted); margin: 0 0 1.5rem; }
+  @media (max-width: 880px) {
+    .ds-cart__layout { grid-template-columns: 1fr; }
+    .ds-cart__summary-card { position: static; }
+  }
 </style>
 {% schema %}
 {
   "name": "Cart",
   "tag": "section",
-  "settings": [],
+  "settings": [
+    { "type": "header", "content": "Buy-more nudge" },
+    { "type": "checkbox", "id": "show_addmore", "label": "Show add-one-more nudge", "default": true },
+    { "type": "text", "id": "addmore_title", "label": "Nudge title", "default": "Make it a pair" },
+    { "type": "text", "id": "addmore_sub", "label": "Nudge subtitle", "default": "Most customers add a second one — for a friend or a backup." },
+    { "type": "header", "content": "Extras" },
+    { "type": "checkbox", "id": "show_note", "label": "Show order-note field", "default": true },
+    { "type": "header", "content": "Empty cart" },
+    { "type": "text", "id": "empty_title", "label": "Empty title", "default": "Your cart is empty" },
+    { "type": "text", "id": "empty_sub", "label": "Empty subtitle", "default": "Free shipping over $50 and a 30-day guarantee are waiting." },
+    { "type": "text", "id": "empty_cta", "label": "Empty CTA", "default": "Shop the product" }
+  ],
   "presets": [{ "name": "Cart" }]
 }
 {% endschema %}
@@ -1648,11 +1816,58 @@ body[data-width="wide"] .ds-container { max-width: 1320px; }
 }
 
 function assetThemeJs(_c: BuildConfig): string {
-  return `/* Zenya Dropship · client behaviour. Keep small + dependency-free. */
+  return `/* Zenya Dropship · client behaviour. Dependency-free, one file.
+ * Everything hooks off data-ds-* attributes so sections stay markup-only. */
 (function () {
-  // Sticky ATC visibility — show once the user scrolls past the main
-  // ATC button, hide if they return to it. We use IntersectionObserver
-  // on the #product section: invisible = sticky on, visible = sticky off.
+  /* ── Money formatting (uses the store's format injected by layout) ── */
+  function fmtMoney(cents) {
+    var format = window.dsMoneyFormat || '$0.00';
+    var amount = (Math.max(0, cents) / 100).toFixed(2);
+    var withComma = amount.replace('.', ',');
+    return format
+      .replace(/\\{\\{\\s*amount\\s*\\}\\}/g, amount)
+      .replace(/\\{\\{\\s*amount_no_decimals\\s*\\}\\}/g, String(Math.round(cents / 100)))
+      .replace(/\\{\\{\\s*amount_with_comma_separator\\s*\\}\\}/g, withComma);
+  }
+
+  /* ── Cart API helper ──────────────────────────────────────────────── */
+  function cartFetch(path, body) {
+    return fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(function (r) {
+      if (!r.ok) return r.json().then(function (j) { throw new Error(j.description || j.message || 'Cart error'); });
+      return r.json();
+    });
+  }
+  var dsCart = {
+    add: function (id, qty) { return cartFetch('/cart/add.js', { items: [{ id: Number(id), quantity: qty || 1 }] }); },
+    change: function (line, qty) { return cartFetch('/cart/change.js', { line: line, quantity: qty }); },
+    update: function (fields) { return cartFetch('/cart/update.js', fields); },
+    get: function () { return fetch('/cart.js', { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.json(); }); },
+  };
+  window.dsCart = dsCart;
+
+  /* ── Shared paint: header count + free-shipping bars ──────────────── */
+  function paintGlobals(cart) {
+    document.querySelectorAll('.ds-header__count').forEach(function (el) { el.textContent = cart.item_count; });
+    document.querySelectorAll('[data-ds-shipbar]').forEach(function (bar) {
+      var threshold = parseInt(bar.getAttribute('data-threshold-cents'), 10) || 0;
+      if (!threshold) return;
+      var fill = bar.querySelector('[data-ds-shipbar-fill]');
+      var copy = bar.querySelector('[data-ds-shipbar-copy]');
+      var pct = Math.min(100, Math.round((cart.total_price / threshold) * 100));
+      if (fill) fill.style.width = pct + '%';
+      if (copy) {
+        copy.innerHTML = cart.total_price >= threshold
+          ? '🎉 You unlocked <strong>free shipping</strong>!'
+          : "You're <strong>" + fmtMoney(threshold - cart.total_price) + '</strong> away from free shipping 🚚';
+      }
+    });
+  }
+
+  /* ── Sticky ATC visibility ────────────────────────────────────────── */
   var sticky = document.querySelector('[data-ds-sticky]');
   var product = document.getElementById('product');
   if (sticky && product && 'IntersectionObserver' in window) {
@@ -1670,23 +1885,179 @@ function assetThemeJs(_c: BuildConfig): string {
     io.observe(product);
   }
 
-  // Quantity buttons.
+  /* ── Product-form quantity buttons ────────────────────────────────── */
   document.querySelectorAll('[data-step]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var step = parseInt(btn.getAttribute('data-step'), 10) || 0;
       var input = btn.parentElement.querySelector('input[name="quantity"]');
       if (!input) return;
-      var v = Math.max(1, (parseInt(input.value, 10) || 1) + step);
-      input.value = v;
+      input.value = Math.max(1, (parseInt(input.value, 10) || 1) + step);
     });
   });
 
-  // Thumbnail click swaps hero.
+  /* ── Gallery thumbnails swap the hero image ───────────────────────── */
   document.querySelectorAll('.ds-product__thumb').forEach(function (t) {
     t.addEventListener('click', function () {
       var src = t.getAttribute('data-src');
       var hero = document.querySelector('.ds-product__hero img');
-      if (src && hero) hero.src = src;
+      if (src && hero) { hero.src = src; hero.removeAttribute('srcset'); }
+    });
+  });
+
+  /* ── Countdown timers ─────────────────────────────────────────────── */
+  document.querySelectorAll('[data-ds-countdown]').forEach(function (el) {
+    var end = Date.parse(el.getAttribute('data-end') || '');
+    if (!end) return;
+    var d = el.querySelector('[data-d]'), h = el.querySelector('[data-h]'),
+        m = el.querySelector('[data-m]'), s = el.querySelector('[data-s]');
+    function pad(n) { return n < 10 ? '0' + n : String(n); }
+    function tick() {
+      var left = Math.max(0, end - Date.now());
+      var sec = Math.floor(left / 1000);
+      if (d) d.textContent = pad(Math.floor(sec / 86400));
+      if (h) h.textContent = pad(Math.floor((sec % 86400) / 3600));
+      if (m) m.textContent = pad(Math.floor((sec % 3600) / 60));
+      if (s) s.textContent = pad(sec % 60);
+      if (left > 0) setTimeout(tick, 1000);
+    }
+    tick();
+  });
+
+  /* ── Recently-bought rotator ──────────────────────────────────────── */
+  document.querySelectorAll('.ds-recent').forEach(function (root) {
+    var dataEl = root.querySelector('[data-ds-recent-data]');
+    var line = root.querySelector('[data-ds-recent]');
+    var when = root.querySelector('[data-ds-recent-when]');
+    if (!dataEl || !line) return;
+    var items = [];
+    try { items = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return; }
+    if (items.length < 2) return;
+    var i = 0;
+    setInterval(function () {
+      i = (i + 1) % items.length;
+      var it = items[i];
+      line.style.animation = 'none';
+      void line.offsetWidth; /* restart the entry animation */
+      line.style.animation = '';
+      line.innerHTML = '<strong></strong> ' + (it.action || 'just bought') + ' <em></em>';
+      line.querySelector('strong').textContent = it.name || '';
+      line.querySelector('em').textContent = it.product || '';
+      if (when) when.textContent = (2 + Math.floor(Math.random() * 38)) + ' min ago · ' + (it.location || '');
+    }, 9000);
+  });
+
+  /* ── Bundle picker: selected tier drives a real add-to-cart ──────── */
+  document.querySelectorAll('[data-ds-bundle]').forEach(function (root) {
+    var cta = root.querySelector('[data-ds-bundle-add]');
+    function selected() { return root.querySelector('[data-ds-bundle-option]:checked'); }
+    function syncLabel() {
+      if (!cta) return;
+      var opt = selected();
+      var base = cta.getAttribute('data-label') || cta.textContent;
+      cta.textContent = opt && opt.getAttribute('data-price') ? base + ' — ' + opt.getAttribute('data-price') : base;
+    }
+    root.querySelectorAll('[data-ds-bundle-option]').forEach(function (r) {
+      r.addEventListener('change', syncLabel);
+    });
+    syncLabel();
+    if (!cta) return;
+    cta.addEventListener('click', function () {
+      var opt = selected();
+      var units = opt ? parseInt(opt.getAttribute('data-units'), 10) || 1 : 1;
+      var variantId = cta.getAttribute('data-variant-id');
+      if (!variantId) return;
+      cta.disabled = true;
+      var prev = cta.textContent;
+      cta.textContent = 'Adding…';
+      dsCart.add(variantId, units).then(function () {
+        window.location.href = '/cart';
+      }).catch(function () {
+        cta.disabled = false;
+        cta.textContent = prev;
+      });
+    });
+  });
+
+  /* ── Cart-page wiring (AJAX, no reloads) ──────────────────────────── */
+  var cartRoot = document.querySelector('[data-ds-cart]');
+  if (cartRoot) {
+    function lineNodes() { return Array.prototype.slice.call(cartRoot.querySelectorAll('[data-ds-cart-line]')); }
+    function paintCart(cart) {
+      paintGlobals(cart);
+      cartRoot.querySelectorAll('[data-ds-cart-subtotal]').forEach(function (el) { el.textContent = fmtMoney(cart.total_price); });
+      cartRoot.querySelectorAll('[data-ds-cart-count]').forEach(function (el) { el.textContent = cart.item_count; });
+      var savings = cartRoot.querySelector('[data-ds-cart-savings]');
+      if (savings) {
+        savings.hidden = !(cart.total_discount > 0);
+        var amt = savings.querySelector('[data-ds-cart-savings-amount]');
+        if (amt) amt.textContent = fmtMoney(cart.total_discount);
+      }
+      var nodes = lineNodes();
+      if (cart.items.length !== nodes.length) { window.location.reload(); return; }
+      nodes.forEach(function (node, i) {
+        var item = cart.items[i];
+        node.setAttribute('data-ds-cart-line', String(i + 1));
+        var qty = node.querySelector('[data-ds-cart-qty-num]');
+        if (qty) qty.textContent = item.quantity;
+        var price = node.querySelector('[data-ds-line-price]');
+        if (price) price.textContent = fmtMoney(item.final_line_price);
+        node.classList.remove('is-busy');
+      });
+      if (cart.item_count === 0) {
+        var filled = cartRoot.querySelector('[data-ds-cart-filled]');
+        var empty = cartRoot.querySelector('[data-ds-cart-empty]');
+        if (filled) filled.hidden = true;
+        if (empty) empty.hidden = false;
+        var pill = cartRoot.querySelector('[data-ds-cart-count-pill]');
+        if (pill) pill.hidden = true;
+      }
+    }
+    function changeLine(node, qty) {
+      var line = lineNodes().indexOf(node) + 1;
+      if (line < 1) return;
+      node.classList.add('is-busy');
+      dsCart.change(line, qty).then(function (cart) {
+        if (qty === 0) node.remove();
+        paintCart(cart);
+      }).catch(function () { node.classList.remove('is-busy'); });
+    }
+    cartRoot.addEventListener('click', function (e) {
+      var step = e.target.closest('[data-ds-cart-step]');
+      if (step) {
+        var node = step.closest('[data-ds-cart-line]');
+        var qtyEl = node.querySelector('[data-ds-cart-qty-num]');
+        var next = Math.max(0, (parseInt(qtyEl.textContent, 10) || 0) + (parseInt(step.getAttribute('data-ds-cart-step'), 10) || 0));
+        changeLine(node, next);
+        return;
+      }
+      var rm = e.target.closest('[data-ds-cart-remove]');
+      if (rm) { changeLine(rm.closest('[data-ds-cart-line]'), 0); return; }
+      var more = e.target.closest('[data-ds-cart-add-more]');
+      if (more) {
+        more.disabled = true;
+        dsCart.add(more.getAttribute('data-variant-id'), 1).then(function () {
+          return dsCart.get();
+        }).then(function (cart) {
+          more.disabled = false;
+          paintCart(cart);
+        }).catch(function () { more.disabled = false; });
+      }
+    });
+    var note = cartRoot.querySelector('[data-ds-cart-note]');
+    if (note) {
+      note.addEventListener('change', function () { dsCart.update({ note: note.value }).catch(function () {}); });
+    }
+  }
+
+  /* ── Cart upsell add buttons (real products) ──────────────────────── */
+  document.querySelectorAll('[data-ds-upsell-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      btn.disabled = true;
+      var prev = btn.textContent;
+      btn.textContent = 'Adding…';
+      dsCart.add(btn.getAttribute('data-variant-id'), 1).then(function () {
+        window.location.reload();
+      }).catch(function () { btn.disabled = false; btn.textContent = prev; });
     });
   });
 })();
@@ -1694,6 +2065,10 @@ function assetThemeJs(_c: BuildConfig): string {
 }
 
 function readme(c: BuildConfig): string {
+  const claims = collectClaims(c)
+  const checklist = claims
+    .map((cl) => `- [ ] ${cl.severity === 'high' ? '🔴' : '🟡'} **${cl.location}** — ${cl.claim}\n      Why: ${cl.why}\n      Fix: ${cl.fix}`)
+    .join('\n')
   return `# Zenya Dropship — ${c.storeName || 'Untitled Store'}
 
 Generated by Zenya AI on ${new Date().toISOString().slice(0, 10)}.
@@ -1703,11 +2078,12 @@ Generated by Zenya AI on ${new Date().toISOString().slice(0, 10)}.
 A complete Online Store 2.0 Shopify theme tuned for one-product
 dropshipping conversions:
 
-- Sticky add-to-cart bar (shows when the main CTA scrolls off)
-- Bundle picker (1× / 2× + 1 free / 3× + 2 free)
-- Feature grid + comparison table
-- Reviews + FAQ
-- Final-CTA banner
+- Real add-to-cart everywhere: the buy box, bundle picker, and sticky
+  bar automatically attach to your store's product (no editor wiring)
+- AJAX cart page: quantity steppers, remove, order notes, free-shipping
+  progress, buy-one-more nudge — no page reloads
+- Bundle picker (1× / 2× / 3×) that adds the selected quantity to cart
+- Feature grid + comparison table, reviews + FAQ, final-CTA banner
 - Cart, collection, page, search, 404 fallbacks
 
 Every section is editable in the Shopify theme editor.
@@ -1716,9 +2092,16 @@ Every section is editable in the Shopify theme editor.
 
 1. Unzip this folder.
 2. In Shopify admin → **Online Store → Themes → Add theme → Upload zip**.
-3. After upload, click **Customize** to edit content/colors.
-4. Optional: set the homepage section's product to your real product
-   on Shopify so checkout pulls live inventory + prices.
+3. Add your product (Products → Add product) — the buy buttons attach
+   to it automatically.
+4. Click **Customize** to edit content/colors.
+
+## ⚠️ Before you launch — the honesty checklist
+
+Parts of this theme were AI-generated and contain information only you
+can make true. Go through every item:
+
+${checklist}
 
 ## Source
 

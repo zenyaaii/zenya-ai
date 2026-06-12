@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import JSZip from 'jszip'
 import { createClient } from '@/utils/supabase/server'
-import { generateTheme, type BuildConfig } from '@/lib/build/theme-generator'
+import { generateTheme, type BuildConfig, type ProductReview } from '@/lib/build/theme-generator'
 import { getPalette } from '@/lib/build/palettes'
 
 export const runtime = 'nodejs'
@@ -43,6 +43,30 @@ export async function POST(req: NextRequest) {
     : []
   const sourceUrl = String(body?.sourceUrl || '')
 
+  // Real reviews from the scrape — sanitized hard since they round-trip
+  // through the client: caps on count/length, https-only photo URLs.
+  const reviews: ProductReview[] = Array.isArray(body?.reviews)
+    ? body.reviews
+        .slice(0, 40)
+        .map((r: any): ProductReview => ({
+          name: String(r?.name || '').slice(0, 60).trim() || 'Verified buyer',
+          country: r?.country ? String(r.country).slice(0, 40).trim() : undefined,
+          rating: Math.min(5, Math.max(1, Math.round(Number(r?.rating) || 0))),
+          text: String(r?.text || '').slice(0, 600).trim(),
+          photos: Array.isArray(r?.photos)
+            ? r.photos.map((p: any) => String(p || '').trim()).filter((p: string) => /^https:\/\//.test(p)).slice(0, 4)
+            : undefined,
+          date: r?.date ? String(r.date).slice(0, 20) : undefined,
+        }))
+        .filter((r: ProductReview) => r.text.length >= 8 && r.rating >= 1)
+    : []
+  const statsAvg = Number(body?.reviewStats?.average)
+  const statsCount = Number(body?.reviewStats?.count)
+  const reviewStats =
+    Number.isFinite(statsAvg) && statsAvg > 0 && statsAvg <= 5 && Number.isFinite(statsCount) && statsCount > 0
+      ? { average: statsAvg, count: Math.min(9_999_999, Math.round(statsCount)) }
+      : undefined
+
   if (!productName || !storeName) {
     return NextResponse.json(
       { error: 'invalid', message: 'productName and storeName are required.' },
@@ -80,6 +104,8 @@ export async function POST(req: NextRequest) {
     description: description || undefined,
     highlights: highlights.length ? highlights : undefined,
     sourceUrl: sourceUrl || undefined,
+    reviews: reviews.length ? reviews : undefined,
+    reviewStats,
   }
 
   const files = generateTheme(config)

@@ -108,6 +108,59 @@ function highlightFromDescription(c: BuildConfig): Array<{ icon: string; heading
   return all.filter((x) => (seen.has(x.heading) ? false : (seen.add(x.heading), true))).slice(0, 6)
 }
 
+/* ── real-review helpers ──────────────────────────────────────────── */
+
+/** Usable scraped reviews: non-empty text, valid rating. */
+function realReviews(c: BuildConfig) {
+  return (c.reviews || []).filter(
+    (r) => r && typeof r.text === 'string' && r.text.trim().length >= 8 && r.rating >= 1 && r.rating <= 5,
+  )
+}
+
+/** True when we have enough real reviews to seed the social-proof
+ *  sections from them instead of invented copy. */
+export function hasRealReviews(c: BuildConfig): boolean {
+  return realReviews(c).length >= 3
+}
+
+/** All photo URLs attached to the scraped reviews, deduped. */
+function reviewPhotos(c: BuildConfig): Array<{ url: string; name: string }> {
+  const out: Array<{ url: string; name: string }> = []
+  const seen = new Set<string>()
+  for (const r of realReviews(c)) {
+    for (const url of r.photos || []) {
+      if (!url || seen.has(url)) continue
+      seen.add(url)
+      out.push({ url, name: r.name || 'Verified buyer' })
+    }
+  }
+  return out
+}
+
+/** Build a short headline out of a review's first phrase. */
+function reviewHeadline(text: string): string {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  const firstStop = clean.search(/[.!?]/)
+  let head = firstStop > 0 && firstStop <= 60 ? clean.slice(0, firstStop) : clean
+  if (head.length > 60) head = head.slice(0, 57).trimEnd() + '…'
+  return head
+}
+
+/** "4.8" style average — real stats first, else computed from reviews. */
+function reviewAverage(c: BuildConfig): string | null {
+  if (c.reviewStats && c.reviewStats.average > 0) return c.reviewStats.average.toFixed(1)
+  const rs = realReviews(c)
+  if (!rs.length) return null
+  return (rs.reduce((a, r) => a + r.rating, 0) / rs.length).toFixed(1)
+}
+
+/** Total review count — real stats first, else the scraped sample size. */
+function reviewCount(c: BuildConfig): number | null {
+  if (c.reviewStats && c.reviewStats.count > 0) return c.reviewStats.count
+  const rs = realReviews(c)
+  return rs.length || null
+}
+
 /* ── per-section seeds ────────────────────────────────────────────── */
 
 function seedAnnouncement(c: BuildConfig): SeededSection {
@@ -124,8 +177,13 @@ function seedHero(c: BuildConfig): SeededSection {
   const discount = c.originalPrice > c.salePrice && c.originalPrice > 0
     ? `Save ${Math.round(((c.originalPrice - c.salePrice) / c.originalPrice) * 100)}%`
     : 'Now shipping'
+  const avg = reviewAverage(c)
+  const count = reviewCount(c)
   const stats = [
-    { stat: '4.9★', label: '2,400+ reviews' },
+    {
+      stat: avg ? `${avg}★` : '4.9★',
+      label: count ? `${count.toLocaleString('en-US')} reviews` : '2,400+ reviews',
+    },
     { stat: '30-day', label: 'Money-back' },
     { stat: 'Free', label: 'Shipping over $50' },
   ]
@@ -148,9 +206,12 @@ function seedFooter(c: BuildConfig): SeededSection {
       tagline: `${c.storeName} — premium products, fast shipping, and humans behind the support email.`,
     },
     blocks: {
-      'col-shop': { type: 'column', settings: { heading: 'Shop', links: `${c.productName}\nBundle deals\nGift cards` } },
-      'col-help': { type: 'column', settings: { heading: 'Help', links: 'Shipping\nReturns\nContact us\nFAQ' } },
-      'col-co':   { type: 'column', settings: { heading: 'Company', links: 'About\nReviews\nJournal\nAffiliates' } },
+      // Label|URL — every link must land somewhere real. Homepage anchors
+      // (#bundle, #faq…) are rendered by the sections themselves; 'mailto:'
+      // expands to the store owner's email in liquid.
+      'col-shop': { type: 'column', settings: { heading: 'Shop', links: `${c.productName}|/#product\nBundle & save|/#bundle\nAll products|/collections/all` } },
+      'col-help': { type: 'column', settings: { heading: 'Help', links: 'FAQ|/#faq\nShipping & delivery|/#faq\nReturns & guarantee|/#guarantee\nContact us|mailto:' } },
+      'col-co':   { type: 'column', settings: { heading: 'Company', links: 'Our story|/#our-story\nReviews|/#reviews\nCustomer photos|/#customer-photos\nIn the press|/#press' } },
       'news':     { type: 'newsletter', settings: { heading: 'Get the drop', copy: 'Restock alerts and members-only deals. No spam.' } },
     },
     block_order: ['col-shop', 'col-help', 'col-co', 'news'],
@@ -182,13 +243,15 @@ function seedProductMain(c: BuildConfig): SeededSection {
     blocks[id] = b
     order.push(id)
   })
+  const avg = reviewAverage(c)
+  const count = reviewCount(c)
   return {
     settings: {
       fallback_title: c.productName,
       fallback_desc: safeDescription(c, 400),
       fallback_image_url: pickImage(c, 0),
-      rating: '4.9',
-      review_count: '2,431',
+      rating: avg || '4.9',
+      review_count: count ? count.toLocaleString('en-US') : '2,431',
     },
     blocks,
     block_order: order,
@@ -208,9 +271,13 @@ function seedBundle(c: BuildConfig): SeededSection {
       cta: 'Continue to cart',
     },
     blocks: {
-      'tier-1': { type: 'tier', settings: { qty: '1×', name: 'Single',     price: money(single),    subtext: 'Try it out' } },
-      'tier-2': { type: 'tier', settings: { qty: '2× + 1 free', name: 'Best value', price: money(twoFree), subtext: `Save ${money(twoSaving)} vs single`, featured: true, ribbon: 'Most popular' } },
-      'tier-3': { type: 'tier', settings: { qty: '3× + 2 free', name: 'Bulk',       price: money(threeFree), subtext: 'Stock the shelf' } },
+      // `units` is what the CTA really adds to the cart (paid units). The
+      // "+1 free" fulfilment needs a Buy-X-get-Y automatic discount in
+      // admin — flagged in the claims checklist until the merchant sets
+      // it up or edits the copy.
+      'tier-1': { type: 'tier', settings: { qty: '1×', units: 1, name: 'Single',     price: money(single),    subtext: 'Try it out' } },
+      'tier-2': { type: 'tier', settings: { qty: '2× + 1 free', units: 2, name: 'Best value', price: money(twoFree), subtext: `Save ${money(twoSaving)} vs single`, featured: true, ribbon: 'Most popular' } },
+      'tier-3': { type: 'tier', settings: { qty: '3× + 2 free', units: 3, name: 'Bulk',       price: money(threeFree), subtext: 'Stock the shelf' } },
     },
     block_order: ['tier-1', 'tier-2', 'tier-3'],
   }
@@ -253,6 +320,39 @@ function seedComparison(c: BuildConfig): SeededSection {
 
 function seedReviews(c: BuildConfig): SeededSection {
   const pn = c.productName
+
+  // Real scraped reviews win: real names, real text, real star ratings.
+  if (hasRealReviews(c)) {
+    const rs = realReviews(c)
+      .slice()
+      .sort((a, b) => (b.text.length - a.text.length))
+      .slice(0, 6)
+    const avg = reviewAverage(c)
+    const count = reviewCount(c)
+    const { blocks, order } = indexBlocks('review', rs.map((r) => ({
+      type: 'review',
+      settings: {
+        rating: Math.min(5, Math.max(1, Math.round(r.rating))),
+        headline: reviewHeadline(r.text),
+        body: r.text.replace(/\s+/g, ' ').trim().slice(0, 300),
+        author: r.name || 'Verified buyer',
+        location: r.country || '',
+        verified: true,
+      },
+    })))
+    return {
+      settings: {
+        title: `What ${pn} owners are saying`,
+        average: avg ? `${avg} out of 5` : '',
+        count: count ? `${count.toLocaleString('en-US')} reviews on the original listing` : '',
+      },
+      blocks,
+      block_order: order,
+    }
+  }
+
+  // Fallback: invented copy — every one of these lands in the claims
+  // checklist so the merchant replaces them before launch.
   const reviews = [
     { headline: 'Honestly worth every dollar',          body: `I was skeptical given the price, but the ${pn} has been part of my routine for two months and I have zero complaints.`, author: 'Alex P.',   location: 'Austin, TX' },
     { headline: 'Shipped fast and felt premium',         body: `Showed up in three days in a really nice box. Build quality feels like something twice the price.`,                          author: 'Maya R.',   location: 'Brooklyn, NY' },
@@ -290,6 +390,7 @@ function seedCta(c: BuildConfig): SeededSection {
       title: `Get your ${c.productName} before the next restock`,
       subtitle: `Free shipping over ${money(50)} · 30-day returns · Real humans on email.`,
       cta: `Add ${c.productName} to cart — ${money(c.salePrice)}`,
+      cta_url: '/#product',
     },
   }
 }
@@ -336,10 +437,12 @@ function seedLogoBar(_c: BuildConfig): SeededSection {
   return { settings: { title: 'As seen in' }, blocks, block_order: order }
 }
 
-function seedStats(_c: BuildConfig): SeededSection {
+function seedStats(c: BuildConfig): SeededSection {
+  const avg = reviewAverage(c)
+  const count = reviewCount(c)
   const stats = [
-    { number: '12,400+', label: 'Happy customers' },
-    { number: '4.9★',    label: 'Average rating' },
+    { number: count ? `${count.toLocaleString('en-US')}+` : '12,400+', label: count ? 'Reviews on the original listing' : 'Happy customers' },
+    { number: avg ? `${avg}★` : '4.9★', label: 'Average rating' },
     { number: '30 day',  label: 'Money-back guarantee' },
     { number: '24h',     label: 'Ships within' },
   ]
@@ -418,9 +521,28 @@ function seedImageText(c: BuildConfig): SeededSection {
 }
 
 function seedUgc(c: BuildConfig): SeededSection {
-  const handles = ['@maya', '@alexp', '@jordan', '@sam', '@riley', '@taylor', '@kai', '@morgan', '@quinn', '@emma', '@noah', '@avery']
+  // Real review photos with real reviewer names beat product shots with
+  // invented handles.
+  const photos = reviewPhotos(c)
   const blocks: Record<string, Block> = {}
   const order: string[] = []
+  if (photos.length >= 4) {
+    photos.slice(0, 12).forEach((p, i) => {
+      const id = `p-${i + 1}`
+      blocks[id] = { type: 'post', settings: { image_url: p.url, caption: p.name } }
+      order.push(id)
+    })
+    return {
+      settings: {
+        eyebrow: 'Customer photos',
+        title: `Real ${c.productName} buyers, real photos`,
+        handle: 'From verified reviews',
+      },
+      blocks,
+      block_order: order,
+    }
+  }
+  const handles = ['@maya', '@alexp', '@jordan', '@sam', '@riley', '@taylor', '@kai', '@morgan', '@quinn', '@emma', '@noah', '@avery']
   for (let i = 0; i < 12; i++) {
     const id = `p-${i + 1}`
     blocks[id] = { type: 'post', settings: { image_url: pickImage(c, i), caption: handles[i % handles.length] } }
@@ -555,13 +677,33 @@ function seedFloatingCta(c: BuildConfig): SeededSection {
       title: 'First-timer? Get 10% off',
       subtitle: `Code WELCOME10 on your first ${c.productName}.`,
       cta: 'Use code',
-      cta_url: '#product',
+      cta_url: '/#product',
       image_url: pickImage(c, 0),
     },
   }
 }
 
-function seedStarsSummary(_c: BuildConfig): SeededSection {
+function seedStarsSummary(c: BuildConfig): SeededSection {
+  // Real distribution computed from the scraped ratings when available.
+  if (hasRealReviews(c)) {
+    const rs = realReviews(c)
+    const dist = [0, 0, 0, 0, 0]
+    for (const r of rs) dist[Math.min(5, Math.max(1, Math.round(r.rating))) - 1]++
+    const pct = dist.map((n) => Math.round((n / rs.length) * 100))
+    const avg = reviewAverage(c) || '5.0'
+    const count = reviewCount(c) || rs.length
+    return {
+      settings: { average: avg, count: `Based on ${count.toLocaleString('en-US')} reviews on the original listing` },
+      blocks: {
+        'r-5': { type: 'bar', settings: { label: '5★', percent: pct[4] } },
+        'r-4': { type: 'bar', settings: { label: '4★', percent: pct[3] } },
+        'r-3': { type: 'bar', settings: { label: '3★', percent: pct[2] } },
+        'r-2': { type: 'bar', settings: { label: '2★', percent: pct[1] } },
+        'r-1': { type: 'bar', settings: { label: '1★', percent: pct[0] } },
+      },
+      block_order: ['r-5', 'r-4', 'r-3', 'r-2', 'r-1'],
+    }
+  }
   return {
     settings: { average: '4.9', count: 'Based on 2,431 reviews' },
     blocks: {
@@ -598,6 +740,18 @@ function seedTestimonialsVideo(c: BuildConfig): SeededSection {
 }
 
 function seedCustomerPhotos(c: BuildConfig): SeededSection {
+  const blocks: Record<string, Block> = {}
+  const order: string[] = []
+  // Real review photos with the reviewer's real name when we have them.
+  const photos = reviewPhotos(c)
+  if (photos.length >= 4) {
+    photos.slice(0, 8).forEach((p, i) => {
+      const id = `p-${i + 1}`
+      blocks[id] = { type: 'photo', settings: { author: p.name, note: 'Verified buyer', image_url: p.url } }
+      order.push(id)
+    })
+    return { settings: { title: `Real ${c.productName} owners, real photos` }, blocks, block_order: order }
+  }
   const items = [
     { author: 'Sarah M.', note: 'Verified buyer' },
     { author: 'Alex P.',  note: 'Verified buyer' },
@@ -608,8 +762,6 @@ function seedCustomerPhotos(c: BuildConfig): SeededSection {
     { author: 'Daniel K.',note: 'Verified buyer' },
     { author: 'Morgan H.',note: 'Verified buyer' },
   ]
-  const blocks: Record<string, Block> = {}
-  const order: string[] = []
   items.forEach((it, i) => {
     const id = `p-${i + 1}`
     blocks[id] = { type: 'photo', settings: { ...it, image_url: pickImage(c, i + 1) } }
@@ -942,9 +1094,9 @@ function seedMultiColumn(c: BuildConfig): SeededSection {
   return {
     settings: { title: 'Three ways we win', columns: 3 },
     blocks: {
-      'c-1': { type: 'column', settings: { image_url: pickImage(c, 0), heading: 'Materials',  body: '<p>Premium-grade across the board — no plastic shortcuts.</p>',                 cta: 'See details', cta_url: '#product' } },
+      'c-1': { type: 'column', settings: { image_url: pickImage(c, 0), heading: 'Materials',  body: '<p>Premium-grade across the board — no plastic shortcuts.</p>',                 cta: 'See details', cta_url: '/#product' } },
       'c-2': { type: 'column', settings: { image_url: pickImage(c, 1), heading: 'Build',      body: '<p>QA’d by hand before it ships. Every single piece.</p>',                 cta: '',           cta_url: '' } },
-      'c-3': { type: 'column', settings: { image_url: pickImage(c, 2), heading: 'Support',    body: '<p>Real humans reply within 6 hours — and they actually know the product.</p>',cta: 'Read reviews', cta_url: '#reviews' } },
+      'c-3': { type: 'column', settings: { image_url: pickImage(c, 2), heading: 'Support',    body: '<p>Real humans reply within 6 hours — and they actually know the product.</p>',cta: 'Read reviews', cta_url: '/#reviews' } },
     },
     block_order: ['c-1', 'c-2', 'c-3'],
   }
@@ -973,16 +1125,10 @@ function seedDivider(_c: BuildConfig): SeededSection {
   return { settings: { style: 'ornament', ornament: '· · ·', height: 48 } }
 }
 
-function seedCartUpsell(c: BuildConfig): SeededSection {
-  return {
-    settings: { title: 'Pair it with…' },
-    blocks: {
-      'u-1': { type: 'item', settings: { image_url: pickImage(c, 1), name: 'Travel case', price: '$19.99' } },
-      'u-2': { type: 'item', settings: { image_url: pickImage(c, 2), name: 'Refill pack', price: '$14.99' } },
-      'u-3': { type: 'item', settings: { image_url: pickImage(c, 3), name: 'Bundle save', price: '$29.99' } },
-    },
-    block_order: ['u-1', 'u-2', 'u-3'],
-  }
+function seedCartUpsell(_c: BuildConfig): SeededSection {
+  // The section now recommends real store products (and hides itself
+  // when there's nothing to recommend) — no fake companion items.
+  return { settings: { title: 'You may also like' } }
 }
 
 function seedContactForm(c: BuildConfig): SeededSection {
@@ -1108,6 +1254,136 @@ export function seedSection(name: string, c: BuildConfig): SeededSection {
  * `{id, type}` section refs, return the fully-seeded JSON document
  * Shopify will render.
  */
+/* ── AI-claims manifest ───────────────────────────────────────────── */
+
+/**
+ * Everything in the generated theme that the AI invented and the
+ * merchant MUST verify or replace before launch — numbers we cannot
+ * know (stock counts, buyer names), legal-risk content (press quotes),
+ * and promises that must match the store's actual policies.
+ *
+ * Surfaced post-generation in the build UI and written into the theme
+ * README. Entries drop off automatically when real data replaced them
+ * (e.g. scraped reviews).
+ */
+export type ThemeClaim = {
+  id: string
+  severity: 'high' | 'medium'
+  location: string
+  claim: string
+  why: string
+  fix: string
+}
+
+export function collectClaims(c: BuildConfig): ThemeClaim[] {
+  const claims: ThemeClaim[] = []
+  const real = hasRealReviews(c)
+  const photosReal = reviewPhotos(c).length >= 4
+
+  claims.push({
+    id: 'press-quotes',
+    severity: 'high',
+    location: 'Homepage → "What the press is saying" + "As seen in" logos',
+    claim: 'Quotes attributed to FORBES, WIRED, TECHCRUNCH (and the logo bar)',
+    why: 'These outlets never reviewed your product. Publishing invented quotes under real brand names is false advertising and can get the store taken down.',
+    fix: 'Theme editor → Press / Logo bar: replace with real coverage, or delete both sections.',
+  })
+  claims.push({
+    id: 'stock-counter',
+    severity: 'high',
+    location: 'Homepage → stock counter',
+    claim: '"Hurry! Only 23 left in stock" (count and bar are static)',
+    why: 'The theme cannot know your real inventory — 23 is an invented number.',
+    fix: 'Theme editor → Stock counter: set your real count, or delete the section.',
+  })
+  claims.push({
+    id: 'recent-buyers',
+    severity: 'high',
+    location: 'Homepage + product page → "recently bought" toasts',
+    claim: 'Sarah M., Jamie L., Maya R… "just bought" notifications',
+    why: 'These buyers are invented. Fake purchase notifications are banned by consumer-protection rules in the EU/UK and risky everywhere.',
+    fix: 'Theme editor → Recently bought: replace with real orders once you have them, or delete the section.',
+  })
+  if (!real) {
+    claims.push({
+      id: 'reviews-fallback',
+      severity: 'high',
+      location: 'Reviews, star summary, customer photos, UGC gallery',
+      claim: 'All reviews, the 4.9★ average, and "2,431 verified reviews" are invented',
+      why: 'No real reviews could be scraped from the source listing, so placeholder reviews were generated.',
+      fix: 'Import real reviews (e.g. a reviews app, or re-generate from an AliExpress URL so Zenya can pull the real ones), then replace these.',
+    })
+  } else {
+    claims.push({
+      id: 'reviews-imported',
+      severity: 'medium',
+      location: 'Reviews, star summary' + (photosReal ? ', customer photos, UGC gallery' : ''),
+      claim: 'Seeded from real reviews on the source listing (real names, text, ratings' + (photosReal ? ', photos' : '') + ')',
+      why: 'These are reviews of the supplier listing, not of your store — review them for tone and remove any that mention the supplier or prices.',
+      fix: 'Theme editor → Reviews: prune anything that does not fit your brand.',
+    })
+  }
+  claims.push({
+    id: 'bundle-discount',
+    severity: 'high',
+    location: 'Bundle picker ("2× + 1 free") + volume-discount tiers',
+    claim: 'Free-unit and percentage-off promises',
+    why: 'The bundle button adds the paid units to the cart, but Shopify only honors "+1 free" or "15% off" if you create the discount.',
+    fix: 'Shopify admin → Discounts → create automatic "Buy X get Y" / volume discounts that match the tiers, or edit the tier copy.',
+  })
+  claims.push({
+    id: 'social-counts',
+    severity: real ? 'medium' : 'high',
+    location: 'Hero stats, stats strip, marquee, announcement bar',
+    claim: real
+      ? 'Counts now use the source listing’s review numbers — "happy customers" style phrasing is still yours to own'
+      : '"12,400+ happy customers", "4.9★", "2,400+ reviews"',
+    why: 'Customer counts must be true for YOUR store.',
+    fix: 'Theme editor → Hero / Stats / Marquee: set real numbers or soften the copy ("Join our first customers").',
+  })
+  claims.push({
+    id: 'founder-persona',
+    severity: 'medium',
+    location: 'Homepage + about page → founder story',
+    claim: '"Sam Rivers, Founder" and the founder quote',
+    why: 'Invented persona with a product photo as the portrait.',
+    fix: 'Theme editor → Founder story: use your real name, photo, and words — or delete the section.',
+  })
+  claims.push({
+    id: 'policy-promises',
+    severity: 'medium',
+    location: 'Guarantee, trust badges, FAQ, footer, product trust points',
+    claim: '30-day money-back, 12-month warranty, free shipping over $50, 3-5 day delivery, 6-hour support replies',
+    why: 'These must match your actual Shopify policies and what your supplier can deliver.',
+    fix: 'Set real policies in Shopify admin → Settings → Policies, then align the copy (or keep the promises and honor them).',
+  })
+  claims.push({
+    id: 'countdown',
+    severity: 'medium',
+    location: 'Homepage → countdown timer',
+    claim: `Sale end date auto-set ~6 days from generation`,
+    why: 'An evergreen fake deadline that resets is a dark pattern; a real one converts and stays legal.',
+    fix: 'Theme editor → Countdown: set a real end date for a real promotion, or delete the section.',
+  })
+  claims.push({
+    id: 'specs',
+    severity: 'medium',
+    location: 'Product page → specs table',
+    claim: 'Dimensions, weight, "ships from US/UK/EU/AU warehouses", box contents',
+    why: 'Placeholder specs — buyers will return products over wrong dimensions.',
+    fix: 'Theme editor → Product specs: copy the real specs from your supplier listing.',
+  })
+  claims.push({
+    id: 'discount-code',
+    severity: 'medium',
+    location: 'Floating CTA card',
+    claim: '"Code WELCOME10 for 10% off"',
+    why: 'The code does not exist until you create it.',
+    fix: 'Shopify admin → Discounts → create WELCOME10 (10%), or edit/remove the card.',
+  })
+  return claims
+}
+
 export function buildTemplate(
   refs: Array<{ id: string; type: string }>,
   c: BuildConfig,
