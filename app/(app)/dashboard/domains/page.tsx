@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Globe, Plus, ExternalLink, RefreshCw, AlertCircle,
@@ -42,8 +42,12 @@ type DomainPurchase = {
 
 type SearchResult = {
   domain: string
-  /** true = available, false = registered, null = lookup failed (don't render as "taken"). */
+  /** true = available, false = registered, null = unchecked OR lookup failed. */
   available: boolean | null
+  /** True once we've attempted a Porkbun checkDomain for this row.
+   *  null+checked=false → row shows a "Check" button.
+   *  null+checked=true  → row shows the failure reason. */
+  checked: boolean
   premium?: boolean
   /** Wholesale first-year USD price from Porkbun (informational; we charge retail). */
   wholesale_usd_year?: number | null
@@ -54,6 +58,7 @@ type SearchResult = {
   first_year_promo?: boolean
   message?: string
   error_code?: string
+  retry_after_seconds?: number
 }
 
 const STATUS: Record<DomainRow['status'], {
@@ -85,6 +90,17 @@ export default function DomainsPage() {
   const [buyForThemeId, setBuyForThemeId] = useState<string>('')
   const [buying, setBuying] = useState<string | null>(null) // domain string mid-checkout
   const [renewing, setRenewing] = useState<string | null>(null) // purchase_id mid-checkout
+  /** Domain currently mid-check (server call in flight). */
+  const [checking, setChecking] = useState<string | null>(null)
+  /** True while the auto-check loop is walking the unchecked rows. Rows
+   *  ahead of the cursor render as "Waiting" instead of "Not checked". */
+  const [autoChecking, setAutoChecking] = useState(false)
+  /** Generation counter — bumped to cancel any in-flight auto-check
+   *  loop (e.g. when the user fires a new search). */
+  const checkGenRef = useRef(0)
+  /** How many milliseconds to wait between sequential checks. Porkbun
+   *  enforces 1 checkDomain call per 10 seconds. Add a hair of buffer. */
+  const RATE_WINDOW_MS = 10_500
   /** Lookup: domain string → domain_purchases row owned by current user. */
   const [purchases, setPurchases] = useState<Record<string, DomainPurchase>>({})
 
@@ -145,18 +161,103 @@ export default function DomainsPage() {
     setSearching(true)
     setSearchError(null)
     setResults(null)
+    // Bumping the generation counter cancels any auto-check loop still
+    // running from the previous search — we never want two loops both
+    // racing Porkbun's rate limit.
+    checkGenRef.current++
+    setAutoChecking(false)
+    setChecking(null)
     try {
       const r = await fetch(`/api/domains/search?q=${encodeURIComponent(q)}`)
       const j = await r.json()
       if (!r.ok) {
-        setSearchError(j.message || j.error || 'Could not search domains.')
+        setSearchError(friendlyError(j))
         return
       }
-      setResults(j.results || [])
+      const list: SearchResult[] = j.results || []
+      setResults(list)
+      // Kick off the sequential auto-checker for any rows we don't
+      // already know about. For dotted queries this is a no-op (the
+      // single row arrived pre-checked).
+      void runAutoCheck(list)
     } catch (e: any) {
       setSearchError(e?.message || 'Network error')
     } finally {
       setSearching(false)
+    }
+  }
+
+  /** Sleep that wakes up if the auto-check generation has been bumped
+   *  (e.g. the user started a new search). Polls every 200ms so a
+   *  cancel feels immediate without dropping the loop into a tight
+   *  spin. */
+  async function pacedWait(ms: number, gen: number): Promise<boolean> {
+    const start = Date.now()
+    while (Date.now() - start < ms) {
+      if (checkGenRef.current !== gen) return false
+      await new Promise((r) => setTimeout(r, 200))
+    }
+    return checkGenRef.current === gen
+  }
+
+  /** Fire one availability check and merge the response into results.
+   *  Used by both the auto-check loop and the manual Retry button. */
+  async function fetchCheck(domain: string): Promise<SearchResult | null> {
+    try {
+      const r = await fetch(`/api/domains/check?domain=${encodeURIComponent(domain)}`)
+      const j = (await r.json()) as SearchResult
+      setResults((prev) =>
+        prev ? prev.map((row) => (row.domain === domain ? { ...row, ...j } : row)) : prev,
+      )
+      return j
+    } catch {
+      return null
+    }
+  }
+
+  /** Walk every unchecked row in `initial`, calling /api/domains/check
+   *  sequentially with a 10.5s gap between calls. Aborts cleanly if
+   *  the user fires a new search or clicks Retry on a specific row. */
+  async function runAutoCheck(initial: SearchResult[]) {
+    const myGen = ++checkGenRef.current
+    const targets = initial
+      .filter((r) => !r.checked && r.available === null)
+      .map((r) => r.domain)
+    if (targets.length === 0) return
+
+    setAutoChecking(true)
+    try {
+      for (let i = 0; i < targets.length; i++) {
+        if (checkGenRef.current !== myGen) return
+        const domain = targets[i]
+        setChecking(domain)
+        await fetchCheck(domain)
+        if (checkGenRef.current !== myGen) return
+        if (i < targets.length - 1) {
+          const survived = await pacedWait(RATE_WINDOW_MS, myGen)
+          if (!survived) return
+        }
+      }
+    } finally {
+      if (checkGenRef.current === myGen) {
+        setChecking(null)
+        setAutoChecking(false)
+      }
+    }
+  }
+
+  /** Manual retry on a specific row. Cancels any running auto-check so
+   *  we don't double up on Porkbun calls. */
+  async function checkOne(domain: string) {
+    if (checking === domain) return
+    checkGenRef.current++
+    setAutoChecking(false)
+    setChecking(domain)
+    setSearchError(null)
+    try {
+      await fetchCheck(domain)
+    } finally {
+      setChecking(null)
     }
   }
 
@@ -186,7 +287,7 @@ export default function DomainsPage() {
       })
       const j = await r.json()
       if (!r.ok || !j?.url) {
-        setSearchError(j?.message || j?.error || 'Could not start checkout.')
+        setSearchError(friendlyError(j) || 'Could not start checkout.')
         return
       }
       window.location.href = j.url
@@ -306,6 +407,24 @@ export default function DomainsPage() {
           </div>
         )}
 
+        {results && autoChecking && (() => {
+          const total = results.length
+          const checkedCount = results.filter((r) => r.checked).length
+          const remaining = total - checkedCount
+          const seconds = Math.max(0, (remaining - 1) * 10 + 2)
+          return (
+            <div className="mt-3 flex items-center gap-2 rounded-md border border-token bg-[rgba(94,106,210,0.06)] px-3 py-2 text-[12px] text-primary">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              <span>
+                Checking each TLD ({checkedCount} of {total} done) · ~{seconds}s remaining
+              </span>
+              <span className="ml-auto text-muted">
+                Porkbun limits 1 check / 10s — we pace it for you.
+              </span>
+            </div>
+          )
+        })()}
+
         {results && results.length > 0 && (
           <div className="mt-4 overflow-hidden rounded-lg border border-token">
             {/* If the user owns multiple eligible sites, let them pick
@@ -340,6 +459,12 @@ export default function DomainsPage() {
               <tbody>
                 {results.map((r) => {
                   const isPending = buying === r.domain
+                  const isCheckingThis = checking === r.domain
+                  // Row is queued if the loop is running but hasn't
+                  // reached it yet. We keep it visually distinct from
+                  // genuine failures so the user understands waiting is
+                  // intentional, not a bug.
+                  const isQueued = !r.checked && autoChecking && !isCheckingThis
                   return (
                     <tr key={r.domain} className="border-t border-token">
                       <td className="px-3 py-2 font-mono text-foreground">{r.domain}</td>
@@ -351,6 +476,21 @@ export default function DomainsPage() {
                         ) : r.available === false ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
                             Taken
+                          </span>
+                        ) : isCheckingThis ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(94,106,210,0.12)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-primary">
+                            <RefreshCw className="h-3 w-3 animate-spin" /> Checking…
+                          </span>
+                        ) : isQueued ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(0,0,0,0.04)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
+                            <Clock className="h-3 w-3" /> Waiting…
+                          </span>
+                        ) : r.error_code === 'rate_limited' ? (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
+                            title="Porkbun rate limit — 1 check / 10 seconds"
+                          >
+                            <Clock className="h-3 w-3" /> Cooling down
                           </span>
                         ) : (
                           <span
@@ -385,8 +525,22 @@ export default function DomainsPage() {
                           </button>
                         ) : r.available === false ? (
                           <span className="text-[11.5px] text-muted">Already taken</span>
+                        ) : isCheckingThis || isQueued ? (
+                          <span className="text-[11.5px] text-muted">
+                            {isCheckingThis ? '…' : 'Up next'}
+                          </span>
                         ) : (
-                          <span className="text-[11.5px] text-[#b45309]" title={r.message || ''}>Try again</span>
+                          <button
+                            onClick={() => checkOne(r.domain)}
+                            title={
+                              r.error_code === 'rate_limited'
+                                ? 'Registrar limit — try again in ~10s'
+                                : 'Re-check this TLD'
+                            }
+                            className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition hover:bg-black/5"
+                          >
+                            Retry
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -508,6 +662,21 @@ export default function DomainsPage() {
       )}
     </div>
   )
+}
+
+/** Turn an API error payload into a friendly one-liner. The big one is
+ *  Porkbun's rate-limit — the raw "1 out of 1 checks within 10 seconds
+ *  used" string is jargon, replace it. */
+function friendlyError(j: any): string {
+  if (!j) return ''
+  if (j.error_code === 'rate_limited' || j.error === 'rate_limited') {
+    return 'Domain registrar is cooling down. Give it about 10 seconds and try again.'
+  }
+  const m = String(j.message || j.error || '')
+  if (/within\s+\d+\s+seconds?\s+used/i.test(m)) {
+    return 'Domain registrar is cooling down. Give it about 10 seconds and try again.'
+  }
+  return m
 }
 
 function EmptyState({ hasHosting, hasEligible, onAdd }: { hasHosting: boolean; hasEligible: boolean; onAdd: () => void }) {

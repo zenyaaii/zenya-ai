@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { REGISTRARS, getRegistrar, type RegistrarId } from '@/lib/registrars'
+import { useState } from 'react'
+import { getRegistrar } from '@/lib/registrars'
 
 type Required = Array<{
   type: 'A' | 'CNAME' | 'TXT'
@@ -21,13 +21,15 @@ export default function AddDomainModal({
 }) {
   const [step, setStep] = useState<'enter' | 'dns'>('enter')
   const [domain, setDomain] = useState('')
-  const [registrarId, setRegistrarId] = useState<RegistrarId>('godaddy')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [required, setRequired] = useState<Required>([])
   const [status, setStatus] = useState<string>('pending_dns')
 
-  const registrar = useMemo(() => getRegistrar(registrarId), [registrarId])
+  // Generic per-registrar guide — the modal no longer asks "where did
+  // you buy this domain?". The 'other' guide is registrar-agnostic and
+  // works against any DNS panel.
+  const registrar = getRegistrar('other')
 
   async function submit() {
     setError(null)
@@ -78,8 +80,6 @@ export default function AddDomainModal({
           <EnterStep
             domain={domain}
             setDomain={setDomain}
-            registrarId={registrarId}
-            setRegistrarId={setRegistrarId}
             onSubmit={submit}
             submitting={submitting}
             error={error}
@@ -100,12 +100,10 @@ export default function AddDomainModal({
 }
 
 function EnterStep({
-  domain, setDomain, registrarId, setRegistrarId, onSubmit, submitting, error, onClose,
+  domain, setDomain, onSubmit, submitting, error, onClose,
 }: {
   domain: string
   setDomain: (s: string) => void
-  registrarId: RegistrarId
-  setRegistrarId: (id: RegistrarId) => void
   onSubmit: () => void
   submitting: boolean
   error: string | null
@@ -117,7 +115,7 @@ function EnterStep({
         Connect a custom domain
       </h2>
       <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        Point your domain at Zenya. Two minutes to add the records, then we verify and issue SSL automatically.
+        Type the domain you own — we’ll show you the two DNS records to add. Zenya verifies and issues SSL automatically.
       </p>
 
       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
@@ -128,6 +126,7 @@ function EnterStep({
         placeholder="mycoolstore.com"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter' && domain.trim()) onSubmit() }}
         style={{
           width: '100%',
           padding: '11px 13px',
@@ -140,29 +139,6 @@ function EnterStep({
           color: '#1c1c1c',
         }}
       />
-
-      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
-        Where did you buy this domain?
-      </label>
-      <select
-        value={registrarId}
-        onChange={(e) => setRegistrarId(e.target.value as RegistrarId)}
-        style={{
-          width: '100%',
-          padding: '11px 13px',
-          fontSize: 14,
-          border: '1px solid #e5e2d9',
-          borderRadius: 8,
-          background: 'white',
-          fontFamily: 'inherit',
-          color: '#1c1c1c',
-          marginBottom: 18,
-        }}
-      >
-        {REGISTRARS.map((r) => (
-          <option key={r.id} value={r.id}>{r.name}</option>
-        ))}
-      </select>
 
       <div
         style={{
@@ -247,30 +223,12 @@ function DnsStep({
         Almost there — add these DNS records
       </h2>
       <p style={{ margin: '6px 0 14px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        Go to <strong>{registrar.name}</strong> and add the records below.
-        Zenya will verify automatically — usually within 5-15 minutes. Status:{' '}
+        Open your domain registrar’s DNS panel and add the records below.
+        Zenya verifies automatically — usually within 5-15 minutes. Status:{' '}
         <strong style={{ color: status === 'live' ? '#15803d' : '#5e6ad2' }}>
           {status === 'live' ? '🔒 Live' : 'Waiting on DNS'}
         </strong>
       </p>
-
-      {registrar.dashboardUrl && (
-        <a
-          href={registrar.dashboardUrl}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            display: 'inline-block',
-            marginBottom: 14,
-            fontSize: 12.5, fontWeight: 600,
-            color: '#5e6ad2',
-            textDecoration: 'none',
-            borderBottom: '1px solid currentColor',
-          }}
-        >
-          Open {registrar.name} DNS panel →
-        </a>
-      )}
 
       <ol style={{ margin: '8px 0 16px 18px', padding: 0, color: '#3a3a3a', lineHeight: 1.65, fontSize: 13 }}>
         {registrar.steps.map((step, i) => (

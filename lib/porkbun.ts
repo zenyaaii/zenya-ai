@@ -64,7 +64,22 @@ async function pb<T>(path: string, body: Record<string, any> = {}, opts?: { auth
   }
 
   if (json.status === 'ERROR') {
-    throw new PorkbunError(json.message || `Porkbun ${r.status}`, r.status || 502)
+    const msg = json.message || `Porkbun ${r.status}`
+    // Porkbun rate-limits checkDomain at 1/10s and surfaces it as
+    // "N out of M checks within 10 seconds used". Translate that to a
+    // structured error so callers can show a friendly message + retry.
+    const isRateLimit =
+      /within\s+\d+\s+seconds?\s+used/i.test(msg) ||
+      /rate\s*limit/i.test(msg) ||
+      /too\s+many/i.test(msg)
+    if (isRateLimit) {
+      throw new PorkbunError(
+        'Registrar is cooling down (1 check / 10s). Try again in a few seconds.',
+        429,
+        'rate_limited',
+      )
+    }
+    throw new PorkbunError(msg, r.status || 502)
   }
   if (!r.ok) {
     throw new PorkbunError(`Porkbun ${r.status}`, r.status)
@@ -128,6 +143,91 @@ export async function checkDomain(domain: string): Promise<PorkbunDomainCheck> {
     premium: r.premium === 'yes',
     firstYearPromo: r.firstYearPromo === 'yes',
   }
+}
+
+/* ── Cached lookups (in-process) ────────────────────────────────────── */
+
+// Porkbun's checkDomain is capped at 1 call per 10 seconds. Two things
+// trip on that in the dashboard: a bare-name search firing 4 lookups in
+// parallel, and "Buy now" re-checking immediately after the search. We
+// cache successful results for 5 minutes so the buy/search interplay
+// uses one upstream call, and cache rate-limit failures briefly so the
+// UI shows the retry hint without hammering the registrar.
+
+type CheckCacheEntry =
+  | { ok: PorkbunDomainCheck; expiresAt: number }
+  | { err: PorkbunError; expiresAt: number }
+
+const checkCache = new Map<string, CheckCacheEntry>()
+const CHECK_OK_TTL_MS = 5 * 60_000
+const CHECK_RATELIMIT_TTL_MS = 8_000
+
+/**
+ * checkDomain wrapped with a small in-process cache. Always prefer
+ * this in API routes — direct calls to checkDomain() should be reserved
+ * for cases that genuinely want a bypass.
+ */
+export async function checkDomainCached(domain: string): Promise<PorkbunDomainCheck> {
+  const lower = domain.trim().toLowerCase()
+  const hit = checkCache.get(lower)
+  if (hit && hit.expiresAt > Date.now()) {
+    if ('ok' in hit) return hit.ok
+    throw hit.err
+  }
+  if (hit) checkCache.delete(lower)
+  try {
+    const r = await checkDomain(lower)
+    checkCache.set(lower, { ok: r, expiresAt: Date.now() + CHECK_OK_TTL_MS })
+    return r
+  } catch (e) {
+    const err = e as PorkbunError
+    if (err.code === 'rate_limited') {
+      checkCache.set(lower, { err, expiresAt: Date.now() + CHECK_RATELIMIT_TTL_MS })
+    }
+    throw err
+  }
+}
+
+/* ── Pricing for all TLDs ───────────────────────────────────────────── */
+
+export type PorkbunTldPricing = {
+  /** First-year registration price, USD. Null if Porkbun didn't return it. */
+  registration: number | null
+  /** Renewal price/year, USD. */
+  renewal: number | null
+  /** Transfer price, USD. */
+  transfer: number | null
+}
+
+type PricingRaw = {
+  status: 'SUCCESS'
+  pricing: Record<string, { registration: string; renewal: string; transfer: string }>
+}
+
+let pricingCache: { data: Record<string, PorkbunTldPricing>; expiresAt: number } | null = null
+const PRICING_TTL_MS = 60 * 60_000
+
+/**
+ * Returns wholesale pricing for every TLD Porkbun sells. Endpoint is
+ * unauthenticated and has no documented rate limit, but we still cache
+ * for an hour — these numbers change rarely and the response is large.
+ */
+export async function getPricing(): Promise<Record<string, PorkbunTldPricing>> {
+  if (pricingCache && pricingCache.expiresAt > Date.now()) return pricingCache.data
+  const j = await pb<PricingRaw>('/pricing/get', {}, { auth: false })
+  const out: Record<string, PorkbunTldPricing> = {}
+  for (const [tld, p] of Object.entries(j.pricing || {})) {
+    const reg = Number(p.registration)
+    const ren = Number(p.renewal)
+    const tr = Number(p.transfer)
+    out[tld.toLowerCase()] = {
+      registration: Number.isFinite(reg) ? reg : null,
+      renewal: Number.isFinite(ren) ? ren : null,
+      transfer: Number.isFinite(tr) ? tr : null,
+    }
+  }
+  pricingCache = { data: out, expiresAt: Date.now() + PRICING_TTL_MS }
+  return out
 }
 
 /* ── Registration ───────────────────────────────────────────────────── */

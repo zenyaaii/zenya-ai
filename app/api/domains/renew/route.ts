@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { stripe } from '@/lib/stripe'
-import { checkDomain, retailPrice, PorkbunError } from '@/lib/porkbun'
+import { checkDomainCached, retailPrice, PorkbunError } from '@/lib/porkbun'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   // registrations and would understate the cost.
   let renewalWholesale: number | null = null
   try {
-    const r = await checkDomain(purchase.domain)
+    const r = await checkDomainCached(purchase.domain)
     renewalWholesale = r.regularPrice
   } catch (e: any) {
     const err = e as PorkbunError

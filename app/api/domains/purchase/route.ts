@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { stripe } from '@/lib/stripe'
-import { checkDomain, retailPrice, PorkbunError } from '@/lib/porkbun'
+import { checkDomainCached, retailPrice, PorkbunError } from '@/lib/porkbun'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -86,19 +86,21 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Re-check Porkbun — fresh availability + wholesale price.
+  // Re-check Porkbun (via the shared cache). The search the user just
+  // ran usually warmed this, so the buy-now click stays inside the
+  // registrar's 1-per-10s window instead of failing with a rate-limit.
   let wholesale: number | null = null
   let available = false
   try {
-    const r = await checkDomain(domain)
+    const r = await checkDomainCached(domain)
     available = r.available
     wholesale = r.price
   } catch (e: any) {
     const err = e as PorkbunError
     console.error('[/api/domains/purchase] porkbun check failed:', err)
     return NextResponse.json(
-      { error: 'lookup_failed', message: err.message },
-      { status: 502 }
+      { error: err.code || 'lookup_failed', message: err.message },
+      { status: err.code === 'rate_limited' ? 429 : 502 }
     )
   }
 
