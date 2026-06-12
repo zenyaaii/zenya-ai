@@ -978,6 +978,38 @@ function sectionProductMain(c: BuildConfig): string {
         In stock · ships in 24h
       </div>
 
+      {%- liquid
+        assign unit_cents = ${fallbackPriceCents}
+        if use_real
+          assign unit_cents = p.selected_or_first_available_variant.price
+        endif
+        assign has_tiers = false
+        for block in section.blocks
+          if block.type == 'tier'
+            assign has_tiers = true
+          endif
+        endfor
+      -%}
+      {%- if has_tiers -%}
+        <div class="ds-product__tiers" data-ds-pm-tiers>
+          <div class="ds-product__tiers-label">Bundle &amp; save</div>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'tier' -%}
+              {%- assign tier_units = block.settings.units | default: 1 -%}
+              {%- assign tier_total = unit_cents | times: tier_units -%}
+              <label class="ds-product__tier {% if block.settings.featured %}ds-product__tier--featured{% endif %}" {{ block.shopify_attributes }}>
+                <input type="radio" name="pm-tier-{{ section.id }}" data-ds-pm-tier data-units="{{ tier_units }}" {% if forloop.first %}checked{% endif %}>
+                <span class="ds-product__tier-label">{{ block.settings.label }}</span>
+                {%- if block.settings.badge != blank -%}
+                  <span class="ds-product__tier-badge">{{ block.settings.badge }}</span>
+                {%- endif -%}
+                <span class="ds-product__tier-price">{{ tier_total | money }}</span>
+              </label>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
       {%- if use_real -%}
         {% form 'product', p, id: 'ds-product-form', class: 'ds-product__form' %}
           <input type="hidden" name="id" value="{{ p.selected_or_first_available_variant.id }}">
@@ -998,11 +1030,11 @@ function sectionProductMain(c: BuildConfig): string {
           <div class="ds-product__qty-row">
             <label class="ds-product__qty">
               <button type="button" class="ds-qty-btn" data-step="-1" aria-label="Decrease">−</button>
-              <input type="number" name="quantity" value="1" min="1" inputmode="numeric">
+              <input type="number" name="quantity" value="1" min="1" inputmode="numeric" data-ds-pm-qty>
               <button type="button" class="ds-qty-btn" data-step="1" aria-label="Increase">+</button>
             </label>
             <button type="submit" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">
-              Add to cart
+              Add to cart · <span data-ds-atc-price data-unit-cents="{{ unit_cents }}">{{ unit_cents | money }}</span>
             </button>
           </div>
           {{ form | payment_button }}
@@ -1030,6 +1062,23 @@ function sectionProductMain(c: BuildConfig): string {
           {%- endif -%}
         {%- endfor -%}
       </ul>
+
+      <div class="ds-product__accordions">
+        {%- if use_real and p.description != blank -%}
+          <details class="ds-product__acc">
+            <summary>Description<span class="ds-product__acc-icon" aria-hidden="true"></span></summary>
+            <div class="ds-product__acc-body">{{ p.description }}</div>
+          </details>
+        {%- endif -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'accordion' -%}
+            <details class="ds-product__acc" {{ block.shopify_attributes }}>
+              <summary>{{ block.settings.title }}<span class="ds-product__acc-icon" aria-hidden="true"></span></summary>
+              <div class="ds-product__acc-body">{{ block.settings.body | newline_to_br }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
     </div>
   </div>
 </section>
@@ -1067,6 +1116,33 @@ function sectionProductMain(c: BuildConfig): string {
   .ds-product__payments { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; margin-top: .25rem; }
   .ds-product__payments .ds-pay-icon { height: 22px; width: auto; border-radius: 3px; }
   .ds-product__payments-note { font-size: .72rem; color: var(--color-muted); margin-left: .35rem; }
+  .ds-product__tiers { display: grid; gap: .5rem; margin-bottom: 1.4rem; }
+  .ds-product__tiers-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--color-muted); }
+  .ds-product__tier { position: relative; display: flex; align-items: center; gap: .65rem; padding: .8rem 1rem; border: 1.5px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+  .ds-product__tier:has(input:checked) { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+  .ds-product__tier input { accent-color: var(--color-primary); margin: 0; }
+  .ds-product__tier-label { font-weight: 700; font-size: .92rem; color: var(--color-fg); flex: 1; }
+  .ds-product__tier-badge { background: var(--color-primary); color: var(--color-primary-fg); font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+  .ds-product__tier-price { font-weight: 800; color: var(--color-primary); font-size: .95rem; font-variant-numeric: tabular-nums; }
+  .ds-product__tier--featured { border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border)); }
+  .ds-product__accordions { margin-top: 1.5rem; border-top: 1px solid var(--color-border); }
+  .ds-product__acc { border-bottom: 1px solid var(--color-border); }
+  .ds-product__acc summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 2px; font-weight: 700; font-size: .92rem; color: var(--color-fg); cursor: pointer; list-style: none; }
+  .ds-product__acc summary::-webkit-details-marker { display: none; }
+  .ds-product__acc-icon { position: relative; width: 14px; height: 14px; flex-shrink: 0; }
+  .ds-product__acc-icon::before, .ds-product__acc-icon::after { content: ''; position: absolute; inset: 0; margin: auto; background: var(--color-muted); transition: transform .2s; }
+  .ds-product__acc-icon::before { width: 14px; height: 2px; }
+  .ds-product__acc-icon::after { width: 2px; height: 14px; }
+  .ds-product__acc[open] .ds-product__acc-icon::after { transform: rotate(90deg); }
+  .ds-product__acc-body { padding: 0 2px 1rem; color: var(--color-muted); font-size: .9rem; line-height: 1.6; }
+  .ds-product__acc-body p { margin: 0 0 .6rem; }
+  /* Dynamic checkout (Buy it now) — match the theme instead of the
+     unstyled default. Branded buttons (Shop Pay etc.) keep their brand
+     color but inherit the radius. */
+  .shopify-payment-button__button { border-radius: var(--radius) !important; font-weight: 700 !important; }
+  .shopify-payment-button__button--unbranded { background: var(--color-fg) !important; color: var(--color-bg) !important; padding: .95rem 1.5rem !important; font-size: 1rem !important; transition: opacity .15s !important; }
+  .shopify-payment-button__button--unbranded:hover { opacity: .88 !important; }
+  .shopify-payment-button__more-options { color: var(--color-muted) !important; font-size: .8rem !important; }
   .ds-product__trust { list-style: none; padding: 0; margin: 1.4rem 0 0; display: grid; gap: .5rem; }
   .ds-product__trust li { display: flex; gap: .5rem; align-items: center; font-size: .9rem; color: var(--color-fg); }
   .ds-product__trust svg { color: #16a34a; }
@@ -1103,13 +1179,36 @@ function sectionProductMain(c: BuildConfig): string {
       "settings": [
         { "type": "text", "id": "text", "label": "Text", "default": "Free shipping over $50" }
       ]
+    },
+    {
+      "type": "tier",
+      "name": "Bundle tier",
+      "settings": [
+        { "type": "paragraph", "content": "Price shows units × the live product price. Selecting a tier sets the add-to-cart quantity." },
+        { "type": "text", "id": "label", "label": "Label", "default": "1× — Single" },
+        { "type": "number", "id": "units", "label": "Units added to cart", "default": 1 },
+        { "type": "text", "id": "badge", "label": "Badge (optional)" },
+        { "type": "checkbox", "id": "featured", "label": "Accent border" }
+      ]
+    },
+    {
+      "type": "accordion",
+      "name": "Info accordion",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Shipping & delivery" },
+        { "type": "textarea", "id": "body", "label": "Body" }
+      ]
     }
   ],
-  "max_blocks": 12,
+  "max_blocks": 20,
   "presets": [{ "name": "Product", "blocks": [
+      { "type": "tier", "settings": { "label": "1× — Single", "units": 1 } },
+      { "type": "tier", "settings": { "label": "2× — Pair & save", "units": 2, "badge": "Most popular", "featured": true } },
       { "type": "trust", "settings": { "text": "Free shipping over $50" } },
       { "type": "trust", "settings": { "text": "30-day money-back guarantee" } },
-      { "type": "trust", "settings": { "text": "Tracked delivery in 3-5 days" } }
+      { "type": "trust", "settings": { "text": "Tracked delivery in 3-5 days" } },
+      { "type": "accordion", "settings": { "title": "Shipping & delivery", "body": "Orders ship within 24 hours on business days with a tracked carrier. Typical delivery is 3-5 business days; you'll get the tracking number by email." } },
+      { "type": "accordion", "settings": { "title": "Returns & guarantee", "body": "30-day money-back guarantee. Return for any reason and we cover the return label." } }
     ] }]
 }
 {% endschema %}
@@ -2080,13 +2179,33 @@ function assetThemeJs(_c: BuildConfig): string {
     io.observe(product);
   }
 
-  /* ── Product-form quantity buttons ────────────────────────────────── */
+  /* ── Product-form quantity + buy-box bundle tiers ─────────────────
+   * The tier radios set the form quantity; the ATC button label shows
+   * the live total (units × unit price). Manual qty steppers update
+   * the total too. */
+  function syncAtcPrice() {
+    var priceEl = document.querySelector('[data-ds-atc-price]');
+    var qtyInput = document.querySelector('[data-ds-pm-qty]');
+    if (!priceEl || !qtyInput) return;
+    var unit = parseInt(priceEl.getAttribute('data-unit-cents'), 10) || 0;
+    var qty = Math.max(1, parseInt(qtyInput.value, 10) || 1);
+    if (unit) priceEl.textContent = fmtMoney(unit * qty);
+  }
   document.querySelectorAll('[data-step]').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var step = parseInt(btn.getAttribute('data-step'), 10) || 0;
       var input = btn.parentElement.querySelector('input[name="quantity"]');
       if (!input) return;
       input.value = Math.max(1, (parseInt(input.value, 10) || 1) + step);
+      syncAtcPrice();
+    });
+  });
+  document.querySelectorAll('[data-ds-pm-tier]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      var units = parseInt(radio.getAttribute('data-units'), 10) || 1;
+      var qtyInput = document.querySelector('[data-ds-pm-qty]');
+      if (qtyInput) qtyInput.value = units;
+      syncAtcPrice();
     });
   });
 

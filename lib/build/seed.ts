@@ -238,9 +238,34 @@ function seedProductMain(c: BuildConfig): SeededSection {
     blocks[id] = b
     order.push(id)
   })
+  // Bundle tiers inside the buy box — prices render as units × the live
+  // product price, the radio sets the add-to-cart quantity.
+  const tiers = [
+    { label: '1× — Single', units: 1 },
+    { label: '2× + 1 free', units: 2, badge: 'Most popular', featured: true },
+    { label: '3× + 2 free', units: 3, badge: 'Best deal' },
+  ]
+  tiers.forEach((t, i) => {
+    const id = `tier-${i + 1}`
+    blocks[id] = { type: 'tier', settings: t }
+    order.push(id)
+  })
   trustBlocks.forEach((b, i) => {
     const id = `trust-${i + 1}`
     blocks[id] = b
+    order.push(id)
+  })
+  // Info accordions next to the gallery: shipping/carrier, returns,
+  // warranty. The full product description renders as its own accordion
+  // automatically once a real product is connected.
+  const accordions = [
+    { title: 'Shipping & delivery', body: `Orders ship within 24 hours on business days with a tracked carrier (USPS/DHL/local equivalent). Typical delivery is 3-5 business days — you'll get the tracking number by email the moment it leaves the warehouse.` },
+    { title: 'Returns & guarantee', body: `30-day money-back guarantee. Return your ${c.productName} for any reason — we send you a prepaid return label and refund the full amount within 3 days of receiving it back.` },
+    { title: 'Warranty', body: `Every ${c.productName} is covered by a 12-month manufacturing warranty. If it fails under normal use, we replace it — no return-shipping argument.` },
+  ]
+  accordions.forEach((a, i) => {
+    const id = `acc-${i + 1}`
+    blocks[id] = { type: 'accordion', settings: a }
     order.push(id)
   })
   const avg = reviewAverage(c)
@@ -1326,7 +1351,7 @@ export function collectClaims(c: BuildConfig): ThemeClaim[] {
   claims.push({
     id: 'bundle-discount',
     severity: 'high',
-    location: 'Bundle picker ("2× + 1 free") + volume-discount tiers',
+    location: 'Buy-box tiers + bundle picker ("2× + 1 free") + volume-discount tiers',
     claim: 'Free-unit and percentage-off promises',
     why: 'The bundle button adds the paid units to the cart, but Shopify only honors "+1 free" or "15% off" if you create the discount.',
     fix: 'Shopify admin → Discounts → create automatic "Buy X get Y" / volume discounts that match the tiers, or edit the tier copy.',
