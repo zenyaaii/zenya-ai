@@ -624,7 +624,7 @@ function seedRecentlyBought(c: BuildConfig): SeededSection {
     { name: 'Quinn B.',  product: '1× ' + c.productName,           location: 'London, UK' },
   ]
   const { blocks, order } = indexBlocks('n', buyers.map((b) => ({ type: 'notification', settings: { ...b, action: 'just bought' } })))
-  return { settings: { icon: '🛒' }, blocks, block_order: order }
+  return { settings: { icon: '🛒', position: 'left' }, blocks, block_order: order }
 }
 
 function seedNewsletter(c: BuildConfig): SeededSection {
@@ -643,9 +643,9 @@ function seedFreeShippingBar(_c: BuildConfig): SeededSection {
 }
 
 function seedSecureCheckout(_c: BuildConfig): SeededSection {
-  const labels = ['VISA', 'MASTERCARD', 'AMEX', 'SHOP PAY', 'PAYPAL', 'KLARNA', 'APPLE PAY']
-  const { blocks, order } = indexBlocks('b', labels.map((label) => ({ type: 'badge', settings: { label } })))
-  return { settings: { title: 'Secure checkout · 256-bit encrypted' }, blocks, block_order: order }
+  // The section renders the store's real enabled payment-type icons —
+  // no manual badge blocks to maintain.
+  return { settings: { title: 'Secure checkout · 256-bit encrypted' } }
 }
 
 function seedShippingInfo(_c: BuildConfig): SeededSection {

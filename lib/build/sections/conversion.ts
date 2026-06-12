@@ -105,46 +105,52 @@ export const conversionSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-recently-bought': () => `<section class="ds-recent">
-  <div class="ds-container">
-    <div class="ds-recent__card" aria-live="polite">
-      <div class="ds-recent__avatar">{{ section.settings.icon }}</div>
-      <div class="ds-recent__copy">
-        <div class="ds-recent__line" data-ds-recent>
-          <strong>{{ section.blocks[0].settings.name }}</strong> {{ section.blocks[0].settings.action }} <em>{{ section.blocks[0].settings.product }}</em>
-        </div>
-        <div class="ds-recent__when" data-ds-recent-when>just now · {{ section.blocks[0].settings.location }}</div>
+  'ds-recently-bought': () => `<div class="ds-recent {% if section.settings.position == 'right' %}ds-recent--right{% endif %}" data-ds-recent-root aria-hidden="true">
+  <div class="ds-recent__card" aria-live="polite">
+    <div class="ds-recent__avatar">{{ section.settings.icon }}</div>
+    <div class="ds-recent__copy">
+      <div class="ds-recent__line" data-ds-recent>
+        <strong>{{ section.blocks[0].settings.name }}</strong> {{ section.blocks[0].settings.action }} <em>{{ section.blocks[0].settings.product }}</em>
       </div>
-      <div class="ds-recent__check">✓</div>
+      <div class="ds-recent__when" data-ds-recent-when>just now · {{ section.blocks[0].settings.location }}</div>
     </div>
-    <script type="application/json" data-ds-recent-data>
-      [
-        {%- for block in section.blocks -%}
-          { "name": {{ block.settings.name | json }}, "action": {{ block.settings.action | json }}, "product": {{ block.settings.product | json }}, "location": {{ block.settings.location | json }} }{%- unless forloop.last -%},{%- endunless -%}
-        {%- endfor -%}
-      ]
-    </script>
+    <div class="ds-recent__check">✓</div>
+    <button type="button" class="ds-recent__close" data-ds-recent-close aria-label="Dismiss notifications">×</button>
   </div>
-</section>
+  <script type="application/json" data-ds-recent-data>
+    [
+      {%- for block in section.blocks -%}
+        { "name": {{ block.settings.name | json }}, "action": {{ block.settings.action | json }}, "product": {{ block.settings.product | json }}, "location": {{ block.settings.location | json }} }{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  </script>
+</div>
 <style>
-  .ds-recent { padding: 1rem 0; }
-  .ds-recent__card { display: flex; gap: .75rem; align-items: center; padding: .75rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); max-width: 340px; box-shadow: 0 12px 28px -16px rgba(0,0,0,.15); }
-  .ds-recent__avatar { width: 36px; height: 36px; border-radius: 18px; background: color-mix(in srgb, var(--color-primary) 14%, transparent); display: grid; place-items: center; flex-shrink: 0; font-size: 16px; }
+  .ds-recent { position: fixed; bottom: 1rem; left: 1rem; z-index: 37; max-width: 320px; transform: translateY(150%); opacity: 0; transition: transform .35s ease, opacity .35s ease; pointer-events: none; }
+  .ds-recent--right { left: auto; right: 1rem; }
+  .ds-recent.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .ds-recent.is-dismissed { display: none; }
+  .ds-recent__card { position: relative; display: flex; gap: .75rem; align-items: center; padding: .7rem 1.8rem .7rem .9rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; box-shadow: 0 16px 36px -16px rgba(0,0,0,.28); }
+  .ds-recent__avatar { width: 34px; height: 34px; border-radius: 17px; background: color-mix(in srgb, var(--color-primary) 14%, transparent); display: grid; place-items: center; flex-shrink: 0; font-size: 15px; }
   .ds-recent__copy { flex: 1; min-width: 0; }
-  .ds-recent__line { font-size: .82rem; color: var(--color-fg); }
+  .ds-recent__line { font-size: .8rem; color: var(--color-fg); line-height: 1.3; }
   .ds-recent__line strong { font-weight: 700; }
   .ds-recent__line em { font-style: normal; font-weight: 600; color: var(--color-primary); }
-  .ds-recent__when { font-size: .7rem; color: var(--color-muted); margin-top: 2px; }
-  .ds-recent__check { width: 22px; height: 22px; border-radius: 11px; background: #16a34a; color: white; font-size: 13px; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
-  [data-ds-recent] { animation: ds-recent-in .35s ease; }
-  @keyframes ds-recent-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .ds-recent__when { font-size: .68rem; color: var(--color-muted); margin-top: 2px; }
+  .ds-recent__check { width: 20px; height: 20px; border-radius: 10px; background: #16a34a; color: white; font-size: 12px; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
+  .ds-recent__close { position: absolute; top: 3px; right: 5px; background: transparent; border: 0; color: var(--color-muted); font-size: 14px; cursor: pointer; padding: 0 4px; line-height: 1; }
+  @media (max-width: 540px) { .ds-recent { max-width: calc(100vw - 2rem); } }
 </style>
 {% schema %}
 {
   "name": "Recently bought ticker",
   "tag": "section",
   "settings": [
-    { "type": "paragraph", "content": "Rotates social-proof notifications. Add blocks for each name/product combo to cycle through." },
+    { "type": "paragraph", "content": "Small corner toast that fades in and out with social-proof notifications. One-tap dismissable." },
+    { "type": "select", "id": "position", "label": "Corner", "default": "left", "options": [
+      { "value": "left", "label": "Bottom left" },
+      { "value": "right", "label": "Bottom right" }
+    ] },
     { "type": "text", "id": "icon", "label": "Icon", "default": "🛒" }
   ],
   "blocks": [
@@ -272,11 +278,9 @@ export const conversionSections: SectionMap = {
   'ds-secure-checkout': () => `<section class="ds-secure">
   <div class="ds-container ds-secure__inner">
     <div class="ds-secure__title">{{ section.settings.title }}</div>
-    <div class="ds-secure__icons">
-      {%- for block in section.blocks -%}
-        <div class="ds-secure__icon" {{ block.shopify_attributes }} title="{{ block.settings.label | escape }}">
-          {{ block.settings.label }}
-        </div>
+    <div class="ds-secure__icons" aria-label="Accepted payment methods">
+      {%- for type in shop.enabled_payment_types limit: 10 -%}
+        {{ type | payment_type_svg_tag: class: 'ds-secure__svg' }}
       {%- endfor -%}
     </div>
   </div>
@@ -285,33 +289,18 @@ export const conversionSections: SectionMap = {
   .ds-secure { padding: 2rem 0; }
   .ds-secure__inner { text-align: center; }
   .ds-secure__title { font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 1rem; }
-  .ds-secure__icons { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
-  .ds-secure__icon { padding: .55rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; font-size: .72rem; font-weight: 800; letter-spacing: .08em; color: var(--color-fg); }
+  .ds-secure__icons { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; align-items: center; }
+  .ds-secure__svg { height: 26px; width: auto; border-radius: 4px; }
 </style>
 {% schema %}
 {
   "name": "Secure checkout badges",
   "tag": "section",
   "settings": [
+    { "type": "paragraph", "content": "Shows the real payment-method icons enabled on this store's checkout." },
     { "type": "text", "id": "title", "label": "Title", "default": "Secure checkout · 256-bit encrypted" }
   ],
-  "blocks": [
-    {
-      "type": "badge",
-      "name": "Badge",
-      "settings": [{ "type": "text", "id": "label", "label": "Label" }]
-    }
-  ],
-  "max_blocks": 12,
-  "presets": [{ "name": "Secure checkout", "blocks": [
-      { "type": "badge", "settings": { "label": "VISA" } },
-      { "type": "badge", "settings": { "label": "MASTERCARD" } },
-      { "type": "badge", "settings": { "label": "AMEX" } },
-      { "type": "badge", "settings": { "label": "SHOP PAY" } },
-      { "type": "badge", "settings": { "label": "PAYPAL" } },
-      { "type": "badge", "settings": { "label": "KLARNA" } },
-      { "type": "badge", "settings": { "label": "APPLE PAY" } }
-    ] }]
+  "presets": [{ "name": "Secure checkout" }]
 }
 {% endschema %}
 `,

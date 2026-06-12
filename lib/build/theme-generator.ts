@@ -159,6 +159,90 @@ function fileLayout(_c: BuildConfig): string {
       {{ content_for_layout }}
     </main>
     {% sections 'footer-group' %}
+
+    {%- comment -%} Mini-cart drawer — opened by theme.js after any
+    add-to-cart and from the header cart icon. Lines are rendered
+    client-side from /cart.js. {%- endcomment -%}
+    <div class="ds-drawer" data-ds-drawer aria-hidden="true">
+      <div class="ds-drawer__overlay" data-ds-drawer-close></div>
+      <aside class="ds-drawer__panel" role="dialog" aria-modal="true" aria-label="Shopping cart">
+        <header class="ds-drawer__head">
+          <div class="ds-drawer__title">Your cart <span class="ds-drawer__count" data-ds-drawer-count>{{ cart.item_count }}</span></div>
+          <button type="button" class="ds-drawer__close" data-ds-drawer-close aria-label="Close cart">×</button>
+        </header>
+        {%- assign ds_threshold = 5000 -%}
+        {%- assign ds_pct = cart.total_price | times: 100 | divided_by: ds_threshold -%}
+        {%- if ds_pct > 100 -%}{%- assign ds_pct = 100 -%}{%- endif -%}
+        <div class="ds-drawer__ship" data-ds-shipbar data-threshold-cents="{{ ds_threshold }}">
+          <div class="ds-drawer__ship-copy" data-ds-shipbar-copy aria-live="polite">
+            {%- assign ds_remaining = ds_threshold | minus: cart.total_price -%}
+            {%- if ds_remaining > 0 -%}
+              You're <strong>{{ ds_remaining | money }}</strong> away from free shipping 🚚
+            {%- else -%}
+              🎉 You unlocked <strong>free shipping</strong>!
+            {%- endif -%}
+          </div>
+          <div class="ds-drawer__ship-track"><div class="ds-drawer__ship-fill" data-ds-shipbar-fill style="width: {{ ds_pct }}%"></div></div>
+        </div>
+        <ul class="ds-drawer__lines" data-ds-drawer-lines></ul>
+        <div class="ds-drawer__empty" data-ds-drawer-empty hidden>
+          <div class="ds-drawer__empty-icon">🛒</div>
+          <p>Your cart is empty.</p>
+          <a href="/#product" class="ds-btn ds-btn-primary ds-btn-sm" data-ds-drawer-close>Shop the product</a>
+        </div>
+        <footer class="ds-drawer__foot">
+          <div class="ds-drawer__row">
+            <span>Subtotal</span>
+            <strong data-ds-cart-subtotal>{{ cart.total_price | money }}</strong>
+          </div>
+          <form action="{{ routes.cart_url }}" method="post">
+            <button type="submit" name="checkout" class="ds-btn ds-btn-primary ds-btn-lg ds-drawer__checkout">Checkout</button>
+          </form>
+          <a href="{{ routes.cart_url }}" class="ds-drawer__viewcart">View full cart</a>
+          <div class="ds-drawer__payments" aria-label="Accepted payment methods">
+            {%- for type in shop.enabled_payment_types limit: 6 -%}
+              {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
+            {%- endfor -%}
+          </div>
+        </footer>
+      </aside>
+    </div>
+    <style>
+      .ds-drawer { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+      .ds-drawer__overlay { position: absolute; inset: 0; background: rgba(0,0,0,.40); opacity: 0; transition: opacity .25s ease; }
+      .ds-drawer__panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 92vw); background: var(--color-bg); display: flex; flex-direction: column; transform: translateX(105%); transition: transform .28s ease; box-shadow: -24px 0 60px -24px rgba(0,0,0,.35); }
+      .ds-drawer.is-open { pointer-events: auto; }
+      .ds-drawer.is-open .ds-drawer__overlay { opacity: 1; }
+      .ds-drawer.is-open .ds-drawer__panel { transform: translateX(0); }
+      .ds-drawer__head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border); }
+      .ds-drawer__title { font-weight: 800; font-size: 1.05rem; color: var(--color-fg); }
+      .ds-drawer__count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--color-primary); color: var(--color-primary-fg); font-size: .72rem; font-weight: 800; margin-left: .35rem; }
+      .ds-drawer__close { background: transparent; border: 0; font-size: 22px; line-height: 1; color: var(--color-muted); cursor: pointer; padding: .25rem .5rem; }
+      .ds-drawer__ship { padding: .8rem 1.25rem; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
+      .ds-drawer__ship-copy { font-size: .8rem; color: var(--color-fg); margin-bottom: .45rem; }
+      .ds-drawer__ship-track { height: 6px; background: color-mix(in srgb, var(--color-fg) 8%, transparent); border-radius: 4px; overflow: hidden; }
+      .ds-drawer__ship-fill { height: 100%; background: linear-gradient(90deg, var(--color-accent), var(--color-primary)); border-radius: 4px; transition: width .35s ease; }
+      .ds-drawer__lines { list-style: none; margin: 0; padding: .75rem 1.25rem; flex: 1; overflow-y: auto; display: grid; gap: .75rem; align-content: start; }
+      .ds-drawer__line { display: grid; grid-template-columns: 64px 1fr auto; gap: .75rem; align-items: center; padding: .6rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; }
+      .ds-drawer__line.is-busy { opacity: .55; pointer-events: none; }
+      .ds-drawer__line img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; display: block; background: var(--color-bg); }
+      .ds-drawer__line-name { font-weight: 700; font-size: .85rem; color: var(--color-fg); line-height: 1.25; }
+      .ds-drawer__line-price { color: var(--color-primary); font-weight: 800; font-size: .85rem; margin-top: 2px; }
+      .ds-drawer__line-controls { display: grid; gap: .35rem; justify-items: end; }
+      .ds-drawer__qty { display: inline-flex; align-items: center; border: 1px solid var(--color-border); border-radius: 9px; overflow: hidden; background: var(--color-bg); }
+      .ds-drawer__qty button { padding: .25rem .6rem; background: transparent; border: 0; cursor: pointer; font-size: .95rem; color: var(--color-fg); }
+      .ds-drawer__qty span { min-width: 26px; text-align: center; font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums; }
+      .ds-drawer__line-remove { background: none; border: 0; color: var(--color-muted); font-size: .72rem; cursor: pointer; text-decoration: underline; padding: 0; }
+      .ds-drawer__empty { text-align: center; padding: 2.5rem 1.25rem; color: var(--color-muted); }
+      .ds-drawer__empty-icon { font-size: 2rem; margin-bottom: .5rem; }
+      .ds-drawer__foot { padding: 1rem 1.25rem 1.25rem; border-top: 1px solid var(--color-border); display: grid; gap: .7rem; background: var(--color-surface); }
+      .ds-drawer__row { display: flex; justify-content: space-between; font-size: .95rem; color: var(--color-fg); }
+      .ds-drawer__checkout { width: 100%; }
+      .ds-drawer__viewcart { text-align: center; font-size: .82rem; color: var(--color-muted); text-decoration: underline; }
+      .ds-drawer__payments { display: flex; gap: .35rem; justify-content: center; flex-wrap: wrap; }
+      .ds-drawer__payments .ds-pay-icon { height: 20px; width: auto; border-radius: 3px; }
+    </style>
+
     <script>window.dsMoneyFormat = {{ shop.money_format | json }};</script>
     <script src="{{ 'theme.js' | asset_url }}" defer></script>
   </body>
@@ -1867,6 +1951,117 @@ function assetThemeJs(_c: BuildConfig): string {
     });
   }
 
+  /* ── Mini-cart drawer ─────────────────────────────────────────────
+   * Opens after any AJAX add-to-cart and from the header cart icon.
+   * Lines are rebuilt from /cart.js JSON with DOM APIs (no innerHTML
+   * for product data). */
+  var drawer = document.querySelector('[data-ds-drawer]');
+  function renderDrawer(cart) {
+    if (!drawer) return;
+    var count = drawer.querySelector('[data-ds-drawer-count]');
+    if (count) count.textContent = cart.item_count;
+    drawer.querySelectorAll('[data-ds-cart-subtotal]').forEach(function (el) { el.textContent = fmtMoney(cart.total_price); });
+    var empty = drawer.querySelector('[data-ds-drawer-empty]');
+    if (empty) empty.hidden = cart.item_count > 0;
+    var list = drawer.querySelector('[data-ds-drawer-lines]');
+    if (!list) return;
+    list.textContent = '';
+    cart.items.forEach(function (item, i) {
+      var li = document.createElement('li');
+      li.className = 'ds-drawer__line';
+      li.setAttribute('data-ds-drawer-line', String(i + 1));
+      var img = document.createElement('img');
+      if (item.image) { img.src = item.image; img.alt = ''; img.width = 64; img.height = 64; img.loading = 'lazy'; }
+      li.appendChild(img);
+      var info = document.createElement('div');
+      var name = document.createElement('div');
+      name.className = 'ds-drawer__line-name';
+      name.textContent = item.product_title || item.title || '';
+      var price = document.createElement('div');
+      price.className = 'ds-drawer__line-price';
+      price.textContent = fmtMoney(item.final_line_price);
+      info.appendChild(name);
+      info.appendChild(price);
+      li.appendChild(info);
+      var controls = document.createElement('div');
+      controls.className = 'ds-drawer__line-controls';
+      var qty = document.createElement('div');
+      qty.className = 'ds-drawer__qty';
+      var minus = document.createElement('button');
+      minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('data-ds-drawer-step', '-1'); minus.setAttribute('aria-label', 'Decrease quantity');
+      var num = document.createElement('span');
+      num.textContent = item.quantity; num.setAttribute('data-ds-drawer-qty-num', '');
+      var plus = document.createElement('button');
+      plus.type = 'button'; plus.textContent = '+'; plus.setAttribute('data-ds-drawer-step', '1'); plus.setAttribute('aria-label', 'Increase quantity');
+      qty.appendChild(minus); qty.appendChild(num); qty.appendChild(plus);
+      var remove = document.createElement('button');
+      remove.type = 'button'; remove.className = 'ds-drawer__line-remove'; remove.textContent = 'Remove'; remove.setAttribute('data-ds-drawer-remove', '');
+      controls.appendChild(qty); controls.appendChild(remove);
+      li.appendChild(controls);
+      list.appendChild(li);
+    });
+  }
+  function openDrawer() {
+    if (!drawer) return;
+    dsCart.get().then(function (cart) {
+      paintGlobals(cart);
+      renderDrawer(cart);
+      drawer.classList.add('is-open');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  if (drawer) {
+    drawer.addEventListener('click', function (e) {
+      if (e.target.closest('[data-ds-drawer-close]')) { closeDrawer(); return; }
+      var step = e.target.closest('[data-ds-drawer-step]');
+      var rm = e.target.closest('[data-ds-drawer-remove]');
+      if (!step && !rm) return;
+      var node = e.target.closest('[data-ds-drawer-line]');
+      if (!node) return;
+      var line = Array.prototype.indexOf.call(node.parentElement.children, node) + 1;
+      var qtyEl = node.querySelector('[data-ds-drawer-qty-num]');
+      var next = rm ? 0 : Math.max(0, (parseInt(qtyEl.textContent, 10) || 0) + (parseInt(step.getAttribute('data-ds-drawer-step'), 10) || 0));
+      node.classList.add('is-busy');
+      dsCart.change(line, next).then(function (cart) {
+        paintGlobals(cart);
+        renderDrawer(cart);
+      }).catch(function () { node.classList.remove('is-busy'); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeDrawer();
+    });
+    // Header cart icon opens the drawer everywhere except the cart page.
+    if (!document.querySelector('[data-ds-cart]')) {
+      document.querySelectorAll('.ds-header__cart').forEach(function (a) {
+        a.addEventListener('click', function (e) { e.preventDefault(); openDrawer(); });
+      });
+    }
+    // Product + sticky ATC forms: AJAX add, then open the drawer
+    // instead of navigating away.
+    document.querySelectorAll('form[action*="/cart/add"]').forEach(function (form) {
+      form.addEventListener('submit', function (e) {
+        var idInput = form.querySelector('input[name="id"]');
+        if (!idInput) return; /* let unknown forms submit natively */
+        e.preventDefault();
+        var qtyInput = form.querySelector('input[name="quantity"]');
+        var qty = qtyInput ? Math.max(1, parseInt(qtyInput.value, 10) || 1) : 1;
+        var btn = form.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true;
+        dsCart.add(idInput.value, qty).then(function () {
+          if (btn) btn.disabled = false;
+          openDrawer();
+        }).catch(function () { if (btn) btn.disabled = false; });
+      });
+    });
+  }
+
   /* ── Sticky ATC visibility ────────────────────────────────────────── */
   var sticky = document.querySelector('[data-ds-sticky]');
   var product = document.getElementById('product');
@@ -1923,27 +2118,41 @@ function assetThemeJs(_c: BuildConfig): string {
     tick();
   });
 
-  /* ── Recently-bought rotator ──────────────────────────────────────── */
-  document.querySelectorAll('.ds-recent').forEach(function (root) {
+  /* ── Recently-bought corner toast ─────────────────────────────────
+   * Slides in from the corner, shows one notification for ~6s, hides
+   * for ~12s, then shows the next. Dismiss sticks for the session. */
+  document.querySelectorAll('[data-ds-recent-root]').forEach(function (root) {
     var dataEl = root.querySelector('[data-ds-recent-data]');
     var line = root.querySelector('[data-ds-recent]');
     var when = root.querySelector('[data-ds-recent-when]');
     if (!dataEl || !line) return;
+    if (sessionStorage.getItem('ds-recent-closed') === '1') { root.classList.add('is-dismissed'); return; }
     var items = [];
     try { items = JSON.parse(dataEl.textContent || '[]'); } catch (e) { return; }
-    if (items.length < 2) return;
-    var i = 0;
-    setInterval(function () {
+    if (!items.length) return;
+    var i = -1;
+    function showNext() {
+      if (root.classList.contains('is-dismissed')) return;
       i = (i + 1) % items.length;
       var it = items[i];
-      line.style.animation = 'none';
-      void line.offsetWidth; /* restart the entry animation */
-      line.style.animation = '';
       line.innerHTML = '<strong></strong> ' + (it.action || 'just bought') + ' <em></em>';
       line.querySelector('strong').textContent = it.name || '';
       line.querySelector('em').textContent = it.product || '';
       if (when) when.textContent = (2 + Math.floor(Math.random() * 38)) + ' min ago · ' + (it.location || '');
-    }, 9000);
+      root.classList.add('is-visible');
+      root.setAttribute('aria-hidden', 'false');
+      setTimeout(function () {
+        root.classList.remove('is-visible');
+        root.setAttribute('aria-hidden', 'true');
+        setTimeout(showNext, 12000);
+      }, 6000);
+    }
+    setTimeout(showNext, 7000);
+    var close = root.querySelector('[data-ds-recent-close]');
+    if (close) close.addEventListener('click', function () {
+      root.classList.add('is-dismissed');
+      sessionStorage.setItem('ds-recent-closed', '1');
+    });
   });
 
   /* ── Bundle picker: selected tier drives a real add-to-cart ──────── */
@@ -1970,7 +2179,9 @@ function assetThemeJs(_c: BuildConfig): string {
       var prev = cta.textContent;
       cta.textContent = 'Adding…';
       dsCart.add(variantId, units).then(function () {
-        window.location.href = '/cart';
+        cta.disabled = false;
+        cta.textContent = prev;
+        if (drawer) openDrawer(); else window.location.href = '/cart';
       }).catch(function () {
         cta.disabled = false;
         cta.textContent = prev;
@@ -2056,7 +2267,10 @@ function assetThemeJs(_c: BuildConfig): string {
       var prev = btn.textContent;
       btn.textContent = 'Adding…';
       dsCart.add(btn.getAttribute('data-variant-id'), 1).then(function () {
-        window.location.reload();
+        if (cartRoot) { window.location.reload(); return; }
+        btn.disabled = false;
+        btn.textContent = prev;
+        openDrawer();
       }).catch(function () { btn.disabled = false; btn.textContent = prev; });
     });
   });

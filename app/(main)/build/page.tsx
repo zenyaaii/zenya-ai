@@ -78,6 +78,13 @@ export default function BuildPage() {
   // Step 3
   const [paletteId, setPaletteId] = useState<string>(PALETTES[0].id)
 
+  // Honesty gate (between product info and colors): the user must
+  // acknowledge that parts of the theme are AI-invented before
+  // continuing. The acknowledgment is recorded server-side.
+  const [honestyOpen, setHonestyOpen] = useState(false)
+  const [honestyAcked, setHonestyAcked] = useState(false)
+  const [ackSending, setAckSending] = useState(false)
+
   // Step 4
   const [generating, setGenerating] = useState(false)
   const [generateMsg, setGenerateMsg] = useState<string | null>(null)
@@ -318,7 +325,10 @@ export default function BuildPage() {
             onCloseAiPanel={() => setAiNames(null)}
             canNext={canStep2Next}
             onBack={() => setStep(1)}
-            onNext={() => setStep(3)}
+            onNext={() => {
+              if (honestyAcked) setStep(3)
+              else setHonestyOpen(true)
+            }}
           />
         )}
 
@@ -356,6 +366,37 @@ export default function BuildPage() {
           />
         )}
       </main>
+
+      {honestyOpen && (
+        <HonestyGateModal
+          reviews={scraped?.reviews || []}
+          reviewStats={scraped?.reviewStats || null}
+          sending={ackSending}
+          onClose={() => setHonestyOpen(false)}
+          onAcknowledge={async (claimIds) => {
+            setAckSending(true)
+            try {
+              await fetch('/api/build/acknowledge', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  productName,
+                  storeName,
+                  sourceUrl: url,
+                  claimIds,
+                }),
+              })
+            } catch {
+              // Recording failed — don't block the user's flow over it.
+            } finally {
+              setAckSending(false)
+              setHonestyAcked(true)
+              setHonestyOpen(false)
+              setStep(3)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }
@@ -1139,6 +1180,97 @@ function GenerateStep({
             Dashboard <ArrowRight className="h-4 w-4" />
           </button>
         )}
+      </div>
+    </div>
+  )
+}
+
+/* ─── Honesty gate modal (between product info and colors) ─────────── */
+
+function HonestyGateModal({
+  reviews, reviewStats, sending, onClose, onAcknowledge,
+}: {
+  reviews: ScrapedReview[]
+  reviewStats: { average: number; count: number } | null
+  sending: boolean
+  onClose: () => void
+  onAcknowledge: (claimIds: string[]) => void
+}) {
+  const claims: ThemeClaim[] = useMemo(
+    () => collectClaims({ reviews, reviewStats: reviewStats || undefined } as unknown as BuildConfig),
+    [reviews, reviewStats],
+  )
+  const high = claims.filter((c) => c.severity === 'high')
+  const medium = claims.filter((c) => c.severity === 'medium')
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="AI-generated content notice"
+    >
+      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+        <div className="border-b border-token bg-[rgba(217,119,6,0.05)] px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(217,119,6,0.12)]">
+              <AlertCircle className="h-5 w-5 text-[#d97706]" />
+            </div>
+            <div>
+              <h2 className="text-[16px] font-bold text-foreground">Heads up — parts of this theme are AI-invented</h2>
+              <p className="mt-0.5 text-[12.5px] text-muted">
+                {high.length} must-fix · {medium.length} to verify. Only you can make these true before launch.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <ul className="space-y-2.5">
+            {[...high, ...medium].map((cl) => (
+              <li key={cl.id} className="rounded-xl border border-token bg-[#fafaf7] p-3.5">
+                <div className="flex items-start gap-2.5">
+                  <span
+                    className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
+                      cl.severity === 'high' ? 'bg-[#dc2626]' : 'bg-[#d97706]'
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
+                    <div className="mt-0.5 text-[13px] font-semibold text-foreground">{cl.claim}</div>
+                    <div className="mt-1 text-[12px] leading-relaxed text-muted">{cl.why}</div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="border-t border-token bg-white px-6 py-4">
+          <p className="mb-3 text-[12px] leading-relaxed text-muted">
+            By continuing you acknowledge that stock counts, buyer notifications, press quotes, review
+            placeholders, and similar content in the generated theme are AI-generated examples — not real
+            information — and that it's your responsibility to replace or verify them before publishing.
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+            >
+              Go back
+            </button>
+            <button
+              type="button"
+              disabled={sending}
+              onClick={() => onAcknowledge(claims.map((c) => c.id))}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              I understand — continue
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )
