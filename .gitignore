@@ -53,3 +53,13 @@ tsconfig.tsbuildinfo
 tmp-*/
 
 testsprite_tests\tmp\config.json
+
+# Shopify push scratch — base64'd liquid + upsert payloads we hand to the MCP
+.bundle.json
+.bundle-vars.json
+.product-main.b64
+.upsert*.json
+tsc_recent.txt
+
+# Codex working dir (not committed; tool-managed)
+.codex/

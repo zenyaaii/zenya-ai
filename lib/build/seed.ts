@@ -367,7 +367,7 @@ function seedStockCounter(c: BuildConfig): SeededSection {
     settings: {
       title: 'Hurry! Only COUNT left in stock',
       count: '23',
-      percent: 22,
+      percent: 20,
       subtitle: `Once this batch of ${c.productName}s is gone, the next restock is 2 weeks out.`,
     },
   }

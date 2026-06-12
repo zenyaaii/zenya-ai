@@ -1737,6 +1737,7 @@ import { socialProofSections }    from './sections/social-proof'
 import { productExtraSections }   from './sections/product-extras'
 import { storytellingSections }   from './sections/storytelling'
 import { marketingSections }      from './sections/marketing'
+import { sanitizeTemplates }      from './validate'
 
 export function generateTheme(c: BuildConfig): ThemeFiles {
   // Sections defined inline in this file (the original 16). Each is a
@@ -1799,5 +1800,5 @@ export function generateTheme(c: BuildConfig): ThemeFiles {
     files[`sections/${name}.liquid`] = fn(c)
   }
 
-  return files
+  return sanitizeTemplates(files)
 }
