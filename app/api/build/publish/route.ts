@@ -23,45 +23,81 @@ export const maxDuration = 60
  * install for the shop — knowing a shop domain is never enough.
  */
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-
   let body: any
   try { body = await req.json() } catch { body = {} }
 
-  const rawShop = String(body?.shop || '')
-  const shop = shopify.utils.sanitizeShop(rawShop, true)
-  if (!shop) {
+  // Two authorization paths:
+  //  A) Embedded Shopify app — a valid App Bridge session token proves
+  //     the caller is inside the installed app; the shop comes from the
+  //     token, no Supabase binding needed.
+  //  B) Standalone /build — a Supabase session plus a shopify_connections
+  //     binding written during the OAuth install.
+  const authorization = req.headers.get('authorization') || ''
+  const bearer = authorization.startsWith('Bearer ') ? authorization.slice(7).trim() : ''
+
+  let shop = ''
+  let embedded = false
+
+  if (bearer) {
+    try {
+      const payload = await shopify.session.decodeSessionToken(bearer)
+      const dest = typeof payload?.dest === 'string' ? payload.dest : ''
+      shop = dest.replace(/^https?:\/\//, '').replace(/\/$/, '')
+      embedded = Boolean(shop)
+    } catch {
+      return NextResponse.json(
+        { error: 'invalid_session_token', message: 'Reopen the app inside Shopify Admin and try again.' },
+        { status: 401 },
+      )
+    }
+  }
+
+  if (!embedded) {
+    // Standalone path requires a Zenya account + an explicit shop.
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+    shop = shopify.utils.sanitizeShop(String(body?.shop || ''), true) || ''
+    if (!shop) {
+      return NextResponse.json(
+        { error: 'invalid_shop', message: 'Enter your store like my-store.myshopify.com.' },
+        { status: 400 },
+      )
+    }
+
+    const { data: connection } = await supabase
+      .from('shopify_connections')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('shop', shop)
+      .maybeSingle()
+    if (!connection) {
+      return NextResponse.json(
+        {
+          error: 'not_connected',
+          message: 'This store is not connected to your Zenya account yet.',
+          authUrl: `/api/shopify/auth?shop=${encodeURIComponent(shop)}&returnTo=${encodeURIComponent('/build/connected')}`,
+        },
+        { status: 403 },
+      )
+    }
+  }
+
+  const sanitizedShop = shopify.utils.sanitizeShop(shop, true)
+  if (!sanitizedShop) {
     return NextResponse.json(
-      { error: 'invalid_shop', message: 'Enter your store like my-store.myshopify.com.' },
+      { error: 'invalid_shop', message: 'Could not resolve a valid store domain.' },
       { status: 400 },
     )
   }
+  shop = sanitizedShop
 
   const parsed = parseBuildConfig(body)
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.error, message: parsed.message }, { status: 400 })
   }
   const config = parsed.config
-
-  // The shop must be bound to this user (written by the OAuth callback).
-  const { data: connection } = await supabase
-    .from('shopify_connections')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('shop', shop)
-    .maybeSingle()
-  if (!connection) {
-    return NextResponse.json(
-      {
-        error: 'not_connected',
-        message: 'This store is not connected to your Zenya account yet.',
-        authUrl: `/api/shopify/auth?shop=${encodeURIComponent(shop)}&returnTo=${encodeURIComponent('/build/connected')}`,
-      },
-      { status: 403 },
-    )
-  }
 
   // Offline access token from the app's session storage.
   let accessToken = ''

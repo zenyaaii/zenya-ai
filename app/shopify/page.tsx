@@ -176,14 +176,14 @@ function DashboardContent() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Your Themes</h1>
-            <p className="mt-2 text-gray-600">Manage and download your AI-generated themes.</p>
+            <h1 className="text-3xl font-bold text-gray-900">Your store builder</h1>
+            <p className="mt-2 text-gray-600">Generate a one-product theme and install it — plus the product — straight into this store.</p>
           </div>
-          <Link 
-            href={`/shopify/new${queryString}`} 
+          <Link
+            href={`/shopify/new${queryString}`}
             className="rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-indigo-700"
           >
-            + Create New Theme
+            + Create &amp; install a store
           </Link>
         </div>
         
@@ -192,10 +192,17 @@ function DashboardContent() {
              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-3xl">
                ✨
              </div>
-             <h3 className="mb-2 text-lg font-bold text-gray-900">Start your journey</h3>
+             <h3 className="mb-2 text-lg font-bold text-gray-900">Build your first store</h3>
              <p className="mx-auto mb-6 max-w-md text-gray-500">
-               You have not generated any themes yet. Click the button above to create your first unique Shopify theme.
+               Paste an AliExpress product link and Zenya generates the theme, imports real reviews, and installs the
+               theme + product into this store — no zip uploads.
              </p>
+             <Link
+               href={`/shopify/new${queryString}`}
+               className="inline-block rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-indigo-700"
+             >
+               + Create &amp; install a store
+             </Link>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

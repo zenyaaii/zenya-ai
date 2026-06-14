@@ -1,615 +1,378 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TitleBar } from '@shopify/app-bridge-react';
-import StepProgress from '@/components/StepProgress';
 import ImageSelector from '@/components/ImageSelector';
-import ColorThief from 'colorthief';
-import MobilePreview from '@/components/wizard/MobilePreview';
-import { generateShopifyTheme } from '@/utils/shopify-generator';
 import { saveAs } from 'file-saver';
+import { useShopifyBridge } from '@/components/ShopifyAppBridge';
+import { PALETTES, VIBE_LABELS, getPalette } from '@/lib/build/palettes';
+import { collectClaims, type ThemeClaim } from '@/lib/build/seed';
+import type { BuildConfig } from '@/lib/build/theme-generator';
 
-type StylePresetId = 'clean_light' | 'bold_gradient' | 'luxury_dark'
+type ScrapedReview = { name: string; country?: string; rating: number; text: string; photos?: string[]; date?: string };
+type Scraped = {
+  name: string;
+  description: string;
+  images: string[];
+  price?: number | null;
+  originalPrice?: number | null;
+  productFacts?: { highlights?: string[]; specs?: Record<string, string> } | null;
+  reviews?: ScrapedReview[];
+  reviewStats?: { average: number; count: number } | null;
+};
 
-const STYLE_PRESETS: Array<{
-  id: StylePresetId
-  name: string
-  description: string
-  p: string
-  s: string
-  sectionStyles: Record<string, string>
-}> = [
-  {
-    id: 'clean_light',
-    name: 'Clean Light',
-    description: 'Soft premium',
-    p: '#4f46e5',
-    s: '#06b6d4',
-    sectionStyles: { heroPanel: 'soft', marketing: 'soft', socialProof: 'soft', faq: 'soft', productMedia: 'soft', countdown: 'glass', volume: 'soft', upsellBundles: 'soft', frequentlyBought: 'soft', guaranteeBar: 'soft', stickyAtc: 'glass' }
-  },
-  {
-    id: 'bold_gradient',
-    name: 'Bold Gradient',
-    description: 'Vivid glass',
-    p: '#7c3aed',
-    s: '#06b6d4',
-    sectionStyles: { heroPanel: 'glass', marketing: 'glass', socialProof: 'glass', faq: 'soft', productMedia: 'glass', countdown: 'glass', volume: 'glass', upsellBundles: 'glass', frequentlyBought: 'glass', guaranteeBar: 'soft', stickyAtc: 'glass' }
-  },
-  {
-    id: 'luxury_dark',
-    name: 'Luxury Dark',
-    description: 'Minimal luxe',
-    p: '#111827',
-    s: '#334155',
-    sectionStyles: { heroPanel: 'minimal', marketing: 'minimal', socialProof: 'minimal', faq: 'minimal', productMedia: 'minimal', countdown: 'minimal', volume: 'minimal', upsellBundles: 'minimal', frequentlyBought: 'minimal', guaranteeBar: 'minimal', stickyAtc: 'minimal' }
-  }
-]
+const MIN_IMAGES = 5;
 
 function NewThemeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const shop = searchParams.get('shop');
+  const shop = searchParams.get('shop') || '';
+  const { authenticatedFetch } = useShopifyBridge();
 
   const [step, setStep] = useState(1);
-  
   const [url, setUrl] = useState('');
-  const [scrapedDescription, setScrapedDescription] = useState('');
-  const [productFacts, setProductFacts] = useState<any | null>(null);
+  const [scraped, setScraped] = useState<Scraped | null>(null);
   const [name, setName] = useState('');
-  const [price, setPrice] = useState('49.99');
-  const [originalPrice, setOriginalPrice] = useState('99.99');
-  const [shopName, setShopName] = useState(shop?.replace('.myshopify.com', '') || '');
-  const [images, setImages] = useState<string[]>([]);
+  const [storeName, setStoreName] = useState(shop.replace('.myshopify.com', ''));
+  const [price, setPrice] = useState('');
+  const [originalPrice, setOriginalPrice] = useState('');
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [primary, setPrimary] = useState('#4f46e5');
-  const [secondary, setSecondary] = useState('#06b6d4');
-  const [stylePreset, setStylePreset] = useState<StylePresetId>('clean_light');
-  const [content, setContent] = useState<any | null>(null);
+  const [paletteId, setPaletteId] = useState(PALETTES[0].id);
+
   const [loading, setLoading] = useState(false);
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [downloadedFileName, setDownloadedFileName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [honestyOpen, setHonestyOpen] = useState(false);
+  const [honestyAcked, setHonestyAcked] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
 
-  const PALETTES = [
-    { name: 'Modern Tech', p: '#4f46e5', s: '#06b6d4' },
-    { name: 'Nature', p: '#059669', s: '#10b981' },
-    { name: 'Energetic', p: '#dc2626', s: '#f87171' },
-    { name: 'Warmth', p: '#d97706', s: '#fbbf24' },
-    { name: 'Trust', p: '#2563eb', s: '#60a5fa' },
-    { name: 'Royal', p: '#7c3aed', s: '#a78bfa' },
-    { name: 'Playful', p: '#db2777', s: '#f472b6' },
-    { name: 'Minimal', p: '#111827', s: '#6b7280' },
-  ];
+  const palette = useMemo(() => getPalette(paletteId), [paletteId]);
+  const realReviewCount = (scraped?.reviews || []).filter((r) => r.text && r.text.length >= 8).length;
 
-  function applyStylePreset(presetId: StylePresetId) {
-    const preset = STYLE_PRESETS.find((x) => x.id === presetId);
-    if (!preset) return;
-    setStylePreset(presetId);
-    setPrimary(preset.p);
-    setSecondary(preset.s);
-    setContent((prev: any) =>
-      prev
-        ? {
-            ...prev,
-            stylePreset: preset.id,
-            _preview: { ...(prev?._preview || {}), stylePreset: preset.id, sectionStyles: preset.sectionStyles }
-          }
-        : prev
-    );
-  }
-
-  async function safeReadJson(response: Response) {
-    const text = await response.text();
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      try {
-        return JSON.parse(text);
-      } catch {
-        throw new Error(`Invalid JSON response (${response.status}): ${text.slice(0, 200)}`);
-      }
-    }
-    throw new Error(`Non-JSON response (${response.status}): ${text.slice(0, 200)}`);
-  }
-  
   async function scrape() {
-    setLoading(true);
-    setDownloadedFileName(null);
+    const u = url.trim();
+    if (!/^https?:\/\//i.test(u)) { setError('Add http:// or https:// to the URL.'); return; }
+    setLoading(true); setError(null);
     try {
-      const r = await fetch('/api/scrape', { method: 'POST', body: JSON.stringify({ url }), headers: { 'Content-Type': 'application/json' } });
-      const j = await safeReadJson(r);
-      if (!r.ok || j.error) throw new Error(j.message || j.error || 'Failed to scrape');
-      setName(j.name);
-      setScrapedDescription(j.description || '');
-      setProductFacts(j.productFacts || null);
-      setImages(j.images);
-      setStep(2);
-    } catch {
-      alert('Failed to scrape. Try another URL.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function generateAndDownload() {
-    setLoading(true);
-    setDownloadedFileName(null);
-    try {
-      // 1. Generate Content
-      const r = await fetch('/api/generate-content', {
+      const r = await fetch('/api/scrape', {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          description: scrapedDescription,
-          productUrl: url,
-          price: Number.isFinite(parseFloat(price)) ? parseFloat(price) : undefined,
-          originalPrice: Number.isFinite(parseFloat(originalPrice)) ? parseFloat(originalPrice) : undefined,
-          productFacts: productFacts || undefined,
-        }),
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: u }),
       });
-      const j = await safeReadJson(r);
-      if (!r.ok || j?.error) throw new Error(j.message || j.error || 'Failed to generate content')
-      if (typeof j?._meta?.source === 'string' && j._meta.source.startsWith('fallback')) {
-        console.warn('AI generation returned fallback content', j?._meta)
-      }
-      const preset = STYLE_PRESETS.find((x) => x.id === stylePreset) || STYLE_PRESETS[0];
-      const payload = {
-        ...j,
-        stylePreset: preset.id,
-        _preview: { ...(j?._preview || {}), stylePreset: preset.id, sectionStyles: preset.sectionStyles }
+      const j = await r.json();
+      if (!r.ok || j?.error) { setError(j?.message || 'Could not read that page. Try another product URL.'); return; }
+      const s: Scraped = {
+        name: j.name || '', description: j.description || '',
+        images: Array.isArray(j.images) ? j.images : [],
+        price: typeof j.price === 'number' ? j.price : null,
+        originalPrice: typeof j.originalPrice === 'number' ? j.originalPrice : null,
+        productFacts: j.productFacts || null,
+        reviews: Array.isArray(j.reviews) ? j.reviews : [],
+        reviewStats: j.reviewStats || null,
       };
-      setContent(payload);
-
-      const blob = await generateShopifyTheme(
-        name,
-        { ...payload, shopName: shopName || name },
-        { primary, secondary },
-        selectedImages
-      );
-      const fileName = `${name.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`;
-      saveAs(blob, fileName);
-      setDownloadedFileName(fileName);
-      
+      setScraped(s);
+      setName(s.name);
+      setPrice(s.price != null ? String(s.price) : '');
+      setOriginalPrice(s.originalPrice != null ? String(s.originalPrice) : '');
+      setSelectedImages(s.images.slice(0, MIN_IMAGES));
+      setStep(2);
     } catch (e: any) {
-      console.error(e);
-      alert('Error generating and downloading theme: ' + e.message);
-    } finally {
-      setLoading(false);
-    }
+      setError(e?.message || 'Network error.');
+    } finally { setLoading(false); }
   }
 
-  async function generateProductPreview() {
-    if (!name) return
-    setLoading(true);
-    setDownloadedFileName(null);
+  function buildPayload() {
+    return {
+      productName: name,
+      storeName,
+      salePrice: Number(price) || 0,
+      originalPrice: Number(originalPrice) || 0,
+      images: selectedImages,
+      paletteId,
+      description: scraped?.description || '',
+      highlights: scraped?.productFacts?.highlights || [],
+      specs: scraped?.productFacts?.specs || {},
+      sourceUrl: url,
+      reviews: scraped?.reviews || [],
+      reviewStats: scraped?.reviewStats || null,
+    };
+  }
+
+  async function ackThenColors() {
+    if (honestyAcked) { setStep(3); return; }
+    setHonestyOpen(true);
+  }
+
+  async function recordAck(claimIds: string[]) {
     try {
-      const r = await fetch('/api/generate-content', {
+      await fetch('/api/build/acknowledge', {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          description: scrapedDescription,
-          productUrl: url,
-          price: Number.isFinite(parseFloat(price)) ? parseFloat(price) : undefined,
-          originalPrice: Number.isFinite(parseFloat(originalPrice)) ? parseFloat(originalPrice) : undefined,
-          productFacts: productFacts || undefined,
-        }),
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productName: name, storeName, sourceUrl: url, claimIds }),
       });
-      const j = await safeReadJson(r);
-      if (!r.ok || j?.error) throw new Error(j.message || j.error || 'Failed to generate product preview');
-      if (typeof j?._meta?.source === 'string' && j._meta.source.startsWith('fallback')) {
-        console.warn('AI generation returned fallback content', j?._meta)
-      }
-      const preset = STYLE_PRESETS.find((x) => x.id === stylePreset) || STYLE_PRESETS[0];
-      setContent({
-        ...j,
-        stylePreset: preset.id,
-        _preview: { ...(j?._preview || {}), stylePreset: preset.id, sectionStyles: preset.sectionStyles }
-      });
-      setStep(3);
-    } catch (e: any) {
-      console.error(e);
-      alert('Error generating product preview: ' + e.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* best-effort in the iframe */ }
+    setHonestyAcked(true);
+    setHonestyOpen(false);
+    setStep(3);
   }
+
+  async function installToStore() {
+    setPublishing(true); setError(null); setResult(null);
+    try {
+      const r = await authenticatedFetch('/api/build/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload()),
+      });
+      const j = await r.json();
+      if (!r.ok || !j?.ok) { setError(j?.message || 'Install failed. Please try again.'); return; }
+      setResult(j);
+    } catch (e: any) {
+      setError(e?.message || 'Network error during install.');
+    } finally { setPublishing(false); }
+  }
+
+  async function downloadZip() {
+    setLoading(true); setError(null);
+    try {
+      const r = await fetch('/api/build/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload()),
+      });
+      if (!r.ok) { setError('Could not generate the theme zip.'); return; }
+      const blob = await r.blob();
+      saveAs(blob, `${(storeName || 'store').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-zenya-theme.zip`);
+    } catch (e: any) {
+      setError(e?.message || 'Download failed.');
+    } finally { setLoading(false); }
+  }
+
+  const canColors = selectedImages.length >= MIN_IMAGES && name.trim() && storeName.trim() && Number(price) > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-24">
       <TitleBar title="Create New Theme" />
-      
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-xl font-bold text-gray-900">New Theme Generator</h1>
-            <button 
-              onClick={() => router.back()}
-              className="text-gray-500 hover:text-gray-700 font-medium"
-            >
-              Cancel
-            </button>
-          </div>
-          <StepProgress step={step} total={3} />
+      <div className="sticky top-0 z-10 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+          <h1 className="text-lg font-bold text-gray-900">New one-product store</h1>
+          <div className="text-xs text-gray-500">Step {step} of 4</div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Step 1: Input URL */}
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {error && (
+          <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
+
+        {/* Step 1 — URL */}
         {step === 1 && (
-          <div className="max-w-xl mx-auto bg-white rounded-xl shadow-sm p-8">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-3xl mb-6">🔗</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Start with a Product</h2>
-            <p className="text-gray-500 mb-6 text-center">Enter an AliExpress or Amazon product URL to extract details.</p>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Product URL</label>
-                <input 
-                  type="text" 
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://www.aliexpress.com/item/..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                />
+          <div className="mx-auto max-w-xl rounded-2xl bg-white p-8 shadow-sm">
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">🔗</div>
+            <h2 className="text-center text-xl font-bold text-gray-900">Start with a product</h2>
+            <p className="mt-1 text-center text-sm text-gray-500">Paste an AliExpress product link — we pull images, price, specs, and real reviews.</p>
+            <input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://www.aliexpress.com/item/..."
+              className="mt-5 w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            />
+            <button
+              onClick={scrape}
+              disabled={!url || loading}
+              className="mt-3 w-full rounded-xl bg-indigo-600 py-3 font-bold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {loading ? 'Analyzing…' : 'Analyze product'}
+            </button>
+          </div>
+        )}
+
+        {/* Step 2 — details + images */}
+        {step === 2 && scraped && (
+          <div className="space-y-6">
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
+              {realReviewCount >= 3 && (
+                <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                  ✓ {realReviewCount} real reviews imported{scraped.reviewStats ? ` · ${scraped.reviewStats.average.toFixed(1)}★ from ${scraped.reviewStats.count.toLocaleString()} ratings` : ''}
+                </div>
+              )}
+              <div className="grid gap-5 md:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-bold text-gray-900">Product name</span>
+                  <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-bold text-gray-900">Store name</span>
+                  <input value={storeName} onChange={(e) => setStoreName(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-bold text-gray-900">Sale price</span>
+                  <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-bold text-gray-900">Compare-at price</span>
+                  <input type="number" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} className="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </label>
               </div>
-              <button 
-                onClick={scrape}
-                disabled={!url || loading}
-                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 flex justify-center items-center shadow-lg shadow-indigo-200"
-              >
-                {loading ? (
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-                ) : null}
-                {loading ? 'Analyzing...' : 'Analyze Product'}
+              <h3 className="mb-3 mt-6 text-lg font-bold text-gray-900">Select product images ({selectedImages.length}/{MIN_IMAGES}+)</h3>
+              <ImageSelector images={scraped.images} selected={selectedImages} onChange={setSelectedImages} />
+            </div>
+            <div className="flex justify-between">
+              <button onClick={() => setStep(1)} className="rounded-lg border border-gray-300 px-6 py-2 font-medium hover:bg-gray-50">Back</button>
+              <button onClick={ackThenColors} disabled={!canColors} className="rounded-lg bg-indigo-600 px-6 py-2 font-bold text-white hover:bg-indigo-700 disabled:opacity-50">
+                Pick colors
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Product Details & Images */}
-        {step === 2 && (
+        {/* Step 3 — palette */}
+        {step === 3 && (
           <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-               <div className="rounded-xl bg-green-50 p-4 flex items-center gap-3 text-green-700 border border-green-100 mb-6">
-                <span className="text-xl">✅</span>
-                <span className="font-medium">Success! We found your product details.</span>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 mb-6">
-                 <div className="space-y-2">
-                  <label className="block text-sm font-bold text-gray-900">Product Name</label>
-                  <div className="flex gap-3">
-                    <input 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                    <button
-                      onClick={async () => {
-                        const baseContext = scrapedDescription || name || "an ecommerce product";
-                        setName("Generating...");
-                        try {
-                          const res = await fetch('/api/generate-name', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ context: baseContext.substring(0, 500) })
-                          });
-                          const data = await res.json();
-                          setName(data.name || "Premium Product");
-                        } catch (e) {
-                          setName("");
-                        }
-                      }}
-                      disabled={loading}
-                      className="flex shrink-0 items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-70"
-                    >
-                      <span>✨</span> Auto-Name
-                    </button>
-                  </div>
-                </div>
-                 <div className="space-y-2">
-                  <label className="block text-sm font-bold text-gray-900">Store Name</label>
-                  <input 
-                    value={shopName}
-                    onChange={(e) => setShopName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 mb-8">
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-1">Sale Price</label>
-                  <input 
-                    type="number" 
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-1">Original Price</label>
-                  <input 
-                    type="number" 
-                    value={originalPrice}
-                    onChange={(e) => setOriginalPrice(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Select Product Images</h2>
-              <ImageSelector 
-                images={images} 
-                selected={selectedImages} 
-                onChange={setSelectedImages} 
-              />
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Choose your store look</h2>
+              <p className="mt-1 text-gray-500">Each palette is a complete, conversion-tuned color system.</p>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setStep(1)} className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50">Back</button>
-              <div className="flex flex-col items-end gap-2">
-                <button 
-                  onClick={generateProductPreview}
-                  disabled={selectedImages.length < 5 || !name.trim() || loading}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50 shadow-lg shadow-indigo-200"
-                >
-                  {loading ? 'Generating Product Preview...' : 'Generate Product Preview'}
-                </button>
-                {selectedImages.length < 5 && (
-                  <span className="text-xs font-medium text-red-500">Please select at least 5 images. ({selectedImages.length}/5)</span>
-                )}
-                {!name.trim() && selectedImages.length >= 5 && (
-                  <span className="text-xs font-medium text-red-500">Please provide a product name.</span>
-                )}
-              </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {PALETTES.map((p) => {
+                const selected = paletteId === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setPaletteId(p.id)}
+                    className={`rounded-2xl border p-4 text-left transition ${selected ? 'border-indigo-600 ring-1 ring-indigo-600' : 'border-gray-200 hover:border-indigo-300'}`}
+                    style={{ background: p.bg, color: p.fg }}
+                  >
+                    <div className="mb-3 flex gap-1.5">
+                      {[p.primary, p.accent, p.surface].map((c, i) => (
+                        <span key={i} className="h-6 w-6 rounded-full ring-1 ring-black/10" style={{ background: c }} />
+                      ))}
+                    </div>
+                    <div className="text-sm font-bold">{p.name}</div>
+                    <div className="text-xs opacity-70">{VIBE_LABELS[p.vibe].name}</div>
+                    {selected && <div className="mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ background: p.primary, color: p.primaryFg }}>SELECTED</div>}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex justify-between border-t border-gray-200 pt-6">
+              <button onClick={() => setStep(2)} className="rounded-lg border border-gray-300 px-6 py-2 font-medium hover:bg-gray-50">Back</button>
+              <button onClick={() => setStep(4)} className="rounded-lg bg-indigo-600 px-6 py-2 font-bold text-white hover:bg-indigo-700">Review &amp; install</button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Design Your Store */}
-        {step === 3 && (
-          <div className="max-w-5xl mx-auto">
-            {downloadedFileName && (
-              <div className="mb-8 rounded-xl border border-green-200 bg-green-50 p-4 text-green-700 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">✅</span>
-                  <span className="font-medium">Downloaded: {downloadedFileName}</span>
+        {/* Step 4 — install */}
+        {step === 4 && (
+          <div className="space-y-6">
+            {!result && (
+              <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-2xl">🚀</div>
+                <h2 className="mt-4 text-xl font-bold text-gray-900">Install into {shop || 'your store'}</h2>
+                <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                  One click installs the full theme (unpublished, safe to preview) <strong>and</strong> creates
+                  “{name}” in your products — the buy buttons attach to it automatically.
+                </p>
+                <button
+                  onClick={installToStore}
+                  disabled={publishing}
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-indigo-600 px-7 py-3 font-bold text-white shadow-lg transition hover:bg-indigo-700 disabled:opacity-60"
+                >
+                  {publishing ? 'Installing theme + product…' : 'Install theme + product'}
+                </button>
+                <div className="mt-4">
+                  <button onClick={downloadZip} disabled={loading} className="text-xs font-medium text-gray-500 underline hover:text-gray-700 disabled:opacity-50">
+                    {loading ? 'Preparing…' : 'or download the .zip instead'}
+                  </button>
                 </div>
               </div>
             )}
-             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-gray-900">Design Your Store</h2>
-              <p className="mt-2 text-lg text-gray-500">Choose a starting palette and fine-tune your colors.</p>
-            </div>
-            
-            <div className="grid gap-8 lg:grid-cols-12">
-              {/* Left Column: Palettes & Custom */}
-              <div className="space-y-8 lg:col-span-7">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-gray-900">Theme Style Presets</h3>
-                    <span className="text-xs text-gray-500">One click full style</span>
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {STYLE_PRESETS.map((preset) => {
-                      const selected = stylePreset === preset.id;
-                      return (
-                        <button
-                          key={preset.id}
-                          onClick={() => applyStylePreset(preset.id)}
-                          className={`rounded-xl border p-3 text-left transition-all ${selected ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50' : 'border-gray-200 bg-white hover:border-indigo-200'}`}
-                        >
-                          <div className="mb-2 flex h-8 w-full overflow-hidden rounded-md ring-1 ring-black/5">
-                            <div className="h-full w-1/2" style={{ backgroundColor: preset.p }} />
-                            <div className="h-full w-1/2" style={{ backgroundColor: preset.s }} />
-                          </div>
-                          <p className={`text-xs font-bold ${selected ? 'text-indigo-600' : 'text-gray-900'}`}>{preset.name}</p>
-                          <p className="mt-1 text-[11px] text-gray-500">{preset.description}</p>
-                        </button>
-                      );
-                    })}
-                  </div>
+
+            {result?.ok && (
+              <div className="rounded-2xl border border-green-200 bg-green-50 p-6">
+                <h2 className="text-lg font-bold text-gray-900">✅ Installed into {result.shop}</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Theme <strong>{result.theme?.name}</strong> added (unpublished){result.product ? ' and the product was created' : ''}.
+                  {result.theme?.processing ? ' Shopify is finishing processing — give it ~30s.' : ''}
+                  {result.productError ? ` Product note: ${result.productError}` : ''}
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {result.theme?.editorUrl && <a href={result.theme.editorUrl} target="_blank" rel="noreferrer" className="rounded-full bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700">Customize theme</a>}
+                  {result.theme?.previewUrl && <a href={result.theme.previewUrl} target="_blank" rel="noreferrer" className="rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Preview store</a>}
+                  {result.product?.adminUrl && <a href={result.product.adminUrl} target="_blank" rel="noreferrer" className="rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">View product</a>}
+                  {result.theme?.themesUrl && <a href={result.theme.themesUrl} target="_blank" rel="noreferrer" className="rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">Publish it live</a>}
                 </div>
-                {/* Palette Grid */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {PALETTES.map((c) => {
-                    const isSelected = primary === c.p && secondary === c.s
-                    return (
-                      <button 
-                        key={c.name}
-                        onClick={() => { setPrimary(c.p); setSecondary(c.s) }}
-                        className={`group relative flex flex-col gap-3 rounded-xl border p-3 text-left transition-all hover:shadow-md active:scale-95 ${
-                          isSelected 
-                            ? 'border-indigo-600 ring-1 ring-indigo-600 bg-indigo-50' 
-                            : 'border-gray-200 bg-white hover:border-indigo-200'
-                        }`}
-                      >
-                        <div className="flex h-10 w-full overflow-hidden rounded-lg shadow-sm ring-1 ring-black/5">
-                          <div className="h-full w-1/2" style={{ backgroundColor: c.p }} />
-                          <div className="h-full w-1/2" style={{ backgroundColor: c.s }} />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-bold ${isSelected ? 'text-indigo-600' : 'text-gray-900'}`}>
-                            {c.name}
-                          </span>
-                          {isSelected && (
-                            <div className="flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-white">
-                              <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Custom Colors */}
-                <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-100 text-xs">🎨</div>
-                      <h3 className="font-bold text-gray-900">Custom Colors</h3>
-                    </div>
-                    <button 
-                      disabled={isExtracting}
-                      onClick={async () => {
-                        setIsExtracting(true);
-                        try {
-                          const imgUrl = selectedImages[0] || images[0];
-                          if (!imgUrl) {
-                             const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-                             setPrimary(randomColor());
-                             setSecondary(randomColor());
-                             return;
-                          }
-                          
-                          const img = new Image();
-                          img.crossOrigin = 'Anonymous';
-                          img.src = imgUrl;
-                          
-                          await new Promise((resolve, reject) => {
-                            img.onload = resolve;
-                            img.onerror = reject;
-                          });
-
-                          const colorThief = new ColorThief();
-                          const palette = colorThief.getPalette(img, 5);
-                          
-                          const rgbToHex = (r: number, g: number, b: number) => '#' + [r, g, b].map(x => {
-                            const hex = x.toString(16);
-                            return hex.length === 1 ? '0' + hex : hex;
-                          }).join('');
-
-                          if (palette && palette.length >= 2) {
-                            setPrimary(rgbToHex(palette[0][0], palette[0][1], palette[0][2]));
-                            setSecondary(rgbToHex(palette[1][0], palette[1][1], palette[1][2]));
-                          }
-                        } catch (e) {
-                          console.error(e);
-                          const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-                          setPrimary(randomColor());
-                          setSecondary(randomColor());
-                        } finally {
-                          setIsExtracting(false);
-                        }
-                      }}
-                      className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:underline disabled:opacity-50"
-                    >
-                      {isExtracting ? (
-                        <>
-                          <span className="animate-spin">⏳</span> Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          Magic Match ✨
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    {/* Primary Color Input */}
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Primary Color</label>
-                      <div className="flex items-center gap-3">
-                        <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
-                          <input 
-                            type="color" 
-                            value={primary} 
-                            onChange={(e) => setPrimary(e.target.value)}
-                            className="absolute -left-2 -top-2 h-20 w-24 cursor-pointer p-0 border-0"
-                          />
-                        </div>
-                        <div className="flex-1 relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono text-sm">#</span>
-                          <input 
-                            type="text" 
-                            value={primary.replace('#', '')} 
-                            onChange={(e) => setPrimary(`#${e.target.value.replace('#', '')}`)}
-                            className="w-full pl-7 pr-3 py-3 font-mono text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 uppercase"
-                            maxLength={6}
-                          />
-                        </div>
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500">Used for buttons, links, and highlights.</p>
-                    </div>
-
-                    {/* Secondary Color Input */}
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-2">Accent Color</label>
-                      <div className="flex items-center gap-3">
-                         <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
-                          <input 
-                            type="color" 
-                            value={secondary} 
-                            onChange={(e) => setSecondary(e.target.value)}
-                            className="absolute -left-2 -top-2 h-20 w-24 cursor-pointer p-0 border-0"
-                          />
-                        </div>
-                        <div className="flex-1 relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-mono text-sm">#</span>
-                          <input 
-                            type="text" 
-                            value={secondary.replace('#', '')} 
-                            onChange={(e) => setSecondary(`#${e.target.value.replace('#', '')}`)}
-                            className="w-full pl-7 pr-3 py-3 font-mono text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 uppercase"
-                            maxLength={6}
-                          />
-                        </div>
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500">Used for sales tags, alerts, and secondary actions.</p>
-                    </div>
-                  </div>
-                </div>
+                <button onClick={() => router.push(`/shopify?host=${searchParams.get('host')}&shop=${shop}`)} className="mt-4 text-xs font-medium text-gray-500 underline hover:text-gray-700">← Back to dashboard</button>
               </div>
+            )}
 
-              {/* Right Column: Live Preview */}
-              <div className="lg:col-span-5">
-                <MobilePreview 
-                  name={name}
-                  price={price}
-                  originalPrice={originalPrice}
-                  images={selectedImages}
-                  primary={primary}
-                  secondary={secondary}
-                  content={content}
-                  shopName={shopName}
-                  mode="product"
-                  lockToProduct
-                />
+            {!result && (
+              <div className="flex justify-start">
+                <button onClick={() => setStep(3)} className="rounded-lg border border-gray-300 px-6 py-2 font-medium hover:bg-gray-50">Back</button>
               </div>
-            </div>
-
-            <div className="flex justify-between pt-8 border-t border-gray-200 mt-12">
-              <button onClick={() => setStep(2)} className="flex items-center gap-2 rounded-lg border border-gray-300 px-6 py-3 font-bold text-gray-500 transition hover:bg-gray-50 hover:text-gray-700">
-                <span>←</span> Back
-              </button>
-              <button 
-                onClick={generateAndDownload} 
-                disabled={loading}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-3 font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 hover:scale-105 disabled:opacity-70"
-              >
-                {loading ? (
-                  <>
-                    <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Generating Theme...
-                  </>
-                ) : (
-                  <>
-                    Download Theme Zip <span>⬇️</span>
-                  </>
-                )}
-              </button>
-            </div>
+            )}
           </div>
         )}
+      </div>
 
+      {honestyOpen && (
+        <HonestyModal
+          reviews={scraped?.reviews || []}
+          reviewStats={scraped?.reviewStats || null}
+          specs={scraped?.productFacts?.specs || null}
+          onClose={() => setHonestyOpen(false)}
+          onAck={recordAck}
+        />
+      )}
+    </div>
+  );
+}
 
-
+function HonestyModal({
+  reviews, reviewStats, specs, onClose, onAck,
+}: {
+  reviews: ScrapedReview[];
+  reviewStats: { average: number; count: number } | null;
+  specs: Record<string, string> | null;
+  onClose: () => void;
+  onAck: (ids: string[]) => void;
+}) {
+  const claims: ThemeClaim[] = useMemo(
+    () => collectClaims({ reviews, reviewStats: reviewStats || undefined, specs: specs || undefined } as unknown as BuildConfig),
+    [reviews, reviewStats, specs],
+  );
+  const high = claims.filter((c) => c.severity === 'high');
+  const medium = claims.filter((c) => c.severity === 'medium');
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="border-b border-gray-200 bg-amber-50 px-6 py-4">
+          <h2 className="text-base font-bold text-gray-900">Heads up — parts of this theme are AI-invented</h2>
+          <p className="mt-0.5 text-xs text-gray-600">{high.length} must-fix · {medium.length} to verify. Only you can make these true before launch.</p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <ul className="space-y-2.5">
+            {[...high, ...medium].map((cl) => (
+              <li key={cl.id} className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">{cl.location}</div>
+                <div className="mt-0.5 text-sm font-semibold text-gray-900">{cl.claim}</div>
+                <div className="mt-1 text-xs text-gray-500">{cl.why}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="border-t border-gray-200 px-6 py-4">
+          <p className="mb-3 text-xs leading-relaxed text-gray-500">
+            By continuing you acknowledge that stock counts, buyer notifications, press quotes, review placeholders, and
+            similar content are AI-generated examples — not real information — and it's your responsibility to replace or
+            verify them before publishing.
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <button onClick={onClose} className="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">Go back</button>
+            <button onClick={() => onAck(claims.map((c) => c.id))} className="rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">I understand — continue</button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -617,7 +380,7 @@ function NewThemeContent() {
 
 export default function NewThemePage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading…</div>}>
       <NewThemeContent />
     </Suspense>
   );
