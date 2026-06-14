@@ -27,6 +27,24 @@ type ScrapedReview = {
   date?: string
 }
 
+type PublishResult = {
+  status: number
+  ok?: boolean
+  error?: string
+  message?: string
+  authUrl?: string
+  theme?: {
+    id: string
+    name: string
+    processing: boolean
+    previewUrl: string
+    editorUrl: string
+    themesUrl: string
+  }
+  product?: { id: number | string; handle?: string | null; adminUrl: string } | null
+  productError?: string | null
+}
+
 type Scraped = {
   name: string
   description: string
@@ -221,6 +239,7 @@ export default function BuildPage() {
           paletteId,
           description: scraped?.description || '',
           highlights: scraped?.productFacts?.highlights || [],
+          specs: scraped?.productFacts?.specs || {},
           sourceUrl: url,
           reviews: scraped?.reviews || [],
           reviewStats: scraped?.reviewStats || null,
@@ -252,6 +271,35 @@ export default function BuildPage() {
       setGenerateMsg('error:' + (e?.message || 'Network error'))
     } finally {
       setGenerating(false)
+    }
+  }
+
+  /* ── One-click publish: theme + product straight into Shopify ───── */
+  async function publishToShopify(shopDomain: string): Promise<PublishResult> {
+    try {
+      const r = await fetch('/api/build/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          shop: shopDomain,
+          productName,
+          storeName,
+          salePrice: Number(salePrice) || 0,
+          originalPrice: Number(originalPrice) || 0,
+          images: selectedImages,
+          paletteId,
+          description: scraped?.description || '',
+          highlights: scraped?.productFacts?.highlights || [],
+          specs: scraped?.productFacts?.specs || {},
+          sourceUrl: url,
+          reviews: scraped?.reviews || [],
+          reviewStats: scraped?.reviewStats || null,
+        }),
+      })
+      const j = await r.json()
+      return { status: r.status, ...j }
+    } catch (e: any) {
+      return { status: 0, error: 'network', message: e?.message || 'Network error' }
     }
   }
 
@@ -358,10 +406,12 @@ export default function BuildPage() {
             heroImage={selectedImages[0]}
             reviews={scraped?.reviews || []}
             reviewStats={scraped?.reviewStats || null}
+            specs={scraped?.productFacts?.specs || null}
             generating={generating}
             generateMsg={generateMsg}
             onBack={() => setStep(3)}
             onGenerate={generate}
+            onPublish={publishToShopify}
             onGoDashboard={() => router.push('/dashboard/sites')}
           />
         )}
@@ -371,6 +421,7 @@ export default function BuildPage() {
         <HonestyGateModal
           reviews={scraped?.reviews || []}
           reviewStats={scraped?.reviewStats || null}
+          specs={scraped?.productFacts?.specs || null}
           sending={ackSending}
           onClose={() => setHonestyOpen(false)}
           onAcknowledge={async (claimIds) => {
@@ -989,7 +1040,7 @@ function PaletteTile({
 
 function GenerateStep({
   productName, storeName, palette, price, originalPrice, images, heroImage,
-  reviews, reviewStats, generating, generateMsg, onBack, onGenerate, onGoDashboard,
+  reviews, reviewStats, specs, generating, generateMsg, onBack, onGenerate, onPublish, onGoDashboard,
 }: {
   productName: string
   storeName: string
@@ -1000,10 +1051,12 @@ function GenerateStep({
   heroImage?: string
   reviews: ScrapedReview[]
   reviewStats: { average: number; count: number } | null
+  specs: Record<string, string> | null
   generating: boolean
   generateMsg: string | null
   onBack: () => void
   onGenerate: () => void
+  onPublish: (shop: string) => Promise<PublishResult>
   onGoDashboard: () => void
 }) {
   const downloaded = generateMsg === 'downloaded'
@@ -1032,6 +1085,7 @@ function GenerateStep({
               storeName={storeName}
               onGenerate={onGenerate}
               generating={generating}
+              onPublish={onPublish}
             />
           ) : (
             <>
@@ -1119,7 +1173,7 @@ function GenerateStep({
 
       {/* Honesty check — everything the AI invented that the merchant
           must verify before launch. Always visible at this step. */}
-      <ClaimsPanel reviews={reviews} reviewStats={reviewStats} />
+      <ClaimsPanel reviews={reviews} reviewStats={reviewStats} specs={specs} />
 
       {/* Generate CTA (pre-download only) */}
       {!downloaded && (
@@ -1188,17 +1242,18 @@ function GenerateStep({
 /* ─── Honesty gate modal (between product info and colors) ─────────── */
 
 function HonestyGateModal({
-  reviews, reviewStats, sending, onClose, onAcknowledge,
+  reviews, reviewStats, specs, sending, onClose, onAcknowledge,
 }: {
   reviews: ScrapedReview[]
   reviewStats: { average: number; count: number } | null
+  specs: Record<string, string> | null
   sending: boolean
   onClose: () => void
   onAcknowledge: (claimIds: string[]) => void
 }) {
   const claims: ThemeClaim[] = useMemo(
-    () => collectClaims({ reviews, reviewStats: reviewStats || undefined } as unknown as BuildConfig),
-    [reviews, reviewStats],
+    () => collectClaims({ reviews, reviewStats: reviewStats || undefined, specs: specs || undefined } as unknown as BuildConfig),
+    [reviews, reviewStats, specs],
   )
   const high = claims.filter((c) => c.severity === 'high')
   const medium = claims.filter((c) => c.severity === 'medium')
@@ -1279,17 +1334,18 @@ function HonestyGateModal({
 /* ─── Honesty check panel ──────────────────────────────────────────── */
 
 function ClaimsPanel({
-  reviews, reviewStats,
+  reviews, reviewStats, specs,
 }: {
   reviews: ScrapedReview[]
   reviewStats: { average: number; count: number } | null
+  specs: Record<string, string> | null
 }) {
   const [open, setOpen] = useState(false)
-  // collectClaims only reads the review fields — the rest of the config
-  // doesn't change which claims are raised.
+  // collectClaims only reads the review/spec fields — the rest of the
+  // config doesn't change which claims are raised.
   const claims: ThemeClaim[] = useMemo(
-    () => collectClaims({ reviews, reviewStats: reviewStats || undefined } as unknown as BuildConfig),
-    [reviews, reviewStats],
+    () => collectClaims({ reviews, reviewStats: reviewStats || undefined, specs: specs || undefined } as unknown as BuildConfig),
+    [reviews, reviewStats, specs],
   )
   const high = claims.filter((c) => c.severity === 'high')
   const medium = claims.filter((c) => c.severity === 'medium')
@@ -1351,19 +1407,24 @@ function ClaimsPanel({
 }
 
 function PublishPanel({
-  productName, storeName, onGenerate, generating,
+  productName, storeName, onGenerate, generating, onPublish,
 }: {
   productName: string
   storeName: string
   onGenerate: () => void
   generating: boolean
+  onPublish: (shop: string) => Promise<PublishResult>
 }) {
   const [shop, setShop] = useState('')
   const [hasShopify, setHasShopify] = useState<'yes' | 'no' | null>(null)
 
-  // Shopify admin themes page — the user uploads the .zip from this
-  // exact screen. We deep-link straight there so it's one click after
-  // they paste their store handle.
+  // Connect → publish state machine for the one-click path.
+  const [connState, setConnState] = useState<'idle' | 'checking' | 'waiting' | 'connected'>('idle')
+  const [publishing, setPublishing] = useState(false)
+  const [publishResult, setPublishResult] = useState<PublishResult | null>(null)
+  const [connError, setConnError] = useState<string | null>(null)
+  const [showManual, setShowManual] = useState(false)
+
   const handle = shop
     .trim()
     .toLowerCase()
@@ -1371,10 +1432,59 @@ function PublishPanel({
     .replace(/\/.*$/, '')
     .replace(/\.myshopify\.com$/, '')
     .replace(/[^a-z0-9-]/g, '')
+  const shopDomain = handle ? `${handle}.myshopify.com` : ''
 
   const adminHref = handle ? `https://admin.shopify.com/store/${handle}/themes` : ''
   // Affiliate signup for users without a store.
   const shopifyAffiliate = 'https://www.shopify.com/free-trial?ref=zenya-ai'
+
+  async function checkConnection(): Promise<boolean> {
+    const r = await fetch(`/api/shopify/connection?shop=${encodeURIComponent(shopDomain)}`)
+    const j = await r.json()
+    return Boolean(j?.connected)
+  }
+
+  async function connect() {
+    if (!shopDomain) return
+    setConnError(null)
+    setConnState('checking')
+    try {
+      if (await checkConnection()) {
+        setConnState('connected')
+        return
+      }
+      // Send the user through OAuth in a new tab, then poll until the
+      // callback has bound the store to their account.
+      window.open(
+        `/api/shopify/auth?shop=${encodeURIComponent(shopDomain)}&returnTo=${encodeURIComponent('/build/connected')}`,
+        '_blank',
+      )
+      setConnState('waiting')
+      for (let i = 0; i < 40; i++) {
+        await new Promise((res) => setTimeout(res, 3000))
+        try {
+          if (await checkConnection()) {
+            setConnState('connected')
+            return
+          }
+        } catch { /* poll hiccup — keep waiting */ }
+      }
+      setConnState('idle')
+      setConnError('We didn’t see the connection come through. Finish the Shopify approval and try again.')
+    } catch (e: any) {
+      setConnState('idle')
+      setConnError(e?.message || 'Connection check failed.')
+    }
+  }
+
+  async function publish() {
+    setPublishing(true)
+    setPublishResult(null)
+    const result = await onPublish(shopDomain)
+    setPublishing(false)
+    setPublishResult(result)
+    if (result.status === 401 || result.status === 403) setConnState('idle')
+  }
 
   return (
     <div className="space-y-4">
@@ -1440,20 +1550,22 @@ function PublishPanel({
         </div>
       )}
 
-      {/* Has a Shopify store → deep link to upload */}
+      {/* Has a Shopify store → connect once, then one-click publish */}
       {hasShopify === 'yes' && (
         <div className="rounded-2xl border border-token bg-white p-5">
           <div className="flex items-center gap-2 text-[14px] font-bold text-foreground">
-            <Upload className="h-4 w-4 text-primary" /> Push to your Shopify store
+            <Upload className="h-4 w-4 text-primary" /> Publish straight to your Shopify store
           </div>
           <div className="mt-1 text-[12px] text-muted">
-            Enter your store handle (the part before <code>.myshopify.com</code>) — we'll open the upload screen for you.
+            Connect once and Zenya installs the theme <strong>and creates the product</strong> from your
+            AliExpress scrape — the buy buttons attach to it automatically.
           </div>
+
           <div className="mt-3 flex items-stretch gap-2">
             <div className="relative flex-1">
               <input
                 value={shop}
-                onChange={(e) => setShop(e.target.value)}
+                onChange={(e) => { setShop(e.target.value); setConnState('idle'); setPublishResult(null) }}
                 placeholder={storeName ? storeName.toLowerCase().replace(/[^a-z0-9-]+/g, '-') : 'my-store'}
                 className="w-full rounded-lg border border-token bg-surface px-3 py-2.5 pr-32 text-[14px] text-foreground outline-none transition focus:border-primary"
               />
@@ -1461,39 +1573,133 @@ function PublishPanel({
                 .myshopify.com
               </span>
             </div>
-            <a
-              href={adminHref || undefined}
-              target="_blank"
-              rel="noreferrer"
-              aria-disabled={!handle}
-              onClick={(e) => { if (!handle) e.preventDefault() }}
-              className={
-                'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold shadow-sm transition ' +
-                (handle
-                  ? 'bg-primary text-white hover:scale-[1.02]'
-                  : 'cursor-not-allowed bg-primary/40 text-white')
-              }
-            >
-              Open Shopify <ExternalLink className="h-3.5 w-3.5" />
-            </a>
+            {connState !== 'connected' && (
+              <button
+                type="button"
+                disabled={!handle || connState === 'checking' || connState === 'waiting'}
+                onClick={connect}
+                className={
+                  'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold shadow-sm transition ' +
+                  (handle ? 'bg-primary text-white hover:scale-[1.02] disabled:opacity-60' : 'cursor-not-allowed bg-primary/40 text-white')
+                }
+              >
+                {connState === 'checking' || connState === 'waiting'
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Store className="h-4 w-4" />}
+                {connState === 'waiting' ? 'Waiting for Shopify…' : 'Connect'}
+              </button>
+            )}
           </div>
-          <ol className="mt-4 space-y-2 text-[12.5px] text-foreground">
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">1</span>
-              Click <strong>Add theme → Upload zip file</strong> and pick the .zip you just downloaded.
-            </li>
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</span>
-              Click <strong>Customize</strong> — every section is editable from there.
-            </li>
-          </ol>
-          <button
-            type="button"
-            onClick={() => setHasShopify(null)}
-            className="mt-3 text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
-          >
-            ← change answer
-          </button>
+
+          {connState === 'waiting' && (
+            <div className="mt-2 text-[12px] text-muted">
+              Approve the Zenya app in the tab that just opened — this screen picks the connection up automatically.
+            </div>
+          )}
+          {connError && (
+            <div className="mt-2 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12px] text-[#b91c1c]">
+              {connError}
+            </div>
+          )}
+
+          {connState === 'connected' && !publishResult?.ok && (
+            <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
+              <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+                <Check className="h-4 w-4 text-[#15803d]" /> {shopDomain} connected
+              </div>
+              <p className="mt-1 text-[12px] text-muted">
+                One click installs the theme (unpublished, safe to preview) and creates
+                “{productName || 'your product'}” with the scraped images and pricing.
+              </p>
+              <button
+                type="button"
+                disabled={publishing}
+                onClick={publish}
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:opacity-60"
+              >
+                {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {publishing ? 'Publishing theme + product…' : 'Publish theme + product'}
+              </button>
+            </div>
+          )}
+
+          {publishResult && !publishResult.ok && (
+            <div className="mt-3 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+              {publishResult.message || 'Publishing failed — try again.'}
+            </div>
+          )}
+
+          {publishResult?.ok && publishResult.theme && (
+            <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
+              <div className="flex items-center gap-2 text-[13.5px] font-bold text-foreground">
+                <Check className="h-4 w-4 text-[#15803d]" /> Live on {shopDomain}
+              </div>
+              <p className="mt-1 text-[12px] text-muted">
+                Theme <strong>{publishResult.theme.name}</strong> installed (unpublished)
+                {publishResult.product ? ' and the product was created' : ''}.
+                {publishResult.theme.processing ? ' Shopify is finishing processing — give it ~30s.' : ''}
+                {publishResult.productError ? ` Product creation failed: ${publishResult.productError}` : ''}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a href={publishResult.theme.previewUrl} target="_blank" rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:scale-[1.02]">
+                  Preview store <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <a href={publishResult.theme.editorUrl} target="_blank" rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                  Customize theme <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                {publishResult.product && (
+                  <a href={publishResult.product.adminUrl} target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                    View product <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+                {publishResult.theme.themesUrl && (
+                  <a href={publishResult.theme.themesUrl} target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                    Publish it live <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setHasShopify(null)}
+              className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+            >
+              ← change answer
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowManual((v) => !v)}
+              className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+            >
+              {showManual ? 'hide manual upload' : 'prefer to upload the zip manually?'}
+            </button>
+          </div>
+
+          {showManual && (
+            <ol className="mt-3 space-y-2 border-t border-token pt-3 text-[12.5px] text-foreground">
+              <li className="flex gap-2">
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">1</span>
+                <span>
+                  Open{' '}
+                  <a className="font-semibold underline" href={adminHref || 'https://admin.shopify.com'} target="_blank" rel="noreferrer">
+                    Online Store → Themes
+                  </a>{' '}
+                  and click <strong>Add theme → Upload zip file</strong> with the .zip you downloaded.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</span>
+                <span>Click <strong>Customize</strong> — every section is editable from there.</span>
+              </li>
+            </ol>
+          )}
         </div>
       )}
 

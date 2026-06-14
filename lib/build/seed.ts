@@ -533,14 +533,22 @@ function seedHowItWorks(c: BuildConfig): SeededSection {
 }
 
 function seedImageText(c: BuildConfig): SeededSection {
+  // Transformation copy: paint the buyer's life AFTER the product, not
+  // the product itself. Pulls a benefit phrase from the description
+  // when one exists so the copy stays grounded in the listing.
+  const pn = c.productName
+  const desc = safeDescription(c, 160)
   return {
     settings: {
       image_url: pickImage(c, 1),
-      eyebrow: 'Made for you',
-      heading: `An honest ${c.productName.toLowerCase()} from a small team`,
-      body: `<p>Most ${c.productName.toLowerCase()}s on the market are made in factories you'll never see. Ours isn't. Every piece is QA'd by a human before it ships. We email you back personally if something's off — usually within a few hours.</p>`,
-      cta: 'Read our story',
-      cta_url: '/pages/about',
+      eyebrow: 'Life with it',
+      heading: `What actually changes once your ${pn} arrives`,
+      body:
+        `<p>Day one: you unbox it, set it up in minutes, and wonder why you waited this long. ` +
+        `By week two it's just part of the routine — the annoying workaround it replaced is gone and you stop thinking about it.</p>` +
+        `<p>${desc} That's the job the ${pn} does quietly, every single day — and if it doesn't earn its spot in your routine within 30 days, send it back on us.</p>`,
+      cta: `Get your ${pn}`,
+      cta_url: '/#product',
     },
   }
 }
@@ -832,18 +840,35 @@ function seedFrequentlyBought(c: BuildConfig): SeededSection {
 }
 
 function seedProductSpecs(c: BuildConfig): SeededSection {
-  return {
-    settings: { title: `${c.productName} specs` },
-    blocks: {
-      's-1': { type: 'spec', settings: { label: 'Material',       value: 'Premium grade — see details below' } },
-      's-2': { type: 'spec', settings: { label: 'Dimensions',     value: '18 × 12 × 4 cm' } },
-      's-3': { type: 'spec', settings: { label: 'Weight',         value: '320 g' } },
-      's-4': { type: 'spec', settings: { label: 'In the box',     value: `${c.productName}, manual, USB-C cable, sticker pack` } },
-      's-5': { type: 'spec', settings: { label: 'Warranty',       value: '12 months' } },
-      's-6': { type: 'spec', settings: { label: 'Ships from',     value: 'US, UK, EU, AU warehouses' } },
-    },
-    block_order: ['s-1', 's-2', 's-3', 's-4', 's-5', 's-6'],
+  // Real specs scraped from the source listing win — no invented
+  // dimensions/weights a buyer could return the product over.
+  const real = Object.entries(c.specs || {})
+    .filter(([k, v]) => k && v && k.length <= 40 && String(v).length <= 120)
+    .slice(0, 8)
+  const blocks: Record<string, Block> = {}
+  const order: string[] = []
+  if (real.length >= 2) {
+    real.forEach(([label, value], i) => {
+      const id = `s-${i + 1}`
+      blocks[id] = { type: 'spec', settings: { label, value: String(value) } }
+      order.push(id)
+    })
+    return { settings: { title: `${c.productName} specs` }, blocks, block_order: order }
   }
+  // Fallback: only claims we stand behind elsewhere in the theme —
+  // no fabricated dimensions or weights.
+  const fallback = [
+    { label: 'Warranty',   value: '12 months against manufacturing defects' },
+    { label: 'Returns',    value: '30-day money-back guarantee' },
+    { label: 'Shipping',   value: 'Tracked, typically 3-5 business days' },
+    { label: 'In the box', value: `1× ${c.productName}` },
+  ]
+  fallback.forEach((s, i) => {
+    const id = `s-${i + 1}`
+    blocks[id] = { type: 'spec', settings: s }
+    order.push(id)
+  })
+  return { settings: { title: `${c.productName} specs` }, blocks, block_order: order }
 }
 
 function seedProductVideo(_c: BuildConfig): SeededSection {
@@ -1390,14 +1415,16 @@ export function collectClaims(c: BuildConfig): ThemeClaim[] {
     why: 'An evergreen fake deadline that resets is a dark pattern; a real one converts and stays legal.',
     fix: 'Theme editor → Countdown: set a real end date for a real promotion, or delete the section.',
   })
-  claims.push({
-    id: 'specs',
-    severity: 'medium',
-    location: 'Product page → specs table',
-    claim: 'Dimensions, weight, "ships from US/UK/EU/AU warehouses", box contents',
-    why: 'Placeholder specs — buyers will return products over wrong dimensions.',
-    fix: 'Theme editor → Product specs: copy the real specs from your supplier listing.',
-  })
+  if (!c.specs || Object.keys(c.specs).length < 2) {
+    claims.push({
+      id: 'specs',
+      severity: 'medium',
+      location: 'Product page → specs table',
+      claim: 'Generic placeholder spec rows (no real specs could be scraped)',
+      why: 'Buyers return products over wrong specs — only you can confirm dimensions, materials, and box contents.',
+      fix: 'Theme editor → Product specs: copy the real specs from your supplier listing.',
+    })
+  }
   claims.push({
     id: 'discount-code',
     severity: 'medium',

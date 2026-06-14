@@ -77,6 +77,8 @@ export type BuildConfig = {
   description?: string
   /** Optional product highlights (bullet points). */
   highlights?: string[]
+  /** Real spec rows scraped from the source listing (label → value). */
+  specs?: Record<string, string>
   /** Optional source URL — recorded in README for the merchant. */
   sourceUrl?: string
   /** Real reviews scraped from the source listing. When present, the
@@ -442,10 +444,12 @@ function fileIndexTemplate(c: BuildConfig): string {
 function fileProductTemplate(c: BuildConfig): string {
   const t = buildTemplate(
     [
+      // No standalone ds-bundle here — the buy box has the tier picker.
+      // No ds-related-products / ds-recently-viewed — meaningless on a
+      // one-product store.
       { id: 'ship_est',   type: 'ds-shipping-estimator' },
       { id: 'main',       type: 'ds-product-main' },
       { id: 'volume',     type: 'ds-volume-discount' },
-      { id: 'bundle',     type: 'ds-bundle' },
       { id: 'fbt',        type: 'ds-frequently-bought' },
       { id: 'highlights', type: 'ds-product-highlights' },
       { id: 'specs',      type: 'ds-product-specs' },
@@ -458,8 +462,6 @@ function fileProductTemplate(c: BuildConfig): string {
       { id: 'qa',         type: 'ds-product-qa' },
       { id: 'trust',      type: 'ds-trust-badges' },
       { id: 'secure',     type: 'ds-secure-checkout' },
-      { id: 'related',    type: 'ds-related-products' },
-      { id: 'recent',     type: 'ds-recently-viewed' },
       { id: 'guarantee',  type: 'ds-guarantee' },
       { id: 'faq',        type: 'ds-faq' },
       { id: 'cta',        type: 'ds-cta' },
@@ -1093,11 +1095,11 @@ function sectionProductMain(c: BuildConfig): string {
   .ds-product__rating { display: flex; gap: .5rem; align-items: center; }
   .ds-stars { color: var(--color-accent); letter-spacing: 2px; font-size: 14px; }
   .ds-product__rating-text { color: var(--color-muted); font-size: .85rem; }
-  .ds-product__title { font-size: clamp(1.6rem, 3vw, 2.4rem); margin: .6rem 0 .9rem; letter-spacing: -0.02em; line-height: 1.1; }
-  .ds-product__desc { color: var(--color-muted); font-size: .98rem; line-height: 1.55; margin: 0 0 1.4rem; max-width: 52ch; }
-  .ds-product__price { display: flex; gap: .75rem; align-items: baseline; margin-bottom: .5rem; }
-  .ds-product__price-sale { font-size: 2rem; font-weight: 800; color: var(--color-primary); }
-  .ds-product__price-compare { text-decoration: line-through; color: var(--color-muted); font-size: 1.1rem; }
+  .ds-product__title { font-size: clamp(1.45rem, 2.6vw, 2.05rem); margin: .55rem 0 .8rem; letter-spacing: -0.02em; line-height: 1.12; }
+  .ds-product__desc { color: var(--color-muted); font-size: .94rem; line-height: 1.55; margin: 0 0 1.25rem; max-width: 52ch; }
+  .ds-product__price { display: flex; gap: .65rem; align-items: baseline; margin-bottom: .45rem; }
+  .ds-product__price-sale { font-size: 1.65rem; font-weight: 800; color: var(--color-primary); letter-spacing: -0.01em; }
+  .ds-product__price-compare { text-decoration: line-through; color: var(--color-muted); font-size: 1rem; }
   .ds-product__discount { background: color-mix(in srgb, var(--color-accent) 14%, transparent); color: var(--color-accent); font-size: .8rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
   .ds-product__klarna { font-size: .85rem; color: var(--color-muted); margin-bottom: 1rem; }
   .ds-product__stock { display: inline-flex; gap: .5rem; align-items: center; font-size: .85rem; color: var(--color-muted); margin-bottom: 1.5rem; }
@@ -1967,28 +1969,33 @@ body[data-width="wide"] .ds-container { max-width: 1320px; }
 
 .ds-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .8rem 1.4rem; border: 0; border-radius: var(--radius);
+  padding: .75rem 1.3rem; border: 0; border-radius: var(--radius);
   background: var(--color-surface); color: var(--color-fg);
   border: 1px solid var(--color-border);
-  font-weight: 700; font-size: .95rem; text-decoration: none; cursor: pointer;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
-  line-height: 1;
+  font-weight: 700; font-size: .92rem; letter-spacing: .01em;
+  text-decoration: none; cursor: pointer;
+  transition: transform .12s ease, box-shadow .15s ease, filter .15s ease;
+  line-height: 1.15;
 }
-.ds-btn:hover { transform: translateY(-1px); }
+.ds-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgba(0,0,0,.25); }
+.ds-btn:active { transform: translateY(0); box-shadow: none; }
+.ds-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.ds-btn[disabled] { opacity: .6; cursor: wait; transform: none; box-shadow: none; }
 .ds-btn-primary {
   background: var(--color-primary);
   color: var(--color-primary-fg);
   border-color: transparent;
-  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--color-primary) 55%, transparent);
 }
+.ds-btn-primary:hover { filter: brightness(1.06); box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--color-primary) 60%, transparent); }
 .ds-btn-on-primary {
   background: var(--color-primary-fg);
   color: var(--color-primary);
   border-color: transparent;
 }
-.ds-btn-sm { padding: .55rem .9rem; font-size: .85rem; }
-.ds-btn-lg { padding: 1rem 1.6rem; font-size: 1.02rem; }
-.ds-btn-xl { padding: 1.2rem 1.8rem; font-size: 1.08rem; }
+.ds-btn-sm { padding: .5rem .9rem; font-size: .82rem; }
+.ds-btn-lg { padding: .9rem 1.5rem; font-size: .96rem; }
+.ds-btn-xl { padding: 1.05rem 1.7rem; font-size: 1rem; }
 
 .ds-stars { color: var(--color-accent); letter-spacing: 2px; font-size: 14px; }
 
