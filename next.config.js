@@ -54,6 +54,31 @@ const nextConfig = {
       }
     ]
   },
+  async redirects() {
+    // The embedded Shopify app entry point (application_url) is /app, which used
+    // to be the old download-only wizard. The current one-click install flow
+    // lives under /shopify. Point the entry at the new flow so opening (or
+    // reinstalling) the app lands on the install wizard, not the stale zip page.
+    // Next.js passes the original query string (host, shop, embedded, ...) through
+    // automatically, so App Bridge still initializes correctly.
+    // Gate on the `host` param: Shopify always sends it when loading an embedded
+    // app in Admin, but the storefront app-proxy (apps/zenya -> /app) does not,
+    // so this can't hijack proxy traffic.
+    return [
+      {
+        source: '/app',
+        has: [{ type: 'query', key: 'host' }],
+        destination: '/shopify',
+        permanent: false,
+      },
+      {
+        source: '/app/create',
+        has: [{ type: 'query', key: 'host' }],
+        destination: '/shopify/new',
+        permanent: false,
+      },
+    ]
+  },
   async rewrites() {
     return [
       {
