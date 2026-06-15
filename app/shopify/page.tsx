@@ -11,11 +11,10 @@ import {
   Store,
   Settings,
   ShoppingBag,
-  Shirt,
-  Leaf,
   Sparkles,
   ArrowUpRight,
   ArrowRight,
+  ExternalLink,
   Layers,
   Palette,
   Eye,
@@ -74,41 +73,20 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'collective',
-    name: 'Collective',
+    name: 'Catalog',
     tagline: 'Catalog · Multi-product',
     description:
-      'Luxury multi-product storefront — curated collection grid, new arrivals, bestsellers, brand promise, testimonials, and newsletter.',
+      'Multi-product storefront for stores with a full catalog — curated collection grid, new arrivals, bestsellers, brand promise, and newsletter. Installs into your store and renders your real products.',
     sections: 10,
     presets: 4,
     icon: Store,
     type: null,
     status: 'soon',
   },
-  {
-    id: 'lookbook',
-    name: 'Lookbook',
-    tagline: 'Fashion · Apparel',
-    description:
-      'High-end fashion store — full-bleed editorial lookbook, drop banner, bestsellers grid, brand story, reviews, and newsletter.',
-    sections: 11,
-    presets: 4,
-    icon: Shirt,
-    type: null,
-    status: 'soon',
-  },
-  {
-    id: 'wellness',
-    name: 'Wellness',
-    tagline: 'Spa · Studio · Booking',
-    description:
-      'Calming store for spas, studios, and wellness brands — treatment menu, bookings, gift cards, instructors, and schedules.',
-    sections: 12,
-    presets: 3,
-    icon: Leaf,
-    type: null,
-    status: 'soon',
-  },
 ];
+
+/** Where "generate more templates" sends merchants — the full web catalog. */
+const WEBSITE_TEMPLATES_URL = 'https://zenyaai.co/themes';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -446,11 +424,38 @@ function StatCard({ icon: Icon, label, value, accent }: { icon: LucideIcon; labe
 function TemplatesView({ queryString }: { queryString: string }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      <SectionHeader title="Templates" subtitle="Ecommerce themes that install into your Shopify store." />
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <SectionHeader title="Templates" subtitle="Ecommerce themes that install directly into your Shopify store." />
+      <div className="grid gap-6 sm:grid-cols-2">
         {TEMPLATES.map((t, i) => (
           <TemplateCard key={t.id} template={t} index={i} queryString={queryString} />
         ))}
+      </div>
+
+      {/* Everything else lives on the website */}
+      <div className="relative mt-8 overflow-hidden rounded-2xl border border-token bg-white/70 p-6 shadow-soft-md backdrop-blur-md">
+        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 100% at 100% 0%, rgba(99,102,241,0.10), transparent 60%)' }} />
+        <div className="relative flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6366f1]/10 text-[#6366f1]">
+              <Sparkles className="h-5 w-5" strokeWidth={2} />
+            </div>
+            <div>
+              <h3 className="text-[15px] font-[590] tracking-[-0.3px] text-foreground">Need a different kind of site?</h3>
+              <p className="mt-0.5 max-w-md text-[13px] leading-[1.55] text-muted">
+                Restaurants, SaaS, fashion, services and more — build them on the Zenya website. Only ecommerce store themes install here.
+              </p>
+            </div>
+          </div>
+          <a
+            href={WEBSITE_TEMPLATES_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full border border-token bg-white px-5 py-2.5 text-[13.5px] font-semibold text-foreground transition hover:bg-foreground hover:text-white"
+          >
+            Generate more on our website
+            <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </a>
+        </div>
       </div>
     </motion.div>
   );
