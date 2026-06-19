@@ -5,9 +5,9 @@ export default function VisualShowcase({
   image,
   primaryColor,
   onShopNow,
-  heading = 'Experience Perfection',
-  subheading = "Don't settle for less. Join thousands of satisfied customers who have upgraded their lifestyle.",
-  cta = 'Get Yours Today',
+  heading = 'اختبر الكمال',
+  subheading = 'لا ترضَ بأقل. انضمّ إلى آلاف العملاء الراضين الذين طوّروا أسلوب حياتهم.',
+  cta = 'احصل عليه اليوم',
 }: { 
   image: string
   primaryColor: string

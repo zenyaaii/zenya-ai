@@ -42,10 +42,10 @@ type AnalyticsSummary = {
 }
 
 const PLAN_LABEL: Record<Plan, string> = {
-  free:        'Free Plan',
-  pro_onetime: 'Pro · Lifetime',
-  pro_hosting: 'Pro · Hosting',
-  admin:       'Admin',
+  free:        'الباقة المجانية',
+  pro_onetime: 'برو · مدى الحياة',
+  pro_hosting: 'برو · استضافة',
+  admin:       'مشرف',
 }
 
 const PLAN_TINT: Record<Plan, { bg: string; ring: string; fg: string }> = {
@@ -102,7 +102,7 @@ export default function DashboardHomePage() {
   const firstName =
     profile?.full_name?.split(' ')?.[0] ||
     user?.user_metadata?.full_name?.split(' ')?.[0] ||
-    (user?.email ? user.email.split('@')[0] : 'there')
+    (user?.email ? user.email.split('@')[0] : 'صديقي')
 
   const recent = themes.slice(0, 3)
 
@@ -115,7 +115,7 @@ export default function DashboardHomePage() {
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
         <h1 className="text-[28px] font-bold tracking-tight text-foreground">
-          {loading ? 'Welcome…' : `Welcome back, ${firstName}`}
+          {loading ? 'مرحبًا…' : `مرحبًا بعودتك، ${firstName}`}
         </h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <PlanBadge plan={plan} />
@@ -125,9 +125,9 @@ export default function DashboardHomePage() {
 
       {/* Stat grid */}
       <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Total sites"  value={loading ? '—' : themes.length} sub={liveCount > 0 ? `${liveCount} live` : 'none live yet'} icon={Folder} />
-        <StatTile label="Live sites"   value={loading ? '—' : liveCount}     sub={liveCount > 0 ? 'live on zenya.app' : 'publish one to get started'} icon={Globe} />
-        <StatTile label="Pageviews"    value={loading ? '—' : totalViews.toLocaleString()} sub="lifetime" icon={Eye} />
+        <StatTile label="إجمالي المواقع"  value={loading ? '—' : themes.length} sub={liveCount > 0 ? `${liveCount} مباشر` : 'لا شيء مباشر بعد'} icon={Folder} />
+        <StatTile label="مواقع مباشرة"   value={loading ? '—' : liveCount}     sub={liveCount > 0 ? 'مباشرة على zenya.app' : 'انشر واحدًا للبدء'} icon={Globe} />
+        <StatTile label="مشاهدات الصفحات"    value={loading ? '—' : totalViews.toLocaleString()} sub="مدى الحياة" icon={Eye} />
         <PlanCard plan={plan} trialRemaining={trialRemaining} trialLimit={trialLimit} hostingEnd={profile?.hosting_current_period_end} />
       </section>
 
@@ -142,9 +142,9 @@ export default function DashboardHomePage() {
         {/* Recent sites */}
         <section className="lg:col-span-2">
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Recent sites</h2>
+            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">أحدث المواقع</h2>
             <Link href="/dashboard/sites" className="text-[12.5px] font-medium text-primary hover:underline">
-              View all →
+              عرض الكل ←
             </Link>
           </div>
 
@@ -162,7 +162,7 @@ export default function DashboardHomePage() {
                   href="/dashboard/sites"
                   className="block rounded-2xl border border-dashed border-token px-4 py-3 text-center text-[12.5px] font-medium text-muted hover:bg-black/[0.02]"
                 >
-                  + {themes.length - 3} more · open Sites
+                  + {themes.length - 3} أخرى · افتح المواقع
                 </Link>
               )}
             </div>
@@ -231,10 +231,10 @@ function PlanCard({
       <div className="rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
           <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
-          Hosting active
+          الاستضافة نشطة
         </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">$19.99 / month</div>
-        <div className="mt-1 text-[12px] text-muted">Renews {formatted}</div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">19.99$ / شهريًا</div>
+        <div className="mt-1 text-[12px] text-muted">يتجدّد {formatted}</div>
       </div>
     )
   }
@@ -243,11 +243,11 @@ function PlanCard({
       <div className="rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          Pro Lifetime
+          برو مدى الحياة
         </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">Unlimited generations</div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
         <Link href="/checkout?plan=hosting" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-          Add hosting · $19.99/mo
+          أضف الاستضافة · 19.99$ شهريًا
           <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
         </Link>
       </div>
@@ -258,10 +258,10 @@ function PlanCard({
       <div className="rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#9b6f00]">
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          Admin
+          مشرف
         </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">All features unlocked</div>
-        <div className="mt-1 text-[12px] text-muted">Hosting + lifetime included</div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">كل المزايا مفتوحة</div>
+        <div className="mt-1 text-[12px] text-muted">الاستضافة + مدى الحياة مشمولان</div>
       </div>
     )
   }
@@ -269,16 +269,16 @@ function PlanCard({
   const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
-      <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Free Plan</div>
+      <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الباقة المجانية</div>
       <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-        {trialRemaining > 0 ? `${trialRemaining} of ${trialLimit} left` : 'Trial used'}
+        {trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'انتهت التجربة'}
       </div>
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#5e6ad2' }} />
       </div>
       <Link href="/checkout?plan=onetime" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-        Get Pro · $9.99 once
-        <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+        احصل على برو · 9.99$ مرة واحدة
+        <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
     </div>
   )
@@ -303,7 +303,7 @@ function RecentRow({ theme }: { theme: Theme }) {
                 zenyaai.co/s/{theme.slug} <ExternalLink className="inline-block h-2.5 w-2.5 opacity-70" />
               </a>
             ) : (
-              <>Draft — created {new Date(theme.created_at).toLocaleDateString()}</>
+              <>مسودّة — أُنشئت {new Date(theme.created_at).toLocaleDateString()}</>
             )}
           </div>
         </div>
@@ -312,7 +312,7 @@ function RecentRow({ theme }: { theme: Theme }) {
         href={`/preview/${theme.id}`}
         className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
       >
-        Open
+        فتح
       </Link>
     </div>
   )
@@ -346,21 +346,21 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
       >
         <Sparkles className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
-      <h3 className="text-[18px] font-bold tracking-tight text-foreground">Build your first site</h3>
+      <h3 className="text-[18px] font-bold tracking-tight text-foreground">أنشئ موقعك الأول</h3>
       <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-        Pick a template, share a quick brief, and Zenya writes the copy and designs
-        the page. Live in under a minute.
+        اختر قالبًا، واكتب نبذة سريعة، وتكتب زينيا المحتوى وتصمّم الصفحة.
+        جاهز خلال أقل من دقيقة.
       </p>
       <Link
         href="/theme/new"
         className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />
-        Create new site
+        أنشئ موقعًا جديدًا
       </Link>
       <div className="mt-3">
         <Link href="/themes" className="text-[12px] text-muted hover:text-foreground">
-          or browse the 8 templates →
+          أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
     </div>
@@ -370,35 +370,35 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
 function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan }) {
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Quick actions</div>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">إجراءات سريعة</div>
       <div className="mt-3 space-y-2">
         <Link href="/theme/new" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
           <span className="inline-flex items-center gap-2">
             <Plus className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-            New site
+            موقع جديد
           </span>
-          <ArrowRight className="h-3 w-3 text-muted" />
+          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
         </Link>
         <Link href="/dashboard/domains" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
           <span className="inline-flex items-center gap-2">
             <Globe className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-            Manage domains
+            إدارة النطاقات
           </span>
-          <ArrowRight className="h-3 w-3 text-muted" />
+          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
         </Link>
         <Link href="/dashboard/gallery" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
           <span className="inline-flex items-center gap-2">
             <ImageIcon className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-            Open my gallery
+            افتح معرضي
           </span>
-          <ArrowRight className="h-3 w-3 text-muted" />
+          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
         </Link>
         <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
           <span className="inline-flex items-center gap-2">
             <BarChart3 className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
-            View analytics
+            عرض التحليلات
           </span>
-          <ArrowRight className="h-3 w-3 text-muted" />
+          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
         </Link>
       </div>
     </div>
@@ -413,9 +413,9 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
       <div className="flex items-baseline justify-between">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Pageviews · last 30 days</div>
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">مشاهدات · آخر 30 يومًا</div>
         <Link href="/dashboard/analytics" className="text-[11.5px] font-medium text-primary hover:underline">
-          Open analytics →
+          افتح التحليلات ←
         </Link>
       </div>
       <div className="mt-2 flex items-end gap-3">
@@ -423,7 +423,7 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
           {loading ? '—' : views30.toLocaleString()}
         </div>
         <div className="pb-1.5 text-[11.5px] text-muted">
-          {views7 > 0 ? `${views7.toLocaleString()} this week` : 'no views this week'}
+          {views7 > 0 ? `${views7.toLocaleString()} هذا الأسبوع` : 'لا مشاهدات هذا الأسبوع'}
         </div>
       </div>
       {/* Sparkline */}
@@ -456,8 +456,8 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
       <div className="flex items-baseline justify-between">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Top performing sites</div>
-        <span className="text-[11.5px] text-muted">{liveDomains > 0 ? `${liveDomains} custom domain${liveDomains === 1 ? '' : 's'}` : 'last 30 days'}</span>
+        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">أفضل المواقع أداءً</div>
+        <span className="text-[11.5px] text-muted">{liveDomains > 0 ? `${liveDomains} نطاق مخصّص` : 'آخر 30 يومًا'}</span>
       </div>
       {loading ? (
         <div className="mt-3 space-y-2">
@@ -467,7 +467,7 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
         </div>
       ) : top.length === 0 ? (
         <div className="mt-4 py-2 text-[12.5px] text-muted">
-          No pageviews yet. Publish a site to start collecting traffic.
+          لا مشاهدات بعد. انشر موقعًا لتبدأ جمع الزيارات.
         </div>
       ) : (
         <ul className="mt-3 space-y-1.5">
@@ -479,7 +479,7 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
               <li key={s.id} className="rounded-md px-1 py-1">
                 <div className="flex items-baseline justify-between text-[12.5px]">
                   <span className="truncate font-medium text-foreground">
-                    <span className="mr-1.5 inline-block w-4 text-right text-muted tabular-nums">{i + 1}.</span>
+                    <span className="me-1.5 inline-block w-4 text-end text-muted tabular-nums">{i + 1}.</span>
                     {s.product_name}
                   </span>
                   <span className="tabular-nums text-muted">{v.toLocaleString()}</span>
@@ -501,13 +501,13 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
   if (plan === 'pro_onetime') {
     return (
       <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Add hosting</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">أضف الاستضافة</div>
         <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
-          Publish your brochure templates on Zenya at a custom domain. $19.99/month, cancel anytime.
+          انشر قوالب العرض على زينيا بنطاق مخصّص. 19.99$ شهريًا، ألغِ في أي وقت.
         </p>
         <Link href="/checkout?plan=hosting" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
-          Start hosting
-          <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+          ابدأ الاستضافة
+          <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
         </Link>
       </div>
     )
@@ -516,16 +516,16 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
   return (
     <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-        {trialRemaining === 0 ? 'Trial complete' : 'Upgrade to Pro'}
+        {trialRemaining === 0 ? 'انتهت التجربة' : 'الترقية إلى برو'}
       </div>
       <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
         {trialRemaining === 0
-          ? 'You used your 3 free generations. Get unlimited for a single $9.99.'
-          : 'Pay once, get unlimited generations + Shopify ZIP export + project ZIPs forever.'}
+          ? 'استخدمت عملياتك الثلاث المجانية. احصل على توليد غير محدود بدفعة واحدة 9.99$.'
+          : 'ادفع مرة واحدة، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع مدى الحياة.'}
       </p>
       <Link href="/checkout?plan=onetime" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
-        Get Pro · $9.99
-        <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+        احصل على برو · 9.99$
+        <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
     </div>
   )

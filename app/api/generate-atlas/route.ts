@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { atlasInputSchema, type AtlasInput } from '@/utils/atlas/input'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -280,7 +282,9 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert SaaS copywriter. Output only valid JSON.'
+            content:
+              'You are an expert SaaS copywriter. Output only valid JSON.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           {
             role: 'user',
@@ -291,6 +295,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'openai_atlas'
     )
+
+    await logAiUsage({ operation: 'generate-atlas', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

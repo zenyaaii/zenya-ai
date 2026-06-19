@@ -99,19 +99,19 @@ export default function GalleryPage() {
     <div className="mx-auto max-w-6xl px-6 py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-foreground">Gallery</h1>
+          <h1 className="text-[24px] font-bold tracking-tight text-foreground">المعرض</h1>
           <p className="mt-1 text-[13px] text-muted">
-            Every image you’ve uploaded lives here. Reuse them across any site you build.
+            كل صورة رفعتها تعيش هنا. أعِد استخدامها في أي موقع تبنيه.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted" />
+            <Search className="pointer-events-none absolute start-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted" />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search images"
-              className="w-56 rounded-full border border-token bg-white py-1.5 pl-7 pr-3 text-[12.5px] outline-none focus:border-primary"
+              placeholder="ابحث في الصور"
+              className="w-56 rounded-full border border-token bg-white py-1.5 ps-7 pe-3 text-[12.5px] outline-none focus:border-primary"
             />
           </div>
           <button
@@ -121,7 +121,7 @@ export default function GalleryPage() {
             className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:opacity-50"
           >
             {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" strokeWidth={2.5} />}
-            {uploading ? 'Uploading…' : 'Upload images'}
+            {uploading ? 'جارٍ الرفع…' : 'رفع صور'}
           </button>
           <input
             ref={fileRef}
@@ -164,20 +164,20 @@ export default function GalleryPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
-                alt={img.name || 'gallery image'}
+                alt={img.name || 'صورة من المعرض'}
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2.5 py-2 opacity-0 transition group-hover:opacity-100">
                 <span className="truncate text-[10.5px] font-medium text-white" title={img.name || img.url}>
-                  {img.name || 'Untitled'}
+                  {img.name || 'بلا عنوان'}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
                     onClick={() => copy(img)}
                     className="rounded-md bg-white/15 p-1.5 text-white hover:bg-white/30"
-                    title={copiedId === img.id ? 'Copied!' : 'Copy URL'}
+                    title={copiedId === img.id ? 'نُسخ!' : 'نسخ الرابط'}
                   >
                     <Copy className="h-3 w-3" />
                   </button>
@@ -186,15 +186,15 @@ export default function GalleryPage() {
                     onClick={() => remove(img)}
                     disabled={deletingId === img.id}
                     className="rounded-md bg-white/15 p-1.5 text-white hover:bg-[rgba(220,38,38,0.55)] disabled:opacity-50"
-                    title="Delete"
+                    title="حذف"
                   >
                     {deletingId === img.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                   </button>
                 </div>
               </div>
               {copiedId === img.id && (
-                <span className="absolute right-2 top-2 rounded-full bg-[#15803d] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-white shadow">
-                  Copied
+                <span className="absolute end-2 top-2 rounded-full bg-[#15803d] px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-white shadow">
+                  نُسخ
                 </span>
               )}
             </div>
@@ -210,7 +210,7 @@ function Empty({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: boolean
     return (
       <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
         <ImageIcon className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
-        <p className="mt-3 text-[13px] text-muted">No images match your search.</p>
+        <p className="mt-3 text-[13px] text-muted">لا صور تطابق بحثك.</p>
       </div>
     )
   }
@@ -219,16 +219,16 @@ function Empty({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: boolean
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
         <ImageIcon className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
-      <h3 className="mt-4 text-[16px] font-semibold text-foreground">Your gallery is empty</h3>
+      <h3 className="mt-4 text-[16px] font-semibold text-foreground">معرضك فارغ</h3>
       <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-        Upload your first image — every image you use in any of your sites will collect here so you can reuse it instantly.
+        ارفع صورتك الأولى — كل صورة تستخدمها في أي موقع ستتجمّع هنا لإعادة استخدامها فورًا.
       </p>
       <button
         onClick={onUpload}
         className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-primary/25"
       >
         <Upload className="h-3.5 w-3.5" strokeWidth={2.5} />
-        Upload your first image
+        ارفع صورتك الأولى
       </button>
     </div>
   )

@@ -140,13 +140,13 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
           {/* Sprint cards row */}
           <div className="mb-3 grid grid-cols-3 gap-2">
             {[
-              { label: 'In Progress', count: '8', color: colors.primary },
-              { label: 'In Review', count: '3', color: colors.accent },
-              { label: 'Done', count: '24', color: '#10b981' }
+              { label: 'قيد التنفيذ', count: '8', color: colors.primary },
+              { label: 'قيد المراجعة', count: '3', color: colors.accent },
+              { label: 'منجز', count: '24', color: '#10b981' }
             ].map((col) => (
               <div key={col.label} className="rounded-xl p-3" style={{ background: cardBg, border: `1px solid ${colors.border}` }}>
                 <div className="h-1.5 w-full rounded-full mb-2" style={{ background: col.color, opacity: 0.3 }}>
-                  <div className="h-full rounded-full" style={{ width: col.label === 'Done' ? '100%' : col.label === 'In Progress' ? '55%' : '33%', background: col.color }} />
+                  <div className="h-full rounded-full" style={{ width: col.label === 'منجز' ? '100%' : col.label === 'قيد التنفيذ' ? '55%' : '33%', background: col.color }} />
                 </div>
                 <p className="text-[10px] font-bold" style={{ color: col.color }}>{col.count}</p>
                 <p className="text-[9px]" style={{ color: textColor }}>{col.label}</p>
@@ -182,11 +182,11 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
 
         {/* Right panel */}
         <div className="hidden w-36 border-l p-3 sm:block" style={{ borderColor: colors.border }}>
-          <p className="mb-3 text-[9px] font-bold uppercase tracking-wider" style={{ color: textColor }}>AI Insights</p>
+          <p className="mb-3 text-[9px] font-bold uppercase tracking-wider" style={{ color: textColor }}>رؤى الذكاء الاصطناعي</p>
           {[
-            { label: 'Sprint velocity', value: '+18%' },
-            { label: 'Blockers found', value: '2 risks' },
-            { label: 'Est. ship date', value: 'Mar 28' },
+            { label: 'سرعة الإنجاز', value: '+18%' },
+            { label: 'عوائق مكتشفة', value: 'خطران' },
+            { label: 'تاريخ الإطلاق المتوقّع', value: '28 مارس' },
           ].map((item, i) => (
             <div key={i} className="mb-2 rounded-lg p-2" style={{ background: cardBg, border: `1px solid ${colors.border}` }}>
               <p className="text-[9px]" style={{ color: textColor }}>{item.label}</p>
@@ -197,7 +197,7 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
             className="mt-3 rounded-lg p-2 text-center text-[9px] font-bold text-white"
             style={{ background: colors.gradient }}
           >
-            ✦ AI suggest fix
+            ✦ الذكاء يقترح حلًّا
           </div>
         </div>
       </div>
@@ -208,10 +208,10 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
 // ─── Navbar ────────────────────────────────────────────────────────────────────
 function AtlasNav({ content, colors, font, view, setView }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; view: AtlasView; setView: (v: AtlasView) => void }) {
   const navLinks: { label: string; view: AtlasView }[] = [
-    { label: 'Features', view: 'features' },
-    { label: 'Pricing', view: 'pricing' },
-    { label: 'Integrations', view: 'integrations' },
-    { label: 'Docs', view: 'docs' },
+    { label: 'المزايا', view: 'features' },
+    { label: 'الأسعار', view: 'pricing' },
+    { label: 'التكاملات', view: 'integrations' },
+    { label: 'التوثيق', view: 'docs' },
   ]
   return (
     <nav
@@ -234,7 +234,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
         ))}
       </div>
       <div className="flex items-center gap-3">
-        <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>Log in</button>
+        <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
         <button
           onClick={() => setView('pricing')}
           className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
@@ -512,7 +512,7 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
         </p>
         <div className="mt-3 flex items-end gap-1">
           <span className="text-5xl font-black" style={{ color: tier.highlighted ? '#fff' : colors.text }}>{tier.price}</span>
-          {tier.price !== 'Custom' && (
+          {tier.price !== 'حسب الطلب' && (
             <span className="mb-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.7)' : colors.muted }}>/{tier.period}</span>
           )}
         </div>

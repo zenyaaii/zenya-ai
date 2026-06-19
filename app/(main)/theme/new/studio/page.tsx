@@ -35,28 +35,28 @@ type Form = {
 
 function buildSampleForm(): Form {
   return {
-    brand_name: 'Marlowe & Co',
-    brand_tagline: 'Made by hand. Meant to last.',
-    brand_category: 'Artisan Homeware',
+    brand_name: 'صَنعة',
+    brand_tagline: 'صُنع باليد. خُلق ليدوم.',
+    brand_category: 'مفروشات حرفية',
     brand_founded: '2017',
-    mission: 'We are building an argument against the disposable — one handmade object at a time. Every piece is made to live in a house for decades, not seasons.',
-    founder_story: 'Marlowe started in a one-bedroom flat in Lisbon when our co-founder Aoife inherited her grandmother\'s ceramics studio. The first 200 pieces sold out from her Instagram in a weekend. Eight years later we still work with the same kiln, the same potters, and the same rule: if it isn\'t worth keeping, we don\'t make it.',
+    mission: 'نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى. كل قطعة مصنوعة لتعيش في البيت عقودًا، لا مواسم.',
+    founder_story: 'بدأت «صَنعة» في شقة صغيرة حين ورث مؤسّسنا خالد مشغل الخزف عن جدّه. نفدت أول 200 قطعة في عطلة أسبوع واحدة. وبعد ثماني سنوات ما زلنا نعمل مع الفرن نفسه، والخزّافين أنفسهم، والقاعدة نفسها: إن لم تكن تستحق الاقتناء، فلن نصنعها.',
     values: [
-      { id: uid(), title: 'Slow on purpose', description: 'We refuse to release more than four collections a year. Things take time because things take time.' },
-      { id: uid(), title: 'Honest sourcing', description: 'Every material traces back to a named workshop, kiln, or mill. No mystery supply chains.' },
-      { id: uid(), title: 'Made to outlast us', description: 'We design objects you fix instead of replace. We sell spare parts forever.' },
+      { id: uid(), title: 'بطء عن قصد', description: 'نرفض إطلاق أكثر من أربع تشكيلات سنويًا. الأشياء تأخذ وقتها لأنها تستحق الوقت.' },
+      { id: uid(), title: 'مصدر صادق', description: 'كل مادة تعود إلى مشغل أو فرن أو مصنع باسمٍ معروف. لا سلاسل توريد غامضة.' },
+      { id: uid(), title: 'صُنعت لتدوم بعدنا', description: 'نصمّم أشياء تُصلِحها بدل أن تستبدلها. ونبيع قطع الغيار إلى الأبد.' },
     ],
-    process_description: 'Every piece takes weeks to make. We visit every workshop, inspect every batch, and reject anything that isn\'t perfect. There is no factory floor — there is a kiln in Alentejo, a small mill in Yorkshire, and a tiny atelier in Kyoto.',
-    process_steps: 'Source, Design, Make, Inspect, Pack, Ship',
-    team_size: '9 people across Lisbon, Yorkshire, and Kyoto',
+    process_description: 'كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا. لا أرضية مصنع — بل فرن في الريف، ومشغل صغير، وأتيليه متواضع.',
+    process_steps: 'التوريد، التصميم، الصنع، الفحص، التغليف، الشحن',
+    team_size: '9 أشخاص موزّعون على ثلاث ورش',
     press_features: 'The New York Times, Wallpaper*, Monocle, Vogue Living, Cereal',
     milestones: [
-      { id: uid(), year: '2017', event: 'First collection launched from a Lisbon flat' },
-      { id: uid(), year: '2019', event: 'Opened the Alentejo kiln workshop' },
-      { id: uid(), year: '2022', event: 'Featured in Wallpaper\'s Design 100' },
-      { id: uid(), year: '2024', event: '40,000th object in a home' },
+      { id: uid(), year: '2017', event: 'إطلاق أول تشكيلة من شقة صغيرة' },
+      { id: uid(), year: '2019', event: 'افتتاح ورشة الفرن' },
+      { id: uid(), year: '2022', event: 'ظهور ضمن قائمة Wallpaper للتصميم' },
+      { id: uid(), year: '2024', event: 'القطعة الأربعون ألفًا في بيتٍ ما' },
     ],
-    customer_count: '42,000+ objects in homes',
+    customer_count: '+42,000 قطعة في البيوت',
     repeat_rate: '82%',
     avg_rating: '4.97★',
     style_preset: 'ink',
@@ -90,9 +90,9 @@ const INITIAL_FORM: Form = {
 }
 
 const CATEGORY_OPTIONS = [
-  'Artisan Homeware', 'Fashion & Apparel', 'Beauty & Skincare', 'Food & Beverage',
-  'Art & Prints', 'Jewellery', 'Books & Publishing', 'Outdoor & Adventure',
-  'Furniture & Design', 'Ceramics & Pottery', 'Textiles & Linen', 'Other'
+  'مفروشات حرفية', 'الأزياء والملابس', 'الجمال والعناية بالبشرة', 'الأطعمة والمشروبات',
+  'الفن والمطبوعات', 'المجوهرات', 'الكتب والنشر', 'الهواء الطلق والمغامرة',
+  'الأثاث والتصميم', 'الخزف والفخار', 'المنسوجات والكتّان', 'أخرى'
 ]
 
 const sectionMotion = {
@@ -150,12 +150,12 @@ export default function StudioWizardPage() {
   }
 
   function validate(): string | null {
-    if (form.brand_name.trim().length < 2) return 'Enter your brand name.'
-    if (form.brand_tagline.trim().length < 5) return 'Enter a brand tagline.'
-    if (form.brand_category.trim().length < 2) return 'Select a brand category.'
-    if (form.mission.trim().length < 20) return 'Describe your mission (at least 20 characters).'
+    if (form.brand_name.trim().length < 2) return 'أدخل اسم علامتك التجارية.'
+    if (form.brand_tagline.trim().length < 5) return 'أدخل شعار العلامة.'
+    if (form.brand_category.trim().length < 2) return 'اختر فئة العلامة.'
+    if (form.mission.trim().length < 20) return 'صِف رسالتك (20 حرفًا على الأقل).'
     const validValues = form.values.filter((v) => v.title.trim().length >= 2)
-    if (validValues.length < 1) return 'Add at least one core value.'
+    if (validValues.length < 1) return 'أضف قيمة جوهرية واحدة على الأقل.'
     return null
   }
 
@@ -205,7 +205,7 @@ export default function StudioWizardPage() {
         body: JSON.stringify(payload)
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'Generation failed')
+      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = STUDIO_PRESETS.find((p) => p.id === form.style_preset) || STUDIO_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
@@ -226,17 +226,17 @@ export default function StudioWizardPage() {
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/studio'); return }
-      if (saveRes.status === 402) { alert('Free theme limit reached. Please upgrade to continue.'); router.push('/pricing'); return }
-      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'Save failed')
+      if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
+      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
       router.push(`/preview/studio/${saveJson.id}`)
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong. Please try again.')
+      setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
     }
   }
 
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">Loading...</div>
+    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
   }
 
   return (
@@ -251,12 +251,12 @@ export default function StudioWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
-          <p className="text-xs uppercase tracking-[0.35em] text-stone-500">Studio · Brand story theme</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-stone-500">ستوديو · قالب قصة العلامة</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Build your brand story page.
+            ابنِ صفحة قصة علامتك.
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
-            Tell us your story and Zenya crafts a premium editorial brand page — manifesto hero, mission, founder letter, timeline, values, process, team, and press quotes.
+            أخبرنا قصتك وتصوغ زينيا صفحة علامة تحريرية فاخرة — واجهة بيان وغاية ورسالة المؤسّس وخط زمني وقيم وأسلوب عمل وفريق واقتباسات صحفية.
           </p>
         </motion.div>
 
@@ -270,62 +270,62 @@ export default function StudioWizardPage() {
 
           {/* ── Brand ──────────────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. Your brand</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Brand name *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">اسم العلامة *</label>
                 <input
                   value={form.brand_name}
                   onChange={(e) => update('brand_name', e.target.value)}
-                  placeholder="e.g. ARCANA, Marlowe & Co, The Still Life"
+                  placeholder="مثلاً: صَنعة، أصالة، دار الحِرَف"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Tagline *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
                 <input
                   value={form.brand_tagline}
                   onChange={(e) => update('brand_tagline', e.target.value)}
-                  placeholder="e.g. Made by hand. Meant to last."
+                  placeholder="مثلاً: صُنع باليد. خُلق ليدوم."
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Category *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">الفئة *</label>
                 <select
                   value={form.brand_category}
                   onChange={(e) => update('brand_category', e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 >
-                  <option value="">Select category...</option>
+                  <option value="">اختر الفئة...</option>
                   {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Year founded</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">سنة التأسيس</label>
                 <input
                   value={form.brand_founded}
                   onChange={(e) => update('brand_founded', e.target.value)}
-                  placeholder="e.g. 2017"
+                  placeholder="مثلاً: 2017"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Mission statement *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">بيان الرسالة *</label>
                 <textarea
                   value={form.mission}
                   onChange={(e) => update('mission', e.target.value)}
-                  placeholder="e.g. We are building an argument against the disposable — one handmade object at a time."
+                  placeholder="مثلاً: نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى."
                   rows={3}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Founder story</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">قصة المؤسّس</label>
                 <textarea
                   value={form.founder_story}
                   onChange={(e) => update('founder_story', e.target.value)}
-                  placeholder="How did the brand start? What problem were you solving? The AI will write a compelling letter from this."
+                  placeholder="كيف بدأت العلامة؟ ما المشكلة التي كنت تحلّها؟ سيكتب الذكاء الاصطناعي رسالةً مؤثّرة من هذا."
                   rows={3}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
@@ -336,23 +336,23 @@ export default function StudioWizardPage() {
           {/* ── Values ─────────────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">2. Core values</h2>
+              <h2 className="text-xl font-black text-foreground">2. القيم الجوهرية</h2>
               <span className="text-sm text-muted">{form.values.filter(v => v.title.trim()).length}/5</span>
             </div>
-            <p className="mb-5 text-sm text-muted">What does your brand refuse to compromise on? 1–5 values.</p>
+            <p className="mb-5 text-sm text-muted">ما الذي ترفض علامتك المساومة عليه؟ من 1 إلى 5 قيم.</p>
             <div className="space-y-3">
               {form.values.map((val, i) => (
                 <div key={val.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
                   <input
                     value={val.title}
                     onChange={(e) => updateValue(val.id, { title: e.target.value })}
-                    placeholder={`Value ${i + 1}`}
+                    placeholder={`القيمة ${i + 1}`}
                     className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                   />
                   <input
                     value={val.description}
                     onChange={(e) => updateValue(val.id, { description: e.target.value })}
-                    placeholder="Brief description (optional)"
+                    placeholder="وصف موجز (اختياري)"
                     className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                   />
                   <button
@@ -368,49 +368,49 @@ export default function StudioWizardPage() {
             </div>
             {form.values.length < 5 && (
               <button type="button" onClick={addValue} className="mt-4 flex items-center gap-2 text-sm font-semibold text-stone-600 hover:underline">
-                + Add value
+                + أضف قيمة
               </button>
             )}
           </motion.section>
 
           {/* ── Process & Timeline ─────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">3. Process & milestones</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">3. أسلوب العمل والمحطّات</h2>
             <div className="grid gap-5">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">How you make things</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">كيف تصنع أشياءك</label>
                 <textarea
                   value={form.process_description}
                   onChange={(e) => update('process_description', e.target.value)}
-                  placeholder="e.g. Every piece takes weeks to make. We visit every workshop, inspect every batch, and reject anything that isn't perfect."
+                  placeholder="مثلاً: كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا."
                   rows={2}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Process steps</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">خطوات العمل</label>
                 <input
                   value={form.process_steps}
                   onChange={(e) => update('process_steps', e.target.value)}
-                  placeholder="Source, Design, Make, Inspect, Ship (comma separated)"
+                  placeholder="التوريد، التصميم، الصنع, الفحص، الشحن (مفصولة بفواصل)"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-4 block text-sm font-bold text-foreground">Key milestones (year + event)</label>
+                <label className="mb-4 block text-sm font-bold text-foreground">المحطّات البارزة (السنة + الحدث)</label>
                 <div className="space-y-3">
                   {form.milestones.map((m, i) => (
                     <div key={m.id} className="grid gap-3 sm:grid-cols-[120px_1fr_auto]">
                       <input
                         value={m.year}
                         onChange={(e) => updateMilestone(m.id, { year: e.target.value })}
-                        placeholder="Year"
+                        placeholder="السنة"
                         className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                       />
                       <input
                         value={m.event}
                         onChange={(e) => updateMilestone(m.id, { event: e.target.value })}
-                        placeholder={`e.g. Opened our first studio in Lisbon`}
+                        placeholder={`مثلاً: افتتحنا أول ستوديو لنا`}
                         className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                       />
                       <button
@@ -426,7 +426,7 @@ export default function StudioWizardPage() {
                 </div>
                 {form.milestones.length < 6 && (
                   <button type="button" onClick={addMilestone} className="mt-3 flex items-center gap-2 text-sm font-semibold text-stone-600 hover:underline">
-                    + Add milestone
+                    + أضف محطّة
                   </button>
                 )}
               </div>
@@ -435,51 +435,51 @@ export default function StudioWizardPage() {
 
           {/* ── Credibility ────────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. Credibility</h2>
-            <p className="mb-6 text-sm text-muted">Press features, team size, and customer proof build trust.</p>
+            <h2 className="mb-2 text-xl font-black text-foreground">4. المصداقية</h2>
+            <p className="mb-6 text-sm text-muted">الظهور الصحفي وحجم الفريق وأدلّة العملاء تبني الثقة.</p>
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Press features</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">ظهور في الصحافة</label>
                 <input
                   value={form.press_features}
                   onChange={(e) => update('press_features', e.target.value)}
-                  placeholder="The New York Times, Wallpaper*, Monocle, Vogue Living... (comma separated)"
+                  placeholder="The New York Times, Wallpaper*, Monocle, Vogue Living... (مفصولة بفواصل)"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Team size</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">حجم الفريق</label>
                 <input
                   value={form.team_size}
                   onChange={(e) => update('team_size', e.target.value)}
-                  placeholder="e.g. 9 people"
+                  placeholder="مثلاً: 9 أشخاص"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Objects / products sold</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">القطع / المنتجات المباعة</label>
                 <input
                   value={form.customer_count}
                   onChange={(e) => update('customer_count', e.target.value)}
-                  placeholder="e.g. 42,000+ objects in homes"
+                  placeholder="مثلاً: +42,000 قطعة في البيوت"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Repeat customer rate</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">نسبة العملاء المتكرّرين</label>
                 <input
                   value={form.repeat_rate}
                   onChange={(e) => update('repeat_rate', e.target.value)}
-                  placeholder="e.g. 82%"
+                  placeholder="مثلاً: 82%"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Average rating</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
                 <input
                   value={form.avg_rating}
                   onChange={(e) => update('avg_rating', e.target.value)}
-                  placeholder="e.g. 4.97★"
+                  placeholder="مثلاً: 4.97★"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
@@ -488,7 +488,7 @@ export default function StudioWizardPage() {
 
           {/* ── Style preset ───────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. Visual style</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {STUDIO_PRESETS.map((preset) => {
                 const selected = form.style_preset === preset.id
@@ -522,13 +522,13 @@ export default function StudioWizardPage() {
               className="flex items-center gap-3 rounded-full bg-gradient-to-r from-stone-800 to-stone-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-500/25 transition hover:scale-105 hover:shadow-stone-500/40 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> Crafting your story...</>
+                <><span className="animate-spin">⏳</span> جارٍ صياغة قصتك...</>
               ) : (
-                <>✦ Generate Studio brand page</>
+                <>✦ ولّد صفحة علامة ستوديو</>
               )}
             </button>
             {loading && (
-              <p className="text-sm text-muted">AI is writing your manifesto, founder letter, values, and press quotes — about 15–20 seconds.</p>
+              <p className="text-sm text-muted">يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك واقتباساتك الصحفية — نحو 15 إلى 20 ثانية.</p>
             )}
           </motion.div>
         </div>

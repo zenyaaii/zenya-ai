@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+/* ── Arabic typeface — Tajawal: geometric, modern, full weight range.
+   Primary UI + display face for the whole RTL product. ── */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -78,8 +81,15 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    font-feature-settings: 'cv01', 'ss03';
+    /* Tajawal renders Arabic; Inter is the Latin fallback for the few Latin
+       tokens (numerals, the "Zenya" wordmark, code). */
+    font-family: 'Tajawal', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Slightly more line-height for Arabic body text — Arabic glyphs are taller
+     and need more breathing room than Latin to stay legible. */
+  p, li, dd, blockquote, label {
+    line-height: 1.85;
   }
 
   /* ── Vertical connecting gradient: cool indigo top → warm amber bottom ── */
@@ -286,6 +296,51 @@
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── Latin font escape hatch ──
+     For brand wordmarks, code, and Latin-only tokens that read better in
+     Inter than in Tajawal's Latin glyphs. */
+  .font-latin {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* ── RTL icon flip ──
+     Direction-bearing glyphs (arrows, chevrons, send, etc.) point the wrong
+     way once the document is RTL. Apply `.rtl-flip` to mirror them so
+     "forward / next" points to the left as Arabic readers expect. */
+  [dir='rtl'] .rtl-flip {
+    transform: scaleX(-1);
+  }
+
+  /* ── Animated Arabic wordmark (زينيا) ──
+     The brand gradient flows through the connected letters with a slow shine
+     sweep, so the logotype always feels alive. Pairs with the per-letter
+     RTL reveal in components/ZenyaWordmark.tsx. Ligatures stay intact because
+     the word is never split — we animate the gradient + a clip reveal. */
+  .wordmark-ar {
+    background-image: linear-gradient(
+      110deg,
+      #4f5ab8 0%,
+      #5e6ad2 32%,
+      #b9b8ff 47%,
+      #7170ff 54%,
+      #5e6ad2 68%,
+      #4f5ab8 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: wordmark-shine 7s ease-in-out infinite;
+  }
+  @keyframes wordmark-shine {
+    0%, 100% { background-position: 100% 50%; }
+    50%      { background-position: 0%   50%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wordmark-ar { animation: none; background-position: 50% 50%; }
+  }
 }
 
 /* ── Lenis smooth-scroll integration ──

@@ -2,122 +2,122 @@ import type { StudioContent } from './types'
 
 export const STUDIO_MOCK_CONTENT: StudioContent = {
   brand: {
-    name: 'ARCANA',
-    tagline: 'Made by hand. Meant to last.',
-    category: 'Artisan Homeware',
+    name: 'صَنعة',
+    tagline: 'مصنوعٌ يدويًا. خُلِق ليدوم.',
+    category: 'مفروشات منزلية حرفية',
     founded: '2017'
   },
   hero: {
-    eyebrow: 'Est. 2017 · Porto, Portugal',
-    manifesto: 'Against the\ndisposable.',
-    subheadline: 'We make objects that belong in your home for decades, not seasons. Each piece emerges from a process as old as the craft itself — hands, fire, time.',
-    cta_primary: 'Discover the collection',
-    cta_secondary: 'Read our story'
+    eyebrow: 'تأسّست 2017 · فاس، المغرب',
+    manifesto: 'في وجه\nكل ما يُرمى.',
+    subheadline: 'نصنع أشياءً تبقى في بيتك عقودًا، لا مواسم. كل قطعة تخرج من عملية قديمة قِدَم الحرفة نفسها — أيدٍ، ونار، ووقت.',
+    cta_primary: 'اكتشف التشكيلة',
+    cta_secondary: 'اقرأ قصتنا'
   },
   mission: {
-    statement: 'We are building an argument against the disposable — one handmade object at a time.',
-    elaboration: 'Every product we make is a quiet act of resistance. Against fast production. Against synthetic materials. Against the idea that beautiful things should be cheap and replaceable. We believe in the opposite: that the objects around you should earn their place slowly, improve with age, and outlast the trends that were supposed to replace them.'
+    statement: 'نبني حُجّةً في وجه كل ما يُرمى — قطعةً يدويةً واحدة في كل مرة.',
+    elaboration: 'كل منتج نصنعه فعلُ مقاومةٍ هادئ. في وجه الإنتاج السريع، والخامات الصناعية، وفكرة أن الأشياء الجميلة يجب أن تكون رخيصة وقابلة للاستبدال. نؤمن بالعكس: أن الأشياء حولك يجب أن تستحقّ مكانها على مهل، وتزداد جمالًا مع العمر، وتعمّر أطول من الموضات التي كان يُفترض أن تستبدلها.'
   },
   founder_letter: {
-    eyebrow: 'A letter from the founders',
-    heading: 'We started with one question.',
+    eyebrow: 'رسالة من المؤسِّسَين',
+    heading: 'بدأنا بسؤالٍ واحد.',
     paragraphs: [
-      'In 2016, my partner Lena and I moved into our first apartment together. We went looking for things to fill it with — things we\'d actually want to live around. We couldn\'t find them. Everything was either beautifully made and impossibly priced, or affordable and obviously temporary.',
-      'We spent a year visiting workshops across Portugal, Spain, and Morocco — places where the old ways were still practiced, where potters and weavers and woodworkers were making things by hand with the same methods their grandparents had used. We found what we were looking for.',
-      'ARCANA began as a collection of those objects. It has grown into something larger — a community of makers and a shared belief that the things in our homes should mean something. That they should be worth keeping.',
-      'Every piece in our catalogue is made by a craftsperson we know by name, in a workshop we have visited. That is not a marketing line. It is the only way we know how to do this properly.'
+      'في 2016، انتقلتُ أنا وشريكي ليث إلى أول مساحة عملٍ لنا. بحثنا عن أشياء نملأ بها المكان — أشياء نرغب فعلًا في العيش بينها. لم نجدها. كان كل شيء إمّا بديع الصنع باهظ الثمن، أو رخيصًا ومؤقتًا بوضوح.',
+      'أمضينا عامًا نزور ورشًا في المغرب وسوريا ومصر — أماكن ما زالت تُمارَس فيها الطرق القديمة، حيث يصنع الخزّافون والنسّاجون والنجّارون أشياءهم بأيديهم بالطرق نفسها التي ورثوها عن أجدادهم. وجدنا ما كنّا نبحث عنه.',
+      'بدأت «صَنعة» كمجموعة من تلك الأشياء. ثم نمت إلى ما هو أكبر — مجتمع من الحرفيين وإيمان مشترك بأن الأشياء في بيوتنا يجب أن تعني شيئًا، وأن تستحقّ الاحتفاظ بها.',
+      'كل قطعة في كتالوجنا يصنعها حرفيٌّ نعرفه بالاسم، في ورشةٍ زرناها. هذه ليست عبارة تسويقية، بل الطريقة الوحيدة التي نعرف بها كيف نفعل هذا كما يجب.'
     ],
-    signature: 'Marco & Lena',
-    signature_role: 'Co-founders, ARCANA'
+    signature: 'مروان وليث',
+    signature_role: 'المؤسِّسان المشاركان، صَنعة'
   },
   timeline: {
-    eyebrow: 'Our history',
-    heading: 'Eight years of slow building.',
+    eyebrow: 'تاريخنا',
+    heading: 'ثماني سنوات من البناء المتأنّي.',
     events: [
-      { year: '2017', title: 'First collection', description: 'Twelve handmade ceramic pieces from a workshop outside Porto. Sold out in three weeks. We knew we were onto something.' },
-      { year: '2019', title: 'The Porto atelier', description: 'Opened our first physical space — part studio, part showroom, part community. A place to see the work being made.' },
-      { year: '2021', title: 'Fifteen workshops', description: 'Expanded to 15 partner artisans across Portugal, Spain, and Morocco. Strict sourcing: every material natural, every workshop visited in person.' },
-      { year: '2023', title: 'B Corp certified', description: 'Achieved B Corporation certification. Verified against the highest standards of social and environmental performance.' },
-      { year: '2025', title: 'Two hundred pieces', description: 'Our catalogue reaches 200 objects. Still handmade. Still from the same families of craftspeople we started with.' }
+      { year: '2017', title: 'أول تشكيلة', description: 'اثنتا عشرة قطعة خزفية يدوية من ورشة قرب فاس. نفدت في ثلاثة أسابيع. عرفنا أننا على الطريق الصحيح.' },
+      { year: '2019', title: 'ورشة فاس', description: 'افتتحنا أول مساحة فعلية — ستوديو ومعرض ومجتمع. مكانٌ لرؤية العمل وهو يُصنع.' },
+      { year: '2021', title: 'خمس عشرة ورشة', description: 'توسّعنا إلى 15 حرفيًا شريكًا في المغرب وسوريا ومصر. مصادر صارمة: كل خامة طبيعية، وكل ورشة تُزار شخصيًا.' },
+      { year: '2023', title: 'اعتماد B Corp', description: 'حصلنا على شهادة B Corporation، مُقاسةً على أعلى معايير الأداء الاجتماعي والبيئي.' },
+      { year: '2025', title: 'مئتا قطعة', description: 'بلغ كتالوجنا 200 قطعة. ما زالت يدوية، وما زالت من العائلات الحرفية نفسها التي بدأنا معها.' }
     ]
   },
   values: {
-    eyebrow: 'What we stand for',
-    heading: 'Three things we refuse to compromise on.',
-    subheading: 'These are not aspirational values. They are operational constraints.',
+    eyebrow: 'ما نؤمن به',
+    heading: 'ثلاثة أشياء نرفض المساومة عليها.',
+    subheading: 'هذه ليست قيمًا طموحة، بل قيودٌ تشغيلية.',
     items: [
       {
         number: '01',
-        title: 'Handmade without exception',
-        body: 'Every object in our catalogue is made by a human being, using traditional craft techniques. We do not use machine production, and we do not plan to. The imperfection is the point — it is what makes the object yours.'
+        title: 'يدويٌّ دون استثناء',
+        body: 'كل قطعة في كتالوجنا يصنعها إنسان بتقنيات حرفية تقليدية. لا نستخدم الإنتاج الآلي، ولا ننوي ذلك. عدم الكمال هو المقصد — وهو ما يجعل القطعة لك وحدك.'
       },
       {
         number: '02',
-        title: 'Natural materials only',
-        body: 'Clay, linen, walnut, wool, cork, copper, glass, leather. Nothing synthetic, nothing composite. We choose materials that age with dignity — that look better in ten years than they do on the day they arrive.'
+        title: 'خامات طبيعية فقط',
+        body: 'طين، وكتان، وجوز، وصوف، وفلّين، ونحاس، وزجاج، وجلد. لا شيء صناعي، ولا مركّب. نختار خامات تتقادم بكرامة — تبدو أجمل بعد عشر سنوات منها يوم وصولها.'
       },
       {
         number: '03',
-        title: 'Maker-first economics',
-        body: 'Our artisan partners earn a minimum of 60% of the retail price. We know their names. We know their families. That is not charity — it is the only way to sustain the craft for the next generation.'
+        title: 'اقتصادٌ يضع الحرفيّ أولًا',
+        body: 'يحصل شركاؤنا الحرفيون على 60% من سعر البيع كحدّ أدنى. نعرف أسماءهم وعائلاتهم. هذا ليس إحسانًا — بل الطريقة الوحيدة لاستدامة الحرفة للجيل القادم.'
       }
     ]
   },
   process: {
-    eyebrow: 'How it\'s made',
-    heading: 'Slow on purpose.',
-    body: 'Most things in our catalogue take weeks to make. Some take months. We think that is worth knowing — and worth waiting for.',
+    eyebrow: 'كيف تُصنع',
+    heading: 'بطيئةٌ عن قصد.',
+    body: 'معظم ما في كتالوجنا يستغرق أسابيع، وبعضه شهورًا. نظنّ أن هذا يستحقّ المعرفة — ويستحقّ الانتظار.',
     steps: [
-      { title: 'Source', description: 'We visit workshops. We meet the people. We look at the materials. Only then do we commission anything.' },
-      { title: 'Make', description: 'Each piece is made by hand. No moulds, no shortcuts, no batches of thousands. Each one is individually finished.' },
-      { title: 'Inspect', description: 'Every piece is inspected before it leaves the workshop and again on arrival. We reject around 8% of production. That is considered excellent. We consider it the minimum.' },
-      { title: 'Ship', description: 'Packaged in recycled materials. Shipped with carbon offset. Arrived with a maker card so you know whose hands made what you hold.' }
+      { title: 'المصدر', description: 'نزور الورش، ونلتقي الناس، وننظر في الخامات. عندها فقط نطلب أي شيء.' },
+      { title: 'الصنع', description: 'كل قطعة تُصنع باليد. بلا قوالب، ولا اختصارات، ولا دفعات بالآلاف. كل واحدة تُنهى على حدة.' },
+      { title: 'الفحص', description: 'تُفحص كل قطعة قبل مغادرتها الورشة ومرة أخرى عند وصولها. نرفض نحو 8% من الإنتاج. يُعدّ ذلك ممتازًا، ونعدّه نحن الحدّ الأدنى.' },
+      { title: 'الشحن', description: 'تُغلّف بمواد معاد تدويرها، وتُشحن مع تعويض الكربون، وتصلك مع بطاقة الحرفيّ لتعرف من صنع ما تحمله.' }
     ]
   },
   team: {
-    eyebrow: 'The people behind it',
-    heading: 'Small team.\nBig conviction.',
-    subheading: 'We are nine people. Intentionally. We believe in doing less, better.',
+    eyebrow: 'من يقف وراءها',
+    heading: 'فريقٌ صغير.\nقناعةٌ كبيرة.',
+    subheading: 'نحن تسعة أشخاص. عن قصد. نؤمن بأن نفعل أقلّ، بشكلٍ أفضل.',
     members: [
-      { name: 'Marco Vieira', role: 'Co-founder & Creative Director', bio: 'Former architect. Believes deeply that the things around you shape who you become.', avatar_letter: 'M' },
-      { name: 'Lena Hartmann', role: 'Co-founder & Head of Sourcing', bio: 'Speaks four languages. Has visited every single workshop we work with. Takes no shortcuts.', avatar_letter: 'L' },
-      { name: 'Sofia Carvalho', role: 'Head of Craft & Quality', bio: 'Trained ceramicist. Inspects every piece that comes through our atelier. The standards are hers.', avatar_letter: 'S' }
+      { name: 'مروان فهمي', role: 'مؤسّس مشارك ومدير إبداعي', bio: 'معماريٌّ سابق. يؤمن عميقًا بأن الأشياء حولك تصوغ من تصير.', avatar_letter: 'م' },
+      { name: 'ليث الخطيب', role: 'مؤسّس مشارك ورئيس المصادر', bio: 'يتحدّث أربع لغات. زار كل ورشة نعمل معها. لا يسلك أي اختصار.', avatar_letter: 'ل' },
+      { name: 'سامي رشدان', role: 'رئيس الحِرفة والجودة', bio: 'خزّافٌ مدرَّب. يفحص كل قطعة تمرّ عبر ورشتنا. المعايير معاييره.', avatar_letter: 'س' }
     ]
   },
   press: {
-    heading: 'What they\'ve said',
+    heading: 'ماذا قالوا',
     items: [
-      { publication: 'The New York Times', quote: 'ARCANA is making the strongest argument we\'ve seen for buying less and buying better.', year: '2024' },
-      { publication: 'Wallpaper*', quote: 'The kind of objects you stop people in their tracks to ask about. Every single one.', year: '2024' },
-      { publication: 'Vogue Living', quote: 'A rare thing: a brand that actually does what it says. The craft is real, the sourcing is real, the quality is extraordinary.', year: '2023' },
-      { publication: 'Monocle', quote: 'We keep coming back to ARCANA because the quality is genuinely without equal at this price point.', year: '2023' }
+      { publication: 'مجلة التصميم', quote: 'تقدّم «صَنعة» أقوى حُجّة رأيناها لشراء أقلّ وشراء أفضل.', year: '2024' },
+      { publication: 'وولبيبر', quote: 'من تلك الأشياء التي توقف الناس ليسألوا عنها. كل قطعة منها.', year: '2024' },
+      { publication: 'ڤوغ ليڤينغ', quote: 'شيءٌ نادر: علامة تفعل فعلًا ما تقوله. الحرفة حقيقية، والمصادر حقيقية، والجودة استثنائية.', year: '2023' },
+      { publication: 'مونوكل', quote: 'نعود دائمًا إلى «صَنعة» لأن الجودة بلا منافس فعلًا في هذه الفئة السعرية.', year: '2023' }
     ]
   },
   community: {
-    eyebrow: 'The people who live with our work',
-    heading: 'A community built on\nthe long view.',
-    subheading: '82% of our customers have bought from us more than once. That is the number we are proudest of.',
+    eyebrow: 'من يعيشون مع أعمالنا',
+    heading: 'مجتمعٌ بُني على\nالنظرة البعيدة.',
+    subheading: '82% من عملائنا اشتروا منّا أكثر من مرة. هذا الرقم الذي نفخر به أكثر من غيره.',
     stats: [
-      { value: '42,000+', label: 'Objects in homes worldwide' },
-      { value: '82%', label: 'Repeat customers' },
-      { value: '4.97★', label: 'Average product rating' },
-      { value: '200+', label: 'Handmade pieces' }
+      { value: '+42,000', label: 'قطعة في بيوت حول العالم' },
+      { value: '82%', label: 'عملاء متكرّرون' },
+      { value: '4.97★', label: 'متوسط تقييم المنتجات' },
+      { value: '+200', label: 'قطعة يدوية' }
     ]
   },
   cta: {
-    eyebrow: 'Join us',
-    heading: 'Find the piece\nthat stays.',
-    subheading: 'Browse 200 handmade objects. Each one from a workshop we know, made from a material we trust, by a craftsperson who signs their work.',
-    cta_primary: 'Shop the collection',
-    cta_secondary: 'Visit the atelier'
+    eyebrow: 'انضمّ إلينا',
+    heading: 'اعثر على القطعة\nالتي تبقى.',
+    subheading: 'تصفّح 200 قطعة يدوية. كلٌّ منها من ورشة نعرفها، مصنوعة من خامة نثق بها، بيد حرفيّ يوقّع عمله.',
+    cta_primary: 'تسوّق التشكيلة',
+    cta_secondary: 'زُر الورشة'
   },
   footer: {
-    tagline: 'Made by hand. Meant to last.',
-    legal: '© 2025 ARCANA. All rights reserved.',
-    email: 'hello@arcana.co'
+    tagline: 'مصنوعٌ يدويًا. خُلِق ليدوم.',
+    legal: '© 2025 صَنعة. جميع الحقوق محفوظة.',
+    email: 'hello@sanaa.co'
   },
   seo: {
-    title: 'ARCANA — Handmade Homeware. Made to Last.',
-    description: 'Artisan ceramics, linen, and wood objects from workshops across Portugal, Spain, and Morocco. 200 pieces. Every one handmade. Every one worth keeping.'
+    title: 'صَنعة — مفروشات منزلية يدوية. خُلِقت لتدوم.',
+    description: 'خزف وكتان وأخشاب حرفية من ورش في المغرب وسوريا ومصر. 200 قطعة. كلٌّ منها يدوية. كلٌّ منها تستحقّ البقاء.'
   }
 }

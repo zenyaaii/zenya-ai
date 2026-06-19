@@ -25,14 +25,14 @@ export default function Guarantee({
                 ✅ {guarantee.days}-Day Money Back Guarantee
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-6 py-3 text-slate-800 font-bold text-sm border border-slate-200 shadow-sm">
-                🔒 Secure SSL Checkout
+                🔒 دفع آمن بشهادة SSL
               </div>
             </div>
             
             {/* Signature Area (Visual Flair) */}
             <div className="mt-12 pt-8 border-t border-slate-100 flex flex-col items-center opacity-60">
-              <span className="font-cursive text-2xl text-slate-400 rotate-[-5deg] mb-2">Satisfaction Team</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Official Promise</span>
+              <span className="font-cursive text-2xl text-slate-400 rotate-[-5deg] mb-2">فريق الرضا</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-slate-300">وعد رسمي</span>
             </div>
           </div>
         </div>

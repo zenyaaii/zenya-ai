@@ -2,125 +2,125 @@ import type { LookbookContent } from './types'
 
 export const LOOKBOOK_MOCK_CONTENT: LookbookContent = {
   brand: {
-    name: 'VELA',
-    tagline: 'Wear what matters.',
-    category: 'Contemporary Women\'s Fashion'
+    name: 'وَقار',
+    tagline: 'ارتدي ما يليق بكِ.',
+    category: 'أزياء نسائية محتشمة عصرية'
   },
   hero: {
-    eyebrow: 'Spring · Summer 2025',
-    headline: 'Dressed for\nthe life\nyou\'re living.',
+    eyebrow: 'ربيع · صيف 2025',
+    headline: 'مُصمَّمة\nللحياة\nالتي تعيشينها.',
     subheadline:
-      'Elevated basics and considered pieces for women who move through the world with intention. Crafted in limited runs, made to last.',
-    cta_primary: 'Shop the collection',
-    cta_secondary: 'View lookbook',
-    badge: 'New drop · Limited pieces'
+      'قطع أساسية راقية ومدروسة للمرأة التي تمضي في العالم بثقة واحتشام. مصنوعة بكميات محدودة، لتدوم.',
+    cta_primary: 'تسوّقي التشكيلة',
+    cta_secondary: 'شاهدي اللوك بوك',
+    badge: 'إصدار جديد · قطع محدودة'
   },
   drop_banner: {
-    label: '🖤 New drop',
-    text: 'The Cortège Edit — 18 new pieces, available now. Free shipping on all orders.',
-    cta: 'Shop now →'
+    label: '🖤 إصدار جديد',
+    text: 'تشكيلة «الموكب» — 18 قطعة جديدة، متوفّرة الآن. شحن مجاني على جميع الطلبات.',
+    cta: 'تسوّقي الآن ←'
   },
   lookbook: {
-    eyebrow: 'SS25 Lookbook',
-    heading: 'The Cortège Edit.',
+    eyebrow: 'لوك بوك SS25',
+    heading: 'تشكيلة الموكب.',
     subheading:
-      'A collection built around ease, intention, and the quiet confidence of a woman who already knows.',
+      'تشكيلة مبنية على الانسيابية والاحتشام والثقة الهادئة لامرأة تعرف ما تريد.',
     looks: [
-      { title: 'Look 01', subtitle: 'The Linen Column Dress', tag: 'Shop this look' },
-      { title: 'Look 02', subtitle: 'The Tailored Slouch', tag: 'Shop this look' },
-      { title: 'Look 03', subtitle: 'The Silk Bias Set', tag: 'New arrival' },
-      { title: 'Look 04', subtitle: 'The Côte d\'Azur Knit', tag: 'Shop this look' },
-      { title: 'Look 05', subtitle: 'The Weekend Trench', tag: 'Almost gone' },
-      { title: 'Look 06', subtitle: 'The Studio Trouser', tag: 'Shop this look' }
+      { title: 'إطلالة 01', subtitle: 'فستان الكتان العمودي', tag: 'تسوّقي هذه الإطلالة' },
+      { title: 'إطلالة 02', subtitle: 'البدلة الانسيابية', tag: 'تسوّقي هذه الإطلالة' },
+      { title: 'إطلالة 03', subtitle: 'طقم الحرير المائل', tag: 'وصل حديثًا' },
+      { title: 'إطلالة 04', subtitle: 'تريكو الريفييرا', tag: 'تسوّقي هذه الإطلالة' },
+      { title: 'إطلالة 05', subtitle: 'معطف نهاية الأسبوع', tag: 'أوشك على النفاد' },
+      { title: 'إطلالة 06', subtitle: 'بنطال الستوديو', tag: 'تسوّقي هذه الإطلالة' }
     ]
   },
   bestsellers: {
-    eyebrow: 'Customer favourites',
-    heading: 'The pieces they keep reordering.',
+    eyebrow: 'المفضّلة لدى عميلاتنا',
+    heading: 'القطع التي يُعِدن طلبها دائمًا.',
     products: [
-      { name: 'The Linen Column Dress', price: '$245', badge: 'New', category: 'Dresses' },
-      { name: 'The Tailored Blazer', price: '$320', original_price: '$420', badge: 'Sale', category: 'Outerwear' },
-      { name: 'The Wide-Leg Trouser', price: '$195', category: 'Bottoms' },
-      { name: 'The Silk Camisole', price: '$145', badge: 'Almost gone', category: 'Tops' },
-      { name: 'The Cashmere Knit', price: '$285', category: 'Knitwear' },
-      { name: 'The Bias-Cut Skirt', price: '$175', badge: 'New', category: 'Bottoms' },
-      { name: 'The Oversized Shirt', price: '$165', category: 'Tops' },
-      { name: 'The Minimal Mule', price: '$215', category: 'Shoes' }
+      { name: 'فستان الكتان العمودي', price: '$245', badge: 'جديد', category: 'فساتين' },
+      { name: 'البليزر المُفصّل', price: '$320', original_price: '$420', badge: 'تخفيض', category: 'ملابس خارجية' },
+      { name: 'البنطال الواسع', price: '$195', category: 'بناطيل' },
+      { name: 'قميص الحرير الداخلي', price: '$145', badge: 'أوشك على النفاد', category: 'بلوزات' },
+      { name: 'تريكو الكشمير', price: '$285', category: 'تريكو' },
+      { name: 'التنّورة المائلة', price: '$175', badge: 'جديد', category: 'بناطيل' },
+      { name: 'القميص الواسع', price: '$165', category: 'بلوزات' },
+      { name: 'الحذاء البسيط', price: '$215', category: 'أحذية' }
     ]
   },
   brand_story: {
-    eyebrow: 'Our story',
-    heading: 'Built slowly.\nFor women\nwho move fast.',
+    eyebrow: 'قصتنا',
+    heading: 'صُنعت بتأنٍّ.\nلامرأة\nتمضي بثقة.',
     body:
-      'VELA was founded in 2019 with one question: why does getting dressed still feel so hard? We set out to build a wardrobe of considered pieces — things that work together, hold their shape, and get better with time. No seasonal overload. No fast fashion filler. Just the pieces you\'ll reach for on every kind of day.',
+      'تأسّست «وَقار» عام 2019 بسؤال واحد: لماذا ما يزال اختيار الملابس صعبًا؟ انطلقنا لنبني خزانة من القطع المدروسة — أشياء تتناغم معًا، وتحافظ على شكلها، وتزداد جمالًا مع الوقت. بلا إفراط موسمي، وبلا حشو الموضة السريعة. فقط القطع التي ستلجئين إليها في كل يوم.',
     values: [
       {
         icon: '◎',
-        title: 'Considered production',
-        text: 'We produce in limited runs to eliminate waste and work only with certified ethical manufacturers.'
+        title: 'إنتاج مدروس',
+        text: 'ننتج بكميات محدودة للقضاء على الهدر، ونعمل فقط مع مصانع أخلاقية معتمدة.'
       },
       {
         icon: '✦',
-        title: 'Natural fibres only',
-        text: 'Linen, silk, organic cotton, cashmere — materials that breathe, age beautifully, and biodegrade.'
+        title: 'ألياف طبيعية فقط',
+        text: 'كتان وحرير وقطن عضوي وكشمير — خامات تتنفّس، وتتقادم بجمال، وتتحلّل طبيعيًا.'
       },
       {
         icon: '→',
-        title: 'Timeless over trending',
-        text: 'No drops every two weeks. We release two considered collections per year — and that is enough.'
+        title: 'الخلود قبل الموضة',
+        text: 'لا إصدارات كل أسبوعين. نطلق تشكيلتين مدروستين في العام — وهذا يكفي.'
       }
     ]
   },
   press: {
-    heading: 'As seen in',
-    publications: ['Vogue', 'Harper\'s Bazaar', 'The Cut', 'Refinery29', 'Who What Wear', 'Byrdie']
+    heading: 'ظهرنا في',
+    publications: ['ڤوغ العربية', 'هاربرز بازار العربية', 'سيدتي', 'الجميلة', 'مجلّة لها', 'ELLE العربية']
   },
   testimonials: {
-    eyebrow: 'What they\'re saying',
-    heading: 'Worn, loved, reordered.',
+    eyebrow: 'ماذا يقُلن',
+    heading: 'تُلبَس وتُحَبّ ويُعاد طلبها.',
     average_rating: 4.9,
-    review_count: '2,400+ reviews',
+    review_count: '+2,400 تقييم',
     items: [
       {
-        author: 'Sophie L.',
+        author: 'نورة العتيبي',
         rating: 5,
-        text: 'The linen dress is the best thing I have bought in years. I wore it every single day in Sardinia and got stopped three times to ask where it was from. The quality is unlike anything else at this price point.',
-        item: 'The Linen Column Dress',
+        text: 'فستان الكتان أفضل ما اشتريته منذ سنوات. ارتديته كل يوم في رحلتي وسُئلت ثلاث مرات عن مصدره. الجودة لا تُضاهى في هذه الفئة السعرية.',
+        item: 'فستان الكتان العمودي',
         verified: true
       },
       {
-        author: 'Camille R.',
+        author: 'ريم القحطاني',
         rating: 5,
-        text: 'I have returned more clothes than I care to admit, but I have never returned a single VELA piece. The tailored blazer fits like it was made for me, and the cashmere has survived two machine washes without pilling.',
-        item: 'The Tailored Blazer',
+        text: 'أرجعت ملابس أكثر مما أعترف به، لكنني لم أُرجع قطعة واحدة من «وَقار». البليزر يناسبني تمامًا، والكشمير صمد أمام غسلتين دون تكتّل.',
+        item: 'البليزر المُفصّل',
         verified: true
       },
       {
-        author: 'Nadia M.',
+        author: 'لمياء حسن',
         rating: 5,
-        text: 'I bought the wide-leg trouser six months ago and I have worn it at least twice a week since. It hasn\'t stretched, the colour hasn\'t faded, and it still looks as good as the day it arrived. Worth every penny.',
-        item: 'The Wide-Leg Trouser',
+        text: 'اشتريت البنطال الواسع قبل ستة أشهر وارتديته مرّتين أسبوعيًا منذ ذلك الحين. لم يتمدّد، ولم يبهت لونه، وما زال كيوم وصوله. يستحقّ كل قرش.',
+        item: 'البنطال الواسع',
         verified: true
       }
     ]
   },
   newsletter: {
-    eyebrow: 'Join the edit',
-    heading: 'First to the new drop.',
+    eyebrow: 'انضمّي إلى القائمة',
+    heading: 'كوني أول من يعرف بالإصدار الجديد.',
     subheading:
-      'Get early access to new collections, behind-the-scenes from our ateliers, and styling notes delivered quietly to your inbox.',
+      'احصلي على وصول مبكر للتشكيلات الجديدة، ولقطات من خلف الكواليس في ورشنا، وملاحظات تنسيق تصلك بهدوء إلى بريدك.',
     placeholder: 'your@email.com',
-    cta: 'Join the list',
-    note: 'No spam. Unsubscribe any time. We send 2–3 emails per month.'
+    cta: 'انضمّي للقائمة',
+    note: 'بلا إزعاج. ألغي الاشتراك متى شئت. نرسل 2–3 رسائل شهريًا.'
   },
   footer: {
-    tagline: 'Wear what matters.',
-    legal: '© 2025 VELA. All rights reserved.',
-    email: 'hello@vela.co'
+    tagline: 'ارتدي ما يليق بكِ.',
+    legal: '© 2025 وَقار. جميع الحقوق محفوظة.',
+    email: 'hello@wiqar.co'
   },
   seo: {
-    title: 'VELA — Contemporary Women\'s Fashion · SS25 Collection',
+    title: 'وَقار — أزياء نسائية محتشمة · تشكيلة SS25',
     description:
-      'Elevated basics and considered pieces for women who move with intention. Limited runs, natural fibres, ethical production. Shop the SS25 collection.'
+      'قطع أساسية راقية ومدروسة للمرأة التي تمضي باحتشام وثقة. كميات محدودة، وألياف طبيعية، وإنتاج أخلاقي. تسوّقي تشكيلة SS25.'
   }
 }

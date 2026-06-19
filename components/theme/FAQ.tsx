@@ -14,7 +14,7 @@ export default function FAQ({
   return (
     <section className="py-24 bg-white">
       <div className="container mx-auto px-6 max-w-3xl">
-        <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">Frequently Asked Questions</h2>
+        <h2 className="text-3xl font-bold text-center text-slate-900 mb-12">الأسئلة الشائعة</h2>
         
         <div className="space-y-4">
           {faqs.map((faq, i) => (
@@ -24,7 +24,7 @@ export default function FAQ({
             >
               <button 
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                className="flex w-full items-center justify-between p-6 text-left transition hover:bg-slate-50"
+                className="flex w-full items-center justify-between p-6 text-start transition hover:bg-slate-50"
               >
                 <span className="font-bold text-slate-900">{faq.q}</span>
                 <span className={`transform transition-transform duration-300 ${openIndex === i ? 'rotate-180' : ''}`}>
@@ -50,14 +50,14 @@ export default function FAQ({
         </div>
 
         <div className="mt-12 text-center bg-slate-50 rounded-2xl p-8 border border-slate-100">
-           <h3 className="font-bold text-slate-900 mb-2">Still have questions?</h3>
-           <p className="text-slate-600 mb-6 text-sm">We are here to help you 24/7. Contact our support team.</p>
+           <h3 className="font-bold text-slate-900 mb-2">لا تزال لديك أسئلة؟</h3>
+           <p className="text-slate-600 mb-6 text-sm">نحن هنا لمساعدتك على مدار الساعة. تواصل مع فريق الدعم.</p>
            <a 
              href="mailto:support@example.com"
              className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold text-white shadow-lg transition hover:opacity-90"
              style={{ backgroundColor: primaryColor }}
            >
-             Contact Support
+             تواصل مع الدعم
            </a>
         </div>
       </div>

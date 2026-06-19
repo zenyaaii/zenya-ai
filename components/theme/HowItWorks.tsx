@@ -3,8 +3,8 @@ import { motion } from 'framer-motion'
 
 export default function HowItWorks({ 
   primaryColor,
-  heading = 'How It Works',
-  subheading = 'Simple, fast, and hassle-free process.',
+  heading = 'كيف يعمل',
+  subheading = 'عملية بسيطة وسريعة وبلا متاعب.',
   steps: providedSteps,
 }: { 
   primaryColor: string

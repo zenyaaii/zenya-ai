@@ -23,50 +23,50 @@ const TYPE_META: Record<
 > = {
   one_product: {
     icon: ShoppingBag,
-    tagline: 'One-product Shopify',
-    pitch: 'Hero funnel, sticky add-to-cart, bundles, comparison, urgency, FAQ. Exports as a Shopify OS 2.0 theme.',
+    tagline: 'متجر شوبيفاي بمنتج واحد',
+    pitch: 'مسار بيع متكامل، وزر إضافة ثابت، وحزم، ومقارنة، وإلحاح، وأسئلة شائعة. يُصدَّر كثيم شوبيفاي OS 2.0.',
     demoHref: '/demo',
   },
   restaurant: {
     icon: Utensils,
-    tagline: 'Restaurant · Menu · Reservations',
-    pitch: 'Editorial fine-dining site: tabbed menu, gallery, hours, reservations, press wall, and chef story.',
+    tagline: 'مطعم · قائمة · حجوزات',
+    pitch: 'موقع مطعم راقٍ: قائمة بتبويبات، ومعرض صور، وساعات عمل، وحجوزات، وحائط صحافة، وقصة الشيف.',
     demoHref: '/demo/restaurant',
   },
   atlas: {
     icon: LayoutDashboard,
-    tagline: 'SaaS · Software · B2B',
-    pitch: 'Modern product landing: hero, feature grid, pricing tiers, integrations, security trust strip, demo CTA.',
+    tagline: 'تطبيق · برمجيات · B2B',
+    pitch: 'صفحة منتج عصرية: واجهة، وشبكة مزايا، وباقات أسعار، وتكاملات، وشريط ثقة أمني، ودعوة لعرض توضيحي.',
     demoHref: '/demo/atlas',
   },
   lookbook: {
     icon: Shirt,
-    tagline: 'Fashion · Apparel · Brand',
-    pitch: 'Full-bleed editorial lookbook, drop banner, bestsellers grid, brand story, press wall, newsletter.',
+    tagline: 'أزياء · ملابس · علامة',
+    pitch: 'لوك بوك تحريري بملء الشاشة، ولافتة إصدار، وشبكة الأكثر مبيعًا، وقصة علامة، وحائط صحافة، ونشرة بريدية.',
     demoHref: '/demo/lookbook',
   },
   collective: {
     icon: Store,
-    tagline: 'Catalog · Multi-product',
-    pitch: 'Luxury multi-brand storefront with curated collections, bestsellers, brand promise, newsletter.',
+    tagline: 'كتالوج · منتجات متعددة',
+    pitch: 'متجر فاخر متعدد العلامات بمجموعات منسّقة، والأكثر مبيعًا، ووعد العلامة، ونشرة بريدية.',
     demoHref: '/demo/collective',
   },
   studio: {
     icon: Feather,
-    tagline: 'Brand story · Editorial',
-    pitch: 'Founder letter, timeline, values, process, team, press wall, community stats — long-form storytelling.',
+    tagline: 'قصة علامة · تحرير',
+    pitch: 'رسالة المؤسّس، وخط زمني، وقيم، ومنهجية، وفريق، وحائط صحافة، وإحصاءات مجتمع — سرد مطوّل.',
     demoHref: '/demo/studio',
   },
   services: {
     icon: Wrench,
-    tagline: 'Local services · Trades',
-    pitch: 'Premium services site: hero, proof, before-after, areas served, reviews, FAQ, quote-request flow.',
+    tagline: 'خدمات محلية · حِرف',
+    pitch: 'موقع خدمات احترافي: واجهة، وإثبات، وقبل/بعد، ومناطق الخدمة، وتقييمات، وأسئلة شائعة، ومسار طلب عرض سعر.',
     demoHref: '/demo/services',
   },
   wellness: {
     icon: Leaf,
-    tagline: 'Spa · Yoga · Wellness',
-    pitch: 'Calming template with treatment menu, booking, instructors, schedules, gift cards.',
+    tagline: 'سبا · يوغا · عافية',
+    pitch: 'قالب هادئ بقائمة جلسات، وحجز، ومدرّبين، وجداول، وبطاقات هدايا.',
     demoHref: '/demo/wellness',
   },
 }
@@ -85,19 +85,19 @@ export default function ShowcaseSection() {
         >
           <div>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              Eight templates · one design language
+              ثمانية قوالب · لغة تصميم واحدة
             </p>
-            <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
-              Built with{' '}
-              <span className="gradient-text">Zenya.</span>
+            <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+              مبنيّ بـ{' '}
+              <span className="gradient-text">زينيا.</span>
             </h2>
           </div>
           <Link
             href="/themes"
             className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-muted transition-colors hover:text-foreground"
           >
-            Explore all templates
-            <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.25} />
+            استكشف كل القوالب
+            <ArrowUpRight className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.25} />
           </Link>
         </motion.div>
 
@@ -156,9 +156,9 @@ export default function ShowcaseSection() {
                       'text-muted group-hover:text-foreground'
                     )}
                   >
-                    View live demo
+                    شاهد العرض الحي
                     <ArrowUpRight
-                      className="h-3 w-3 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                      className="h-3 w-3 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
                       strokeWidth={2.25}
                     />
                   </Link>

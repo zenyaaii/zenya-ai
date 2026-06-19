@@ -9,47 +9,47 @@ const SITE_URL = 'https://zenyaai.co'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Zenya — AI Website Generator. Every Template. Live in Minutes.',
-    template: '%s · Zenya',
+    default: 'زينيا — منشئ المواقع بالذكاء الاصطناعي. كل قالب. جاهز خلال دقائق.',
+    template: '%s · زينيا',
   },
   description:
-    'Zenya is the AI website generator for every kind of business. Pick from 8 premium templates — restaurants, fashion, SaaS, wellness, services, and more — share a quick brief, and Zenya writes the copy and ships the site in minutes. $9.99 lifetime or $19.99/mo with full hosting.',
-  applicationName: 'Zenya',
-  generator: 'Zenya',
+    'زينيا منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي لكل نشاط تجاري. اختر من بين 8 قوالب احترافية — مطاعم، أزياء، تطبيقات، عافية، خدمات والمزيد — اكتب نبذة قصيرة، وتتكفّل زينيا بكتابة المحتوى ونشر الموقع خلال دقائق. ‎9.99$ مدى الحياة أو 19.99$ شهريًا مع استضافة كاملة.',
+  applicationName: 'زينيا',
+  generator: 'زينيا',
   keywords: [
-    'AI website builder',
-    'AI website generator',
-    'website builder for small business',
-    'restaurant website builder',
-    'AI SaaS landing page',
-    'wellness studio website',
-    'lookbook generator',
-    'one product Shopify store',
-    'no-code website builder',
-    'AI copywriter for websites',
-    'launch a website in minutes',
+    'منشئ مواقع بالذكاء الاصطناعي',
+    'إنشاء موقع إلكتروني',
+    'منشئ مواقع للشركات الصغيرة',
+    'موقع مطعم',
+    'صفحة هبوط لتطبيق',
+    'موقع مركز عافية',
+    'منشئ لوك بوك',
+    'متجر شوبيفاي بمنتج واحد',
+    'إنشاء موقع بدون برمجة',
+    'كاتب محتوى بالذكاء الاصطناعي',
+    'أطلق موقعك خلال دقائق',
   ],
-  authors: [{ name: 'Zenya', url: SITE_URL }],
-  creator: 'Zenya',
-  publisher: 'Zenya',
+  authors: [{ name: 'زينيا', url: SITE_URL }],
+  creator: 'زينيا',
+  publisher: 'زينيا',
   category: 'technology',
   openGraph: {
     type: 'website',
-    locale: 'en_US',
+    locale: 'ar_SA',
     url: SITE_URL,
-    siteName: 'Zenya',
-    title: 'Zenya — AI Website Generator. Every Template. Live in Minutes.',
+    siteName: 'زينيا',
+    title: 'زينيا — منشئ المواقع بالذكاء الاصطناعي. كل قالب. جاهز خلال دقائق.',
     description:
-      '8 premium AI-built website templates for restaurants, fashion, SaaS, wellness, services, and Shopify stores. Brief in → full site out — copy, layout, images, ready to publish.',
+      '8 قوالب مواقع احترافية مبنية بالذكاء الاصطناعي للمطاعم والأزياء والتطبيقات والعافية والخدمات ومتاجر شوبيفاي. اكتب نبذة → احصل على موقع كامل: نصوص وتصميم وصور جاهزة للنشر.',
     images: [
-      { url: '/opengraph-image', width: 1200, height: 630, alt: 'Zenya — AI Website Generator' },
+      { url: '/opengraph-image', width: 1200, height: 630, alt: 'زينيا — منشئ المواقع بالذكاء الاصطناعي' },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Zenya — AI Website Generator. Every Template. Live in Minutes.',
+    title: 'زينيا — منشئ المواقع بالذكاء الاصطناعي. كل قالب. جاهز خلال دقائق.',
     description:
-      'Brief in → full site out. 8 AI-built templates for every kind of business. $9.99 lifetime or $19.99/mo with hosting.',
+      'اكتب نبذة → احصل على موقع كامل. 8 قوالب مبنية بالذكاء الاصطناعي لكل نشاط تجاري. ‎9.99$ مدى الحياة أو 19.99$ شهريًا مع استضافة.',
     images: ['/opengraph-image'],
   },
   alternates: {
@@ -72,46 +72,46 @@ export const metadata: Metadata = {
   },
 }
 
-// JSON-LD: tells Google explicitly what Zenya is — drops the old "one-product
-// Shopify generator" snippet that was leaking from the previous description.
+// JSON-LD: تُعرّف جوجل صراحةً بماهية زينيا — منصّة عربية لإنشاء المواقع
+// بالذكاء الاصطناعي، موجَّهة للسوق العربي.
 const structuredData = [
   {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Zenya',
+    name: 'زينيا',
     url: SITE_URL,
     logo: `${SITE_URL}/logo.png`,
     description:
-      'AI website generator for every kind of business. 8 premium templates from restaurants to Shopify stores, live in minutes.',
+      'منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
     foundingDate: '2025',
     sameAs: [],
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'support@zenyaai.co',
-      availableLanguage: ['English'],
+      availableLanguage: ['Arabic'],
     },
   },
   {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'Zenya',
+    name: 'زينيا',
     operatingSystem: 'Web Browser',
     applicationCategory: 'BusinessApplication',
     description:
-      'AI-powered website generator. Choose a template, share a brief, get a finished website with copy, layout, and imagery — ready to publish.',
+      'منشئ مواقع بالذكاء الاصطناعي. اختر قالبًا، اكتب نبذة، واحصل على موقع متكامل بالنصوص والتصميم والصور — جاهز للنشر.',
     url: SITE_URL,
     offers: [
       {
         '@type': 'Offer',
-        name: 'Pro Lifetime',
+        name: 'برو مدى الحياة',
         price: '9.99',
         priceCurrency: 'USD',
-        description: 'One-time purchase. Unlimited AI generations + Shopify export + project ZIP.',
+        description: 'دفعة واحدة. توليد غير محدود بالذكاء الاصطناعي + تصدير شوبيفاي + ملف المشروع المضغوط.',
       },
       {
         '@type': 'Offer',
-        name: 'Pro Hosting',
+        name: 'برو مع الاستضافة',
         price: '19.99',
         priceCurrency: 'USD',
         priceSpecification: {
@@ -122,14 +122,14 @@ const structuredData = [
           unitText: 'MONTH',
         },
         description:
-          'Monthly subscription. Zenya hosts your brochure sites, plus custom domain, SSL, and analytics. Includes everything in Pro Lifetime.',
+          'اشتراك شهري. تستضيف زينيا مواقعك، مع نطاق مخصّص وشهادة SSL وتحليلات. يشمل كل ما في باقة برو مدى الحياة.',
       },
       {
         '@type': 'Offer',
-        name: 'Free',
+        name: 'مجاني',
         price: '0',
         priceCurrency: 'USD',
-        description: '3 AI generations to try Zenya. All 8 templates available.',
+        description: '3 عمليات توليد بالذكاء الاصطناعي لتجربة زينيا. جميع القوالب الـ8 متاحة.',
       },
     ],
     aggregateRating: {
@@ -141,8 +141,9 @@ const structuredData = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Zenya',
+    name: 'زينيا',
     url: SITE_URL,
+    inLanguage: 'ar',
     potentialAction: {
       '@type': 'SearchAction',
       target: `${SITE_URL}/themes?q={search_term_string}`,
@@ -153,7 +154,7 @@ const structuredData = [
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl">
       <head>
         <script
           type="application/ld+json"

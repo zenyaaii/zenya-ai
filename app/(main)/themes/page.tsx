@@ -51,10 +51,10 @@ type ThemeCard = {
 const THEMES: ThemeCard[] = [
   {
     id: 'restaurant',
-    name: 'Maison',
-    tagline: 'Fine dining · Restaurant',
+    name: 'مطعم',
+    tagline: 'مطاعم راقية · فاخر',
     description:
-      'Editorial fine-dining website for restaurants, tasting rooms, and chef counters. Tabbed menu, gallery, reservations, hours, and press wall — fully responsive.',
+      'موقع مطعم تحريري للمطاعم وقاعات التذوّق وطاولات الشيف. قائمة بتبويبات، ومعرض، وحجوزات، وساعات عمل، وحائط صحافة — متجاوب بالكامل.',
     cover: themePreview('restaurant'),
     presets: 4,
     sections: 13,
@@ -65,10 +65,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'one_product',
-    name: 'Storefront',
-    tagline: 'One-product · Dropshipping',
+    name: 'متجر',
+    tagline: 'منتج واحد · دروبشيبينغ',
     description:
-      'Conversion-first single-product Shopify theme. Hero funnel, sticky add-to-cart, bundles, comparison, FAQ, urgency, and a fully designed product page. Exports as a Shopify OS 2.0 ZIP.',
+      'ثيم شوبيفاي بمنتج واحد يركّز على التحويل. مسار بيع، وزر إضافة ثابت، وحزم، ومقارنة، وأسئلة شائعة، وإلحاح، وصفحة منتج كاملة التصميم. يُصدَّر كملف شوبيفاي OS 2.0.',
     cover: themePreview('one_product'),
     presets: 3,
     sections: 24,
@@ -78,10 +78,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'atlas',
-    name: 'Atlas',
-    tagline: 'SaaS · Software',
+    name: 'تطبيق',
+    tagline: 'تطبيقات · برمجيات',
     description:
-      'Modern software landing template. Product hero, feature grid, pricing tiers, integrations, security trust strip, and demo CTA.',
+      'قالب صفحة هبوط عصري للبرمجيات. واجهة منتج، وشبكة مزايا، وباقات أسعار، وتكاملات، وشريط ثقة أمني، ودعوة لعرض توضيحي.',
     cover: themePreview('atlas'),
     presets: 4,
     sections: 12,
@@ -91,10 +91,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'services',
-    name: 'Trade',
-    tagline: 'Local services · Trades',
+    name: 'خدمات',
+    tagline: 'خدمات محلية · حِرف',
     description:
-      'For plumbers, salons, cleaners, home services, and agencies. Premium hero, services, proof, before-after, areas served, reviews, FAQ, and quote-request flow.',
+      'للسبّاكين والصالونات وشركات التنظيف والخدمات المنزلية والوكالات. واجهة فاخرة، وخدمات، وإثبات، وقبل/بعد، ومناطق الخدمة، وتقييمات، وأسئلة شائعة، ومسار طلب عرض سعر.',
     cover: themePreview('services'),
     presets: 4,
     sections: 13,
@@ -104,10 +104,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'collective',
-    name: 'Collective',
-    tagline: 'Catalog · Multi-product',
+    name: 'تشكيلة',
+    tagline: 'كتالوج · منتجات متعددة',
     description:
-      'Luxury multi-brand storefront with aurora-lit hero, curated collection grid, new arrivals, bestsellers, brand promise, testimonials, and newsletter.',
+      'متجر فاخر متعدد العلامات بواجهة مضيئة، وشبكة مجموعات منسّقة، ووافدون جدد، والأكثر مبيعًا، ووعد العلامة، وشهادات، ونشرة بريدية.',
     cover: themePreview('collective'),
     presets: 4,
     sections: 10,
@@ -117,10 +117,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'studio',
-    name: 'Studio',
-    tagline: 'Brand story · Editorial',
+    name: 'ستوديو',
+    tagline: 'قصة علامة · تحرير',
     description:
-      'Editorial brand story page with giant display type, founder letter, timeline, values, process, team, press wall, and community stats.',
+      'صفحة قصة علامة تحريرية بخط عرض ضخم، ورسالة المؤسّس، وخط زمني، وقيم، ومنهجية، وفريق، وحائط صحافة، وإحصاءات مجتمع.',
     cover: themePreview('studio'),
     presets: 4,
     sections: 12,
@@ -130,10 +130,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'lookbook',
-    name: 'Lookbook',
-    tagline: 'Fashion · Apparel',
+    name: 'أزياء',
+    tagline: 'أزياء · ملابس',
     description:
-      'High-end fashion template with full-bleed editorial lookbook, drop banner, bestsellers grid, brand story, press wall, reviews, and newsletter.',
+      'قالب أزياء راقٍ بلوك بوك تحريري بملء الشاشة، ولافتة إصدار، وشبكة الأكثر مبيعًا، وقصة علامة، وحائط صحافة، وتقييمات، ونشرة بريدية.',
     cover: themePreview('lookbook'),
     presets: 4,
     sections: 11,
@@ -143,10 +143,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'wellness',
-    name: 'Wellness',
-    tagline: 'Spa · Wellness · Studio',
+    name: 'عافية',
+    tagline: 'سبا · عافية · ستوديو',
     description:
-      'Calming template for spas, yoga studios, and wellness brands. Treatment menu, booking, instructors, schedules, gift cards.',
+      'قالب هادئ للسبا واستوديوهات اليوغا وعلامات العافية. قائمة جلسات، وحجز، ومدرّبون، وجداول، وبطاقات هدايا.',
     cover: themePreview('wellness'),
     presets: 3,
     sections: 12,
@@ -156,10 +156,10 @@ const THEMES: ThemeCard[] = [
   },
   {
     id: 'restaurant',
-    name: 'Restaurant',
-    tagline: 'Restaurant · Café · Bar',
+    name: 'مقهى',
+    tagline: 'مطعم · مقهى · بار',
     description:
-      'Mouth-watering template for restaurants, cafés, and bars. Hero with reservation CTA, menu, story, gallery, hours, contact, and press strip.',
+      'قالب شهيّ للمطاعم والمقاهي والبارات. واجهة بدعوة للحجز، وقائمة، وقصة، ومعرض، وساعات عمل، وتواصل، وشريط صحافة.',
     cover: themePreview('restaurant'),
     presets: 4,
     sections: 13,
@@ -172,9 +172,9 @@ const THEMES: ThemeCard[] = [
 type Category = 'all' | 'sites' | 'shopify'
 
 const FILTERS: { id: Category; label: string }[] = [
-  { id: 'all',     label: 'All templates'  },
-  { id: 'sites',   label: 'Hosted sites'   },
-  { id: 'shopify', label: 'Shopify export' },
+  { id: 'all',     label: 'كل القوالب'       },
+  { id: 'sites',   label: 'مواقع مُستضافة'   },
+  { id: 'shopify', label: 'تصدير شوبيفاي'    },
 ]
 
 export default function ThemesPage() {
@@ -207,15 +207,14 @@ export default function ThemesPage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            All {total} templates live · more launching monthly
+            جميع القوالب الـ{total} متاحة · والمزيد شهريًا
           </div>
-          <h1 className="text-[52px] font-[590] leading-[1.06] tracking-[-1.6px] text-foreground sm:text-[64px] sm:tracking-[-2px]">
-            <span className="gradient-text">Templates</span> for every business.
+          <h1 className="text-[52px] font-[590] leading-[1.12] tracking-[-1.6px] text-foreground sm:text-[64px] sm:tracking-[-2px]">
+            <span className="gradient-text">قوالب</span> لكل نشاط تجاري.
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-[16px] leading-[1.65] text-muted">
-            Eight beautifully crafted website templates. Pick one, share your brief,
-            and Zenya AI writes the copy, designs the page, and delivers a live preview
-            you can ship today.
+          <p className="mx-auto mt-5 max-w-2xl text-[16px] leading-[1.85] text-muted">
+            ثمانية قوالب مواقع مصمّمة بإتقان. اختر واحدًا، اكتب نبذتك، ويكتب ذكاء
+            زينيا الاصطناعي المحتوى ويصمّم الصفحة ويسلّمك معاينة مباشرة يمكنك نشرها اليوم.
           </p>
 
           {/* Filters */}
@@ -291,9 +290,9 @@ function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-          <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+          <div className="absolute start-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
             <Sparkles className="h-3 w-3" strokeWidth={2.25} />
-            Featured · New release
+            مميّز · إصدار جديد
           </div>
           <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-3 text-white">
             <div>
@@ -304,7 +303,7 @@ function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
               className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
               style={{ background: tint.accent, color: '#0a0a0c' }}
             >
-              Live
+              مباشر
             </span>
           </div>
         </div>
@@ -316,15 +315,15 @@ function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
             <Icon className="h-3 w-3" strokeWidth={2.25} style={{ color: tint.accent }} />
             {theme.tagline.split(' · ')[0]}
           </div>
-          <h3 className="text-[32px] font-[590] leading-[1.08] tracking-[-1.1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
-            A quiet kind of extraordinary.
+          <h3 className="text-[32px] font-[590] leading-[1.15] tracking-[-1.1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
+            تميّزٌ يسكنه الهدوء.
           </h3>
-          <p className="mt-4 text-[14.5px] leading-[1.65] text-muted">{theme.description}</p>
+          <p className="mt-4 text-[14.5px] leading-[1.85] text-muted">{theme.description}</p>
 
           <div className="mt-6 grid grid-cols-3 gap-3">
-            <Stat label="Style presets" value={String(theme.presets)} icon={Palette} />
-            <Stat label="Sections"      value={String(theme.sections)} icon={Layers} />
-            <Stat label="AI-generated"  value="100%"                   icon={Sparkles} />
+            <Stat label="أنماط جاهزة" value={String(theme.presets)} icon={Palette} />
+            <Stat label="أقسام"       value={String(theme.sections)} icon={Layers} />
+            <Stat label="بالذكاء الاصطناعي" value="100%"            icon={Sparkles} />
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -337,14 +336,14 @@ function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
                 boxShadow: 'rgba(28,28,28,0.10) 0px 1px 3px 0px',
               }}
             >
-              View live demo
-              <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
+              شاهد العرض الحي
+              <ArrowUpRight className="h-3 w-3 rtl-flip transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
             </Link>
             <Link
               href={theme.createHref}
               className="inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-5 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
             >
-              Build with this
+              ابنِ بهذا
             </Link>
           </div>
         </div>
@@ -421,12 +420,12 @@ function ThemeGridCard({
         {/* Accent stripe */}
         <div className="absolute left-0 top-0 h-1 w-full" style={{ background: tint.accent }} />
         {/* Status pill */}
-        <div className="absolute right-4 top-4">
+        <div className="absolute end-4 top-4">
           <span
             className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
             style={{ background: tint.accent, color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c' }}
           >
-            Live
+            مباشر
           </span>
         </div>
         {/* Bottom title overlay */}
@@ -451,10 +450,10 @@ function ThemeGridCard({
             {theme.tagline.split(' · ')[0]}
           </span>
           <span className="rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
-            {theme.sections} sections
+            {theme.sections} أقسام
           </span>
           <span className="rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
-            {theme.presets} presets
+            {theme.presets} أنماط
           </span>
         </div>
 
@@ -469,14 +468,14 @@ function ThemeGridCard({
                 boxShadow: 'rgba(28,28,28,0.08) 0px 1px 2px 0px',
               }}
             >
-              View demo
+              شاهد العرض
             </Link>
             <Link
               href={theme.createHref}
               className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
-              aria-label={`Build with ${theme.name}`}
+              aria-label={`ابنِ بقالب ${theme.name}`}
             >
-              Build
+              ابنِ
             </Link>
           </div>
         </div>
@@ -506,24 +505,23 @@ function BottomCTA() {
 
       <div className="relative">
         <h2 className="text-[28px] font-[590] tracking-[-0.8px] text-foreground sm:text-[36px] sm:tracking-[-1.2px]">
-          Don&rsquo;t see your business type?
+          لا تجد نوع نشاطك؟
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-[15px] text-muted">
-          We&rsquo;re adding new templates every month. Tell us what you need and we&rsquo;ll
-          prioritize it.
+          نضيف قوالب جديدة كل شهر. أخبرنا بما تحتاجه وسنمنحه الأولوية.
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/contact"
             className="rounded-full bg-foreground px-6 py-3 text-[13.5px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02] hover:shadow-soft-lg"
           >
-            Request a template
+            اطلب قالبًا
           </Link>
           <Link
             href="/theme/new"
             className="rounded-full border border-token bg-white/70 px-6 py-3 text-[13.5px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
           >
-            Start building now
+            ابدأ الإنشاء الآن
           </Link>
         </div>
       </div>

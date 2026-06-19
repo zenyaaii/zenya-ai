@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { studioInputSchema, type StudioInput } from '@/utils/studio/input'
 import type { StudioContent } from '@/utils/studio/types'
 import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
@@ -285,7 +287,9 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert brand storyteller writing for premium, craft-focused businesses. Your copy is literary, sincere, and specific — never generic. Output only valid JSON.'
+            content:
+              'You are an expert brand storyteller writing for premium, craft-focused businesses. Your copy is literary, sincere, and specific — never generic. Output only valid JSON.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           {
             role: 'user',
@@ -296,6 +300,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'openai_studio'
     )
+
+    await logAiUsage({ operation: 'generate-studio', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

@@ -18,8 +18,8 @@ export default function Testimonials({
                ))}
              </div>
           </div>
-          <h2 className="text-3xl font-bold sm:text-4xl">Loved by 50,000+ Customers</h2>
-          <p className="mt-4 text-slate-400 max-w-2xl mx-auto">Join the community of happy customers who have transformed their lives with our product.</p>
+          <h2 className="text-3xl font-bold sm:text-4xl">محبوب من أكثر من 50,000 عميل</h2>
+          <p className="mt-4 text-slate-400 max-w-2xl mx-auto">انضمّ إلى مجتمع العملاء السعداء الذين غيّروا حياتهم بمنتجنا.</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -60,10 +60,10 @@ export default function Testimonials({
                 </div>
                 <div>
                   <div className="font-bold text-white flex items-center gap-2">
-                    {safeName || 'Verified Buyer'}
-                    <span className="text-[10px] bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full border border-green-800">Verified</span>
+                    {safeName || 'مشترٍ موثّق'}
+                    <span className="text-[10px] bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full border border-green-800">موثّق</span>
                   </div>
-                  <div className="text-xs text-slate-500">{safeLocation || 'Verified Buyer'}</div>
+                  <div className="text-xs text-slate-500">{safeLocation || 'مشترٍ موثّق'}</div>
                 </div>
               </div>
             </motion.div>

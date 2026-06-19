@@ -42,7 +42,7 @@ export default function AddDomainModal({
       })
       const j = await r.json()
       if (!r.ok) {
-        setError(j.message || j.error || 'Could not add domain.')
+        setError(j.message || j.error || 'تعذّر إضافة النطاق.')
         return
       }
       setRequired(j.required || [])
@@ -50,7 +50,7 @@ export default function AddDomainModal({
       setStep('dns')
       onAdded()
     } catch (e: any) {
-      setError(e?.message || 'Network error')
+      setError(e?.message || 'خطأ في الشبكة')
     } finally {
       setSubmitting(false)
     }
@@ -112,18 +112,18 @@ function EnterStep({
   return (
     <>
       <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: '#1c1c1c' }}>
-        Connect a custom domain
+        اربط نطاقًا مخصصًا
       </h2>
       <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        Type the domain you own — we’ll show you the two DNS records to add. Zenya verifies and issues SSL automatically.
+        اكتب النطاق الذي تملكه — وسنعرض لك سجلَّي DNS لإضافتهما. تتحقّق زينيا وتُصدِر شهادة SSL تلقائيًا.
       </p>
 
       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
-        Domain
+        النطاق
       </label>
       <input
         autoFocus
-        placeholder="mycoolstore.com"
+        placeholder="mystore.com"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && domain.trim()) onSubmit() }}
@@ -152,8 +152,8 @@ function EnterStep({
           lineHeight: 1.55,
         }}
       >
-        <strong>Heads up:</strong> connecting your domain to Zenya{' '}
-        <strong>does NOT affect your email</strong>. Your existing email (e.g. info@yourdomain.com) keeps working — Zenya only changes the records that point web traffic.
+        <strong>تنبيه:</strong> ربط نطاقك بزينيا{' '}
+        <strong>لا يؤثّر على بريدك الإلكتروني</strong>. يبقى بريدك الحالي (مثل info@yourdomain.com) يعمل — تُغيّر زينيا فقط السجلّات التي توجّه زيارات الويب.
       </div>
 
       {error && (
@@ -174,7 +174,7 @@ function EnterStep({
             cursor: 'pointer',
           }}
         >
-          Cancel
+          إلغاء
         </button>
         <button
           type="button"
@@ -189,7 +189,7 @@ function EnterStep({
             boxShadow: '0 4px 14px rgba(94,106,210,0.25)',
           }}
         >
-          {submitting ? 'Connecting…' : 'Next: DNS records →'}
+          {submitting ? 'جارٍ الربط…' : 'التالي: سجلات DNS ←'}
         </button>
       </div>
     </>
@@ -220,13 +220,13 @@ function DnsStep({
   return (
     <>
       <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: '#1c1c1c' }}>
-        Almost there — add these DNS records
+        أوشكت على الانتهاء — أضف سجلات DNS هذه
       </h2>
       <p style={{ margin: '6px 0 14px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        Open your domain registrar’s DNS panel and add the records below.
-        Zenya verifies automatically — usually within 5-15 minutes. Status:{' '}
+        افتح لوحة DNS لدى مُسجِّل نطاقك وأضف السجلات أدناه.
+        تتحقّق زينيا تلقائيًا — عادةً خلال 5 إلى 15 دقيقة. الحالة:{' '}
         <strong style={{ color: status === 'live' ? '#15803d' : '#5e6ad2' }}>
-          {status === 'live' ? '🔒 Live' : 'Waiting on DNS'}
+          {status === 'live' ? '🔒 منشور' : 'بانتظار DNS'}
         </strong>
       </p>
 
@@ -238,14 +238,14 @@ function DnsStep({
 
       <div style={{ marginTop: 16, border: '1px solid #e5e2d9', borderRadius: 10, overflow: 'hidden' }}>
         <div style={{ background: '#f7f4ed', padding: '8px 12px', fontSize: 11, fontWeight: 700, color: '#6b6b6b', letterSpacing: 0.4, textTransform: 'uppercase' }}>
-          DNS records to add for {domain}
+          سجلات DNS لإضافتها للنطاق {domain}
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'white' }}>
-              <th style={th}>Type</th>
-              <th style={th}>Name / Host</th>
-              <th style={th}>Value</th>
+              <th style={th}>النوع</th>
+              <th style={th}>الاسم / المضيف</th>
+              <th style={th}>القيمة</th>
               <th style={th}></th>
             </tr>
           </thead>
@@ -255,7 +255,7 @@ function DnsStep({
                 <td style={td}><code>{r.type}</code></td>
                 <td style={td}><code>{r.name}</code></td>
                 <td style={{ ...td, fontFamily: 'monospace', fontSize: 12 }}>{r.value}</td>
-                <td style={{ ...td, textAlign: 'right' }}>
+                <td style={{ ...td, textAlign: 'end' }}>
                   <button
                     type="button"
                     onClick={() => copy(r.value, `${r.type}-${i}`)}
@@ -267,14 +267,14 @@ function DnsStep({
                       cursor: 'pointer',
                     }}
                   >
-                    {copied === `${r.type}-${i}` ? 'Copied' : 'Copy'}
+                    {copied === `${r.type}-${i}` ? 'نُسخ' : 'نسخ'}
                   </button>
                 </td>
               </tr>
             ))}
             {required.length === 0 && (
               <tr><td colSpan={4} style={{ ...td, color: '#9b9b9b', fontStyle: 'italic' }}>
-                Verification will start in a few seconds. Refresh the dashboard to see updated records.
+                سيبدأ التحقّق خلال ثوانٍ قليلة. حدِّث لوحة التحكم لرؤية السجلات المحدَّثة.
               </td></tr>
             )}
           </tbody>
@@ -298,7 +298,7 @@ function DnsStep({
             boxShadow: '0 4px 14px rgba(94,106,210,0.25)',
           }}
         >
-          Done — close
+          تم — إغلاق
         </button>
       </div>
     </>
@@ -306,7 +306,7 @@ function DnsStep({
 }
 
 const th: React.CSSProperties = {
-  textAlign: 'left',
+  textAlign: 'start',
   padding: '10px 12px',
   fontSize: 11,
   fontWeight: 700,

@@ -79,7 +79,7 @@ export default function Logos() {
     <section className="relative border-y border-token py-10">
       <div className="mx-auto max-w-5xl px-6">
         <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-          Built on the modern commerce &amp; AI stack
+          مبنيّ على منظومة التجارة والذكاء الاصطناعي الحديثة
         </p>
         <div className="relative overflow-hidden">
           <div className="flex items-center gap-12 marquee-track" style={{ width: 'max-content' }}>
@@ -92,7 +92,7 @@ export default function Logos() {
                 )}
               >
                 {logo.icon}
-                <span className="text-[13px] font-medium">{logo.name}</span>
+                <span className="text-[13px] font-medium font-latin" dir="ltr">{logo.name}</span>
               </div>
             ))}
           </div>

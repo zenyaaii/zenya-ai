@@ -7,11 +7,11 @@ export default function VolumeBundles({
   originalPrice,
   primaryColor, 
   onChange,
-  heading = 'Select Quantity',
-  badgeText = '🔥 High demand',
-  label_buy_1 = 'Standard',
-  label_buy_2 = 'Most Popular',
-  label_buy_3 = 'Best Value',
+  heading = 'اختر الكمية',
+  badgeText = '🔥 طلب مرتفع',
+  label_buy_1 = 'عادي',
+  label_buy_2 = 'الأكثر شيوعًا',
+  label_buy_3 = 'أفضل قيمة',
 }: { 
   price: number
   originalPrice?: number
@@ -66,9 +66,9 @@ export default function VolumeBundles({
               {opt.discount > 0 && (
                 <div 
                   className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 text-xs font-bold text-white shadow-sm rounded-full"
-                  style={{ backgroundColor: opt.label === 'Best Value' ? '#ef4444' : primaryColor }}
+                  style={{ backgroundColor: opt.qty === 3 ? '#ef4444' : primaryColor }}
                 >
-                  {opt.label === 'Most Popular' ? 'MOST POPULAR' : `SAVE ${opt.discount}%`}
+                  {opt.qty === 2 ? 'الأكثر شيوعًا' : `وفّر ${opt.discount}%`}
                 </div>
               )}
 
@@ -85,11 +85,11 @@ export default function VolumeBundles({
                   </div>
                   <div>
                     <div className="font-bold text-slate-900">
-                      Buy {opt.qty}
-                      {originalPrice && <span className="ml-2 text-xs font-normal text-slate-500 line-through">${(originalPrice * opt.qty).toFixed(2)}</span>}
+                      اشترِ {opt.qty}
+                      {originalPrice && <span className="ms-2 text-xs font-normal text-slate-500 line-through">${(originalPrice * opt.qty).toFixed(2)}</span>}
                     </div>
                     <div className="text-xs text-slate-500">
-                      ${perItem.toFixed(2)}/each
+                      ${perItem.toFixed(2)}/للقطعة
                     </div>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export default function VolumeBundles({
                   <div className="font-bold text-slate-900">${total.toFixed(2)}</div>
                   {opt.discount > 0 && (
                     <div className="text-xs font-bold text-green-600">
-                      Save ${(price * opt.qty - total).toFixed(2)}
+                      وفّر ${(price * opt.qty - total).toFixed(2)}
                     </div>
                   )}
                 </div>

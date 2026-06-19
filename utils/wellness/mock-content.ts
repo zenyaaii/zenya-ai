@@ -133,51 +133,52 @@ export const WELLNESS_MOCK_CONTENT: WellnessContent = {
     ]
   },
   team: {
-    heading: 'Meet our practitioners',
-    subheading: 'Every practitioner at Sōla is selected for deep expertise and genuine presence.',
+    heading: 'تعرّف على معالجينا',
+    subheading: 'كل معالج في «سُولا» مختار لخبرته العميقة وحضوره الصادق.',
     members: [
       {
-        name: 'Maya Chen',
-        title: 'Lead Therapist & Founder',
-        specialty: 'Deep tissue · Thai massage · Trauma-informed bodywork',
-        bio: 'With 11 years of practice across Austin and Bali, Maya built Sōla around the belief that every body deserves patient, skilled attention.',
-        image: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=600&q=80'
+        name: 'خالد المنصور',
+        title: 'كبير المعالجين والمؤسّس',
+        specialty: 'أنسجة عميقة · تدليك تايلندي · علاج واعٍ بالتوتر',
+        bio: 'بخبرة 11 عامًا بين الرياض ودبي، بنى خالد «سُولا» على قناعة بأن كل جسد يستحقّ عناية صبورة وماهرة.',
+        image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80'
       },
       {
-        name: 'James Okafor',
-        title: 'Yoga Teacher & Breathwork Guide',
-        specialty: 'Yin yoga · Pranayama · Somatic movement',
-        bio: 'James trained in Mysore and has spent eight years teaching nervous system-focused movement in studios across the US.',
-        image: 'https://images.unsplash.com/photo-1571019613914-85f342c6a11e?auto=format&fit=crop&w=600&q=80'
+        name: 'يوسف عمر',
+        title: 'مدرّب يوغا ومرشد تنفّس',
+        specialty: 'يين يوغا · تمارين التنفّس · حركة جسدية',
+        bio: 'تدرّب يوسف في الهند وأمضى ثماني سنوات في تعليم الحركة المركّزة على الجهاز العصبي في استوديوهات عدّة.',
+        image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=600&q=80'
       },
       {
-        name: 'Sofia Reyes',
-        title: 'Esthetician & Facial Specialist',
-        specialty: 'Organic facials · LED therapy · Lymphatic drainage',
-        bio: 'Sofia is a licensed esthetician with a specialism in clean beauty and results-driven skin protocols without the clinical feel.',
-        image: 'https://images.unsplash.com/photo-1499557354967-2b2d8910bcca?auto=format&fit=crop&w=600&q=80'
+        name: 'سامي رضا',
+        title: 'أخصائي العناية بالبشرة',
+        specialty: 'عناية عضوية بالبشرة · علاج LED · تصريف لمفاوي',
+        bio: 'سامي أخصائي معتمد للعناية بالبشرة متخصّص في الجمال النظيف وبروتوكولات بشرة فعّالة دون طابع عيادي.',
+        image: 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=600&q=80'
       }
     ]
   },
   space: {
-    heading: 'Our space',
-    subheading: 'Designed around stillness — a place where the shift starts the moment you step inside.',
+    heading: 'مساحتنا',
+    subheading: 'مصمَّمة حول السكينة — مكان يبدأ فيه التحوّل لحظة دخولك.',
     images: [
       {
         url: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Treatment room'
+        alt: 'غرفة العلاج'
       },
       {
         url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Relaxation lounge'
+        alt: 'صالة الاسترخاء'
       },
       {
         url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Yoga studio'
+        alt: 'استوديو اليوغا'
       },
       {
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80',
-        alt: 'Reception'
+        // كان هنا صورة شخصية لامرأة — استُبدلت بصورة داخلية للاستقبال (بلا أشخاص)
+        url: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80',
+        alt: 'الاستقبال'
       }
     ],
     amenities: [

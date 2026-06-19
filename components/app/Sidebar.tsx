@@ -8,6 +8,7 @@ import {
   CreditCard, Settings, X, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ZenyaWordmark from '@/components/ZenyaWordmark'
 
 type NavItem = {
   href: string
@@ -24,22 +25,22 @@ type NavGroup = {
 
 const NAV: NavGroup[] = [
   {
-    label: 'Workspace',
+    label: 'مساحة العمل',
     items: [
-      { href: '/dashboard',            label: 'Home',       icon: Home },
-      { href: '/dashboard/sites',      label: 'Sites',      icon: Folder },
-      { href: '/dashboard/gallery',    label: 'Gallery',    icon: ImageIcon },
-      { href: '/dashboard/analytics',  label: 'Analytics',  icon: BarChart3 },
-      { href: '/dashboard/visitors',   label: 'Visitors',   icon: Users, pill: 'Soon' },
-      { href: '/dashboard/seo',        label: 'SEO',        icon: Search },
-      { href: '/dashboard/domains',    label: 'Domains',    icon: Globe },
+      { href: '/dashboard',            label: 'الرئيسية',  icon: Home },
+      { href: '/dashboard/sites',      label: 'المواقع',   icon: Folder },
+      { href: '/dashboard/gallery',    label: 'المعرض',    icon: ImageIcon },
+      { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3 },
+      { href: '/dashboard/visitors',   label: 'الزوّار',   icon: Users, pill: 'قريبًا' },
+      { href: '/dashboard/seo',        label: 'السيو',     icon: Search },
+      { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe },
     ],
   },
   {
-    label: 'Account',
+    label: 'الحساب',
     items: [
-      { href: '/dashboard/billing',  label: 'Billing',  icon: CreditCard },
-      { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+      { href: '/dashboard/billing',  label: 'الفوترة',    icon: CreditCard },
+      { href: '/dashboard/settings', label: 'الإعدادات',  icon: Settings },
     ],
   },
 ]
@@ -72,9 +73,9 @@ export default function Sidebar({
             boxShadow: 'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
           }}
         >
-          <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+          <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
         </div>
-        <span className="text-[15px] font-semibold tracking-tight text-foreground">Zenya</span>
+        <ZenyaWordmark className="text-[17px]" />
       </Link>
 
       {/* Nav */}
@@ -121,7 +122,7 @@ export default function Sidebar({
       {/* Foot — small marketing link out */}
       <div className="border-t border-token p-3 text-[11.5px] text-muted">
         <Link href="/" className="hover:text-foreground" onClick={onMobileClose}>
-          ← Back to marketing site
+          → العودة إلى الموقع التسويقي
         </Link>
       </div>
     </>
@@ -131,7 +132,7 @@ export default function Sidebar({
     <>
       {/* Desktop sidebar — always visible at lg+ */}
       <aside
-        className="hidden w-60 flex-shrink-0 flex-col border-r border-token bg-white lg:flex"
+        className="hidden w-60 flex-shrink-0 flex-col border-e border-token bg-white lg:flex"
         style={{ boxShadow: '1px 0 0 #f0ede6' }}
       >
         {body}
@@ -146,14 +147,14 @@ export default function Sidebar({
             aria-hidden
           />
           <aside
-            className="absolute left-0 top-0 flex h-full w-60 flex-col border-r border-token bg-white"
+            className="absolute start-0 top-0 flex h-full w-60 flex-col border-e border-token bg-white"
             style={{ boxShadow: '4px 0 24px rgba(0,0,0,0.10)' }}
           >
             <button
               type="button"
               onClick={onMobileClose}
-              className="absolute right-2 top-2 z-10 rounded-md p-1.5 text-muted hover:bg-black/5"
-              aria-label="Close menu"
+              className="absolute end-2 top-2 z-10 rounded-md p-1.5 text-muted hover:bg-black/5"
+              aria-label="إغلاق القائمة"
             >
               <X className="h-4 w-4" />
             </button>

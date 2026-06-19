@@ -83,21 +83,20 @@ export default function CookieConsent() {
             id="cookie-consent-title"
             className="text-[15px] font-semibold text-foreground"
           >
-            Cookies on Zenya
+            ملفات تعريف الارتباط في زينيا
           </h2>
           <p
             id="cookie-consent-desc"
             className="mt-1.5 text-[13.5px] leading-[1.6] text-muted"
           >
-            We use strictly-necessary cookies to keep you signed in. With your
-            consent we&rsquo;d also like to use functional and analytics
-            cookies to improve the product. Read more in our{' '}
+            نستخدم ملفات تعريف ارتباط ضرورية تمامًا لإبقائك مسجَّل الدخول. وبموافقتك
+            نودّ أيضًا استخدام ملفات وظيفية وتحليلية لتحسين المنتج. اقرأ المزيد في{' '}
             <Link href="/cookies" className="underline hover:text-foreground">
-              Cookie Policy
+              سياسة ملفات تعريف الارتباط
             </Link>{' '}
-            and{' '}
+            و{' '}
             <Link href="/privacy" className="underline hover:text-foreground">
-              Privacy Policy
+              سياسة الخصوصية
             </Link>
             .
           </p>
@@ -107,25 +106,25 @@ export default function CookieConsent() {
               <div className="flex items-start gap-3">
                 <input type="checkbox" checked disabled className="mt-0.5 h-4 w-4" />
                 <div>
-                  <div className="font-medium text-foreground">Strictly necessary</div>
-                  <div className="text-muted">Required for login, payment, and security. Always on.</div>
+                  <div className="font-medium text-foreground">ضرورية تمامًا</div>
+                  <div className="text-muted">لازمة لتسجيل الدخول والدفع والأمان. مفعّلة دائمًا.</div>
                 </div>
               </div>
               <Toggle
-                label="Functional"
-                desc="Remember preferences like dark mode and pre-filled email."
+                label="وظيفية"
+                desc="تتذكّر التفضيلات مثل الوضع الداكن والبريد المعبّأ مسبقًا."
                 checked={functional}
                 onChange={setFunctional}
               />
               <Toggle
-                label="Analytics"
-                desc="Anonymous usage stats so we can improve the product. None loaded today."
+                label="تحليلية"
+                desc="إحصاءات استخدام مجهولة الهوية لنحسّن المنتج. لا شيء محمَّل اليوم."
                 checked={analytics}
                 onChange={setAnalytics}
               />
               <Toggle
-                label="Marketing"
-                desc="Currently not used. Will only load with your explicit consent if added."
+                label="تسويقية"
+                desc="غير مستخدمة حاليًا. لن تُحمَّل إلا بموافقتك الصريحة إن أُضيفت."
                 checked={marketing}
                 onChange={setMarketing}
               />
@@ -138,27 +137,27 @@ export default function CookieConsent() {
             onClick={acceptAll}
             className="rounded-md bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90"
           >
-            Accept all
+            قبول الكل
           </button>
           <button
             onClick={rejectAll}
             className="rounded-md border border-token bg-background px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors hover:bg-black/5"
           >
-            Reject non-essential
+            رفض غير الأساسي
           </button>
           {showDetails ? (
             <button
               onClick={saveChoices}
               className="rounded-md border border-token bg-background px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors hover:bg-black/5"
             >
-              Save my choices
+              حفظ اختياراتي
             </button>
           ) : (
             <button
               onClick={() => setShowDetails(true)}
               className="text-[12.5px] text-muted underline hover:text-foreground"
             >
-              Manage preferences
+              إدارة التفضيلات
             </button>
           )}
         </div>

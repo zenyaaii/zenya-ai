@@ -2,264 +2,264 @@ import type { AtlasContent } from './types'
 
 export const ATLAS_MOCK_CONTENT: AtlasContent = {
   brand: {
-    name: 'Streamline',
-    tagline: 'Ship faster, together.',
-    category: 'Project Management'
+    name: 'تدفّق',
+    tagline: 'أنجزوا أسرع، معًا.',
+    category: 'إدارة المشاريع'
   },
   hero: {
-    eyebrow: 'Now in public beta · Join 4,200+ teams',
-    headline: 'The project tool\nyour team will\nactually use.',
+    eyebrow: 'الآن في النسخة التجريبية · انضمّ إلى أكثر من 4,200 فريق',
+    headline: 'أداة المشاريع\nالتي سيستخدمها\nفريقك فعلًا.',
     subheadline:
-      'Streamline replaces your chaotic stack with one intelligent workspace. AI-powered planning, real-time collaboration, and automations that just work — so your team can focus on building, not tracking.',
-    cta_primary: 'Start for free',
-    cta_secondary: 'See how it works',
-    social_proof: 'Trusted by 4,200+ product teams · No credit card required',
-    badge: 'AI-powered · SOC 2 certified'
+      'تستبدل «تدفّق» أدواتك المبعثرة بمساحة عمل واحدة ذكية. تخطيط مدعوم بالذكاء الاصطناعي، وتعاون لحظي، وأتمتة تعمل ببساطة — ليركّز فريقك على البناء لا على التتبّع.',
+    cta_primary: 'ابدأ مجانًا',
+    cta_secondary: 'شاهد كيف يعمل',
+    social_proof: 'موثوق من أكثر من 4,200 فريق منتجات · بدون بطاقة ائتمان',
+    badge: 'مدعوم بالذكاء الاصطناعي · معتمد SOC 2'
   },
   trust_bar: {
-    label: 'Trusted by teams at',
+    label: 'موثوق من فرق في',
     logos: ['Vercel', 'Stripe', 'Linear', 'Notion', 'Figma', 'Loom', 'Resend', 'Railway']
   },
   features: {
-    eyebrow: 'Everything your team needs',
-    heading: 'Built for speed.\nDesigned for clarity.',
+    eyebrow: 'كل ما يحتاجه فريقك',
+    heading: 'مبني للسرعة.\nمصمَّم للوضوح.',
     subheading:
-      'Every feature is designed to reduce friction and keep your team in flow — not fighting with software.',
+      'كل ميزة مصمّمة لتقليل الاحتكاك وإبقاء فريقك في تدفّقه — لا في صراع مع البرمجيات.',
     items: [
       {
         icon: '⚡',
-        title: 'AI-powered planning',
+        title: 'تخطيط بالذكاء الاصطناعي',
         description:
-          'Describe your project in plain English. Streamline generates milestones, tasks, and timelines automatically — updated as your scope evolves.',
-        badge: 'AI'
+          'صِف مشروعك بلغة بسيطة، وتولّد «تدفّق» المراحل والمهام والجداول تلقائيًا — وتُحدّثها مع تطوّر نطاقك.',
+        badge: 'ذكاء اصطناعي'
       },
       {
         icon: '🔗',
-        title: 'Real-time collaboration',
+        title: 'تعاون لحظي',
         description:
-          'Every cursor, every comment, every status update — synced instantly across your entire team with zero lag and zero conflicts.'
+          'كل مؤشّر، وكل تعليق، وكل تحديث حالة — يُزامَن فورًا عبر فريقك كله بلا تأخير ولا تعارض.'
       },
       {
         icon: '⚙️',
-        title: 'Workflow automation',
+        title: 'أتمتة سير العمل',
         description:
-          'Build powerful no-code automations in minutes. Trigger actions across tools when tasks move, deadlines approach, or PRs merge.'
+          'ابنِ أتمتة قوية بلا برمجة في دقائق. شغّل إجراءات عبر الأدوات عند تحرّك المهام أو اقتراب المواعيد أو دمج التحديثات.'
       },
       {
         icon: '📊',
-        title: 'Smart analytics',
+        title: 'تحليلات ذكية',
         description:
-          'Velocity charts, cycle time tracking, and burndown reports that actually help — not just dashboards that look good in demos.'
+          'مخططات سرعة الإنجاز، وتتبّع زمن الدورة، وتقارير حرق المهام التي تساعد فعلًا — لا لوحات تبدو جميلة في العروض فقط.'
       },
       {
         icon: '🔒',
-        title: 'Enterprise-grade security',
+        title: 'أمان بمستوى المؤسسات',
         description:
-          'SOC 2 Type II certified, GDPR compliant, SSO with every major provider, and granular role-based access control built in.'
+          'معتمد SOC 2 من النوع الثاني، ومتوافق مع GDPR، ودخول موحّد مع كل مزوّد رئيسي، وتحكّم دقيق بالصلاحيات.'
       },
       {
         icon: '🧩',
-        title: '80+ integrations',
+        title: 'أكثر من 80 تكاملًا',
         description:
-          'GitHub, Slack, Figma, Notion, Linear, Jira and 75 more. Streamline lives where your team already works.'
+          'GitHub وSlack وFigma وNotion وLinear وJira و75 غيرها. تعيش «تدفّق» حيث يعمل فريقك أصلًا.'
       }
     ]
   },
   how_it_works: {
-    eyebrow: 'Get started in minutes',
-    heading: 'From chaos to clarity\nin three steps.',
-    subheading: 'No consultants, no implementation fees, no six-week onboarding. Just results.',
+    eyebrow: 'ابدأ خلال دقائق',
+    heading: 'من الفوضى إلى الوضوح\nفي ثلاث خطوات.',
+    subheading: 'بلا استشاريين، ولا رسوم تطبيق، ولا تهيئة تستغرق ستة أسابيع. فقط نتائج.',
     steps: [
       {
         step: '01',
-        title: 'Connect your stack',
+        title: 'اربط أدواتك',
         description:
-          'Link your GitHub, Slack, and existing tools in under two minutes. Streamline pulls in your context automatically.',
+          'اربط GitHub وSlack وأدواتك الحالية في أقل من دقيقتين. تسحب «تدفّق» سياقك تلقائيًا.',
         icon: '🔌'
       },
       {
         step: '02',
-        title: 'Let AI plan your project',
+        title: 'دع الذكاء الاصطناعي يخطّط',
         description:
-          'Describe your goal. Our AI breaks it into sprints, assigns ownership, and flags risks before they become blockers.',
+          'صِف هدفك، ويقسّمه ذكاؤنا إلى مراحل، ويوزّع المسؤوليات، ويرصد المخاطر قبل أن تصبح عوائق.',
         icon: '🤖'
       },
       {
         step: '03',
-        title: 'Ship and iterate fast',
+        title: 'أنجز وكرّر بسرعة',
         description:
-          'Real-time updates, async standups, and automated reports keep your team aligned — even across time zones.',
+          'تحديثات لحظية، واجتماعات غير متزامنة، وتقارير آلية تُبقي فريقك متوائمًا — حتى عبر المناطق الزمنية.',
         icon: '🚀'
       }
     ]
   },
   pricing: {
-    eyebrow: 'Simple, honest pricing',
-    heading: 'Start free.\nScale when you\'re ready.',
-    subheading: 'No hidden fees. No per-seat surprises. Cancel any time.',
+    eyebrow: 'أسعار بسيطة وصادقة',
+    heading: 'ابدأ مجانًا.\nوتوسّع عند جاهزيتك.',
+    subheading: 'بلا رسوم خفية. بلا مفاجآت لكل مقعد. ألغِ في أي وقت.',
     tiers: [
       {
-        name: 'Starter',
+        name: 'المبتدئ',
         price: '$0',
-        period: 'forever',
-        description: 'Perfect for small teams getting started.',
-        cta: 'Get started free',
+        period: 'للأبد',
+        description: 'مثالي للفرق الصغيرة في بدايتها.',
+        cta: 'ابدأ مجانًا',
         highlighted: false,
         features: [
-          'Up to 5 team members',
-          '3 active projects',
-          'Basic task management',
-          'Slack integration',
-          '7-day activity history',
-          'Community support'
+          'حتى 5 أعضاء فريق',
+          '3 مشاريع نشطة',
+          'إدارة مهام أساسية',
+          'تكامل Slack',
+          'سجلّ نشاط 7 أيام',
+          'دعم المجتمع'
         ]
       },
       {
-        name: 'Pro',
+        name: 'برو',
         price: '$49',
-        period: 'per month',
-        description: 'For growing teams that need more power.',
-        cta: 'Start 14-day trial',
+        period: 'شهريًا',
+        description: 'للفرق النامية التي تحتاج قوة أكبر.',
+        cta: 'ابدأ تجربة 14 يومًا',
         highlighted: true,
         features: [
-          'Unlimited team members',
-          'Unlimited projects',
-          'AI-powered planning',
-          '80+ integrations',
-          'Workflow automation',
-          'Advanced analytics',
-          'Priority support',
-          'Custom fields & views'
+          'أعضاء فريق غير محدودين',
+          'مشاريع غير محدودة',
+          'تخطيط بالذكاء الاصطناعي',
+          'أكثر من 80 تكاملًا',
+          'أتمتة سير العمل',
+          'تحليلات متقدّمة',
+          'دعم ذو أولوية',
+          'حقول وعروض مخصّصة'
         ]
       },
       {
-        name: 'Enterprise',
-        price: 'Custom',
-        period: 'per year',
-        description: 'For organisations with compliance needs.',
-        cta: 'Talk to sales',
+        name: 'المؤسسات',
+        price: 'حسب الطلب',
+        period: 'سنويًا',
+        description: 'للمؤسسات ذات متطلبات الامتثال.',
+        cta: 'تحدّث إلى المبيعات',
         highlighted: false,
         features: [
-          'Everything in Pro',
-          'SOC 2 & GDPR compliance',
-          'SSO / SAML',
-          'Custom data retention',
-          'Dedicated success manager',
-          'SLA guarantee',
-          'On-premise option',
-          'Audit logs'
+          'كل ما في برو',
+          'امتثال SOC 2 وGDPR',
+          'دخول موحّد SSO / SAML',
+          'احتفاظ مخصّص بالبيانات',
+          'مدير نجاح مخصّص',
+          'ضمان مستوى الخدمة SLA',
+          'خيار التثبيت المحلي',
+          'سجلّات تدقيق'
         ]
       }
     ]
   },
   integrations: {
-    heading: 'Works with the tools\nyour team already loves.',
-    subheading: 'Connect in one click — no API keys, no maintenance.',
+    heading: 'يعمل مع الأدوات\nالتي يحبّها فريقك أصلًا.',
+    subheading: 'اربط بنقرة واحدة — بلا مفاتيح API، وبلا صيانة.',
     items: [
-      { name: 'GitHub', icon: '⚙️', category: 'Dev' },
-      { name: 'Slack', icon: '💬', category: 'Comms' },
-      { name: 'Figma', icon: '🎨', category: 'Design' },
-      { name: 'Notion', icon: '📝', category: 'Docs' },
-      { name: 'Linear', icon: '◆', category: 'Issues' },
-      { name: 'Jira', icon: '🔷', category: 'Issues' },
-      { name: 'Vercel', icon: '▲', category: 'Deploy' },
-      { name: 'Stripe', icon: '💳', category: 'Billing' },
-      { name: 'Sentry', icon: '🛡️', category: 'Monitoring' },
-      { name: 'Datadog', icon: '📈', category: 'Observability' },
-      { name: 'Loom', icon: '🎥', category: 'Video' },
-      { name: 'Zapier', icon: '⚡', category: 'Automation' }
+      { name: 'GitHub', icon: '⚙️', category: 'تطوير' },
+      { name: 'Slack', icon: '💬', category: 'تواصل' },
+      { name: 'Figma', icon: '🎨', category: 'تصميم' },
+      { name: 'Notion', icon: '📝', category: 'مستندات' },
+      { name: 'Linear', icon: '◆', category: 'مهام' },
+      { name: 'Jira', icon: '🔷', category: 'مهام' },
+      { name: 'Vercel', icon: '▲', category: 'نشر' },
+      { name: 'Stripe', icon: '💳', category: 'فوترة' },
+      { name: 'Sentry', icon: '🛡️', category: 'مراقبة' },
+      { name: 'Datadog', icon: '📈', category: 'رصد' },
+      { name: 'Loom', icon: '🎥', category: 'فيديو' },
+      { name: 'Zapier', icon: '⚡', category: 'أتمتة' }
     ]
   },
   testimonials: {
-    eyebrow: 'Loved by product teams',
-    heading: 'Real teams. Real results.',
+    eyebrow: 'محبوب من فرق المنتجات',
+    heading: 'فرقٌ حقيقية. نتائج حقيقية.',
     items: [
       {
         quote:
-          'We replaced Jira, Notion, and a Slack bot with Streamline. Our sprint planning went from 3 hours to 20 minutes. I genuinely didn\'t think that was possible.',
-        author: 'Sarah K.',
-        role: 'VP of Engineering',
+          'استبدلنا Jira وNotion وروبوت Slack بـ«تدفّق». انخفض تخطيط السبرنت لدينا من 3 ساعات إلى 20 دقيقة. لم أكن أظنّ ذلك ممكنًا.',
+        author: 'سارة الخالدي',
+        role: 'نائبة رئيس الهندسة',
         company: 'Launchpad AI',
         rating: 5,
-        avatar_letter: 'S'
+        avatar_letter: 'س'
       },
       {
         quote:
-          'The AI planning feature is not a gimmick — it actually understands dependencies and flags blockers we would have missed. It\'s like having a senior PM on every project.',
-        author: 'Marcus T.',
-        role: 'Head of Product',
+          'ميزة التخطيط بالذكاء الاصطناعي ليست حيلة — تفهم فعلًا الاعتماديات وترصد العوائق التي كنا سنغفلها. كأن لديك مدير منتج خبيرًا في كل مشروع.',
+        author: 'مروان طارق',
+        role: 'رئيس المنتجات',
         company: 'Relay Finance',
         rating: 5,
-        avatar_letter: 'M'
+        avatar_letter: 'م'
       },
       {
         quote:
-          'Onboarding took 40 minutes. Within a week our team was shipping 30% faster. The automation builder alone saved us from hiring a dedicated ops person.',
-        author: 'Priya N.',
-        role: 'CTO',
+          'استغرقت التهيئة 40 دقيقة. وخلال أسبوع صار فريقنا ينجز أسرع بنسبة 30%. باني الأتمتة وحده وفّر علينا توظيف شخص عمليات متفرّغ.',
+        author: 'نورة ناصر',
+        role: 'المديرة التقنية',
         company: 'Stackr',
         rating: 5,
-        avatar_letter: 'P'
+        avatar_letter: 'ن'
       }
     ]
   },
   security: {
-    heading: 'Enterprise security. Built in, not bolted on.',
+    heading: 'أمان المؤسسات. مبنيٌّ في الصميم، لا مُضافًا لاحقًا.',
     items: [
-      'SOC 2 Type II certified',
-      'GDPR & CCPA compliant',
-      'SSO / SAML support',
-      '99.99% uptime SLA',
-      'End-to-end encryption',
-      'Role-based access control'
+      'معتمد SOC 2 من النوع الثاني',
+      'متوافق مع GDPR وCCPA',
+      'دعم الدخول الموحّد SSO / SAML',
+      'ضمان توافر 99.99%',
+      'تشفير من طرف إلى طرف',
+      'تحكّم بالصلاحيات حسب الدور'
     ]
   },
   cta: {
-    eyebrow: 'Ready to ship faster?',
-    heading: 'Your team deserves\nbetter tools.',
+    eyebrow: 'جاهز للإنجاز أسرع؟',
+    heading: 'فريقك يستحقّ\nأدوات أفضل.',
     subheading:
-      'Join 4,200+ teams who replaced their chaotic stack with Streamline. Set up in minutes, not months.',
-    cta_primary: 'Start free — no card needed',
-    cta_secondary: 'Book a demo',
-    note: '14-day Pro trial included · Cancel any time · SOC 2 certified'
+      'انضمّ إلى أكثر من 4,200 فريق استبدلوا أدواتهم المبعثرة بـ«تدفّق». الإعداد خلال دقائق، لا شهور.',
+    cta_primary: 'ابدأ مجانًا — بلا بطاقة',
+    cta_secondary: 'احجز عرضًا توضيحيًا',
+    note: 'تجربة برو 14 يومًا مشمولة · ألغِ في أي وقت · معتمد SOC 2'
   },
   faq: {
-    heading: 'Questions, answered.',
+    heading: 'أسئلة، وأجوبتها.',
     items: [
       {
-        q: 'How long does it take to set up?',
-        a: 'Most teams are fully set up in under 40 minutes. Connect your tools, invite your team, and Streamline pulls in your existing context automatically.'
+        q: 'كم يستغرق الإعداد؟',
+        a: 'تكتمل تهيئة معظم الفرق في أقل من 40 دقيقة. اربط أدواتك، وادعُ فريقك، وتسحب «تدفّق» سياقك الحالي تلقائيًا.'
       },
       {
-        q: 'Can I migrate from Jira or Notion?',
-        a: 'Yes. We have one-click importers for Jira, Notion, Linear, Asana, and Trello. Your history, attachments, and structure come with you.'
+        q: 'هل يمكنني الترحيل من Jira أو Notion؟',
+        a: 'نعم. لدينا مستوردات بنقرة واحدة من Jira وNotion وLinear وAsana وTrello. يأتي معك سجلّك ومرفقاتك وبنيتك.'
       },
       {
-        q: 'Is the AI planning actually useful?',
-        a: 'It is not a chatbot bolted on. The AI reads your codebase, integrations, and past project data to give context-aware recommendations — not generic suggestions.'
+        q: 'هل التخطيط بالذكاء الاصطناعي مفيد فعلًا؟',
+        a: 'ليس روبوت محادثة مُضافًا. يقرأ الذكاء سياق مشروعك وتكاملاتك وبياناتك السابقة ليقدّم توصيات واعية بالسياق — لا اقتراحات عامة.'
       },
       {
-        q: 'What happens when the trial ends?',
-        a: 'You automatically drop to the Starter (free) plan. Your data is never deleted. Upgrade any time to restore Pro features without losing anything.'
+        q: 'ماذا يحدث عند انتهاء التجربة؟',
+        a: 'تنتقل تلقائيًا إلى خطة المبتدئ المجانية. لا تُحذف بياناتك أبدًا. ارتقِ في أي وقت لاستعادة مزايا برو دون فقدان أي شيء.'
       },
       {
-        q: 'Do you offer discounts for startups or nonprofits?',
-        a: 'Yes. Startups under Series A and registered nonprofits get 50% off Pro plans. Email us at hello@streamline.app to apply.'
+        q: 'هل تقدّمون خصومات للشركات الناشئة أو غير الربحية؟',
+        a: 'نعم. تحصل الشركات الناشئة والجهات غير الربحية المسجّلة على خصم 50% على خطط برو. راسلنا على hello@tadaffuq.app للتقديم.'
       },
       {
-        q: 'Is my data secure?',
-        a: 'Streamline is SOC 2 Type II certified, GDPR compliant, and your data is encrypted at rest and in transit. We never sell or share customer data.'
+        q: 'هل بياناتي آمنة؟',
+        a: '«تدفّق» معتمدة SOC 2 من النوع الثاني، ومتوافقة مع GDPR، وبياناتك مشفّرة في التخزين والنقل. لا نبيع بيانات العملاء أو نشاركها أبدًا.'
       }
     ]
   },
   footer: {
-    tagline: 'Built for teams who ship.',
-    legal: '© 2025 Streamline, Inc. All rights reserved.',
-    email: 'hello@streamline.app'
+    tagline: 'مبنية للفرق التي تُنجز.',
+    legal: '© 2025 تدفّق. جميع الحقوق محفوظة.',
+    email: 'hello@tadaffuq.app'
   },
   seo: {
-    title: 'Streamline — AI-Powered Project Management for Fast Teams',
+    title: 'تدفّق — إدارة مشاريع بالذكاء الاصطناعي للفرق السريعة',
     description:
-      'Replace your chaotic stack with one intelligent workspace. AI planning, real-time collaboration, and 80+ integrations. Start free.'
+      'استبدل أدواتك المبعثرة بمساحة عمل واحدة ذكية. تخطيط بالذكاء الاصطناعي، وتعاون لحظي، وأكثر من 80 تكاملًا. ابدأ مجانًا.'
   }
 }

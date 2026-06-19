@@ -48,39 +48,39 @@ function newId() {
 
 function buildSampleForm(): Form {
   return {
-    brand_name: 'Northline Home Services',
-    category: 'Plumbing & HVAC',
-    city: 'Austin',
-    region: 'Texas',
-    owner_name: 'Daniel Hart',
-    years_in_business: '12 years',
-    phone: '+1 (512) 555-0187',
-    email: 'hello@northlinehome.com',
-    address: '1204 W 6th St, Austin, TX 78703',
-    booking_url: 'https://book.northlinehome.com',
+    brand_name: 'إتقان لخدمات المنازل',
+    category: 'السباكة والتكييف',
+    city: 'الرياض',
+    region: 'منطقة الرياض',
+    owner_name: 'خالد العتيبي',
+    years_in_business: '12 سنة',
+    phone: '+966 11 555 0187',
+    email: 'hello@itqan.sa',
+    address: 'طريق الملك فهد، حي العليا، الرياض',
+    booking_url: 'https://book.itqan.sa',
     emergency_service: true,
-    availability: 'Mon–Sat, 8am–6pm',
-    response_time: 'Same-day response in most service areas',
+    availability: 'السبت–الخميس، 8 ص – 6 م',
+    response_time: 'استجابة في نفس اليوم لمعظم مناطق الخدمة',
     services: [
-      { id: newId(), name: 'Emergency Leak Repair', description: 'Burst pipes and water-line emergencies handled within 2 hours, day or night.', price_from: 'From $129', badge: '24/7' },
-      { id: newId(), name: 'Water Heater Install', description: 'Tankless and traditional installs with a 10-year warranty.', price_from: 'From $1,490', badge: 'Most popular' },
-      { id: newId(), name: 'HVAC Tune-Up', description: '21-point spring or fall inspection so your system runs at peak efficiency.', price_from: 'From $89', badge: 'Seasonal' },
+      { id: newId(), name: 'إصلاح التسريبات الطارئ', description: 'نتعامل مع انفجار المواسير وطوارئ خطوط المياه خلال ساعتين، ليلًا أو نهارًا.', price_from: 'يبدأ من 129 ﷼', badge: 'على مدار الساعة' },
+      { id: newId(), name: 'تركيب سخّانات المياه', description: 'تركيب سخّانات فورية وتقليدية بضمان 10 سنوات.', price_from: 'يبدأ من 1,490 ﷼', badge: 'الأكثر طلبًا' },
+      { id: newId(), name: 'صيانة التكييف', description: 'فحص من 21 نقطة في الربيع أو الخريف ليعمل نظامك بأعلى كفاءة.', price_from: 'يبدأ من 89 ﷼', badge: 'موسمي' },
     ],
-    areas_served: 'Downtown Austin\nWest Lake Hills\nBee Cave\nCedar Park\nRound Rock',
-    differentiators: 'Upfront flat-rate pricing — no surprises\nLicensed master plumbers and EPA-certified techs\nSame-day service across central Austin\n2-year workmanship guarantee',
-    story_brief: "Northline started in 2013 out of a single van in East Austin. Daniel grew up fixing things on his dad's job sites — the rule was always 'leave it cleaner than you found it.' Twelve years later, that's still our standard. We show up on time, quote flat rates, and treat every house like it's our own.",
-    owner_title: 'Founder & Master Plumber',
-    quote_seed: "Honest pricing and clean work — that's the whole job.",
+    areas_served: 'العليا\nالملقا\nحطين\nالنرجس\nالياسمين',
+    differentiators: 'أسعار مقطوعة معلنة مسبقًا — دون مفاجآت\nفنّيون مرخّصون ومعتمدون\nخدمة في نفس اليوم عبر وسط الرياض\nضمان على جودة العمل لسنتين',
+    story_brief: 'بدأت «إتقان» عام 2013 بشاحنة واحدة في شرق الرياض. نشأ خالد وهو يصلح الأشياء في مواقع عمل والده — وكانت القاعدة دائمًا «اتركه أنظف مما وجدته». وبعد اثنتي عشرة سنة، لا يزال ذلك معيارنا. نصل في الموعد، ونقدّم أسعارًا مقطوعة، ونعامل كل بيت كأنه بيتنا.',
+    owner_title: 'المؤسّس وكبير الفنّيين',
+    quote_seed: 'أسعار صادقة وعمل نظيف — هذا هو العمل كله.',
     hero_image_url: '',
     team_image_url: '',
     before_image_url: '',
     after_image_url: '',
     gallery_image_urls: [],
     review_rating: '4.9',
-    review_count: '320+',
-    licenses: 'Texas Master Plumber #M-39817\nEPA 608 Certified',
-    guarantees: '2-year workmanship guarantee\n100% satisfaction or we redo it',
-    promo_offer: 'Free inspection with any installation quote',
+    review_count: '+320',
+    licenses: 'رخصة سباكة احترافية رقم M-39817\nشهادة اعتماد فنّي',
+    guarantees: 'ضمان على جودة العمل لسنتين\nرضا تام أو نعيد العمل',
+    promo_offer: 'فحص مجاني مع أي عرض سعر للتركيب',
     style_preset: 'cobalt',
   }
 }
@@ -97,8 +97,8 @@ const INITIAL_FORM: Form = {
   address: '',
   booking_url: '',
   emergency_service: false,
-  availability: 'Mon-Sat, 8am-6pm',
-  response_time: 'Same-day response in most service areas',
+  availability: 'السبت–الخميس، 8 ص – 6 م',
+  response_time: 'استجابة في نفس اليوم لمعظم مناطق الخدمة',
   services: [
     { id: newId(), name: '', description: '', price_from: '', badge: '' }
   ],
@@ -113,7 +113,7 @@ const INITIAL_FORM: Form = {
   after_image_url: '',
   gallery_image_urls: [],
   review_rating: '4.9',
-  review_count: '200+',
+  review_count: '+200',
   licenses: '',
   guarantees: '',
   promo_offer: '',
@@ -188,15 +188,15 @@ export default function ServicesWizardPage() {
   }
 
   function validate(): string | null {
-    if (form.brand_name.trim().length < 2) return 'Please enter the business name.'
-    if (form.category.trim().length < 2) return 'Please enter the service category.'
-    if (form.city.trim().length < 2) return 'Please enter the main city.'
-    if (form.phone.trim().length < 4) return 'Please enter a contact phone number.'
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Please enter a valid email address.'
-    if (form.story_brief.trim().length < 20) return 'Tell us a bit more about the business story.'
+    if (form.brand_name.trim().length < 2) return 'يرجى إدخال اسم النشاط التجاري.'
+    if (form.category.trim().length < 2) return 'يرجى إدخال فئة الخدمة.'
+    if (form.city.trim().length < 2) return 'يرجى إدخال المدينة الرئيسية.'
+    if (form.phone.trim().length < 4) return 'يرجى إدخال رقم هاتف للتواصل.'
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'يرجى إدخال بريد إلكتروني صحيح.'
+    if (form.story_brief.trim().length < 20) return 'أخبرنا المزيد عن قصة النشاط.'
 
     const validServices = form.services.filter((service) => service.name.trim().length >= 2)
-    if (validServices.length < 1) return 'Add at least one service to generate the site.'
+    if (validServices.length < 1) return 'أضف خدمة واحدة على الأقل لتوليد الموقع.'
 
     return null
   }
@@ -272,7 +272,7 @@ export default function ServicesWizardPage() {
       })
       const generateJson = await generateRes.json()
       if (!generateRes.ok || !generateJson?.content) {
-        throw new Error(generateJson?.error || 'Generation failed')
+        throw new Error(generateJson?.error || 'فشل التوليد')
       }
 
       const preset = SERVICE_PRESETS.find((item) => item.id === form.style_preset) || SERVICE_PRESETS[0]
@@ -298,22 +298,22 @@ export default function ServicesWizardPage() {
         return
       }
       if (saveRes.status === 402) {
-        alert('You have reached your free theme limit. Please upgrade to continue.')
+        alert('لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.')
         router.push('/pricing')
         return
       }
       if (!saveRes.ok || !saveJson?.id) {
-        throw new Error(saveJson?.error || 'Save failed')
+        throw new Error(saveJson?.error || 'فشل الحفظ')
       }
       router.push(`/preview/services/${saveJson.id}`)
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong while generating your site.')
+      setError(err?.message || 'حدث خطأ ما أثناء توليد موقعك.')
       setLoading(false)
     }
   }
 
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">Loading...</div>
+    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
   }
 
   return (
@@ -328,12 +328,12 @@ export default function ServicesWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-sky-700">Local services theme · Trade</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-sky-700">قالب الخدمات المحلية · حِرَف</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Build a modern local service website.
+            ابنِ موقع خدمات محلية عصريًا.
           </h1>
           <p className="mt-3 max-w-3xl text-muted">
-            Tell us the business basics, the services you sell, and why clients trust you. Zenya will generate the full site structure, copy, and sections for a premium local service brand.
+            أخبرنا بأساسيات النشاط والخدمات التي تقدّمها ولماذا يثق بك العملاء. ستولّد زينيا بنية الموقع الكاملة والنصوص والأقسام لعلامة خدمات محلية فاخرة.
           </p>
         </motion.div>
 
@@ -343,123 +343,123 @@ export default function ServicesWizardPage() {
           </div>
         )}
 
-        <Section title="Business basics" subtitle="What kind of local service business is this?">
+        <Section title="أساسيات النشاط" subtitle="ما نوع نشاط الخدمات المحلية هذا؟">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Business name" required>
-              <input className={inputCls} value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Northline Home Services" />
+            <Field label="اسم النشاط" required>
+              <input className={inputCls} value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="إتقان لخدمات المنازل" />
             </Field>
-            <Field label="Service category" required>
-              <input className={inputCls} value={form.category} onChange={(e) => update('category', e.target.value)} placeholder="Plumbing, HVAC, salon, cleaning, agency..." />
+            <Field label="فئة الخدمة" required>
+              <input className={inputCls} value={form.category} onChange={(e) => update('category', e.target.value)} placeholder="سباكة، تكييف، صالون، تنظيف، وكالة..." />
             </Field>
-            <Field label="City" required>
-              <input className={inputCls} value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="Austin" />
+            <Field label="المدينة" required>
+              <input className={inputCls} value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="الرياض" />
             </Field>
-            <Field label="State / region">
-              <input className={inputCls} value={form.region} onChange={(e) => update('region', e.target.value)} placeholder="Texas" />
+            <Field label="المنطقة">
+              <input className={inputCls} value={form.region} onChange={(e) => update('region', e.target.value)} placeholder="منطقة الرياض" />
             </Field>
-            <Field label="Owner / lead name">
-              <input className={inputCls} value={form.owner_name} onChange={(e) => update('owner_name', e.target.value)} placeholder="Daniel Hart" />
+            <Field label="اسم المالك / المسؤول">
+              <input className={inputCls} value={form.owner_name} onChange={(e) => update('owner_name', e.target.value)} placeholder="خالد العتيبي" />
             </Field>
-            <Field label="Years in business">
-              <input className={inputCls} value={form.years_in_business} onChange={(e) => update('years_in_business', e.target.value)} placeholder="12 years" />
+            <Field label="سنوات الخبرة">
+              <input className={inputCls} value={form.years_in_business} onChange={(e) => update('years_in_business', e.target.value)} placeholder="12 سنة" />
             </Field>
           </div>
         </Section>
 
-        <Section title="Contact and availability" subtitle="What should the customer know before booking?">
+        <Section title="التواصل والتوفّر" subtitle="ما الذي ينبغي أن يعرفه العميل قبل الحجز؟">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Phone" required>
-              <input className={inputCls} value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+1 (512) 555-0187" />
+            <Field label="الهاتف" required>
+              <input className={inputCls} dir="ltr" value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+966 11 555 0187" />
             </Field>
-            <Field label="Email" required>
-              <input className={inputCls} value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="hello@business.com" />
+            <Field label="البريد الإلكتروني" required>
+              <input className={inputCls} dir="ltr" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="hello@business.com" />
             </Field>
-            <Field label="Address">
-              <input className={inputCls} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="1204 W 6th St, Austin, TX" />
+            <Field label="العنوان">
+              <input className={inputCls} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="طريق الملك فهد، حي العليا، الرياض" />
             </Field>
-            <Field label="Booking / scheduling URL">
-              <input className={inputCls} value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://..." />
+            <Field label="رابط الحجز / الجدولة">
+              <input className={inputCls} dir="ltr" value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://..." />
             </Field>
-            <Field label="Availability line">
-              <input className={inputCls} value={form.availability} onChange={(e) => update('availability', e.target.value)} placeholder="Mon-Sat, 8am-6pm" />
+            <Field label="سطر التوفّر">
+              <input className={inputCls} value={form.availability} onChange={(e) => update('availability', e.target.value)} placeholder="السبت–الخميس، 8 ص – 6 م" />
             </Field>
-            <Field label="Response time line">
-              <input className={inputCls} value={form.response_time} onChange={(e) => update('response_time', e.target.value)} placeholder="Same-day response in most areas" />
+            <Field label="سطر وقت الاستجابة">
+              <input className={inputCls} value={form.response_time} onChange={(e) => update('response_time', e.target.value)} placeholder="استجابة في نفس اليوم لمعظم المناطق" />
             </Field>
           </div>
           <label className="mt-4 flex items-center gap-3 text-sm text-foreground">
             <input type="checkbox" checked={form.emergency_service} onChange={(e) => update('emergency_service', e.target.checked)} />
-            This business offers emergency or urgent service.
+            يقدّم هذا النشاط خدمة طارئة أو عاجلة.
           </label>
         </Section>
 
-        <Section title="Services" subtitle="Even one service is enough. Add more if you offer them — we'll turn them into a complete services section.">
+        <Section title="الخدمات" subtitle="حتى خدمة واحدة تكفي. أضف المزيد إن كنت تقدّمها — وسنحوّلها إلى قسم خدمات متكامل.">
           <div className="space-y-5">
             {form.services.map((service, index) => (
               <div key={service.id} className="rounded-3xl border border-token bg-elevated/60 p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-sm font-bold uppercase tracking-[0.24em] text-muted">Service 0{index + 1}</p>
+                  <p className="text-sm font-bold uppercase tracking-[0.24em] text-muted">الخدمة 0{index + 1}</p>
                   {form.services.length > 1 && (
                     <button type="button" onClick={() => removeService(service.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-600">
-                      Remove
+                      إزالة
                     </button>
                   )}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <input className={inputCls} value={service.name} onChange={(e) => updateService(service.id, { name: e.target.value })} placeholder="Service name" />
-                  <input className={inputCls} value={service.price_from} onChange={(e) => updateService(service.id, { price_from: e.target.value })} placeholder="Price from / quote label" />
-                  <input className={inputCls + ' sm:col-span-2'} value={service.description} onChange={(e) => updateService(service.id, { description: e.target.value })} placeholder="Short rough description" />
-                  <input className={inputCls} value={service.badge} onChange={(e) => updateService(service.id, { badge: e.target.value })} placeholder="Badge (Popular, Fast response...)" />
+                  <input className={inputCls} value={service.name} onChange={(e) => updateService(service.id, { name: e.target.value })} placeholder="اسم الخدمة" />
+                  <input className={inputCls} value={service.price_from} onChange={(e) => updateService(service.id, { price_from: e.target.value })} placeholder="يبدأ من / صيغة عرض السعر" />
+                  <input className={inputCls + ' sm:col-span-2'} value={service.description} onChange={(e) => updateService(service.id, { description: e.target.value })} placeholder="وصف موجز مبدئي" />
+                  <input className={inputCls} value={service.badge} onChange={(e) => updateService(service.id, { badge: e.target.value })} placeholder="شارة (الأكثر طلبًا، استجابة سريعة...)" />
                 </div>
               </div>
             ))}
             <button type="button" onClick={addService} className="w-full rounded-2xl border-2 border-dashed border-token py-4 text-sm font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground">
-              + Add another service
+              + أضف خدمة أخرى
             </button>
           </div>
         </Section>
 
-        <Section title="Service area and trust" subtitle="All optional — the more you add, the richer the site feels.">
+        <Section title="منطقة الخدمة والثقة" subtitle="كلها اختيارية — كلما أضفت أكثر، بدا الموقع أغنى.">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Areas served (optional — more = better)" className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[110px] resize-y'} value={form.areas_served} onChange={(e) => update('areas_served', e.target.value)} placeholder="One per line&#10;Downtown Austin&#10;West Lake Hills&#10;Bee Cave" />
+            <Field label="المناطق المخدومة (اختياري — أكثر = أفضل)" className="sm:col-span-2">
+              <textarea className={inputCls + ' min-h-[110px] resize-y'} value={form.areas_served} onChange={(e) => update('areas_served', e.target.value)} placeholder="واحدة في كل سطر&#10;العليا&#10;الملقا&#10;حطين" />
             </Field>
-            <Field label="Differentiators / trust points (optional — more = better)" className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[120px] resize-y'} value={form.differentiators} onChange={(e) => update('differentiators', e.target.value)} placeholder="One per line&#10;Upfront pricing&#10;Licensed and insured&#10;Clean work and fast follow-up" />
+            <Field label="عوامل التميّز / نقاط الثقة (اختياري — أكثر = أفضل)" className="sm:col-span-2">
+              <textarea className={inputCls + ' min-h-[120px] resize-y'} value={form.differentiators} onChange={(e) => update('differentiators', e.target.value)} placeholder="واحدة في كل سطر&#10;أسعار معلنة مسبقًا&#10;مرخّص ومؤمّن&#10;عمل نظيف ومتابعة سريعة" />
             </Field>
-            <Field label="Licenses / certifications">
-              <textarea className={inputCls + ' min-h-[90px] resize-y'} value={form.licenses} onChange={(e) => update('licenses', e.target.value)} placeholder="One per line" />
+            <Field label="الرخص / الشهادات">
+              <textarea className={inputCls + ' min-h-[90px] resize-y'} value={form.licenses} onChange={(e) => update('licenses', e.target.value)} placeholder="واحدة في كل سطر" />
             </Field>
-            <Field label="Guarantees / reassurances">
-              <textarea className={inputCls + ' min-h-[90px] resize-y'} value={form.guarantees} onChange={(e) => update('guarantees', e.target.value)} placeholder="One per line" />
+            <Field label="الضمانات / الطمأنة">
+              <textarea className={inputCls + ' min-h-[90px] resize-y'} value={form.guarantees} onChange={(e) => update('guarantees', e.target.value)} placeholder="واحدة في كل سطر" />
             </Field>
-            <Field label="Average review rating">
+            <Field label="متوسط التقييم">
               <input className={inputCls} value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.9" />
             </Field>
-            <Field label="Review count">
-              <input className={inputCls} value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="320+" />
+            <Field label="عدد التقييمات">
+              <input className={inputCls} value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="+320" />
             </Field>
-            <Field label="Promo offer">
-              <input className={inputCls} value={form.promo_offer} onChange={(e) => update('promo_offer', e.target.value)} placeholder="Free inspection with installation quote" />
+            <Field label="عرض ترويجي">
+              <input className={inputCls} value={form.promo_offer} onChange={(e) => update('promo_offer', e.target.value)} placeholder="فحص مجاني مع عرض سعر التركيب" />
             </Field>
           </div>
         </Section>
 
-        <Section title="Business story" subtitle="A few sentences are enough. We will polish them into premium site copy.">
+        <Section title="قصة النشاط" subtitle="بضع جمل تكفي. سنصقلها إلى نصوص موقع فاخرة.">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Story brief" required className="sm:col-span-2">
-              <textarea className={inputCls + ' min-h-[140px] resize-y'} value={form.story_brief} onChange={(e) => update('story_brief', e.target.value)} placeholder="How the business started, what clients value most, and what makes the experience different." />
+            <Field label="ملخّص القصة" required className="sm:col-span-2">
+              <textarea className={inputCls + ' min-h-[140px] resize-y'} value={form.story_brief} onChange={(e) => update('story_brief', e.target.value)} placeholder="كيف بدأ النشاط، وما الذي يقدّره العملاء أكثر، وما الذي يجعل التجربة مختلفة." />
             </Field>
-            <Field label="Owner title">
-              <input className={inputCls} value={form.owner_title} onChange={(e) => update('owner_title', e.target.value)} placeholder="Founder" />
+            <Field label="لقب المالك">
+              <input className={inputCls} value={form.owner_title} onChange={(e) => update('owner_title', e.target.value)} placeholder="المؤسّس" />
             </Field>
-            <Field label="Quote seed">
-              <input className={inputCls} value={form.quote_seed} onChange={(e) => update('quote_seed', e.target.value)} placeholder="A short quote that sounds like the owner" />
+            <Field label="بذرة اقتباس">
+              <input className={inputCls} value={form.quote_seed} onChange={(e) => update('quote_seed', e.target.value)} placeholder="اقتباس قصير يشبه كلام المالك" />
             </Field>
           </div>
         </Section>
 
-        <Section title="Visual assets" subtitle="Upload your own photos. Skip any slot and we'll fill it with beautiful fallback imagery.">
+        <Section title="الأصول البصرية" subtitle="ارفع صورك الخاصة. تخطَّ أي خانة وسنملؤها بصور بديلة جميلة.">
           <div
             className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-elevated/60 p-4 backdrop-blur-md"
             style={{ background: 'rgba(14,165,233,0.06)', borderColor: 'rgba(14,165,233,0.25)' }}
@@ -468,44 +468,44 @@ export default function ServicesWizardPage() {
               ✨
             </div>
             <div className="text-[13px] leading-[1.55] text-foreground">
-              <strong>Anything you upload here lands in your gallery too,</strong>{' '}
+              <strong>كل ما ترفعه هنا يُحفَظ في معرضك أيضًا،</strong>{' '}
               <span className="text-muted">
-                so you can reuse it later when editing your site. No image is no problem — leave a slot empty and we'll drop in a high-quality fallback.
+                لتعيد استخدامه لاحقًا عند تعديل موقعك. غياب الصورة ليس مشكلة — اترك الخانة فارغة وسنضع صورة بديلة عالية الجودة.
               </span>
             </div>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <ImageUploadField
-              label="Hero image"
+              label="الصورة الرئيسية"
               value={form.hero_image_url}
               onChange={(url) => update('hero_image_url', url)}
               aspect="wide"
-              helper="Big image at the top of your page."
+              helper="الصورة الكبيرة أعلى صفحتك."
               className="sm:col-span-2"
             />
             <ImageUploadField
-              label="Team photo"
+              label="صورة الفريق"
               value={form.team_image_url}
               onChange={(url) => update('team_image_url', url)}
               aspect="square"
             />
             <ImageUploadField
-              label="Before"
+              label="قبل"
               value={form.before_image_url}
               onChange={(url) => update('before_image_url', url)}
               aspect="square"
-              helper="Used in the before/after comparison."
+              helper="تُستخدَم في مقارنة قبل/بعد."
             />
             <ImageUploadField
-              label="After"
+              label="بعد"
               value={form.after_image_url}
               onChange={(url) => update('after_image_url', url)}
               aspect="square"
-              helper="Used in the before/after comparison."
+              helper="تُستخدَم في مقارنة قبل/بعد."
             />
             <div className="sm:col-span-2">
               <label className="mb-2 block text-[12.5px] font-medium text-foreground">
-                Gallery (up to 8)
+                المعرض (حتى 8)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
                 {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -521,7 +521,7 @@ export default function ServicesWizardPage() {
           </div>
         </Section>
 
-        <Section title="Visual style" subtitle="Choose the preset that fits this local business best.">
+        <Section title="النمط البصري" subtitle="اختر النمط الجاهز الأنسب لهذا النشاط المحلي.">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {SERVICE_PRESETS.map((preset) => {
               const selected = form.style_preset === preset.id
@@ -550,8 +550,8 @@ export default function ServicesWizardPage() {
         <div className="sticky bottom-6 z-20 mt-12 rounded-[28px] border border-token bg-foreground p-5 shadow-soft-lg">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="text-white">
-              <p className="text-sm font-semibold">Ready to generate the Trade theme.</p>
-              <p className="text-xs opacity-70">We will build the full local-services site and send you to the live preview.</p>
+              <p className="text-sm font-semibold">جاهز لتوليد قالب الحِرَف.</p>
+              <p className="text-xs opacity-70">سنبني موقع الخدمات المحلية كاملًا وننقلك إلى المعاينة الحيّة.</p>
             </div>
             <button
               type="button"
@@ -559,7 +559,7 @@ export default function ServicesWizardPage() {
               onClick={handleGenerate}
               className="rounded-full bg-sky-400 px-8 py-3.5 text-sm font-bold text-slate-950 transition hover:scale-[1.02] disabled:opacity-60"
             >
-              {loading ? 'Generating your site...' : 'Generate Trade theme'}
+              {loading ? 'جارٍ توليد موقعك...' : 'ولّد قالب الحِرَف'}
             </button>
           </div>
         </div>
@@ -595,7 +595,7 @@ function Field({ label, required, children, className = '' }: { label: string; r
     <label className={`block ${className}`}>
       <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ms-1 text-red-500">*</span>}
       </span>
       {children}
     </label>

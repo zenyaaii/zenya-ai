@@ -6,6 +6,7 @@ import {
   Upload,
 } from 'lucide-react'
 import GalleryPicker from './GalleryPicker'
+import { useAiRewrite } from './AiRewrite'
 
 /* ────────────────────────────────────────────────────────────────────── *
  * Shared editor field components — used by every theme's editor.        *
@@ -14,27 +15,36 @@ import GalleryPicker from './GalleryPicker'
  * ────────────────────────────────────────────────────────────────────── */
 
 export function FieldText({
-  label, value, onChange, placeholder,
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  label, value, onChange, placeholder, panelLabel,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; panelLabel?: string }) {
+  const ai = useAiRewrite({ fieldLabel: label, panelLabel, multiline: false, current: value, onChange })
   return (
-    <label className="block">
-      <span className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="block">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+        {ai.trigger}
+      </div>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="w-full rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
       />
-    </label>
+      {ai.panel}
+    </div>
   )
 }
 
 export function FieldTextArea({
-  label, value, onChange, placeholder, rows = 3,
-}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
+  label, value, onChange, placeholder, rows = 3, panelLabel,
+}: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; panelLabel?: string }) {
+  const ai = useAiRewrite({ fieldLabel: label, panelLabel, multiline: true, current: value, onChange })
   return (
-    <label className="block">
-      <span className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="block">
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+        {ai.trigger}
+      </div>
       <textarea
         rows={rows}
         value={value}
@@ -44,7 +54,8 @@ export function FieldTextArea({
         className="block w-full resize-y break-words rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
         style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
       />
-    </label>
+      {ai.panel}
+    </div>
   )
 }
 

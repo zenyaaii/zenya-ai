@@ -2,238 +2,238 @@ import type { RestaurantContent } from './types'
 
 export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
   brand: {
-    name: 'Maison Lumière',
-    cuisine: 'Modern French',
-    tagline: 'A seven-course conversation between fire, sea, and season.',
-    city: 'New York',
-    neighborhood: 'West Village'
+    name: 'دار نُور',
+    cuisine: 'مطبخ شرقي عصري',
+    tagline: 'حوارٌ من سبعة أطباق بين النار والبحر والفصول.',
+    city: 'الرياض',
+    neighborhood: 'حي السفارات'
   },
   hero: {
-    eyebrow: 'Reservations open · Spring tasting menu',
-    headline: 'A quiet kind of\nextraordinary.',
+    eyebrow: 'الحجوزات مفتوحة · قائمة تذوّق الربيع',
+    headline: 'تميّزٌ\nيسكنه الهدوء.',
     subheadline:
-      'An intimate twenty-four seat counter where each plate is composed in front of you. Chef Élodie Marchand cooks a single tasting menu that changes with the markets of the Hudson Valley.',
-    primary_cta: 'Reserve a Table',
-    secondary_cta: 'See the Menu',
+      'طاولةٌ حميمة من أربعة وعشرين مقعدًا، يُجهَّز فيها كل طبق أمامك. يطهو الشيف خالد مرعي قائمة تذوّق واحدة تتغيّر مع مواسم المزارع المحلية.',
+    primary_cta: 'احجز طاولة',
+    secondary_cta: 'شاهد القائمة',
     image:
       'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=80'
   },
   story: {
-    eyebrow: 'Our story',
-    heading: 'Built on stillness, fire, and the seasons.',
+    eyebrow: 'قصتنا',
+    heading: 'مبنية على السكينة والنار والفصول.',
     body:
-      'Maison Lumière opened in 2019 in a converted print shop on Cornelia Street. We grow most of what we serve at our family farm in Columbia County, and we work with a small circle of fishermen, foragers, and dairy people who share our obsession with patience.',
-    chef_name: 'Élodie Marchand',
-    chef_title: 'Chef · Proprietor',
+      'افتُتحت «دار نُور» عام 2019 في بيتٍ قديم أُعيد ترميمه. نزرع معظم ما نقدّمه في مزرعتنا العائلية خارج المدينة، ونعمل مع دائرة صغيرة من الصيّادين والمزارعين الذين يشاركوننا شغف الصبر والإتقان.',
+    chef_name: 'خالد مرعي',
+    chef_title: 'الشيف · المالك',
     chef_bio:
-      'Trained at L\'Ambroisie in Paris and Manresa in Los Gatos, Élodie returned to New York in 2017 to cook the food she missed eating — quieter, slower, more rooted in place.',
+      'تدرّب خالد في باريس وبيروت، وعاد إلى الرياض عام 2017 ليطهو الطعام الذي اشتاق إليه — أهدأ، وأبطأ، وأكثر تجذّرًا في المكان.',
     chef_photo:
-      'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80',
     accent_image:
       'https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1600&q=80'
   },
   signature_dishes: [
     {
-      name: 'Hand-Dived Sea Scallop',
-      description: 'Brown butter, pickled gooseberry, fennel pollen.',
+      name: 'إسكالوب البحر المصطاد يدويًا',
+      description: 'زبدة بنّية، وكشمش مخلّل، وغبار الشمر.',
       price: '$36',
       image:
         'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'Hudson Valley Duck',
-      description: 'Aged forty days, fig leaf, smoked salt, charred plum.',
+      name: 'بطّ الوادي',
+      description: 'مُعتَّق أربعين يومًا، ورق التين، ملح مدخّن، خوخ مشوي.',
       price: '$58',
       image:
         'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'Hand-Cut Tagliolini',
-      description: 'Sea urchin, brown butter, lemon zest, sourdough crumb.',
+      name: 'تالياتيلّي مقطّعة يدويًا',
+      description: 'قنفذ البحر، زبدة بنّية، قشر الليمون، فتات العجين المخمّر.',
       price: '$42',
       image:
         'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'Crème Brûlée au Lavande',
-      description: 'Lavender from Provence, vanilla bean, demerara crust.',
+      name: 'كريم بروليه باللافندر',
+      description: 'لافندر، حبّة الفانيليا، قشرة سكر الديميرارا.',
       price: '$18',
       image:
         'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
     }
   ],
   menu: {
-    heading: 'À la carte',
-    subheading: 'Served Tuesday through Saturday, 5:30 to 10:00pm. Our tasting menu changes weekly.',
+    heading: 'قائمة الطعام',
+    subheading: 'تُقدَّم من الثلاثاء إلى السبت، من 5:30 إلى 10:00 مساءً. قائمة التذوّق تتغيّر أسبوعيًا.',
     categories: [
       {
         id: 'starters',
-        name: 'Starters',
-        description: 'To begin slowly.',
+        name: 'المقبّلات',
+        description: 'لبدايةٍ هادئة.',
         items: [
-          { name: 'Beef Tartare', description: 'Aged sirloin, smoked egg yolk, sourdough.', price: '$24' },
-          { name: 'Roasted Beets', description: 'Cultured cream, walnuts, sherry vinegar.', price: '$18' },
-          { name: 'Oysters', description: 'Half-dozen East Coast, mignonette, lemon.', price: '$28' },
-          { name: 'Burrata', description: 'Heirloom tomato, basil oil, finishing salt.', price: '$22' }
+          { name: 'تارتار اللحم', description: 'سَمَك مُعتَّق، صفار بيض مدخّن، عجين مخمّر.', price: '$24' },
+          { name: 'شمندر مشوي', description: 'كريمة مخمّرة، جوز، خلّ الشيري.', price: '$18' },
+          { name: 'محار', description: 'نصف دزينة محار طازج، صلصة مينيونيت، ليمون.', price: '$28' },
+          { name: 'بوراتا', description: 'طماطم بلدية، زيت الريحان، ملح التقديم.', price: '$22' }
         ]
       },
       {
         id: 'mains',
-        name: 'Mains',
-        description: 'The heart of the menu.',
+        name: 'الأطباق الرئيسية',
+        description: 'قلب القائمة.',
         items: [
-          { name: 'Hudson Valley Duck', description: 'Aged forty days, fig leaf, smoked salt.', price: '$58', badge: 'Signature' },
-          { name: 'Wild Striped Bass', description: 'Brown butter, capers, charred lemon.', price: '$48' },
-          { name: 'Tagliolini', description: 'Sea urchin, brown butter, lemon zest.', price: '$42' },
-          { name: 'Dry-Aged Ribeye', description: 'For two. Bone marrow, watercress, pommes purée.', price: '$120' },
-          { name: 'Roasted Cauliflower', description: 'Brown butter, capers, almond praline.', price: '$32' }
+          { name: 'بطّ الوادي', description: 'مُعتَّق أربعين يومًا، ورق التين، ملح مدخّن.', price: '$58', badge: 'طبق التوقيع' },
+          { name: 'قاروص بحري بري', description: 'زبدة بنّية، كبر، ليمون مشوي.', price: '$48' },
+          { name: 'تالياتيلّي', description: 'قنفذ البحر، زبدة بنّية، قشر الليمون.', price: '$42' },
+          { name: 'ريب آي مُعتَّق', description: 'لشخصين. نخاع العظم، جرجير، بطاطس مهروسة.', price: '$120' },
+          { name: 'قرنبيط محمّر', description: 'زبدة بنّية، كبر، برالين اللوز.', price: '$32' }
         ]
       },
       {
         id: 'desserts',
-        name: 'Desserts',
-        description: 'A quiet finish.',
+        name: 'الحلويات',
+        description: 'ختامٌ هادئ.',
         items: [
-          { name: 'Crème Brûlée au Lavande', description: 'Lavender, vanilla, demerara crust.', price: '$18', badge: 'Signature' },
-          { name: 'Chocolate Soufflé', description: 'Valrhona Guanaja, crème anglaise.', price: '$20' },
-          { name: 'Tarte Tatin', description: 'Honeycrisp apple, salted caramel, crème fraîche.', price: '$18' },
-          { name: 'Selection of Cheeses', description: 'Three artisanal cheeses, honeycomb, walnut bread.', price: '$24' }
+          { name: 'كريم بروليه باللافندر', description: 'لافندر، فانيليا، قشرة الديميرارا.', price: '$18', badge: 'طبق التوقيع' },
+          { name: 'سوفليه الشوكولاتة', description: 'شوكولاتة فالرونا، كريمة إنجليزية.', price: '$20' },
+          { name: 'تارت التفّاح المقلوب', description: 'تفّاح، كراميل مملّح، كريمة فريش.', price: '$18' },
+          { name: 'تشكيلة أجبان', description: 'ثلاثة أجبان حرفية، شهد العسل، خبز الجوز.', price: '$24' }
         ]
       },
       {
-        id: 'wine',
-        name: 'Wine & Spirits',
-        description: 'Curated by sommelier Théo Bernard.',
+        id: 'drinks',
+        name: 'المشروبات',
+        description: 'من اختيار خبير المشروبات سامي حدّاد.',
         items: [
-          { name: 'Champagne Pairing', description: 'Three glasses across the meal.', price: '$95' },
-          { name: 'Wine Pairing', description: 'Five glasses, paired to the tasting menu.', price: '$165' },
-          { name: 'Reserve Pairing', description: 'Five rare glasses from our cellar.', price: '$345' },
-          { name: 'Non-Alcoholic Pairing', description: 'Botanical infusions, ferments, juices.', price: '$75' }
+          { name: 'تناغم العصائر الموسمية', description: 'ثلاثة أكواب على امتداد الوجبة.', price: '$45' },
+          { name: 'تناغم النقائع النباتية', description: 'خمسة أكواب، منسّقة مع قائمة التذوّق.', price: '$65' },
+          { name: 'القهوة المختصّة', description: 'تحضير يدوي من حبوب مختارة.', price: '$18' },
+          { name: 'شاي وأعشاب فاخرة', description: 'نقائع وتخميرات وعصائر طازجة.', price: '$22' }
         ]
       }
     ]
   },
   gallery: {
-    heading: 'A room, a fire, a season.',
-    subheading: 'Photographs from the dining room and kitchen.',
+    heading: 'مكانٌ، ونار، وفصل.',
+    subheading: 'صورٌ من قاعة الطعام والمطبخ.',
     images: [
-      { url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80', alt: 'Candlelit table setting' },
-      { url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80', alt: 'Plated dish overhead' },
-      { url: 'https://images.unsplash.com/photo-1428515613728-6b4607e44363?auto=format&fit=crop&w=1400&q=80', alt: 'Wine glass and bottle' },
-      { url: 'https://images.unsplash.com/photo-1559329007-40df8a9345d8?auto=format&fit=crop&w=1400&q=80', alt: 'Chef plating dish' },
-      { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80', alt: 'Dining room interior' },
-      { url: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=1400&q=80', alt: 'Seasonal vegetables' }
+      { url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80', alt: 'طاولة على ضوء الشموع' },
+      { url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80', alt: 'طبق من الأعلى' },
+      { url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1400&q=80', alt: 'طبق التوقيع' },
+      { url: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1400&q=80', alt: 'تفاصيل طبق' },
+      { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80', alt: 'قاعة الطعام' },
+      { url: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=1400&q=80', alt: 'خضراوات موسمية' }
     ]
   },
   hours_location: {
-    heading: 'Find us.',
-    subheading: '24 Cornelia Street, West Village, New York',
-    address: '24 Cornelia Street, New York, NY 10014',
-    phone: '+1 (212) 555-0140',
-    email: 'reservations@maisonlumiere.nyc',
-    map_link: 'https://maps.google.com/?q=24+Cornelia+Street+New+York',
+    heading: 'تجدنا هنا.',
+    subheading: 'شارع الأمير، حي السفارات، الرياض',
+    address: 'شارع الأمير، حي السفارات، الرياض 12512',
+    phone: '+966 11 555 0140',
+    email: 'reservations@darnoor.sa',
+    map_link: 'https://maps.google.com/?q=Diplomatic+Quarter+Riyadh',
     hours: [
-      { day: 'monday', label: 'Monday', open: '', close: '', closed: true },
-      { day: 'tuesday', label: 'Tuesday', open: '5:30pm', close: '10:00pm' },
-      { day: 'wednesday', label: 'Wednesday', open: '5:30pm', close: '10:00pm' },
-      { day: 'thursday', label: 'Thursday', open: '5:30pm', close: '10:00pm' },
-      { day: 'friday', label: 'Friday', open: '5:30pm', close: '11:00pm' },
-      { day: 'saturday', label: 'Saturday', open: '5:30pm', close: '11:00pm' },
-      { day: 'sunday', label: 'Sunday', open: '5:00pm', close: '9:30pm' }
+      { day: 'monday', label: 'الإثنين', open: '', close: '', closed: true },
+      { day: 'tuesday', label: 'الثلاثاء', open: '5:30 م', close: '10:00 م' },
+      { day: 'wednesday', label: 'الأربعاء', open: '5:30 م', close: '10:00 م' },
+      { day: 'thursday', label: 'الخميس', open: '5:30 م', close: '10:00 م' },
+      { day: 'friday', label: 'الجمعة', open: '5:30 م', close: '11:00 م' },
+      { day: 'saturday', label: 'السبت', open: '5:30 م', close: '11:00 م' },
+      { day: 'sunday', label: 'الأحد', open: '5:00 م', close: '9:30 م' }
     ]
   },
   reservations: {
-    heading: 'Reserve your evening.',
+    heading: 'احجز أمسيتك.',
     subheading:
-      'Reservations open thirty days in advance, every morning at 9:00am. The chef\'s counter and private dining room are released on the first of each month.',
-    cta_label: 'Book on Resy',
-    provider: { type: 'resy', url: 'https://resy.com/cities/ny/maison-lumiere' },
-    note: 'For private dining or events of eight or more, please write to events@maisonlumiere.nyc.'
+      'تُفتح الحجوزات قبل ثلاثين يومًا، كل صباح عند التاسعة. تُتاح طاولة الشيف وقاعة الطعام الخاصة في أول كل شهر.',
+    cta_label: 'احجز الآن',
+    provider: { type: 'resy', url: 'https://darnoor.sa/reserve' },
+    note: 'للمناسبات الخاصة أو الحجوزات لثمانية أشخاص فأكثر، يُرجى المراسلة على events@darnoor.sa.'
   },
   reviews: {
-    heading: 'In the room.',
-    subheading: 'A few words from recent guests and critics.',
+    heading: 'في القاعة.',
+    subheading: 'كلماتٌ من ضيوف ونقّاد زارونا مؤخّرًا.',
     overall_rating: 4.9,
-    review_count: '630+',
+    review_count: '+630',
     testimonials: [
       {
-        name: 'Pete Wells',
-        text: 'A restaurant of unusual quiet confidence. Marchand cooks with the patience of someone who has nothing left to prove.',
-        source: 'The New York Times',
+        name: 'سعد الدوسري',
+        text: 'مطعمٌ بثقةٍ هادئة غير معتادة. يطهو مرعي بصبر من لم يعد لديه ما يثبته.',
+        source: 'مجلة المذاق',
         rating: 5
       },
       {
-        name: 'Sarah Lin',
-        text: 'The kind of dinner you remember a year later. The duck alone is worth the trip from anywhere on the East Coast.',
-        source: 'Eater · Verified diner',
+        name: 'ريم النعيمي',
+        text: 'العشاء الذي تتذكّره بعد عام. البطّ وحده يستحقّ الرحلة من أي مكان.',
+        source: 'ضيفة موثّقة',
         rating: 5
       },
       {
-        name: 'James Whitfield',
-        text: 'Service is precise without being formal. Wine pairings are extraordinary. We celebrated our anniversary here and will be back.',
-        source: 'Resy · Verified diner',
+        name: 'يوسف الحربي',
+        text: 'خدمة دقيقة دون تكلّف، وتناغم المشروبات استثنائي. احتفلنا بمناسبتنا هنا وسنعود.',
+        source: 'ضيف موثّق',
         rating: 5
       },
       {
-        name: 'Marielle Foster',
-        text: 'Worth every penny. The kitchen counter is the best seat in New York if you want to watch a master at work.',
-        source: 'OpenTable · Verified diner',
+        name: 'منى الشمري',
+        text: 'يستحقّ كل ريال. طاولة المطبخ أفضل مقعد في المدينة إن أردت مشاهدة محترف في عمله.',
+        source: 'ضيفة موثّقة',
         rating: 5
       }
     ]
   },
   press: {
-    heading: 'In the press.',
+    heading: 'في الصحافة.',
     items: [
-      { outlet: 'The New York Times', quote: '"Three Stars."' },
-      { outlet: 'Michelin Guide', quote: 'One Star · 2023, 2024' },
-      { outlet: 'Eater 38' },
-      { outlet: 'Bon Appétit', quote: 'Top 50 New Restaurants' },
-      { outlet: 'The Infatuation' },
-      { outlet: 'Food & Wine' }
+      { outlet: 'دليل ميشلان', quote: 'نجمة واحدة · 2023، 2024' },
+      { outlet: 'مجلة المذاق', quote: '«ثلاث نجوم.»' },
+      { outlet: 'دليل المطاعم' },
+      { outlet: 'مجلة الذوّاقة', quote: 'أفضل 50 مطعمًا جديدًا' },
+      { outlet: 'سفرة' },
+      { outlet: 'طعام ونبيذ' }
     ]
   },
   newsletter: {
-    heading: 'Seasonal letter.',
-    subheading: 'Three times a year we share the new menu, the farm, and what we are reading.',
-    button_label: 'Subscribe'
+    heading: 'رسالة الموسم.',
+    subheading: 'ثلاث مرّات في العام نشارككم القائمة الجديدة، والمزرعة، وما نقرؤه.',
+    button_label: 'اشترك'
   },
   faq: {
-    heading: 'Before you come.',
+    heading: 'قبل أن تأتي.',
     items: [
       {
-        q: 'Is there a dress code?',
-        a: 'We ask guests to dress smart-casual. Sport coats and dresses are common; we do not require ties.'
+        q: 'هل هناك قواعد للزيّ؟',
+        a: 'نطلب من الضيوف ارتداء زيّ أنيق غير رسمي. السترات والأزياء الراقية شائعة، ولا نشترط ربطة عنق.'
       },
       {
-        q: 'Can you accommodate dietary restrictions?',
-        a: 'Yes. Please let us know at the time of booking and we will compose a menu around any allergy or preference, including vegetarian, vegan, and gluten-free.'
+        q: 'هل تراعون القيود الغذائية؟',
+        a: 'نعم. أخبرونا عند الحجز وسنُعدّ قائمة تراعي أي حساسية أو تفضيل، بما في ذلك النباتي والخالي من الغلوتين.'
       },
       {
-        q: 'Do you welcome children?',
-        a: 'Children over the age of ten are welcome at all seatings. Younger guests are welcome at our 5:00pm Sunday seating.'
+        q: 'هل ترحّبون بالأطفال؟',
+        a: 'الأطفال فوق العاشرة مرحّب بهم في جميع الأوقات، والأصغر سنًّا في جلسة الأحد عند الخامسة مساءً.'
       },
       {
-        q: 'Where can we park?',
-        a: 'Street parking is limited in the West Village. We recommend the public garage on Carmine Street, two blocks east.'
+        q: 'أين يمكننا ركن السيارة؟',
+        a: 'يتوفّر موقف عام قريب على بُعد مبنيين، إضافة إلى خدمة صفّ السيارات في المساء.'
       },
       {
-        q: 'Do you offer private dining?',
-        a: 'Our private dining room seats up to twenty. Please write to events@maisonlumiere.nyc for inquiries.'
+        q: 'هل تقدّمون قاعة طعام خاصة؟',
+        a: 'تتّسع قاعتنا الخاصة لعشرين ضيفًا. يُرجى المراسلة على events@darnoor.sa للاستفسار.'
       },
       {
-        q: 'What is your cancellation policy?',
-        a: 'We hold a $75 per person deposit at booking, refundable up to forty-eight hours before your reservation.'
+        q: 'ما سياسة الإلغاء؟',
+        a: 'نحجز عربونًا قدره 75$ للشخص عند الحجز، قابلًا للاسترداد حتى ثماني وأربعين ساعة قبل موعدك.'
       }
     ]
   },
   footer: {
-    tagline: 'Open for dinner Tuesday – Sunday. Closed Mondays.',
-    legal: '© 2026 Maison Lumière. All rights reserved.'
+    tagline: 'مفتوح للعشاء من الثلاثاء إلى الأحد. مغلق الإثنين.',
+    legal: '© 2026 دار نُور. جميع الحقوق محفوظة.'
   },
   seo: {
-    title: 'Maison Lumière · Modern French Tasting Menu · West Village, New York',
+    title: 'دار نُور · قائمة تذوّق شرقية عصرية · الرياض',
     description:
-      'An intimate twenty-four seat counter in the West Village. Chef Élodie Marchand cooks a seasonal tasting menu sourced from the Hudson Valley.'
+      'طاولةٌ حميمة من أربعة وعشرين مقعدًا في الرياض. يطهو الشيف خالد مرعي قائمة تذوّق موسمية من مزارع محلية.'
   }
 }

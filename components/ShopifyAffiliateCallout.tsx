@@ -31,9 +31,9 @@ export default function ShopifyAffiliateCallout({
           rel="sponsored noopener noreferrer"
           className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
         >
-          Start a free Shopify trial
+          ابدأ تجربة Shopify مجانية
         </a>{' '}
-        <span className="text-xs text-muted">(affiliate link — we earn a small commission)</span>
+        <span className="text-xs text-muted">(رابط تابع — نتقاضى عمولة بسيطة)</span>
       </span>
     )
   }
@@ -44,18 +44,18 @@ export default function ShopifyAffiliateCallout({
         className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-token bg-white px-4 py-3 ${className}`}
       >
         <div className="text-sm text-foreground">
-          <strong>Don&apos;t have a Shopify store yet?</strong>{' '}
-          <span className="text-muted">Spin one up free, then upload your Zenya theme.</span>
+          <strong>ألا تملك متجر Shopify بعد؟</strong>{' '}
+          <span className="text-muted">أنشئ واحدًا مجانًا، ثم ارفع قالب زينيا.</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-[11px] text-muted sm:inline">affiliate link · supports Zenya</span>
+          <span className="hidden text-[11px] text-muted sm:inline">رابط تابع · يدعم زينيا</span>
           <a
             href={href}
             target="_blank"
             rel="sponsored noopener noreferrer"
             className="rounded-md bg-[#008060] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
           >
-            Start free trial →
+            ابدأ تجربة مجانية ←
           </a>
         </div>
       </div>
@@ -89,20 +89,19 @@ export default function ShopifyAffiliateCallout({
         </div>
         <div>
           <h3 className="text-sm font-bold text-foreground">
-            Don&apos;t have a Shopify store yet?
+            ألا تملك متجر Shopify بعد؟
           </h3>
           <p className="mt-1 text-xs text-muted leading-relaxed">
-            Spin up a free trial in two minutes, then upload your Zenya OS 2.0
-            theme ZIP from{' '}
-            <strong>Online Store → Themes → Add → Upload</strong>. Shopify
-            handles the cart, checkout, payments, and inventory — Zenya
-            handles the look.
+            أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب زينيا بصيغة OS 2.0
+            من{' '}
+            <strong>المتجر الإلكتروني ← القوالب ← إضافة ← رفع</strong>. يتولّى Shopify
+            السلّة والدفع والمدفوعات والمخزون — وتتولّى زينيا المظهر.
           </p>
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="text-[11px] text-muted">
-          Affiliate link — Zenya earns a small commission, no extra cost to you.
+          رابط تابع — تتقاضى زينيا عمولة بسيطة، دون أي تكلفة إضافية عليك.
         </p>
         <a
           href={href}
@@ -110,7 +109,7 @@ export default function ShopifyAffiliateCallout({
           rel="sponsored noopener noreferrer"
           className="rounded-md bg-[#008060] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90"
         >
-          Start free Shopify trial →
+          ابدأ تجربة Shopify مجانية ←
         </a>
       </div>
     </div>

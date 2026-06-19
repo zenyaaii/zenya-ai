@@ -62,10 +62,10 @@ type Scraped = {
 }
 
 const STEP_LABELS: Record<Step, { name: string; sub: string }> = {
-  1: { name: 'Product URL',  sub: 'Paste a link to start' },
-  2: { name: 'Product info', sub: 'Pick images & set details' },
-  3: { name: 'Colors',       sub: 'Choose your store look' },
-  4: { name: 'Generate',     sub: 'Build your Shopify theme' },
+  1: { name: 'رابط المنتج',   sub: 'الصق رابطًا للبدء' },
+  2: { name: 'معلومات المنتج', sub: 'اختر الصور وحدّد التفاصيل' },
+  3: { name: 'الألوان',        sub: 'اختر مظهر متجرك' },
+  4: { name: 'التوليد',        sub: 'أنشئ قالب Shopify' },
 }
 
 const MIN_IMAGES = 5
@@ -129,7 +129,7 @@ export default function BuildPage() {
     const u = url.trim()
     if (!u) return
     if (!/^https?:\/\//i.test(u)) {
-      setAnalyzeError('Add http:// or https:// at the start of the URL.')
+      setAnalyzeError('أضف ‎http://‎ أو ‎https://‎ في بداية الرابط.')
       return
     }
     setAnalyzing(true)
@@ -142,7 +142,7 @@ export default function BuildPage() {
       })
       const j = await r.json()
       if (!r.ok || j?.error) {
-        setAnalyzeError(j?.message || 'We couldn’t read that page. Some stores block scrapers — try a different product URL.')
+        setAnalyzeError(j?.message || 'تعذّر علينا قراءة تلك الصفحة. بعض المتاجر تحجب أدوات الاستخراج — جرّب رابط منتج آخر.')
         return
       }
       const s: Scraped = {
@@ -167,7 +167,7 @@ export default function BuildPage() {
       setSelectedImages(s.images.slice(0, MIN_IMAGES))
       setStep(2)
     } catch (e: any) {
-      setAnalyzeError(e?.message || 'Network error. Try again.')
+      setAnalyzeError(e?.message || 'خطأ في الشبكة. حاول مجددًا.')
     } finally {
       setAnalyzing(false)
     }
@@ -197,12 +197,12 @@ export default function BuildPage() {
       })
       const j = await r.json()
       if (!r.ok || !Array.isArray(j?.names)) {
-        setAiNameError(j?.message || 'AI naming is unavailable right now.')
+        setAiNameError(j?.message || 'التسمية بالذكاء الاصطناعي غير متاحة حاليًا.')
         return
       }
       setAiNames(j.names)
     } catch (e: any) {
-      setAiNameError(e?.message || 'Network error')
+      setAiNameError(e?.message || 'خطأ في الشبكة')
     } finally {
       setAiNaming(false)
     }
@@ -246,7 +246,7 @@ export default function BuildPage() {
         }),
       })
       if (!r.ok) {
-        let msg = 'Could not generate the theme.'
+        let msg = 'تعذّر توليد القالب.'
         try { msg = (await r.json())?.message || msg } catch {}
         setGenerateMsg('error:' + msg)
         return
@@ -268,7 +268,7 @@ export default function BuildPage() {
       setTimeout(() => URL.revokeObjectURL(href), 4_000)
       setGenerateMsg('downloaded')
     } catch (e: any) {
-      setGenerateMsg('error:' + (e?.message || 'Network error'))
+      setGenerateMsg('error:' + (e?.message || 'خطأ في الشبكة'))
     } finally {
       setGenerating(false)
     }
@@ -299,7 +299,7 @@ export default function BuildPage() {
       const j = await r.json()
       return { status: r.status, ...j }
     } catch (e: any) {
-      return { status: 0, error: 'network', message: e?.message || 'Network error' }
+      return { status: 0, error: 'network', message: e?.message || 'خطأ في الشبكة' }
     }
   }
 
@@ -328,10 +328,10 @@ export default function BuildPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
-            Build a one-product store
+            أنشئ متجر منتج واحد
           </div>
           <div className="text-[12.5px] text-muted">
-            Step {step} of 4 · {STEP_LABELS[step].name}
+            الخطوة {step} من 4 · {STEP_LABELS[step].name}
           </div>
         </div>
         <StepNav step={step} onJump={(s) => {
@@ -385,8 +385,8 @@ export default function BuildPage() {
             palette={palette}
             paletteId={paletteId}
             onPalette={setPaletteId}
-            productName={productName || scraped?.name || 'Your product'}
-            storeName={storeName || 'Your Store'}
+            productName={productName || scraped?.name || 'منتجك'}
+            storeName={storeName || 'متجرك'}
             price={Number(salePrice) || 0}
             originalPrice={Number(originalPrice) || 0}
             heroImage={selectedImages[0]}
@@ -520,11 +520,11 @@ function UrlStep({
           <Link2 className="h-5 w-5 text-primary" strokeWidth={2.2} />
         </div>
         <h1 className="mt-5 text-[26px] font-bold tracking-tight text-foreground">
-          Start with a product link
+          ابدأ برابط منتج
         </h1>
         <p className="mt-2 text-[14px] text-muted">
-          Paste any product URL — Shopify, AliExpress, Amazon, an indie store, anywhere. We pull the
-          name, images, description, and price so you don’t have to retype anything.
+          الصق أي رابط منتج — Shopify أو AliExpress أو Amazon أو متجر مستقل، من أي مكان. نستخرج الاسم
+          والصور والوصف والسعر حتى لا تضطر لإعادة كتابة أي شيء.
         </p>
 
         <form
@@ -535,6 +535,7 @@ function UrlStep({
             <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               autoFocus
+              dir="ltr"
               value={url}
               onChange={(e) => onUrl(e.target.value)}
               placeholder="https://example.com/products/cool-thing"
@@ -549,12 +550,12 @@ function UrlStep({
             {analyzing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing…
+                جارٍ التحليل…
               </>
             ) : (
               <>
-                Start analyzing
-                <ArrowRight className="h-4 w-4" />
+                ابدأ التحليل
+                <ArrowRight className="h-4 w-4 rtl-flip" />
               </>
             )}
           </button>
@@ -571,23 +572,23 @@ function UrlStep({
           <div className="mt-6 space-y-2 text-[12.5px] text-muted">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-              Fetching the product page…
+              جارٍ جلب صفحة المنتج…
             </div>
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary [animation-delay:200ms]" />
-              Pulling images, name, price…
+              جارٍ استخراج الصور والاسم والسعر…
             </div>
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary [animation-delay:400ms]" />
-              Reading the description…
+              جارٍ قراءة الوصف…
             </div>
           </div>
         )}
 
         <div className="mt-8 rounded-xl border border-token bg-[#fafaf7] p-4 text-[12.5px] text-muted">
-          <strong className="text-foreground">Tip:</strong> Shopify product pages give us the best
-          data. We also handle AliExpress, Amazon, and any storefront that publishes Open Graph or
-          JSON-LD product metadata.
+          <strong className="text-foreground">نصيحة:</strong> صفحات منتجات Shopify تمنحنا أفضل
+          البيانات. ونتعامل أيضًا مع AliExpress وAmazon وأي واجهة متجر تنشر بيانات منتج بصيغة
+          Open Graph أو JSON-LD.
         </div>
       </div>
     </div>
@@ -632,10 +633,10 @@ function ProductStep(props: {
     <div className="space-y-6">
       <header>
         <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-          Make it yours
+          خصّصه
         </h1>
         <p className="mt-1 text-[13px] text-muted">
-          Pick at least {MIN_IMAGES} images, tighten the product name, and add your store details.
+          اختر {MIN_IMAGES} صور على الأقل، وحسّن اسم المنتج، وأضف تفاصيل متجرك.
         </p>
       </header>
 
@@ -645,7 +646,7 @@ function ProductStep(props: {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-primary" />
-              <h2 className="text-[14px] font-semibold text-foreground">Pick your images</h2>
+              <h2 className="text-[14px] font-semibold text-foreground">اختر صورك</h2>
             </div>
             <div
               className={
@@ -655,16 +656,16 @@ function ProductStep(props: {
                   : 'bg-[rgba(94,106,210,0.10)] text-primary')
               }
             >
-              {selectedCount} of {MIN_IMAGES} minimum{minOk ? ' ✓' : ''}
+              {selectedCount} من {MIN_IMAGES} كحد أدنى{minOk ? ' ✓' : ''}
             </div>
           </div>
           <p className="mt-1 text-[12px] text-muted">
-            The first image you pick becomes the hero. Click to toggle.
+            أول صورة تختارها تصبح الصورة الرئيسية. انقر للتبديل.
           </p>
 
           {scraped.images.length === 0 ? (
             <div className="mt-4 rounded-xl border border-dashed border-token bg-[#fafaf7] p-6 text-center text-[12.5px] text-muted">
-              No images found on that page. Try a different product URL.
+              لم نجد صورًا في تلك الصفحة. جرّب رابط منتج آخر.
             </div>
           ) : (
             <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -685,7 +686,7 @@ function ProductStep(props: {
                   >
                     <Image src={src} alt="" fill sizes="160px" className="object-cover" unoptimized />
                     {isSelected && (
-                      <div className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md">
+                      <div className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md">
                         <span className="text-[11px] font-bold">{sel + 1}</span>
                       </div>
                     )}
@@ -701,24 +702,24 @@ function ProductStep(props: {
           {/* Product name + AI gen */}
           <div className="rounded-2xl border border-token bg-white p-5">
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-              Product name
+              اسم المنتج
             </label>
             <div className="mt-2 flex items-stretch gap-2">
               <input
                 value={productName}
                 onChange={(e) => onProductName(e.target.value)}
-                placeholder="GlowPro"
+                placeholder="اسم منتجك"
                 className="flex-1 rounded-lg border border-token bg-surface px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary"
               />
               <button
                 type="button"
                 onClick={onSuggestNames}
                 disabled={aiNaming}
-                title="Suggest names with AI"
+                title="اقترح أسماء بالذكاء الاصطناعي"
                 className="inline-flex items-center gap-1 rounded-lg border border-token bg-white px-3 py-2.5 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
               >
                 {aiNaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4 text-primary" />}
-                {aiNaming ? 'Thinking…' : 'Auto-name'}
+                {aiNaming ? 'يفكّر…' : 'تسمية تلقائية'}
               </button>
             </div>
 
@@ -729,7 +730,7 @@ function ProductStep(props: {
             {aiNames && aiNames.length > 0 && (
               <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3">
                 <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                  <span>AI suggestions · tap to use</span>
+                  <span>اقتراحات الذكاء الاصطناعي · انقر للاستخدام</span>
                   <button
                     type="button"
                     onClick={onCloseAiPanel}
@@ -755,8 +756,8 @@ function ProductStep(props: {
                     disabled={aiNaming}
                     className="rounded-full px-3 py-1 text-[11.5px] font-medium text-muted hover:text-foreground"
                   >
-                    <RefreshCw className="mr-1 inline h-3 w-3" />
-                    More
+                    <RefreshCw className="me-1 inline h-3 w-3" />
+                    المزيد
                   </button>
                 </div>
               </div>
@@ -766,30 +767,31 @@ function ProductStep(props: {
           {/* Store name */}
           <div className="rounded-2xl border border-token bg-white p-5">
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-              <Store className="mr-1 inline h-3 w-3" /> Store name
+              <Store className="me-1 inline h-3 w-3" /> اسم المتجر
             </label>
             <input
               value={storeName}
               onChange={(e) => onStoreName(e.target.value)}
-              placeholder="e.g. Halo Goods"
+              placeholder="مثلاً: متجر نور"
               className="mt-2 w-full rounded-lg border border-token bg-surface px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary"
             />
             <p className="mt-1.5 text-[11.5px] text-muted">
-              Shown in the header, cart, and footer.
+              يظهر في الترويسة والسلّة والتذييل.
             </p>
           </div>
 
           {/* Pricing */}
           <div className="rounded-2xl border border-token bg-white p-5">
             <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-              <Tag className="mr-1 inline h-3 w-3" /> Pricing
+              <Tag className="me-1 inline h-3 w-3" /> التسعير
             </label>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
-                <div className="mb-1 text-[10.5px] font-medium text-muted">Original price</div>
+                <div className="mb-1 text-[10.5px] font-medium text-muted">السعر الأصلي</div>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-muted">$</span>
                   <input
+                    dir="ltr"
                     value={originalPrice}
                     onChange={(e) => onOriginalPrice(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder="99.99"
@@ -799,10 +801,11 @@ function ProductStep(props: {
                 </div>
               </div>
               <div>
-                <div className="mb-1 text-[10.5px] font-medium text-muted">Sale price</div>
+                <div className="mb-1 text-[10.5px] font-medium text-muted">سعر العرض</div>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-muted">$</span>
                   <input
+                    dir="ltr"
                     value={salePrice}
                     onChange={(e) => onSalePrice(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder="49.99"
@@ -814,7 +817,7 @@ function ProductStep(props: {
             </div>
             {priceDiscount > 0 && (
               <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[11px] font-semibold text-[#15803d]">
-                {priceDiscount}% off shown to shoppers
+                خصم {priceDiscount}٪ يظهر للمتسوّقين
               </div>
             )}
           </div>
@@ -828,10 +831,10 @@ function ProductStep(props: {
           onClick={onBack}
           className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
         </button>
         <div className="text-[12px] text-muted">
-          {canNext ? 'Ready to pick colors' : `Need ${Math.max(0, MIN_IMAGES - selectedCount)} more image${MIN_IMAGES - selectedCount === 1 ? '' : 's'} + name, store, and sale price.`}
+          {canNext ? 'جاهز لاختيار الألوان' : `تحتاج ${Math.max(0, MIN_IMAGES - selectedCount)} صورة إضافية + الاسم والمتجر وسعر العرض.`}
         </div>
         <button
           type="button"
@@ -839,7 +842,7 @@ function ProductStep(props: {
           disabled={!canNext}
           className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
         >
-          Pick colors <ArrowRight className="h-4 w-4" />
+          اختر الألوان <ArrowRight className="h-4 w-4 rtl-flip" />
         </button>
       </div>
     </div>
@@ -869,10 +872,10 @@ function ColorStep({
     <div className="space-y-6">
       <header>
         <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-          Choose your store look
+          اختر مظهر متجرك
         </h1>
         <p className="mt-1 text-[13px] text-muted">
-          Tap a palette — the phone on the left updates instantly.
+          انقر لوحة ألوان — تتحدّث معاينة الهاتف فورًا.
         </p>
       </header>
 
@@ -933,15 +936,15 @@ function ColorStep({
           onClick={onBack}
           className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
         </button>
-        <div className="text-[12px] text-muted">{palette.name} selected</div>
+        <div className="text-[12px] text-muted">{palette.name} محدّدة</div>
         <button
           type="button"
           onClick={onNext}
           className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
         >
-          Generate <ArrowRight className="h-4 w-4" />
+          توليد <ArrowRight className="h-4 w-4 rtl-flip" />
         </button>
       </div>
     </div>
@@ -966,7 +969,7 @@ function PaletteTile({
       onClick={onClick}
       aria-pressed={active}
       className={
-        'group relative w-full overflow-hidden rounded-2xl border p-5 text-left transition focus:outline-none ' +
+        'group relative w-full overflow-hidden rounded-2xl border p-5 text-start transition focus:outline-none ' +
         (active
           ? 'shadow-[0_0_0_2px_var(--color-primary)] ring-0'
           : 'border-token hover:-translate-y-0.5 hover:shadow-md')
@@ -999,13 +1002,13 @@ function PaletteTile({
       {/* SELECTED chip */}
       {active && (
         <div
-          className="absolute right-4 top-4 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
+          className="absolute end-4 top-4 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
           style={{
             background: p.primary,
             color: p.primaryFg,
           }}
         >
-          Selected
+          محدّدة
         </div>
       )}
 
@@ -1067,12 +1070,12 @@ function GenerateStep({
     <div className="space-y-6">
       <header>
         <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-          {downloaded ? 'Your theme is ready' : 'You’re ready to generate'}
+          {downloaded ? 'قالبك جاهز' : 'أنت جاهز للتوليد'}
         </h1>
         <p className="mt-1 text-[13px] text-muted">
           {downloaded
-            ? 'Preview it below, then push it to Shopify or download the .zip.'
-            : 'Review the build, then we’ll spin up your full Shopify theme.'}
+            ? 'عاينه أدناه، ثم ادفعه إلى Shopify أو نزّل ملف ‎.zip‎.'
+            : 'راجع التصميم، ثم سننشئ قالب Shopify الكامل.'}
         </p>
       </header>
 
@@ -1091,15 +1094,15 @@ function GenerateStep({
             <>
               <div className="rounded-2xl border border-token bg-white p-5">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                  <ShoppingBag className="h-3 w-3" /> Product
+                  <ShoppingBag className="h-3 w-3" /> المنتج
                 </div>
-                <div className="mt-2 text-[18px] font-bold text-foreground">{productName || 'Untitled product'}</div>
-                <div className="mt-1 text-[13px] text-muted">in <strong className="text-foreground">{storeName || 'your store'}</strong></div>
+                <div className="mt-2 text-[18px] font-bold text-foreground">{productName || 'منتج بلا اسم'}</div>
+                <div className="mt-1 text-[13px] text-muted">في <strong className="text-foreground">{storeName || 'متجرك'}</strong></div>
                 {realReviewCount >= 3 && (
                   <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
                     <Check className="h-3 w-3" />
-                    {realReviewCount} real reviews imported{realPhotoCount > 0 ? ` · ${realPhotoCount} customer photos` : ''}
-                    {reviewStats ? ` · ${reviewStats.average.toFixed(1)}★ from ${reviewStats.count.toLocaleString()} ratings` : ''}
+                    {realReviewCount} تقييم حقيقي مستورد{realPhotoCount > 0 ? ` · ${realPhotoCount} صورة من العملاء` : ''}
+                    {reviewStats ? ` · ${reviewStats.average.toFixed(1)}★ من ${reviewStats.count.toLocaleString()} تقييم` : ''}
                   </div>
                 )}
                 <div className="mt-3 flex items-baseline gap-2">
@@ -1108,7 +1111,7 @@ function GenerateStep({
                     <>
                       <div className="text-[13px] text-muted line-through">${originalPrice.toFixed(2)}</div>
                       <div className="rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[11px] font-semibold text-[#15803d]">
-                        Save ${(originalPrice - price).toFixed(2)}
+                        وفّر ${(originalPrice - price).toFixed(2)}
                       </div>
                     </>
                   )}
@@ -1117,7 +1120,7 @@ function GenerateStep({
 
               <div className="rounded-2xl border border-token bg-white p-5">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                  {images.length} images selected
+                  {images.length} صورة محدّدة
                 </div>
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {images.slice(0, 10).map((src) => (
@@ -1133,7 +1136,7 @@ function GenerateStep({
                 <div className="mt-2 flex items-center gap-3">
                   <div className="flex">
                     {[palette.bg, palette.surface, palette.primary, palette.accent, palette.fg].map((c, i) => (
-                      <div key={i} className="h-8 w-8 rounded-full border-2 border-white shadow-sm -ml-2 first:ml-0" style={{ background: c }} />
+                      <div key={i} className="h-8 w-8 rounded-full border-2 border-white shadow-sm -ms-2 first:ms-0" style={{ background: c }} />
                     ))}
                   </div>
                   <div>
@@ -1150,13 +1153,13 @@ function GenerateStep({
         <div className="lg:col-span-2 flex flex-col items-center rounded-3xl border border-token bg-white p-6">
           {downloaded && (
             <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
-              <Check className="h-3 w-3" /> Generated
+              <Check className="h-3 w-3" /> تم التوليد
             </div>
           )}
           <PhoneMockup
             palette={palette}
-            productName={productName || 'Your product'}
-            storeName={storeName || 'Your Store'}
+            productName={productName || 'منتجك'}
+            storeName={storeName || 'متجرك'}
             price={price}
             originalPrice={originalPrice}
             heroImage={heroImage}
@@ -1166,7 +1169,7 @@ function GenerateStep({
               {VIBE_LABELS[palette.vibe].name}
             </div>
             <div className="text-[14px] font-bold text-foreground">{palette.name}</div>
-            <div className="mt-1 text-[11.5px] text-muted">Product page · live preview</div>
+            <div className="mt-1 text-[11.5px] text-muted">صفحة المنتج · معاينة حيّة</div>
           </div>
         </div>
       </div>
@@ -1183,11 +1186,11 @@ function GenerateStep({
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
             <h2 className="mt-4 text-[20px] font-bold text-foreground">
-              Build the full Shopify theme
+              أنشئ قالب Shopify الكامل
             </h2>
             <p className="mx-auto mt-2 max-w-md text-[13px] text-muted">
-              We’ll generate every page and section — hero, bundles, upsells, reviews, FAQ,
-              sticky add-to-cart, the works — and hand you a Shopify-ready theme.
+              سنولّد كل صفحة وقسم — الواجهة الرئيسية والحزم والعروض الإضافية والتقييمات والأسئلة الشائعة
+              وزر الإضافة للسلّة الثابت، وكل شيء — ونسلّمك قالبًا جاهزًا لـ Shopify.
             </p>
             <button
               type="button"
@@ -1198,12 +1201,12 @@ function GenerateStep({
               {generating ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Generating…
+                  جارٍ التوليد…
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  Generate &amp; download .zip
+                  ولّد ونزّل ملف ‎.zip‎
                 </>
               )}
             </button>
@@ -1223,7 +1226,7 @@ function GenerateStep({
           onClick={onBack}
           className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to colors
+          <ArrowLeft className="h-4 w-4 rtl-flip" /> العودة للألوان
         </button>
         {downloaded && (
           <button
@@ -1231,7 +1234,7 @@ function GenerateStep({
             onClick={onGoDashboard}
             className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
           >
-            Dashboard <ArrowRight className="h-4 w-4" />
+            لوحة التحكم <ArrowRight className="h-4 w-4 rtl-flip" />
           </button>
         )}
       </div>
@@ -1263,7 +1266,7 @@ function HonestyGateModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="AI-generated content notice"
+      aria-label="إشعار بمحتوى مولَّد بالذكاء الاصطناعي"
     >
       <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
         <div className="border-b border-token bg-[rgba(217,119,6,0.05)] px-6 py-5">
@@ -1272,9 +1275,9 @@ function HonestyGateModal({
               <AlertCircle className="h-5 w-5 text-[#d97706]" />
             </div>
             <div>
-              <h2 className="text-[16px] font-bold text-foreground">Heads up — parts of this theme are AI-invented</h2>
+              <h2 className="text-[16px] font-bold text-foreground">تنبيه — أجزاء من هذا القالب من اختراع الذكاء الاصطناعي</h2>
               <p className="mt-0.5 text-[12.5px] text-muted">
-                {high.length} must-fix · {medium.length} to verify. Only you can make these true before launch.
+                {high.length} يجب إصلاحها · {medium.length} للتحقق منها. أنت وحدك من يجعلها حقيقية قبل الإطلاق.
               </p>
             </div>
           </div>
@@ -1303,9 +1306,9 @@ function HonestyGateModal({
 
         <div className="border-t border-token bg-white px-6 py-4">
           <p className="mb-3 text-[12px] leading-relaxed text-muted">
-            By continuing you acknowledge that stock counts, buyer notifications, press quotes, review
-            placeholders, and similar content in the generated theme are AI-generated examples — not real
-            information — and that it's your responsibility to replace or verify them before publishing.
+            بالمتابعة، تُقرّ بأن أعداد المخزون وإشعارات المشترين واقتباسات الصحافة ونماذج التقييمات
+            وما شابهها في القالب المولَّد هي أمثلة مولَّدة بالذكاء الاصطناعي — وليست معلومات حقيقية —
+            وأن مسؤوليتك استبدالها أو التحقق منها قبل النشر.
           </p>
           <div className="flex items-center justify-between gap-3">
             <button
@@ -1313,7 +1316,7 @@ function HonestyGateModal({
               onClick={onClose}
               className="rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
             >
-              Go back
+              رجوع
             </button>
             <button
               type="button"
@@ -1322,7 +1325,7 @@ function HonestyGateModal({
               className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              I understand — continue
+              فهمت — أكمل
             </button>
           </div>
         </div>
@@ -1364,16 +1367,16 @@ function ClaimsPanel({
           </div>
           <div>
             <div className="text-[14px] font-bold text-foreground">
-              Honesty check — what the AI invented
+              فحص المصداقية — ما اخترعه الذكاء الاصطناعي
             </div>
             <div className="mt-0.5 text-[12px] text-muted">
-              {high.length} must-fix · {medium.length} to verify before launch. Stock counts, buyer names,
-              press quotes — things only you can make true.
+              {high.length} يجب إصلاحها · {medium.length} للتحقق منها قبل الإطلاق. أعداد المخزون وأسماء المشترين
+              واقتباسات الصحافة — أمور أنت وحدك من يجعلها حقيقية.
             </div>
           </div>
         </div>
         <span className="flex-shrink-0 rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-foreground">
-          {open ? 'Hide' : 'Review'}
+          {open ? 'إخفاء' : 'مراجعة'}
         </span>
       </button>
 
@@ -1386,19 +1389,19 @@ function ClaimsPanel({
                   className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
                     cl.severity === 'high' ? 'bg-[#dc2626]' : 'bg-[#d97706]'
                   }`}
-                  aria-label={cl.severity === 'high' ? 'Must fix' : 'Verify'}
+                  aria-label={cl.severity === 'high' ? 'يجب إصلاحها' : 'تحقّق'}
                 />
                 <div className="min-w-0">
                   <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
                   <div className="mt-0.5 text-[13px] font-semibold text-foreground">{cl.claim}</div>
                   <div className="mt-1 text-[12.5px] leading-relaxed text-muted">{cl.why}</div>
-                  <div className="mt-1.5 text-[12.5px] font-medium text-foreground">→ {cl.fix}</div>
+                  <div className="mt-1.5 text-[12.5px] font-medium text-foreground">← {cl.fix}</div>
                 </div>
               </div>
             </li>
           ))}
           <li className="px-1 pt-1 text-[11.5px] text-muted">
-            This list also ships inside the theme as a checklist in README.md.
+            تُرفَق هذه القائمة أيضًا داخل القالب كقائمة تحقّق في ملف README.md.
           </li>
         </ul>
       )}
@@ -1470,10 +1473,10 @@ function PublishPanel({
         } catch { /* poll hiccup — keep waiting */ }
       }
       setConnState('idle')
-      setConnError('We didn’t see the connection come through. Finish the Shopify approval and try again.')
+      setConnError('لم نرَ الاتصال يكتمل. أكمِل موافقة Shopify ثم حاول مجددًا.')
     } catch (e: any) {
       setConnState('idle')
-      setConnError(e?.message || 'Connection check failed.')
+      setConnError(e?.message || 'فشل التحقق من الاتصال.')
     }
   }
 
@@ -1496,10 +1499,10 @@ function PublishPanel({
           </div>
           <div>
             <div className="text-[15px] font-bold text-foreground">
-              {productName || 'Your'} theme is ready
+              قالب {productName || 'منتجك'} جاهز
             </div>
             <p className="mt-0.5 text-[12.5px] text-muted">
-              The .zip just hit your downloads folder. Push it to Shopify in 2 clicks below.
+              وصل ملف ‎.zip‎ للتو إلى مجلّد التنزيلات. ادفعه إلى Shopify بنقرتين أدناه.
             </p>
           </div>
         </div>
@@ -1509,9 +1512,9 @@ function PublishPanel({
       <div className="rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[14px] font-bold text-foreground">Theme .zip</div>
+            <div className="text-[14px] font-bold text-foreground">ملف القالب ‎.zip‎</div>
             <div className="mt-0.5 text-[11.5px] text-muted">
-              Shopify-ready · upload from <em>Online Store → Themes → Add theme</em>.
+              جاهز لـ Shopify · ارفعه من <em>المتجر الإلكتروني ← القوالب ← إضافة قالب</em>.
             </div>
           </div>
           <button
@@ -1521,7 +1524,7 @@ function PublishPanel({
             className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
           >
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Re-download
+            إعادة التنزيل
           </button>
         </div>
       </div>
@@ -1529,22 +1532,22 @@ function PublishPanel({
       {/* Path picker */}
       {hasShopify === null && (
         <div className="rounded-2xl border border-token bg-white p-5">
-          <div className="text-[14px] font-bold text-foreground">Do you have a Shopify store yet?</div>
-          <div className="mt-0.5 text-[12px] text-muted">We'll show the right next step.</div>
+          <div className="text-[14px] font-bold text-foreground">هل تملك متجر Shopify بعد؟</div>
+          <div className="mt-0.5 text-[12px] text-muted">سنعرض لك الخطوة التالية المناسبة.</div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setHasShopify('yes')}
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
             >
-              <Store className="h-4 w-4" /> Yes — let's upload it
+              <Store className="h-4 w-4" /> نعم — لنرفعه
             </button>
             <button
               type="button"
               onClick={() => setHasShopify('no')}
               className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
             >
-              Not yet — show me how to start
+              ليس بعد — أرني كيف أبدأ
             </button>
           </div>
         </div>
@@ -1554,16 +1557,17 @@ function PublishPanel({
       {hasShopify === 'yes' && (
         <div className="rounded-2xl border border-token bg-white p-5">
           <div className="flex items-center gap-2 text-[14px] font-bold text-foreground">
-            <Upload className="h-4 w-4 text-primary" /> Publish straight to your Shopify store
+            <Upload className="h-4 w-4 text-primary" /> انشر مباشرةً إلى متجر Shopify الخاص بك
           </div>
           <div className="mt-1 text-[12px] text-muted">
-            Connect once and Zenya installs the theme <strong>and creates the product</strong> from your
-            AliExpress scrape — the buy buttons attach to it automatically.
+            اربط مرة واحدة وتُثبّت زينيا القالب <strong>وتنشئ المنتج</strong> من بيانات
+            AliExpress المستخرجة — وتُربط أزرار الشراء به تلقائيًا.
           </div>
 
           <div className="mt-3 flex items-stretch gap-2">
             <div className="relative flex-1">
               <input
+                dir="ltr"
                 value={shop}
                 onChange={(e) => { setShop(e.target.value); setConnState('idle'); setPublishResult(null) }}
                 placeholder={storeName ? storeName.toLowerCase().replace(/[^a-z0-9-]+/g, '-') : 'my-store'}
@@ -1586,14 +1590,14 @@ function PublishPanel({
                 {connState === 'checking' || connState === 'waiting'
                   ? <Loader2 className="h-4 w-4 animate-spin" />
                   : <Store className="h-4 w-4" />}
-                {connState === 'waiting' ? 'Waiting for Shopify…' : 'Connect'}
+                {connState === 'waiting' ? 'بانتظار Shopify…' : 'اتصال'}
               </button>
             )}
           </div>
 
           {connState === 'waiting' && (
             <div className="mt-2 text-[12px] text-muted">
-              Approve the Zenya app in the tab that just opened — this screen picks the connection up automatically.
+              وافِق على تطبيق زينيا في التبويب الذي فُتح للتو — تلتقط هذه الشاشة الاتصال تلقائيًا.
             </div>
           )}
           {connError && (
@@ -1605,11 +1609,11 @@ function PublishPanel({
           {connState === 'connected' && !publishResult?.ok && (
             <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
               <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
-                <Check className="h-4 w-4 text-[#15803d]" /> {shopDomain} connected
+                <Check className="h-4 w-4 text-[#15803d]" /> تم الاتصال بـ {shopDomain}
               </div>
               <p className="mt-1 text-[12px] text-muted">
-                One click installs the theme (unpublished, safe to preview) and creates
-                “{productName || 'your product'}” with the scraped images and pricing.
+                نقرة واحدة تُثبّت القالب (غير منشور، آمن للمعاينة) وتنشئ
+                «{productName || 'منتجك'}» بالصور والأسعار المستخرجة.
               </p>
               <button
                 type="button"
@@ -1618,47 +1622,47 @@ function PublishPanel({
                 className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:opacity-60"
               >
                 {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                {publishing ? 'Publishing theme + product…' : 'Publish theme + product'}
+                {publishing ? 'جارٍ نشر القالب + المنتج…' : 'انشر القالب + المنتج'}
               </button>
             </div>
           )}
 
           {publishResult && !publishResult.ok && (
             <div className="mt-3 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
-              {publishResult.message || 'Publishing failed — try again.'}
+              {publishResult.message || 'فشل النشر — حاول مجددًا.'}
             </div>
           )}
 
           {publishResult?.ok && publishResult.theme && (
             <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
               <div className="flex items-center gap-2 text-[13.5px] font-bold text-foreground">
-                <Check className="h-4 w-4 text-[#15803d]" /> Live on {shopDomain}
+                <Check className="h-4 w-4 text-[#15803d]" /> منشور على {shopDomain}
               </div>
               <p className="mt-1 text-[12px] text-muted">
-                Theme <strong>{publishResult.theme.name}</strong> installed (unpublished)
-                {publishResult.product ? ' and the product was created' : ''}.
-                {publishResult.theme.processing ? ' Shopify is finishing processing — give it ~30s.' : ''}
-                {publishResult.productError ? ` Product creation failed: ${publishResult.productError}` : ''}
+                القالب <strong>{publishResult.theme.name}</strong> مُثبَّت (غير منشور)
+                {publishResult.product ? ' وأُنشئ المنتج' : ''}.
+                {publishResult.theme.processing ? ' يُنهي Shopify المعالجة — امنحه ~30 ثانية.' : ''}
+                {publishResult.productError ? ` فشل إنشاء المنتج: ${publishResult.productError}` : ''}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href={publishResult.theme.previewUrl} target="_blank" rel="noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:scale-[1.02]">
-                  Preview store <ExternalLink className="h-3.5 w-3.5" />
+                  معاينة المتجر <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 <a href={publishResult.theme.editorUrl} target="_blank" rel="noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
-                  Customize theme <ExternalLink className="h-3.5 w-3.5" />
+                  تخصيص القالب <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 {publishResult.product && (
                   <a href={publishResult.product.adminUrl} target="_blank" rel="noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
-                    View product <ExternalLink className="h-3.5 w-3.5" />
+                    عرض المنتج <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 )}
                 {publishResult.theme.themesUrl && (
                   <a href={publishResult.theme.themesUrl} target="_blank" rel="noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
-                    Publish it live <ExternalLink className="h-3.5 w-3.5" />
+                    انشره مباشرةً <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 )}
               </div>
@@ -1671,14 +1675,14 @@ function PublishPanel({
               onClick={() => setHasShopify(null)}
               className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
             >
-              ← change answer
+              → تغيير الإجابة
             </button>
             <button
               type="button"
               onClick={() => setShowManual((v) => !v)}
               className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
             >
-              {showManual ? 'hide manual upload' : 'prefer to upload the zip manually?'}
+              {showManual ? 'إخفاء الرفع اليدوي' : 'تفضّل رفع ملف zip يدويًا؟'}
             </button>
           </div>
 
@@ -1687,16 +1691,16 @@ function PublishPanel({
               <li className="flex gap-2">
                 <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">1</span>
                 <span>
-                  Open{' '}
+                  افتح{' '}
                   <a className="font-semibold underline" href={adminHref || 'https://admin.shopify.com'} target="_blank" rel="noreferrer">
-                    Online Store → Themes
+                    المتجر الإلكتروني ← القوالب
                   </a>{' '}
-                  and click <strong>Add theme → Upload zip file</strong> with the .zip you downloaded.
+                  وانقر <strong>إضافة قالب ← رفع ملف zip</strong> بملف ‎.zip‎ الذي نزّلته.
                 </span>
               </li>
               <li className="flex gap-2">
                 <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</span>
-                <span>Click <strong>Customize</strong> — every section is editable from there.</span>
+                <span>انقر <strong>تخصيص</strong> — كل قسم قابل للتعديل من هناك.</span>
               </li>
             </ol>
           )}
@@ -1706,9 +1710,9 @@ function PublishPanel({
       {/* No Shopify store → affiliate signup */}
       {hasShopify === 'no' && (
         <div className="rounded-2xl border border-token bg-white p-5">
-          <div className="text-[14px] font-bold text-foreground">Start your store free for 3 days</div>
+          <div className="text-[14px] font-bold text-foreground">ابدأ متجرك مجانًا لمدة 3 أيام</div>
           <div className="mt-1 text-[12.5px] text-muted">
-            Shopify’s free trial gets you a working store. Once it’s up, come back, paste your handle, and we’ll deep-link you to the upload screen.
+            تمنحك تجربة Shopify المجانية متجرًا يعمل. وما إن يجهز، عُد والصق معرّف متجرك، وسننقلك مباشرةً إلى شاشة الرفع.
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <a
@@ -1717,14 +1721,14 @@ function PublishPanel({
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-5 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
             >
-              Start Shopify free trial <ExternalLink className="h-3.5 w-3.5" />
+              ابدأ تجربة Shopify المجانية <ExternalLink className="h-3.5 w-3.5" />
             </a>
             <button
               type="button"
               onClick={() => setHasShopify('yes')}
               className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
             >
-              Actually, I have one — let me paste my handle
+              في الواقع أملك واحدًا — دعني ألصق معرّف متجري
             </button>
           </div>
         </div>

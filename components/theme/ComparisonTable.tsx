@@ -5,8 +5,8 @@ export default function ComparisonTable({
   productName, 
   shopName,
   primaryColor,
-  heading = 'Why Choose Us?',
-  subheading = 'See how we stack up against the competition.',
+  heading = 'لماذا تختارنا؟',
+  subheading = 'شاهد كيف نتفوّق على المنافسين.',
   features: providedFeatures,
 }: { 
   productName: string
@@ -27,11 +27,11 @@ export default function ComparisonTable({
           .filter((f) => f.name.trim())
           .slice(0, 6)
       : [
-          { name: 'Premium Quality Materials', us: true, them: false },
-          { name: '24/7 Customer Support', us: true, them: false },
-          { name: '30-Day Money Back Guarantee', us: true, them: false },
-          { name: 'Fast & Free Shipping', us: true, them: false },
-          { name: 'Eco-Friendly Packaging', us: true, them: false },
+          { name: 'خامات عالية الجودة', us: true, them: false },
+          { name: 'دعم على مدار الساعة', us: true, them: false },
+          { name: 'ضمان استرداد 30 يومًا', us: true, them: false },
+          { name: 'شحن سريع ومجاني', us: true, them: false },
+          { name: 'تغليف صديق للبيئة', us: true, them: false },
         ]
 
   return (
@@ -44,8 +44,8 @@ export default function ComparisonTable({
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
           <div className="grid grid-cols-3 bg-slate-100 p-4 text-center font-bold text-slate-900">
-            <div className="text-left pl-4">Feature</div>
-            <div className="text-slate-500">Others</div>
+            <div className="text-start ps-4">الميزة</div>
+            <div className="text-slate-500">الآخرون</div>
             <div style={{ color: primaryColor }}>{shopName || productName}</div>
           </div>
 
@@ -58,7 +58,7 @@ export default function ComparisonTable({
               transition={{ delay: i * 0.1 }}
               className="grid grid-cols-3 items-center border-b border-slate-100 p-4 text-center last:border-0 hover:bg-slate-50"
             >
-              <div className="text-left pl-4 font-medium text-slate-700">{feature.name}</div>
+              <div className="text-start ps-4 font-medium text-slate-700">{feature.name}</div>
               <div className="flex justify-center text-slate-300">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

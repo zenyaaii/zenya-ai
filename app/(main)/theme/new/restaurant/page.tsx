@@ -10,30 +10,30 @@ import DevFillButton from '@/components/DevFillButton'
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
-  { id: 'fine_dining',     label: 'Fine dining',         icon: '🍷' },
-  { id: 'bistro',          label: 'Bistro',              icon: '🥖' },
-  { id: 'cafe',            label: 'Café',                icon: '☕' },
-  { id: 'coffee_takeaway', label: 'Coffee · Takeaway',   icon: '🥤' },
-  { id: 'bakery',          label: 'Bakery',              icon: '🥐' },
-  { id: 'pizzeria',        label: 'Pizzeria',            icon: '🍕' },
-  { id: 'bar',             label: 'Bar · Wine bar',      icon: '🍸' },
-  { id: 'brunch',          label: 'Brunch · All-day',    icon: '🥞' },
-  { id: 'cafeteria',       label: 'Cafeteria · Canteen', icon: '🍱' },
-  { id: 'food_truck',      label: 'Food truck',          icon: '🚚' },
-  { id: 'dessert',         label: 'Patisserie · Dessert', icon: '🍰' },
-  { id: 'other',           label: 'Other',               icon: '🍽️' },
+  { id: 'fine_dining',     label: 'مطعم راقٍ',           icon: '🍽️' },
+  { id: 'bistro',          label: 'بيسترو',              icon: '🥖' },
+  { id: 'cafe',            label: 'مقهى',                icon: '☕' },
+  { id: 'coffee_takeaway', label: 'قهوة · سفري',         icon: '🥤' },
+  { id: 'bakery',          label: 'مخبز',                icon: '🥐' },
+  { id: 'pizzeria',        label: 'بيتزا',               icon: '🍕' },
+  { id: 'bar',             label: 'لاونج · عصائر',        icon: '🧃' },
+  { id: 'brunch',          label: 'فطور متأخّر · طوال اليوم', icon: '🥞' },
+  { id: 'cafeteria',       label: 'كافيتيريا',           icon: '🍱' },
+  { id: 'food_truck',      label: 'عربة طعام',           icon: '🚚' },
+  { id: 'dessert',         label: 'حلويات وباتيسري',      icon: '🍰' },
+  { id: 'other',           label: 'أخرى',                icon: '🍴' },
 ]
 
 type Hour = RestaurantInput['location']['hours'][number]
 
 const DEFAULT_HOURS: Hour[] = [
-  { day: 'monday', label: 'Monday', open: '', close: '', closed: true },
-  { day: 'tuesday', label: 'Tuesday', open: '5:30pm', close: '10:00pm' },
-  { day: 'wednesday', label: 'Wednesday', open: '5:30pm', close: '10:00pm' },
-  { day: 'thursday', label: 'Thursday', open: '5:30pm', close: '10:00pm' },
-  { day: 'friday', label: 'Friday', open: '5:30pm', close: '11:00pm' },
-  { day: 'saturday', label: 'Saturday', open: '5:30pm', close: '11:00pm' },
-  { day: 'sunday', label: 'Sunday', open: '5:00pm', close: '9:30pm' }
+  { day: 'saturday', label: 'السبت', open: '5:30 م', close: '11:00 م' },
+  { day: 'sunday', label: 'الأحد', open: '5:00 م', close: '9:30 م' },
+  { day: 'monday', label: 'الإثنين', open: '', close: '', closed: true },
+  { day: 'tuesday', label: 'الثلاثاء', open: '5:30 م', close: '10:00 م' },
+  { day: 'wednesday', label: 'الأربعاء', open: '5:30 م', close: '10:00 م' },
+  { day: 'thursday', label: 'الخميس', open: '5:30 م', close: '11:00 م' },
+  { day: 'friday', label: 'الجمعة', open: '1:00 م', close: '11:00 م' }
 ]
 
 type MenuItem = {
@@ -88,64 +88,64 @@ function emptyItem(): MenuItem {
 
 function buildSampleForm(): Form {
   return {
-    brand_name: 'Maison Lumière',
-    cuisine: 'Modern French',
-    city: 'New York',
-    neighborhood: 'West Village',
+    brand_name: 'دار نُور',
+    cuisine: 'مأكولات شامية عصرية',
+    city: 'بيروت',
+    neighborhood: 'الجميزة',
     restaurant_type: 'fine_dining',
-    address: '24 Cornelia Street, New York, NY 10014',
-    phone: '+1 (212) 555-0140',
-    email: 'reservations@maisonlumiere.com',
-    map_link: 'https://maps.google.com/?q=24+Cornelia+St+New+York',
+    address: 'شارع غورو، الجميزة، بيروت',
+    phone: '+961 1 555 0140',
+    email: 'reservations@darnoor.com',
+    map_link: 'https://maps.google.com/?q=Gouraud+St+Beirut',
     hours: [
-      { day: 'monday', label: 'Monday', open: '', close: '', closed: true },
-      { day: 'tuesday', label: 'Tuesday', open: '5:30pm', close: '10:00pm' },
-      { day: 'wednesday', label: 'Wednesday', open: '5:30pm', close: '10:00pm' },
-      { day: 'thursday', label: 'Thursday', open: '5:30pm', close: '10:00pm' },
-      { day: 'friday', label: 'Friday', open: '5:30pm', close: '11:00pm' },
-      { day: 'saturday', label: 'Saturday', open: '5:30pm', close: '11:00pm' },
-      { day: 'sunday', label: 'Sunday', open: '5:00pm', close: '9:30pm' },
+      { day: 'saturday', label: 'السبت', open: '5:30 م', close: '11:00 م' },
+      { day: 'sunday', label: 'الأحد', open: '5:00 م', close: '9:30 م' },
+      { day: 'monday', label: 'الإثنين', open: '', close: '', closed: true },
+      { day: 'tuesday', label: 'الثلاثاء', open: '5:30 م', close: '10:00 م' },
+      { day: 'wednesday', label: 'الأربعاء', open: '5:30 م', close: '10:00 م' },
+      { day: 'thursday', label: 'الخميس', open: '5:30 م', close: '11:00 م' },
+      { day: 'friday', label: 'الجمعة', open: '1:00 م', close: '11:00 م' },
     ],
     categories: [
       {
         id: newId(),
-        name: 'To begin',
-        description: 'Small things, slow openings.',
+        name: 'للبداية',
+        description: 'أشياء صغيرة، بدايات على مهل.',
         items: [
-          { id: newId(), name: 'Oysters · Mignonette', description: 'Half dozen, shucked to order.', price: '$24', badge: '', image_url: '' },
-          { id: newId(), name: 'Beef tartare', description: 'Hand-cut, smoked yolk, sourdough toast.', price: '$22', badge: 'Signature', image_url: '' },
+          { id: newId(), name: 'مقبّلات باردة · مشكّل', description: 'حمّص ومتبّل وورق عنب، تُحضَّر طازجة.', price: '$24', badge: '', image_url: '' },
+          { id: newId(), name: 'كبة نية', description: 'لحم مفروم طازج، برغل ناعم، زيت زيتون.', price: '$22', badge: 'الطبق المميّز', image_url: '' },
         ],
       },
       {
         id: newId(),
-        name: 'Mains',
+        name: 'الأطباق الرئيسية',
         description: '',
         items: [
-          { id: newId(), name: 'Duck à l’orange', description: 'Aged 21 days, glazed in bitter orange.', price: '$42', badge: '', image_url: '' },
-          { id: newId(), name: 'Whole roasted branzino', description: 'Salt-crusted, lemon, fennel oil.', price: '$48', badge: '', image_url: '' },
+          { id: newId(), name: 'مشاوي مشكّلة', description: 'كباب وشيش طاووق وريش، تُشوى على الفحم.', price: '$42', badge: '', image_url: '' },
+          { id: newId(), name: 'سمك مشوي كامل', description: 'بقشرة ملح، ليمون، وزيت الشمر.', price: '$48', badge: '', image_url: '' },
         ],
       },
       {
         id: newId(),
-        name: 'Desserts',
+        name: 'الحلويات',
         description: '',
         items: [
-          { id: newId(), name: 'Île flottante', description: 'Vanilla custard, almond praline.', price: '$14', badge: '', image_url: '' },
+          { id: newId(), name: 'كنافة بالجبن', description: 'عجينة ذهبية، قطر بماء الزهر.', price: '$14', badge: '', image_url: '' },
         ],
       },
     ],
-    story_brief: 'Maison Lumière opened in 2019 in a narrow West Village townhouse. Chef Élodie Marchand spent ten years between Paris and Burgundy before bringing her precise, ingredient-led cooking to New York. The room is candlelit, the wine list is short and personal, the music is jazz on vinyl.',
-    chef_name: 'Élodie Marchand',
-    chef_title: 'Chef · Proprietor',
-    chef_bio_brief: 'Trained at L’Arpège in Paris and Maison Pic in Valence. Believes the best dish is the one that tastes like itself.',
-    booking: 'https://resy.com/cities/ny/maison-lumiere',
-    reservation_note: 'For private dining or parties of 8+, please write to events@maisonlumiere.com.',
+    story_brief: 'افتُتح «دار نُور» عام 2019 في منزل قديم بحي الجميزة. أمضى الشيف سامي خوري عشر سنوات بين دمشق وبيروت قبل أن يقدّم مطبخه الدقيق القائم على المكوّن الطازج. القاعة مضاءة بالشموع، وقائمة العصائر الطازجة قصيرة وشخصية، والموسيقى عودٌ شرقي.',
+    chef_name: 'الشيف سامي خوري',
+    chef_title: 'الشيف · المالك',
+    chef_bio_brief: 'تدرّب في كبرى مطابخ الشام. يؤمن بأن أفضل طبق هو الذي يبقى صادقًا لنكهته.',
+    booking: 'https://book.darnoor.com',
+    reservation_note: 'للمناسبات الخاصة أو المجموعات من 8 أشخاص فأكثر، يُرجى المراسلة على events@darnoor.com.',
     hero_image_url: '',
     chef_photo_url: '',
     accent_image_url: '',
     gallery_image_urls: [],
     signature_dish_image_urls: [],
-    press_outlets: 'The New York Times\nMichelin Guide\nEater 38\nBon Appétit',
+    press_outlets: 'النهار\nدليل ميشلان\nتايم آوت بيروت\nالشرق الأوسط',
     style_preset: 'onyx',
   }
 }
@@ -164,7 +164,7 @@ const INITIAL_FORM: Form = {
   // Lean default: one category with one item. User can leave it at one or
   // add more — both work now.
   categories: [
-    { id: newId(), name: 'Menu', description: '', items: [emptyItem()] },
+    { id: newId(), name: 'القائمة', description: '', items: [emptyItem()] },
   ],
   story_brief: '',
   chef_name: '',
@@ -357,14 +357,14 @@ export default function RestaurantWizardPage() {
   }
 
   function validate(): string | null {
-    if (form.brand_name.trim().length < 2) return 'Please enter the restaurant name.'
-    if (form.cuisine.trim().length < 2)    return 'Please enter the cuisine type.'
-    if (form.city.trim().length < 2)       return 'Please enter the city.'
-    if (form.address.trim().length < 4)    return 'Please enter the full address.'
-    if (form.phone.trim().length < 4)      return 'Please enter a contact phone number.'
-    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'Please enter a valid email address.'
+    if (form.brand_name.trim().length < 2) return 'يرجى إدخال اسم المطعم.'
+    if (form.cuisine.trim().length < 2)    return 'يرجى إدخال نوع المطبخ.'
+    if (form.city.trim().length < 2)       return 'يرجى إدخال المدينة.'
+    if (form.address.trim().length < 4)    return 'يرجى إدخال العنوان الكامل.'
+    if (form.phone.trim().length < 4)      return 'يرجى إدخال رقم هاتف للتواصل.'
+    if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) return 'يرجى إدخال بريد إلكتروني صحيح.'
     if (form.story_brief.trim().length < 10) {
-      return 'Tell us a sentence or two about the restaurant story.'
+      return 'أخبرنا جملةً أو جملتين عن قصة المطعم.'
     }
     // Relaxed: just need ONE valid menu item to generate.
     let validItems = 0
@@ -374,7 +374,7 @@ export default function RestaurantWizardPage() {
         if (item.name.trim().length >= 2 && item.price.trim().length >= 1) validItems++
       }
     }
-    if (validItems < 1) return 'Add at least one menu item with a name and a price.'
+    if (validItems < 1) return 'أضف صنفًا واحدًا على الأقل باسم وسعر.'
     return null
   }
 
@@ -462,7 +462,7 @@ export default function RestaurantWizardPage() {
     // If we'll silently drop any rows, surface that to the user.
     if (counts.dropped > 0) {
       const ok = window.confirm(
-        `${counts.dropped} of your ${counts.total} menu items will be skipped because they're missing a name or a price.\n\nGenerate anyway?`
+        `سيُتخطّى ${counts.dropped} من أصناف قائمتك الـ ${counts.total} لأنها تفتقد اسمًا أو سعرًا.\n\nهل تريد التوليد على أي حال؟`
       )
       if (!ok) return
     }
@@ -477,7 +477,7 @@ export default function RestaurantWizardPage() {
       })
       const genJson = await genRes.json()
       if (!genRes.ok || !genJson?.content) {
-        throw new Error(genJson?.error || 'Generation failed')
+        throw new Error(genJson?.error || 'فشل التوليد')
       }
       const content = genJson.content
 
@@ -505,25 +505,25 @@ export default function RestaurantWizardPage() {
         return
       }
       if (saveRes.status === 402) {
-        alert('You have reached your free theme limit. Please upgrade to continue.')
+        alert('لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.')
         router.push('/pricing')
         return
       }
       if (!saveRes.ok || !saveJson?.id) {
-        throw new Error(saveJson?.error || 'Save failed')
+        throw new Error(saveJson?.error || 'فشل الحفظ')
       }
       // Keep the draft in localStorage so the user can come back and
       // tweak / regenerate — we don't clear it until they explicitly
       // hit "Start fresh".
       router.push(`/preview/restaurant/${saveJson.id}`)
     } catch (e: any) {
-      setError(e?.message || 'Something went wrong while generating your site.')
+      setError(e?.message || 'حدث خطأ ما أثناء توليد موقعك.')
       setLoading(false)
     }
   }
 
   function startFresh() {
-    if (!confirm('Clear this form and start over? Your draft will be deleted.')) return
+    if (!confirm('مسح هذا النموذج والبدء من جديد؟ ستُحذف مسوّدتك.')) return
     if (userId) clearDraft(userId)
     setForm(INITIAL_FORM)
     setRestoredDraft(false)
@@ -533,7 +533,7 @@ export default function RestaurantWizardPage() {
 
   if (!authReady) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted">Loading…</div>
+      <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل…</div>
     )
   }
 
@@ -549,27 +549,27 @@ export default function RestaurantWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Restaurant theme · Maison</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-amber-700">قالب المطاعم · دار</p>
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Tell us about your restaurant.
+            أخبرنا عن مطعمك.
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
-            Only a few fields are required — the rest is optional. Even one menu item is enough to generate. AI fills in any gaps.
+            بضعة حقول فقط مطلوبة — والباقي اختياري. حتى صنف واحد يكفي للتوليد. يملأ الذكاء الاصطناعي أي فراغات.
           </p>
         </div>
 
         {restoredDraft && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-[rgba(94,106,210,0.06)] p-4 text-sm text-foreground backdrop-blur">
             <div>
-              <strong>We saved your draft.</strong>{' '}
-              <span className="text-muted">Picking up where you left off.</span>
+              <strong>حفظنا مسوّدتك.</strong>{' '}
+              <span className="text-muted">نُكمل من حيث توقّفت.</span>
             </div>
             <button
               type="button"
               onClick={startFresh}
               className="rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-muted hover:bg-black/5"
             >
-              Start fresh
+              ابدأ من جديد
             </button>
           </div>
         )}
@@ -581,19 +581,19 @@ export default function RestaurantWizardPage() {
         )}
 
         {/* Section: Basics */}
-        <Section title="The basics" subtitle="Who you are and what you serve.">
+        <Section title="الأساسيات" subtitle="من أنت وماذا تقدّم.">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Restaurant name" required>
-              <input className={inputCls} value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Maison Lumière" />
+            <Field label="اسم المطعم" required>
+              <input className={inputCls} value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="دار نُور" />
             </Field>
-            <Field label="Cuisine" required>
-              <input className={inputCls} value={form.cuisine} onChange={(e) => update('cuisine', e.target.value)} placeholder="Modern French" />
+            <Field label="المطبخ" required>
+              <input className={inputCls} value={form.cuisine} onChange={(e) => update('cuisine', e.target.value)} placeholder="مأكولات شامية عصرية" />
             </Field>
-            <Field label="City" required>
-              <input className={inputCls} value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="New York" />
+            <Field label="المدينة" required>
+              <input className={inputCls} value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="بيروت" />
             </Field>
-            <Field label="Neighborhood">
-              <input className={inputCls} value={form.neighborhood} onChange={(e) => update('neighborhood', e.target.value)} placeholder="West Village" />
+            <Field label="الحي">
+              <input className={inputCls} value={form.neighborhood} onChange={(e) => update('neighborhood', e.target.value)} placeholder="الجميزة" />
             </Field>
           </div>
 
@@ -602,7 +602,7 @@ export default function RestaurantWizardPage() {
               quiet; a food truck is direct and punchy. */}
           <div className="mt-6">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-              What kind of place is it? <span className="text-muted/60">· optional</span>
+              ما نوع المكان؟ <span className="text-muted/60">· اختياري</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {RESTAURANT_TYPES.map((t) => {
@@ -625,13 +625,13 @@ export default function RestaurantWizardPage() {
               })}
             </div>
             <p className="mt-2 text-[11.5px] text-muted">
-              Helps the AI write copy that matches the energy of your place. Skip if nothing fits.
+              يساعد الذكاء الاصطناعي على كتابة نصوص تناسب أجواء مكانك. تخطَّ إن لم يناسبك شيء.
             </p>
           </div>
         </Section>
 
         {/* Section: Style */}
-        <Section title="Visual style" subtitle="Choose the look. You can change this later.">
+        <Section title="النمط البصري" subtitle="اختر المظهر. يمكنك تغييره لاحقًا.">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {RESTAURANT_PRESETS.map((p) => {
               const selected = form.style_preset === p.id
@@ -660,8 +660,8 @@ export default function RestaurantWizardPage() {
                     {p.description}
                   </p>
                   {selected && (
-                    <span className="absolute right-3 top-3 rounded-full bg-foreground px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
-                      Selected
+                    <span className="absolute end-3 top-3 rounded-full bg-foreground px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                      محدّد
                     </span>
                   )}
                 </button>
@@ -671,38 +671,38 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Section: Location & Hours */}
-        <Section title="Location & hours" subtitle="Where guests find you, and when you're open.">
+        <Section title="الموقع وساعات العمل" subtitle="أين يجدك الضيوف، ومتى تفتح.">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Full address" required className="sm:col-span-2">
-              <input className={inputCls} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="24 Cornelia Street, New York, NY 10014" />
+            <Field label="العنوان الكامل" required className="sm:col-span-2">
+              <input className={inputCls} value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="شارع غورو، الجميزة، بيروت" />
             </Field>
-            <Field label="Phone" required>
-              <input className={inputCls} value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+1 (212) 555-0140" />
+            <Field label="الهاتف" required>
+              <input className={inputCls} dir="ltr" value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+961 1 555 0140" />
             </Field>
-            <Field label="Email" required>
-              <input type="email" className={inputCls} value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="reservations@restaurant.com" />
+            <Field label="البريد الإلكتروني" required>
+              <input type="email" dir="ltr" className={inputCls} value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="reservations@restaurant.com" />
             </Field>
-            <Field label="Google Maps link" className="sm:col-span-2">
-              <input className={inputCls} value={form.map_link} onChange={(e) => update('map_link', e.target.value)} placeholder="https://maps.google.com/..." />
+            <Field label="رابط خرائط Google" className="sm:col-span-2">
+              <input className={inputCls} dir="ltr" value={form.map_link} onChange={(e) => update('map_link', e.target.value)} placeholder="https://maps.google.com/..." />
             </Field>
           </div>
 
           <div className="mt-6 rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
-            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-muted">Hours</p>
+            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-muted">ساعات العمل</p>
             <div className="divide-y divide-token">
               {form.hours.map((h, idx) => (
                 <div key={h.day} className="grid grid-cols-[110px_1fr_1fr_80px] items-center gap-3 py-3">
                   <span className="text-sm font-medium text-foreground">{h.label}</span>
                   <input
                     className={inputCls + ' py-2'}
-                    placeholder="5:30pm"
+                    placeholder="5:30 م"
                     value={h.open}
                     onChange={(e) => updateHour(idx, { open: e.target.value })}
                     disabled={h.closed}
                   />
                   <input
                     className={inputCls + ' py-2'}
-                    placeholder="10:00pm"
+                    placeholder="10:00 م"
                     value={h.close}
                     onChange={(e) => updateHour(idx, { close: e.target.value })}
                     disabled={h.closed}
@@ -713,7 +713,7 @@ export default function RestaurantWizardPage() {
                       checked={!!h.closed}
                       onChange={(e) => updateHour(idx, { closed: e.target.checked, ...(e.target.checked ? { open: '', close: '' } : {}) })}
                     />
-                    Closed
+                    مغلق
                   </label>
                 </div>
               ))}
@@ -722,7 +722,7 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Section: Menu */}
-        <Section title="The menu" subtitle="Even one item is enough. Add an image to any item — it shows next to the name on your live site.">
+        <Section title="القائمة" subtitle="حتى صنف واحد يكفي. أضف صورة لأي صنف — تظهر بجانب الاسم في موقعك المنشور.">
           <div className="space-y-5">
             {form.categories.map((cat) => (
               <div key={cat.id} className="rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
@@ -731,7 +731,7 @@ export default function RestaurantWizardPage() {
                     className={inputCls + ' flex-1 font-semibold'}
                     value={cat.name}
                     onChange={(e) => updateCategory(cat.id, { name: e.target.value })}
-                    placeholder="Category name (Menu, Mains, Desserts…)"
+                    placeholder="اسم الفئة (القائمة، الأطباق الرئيسية، الحلويات…)"
                   />
                   {form.categories.length > 1 && (
                     <button
@@ -739,7 +739,7 @@ export default function RestaurantWizardPage() {
                       onClick={() => removeCategory(cat.id)}
                       className="rounded-full border border-token bg-surface px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-red-300 hover:text-red-600"
                     >
-                      Remove
+                      إزالة
                     </button>
                   )}
                 </div>
@@ -747,7 +747,7 @@ export default function RestaurantWizardPage() {
                   className={inputCls + ' mb-4 text-sm'}
                   value={cat.description}
                   onChange={(e) => updateCategory(cat.id, { description: e.target.value })}
-                  placeholder="Optional category note (e.g. 'To begin slowly.')"
+                  placeholder="ملاحظة اختيارية للفئة (مثلاً: «لنبدأ على مهل».)"
                 />
 
                 <div className="space-y-4">
@@ -772,15 +772,15 @@ export default function RestaurantWizardPage() {
                         />
                         <div className="space-y-2">
                           <div className="grid gap-2 sm:grid-cols-[1.5fr_90px_90px_auto]">
-                            <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="Item name (required)" />
-                            <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24 (required)" />
-                            <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="Badge" />
+                            <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="اسم الصنف (مطلوب)" />
+                            <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24 (مطلوب)" />
+                            <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="شارة" />
                             {cat.items.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => removeItem(cat.id, item.id)}
                                 className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
-                                aria-label="Remove item"
+                                aria-label="إزالة الصنف"
                               >
                                 ✕
                               </button>
@@ -790,19 +790,19 @@ export default function RestaurantWizardPage() {
                             className={inputCls + ' py-2 text-sm'}
                             value={item.description}
                             onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })}
-                            placeholder="Short description (optional — AI will polish)"
+                            placeholder="وصف موجز (اختياري — سيصقله الذكاء الاصطناعي)"
                           />
                           {/* Status — explicit so users see why an item may not save */}
                           <div className="flex items-center gap-1.5 text-[11px] font-medium">
                             {itemValid ? (
                               <span className="inline-flex items-center gap-1 text-[#15803d]">
                                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#15803d]" />
-                                Will be saved
+                                سيُحفَظ
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 text-[#b45309]">
                                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#b45309]" />
-                                Needs both <strong className="font-semibold">name</strong> and <strong className="font-semibold">price</strong> to save
+                                يحتاج <strong className="font-semibold">اسمًا</strong> و<strong className="font-semibold">سعرًا</strong> ليُحفَظ
                               </span>
                             )}
                           </div>
@@ -816,7 +816,7 @@ export default function RestaurantWizardPage() {
                   onClick={() => addItem(cat.id)}
                   className="mt-4 inline-flex items-center gap-2 rounded-full border border-token bg-surface px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-elevated"
                 >
-                  + Add item
+                  + أضف صنفًا
                 </button>
               </div>
             ))}
@@ -825,34 +825,34 @@ export default function RestaurantWizardPage() {
               onClick={addCategory}
               className="w-full rounded-2xl border-2 border-dashed border-token bg-transparent py-4 text-sm font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground"
             >
-              + Add menu category
+              + أضف فئة للقائمة
             </button>
           </div>
         </Section>
 
         {/* Section: Story */}
-        <Section title="Your story" subtitle="A short brief. AI will turn this into editorial copy.">
-          <Field label="About the restaurant" required>
+        <Section title="قصتك" subtitle="ملخّص قصير. سيحوّله الذكاء الاصطناعي إلى نص تحريري.">
+          <Field label="عن المطعم" required>
             <textarea
               className={inputCls + ' min-h-[140px] resize-y'}
               value={form.story_brief}
               onChange={(e) => update('story_brief', e.target.value)}
-              placeholder="A few sentences. When did you open, what's the philosophy, where do you source from, what makes the room feel like itself?"
+              placeholder="بضع جمل. متى افتتحت، وما الفلسفة، ومن أين تستورد، وما الذي يمنح القاعة طابعها الخاص؟"
             />
           </Field>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field label="Chef name">
-              <input className={inputCls} value={form.chef_name} onChange={(e) => update('chef_name', e.target.value)} placeholder="Élodie Marchand" />
+            <Field label="اسم الشيف">
+              <input className={inputCls} value={form.chef_name} onChange={(e) => update('chef_name', e.target.value)} placeholder="الشيف سامي خوري" />
             </Field>
-            <Field label="Chef title">
-              <input className={inputCls} value={form.chef_title} onChange={(e) => update('chef_title', e.target.value)} placeholder="Chef · Proprietor" />
+            <Field label="لقب الشيف">
+              <input className={inputCls} value={form.chef_title} onChange={(e) => update('chef_title', e.target.value)} placeholder="الشيف · المالك" />
             </Field>
-            <Field label="Chef bio brief" className="sm:col-span-2">
+            <Field label="نبذة عن الشيف" className="sm:col-span-2">
               <textarea
                 className={inputCls + ' min-h-[100px] resize-y'}
                 value={form.chef_bio_brief}
                 onChange={(e) => update('chef_bio_brief', e.target.value)}
-                placeholder="Training, background, what brought them here — AI will polish."
+                placeholder="التدريب والخلفية وما الذي أتى به إلى هنا — سيصقله الذكاء الاصطناعي."
               />
             </Field>
           </div>
@@ -860,29 +860,30 @@ export default function RestaurantWizardPage() {
 
         {/* Section: Reservations — single input, auto-detected */}
         <Section
-          title="Reservations"
-          subtitle="Paste your Resy / OpenTable / SevenRooms link, a phone number, or leave blank. We figure it out."
+          title="الحجوزات"
+          subtitle="الصق رابط منصّة الحجز، أو رقم هاتف، أو اتركه فارغًا. سنكتشفه تلقائيًا."
         >
-          <Field label="Booking URL or phone (optional)">
+          <Field label="رابط الحجز أو الهاتف (اختياري)">
             <input
               className={inputCls}
+              dir="ltr"
               value={form.booking}
               onChange={(e) => update('booking', e.target.value)}
-              placeholder="https://resy.com/cities/ny/your-restaurant  ·  or  ·  +1 (212) 555-0140"
+              placeholder="https://book.your-restaurant.com  ·  أو  ·  +961 1 555 0140"
             />
           </Field>
-          <Field label="Booking note (optional)" className="mt-4">
+          <Field label="ملاحظة الحجز (اختياري)" className="mt-4">
             <textarea
               className={inputCls + ' min-h-[80px] resize-y'}
               value={form.reservation_note}
               onChange={(e) => update('reservation_note', e.target.value)}
-              placeholder="e.g. 'For private dining or 8+, please write to events@...'"
+              placeholder="مثلاً: «للمناسبات الخاصة أو 8 أشخاص فأكثر، يُرجى المراسلة على events@...»"
             />
           </Field>
         </Section>
 
         {/* Section: Visuals — uploads everywhere */}
-        <Section title="Visuals" subtitle="Upload your own photos. Or skip — we've got you.">
+        <Section title="الصور" subtitle="ارفع صورك الخاصة. أو تخطَّ — نحن نتكفّل بذلك.">
           {/* Reassurance banner — explicit: no photos? not a problem. */}
           <div
             className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-elevated/60 p-4 backdrop-blur-md"
@@ -895,43 +896,42 @@ export default function RestaurantWizardPage() {
               ✨
             </div>
             <div className="text-[13px] leading-[1.55] text-foreground">
-              <strong>No photos? Don&rsquo;t worry.</strong>{' '}
+              <strong>لا صور؟ لا تقلق.</strong>{' '}
               <span className="text-muted">
-                Leave any image slot empty and we&rsquo;ll fill it with beautiful,
-                royalty-free photos from Unsplash that match your{' '}
+                اترك أي خانة صورة فارغة وسنملؤها بصور جميلة خالية من الحقوق تناسب{' '}
                 {form.restaurant_type
-                  ? <span className="font-medium text-foreground">{RESTAURANT_TYPES.find((t) => t.id === form.restaurant_type)?.label.toLowerCase()}</span>
-                  : 'restaurant type'}
-                . You can always come back and replace them later.
+                  ? <span className="font-medium text-foreground">{RESTAURANT_TYPES.find((t) => t.id === form.restaurant_type)?.label}</span>
+                  : 'نوع مطعمك'}
+                . يمكنك دائمًا العودة واستبدالها لاحقًا.
               </span>
             </div>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <ImageUploadField
-              label="Hero image"
+              label="الصورة الرئيسية"
               value={form.hero_image_url}
               onChange={(url) => update('hero_image_url', url)}
               aspect="wide"
-              helper="Big image at the top of your page."
+              helper="الصورة الكبيرة أعلى صفحتك."
               className="sm:col-span-2"
             />
             <ImageUploadField
-              label="Chef photo"
+              label="صورة الشيف"
               value={form.chef_photo_url}
               onChange={(url) => update('chef_photo_url', url)}
               aspect="square"
             />
             <ImageUploadField
-              label="Story accent image"
+              label="صورة مرافقة للقصة"
               value={form.accent_image_url}
               onChange={(url) => update('accent_image_url', url)}
               aspect="square"
-              helper="Shows next to the chef story."
+              helper="تظهر بجانب قصة الشيف."
             />
 
             <div className="sm:col-span-2">
               <label className="mb-2 block text-[12.5px] font-medium text-foreground">
-                Gallery (up to 8)
+                المعرض (حتى 8)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
                 {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -947,7 +947,7 @@ export default function RestaurantWizardPage() {
 
             <div className="sm:col-span-2">
               <label className="mb-2 block text-[12.5px] font-medium text-foreground">
-                Signature dish photos (up to 4)
+                صور الأطباق المميّزة (حتى 4)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
                 {[0, 1, 2, 3].map((i) => (
@@ -964,12 +964,12 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Section: Press */}
-        <Section title="Press & awards" subtitle="Optional. One per line.">
+        <Section title="الصحافة والجوائز" subtitle="اختياري. واحدة في كل سطر.">
           <textarea
             className={inputCls + ' min-h-[100px] resize-y'}
             value={form.press_outlets}
             onChange={(e) => update('press_outlets', e.target.value)}
-            placeholder={'The New York Times\nMichelin Guide\nEater 38'}
+            placeholder={'النهار\nدليل ميشلان\nتايم آوت بيروت'}
           />
         </Section>
 
@@ -977,8 +977,8 @@ export default function RestaurantWizardPage() {
         <div className="sticky bottom-6 z-20 mt-12 rounded-3xl border border-token bg-foreground p-5 shadow-soft-lg backdrop-blur-xl">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="text-white">
-              <p className="text-sm font-semibold">Ready when you are.</p>
-              <p className="text-xs opacity-70">Takes about 20–40 seconds. We&rsquo;ll redirect you to your live preview.</p>
+              <p className="text-sm font-semibold">جاهزون متى كنت مستعدًّا.</p>
+              <p className="text-xs opacity-70">يستغرق نحو 20 إلى 40 ثانية. سننقلك إلى معاينتك الحيّة.</p>
             </div>
             <button
               type="button"
@@ -986,7 +986,7 @@ export default function RestaurantWizardPage() {
               onClick={handleGenerate}
               className="rounded-full bg-amber-400 px-8 py-3.5 text-sm font-bold text-black shadow-soft-md transition hover:scale-[1.02] disabled:opacity-60"
             >
-              {loading ? 'Generating your site…' : 'Generate my site'}
+              {loading ? 'جارٍ توليد موقعك…' : 'ولّد موقعي'}
             </button>
           </div>
         </div>
@@ -1015,7 +1015,7 @@ function Field({ label, required, children, className = '' }: { label: string; r
     <label className={`block ${className}`}>
       <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && <span className="ms-1 text-red-500">*</span>}
       </span>
       {children}
     </label>

@@ -54,15 +54,15 @@ const TEMPLATE_ICON: Record<string, LucideIcon> = {
 }
 
 const TEMPLATE_LABEL: Record<string, string> = {
-  one_product: 'Storefront · Shopify',
-  storefront:  'Storefront · Shopify',
-  collective:  'Collective · Shopify',
-  restaurant:  'Maison · Restaurant',
-  atlas:       'Atlas · SaaS',
-  lookbook:    'Lookbook · Fashion',
-  studio:      'Studio · Brand',
-  services:    'Trade · Services',
-  wellness:    'Wellness · Spa',
+  one_product: 'متجر · شوبيفاي',
+  storefront:  'متجر · شوبيفاي',
+  collective:  'تشكيلة · شوبيفاي',
+  restaurant:  'مطعم',
+  atlas:       'تطبيق',
+  lookbook:    'أزياء',
+  studio:      'ستوديو',
+  services:    'خدمات',
+  wellness:    'عافية',
 }
 
 const TEMPLATE_TINT: Record<string, { bg: string; ring: string; fg: string }> = {
@@ -124,7 +124,7 @@ export default function SiteCard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={themePreview(businessType)}
-            alt={`${label} preview`}
+            alt={`معاينة ${label}`}
             className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
             onError={(e) => {
               const fb = themePreviewFallback(businessType)
@@ -139,7 +139,7 @@ export default function SiteCard({
             className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-b from-transparent to-white/40"
           />
           {/* Status pill — top right */}
-          <div className="absolute right-3 top-3">
+          <div className="absolute end-3 top-3">
             <StatusPill
               isPublished={!!publishedHere}
               isDraft={!publishedHere && isHostable}
@@ -179,7 +179,7 @@ export default function SiteCard({
           </div>
 
           {/* Status pill — top right */}
-          <div className="absolute right-3 top-3">
+          <div className="absolute end-3 top-3">
             <StatusPill
               isPublished={!!publishedHere}
               isDraft={!publishedHere && isHostable}
@@ -193,7 +193,7 @@ export default function SiteCard({
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3">
           <h3 className="line-clamp-1 text-[16px] font-semibold tracking-tight text-foreground">
-            {theme.product_name || 'Untitled site'}
+            {theme.product_name || 'موقع بلا عنوان'}
           </h3>
           <p className="mt-0.5 text-[11.5px] font-medium uppercase tracking-[0.14em] text-muted">
             {label}
@@ -215,12 +215,12 @@ export default function SiteCard({
         )}
         {!publishedHere && isHostable && (
           <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(217,119,6,0.08)] px-2 py-1 text-[12px] font-medium text-[#b45309]">
-            Draft · not live yet
+            مسودّة · غير مباشر بعد
           </div>
         )}
         {isEcom && (
           <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(94,106,210,0.08)] px-2 py-1 text-[12px] font-medium text-primary">
-            Ships to Shopify
+            يُصدَّر إلى شوبيفاي
           </div>
         )}
 
@@ -235,9 +235,9 @@ export default function SiteCard({
             <div className="flex items-start gap-2">
               <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
               <div>
-                <div className="font-medium text-foreground">Hosting plan unlocks publishing</div>
+                <div className="font-medium text-foreground">باقة الاستضافة تفتح النشر</div>
                 <Link href="/checkout?plan=hosting" className="text-primary hover:underline">
-                  Add hosting · $19.99/mo →
+                  أضف الاستضافة · 19.99$ شهريًا ←
                 </Link>
               </div>
             </div>
@@ -249,17 +249,17 @@ export default function SiteCard({
           <Link
             href={editUrlFor(theme.id, businessType)}
             className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
-            title="Edit content"
+            title="تعديل المحتوى"
           >
-            <Edit3 className="mr-1 inline-block h-3 w-3" strokeWidth={2.25} />
-            Edit
+            <Edit3 className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
+            تعديل
           </Link>
           <Link
             href={`/preview/${theme.id}`}
             className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
           >
-            <Eye className="mr-1 inline-block h-3 w-3" strokeWidth={2.25} />
-            Preview
+            <Eye className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
+            معاينة
           </Link>
 
           {/* Hostable primary action */}
@@ -271,7 +271,7 @@ export default function SiteCard({
                   className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
                 >
                   <Globe className="h-3 w-3" strokeWidth={2.5} />
-                  Add domain
+                  أضف نطاقًا
                 </button>
               ) : null
             ) : (
@@ -280,14 +280,14 @@ export default function SiteCard({
                   onClick={onPublish}
                   className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
                 >
-                  Publish to Zenya
+                  انشر على زينيا
                 </button>
               ) : (
                 <Link
                   href="/checkout?plan=hosting"
                   className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
                 >
-                  Upgrade to publish
+                  رقِّ للنشر
                 </Link>
               )
             )
@@ -300,7 +300,7 @@ export default function SiteCard({
               className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
             >
               <Download className="h-3 w-3" strokeWidth={2.5} />
-              Download Shopify ZIP
+              نزّل ملف شوبيفاي
             </a>
           )}
           {isEcom && !isPro && (
@@ -308,17 +308,17 @@ export default function SiteCard({
               href="/checkout?plan=onetime"
               className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
             >
-              Upgrade for ZIP
+              رقِّ للحصول على الملف
             </Link>
           )}
 
           {/* Overflow menu — unpublish only (Edit is now a top-level action) */}
           {publishedHere && (
-            <div className="relative ml-auto">
+            <div className="relative ms-auto">
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 className="rounded-md border border-token p-1.5 text-muted hover:bg-black/5"
-                aria-label="More actions"
+                aria-label="إجراءات إضافية"
               >
                 <MoreHorizontal className="h-3.5 w-3.5" strokeWidth={2.25} />
               </button>
@@ -335,15 +335,15 @@ export default function SiteCard({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 4, scale: 0.98 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
+                      className="absolute end-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
                       style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
                     >
                       <button
                         onClick={() => { setMenuOpen(false); onUnpublish() }}
-                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
+                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
                       >
                         <Trash2 className="h-3 w-3" strokeWidth={2.25} />
-                        Unpublish
+                        إلغاء النشر
                       </button>
                     </motion.div>
                   </>
@@ -391,7 +391,7 @@ function StatusPill({
         }}
       >
         <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#15803d]" />
-        Live
+        مباشر
       </span>
     )
   }
@@ -405,7 +405,7 @@ function StatusPill({
           border: '1px solid rgba(94,106,210,0.20)',
         }}
       >
-        Shopify
+        شوبيفاي
       </span>
     )
   }
@@ -419,7 +419,7 @@ function StatusPill({
           border: '1px solid rgba(217,119,6,0.20)',
         }}
       >
-        Draft
+        مسودّة
       </span>
     )
   }

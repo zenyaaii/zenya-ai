@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
 import { LOOKBOOK_MOCK_CONTENT } from '@/utils/lookbook/mock-content'
@@ -231,13 +233,15 @@ export async function POST(req: NextRequest) {
         temperature: 0.72,
         max_tokens: 3500,
         messages: [
-          { role: 'system', content: 'You are an expert fashion copywriter. Output only valid JSON.' },
+          { role: 'system', content: 'You are an expert fashion copywriter. Output only valid JSON.\n\n' + ARABIC_OUTPUT_DIRECTIVE },
           { role: 'user', content: buildPrompt(input) }
         ]
       }),
       TIMEOUT_MS,
       'openai_lookbook'
     )
+
+    await logAiUsage({ operation: 'generate-lookbook', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

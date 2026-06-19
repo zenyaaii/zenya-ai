@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { serviceInputSchema, type ServiceInput } from '@/utils/services/input'
 import type { ServiceContent } from '@/utils/services/types'
 import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
@@ -471,7 +473,8 @@ export async function POST(req: NextRequest) {
           {
             role: 'system',
             content:
-              'You are a senior website copywriter for premium local service companies. You write clean, conversion-focused, design-aware copy and always return strict JSON only.'
+              'You are a senior website copywriter for premium local service companies. You write clean, conversion-focused, design-aware copy and always return strict JSON only.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           { role: 'user', content: prompt }
         ]
@@ -479,6 +482,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'services_ai'
     )
+
+    await logAiUsage({ operation: 'generate-services', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, response.usage)
 
     const raw = response.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}

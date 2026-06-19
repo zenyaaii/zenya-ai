@@ -53,10 +53,10 @@ export default function PublishSiteModal({
         const r = await fetch(`/api/slug/check?slug=${encodeURIComponent(trimmed)}`)
         const j = await r.json()
         if (j.available) setAvailability({ state: 'ok' })
-        else if (j.reason) setAvailability({ state: 'invalid', message: slugErrorMessage(j.reason as any) || 'Unavailable' })
+        else if (j.reason) setAvailability({ state: 'invalid', message: slugErrorMessage(j.reason as any) || 'غير متاح' })
         else setAvailability({ state: 'taken' })
       } catch {
-        setAvailability({ state: 'invalid', message: 'Check failed — try again' })
+        setAvailability({ state: 'invalid', message: 'فشل الفحص — حاول مجددًا' })
       }
     }, 350)
     return () => {
@@ -76,19 +76,19 @@ export default function PublishSiteModal({
       const j = await r.json()
       if (!r.ok) {
         if (r.status === 402) {
-          setError(j.message || 'Hosting plan required.')
+          setError(j.message || 'باقة الاستضافة مطلوبة.')
         } else if (r.status === 409) {
           setAvailability({ state: 'taken' })
-          setError(j.message || 'Slug already taken.')
+          setError(j.message || 'المُعرّف محجوز بالفعل.')
         } else {
-          setError(j.message || j.error || 'Could not publish.')
+          setError(j.message || j.error || 'تعذّر النشر.')
         }
         return
       }
       onPublished(j.slug, j.url)
       onClose()
     } catch (e: any) {
-      setError(e?.message || 'Network error')
+      setError(e?.message || 'خطأ في الشبكة')
     } finally {
       setSubmitting(false)
     }
@@ -100,7 +100,7 @@ export default function PublishSiteModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Publish your site"
+      aria-label="انشر موقعك"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 60,
@@ -118,22 +118,23 @@ export default function PublishSiteModal({
         }}
       >
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: '#1c1c1c' }}>
-          Publish to Zenya
+          النشر على زينيا
         </h2>
         <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-          Pick a slug. Your site will be live at{' '}
-          <code style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>
+          اختر معرّفًا للرابط. سيكون موقعك منشورًا على{' '}
+          <code dir="ltr" style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>
             zenyaai.co/s/{slug || 'your-slug'}
           </code>
           .
         </p>
 
         <label htmlFor="slug-input" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
-          Slug
+          معرّف الرابط
         </label>
         <div style={{ position: 'relative' }}>
           <input
             id="slug-input"
+            dir="ltr"
             value={slug}
             onChange={(e) => setSlug(normalizeSlug(e.target.value))}
             autoFocus
@@ -165,9 +166,9 @@ export default function PublishSiteModal({
               lineHeight: 1.55,
             }}
           >
-            Publishing requires the <strong>Hosting plan ($19.99/mo)</strong>.{' '}
+            يتطلّب النشر <strong>باقة الاستضافة (19.99$ شهريًا)</strong>.{' '}
             <a href="/checkout?plan=hosting" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
-              Upgrade →
+              الترقية ←
             </a>
           </div>
         )}
@@ -190,7 +191,7 @@ export default function PublishSiteModal({
               cursor: 'pointer',
             }}
           >
-            Cancel
+            إلغاء
           </button>
           <button
             type="button"
@@ -205,7 +206,7 @@ export default function PublishSiteModal({
               boxShadow: canSubmit ? '0 4px 14px rgba(94,106,210,0.25)' : 'none',
             }}
           >
-            {submitting ? 'Publishing…' : 'Publish site'}
+            {submitting ? 'جارٍ النشر…' : 'نشر الموقع'}
           </button>
         </div>
       </div>
@@ -216,17 +217,17 @@ export default function PublishSiteModal({
 function AvailabilityHint({ state }: { state: Availability }) {
   if (state.state === 'idle') return null
   const styles: React.CSSProperties = {
-    position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+    position: 'absolute', insetInlineEnd: 12, top: '50%', transform: 'translateY(-50%)',
     fontSize: 11.5, fontWeight: 600, letterSpacing: 0.3,
   }
   if (state.state === 'checking') {
-    return <span style={{ ...styles, color: '#9b9b9b' }}>Checking…</span>
+    return <span style={{ ...styles, color: '#9b9b9b' }}>جارٍ الفحص…</span>
   }
   if (state.state === 'ok') {
-    return <span style={{ ...styles, color: '#15803d' }}>Available ✓</span>
+    return <span style={{ ...styles, color: '#15803d' }}>متاح ✓</span>
   }
   if (state.state === 'taken') {
-    return <span style={{ ...styles, color: '#b91c1c' }}>Taken</span>
+    return <span style={{ ...styles, color: '#b91c1c' }}>محجوز</span>
   }
-  return <span style={{ ...styles, color: '#b91c1c' }} title={state.message}>Invalid</span>
+  return <span style={{ ...styles, color: '#b91c1c' }} title={state.message}>غير صالح</span>
 }

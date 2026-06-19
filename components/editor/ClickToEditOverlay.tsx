@@ -3,22 +3,24 @@
 /* ─────────────────────────────────────────────────────────────────────── *
  * Click-to-edit overlay                                                    *
  *                                                                          *
- * Mount this inside an editor's preview area, give it a ref to the scroll  *
- * container, and any [data-section="<panelId>"] element in the canvas      *
- * gets a hover outline; clicking anywhere on the section opens that        *
- * section's editor panel.                                                  *
+ * The theme preview renders inside an <iframe> (see PreviewFrame). This    *
+ * overlay watches that iframe's document: any [data-section="<panelId>"]   *
+ * element gets a hover outline, and clicking it opens that section's panel *
+ * in the editor.                                                           *
  *                                                                          *
- * Real buttons, links, and form fields inside the section keep working —   *
- * the click handler walks up from the click target and bails out if it     *
- * crosses an interactive element on the way to the section root.           *
+ * The iframe auto-grows to its content and the parent pane scrolls, so a   *
+ * section's rect (measured inside the iframe) is translated into the       *
+ * parent viewport by adding the iframe element's own position. The outline *
+ * is drawn in the parent document with `position: fixed`.                  *
+ *                                                                          *
+ * Real buttons, links, and form fields inside a section keep working — the *
+ * click handler walks up from the target and bails if it crosses an        *
+ * interactive element before reaching the section root.                    *
  * ─────────────────────────────────────────────────────────────────────── */
 
 import { useEffect, useState } from 'react'
 
-type Hovered = {
-  panelId: string
-  rect: { top: number; left: number; width: number; height: number }
-}
+type Rect = { top: number; left: number; width: number; height: number }
 
 const INTERACTIVE_TAGS = new Set(['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'LABEL', 'OPTION', 'SUMMARY'])
 
@@ -35,101 +37,98 @@ function isInteractiveBetween(target: HTMLElement, sectionRoot: HTMLElement): bo
 }
 
 export default function ClickToEditOverlay({
-  containerRef,
+  doc,
+  iframe,
   onPick,
   panelToView,
   onViewChange,
 }: {
-  containerRef: React.RefObject<HTMLElement>
+  /** The iframe's document (null until the preview is ready). */
+  doc: Document | null
+  /** The iframe element, for translating rects into the parent viewport. */
+  iframe: HTMLIFrameElement | null
   onPick: (panelId: string) => void
   /** Map panelId → view id, so clicking a section on another page also switches the page. */
   panelToView?: Record<string, string>
   onViewChange?: (view: string) => void
 }) {
-  const [hovered, setHovered] = useState<Hovered | null>(null)
+  const [hovered, setHovered] = useState<{ panelId: string; rect: Rect } | null>(null)
 
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
+    if (!doc || !iframe) return
 
-    function findSection(target: EventTarget | null): HTMLElement | null {
+    function sectionFor(target: EventTarget | null): HTMLElement | null {
       if (!(target instanceof HTMLElement)) return null
       return target.closest('[data-section]') as HTMLElement | null
     }
 
-    function rectFor(panelId: string) {
-      const root = containerRef.current
-      if (!root) return null
-      const sec = root.querySelector(`[data-section="${cssEscape(panelId)}"]`) as HTMLElement | null
-      if (!sec) return null
-      const r = sec.getBoundingClientRect()
-      return { top: r.top, left: r.left, width: r.width, height: r.height }
+    // Translate an iframe-internal element rect into the parent viewport.
+    function parentRect(el: HTMLElement): Rect {
+      const r = el.getBoundingClientRect()
+      const f = iframe!.getBoundingClientRect()
+      return { top: f.top + r.top, left: f.left + r.left, width: r.width, height: r.height }
+    }
+
+    let activeEl: HTMLElement | null = null
+
+    function show(el: HTMLElement) {
+      activeEl = el
+      const panelId = el.getAttribute('data-section') || ''
+      if (!panelId) { setHovered(null); return }
+      setHovered({ panelId, rect: parentRect(el) })
     }
 
     function onMove(e: MouseEvent) {
-      const sec = findSection(e.target)
-      if (!sec) {
-        setHovered(null)
-        return
-      }
-      const panelId = sec.getAttribute('data-section') || ''
-      if (!panelId) {
-        setHovered(null)
-        return
-      }
-      const r = sec.getBoundingClientRect()
-      setHovered((cur) =>
-        cur?.panelId === panelId &&
-        cur.rect.top === r.top &&
-        cur.rect.left === r.left &&
-        cur.rect.width === r.width &&
-        cur.rect.height === r.height
-          ? cur
-          : { panelId, rect: { top: r.top, left: r.left, width: r.width, height: r.height } }
-      )
+      const sec = sectionFor(e.target)
+      if (!sec) { activeEl = null; setHovered(null); return }
+      show(sec)
     }
 
-    function onLeave() { setHovered(null) }
-
-    function onScroll() {
-      setHovered((cur) => {
-        if (!cur) return cur
-        const r = rectFor(cur.panelId)
-        return r ? { panelId: cur.panelId, rect: r } : null
-      })
+    function reposition() {
+      if (!activeEl || !activeEl.isConnected) return
+      const panelId = activeEl.getAttribute('data-section') || ''
+      if (!panelId) return
+      setHovered({ panelId, rect: parentRect(activeEl) })
     }
+
+    function onLeave() { activeEl = null; setHovered(null) }
 
     function onClick(e: MouseEvent) {
       const target = e.target as HTMLElement | null
       if (!target) return
       const sec = target.closest('[data-section]') as HTMLElement | null
       if (!sec) return
-      // Don't hijack real button/link/input clicks — those should still work
-      // exactly as the user expects.
-      if (isInteractiveBetween(target, sec)) return
+      if (isInteractiveBetween(target, sec)) return // let real buttons/links work
       const panelId = sec.getAttribute('data-section') || ''
       if (!panelId) return
       e.preventDefault()
       e.stopPropagation()
-      if (panelToView && panelToView[panelId] && onViewChange) {
-        onViewChange(panelToView[panelId])
-      }
+      if (panelToView && panelToView[panelId] && onViewChange) onViewChange(panelToView[panelId])
       onPick(panelId)
     }
 
-    el.addEventListener('mousemove', onMove)
-    el.addEventListener('mouseleave', onLeave)
-    el.addEventListener('scroll', onScroll, { passive: true })
-    // Capture phase so we win the click before any inert listeners inside
-    // the canvas swallow it.
-    el.addEventListener('click', onClick, true)
+    const win = doc.defaultView
+
+    doc.addEventListener('mousemove', onMove)
+    doc.documentElement.addEventListener('mouseleave', onLeave)
+    doc.addEventListener('click', onClick, true)
+    // The iframe scrolls internally — keep the outline glued to its section as
+    // the user scrolls inside the preview (and if the parent pane shifts).
+    doc.addEventListener('scroll', reposition, true)
+    win?.addEventListener('scroll', reposition, true)
+    window.addEventListener('scroll', reposition, true)
+    window.addEventListener('resize', reposition)
+
     return () => {
-      el.removeEventListener('mousemove', onMove)
-      el.removeEventListener('mouseleave', onLeave)
-      el.removeEventListener('scroll', onScroll)
-      el.removeEventListener('click', onClick, true)
+      doc.removeEventListener('mousemove', onMove)
+      doc.documentElement.removeEventListener('mouseleave', onLeave)
+      doc.removeEventListener('click', onClick, true)
+      doc.removeEventListener('scroll', reposition, true)
+      win?.removeEventListener('scroll', reposition, true)
+      window.removeEventListener('scroll', reposition, true)
+      window.removeEventListener('resize', reposition)
     }
-  }, [containerRef, onPick, panelToView, onViewChange])
+  }, [doc, iframe, onPick, panelToView, onViewChange])
 
   if (!hovered) return null
   const { rect } = hovered
@@ -152,12 +151,4 @@ export default function ClickToEditOverlay({
       }}
     />
   )
-}
-
-/** Minimal CSS.escape polyfill — CSS.escape is missing in older browsers. */
-function cssEscape(s: string): string {
-  if (typeof window !== 'undefined' && (window as any).CSS?.escape) {
-    return (window as any).CSS.escape(s)
-  }
-  return s.replace(/["\\]/g, '\\$&')
 }

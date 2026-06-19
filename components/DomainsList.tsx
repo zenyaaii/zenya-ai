@@ -15,11 +15,11 @@ type DomainRow = {
 }
 
 const STATUS_LABEL: Record<DomainRow['status'], { label: string; color: string; bg: string }> = {
-  pending_dns: { label: 'Waiting on DNS',   color: '#7a5f00', bg: 'rgba(217,119,6,0.10)' },
-  pending_ssl: { label: 'Issuing SSL…',     color: '#5e6ad2', bg: 'rgba(94,106,210,0.10)' },
-  live:        { label: '🔒 Live',           color: '#15803d', bg: 'rgba(22,163,74,0.10)' },
-  error:       { label: 'Error',            color: '#b91c1c', bg: 'rgba(220,38,38,0.10)' },
-  removed:     { label: 'Removed',          color: '#6b6b6b', bg: 'rgba(0,0,0,0.05)' },
+  pending_dns: { label: 'بانتظار DNS',     color: '#7a5f00', bg: 'rgba(217,119,6,0.10)' },
+  pending_ssl: { label: 'جارٍ إصدار SSL…',  color: '#5e6ad2', bg: 'rgba(94,106,210,0.10)' },
+  live:        { label: '🔒 منشور',         color: '#15803d', bg: 'rgba(22,163,74,0.10)' },
+  error:       { label: 'خطأ',             color: '#b91c1c', bg: 'rgba(220,38,38,0.10)' },
+  removed:     { label: 'مُزال',            color: '#6b6b6b', bg: 'rgba(0,0,0,0.05)' },
 }
 
 export default function DomainsList({ themeId }: { themeId?: string }) {
@@ -59,7 +59,7 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
   }, [domains, reload])
 
   async function remove(id: string, domain: string) {
-    if (!confirm(`Disconnect ${domain}? Your site will stop resolving on that domain.`)) return
+    if (!confirm(`هل تريد فصل ${domain}؟ سيتوقّف موقعك عن العمل على هذا النطاق.`)) return
     setBusy(id)
     try {
       await fetch(`/api/domains/${id}`, { method: 'DELETE' })
@@ -79,7 +79,7 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
     }
   }
 
-  if (loading) return <div className="text-sm text-muted">Loading domains…</div>
+  if (loading) return <div className="text-sm text-muted">جارٍ تحميل النطاقات…</div>
   if (domains.length === 0) return null
 
   return (
@@ -107,7 +107,7 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
                   disabled={busy === d.id}
                   className="rounded-md border border-token px-2.5 py-1 text-[11px] font-medium text-muted hover:bg-black/5"
                 >
-                  {busy === d.id ? '…' : 'Recheck'}
+                  {busy === d.id ? '…' : 'إعادة فحص'}
                 </button>
               )}
               {d.status === 'live' && (
@@ -117,7 +117,7 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
                   rel="noreferrer"
                   className="rounded-md border border-token px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-black/5"
                 >
-                  Open ↗
+                  فتح ↖
                 </a>
               )}
               <button
@@ -125,7 +125,7 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
                 disabled={busy === d.id}
                 className="rounded-md border border-token px-2.5 py-1 text-[11px] font-medium text-muted hover:bg-black/5"
               >
-                Remove
+                إزالة
               </button>
             </div>
           </div>

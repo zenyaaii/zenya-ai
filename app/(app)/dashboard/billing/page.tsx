@@ -64,9 +64,9 @@ export default function BillingPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
       <header className="mb-6 border-b border-token pb-5">
-        <h1 className="text-[24px] font-bold tracking-tight text-foreground">Billing</h1>
+        <h1 className="text-[24px] font-bold tracking-tight text-foreground">الفوترة</h1>
         <p className="mt-1 text-[13px] text-muted">
-          Your plan, payment history, and Stripe Customer Portal — invoices and saved payment methods.
+          باقتك، وسجلّ الدفع، وبوابة عملاء Stripe — الفواتير وطرق الدفع المحفوظة.
         </p>
       </header>
 
@@ -85,23 +85,23 @@ export default function BillingPage() {
           <section className="rounded-2xl border border-token bg-white p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                {plan === 'pro_hosting' && <PlanHeader icon="✓" tint="#15803d" label="Hosting active" />}
-                {plan === 'pro_onetime' && <PlanHeader icon="★" tint="#5e6ad2" label="Pro · Lifetime" />}
-                {plan === 'admin' && <PlanHeader icon="★" tint="#9b6f00" label="Admin · all features" />}
-                {plan === 'free' && <PlanHeader icon=" " tint="#6b6b6b" label="Free Plan" />}
+                {plan === 'pro_hosting' && <PlanHeader icon="✓" tint="#15803d" label="الاستضافة نشطة" />}
+                {plan === 'pro_onetime' && <PlanHeader icon="★" tint="#5e6ad2" label="برو · مدى الحياة" />}
+                {plan === 'admin' && <PlanHeader icon="★" tint="#9b6f00" label="مشرف · كل المزايا" />}
+                {plan === 'free' && <PlanHeader icon=" " tint="#6b6b6b" label="الباقة المجانية" />}
 
                 <div className="mt-2 text-[26px] font-bold tracking-tight text-foreground">
-                  {plan === 'pro_hosting' && '$19.99 / month'}
-                  {plan === 'pro_onetime' && '$9.99 paid once'}
-                  {plan === 'admin' && 'No charge'}
+                  {plan === 'pro_hosting' && '19.99$ / شهريًا'}
+                  {plan === 'pro_onetime' && '9.99$ دُفعت مرة واحدة'}
+                  {plan === 'admin' && 'بلا رسوم'}
                   {plan === 'free' && '$0'}
                 </div>
 
                 <div className="mt-1 text-[13px] text-muted">
-                  {plan === 'pro_hosting' && renews && <>Renews {renews.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
-                  {plan === 'pro_onetime' && purchased && <>Lifetime access · purchased {purchased.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
-                  {plan === 'free' && '3 free generations on signup. No subscription.'}
-                  {plan === 'admin' && 'Internal team account'}
+                  {plan === 'pro_hosting' && renews && <>يتجدّد {renews.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
+                  {plan === 'pro_onetime' && purchased && <>وصول مدى الحياة · تم الشراء {purchased.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
+                  {plan === 'free' && '3 عمليات توليد مجانية عند التسجيل. بلا اشتراك.'}
+                  {plan === 'admin' && 'حساب فريق داخلي'}
                 </div>
               </div>
 
@@ -111,27 +111,27 @@ export default function BillingPage() {
                   <>
                     <Link href="/checkout?plan=onetime"
                           className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
-                      Get Pro · $9.99
-                      <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+                      احصل على برو · 9.99$
+                      <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
                     <Link href="/checkout?plan=hosting"
                           className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
-                      Start Hosting · $19.99/mo
+                      ابدأ الاستضافة · 19.99$ شهريًا
                     </Link>
                   </>
                 )}
                 {plan === 'pro_onetime' && (
                   <Link href="/checkout?plan=hosting"
                         className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
-                    Add Hosting · $19.99/mo
-                    <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+                    أضف الاستضافة · 19.99$ شهريًا
+                    <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                   </Link>
                 )}
                 {plan === 'pro_hosting' && (
                   <button onClick={openPortal} disabled={portalBusy}
                           className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                     <CreditCard className="h-3 w-3" />
-                    {portalBusy ? 'Opening…' : 'Manage subscription'}
+                    {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
                   </button>
                 )}
               </div>
@@ -141,14 +141,14 @@ export default function BillingPage() {
           {/* Stripe portal + invoices */}
           {(plan === 'pro_onetime' || plan === 'pro_hosting') && (
             <section className="mt-4 rounded-2xl border border-token bg-white p-6">
-              <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Invoices & payment methods</h2>
+              <h2 className="text-[15px] font-semibold tracking-tight text-foreground">الفواتير وطرق الدفع</h2>
               <p className="mt-1 text-[12.5px] text-muted">
-                The Stripe Customer Portal handles invoices, receipts, and payment-method updates.
+                تتولّى بوابة عملاء Stripe الفواتير والإيصالات وتحديث طرق الدفع.
               </p>
               <button onClick={openPortal} disabled={portalBusy}
                       className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5">
                 <Receipt className="h-3.5 w-3.5" strokeWidth={2.25} />
-                {portalBusy ? 'Opening Stripe…' : 'Open Stripe portal'}
+                {portalBusy ? 'جارٍ فتح Stripe…' : 'افتح بوابة Stripe'}
                 <ExternalLink className="h-3 w-3 opacity-70" />
               </button>
             </section>
@@ -156,15 +156,15 @@ export default function BillingPage() {
 
           {/* What's included */}
           <section className="mt-4 rounded-2xl border border-token bg-white p-6">
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">What's included</h2>
+            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">ما هو مشمول</h2>
             <ul className="mt-3 space-y-2 text-[13px]">
-              <Included on={true}                  label="Free · 3 AI-generated sites" />
-              <Included on={plan !== 'free'}       label="Pro · Unlimited generations" />
-              <Included on={plan !== 'free'}       label="Pro · Shopify OS 2.0 ZIP exports" />
-              <Included on={plan !== 'free'}       label="Pro · Project ZIPs for non-Shopify templates" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="Hosting · Live at zenya.app/s/{slug}" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="Hosting · Custom domain + automatic SSL" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="Hosting · Edit content + style without regenerating" />
+              <Included on={true}                  label="مجاني · 3 مواقع بالذكاء الاصطناعي" />
+              <Included on={plan !== 'free'}       label="برو · توليد غير محدود" />
+              <Included on={plan !== 'free'}       label="برو · تصدير شوبيفاي OS 2.0" />
+              <Included on={plan !== 'free'}       label="برو · ملفات المشاريع للقوالب غير الشوبيفاي" />
+              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · مباشر على zenya.app/s/{slug}" />
+              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · نطاق مخصّص + SSL تلقائي" />
+              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · تعديل المحتوى والتصميم دون إعادة التوليد" />
             </ul>
           </section>
         </>

@@ -33,33 +33,33 @@ type Form = {
 }
 
 const CATEGORY_OPTIONS = [
-  'Contemporary Women\'s', 'Contemporary Men\'s', 'Unisex / Gender-neutral',
-  'Luxury / Couture', 'Streetwear', 'Activewear', 'Swimwear', 'Lingerie',
-  'Accessories', 'Footwear', 'Kidswear', 'Bridal', 'Denim', 'Knitwear', 'Other'
+  'نسائي عصري', 'رجالي عصري', 'للجنسين',
+  'فاخر / كوتور', 'ستريت وير', 'ملابس رياضية', 'عبايات', 'أوشحة وحجاب',
+  'إكسسوارات', 'أحذية', 'ملابس أطفال', 'أزياء زفاف', 'دينيم', 'تريكو', 'أخرى'
 ]
 
-const PRODUCT_CATEGORIES = ['Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Knitwear', 'Accessories', 'Shoes', 'Bags', 'Swimwear', 'Activewear', 'Other']
+const PRODUCT_CATEGORIES = ['فساتين', 'قطع علوية', 'قطع سفلية', 'ملابس خارجية', 'تريكو', 'إكسسوارات', 'أحذية', 'حقائب', 'عبايات', 'ملابس رياضية', 'أخرى']
 
 function buildSampleForm(): Form {
   return {
-    brand_name: 'VELA',
-    brand_tagline: 'Wear what matters.',
-    brand_category: 'Contemporary Women\'s',
-    style_direction: 'Minimal European luxury. Think The Row meets Reformation — clean lines, natural fabrics, timeless not trendy. Palette is warm neutrals, ivory, deep forest green.',
-    target_customer: 'Professional women 28–45 who value quality over quantity and want a wardrobe of fewer, better pieces.',
-    collection_name: 'The Cortège Edit',
-    collection_season: 'SS25',
+    brand_name: 'وَقار',
+    brand_tagline: 'ارتدي ما يليق بك.',
+    brand_category: 'نسائي عصري',
+    style_direction: 'فخامة محتشمة وعصرية. خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية. لوحة الألوان من درجات محايدة دافئة وعاجية وأخضر غابي عميق.',
+    target_customer: 'نساء محترفات بين 28 و45 يقدّرن الجودة على الكمية ويردن خزانة من قطع أقل وأفضل.',
+    collection_name: 'تشكيلة الوقار',
+    collection_season: 'ربيع/صيف 25',
     products: [
-      { id: uid(), name: 'Silk Slip Dress · Ivory', price: '$345', category: 'Dresses' },
-      { id: uid(), name: 'Linen Tailored Trouser', price: '$245', category: 'Bottoms' },
-      { id: uid(), name: 'Wool Crepe Blazer', price: '$595', category: 'Outerwear' },
-      { id: uid(), name: 'Cashmere Crew', price: '$285', category: 'Knitwear' },
+      { id: uid(), name: 'عباية حريرية · عاجية', price: '345$', category: 'عبايات' },
+      { id: uid(), name: 'بنطال كتّاني مفصّل', price: '245$', category: 'قطع سفلية' },
+      { id: uid(), name: 'بليزر صوفي', price: '595$', category: 'ملابس خارجية' },
+      { id: uid(), name: 'كنزة كشمير', price: '285$', category: 'تريكو' },
     ],
-    brand_story: 'VELA started in 2021 with one question: why is the considered, well-made wardrobe still so rare? We work directly with small mills in Portugal and Italy, ship from a single studio in Lisbon, and never run sales — the price is the price.',
+    brand_story: 'بدأت «وَقار» عام 2021 بسؤال واحد: لماذا لا تزال الخزانة المدروسة جيّدة الصنع نادرة؟ نعمل مباشرةً مع مشاغل صغيرة، ونشحن من ستوديو واحد، ولا نُقيم تخفيضات أبدًا — السعر هو السعر.',
     sustainability_focus: true,
-    press_features: 'Vogue, Harper\'s Bazaar, The Cut, Refinery29',
+    press_features: 'ڤوغ العربية، هي، سيدتي، الجميلة',
     review_rating: '4.9',
-    review_count: '2,400+ reviews',
+    review_count: '+2,400 تقييم',
     hero_image_url: '',
     gallery_image_urls: [],
     style_preset: 'noir',
@@ -73,9 +73,9 @@ const INITIAL_FORM: Form = {
   style_direction: '',
   target_customer: '',
   collection_name: '',
-  collection_season: 'SS25',
+  collection_season: 'ربيع/صيف 25',
   products: [
-    { id: uid(), name: '', price: '', category: 'Dresses' }
+    { id: uid(), name: '', price: '', category: 'فساتين' }
   ],
   brand_story: '',
   sustainability_focus: false,
@@ -121,7 +121,7 @@ export default function LookbookWizardPage() {
   }
   function addProduct() {
     if (form.products.length >= 8) return
-    setForm((p) => ({ ...p, products: [...p.products, { id: uid(), name: '', price: '', category: 'Other' }] }))
+    setForm((p) => ({ ...p, products: [...p.products, { id: uid(), name: '', price: '', category: 'أخرى' }] }))
   }
   function removeProduct(id: string) {
     if (form.products.length <= 1) return
@@ -137,13 +137,13 @@ export default function LookbookWizardPage() {
   }
 
   function validate(): string | null {
-    if (form.brand_name.trim().length < 2) return 'Please enter your brand name.'
-    if (form.brand_tagline.trim().length < 3) return 'Please enter a tagline.'
-    if (form.brand_category.trim().length < 2) return 'Please select a brand category.'
-    if (form.style_direction.trim().length < 10) return 'Describe your style direction (at least 10 characters).'
-    if (form.target_customer.trim().length < 10) return 'Describe your target customer (at least 10 characters).'
+    if (form.brand_name.trim().length < 2) return 'يرجى إدخال اسم علامتك التجارية.'
+    if (form.brand_tagline.trim().length < 3) return 'يرجى إدخال شعار.'
+    if (form.brand_category.trim().length < 2) return 'يرجى اختيار فئة العلامة.'
+    if (form.style_direction.trim().length < 10) return 'صِف توجّهك التصميمي (10 أحرف على الأقل).'
+    if (form.target_customer.trim().length < 10) return 'صِف عميلك المستهدف (10 أحرف على الأقل).'
     const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
-    if (validProducts.length < 1) return 'Add at least one product to populate the lookbook.'
+    if (validProducts.length < 1) return 'أضف منتجًا واحدًا على الأقل لملء اللوك بوك.'
     return null
   }
 
@@ -190,7 +190,7 @@ export default function LookbookWizardPage() {
         body: JSON.stringify(payload)
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'Generation failed')
+      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = LOOKBOOK_PRESETS.find((p) => p.id === form.style_preset) || LOOKBOOK_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
@@ -211,17 +211,17 @@ export default function LookbookWizardPage() {
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/lookbook'); return }
-      if (saveRes.status === 402) { alert('Free theme limit reached. Please upgrade to continue.'); router.push('/pricing'); return }
-      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'Save failed')
+      if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
+      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
       router.push(`/preview/lookbook/${saveJson.id}`)
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong. Please try again.')
+      setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
     }
   }
 
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">Loading...</div>
+    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
   }
 
   return (
@@ -236,12 +236,12 @@ export default function LookbookWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sm} className="mb-12">
-          <p className="text-xs uppercase tracking-[0.35em] text-stone-500">Lookbook · Fashion theme</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-stone-500">لوك بوك · قالب الأزياء المحتشمة</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Build a premium fashion site.
+            ابنِ موقع أزياء فاخرًا.
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
-            Tell us about your brand and collection. Zenya generates a full editorial site — hero, lookbook grid, product shop, brand story, press wall, reviews, and newsletter.
+            أخبرنا عن علامتك وتشكيلتك. تولّد زينيا موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة وجدار صحافة وتقييمات ونشرة بريدية.
           </p>
         </motion.div>
 
@@ -255,50 +255,50 @@ export default function LookbookWizardPage() {
 
           {/* ── Brand ──────────────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. Your brand</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Brand name *</label>
-                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="e.g. VELA, MAEVE, ARCA" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">اسم العلامة *</label>
+                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: وَقار، نُهى، صفاء" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Tagline *</label>
-                <input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="e.g. Wear what matters." className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
+                <input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: ارتدي ما يليق بك." className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Brand category *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">فئة العلامة *</label>
                 <select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
-                  <option value="">Select category...</option>
+                  <option value="">اختر الفئة...</option>
                   {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Target customer *</label>
-                <input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="e.g. Professional women 28–45 who value quality over quantity" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">العميل المستهدف *</label>
+                <input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="مثلاً: نساء محترفات بين 28 و45 يقدّرن الجودة على الكمية" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Style direction *</label>
-                <textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="e.g. Minimal European luxury. Think The Row meets Reformation — clean lines, natural fabrics, timeless not trendy. Palette is warm neutrals, ivory, deep forest." rows={3} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">التوجّه التصميمي *</label>
+                <textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية. لوحة ألوان محايدة دافئة وعاجية وأخضر غابي." rows={3} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Brand story</label>
-                <textarea value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="Tell us the origin story, founding values, or what makes the brand different. AI will use this to write the 'Our story' section." rows={4} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">قصة العلامة</label>
+                <textarea value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="أخبرنا قصة البداية أو القيم التأسيسية أو ما يميّز العلامة. سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا»." rows={4} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
             </div>
           </motion.section>
 
           {/* ── Collection ─────────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">2. Collection</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">2. التشكيلة</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Collection name</label>
-                <input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="e.g. The Cortège Edit" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-sm font-bold text-foreground">اسم التشكيلة</label>
+                <input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="مثلاً: تشكيلة الوقار" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Season</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">الموسم</label>
                 <select value={form.collection_season} onChange={(e) => update('collection_season', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
-                  {['SS25', 'AW25', 'SS26', 'AW26', 'Pre-Fall 2025', 'Resort 2025', 'Holiday 2025'].map((s) => <option key={s} value={s}>{s}</option>)}
+                  {['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'ريزورت 2025', 'أعياد 2025'].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             </div>
@@ -307,15 +307,15 @@ export default function LookbookWizardPage() {
           {/* ── Products ───────────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">3. Products</h2>
+              <h2 className="text-xl font-black text-foreground">3. المنتجات</h2>
               <span className="text-sm text-muted">{form.products.filter((p) => p.name.trim()).length}/8</span>
             </div>
-            <p className="mb-5 text-sm text-muted">Even one product is enough — add up to 8. These will appear in the lookbook and bestsellers grid.</p>
+            <p className="mb-5 text-sm text-muted">حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.</p>
             <div className="space-y-3">
               {form.products.map((product, i) => (
                 <div key={product.id} className="grid gap-3 sm:grid-cols-[2fr_1fr_1.2fr_auto]">
-                  <input value={product.name} onChange={(e) => updateProduct(product.id, { name: e.target.value })} placeholder={`Product ${i + 1} name`} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                  <input value={product.price} onChange={(e) => updateProduct(product.id, { price: e.target.value })} placeholder="Price (e.g. $245)" className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                  <input value={product.name} onChange={(e) => updateProduct(product.id, { name: e.target.value })} placeholder={`اسم المنتج ${i + 1}`} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                  <input value={product.price} onChange={(e) => updateProduct(product.id, { price: e.target.value })} placeholder="السعر (مثلاً: 245$)" className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
                   <select value={product.category} onChange={(e) => updateProduct(product.id, { category: e.target.value })} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
                     {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -325,25 +325,25 @@ export default function LookbookWizardPage() {
             </div>
             {form.products.length < 8 && (
               <button type="button" onClick={addProduct} className="mt-4 text-sm font-semibold text-stone-600 hover:underline">
-                + Add another product
+                + أضف منتجًا آخر
               </button>
             )}
           </motion.section>
 
           {/* ── Visual assets ──────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. Visual assets</h2>
-            <p className="mb-5 text-sm text-muted">Upload your editorial and product shots — they'll appear in your lookbook and also land in your gallery for reuse later. Skip any slot and we'll fill it with a curated fallback.</p>
+            <h2 className="mb-2 text-xl font-black text-foreground">4. الأصول البصرية</h2>
+            <p className="mb-5 text-sm text-muted">ارفع صورك التحريرية وصور المنتجات — ستظهر في اللوك بوك وتُحفَظ أيضًا في معرضك لإعادة استخدامها لاحقًا. تخطَّ أي خانة وسنملؤها بصورة بديلة منتقاة.</p>
             <div className="grid gap-5">
               <ImageUploadField
-                label="Hero image"
+                label="الصورة الرئيسية"
                 value={form.hero_image_url}
                 onChange={(url) => update('hero_image_url', url)}
                 aspect="wide"
-                helper="The big image at the top of the page."
+                helper="الصورة الكبيرة أعلى الصفحة."
               />
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Lookbook gallery (up to 8)</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">معرض اللوك بوك (حتى 8)</label>
                 <div className="grid gap-3 sm:grid-cols-4">
                   {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                     <ImageUploadField
@@ -360,27 +360,27 @@ export default function LookbookWizardPage() {
 
           {/* ── Social proof & Press ───────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. Credibility</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">5. المصداقية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Review count</label>
-                <input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="e.g. 2,400+ reviews" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                <label className="mb-2 block text-sm font-bold text-foreground">عدد التقييمات</label>
+                <input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Average rating</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
                 <select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
                   {['5.0', '4.9', '4.8', '4.7'].map((r) => <option key={r} value={r}>{r} ★</option>)}
                 </select>
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Press features</label>
-                <input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="e.g. Vogue, Harper's Bazaar, The Cut, Refinery29" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                <p className="mt-1 text-xs text-muted">Comma-separated. Leave blank and AI will use fashion-relevant defaults.</p>
+                <label className="mb-2 block text-sm font-bold text-foreground">ظهور في الصحافة</label>
+                <input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي، الجميلة" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                <p className="mt-1 text-xs text-muted">مفصولة بفواصل. اتركها فارغة وسيستخدم الذكاء الاصطناعي قيمًا افتراضية ملائمة للأزياء.</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="flex cursor-pointer items-center gap-3">
                   <input type="checkbox" checked={form.sustainability_focus} onChange={(e) => update('sustainability_focus', e.target.checked)} className="h-4 w-4 rounded text-stone-600" />
-                  <span className="text-sm font-semibold text-foreground">Highlight sustainability / ethical production in brand story</span>
+                  <span className="text-sm font-semibold text-foreground">أبرِز الاستدامة / الإنتاج الأخلاقي في قصة العلامة</span>
                 </label>
               </div>
             </div>
@@ -388,7 +388,7 @@ export default function LookbookWizardPage() {
 
           {/* ── Style preset ───────────────────────────────────── */}
           <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">6. Visual style</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">6. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {LOOKBOOK_PRESETS.map((preset) => {
                 const selected = form.style_preset === preset.id
@@ -417,12 +417,12 @@ export default function LookbookWizardPage() {
               className="flex items-center gap-3 rounded-full bg-stone-900 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-900/20 transition hover:scale-105 hover:bg-stone-800 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> Generating your site...</>
+                <><span className="animate-spin">⏳</span> جارٍ توليد موقعك...</>
               ) : (
-                <>✦ Generate Lookbook site</>
+                <>✦ ولّد موقع اللوك بوك</>
               )}
             </button>
-            {loading && <p className="text-sm text-muted">AI is crafting your editorial copy and collection — about 15–20 seconds.</p>}
+            {loading && <p className="text-sm text-muted">يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية.</p>}
           </motion.div>
         </div>
       </main>

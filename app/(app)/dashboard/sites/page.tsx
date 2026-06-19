@@ -123,13 +123,13 @@ export default function SitesPage() {
         className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
       >
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-foreground">Your sites</h1>
+          <h1 className="text-[24px] font-bold tracking-tight text-foreground">مواقعك</h1>
           <p className="mt-1 text-[13px] text-muted">
             {loading
-              ? 'Loading…'
+              ? 'جارٍ التحميل…'
               : counts.all === 0
-                ? 'Generate your first site to see it here.'
-                : `${counts.all} site${counts.all === 1 ? '' : 's'} · ${counts.live} live · ${counts.drafts} draft${counts.drafts === 1 ? '' : 's'}${counts.shopify ? ` · ${counts.shopify} Shopify` : ''}`}
+                ? 'أنشئ موقعك الأول لتراه هنا.'
+                : `${counts.all} موقع · ${counts.live} مباشر · ${counts.drafts} مسودّة${counts.shopify ? ` · ${counts.shopify} شوبيفاي` : ''}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -137,14 +137,14 @@ export default function SitesPage() {
             href="/themes"
             className="hidden items-center gap-1.5 rounded-full border border-token bg-white px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
           >
-            Browse templates
+            تصفّح القوالب
           </Link>
           <Link
             href="/theme/new"
             className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-            New site
+            موقع جديد
           </Link>
         </div>
       </motion.header>
@@ -153,27 +153,27 @@ export default function SitesPage() {
       {counts.all > 0 && (
         <section className="mt-5 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[180px] max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search sites"
-              className="w-full rounded-full border border-token bg-white py-1.5 pl-9 pr-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+              placeholder="ابحث في المواقع"
+              className="w-full rounded-full border border-token bg-white py-1.5 ps-9 pe-3 text-[13px] text-foreground outline-none transition focus:border-primary"
             />
           </div>
 
           <div className="inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
-            <FilterPill v="all"     cur={filter} onClick={setFilter}>All <Pill n={counts.all} /></FilterPill>
-            <FilterPill v="live"    cur={filter} onClick={setFilter}>Live <Pill n={counts.live} /></FilterPill>
-            <FilterPill v="drafts"  cur={filter} onClick={setFilter}>Drafts <Pill n={counts.drafts} /></FilterPill>
+            <FilterPill v="all"     cur={filter} onClick={setFilter}>الكل <Pill n={counts.all} /></FilterPill>
+            <FilterPill v="live"    cur={filter} onClick={setFilter}>مباشر <Pill n={counts.live} /></FilterPill>
+            <FilterPill v="drafts"  cur={filter} onClick={setFilter}>مسودّات <Pill n={counts.drafts} /></FilterPill>
             {counts.shopify > 0 && (
-              <FilterPill v="shopify" cur={filter} onClick={setFilter}>Shopify <Pill n={counts.shopify} /></FilterPill>
+              <FilterPill v="shopify" cur={filter} onClick={setFilter}>شوبيفاي <Pill n={counts.shopify} /></FilterPill>
             )}
           </div>
 
-          <div className="ml-auto inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
-            <ViewBtn cur={view} v="grid" onClick={setView} title="Grid view"><LayoutGrid className="h-3.5 w-3.5" /></ViewBtn>
-            <ViewBtn cur={view} v="list" onClick={setView} title="List view"><List className="h-3.5 w-3.5" /></ViewBtn>
+          <div className="ms-auto inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
+            <ViewBtn cur={view} v="grid" onClick={setView} title="عرض شبكي"><LayoutGrid className="h-3.5 w-3.5" /></ViewBtn>
+            <ViewBtn cur={view} v="list" onClick={setView} title="عرض قائمة"><List className="h-3.5 w-3.5" /></ViewBtn>
           </div>
         </section>
       )}
@@ -235,7 +235,7 @@ export default function SitesPage() {
           onClose={() => setPublishingTheme(null)}
           onPublished={(slug, url) => {
             refreshTheme(publishingTheme.id, { slug, is_published: true })
-            setTimeout(() => alert(`Live: ${url}`), 50)
+            setTimeout(() => alert(`مباشر: ${url}`), 50)
           }}
         />
       )}
@@ -359,22 +359,22 @@ function EmptyState() {
         <Sparkles className="h-7 w-7 text-primary" strokeWidth={1.75} />
       </div>
       <h3 className="text-[20px] font-bold tracking-tight text-foreground">
-        Build your first site
+        أنشئ موقعك الأول
       </h3>
       <p className="mx-auto mt-2 max-w-md text-[13.5px] text-muted">
-        Pick a template, share a quick brief, and Zenya writes the copy and
-        designs the page. Live in under a minute.
+        اختر قالبًا، واكتب نبذة سريعة، وتكتب زينيا المحتوى وتصمّم الصفحة.
+        جاهز خلال أقل من دقيقة.
       </p>
       <Link
         href="/theme/new"
         className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />
-        Create new site
+        أنشئ موقعًا جديدًا
       </Link>
       <div className="mt-4">
         <Link href="/themes" className="text-[12.5px] text-muted hover:text-foreground">
-          or browse the 8 templates →
+          أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
     </motion.div>
@@ -385,21 +385,21 @@ function FilteredEmpty({
   filter, query, onReset,
 }: { filter: Filter; query: string; onReset: () => void }) {
   const labels: Record<Filter, string> = {
-    all: 'sites',
-    drafts: 'draft sites',
-    live: 'published sites',
-    shopify: 'Shopify sites',
+    all: 'مواقع',
+    drafts: 'مسودّات',
+    live: 'مواقع منشورة',
+    shopify: 'مواقع شوبيفاي',
   }
   return (
     <div className="rounded-2xl border border-dashed border-token p-10 text-center">
       <p className="text-[14px] text-muted">
-        No {labels[filter]} match{query ? ` “${query}”` : ' the current filter'}.
+        لا توجد {labels[filter]} تطابق{query ? ` «${query}»` : ' الفلتر الحالي'}.
       </p>
       <button
         onClick={onReset}
         className="mt-3 text-[13px] font-medium text-primary hover:underline"
       >
-        Clear filters
+        مسح الفلاتر
       </button>
     </div>
   )

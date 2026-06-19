@@ -11,9 +11,9 @@ export default function Features({
     <section className="bg-slate-50 py-24">
       <div className="container mx-auto px-6">
         <div className="mb-16 text-center max-w-3xl mx-auto">
-          <span className="text-sm font-bold uppercase tracking-wider text-slate-500">Why It Stands Out</span>
-          <h2 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">Engineered for Excellence</h2>
-          <p className="mt-4 text-lg text-slate-600">We focused on every detail so you do not have to. Experience the perfect blend of form and function.</p>
+          <span className="text-sm font-bold uppercase tracking-wider text-slate-500">لماذا يتميّز</span>
+          <h2 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">مصمَّم للتميّز</h2>
+          <p className="mt-4 text-lg text-slate-600">ركّزنا على كل تفصيلة كي لا تضطر أنت. اختبر المزيج المثالي بين الشكل والوظيفة.</p>
         </div>
         
         <div className="grid gap-8 md:grid-cols-3">

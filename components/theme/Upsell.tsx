@@ -5,7 +5,7 @@ export default function Upsell({
   primaryColor,
   mainProductImage,
   onAdd,
-  heading = 'Frequently Bought Together',
+  heading = 'يُشترى عادةً معًا',
   product,
 }: { 
   primaryColor: string
@@ -17,7 +17,7 @@ export default function Upsell({
   const [added, setAdded] = useState(false)
 
   const upsellProduct = product || {
-    name: "Premium Protection Case",
+    name: "حافظة حماية مميزة",
     price: 14.99,
     originalPrice: 29.99,
     image: "https://images.unsplash.com/photo-1541140532154-b024d705b909?q=80&w=400&auto=format&fit=crop"
@@ -75,12 +75,12 @@ export default function Upsell({
           className="shrink-0 rounded-lg px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90"
           style={{ backgroundColor: primaryColor }}
         >
-          Add +
+          أضف +
         </button>
       </div>
       
       <div className="mt-3 text-xs text-slate-500">
-        <span className="text-green-600 font-bold">✓ Free Shipping</span> applied to this bundle
+        <span className="text-green-600 font-bold">✓ شحن مجاني</span> مطبَّق على هذه الحزمة
       </div>
     </div>
   )

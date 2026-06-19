@@ -302,11 +302,11 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
 function NavBar({ content, isDark, view, setView }: { content: RestaurantContent; isDark: boolean; view: RestaurantView; setView: (v: RestaurantView) => void }) {
   const { reduce } = useMotionKit()
   const links: { label: string; view: RestaurantView }[] = [
-    { label: 'About', view: 'about' },
-    { label: 'Menu', view: 'menu' },
-    { label: 'Gallery', view: 'gallery' },
-    { label: 'Visit', view: 'visit' },
-    { label: 'Reviews', view: 'reviews' },
+    { label: 'من نحن', view: 'about' },
+    { label: 'القائمة', view: 'menu' },
+    { label: 'المعرض', view: 'gallery' },
+    { label: 'زورونا', view: 'visit' },
+    { label: 'الآراء', view: 'reviews' },
   ]
   return (
     <motion.div
@@ -352,7 +352,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.2, ease: EASE_OUT }}
         >
-          Reserve
+          احجز
         </motion.button>
       </Container>
     </motion.div>
@@ -511,7 +511,7 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
     <section data-section="signature_dishes" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
-          <Eyebrow className="mb-5">Signature</Eyebrow>
+          <Eyebrow className="mb-5">أطباق التوقيع</Eyebrow>
           <Heading size="lg" className="mb-5">
             Dishes the kitchen is known for.
           </Heading>
@@ -687,7 +687,7 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
     <section id="gallery" data-section="gallery" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <Eyebrow className="mb-5">Gallery</Eyebrow>
+          <Eyebrow className="mb-5">المعرض</Eyebrow>
           <Heading size="lg" className="mb-5">
             {content.gallery.heading}
           </Heading>
@@ -728,7 +728,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
       <Container>
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16">
           <Reveal className="lg:col-span-5">
-            <Eyebrow className="mb-5">Visit</Eyebrow>
+            <Eyebrow className="mb-5">زورونا</Eyebrow>
             <Heading size="lg" className="mb-7">
               {content.hours_location.heading}
             </Heading>
@@ -828,7 +828,7 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
       />
       <Container className="relative">
         <Reveal className="text-center max-w-2xl mx-auto">
-          <Eyebrow className="mb-5">Reservations</Eyebrow>
+          <Eyebrow className="mb-5">الحجوزات</Eyebrow>
           <Heading size="xl" className="mb-7">
             {r.heading}
           </Heading>
@@ -865,7 +865,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
     <section data-section="reviews" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
-          <Eyebrow className="mb-5">Reviews</Eyebrow>
+          <Eyebrow className="mb-5">الآراء</Eyebrow>
           <Heading size="lg" className="mb-7">
             {r.heading}
           </Heading>
@@ -935,7 +935,7 @@ function Press({ content, isDark }: { content: RestaurantContent; isDark: boolea
     <section data-section="press" className="py-20 md:py-28">
       <Container>
         <Reveal className="text-center mb-12">
-          <Eyebrow className="mb-3">As seen in</Eyebrow>
+          <Eyebrow className="mb-3">ظهرنا في</Eyebrow>
         </Reveal>
         <motion.div
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-y-10 gap-x-6 items-center"
@@ -969,7 +969,7 @@ function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: b
     <section data-section="newsletter" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(200,169,106,0.06)' : 'rgba(0,0,0,0.04)' }}>
       <Container>
         <Reveal className="max-w-2xl mx-auto text-center">
-          <Eyebrow className="mb-5">Newsletter</Eyebrow>
+          <Eyebrow className="mb-5">النشرة البريدية</Eyebrow>
           <Heading size="lg" className="mb-5">
             {content.newsletter.heading}
           </Heading>
@@ -1013,7 +1013,7 @@ function FAQ({ content, isDark }: { content: RestaurantContent; isDark: boolean 
       <Container>
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-16">
           <Reveal className="lg:col-span-4">
-            <Eyebrow className="mb-5">Before you come</Eyebrow>
+            <Eyebrow className="mb-5">قبل أن تأتي</Eyebrow>
             <Heading size="lg">{content.faq.heading}</Heading>
           </Reveal>
           <Reveal className="lg:col-span-8" delay={0.08}>

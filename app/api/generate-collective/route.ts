@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { collectiveInputSchema, type CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveContent } from '@/utils/collective/types'
 import { COLLECTIVE_MOCK_CONTENT } from '@/utils/collective/mock-content'
@@ -245,7 +247,9 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert luxury retail copywriter and brand strategist. Output only valid JSON.'
+            content:
+              'You are an expert luxury retail copywriter and brand strategist. Output only valid JSON.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           {
             role: 'user',
@@ -256,6 +260,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'openai_collective'
     )
+
+    await logAiUsage({ operation: 'generate-collective', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

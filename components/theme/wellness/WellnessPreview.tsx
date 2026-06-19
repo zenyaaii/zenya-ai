@@ -184,10 +184,10 @@ export default function WellnessPreview({
 // ─── NavBar ───────────────────────────────────────────────────────────────────
 function NavBar({ content, isDark, view, setView }: { content: WellnessContent; isDark: boolean; view: WellnessView; setView: (v: WellnessView) => void }) {
   const navLinks: { label: string; view: WellnessView }[] = [
-    { label: 'Treatments', view: 'treatments' },
-    { label: 'Our Space', view: 'space' },
-    { label: 'Team', view: 'team' },
-    { label: 'About', view: 'about' },
+    { label: 'الجلسات', view: 'treatments' },
+    { label: 'مساحتنا', view: 'space' },
+    { label: 'الفريق', view: 'team' },
+    { label: 'من نحن', view: 'about' },
   ]
   return (
     <nav

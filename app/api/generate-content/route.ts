@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { generateContentSchema } from '@/utils/validators'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -44,115 +46,115 @@ export async function POST(req: NextRequest) {
 
   const getMockContent = (productName: string) => ({
     hero: {
-      headline: `The Ultimate ${productName}`,
-      subheadline: "Experience perfection in every detail with the most advanced design on the market.",
-      cta: "Get 50% Off Today"
+      headline: `${productName} الأفضل على الإطلاق`,
+      subheadline: "اختبر الكمال في كل تفصيلة مع أحدث تصميم في السوق.",
+      cta: "احصل على خصم 50% اليوم"
     },
     slideshow: [
-      { heading: `Welcome to the Future of ${productName}`, subheading: "Discover the innovation that everyone is talking about.", cta: "Shop Collection" },
-      { heading: "Engineered for Excellence", subheading: "Quality that stands the test of time.", cta: "Learn More" }
+      { heading: `مرحبًا بك في مستقبل ${productName}`, subheading: "اكتشف الابتكار الذي يتحدث عنه الجميع.", cta: "تسوّق التشكيلة" },
+      { heading: "مصمَّم للتميّز", subheading: "جودة تصمد أمام اختبار الزمن.", cta: "اعرف المزيد" }
     ],
     video_hero: {
-      heading: "Cinematic Excellence",
-      subheading: "Immerse yourself in the story behind the brand.",
-      cta: "Watch Film"
+      heading: "تميّز سينمائي",
+      subheading: "انغمس في القصة وراء العلامة.",
+      cta: "شاهد الفيلم"
     },
     features: [
-      { title: "Eco-Friendly Materials", desc: "Crafted with 100% sustainable materials that are built to last a lifetime.", icon: "leaf" },
-      { title: "Ergonomic Design", desc: "Designed by experts to fit perfectly in your life, maximizing comfort and utility.", icon: "design" },
-      { title: "Instant Setup", desc: "Ready to use right out of the box. No complicated manuals or tools required.", icon: "bolt" }
+      { title: "خامات صديقة للبيئة", desc: "مصنوعة من مواد مستدامة 100% مصمَّمة لتدوم مدى الحياة.", icon: "leaf" },
+      { title: "تصميم مريح", desc: "صُمّم على يد خبراء ليناسب حياتك تمامًا، مع أقصى قدر من الراحة والفائدة.", icon: "design" },
+      { title: "إعداد فوري", desc: "جاهز للاستخدام فور إخراجه من العلبة. بلا أدلة معقّدة أو أدوات.", icon: "bolt" }
     ],
     problem: {
-      headline: "Tired of cheap alternatives that break?",
-      text: "Most products on the market are built with planned obsolescence in mind. They look good but fail when you need them most, leaving you frustrated and out of pocket."
+      headline: "سئمت من البدائل الرخيصة التي تتعطّل؟",
+      text: "معظم المنتجات في السوق مصمَّمة لتتقادم سريعًا. تبدو جيدة لكنها تخذلك حين تحتاجها أكثر، فتترك لك الإحباط وخسارة المال."
     },
     solution: {
-      headline: `Meet the ${productName}`,
-      text: "We engineered this from the ground up to solve every pain point. Durable, stylish, and incredibly effective—it is the last one you will ever need to buy."
+      headline: `تعرّف على ${productName}`,
+      text: "صمّمناه من الصفر لحلّ كل نقطة ألم. متين وأنيق وفعّال بشكل مذهل — إنه آخر ما ستحتاج لشرائه."
     },
     testimonials: [
-      { name: "Sarah J.", text: "This changed my daily routine completely. Highly recommended!", location: "New York, USA", rating: 5 },
-      { name: "Mike T.", text: "Best investment I've made this year. Quality is unmatched.", location: "London, UK", rating: 5 },
-      { name: "Jessica L.", text: "Fast shipping and great customer service. 10/10.", location: "Sydney, AU", rating: 5 }
+      { name: "سارة المطيري", text: "غيّر روتيني اليومي بالكامل. أنصح به بشدة!", location: "الرياض، السعودية", rating: 5 },
+      { name: "محمد العتيبي", text: "أفضل استثمار قمت به هذا العام. جودة لا تُضاهى.", location: "دبي، الإمارات", rating: 5 },
+      { name: "ليلى حسن", text: "شحن سريع وخدمة عملاء رائعة. 10/10.", location: "القاهرة، مصر", rating: 5 }
     ],
     faq: [
-      { q: "Is this suitable for beginners?", a: "Absolutely! It is designed for all skill levels." },
-      { q: "How do I clean it?", a: "Just wipe it down with a damp cloth after use." },
-      { q: "What is the warranty?", a: "We offer a full 5-year comprehensive warranty." },
-      { q: "Do you ship internationally?", a: "Yes, we ship to over 50 countries worldwide." }
+      { q: "هل هو مناسب للمبتدئين؟", a: "بالتأكيد! مصمَّم لجميع المستويات." },
+      { q: "كيف أنظّفه؟", a: "امسحه بقطعة قماش مبلّلة بعد الاستخدام." },
+      { q: "ما مدة الضمان؟", a: "نقدّم ضمانًا شاملًا لمدة 5 سنوات." },
+      { q: "هل تشحنون دوليًا؟", a: "نعم، نشحن إلى أكثر من 50 دولة حول العالم." }
     ],
     guarantee: {
-      title: "Ironclad 30-Day Guarantee",
-      text: "Try it risk-free. If you aren't completely blown away, simply return it for a full refund. No questions asked.",
+      title: "ضمان 30 يومًا بلا قلق",
+      text: "جرّبه دون مخاطرة. إن لم تكن مبهورًا تمامًا، فأعِده واسترد كامل المبلغ. دون أي أسئلة.",
       days: 30
     },
     rich_text: {
-      title: "Our Mission",
-      text: "We believe in creating products that actually solve problems, not just add clutter to your life."
+      title: "رسالتنا",
+      text: "نؤمن بصناعة منتجات تحلّ المشكلات فعلًا، لا مجرد إضافة فوضى إلى حياتك."
     },
     image_text: {
-      title: "Designed for Real Life",
-      text: "We spent 2 years prototyping to ensure every curve and edge serves a purpose.",
-      cta: "Read Our Story"
+      title: "مصمَّم للحياة الواقعية",
+      text: "أمضينا عامين في التجارب لنضمن أن كل منحنى وحافة يخدم غرضًا.",
+      cta: "اقرأ قصتنا"
     },
     newsletter: {
-      title: "Join the Inner Circle",
-      text: "Get exclusive access to new drops and secret sales."
+      title: "انضمّ إلى الدائرة المقرّبة",
+      text: "احصل على وصول حصري للإصدارات الجديدة والعروض السرية."
     },
     timeline: [
-      { year: "2020", title: "The Idea", text: "It started with a sketch on a napkin." },
-      { year: "2021", title: "Prototyping", text: "We tested 50+ iterations to get it right." },
-      { year: "2023", title: "Launch", text: "We shared our creation with the world." }
+      { year: "2020", title: "الفكرة", text: "بدأت برسم بسيط على ورقة." },
+      { year: "2021", title: "النماذج الأولية", text: "اختبرنا أكثر من 50 نسخة حتى أتقنّاه." },
+      { year: "2023", title: "الإطلاق", text: "شاركنا إبداعنا مع العالم." }
     ],
     scrolling_text: [
-      "Free Worldwide Shipping", "30-Day Money Back Guarantee", "Over 10,000 Happy Customers", "Rated 5 Stars"
+      "شحن مجاني حول العالم", "ضمان استرداد المال خلال 30 يومًا", "أكثر من 10,000 عميل سعيد", "تقييم 5 نجوم"
     ],
     comparison: [
-      { feature: "Premium Materials", us: true, them: false },
-      { feature: "24/7 Support", us: true, them: false },
-      { feature: "Lifetime Warranty", us: true, them: false },
-      { feature: "Eco-Friendly", us: true, them: false }
+      { feature: "خامات فاخرة", us: true, them: false },
+      { feature: "دعم على مدار الساعة", us: true, them: false },
+      { feature: "ضمان مدى الحياة", us: true, them: false },
+      { feature: "صديق للبيئة", us: true, them: false }
     ],
     multicolumn: [
-      { title: "Fast Shipping", text: "We ship within 24 hours of your order." },
-      { title: "Secure Payment", text: "Your data is protected by 256-bit encryption." },
-      { title: "Expert Support", text: "Our team is here to help you 24/7." }
+      { title: "شحن سريع", text: "نشحن خلال 24 ساعة من طلبك." },
+      { title: "دفع آمن", text: "بياناتك محمية بتشفير 256-بت." },
+      { title: "دعم خبير", text: "فريقنا هنا لمساعدتك على مدار الساعة." }
     ],
     contact: {
-      heading: "Get in Touch",
-      subheading: "We'd love to hear from you. Our team is always here to help."
+      heading: "تواصل معنا",
+      subheading: "يسعدنا سماع رأيك. فريقنا دائمًا هنا للمساعدة."
     },
-    upsell: { heading: "Frequently Bought Together" },
-    volume_bundles: { 
-      heading: "Stock Up & Save",
-      label_buy_1: "Buy 1 (Standard)",
-      label_buy_2: "Buy 2 (Save 15%)",
-      label_buy_3: "Buy 3 (Save 25%)"
+    upsell: { heading: "يُشترى عادةً معًا" },
+    volume_bundles: {
+      heading: "اشترِ أكثر ووفّر",
+      label_buy_1: "اشترِ 1 (عادي)",
+      label_buy_2: "اشترِ 2 (وفّر 15%)",
+      label_buy_3: "اشترِ 3 (وفّر 25%)"
     },
-    countdown: { heading: "Limited Time Offer", timer_text: "Offer ends in:" },
-    logo_list: { heading: "As Seen In" },
-    before_after: { heading: "Real Results", label_before: "Before", label_after: "After" },
+    countdown: { heading: "عرض لوقت محدود", timer_text: "ينتهي العرض خلال:" },
+    logo_list: { heading: "ظهرنا في" },
+    before_after: { heading: "نتائج حقيقية", label_before: "قبل", label_after: "بعد" },
     stats: [
-      { value: "10,000+", label: "Happy Customers" },
-      { value: "4.9/5", label: "Average Rating" },
-      { value: "24/7", label: "Support" }
+      { value: "10,000+", label: "عميل سعيد" },
+      { value: "4.9/5", label: "متوسط التقييم" },
+      { value: "24/7", label: "الدعم" }
     ],
-    visual_showcase: { heading: "Experience the Difference", subheading: "See every detail up close." },
+    visual_showcase: { heading: "اختبر الفرق", subheading: "شاهد كل تفصيلة عن قرب." },
     how_it_works: [
-      { title: "Order Online", text: "Choose your favorite options and place your order securely." },
-      { title: "We Ship Fast", text: "Your package leaves our warehouse within 24 hours." },
-      { title: "Enjoy!", text: "Experience the quality and difference yourself." }
+      { title: "اطلب عبر الإنترنت", text: "اختر خياراتك المفضّلة وأكمل طلبك بأمان." },
+      { title: "نشحن بسرعة", text: "تغادر شحنتك مستودعنا خلال 24 ساعة." },
+      { title: "استمتع!", text: "اختبر الجودة والفرق بنفسك." }
     ],
-    trust_badges: { heading: "Shop with Confidence" },
+    trust_badges: { heading: "تسوّق بثقة" },
     accordion: [
-      { title: "Specifications", content: "High-quality materials designed to last." },
-      { title: "Shipping Info", content: "Free worldwide shipping on all orders." },
-      { title: "Care Instructions", content: "Wipe clean with a damp cloth." }
+      { title: "المواصفات", content: "خامات عالية الجودة مصمَّمة لتدوم." },
+      { title: "معلومات الشحن", content: "شحن مجاني حول العالم لجميع الطلبات." },
+      { title: "تعليمات العناية", content: "نظّفه بمسحة قماش مبلّلة." }
     ],
     tabs: [
-      { title: "Description", content: "The ultimate solution for your needs." },
-      { title: "Shipping", content: "We ship worldwide with tracking." },
-      { title: "Returns", content: "30-day money back guarantee." }
+      { title: "الوصف", content: "الحل الأمثل لاحتياجاتك." },
+      { title: "الشحن", content: "نشحن حول العالم مع خدمة التتبّع." },
+      { title: "الإرجاع", content: "ضمان استرداد المال خلال 30 يومًا." }
     ]
   })
 
@@ -374,7 +376,7 @@ export async function POST(req: NextRequest) {
     merged.announcement_bar = merged.announcement_bar && typeof merged.announcement_bar === 'object' ? merged.announcement_bar : {}
     merged.announcement_bar.text = asString(
       merged.announcement_bar.text,
-      asString(merged.countdown.heading, 'Free Shipping Worldwide')
+      asString(merged.countdown.heading, 'شحن مجاني حول العالم')
     )
 
     merged.logo_list = merged.logo_list && typeof merged.logo_list === 'object' ? merged.logo_list : {}
@@ -422,20 +424,20 @@ export async function POST(req: NextRequest) {
       merged.trust_badges.badges,
       4,
       [
-        { title: 'Free Shipping', desc: 'On all orders' },
-        { title: '30-Day Returns', desc: 'Hassle-free returns' },
-        { title: 'Secure Checkout', desc: 'Encrypted payments' },
-        { title: 'Support', desc: 'Help when you need it' },
+        { title: 'شحن مجاني', desc: 'على جميع الطلبات' },
+        { title: 'إرجاع خلال 30 يومًا', desc: 'إرجاع بلا متاعب' },
+        { title: 'دفع آمن', desc: 'مدفوعات مشفّرة' },
+        { title: 'دعم', desc: 'مساعدة وقت الحاجة' },
       ],
       (v: any, i: number) => ({
-        title: asString(v?.title, ['Free Shipping', '30-Day Returns', 'Secure Checkout', 'Support'][i] || ''),
-        desc: asString(v?.desc, ['On all orders', 'Hassle-free returns', 'Encrypted payments', 'Help when you need it'][i] || ''),
+        title: asString(v?.title, ['شحن مجاني', 'إرجاع خلال 30 يومًا', 'دفع آمن', 'دعم'][i] || ''),
+        desc: asString(v?.desc, ['على جميع الطلبات', 'إرجاع بلا متاعب', 'مدفوعات مشفّرة', 'مساعدة وقت الحاجة'][i] || ''),
       })
     )
 
     merged.how_it_works_section = merged.how_it_works_section && typeof merged.how_it_works_section === 'object' ? merged.how_it_works_section : {}
-    merged.how_it_works_section.heading = asString(merged.how_it_works_section.heading, 'How It Works')
-    merged.how_it_works_section.subheading = asString(merged.how_it_works_section.subheading, 'Simple steps. Fast results.')
+    merged.how_it_works_section.heading = asString(merged.how_it_works_section.heading, 'كيف يعمل')
+    merged.how_it_works_section.subheading = asString(merged.how_it_works_section.subheading, 'خطوات بسيطة. نتائج سريعة.')
     merged.how_it_works_section.steps = normalizeCards(
       merged.how_it_works_section.steps,
       3,
@@ -467,88 +469,88 @@ export async function POST(req: NextRequest) {
     )
 
     merged.collection_page = merged.collection_page && typeof merged.collection_page === 'object' ? merged.collection_page : {}
-    merged.collection_page.headline = asString(merged.collection_page.headline, 'Shop Our Collection')
-    merged.collection_page.subheadline = asString(merged.collection_page.subheadline, 'Browse our best picks for your everyday.')
-    merged.collection_page.filter_help = asString(merged.collection_page.filter_help, 'Tip: choose based on your needs and daily use.')
-    merged.collection_page.why_buy_heading = asString(merged.collection_page.why_buy_heading, 'Why buy from us')
+    merged.collection_page.headline = asString(merged.collection_page.headline, 'تسوّق تشكيلتنا')
+    merged.collection_page.subheadline = asString(merged.collection_page.subheadline, 'تصفّح أفضل اختياراتنا ليومك.')
+    merged.collection_page.filter_help = asString(merged.collection_page.filter_help, 'نصيحة: اختر بناءً على احتياجك واستخدامك اليومي.')
+    merged.collection_page.why_buy_heading = asString(merged.collection_page.why_buy_heading, 'لماذا الشراء منّا')
     merged.collection_page.why_buy_points = normalizeCards(
       merged.collection_page.why_buy_points,
       3,
-      ['Fast support', 'Quality checked', 'Easy returns'],
-      (v: any, i: number) => asString(v, ['Fast support', 'Quality checked', 'Easy returns'][i] || '')
+      ['دعم سريع', 'جودة مفحوصة', 'إرجاع سهل'],
+      (v: any, i: number) => asString(v, ['دعم سريع', 'جودة مفحوصة', 'إرجاع سهل'][i] || '')
     )
 
     merged.cart_drawer = merged.cart_drawer && typeof merged.cart_drawer === 'object' ? merged.cart_drawer : {}
-    merged.cart_drawer.headline = asString(merged.cart_drawer.headline, 'Your Cart')
-    merged.cart_drawer.free_shipping_before = asString(merged.cart_drawer.free_shipping_before, 'You are {amount} away from Free Shipping!')
-    merged.cart_drawer.free_shipping_after = asString(merged.cart_drawer.free_shipping_after, "You’ve unlocked Free Shipping!")
-    merged.cart_drawer.secure_line = asString(merged.cart_drawer.secure_line, 'Secure checkout — SSL encrypted')
+    merged.cart_drawer.headline = asString(merged.cart_drawer.headline, 'سلّتك')
+    merged.cart_drawer.free_shipping_before = asString(merged.cart_drawer.free_shipping_before, 'يفصلك {amount} عن الشحن المجاني!')
+    merged.cart_drawer.free_shipping_after = asString(merged.cart_drawer.free_shipping_after, 'لقد حصلت على الشحن المجاني!')
+    merged.cart_drawer.secure_line = asString(merged.cart_drawer.secure_line, 'دفع آمن — مشفّر بشهادة SSL')
     merged.cart_drawer.reassurance_lines = normalizeCards(
       merged.cart_drawer.reassurance_lines,
       3,
-      ['30-day returns', 'Fast support', 'Tracked delivery'],
-      (v: any, i: number) => asString(v, ['30-day returns', 'Fast support', 'Tracked delivery'][i] || '')
+      ['إرجاع خلال 30 يومًا', 'دعم سريع', 'توصيل مع تتبّع'],
+      (v: any, i: number) => asString(v, ['إرجاع خلال 30 يومًا', 'دعم سريع', 'توصيل مع تتبّع'][i] || '')
     )
-    merged.cart_drawer.checkout_cta = asString(merged.cart_drawer.checkout_cta, 'Checkout Now')
+    merged.cart_drawer.checkout_cta = asString(merged.cart_drawer.checkout_cta, 'إتمام الشراء الآن')
 
     merged.cart_page = merged.cart_page && typeof merged.cart_page === 'object' ? merged.cart_page : {}
-    merged.cart_page.headline = asString(merged.cart_page.headline, 'Your Cart')
-    merged.cart_page.subheadline = asString(merged.cart_page.subheadline, 'Review your items and check out securely.')
-    merged.cart_page.order_summary_heading = asString(merged.cart_page.order_summary_heading, 'Order Summary')
+    merged.cart_page.headline = asString(merged.cart_page.headline, 'سلّتك')
+    merged.cart_page.subheadline = asString(merged.cart_page.subheadline, 'راجع منتجاتك وأكمل الشراء بأمان.')
+    merged.cart_page.order_summary_heading = asString(merged.cart_page.order_summary_heading, 'ملخّص الطلب')
     merged.cart_page.checkout_cta = asString(merged.cart_page.checkout_cta, merged.cart_drawer.checkout_cta)
-    merged.cart_page.empty_headline = asString(merged.cart_page.empty_headline, 'Your cart is empty')
-    merged.cart_page.empty_subheadline = asString(merged.cart_page.empty_subheadline, "Looks like you haven't added anything yet.")
+    merged.cart_page.empty_headline = asString(merged.cart_page.empty_headline, 'سلّتك فارغة')
+    merged.cart_page.empty_subheadline = asString(merged.cart_page.empty_subheadline, 'يبدو أنك لم تُضِف أي شيء بعد.')
 
     merged.pages = merged.pages && typeof merged.pages === 'object' ? merged.pages : {}
     merged.pages.about = merged.pages.about && typeof merged.pages.about === 'object' ? merged.pages.about : {}
-    merged.pages.about.hero_heading = asString(merged.pages.about.hero_heading, 'Our Story')
-    merged.pages.about.hero_subheading = asString(merged.pages.about.hero_subheading, 'Built around quality and real results.')
-    merged.pages.about.mission_title = asString(merged.pages.about.mission_title, 'Mission')
-    merged.pages.about.mission_text = asString(merged.pages.about.mission_text, 'We exist to make products that feel better to use every day.')
-    merged.pages.about.craftsmanship_heading = asString(merged.pages.about.craftsmanship_heading, 'Craftsmanship')
-    merged.pages.about.craftsmanship_text = asString(merged.pages.about.craftsmanship_text, 'We focus on the details that matter: comfort, durability, and finish.')
-    merged.pages.about.process_heading = asString(merged.pages.about.process_heading, 'Our Process')
-    merged.pages.about.process_subheading = asString(merged.pages.about.process_subheading, 'Thoughtful design. Quality checks. Fast dispatch.')
+    merged.pages.about.hero_heading = asString(merged.pages.about.hero_heading, 'قصتنا')
+    merged.pages.about.hero_subheading = asString(merged.pages.about.hero_subheading, 'مبنية على الجودة والنتائج الحقيقية.')
+    merged.pages.about.mission_title = asString(merged.pages.about.mission_title, 'رسالتنا')
+    merged.pages.about.mission_text = asString(merged.pages.about.mission_text, 'نوجد لنصنع منتجات أفضل في الاستخدام كل يوم.')
+    merged.pages.about.craftsmanship_heading = asString(merged.pages.about.craftsmanship_heading, 'الحِرفية')
+    merged.pages.about.craftsmanship_text = asString(merged.pages.about.craftsmanship_text, 'نركّز على التفاصيل المهمة: الراحة والمتانة والإتقان.')
+    merged.pages.about.process_heading = asString(merged.pages.about.process_heading, 'منهجيتنا')
+    merged.pages.about.process_subheading = asString(merged.pages.about.process_subheading, 'تصميم مدروس. فحص للجودة. شحن سريع.')
 
     merged.pages.contact = merged.pages.contact && typeof merged.pages.contact === 'object' ? merged.pages.contact : {}
-    merged.pages.contact.faq_heading = asString(merged.pages.contact.faq_heading, 'Common Questions')
+    merged.pages.contact.faq_heading = asString(merged.pages.contact.faq_heading, 'أسئلة شائعة')
     merged.pages.contact.faq_items = normalizeCards(
       merged.pages.contact.faq_items,
       2,
       [
-        { q: 'Shipping time?', a: 'Most orders ship fast with tracking. Exact time depends on location.' },
-        { q: 'Returns?', a: '30-day returns. If it’s not right for you, we’ll make it right.' },
+        { q: 'مدة الشحن؟', a: 'تُشحن معظم الطلبات بسرعة مع تتبّع. تعتمد المدة الدقيقة على موقعك.' },
+        { q: 'الإرجاع؟', a: 'إرجاع خلال 30 يومًا. إن لم يناسبك، فسنُصلح الأمر.' },
       ],
       (v: any, i: number) => ({
-        q: asString(v?.q, i === 0 ? 'Shipping time?' : 'Returns?'),
+        q: asString(v?.q, i === 0 ? 'مدة الشحن؟' : 'الإرجاع؟'),
         a: asString(
           v?.a,
           i === 0
-            ? 'Most orders ship fast with tracking. Exact time depends on location.'
-            : '30-day returns. If it’s not right for you, we’ll make it right.'
+            ? 'تُشحن معظم الطلبات بسرعة مع تتبّع. تعتمد المدة الدقيقة على موقعك.'
+            : 'إرجاع خلال 30 يومًا. إن لم يناسبك، فسنُصلح الأمر.'
         ),
       })
     )
 
     merged.pages.faq = merged.pages.faq && typeof merged.pages.faq === 'object' ? merged.pages.faq : {}
-    merged.pages.faq.title = asString(merged.pages.faq.title, 'Help Center')
-    merged.pages.faq.intro = asString(merged.pages.faq.intro, 'Find the answers you need below.')
+    merged.pages.faq.title = asString(merged.pages.faq.title, 'مركز المساعدة')
+    merged.pages.faq.intro = asString(merged.pages.faq.intro, 'تجد الإجابات التي تحتاجها أدناه.')
     merged.pages.faq.items = normalizeCards(
       merged.pages.faq.items,
       3,
       [
-        { q: 'How do I track my order?', a: 'You’ll get a tracking link by email once your order ships.' },
-        { q: 'Can I change my order?', a: 'If your order hasn’t shipped yet, contact support and we’ll do our best.' },
-        { q: 'Do you ship internationally?', a: 'Yes. Delivery times vary by location.' },
+        { q: 'كيف أتتبّع طلبي؟', a: 'ستصلك رسالة بريد فيها رابط التتبّع فور شحن طلبك.' },
+        { q: 'هل يمكنني تعديل طلبي؟', a: 'إن لم يُشحن طلبك بعد، تواصل مع الدعم وسنبذل قصارى جهدنا.' },
+        { q: 'هل تشحنون دوليًا؟', a: 'نعم. تختلف مدة التوصيل حسب الموقع.' },
       ],
       (v: any, i: number) => ({
-        q: asString(v?.q, ['How do I track my order?', 'Can I change my order?', 'Do you ship internationally?'][i] || ''),
+        q: asString(v?.q, ['كيف أتتبّع طلبي؟', 'هل يمكنني تعديل طلبي؟', 'هل تشحنون دوليًا؟'][i] || ''),
         a: asString(
           v?.a,
           [
-            'You’ll get a tracking link by email once your order ships.',
-            'If your order hasn’t shipped yet, contact support and we’ll do our best.',
-            'Yes. Delivery times vary by location.',
+            'ستصلك رسالة بريد فيها رابط التتبّع فور شحن طلبك.',
+            'إن لم يُشحن طلبك بعد، تواصل مع الدعم وسنبذل قصارى جهدنا.',
+            'نعم. تختلف مدة التوصيل حسب الموقع.',
           ][i] || ''
         ),
       })
@@ -556,20 +558,20 @@ export async function POST(req: NextRequest) {
 
     merged.policies = merged.policies && typeof merged.policies === 'object' ? merged.policies : {}
     merged.policies.shipping = merged.policies.shipping && typeof merged.policies.shipping === 'object' ? merged.policies.shipping : {}
-    merged.policies.shipping.title = asString(merged.policies.shipping.title, 'Shipping Policy')
+    merged.policies.shipping.title = asString(merged.policies.shipping.title, 'سياسة الشحن')
     merged.policies.shipping.bullets = normalizeCards(
       merged.policies.shipping.bullets,
       3,
-      ['Fast processing', 'Tracked delivery', 'Support if anything goes wrong'],
-      (v: any, i: number) => asString(v, ['Fast processing', 'Tracked delivery', 'Support if anything goes wrong'][i] || '')
+      ['معالجة سريعة', 'توصيل مع تتبّع', 'دعم إن حدث أي خطأ'],
+      (v: any, i: number) => asString(v, ['معالجة سريعة', 'توصيل مع تتبّع', 'دعم إن حدث أي خطأ'][i] || '')
     )
     merged.policies.returns = merged.policies.returns && typeof merged.policies.returns === 'object' ? merged.policies.returns : {}
-    merged.policies.returns.title = asString(merged.policies.returns.title, 'Returns & Refunds')
+    merged.policies.returns.title = asString(merged.policies.returns.title, 'الإرجاع والاسترداد')
     merged.policies.returns.bullets = normalizeCards(
       merged.policies.returns.bullets,
       3,
-      ['30-day returns', 'Simple process', 'Fast help from support'],
-      (v: any, i: number) => asString(v, ['30-day returns', 'Simple process', 'Fast help from support'][i] || '')
+      ['إرجاع خلال 30 يومًا', 'إجراء بسيط', 'مساعدة سريعة من الدعم'],
+      (v: any, i: number) => asString(v, ['إرجاع خلال 30 يومًا', 'إجراء بسيط', 'مساعدة سريعة من الدعم'][i] || '')
     )
 
     merged.seo = merged.seo && typeof merged.seo === 'object' ? merged.seo : {}
@@ -577,10 +579,10 @@ export async function POST(req: NextRequest) {
       title: asString(obj?.title, fallbackTitle),
       description: asString(obj?.description, fallbackDesc),
     })
-    merged.seo.homepage = normalizeSeo(merged.seo.homepage, `${productName} | Official Store`, 'Premium quality. Fast shipping. Secure checkout.')
-    merged.seo.product = normalizeSeo(merged.seo.product, `${productName} | Limited Offer`, 'Shop the details, reviews, and guarantee. Order today.')
-    merged.seo.collection = normalizeSeo(merged.seo.collection, `Shop ${productName} Collection`, 'Browse our best sellers and newest arrivals.')
-    merged.seo.og = normalizeSeo(merged.seo.og, `${productName}`, 'A premium product built for daily life.')
+    merged.seo.homepage = normalizeSeo(merged.seo.homepage, `${productName} | المتجر الرسمي`, 'جودة فاخرة. شحن سريع. دفع آمن.')
+    merged.seo.product = normalizeSeo(merged.seo.product, `${productName} | عرض محدود`, 'تصفّح التفاصيل والتقييمات والضمان. اطلب اليوم.')
+    merged.seo.collection = normalizeSeo(merged.seo.collection, `تسوّق تشكيلة ${productName}`, 'تصفّح أكثر منتجاتنا مبيعًا وأحدث الوافدين.')
+    merged.seo.og = normalizeSeo(merged.seo.og, `${productName}`, 'منتج فاخر مصمَّم للحياة اليومية.')
 
     return merged
   }
@@ -623,68 +625,68 @@ export async function POST(req: NextRequest) {
     const originalText = formatPrice(originalPrice)
 
     const promisesByCategory: Record<string, string[]> = {
-      fitness: ['Stronger. Faster. More consistent.', 'A routine you actually keep.', 'Less friction. More progress.'],
-      electronics: ['Sharper performance, less hassle.', 'Smart features. Simple use.', 'Built to work. Not to glitch.'],
-      'home lighting': ['Instant vibe, zero effort.', 'Make the room feel premium.', 'Light that changes the mood.'],
-      beauty: ['Visible results, simpler routine.', 'Comfort first. Confidence next.', 'Gentle. Effective. Daily.'],
-      pet: ['Happier pets. Calmer days.', 'Less mess, more moments.', 'Made for real pet life.'],
-      baby: ['Safer days, easier nights.', 'Designed for busy parents.', 'Comfort that travels.'],
-      kitchen: ['Cook quicker. Clean easier.', 'Make every meal smoother.', 'Small upgrade. Big payoff.'],
-      everyday: ['Make the day easier.', 'A better version of the basic.', 'Simple upgrade, real impact.'],
+      fitness: ['أقوى. أسرع. أكثر انتظامًا.', 'روتين تستمر عليه فعلًا.', 'مقاومة أقل. تقدّم أكبر.'],
+      electronics: ['أداء أدق ومتاعب أقل.', 'مزايا ذكية. استخدام بسيط.', 'مصنوع ليعمل، لا ليتعطّل.'],
+      'home lighting': ['أجواء فورية بلا أي جهد.', 'اجعل الغرفة تبدو فاخرة.', 'إضاءة تغيّر المزاج.'],
+      beauty: ['نتائج ظاهرة وروتين أبسط.', 'الراحة أولًا. ثم الثقة.', 'لطيف. فعّال. يومي.'],
+      pet: ['حيوانات أسعد وأيام أهدأ.', 'فوضى أقل ولحظات أكثر.', 'مصنوع لحياة الحيوانات الحقيقية.'],
+      baby: ['أيام أأمن وليالٍ أسهل.', 'مصمَّم للوالدين المشغولين.', 'راحة تسافر معك.'],
+      kitchen: ['اطبخ أسرع ونظّف أسهل.', 'اجعل كل وجبة أكثر سلاسة.', 'تحديث صغير بمردود كبير.'],
+      everyday: ['اجعل يومك أسهل.', 'نسخة أفضل من الأساسي.', 'تحديث بسيط بأثر حقيقي.'],
     }
 
     const promise = pick(promisesByCategory[category] || promisesByCategory.everyday, seed, 1)
     const mechanism = pick(
       [
-        'Precision-fit design that removes the usual friction.',
-        'A smarter build that holds up under daily use.',
-        'Details-first engineering where it actually matters.',
-        'A simple system: set it up once, enjoy it every day.',
+        'تصميم دقيق المقاس يزيل الاحتكاك المعتاد.',
+        'بنية أذكى تصمد أمام الاستخدام اليومي.',
+        'هندسة تضع التفاصيل أولًا حيث يهمّ ذلك فعلًا.',
+        'نظام بسيط: جهّزه مرة، واستمتع به كل يوم.',
       ],
       seed,
       3
     )
 
     base._strategy = {
-      target_avatar: `${audience}. People shopping for ${category} upgrades that feel premium.`,
-      core_pain_point: `They keep buying products that look good online but feel disappointing in real life.`,
+      target_avatar: `${audience}. أشخاص يبحثون عن تحديثات فاخرة في فئة ${category}.`,
+      core_pain_point: `يشترون باستمرار منتجات تبدو جيدة على الإنترنت لكنها مخيّبة في الواقع.`,
       unique_mechanism: mechanism,
-      competitor_weakness: `Cheap builds, generic claims, and inconsistent quality control.`,
+      competitor_weakness: `تصنيع رخيص، ووعود عامة، وجودة غير ثابتة.`,
     }
 
-    base.hero.headline = pick([promise, `A better ${productName}.`, `Meet your new favorite ${productName}.`], seed, 4)
-    base.hero.subheadline = `Designed for ${audience}. ${mechanism} Built to feel premium from day one.`
-    base.hero.cta = priceText ? `Get it for ${priceText}` : pick(['Shop the Drop', 'Claim Today’s Deal', 'Get Yours Now'], seed, 5)
+    base.hero.headline = pick([promise, `${productName} أفضل.`, `تعرّف على ${productName} المفضّل الجديد لديك.`], seed, 4)
+    base.hero.subheadline = `مصمَّم لـ${audience}. ${mechanism} مصنوع ليمنحك إحساسًا فاخرًا من اليوم الأول.`
+    base.hero.cta = priceText ? `احصل عليه بـ${priceText}` : pick(['تسوّق الإصدار', 'احجز عرض اليوم', 'اطلبه الآن'], seed, 5)
 
     base.problem.headline = pick(
-      [`Most ${category} products disappoint.`, 'Cheap alternatives look good—until they don’t.', 'Tired of buying the same thing twice?', 'When “good enough” isn’t good enough.'],
+      [`معظم منتجات ${category} مخيّبة.`, 'البدائل الرخيصة تبدو جيدة — حتى تتعطّل.', 'سئمت من شراء الشيء نفسه مرتين؟', 'حين لا يكون "الجيد كفاية" كافيًا.'],
       seed,
       6
     )
     base.problem.text = pick(
       [
-        `You order it. You’re excited. Then it arrives and feels flimsy, awkward, or just not like the photos. That’s the real cost: wasted time, wasted money, and the frustration of starting over.`,
-        `The market is full of shortcuts—thin materials, weak joints, poor finishing. It works for a week, then it starts to annoy you. And you stop using it.`,
-        `Most brands optimize for clicks, not outcomes. They rely on generic claims instead of making the experience actually better.`,
+        `تطلبه وأنت متحمّس. ثم يصل فيبدو هشًّا أو غير مريح أو مختلفًا عن الصور. تلك هي الكلفة الحقيقية: وقت ومال ضائعان، وإحباط البدء من جديد.`,
+        `السوق مليء بالاختصارات — مواد رقيقة ووصلات ضعيفة وتشطيب رديء. يعمل أسبوعًا ثم يبدأ بإزعاجك، فتتوقف عن استخدامه.`,
+        `معظم العلامات تُحسّن للنقرات لا للنتائج. تعتمد على وعود عامة بدلًا من تحسين التجربة فعلًا.`,
       ],
       seed,
       7
     )
 
-    base.solution.headline = `Why ${productName} works better`
-    base.solution.text = `${productName} is built around one idea: make the experience feel effortless. ${mechanism} ${
-      priceText && originalText ? `And right now, it’s ${priceText} (was ${originalText}).` : ''
+    base.solution.headline = `لماذا ${productName} أفضل`
+    base.solution.text = `صُمّم ${productName} حول فكرة واحدة: أن تكون التجربة سلسة بلا عناء. ${mechanism} ${
+      priceText && originalText ? `والآن، سعره ${priceText} (كان ${originalText}).` : ''
     }`
 
     base.features = (base.features || []).map((f: any, i: number) => ({
       ...f,
-      title: pick(['Feels better to use', 'Built for daily life', 'Fast setup, zero fuss', 'Looks premium on day one'], seed, 10 + i),
+      title: pick(['أفضل في الاستخدام', 'مصنوع للحياة اليومية', 'إعداد سريع بلا عناء', 'مظهر فاخر من اليوم الأول'], seed, 10 + i),
       desc: pick(
         [
-          `Designed around how you actually use ${productName}. Less awkwardness. More flow.`,
-          `The parts that usually fail are reinforced. The finish stays clean and premium.`,
-          `From box to first use in minutes. No complicated steps.`,
-          `Clean lines, modern feel, and details that make it look expensive.`,
+          `مصمَّم حول طريقة استخدامك الفعلية لـ${productName}. إحراج أقل وانسيابية أكثر.`,
+          `الأجزاء التي تتعطّل عادةً مُعزَّزة. والتشطيب يبقى نظيفًا وفاخرًا.`,
+          `من العلبة إلى أول استخدام خلال دقائق. بلا خطوات معقّدة.`,
+          `خطوط أنيقة وإحساس عصري وتفاصيل تجعله يبدو باهظًا.`,
         ],
         seed,
         20 + i
@@ -692,21 +694,21 @@ export async function POST(req: NextRequest) {
       icon: pick(['shield', 'zap', 'check', 'star', 'lock', 'sparkles', 'heart', 'truck'], seed, 30 + i),
     }))
 
-    const shippingLine = pick(['Orders ship fast with tracking.', 'Quick dispatch + tracked delivery.', 'Fast processing so you’re not waiting weeks.'], seed, 60)
+    const shippingLine = pick(['تُشحن الطلبات بسرعة مع تتبّع.', 'إرسال سريع + توصيل مع تتبّع.', 'معالجة سريعة كي لا تنتظر أسابيع.'], seed, 60)
     base.faq = [
-      { q: `Is ${productName} easy to use?`, a: `Yes—it's designed to feel intuitive from the first use. No complicated setup.` },
-      { q: 'How fast is shipping?', a: shippingLine },
-      { q: 'What if I don’t like it?', a: `Try it risk-free for 30 days. Return it for a refund.` },
-      { q: 'Is this a good gift?', a: `Absolutely. It’s practical, premium-looking, and something people actually use.` },
+      { q: `هل ${productName} سهل الاستخدام؟`, a: `نعم — مصمَّم ليكون بديهيًا من أول استخدام. بلا إعداد معقّد.` },
+      { q: 'ما سرعة الشحن؟', a: shippingLine },
+      { q: 'ماذا لو لم يعجبني؟', a: `جرّبه دون مخاطرة لمدة 30 يومًا. أعِده واسترد أموالك.` },
+      { q: 'هل هو هدية مناسبة؟', a: `بالتأكيد. عملي وأنيق، وشيء يستخدمه الناس فعلًا.` },
     ]
     base.tabs = [
-      { title: 'Description', content: `${productName} is a premium upgrade built for daily use. ${mechanism}` },
-      { title: 'Shipping', content: shippingLine },
-      { title: 'Returns', content: `30-day returns. Simple process. No stress.` },
+      { title: 'الوصف', content: `${productName} تحديث فاخر مصنوع للاستخدام اليومي. ${mechanism}` },
+      { title: 'الشحن', content: shippingLine },
+      { title: 'الإرجاع', content: `إرجاع خلال 30 يومًا. إجراء بسيط. بلا توتر.` },
     ]
 
-    base.countdown.heading = priceText ? `Limited-time: ${priceText}` : base.countdown.heading
-    base.countdown.timer_text = 'Deal ends in:'
+    base.countdown.heading = priceText ? `لوقت محدود: ${priceText}` : base.countdown.heading
+    base.countdown.timer_text = 'ينتهي العرض خلال:'
     return base
   }
 
@@ -792,6 +794,7 @@ export async function POST(req: NextRequest) {
       timeout: Math.max(20_000, Math.min(55_000, timeLeft())),
     })
     const nonce = `${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const usageUserId = await getUserIdSafe()
 
     async function runJson(
       model: string,
@@ -813,6 +816,7 @@ export async function POST(req: NextRequest) {
         maxWait,
         'analysis'
       )
+      await logAiUsage({ operation: 'generate-content:analysis', userId: usageUserId, model }, resp.usage)
       const content = resp.choices[0]?.message?.content
       if (!content) throw new Error('No content from OpenAI')
       const finish = resp.choices[0]?.finish_reason
@@ -1181,7 +1185,9 @@ Return JSON only with this shape:
           Never return null. Never omit required keys. If you don't know a value, return an empty string.
           Ensure "testimonials" items always include {name,text,location,rating} where name/location are non-empty strings and rating is an integer 1-5.
           For new objects below ("collection_page","cart_drawer","cart_page","pages","policies","seo"), always include them even if some strings are empty.
-          You MUST include a "_strategy" object first to prove your research.` 
+          You MUST include a "_strategy" object first to prove your research.
+
+${ARABIC_OUTPUT_DIRECTIVE}`
           },
             { role: 'user', content: userPrompt },
           ],
@@ -1198,6 +1204,8 @@ Return JSON only with this shape:
     } catch (e) {
       return buildFallbackResponse(String((e as any)?.message || e), productAnalysis)
     }
+
+    await logAiUsage({ operation: 'generate-content', userId: usageUserId, model: 'gpt-4o-mini' }, resp?.usage)
     
     const content = resp.choices[0]?.message?.content
     if (!content) throw new Error('No content from OpenAI')
@@ -1225,6 +1233,7 @@ Return JSON only with this shape:
           ],
           response_format: { type: 'json_object' as const },
         }), maxWait, 'repair')
+        await logAiUsage({ operation: 'generate-content:repair', userId: usageUserId, model: 'gpt-4o-mini' }, repair.usage)
         const repaired = repair.choices[0]?.message?.content || ''
         return parseModelJson(repaired)
       }

@@ -8,22 +8,22 @@ const STEPS = [
   {
     num: '01',
     icon: LayoutTemplate,
-    title: 'Pick your template',
-    desc: 'Eight to choose from — restaurant, lookbook, SaaS landing, brand story, wellness, catalog, services, or one-product Shopify.',
+    title: 'اختر قالبك',
+    desc: 'ثمانية للاختيار — مطعم، أو لوك بوك، أو صفحة هبوط لتطبيق، أو قصة علامة، أو عافية، أو كتالوج، أو خدمات، أو متجر شوبيفاي بمنتج واحد.',
     color: '#5e6ad2',
   },
   {
     num: '02',
     icon: PenLine,
-    title: 'Share a brief or paste a URL',
-    desc: 'Most templates take a short form — your menu, services, hours, etc. The one-product Shopify path just needs a product URL. Either way, AI takes it from there.',
+    title: 'اكتب نبذة أو ألصق رابطًا',
+    desc: 'تطلب معظم القوالب نموذجًا قصيرًا — قائمتك، وخدماتك، وساعات عملك، وغيرها. أما مسار شوبيفاي بمنتج واحد فيحتاج فقط رابط المنتج. وفي الحالتين، يتكفّل الذكاء الاصطناعي بالباقي.',
     color: '#d97706',
   },
   {
     num: '03',
     icon: Rocket,
-    title: 'Go live, instantly',
-    desc: 'Get a hosted preview site you can ship today — or download a full Shopify OS 2.0 theme ZIP. Everything is editable.',
+    title: 'انطلق فورًا',
+    desc: 'احصل على موقع معاينة مُستضاف يمكنك نشره اليوم — أو نزّل ملف ثيم شوبيفاي OS 2.0 كاملًا. كل شيء قابل للتعديل.',
     color: '#27a644',
   },
 ] as const
@@ -41,11 +41,11 @@ export default function StepsSection() {
           className="mb-20 text-center"
         >
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            How it works
+            كيف يعمل
           </p>
-          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
-            From idea to live website in{' '}
-            <span className="gradient-text">three steps.</span>
+          <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            من الفكرة إلى موقع مباشر في{' '}
+            <span className="gradient-text">ثلاث خطوات.</span>
           </h2>
         </motion.div>
 
@@ -72,7 +72,7 @@ export default function StepsSection() {
                 transition={{ duration: 0.48, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className={cn(
                   'relative flex flex-col px-6 md:items-center md:text-center',
-                  i > 0 && 'border-l border-token'
+                  i > 0 && 'border-s border-token'
                 )}
               >
                 {/* Step number */}
@@ -112,8 +112,8 @@ export default function StepsSection() {
           transition={{ duration: 0.4, delay: 0.4 }}
           className="mx-auto mt-16 max-w-2xl text-center text-[12.5px] text-muted"
         >
-          The one-product <strong className="font-[590] text-foreground">Storefront</strong> template exports
-          as a Shopify OS&nbsp;2.0 theme ZIP. The other seven ship as live, hosted sites on the Zenya domain.
+          يُصدَّر قالب <strong className="font-[590] text-foreground">المتجر</strong> بمنتج واحد كملف ثيم
+          شوبيفاي OS&nbsp;2.0. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق زينيا.
         </motion.p>
       </div>
     </section>

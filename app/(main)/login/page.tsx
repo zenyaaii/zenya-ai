@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
+import ZenyaWordmark from '@/components/ZenyaWordmark'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -42,14 +43,14 @@ function LoginForm() {
 
     try {
       if (mode === 'forgot') {
-        if (!validateEmail(email)) throw new Error('Please enter a valid email address.')
+        if (!validateEmail(email)) throw new Error('يرجى إدخال بريد إلكتروني صالح.')
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
         })
         if (error) throw error
-        setStatus({ type: 'success', message: 'Password reset link sent! Check your email.' })
+        setStatus({ type: 'success', message: 'تم إرسال رابط إعادة تعيين كلمة المرور! تحقق من بريدك.' })
       } else if (mode === 'signin') {
-        if (!email || !password) throw new Error('Please fill in all fields.')
+        if (!email || !password) throw new Error('يرجى تعبئة جميع الحقول.')
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         localStorage.setItem('zenya_last_email', email)
@@ -57,10 +58,10 @@ function LoginForm() {
         router.push(next)
         router.refresh()
       } else {
-        if (!fullName) throw new Error('Please enter your full name.')
-        if (!validateEmail(email)) throw new Error('Please enter a valid email address.')
-        if (!validatePassword(password)) throw new Error('Password must be at least 6 characters.')
-        if (!acceptTerms) throw new Error('Please accept the Terms of Service and Privacy Policy to continue.')
+        if (!fullName) throw new Error('يرجى إدخال اسمك الكامل.')
+        if (!validateEmail(email)) throw new Error('يرجى إدخال بريد إلكتروني صالح.')
+        if (!validatePassword(password)) throw new Error('يجب ألّا تقلّ كلمة المرور عن 6 أحرف.')
+        if (!acceptTerms) throw new Error('يرجى الموافقة على شروط الخدمة وسياسة الخصوصية للمتابعة.')
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -80,11 +81,11 @@ function LoginForm() {
           router.push(next)
           router.refresh()
         } else {
-          setStatus({ type: 'success', message: 'Account created! Please check your email to confirm.' })
+          setStatus({ type: 'success', message: 'تم إنشاء الحساب! يرجى التحقق من بريدك لتأكيده.' })
         }
       }
     } catch (error: any) {
-      setStatus({ type: 'error', message: error.message || 'An error occurred.' })
+      setStatus({ type: 'error', message: error.message || 'حدث خطأ ما.' })
     } finally {
       setLoading(false)
     }
@@ -119,9 +120,9 @@ function LoginForm() {
                 'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
             }}
           >
-            <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+            <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
           </div>
-          <span className="text-[15px] font-semibold tracking-tight text-foreground">Zenya</span>
+          <ZenyaWordmark className="text-[17px]" />
         </Link>
 
         <AnimatePresence mode="wait">
@@ -133,12 +134,12 @@ function LoginForm() {
             transition={{ duration: 0.22 }}
           >
             <h1 className="text-[26px] font-semibold tracking-tight text-foreground mb-1.5" style={{ letterSpacing: '-0.02em' }}>
-              {mode === 'signin' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset password'}
+              {mode === 'signin' ? 'أهلًا بعودتك' : mode === 'signup' ? 'أنشئ حسابك' : 'إعادة تعيين كلمة المرور'}
             </h1>
             <p className="text-[13.5px] text-muted">
-              {mode === 'signin' ? 'Sign in to access your Zenya themes.' :
-               mode === 'signup' ? 'Start building high-converting themes today.' :
-               'Enter your email to receive a reset link.'}
+              {mode === 'signin' ? 'سجّل الدخول للوصول إلى قوالبك في زينيا.' :
+               mode === 'signup' ? 'ابدأ بناء قوالب عالية التحويل اليوم.' :
+               'أدخل بريدك الإلكتروني لتصلك رابط إعادة التعيين.'}
             </p>
           </motion.div>
         </AnimatePresence>
@@ -154,13 +155,13 @@ function LoginForm() {
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <label htmlFor="fullName" className="sr-only">Full Name</label>
+              <label htmlFor="fullName" className="sr-only">الاسم الكامل</label>
               <input
                 id="fullName"
                 type="text"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                placeholder="Full name"
+                placeholder="الاسم الكامل"
                 className={inputClass}
               />
             </motion.div>
@@ -169,7 +170,7 @@ function LoginForm() {
 
         {/* Email */}
         <div>
-          <label htmlFor="email" className="sr-only">Email address</label>
+          <label htmlFor="email" className="sr-only">البريد الإلكتروني</label>
           <input
             id="email"
             type="email"
@@ -177,7 +178,8 @@ function LoginForm() {
             onChange={e => setEmail(e.target.value)}
             placeholder="name@company.com"
             autoComplete="email"
-            className={inputClass}
+            dir="ltr"
+            className={inputClass + ' text-start'}
           />
         </div>
 
@@ -190,21 +192,21 @@ function LoginForm() {
               exit={{ opacity: 0, height: 0 }}
               className="relative overflow-hidden"
             >
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="sr-only">كلمة المرور</label>
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder="كلمة المرور"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                className={inputClass + ' pr-12'}
+                className={inputClass + ' pe-12'}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:text-foreground hover:bg-[rgba(28,28,28,0.05)]"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute end-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:text-foreground hover:bg-[rgba(28,28,28,0.05)]"
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
               </button>
@@ -229,15 +231,15 @@ function LoginForm() {
                 style={{ accentColor: '#5e6ad2' }}
               />
               <span>
-                I agree to the{' '}
+                أوافق على{' '}
                 <Link href="/terms" target="_blank" className="font-medium text-primary underline-offset-2 hover:underline">
-                  Terms of Service
+                  شروط الخدمة
                 </Link>{' '}
-                and{' '}
+                و{' '}
                 <Link href="/privacy" target="_blank" className="font-medium text-primary underline-offset-2 hover:underline">
-                  Privacy Policy
+                  سياسة الخصوصية
                 </Link>
-                , and I consent to immediate access to the Service (waiving the 14-day withdrawal right for content I generate).
+                ، وأوافق على الوصول الفوري للخدمة (متنازلًا عن حق الانسحاب خلال 14 يومًا للمحتوى الذي أُنشئه).
               </span>
             </motion.label>
           )}
@@ -255,9 +257,9 @@ function LoginForm() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-              Processing…
+              جارٍ المعالجة…
             </span>
-          ) : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
+          ) : mode === 'signin' ? 'تسجيل الدخول' : mode === 'signup' ? 'إنشاء حساب' : 'إرسال رابط التعيين'}
         </button>
 
         {/* Status message */}
@@ -289,42 +291,42 @@ function LoginForm() {
                   onClick={() => toggleMode('forgot')}
                   className="text-muted transition-colors hover:text-foreground"
                 >
-                  Forgot password?
+                  نسيت كلمة المرور؟
                 </button>
               </div>
               <div className="text-muted">
-                No account?{' '}
+                ليس لديك حساب؟{' '}
                 <button
                   type="button"
                   onClick={() => toggleMode('signup')}
                   className="font-medium text-primary hover:underline underline-offset-2"
                 >
-                  Sign up free
+                  أنشئ حسابًا مجانًا
                 </button>
               </div>
             </>
           )}
           {mode === 'signup' && (
             <div className="text-muted">
-              Already have an account?{' '}
+              لديك حساب بالفعل؟{' '}
               <button
                 type="button"
                 onClick={() => toggleMode('signin')}
                 className="font-medium text-primary hover:underline underline-offset-2"
               >
-                Sign in
+                تسجيل الدخول
               </button>
             </div>
           )}
           {mode === 'forgot' && (
             <div className="text-muted">
-              Remembered it?{' '}
+              تذكّرتها؟{' '}
               <button
                 type="button"
                 onClick={() => toggleMode('signin')}
                 className="font-medium text-primary hover:underline underline-offset-2"
               >
-                Back to sign in
+                العودة لتسجيل الدخول
               </button>
             </div>
           )}

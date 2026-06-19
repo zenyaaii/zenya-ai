@@ -57,10 +57,10 @@ export default function StoreNavbar({
 
           {/* Desktop Nav */}
           <nav className="hidden gap-8 text-sm font-medium text-slate-600 md:flex">
-            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">Home</button>
-            <button onClick={() => onNavigate('product')} className="transition hover:text-slate-900">Shop</button>
-            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">About Us</button>
-            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">Contact</button>
+            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">الرئيسية</button>
+            <button onClick={() => onNavigate('product')} className="transition hover:text-slate-900">المتجر</button>
+            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">من نحن</button>
+            <button onClick={() => onNavigate('home')} className="transition hover:text-slate-900">تواصل معنا</button>
           </nav>
 
           {/* Icons */}
@@ -96,11 +96,11 @@ export default function StoreNavbar({
         {mobileMenuOpen && (
           <div className="absolute top-full left-0 right-0 h-screen bg-white px-6 py-4 shadow-lg md:hidden">
             <nav className="flex flex-col gap-6 text-lg font-medium text-slate-800">
-              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-left border-b border-slate-100 pb-4">Home</button>
-              <button onClick={() => { onNavigate('product'); setMobileMenuOpen(false) }} className="text-left border-b border-slate-100 pb-4">Shop Now</button>
-              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-left border-b border-slate-100 pb-4">About Us</button>
-              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-left border-b border-slate-100 pb-4">Contact</button>
-              <button onClick={() => setMobileMenuOpen(false)} className="text-left text-slate-500">Close Menu</button>
+              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-start border-b border-slate-100 pb-4">الرئيسية</button>
+              <button onClick={() => { onNavigate('product'); setMobileMenuOpen(false) }} className="text-start border-b border-slate-100 pb-4">تسوّق الآن</button>
+              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-start border-b border-slate-100 pb-4">من نحن</button>
+              <button onClick={() => { onNavigate('home'); setMobileMenuOpen(false) }} className="text-start border-b border-slate-100 pb-4">تواصل معنا</button>
+              <button onClick={() => setMobileMenuOpen(false)} className="text-start text-slate-500">إغلاق القائمة</button>
             </nav>
           </div>
         )}

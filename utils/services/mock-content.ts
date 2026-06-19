@@ -2,168 +2,168 @@ import type { ServiceContent } from './types'
 
 export const SERVICE_MOCK_CONTENT: ServiceContent = {
   brand: {
-    name: 'Northline Home Services',
-    category: 'Heating, cooling, and electrical upgrades',
-    city: 'Austin',
-    region: 'Texas',
-    tagline: 'High-trust local service for homes that need fast, careful work.',
-    owner_name: 'Daniel Hart'
+    name: 'إتقان للخدمات المنزلية',
+    category: 'تكييف وتبريد وتمديدات كهربائية',
+    city: 'الرياض',
+    region: 'المملكة العربية السعودية',
+    tagline: 'خدمة محلية موثوقة للبيوت التي تحتاج عملًا سريعًا ومتقنًا.',
+    owner_name: 'فهد الراشد'
   },
   hero: {
-    eyebrow: 'Licensed team · Same-week visits',
-    headline: 'Modern local service,\nwithout the usual hassle.',
+    eyebrow: 'فريق مرخّص · زيارات خلال الأسبوع نفسه',
+    headline: 'خدمة محلية عصرية،\nبلا المتاعب المعتادة.',
     subheadline:
-      'Northline helps Austin homeowners with repairs, upgrades, and urgent callouts through a cleaner, faster, more premium service experience.',
-    primary_cta: 'Book a visit',
-    secondary_cta: 'See services',
+      'تساعد «إتقان» أصحاب المنازل في الرياض على الإصلاحات والتحديثات والطوارئ عبر تجربة خدمة أنظف وأسرع وأكثر رقيًا.',
+    primary_cta: 'احجز زيارة',
+    secondary_cta: 'شاهد الخدمات',
     image:
       'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=2000&q=80',
     stats: [
-      { value: '4.9/5', label: 'Average rating' },
-      { value: '12 yrs', label: 'In business' },
-      { value: 'Same day', label: 'Urgent response' }
+      { value: '4.9/5', label: 'متوسط التقييم' },
+      { value: '12 سنة', label: 'في السوق' },
+      { value: 'في اليوم نفسه', label: 'استجابة الطوارئ' }
     ]
   },
   trust_bar: {
-    items: ['Licensed and insured', 'Upfront pricing', 'Workmanship guarantee', 'Locally owned']
+    items: ['مرخّصون ومؤمَّنون', 'أسعار واضحة مسبقًا', 'ضمان جودة العمل', 'ملكية محلية']
   },
   services: {
-    heading: 'What we help with',
-    subheading: 'Built for the services homeowners ask for most often, from routine fixes to high-value upgrades.',
+    heading: 'فيمَ نساعدك',
+    subheading: 'مبنية للخدمات التي يطلبها أصحاب المنازل أكثر من غيرها، من الإصلاحات الروتينية إلى التحديثات القيّمة.',
     items: [
       {
-        name: 'System diagnostics',
-        description: 'Fast issue finding with clear next steps and no-pressure recommendations.',
-        price_from: 'From $129',
-        badge: 'Popular'
+        name: 'تشخيص الأعطال',
+        description: 'تحديد سريع للمشكلة مع خطوات واضحة وتوصيات بلا ضغط.',
+        price_from: 'من 129$',
+        badge: 'الأكثر طلبًا'
       },
       {
-        name: 'Installations and replacements',
-        description: 'Planned upgrades installed cleanly with project communication from start to finish.',
-        price_from: 'Custom quote'
+        name: 'التركيب والاستبدال',
+        description: 'تحديثات مخطّطة تُركَّب بنظافة مع تواصل واضح من البداية إلى النهاية.',
+        price_from: 'عرض سعر مخصّص'
       },
       {
-        name: 'Emergency callouts',
-        description: 'Priority scheduling for urgent service needs when downtime is not an option.',
-        price_from: '24/7 support',
-        badge: 'Fast response'
+        name: 'زيارات الطوارئ',
+        description: 'جدولة بأولوية للحالات العاجلة حين لا يكون التعطّل خيارًا.',
+        price_from: 'دعم على مدار الساعة',
+        badge: 'استجابة سريعة'
       }
     ]
   },
   story: {
-    eyebrow: 'Why clients switch',
-    heading: 'The premium version of a local service company.',
+    eyebrow: 'لماذا يتحوّل العملاء إلينا',
+    heading: 'النسخة الفاخرة من شركة خدمات محلية.',
     body:
-      'Northline was built for homeowners who are tired of vague arrival windows, rushed work, and messy follow-through. We bring tighter communication, cleaner installs, and a calmer customer experience from the first call to the final walkthrough.',
-    owner_name: 'Daniel Hart',
-    owner_title: 'Founder',
-    quote: 'People remember how a service company makes them feel. We designed the whole experience around clarity and care.',
+      'بُنيت «إتقان» لأصحاب المنازل الذين سئموا مواعيد الوصول الغامضة، والعمل المتعجّل، والمتابعة الفوضوية. نقدّم تواصلًا أدقّ، وتركيبًا أنظف، وتجربة عميل أهدأ من أول اتصال إلى الجولة الأخيرة.',
+    owner_name: 'فهد الراشد',
+    owner_title: 'المؤسّس',
+    quote: 'يتذكّر الناس شعورهم تجاه شركة الخدمة. صمّمنا التجربة كلها حول الوضوح والعناية.',
     image:
       'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80'
   },
   proof: {
-    heading: 'Why homeowners choose us',
-    subheading: 'Every part of the site is designed to reduce hesitation and show that this business operates at a higher level.',
+    heading: 'لماذا يختارنا أصحاب المنازل',
+    subheading: 'كل جزء من الموقع مصمَّم لتقليل التردّد وإظهار أن هذا العمل يُدار بمستوى أعلى.',
     items: [
-      { title: 'Clear communication', text: 'Arrival windows, scope, and next steps stay obvious at every stage.' },
-      { title: 'Clean execution', text: 'Teams protect the space, document the work, and leave the job looking finished.' },
-      { title: 'Confident expertise', text: 'Recommendations are practical, well explained, and never padded with pressure.' }
+      { title: 'تواصل واضح', text: 'مواعيد الوصول والنطاق والخطوات التالية تبقى واضحة في كل مرحلة.' },
+      { title: 'تنفيذ نظيف', text: 'تحمي الفرق المكان، وتوثّق العمل، وتترك المهمة بمظهر مكتمل.' },
+      { title: 'خبرة واثقة', text: 'التوصيات عملية، ومشروحة جيدًا، وبلا أي ضغط.' }
     ]
   },
   before_after: {
-    heading: 'See the difference',
-    subheading: 'Use this section for repairs, upgrades, cleaning transformations, or any visible result.',
-    before_label: 'Before',
-    after_label: 'After',
+    heading: 'شاهد الفرق',
+    subheading: 'استخدم هذا القسم للإصلاحات أو التحديثات أو نتائج التنظيف أو أي نتيجة مرئية.',
+    before_label: 'قبل',
+    after_label: 'بعد',
     before_image:
       'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
     after_image:
       'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80',
-    highlights: ['Cleaner finish', 'Safer performance', 'More polished customer experience']
+    highlights: ['تشطيب أنظف', 'أداء أكثر أمانًا', 'تجربة عميل أكثر رقيًا']
   },
   process: {
-    heading: 'How it works',
-    subheading: 'A service flow that feels modern, direct, and easy to trust.',
+    heading: 'كيف يعمل',
+    subheading: 'مسار خدمة يبدو عصريًا ومباشرًا وسهل الثقة به.',
     steps: [
-      { step: '01', title: 'Share the job', text: 'Tell us what is happening, what you need, and when you want help.' },
-      { step: '02', title: 'Get a clear plan', text: 'We confirm fit, timing, and what to expect before the appointment.' },
-      { step: '03', title: 'Finish with confidence', text: 'The team completes the work cleanly and walks you through the result.' }
+      { step: '01', title: 'أخبرنا بالمهمة', text: 'قل لنا ما الذي يحدث، وما تحتاجه، ومتى تريد المساعدة.' },
+      { step: '02', title: 'احصل على خطة واضحة', text: 'نؤكّد الملاءمة والتوقيت وما يمكن توقّعه قبل الموعد.' },
+      { step: '03', title: 'أنهِ بثقة', text: 'ينجز الفريق العمل بنظافة ويأخذك في جولة على النتيجة.' }
     ]
   },
   areas: {
-    heading: 'Proudly serving Austin and nearby neighborhoods',
-    subheading: 'Strong local coverage makes scheduling faster and follow-up easier.',
-    areas_served: ['Downtown Austin', 'Tarrytown', 'West Lake Hills', 'South Congress', 'Bee Cave', 'Round Rock'],
-    response_time: 'Often same-day for urgent requests',
-    availability: 'Mon-Sat, 7am-7pm'
+    heading: 'نخدم الرياض والأحياء المجاورة بفخر',
+    subheading: 'التغطية المحلية القوية تجعل الجدولة أسرع والمتابعة أسهل.',
+    areas_served: ['وسط الرياض', 'حي الملقا', 'حي النخيل', 'حي الياسمين', 'حي القيروان', 'الدرعية'],
+    response_time: 'غالبًا في اليوم نفسه للطلبات العاجلة',
+    availability: 'السبت–الخميس، 7 ص – 7 م'
   },
   offer: {
-    badge: 'Limited offer',
-    heading: 'Start with a fast consultation',
-    subheading: 'A premium quote flow that gives shoppers a clear next step without friction.',
-    points: ['Fast response from a real person', 'Upfront scope discussion', 'No-pressure recommendations'],
-    cta_label: 'Request my quote'
+    badge: 'عرض محدود',
+    heading: 'ابدأ باستشارة سريعة',
+    subheading: 'مسار عرض سعر راقٍ يمنح العملاء خطوة تالية واضحة دون عناء.',
+    points: ['استجابة سريعة من شخص حقيقي', 'مناقشة واضحة للنطاق', 'توصيات بلا ضغط'],
+    cta_label: 'اطلب عرض سعري'
   },
   testimonials: {
-    heading: 'What local clients say',
-    subheading: 'Reviews here should feel specific, believable, and tied to the real experience.',
+    heading: 'ماذا يقول العملاء المحليون',
+    subheading: 'يجب أن تبدو التقييمات هنا محدّدة وقابلة للتصديق ومرتبطة بالتجربة الحقيقية.',
     average_rating: 4.9,
-    review_count: '320+',
+    review_count: '+320',
     items: [
       {
-        name: 'Maya T.',
-        text: 'The whole experience felt far more organized than any contractor we have used before. Fast updates, clean work, and zero surprises.',
-        source: 'Google Reviews',
+        name: 'سعد العنزي',
+        text: 'كانت التجربة أكثر تنظيمًا من أي مقاول تعاملنا معه. تحديثات سريعة، وعمل نظيف، وبلا أي مفاجآت.',
+        source: 'تقييمات جوجل',
         rating: 5
       },
       {
-        name: 'Chris L.',
-        text: 'They diagnosed the issue quickly, explained our options clearly, and left the space cleaner than they found it.',
-        source: 'Yelp',
+        name: 'خالد المطيري',
+        text: 'شخّصوا المشكلة بسرعة، وشرحوا خياراتنا بوضوح، وتركوا المكان أنظف مما وجدوه.',
+        source: 'منصّة التقييم',
         rating: 5
       },
       {
-        name: 'Jenna P.',
-        text: 'Professional from start to finish. It finally felt like a premium service company, not a random crew showing up late.',
-        source: 'Verified customer',
+        name: 'فيصل القرني',
+        text: 'احترافيون من البداية إلى النهاية. شعرت أخيرًا أنها شركة خدمة فاخرة، لا فريق عشوائي يصل متأخرًا.',
+        source: 'عميل موثّق',
         rating: 5
       }
     ]
   },
   faq: {
-    heading: 'Questions clients ask before booking',
+    heading: 'أسئلة يطرحها العملاء قبل الحجز',
     items: [
-      { q: 'Do you offer free estimates?', a: 'For many jobs, yes. More complex work may begin with a paid assessment that is applied to the final project.' },
-      { q: 'How fast can you come out?', a: 'Urgent requests are often handled the same day, depending on your area and the type of work.' },
-      { q: 'Are you licensed and insured?', a: 'Yes. This should be stated clearly in the trust bar and repeated anywhere it helps reduce hesitation.' },
-      { q: 'Do you work in nearby neighborhoods?', a: 'Yes. Use the service-area section to make local coverage obvious and easy to scan.' },
-      { q: 'What happens after I request a quote?', a: 'We confirm details, recommend the right next step, and help you choose a time that works.' }
+      { q: 'هل تقدّمون تقديرات مجانية؟', a: 'لكثير من المهام، نعم. قد يبدأ العمل الأعقد بتقييم مدفوع يُحتسب ضمن المشروع النهائي.' },
+      { q: 'ما سرعة وصولكم؟', a: 'تُعالَج الطلبات العاجلة غالبًا في اليوم نفسه، بحسب منطقتك ونوع العمل.' },
+      { q: 'هل أنتم مرخّصون ومؤمَّنون؟', a: 'نعم. يُذكر ذلك بوضوح في شريط الثقة، ويُكرَّر حيثما يقلّل التردّد.' },
+      { q: 'هل تعملون في الأحياء المجاورة؟', a: 'نعم. استخدم قسم مناطق الخدمة لإبراز التغطية المحلية بوضوح.' },
+      { q: 'ماذا يحدث بعد طلب عرض السعر؟', a: 'نؤكّد التفاصيل، ونوصي بالخطوة المناسبة، ونساعدك على اختيار وقت يناسبك.' }
     ]
   },
   final_cta: {
-    heading: 'Ready to get the job handled?',
-    subheading: 'Give visitors one clean final CTA with enough reassurance to convert without feeling pushy.',
-    cta_label: 'Book now',
-    secondary_text: 'Fast replies. Clear pricing. Professional follow-through.'
+    heading: 'جاهز لإنجاز المهمة؟',
+    subheading: 'امنح الزوّار دعوة أخيرة واضحة بطمأنينة كافية للتحويل دون إلحاح.',
+    cta_label: 'احجز الآن',
+    secondary_text: 'ردود سريعة. أسعار واضحة. متابعة احترافية.'
   },
   gallery: {
-    heading: 'Recent work and real moments',
+    heading: 'أعمال حديثة ولحظات حقيقية',
     images: [
-      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80', alt: 'Interior service before' },
-      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80', alt: 'Interior service after' },
-      { url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1400&q=80', alt: 'Team discussing project' },
-      { url: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1400&q=80', alt: 'Technician at work' }
+      { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80', alt: 'قبل الخدمة الداخلية' },
+      { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80', alt: 'بعد الخدمة الداخلية' },
+      { url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=80', alt: 'تجهيزات حديثة' },
+      { url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1400&q=80', alt: 'أدوات العمل' }
     ]
   },
   footer: {
-    tagline: 'Built for homeowners who want speed, clarity, and work done right.',
-    legal: '© 2026 Northline Home Services. All rights reserved.',
-    phone: '+1 (512) 555-0187',
-    email: 'hello@northlinehome.com',
-    address: '1204 W 6th St, Austin, TX 78703'
+    tagline: 'مبنية لأصحاب المنازل الذين يريدون السرعة والوضوح والعمل المتقن.',
+    legal: '© 2026 إتقان للخدمات المنزلية. جميع الحقوق محفوظة.',
+    phone: '+966 11 555 0187',
+    email: 'hello@itqan.sa',
+    address: 'طريق الملك فهد، حي العليا، الرياض 12333'
   },
   seo: {
-    title: 'Northline Home Services · Local Service Website Template',
-    description: 'Modern local services website with hero, services, proof, before-after, reviews, FAQ, and quote CTA.'
+    title: 'إتقان للخدمات المنزلية · قالب موقع خدمات محلية',
+    description: 'موقع خدمات محلية عصري بواجهة، وخدمات، وإثبات، وقبل/بعد، وتقييمات، وأسئلة شائعة، ودعوة لطلب عرض سعر.'
   }
 }

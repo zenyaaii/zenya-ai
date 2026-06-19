@@ -14,39 +14,39 @@ type Testimonial = {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    name: 'Alex M.',
-    role: 'One-product brand · Berlin',
-    text: "Launched in a weekend. The Storefront export landed in Shopify clean — sections, blocks, settings, all there.",
+    name: 'أحمد العلي',
+    role: 'علامة بمنتج واحد · الرياض',
+    text: "أطلقته في عطلة نهاية أسبوع. تصدير قالب المتجر وصل إلى شوبيفاي نظيفًا — أقسام وبلوكات وإعدادات، كلها موجودة.",
     color: '#5e6ad2',
   },
   {
-    name: 'Élodie M.',
-    role: 'Chef · Maison Lumière, NYC',
-    text: "The Maison template made our menu finally feel like the room. Reservations went up the first month — no agency involved.",
+    name: 'إيلاف منصور',
+    role: 'شيف · مطعم لمعة، دبي',
+    text: "جعل قالب المطعم قائمتنا أخيرًا تليق بالمكان. ارتفعت الحجوزات في الشهر الأول — دون أي وكالة.",
     color: '#c8a96a',
   },
   {
-    name: 'Priya N.',
-    role: 'Founder · Atlas user, Singapore',
-    text: "Atlas for our SaaS landing saved us weeks of dev. The copy AI wrote actually understood our pricing tiers — that surprised me.",
+    name: 'نورة سالم',
+    role: 'مؤسِّسة · مستخدمة قالب التطبيق، جدة',
+    text: "وفّر علينا قالب التطبيق أسابيع من التطوير. والمحتوى الذي كتبه الذكاء الاصطناعي فهم باقاتنا السعرية فعلًا — وهذا فاجأني.",
     color: '#5e6ad2',
   },
   {
-    name: 'Maya R.',
-    role: 'Apparel brand · London',
-    text: "The Lookbook template is stunning. Customers constantly ask who designed our site. Worth the subscription on the first sale.",
+    name: 'مايا خالد',
+    role: 'علامة أزياء · عمّان',
+    text: "قالب الأزياء مذهل. يسألنا العملاء باستمرار من صمّم موقعنا. استحقّ الاشتراك من أول عملية بيع.",
     color: '#1c1c1c',
   },
   {
-    name: 'Sara L.',
-    role: 'Wellness studio · Austin',
-    text: "I expected basic. I got a Wellness template that handles treatments, instructors, and gift cards out of the box. We were booking within a day.",
+    name: 'سارة إبراهيم',
+    role: 'مركز عافية · المنامة',
+    text: "توقّعت شيئًا بسيطًا، فحصلت على قالب عافية يدير الجلسات والمدرّبين وبطاقات الهدايا جاهزًا. كنا نستقبل الحجوزات خلال يوم.",
     color: '#14b8a6',
   },
   {
-    name: 'Carlos T.',
-    role: 'Local services · Madrid',
-    text: "The Trade template nailed the quote-request flow. I tried three other AI builders before this — none came close.",
+    name: 'يوسف حدّاد',
+    role: 'خدمات محلية · الدوحة',
+    text: "أتقن قالب الخدمات مسار طلب عرض السعر. جرّبت ثلاثة منشئات أخرى قبله — لا شيء يقترب.",
     color: '#f59e0b',
   },
 ]
@@ -64,11 +64,11 @@ export default function Testimonials() {
           className="mb-14"
         >
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            Testimonials
+            آراء العملاء
           </p>
-          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
-            Trusted by{' '}
-            <span className="gradient-text">2,400+ founders &amp; operators.</span>
+          <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            موثوق من{' '}
+            <span className="gradient-text">أكثر من 2,400 مؤسّس وصاحب عمل.</span>
           </h2>
         </motion.div>
 

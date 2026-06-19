@@ -69,7 +69,7 @@ export default function ProductPage({
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const addToCartLabel = actions?.addToCartLabel || 'Add to Cart'
+  const addToCartLabel = actions?.addToCartLabel || 'أضف إلى السلة'
   const unitPrice = Number(price) || 49.99
   const unitCompare = Number(originalPrice) || 0
   const discountPct = selectedQuantity === 2 ? 15 : selectedQuantity === 3 ? 25 : 0
@@ -85,7 +85,7 @@ export default function ProductPage({
     const h = Math.floor(seconds / 3600)
     const m = Math.floor((seconds % 3600) / 60)
     const s = seconds % 60
-    return `${h}h ${m}m ${s}s`
+    return `${h}س ${m}د ${s}ث`
   }
 
   return (
@@ -96,7 +96,7 @@ export default function ProductPage({
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1">
-            <div className="text-xs text-slate-500 font-medium">Total Price</div>
+            <div className="text-xs text-slate-500 font-medium">السعر الإجمالي</div>
             <div className="font-bold text-slate-900 text-lg">${totals.discounted.toFixed(2)}</div>
           </div>
           <button
@@ -112,7 +112,7 @@ export default function ProductPage({
       <div className="container mx-auto px-4 lg:px-6">
         <nav className="mb-6 flex items-center text-sm text-slate-500">
           <button onClick={onBack} className="hover:text-slate-900 hover:underline">
-            Home
+            الرئيسية
           </button>
           <span className="mx-2">/</span>
           <span className="font-medium text-slate-900 line-clamp-1">{productName}</span>
@@ -130,8 +130,8 @@ export default function ProductPage({
                   decoding="async"
                 />
                 {unitCompare > unitPrice ? (
-                  <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm z-10">
-                    Sale
+                  <div className="absolute top-4 start-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm z-10">
+                    تخفيض
                   </div>
                 ) : null}
               </div>
@@ -157,8 +157,8 @@ export default function ProductPage({
                 <div key={idx} className="snap-center shrink-0 w-[85vw] relative aspect-square rounded-xl bg-slate-100 overflow-hidden shadow-sm">
                   <img src={src} alt={`${productName} ${idx + 1}`} className="h-full w-full object-cover" loading="lazy" decoding="async" />
                   {idx === 0 && unitCompare > unitPrice ? (
-                    <div className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm">
-                      Sale
+                    <div className="absolute top-4 start-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide shadow-sm">
+                      تخفيض
                     </div>
                   ) : null}
                 </div>
@@ -176,7 +176,7 @@ export default function ProductPage({
                   </div>
                   <span className="text-xs text-slate-400">|</span>
                   <span className="text-xs text-slate-500 underline decoration-slate-300 underline-offset-2">
-                    {content?.product?.review_count || '1,234 Reviews'}
+                    {content?.product?.review_count || '1,234 تقييم'}
                   </span>
                 </div>
 
@@ -189,7 +189,7 @@ export default function ProductPage({
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
                     </div>
-                    In Stock Ready to Ship
+                    متوفّر وجاهز للشحن
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="p-1 rounded-full bg-blue-100 text-blue-700">
@@ -197,7 +197,7 @@ export default function ProductPage({
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                       </svg>
                     </div>
-                    1-Year Warranty
+                    ضمان سنة كاملة
                   </div>
                 </div>
               </div>
@@ -208,7 +208,7 @@ export default function ProductPage({
                   <>
                     <span className="mb-1.5 text-xl text-slate-400 line-through">${unitCompare.toFixed(2)}</span>
                     <span className="mb-2 rounded bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
-                      SAVE ${(unitCompare - unitPrice).toFixed(2)}
+                      وفّر ${(unitCompare - unitPrice).toFixed(2)}
                     </span>
                   </>
                 ) : null}
@@ -220,7 +220,7 @@ export default function ProductPage({
                     <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                   </span>
-                  {visitors} viewing now
+                  {visitors} يشاهدون الآن
                 </div>
 
                 <div className="flex items-center justify-between text-sm font-bold text-red-800 pt-2">
@@ -229,10 +229,10 @@ export default function ProductPage({
                       <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                     </span>
-                    Only {stock} items left!
+                    بقي {stock} قطعة فقط!
                   </div>
                   <div>
-                    Ends in: <span className="tabular-nums">{formatTime(timeLeft)}</span>
+                    ينتهي خلال: <span className="tabular-nums" dir="ltr">{formatTime(timeLeft)}</span>
                   </div>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-red-200">
@@ -242,8 +242,8 @@ export default function ProductPage({
 
               <div className="my-6 space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-900">Select Quantity</span>
-                  <span className="text-xs font-medium text-red-600 animate-pulse">🔥 High demand</span>
+                  <span className="text-sm font-bold text-slate-900">اختر الكمية</span>
+                  <span className="text-xs font-medium text-red-600 animate-pulse">🔥 طلب مرتفع</span>
                 </div>
 
                 <div className="space-y-3">
@@ -267,8 +267,8 @@ export default function ProductPage({
                           {selectedQuantity === 1 ? <div className="h-2.5 w-2.5 rounded-full bg-white" /> : null}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 text-base">Buy 1</div>
-                          <div className="text-xs text-slate-500">Standard Price</div>
+                          <div className="font-bold text-slate-900 text-base">اشترِ 1</div>
+                          <div className="text-xs text-slate-500">السعر العادي</div>
                         </div>
                       </div>
                       <div className="font-bold text-slate-900 text-lg">${unitPrice.toFixed(2)}</div>
@@ -288,7 +288,7 @@ export default function ProductPage({
                       className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-bold text-white shadow-sm rounded-full uppercase tracking-wide"
                       style={{ backgroundColor: primaryColor }}
                     >
-                      Most Popular
+                      الأكثر شيوعًا
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -301,8 +301,8 @@ export default function ProductPage({
                           {selectedQuantity === 2 ? <div className="h-2.5 w-2.5 rounded-full bg-white" /> : null}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 text-base">Buy 2</div>
-                          <div className="text-xs font-bold text-green-600">Save 15% OFF</div>
+                          <div className="font-bold text-slate-900 text-base">اشترِ 2</div>
+                          <div className="text-xs font-bold text-green-600">وفّر 15%</div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -325,7 +325,7 @@ export default function ProductPage({
                       className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-xs font-bold text-white shadow-sm rounded-full uppercase tracking-wide"
                       style={{ backgroundColor: primaryColor }}
                     >
-                      Best Value
+                      أفضل قيمة
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -338,8 +338,8 @@ export default function ProductPage({
                           {selectedQuantity === 3 ? <div className="h-2.5 w-2.5 rounded-full bg-white" /> : null}
                         </div>
                         <div>
-                          <div className="font-bold text-slate-900 text-base">Buy 3</div>
-                          <div className="text-xs font-bold text-green-600">Save 25% OFF</div>
+                          <div className="font-bold text-slate-900 text-base">اشترِ 3</div>
+                          <div className="text-xs font-bold text-green-600">وفّر 25%</div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -359,7 +359,7 @@ export default function ProductPage({
                 style={{ backgroundColor: primaryColor }}
               >
                 <span>{addToCartLabel}</span>
-                {totals.savings > 0 ? <span className="text-sm opacity-90 font-normal">- Save ${totals.savings.toFixed(2)}</span> : null}
+                {totals.savings > 0 ? <span className="text-sm opacity-90 font-normal">— وفّر ${totals.savings.toFixed(2)}</span> : null}
               </button>
 
               <div className="mt-6 divide-y divide-slate-100 border-t border-slate-100">
@@ -369,7 +369,7 @@ export default function ProductPage({
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                       </svg>
-                      Description
+                      الوصف
                     </span>
                     <span className="transition transform duration-200 group-open:rotate-180">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -378,7 +378,7 @@ export default function ProductPage({
                     </span>
                   </summary>
                   <div className="mt-3 text-sm leading-relaxed text-slate-600">
-                    {content?.solution?.text || content?.hero?.subheadline || 'Built to feel premium from day one.'}
+                    {content?.solution?.text || content?.hero?.subheadline || 'مصنوع ليمنحك إحساسًا فاخرًا من اليوم الأول.'}
                   </div>
                 </details>
 
@@ -390,7 +390,7 @@ export default function ProductPage({
                         <path d="M16 21H8"></path>
                         <path d="M12 17v4"></path>
                       </svg>
-                      Shipping
+                      الشحن
                     </span>
                     <span className="transition transform duration-200 group-open:rotate-180">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -399,7 +399,7 @@ export default function ProductPage({
                     </span>
                   </summary>
                   <div className="mt-3 text-sm leading-relaxed text-slate-600">
-                    {content?.tabs?.find?.((t: any) => t?.title === 'Shipping')?.content || 'Fast dispatch + tracked delivery.'}
+                    {content?.tabs?.find?.((t: any) => t?.title === 'الشحن')?.content || content?.tabs?.[1]?.content || 'إرسال سريع + توصيل مع تتبّع.'}
                   </div>
                 </details>
 
@@ -409,7 +409,7 @@ export default function ProductPage({
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                       </svg>
-                      Our Guarantee
+                      ضماننا
                     </span>
                     <span className="transition transform duration-200 group-open:rotate-180">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -417,7 +417,7 @@ export default function ProductPage({
                       </svg>
                     </span>
                   </summary>
-                  <div className="mt-3 text-sm leading-relaxed text-slate-600">{content?.guarantee?.text || '30-day returns. Simple process. No stress.'}</div>
+                  <div className="mt-3 text-sm leading-relaxed text-slate-600">{content?.guarantee?.text || 'إرجاع خلال 30 يومًا. إجراء بسيط. بلا توتر.'}</div>
                 </details>
               </div>
             </div>
@@ -428,10 +428,10 @@ export default function ProductPage({
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-7">
               <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 mb-4">
-                Why {productName} works
+                لماذا {productName}
               </h2>
               <p className="text-slate-600 mb-8 max-w-2xl">
-                Fast benefits, easy scanning, and proof that makes buyers feel safe.
+                فوائد سريعة، وقراءة سهلة، ودليل يجعل المشترين يشعرون بالأمان.
               </p>
               <div className="grid gap-6 sm:grid-cols-2">
                 {(content?.features?.length ? content.features : []).slice(0, 6).map((f: any, i: number) => (
@@ -439,7 +439,7 @@ export default function ProductPage({
                     <div className="h-11 w-11 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: `${primaryColor}22`, color: primaryColor }}>
                       <span className="font-extrabold">★</span>
                     </div>
-                    <div className="font-bold text-slate-900">{f?.title || 'Benefit'}</div>
+                    <div className="font-bold text-slate-900">{f?.title || 'ميزة'}</div>
                     <div className="mt-1 text-sm text-slate-600 leading-relaxed">{f?.desc || ''}</div>
                   </div>
                 ))}
@@ -448,23 +448,23 @@ export default function ProductPage({
 
             <div className="lg:col-span-5">
               <div className="rounded-3xl border border-slate-100 bg-slate-50 p-8 shadow-sm">
-                <div className="text-sm font-extrabold text-slate-900 mb-4">Shop with confidence</div>
+                <div className="text-sm font-extrabold text-slate-900 mb-4">تسوّق بثقة</div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="rounded-2xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-900">Free Shipping</div>
-                    <div className="text-xs text-slate-500 mt-1">Tracked delivery</div>
+                    <div className="text-xs font-bold text-slate-900">شحن مجاني</div>
+                    <div className="text-xs text-slate-500 mt-1">توصيل مع تتبّع</div>
                   </div>
                   <div className="rounded-2xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-900">Easy Returns</div>
-                    <div className="text-xs text-slate-500 mt-1">30-day policy</div>
+                    <div className="text-xs font-bold text-slate-900">إرجاع سهل</div>
+                    <div className="text-xs text-slate-500 mt-1">سياسة 30 يومًا</div>
                   </div>
                   <div className="rounded-2xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-900">Secure Checkout</div>
-                    <div className="text-xs text-slate-500 mt-1">Encrypted</div>
+                    <div className="text-xs font-bold text-slate-900">دفع آمن</div>
+                    <div className="text-xs text-slate-500 mt-1">مشفّر</div>
                   </div>
                   <div className="rounded-2xl bg-white border border-slate-100 p-4">
-                    <div className="text-xs font-bold text-slate-900">Fast Support</div>
-                    <div className="text-xs text-slate-500 mt-1">We respond fast</div>
+                    <div className="text-xs font-bold text-slate-900">دعم سريع</div>
+                    <div className="text-xs text-slate-500 mt-1">نردّ بسرعة</div>
                   </div>
                 </div>
               </div>
@@ -476,7 +476,7 @@ export default function ProductPage({
           <div className="border-t border-slate-100 pt-16">
             <div className="mx-auto max-w-6xl">
               <h2 className="text-center text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 mb-10">
-                Customer Reviews
+                آراء العملاء
               </h2>
               <div className="grid gap-6 md:grid-cols-3">
                 {(content?.testimonials?.length ? content.testimonials : []).slice(0, 6).map((t: any, i: number) => (
@@ -484,8 +484,8 @@ export default function ProductPage({
                     <div className="text-yellow-400 text-sm mb-3">★★★★★</div>
                     <div className="text-slate-700 leading-relaxed">&ldquo;{t?.text || ''}&rdquo;</div>
                     <div className="mt-5 flex items-center justify-between text-sm">
-                      <div className="font-bold text-slate-900">{t?.name || 'Customer'}</div>
-                      <div className="text-slate-500">{t?.location || 'Verified buyer'}</div>
+                      <div className="font-bold text-slate-900">{t?.name || 'عميل'}</div>
+                      <div className="text-slate-500">{t?.location || 'مشترٍ موثّق'}</div>
                     </div>
                   </div>
                 ))}
@@ -498,12 +498,12 @@ export default function ProductPage({
           <div className="border-t border-slate-100 pt-16">
             <div className="mx-auto max-w-4xl">
               <h2 className="text-center text-2xl lg:text-3xl font-extrabold tracking-tight text-slate-900 mb-10">
-                FAQ
+                الأسئلة الشائعة
               </h2>
               <div className="divide-y divide-slate-100 rounded-3xl border border-slate-100 bg-white shadow-sm overflow-hidden">
                 {(content?.faq?.length ? content.faq : []).slice(0, 8).map((f: any, i: number) => (
                   <details key={i} className="group p-6" open={i === 0}>
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-left font-extrabold text-slate-900">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-start font-extrabold text-slate-900">
                       <span>{f?.q || ''}</span>
                       <span className="transition transform duration-200 group-open:rotate-180">▼</span>
                     </summary>
@@ -520,8 +520,8 @@ export default function ProductPage({
             <div className="mx-auto max-w-3xl text-center px-4">
               <div className="rounded-[2rem] bg-white border border-slate-100 shadow-xl p-10">
                 <div className="text-6xl mb-6">🛡️</div>
-                <div className="text-2xl font-extrabold text-slate-900">{content?.guarantee?.title || 'Risk-Free Guarantee'}</div>
-                <div className="mt-4 text-slate-600 leading-relaxed">{content?.guarantee?.text || 'Try it risk-free. If you don’t love it, we’ll refund you.'}</div>
+                <div className="text-2xl font-extrabold text-slate-900">{content?.guarantee?.title || 'ضمان بلا مخاطرة'}</div>
+                <div className="mt-4 text-slate-600 leading-relaxed">{content?.guarantee?.text || 'جرّبه دون مخاطرة. إن لم يعجبك، سنعيد لك أموالك.'}</div>
                 <button
                   onClick={() => {
                     mainAtcRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })

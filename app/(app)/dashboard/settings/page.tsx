@@ -16,56 +16,56 @@ export default function DashboardSettingsPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-8">
       <header className="mb-6 border-b border-token pb-5">
-        <h1 className="text-[24px] font-bold tracking-tight text-foreground">Settings</h1>
+        <h1 className="text-[24px] font-bold tracking-tight text-foreground">الإعدادات</h1>
         <p className="mt-1 text-[13px] text-muted">
-          Account, security, and data. Hosted-site visibility lives in each site's editor.
+          الحساب والأمان والبيانات. تظهر إعدادات ظهور المواقع المُستضافة في محرّر كل موقع.
         </p>
       </header>
 
       <div className="space-y-4">
-        <Card title="Account" icon={AtSign}>
-          <Row label="Email"><code className="text-[13px] text-foreground">{user?.email || '—'}</code></Row>
-          <Row label="Name">{user?.user_metadata?.full_name || '—'}</Row>
-          <Row label="User ID"><code className="text-[11.5px] text-muted">{user?.id || '—'}</code></Row>
+        <Card title="الحساب" icon={AtSign}>
+          <Row label="البريد الإلكتروني"><code className="text-[13px] text-foreground">{user?.email || '—'}</code></Row>
+          <Row label="الاسم">{user?.user_metadata?.full_name || '—'}</Row>
+          <Row label="معرّف المستخدم"><code className="text-[11.5px] text-muted">{user?.id || '—'}</code></Row>
         </Card>
 
-        <Card title="Security" icon={Shield}>
-          <Row label="Password">
+        <Card title="الأمان" icon={Shield}>
+          <Row label="كلمة المرور">
             <Link href="/login?mode=forgot" className="text-[13px] text-primary hover:underline">
-              Send reset link to my email →
+              أرسل رابط إعادة التعيين إلى بريدي ←
             </Link>
           </Row>
         </Card>
 
-        <Card title="Privacy & cookies" icon={Cookie}>
-          <Row label="Cookie preferences">
-            <Link href="/cookies" className="text-[13px] text-primary hover:underline">Manage →</Link>
+        <Card title="الخصوصية وملفات الارتباط" icon={Cookie}>
+          <Row label="تفضيلات ملفات الارتباط">
+            <Link href="/cookies" className="text-[13px] text-primary hover:underline">إدارة ←</Link>
           </Row>
-          <Row label="Privacy policy">
+          <Row label="سياسة الخصوصية">
             <Link href="/privacy" className="inline-flex items-center gap-1 text-[13px] text-primary hover:underline">
-              Open <ExternalLink className="h-2.5 w-2.5" />
+              فتح <ExternalLink className="h-2.5 w-2.5" />
             </Link>
           </Row>
         </Card>
 
-        <Card title="Your data" icon={Download}>
-          <Row label="Export everything">
+        <Card title="بياناتك" icon={Download}>
+          <Row label="تصدير كل شيء">
             <a href="/api/account/export" download className="text-[13px] text-primary hover:underline">
-              Download JSON →
+              تنزيل JSON ←
             </a>
           </Row>
           <p className="px-3 pb-3 pt-1 text-[11.5px] leading-[1.55] text-muted">
-            Includes your profile, themes, scrape history, and purchases. GDPR Art. 15 + 20.
+            يشمل ملفك الشخصي وقوالبك وسجلّ الاستخراج والمشتريات. وفق المادتين 15 و20 من GDPR.
           </p>
         </Card>
 
-        <Card title="Danger zone" icon={Trash2} tint="#b91c1c">
-          <Row label="Delete account">
+        <Card title="منطقة الخطر" icon={Trash2} tint="#b91c1c">
+          <Row label="حذف الحساب">
             <DeleteAccountButton />
           </Row>
           <p className="px-3 pb-3 pt-1 text-[11.5px] leading-[1.55] text-muted">
-            Removes your profile, themes, history, and signs you out.{' '}
-            <strong>Payment records are kept for 7 years</strong> (Dutch tax law).
+            يحذف ملفك وقوالبك وسجلّك ويسجّل خروجك.{' '}
+            <strong>تُحفظ سجلّات الدفع لمدة 7 سنوات</strong> (القانون الضريبي الهولندي).
           </p>
         </Card>
       </div>
@@ -107,7 +107,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 function DeleteAccountButton() {
   const [busy, setBusy] = useState(false)
   async function go() {
-    const text = prompt('Type DELETE to confirm permanent account deletion:')
+    const text = prompt('اكتب DELETE لتأكيد حذف الحساب نهائيًا:')
     if (text !== 'DELETE') return
     setBusy(true)
     try {
@@ -116,7 +116,7 @@ function DeleteAccountButton() {
         window.location.href = '/'
       } else {
         const j = await r.json().catch(() => ({}))
-        alert(j?.details || j?.error || 'Delete failed.')
+        alert(j?.details || j?.error || 'فشل الحذف.')
       }
     } finally {
       setBusy(false)
@@ -128,7 +128,7 @@ function DeleteAccountButton() {
       disabled={busy}
       className="rounded-md border border-[#fca5a5] bg-[#fee2e2] px-3 py-1.5 text-[12px] font-semibold text-[#b91c1c] hover:bg-[#fecaca] disabled:opacity-60"
     >
-      {busy ? 'Deleting…' : 'Delete account…'}
+      {busy ? 'جارٍ الحذف…' : 'حذف الحساب…'}
     </button>
   )
 }

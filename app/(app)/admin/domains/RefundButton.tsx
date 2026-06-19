@@ -21,7 +21,7 @@ export default function RefundButton({
   const [busy, setBusy] = useState(false)
 
   async function refund() {
-    if (!confirm(`Refund $${amount.toFixed(2)} for ${domain}?\n\nThis issues a full Stripe refund and marks the purchase as refunded. Porkbun does not automatically un-register the domain — handle that separately if needed.`)) {
+    if (!confirm(`هل تريد استرداد $${amount.toFixed(2)} مقابل ${domain}؟\n\nسيُصدر هذا استردادًا كاملًا عبر Stripe ويضع علامة "مُسترد" على عملية الشراء. لا يُلغي المُسجِّل تسجيل النطاق تلقائيًا — تعامل مع ذلك بشكل منفصل عند الحاجة.`)) {
       return
     }
     setBusy(true)
@@ -33,12 +33,12 @@ export default function RefundButton({
       })
       const j = await r.json()
       if (!r.ok) {
-        alert(`Refund failed: ${j?.message || j?.error || r.statusText}`)
+        alert(`فشل الاسترداد: ${j?.message || j?.error || r.statusText}`)
         return
       }
       router.refresh()
     } catch (e: any) {
-      alert(`Network error: ${e?.message || e}`)
+      alert(`خطأ في الشبكة: ${e?.message || e}`)
     } finally {
       setBusy(false)
     }
@@ -51,7 +51,7 @@ export default function RefundButton({
       className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11px] font-medium text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)] disabled:opacity-50"
     >
       <RotateCcw className={'h-3 w-3 ' + (busy ? 'animate-spin' : '')} />
-      {busy ? 'Refunding…' : 'Refund'}
+      {busy ? 'جارٍ الاسترداد…' : 'استرداد'}
     </button>
   )
 }

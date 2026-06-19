@@ -5,10 +5,10 @@ import { motion } from 'framer-motion'
 type Stat = { value: string; label: string; color: string }
 
 const STATS: Stat[] = [
-  { value: '8',         label: 'Live templates',       color: '#5e6ad2' },
-  { value: '2,400+',    label: 'Sites launched',       color: '#d97706' },
-  { value: 'Under 1m',  label: 'Avg. time to live',    color: '#27a644' },
-  { value: '99.9%',     label: 'Uptime, 30-day',       color: '#5e6ad2' },
+  { value: '8',              label: 'قوالب متاحة',          color: '#5e6ad2' },
+  { value: '2,400+',         label: 'موقع تم إطلاقه',       color: '#d97706' },
+  { value: 'أقل من دقيقة',   label: 'متوسط وقت الإطلاق',    color: '#27a644' },
+  { value: '99.9%',          label: 'وقت التشغيل، 30 يومًا', color: '#5e6ad2' },
 ]
 
 export default function StatsSection() {

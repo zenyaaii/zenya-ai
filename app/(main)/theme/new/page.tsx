@@ -21,9 +21,9 @@ const WEBSITE_STYLES: Array<{
   name: string
   description: string
 }> = [
-  { id: 'one_product', name: 'One Product', description: 'High-converting product-first flow (best for single offer stores).' },
-  { id: 'catalog_store', name: 'Catalog Store', description: 'Multi-product storefront with collection browsing focus.' },
-  { id: 'brand_story', name: 'Brand Story', description: 'Story-led homepage with trust + community + content flow.' }
+  { id: 'one_product', name: 'منتج واحد', description: 'مسار يركّز على المنتج وعالي التحويل (الأفضل لمتاجر العرض الواحد).' },
+  { id: 'catalog_store', name: 'متجر كتالوج', description: 'واجهة متجر متعددة المنتجات تركّز على تصفّح التشكيلات.' },
+  { id: 'brand_story', name: 'قصة العلامة', description: 'صفحة رئيسية تقودها القصة مع الثقة والمجتمع وتدفّق المحتوى.' }
 ]
 
 const STYLE_PRESETS: Array<{
@@ -36,8 +36,8 @@ const STYLE_PRESETS: Array<{
 }> = [
   {
     id: 'clean_light',
-    name: 'Clean Light',
-    description: 'Soft premium surfaces and balanced modern feel.',
+    name: 'فاتح أنيق',
+    description: 'أسطح ناعمة فاخرة وإحساس عصري متوازن.',
     p: '#4f46e5',
     s: '#06b6d4',
     sectionStyles: {
@@ -56,8 +56,8 @@ const STYLE_PRESETS: Array<{
   },
   {
     id: 'bold_gradient',
-    name: 'Bold Gradient',
-    description: 'Stronger contrast, richer glass cards, vivid vibe.',
+    name: 'تدرّج جريء',
+    description: 'تباين أقوى وبطاقات زجاجية أغنى وأجواء نابضة.',
     p: '#7c3aed',
     s: '#06b6d4',
     sectionStyles: {
@@ -76,8 +76,8 @@ const STYLE_PRESETS: Array<{
   },
   {
     id: 'luxury_dark',
-    name: 'Luxury Dark',
-    description: 'Minimal high-end look with restrained surfaces.',
+    name: 'داكن فاخر',
+    description: 'مظهر راقٍ بسيط بأسطح هادئة.',
     p: '#111827',
     s: '#334155',
     sectionStyles: {
@@ -121,14 +121,14 @@ export default function NewThemePage() {
   const [isExtracting, setIsExtracting] = useState(false)
   
   const PALETTES = [
-    { name: 'Modern Tech', p: '#4f46e5', s: '#06b6d4' },
-    { name: 'Nature', p: '#059669', s: '#10b981' },
-    { name: 'Energetic', p: '#dc2626', s: '#f87171' },
-    { name: 'Warmth', p: '#d97706', s: '#fbbf24' },
-    { name: 'Trust', p: '#2563eb', s: '#60a5fa' },
-    { name: 'Royal', p: '#7c3aed', s: '#a78bfa' },
-    { name: 'Playful', p: '#db2777', s: '#f472b6' },
-    { name: 'Minimal', p: '#111827', s: '#6b7280' },
+    { name: 'تقنية عصرية', p: '#4f46e5', s: '#06b6d4' },
+    { name: 'طبيعة', p: '#059669', s: '#10b981' },
+    { name: 'حيوية', p: '#dc2626', s: '#f87171' },
+    { name: 'دفء', p: '#d97706', s: '#fbbf24' },
+    { name: 'ثقة', p: '#2563eb', s: '#60a5fa' },
+    { name: 'ملكي', p: '#7c3aed', s: '#a78bfa' },
+    { name: 'مرِح', p: '#db2777', s: '#f472b6' },
+    { name: 'بسيط', p: '#111827', s: '#6b7280' },
   ]
 
   function applyStylePreset(presetId: StylePresetId) {
@@ -213,7 +213,7 @@ export default function NewThemePage() {
       const limit = profile?.trial_themes_limit ?? 3
 
       if (!isPro && used >= limit) {
-        alert(`You've used all ${limit} free generations. Upgrade to Pro for unlimited.`)
+        alert(`لقد استخدمت كل عمليات التوليد المجانية الـ ${limit}. رقِّ إلى Pro للحصول على عدد غير محدود.`)
         router.push('/pricing')
       }
       setCheckingAuth(false)
@@ -222,7 +222,7 @@ export default function NewThemePage() {
   }, [router, supabase])
 
   if (checkingAuth) {
-    return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+    return <div className="flex min-h-screen items-center justify-center">جارٍ التحميل...</div>
   }
 
   if (!businessType) {
@@ -244,7 +244,7 @@ export default function NewThemePage() {
       } else if (t === 'one_product') {
         router.push('/build')
       } else {
-        alert('This business type is coming soon. We will email you when it launches.')
+        alert('هذا النوع من الأعمال قادم قريبًا. سنراسلك عبر البريد عند إطلاقه.')
       }
     }} />
   }
@@ -267,14 +267,14 @@ export default function NewThemePage() {
     try {
       const r = await fetch('/api/scrape', { method: 'POST', body: JSON.stringify({ url }), headers: { 'Content-Type': 'application/json' } })
       const j = await safeReadJson(r)
-      if (!r.ok || j.error) throw new Error(j.message || j.error || 'Failed to scrape')
+      if (!r.ok || j.error) throw new Error(j.message || j.error || 'فشل الاستخراج')
       setName(j.name)
       setScrapedDescription(j.description || '')
       setProductFacts(j.productFacts || null)
       setImages(j.images)
       setStep(2)
     } catch {
-      alert('Failed to scrape. The product page may be blocking requests. Try another URL or use a supported source.')
+      alert('فشل استخراج البيانات. قد تكون صفحة المنتج تحجب الطلبات. جرّب رابطًا آخر أو استخدم مصدرًا مدعومًا.')
     } finally {
       setLoading(false)
     }
@@ -297,7 +297,7 @@ export default function NewThemePage() {
         headers: { 'Content-Type': 'application/json' },
       })
       const j = await safeReadJson(r)
-      if (!r.ok || j.error) throw new Error(j.message || j.error || 'Failed to generate content')
+      if (!r.ok || j.error) throw new Error(j.message || j.error || 'فشل توليد المحتوى')
       if (typeof j?._meta?.source === 'string' && j._meta.source.startsWith('fallback')) {
         console.warn('AI generation returned fallback content', j?._meta)
       }
@@ -339,7 +339,7 @@ export default function NewThemePage() {
       const saveJson = await safeReadJson(saveRes)
       
       if (saveRes.status === 401) {
-        alert('Please log in to save your theme.')
+        alert('يرجى تسجيل الدخول لحفظ قالبك.')
         window.location.href = '/login'
         return
       }
@@ -347,15 +347,15 @@ export default function NewThemePage() {
       if (saveJson.id) {
         window.location.href = `/preview/${saveJson.id}`
       } else if (saveJson.error === 'limit_reached') {
-        alert('You have reached your free theme limit. Please upgrade to continue.')
+        alert('لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.')
         // Optional: redirect to pricing
         // window.location.href = '/pricing'
       } else {
-        alert('Failed to save theme. Please try again.')
+        alert('فشل حفظ القالب. يرجى المحاولة مجددًا.')
       }
     } catch (e) {
       console.error(e)
-      alert((e as any)?.message || 'Failed to generate and save theme.')
+      alert((e as any)?.message || 'فشل توليد القالب وحفظه.')
     } finally {
       setLoading(false)
     }
@@ -378,7 +378,7 @@ export default function NewThemePage() {
         headers: { 'Content-Type': 'application/json' },
       })
       const j = await safeReadJson(r)
-      if (!r.ok || j.error) throw new Error(j.message || j.error || 'Failed to generate preview')
+      if (!r.ok || j.error) throw new Error(j.message || j.error || 'فشل توليد المعاينة')
       if (typeof j?._meta?.source === 'string' && j._meta.source.startsWith('fallback')) {
         console.warn('AI generation returned fallback content', j?._meta)
       }
@@ -395,7 +395,7 @@ export default function NewThemePage() {
       setStep(3)
     } catch (e) {
       console.error(e)
-      alert((e as any)?.message || 'Failed to generate product preview.')
+      alert((e as any)?.message || 'فشل توليد معاينة المنتج.')
     } finally {
       setLoading(false)
     }
@@ -405,8 +405,8 @@ export default function NewThemePage() {
     <main className="mx-auto max-w-5xl px-6 py-12">
       <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Create New Theme</h1>
-          <p className="mt-2 text-muted">Go from product link to published store in minutes.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">إنشاء قالب جديد</h1>
+          <p className="mt-2 text-muted">انتقل من رابط المنتج إلى متجر منشور خلال دقائق.</p>
         </div>
         <StepProgress step={step} total={3} />
       </div>
@@ -422,23 +422,24 @@ export default function NewThemePage() {
           <div className="mx-auto max-w-lg space-y-6 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">🔗</div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Start with your product</h2>
-              <p className="mt-2 text-muted">Paste the URL of your product (AliExpress, Amazon, Shopify, etc).</p>
+              <h2 className="text-xl font-bold text-foreground">ابدأ بمنتجك</h2>
+              <p className="mt-2 text-muted">الصق رابط منتجك (AliExpress أو Amazon أو Shopify، إلخ).</p>
             </div>
             <div className="relative">
-              <input 
-                value={url} 
-                onChange={(e) => setUrl(e.target.value)} 
-                placeholder="https://..." 
-                className="w-full rounded-xl border border-token bg-surface px-5 py-4 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" 
+              <input
+                dir="ltr"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full rounded-xl border border-token bg-surface px-5 py-4 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <button 
-              disabled={!url || loading} 
-              onClick={scrape} 
+            <button
+              disabled={!url || loading}
+              onClick={scrape}
               className="w-full rounded-full bg-primary py-4 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02] disabled:opacity-70"
             >
-              {loading ? 'Analyzing Product...' : 'Start Building'}
+              {loading ? 'جارٍ تحليل المنتج...' : 'ابدأ البناء'}
             </button>
           </div>
         )}
@@ -448,23 +449,23 @@ export default function NewThemePage() {
             {/* Success Banner */}
             <div className="rounded-xl bg-green-500/10 p-4 flex items-center gap-3 text-green-600 dark:text-green-400 border border-green-500/20">
               <span className="text-xl">✅</span>
-              <span className="font-medium">Success! We found your product details.</span>
+              <span className="font-medium">رائع! وجدنا تفاصيل منتجك.</span>
             </div>
 
             {/* Name Verification */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground">Product Name</label>
+              <label className="text-sm font-bold text-foreground">اسم المنتج</label>
               <div className="flex gap-3">
                 <input 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Enter product name..."
+                  placeholder="أدخل اسم المنتج..."
                 />
                 <button
                   onClick={async () => {
                     const baseContext = scrapedDescription || name || "an ecommerce product";
-                    setName("Generating...");
+                    setName("جارٍ التوليد...");
                     try {
                       const res = await fetch('/api/generate-name', {
                         method: 'POST',
@@ -472,7 +473,7 @@ export default function NewThemePage() {
                         body: JSON.stringify({ context: baseContext.substring(0, 500) })
                       });
                       const data = await res.json();
-                      setName(data.name || "Premium Product");
+                      setName(data.name || "منتج مميّز");
                     } catch (e) {
                       setName("");
                     }
@@ -480,18 +481,19 @@ export default function NewThemePage() {
                   disabled={loading}
                   className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-primary px-5 py-3 font-bold text-white shadow-sm transition hover:scale-[1.02] active:scale-95 disabled:opacity-70"
                 >
-                  <span>✨</span> Auto-Name
+                  <span>✨</span> تسمية تلقائية
                 </button>
               </div>
-              <p className="text-xs text-muted">Edit the name to make it look professional (e.g., remove &quot;2024 New&quot; or brand tags).</p>
+              <p className="text-xs text-muted">عدّل الاسم ليبدو احترافيًا (مثلاً، احذف «2024 جديد» أو وسوم العلامات التجارية).</p>
             </div>
 
             {/* Price & Shop Name */}
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Original Price ($)</label>
-                <input 
+                <label className="text-sm font-bold text-foreground">السعر الأصلي ($)</label>
+                <input
                   type="number"
+                  dir="ltr"
                   value={originalPrice}
                   onChange={(e) => setOriginalPrice(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -499,9 +501,10 @@ export default function NewThemePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Sale Price ($)</label>
-                <input 
+                <label className="text-sm font-bold text-foreground">سعر العرض ($)</label>
+                <input
                   type="number"
+                  dir="ltr"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -509,12 +512,12 @@ export default function NewThemePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Store Name</label>
-                <input 
+                <label className="text-sm font-bold text-foreground">اسم المتجر</label>
+                <input
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="e.g. Zenya Store"
+                  placeholder="مثلاً: متجر زينيا"
                 />
               </div>
             </div>
@@ -523,29 +526,29 @@ export default function NewThemePage() {
             <div className="pt-4">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Select Images</h2>
-                  <p className="text-sm text-muted">Choose the best photos for your store.</p>
+                  <h2 className="text-xl font-bold text-foreground">اختر الصور</h2>
+                  <p className="text-sm text-muted">اختر أفضل الصور لمتجرك.</p>
                 </div>
-                <span className="text-sm font-medium bg-surface px-3 py-1 rounded-full border border-token">{selectedImages.length} selected</span>
+                <span className="text-sm font-medium bg-surface px-3 py-1 rounded-full border border-token">{selectedImages.length} محدّدة</span>
               </div>
               <ImageSelector images={images} selected={selectedImages} onChange={setSelectedImages} />
             </div>
 
             <div className="flex justify-between pt-6">
-              <button onClick={() => setStep(1)} className="rounded-full border border-token px-6 py-2.5 font-medium text-muted transition hover:bg-surface hover:text-foreground">Back</button>
+              <button onClick={() => setStep(1)} className="rounded-full border border-token px-6 py-2.5 font-medium text-muted transition hover:bg-surface hover:text-foreground">رجوع</button>
               <div className="flex flex-col items-end gap-2">
                 <button
                   disabled={selectedImages.length < 5 || !name.trim() || loading}
                   onClick={generateProductPreview}
                   className="rounded-full bg-primary px-8 py-2.5 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  {loading ? 'Generating Product Preview...' : 'Generate Product Preview'}
+                  {loading ? 'جارٍ توليد معاينة المنتج...' : 'ولّد معاينة المنتج'}
                 </button>
                 {selectedImages.length < 5 && (
-                  <span className="text-xs font-medium text-red-500">Please select at least 5 images to proceed. ({selectedImages.length}/5)</span>
+                  <span className="text-xs font-medium text-red-500">يرجى اختيار 5 صور على الأقل للمتابعة. ({selectedImages.length}/5)</span>
                 )}
                 {!name.trim() && selectedImages.length >= 5 && (
-                  <span className="text-xs font-medium text-red-500">Please provide a product name to proceed.</span>
+                  <span className="text-xs font-medium text-red-500">يرجى إدخال اسم المنتج للمتابعة.</span>
                 )}
               </div>
             </div>
@@ -556,8 +559,8 @@ export default function NewThemePage() {
         {step === 3 && (
           <div className="mx-auto max-w-4xl space-y-10">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-foreground">Design Your Store</h2>
-              <p className="mt-2 text-lg text-muted">Choose a starting palette and fine-tune your colors.</p>
+              <h2 className="text-3xl font-bold text-foreground">صمّم متجرك</h2>
+              <p className="mt-2 text-lg text-muted">اختر لوحة ألوان للبدء واضبط ألوانك بدقّة.</p>
             </div>
             
             <div className="grid gap-8 lg:grid-cols-12">
@@ -566,8 +569,8 @@ export default function NewThemePage() {
                 {/* Style Presets */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-foreground">Theme Style Presets</h3>
-                    <span className="text-xs text-muted">One click full style direction</span>
+                    <h3 className="text-sm font-bold text-foreground">أنماط القالب الجاهزة</h3>
+                    <span className="text-xs text-muted">اتجاه تصميمي كامل بنقرة واحدة</span>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-3">
                     {STYLE_PRESETS.map((preset) => {
@@ -634,7 +637,7 @@ export default function NewThemePage() {
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-md bg-token text-xs">🎨</div>
-                      <h3 className="font-bold text-foreground">Custom Colors</h3>
+                      <h3 className="font-bold text-foreground">ألوان مخصّصة</h3>
                     </div>
                     <button 
                       disabled={isExtracting}
@@ -683,11 +686,11 @@ export default function NewThemePage() {
                     >
                       {isExtracting ? (
                         <>
-                          <span className="animate-spin">⏳</span> Analyzing...
+                          <span className="animate-spin">⏳</span> جارٍ التحليل...
                         </>
                       ) : (
                         <>
-                          Magic Match ✨
+                          مطابقة سحرية ✨
                         </>
                       )}
                     </button>
@@ -695,54 +698,56 @@ export default function NewThemePage() {
                   <div className="grid gap-6 md:grid-cols-2">
                     {/* Primary Color Input */}
                     <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">Primary Color</label>
+                      <label className="block text-sm font-bold text-foreground mb-2">اللون الأساسي</label>
                       <div className="flex items-center gap-3">
                         <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
-                          <input 
-                            type="color" 
-                            value={primary} 
+                          <input
+                            type="color"
+                            value={primary}
                             onChange={(e) => setPrimary(e.target.value)}
                             className="absolute -left-2 -top-2 h-20 w-24 cursor-pointer p-0 border-0"
                           />
                         </div>
                         <div className="flex-1 relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted font-mono text-sm">#</span>
-                          <input 
-                            type="text" 
-                            value={primary.replace('#', '')} 
+                          <input
+                            type="text"
+                            dir="ltr"
+                            value={primary.replace('#', '')}
                             onChange={(e) => setPrimary(`#${e.target.value.replace('#', '')}`)}
                             className="w-full pl-7 pr-3 py-3 font-mono text-sm border border-token bg-surface rounded-lg focus:ring-2 focus:ring-primary focus:border-primary uppercase"
                             maxLength={6}
                           />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-muted">Used for buttons, links, and highlights.</p>
+                      <p className="mt-2 text-xs text-muted">يُستخدَم للأزرار والروابط والإبرازات.</p>
                     </div>
 
                     {/* Secondary Color Input */}
                     <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">Accent Color</label>
+                      <label className="block text-sm font-bold text-foreground mb-2">لون التمييز</label>
                       <div className="flex items-center gap-3">
                          <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
-                          <input 
-                            type="color" 
-                            value={secondary} 
+                          <input
+                            type="color"
+                            value={secondary}
                             onChange={(e) => setSecondary(e.target.value)}
                             className="absolute -left-2 -top-2 h-20 w-24 cursor-pointer p-0 border-0"
                           />
                         </div>
                         <div className="flex-1 relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted font-mono text-sm">#</span>
-                          <input 
-                            type="text" 
-                            value={secondary.replace('#', '')} 
+                          <input
+                            type="text"
+                            dir="ltr"
+                            value={secondary.replace('#', '')}
                             onChange={(e) => setSecondary(`#${e.target.value.replace('#', '')}`)}
                             className="w-full pl-7 pr-3 py-3 font-mono text-sm border border-token bg-surface rounded-lg focus:ring-2 focus:ring-primary focus:border-primary uppercase"
                             maxLength={6}
                           />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-muted">Used for sales tags, alerts, and secondary actions.</p>
+                      <p className="mt-2 text-xs text-muted">يُستخدَم لوسوم التخفيضات والتنبيهات والإجراءات الثانوية.</p>
                     </div>
                   </div>
                 </div>
@@ -768,20 +773,20 @@ export default function NewThemePage() {
 
             <div className="flex justify-between pt-8 border-t border-token">
               <button onClick={() => setStep(2)} className="flex items-center gap-2 rounded-full border border-token px-8 py-3 font-bold text-muted transition hover:bg-surface hover:text-foreground">
-                <span>←</span> Back
+                <span>→</span> رجوع
               </button>
-              <button 
-                onClick={generateAndSave} 
+              <button
+                onClick={generateAndSave}
                 disabled={loading}
                 className="flex items-center gap-2 rounded-full bg-primary px-10 py-3 font-bold text-white shadow-xl shadow-primary/20 transition hover:scale-105 hover:shadow-primary/30 disabled:opacity-70 disabled:hover:scale-100"
               >
                 {loading ? (
                   <>
-                    <span className="animate-spin">⏳</span> Building Store...
+                    <span className="animate-spin">⏳</span> جارٍ بناء المتجر...
                   </>
                 ) : (
                   <>
-                    Generate & Publish <span>→</span>
+                    ولّد وانشر <span>←</span>
                   </>
                 )}
               </button>
@@ -806,72 +811,72 @@ type BusinessTypeOption = {
 const BUSINESS_TYPES: BusinessTypeOption[] = [
   {
     id: 'restaurant',
-    name: 'Restaurant',
-    tagline: 'Fine dining · Cafe · Bar',
-    description: 'Menu, reservations, hours, gallery, story. Maison · fine-dining template.',
+    name: 'مطعم',
+    tagline: 'مطاعم راقية · مقاهٍ',
+    description: 'قائمة طعام وحجوزات ومواعيد ومعرض صور وقصة. قالب «دار» للمطاعم الراقية.',
     accent: '#c8a96a',
     status: 'live',
     cover: themePreview('restaurant')
   },
   {
     id: 'one_product',
-    name: 'One-Product Store',
-    tagline: 'Dropshipping · Single offer',
-    description: 'High-converting one-product funnel with bundles, urgency, and trust blocks.',
+    name: 'متجر منتج واحد',
+    tagline: 'دروبشيبينغ · عرض واحد',
+    description: 'مسار منتج واحد عالي التحويل مع الحزم وعناصر الإلحاح وكتل الثقة.',
     accent: '#6366f1',
     status: 'live',
     cover: themePreview('one_product')
   },
   {
     id: 'saas',
-    name: 'SaaS / Software',
-    tagline: 'Product landing · B2B',
-    description: 'Features, pricing tiers, integrations, and demo CTA. Atlas template — built for modern SaaS products.',
+    name: 'برمجيات / SaaS',
+    tagline: 'صفحة منتج · B2B',
+    description: 'مزايا وباقات أسعار وتكاملات وزر طلب عرض توضيحي. قالب «أطلس» — مصمَّم لمنتجات SaaS الحديثة.',
     accent: '#6366f1',
     status: 'live',
     cover: themePreview('atlas')
   },
   {
     id: 'services',
-    name: 'Local Services',
-    tagline: 'Trades · Salons · Agencies',
-    description: 'Premium local-service site with services, proof, before/after, areas served, reviews, and quote flow.',
+    name: 'خدمات محلية',
+    tagline: 'حِرَف · صالونات · وكالات',
+    description: 'موقع خدمات محلية فاخر مع الخدمات والأدلّة وقبل/بعد ومناطق الخدمة والتقييمات ومسار طلب عرض السعر.',
     accent: '#f59e0b',
     status: 'live',
     cover: themePreview('services')
   },
   {
     id: 'collective',
-    name: 'Catalog Store',
-    tagline: 'Multi-product · Collections',
-    description: 'Luxury aurora-lit catalog with curated collections, bestsellers, new arrivals, brand story, and newsletter. Collective template.',
+    name: 'متجر كتالوج',
+    tagline: 'متعدد المنتجات · تشكيلات',
+    description: 'كتالوج فاخر بإضاءة شفقية مع تشكيلات منتقاة والأكثر مبيعًا والوافد الجديد وقصة العلامة والنشرة البريدية. قالب «نُخبة».',
     accent: '#10b981',
     status: 'live',
     cover: themePreview('collective')
   },
   {
     id: 'studio',
-    name: 'Brand Story',
-    tagline: 'Editorial · Founder story',
-    description: 'Premium editorial brand page with giant display type, founder letter, timeline, values, press wall, and community stats. Studio template.',
+    name: 'قصة العلامة',
+    tagline: 'تحريري · قصة المؤسّس',
+    description: 'صفحة علامة تحريرية فاخرة بخطوط عرض ضخمة ورسالة المؤسّس وخط زمني وقيم وجدار صحافة وإحصاءات المجتمع. قالب «ستوديو».',
     accent: '#0a0a0a',
     status: 'live',
     cover: themePreview('studio')
   },
   {
     id: 'lookbook',
-    name: 'Fashion / Apparel',
-    tagline: 'Lookbook · Editorial · Brand',
-    description: 'Full-bleed editorial lookbook, bestsellers grid, brand story, press wall, reviews, and newsletter.',
+    name: 'أزياء محتشمة',
+    tagline: 'لوك بوك · تحريري · علامة',
+    description: 'لوك بوك تحريري بكامل العرض وشبكة الأكثر مبيعًا وقصة العلامة وجدار صحافة وتقييمات ونشرة بريدية.',
     accent: '#0a0a0a',
     status: 'live',
     cover: themePreview('lookbook')
   },
   {
     id: 'wellness',
-    name: 'Wellness Studio',
-    tagline: 'Spa · Yoga · Wellness',
-    description: 'Treatment menu, practitioner profiles, gallery, testimonials, and booking flow.',
+    name: 'ستوديو عافية',
+    tagline: 'سبا · يوغا · عافية',
+    description: 'قائمة جلسات وملفات المختصّين ومعرض صور وشهادات ومسار حجز.',
     accent: '#14b8a6',
     status: 'live',
     cover: themePreview('wellness')
@@ -890,12 +895,12 @@ function BusinessTypePicker({ onPick }: { onPick: (type: string) => void }) {
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-16">
         <div className="mb-12 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted">Step 1 of 2</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted">الخطوة 1 من 2</p>
           <h1 className="mt-3 text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl">
-            What kind of business?
+            ما نوع نشاطك؟
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-muted">
-            Pick the closest match. Each business type uses a different layout, content structure, and AI prompt.
+            اختر الأقرب لنشاطك. كل نوع عمل يستخدم تخطيطًا وبنية محتوى وموجّه ذكاء اصطناعي مختلفًا.
           </p>
         </div>
 
@@ -919,14 +924,14 @@ function BusinessTypePicker({ onPick }: { onPick: (type: string) => void }) {
                   />
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)' }} />
                   <div className="absolute left-0 top-0 h-1 w-full" style={{ background: t.accent }} />
-                  <div className="absolute right-3 top-3">
+                  <div className="absolute end-3 top-3">
                     {live ? (
                       <span className="rounded-full px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-black" style={{ background: t.accent }}>
-                        Live
+                        متاح
                       </span>
                     ) : (
                       <span className="rounded-full border border-white/30 bg-black/40 px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-white backdrop-blur">
-                        Coming soon
+                        قريبًا
                       </span>
                     )}
                   </div>

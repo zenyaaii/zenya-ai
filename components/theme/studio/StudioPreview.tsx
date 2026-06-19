@@ -88,9 +88,11 @@ function Eyebrow({ text, colors, fonts }: { text: string; colors: ReturnType<typ
   )
 }
 
-// ─── Unsplash images ────────────────────────────────────────────────────────────
-const HERO_IMG = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=85'
-const FOUNDER_IMG = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80'
+// ─── صور (بلا نساء) ───────────────────────────────────────────────────────────
+// سياسة الصور: لا صور لنساء غير محجّبات. الواجهة = مشهد ورشة/حِرفة، وصورة
+// المؤسّس = رجل. يُرجى التحقّق البصري والاستبدال عند الحاجة.
+const HERO_IMG = 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=1400&q=85'
+const FOUNDER_IMG = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80'
 const PROCESS_IMG = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80'
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
@@ -248,7 +250,7 @@ export default function StudioPreview({
           <Rule color={colors.border} className="mb-16" />
           <div className="grid gap-16 md:grid-cols-[1fr_2fr]">
             <motion.div {...slideInAnim(rm,0, 'left')}>
-              <Eyebrow text="Our mission" colors={colors} fonts={fonts} />
+              <Eyebrow text="رسالتنا" colors={colors} fonts={fonts} />
             </motion.div>
             <motion.div {...slideInAnim(rm,0.15, 'right')}>
               <p

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createClient } from '@/utils/supabase/server'
+import { logAiUsage } from '@/lib/ai-usage'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -53,18 +54,18 @@ export async function POST(req: NextRequest) {
   const openai = new OpenAI({ apiKey: key })
 
   const sys = [
-    'You name dropshipping products for one-product Shopify stores.',
+    'You name dropshipping products for Arabic one-product Shopify stores. The brand serves Arab customers, so every name must be in Arabic.',
     'Output is consumed by a brand picker UI — return ONLY a JSON array.',
     '',
     'Rules:',
-    '• 8 names total.',
-    '• 1–3 words each. No taglines, no punctuation other than & or -.',
-    '• Sound like a real consumer brand — punchy, brandable, memorable.',
-    '• Mix styles: invented words (NovaGlow), compound nouns (PocketSpa), evocative singles (Halo).',
-    '• Never include "TM", "®", "the", "premium", "ultimate", "best".',
-    '• Avoid trademarked names (Apple, Tesla, Nike, etc.).',
-    '• No emojis. No ALL CAPS unless the brand is an acronym.',
-    '• Each name must feel ownable as a .com — short, distinctive.',
+    '• 8 names total, ALL written in Arabic script.',
+    '• 1–2 words each. No taglines, no Latin letters, no punctuation.',
+    '• Sound like a real Arabic consumer brand — punchy, brandable, memorable.',
+    '• Mix styles: evocative single words (وميض، نور، أصيل، ضياء), short compounds (نور بيت، لمسة).',
+    '• Never include generic filler like "الأفضل"، "الفاخر"، "الأمثل"، "بريميوم".',
+    '• Avoid trademarked names.',
+    '• No emojis.',
+    '• Each name must feel ownable and distinctive — short and easy to remember.',
   ].join('\n')
 
   const userParts: string[] = []
@@ -73,17 +74,17 @@ export async function POST(req: NextRequest) {
   if (highlights.length) userParts.push(`Highlights:\n- ${highlights.join('\n- ')}`)
   if (vibe) {
     const vibeNote: Record<string, string> = {
-      bold: 'Vibe: bold, high-energy, conversion-focused.',
-      premium: 'Vibe: quiet luxury, refined, $$$.',
-      dark: 'Vibe: tech, gear, modern, after-dark.',
-      warm: 'Vibe: cozy, lifestyle, lived-in.',
+      bold: 'Vibe: bold, high-energy, conversion-focused. Arabic names only.',
+      premium: 'Vibe: quiet luxury, refined, premium. Arabic names only.',
+      dark: 'Vibe: tech, gear, modern, after-dark. Arabic names only.',
+      warm: 'Vibe: cozy, lifestyle, lived-in. Arabic names only.',
     }
     userParts.push(vibeNote[vibe])
   }
   userParts.push('')
-  userParts.push('Return a JSON object: { "names": ["...", "...", ...] }. No prose.')
+  userParts.push('Return a JSON object: { "names": ["...", "...", ...] } where every name is in Arabic script. No prose.')
 
-  const userPrompt = userParts.join('\n\n') || 'Generate 8 brandable product names for a generic dropshipping product.'
+  const userPrompt = userParts.join('\n\n') || 'Generate 8 brandable Arabic product names for a generic dropshipping product.'
 
   try {
     const ctrl = new AbortController()
@@ -99,6 +100,8 @@ export async function POST(req: NextRequest) {
       max_tokens: 300,
     }, { signal: ctrl.signal as any })
     clearTimeout(timer)
+
+    await logAiUsage({ operation: 'ai-name', userId: user.id, model: MODEL }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || '{}'
     let parsed: any

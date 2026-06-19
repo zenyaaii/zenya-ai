@@ -27,7 +27,7 @@ export type AuroraTint = {
 export const auroraTints: Record<string, AuroraTint> = {
   /** The original Shopify path — URL → AI → downloadable ZIP. */
   one_product: {
-    label: 'Storefront',
+    label: 'متجر',
     accent: '#6366f1',
     orb1: 'rgba(99,102,241,0.18)',
     orb2: 'rgba(167,139,250,0.14)',
@@ -36,7 +36,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Fine-dining / restaurant — warm amber + rose. */
   restaurant: {
-    label: 'Maison',
+    label: 'مطعم',
     accent: '#c8a96a',
     orb1: 'rgba(200,169,106,0.20)',
     orb2: 'rgba(244,114,91,0.12)',
@@ -45,7 +45,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** SaaS / software — Linear indigo + sky. */
   atlas: {
-    label: 'Atlas',
+    label: 'تطبيق',
     accent: '#5e6ad2',
     orb1: 'rgba(94,106,210,0.18)',
     orb2: 'rgba(125,211,252,0.14)',
@@ -54,7 +54,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Local services / trades — amber + warm gold. */
   services: {
-    label: 'Trade',
+    label: 'خدمات',
     accent: '#f59e0b',
     orb1: 'rgba(245,158,11,0.18)',
     orb2: 'rgba(251,191,36,0.14)',
@@ -63,7 +63,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Catalog / multi-product — emerald + mint. */
   collective: {
-    label: 'Collective',
+    label: 'تشكيلة',
     accent: '#10b981',
     orb1: 'rgba(16,185,129,0.18)',
     orb2: 'rgba(110,231,183,0.14)',
@@ -72,7 +72,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Brand story / editorial — ink + gold accent on cream. */
   studio: {
-    label: 'Studio',
+    label: 'ستوديو',
     accent: '#1c1c1c',
     orb1: 'rgba(217,164,79,0.18)',
     orb2: 'rgba(255,237,213,0.20)',
@@ -81,7 +81,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Fashion / apparel — ink + blush. */
   lookbook: {
-    label: 'Lookbook',
+    label: 'أزياء',
     accent: '#1c1c1c',
     orb1: 'rgba(252,165,165,0.16)',
     orb2: 'rgba(252,231,243,0.18)',
@@ -90,7 +90,7 @@ export const auroraTints: Record<string, AuroraTint> = {
 
   /** Wellness / spa / yoga — teal + soft sage. */
   wellness: {
-    label: 'Wellness',
+    label: 'عافية',
     accent: '#14b8a6',
     orb1: 'rgba(20,184,166,0.18)',
     orb2: 'rgba(167,243,208,0.14)',
@@ -104,7 +104,7 @@ export const auroraTints: Record<string, AuroraTint> = {
  * existing Linear × Lovable body::before gradient.
  */
 export const defaultTint: AuroraTint = {
-  label: 'Zenya',
+  label: 'زينيا',
   accent: '#5e6ad2',
   orb1: 'rgba(94,106,210,0.16)',
   orb2: 'rgba(217,119,6,0.10)',

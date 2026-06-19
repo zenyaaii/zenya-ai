@@ -44,12 +44,12 @@ function adminDb() {
 }
 
 const STATUS_TINT: Record<Row['status'], { bg: string; fg: string; ring: string; label: string }> = {
-  pending_payment: { bg: 'rgba(28,28,28,0.06)',  fg: '#5f5f5d', ring: 'rgba(28,28,28,0.14)', label: 'Awaiting payment' },
-  paid:            { bg: 'rgba(94,106,210,0.10)', fg: '#5e6ad2', ring: 'rgba(94,106,210,0.28)', label: 'Paid · registering' },
-  registering:     { bg: 'rgba(94,106,210,0.10)', fg: '#5e6ad2', ring: 'rgba(94,106,210,0.28)', label: 'Registering…' },
-  active:          { bg: 'rgba(21,128,61,0.10)',  fg: '#15803d', ring: 'rgba(21,128,61,0.28)',  label: 'Active' },
-  failed:          { bg: 'rgba(220,38,38,0.10)',  fg: '#b91c1c', ring: 'rgba(220,38,38,0.30)',  label: 'Failed' },
-  refunded:        { bg: 'rgba(217,119,6,0.10)',  fg: '#b45309', ring: 'rgba(217,119,6,0.28)',  label: 'Refunded' },
+  pending_payment: { bg: 'rgba(28,28,28,0.06)',  fg: '#5f5f5d', ring: 'rgba(28,28,28,0.14)', label: 'بانتظار الدفع' },
+  paid:            { bg: 'rgba(94,106,210,0.10)', fg: '#5e6ad2', ring: 'rgba(94,106,210,0.28)', label: 'مدفوع · جارٍ التسجيل' },
+  registering:     { bg: 'rgba(94,106,210,0.10)', fg: '#5e6ad2', ring: 'rgba(94,106,210,0.28)', label: 'جارٍ التسجيل…' },
+  active:          { bg: 'rgba(21,128,61,0.10)',  fg: '#15803d', ring: 'rgba(21,128,61,0.28)',  label: 'نشط' },
+  failed:          { bg: 'rgba(220,38,38,0.10)',  fg: '#b91c1c', ring: 'rgba(220,38,38,0.30)',  label: 'فشل' },
+  refunded:        { bg: 'rgba(217,119,6,0.10)',  fg: '#b45309', ring: 'rgba(217,119,6,0.28)',  label: 'مُسترد' },
 }
 
 function fmtUsd(n: number | null | undefined): string {
@@ -60,7 +60,7 @@ function fmtUsd(n: number | null | undefined): string {
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '—'
   const d = new Date(iso)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return d.toLocaleDateString('ar-u-nu-latn', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function daysUntil(iso: string | null | undefined): number | null {
@@ -125,29 +125,29 @@ export default async function AdminDomainsPage({
     <div className="mx-auto max-w-7xl px-6 py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5">
         <div>
-          <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Admin</div>
-          <h1 className="mt-0.5 text-[24px] font-bold tracking-tight text-foreground">Domains</h1>
+          <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الإدارة</div>
+          <h1 className="mt-0.5 text-[24px] font-bold tracking-tight text-foreground">النطاقات</h1>
           <p className="mt-1 text-[13px] text-muted">
-            Every domain bought through Zenya. Refund here if a registration ever fails or the user asks.
+            كل نطاق اشتُري عبر زينيا. استردّ هنا إن فشل تسجيل أو طلب المستخدم ذلك.
           </p>
         </div>
         <Link href="/dashboard" className="inline-flex items-center gap-1 text-[12.5px] text-muted hover:text-foreground">
-          <ArrowLeft className="h-3 w-3" /> Back to dashboard
+          <ArrowLeft className="h-3 w-3 rtl-flip" /> العودة للوحة التحكم
         </Link>
       </header>
 
       {/* ── KPI strip ───────────────────────────────────────────────── */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-5">
-        <Kpi icon={Globe}       label="Active"           value={String(stats.active)} />
-        <Kpi icon={DollarSign}  label="Gross revenue"    value={fmtUsd(stats.revenue)} sub={`${stats.paidCount} paid`} />
-        <Kpi icon={TrendingUp}  label="Margin"           value={fmtUsd(stats.margin)} sub={stats.revenue > 0 ? `${((stats.margin / stats.revenue) * 100).toFixed(1)}%` : '—'} />
-        <Kpi icon={Calendar}    label="Expiring 30d"     value={String(stats.expiring30)} />
-        <Kpi icon={AlertCircle} label="Failed / refunded" value={String(stats.failed + stats.refunded)} />
+        <Kpi icon={Globe}       label="نشط"             value={String(stats.active)} />
+        <Kpi icon={DollarSign}  label="إجمالي الإيراد"   value={fmtUsd(stats.revenue)} sub={`${stats.paidCount} مدفوع`} />
+        <Kpi icon={TrendingUp}  label="الهامش"          value={fmtUsd(stats.margin)} sub={stats.revenue > 0 ? `${((stats.margin / stats.revenue) * 100).toFixed(1)}%` : '—'} />
+        <Kpi icon={Calendar}    label="ينتهي خلال 30 يومًا" value={String(stats.expiring30)} />
+        <Kpi icon={AlertCircle} label="فشل / مُسترد"     value={String(stats.failed + stats.refunded)} />
       </div>
 
       {/* ── Filter chips ────────────────────────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        <FilterChip current={filterStatus} value="" label={`All (${stats.total})`} />
+        <FilterChip current={filterStatus} value="" label={`الكل (${stats.total})`} />
         {(['active', 'registering', 'paid', 'pending_payment', 'failed', 'refunded'] as const).map((s) => (
           <FilterChip
             key={s}
@@ -163,24 +163,24 @@ export default async function AdminDomainsPage({
       {all.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
           <Globe className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
-          <h3 className="mt-4 text-[16px] font-semibold text-foreground">No domain purchases yet</h3>
+          <h3 className="mt-4 text-[16px] font-semibold text-foreground">لا عمليات شراء نطاقات بعد</h3>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-            Once users buy domains through the Find-a-domain widget they’ll show up here. Try one yourself at <Link href="/dashboard/domains" className="text-primary hover:underline">/dashboard/domains</Link>.
+            بمجرد أن يشتري المستخدمون نطاقات عبر أداة البحث عن نطاق، ستظهر هنا. جرّب واحدًا بنفسك من <Link href="/dashboard/domains" className="text-primary hover:underline">/dashboard/domains</Link>.
           </p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-token bg-white">
-          <table className="w-full text-left text-[12.5px]">
+          <table className="w-full text-start text-[12.5px]">
             <thead className="bg-[#fafaf7]">
               <tr>
-                <Th>Domain</Th>
-                <Th>Owner</Th>
-                <Th>Status</Th>
-                <Th className="text-right">Charged</Th>
-                <Th className="text-right">Wholesale</Th>
-                <Th className="text-right">Margin</Th>
-                <Th>Expires</Th>
-                <Th className="text-right">Actions</Th>
+                <Th>النطاق</Th>
+                <Th>المالك</Th>
+                <Th>الحالة</Th>
+                <Th className="text-end">المبلغ المحصَّل</Th>
+                <Th className="text-end">سعر الجملة</Th>
+                <Th className="text-end">الهامش</Th>
+                <Th>ينتهي في</Th>
+                <Th className="text-end">إجراءات</Th>
               </tr>
             </thead>
             <tbody>
@@ -196,7 +196,7 @@ export default async function AdminDomainsPage({
                     <td className="px-3 py-2.5">
                       <div className="font-mono text-foreground">{r.domain}</div>
                       <div className="mt-0.5 text-[11px] text-muted">
-                        {r.years}yr · bought {fmtDate(r.created_at)}
+                        {r.years} سنة · اشتُري {fmtDate(r.created_at)}
                       </div>
                       {r.error_message && (
                         <div className="mt-1 max-w-[24rem] break-words rounded bg-[rgba(220,38,38,0.06)] px-1.5 py-1 text-[11px] text-[#b91c1c]">
@@ -217,20 +217,20 @@ export default async function AdminDomainsPage({
                         {tint.label}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums">{fmtUsd(r.retail_usd_charged)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-muted">{fmtUsd(r.wholesale_usd)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums" style={{ color: margin > 0 ? '#15803d' : '#5f5f5d' }}>
+                    <td className="px-3 py-2.5 text-end tabular-nums">{fmtUsd(r.retail_usd_charged)}</td>
+                    <td className="px-3 py-2.5 text-end tabular-nums text-muted">{fmtUsd(r.wholesale_usd)}</td>
+                    <td className="px-3 py-2.5 text-end tabular-nums" style={{ color: margin > 0 ? '#15803d' : '#5f5f5d' }}>
                       {fmtUsd(margin || null)}
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="text-foreground">{fmtDate(r.expires_at)}</div>
                       {days != null && r.status === 'active' && (
                         <div className={`text-[11px] ${days < 30 ? 'text-[#b45309]' : 'text-muted'}`}>
-                          {days < 0 ? `${-days}d ago` : `in ${days}d`}
+                          {days < 0 ? `قبل ${-days} يومًا` : `خلال ${days} يومًا`}
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-right">
+                    <td className="px-3 py-2.5 text-end">
                       <div className="flex items-center justify-end gap-1.5">
                         {r.status === 'active' && (
                           <a
@@ -239,7 +239,7 @@ export default async function AdminDomainsPage({
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11px] font-medium text-muted hover:bg-black/5"
                           >
-                            Open <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                            فتح <ExternalLink className="h-2.5 w-2.5 opacity-70" />
                           </a>
                         )}
                         {r.stripe_payment_intent_id && (r.status === 'failed' || r.status === 'active' || r.status === 'paid') && (

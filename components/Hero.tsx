@@ -41,14 +41,14 @@ const TYPE_ICON: Record<string, LucideIcon> = {
 
 /** Short tagline per type — keeps each mockup card legible at small size. */
 const TYPE_TAGLINE: Record<string, string> = {
-  one_product: 'Shopify funnel',
-  restaurant:  'Menu · Reservations',
-  atlas:       'SaaS landing',
-  lookbook:    'Fashion · Editorial',
-  collective:  'Multi-product',
-  studio:      'Brand · Founder',
-  services:    'Trades · Salons',
-  wellness:    'Spa · Studio',
+  one_product: 'مسار شوبيفاي',
+  restaurant:  'قائمة · حجوزات',
+  atlas:       'صفحة هبوط لتطبيق',
+  lookbook:    'أزياء · تحرير',
+  collective:  'منتجات متعددة',
+  studio:      'علامة · مؤسّس',
+  services:    'حِرف · صالونات',
+  wellness:    'سبا · ستوديو',
 }
 
 export default function Hero() {
@@ -77,29 +77,29 @@ export default function Hero() {
               }}
             >
               <Sparkles className="h-3 w-3" strokeWidth={2.25} />
-              8 templates · AI-written · Live in minutes
+              8 قوالب · بصياغة الذكاء الاصطناعي · جاهزة خلال دقائق
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
             {...fade(0.06)}
-            className="text-[52px] font-[590] leading-[1.06] tracking-[-1.6px] text-foreground sm:text-[68px] sm:tracking-[-2.2px] xl:text-[76px] xl:tracking-[-2.6px]"
+            className="text-[52px] font-[590] leading-[1.12] tracking-[-1.6px] text-foreground sm:text-[68px] sm:tracking-[-2.2px] xl:text-[76px] xl:tracking-[-2.6px]"
           >
-            Every business deserves
+            كل نشاط تجاري يستحقّ
             <br />
-            <span className="gradient-text">a great website.</span>
+            <span className="gradient-text">موقعًا رائعًا.</span>
           </motion.h1>
 
           {/* Sub */}
           <motion.p
             {...fade(0.12)}
-            className="mx-auto mt-6 max-w-2xl text-[17px] leading-[1.65] text-muted"
+            className="mx-auto mt-6 max-w-2xl text-[17px] leading-[1.85] text-muted"
           >
-            Restaurant, fashion lookbook, SaaS landing, brand story, wellness
-            studio, multi-product catalog, local trades, or a Shopify storefront
-            — pick a template, share a brief, and Zenya writes the copy and
-            ships the site. $9.99 lifetime or $19.99/mo with full hosting.
+            مطعم، أو لوك بوك أزياء، أو صفحة هبوط لتطبيق، أو قصة علامة تجارية، أو
+            مركز عافية، أو متجر بمنتجات متعددة، أو حِرف محلية، أو متجر شوبيفاي —
+            اختر قالبًا، اكتب نبذة، وتتكفّل زينيا بكتابة المحتوى ونشر الموقع.
+            ‎9.99$ مدى الحياة أو 19.99$ شهريًا مع استضافة كاملة.
           </motion.p>
 
           {/* CTAs */}
@@ -111,8 +111,8 @@ export default function Hero() {
                 'btn-shadow-primary hover:opacity-90 active:scale-[0.98]'
               )}
             >
-              Start building free
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5" strokeWidth={2.5} />
+              ابدأ الإنشاء مجانًا
+              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <Link
               href="/themes"
@@ -121,7 +121,7 @@ export default function Hero() {
                 'hover:bg-black/[0.03] hover:text-foreground active:scale-[0.98]'
               )}
             >
-              See the 8 templates
+              شاهد القوالب الثمانية
             </Link>
           </motion.div>
 
@@ -140,7 +140,7 @@ export default function Hero() {
                 ))}
               </div>
               <span className="text-[13px] text-muted">
-                <strong className="font-semibold text-foreground">2,400+</strong> sites launched
+                <strong className="font-semibold text-foreground">2,400+</strong> موقع تم إطلاقه
               </span>
             </div>
 
@@ -150,8 +150,8 @@ export default function Hero() {
               {Array(5).fill(0).map((_, i) => (
                 <Star key={i} className="h-3.5 w-3.5" fill="#d97706" stroke="none" />
               ))}
-              <span className="ml-1 text-[13px] font-medium text-foreground">4.9</span>
-              <span className="text-[13px] text-muted">&nbsp;· Loved by founders &amp; operators</span>
+              <span className="ms-1 text-[13px] font-medium text-foreground">4.9</span>
+              <span className="text-[13px] text-muted">&nbsp;· محبوب من المؤسّسين وأصحاب الأعمال</span>
             </div>
           </motion.div>
         </div>
@@ -192,7 +192,8 @@ export default function Hero() {
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#86efac' }} />
               </div>
               <div
-                className="mx-auto flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] text-muted"
+                dir="ltr"
+                className="mx-auto flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] text-muted font-latin"
                 style={{ background: '#ffffff', border: '1px solid #e5e2d9' }}
               >
                 app.zenya.ai/theme/new
@@ -203,14 +204,14 @@ export default function Hero() {
             <div className="p-6 sm:p-8" style={{ background: '#f7f4ed', minHeight: 360 }}>
               <div className="mb-5 flex items-end justify-between">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Step 1 of 2</p>
-                  <div className="mt-1 text-[15px] font-[590] text-foreground">What kind of business?</div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">الخطوة 1 من 2</p>
+                  <div className="mt-1 text-[15px] font-[590] text-foreground">ما نوع نشاطك التجاري؟</div>
                 </div>
                 <span
                   className="rounded-full px-2.5 py-1 text-[10px] font-medium"
                   style={{ background: 'rgba(39,166,68,0.10)', color: '#27a644', border: '1px solid rgba(39,166,68,0.18)' }}
                 >
-                  8 templates live
+                  8 قوالب متاحة
                 </span>
               </div>
 

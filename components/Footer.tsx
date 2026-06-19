@@ -5,6 +5,7 @@ import { X as XIcon, Heart, ArrowUpRight } from 'lucide-react'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
 import { openConsent } from '@/components/CookieConsent'
+import ZenyaWordmark from '@/components/ZenyaWordmark'
 
 /**
  * GitHub mark — inlined because lucide-react v1+ removed brand icons.
@@ -35,18 +36,18 @@ const DEMO_HREF: Record<string, string> = {
 }
 
 const PRODUCT = [
-  { href: '/themes',     label: 'Browse templates' },
-  { href: '/pricing',    label: 'Pricing'          },
-  { href: '/theme/new',  label: 'Start building'   },
-  { href: '/contact',    label: 'Contact'          },
+  { href: '/themes',     label: 'تصفّح القوالب' },
+  { href: '/pricing',    label: 'الأسعار'       },
+  { href: '/theme/new',  label: 'ابدأ الإنشاء'  },
+  { href: '/contact',    label: 'تواصل معنا'    },
 ]
 
 const LEGAL = [
-  { href: '/privacy',        label: 'Privacy'        },
-  { href: '/terms',          label: 'Terms'          },
-  { href: '/cookies',        label: 'Cookies'        },
-  { href: '/refund',         label: 'Refund'         },
-  { href: '/subprocessors',  label: 'Subprocessors'  },
+  { href: '/privacy',        label: 'الخصوصية'           },
+  { href: '/terms',          label: 'الشروط'             },
+  { href: '/cookies',        label: 'ملفات الارتباط'     },
+  { href: '/refund',         label: 'الاسترجاع'          },
+  { href: '/subprocessors',  label: 'المعالِجون الفرعيون' },
 ]
 
 const SOCIALS = [
@@ -80,19 +81,19 @@ export default function Footer() {
                     'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
                 }}
               >
-                <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+                <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
               </div>
-              <span className="text-[16px] font-semibold tracking-tight text-foreground">Zenya</span>
+              <ZenyaWordmark className="text-[19px]" />
             </Link>
 
-            <p className="max-w-sm text-[14px] leading-[1.65] text-muted">
-              AI website generator for real businesses. Eight premium templates —
-              restaurants, lookbooks, SaaS landing pages, brand stories, and a
-              full Shopify one-product engine. Brief in, live site out.
+            <p className="max-w-sm text-[14px] leading-[1.85] text-muted">
+              منشئ مواقع بالذكاء الاصطناعي للأنشطة التجارية الحقيقية. ثمانية قوالب
+              احترافية — مطاعم، أزياء، صفحات هبوط للتطبيقات، قصص علامات تجارية،
+              ومحرّك متكامل لمتاجر شوبيفاي بمنتج واحد. اكتب نبذة، واحصل على موقع مباشر.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-1.5">
-              {['HTTPS', 'GDPR-compliant', 'EU-hosted DB'].map((badge) => (
+              {['HTTPS', 'متوافق مع GDPR', 'قاعدة بيانات في أوروبا'].map((badge) => (
                 <span
                   key={badge}
                   className="inline-flex items-center rounded-full border border-token bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted"
@@ -123,7 +124,7 @@ export default function Footer() {
           {/* ── Templates (new — communicates the 8 business types) ── */}
           <div className="md:col-span-4">
             <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              Templates
+              القوالب
             </h3>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
               {BUSINESS_TYPE_ORDER.map((key) => {
@@ -158,7 +159,7 @@ export default function Footer() {
           {/* ── Product ── */}
           <div className="md:col-span-2">
             <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              Product
+              المنتج
             </h3>
             <ul className="space-y-2.5">
               {PRODUCT.map((link) => (
@@ -177,7 +178,7 @@ export default function Footer() {
           {/* ── Legal ── */}
           <div className="md:col-span-1">
             <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              Legal
+              قانوني
             </h3>
             <ul className="space-y-2.5">
               {LEGAL.map((link) => (
@@ -197,21 +198,21 @@ export default function Footer() {
         {/* ── Bottom bar ── */}
         <div className="mt-14 flex flex-col gap-3 border-t border-token pt-6 md:flex-row md:items-center md:justify-between">
           <p className="text-[12.5px] text-muted">
-            © {new Date().getFullYear()} Zenya. Operated as a Dutch eenmanszaak.
-            All rights reserved.
+            © {new Date().getFullYear()} زينيا. تُدار كمؤسسة فردية هولندية.
+            جميع الحقوق محفوظة.
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted">
             <button
               onClick={openConsent}
               className="transition-colors hover:text-foreground"
             >
-              Cookie preferences
+              تفضيلات ملفات الارتباط
             </button>
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1.5">
-              Built with
+              صُنع بحبّ
               <Heart className="h-3.5 w-3.5 text-[#dc2626]" aria-hidden fill="currentColor" />
-              in the EU.
+              في الاتحاد الأوروبي.
             </span>
           </div>
         </div>

@@ -35,25 +35,25 @@ type Form = {
 
 function buildSampleForm(): Form {
   return {
-    brand_name: 'REALM',
-    brand_tagline: 'Curated for the life well lived.',
-    brand_description: 'A multi-brand storefront for home, wardrobe, and wellness. 400 products, every one tested in our own studio before it goes live. We buy what we\'d buy again.',
-    categories: 'Home & Living, Fashion & Apparel, Beauty & Skincare, Wellness, Kitchen & Dining',
-    curation_story: 'We don\'t accept submissions. Twice a year our team visits 200+ studios, mills, and labs across Europe, Japan, and Mexico. If a piece doesn\'t survive six months of personal use, it doesn\'t make the floor.',
+    brand_name: 'نُخبة',
+    brand_tagline: 'منتقاة لحياة تُعاش بإتقان.',
+    brand_description: 'واجهة متجر متعددة العلامات للمنزل والخزانة والعافية. 400 منتج، كلٌّ منها مُختبَر في ستوديونا قبل عرضه. نشتري ما نشتريه ثانيةً.',
+    categories: 'المنزل والمعيشة، الأزياء والملابس، الجمال والعناية بالبشرة، العافية، المطبخ والطعام',
+    curation_story: 'لا نقبل الطلبات المفتوحة. مرّتين سنويًا يزور فريقنا أكثر من 200 ستوديو ومشغل ومختبر حول العالم. وإن لم تصمد قطعة ستة أشهر من الاستخدام الشخصي، فلن تصل إلى المتجر.',
     collections: [
-      { id: uid(), name: 'The Living Room', tagline: 'Objects you live around.' },
-      { id: uid(), name: 'Daily Wardrobe', tagline: 'A small wardrobe, well-edited.' },
-      { id: uid(), name: 'Bath & Body', tagline: 'For the slow hours.' },
-      { id: uid(), name: 'The Kitchen', tagline: 'Tools that earn their place.' },
+      { id: uid(), name: 'غرفة المعيشة', tagline: 'أشياء تعيش حولها.' },
+      { id: uid(), name: 'الخزانة اليومية', tagline: 'خزانة صغيرة، منتقاة بعناية.' },
+      { id: uid(), name: 'الحمّام والجسد', tagline: 'لساعات التمهّل.' },
+      { id: uid(), name: 'المطبخ', tagline: 'أدوات تستحق مكانها.' },
     ],
-    price_min: '$45',
-    price_max: '$895',
-    price_avg: '$185',
+    price_min: '45$',
+    price_max: '895$',
+    price_avg: '185$',
     sustainability: true,
-    shipping_perks: 'Free shipping over $150 · 3–5 day delivery',
-    returns_policy: '14-day free returns, no questions',
-    customer_count: '28,000+ households',
-    review_count: '6,800+ reviews',
+    shipping_perks: 'شحن مجاني فوق 150$ · توصيل خلال 3 إلى 5 أيام',
+    returns_policy: 'إرجاع مجاني خلال 14 يومًا، دون أسئلة',
+    customer_count: '+28,000 أسرة',
+    review_count: '+6,800 تقييم',
     review_rating: '4.9',
     style_preset: 'jade',
   }
@@ -81,8 +81,8 @@ const INITIAL_FORM: Form = {
 }
 
 const CATEGORY_SUGGESTIONS = [
-  'Home & Living', 'Fashion & Apparel', 'Beauty & Skincare', 'Wellness', 'Kitchen & Dining',
-  'Art & Collectibles', 'Accessories', 'Books & Stationery', 'Outdoor & Travel', 'Tech Essentials'
+  'المنزل والمعيشة', 'الأزياء والملابس', 'الجمال والعناية بالبشرة', 'العافية', 'المطبخ والطعام',
+  'الفن والمقتنيات', 'الإكسسوارات', 'الكتب والقرطاسية', 'الهواء الطلق والسفر', 'أساسيات التقنية'
 ]
 
 const sectionMotion = {
@@ -128,12 +128,12 @@ export default function CollectiveWizardPage() {
   }
 
   function validate(): string | null {
-    if (form.brand_name.trim().length < 2) return 'Enter your store or brand name.'
-    if (form.brand_tagline.trim().length < 5) return 'Enter a tagline for your store.'
-    if (form.brand_description.trim().length < 10) return 'Describe your store (at least 10 characters).'
-    if (form.categories.trim().length < 2) return 'Enter at least one product category.'
+    if (form.brand_name.trim().length < 2) return 'أدخل اسم متجرك أو علامتك.'
+    if (form.brand_tagline.trim().length < 5) return 'أدخل شعارًا لمتجرك.'
+    if (form.brand_description.trim().length < 10) return 'صِف متجرك (10 أحرف على الأقل).'
+    if (form.categories.trim().length < 2) return 'أدخل فئة منتجات واحدة على الأقل.'
     const validCols = form.collections.filter((c) => c.name.trim().length >= 2)
-    if (validCols.length < 1) return 'Add at least one collection to generate the store.'
+    if (validCols.length < 1) return 'أضف تشكيلة واحدة على الأقل لتوليد المتجر.'
     return null
   }
 
@@ -179,7 +179,7 @@ export default function CollectiveWizardPage() {
         body: JSON.stringify(payload)
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'Generation failed')
+      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = COLLECTIVE_PRESETS.find((p) => p.id === form.style_preset) || COLLECTIVE_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
@@ -200,17 +200,17 @@ export default function CollectiveWizardPage() {
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/collective'); return }
-      if (saveRes.status === 402) { alert('Free theme limit reached. Please upgrade to continue.'); router.push('/pricing'); return }
-      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'Save failed')
+      if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
+      if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
       router.push(`/preview/collective/${saveJson.id}`)
     } catch (err: any) {
-      setError(err?.message || 'Something went wrong. Please try again.')
+      setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
     }
   }
 
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">Loading...</div>
+    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
   }
 
   return (
@@ -226,9 +226,9 @@ export default function CollectiveWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-600">Collective · Catalog theme</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-600">نُخبة · قالب الكتالوج</p>
           <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Build a curated multi-brand store.
+            ابنِ متجرًا منتقى متعدد العلامات.
           </h1>
           <ShopifyAffiliateCallout
             placement="theme_new_ecom_picker"
@@ -237,7 +237,7 @@ export default function CollectiveWizardPage() {
           />
 
           <p className="mt-3 max-w-2xl text-muted">
-            Tell us about your catalog and Zenya generates a luxury multi-brand storefront — hero, collections, new arrivals, bestsellers, brand story, testimonials, and newsletter.
+            أخبرنا عن كتالوجك وتولّد زينيا واجهة متجر فاخرة متعددة العلامات — واجهة رئيسية وتشكيلات ووافد جديد والأكثر مبيعًا وقصة العلامة وشهادات ونشرة بريدية.
           </p>
         </motion.div>
 
@@ -251,42 +251,42 @@ export default function CollectiveWizardPage() {
 
           {/* ── Brand ──────────────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. Your store</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">1. متجرك</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Store name *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">اسم المتجر *</label>
                 <input
                   value={form.brand_name}
                   onChange={(e) => update('brand_name', e.target.value)}
-                  placeholder="e.g. REALM, The Curated Edit, Maison Nord"
+                  placeholder="مثلاً: نُخبة، المختارات، دار الشمال"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Tagline *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
                 <input
                   value={form.brand_tagline}
                   onChange={(e) => update('brand_tagline', e.target.value)}
-                  placeholder="e.g. Curated for the life well lived."
+                  placeholder="مثلاً: منتقاة لحياة تُعاش بإتقان."
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Store description *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">وصف المتجر *</label>
                 <textarea
                   value={form.brand_description}
                   onChange={(e) => update('brand_description', e.target.value)}
-                  placeholder="e.g. A curated multi-brand marketplace for home, wardrobe, and wellness — 400 products, every one tested."
+                  placeholder="مثلاً: سوق منتقى متعدد العلامات للمنزل والخزانة والعافية — 400 منتج، كلٌّ منها مُختبَر."
                   rows={2}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Product categories *</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">فئات المنتجات *</label>
                 <input
                   value={form.categories}
                   onChange={(e) => update('categories', e.target.value)}
-                  placeholder="Home & Living, Fashion, Beauty, Wellness, Kitchen... (comma separated)"
+                  placeholder="المنزل والمعيشة، الأزياء، الجمال، العافية، المطبخ... (مفصولة بفواصل)"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -306,11 +306,11 @@ export default function CollectiveWizardPage() {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">Curation story</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">قصة الانتقاء</label>
                 <textarea
                   value={form.curation_story}
                   onChange={(e) => update('curation_story', e.target.value)}
-                  placeholder="How do you decide what to carry? e.g. We buy everything ourselves and only list what we'd actually buy again."
+                  placeholder="كيف تقرّر ما تعرضه؟ مثلاً: نشتري كل شيء بأنفسنا ولا نعرض إلا ما نشتريه ثانيةً فعلًا."
                   rows={2}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
@@ -321,23 +321,23 @@ export default function CollectiveWizardPage() {
           {/* ── Collections ────────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
             <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">2. Collections</h2>
+              <h2 className="text-xl font-black text-foreground">2. التشكيلات</h2>
               <span className="text-sm text-muted">{form.collections.filter(c => c.name.trim()).length}/6</span>
             </div>
-            <p className="mb-5 text-sm text-muted">Even one collection is enough — add up to 6. The more you add, the richer the storefront feels. AI will write taglines and build product grids automatically.</p>
+            <p className="mb-5 text-sm text-muted">حتى تشكيلة واحدة تكفي — أضف حتى 6. كلما أضفت أكثر، بدت واجهة المتجر أغنى. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات تلقائيًا.</p>
             <div className="space-y-3">
               {form.collections.map((col, i) => (
                 <div key={col.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
                   <input
                     value={col.name}
                     onChange={(e) => updateCollection(col.id, { name: e.target.value })}
-                    placeholder={`Collection ${i + 1}`}
+                    placeholder={`التشكيلة ${i + 1}`}
                     className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                   />
                   <input
                     value={col.tagline}
                     onChange={(e) => updateCollection(col.id, { tagline: e.target.value })}
-                    placeholder="Collection tagline (optional)"
+                    placeholder="شعار التشكيلة (اختياري)"
                     className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                   />
                   <button
@@ -353,48 +353,48 @@ export default function CollectiveWizardPage() {
             </div>
             {form.collections.length < 6 && (
               <button type="button" onClick={addCollection} className="mt-4 flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:underline">
-                + Add collection
+                + أضف تشكيلة
               </button>
             )}
           </motion.section>
 
           {/* ── Pricing & Perks ────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">3. Pricing & perks</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">3. التسعير والمزايا</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Price range (min)</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">نطاق السعر (الأدنى)</label>
                 <input
                   value={form.price_min}
                   onChange={(e) => update('price_min', e.target.value)}
-                  placeholder="e.g. $45"
+                  placeholder="مثلاً: 45$"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Price range (max)</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">نطاق السعر (الأعلى)</label>
                 <input
                   value={form.price_max}
                   onChange={(e) => update('price_max', e.target.value)}
-                  placeholder="e.g. $495"
+                  placeholder="مثلاً: 495$"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Shipping</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">الشحن</label>
                 <input
                   value={form.shipping_perks}
                   onChange={(e) => update('shipping_perks', e.target.value)}
-                  placeholder="e.g. Free over $150, 3-5 days"
+                  placeholder="مثلاً: مجاني فوق 150$، خلال 3 إلى 5 أيام"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Returns policy</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">سياسة الإرجاع</label>
                 <input
                   value={form.returns_policy}
                   onChange={(e) => update('returns_policy', e.target.value)}
-                  placeholder="e.g. 14-day free returns"
+                  placeholder="مثلاً: إرجاع مجاني خلال 14 يومًا"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
@@ -406,7 +406,7 @@ export default function CollectiveWizardPage() {
                     onChange={(e) => update('sustainability', e.target.checked)}
                     className="h-4 w-4 rounded text-emerald-600"
                   />
-                  <span className="text-sm font-semibold text-foreground">Sustainability-vetted products</span>
+                  <span className="text-sm font-semibold text-foreground">منتجات مُدقَّقة للاستدامة</span>
                 </label>
               </div>
             </div>
@@ -414,29 +414,29 @@ export default function CollectiveWizardPage() {
 
           {/* ── Social proof ───────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. Social proof</h2>
-            <p className="mb-6 text-sm text-muted">Optional — adds review ratings and customer counts to the design.</p>
+            <h2 className="mb-2 text-xl font-black text-foreground">4. الدليل الاجتماعي</h2>
+            <p className="mb-6 text-sm text-muted">اختياري — يضيف تقييمات وأعداد عملاء إلى التصميم.</p>
             <div className="grid gap-5 sm:grid-cols-3">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Customer count</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">عدد العملاء</label>
                 <input
                   value={form.customer_count}
                   onChange={(e) => update('customer_count', e.target.value)}
-                  placeholder="e.g. 28,000+"
+                  placeholder="مثلاً: +28,000"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Review count</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">عدد التقييمات</label>
                 <input
                   value={form.review_count}
                   onChange={(e) => update('review_count', e.target.value)}
-                  placeholder="e.g. 6,800+ reviews"
+                  placeholder="مثلاً: +6,800 تقييم"
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Avg. rating</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
                 <input
                   value={form.review_rating}
                   onChange={(e) => update('review_rating', e.target.value)}
@@ -449,7 +449,7 @@ export default function CollectiveWizardPage() {
 
           {/* ── Style preset ───────────────────────────────────────── */}
           <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. Visual style</h2>
+            <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {COLLECTIVE_PRESETS.map((preset) => {
                 const selected = form.style_preset === preset.id
@@ -483,13 +483,13 @@ export default function CollectiveWizardPage() {
               className="flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition hover:scale-105 hover:shadow-emerald-500/40 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> Generating your store...</>
+                <><span className="animate-spin">⏳</span> جارٍ توليد متجرك...</>
               ) : (
-                <>✦ Generate Collective store</>
+                <>✦ ولّد متجر نُخبة</>
               )}
             </button>
             {loading && (
-              <p className="text-sm text-muted">AI is writing copy, building collections, and styling your catalog — about 15–20 seconds.</p>
+              <p className="text-sm text-muted">يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات ويُنسّق كتالوجك — نحو 15 إلى 20 ثانية.</p>
             )}
           </motion.div>
         </div>

@@ -70,20 +70,23 @@ function Stars({ rating = 5, color }: { rating?: number; color: string }) {
   )
 }
 
-// ─── Unsplash fashion images ───────────────────────────────────────────────────
+// ─── صور أزياء (بلا أشخاص) ───────────────────────────────────────────────────
+// سياسة الصور: لا صور لنساء غير محجّبات. استُبدلت صور العارضات بصور تحريرية
+// خالية من الأشخاص (بوتيك، رفوف ملابس، تنسيقات مسطّحة) لضمان الالتزام.
+// يمكن للمالك استبدالها لاحقًا بصور لرجال أو لنساء محجّبات بعد التحقق البصري.
 const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1800&q=85',
-  'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1800&q=85',
-  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1800&q=85'
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=85',
+  'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1800&q=85'
 ]
 
 const LOOK_IMAGES = [
-  'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1475180098004-ca77a66827be?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
-  'https://images.unsplash.com/photo-1550614000-4895a10e1bfd?auto=format&fit=crop&w=800&q=80'
+  'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80',
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80'
 ]
 
 const PRODUCT_IMAGES = [
@@ -100,9 +103,9 @@ const PRODUCT_IMAGES = [
 // ─── Navbar ────────────────────────────────────────────────────────────────────
 function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; view: LookbookView; setView: (v: LookbookView) => void }) {
   const leftLinks: { label: string; view: LookbookView }[] = [
-    { label: 'Shop', view: 'shop' },
-    { label: 'Lookbook', view: 'lookbook' },
-    { label: 'About', view: 'about' },
+    { label: 'المتجر', view: 'shop' },
+    { label: 'لوك بوك', view: 'lookbook' },
+    { label: 'من نحن', view: 'about' },
   ]
 
   return (
@@ -128,7 +131,7 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
 
       {/* Nav right */}
       <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
-        <button onClick={() => setView('shop')} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.7 }}>Sale</button>
+        <button onClick={() => setView('shop')} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.7 }}>تخفيضات</button>
         <button className="text-lg" style={{ color: colors.text }}>🛍</button>
       </div>
     </nav>
@@ -213,7 +216,7 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
         <div className="h-10 w-px animate-pulse" style={{ background: 'rgba(255,255,255,0.4)' }} />
-        <span className="text-[0.6rem] uppercase tracking-[0.3em] text-white/50">Scroll</span>
+        <span className="text-[0.6rem] uppercase tracking-[0.3em] text-white/50">مرّر</span>
       </motion.div>
     </section>
   )
@@ -395,7 +398,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
         {/* Image side */}
         <div className="relative h-[480px] md:h-auto">
           <img
-            src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80"
+            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
             alt="Brand story"
             className="absolute inset-0 h-full w-full object-cover"
           />

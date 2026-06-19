@@ -1,7 +1,7 @@
 "use client"
 
 export default function LogoList({ 
-  title = "Featured In",
+  title = "ظهرنا في",
   logos = ["Forbes", "TechCrunch", "GQ", "Vogue", "Wired", "Inc."]
 }: { 
   title?: string

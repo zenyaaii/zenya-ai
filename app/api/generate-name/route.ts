@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
       messages: [
         {
           role: "system",
-          content: "You are an expert e-commerce copywriter. Generate a premium, catchy product name based on the context provided. The name MUST be 1 to 3 words maximum. Return ONLY the name, no quotes, no extra text, no periods."
+          content: "You are an expert Arabic e-commerce copywriter for an Arabic brand. Generate a premium, catchy product/brand name IN ARABIC based on the context provided. The name MUST be 1 to 2 words maximum, written in Arabic script only. Return ONLY the name, no quotes, no Latin letters, no extra text, no periods."
         },
         {
           role: "user",
@@ -20,15 +21,17 @@ export async function POST(req: Request) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 10,
+      max_tokens: 24,
     });
 
-    let generatedName = completion.choices[0]?.message?.content?.trim() || "Premium Product";
+    await logAiUsage({ operation: 'generate-name', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage);
+
+    let generatedName = completion.choices[0]?.message?.content?.trim() || "منتج مميز";
     generatedName = generatedName.replace(/^["']|["']$/g, ''); // strip quotes if any
 
     return NextResponse.json({ name: generatedName });
   } catch (error) {
     console.error('Error generating name:', error);
-    return NextResponse.json({ name: "Premium Product" }, { status: 500 });
+    return NextResponse.json({ name: "منتج مميز" }, { status: 500 });
   }
 }

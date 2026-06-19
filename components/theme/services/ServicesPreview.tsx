@@ -200,10 +200,10 @@ function TopBar({ content, isDark }: { content: ServiceContent; isDark: boolean 
 
 function NavBar({ content, isDark, view, setView }: { content: ServiceContent; isDark: boolean; view: ServiceView; setView: (v: ServiceView) => void }) {
   const links: { label: string; view: ServiceView }[] = [
-    { label: 'Services', view: 'services' },
-    { label: 'About', view: 'about' },
-    { label: 'Process', view: 'process' },
-    { label: 'Contact', view: 'contact' },
+    { label: 'الخدمات', view: 'services' },
+    { label: 'من نحن', view: 'about' },
+    { label: 'آلية العمل', view: 'process' },
+    { label: 'تواصل', view: 'contact' },
   ]
 
   return (
@@ -316,7 +316,7 @@ function ServicesSection({ content, isDark }: { content: ServiceContent; isDark:
     <section id="services" data-section="services" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Services</Eyebrow>
+          <Eyebrow>الخدمات</Eyebrow>
           <Heading className="mt-5">{content.services.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.services.subheading}</p>
         </motion.div>
@@ -387,7 +387,7 @@ function ProofSection({ content, isDark }: { content: ServiceContent; isDark: bo
     <section id="proof" data-section="proof" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Why choose us</Eyebrow>
+          <Eyebrow>لماذا تختارنا</Eyebrow>
           <Heading className="mt-5">{content.proof.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.proof.subheading}</p>
         </motion.div>
@@ -410,7 +410,7 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
     <section data-section="before_after" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Results</Eyebrow>
+          <Eyebrow>النتائج</Eyebrow>
           <Heading className="mt-5">{content.before_after.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.before_after.subheading}</p>
         </motion.div>
@@ -430,7 +430,7 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
             </div>
           </div>
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>Transformation snapshot</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>لقطة التحوّل</p>
             <div className="mt-8 space-y-5">
               {content.before_after.highlights.slice(0, 3).map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-[22px] border p-4" style={{ borderColor: 'var(--sv-border)' }}>
@@ -451,7 +451,7 @@ function ProcessSection({ content, isDark }: { content: ServiceContent; isDark: 
     <section data-section="process" className="py-24 md:py-28">
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Process</Eyebrow>
+          <Eyebrow>آلية العمل</Eyebrow>
           <Heading className="mt-5">{content.process.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.process.subheading}</p>
         </motion.div>
@@ -475,16 +475,16 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
       <Container>
         <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <Eyebrow>Service area</Eyebrow>
+            <Eyebrow>منطقة الخدمة</Eyebrow>
             <Heading className="mt-5">{content.areas.heading}</Heading>
             <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.areas.subheading}</p>
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>Response</p>
+                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>الاستجابة</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.response_time}</p>
               </div>
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>Availability</p>
+                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>التوفّر</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.availability}</p>
               </div>
             </div>
@@ -525,12 +525,12 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
             </div>
           </div>
           <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>Request a quote</p>
+            <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
             <form className="mt-6 space-y-4" onSubmit={(event) => event.preventDefault()}>
-              <input className={fieldClass(isDark)} placeholder="Your name" />
-              <input className={fieldClass(isDark)} placeholder="Phone or email" />
-              <input className={fieldClass(isDark)} placeholder="Service needed" />
-              <textarea className={`${fieldClass(isDark)} min-h-[120px] resize-none`} placeholder="Tell us what you need help with" />
+              <input className={fieldClass(isDark)} placeholder="الاسم" />
+              <input className={fieldClass(isDark)} placeholder="الهاتف أو البريد" />
+              <input className={fieldClass(isDark)} placeholder="الخدمة المطلوبة" />
+              <textarea className={`${fieldClass(isDark)} min-h-[120px] resize-none`} placeholder="أخبرنا بما تحتاج المساعدة فيه" />
               <button type="submit" className="w-full rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
                 {content.offer.cta_label}
               </button>
@@ -547,7 +547,7 @@ function TestimonialsSection({ content, isDark }: { content: ServiceContent; isD
     <section id="reviews" data-section="testimonials" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Reviews</Eyebrow>
+          <Eyebrow>الآراء</Eyebrow>
           <Heading className="mt-5">{content.testimonials.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.testimonials.subheading}</p>
           <div className="mt-6 flex items-center gap-3">
@@ -584,7 +584,7 @@ function FaqSection({ content, isDark }: { content: ServiceContent; isDark: bool
       <Container>
         <motion.div {...reveal} className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr]">
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <Eyebrow>FAQ</Eyebrow>
+            <Eyebrow>الأسئلة الشائعة</Eyebrow>
             <Heading className="mt-5">{content.faq.heading}</Heading>
             <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.final_cta.subheading}</p>
             <a href="#quote" className="mt-8 inline-flex rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
@@ -616,7 +616,7 @@ function GallerySection({ content, isDark }: { content: ServiceContent; isDark: 
     <section data-section="gallery" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
         <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>Gallery</Eyebrow>
+          <Eyebrow>المعرض</Eyebrow>
           <Heading className="mt-5">{content.gallery.heading}</Heading>
         </motion.div>
         <div className="grid gap-4 md:grid-cols-4">
@@ -650,7 +650,7 @@ function Footer({ content, isDark }: { content: ServiceContent; isDark: boolean 
           <p className="mt-4 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{content.footer.tagline}</p>
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>Contact</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>تواصل</p>
           <div className="mt-4 space-y-2 text-sm">
             <a href={`tel:${content.footer.phone}`} className="block">{content.footer.phone}</a>
             <a href={`mailto:${content.footer.email}`} className="block">{content.footer.email}</a>

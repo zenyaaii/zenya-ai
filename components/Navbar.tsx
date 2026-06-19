@@ -9,19 +9,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, LayoutDashboard, Settings, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ZenyaWordmark from '@/components/ZenyaWordmark'
 
 type NavItem = { href: string; label: string }
 
 const GUEST_NAV: NavItem[] = [
-  { href: '/',        label: 'Home'    },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/themes',  label: 'Templates' },
+  { href: '/',        label: 'الرئيسية' },
+  { href: '/pricing', label: 'الأسعار'  },
+  { href: '/themes',  label: 'القوالب'  },
 ]
 
 const USER_NAV: NavItem[] = [
-  { href: '/dashboard',  label: 'Dashboard' },
-  { href: '/theme/new',  label: 'New site'  },
-  { href: '/themes',     label: 'Templates' },
+  { href: '/dashboard',  label: 'لوحة التحكم' },
+  { href: '/theme/new',  label: 'موقع جديد'   },
+  { href: '/themes',     label: 'القوالب'     },
 ]
 
 const DROPDOWN_EASE = [0.22, 1, 0.36, 1] as const
@@ -81,8 +82,8 @@ export default function Navbar() {
   }
 
   const navItems = user ? USER_NAV : GUEST_NAV
-  const userInitial = user?.email?.charAt(0).toUpperCase() ?? '?'
-  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Account'
+  const userInitial = user?.email?.charAt(0).toUpperCase() ?? '؟'
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'الحساب'
 
   return (
     <header
@@ -104,7 +105,7 @@ export default function Navbar() {
           <Link
             href={user ? '/dashboard' : '/'}
             className="group flex items-center gap-2.5"
-            aria-label={user ? 'Go to dashboard' : 'Zenya home'}
+            aria-label={user ? 'الذهاب إلى لوحة التحكم' : 'الصفحة الرئيسية لزينيا'}
           >
             <div
               className="relative h-7 w-7 overflow-hidden rounded-lg transition-transform duration-200 group-hover:scale-[1.04]"
@@ -114,9 +115,9 @@ export default function Navbar() {
                   'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
               }}
             >
-              <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+              <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">Zenya</span>
+            <ZenyaWordmark className="text-[17px]" />
           </Link>
 
           {/* ── Desktop nav ── */}
@@ -155,13 +156,13 @@ export default function Navbar() {
                   href="/login"
                   className="hidden rounded-md px-3.5 py-2 text-[13.5px] font-medium text-muted transition-colors hover:text-foreground sm:block"
                 >
-                  Log in
+                  تسجيل الدخول
                 </Link>
                 <Link
                   href="/login?mode=signup"
                   className="rounded-md bg-primary px-4 py-2 text-[13.5px] font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98] btn-shadow-primary"
                 >
-                  Get Started
+                  ابدأ الآن
                 </Link>
               </>
             ) : (
@@ -169,7 +170,7 @@ export default function Navbar() {
                 <DropdownMenu.Trigger asChild>
                   <button
                     className="flex items-center gap-2 rounded-md border border-token px-2.5 py-1.5 transition-colors hover:bg-[rgba(28,28,28,0.05)]"
-                    aria-label="Open account menu"
+                    aria-label="فتح قائمة الحساب"
                   >
                     <div
                       className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold text-white"
@@ -215,14 +216,14 @@ export default function Navbar() {
                         >
                           <DropdownMenu.Label className="mb-1 px-2.5 py-2" style={{ borderBottom: '1px solid #f0ede6' }}>
                             <p className="text-[13px] font-semibold text-foreground">
-                              {user.user_metadata?.full_name || 'User'}
+                              {user.user_metadata?.full_name || 'مستخدم'}
                             </p>
                             <p className="truncate text-[12px] text-muted">{user.email}</p>
                           </DropdownMenu.Label>
 
                           <div className="space-y-0.5">
-                            <DropdownMenuLink href="/dashboard" icon={LayoutDashboard} label="Dashboard" onSelect={() => setMenuOpen(false)} />
-                            <DropdownMenuLink href="/settings"  icon={Settings}         label="Settings"  onSelect={() => setMenuOpen(false)} />
+                            <DropdownMenuLink href="/dashboard" icon={LayoutDashboard} label="لوحة التحكم" onSelect={() => setMenuOpen(false)} />
+                            <DropdownMenuLink href="/settings"  icon={Settings}         label="الإعدادات"  onSelect={() => setMenuOpen(false)} />
                           </div>
 
                           <div className="mt-1 border-t border-[#f0ede6] pt-1">
@@ -231,8 +232,8 @@ export default function Navbar() {
                                 onClick={handleSignOut}
                                 className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-[#dc2626] outline-none transition-colors data-[highlighted]:bg-[rgba(220,38,38,0.06)]"
                               >
-                                <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
-                                Sign out
+                                <LogOut className="h-3.5 w-3.5 rtl-flip" strokeWidth={2} />
+                                تسجيل الخروج
                               </button>
                             </DropdownMenu.Item>
                           </div>
@@ -248,7 +249,7 @@ export default function Navbar() {
             <button
               className="flex items-center justify-center rounded-md p-2 text-muted transition-colors hover:bg-[rgba(28,28,28,0.05)] md:hidden"
               onClick={() => setMobileOpen((v) => !v)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
               aria-expanded={mobileOpen}
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -315,7 +316,7 @@ export default function Navbar() {
                     onClick={() => setMobileOpen(false)}
                     className="mt-2 rounded-md bg-primary px-4 py-3 text-center text-[14px] font-semibold text-white btn-shadow-primary"
                   >
-                    Get Started Free
+                    ابدأ مجانًا
                   </Link>
                 )}
               </nav>

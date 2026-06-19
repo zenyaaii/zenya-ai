@@ -63,8 +63,8 @@ const PRODUCT_IMAGES = [
   'https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?w=600&q=80', // ceramics
   'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80', // home
   'https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=600&q=80', // skincare
-  'https://images.unsplash.com/photo-1616169201999-849d90f2ea45?w=600&q=80', // fashion
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80', // accessories
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80', // fashion (بلا أشخاص: بوتيك)
+  'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80', // accessories (بلا أشخاص: منتج)
   'https://images.unsplash.com/photo-1622495966585-2c87c0b5d07d?w=600&q=80', // wool
   'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&q=80', // candle
 ]

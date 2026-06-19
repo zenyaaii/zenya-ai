@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { wellnessInputSchema, type WellnessInput } from '@/utils/wellness/input'
 import type { WellnessContent } from '@/utils/wellness/types'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
@@ -400,7 +402,9 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: 'You are a senior copywriter for ultra-premium wellness and spa brands. You write calm, precise, sensory copy that feels like it belongs on a $1000/session luxury wellness website. Always return strict JSON only.'
+            content:
+              'You are a senior copywriter for ultra-premium wellness and spa brands. You write calm, precise, sensory copy that feels like it belongs on a $1000/session luxury wellness website. Always return strict JSON only.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           { role: 'user', content: buildPrompt(input) }
         ]
@@ -408,6 +412,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'wellness_ai'
     )
+
+    await logAiUsage({ operation: 'generate-wellness', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, response.usage)
 
     const raw = response.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}

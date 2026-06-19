@@ -21,38 +21,38 @@ type Feature = {
 const FEATURES: Feature[] = [
   {
     icon: Palette,
-    title: 'Polished by design',
-    desc: 'Editorial typography, restrained color, premium spacing — applied automatically across every section.',
+    title: 'تصميم متقن',
+    desc: 'طباعة تحريرية، وألوان مدروسة، ومسافات فاخرة — تُطبَّق تلقائيًا على كل قسم.',
     color: '#5e6ad2',
   },
   {
     icon: Zap,
-    title: 'Live in minutes',
-    desc: 'Pick a template → share your brief or paste a URL → a complete site is written, designed, and previewed. Faster than a coffee break.',
+    title: 'جاهز خلال دقائق',
+    desc: 'اختر قالبًا ← اكتب نبذتك أو ألصق رابطًا ← يُكتب موقع كامل ويُصمَّم ويُعرَض. أسرع من استراحة قهوة.',
     color: '#d97706',
   },
   {
     icon: PenTool,
-    title: 'AI copy with taste',
-    desc: 'Headlines, FAQs, menus, testimonials — written specifically for your business. No generic AI clichés, no filler.',
+    title: 'محتوى بذوق رفيع',
+    desc: 'عناوين، وأسئلة شائعة، وقوائم، وشهادات — مكتوبة خصيصًا لنشاطك. بلا عبارات مكرّرة ولا حشو.',
     color: '#27a644',
   },
   {
     icon: ShoppingBag,
-    title: 'Shopify when you need it',
-    desc: 'The Storefront template exports a full Shopify OS 2.0 theme ZIP — sections, blocks, settings_schema, ready to upload.',
+    title: 'شوبيفاي عند الحاجة',
+    desc: 'يُصدِّر قالب المتجر ملف ثيم شوبيفاي OS 2.0 كاملًا — أقسام وبلوكات وإعدادات، جاهز للرفع.',
     color: '#5e6ad2',
   },
   {
     icon: ShieldCheck,
-    title: 'Built for outcomes',
-    desc: 'Every template includes the trust-building sections, social proof, and clear CTAs the business type actually needs.',
+    title: 'مبني لتحقيق النتائج',
+    desc: 'كل قالب يتضمّن أقسام بناء الثقة، والدليل الاجتماعي، ودعوات واضحة لاتخاذ إجراء — بما يحتاجه نوع النشاط فعلًا.',
     color: '#d97706',
   },
   {
     icon: Layers,
-    title: '8 templates, more coming',
-    desc: 'Restaurant, lookbook, SaaS landing, brand story, wellness, catalog, services, and one-product Shopify. New templates launching monthly.',
+    title: '8 قوالب، والمزيد قادم',
+    desc: 'مطعم، ولوك بوك، وصفحة هبوط لتطبيق، وقصة علامة، وعافية، وكتالوج، وخدمات، ومتجر شوبيفاي بمنتج واحد. قوالب جديدة شهريًا.',
     color: '#27a644',
   },
 ]
@@ -70,11 +70,11 @@ export default function FeaturesSection() {
           className="mb-14 max-w-xl"
         >
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            Why Zenya
+            لماذا زينيا
           </p>
-          <h2 className="text-[40px] font-[590] leading-[1.1] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
-            Everything you need to{' '}
-            <span className="gradient-text">ship fast.</span>
+          <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+            كل ما تحتاجه كي{' '}
+            <span className="gradient-text">تنطلق بسرعة.</span>
           </h2>
         </motion.div>
 

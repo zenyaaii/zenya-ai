@@ -9,9 +9,11 @@
  *
  * We handle:
  *   - load + save the theme via /api/themes/[id] (PATCH)
+ *   - autosave (debounced) + manual save, with a "saved Xs ago" indicator
+ *   - undo / redo across every edit (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z / Ctrl+Y)
  *   - left rail: pages + section panels + global panels
- *   - right rail: render fields from the config
- *   - middle: render the Preview with live overrides applied
+ *   - right rail: render fields from the config, each with inline AI rewrite
+ *   - middle: render the Preview inside a responsive device frame (iframe)
  *   - keyboard: Cmd/Ctrl+S to save
  *
  * Color overrides + typography preset live at the wrapper level
@@ -24,7 +26,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Save, Check, Palette, Type as TypeIcon, RotateCcw, Settings,
-  AlignLeft, AlignCenter, AlignRight,
+  AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Monitor, Tablet, Smartphone,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import {
@@ -32,6 +34,8 @@ import {
   SmallNote, Collapsible, AddRowButton, StringList, ColorRow, MoodChip,
 } from './EditorFields'
 import ClickToEditOverlay from './ClickToEditOverlay'
+import PreviewFrame, { type PreviewDevice } from './PreviewFrame'
+import { AiCopyProvider, type AiCopyContextValue, type AiBrand } from './AiRewrite'
 import {
   getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES,
   type EditorConfig, type EditorFieldDef, type EditorPage, type EditorPanel,
@@ -42,6 +46,15 @@ import {
 } from '@/utils/theme-editor-typography'
 
 type Status = 'idle' | 'saving' | 'saved' | 'error'
+
+/** The full editable state — what undo/redo snapshots. */
+type Doc = {
+  content: any
+  presetId: string
+  typographyPreset: string
+  colorOverrides: Record<string, string>
+  sectionStyles: SectionStyles
+}
 
 export type PreviewProps = {
   content: any
@@ -68,7 +81,6 @@ export default function ThemeEditor({
 }) {
   const router = useRouter()
   const supabase = createClient()
-  const previewRef = useRef<HTMLDivElement>(null)
 
   // ── State ────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
@@ -84,10 +96,29 @@ export default function ThemeEditor({
   const [sectionStyles, setSectionStyles] = useState<SectionStyles>({})
 
   const [original, setOriginal] = useState<string>('')
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
+  const [nowTs, setNowTs] = useState<number>(() => Date.now())
+
+  // Responsive preview device + the iframe handles for click-to-edit.
+  const [device, setDevice] = useState<PreviewDevice>('desktop')
+  const [iframeDoc, setIframeDoc] = useState<Document | null>(null)
+  const [iframeEl, setIframeEl] = useState<HTMLIFrameElement | null>(null)
 
   // Selection state
   const [view, setView] = useState<string>(config.pages?.[0]?.id || 'home')
   const [selected, setSelected] = useState<string>(config.panels[0]?.id || '')
+
+  // Undo / redo history.
+  const historyRef = useRef<{ stack: Doc[]; index: number }>({ stack: [], index: 0 })
+  const restoringRef = useRef(false)
+  const [, setHistVer] = useState(0)
+  const canUndo = historyRef.current.index > 0
+  const canRedo = historyRef.current.index < historyRef.current.stack.length - 1
+
+  // Live content ref so the AI context getters always read the latest copy
+  // without re-creating the context value on every keystroke.
+  const liveContentRef = useRef<any>(null)
+  liveContentRef.current = content
 
   // ── Load ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -125,13 +156,23 @@ export default function ThemeEditor({
       setColorOverrides(nextOverrides)
       setSectionStyles(nextSections)
       setOriginal(snapshot(nextContent, nextPreset, nextTypo, nextOverrides, nextSections))
+
+      // Seed the undo history with the loaded state.
+      historyRef.current = {
+        stack: [{
+          content: nextContent, presetId: nextPreset, typographyPreset: nextTypo,
+          colorOverrides: nextOverrides, sectionStyles: nextSections,
+        }],
+        index: 0,
+      }
+      setHistVer((v) => v + 1)
       setLoading(false)
     }
     load()
     return () => { cancelled = true }
   }, [themeId, supabase, router, config, backHref])
 
-  // ── Dirty detection + save ──────────────────────────────────────────
+  // ── Dirty detection ──────────────────────────────────────────────────
   const dirty = useMemo(() => {
     if (!content) return false
     return snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles) !== original
@@ -144,6 +185,7 @@ export default function ThemeEditor({
     return () => window.removeEventListener('beforeunload', handler)
   }, [dirty])
 
+  // ── Save ───────────────────────────────────────────────────────────────
   const save = useCallback(async () => {
     if (!content) return
     setStatus('saving'); setError(null)
@@ -170,25 +212,98 @@ export default function ThemeEditor({
         throw new Error(j?.message || j?.error || `Save failed (${r.status})`)
       }
       setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles))
+      setLastSavedAt(Date.now())
       setStatus('saved')
-      setTimeout(() => setStatus('idle'), 1800)
+      setTimeout(() => setStatus('idle'), 1600)
     } catch (e: any) {
       setStatus('error')
       setError(e?.message || 'Save failed.')
     }
   }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey])
 
-  // Cmd+S
+  // Autosave — fires ~1.4s after edits settle.
+  useEffect(() => {
+    if (!dirty || status === 'saving') return
+    const t = setTimeout(() => { void save() }, 1400)
+    return () => clearTimeout(t)
+  }, [dirty, status, save])
+
+  // Tick the "saved Xs ago" label.
+  useEffect(() => {
+    const id = setInterval(() => setNowTs(Date.now()), 15000)
+    return () => clearInterval(id)
+  }, [])
+
+  // ── Undo / redo ──────────────────────────────────────────────────────
+  function applyDoc(d: Doc) {
+    restoringRef.current = true
+    setContent(d.content)
+    setPresetId(d.presetId)
+    setTypographyPreset(d.typographyPreset)
+    setColorOverrides(d.colorOverrides)
+    setSectionStyles(d.sectionStyles)
+  }
+
+  const undo = useCallback(() => {
+    const h = historyRef.current
+    if (h.index <= 0) return
+    const idx = h.index - 1
+    historyRef.current = { stack: h.stack, index: idx }
+    applyDoc(h.stack[idx])
+    setHistVer((v) => v + 1)
+  }, [])
+
+  const redo = useCallback(() => {
+    const h = historyRef.current
+    if (h.index >= h.stack.length - 1) return
+    const idx = h.index + 1
+    historyRef.current = { stack: h.stack, index: idx }
+    applyDoc(h.stack[idx])
+    setHistVer((v) => v + 1)
+  }, [])
+
+  // Push edits onto the history stack (debounced so a burst of typing collapses
+  // into one undo step). Restores skip the push.
+  useEffect(() => {
+    if (loading || !content) return
+    if (restoringRef.current) { restoringRef.current = false; return }
+    const t = setTimeout(() => {
+      const h = historyRef.current
+      const curDoc: Doc = { content, presetId, typographyPreset, colorOverrides, sectionStyles }
+      const top = h.stack[h.index]
+      if (top && snapshotDoc(top) === snapshotDoc(curDoc)) return
+      const stack = h.stack.slice(0, h.index + 1)
+      stack.push(curDoc)
+      if (stack.length > 80) stack.shift()
+      historyRef.current = { stack, index: stack.length - 1 }
+      setHistVer((v) => v + 1)
+    }, 400)
+    return () => clearTimeout(t)
+  }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, loading])
+
+  // ── Keyboard: save + undo/redo ───────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+      if (!(e.metaKey || e.ctrlKey)) return
+      const k = e.key.toLowerCase()
+      if (k === 's') {
         e.preventDefault()
         if (dirty && status !== 'saving') void save()
+        return
+      }
+      const tgt = e.target as HTMLElement | null
+      const inField = !!tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)
+      if (k === 'z' && !e.shiftKey) {
+        if (inField) return // let native text undo win while typing in a field
+        e.preventDefault(); undo(); return
+      }
+      if ((k === 'z' && e.shiftKey) || k === 'y') {
+        e.preventDefault(); redo(); return
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dirty, status, save])
+  }, [dirty, status, save, undo, redo])
 
   // When the user switches pages, the currently selected section may no
   // longer belong to the new page. Re-pick the first visible section so the
@@ -200,6 +315,14 @@ export default function ThemeEditor({
     if (visiblePanels.some((p) => p.id === selected)) return
     if (visiblePanels.length > 0) setSelected(visiblePanels[0].id)
   }, [view, selected, config.panels, config.globalPanels])
+
+  // ── AI copy context — stable value, getters read the live content. ─────
+  const aiCopyValue = useMemo<AiCopyContextValue>(() => ({
+    themeName: config.themeName,
+    businessType: config.contentKey,
+    getBrand: () => extractBrand(liveContentRef.current, config),
+    getVoiceSample: () => extractVoiceSample(liveContentRef.current),
+  }), [config])
 
   // ── Helpers ──────────────────────────────────────────────────────────
   function patchPath(path: string, value: any) {
@@ -267,37 +390,42 @@ export default function ThemeEditor({
   // Resolve which panel to render in the right rail
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
   const activePanel = allPanels.find((p) => p.id === selected)
+  const activePanelLabel =
+    selected === '__style__' ? 'Colors & palette' :
+    selected === '__typography__' ? 'Typography' :
+    activePanel?.label || ''
 
   return (
+    <AiCopyProvider value={aiCopyValue}>
     <div className="flex h-screen flex-col overflow-hidden bg-surface">
       {/* Top bar */}
       <header
         className="flex h-14 flex-shrink-0 items-center justify-between gap-3 border-b border-token bg-white px-4"
         style={{ boxShadow: '0 1px 0 #f0ede6' }}
       >
-        <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <Link
-            href={backHref}
+            href="/dashboard/sites"
             className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
             <ArrowLeft className="h-3 w-3" strokeWidth={2.25} />
-            Back to preview
+            Back to dashboard
           </Link>
-          <span className="hidden truncate text-[13px] text-muted sm:inline">
+          <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
+          <span className="hidden truncate text-[13px] text-muted xl:inline">
             Editing <strong className="font-semibold text-foreground">{themeName}</strong>
           </span>
         </div>
 
-        {config.pages && config.pages.length > 0 && (
-          <PageSwitcher
-            pages={config.pages}
-            view={view}
-            onChange={(v) => setView(v)}
-          />
-        )}
+        <div className="flex flex-shrink-0 items-center gap-2">
+          {config.pages && config.pages.length > 0 && (
+            <PageSwitcher pages={config.pages} view={view} onChange={(v) => setView(v)} />
+          )}
+          <DeviceToggle device={device} onChange={setDevice} />
+        </div>
 
         <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
-          <StatusPill status={status} dirty={dirty} />
+          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} now={nowTs} />
           <span className="hidden text-[11px] text-muted/70 sm:inline">
             <kbd className="rounded border border-token bg-surface px-1 py-px text-[10px]">⌘S</kbd> to save
           </span>
@@ -398,30 +526,28 @@ export default function ThemeEditor({
 
         {/* Live preview */}
         <main
-          ref={previewRef}
-          className="flex-1 overflow-y-auto overflow-x-hidden"
+          className="relative flex-1 overflow-hidden"
           style={{ background: '#0a0a0c' }}
         >
-          {/* Per-section text scale + alignment. Themes opt in by tagging
-              section roots with data-section="<panelId>". Themes that
-              haven't been retrofitted simply ignore this. */}
-          {Object.keys(sectionStyles).length > 0 && (
-            <style
-              // eslint-disable-next-line react/no-danger
-              dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
-            />
-          )}
-          <Preview
-            content={content}
-            presetId={presetId}
-            colorOverrides={colorOverrides}
-            typographyPreset={typographyPreset || undefined}
-            sectionStyles={sectionStyles}
-            view={view}
-            onViewChange={(v) => setView(v)}
+          <PreviewFrame
+            device={device}
+            sectionStylesCss={Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''}
+            onReady={(d, el) => { setIframeDoc(d); setIframeEl(el) }}
+            render={() => (
+              <Preview
+                content={content}
+                presetId={presetId}
+                colorOverrides={colorOverrides}
+                typographyPreset={typographyPreset || undefined}
+                sectionStyles={sectionStyles}
+                view={view}
+                onViewChange={(v) => setView(v)}
+              />
+            )}
           />
           <ClickToEditOverlay
-            containerRef={previewRef}
+            doc={iframeDoc}
+            iframe={iframeEl}
             onPick={setSelected}
             panelToView={Object.fromEntries(
               config.panels.filter((p) => p.page).map((p) => [p.id, p.page as string])
@@ -435,9 +561,7 @@ export default function ThemeEditor({
           <div className="sticky top-0 z-10 border-b border-token bg-white px-4 py-3" style={{ boxShadow: '0 1px 0 #f0ede6' }}>
             <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Editing</div>
             <div className="mt-0.5 text-[15px] font-semibold text-foreground">
-              {selected === '__style__' ? 'Colors & palette' :
-               selected === '__typography__' ? 'Typography' :
-               activePanel?.label || 'Section'}
+              {activePanelLabel || 'Section'}
             </div>
           </div>
 
@@ -468,6 +592,7 @@ export default function ThemeEditor({
                   fields={activePanel.fields}
                   content={content}
                   patchPath={patchPath}
+                  panelLabel={activePanel.label}
                 />
               </>
             ) : (
@@ -481,7 +606,7 @@ export default function ThemeEditor({
         <div className="max-w-sm">
           <p className="text-[15px] font-semibold text-foreground">The editor needs a bigger screen.</p>
           <p className="mt-2 text-[13px] text-muted">
-            Open on a laptop or desktop to edit.
+            Open on a laptop or desktop to edit. You can preview the mobile layout from there with the device toggle.
           </p>
           <Link href={backHref} className="mt-5 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white">
             Back to preview
@@ -495,6 +620,7 @@ export default function ThemeEditor({
         </div>
       )}
     </div>
+    </AiCopyProvider>
   )
 }
 
@@ -503,20 +629,20 @@ export default function ThemeEditor({
  * ────────────────────────────────────────────────────────────────────── */
 
 function FieldsRenderer({
-  fields, content, patchPath,
-}: { fields: EditorFieldDef[]; content: any; patchPath: (p: string, v: any) => void }) {
+  fields, content, patchPath, panelLabel,
+}: { fields: EditorFieldDef[]; content: any; patchPath: (p: string, v: any) => void; panelLabel?: string }) {
   return (
     <>
       {fields.map((f, i) => (
-        <RenderField key={i} field={f} content={content} patchPath={patchPath} />
+        <RenderField key={i} field={f} content={content} patchPath={patchPath} panelLabel={panelLabel} />
       ))}
     </>
   )
 }
 
 function RenderField({
-  field, content, patchPath,
-}: { field: EditorFieldDef; content: any; patchPath: (p: string, v: any) => void }) {
+  field, content, patchPath, panelLabel,
+}: { field: EditorFieldDef; content: any; patchPath: (p: string, v: any) => void; panelLabel?: string }) {
   if (field.type === 'note') {
     return <SmallNote>{field.content}</SmallNote>
   }
@@ -527,6 +653,7 @@ function RenderField({
         value={getPath(content, field.path) ?? ''}
         onChange={(v) => patchPath(field.path, v)}
         placeholder={field.placeholder}
+        panelLabel={panelLabel}
       />
     )
   }
@@ -538,6 +665,7 @@ function RenderField({
         value={getPath(content, field.path) ?? ''}
         onChange={(v) => patchPath(field.path, v)}
         placeholder={field.placeholder}
+        panelLabel={panelLabel}
       />
     )
   }
@@ -606,6 +734,7 @@ function RenderField({
                   fields={f.itemFields}
                   content={item}
                   patchPath={(p, v) => update(i, setPath(item, p, v))}
+                  panelLabel={panelLabel}
                 />
               </Collapsible>
             )
@@ -763,12 +892,72 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
   )
 }
 
+/* ── Device toggle — responsive preview viewport ─────────────────────── */
+function DeviceToggle({
+  device, onChange,
+}: { device: PreviewDevice; onChange: (d: PreviewDevice) => void }) {
+  const items: Array<{ id: PreviewDevice; Icon: typeof Monitor; label: string }> = [
+    { id: 'desktop', Icon: Monitor,    label: 'Desktop' },
+    { id: 'tablet',  Icon: Tablet,     label: 'Tablet' },
+    { id: 'mobile',  Icon: Smartphone, label: 'Mobile' },
+  ]
+  return (
+    <div className="flex items-center gap-0.5 rounded-full border border-token bg-surface/60 p-0.5">
+      {items.map(({ id, Icon, label }) => {
+        const active = device === id
+        return (
+          <button
+            key={id}
+            type="button"
+            onClick={() => onChange(id)}
+            title={`${label} preview`}
+            aria-label={`${label} preview`}
+            aria-pressed={active}
+            className={
+              'inline-flex items-center justify-center rounded-full px-2.5 py-1 transition ' +
+              (active ? 'bg-foreground text-white shadow-sm' : 'text-muted hover:bg-black/[0.04] hover:text-foreground')
+            }
+          >
+            <Icon className="h-3.5 w-3.5" strokeWidth={2.1} />
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ── Undo / redo ──────────────────────────────────────────────────────── */
+function UndoRedo({
+  canUndo, canRedo, onUndo, onRedo,
+}: { canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void }) {
+  return (
+    <div className="flex flex-shrink-0 items-center gap-0.5">
+      <button
+        type="button"
+        onClick={onUndo}
+        disabled={!canUndo}
+        title="Undo (⌘Z)"
+        aria-label="Undo"
+        className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <Undo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
+      </button>
+      <button
+        type="button"
+        onClick={onRedo}
+        disabled={!canRedo}
+        title="Redo (⌘⇧Z)"
+        aria-label="Redo"
+        className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <Redo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
+      </button>
+    </div>
+  )
+}
+
 /* ────────────────────────────────────────────────────────────────────── *
  * Page switcher — top-bar control for multi-page themes.                  *
- * Pages live in the URL of the rendered theme, so they're not "sections"  *
- * the user edits — they're the high-level page the editor is currently    *
- * focused on. We keep them out of the left rail and surface them here so  *
- * the user always knows which page they're editing.                       *
  * ────────────────────────────────────────────────────────────────────── */
 function PageSwitcher({
   pages, view, onChange,
@@ -804,7 +993,9 @@ function PageSwitcher({
   )
 }
 
-function StatusPill({ status, dirty }: { status: Status; dirty: boolean }) {
+function StatusPill({
+  status, dirty, lastSavedAt, now,
+}: { status: Status; dirty: boolean; lastSavedAt: number | null; now: number }) {
   if (status === 'saving') return <span className="text-[12px] font-medium text-muted">Saving…</span>
   if (status === 'saved') {
     return (
@@ -814,7 +1005,21 @@ function StatusPill({ status, dirty }: { status: Status; dirty: boolean }) {
     )
   }
   if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">Save failed</span>
-  return <span className="text-[12px] font-medium text-muted">{dirty ? 'Unsaved changes' : 'All saved'}</span>
+  if (dirty) return <span className="text-[12px] font-medium text-muted">Unsaved · autosaving…</span>
+  if (lastSavedAt) {
+    return <span className="text-[12px] font-medium text-muted">Saved {relativeTime(lastSavedAt, now)}</span>
+  }
+  return <span className="text-[12px] font-medium text-muted">All saved</span>
+}
+
+function relativeTime(from: number, now: number): string {
+  const s = Math.max(0, Math.round((now - from) / 1000))
+  if (s < 5) return 'just now'
+  if (s < 60) return `${s}s ago`
+  const m = Math.round(s / 60)
+  if (m < 60) return `${m}m ago`
+  const h = Math.round(m / 60)
+  return `${h}h ago`
 }
 
 function snapshot(
@@ -825,6 +1030,10 @@ function snapshot(
   sections: SectionStyles,
 ) {
   return JSON.stringify({ content, preset, typography, overrides, sections })
+}
+
+function snapshotDoc(d: Doc): string {
+  return snapshot(d.content, d.presetId, d.typographyPreset, d.colorOverrides, d.sectionStyles)
 }
 
 function pruneSectionStyles(s: SectionStyles): SectionStyles {
@@ -842,13 +1051,46 @@ function pruneSectionStyles(s: SectionStyles): SectionStyles {
   return out
 }
 
-/* ── Per-section text size + alignment header ─────────────────────────── *
- * Shown at the top of every section panel. Lets the user dial up the     *
- * text size for that section and shift the alignment without leaving     *
- * the panel. Themes opt in by tagging section roots with                 *
- * data-section="<panelId>"; themes that haven't been retrofitted just    *
- * ignore the overrides.                                                  *
+/* ── AI copy context extractors ──────────────────────────────────────── *
+ * Pull the brand identity + a sample of the site's existing copy so the   *
+ * inline AI rewriter can match the theme's established voice.             *
  * ────────────────────────────────────────────────────────────────────── */
+
+function extractBrand(content: any, config: EditorConfig): AiBrand {
+  if (!content || typeof content !== 'object') return {}
+  const rawName = config.brandNamePath ? getPath(content, config.brandNamePath) : content?.brand?.name
+  const b = (content.brand && typeof content.brand === 'object') ? content.brand : {}
+  return {
+    name: typeof rawName === 'string' ? rawName : (typeof b.name === 'string' ? b.name : undefined),
+    tagline: typeof b.tagline === 'string' ? b.tagline : undefined,
+    category: typeof b.category === 'string' ? b.category : undefined,
+  }
+}
+
+function extractVoiceSample(content: any): string[] {
+  if (!content || typeof content !== 'object') return []
+  const out: string[] = []
+  const push = (v: any) => {
+    if (typeof v !== 'string') return
+    const t = v.replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim()
+    if (t.length > 2 && t.length <= 180) out.push(t)
+  }
+  push(content?.brand?.tagline)
+  push(content?.hero?.headline)
+  push(content?.hero?.subheadline)
+  for (const key of Object.keys(content)) {
+    const sec = (content as any)[key]
+    if (sec && typeof sec === 'object' && !Array.isArray(sec)) {
+      push(sec.heading); push(sec.subheading); push(sec.description); push(sec.tagline)
+      if (Array.isArray(sec.items)) {
+        for (const it of sec.items.slice(0, 2)) { push(it?.title); push(it?.description); push(it?.quote) }
+      }
+    }
+  }
+  return Array.from(new Set(out)).slice(0, 8)
+}
+
+/* ── Per-section text size + alignment header ─────────────────────────── */
 
 function SectionStyleHeader({
   panelId, value, onPatch, onClear,

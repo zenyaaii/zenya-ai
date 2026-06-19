@@ -40,7 +40,7 @@ export default function Newsletter({
         >
           <input 
             type="email" 
-            placeholder="Email address" 
+            placeholder="البريد الإلكتروني"
             required 
             className="flex-1 px-6 py-3 rounded-full text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
           />

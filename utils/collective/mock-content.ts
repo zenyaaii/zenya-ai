@@ -2,122 +2,122 @@ import type { CollectiveContent } from './types'
 
 export const COLLECTIVE_MOCK_CONTENT: CollectiveContent = {
   brand: {
-    name: 'REALM',
-    tagline: 'Curated for the life well lived.',
-    description: 'A luxury multi-brand marketplace for the things that matter — home, wardrobe, wellness, and beauty.'
+    name: 'نُخبة',
+    tagline: 'منتقاةٌ لحياةٍ تستحقّ.',
+    description: 'سوقٌ فاخر متعدّد العلامات لكل ما يهمّ — المنزل، والملابس، والعافية، والجمال.'
   },
   hero: {
-    eyebrow: 'New season · Spring / Summer 2025',
-    headline: 'The things worth\nhaving. Curated.',
-    subheadline: 'Four hundred carefully chosen products across eight categories. Each one tested, considered, and worth the shelf space.',
-    cta_primary: 'Shop new arrivals',
-    cta_secondary: 'Browse collections',
-    badge: 'Free shipping over $150'
+    eyebrow: 'موسم جديد · ربيع / صيف 2025',
+    headline: 'الأشياء التي\nتستحقّ الاقتناء. منتقاة.',
+    subheadline: 'أربعمئة منتج مختار بعناية عبر ثماني فئات. كلٌّ منها مُجرَّب ومدروس ويستحقّ مكانه.',
+    cta_primary: 'تسوّق الوافدين الجدد',
+    cta_secondary: 'تصفّح المجموعات',
+    badge: 'شحن مجاني فوق 150$'
   },
   collections: {
-    eyebrow: 'Shop by collection',
-    heading: 'Built around how\nyou actually live.',
-    subheading: 'Each collection is a considered world — not a category dump. Products that belong together, live together.',
+    eyebrow: 'تسوّق حسب المجموعة',
+    heading: 'مبنية حول طريقة\nعيشك الفعلية.',
+    subheading: 'كل مجموعة عالمٌ مدروس — لا تكديس فئات. منتجات تنتمي معًا، وتعيش معًا.',
     items: [
-      { name: 'The Living Room Edit', tagline: 'Objects that make a room worth being in.', product_count: '64 pieces', tag: 'New season' },
-      { name: 'The Wardrobe Foundation', tagline: 'The 12 pieces every wardrobe needs, elevated.', product_count: '48 pieces', tag: 'Bestseller' },
-      { name: 'The Morning Ritual', tagline: 'Skincare, coffee, and calm — in that order.', product_count: '36 pieces', tag: 'Staff picks' },
-      { name: 'The Work from Anywhere', tagline: 'For the laptop-on-the-road life. Done properly.', product_count: '29 pieces', tag: 'New' }
+      { name: 'تشكيلة غرفة المعيشة', tagline: 'أشياء تجعل الغرفة تستحقّ البقاء فيها.', product_count: '64 قطعة', tag: 'موسم جديد' },
+      { name: 'أساس خزانة الملابس', tagline: 'الـ12 قطعة التي تحتاجها كل خزانة، بلمسة راقية.', product_count: '48 قطعة', tag: 'الأكثر مبيعًا' },
+      { name: 'طقوس الصباح', tagline: 'العناية بالبشرة، والقهوة، والهدوء — بهذا الترتيب.', product_count: '36 قطعة', tag: 'اختيارات الفريق' },
+      { name: 'اعمل من أي مكان', tagline: 'لحياة الحاسوب المحمول في الطريق. كما يجب.', product_count: '29 قطعة', tag: 'جديد' }
     ]
   },
   new_arrivals: {
-    eyebrow: 'Just landed',
-    heading: 'New this week.',
+    eyebrow: 'وصل للتو',
+    heading: 'جديد هذا الأسبوع.',
     products: [
-      { name: 'Linen Throw — Warm Sand', price: '$185', badge: 'New', category: 'Home', rating: 5 },
-      { name: 'The Daily Moisturiser SPF50', price: '$68', badge: 'New', category: 'Beauty', rating: 5 },
-      { name: 'Merino Crew Knit — Ivory', price: '$225', badge: 'New', category: 'Wardrobe', rating: 5 },
-      { name: 'Walnut Serving Board', price: '$145', badge: 'Handmade', category: 'Kitchen', rating: 5 },
-      { name: 'The Leather Card Holder', price: '$95', badge: 'New', category: 'Accessories', rating: 4 },
-      { name: 'Ceramic Mug Set — Ash', price: '$72', badge: 'New', category: 'Kitchen', rating: 5 }
+      { name: 'بطانية كتان — رملي دافئ', price: '$185', badge: 'جديد', category: 'المنزل', rating: 5 },
+      { name: 'مرطّب يومي بحماية SPF50', price: '$68', badge: 'جديد', category: 'الجمال', rating: 5 },
+      { name: 'تريكو ميرينو — عاجي', price: '$225', badge: 'جديد', category: 'الملابس', rating: 5 },
+      { name: 'لوح تقديم من الجوز', price: '$145', badge: 'يدوي', category: 'المطبخ', rating: 5 },
+      { name: 'حافظة بطاقات جلدية', price: '$95', badge: 'جديد', category: 'إكسسوارات', rating: 4 },
+      { name: 'طقم أكواب خزفية — رمادي', price: '$72', badge: 'جديد', category: 'المطبخ', rating: 5 }
     ]
   },
   brand_promise: {
-    eyebrow: 'Why REALM',
-    headline: 'We test everything.\nWe list the rest.',
-    body: 'Every product on REALM passed through our team\'s hands before it passed through yours. We buy it, we use it, we argue about it — and then we decide. That\'s why we carry 400 products instead of 40,000. It is harder to curate than to aggregate, and that is exactly the point.',
+    eyebrow: 'لماذا نُخبة',
+    headline: 'نختبر كل شيء.\nوندرج الأفضل فقط.',
+    body: 'كل منتج في «نُخبة» مرّ بين أيدي فريقنا قبل أن يصل إليك. نشتريه، ونستخدمه، ونتجادل حوله — ثم نقرّر. لهذا نعرض 400 منتج بدلًا من 40,000. الانتقاء أصعب من التجميع، وهذا هو المقصد تمامًا.',
     stats: [
-      { value: '400+', label: 'Curated products' },
-      { value: '92%', label: 'Would buy again' },
-      { value: '14 days', label: 'Free returns' },
-      { value: '4.9★', label: 'Average rating' }
+      { value: '+400', label: 'منتج منتقى' },
+      { value: '92%', label: 'سيشترون مجددًا' },
+      { value: '14 يومًا', label: 'إرجاع مجاني' },
+      { value: '4.9★', label: 'متوسط التقييم' }
     ]
   },
   bestsellers: {
-    eyebrow: 'Consistently loved',
-    heading: 'The ones that never\ngo out of stock long.',
-    subheading: 'These are reordered before they run out. That tells you something.',
+    eyebrow: 'محبوبة باستمرار',
+    heading: 'التي لا تبقى\nخارج المخزون طويلًا.',
+    subheading: 'يُعاد طلبها قبل أن تنفد. وهذا يخبرك بشيء.',
     products: [
-      { name: 'Cashmere Ribbed Beanie', price: '$145', category: 'Wardrobe', rating: 5, badge: '🔁 Reorder favourite' },
-      { name: 'The Anatomy of Rest Candle', price: '$58', category: 'Home', rating: 5 },
-      { name: 'Organic Cotton Robe', price: '$195', category: 'Wellness', rating: 5, badge: 'Top rated' },
-      { name: 'Vitamin C Serum — 20%', price: '$88', original_price: '$110', category: 'Beauty', rating: 5 },
-      { name: 'Leather Belt — Cognac', price: '$120', category: 'Accessories', rating: 5 },
-      { name: 'Linen Duvet Cover — Flint', price: '$265', category: 'Home', rating: 5, badge: 'Almost gone' },
-      { name: 'Stainless Thermal Flask 1L', price: '$75', category: 'Kitchen', rating: 5 },
-      { name: 'Merino Socks — 3 Pack', price: '$55', category: 'Wardrobe', rating: 5, badge: '🔁 Reorder favourite' }
+      { name: 'قبّعة كشمير مضلّعة', price: '$145', category: 'الملابس', rating: 5, badge: '🔁 مفضّل لإعادة الطلب' },
+      { name: 'شمعة «تشريح الراحة»', price: '$58', category: 'المنزل', rating: 5 },
+      { name: 'روب قطن عضوي', price: '$195', category: 'العافية', rating: 5, badge: 'الأعلى تقييمًا' },
+      { name: 'سيروم فيتامين C — 20%', price: '$88', original_price: '$110', category: 'الجمال', rating: 5 },
+      { name: 'حزام جلدي — كونياك', price: '$120', category: 'إكسسوارات', rating: 5 },
+      { name: 'غطاء لحاف كتان — رمادي', price: '$265', category: 'المنزل', rating: 5, badge: 'أوشك على النفاد' },
+      { name: 'ترمس حراري ستانلس 1 لتر', price: '$75', category: 'المطبخ', rating: 5 },
+      { name: 'جوارب ميرينو — 3 أزواج', price: '$55', category: 'الملابس', rating: 5, badge: '🔁 مفضّل لإعادة الطلب' }
     ]
   },
   perks: {
     items: [
-      { icon: '📦', title: 'Free shipping over $150', description: 'Delivered within 3–5 business days. Express available.' },
-      { icon: '↩️', title: '14-day free returns', description: 'No questions, no friction. Print the label, drop it off.' },
-      { icon: '✓', title: 'Every product tested', description: 'We use everything we sell. If it didn\'t make the cut, it\'s not listed.' },
-      { icon: '🌿', title: 'Sustainability vetted', description: 'All suppliers verified for ethical sourcing and fair production.' }
+      { icon: '📦', title: 'شحن مجاني فوق 150$', description: 'يُسلَّم خلال 3–5 أيام عمل. والتوصيل السريع متاح.' },
+      { icon: '↩️', title: 'إرجاع مجاني خلال 14 يومًا', description: 'بلا أسئلة، وبلا عناء. اطبع الملصق وسلّم الطرد.' },
+      { icon: '✓', title: 'كل منتج مُجرَّب', description: 'نستخدم كل ما نبيعه. وإن لم يجتَز المعيار، لا يُدرَج.' },
+      { icon: '🌿', title: 'مُدقّق بيئيًا', description: 'جميع المورّدين موثّقون من حيث المصادر الأخلاقية والإنتاج العادل.' }
     ]
   },
   testimonials: {
-    eyebrow: 'From our customers',
-    heading: 'They said it better than we could.',
+    eyebrow: 'من عملائنا',
+    heading: 'قالوها أجمل مما نستطيع.',
     average_rating: 4.9,
-    review_count: '6,800+ verified reviews',
+    review_count: '+6,800 تقييم موثّق',
     items: [
       {
-        quote: 'I stopped shopping everywhere else. The curation is so good that I just start here. If REALM stocks it, I trust it. That\'s saved me from so many bad purchases.',
-        author: 'Isabelle M.',
-        location: 'London, UK',
+        quote: 'توقّفت عن التسوّق من كل مكان آخر. الانتقاء جيّد لدرجة أنني أبدأ من هنا مباشرة. إن عرضته «نُخبة» وثقت به. أنقذني ذلك من مشتريات سيّئة كثيرة.',
+        author: 'إيمان المالكي',
+        location: 'الرياض، السعودية',
         rating: 5,
-        avatar_letter: 'I',
-        product: 'The Wardrobe Foundation'
+        avatar_letter: 'إ',
+        product: 'أساس خزانة الملابس'
       },
       {
-        quote: 'The linen duvet is everything. I have tried three premium brands and nothing compares. Ships fast, feels expensive, and the colour in the photos is exactly what arrives. No tricks.',
-        author: 'Daniel K.',
-        location: 'New York, USA',
+        quote: 'غطاء اللحاف الكتاني رائع. جرّبت ثلاث علامات فاخرة ولا شيء يُضاهيه. شحن سريع، وملمس فاخر، واللون في الصور هو ما يصل تمامًا. بلا خِداع.',
+        author: 'داود خالد',
+        location: 'دبي، الإمارات',
         rating: 5,
-        avatar_letter: 'D',
-        product: 'Linen Duvet Cover — Flint'
+        avatar_letter: 'د',
+        product: 'غطاء لحاف كتان — رمادي'
       },
       {
-        quote: 'I bought the Vitamin C serum as a gift for my mother who is very hard to please. She emailed me two weeks later to ask where I bought it and to tell me it was the best thing she had tried in years.',
-        author: 'Sophie R.',
-        location: 'Melbourne, AU',
+        quote: 'اشتريت سيروم فيتامين C هدية لوالدتي، وهي صعبة الإرضاء. راسلتني بعد أسبوعين تسأل من أين اشتريته وتخبرني أنه أفضل ما جرّبته منذ سنوات.',
+        author: 'سُهى راشد',
+        location: 'جدة، السعودية',
         rating: 5,
-        avatar_letter: 'S',
-        product: 'Vitamin C Serum — 20%'
+        avatar_letter: 'س',
+        product: 'سيروم فيتامين C — 20%'
       }
     ]
   },
   newsletter: {
-    eyebrow: 'The REALM Edit',
-    heading: 'The best things,\nbefore everyone else.',
-    subheading: 'New arrivals, restocks, and the occasional essay on why we chose something. Twice a month. Never more.',
+    eyebrow: 'نشرة نُخبة',
+    heading: 'أفضل الأشياء،\nقبل الجميع.',
+    subheading: 'وافدون جدد، وإعادة توفّر، ومقالة عرضية عن سبب اختيارنا لشيء ما. مرّتين شهريًا. لا أكثر.',
     placeholder: 'your@email.com',
-    cta: 'Subscribe',
-    note: 'No noise. Unsubscribe any time. We take inbox seriously.'
+    cta: 'اشترك',
+    note: 'بلا ضجيج. ألغِ الاشتراك متى شئت. نحترم بريدك.'
   },
   footer: {
-    tagline: 'Curated for the life well lived.',
-    legal: '© 2025 REALM. All rights reserved.',
-    email: 'hello@realm.co'
+    tagline: 'منتقاةٌ لحياةٍ تستحقّ.',
+    legal: '© 2025 نُخبة. جميع الحقوق محفوظة.',
+    email: 'hello@nukhba.co'
   },
   seo: {
-    title: 'REALM — Curated Luxury Multi-Brand Store',
-    description: 'Four hundred carefully curated products across home, wardrobe, beauty, and wellness. Every one tested. Every one worth it.'
+    title: 'نُخبة — متجر فاخر منتقى متعدّد العلامات',
+    description: 'أربعمئة منتج منتقى بعناية عبر المنزل والملابس والجمال والعافية. كلٌّ منها مُجرَّب. كلٌّ منها يستحقّ.'
   }
 }

@@ -13,12 +13,12 @@ export default function ShopifyConnectedPage() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgba(21,128,61,0.10)]">
           <CheckCircle2 className="h-7 w-7 text-[#15803d]" />
         </div>
-        <h1 className="mt-4 text-[20px] font-bold text-foreground">Store connected</h1>
+        <h1 className="mt-4 text-[20px] font-bold text-foreground">تم ربط المتجر</h1>
         <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
-          Your Shopify store is now linked to Zenya. Head back to the tab where you were
-          building your theme — it picks up the connection automatically.
+          أصبح متجر Shopify الخاص بك مرتبطًا بزينيا الآن. عُد إلى التبويب الذي كنت تبني فيه
+          قالبك — سيلتقط الاتصال تلقائيًا.
         </p>
-        <p className="mt-4 text-[12px] text-muted">You can close this tab.</p>
+        <p className="mt-4 text-[12px] text-muted">يمكنك إغلاق هذا التبويب.</p>
       </div>
     </div>
   )

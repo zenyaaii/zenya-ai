@@ -64,11 +64,11 @@ type SearchResult = {
 const STATUS: Record<DomainRow['status'], {
   label: string; tint: string; ring: string; fg: string; icon: typeof Globe
 }> = {
-  pending_dns: { label: 'Waiting on DNS', tint: 'rgba(217,119,6,0.10)', ring: 'rgba(217,119,6,0.30)', fg: '#b45309', icon: Clock },
-  pending_ssl: { label: 'Issuing SSL…',  tint: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2', icon: Clock },
-  live:        { label: 'Live · SSL on',  tint: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d', icon: CheckCircle2 },
-  error:       { label: 'Error',          tint: 'rgba(220,38,38,0.10)',  ring: 'rgba(220,38,38,0.30)',  fg: '#b91c1c', icon: AlertCircle },
-  removed:     { label: 'Removed',        tint: 'rgba(0,0,0,0.05)',      ring: 'rgba(0,0,0,0.15)',      fg: '#6b6b6b', icon: Trash2 },
+  pending_dns: { label: 'بانتظار DNS', tint: 'rgba(217,119,6,0.10)', ring: 'rgba(217,119,6,0.30)', fg: '#b45309', icon: Clock },
+  pending_ssl: { label: 'جارٍ إصدار SSL…',  tint: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2', icon: Clock },
+  live:        { label: 'منشور · SSL مفعّل',  tint: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d', icon: CheckCircle2 },
+  error:       { label: 'خطأ',          tint: 'rgba(220,38,38,0.10)',  ring: 'rgba(220,38,38,0.30)',  fg: '#b91c1c', icon: AlertCircle },
+  removed:     { label: 'مُزال',        tint: 'rgba(0,0,0,0.05)',      ring: 'rgba(0,0,0,0.15)',      fg: '#6b6b6b', icon: Trash2 },
 }
 
 export default function DomainsPage() {
@@ -150,7 +150,7 @@ export default function DomainsPage() {
     try { await fetch(`/api/domains/${id}`); await load() } finally { setBusyId(null) }
   }
   async function remove(id: string, domain: string) {
-    if (!confirm(`Disconnect ${domain}? Your site stops resolving on that domain.`)) return
+    if (!confirm(`هل تريد فصل ${domain}؟ سيتوقّف موقعك عن العمل على هذا النطاق.`)) return
     setBusyId(id)
     try { await fetch(`/api/domains/${id}`, { method: 'DELETE' }); await load() } finally { setBusyId(null) }
   }
@@ -287,12 +287,12 @@ export default function DomainsPage() {
       })
       const j = await r.json()
       if (!r.ok || !j?.url) {
-        setSearchError(friendlyError(j) || 'Could not start checkout.')
+        setSearchError(friendlyError(j) || 'تعذّر بدء عملية الدفع.')
         return
       }
       window.location.href = j.url
     } catch (e: any) {
-      setSearchError(e?.message || 'Network error')
+      setSearchError(e?.message || 'خطأ في الشبكة')
     } finally {
       setBuying(null)
     }
@@ -312,12 +312,12 @@ export default function DomainsPage() {
       })
       const j = await r.json()
       if (!r.ok || !j?.url) {
-        alert(j?.message || j?.error || `Could not renew ${domain}.`)
+        alert(j?.message || j?.error || `تعذّر تجديد ${domain}.`)
         return
       }
       window.location.href = j.url
     } catch (e: any) {
-      alert(`Network error: ${e?.message || e}`)
+      alert(`خطأ في الشبكة: ${e?.message || e}`)
     } finally {
       setRenewing(null)
     }
@@ -332,9 +332,9 @@ export default function DomainsPage() {
     <div className="mx-auto max-w-6xl px-6 py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-foreground">Domains</h1>
+          <h1 className="text-[24px] font-bold tracking-tight text-foreground">النطاقات</h1>
           <p className="mt-1 text-[13px] text-muted">
-            Connect a custom domain you already own, or search for a new one. SSL is automatic.
+            اربط نطاقًا مخصصًا تملكه بالفعل، أو ابحث عن نطاق جديد. شهادة SSL تلقائية.
           </p>
         </div>
         {eligibleThemes.length > 0 && hasHosting && (
@@ -344,7 +344,7 @@ export default function DomainsPage() {
             className="rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
             style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
           >
-            <option value="">+ Connect a domain you own…</option>
+            <option value="">+ اربط نطاقًا تملكه…</option>
             {eligibleThemes.map((t) => (
               <option key={t.id} value={t.id}>{t.product_name}</option>
             ))}
@@ -359,12 +359,12 @@ export default function DomainsPage() {
               <Lock className="h-4 w-4 text-primary" strokeWidth={2} />
             </div>
             <div>
-              <div className="text-[14px] font-semibold text-foreground">Custom domains need the Hosting plan</div>
-              <p className="mt-1 text-[12.5px] text-muted">$19.99/month. Point any domain at your Zenya site.</p>
+              <div className="text-[14px] font-semibold text-foreground">النطاقات المخصصة تتطلب باقة الاستضافة</div>
+              <p className="mt-1 text-[12.5px] text-muted">19.99$ شهريًا. وجِّه أي نطاق إلى موقعك على زينيا.</p>
             </div>
           </div>
           <Link href="/checkout?plan=hosting" className="rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
-            Start hosting →
+            ابدأ الاستضافة ←
           </Link>
         </div>
       )}
@@ -373,10 +373,10 @@ export default function DomainsPage() {
       <section className="mb-8 rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
-          <h2 className="text-[14px] font-semibold text-foreground">Find a new domain</h2>
+          <h2 className="text-[14px] font-semibold text-foreground">ابحث عن نطاق جديد</h2>
         </div>
         <p className="mt-1 text-[12.5px] text-muted">
-          Type a name, see what’s available, and buy it in one click — registration, DNS, and SSL are wired up for you automatically.
+          اكتب اسمًا، وشاهد المتاح، واشترِه بنقرة واحدة — التسجيل وDNS وSSL تُجهَّز لك تلقائيًا.
         </p>
 
         <form
@@ -384,12 +384,12 @@ export default function DomainsPage() {
           className="mt-4 flex flex-wrap items-center gap-2"
         >
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="mycoolstore  or  mycoolstore.com"
-              className="w-full rounded-full border border-token bg-surface py-2 pl-9 pr-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+              placeholder="mystore  أو  mystore.com"
+              className="w-full rounded-full border border-token bg-surface py-2 ps-9 pe-3 text-[13px] text-foreground outline-none transition focus:border-primary"
             />
           </div>
           <button
@@ -397,7 +397,7 @@ export default function DomainsPage() {
             disabled={searching || !query.trim()}
             className="inline-flex items-center gap-1 rounded-full bg-foreground px-4 py-2 text-[12.5px] font-semibold text-white disabled:opacity-50"
           >
-            {searching ? 'Checking…' : 'Check availability'}
+            {searching ? 'جارٍ الفحص…' : 'تحقق من التوفّر'}
           </button>
         </form>
 
@@ -416,10 +416,10 @@ export default function DomainsPage() {
             <div className="mt-3 flex items-center gap-2 rounded-md border border-token bg-[rgba(94,106,210,0.06)] px-3 py-2 text-[12px] text-primary">
               <RefreshCw className="h-3 w-3 animate-spin" />
               <span>
-                Checking each TLD ({checkedCount} of {total} done) · ~{seconds}s remaining
+                نفحص كل امتداد ({checkedCount} من {total} اكتمل) · يتبقّى ~{seconds}ث
               </span>
-              <span className="ml-auto text-muted">
-                Porkbun limits 1 check / 10s — we pace it for you.
+              <span className="ms-auto text-muted">
+                يسمح المُسجِّل بفحص واحد كل 10 ثوانٍ — ننظّم ذلك تلقائيًا.
               </span>
             </div>
           )
@@ -434,26 +434,26 @@ export default function DomainsPage() {
                 lands in their account. */}
             {eligibleThemes.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 border-b border-token bg-[#fafaf7] px-3 py-2 text-[12px] text-muted">
-                <span>Attach to:</span>
+                <span>اربطه بـ:</span>
                 <select
                   value={buyForThemeId}
                   onChange={(e) => setBuyForThemeId(e.target.value)}
                   className="rounded-md border border-token bg-white px-2 py-1 text-[12px] text-foreground outline-none focus:border-primary"
                 >
-                  <option value="">Decide after purchase</option>
+                  <option value="">أقرر بعد الشراء</option>
                   {eligibleThemes.map((t) => (
                     <option key={t.id} value={t.id}>{t.product_name}</option>
                   ))}
                 </select>
               </div>
             )}
-            <table className="w-full text-left text-[12.5px]">
+            <table className="w-full text-start text-[12.5px]">
               <thead className="bg-[#fafaf7]">
                 <tr>
-                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Domain</th>
-                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Status</th>
-                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">Price / yr</th>
-                  <th className="px-3 py-2 text-right text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted"></th>
+                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">النطاق</th>
+                  <th className="px-3 py-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الحالة</th>
+                  <th className="px-3 py-2 text-end text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">السعر / سنة</th>
+                  <th className="px-3 py-2 text-end text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted"></th>
                 </tr>
               </thead>
               <tbody>
@@ -471,75 +471,75 @@ export default function DomainsPage() {
                       <td className="px-3 py-2">
                         {r.available === true ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]">
-                            <CheckCircle2 className="h-3 w-3" /> Available
+                            <CheckCircle2 className="h-3 w-3" /> متاح
                           </span>
                         ) : r.available === false ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(28,28,28,0.06)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
-                            Taken
+                            محجوز
                           </span>
                         ) : isCheckingThis ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(94,106,210,0.12)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-primary">
-                            <RefreshCw className="h-3 w-3 animate-spin" /> Checking…
+                            <RefreshCw className="h-3 w-3 animate-spin" /> جارٍ الفحص…
                           </span>
                         ) : isQueued ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(0,0,0,0.04)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted">
-                            <Clock className="h-3 w-3" /> Waiting…
+                            <Clock className="h-3 w-3" /> بالانتظار…
                           </span>
                         ) : r.error_code === 'rate_limited' ? (
                           <span
                             className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
-                            title="Porkbun rate limit — 1 check / 10 seconds"
+                            title="حد المُسجِّل — فحص واحد كل 10 ثوانٍ"
                           >
-                            <Clock className="h-3 w-3" /> Cooling down
+                            <Clock className="h-3 w-3" /> فترة تهدئة
                           </span>
                         ) : (
                           <span
                             className="inline-flex items-center gap-1 rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#b45309]"
-                            title={r.message || 'Lookup failed'}
+                            title={r.message || 'فشل البحث'}
                           >
-                            <AlertCircle className="h-3 w-3" /> Couldn’t check
+                            <AlertCircle className="h-3 w-3" /> تعذّر الفحص
                           </span>
                         )}
                         {r.premium && (
-                          <span className="ml-1 rounded-full bg-[rgba(200,169,106,0.16)] px-1.5 py-0.5 text-[10px] font-semibold text-[#9b6f00]">Premium</span>
+                          <span className="ms-1 rounded-full bg-[rgba(200,169,106,0.16)] px-1.5 py-0.5 text-[10px] font-semibold text-[#9b6f00]">مميّز</span>
                         )}
                         {r.first_year_promo && (
-                          <span className="ml-1 rounded-full bg-[rgba(94,106,210,0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-primary" title={`Renews at higher price after year 1`}>
-                            1st-yr deal
+                          <span className="ms-1 rounded-full bg-[rgba(94,106,210,0.12)] px-1.5 py-0.5 text-[10px] font-semibold text-primary" title={`يُجدَّد بسعر أعلى بعد السنة الأولى`}>
+                            عرض السنة الأولى
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2 text-right tabular-nums text-foreground">
+                      <td className="px-3 py-2 text-end tabular-nums text-foreground">
                         {r.retail_usd_year != null
                           ? `$${r.retail_usd_year.toFixed(2)}`
                           : '—'}
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="px-3 py-2 text-end">
                         {r.available === true ? (
                           <button
                             onClick={() => buy(r.domain)}
                             disabled={isPending}
                             className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                           >
-                            {isPending ? 'Loading…' : <>Buy now <ArrowRight className="h-3 w-3" /></>}
+                            {isPending ? 'جارٍ التحميل…' : <>اشترِ الآن <ArrowRight className="h-3 w-3 rtl-flip" /></>}
                           </button>
                         ) : r.available === false ? (
-                          <span className="text-[11.5px] text-muted">Already taken</span>
+                          <span className="text-[11.5px] text-muted">محجوز مسبقًا</span>
                         ) : isCheckingThis || isQueued ? (
                           <span className="text-[11.5px] text-muted">
-                            {isCheckingThis ? '…' : 'Up next'}
+                            {isCheckingThis ? '…' : 'التالي'}
                           </span>
                         ) : (
                           <button
                             onClick={() => checkOne(r.domain)}
                             title={
                               r.error_code === 'rate_limited'
-                                ? 'Registrar limit — try again in ~10s'
-                                : 'Re-check this TLD'
+                                ? 'حد المُسجِّل — حاول بعد ~10 ثوانٍ'
+                                : 'أعد فحص هذا الامتداد'
                             }
                             className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition hover:bg-black/5"
                           >
-                            Retry
+                            إعادة المحاولة
                           </button>
                         )}
                       </td>
@@ -549,18 +549,18 @@ export default function DomainsPage() {
               </tbody>
             </table>
             <div className="border-t border-token bg-[#fafaf7] px-3 py-2 text-[11.5px] text-muted">
-              Buying a domain through Zenya wires it up automatically — registration, DNS, and SSL. No manual records to copy.
+              شراء نطاق عبر زينيا يجهّزه تلقائيًا — التسجيل وDNS وSSL. لا سجلّات يدوية للنسخ.
             </div>
           </div>
         )}
         {results && results.length === 0 && (
-          <div className="mt-3 text-[12.5px] text-muted">No results.</div>
+          <div className="mt-3 text-[12.5px] text-muted">لا نتائج.</div>
         )}
       </section>
 
       {/* ── Connected domains ─────────────────────────────────────────── */}
       <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">
-        Your connected domains
+        نطاقاتك المربوطة
       </h2>
 
       {loading ? (
@@ -598,7 +598,7 @@ export default function DomainsPage() {
                       </span>
                     </div>
                     <div className="mt-1 text-[12px] text-muted">
-                      Points at <strong className="text-foreground">{theme?.product_name || 'unknown site'}</strong>
+                      يشير إلى <strong className="text-foreground">{theme?.product_name || 'موقع غير معروف'}</strong>
                       {theme?.slug && <> · zenyaai.co/s/{theme.slug}</>}
                     </div>
                     {d.error_message && (
@@ -625,30 +625,30 @@ export default function DomainsPage() {
                         disabled={renewing === p.id}
                         className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-50"
                         style={{ background: urgent ? '#b45309' : '#5e6ad2' }}
-                        title={days < 0 ? `Expired ${-days}d ago` : `Expires in ${days} day${days === 1 ? '' : 's'}`}
+                        title={days < 0 ? `انتهى قبل ${-days} يومًا` : `ينتهي خلال ${days} يومًا`}
                       >
                         {renewing === p.id
-                          ? 'Loading…'
-                          : `Renew · ${days < 0 ? 'expired' : `${days}d`}`}
+                          ? 'جارٍ التحميل…'
+                          : `تجديد · ${days < 0 ? 'منتهٍ' : `${days} يومًا`}`}
                       </button>
                     )
                   })()}
                   {d.status === 'live' && (
                     <a href={`https://${d.domain}`} target="_blank" rel="noreferrer"
                        className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
-                      Open <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                      فتح <ExternalLink className="h-2.5 w-2.5 opacity-70" />
                     </a>
                   )}
                   {d.status !== 'live' && (
                     <button onClick={() => recheck(d.id)} disabled={busyId === d.id}
                             className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
                       <RefreshCw className={'h-3 w-3 ' + (busyId === d.id ? 'animate-spin' : '')} />
-                      Recheck
+                      إعادة فحص
                     </button>
                   )}
                   <button onClick={() => remove(d.id, d.domain)} disabled={busyId === d.id}
                           className="rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
-                    Remove
+                    إزالة
                   </button>
                 </div>
               </div>
@@ -670,11 +670,11 @@ export default function DomainsPage() {
 function friendlyError(j: any): string {
   if (!j) return ''
   if (j.error_code === 'rate_limited' || j.error === 'rate_limited') {
-    return 'Domain registrar is cooling down. Give it about 10 seconds and try again.'
+    return 'مُسجِّل النطاقات في فترة تهدئة. انتظر نحو 10 ثوانٍ ثم حاول مجددًا.'
   }
   const m = String(j.message || j.error || '')
   if (/within\s+\d+\s+seconds?\s+used/i.test(m)) {
-    return 'Domain registrar is cooling down. Give it about 10 seconds and try again.'
+    return 'مُسجِّل النطاقات في فترة تهدئة. انتظر نحو 10 ثوانٍ ثم حاول مجددًا.'
   }
   return m
 }
@@ -683,24 +683,24 @@ function EmptyState({ hasHosting, hasEligible, onAdd }: { hasHosting: boolean; h
   return (
     <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
       <Globe className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
-      <h3 className="mt-4 text-[16px] font-semibold text-foreground">No domains connected yet</h3>
+      <h3 className="mt-4 text-[16px] font-semibold text-foreground">لا نطاقات مربوطة بعد</h3>
       {hasHosting && hasEligible ? (
         <>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-            Point a domain you own at Zenya — add two DNS records, we issue SSL automatically.
+            وجِّه نطاقًا تملكه إلى زينيا — أضف سجلَّي DNS، ونصدر شهادة SSL تلقائيًا.
           </p>
           <button onClick={onAdd} className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-primary/25">
             <Plus className="h-4 w-4" strokeWidth={2.5} />
-            Connect your first domain
+            اربط نطاقك الأول
           </button>
         </>
       ) : !hasHosting ? (
         <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-          Upgrade to the Hosting plan and publish a site, then connect any domain you own.
+          رقِّ إلى باقة الاستضافة وانشر موقعًا، ثم اربط أي نطاق تملكه.
         </p>
       ) : (
         <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
-          Publish a Zenya-hosted site first, then come back to connect a custom domain to it.
+          انشر موقعًا مستضافًا على زينيا أولًا، ثم عُد لربط نطاق مخصص به.
         </p>
       )}
     </div>

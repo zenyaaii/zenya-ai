@@ -35,7 +35,7 @@ type Template = {
 const TEMPLATES: Template[] = [
   {
     id: 'restaurant',
-    name: 'Maison',
+    name: 'مطعم',
     gradient: 'linear-gradient(135deg, #1a1410 0%, #0a0a0c 100%)',
     image: themePreview('restaurant'),
     demoHref: '/demo/restaurant',
@@ -43,7 +43,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'one_product',
-    name: 'Storefront',
+    name: 'متجر',
     gradient: 'linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%)',
     image: themePreview('one_product'),
     demoHref: '/demo',
@@ -51,7 +51,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'atlas',
-    name: 'Atlas',
+    name: 'تطبيق',
     gradient: 'linear-gradient(135deg, #4338ca 0%, #818cf8 100%)',
     image: themePreview('atlas'),
     demoHref: '/demo/atlas',
@@ -59,7 +59,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'services',
-    name: 'Trade',
+    name: 'خدمات',
     gradient: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
     image: themePreview('services'),
     demoHref: '/demo/services',
@@ -67,7 +67,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'collective',
-    name: 'Collective',
+    name: 'تشكيلة',
     gradient: 'linear-gradient(135deg, #059669 0%, #34d399 100%)',
     image: themePreview('collective'),
     demoHref: '/demo/collective',
@@ -75,7 +75,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'studio',
-    name: 'Studio',
+    name: 'ستوديو',
     gradient: 'linear-gradient(135deg, #1c1c1c 0%, #4a4a4a 100%)',
     image: themePreview('studio'),
     demoHref: '/demo/studio',
@@ -83,7 +83,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'lookbook',
-    name: 'Lookbook',
+    name: 'أزياء',
     gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
     image: themePreview('lookbook'),
     demoHref: '/demo/lookbook',
@@ -91,7 +91,7 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'wellness',
-    name: 'Wellness',
+    name: 'عافية',
     gradient: 'linear-gradient(135deg, #15803d 0%, #86efac 100%)',
     image: themePreview('wellness'),
     demoHref: '/demo/wellness',
@@ -140,7 +140,7 @@ export default function TemplateStackSection() {
           transition={{ duration: 0.6, ease: EASE_OUT }}
           className="text-[36px] font-[590] tracking-[-1.2px] text-foreground sm:text-[52px] sm:tracking-[-2px]"
         >
-          Customizable templates
+          قوالب قابلة للتخصيص
         </motion.h2>
       </div>
 
@@ -153,7 +153,7 @@ export default function TemplateStackSection() {
               key={t.id}
               type="button"
               onClick={() => setActive(t)}
-              aria-label={`Preview ${t.name} template`}
+              aria-label={`معاينة قالب ${t.name}`}
               className="group absolute bottom-0 cursor-pointer focus:outline-none"
               style={{ transformOrigin: 'bottom center' }}
               initial={{ x: 0, y: 30, rotate: 0, opacity: 0, scale: 0.7 }}
@@ -260,7 +260,7 @@ function TemplateCard({ template, size }: { template: Template; size: 'lg' | 'sm
           }}
         >
           <div className="text-[10px] font-semibold uppercase tracking-[0.25em] opacity-70">
-            Zenya
+            زينيا
           </div>
           <div className="mt-1 text-lg font-bold tracking-tight">{template.name}</div>
         </div>
@@ -318,7 +318,7 @@ function TemplatePreviewModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close preview"
+            aria-label="إغلاق المعاينة"
             className="rounded-full p-1.5 text-muted hover:bg-black/5"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -340,14 +340,14 @@ function TemplatePreviewModal({
             href={template.buildHref}
             className="flex-1 rounded-xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.99]"
           >
-            Build
+            أنشئ
           </Link>
           <Link
             href={template.demoHref}
             target="_blank"
             className="flex-1 rounded-xl border border-token bg-white py-3 text-center text-sm font-semibold text-foreground transition hover:bg-black/5 active:scale-[0.99]"
           >
-            Full preview →
+            معاينة كاملة ←
           </Link>
         </div>
       </motion.div>
@@ -383,8 +383,8 @@ function ScaledDemoPreview({ template }: { template: Template }) {
       href={template.demoHref}
       target="_blank"
       rel="noreferrer"
-      aria-label={`Open ${template.name} full preview in a new tab`}
-      title="Click to open full preview"
+      aria-label={`افتح معاينة ${template.name} الكاملة في تبويب جديد`}
+      title="انقر لفتح المعاينة الكاملة"
       className="group relative block overflow-hidden rounded-2xl bg-white"
       style={{
         aspectRatio: '16 / 10',
@@ -398,7 +398,7 @@ function ScaledDemoPreview({ template }: { template: Template }) {
       <iframe
         key={template.id}
         src={template.demoHref}
-        title={`${template.name} live preview`}
+        title={`معاينة ${template.name} الحية`}
         loading="lazy"
         scrolling="no"
         onLoad={() => setLoaded(true)}
@@ -431,7 +431,7 @@ function ScaledDemoPreview({ template }: { template: Template }) {
           }}
         >
           <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted">
-            Loading preview…
+            جارٍ تحميل المعاينة…
           </div>
           <style>{`
             @keyframes zenya-shimmer {
@@ -452,7 +452,7 @@ function ScaledDemoPreview({ template }: { template: Template }) {
         }}
       >
         <span className="rounded-full bg-white/95 px-3 py-1 text-[11px] font-semibold text-foreground shadow-sm">
-          Open full preview ↗
+          افتح المعاينة الكاملة ↗
         </span>
       </div>
     </a>

@@ -10,67 +10,67 @@ import { affiliateClickHref } from '@/lib/affiliate'
 
 const FAQS = [
   {
-    q: 'What’s the difference between the one-time plan and the hosting plan?',
-    a: 'The one-time $9.99 unlocks unlimited AI generations and exports — for the two e-commerce templates (Storefront, Collective) you connect or upload to your Shopify store; for the other templates you download the project ZIP and host wherever you like. The $19.99/month hosting plan adds Zenya hosting for the brochure templates (live URL, custom domain, no Zenya badge) plus everything in the one-time plan, billed monthly.',
+    q: 'ما الفرق بين الخطة لمرة واحدة وخطة الاستضافة؟',
+    a: 'تفتح خطة 9.99$ لمرة واحدة توليدًا وتصديرًا غير محدودين بالذكاء الاصطناعي — لقالبَي التجارة الإلكترونية (المتجر والتشكيلة) تربطهما أو ترفعهما إلى متجر شوبيفاي؛ أما القوالب الأخرى فتنزّل ملف المشروع المضغوط وتستضيفه أينما شئت. وتضيف خطة 19.99$ شهريًا استضافة زينيا لقوالب العرض (رابط مباشر، ونطاق مخصّص، وبلا شارة زينيا) إلى جانب كل ما في الخطة لمرة واحدة، وتُحاسَب شهريًا.',
   },
   {
-    q: 'Is the one-time payment really one-time?',
-    a: 'Yes. Pay $9.99 (or €9.99 in Europe, VAT included) once and the generator is yours for life. No renewal. Lifetime access to unlimited AI generations and exports.',
+    q: 'هل الدفعة الواحدة فعلًا لمرة واحدة؟',
+    a: 'نعم. ادفع 9.99$ (أو 9.99€ في أوروبا شاملة الضريبة) مرة واحدة ويصبح المنشئ ملكك مدى الحياة. بلا تجديد. وصول دائم لتوليد وتصدير غير محدودين بالذكاء الاصطناعي.',
   },
   {
-    q: 'What does Zenya hosting include?',
-    a: 'A live site at zenya.app/s/your-slug for any brochure template (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison), one connected custom domain (like mycoolstore.com), automatic SSL, fast CDN delivery, and removal of the “Made with Zenya” footer. E-commerce templates (Storefront, Collective) are not Zenya-hosted — they go to Shopify.',
+    q: 'ماذا تشمل استضافة زينيا؟',
+    a: 'موقع مباشر على zenya.app/s/الاسم-المختصر لأي قالب عرض (تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم)، ونطاق مخصّص واحد متصل (مثل mystore.com)، وشهادة SSL تلقائية، وتسليم سريع عبر شبكة CDN، وإزالة تذييل «صُنع بزينيا». أما قوالب التجارة الإلكترونية (المتجر والتشكيلة) فلا تُستضاف على زينيا — بل تذهب إلى شوبيفاي.',
   },
   {
-    q: 'Can I cancel the hosting plan?',
-    a: 'Yes, any time from your dashboard. Hosting stays active until the end of the current billing month, then your site stops resolving. Themes and exports you’ve generated stay in your account.',
+    q: 'هل يمكنني إلغاء خطة الاستضافة؟',
+    a: 'نعم، في أي وقت من لوحة التحكم. تبقى الاستضافة فعّالة حتى نهاية شهر الفوترة الحالي، ثم يتوقف موقعك عن العمل. وتبقى القوالب والتصديرات التي أنشأتها محفوظة في حسابك.',
   },
   {
-    q: 'Do you offer a refund policy?',
-    a: 'Yes. 14-day money-back guarantee on the one-time plan, and you can cancel the hosting plan at any time. See the full Refund Policy for details.',
+    q: 'هل لديكم سياسة استرداد؟',
+    a: 'نعم. ضمان استرداد المال خلال 14 يومًا على الخطة لمرة واحدة، ويمكنك إلغاء خطة الاستضافة في أي وقت. راجع سياسة الاسترداد الكاملة للتفاصيل.',
   },
   {
-    q: 'Which templates work where?',
-    a: 'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify (Shopify handles cart, checkout, products, payments). Don\'t have a Shopify store yet? You can start a free trial through our affiliate link below. The other six templates — Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison — are brochure/showcase sites that Zenya can host directly on the $19.99/mo plan.',
+    q: 'أي القوالب يعمل وأين؟',
+    a: 'يُصدَّر قالبا التجارة الإلكترونية — المتجر والتشكيلة — كثيمات شوبيفاي OS 2.0 ويعملان على شوبيفاي (يتولّى شوبيفاي السلة والدفع والمنتجات والمدفوعات). لا تملك متجر شوبيفاي بعد؟ يمكنك بدء تجربة مجانية عبر رابط الإحالة أدناه. أما القوالب الأخرى — تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم — فهي مواقع عرض يمكن لزينيا استضافتها مباشرة على خطة 19.99$ شهريًا.',
   },
 ] as const
 
 const COMPARE = [
-  { feature: 'Price',                zenya: '$9.99 once / $19.99 mo', other: '$29+/mo', agency: '$2,000+' },
-  { feature: 'Setup Time',           zenya: 'Under 60 sec',           other: 'Minutes', agency: 'Weeks' },
-  { feature: 'Templates',            zenya: '8 templates',            other: '1–2', agency: 'Custom' },
-  { feature: 'Hosting included',     zenya: 'On $19.99 plan',         other: 'On most',  agency: 'You arrange' },
-  { feature: 'Custom domain',        zenya: 'On $19.99 plan',         other: 'On most',  agency: 'Yes' },
-  { feature: 'Shopify export',       zenya: 'On both paid',           other: 'Rare',     agency: 'Custom' },
-  { feature: 'Platform lock-in',     zenya: 'None',                   other: 'High',     agency: 'None' },
+  { feature: 'السعر',              zenya: '9.99$ مرة / 19.99$ شهريًا', other: '+29$ شهريًا', agency: '+2,000$' },
+  { feature: 'وقت الإعداد',        zenya: 'أقل من 60 ثانية',           other: 'دقائق',       agency: 'أسابيع' },
+  { feature: 'القوالب',            zenya: '8 قوالب',                   other: '1–2',         agency: 'مخصّص' },
+  { feature: 'الاستضافة مشمولة',   zenya: 'في خطة 19.99$',             other: 'في معظمها',   agency: 'تتولّاها بنفسك' },
+  { feature: 'نطاق مخصّص',         zenya: 'في خطة 19.99$',             other: 'في معظمها',   agency: 'نعم' },
+  { feature: 'تصدير شوبيفاي',      zenya: 'في الخطتين المدفوعتين',     other: 'نادر',        agency: 'مخصّص' },
+  { feature: 'الارتباط بالمنصّة',  zenya: 'لا يوجد',                   other: 'مرتفع',       agency: 'لا يوجد' },
 ] as const
 
 const FREE_FEATURES = [
-  '3 AI generations total',
-  'All 8 templates available',
-  'Preview your site at zenya.app',
-  'Basic customization',
-  'Community support',
+  '3 عمليات توليد إجمالًا بالذكاء الاصطناعي',
+  'جميع القوالب الثمانية متاحة',
+  'معاينة موقعك على zenya.app',
+  'تخصيص أساسي',
+  'دعم المجتمع',
 ]
 
 const ONETIME_FEATURES = [
-  'Unlimited AI generations',
-  'All 8 premium templates',
-  'Shopify OS 2.0 ZIP (Storefront + Collective)',
-  'Static export ZIP (other templates)',
-  'Priority AI generation',
-  'Priority support',
-  'Early access to new templates',
+  'توليد غير محدود بالذكاء الاصطناعي',
+  'جميع القوالب الثمانية الاحترافية',
+  'ملف شوبيفاي OS 2.0 (المتجر + التشكيلة)',
+  'ملف تصدير ثابت (القوالب الأخرى)',
+  'أولوية في التوليد بالذكاء الاصطناعي',
+  'دعم ذو أولوية',
+  'وصول مبكر للقوالب الجديدة',
 ]
 
 const HOSTING_FEATURES = [
-  'Everything in One-time, plus:',
-  'Zenya hosts your brochure sites',
-  '1 connected custom domain',
-  'Automatic SSL + CDN delivery',
-  'Remove the “Made with Zenya” badge',
-  'Site analytics in your dashboard',
-  'Edit content anytime via AI prompts',
+  'كل ما في الخطة لمرة واحدة، بالإضافة إلى:',
+  'تستضيف زينيا مواقع العرض الخاصة بك',
+  'نطاق مخصّص واحد متصل',
+  'شهادة SSL تلقائية + تسليم عبر CDN',
+  'إزالة شارة «صُنع بزينيا»',
+  'تحليلات الموقع في لوحة تحكمك',
+  'عدّل المحتوى في أي وقت عبر أوامر الذكاء الاصطناعي',
 ]
 
 export default function PricingPage() {
@@ -87,14 +87,14 @@ export default function PricingPage() {
           className="mb-16 text-center"
         >
           <span className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-[rgba(94,106,210,0.18)] bg-[rgba(94,106,210,0.08)] px-3 py-1 text-[12px] font-medium text-primary">
-            Simple, transparent pricing
+            أسعار بسيطة وشفّافة
           </span>
-          <h1 className="text-[46px] font-[590] leading-[1.08] tracking-[-1.6px] text-foreground sm:text-[58px] sm:tracking-[-2px]">
-            Start free.{' '}
-            <span className="gradient-text">Scale when ready.</span>
+          <h1 className="text-[46px] font-[590] leading-[1.15] tracking-[-1.6px] text-foreground sm:text-[58px] sm:tracking-[-2px]">
+            ابدأ مجانًا.{' '}
+            <span className="gradient-text">وتوسّع عند الجاهزية.</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.65] text-muted">
-            One AI generator, three ways to launch. Free to try. Pay once for the generator, or subscribe for full Zenya hosting.
+          <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.85] text-muted">
+            منشئ واحد بالذكاء الاصطناعي، وثلاث طرق للإطلاق. مجاني للتجربة. ادفع مرة واحدة للمنشئ، أو اشترك للحصول على استضافة زينيا الكاملة.
           </p>
         </motion.div>
 
@@ -109,13 +109,13 @@ export default function PricingPage() {
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                Free
+                مجاني
               </p>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$0</span>
-                <span className="text-[15px] text-muted">/forever</span>
+                <span className="text-[15px] text-muted">/للأبد</span>
               </div>
-              <p className="text-[13.5px] text-muted">Try Zenya. See what AI can build.</p>
+              <p className="text-[13.5px] text-muted">جرّب زينيا. شاهد ما يبنيه الذكاء الاصطناعي.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
@@ -134,7 +134,7 @@ export default function PricingPage() {
                 'hover:bg-black/5 active:scale-[0.99]'
               )}
             >
-              Get Started Free
+              ابدأ مجانًا
             </Link>
           </motion.div>
 
@@ -156,20 +156,20 @@ export default function PricingPage() {
                   'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.50) 0px 0px 0px 0.5px inset',
               }}
             >
-              Most Popular
+              الأكثر شيوعًا
             </div>
 
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-                One-time
+                مرة واحدة
               </p>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] gradient-text">
                   $9.99
                 </span>
-                <span className="text-[15px] text-muted">once</span>
+                <span className="text-[15px] text-muted">لمرة واحدة</span>
               </div>
-              <p className="text-[13.5px] text-muted">Lifetime generator. Export anywhere.</p>
+              <p className="text-[13.5px] text-muted">منشئ مدى الحياة. صدّر أينما شئت.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
@@ -188,11 +188,11 @@ export default function PricingPage() {
                 'btn-shadow-primary hover:opacity-90 active:scale-[0.99]'
               )}
             >
-              Get Lifetime Access
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+              احصل على وصول مدى الحياة
+              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <p className="mt-2.5 text-center text-[12px] text-muted">
-              One-time payment · 14-day money-back guarantee
+              دفعة واحدة · ضمان استرداد خلال 14 يومًا
             </p>
           </motion.div>
 
@@ -205,13 +205,13 @@ export default function PricingPage() {
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                Hosting
+                استضافة
               </p>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$19.99</span>
-                <span className="text-[15px] text-muted">/month</span>
+                <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
-              <p className="text-[13.5px] text-muted">We host. You point your domain. Done.</p>
+              <p className="text-[13.5px] text-muted">نحن نستضيف. أنت توجّه نطاقك. وانتهى الأمر.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
@@ -231,11 +231,11 @@ export default function PricingPage() {
               )}
               style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
             >
-              Start Hosting
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} />
+              ابدأ الاستضافة
+              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <p className="mt-2.5 text-center text-[12px] text-muted">
-              Cancel anytime · Site stays live until end of month
+              ألغِ في أي وقت · يبقى الموقع مباشرًا حتى نهاية الشهر
             </p>
           </motion.div>
         </div>
@@ -250,34 +250,34 @@ export default function PricingPage() {
         >
           <div className="mb-10 text-center">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              Compare
+              قارِن
             </p>
             <h2 className="text-[34px] font-[590] tracking-[-1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
-              Why Zenya?
+              لماذا زينيا؟
             </h2>
             <p className="mt-2 text-[15px] text-muted">
-              How we stack up against generic AI builders and traditional agencies.
+              كيف نتفوّق على منشئات الذكاء الاصطناعي العامة والوكالات التقليدية.
             </p>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-token bg-white shadow-soft-sm">
-            <table className="w-full min-w-[520px] text-left">
+            <table className="w-full min-w-[520px] text-start">
               <thead>
                 <tr className="border-b border-token">
                   <th className="px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.10em] text-muted">
-                    Feature
+                    الميزة
                   </th>
                   <th
                     className="px-5 py-4 text-center text-[13px] font-[590] text-primary"
                     style={{ background: 'rgba(94,106,210,0.04)' }}
                   >
-                    Zenya
+                    زينيا
                   </th>
                   <th className="px-5 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.10em] text-muted">
-                    Other AI
+                    ذكاء اصطناعي آخر
                   </th>
                   <th className="px-5 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.10em] text-muted">
-                    Agency
+                    وكالة
                   </th>
                 </tr>
               </thead>
@@ -313,10 +313,10 @@ export default function PricingPage() {
         >
           <div className="mb-10 text-center">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              FAQ
+              الأسئلة الشائعة
             </p>
             <h2 className="text-[34px] font-[590] tracking-[-1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
-              Common questions
+              أسئلة شائعة
             </h2>
           </div>
 
@@ -333,11 +333,11 @@ export default function PricingPage() {
                 <Accordion.Header className="flex">
                   <Accordion.Trigger
                     className={cn(
-                      'flex w-full items-center justify-between px-5 py-4 text-left outline-none',
+                      'flex w-full items-center justify-between px-5 py-4 text-start outline-none',
                       'focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2'
                     )}
                   >
-                    <span className="pr-4 text-[14px] font-[510] text-foreground">{faq.q}</span>
+                    <span className="pe-4 text-[14px] font-[510] text-foreground">{faq.q}</span>
                     <ChevronDown
                       className="h-4 w-4 flex-shrink-0 text-muted transition-transform duration-200 group-data-[state=open]:rotate-180 group-data-[state=open]:text-primary"
                       strokeWidth={2}
@@ -370,18 +370,18 @@ export default function PricingPage() {
         >
           <div className="rounded-xl border border-token bg-white px-5 py-4 text-center">
             <p className="text-[13.5px] text-foreground">
-              Building a Storefront or Collective site and don’t have Shopify yet?{' '}
+              تبني موقع متجر أو تشكيلة ولا تملك شوبيفاي بعد؟{' '}
               <a
                 href={affiliateClickHref('pricing_faq')}
                 target="_blank"
                 rel="sponsored noopener noreferrer"
                 className="font-semibold text-[#008060] underline underline-offset-2 hover:opacity-80"
               >
-                Start a free Shopify trial →
+                ابدأ تجربة شوبيفاي المجانية ←
               </a>
             </p>
             <p className="mt-1 text-[11px] text-muted">
-              Affiliate link — Zenya earns a small commission, no extra cost to you.
+              رابط إحالة — تحصل زينيا على عمولة صغيرة دون أي تكلفة إضافية عليك.
             </p>
           </div>
         </motion.div>

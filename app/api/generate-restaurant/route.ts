@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { restaurantInputSchema, type RestaurantInput } from '@/utils/restaurant/input'
 import type { RestaurantContent } from '@/utils/restaurant/types'
 import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
@@ -470,7 +472,8 @@ export async function POST(req: NextRequest) {
           {
             role: 'system',
             content:
-              'You are a senior restaurant copywriter and food critic. You write quiet, sensory, editorial copy for fine-dining and elevated-casual restaurants. You always return strict JSON in the exact shape requested.'
+              'You are a senior restaurant copywriter and food critic. You write quiet, sensory, editorial copy for fine-dining and elevated-casual restaurants. You always return strict JSON in the exact shape requested.\n\n' +
+              ARABIC_OUTPUT_DIRECTIVE
           },
           { role: 'user', content: prompt }
         ]
@@ -478,6 +481,8 @@ export async function POST(req: NextRequest) {
       TIMEOUT_MS,
       'restaurant_ai'
     )
+
+    await logAiUsage({ operation: 'generate-restaurant', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, resp.usage)
 
     const raw = resp.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}

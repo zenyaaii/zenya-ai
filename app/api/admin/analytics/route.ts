@@ -13,9 +13,21 @@ function admin() {
   )
 }
 
+// gpt-4o-mini list price (USD per 1M tokens). Used to estimate AI spend.
+const PRICE_IN_PER_M = 0.15
+const PRICE_OUT_PER_M = 0.60
+const aiCost = (promptTok: number, completionTok: number) =>
+  (promptTok / 1_000_000) * PRICE_IN_PER_M + (completionTok / 1_000_000) * PRICE_OUT_PER_M
+
+const round2 = (n: number) => Math.round(n * 100) / 100
+
 /**
- * GET /api/admin/analytics
- * Returns aggregated stats for the last 30 days. Admin-only.
+ * GET /api/admin/analytics — founder/business dashboard. Admin-only
+ * (profiles.plan === 'admin'). Aggregates the whole account:
+ *   - activation funnel (signup → create → publish → pay → host)
+ *   - unit economics (AI spend vs revenue)
+ *   - revenue (one-time purchases + hosting MRR)
+ *   - engagement (active users, signups), plan mix, event funnel, series
  */
 export async function GET(_req: NextRequest) {
   const supabase = createClient()
@@ -33,98 +45,113 @@ export async function GET(_req: NextRequest) {
   }
 
   const a = admin()
-
   const now = new Date()
-  const since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const since30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const since7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const since = since30.toISOString()
 
-  // Batch all the counts in parallel.
   const [
-    totals,
-    purchases,
+    profilesRows,
+    themeRows,
+    purchasesAll,
     hostingSubs,
+    aiRows,
     pageviews30d,
     recentEvents,
-    planBreakdown,
   ] = await Promise.all([
-    Promise.all([
-      a.from('profiles').select('*', { count: 'exact', head: true }),
-      a.from('themes').select('*', { count: 'exact', head: true }),
-      a.from('themes').select('*', { count: 'exact', head: true }).eq('is_published', true),
-      a.from('domains').select('*', { count: 'exact', head: true }).eq('status', 'live'),
-    ]).then(([users, themes, published, domainsLive]) => ({
-      users: users.count ?? 0,
-      themes: themes.count ?? 0,
-      published_themes: published.count ?? 0,
-      live_domains: domainsLive.count ?? 0,
-    })),
-
-    a.from('purchases')
-      .select('amount_cents, currency, status, paid_at')
-      .gte('created_at', since)
-      .then(({ data }) => {
-        const rows = data || []
-        const paid = rows.filter((r) => r.status === 'paid')
-        const refunded = rows.filter((r) => r.status === 'refunded')
-        return {
-          count_paid: paid.length,
-          count_refunded: refunded.length,
-          gross_revenue_cents: paid.reduce((s, r) => s + (r.amount_cents || 0), 0),
-        }
-      }),
-
-    a.from('hosting_subscriptions')
-      .select('status, amount_cents, currency, created_at, canceled_at')
-      .then(({ data }) => {
-        const rows = data || []
-        const active = rows.filter((r) => ['active', 'trialing'].includes(r.status))
-        return {
-          active_count: active.length,
-          mrr_cents: active.reduce((s, r) => s + (r.amount_cents || 0), 0),
-          churned_30d: rows.filter(
-            (r) => r.canceled_at && new Date(r.canceled_at).toISOString() >= since
-          ).length,
-        }
-      }),
-
-    a.from('site_views')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', since)
-      .then(({ count }) => count ?? 0),
-
-    a.from('activity_logs')
-      .select('event_type, created_at, metadata')
-      .gte('created_at', since)
-      .order('created_at', { ascending: false })
-      .limit(500)
+    a.from('profiles').select('id, plan, is_pro, has_hosting, last_seen_at, created_at')
       .then(({ data }) => data || []),
-
-    a.from('profiles')
-      .select('plan')
-      .then(({ data }) => {
-        const out: Record<string, number> = {}
-        for (const row of data || []) {
-          const p = (row as any).plan || 'free'
-          out[p] = (out[p] || 0) + 1
-        }
-        return out
-      }),
+    a.from('themes').select('user_id, is_published, created_at')
+      .then(({ data }) => data || []),
+    a.from('purchases').select('user_id, amount_cents, status, created_at')
+      .then(({ data }) => data || []),
+    a.from('hosting_subscriptions').select('status, amount_cents, canceled_at')
+      .then(({ data }) => data || []),
+    a.from('ai_usage').select('operation, prompt_tokens, completion_tokens, total_tokens, created_at')
+      .then(({ data }) => data || []),
+    a.from('site_views').select('id', { count: 'exact', head: true }).gte('created_at', since)
+      .then(({ count }) => count ?? 0),
+    a.from('activity_logs').select('event_type, created_at, metadata')
+      .gte('created_at', since).order('created_at', { ascending: false }).limit(500)
+      .then(({ data }) => data || []),
   ])
 
-  // Bucket recent events by type for a quick funnel view.
-  const eventCounts: Record<string, number> = {}
-  for (const e of recentEvents) {
-    eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1
+  // ── Funnel + engagement (people) ───────────────────────────────────────
+  const users = profilesRows.length
+  const proUsers = profilesRows.filter((p: any) => p.is_pro).length
+  const hostingUsers = profilesRows.filter((p: any) => p.has_hosting).length
+  const active7 = profilesRows.filter((p: any) => p.last_seen_at && new Date(p.last_seen_at) >= since7).length
+  const active30 = profilesRows.filter((p: any) => p.last_seen_at && new Date(p.last_seen_at) >= since30).length
+  const signups30 = profilesRows.filter((p: any) => p.created_at && new Date(p.created_at) >= since30).length
+
+  const creators = new Set(themeRows.map((t: any) => t.user_id)).size
+  const publishers = new Set(themeRows.filter((t: any) => t.is_published).map((t: any) => t.user_id)).size
+
+  const funnel = [
+    { step: 'Signed up', users },
+    { step: 'Created a site', users: creators },
+    { step: 'Published', users: publishers },
+    { step: 'Paid (Pro)', users: proUsers },
+    { step: 'Hosting', users: hostingUsers },
+  ]
+
+  // ── Revenue ────────────────────────────────────────────────────────────
+  const paid = purchasesAll.filter((r: any) => r.status === 'paid')
+  const grossAllTimeCents = paid.reduce((s: number, r: any) => s + (r.amount_cents || 0), 0)
+  const gross30Cents = paid
+    .filter((r: any) => r.created_at && new Date(r.created_at) >= since30)
+    .reduce((s: number, r: any) => s + (r.amount_cents || 0), 0)
+  const payingUsers = new Set(paid.map((r: any) => r.user_id)).size
+  const refunded30 = purchasesAll.filter(
+    (r: any) => r.status === 'refunded' && r.created_at && new Date(r.created_at) >= since30
+  ).length
+
+  const activeHosting = hostingSubs.filter((r: any) => ['active', 'trialing'].includes(r.status))
+  const mrrCents = activeHosting.reduce((s: number, r: any) => s + (r.amount_cents || 0), 0)
+  const churned30 = hostingSubs.filter(
+    (r: any) => r.canceled_at && new Date(r.canceled_at) >= since30
+  ).length
+
+  // ── AI spend (unit economics) ──────────────────────────────────────────
+  let tokensTotal = 0, costTotal = 0, tokens30 = 0, cost30 = 0
+  const byOp: Record<string, { operation: string; calls: number; tokens: number; cost_usd: number }> = {}
+  for (const r of aiRows as any[]) {
+    const tok = r.total_tokens || 0
+    const c = aiCost(r.prompt_tokens || 0, r.completion_tokens || 0)
+    tokensTotal += tok; costTotal += c
+    if (r.created_at && new Date(r.created_at) >= since30) { tokens30 += tok; cost30 += c }
+    const e = (byOp[r.operation] ||= { operation: r.operation, calls: 0, tokens: 0, cost_usd: 0 })
+    e.calls++; e.tokens += tok; e.cost_usd += c
+  }
+  const revenueAllTimeUsd = grossAllTimeCents / 100
+  const ai_usage = {
+    calls: aiRows.length,
+    tokens_total: tokensTotal,
+    cost_total_usd: round2(costTotal),
+    tokens_30d: tokens30,
+    cost_30d_usd: round2(cost30),
+    cost_per_user_usd: users > 0 ? round2(costTotal / users) : 0,
+    // Gross margin on AI alone — what's left of revenue after model spend.
+    margin_vs_revenue_pct:
+      revenueAllTimeUsd > 0 ? Math.round((1 - costTotal / revenueAllTimeUsd) * 100) : null,
+    by_operation: Object.values(byOp).sort((x, y) => y.cost_usd - x.cost_usd).map((o) => ({
+      ...o, cost_usd: round2(o.cost_usd),
+    })),
   }
 
-  // Time series for the last 30 days, by day, for theme.generated + signups.
-  const byDay: Record<string, { generated: number; published: number; purchased: number; viewed: number }> = {}
-  const dayKey = (iso: string) => iso.slice(0, 10)
+  // ── Plan mix + event funnel + daily series ─────────────────────────────
+  const planBreakdown: Record<string, number> = {}
+  for (const p of profilesRows as any[]) planBreakdown[p.plan || 'free'] = (planBreakdown[p.plan || 'free'] || 0) + 1
+
+  const eventCounts: Record<string, number> = {}
+  for (const e of recentEvents as any[]) eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1
+
+  const byDay: Record<string, { generated: number; published: number; purchased: number }> = {}
   for (let i = 0; i < 30; i++) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000)
-    byDay[d.toISOString().slice(0, 10)] = { generated: 0, published: 0, purchased: 0, viewed: 0 }
+    byDay[new Date(now.getTime() - i * 86400000).toISOString().slice(0, 10)] = { generated: 0, published: 0, purchased: 0 }
   }
-  for (const e of recentEvents) {
-    const k = dayKey(e.created_at)
+  for (const e of recentEvents as any[]) {
+    const k = e.created_at.slice(0, 10)
     if (!byDay[k]) continue
     if (e.event_type === 'theme.generated') byDay[k].generated++
     else if (e.event_type === 'theme.published') byDay[k].published++
@@ -134,15 +161,27 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({
     generated_at: now.toISOString(),
     window_days: 30,
-    totals,
+    totals: {
+      users,
+      themes: themeRows.length,
+      published_themes: themeRows.filter((t: any) => t.is_published).length,
+      paying_users: payingUsers,
+    },
+    funnel,
+    engagement: { active_7d: active7, active_30d: active30, signups_30d: signups30 },
+    revenue: {
+      gross_all_time_cents: grossAllTimeCents,
+      gross_30d_cents: gross30Cents,
+      mrr_cents: mrrCents,
+      paying_users: payingUsers,
+      hosting_active: activeHosting.length,
+      churned_30d: churned30,
+      refunded_30d: refunded30,
+    },
+    ai_usage,
     plan_breakdown: planBreakdown,
-    purchases,
-    hosting: hostingSubs,
     pageviews_30d: pageviews30d,
     event_counts_30d: eventCounts,
-    series: Object.entries(byDay)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, vals]) => ({ date, ...vals })),
-    recent_events: recentEvents.slice(0, 50),
+    series: Object.entries(byDay).sort(([x], [y]) => x.localeCompare(y)).map(([date, v]) => ({ date, ...v })),
   })
 }

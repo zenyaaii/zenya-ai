@@ -60,7 +60,7 @@ export default function CTA() {
               className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              Join 2,400+ founders &amp; operators
+              انضمّ إلى أكثر من 2,400 مؤسّس وصاحب عمل
             </motion.p>
 
             <motion.h2
@@ -70,7 +70,7 @@ export default function CTA() {
               transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="text-[38px] font-[590] leading-[1.1] tracking-[-1.2px] text-white sm:text-[46px] sm:tracking-[-1.6px]"
             >
-              Launch your website today.
+              أطلق موقعك اليوم.
             </motion.h2>
 
             <motion.p
@@ -81,8 +81,8 @@ export default function CTA() {
               className="mx-auto mt-4 max-w-sm text-[16px] leading-[1.6]"
               style={{ color: 'rgba(255,255,255,0.78)' }}
             >
-              Pick one of eight templates, share a brief, and get a live site in
-              under a minute. No design or dev work required.
+              اختر أحد القوالب الثمانية، اكتب نبذة، واحصل على موقع مباشر في أقل
+              من دقيقة. دون أي عمل تصميمي أو برمجي.
             </motion.p>
 
             <motion.div
@@ -100,9 +100,9 @@ export default function CTA() {
                 )}
                 style={{ boxShadow: 'rgba(0,0,0,0.10) 0px 1px 3px 0px' }}
               >
-                Start for free
+                ابدأ مجانًا
                 <ArrowRight
-                  className="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-0.5"
+                  className="h-3.5 w-3.5 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5"
                   strokeWidth={2.5}
                 />
               </Link>
@@ -111,7 +111,7 @@ export default function CTA() {
                 className="inline-flex items-center rounded-md border border-white/20 px-6 py-3 text-[14px] font-medium transition-all duration-150 hover:bg-white/10 active:scale-[0.98]"
                 style={{ color: 'rgba(255,255,255,0.88)' }}
               >
-                Browse templates
+                تصفّح القوالب
               </Link>
             </motion.div>
 
@@ -123,7 +123,7 @@ export default function CTA() {
               className="mt-5 text-[12.5px]"
               style={{ color: 'rgba(255,255,255,0.50)' }}
             >
-              No credit card required · Cancel anytime
+              بدون بطاقة ائتمان · ألغِ في أي وقت
             </motion.p>
           </div>
         </motion.div>

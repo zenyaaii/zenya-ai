@@ -7,45 +7,45 @@ export default function SeoPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-8">
       <header className="mb-6 border-b border-token pb-5">
-        <h1 className="text-[24px] font-bold tracking-tight text-foreground">SEO</h1>
+        <h1 className="text-[24px] font-bold tracking-tight text-foreground">السيو</h1>
         <p className="mt-1 text-[13px] text-muted">
-          Page titles, meta descriptions, Open Graph cards, sitemap. Per site.
+          عناوين الصفحات، وأوصاف ميتا، وبطاقات Open Graph، وخريطة الموقع. لكل موقع.
         </p>
       </header>
 
       <ComingSoon />
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Card title="What's already working" tint="#15803d">
-          <Bullet>Auto-generated meta title + description from your site content</Bullet>
-          <Bullet>OpenGraph + Twitter card from your hero image</Bullet>
-          <Bullet>Structured data (LocalBusiness, Organization)</Bullet>
-          <Bullet>Sitemap.xml + robots.txt auto-served per published site</Bullet>
+        <Card title="ما يعمل بالفعل" tint="#15803d">
+          <Bullet>عنوان ووصف ميتا يُولَّدان تلقائيًا من محتوى موقعك</Bullet>
+          <Bullet>بطاقة OpenGraph و Twitter من صورة الواجهة</Bullet>
+          <Bullet>بيانات منظَّمة (نشاط محلي، مؤسسة)</Bullet>
+          <Bullet>ملفّا Sitemap.xml و robots.txt يُقدَّمان تلقائيًا لكل موقع منشور</Bullet>
         </Card>
-        <Card title="Coming soon" tint="#5e6ad2">
-          <Bullet>Edit page title + meta description per site</Bullet>
-          <Bullet>Custom OG image upload + per-page override</Bullet>
-          <Bullet>Google Search Console verification field</Bullet>
-          <Bullet>Sitemap ping on publish</Bullet>
-          <Bullet>Schema.org markup overrides (hours, menu, prices)</Bullet>
+        <Card title="قريبًا" tint="#5e6ad2">
+          <Bullet>تعديل عنوان الصفحة ووصف ميتا لكل موقع</Bullet>
+          <Bullet>رفع صورة OG مخصّصة + تجاوز لكل صفحة</Bullet>
+          <Bullet>حقل التحقّق من Google Search Console</Bullet>
+          <Bullet>إشعار خريطة الموقع عند النشر</Bullet>
+          <Bullet>تجاوزات ترميز Schema.org (ساعات، قائمة، أسعار)</Bullet>
         </Card>
       </section>
 
       <div className="mt-8 rounded-2xl border border-token bg-white p-6">
-        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Today's checklist</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">قائمة اليوم</h2>
         <p className="mt-1 text-[13px] text-muted">
-          Until per-site SEO edits land, these are the most-leveraged things you can do today:
+          حتى تتوفّر تعديلات السيو لكل موقع، هذه أكثر الأمور تأثيرًا التي يمكنك فعلها اليوم:
         </p>
         <ol className="mt-4 space-y-3 text-[13px]">
-          <Step n={1} title="Submit your sitemap to Google Search Console">
-            Add your domain at <Link href="https://search.google.com/search-console" target="_blank" className="text-primary hover:underline">search.google.com/search-console</Link>, verify, then submit{' '}
-            <code className="rounded bg-surface px-1 py-0.5 text-[12px]">https://yourdomain.com/sitemap.xml</code>.
+          <Step n={1} title="أرسل خريطة موقعك إلى Google Search Console">
+            أضف نطاقك على <Link href="https://search.google.com/search-console" target="_blank" className="text-primary hover:underline">search.google.com/search-console</Link>، وتحقّق منه، ثم أرسل{' '}
+            <code className="rounded bg-surface px-1 py-0.5 text-[12px]" dir="ltr">https://yourdomain.com/sitemap.xml</code>.
           </Step>
-          <Step n={2} title="Confirm your hero image looks good when shared">
-            Paste your live URL into <Link href="https://opengraph.xyz" target="_blank" className="text-primary hover:underline">opengraph.xyz</Link> to preview how it'll look when shared on Slack / WhatsApp / iMessage.
+          <Step n={2} title="تأكّد أن صورة الواجهة تبدو جيدة عند المشاركة">
+            ألصق رابطك المباشر في <Link href="https://opengraph.xyz" target="_blank" className="text-primary hover:underline">opengraph.xyz</Link> لمعاينة شكله عند المشاركة على واتساب وتيليجرام والرسائل.
           </Step>
-          <Step n={3} title="Write a clear, location-specific hero subhead">
-            "Modern French dining in the West Village" ranks better than "A truly extraordinary experience." The editor lets you do this without regenerating.
+          <Step n={3} title="اكتب عنوانًا فرعيًا واضحًا ومحدّد الموقع">
+            «مطعم شرقي عصري في حي السفارات» يتصدّر أفضل من «تجربة استثنائية حقًا». يتيح لك المحرّر فعل ذلك دون إعادة التوليد.
           </Step>
         </ol>
       </div>
@@ -65,11 +65,11 @@ function ComingSoon() {
           <Search className="h-5 w-5 text-primary" strokeWidth={1.75} />
         </div>
         <div className="flex-1">
-          <h2 className="text-[16px] font-semibold tracking-tight text-foreground">Per-site SEO controls — landing soon</h2>
+          <h2 className="text-[16px] font-semibold tracking-tight text-foreground">أدوات سيو لكل موقع — قريبًا</h2>
           <p className="mt-1 text-[13px] leading-[1.55] text-muted">
-            Every site you publish on Zenya already ships with auto-generated metadata, OpenGraph cards,
-            structured data, and a sitemap — Google sees you. This page will let you override the auto-generated
-            text per site (title, description, OG image) when you want full control.
+            كل موقع تنشره على زينيا يأتي بالفعل ببيانات وصفية مُولَّدة تلقائيًا، وبطاقات OpenGraph،
+            وبيانات منظَّمة، وخريطة موقع — جوجل يراك. ستتيح لك هذه الصفحة تجاوز النص المُولَّد تلقائيًا
+            لكل موقع (العنوان، الوصف، صورة OG) عندما تريد تحكّمًا كاملًا.
           </p>
         </div>
       </div>

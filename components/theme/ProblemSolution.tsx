@@ -66,13 +66,13 @@ export default function ProblemSolution({
               <span className="text-lg">✨</span> The Solution
             </div>
             <h2 className="text-3xl font-bold text-slate-900 mb-6">{solution.headline}</h2>
-            <p className="text-lg text-slate-600 leading-relaxed border-l-4 border-green-200 pl-6">{solution.text}</p>
+            <p className="text-lg text-slate-600 leading-relaxed border-s-4 border-green-200 ps-6">{solution.text}</p>
             
             <div className="mt-8 flex items-center gap-4">
                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                </div>
-               <span className="font-bold text-slate-900">Scientifically Proven Results</span>
+               <span className="font-bold text-slate-900">نتائج مثبتة علميًا</span>
             </div>
           </motion.div>
           
