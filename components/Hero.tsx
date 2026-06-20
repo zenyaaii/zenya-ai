@@ -1,7 +1,8 @@
 'use client'
 
+import { useRef } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
   Sparkles,
@@ -21,10 +22,11 @@ import CursorGlow from '@/components/marketing/CursorGlow'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
 
+const EASE = [0.22, 1, 0.36, 1] as const
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] as const },
+  transition: { duration: 0.6, delay, ease: EASE },
 })
 
 /** Icon per business type — shown in the in-hero template picker mockup. */
@@ -52,14 +54,27 @@ const TYPE_TAGLINE: Record<string, string> = {
 }
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null)
+  const reduce = useReducedMotion()
+
+  // Parallax: the product mockup drifts up and recedes slightly as the
+  // hero scrolls away, giving the page real depth on the first scroll.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  })
+  const mockY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -90])
+  const mockScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.94])
+  const mockOpacity = useTransform(scrollYProgress, [0, 0.85], [1, reduce ? 1 : 0.35])
+
   return (
-    <section className="relative overflow-hidden pt-20 pb-32">
+    <section ref={sectionRef} className="relative overflow-hidden pt-24 pb-36">
       {/* Aurora orb wash (default Zenya tint) */}
       <AuroraBackground intensity={0.9} />
       {/* Cursor-following glow — scoped to hero only, skipped on touch + reduced motion */}
       <CursorGlow size={520} color="rgba(94,106,210,0.22)" />
-      {/* Very subtle dot grid for depth */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 dot-grid opacity-40" />
+      {/* Fine grid, radially faded — premium structural backdrop */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 grid-fade opacity-70" />
 
       <div className="relative mx-auto max-w-6xl px-6">
         {/* ── Copy column ── */}
@@ -68,57 +83,65 @@ export default function Hero() {
           {/* Badge */}
           <motion.div {...fade(0)} className="mb-8 inline-flex items-center gap-2">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium"
+              className="group inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium card-sheen"
               style={{
-                background: 'rgba(94,106,210,0.08)',
-                border: '1px solid rgba(94,106,210,0.18)',
+                background: 'rgba(94,106,210,0.07)',
+                border: '1px solid rgba(94,106,210,0.20)',
                 color: '#5e6ad2',
-                letterSpacing: '0.01em',
               }}
             >
-              <Sparkles className="h-3 w-3" strokeWidth={2.25} />
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.25} />
               8 قوالب · بصياغة الذكاء الاصطناعي · جاهزة خلال دقائق
             </span>
           </motion.div>
 
-          {/* Headline */}
+          {/* Headline — Arabic display weight, zero tracking (connected script) */}
           <motion.h1
             {...fade(0.06)}
-            className="text-[52px] font-[590] leading-[1.12] tracking-[-1.6px] text-foreground sm:text-[68px] sm:tracking-[-2.2px] xl:text-[76px] xl:tracking-[-2.6px]"
+            className="display-ar display-ar-tight text-[clamp(44px,8vw,82px)] text-foreground"
           >
             كل نشاط تجاري يستحقّ
             <br />
-            <span className="gradient-text">موقعًا رائعًا.</span>
+            <span className="gradient-text">موقعًا استثنائيًا.</span>
           </motion.h1>
 
           {/* Sub */}
           <motion.p
             {...fade(0.12)}
-            className="mx-auto mt-6 max-w-2xl text-[17px] leading-[1.85] text-muted"
+            className="lead-ar mx-auto mt-7 max-w-2xl text-[17.5px] text-muted"
           >
             مطعم، أو لوك بوك أزياء، أو صفحة هبوط لتطبيق، أو قصة علامة تجارية، أو
             مركز عافية، أو متجر بمنتجات متعددة، أو حِرف محلية، أو متجر شوبيفاي —
             اختر قالبًا، اكتب نبذة، وتتكفّل زينيا بكتابة المحتوى ونشر الموقع.
-            ‎9.99$ مدى الحياة أو 19.99$ شهريًا مع استضافة كاملة.
+          </motion.p>
+
+          {/* Price line — set apart for rhythm */}
+          <motion.p
+            {...fade(0.16)}
+            className="mt-3 text-[13.5px] text-subtle"
+          >
+            <span className="font-latin" dir="ltr">‎$9.99</span> مدى الحياة · أو{' '}
+            <span className="font-latin" dir="ltr">$19.99</span> شهريًا مع استضافة كاملة
           </motion.p>
 
           {/* CTAs */}
-          <motion.div {...fade(0.18)} className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <motion.div {...fade(0.22)} className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/login?mode=signup"
               className={cn(
-                'group inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-[14px] font-semibold text-white transition-all duration-150',
-                'btn-shadow-primary hover:opacity-90 active:scale-[0.98]'
+                'group relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white transition-all duration-200',
+                'btn-shadow-primary hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-10px_rgba(94,106,210,0.6)] active:translate-y-0'
               )}
             >
+              <span className="card-sheen absolute inset-0" aria-hidden />
               ابدأ الإنشاء مجانًا
-              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5" strokeWidth={2.5} />
+              <ArrowRight className="h-4 w-4 rtl-flip transition-transform duration-200 group-hover:-translate-x-1" strokeWidth={2.5} />
             </Link>
             <Link
               href="/themes"
               className={cn(
-                'inline-flex items-center gap-2 rounded-md border border-token bg-white/55 px-6 py-3 text-[14px] font-medium text-muted backdrop-blur transition-all duration-150',
-                'hover:bg-black/[0.03] hover:text-foreground active:scale-[0.98]'
+                'inline-flex items-center gap-2 rounded-lg border border-token bg-white/55 px-7 py-3.5 text-[14.5px] font-medium text-muted backdrop-blur transition-all duration-200',
+                'hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.3)] hover:bg-white hover:text-foreground'
               )}
             >
               شاهد القوالب الثمانية
@@ -126,7 +149,7 @@ export default function Hero() {
           </motion.div>
 
           {/* Social proof */}
-          <motion.div {...fade(0.26)} className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <motion.div {...fade(0.3)} className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <div className="flex items-center gap-2.5">
               <div className="flex -space-x-2">
                 {['#5e6ad2', '#c8a96a', '#27a644', '#dc2626', '#7170ff'].map((c, i) => (
@@ -140,7 +163,7 @@ export default function Hero() {
                 ))}
               </div>
               <span className="text-[13px] text-muted">
-                <strong className="font-semibold text-foreground">2,400+</strong> موقع تم إطلاقه
+                <strong className="font-semibold text-foreground tnum">+2,400</strong> موقع تم إطلاقه
               </span>
             </div>
 
@@ -150,35 +173,47 @@ export default function Hero() {
               {Array(5).fill(0).map((_, i) => (
                 <Star key={i} className="h-3.5 w-3.5" fill="#d97706" stroke="none" />
               ))}
-              <span className="ms-1 text-[13px] font-medium text-foreground">4.9</span>
+              <span className="ms-1 text-[13px] font-medium text-foreground tnum">4.9</span>
               <span className="text-[13px] text-muted">&nbsp;· محبوب من المؤسّسين وأصحاب الأعمال</span>
             </div>
           </motion.div>
         </div>
 
-        {/* ── In-hero product mockup: the BusinessTypePicker preview ── */}
+        {/* ── In-hero product mockup: the BusinessTypePicker preview ──
+            Outer wrapper owns the scroll parallax (motion values); the inner
+            wrapper owns the one-time entrance — kept separate so framer isn't
+            driving y/opacity from two sources at once. */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto mt-20 max-w-4xl"
+          style={{ y: mockY, scale: mockScale, opacity: mockOpacity }}
+          className="relative mx-auto mt-20 max-w-4xl will-change-transform"
         >
+         <motion.div
+          initial={{ opacity: 0, y: 48 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.85, delay: 0.34, ease: EASE }}
+          className="relative"
+         >
+          {/* Rotating conic glow behind the window */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] conic-glow opacity-60 blur-3xl"
+          />
           {/* Soft glow behind */}
           <div
             aria-hidden
             className="absolute inset-x-8 top-4 bottom-0 rounded-2xl"
             style={{
-              background: 'radial-gradient(ellipse at center, rgba(94,106,210,0.14) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse at center, rgba(94,106,210,0.16) 0%, transparent 70%)',
               filter: 'blur(28px)',
             }}
           />
 
           {/* Browser window */}
           <div
-            className="relative overflow-hidden rounded-xl bg-white"
+            className="relative overflow-hidden rounded-2xl bg-white"
             style={{
               border: '1px solid #e5e2d9',
-              boxShadow: '0 24px 64px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9',
+              boxShadow: '0 40px 90px -30px rgba(28,28,28,0.28), 0 0 0 1px #e5e2d9',
             }}
           >
             {/* Browser chrome */}
@@ -205,7 +240,7 @@ export default function Hero() {
               <div className="mb-5 flex items-end justify-between">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">الخطوة 1 من 2</p>
-                  <div className="mt-1 text-[15px] font-[590] text-foreground">ما نوع نشاطك التجاري؟</div>
+                  <div className="mt-1 text-[15px] font-bold text-foreground">ما نوع نشاطك التجاري؟</div>
                 </div>
                 <span
                   className="rounded-full px-2.5 py-1 text-[10px] font-medium"
@@ -225,10 +260,12 @@ export default function Hero() {
                       key={key}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + i * 0.04, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      className="group relative overflow-hidden rounded-lg border border-token bg-white p-3 transition-all duration-200 hover:-translate-y-0.5"
+                      transition={{ delay: 0.55 + i * 0.045, duration: 0.4, ease: EASE }}
+                      className="group relative overflow-hidden rounded-lg border border-token bg-white p-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_28px_-12px_rgba(28,28,28,0.25)]"
                       style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
                     >
+                      {/* Sheen sweep on hover */}
+                      <span className="card-sheen absolute inset-0" aria-hidden />
                       {/* Per-type aurora wash, only visible on hover */}
                       <div
                         aria-hidden
@@ -238,12 +275,12 @@ export default function Hero() {
                         }}
                       />
                       <div
-                        className="relative mb-2 flex h-7 w-7 items-center justify-center rounded-md transition-transform duration-200 group-hover:scale-[1.06]"
+                        className="relative mb-2 flex h-7 w-7 items-center justify-center rounded-md transition-transform duration-200 group-hover:scale-[1.08]"
                         style={{ background: `${tint.accent}10`, border: `1px solid ${tint.accent}20`, color: tint.accent }}
                       >
                         <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
                       </div>
-                      <div className="relative text-[12px] font-[590] text-foreground">{tint.label}</div>
+                      <div className="relative text-[12px] font-bold text-foreground">{tint.label}</div>
                       <div className="relative mt-0.5 text-[10.5px] text-muted">{tagline}</div>
                     </motion.div>
                   )
@@ -251,6 +288,7 @@ export default function Hero() {
               </div>
             </div>
           </div>
+         </motion.div>
         </motion.div>
       </div>
     </section>

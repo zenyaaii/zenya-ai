@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import {
   Palette,
   Zap,
@@ -10,6 +9,7 @@ import {
   Layers,
   type LucideIcon,
 } from 'lucide-react'
+import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 
 type Feature = {
   icon: LucideIcon
@@ -62,56 +62,55 @@ export default function FeaturesSection() {
     <section className="relative py-28 border-b border-token">
       <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-14 max-w-xl"
-        >
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            لماذا زينيا
-          </p>
-          <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+        <Reveal className="mb-14 max-w-xl">
+          <p className="kicker mb-4">لماذا زينيا</p>
+          <h2 className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground">
             كل ما تحتاجه كي{' '}
             <span className="gradient-text">تنطلق بسرعة.</span>
           </h2>
-        </motion.div>
+        </Reveal>
 
         {/* Grid */}
-        <div className="grid gap-px overflow-hidden rounded-xl border border-token md:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => {
+        <RevealGroup className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => {
             const Icon = f.icon
             return (
-              <motion.div
+              <RevealItem
                 key={f.title}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: '-30px' }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
-                className="group relative bg-white p-6 transition-colors duration-150 hover:bg-[#faf8f3]"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white p-6 ring-hover card-sheen"
+                style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
               >
-                {/* Icon */}
+                {/* corner aurora glow on hover */}
                 <div
-                  className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105"
-                  style={{ background: `${f.color}10`, border: `1px solid ${f.color}20`, color: f.color }}
+                  aria-hidden
+                  className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100"
+                  style={{ background: `${f.color}33` }}
+                />
+                {/* Icon tile */}
+                <div
+                  className="relative mb-4 flex h-11 w-11 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110"
+                  style={{
+                    background: `linear-gradient(135deg, ${f.color}1f, ${f.color}0a)`,
+                    border: `1px solid ${f.color}28`,
+                    color: f.color,
+                  }}
                 >
-                  <Icon className="h-4 w-4" strokeWidth={1.75} />
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.9} />
                 </div>
 
-                <h3 className="mb-1.5 text-[14px] font-[590] text-foreground">{f.title}</h3>
-                <p className="text-[13.5px] leading-[1.6] text-muted">{f.desc}</p>
+                <h3 className="relative mb-2 text-[16px] font-bold text-foreground">{f.title}</h3>
+                <p className="relative text-[13.5px] leading-[1.7] text-muted">{f.desc}</p>
 
                 {/* Top accent line on hover */}
                 <div
                   aria-hidden
-                  className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-                  style={{ background: f.color }}
+                  className="absolute inset-x-0 top-0 h-[2px] origin-right scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
+                  style={{ background: `linear-gradient(90deg, ${f.color}, transparent)` }}
                 />
-              </motion.div>
+              </RevealItem>
             )
           })}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   )

@@ -284,6 +284,97 @@
   .marquee-track { animation: marquee   30s linear infinite; }
   .fade-up       { animation: fade-up   0.5s ease forwards; }
 
+  /* ════════════════════════════════════════════════════════════════
+     Premium marketing utilities (home page elevation)
+     ════════════════════════════════════════════════════════════════ */
+
+  /* Balanced wrapping for headlines + lead paragraphs. */
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  /* ── Arabic display typography ──
+     Tajawal ships 800/900 — use them for display weight. Crucially,
+     Arabic is a CONNECTED script: negative letter-spacing cramps the
+     joins and reads as broken. Display Arabic wants letter-spacing 0,
+     a heavier weight, and a tighter line-height instead. */
+  .display-ar {
+    font-weight: 800;
+    letter-spacing: 0 !important;
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+  .display-ar-tight { line-height: 1.08; }
+  .heading-ar {
+    font-weight: 700;
+    letter-spacing: 0 !important;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+  /* Lead paragraph — calmer measure + color for premium rhythm. */
+  .lead-ar { line-height: 2; letter-spacing: 0; }
+
+  /* ── Premium section kicker — animated hairline + label ── */
+  .kicker {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--primary);
+  }
+  .kicker::before {
+    content: ''; width: 26px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary));
+  }
+
+  /* ── Hover sheen sweep (RTL-aware) for premium cards ── */
+  .card-sheen { position: relative; overflow: hidden; }
+  .card-sheen::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,0.55) 50%, transparent 62%);
+    transform: translateX(-130%);
+    opacity: 0; transition: transform 0.85s cubic-bezier(0.22,1,0.36,1), opacity 0.3s;
+  }
+  .group:hover .card-sheen::after { transform: translateX(130%); opacity: 1; }
+  [dir='rtl'] .card-sheen::after { transform: translateX(130%); }
+  [dir='rtl'] .group:hover .card-sheen::after { transform: translateX(-130%); }
+
+  /* ── Soft spotlight ring that fades in on hover ── */
+  .ring-hover { transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s; }
+  .ring-hover:hover {
+    box-shadow: 0 18px 50px -18px rgba(94,106,210,0.35), 0 0 0 1px rgba(94,106,210,0.25);
+  }
+
+  /* ── Fine grid + radial fade (premium backdrop) ── */
+  .grid-fade {
+    background-image:
+      linear-gradient(rgba(28,28,28,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28,28,28,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 75%);
+  }
+
+  /* ── Animated conic glow used behind hero mockup ── */
+  @keyframes conic-spin { to { transform: rotate(1turn); } }
+  .conic-glow {
+    background: conic-gradient(from 0deg,
+      rgba(94,106,210,0.0), rgba(94,106,210,0.22), rgba(113,112,255,0.12),
+      rgba(217,119,6,0.10), rgba(94,106,210,0.0));
+    animation: conic-spin 18s linear infinite;
+  }
+
+  /* ── Shimmer for skeleton/preview bars ── */
+  @keyframes shimmer-x { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+  .shimmer {
+    background: linear-gradient(90deg, rgba(28,28,28,0.05) 25%, rgba(28,28,28,0.10) 37%, rgba(28,28,28,0.05) 63%);
+    background-size: 200% 100%;
+    animation: shimmer-x 2.2s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .conic-glow, .shimmer { animation: none; }
+    .card-sheen::after { display: none; }
+  }
+
   /* ── Border token ── */
   .border-token { border-color: var(--border); }
 

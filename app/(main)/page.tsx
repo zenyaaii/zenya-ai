@@ -8,10 +8,12 @@ import ShowcaseSection from "@/components/ShowcaseSection"
 import Testimonials from "@/components/Testimonials"
 import CTA from "@/components/CTA"
 import TemplateStackSection from "@/components/marketing/TemplateStackSection"
+import ScrollProgress from "@/components/marketing/ScrollProgress"
 
 export default function Page() {
   return (
     <main>
+      <ScrollProgress />
       <Hero />
       <Logos />
       <StepsSection />

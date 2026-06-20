@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import {
   ArrowUpRight,
   Utensils,
@@ -15,7 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
-import { cn } from '@/lib/utils'
+import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 
 const TYPE_META: Record<
   string,
@@ -71,102 +70,113 @@ const TYPE_META: Record<
   },
 }
 
+/** Faux template thumbnail — a tasteful, per-type abstraction of a page so
+ *  the card reads as a real preview without shipping a heavy screenshot. */
+function PreviewThumb({ accent, orb, Icon }: { accent: string; orb: string; Icon: LucideIcon }) {
+  return (
+    <div
+      className="relative h-32 overflow-hidden"
+      style={{ background: `linear-gradient(160deg, ${accent}14, #ffffff 65%)` }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full blur-2xl"
+        style={{ background: orb }}
+      />
+      {/* mini browser chrome */}
+      <div className="flex items-center gap-1 px-3 pt-3">
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fca5a5' }} />
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fcd34d' }} />
+        <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#86efac' }} />
+      </div>
+      {/* faux layout */}
+      <div className="relative px-3 pt-3">
+        <div className="flex items-center gap-2">
+          <div
+            className="flex h-6 w-6 items-center justify-center rounded-md"
+            style={{ background: `${accent}1a`, color: accent, border: `1px solid ${accent}2e` }}
+          >
+            <Icon className="h-3 w-3" strokeWidth={2} />
+          </div>
+          <div className="h-2 w-16 rounded-full" style={{ background: `${accent}55` }} />
+          <div className="ms-auto h-4 w-10 rounded-full" style={{ background: `${accent}` , opacity: 0.9 }} />
+        </div>
+        <div className="mt-3 h-1.5 w-28 rounded-full bg-black/10" />
+        <div className="mt-1.5 h-1.5 w-20 rounded-full bg-black/[0.07]" />
+        <div className="mt-3 grid grid-cols-3 gap-1.5">
+          <div className="h-7 rounded-md bg-black/[0.05]" />
+          <div className="h-7 rounded-md bg-black/[0.05]" />
+          <div className="h-7 rounded-md bg-black/[0.05]" />
+        </div>
+      </div>
+      {/* bottom fade into the card body */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent" />
+    </div>
+  )
+}
+
 export default function ShowcaseSection() {
   return (
     <section className="relative py-28 border-b border-token">
       <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
-        >
+        <Reveal className="mb-14 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              ثمانية قوالب · لغة تصميم واحدة
-            </p>
-            <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
-              مبنيّ بـ{' '}
-              <span className="gradient-text">زينيا.</span>
+            <p className="kicker mb-4">ثمانية قوالب · لغة تصميم واحدة</p>
+            <h2 className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground">
+              مبنيّ بـ <span className="gradient-text">زينيا.</span>
             </h2>
           </div>
           <Link
             href="/themes"
-            className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-muted transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-1.5 text-[13.5px] font-medium text-muted transition-colors hover:text-foreground"
           >
             استكشف كل القوالب
-            <ArrowUpRight className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.25} />
+            <ArrowUpRight className="h-3.5 w-3.5 rtl-flip transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.25} />
           </Link>
-        </motion.div>
+        </Reveal>
 
         {/* 8-card grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {BUSINESS_TYPE_ORDER.map((key, i) => {
+        <RevealGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {BUSINESS_TYPE_ORDER.map((key) => {
             const tint = auroraTints[key]
             const meta = TYPE_META[key]
             const Icon = meta.icon
             return (
-              <motion.div
+              <RevealItem
                 key={key}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-30px' }}
-                transition={{ duration: 0.45, delay: (i % 4) * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative flex flex-col overflow-hidden rounded-xl border border-token bg-white transition-all duration-200 hover:-translate-y-1"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white ring-hover card-sheen"
                 style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
               >
-                {/* Per-type aurora wash (hover) */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  style={{
-                    background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${tint.orb1}, transparent 70%)`,
-                  }}
-                />
-                {/* Per-type accent bar at top */}
-                <div className="h-0.5 w-full" style={{ background: tint.accent }} />
+                <div className="transition-transform duration-300 group-hover:-translate-y-0.5">
+                  <PreviewThumb accent={tint.accent} orb={tint.orb1} Icon={Icon} />
+                </div>
 
-                <div className="relative flex flex-1 flex-col gap-3 p-5">
-                  {/* Icon */}
-                  <div
-                    className="flex h-9 w-9 items-center justify-center rounded-md transition-transform duration-200 group-hover:scale-[1.06]"
-                    style={{ background: `${tint.accent}10`, border: `1px solid ${tint.accent}20`, color: tint.accent }}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={1.75} />
-                  </div>
-
-                  {/* Name + tagline */}
+                <div className="relative flex flex-1 flex-col gap-2.5 p-5">
                   <div>
-                    <h3 className="text-[16px] font-[590] text-foreground">{tint.label}</h3>
-                    <p className="mt-0.5 text-[11.5px] uppercase tracking-[0.08em] text-muted">
+                    <h3 className="text-[16px] font-bold text-foreground">{tint.label}</h3>
+                    <p className="mt-0.5 text-[11px] uppercase tracking-[0.08em] text-muted">
                       {meta.tagline}
                     </p>
                   </div>
 
-                  {/* Pitch */}
-                  <p className="text-[13px] leading-[1.55] text-muted">{meta.pitch}</p>
+                  <p className="text-[13px] leading-[1.6] text-muted">{meta.pitch}</p>
 
-                  {/* Footer link */}
                   <Link
                     href={meta.demoHref}
-                    className={cn(
-                      'mt-auto inline-flex items-center gap-1 pt-3 text-[12.5px] font-medium transition-all',
-                      'text-muted group-hover:text-foreground'
-                    )}
+                    className="mt-auto inline-flex items-center gap-1 pt-3 text-[12.5px] font-semibold text-muted transition-colors group-hover:text-[color:var(--primary)]"
                   >
                     شاهد العرض الحي
                     <ArrowUpRight
-                      className="h-3 w-3 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
+                      className="h-3 w-3 rtl-flip transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
                       strokeWidth={2.25}
                     />
                   </Link>
                 </div>
-              </motion.div>
+              </RevealItem>
             )
           })}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   )

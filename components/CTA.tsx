@@ -68,7 +68,7 @@ export default function CTA() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[38px] font-[590] leading-[1.1] tracking-[-1.2px] text-white sm:text-[46px] sm:tracking-[-1.6px]"
+              className="display-ar display-ar-tight text-[clamp(34px,5vw,48px)] text-white"
             >
               أطلق موقعك اليوم.
             </motion.h2>
@@ -95,14 +95,15 @@ export default function CTA() {
               <Link
                 href="/login?mode=signup"
                 className={cn(
-                  'group inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-[14px] font-semibold text-primary transition-all duration-150',
-                  'hover:opacity-90 active:scale-[0.98]'
+                  'group relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-white px-7 py-3.5 text-[14.5px] font-semibold text-primary transition-all duration-200',
+                  'hover:-translate-y-0.5 active:translate-y-0'
                 )}
-                style={{ boxShadow: 'rgba(0,0,0,0.10) 0px 1px 3px 0px' }}
+                style={{ boxShadow: '0 10px 30px -10px rgba(0,0,0,0.35)' }}
               >
+                <span className="card-sheen absolute inset-0" aria-hidden />
                 ابدأ مجانًا
                 <ArrowRight
-                  className="h-3.5 w-3.5 rtl-flip transition-transform duration-150 group-hover:-translate-x-0.5"
+                  className="h-4 w-4 rtl-flip transition-transform duration-200 group-hover:-translate-x-1"
                   strokeWidth={2.5}
                 />
               </Link>

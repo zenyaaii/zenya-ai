@@ -1,8 +1,10 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { LayoutTemplate, PenLine, Rocket } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 
 const STEPS = [
   {
@@ -29,92 +31,92 @@ const STEPS = [
 ] as const
 
 export default function StepsSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start 80%', 'end 60%'],
+  })
+  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
+
   return (
     <section className="relative py-28 border-b border-token">
       <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-20 text-center"
-        >
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            كيف يعمل
-          </p>
-          <h2 className="text-[40px] font-[590] leading-[1.2] tracking-[-1.2px] text-foreground sm:text-[48px] sm:tracking-[-1.6px]">
+        <Reveal className="mb-20 text-center">
+          <p className="kicker mb-4 justify-center">كيف يعمل</p>
+          <h2 className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground">
             من الفكرة إلى موقع مباشر في{' '}
             <span className="gradient-text">ثلاث خطوات.</span>
           </h2>
-        </motion.div>
+        </Reveal>
 
         {/* Steps */}
-        <div className="relative grid gap-px md:grid-cols-3">
-          {/* Connecting line (desktop) */}
+        <div ref={ref} className="relative grid gap-px md:grid-cols-3">
+          {/* Connecting line (desktop) — draws as you scroll */}
           <div
             aria-hidden
             className="pointer-events-none absolute left-[calc(16.67%+24px)] right-[calc(16.67%+24px)] top-10 hidden h-px md:block"
-            style={{
-              background:
-                'linear-gradient(90deg, rgba(94,106,210,0.3), rgba(217,119,6,0.3), rgba(39,166,68,0.3))',
-            }}
-          />
+            style={{ background: 'rgba(28,28,28,0.06)' }}
+          >
+            <motion.div
+              className="h-full w-full origin-right"
+              style={{
+                scaleX: lineScale,
+                background:
+                  'linear-gradient(90deg, rgba(94,106,210,0.55), rgba(217,119,6,0.55), rgba(39,166,68,0.55))',
+              }}
+            />
+          </div>
 
-          {STEPS.map((step, i) => {
-            const Icon = step.icon
-            return (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.48, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className={cn(
-                  'relative flex flex-col px-6 md:items-center md:text-center',
-                  i > 0 && 'border-s border-token'
-                )}
-              >
-                {/* Step number */}
-                <div className="relative mb-6 flex-shrink-0">
-                  <div
-                    className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background"
-                    style={{
-                      background: `${step.color}12`,
-                      border: `1px solid ${step.color}25`,
-                      color: step.color,
-                    }}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={1.75} />
+          <RevealGroup className="contents">
+            {STEPS.map((step, i) => {
+              const Icon = step.icon
+              return (
+                <RevealItem
+                  key={step.num}
+                  className={cn(
+                    'group relative flex flex-col px-6 md:items-center md:text-center',
+                    i > 0 && 'border-s border-token'
+                  )}
+                >
+                  {/* Step number */}
+                  <div className="relative mb-6 flex-shrink-0">
+                    <div
+                      className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full bg-background transition-transform duration-300 group-hover:scale-110"
+                      style={{
+                        background: `${step.color}12`,
+                        border: `1px solid ${step.color}30`,
+                        color: step.color,
+                        boxShadow: `0 0 0 6px ${step.color}08`,
+                      }}
+                    >
+                      <Icon className="h-4 w-4" strokeWidth={1.75} />
+                    </div>
+                    {/* Ghost number */}
+                    <div
+                      aria-hidden
+                      className="absolute -left-3 -top-7 select-none text-[88px] font-[900] leading-none opacity-[0.05] tnum"
+                      style={{ color: step.color }}
+                    >
+                      {step.num}
+                    </div>
                   </div>
-                  {/* Ghost number */}
-                  <div
-                    aria-hidden
-                    className="absolute -left-3 -top-6 select-none text-[80px] font-[800] leading-none opacity-[0.035]"
-                    style={{ color: step.color }}
-                  >
-                    {step.num}
-                  </div>
-                </div>
 
-                <h3 className="mb-2 text-[16px] font-[590] text-foreground">{step.title}</h3>
-                <p className="max-w-sm text-[14px] leading-relaxed text-muted">{step.desc}</p>
-              </motion.div>
-            )
-          })}
+                  <h3 className="mb-2 text-[17px] font-bold text-foreground">{step.title}</h3>
+                  <p className="max-w-sm text-[14px] leading-relaxed text-muted">{step.desc}</p>
+                </RevealItem>
+              )
+            })}
+          </RevealGroup>
         </div>
 
         {/* Subtle footnote about the two flows */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-          className="mx-auto mt-16 max-w-2xl text-center text-[12.5px] text-muted"
-        >
-          يُصدَّر قالب <strong className="font-[590] text-foreground">المتجر</strong> بمنتج واحد كملف ثيم
-          شوبيفاي OS&nbsp;2.0. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق زينيا.
-        </motion.p>
+        <Reveal delay={0.1} className="mx-auto mt-16 max-w-2xl">
+          <p className="text-center text-[12.5px] text-muted">
+            يُصدَّر قالب <strong className="font-bold text-foreground">المتجر</strong> بمنتج واحد كملف ثيم
+            شوبيفاي OS&nbsp;2.0. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق زينيا.
+          </p>
+        </Reveal>
       </div>
     </section>
   )
