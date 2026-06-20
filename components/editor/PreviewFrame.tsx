@@ -196,7 +196,7 @@ export default function PreviewFrame({
             to one device viewport instead of feeding a grow-forever loop. */}
         <iframe
           ref={iframeRef}
-          title="Theme preview"
+          title="معاينة القالب"
           className="block h-full w-full border-0 bg-white"
         />
       </div>

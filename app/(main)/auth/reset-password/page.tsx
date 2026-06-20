@@ -32,11 +32,11 @@ export default function ResetPasswordPage() {
     setStatus(null)
 
     if (password.length < 8) {
-      setStatus({ type: 'error', message: 'Password must be at least 8 characters.' })
+      setStatus({ type: 'error', message: 'يجب أن تتكوّن كلمة المرور من ٨ أحرف على الأقل.' })
       return
     }
     if (password !== confirm) {
-      setStatus({ type: 'error', message: 'Passwords do not match.' })
+      setStatus({ type: 'error', message: 'كلمتا المرور غير متطابقتين.' })
       return
     }
 
@@ -49,7 +49,7 @@ export default function ResetPasswordPage() {
       return
     }
 
-    setStatus({ type: 'success', message: 'Password updated. Redirecting…' })
+    setStatus({ type: 'success', message: 'تم تحديث كلمة المرور. جارٍ إعادة التوجيه…' })
     setTimeout(() => {
       router.push('/dashboard')
       router.refresh()
@@ -82,15 +82,15 @@ export default function ResetPasswordPage() {
                   'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
               }}
             >
-              <Image src="/logo.png" alt="Zenya" fill className="object-cover" />
+              <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">Zenya</span>
+            <span className="text-[15px] font-semibold tracking-tight text-foreground">زينيا</span>
           </Link>
           <h1 className="text-[26px] font-semibold tracking-tight text-foreground mb-1.5" style={{ letterSpacing: '-0.02em' }}>
-            Set a new password
+            تعيين كلمة مرور جديدة
           </h1>
           <p className="text-[13.5px] text-muted">
-            Choose a strong password you haven&apos;t used before.
+            اختر كلمة مرور قوية لم تستخدمها من قبل.
           </p>
         </div>
 
@@ -105,46 +105,46 @@ export default function ResetPasswordPage() {
               color: '#b91c1c',
             }}
           >
-            <p>This reset link is invalid or has expired.</p>
+            <p>رابط إعادة التعيين هذا غير صالح أو انتهت صلاحيته.</p>
             <Link
               href="/login?mode=forgot"
               className="mt-3 inline-block font-semibold text-primary underline underline-offset-2"
             >
-              Request a new reset link →
+              طلب رابط إعادة تعيين جديد ←
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3.5">
             <div className="relative">
-              <label htmlFor="password" className="sr-only">New password</label>
+              <label htmlFor="password" className="sr-only">كلمة المرور الجديدة</label>
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="New password"
+                placeholder="كلمة المرور الجديدة"
                 autoComplete="new-password"
                 required
-                className={inputClass + ' pr-12'}
+                className={inputClass + ' pl-12'}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:bg-[rgba(28,28,28,0.05)] hover:text-foreground"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute left-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:bg-[rgba(28,28,28,0.05)] hover:text-foreground"
+                aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
               </button>
             </div>
 
             <div>
-              <label htmlFor="confirm" className="sr-only">Confirm new password</label>
+              <label htmlFor="confirm" className="sr-only">تأكيد كلمة المرور الجديدة</label>
               <input
                 id="confirm"
                 type={showPassword ? 'text' : 'password'}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder="تأكيد كلمة المرور الجديدة"
                 autoComplete="new-password"
                 required
                 className={inputClass}
@@ -162,9 +162,9 @@ export default function ResetPasswordPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Saving…
+                  جارٍ الحفظ…
                 </span>
-              ) : 'Update password'}
+              ) : 'تحديث كلمة المرور'}
             </button>
 
             <AnimatePresence>

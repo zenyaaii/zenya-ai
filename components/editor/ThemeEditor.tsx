@@ -132,7 +132,7 @@ export default function ThemeEditor({
       }
       const r = await fetch(`/api/themes/${themeId}`)
       if (!r.ok) {
-        setError(r.status === 404 ? 'Theme not found.' : 'You don’t have access to this theme.')
+        setError(r.status === 404 ? 'القالب غير موجود.' : 'لا تملك صلاحية الوصول إلى هذا القالب.')
         setLoading(false)
         return
       }
@@ -140,7 +140,7 @@ export default function ThemeEditor({
       const c = j?.theme?.content
       const inner = c?.[config.contentKey]
       if (!inner) {
-        setError(`This theme isn’t a ${config.themeName} theme — no editor available.`)
+        setError(`هذا القالب ليس قالب ${config.themeName} — لا يوجد محرّر متاح.`)
         setLoading(false)
         return
       }
@@ -209,7 +209,7 @@ export default function ThemeEditor({
       })
       if (!r.ok) {
         const j = await r.json().catch(() => ({}))
-        throw new Error(j?.message || j?.error || `Save failed (${r.status})`)
+        throw new Error(j?.message || j?.error || `فشل الحفظ (${r.status})`)
       }
       setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles))
       setLastSavedAt(Date.now())
@@ -217,7 +217,7 @@ export default function ThemeEditor({
       setTimeout(() => setStatus('idle'), 1600)
     } catch (e: any) {
       setStatus('error')
-      setError(e?.message || 'Save failed.')
+      setError(e?.message || 'فشل الحفظ.')
     }
   }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey])
 
@@ -367,7 +367,7 @@ export default function ThemeEditor({
   if (loading) {
     return (
       <main className="grid min-h-screen place-items-center text-[13px] text-muted">
-        Loading editor…
+        جارٍ تحميل المحرّر…
       </main>
     )
   }
@@ -376,7 +376,7 @@ export default function ThemeEditor({
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-24 text-center">
         <p className="text-foreground">{error}</p>
         <Link href="/dashboard/sites" className="mt-4 inline-block text-sm text-primary hover:underline">
-          ← Back to sites
+          → العودة إلى المواقع
         </Link>
       </main>
     )
@@ -391,8 +391,8 @@ export default function ThemeEditor({
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
   const activePanel = allPanels.find((p) => p.id === selected)
   const activePanelLabel =
-    selected === '__style__' ? 'Colors & palette' :
-    selected === '__typography__' ? 'Typography' :
+    selected === '__style__' ? 'الألوان واللوحة' :
+    selected === '__typography__' ? 'الطباعة' :
     activePanel?.label || ''
 
   return (
@@ -408,12 +408,12 @@ export default function ThemeEditor({
             href="/dashboard/sites"
             className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
-            <ArrowLeft className="h-3 w-3" strokeWidth={2.25} />
-            Back to dashboard
+            <ArrowLeft className="h-3 w-3 rtl-flip" strokeWidth={2.25} />
+            العودة إلى لوحة التحكم
           </Link>
           <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
           <span className="hidden truncate text-[13px] text-muted xl:inline">
-            Editing <strong className="font-semibold text-foreground">{themeName}</strong>
+            تحرير <strong className="font-semibold text-foreground">{themeName}</strong>
           </span>
         </div>
 
@@ -435,7 +435,7 @@ export default function ThemeEditor({
             className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <Save className="h-3 w-3" strokeWidth={2.5} />
-            Save
+            حفظ
           </button>
         </div>
       </header>
@@ -446,7 +446,7 @@ export default function ThemeEditor({
         <aside className="w-64 flex-shrink-0 overflow-y-auto border-r border-token bg-white">
           <div className="border-b border-token px-3 py-3">
             <div className="flex items-baseline justify-between px-1.5 pb-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">Sections</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">الأقسام</span>
               {config.pages && config.pages.length > 0 && (
                 <span className="text-[10px] text-muted/60">
                   {config.pages.find((p) => p.id === view)?.label || ''}
@@ -478,7 +478,7 @@ export default function ThemeEditor({
           </div>
 
           <div className="px-3 py-3">
-            <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">Global · every page</div>
+            <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">عام · كل الصفحات</div>
             <div className="space-y-0.5">
               <button
                 type="button"
@@ -489,7 +489,7 @@ export default function ThemeEditor({
                 }
               >
                 <Palette className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="text-[13px]">Colors & palette</span>
+                <span className="text-[13px]">الألوان واللوحة</span>
               </button>
               <button
                 type="button"
@@ -500,7 +500,7 @@ export default function ThemeEditor({
                 }
               >
                 <TypeIcon className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="text-[13px]">Typography</span>
+                <span className="text-[13px]">الطباعة</span>
               </button>
               {config.globalPanels.map((p) => {
                 const Icon = p.icon || Settings
@@ -559,9 +559,9 @@ export default function ThemeEditor({
         {/* Right rail — fields */}
         <aside className="w-80 flex-shrink-0 overflow-y-auto border-l border-token bg-white" style={{ boxShadow: '-1px 0 0 #f0ede6' }}>
           <div className="sticky top-0 z-10 border-b border-token bg-white px-4 py-3" style={{ boxShadow: '0 1px 0 #f0ede6' }}>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Editing</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">قيد التحرير</div>
             <div className="mt-0.5 text-[15px] font-semibold text-foreground">
-              {activePanelLabel || 'Section'}
+              {activePanelLabel || 'القسم'}
             </div>
           </div>
 
@@ -596,7 +596,7 @@ export default function ThemeEditor({
                 />
               </>
             ) : (
-              <SmallNote>Select a section on the left to start editing.</SmallNote>
+              <SmallNote>اختر قسمًا من الجهة لبدء التحرير.</SmallNote>
             )}
           </div>
         </aside>
@@ -604,12 +604,12 @@ export default function ThemeEditor({
 
       <div className="flex flex-1 items-center justify-center p-6 text-center lg:hidden">
         <div className="max-w-sm">
-          <p className="text-[15px] font-semibold text-foreground">The editor needs a bigger screen.</p>
+          <p className="text-[15px] font-semibold text-foreground">يحتاج المحرّر إلى شاشة أكبر.</p>
           <p className="mt-2 text-[13px] text-muted">
-            Open on a laptop or desktop to edit. You can preview the mobile layout from there with the device toggle.
+            افتحه على حاسوب محمول أو مكتبي للتحرير. يمكنك معاينة تخطيط الجوال من هناك عبر مبدّل الأجهزة.
           </p>
           <Link href={backHref} className="mt-5 inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white">
-            Back to preview
+            العودة إلى المعاينة
           </Link>
         </div>
       </div>
@@ -727,7 +727,7 @@ function RenderField({
                 title={title}
                 defaultOpen={arr.length === 1}
                 onRemove={() => {
-                  if (confirm(`Remove "${title}"?`)) remove(i)
+                  if (confirm(`إزالة «${title}»؟`)) remove(i)
                 }}
               >
                 <FieldsRenderer
@@ -739,7 +739,7 @@ function RenderField({
               </Collapsible>
             )
           })}
-          <AddRowButton label={`+ Add ${f.itemLabel.toLowerCase()}`} onClick={add} />
+          <AddRowButton label={`+ إضافة ${f.itemLabel}`} onClick={add} />
         </div>
       </div>
     )
@@ -764,7 +764,7 @@ function ColorsPanel({
   return (
     <>
       <SmallNote>
-        Pick one of the recommended palettes, then customise any colour. Reset reverts to the preset.
+        اختر إحدى لوحات الألوان المقترحة، ثم خصّص أي لون. تُعيد «إعادة التعيين» إلى النمط الجاهز.
       </SmallNote>
       <div className="grid grid-cols-2 gap-2">
         {config.colorPresets.map((p) => {
@@ -794,7 +794,7 @@ function ColorsPanel({
               </div>
               {selected && (
                 <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  Active
+                  نشط
                 </span>
               )}
             </button>
@@ -802,7 +802,7 @@ function ColorsPanel({
         })}
       </div>
 
-      <SectionLabel>Custom colors</SectionLabel>
+      <SectionLabel>ألوان مخصّصة</SectionLabel>
       <div className="space-y-1.5">
         {config.colorTokens.map((tok) => (
           <ColorRow
@@ -822,7 +822,7 @@ function ColorsPanel({
           onClick={resetOverrides}
           className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
         >
-          <RotateCcw className="h-3 w-3" /> Reset all colours to preset
+          <RotateCcw className="h-3 w-3" /> إعادة كل الألوان إلى النمط الجاهز
         </button>
       )}
     </>
@@ -836,9 +836,9 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
   const presets = mood === 'all' ? TYPOGRAPHY_PRESETS : TYPOGRAPHY_PRESETS.filter((p) => p.mood === mood)
   return (
     <>
-      <SmallNote>Pick a font pair. Headings + body update everywhere.</SmallNote>
+      <SmallNote>اختر زوج خطوط. تتحدّث العناوين والنصوص في كل مكان.</SmallNote>
       <div className="flex flex-wrap gap-1">
-        <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>All</MoodChip>
+        <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>الكل</MoodChip>
         {TYPOGRAPHY_MOODS.map((m) => (
           <MoodChip key={m} active={mood === m} onClick={() => setMood(m)}>{m}</MoodChip>
         ))}
@@ -876,7 +876,7 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
               </div>
               {selected && (
                 <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  Active
+                  نشط
                 </span>
               )}
             </button>
@@ -885,7 +885,7 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
       </div>
       {value && (
         <button type="button" onClick={() => onChange('')} className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground">
-          <RotateCcw className="h-3 w-3" /> Use preset’s default fonts
+          <RotateCcw className="h-3 w-3" /> استخدام الخطوط الافتراضية للنمط
         </button>
       )}
     </>
@@ -897,9 +897,9 @@ function DeviceToggle({
   device, onChange,
 }: { device: PreviewDevice; onChange: (d: PreviewDevice) => void }) {
   const items: Array<{ id: PreviewDevice; Icon: typeof Monitor; label: string }> = [
-    { id: 'desktop', Icon: Monitor,    label: 'Desktop' },
-    { id: 'tablet',  Icon: Tablet,     label: 'Tablet' },
-    { id: 'mobile',  Icon: Smartphone, label: 'Mobile' },
+    { id: 'desktop', Icon: Monitor,    label: 'سطح المكتب' },
+    { id: 'tablet',  Icon: Tablet,     label: 'لوحي' },
+    { id: 'mobile',  Icon: Smartphone, label: 'جوال' },
   ]
   return (
     <div className="flex items-center gap-0.5 rounded-full border border-token bg-surface/60 p-0.5">
@@ -910,8 +910,8 @@ function DeviceToggle({
             key={id}
             type="button"
             onClick={() => onChange(id)}
-            title={`${label} preview`}
-            aria-label={`${label} preview`}
+            title={`معاينة ${label}`}
+            aria-label={`معاينة ${label}`}
             aria-pressed={active}
             className={
               'inline-flex items-center justify-center rounded-full px-2.5 py-1 transition ' +
@@ -936,8 +936,8 @@ function UndoRedo({
         type="button"
         onClick={onUndo}
         disabled={!canUndo}
-        title="Undo (⌘Z)"
-        aria-label="Undo"
+        title="تراجع (⌘Z)"
+        aria-label="تراجع"
         className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Undo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -946,8 +946,8 @@ function UndoRedo({
         type="button"
         onClick={onRedo}
         disabled={!canRedo}
-        title="Redo (⌘⇧Z)"
-        aria-label="Redo"
+        title="إعادة (⌘⇧Z)"
+        aria-label="إعادة"
         className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Redo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -982,7 +982,7 @@ function PageSwitcher({
                 ? 'bg-foreground text-white shadow-sm'
                 : 'text-muted hover:bg-black/[0.04] hover:text-foreground')
             }
-            title={`Edit ${p.label} page`}
+            title={`تحرير صفحة ${p.label}`}
           >
             <Icon className="h-3 w-3" strokeWidth={2.25} />
             {p.label}
@@ -996,30 +996,30 @@ function PageSwitcher({
 function StatusPill({
   status, dirty, lastSavedAt, now,
 }: { status: Status; dirty: boolean; lastSavedAt: number | null; now: number }) {
-  if (status === 'saving') return <span className="text-[12px] font-medium text-muted">Saving…</span>
+  if (status === 'saving') return <span className="text-[12px] font-medium text-muted">جارٍ الحفظ…</span>
   if (status === 'saved') {
     return (
       <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#15803d]">
-        <Check className="h-3 w-3" strokeWidth={2.5} /> Saved
+        <Check className="h-3 w-3" strokeWidth={2.5} /> تم الحفظ
       </span>
     )
   }
-  if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">Save failed</span>
-  if (dirty) return <span className="text-[12px] font-medium text-muted">Unsaved · autosaving…</span>
+  if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">فشل الحفظ</span>
+  if (dirty) return <span className="text-[12px] font-medium text-muted">غير محفوظ · حفظ تلقائي…</span>
   if (lastSavedAt) {
-    return <span className="text-[12px] font-medium text-muted">Saved {relativeTime(lastSavedAt, now)}</span>
+    return <span className="text-[12px] font-medium text-muted">حُفظ {relativeTime(lastSavedAt, now)}</span>
   }
-  return <span className="text-[12px] font-medium text-muted">All saved</span>
+  return <span className="text-[12px] font-medium text-muted">كل التغييرات محفوظة</span>
 }
 
 function relativeTime(from: number, now: number): string {
   const s = Math.max(0, Math.round((now - from) / 1000))
-  if (s < 5) return 'just now'
-  if (s < 60) return `${s}s ago`
+  if (s < 5) return 'الآن'
+  if (s < 60) return `قبل ${s} ثانية`
   const m = Math.round(s / 60)
-  if (m < 60) return `${m}m ago`
+  if (m < 60) return `قبل ${m} دقيقة`
   const h = Math.round(m / 60)
-  return `${h}h ago`
+  return `قبل ${h} ساعة`
 }
 
 function snapshot(
@@ -1108,22 +1108,22 @@ function SectionStyleHeader({
     <div className="rounded-lg border border-token bg-[rgba(94,106,210,0.04)] p-2.5">
       <div className="flex items-baseline justify-between">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-          Section style
+          نمط القسم
         </span>
         {hasOverride && (
           <button
             type="button"
             onClick={onClear}
             className="text-[10.5px] font-medium text-muted hover:text-foreground"
-            title="Reset this section"
+            title="إعادة تعيين هذا القسم"
           >
-            Reset
+            إعادة تعيين
           </button>
         )}
       </div>
 
       <div className="mt-2 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">Size</span>
+        <span className="text-[10.5px] text-muted">الحجم</span>
         <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
           {SECTION_TEXT_SCALES.map((s) => {
             const selected = Math.abs(activeScale - s.value) < 0.01
@@ -1137,7 +1137,7 @@ function SectionStyleHeader({
                   (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
                 }
                 style={{ padding: '3px 0' }}
-                title={`Text size ${s.label}`}
+                title={`حجم النص ${s.label}`}
               >
                 {s.label}
               </button>
@@ -1147,7 +1147,7 @@ function SectionStyleHeader({
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">Align</span>
+        <span className="text-[10.5px] text-muted">المحاذاة</span>
         <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
           {(
             [
@@ -1167,7 +1167,7 @@ function SectionStyleHeader({
                   (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
                 }
                 style={{ padding: '4px 0' }}
-                title={`Align ${id}`}
+                title={`محاذاة ${id}`}
               >
                 <Icon className="h-3 w-3" strokeWidth={2.25} />
               </button>
@@ -1177,7 +1177,7 @@ function SectionStyleHeader({
       </div>
 
       <p className="mt-2 text-[10.5px] leading-snug text-muted/80">
-        Applies to the <strong className="font-semibold text-foreground">{panelId}</strong> section.
+        يُطبَّق على قسم <strong className="font-semibold text-foreground">{panelId}</strong>.
       </p>
     </div>
   )

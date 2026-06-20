@@ -48,10 +48,10 @@ export default function GalleryPicker({
     try {
       const r = await fetch('/api/gallery')
       const j = await r.json()
-      if (!r.ok) throw new Error(j.message || j.error || 'Failed to load gallery')
+      if (!r.ok) throw new Error(j.message || j.error || 'فشل تحميل المعرض')
       setImages(j.images || [])
     } catch (e: any) {
-      setErr(e?.message || 'Failed to load gallery')
+      setErr(e?.message || 'فشل تحميل المعرض')
     } finally {
       setLoading(false)
     }
@@ -78,30 +78,30 @@ export default function GalleryPicker({
       form.append('file', file)
       const r = await fetch('/api/upload', { method: 'POST', body: form })
       const j = await r.json()
-      if (!r.ok) throw new Error(j.message || j.error || 'Upload failed')
+      if (!r.ok) throw new Error(j.message || j.error || 'فشل الرفع')
       // Optimistically prepend, then re-sync from server
       onPick(j.url)
       await load()
       onClose()
     } catch (e: any) {
-      setErr(e?.message || 'Upload failed')
+      setErr(e?.message || 'فشل الرفع')
     } finally {
       setUploading(false)
     }
   }
 
   async function remove(img: GalleryImage) {
-    if (!confirm(`Delete this image from your gallery?\n\nIf it's used by any site, the site will show a broken image.`)) return
+    if (!confirm(`حذف هذه الصورة من معرضك؟\n\nإن كانت مستخدمة في أي موقع، سيُظهر الموقع صورة معطوبة.`)) return
     setDeletingId(img.id)
     try {
       const r = await fetch(`/api/gallery/${img.id}`, { method: 'DELETE' })
       if (!r.ok) {
         const j = await r.json().catch(() => ({}))
-        throw new Error(j.message || j.error || 'Delete failed')
+        throw new Error(j.message || j.error || 'فشل الحذف')
       }
       setImages((cur) => cur.filter((i) => i.id !== img.id))
     } catch (e: any) {
-      setErr(e?.message || 'Delete failed')
+      setErr(e?.message || 'فشل الحذف')
     } finally {
       setDeletingId(null)
     }
@@ -110,7 +110,7 @@ export default function GalleryPicker({
   function pasteUrl() {
     const v = urlInput.trim()
     if (!v || !/^https?:\/\//i.test(v)) {
-      setErr('URL must start with http:// or https://')
+      setErr('يجب أن يبدأ الرابط بـ http:// أو https://')
       return
     }
     // Persist to gallery so it appears next time too, but don't block.
@@ -137,14 +137,14 @@ export default function GalleryPicker({
         className="relative z-10 flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-token bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
-        aria-label="Choose image"
+        aria-label="اختر صورة"
       >
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between gap-2 border-b border-token px-5 py-3">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-primary" strokeWidth={2.25} />
-            <h2 className="text-[15px] font-semibold text-foreground">Your gallery</h2>
-            <span className="text-[11.5px] text-muted">{images.length} {images.length === 1 ? 'image' : 'images'}</span>
+            <h2 className="text-[15px] font-semibold text-foreground">معرضك</h2>
+            <span className="text-[11.5px] text-muted">{images.length} {images.length === 1 ? 'صورة' : 'صورة'}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -152,7 +152,7 @@ export default function GalleryPicker({
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search"
+                placeholder="بحث"
                 className="w-44 rounded-md border border-token bg-white py-1.5 pl-7 pr-2 text-[12px] outline-none focus:border-primary"
               />
             </div>
@@ -163,13 +163,13 @@ export default function GalleryPicker({
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white disabled:opacity-50"
             >
               {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" strokeWidth={2.5} />}
-              {uploading ? 'Uploading…' : 'Upload new'}
+              {uploading ? 'جارٍ الرفع…' : 'رفع جديد'}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="rounded-md border border-token bg-white p-1.5 text-muted hover:bg-black/5"
-              aria-label="Close"
+              aria-label="إغلاق"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -226,20 +226,20 @@ export default function GalleryPicker({
                       loading="lazy"
                     />
                     <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/65 to-transparent px-2 py-1.5 opacity-0 transition group-hover:opacity-100">
-                      <span className="truncate text-[10.5px] font-medium text-white">{img.name || 'Untitled'}</span>
+                      <span className="truncate text-[10.5px] font-medium text-white">{img.name || 'بلا عنوان'}</span>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); remove(img) }}
                         disabled={deletingId === img.id}
                         className="rounded-md bg-white/15 p-1 text-white hover:bg-white/30 disabled:opacity-50"
-                        title="Delete"
+                        title="حذف"
                       >
                         {deletingId === img.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                       </button>
                     </div>
                     {selected && (
                       <span className="absolute right-1.5 top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow">
-                        Current
+                        الحالية
                       </span>
                     )}
                   </button>
@@ -267,14 +267,14 @@ export default function GalleryPicker({
                 onClick={pasteUrl}
                 className="rounded-md bg-foreground px-2.5 py-1 text-[11.5px] font-semibold text-white"
               >
-                Use URL
+                استخدام الرابط
               </button>
               <button
                 type="button"
                 onClick={() => { setShowUrl(false); setUrlInput('') }}
                 className="text-[11.5px] text-muted hover:text-foreground"
               >
-                Cancel
+                إلغاء
               </button>
             </div>
           ) : (
@@ -284,10 +284,10 @@ export default function GalleryPicker({
               className="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
             >
               <LinkIcon className="h-3 w-3" />
-              Or paste an image URL
+أو الصق رابط صورة
             </button>
           )}
-          <span className="text-[10.5px] text-muted/70">JPG · PNG · WebP · GIF · AVIF · 5 MB max</span>
+          <span className="text-[10.5px] text-muted/70">JPG · PNG · WebP · GIF · AVIF · بحدّ أقصى 5 ميجابايت</span>
         </div>
       </div>
     </div>
@@ -299,7 +299,7 @@ function EmptyState({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: bo
     return (
       <div className="grid place-items-center py-20 text-center">
         <ImageIcon className="h-8 w-8 text-muted/60" strokeWidth={1.5} />
-        <p className="mt-3 text-[13px] text-muted">No images match that search.</p>
+        <p className="mt-3 text-[13px] text-muted">لا توجد صور تطابق هذا البحث.</p>
       </div>
     )
   }
@@ -308,16 +308,16 @@ function EmptyState({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: bo
       <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
         <ImageIcon className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
-      <h3 className="mt-4 text-[15px] font-semibold text-foreground">Your gallery is empty</h3>
+      <h3 className="mt-4 text-[15px] font-semibold text-foreground">معرضك فارغ</h3>
       <p className="mt-1 max-w-xs text-[12.5px] text-muted">
-        Upload your first image — it’ll appear here for every site you build.
+        ارفع أول صورة لك — ستظهر هنا في كل موقع تبنيه.
       </p>
       <button
         type="button"
         onClick={onUpload}
         className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white"
       >
-        <Upload className="h-3 w-3" strokeWidth={2.5} /> Upload an image
+        <Upload className="h-3 w-3" strokeWidth={2.5} /> رفع صورة
       </button>
     </div>
   )

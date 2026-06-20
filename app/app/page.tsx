@@ -34,16 +34,16 @@ export default function AppHome() {
           ))}
         </div>
         <p className="text-xs font-medium text-slate-600">
-          <span className="text-green-600 font-bold">✓ Connected</span> Your store is securely linked to Zenya AI inside Shopify Admin.
+          <span className="text-green-600 font-bold">✓ متصل</span> متجرك مرتبط بأمان بـ زينيا AI داخل لوحة تحكم Shopify.
         </p>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl p-10 text-center">
-          <h1 className="text-4xl font-extrabold text-slate-900 mb-6">Welcome to Your Growth Engine</h1>
+          <h1 className="text-4xl font-extrabold text-slate-900 mb-6">مرحبًا بك في محرّك نموّك</h1>
           <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto">
-            Create high-converting landing pages in seconds, directly from your product URLs. 
-            Build trust, increase conversions, and scale your brand with Zenya AI.
+            أنشئ صفحات هبوط عالية التحويل في ثوانٍ، مباشرةً من روابط منتجاتك.
+            ابنِ الثقة، وزِد التحويلات، ووسّع علامتك التجارية مع زينيا AI.
           </p>
           
           <div className="grid gap-6 md:grid-cols-2">
@@ -54,8 +54,8 @@ export default function AppHome() {
               <div className="bg-blue-100 p-4 rounded-full mb-4 group-hover:bg-blue-200 transition">
                 <span className="text-4xl">🚀</span>
               </div>
-              <span className="font-bold text-slate-900 text-xl">Launch New Theme</span>
-              <span className="text-sm text-slate-500 mt-2">Start the step-by-step wizard</span>
+              <span className="font-bold text-slate-900 text-xl">إطلاق قالب جديد</span>
+              <span className="text-sm text-slate-500 mt-2">ابدأ المعالج خطوة بخطوة</span>
             </Link>
 
             <Link 
@@ -65,8 +65,8 @@ export default function AppHome() {
                <div className="bg-purple-100 p-4 rounded-full mb-4 group-hover:bg-purple-200 transition">
                 <span className="text-4xl">🎨</span>
               </div>
-              <span className="font-bold text-slate-900 text-xl">My Themes</span>
-              <span className="text-sm text-slate-500 mt-2">Manage your generated themes</span>
+              <span className="font-bold text-slate-900 text-xl">قوالبي</span>
+              <span className="text-sm text-slate-500 mt-2">أدِر قوالبك المُولّدة</span>
             </Link>
           </div>
         </div>

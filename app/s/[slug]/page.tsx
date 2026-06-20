@@ -100,7 +100,7 @@ export async function generateMetadata(
   const theme = await lookupPublishedTheme(params.slug)
   if (!theme) {
     return {
-      title: 'Site not found',
+      title: 'الموقع غير موجود',
       robots: { index: false, follow: false },
     }
   }
@@ -112,11 +112,11 @@ export async function generateMetadata(
 
   return {
     title: name,
-    description: `${name} — built and hosted on Zenya.`,
+    description: `${name} — مبنيّ ومُستضاف على زينيا.`,
     alternates: { canonical: `/s/${theme.slug}` },
     openGraph: {
       title: name,
-      description: `${name} — built and hosted on Zenya.`,
+      description: `${name} — مبنيّ ومُستضاف على زينيا.`,
       type: 'website',
       url: `https://zenyaai.co/s/${theme.slug}`,
     },

@@ -36,7 +36,7 @@ export default async function CheckoutPage({
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    return <CheckoutError message="Payments aren't configured yet. STRIPE_SECRET_KEY is missing." />
+    return <CheckoutError message="لم تُهيّأ المدفوعات بعد. مفتاح STRIPE_SECRET_KEY مفقود." />
   }
 
   // Skip the Stripe round-trip if the user already has what this plan would give them.
@@ -67,13 +67,13 @@ export default async function CheckoutPage({
     })
 
     if (!session.url) {
-      return <CheckoutError message="Stripe returned no checkout URL." />
+      return <CheckoutError message="لم تُرجِع Stripe رابط دفع." />
     }
 
     redirect(session.url)
   } catch (e: any) {
     if (e?.digest?.startsWith?.('NEXT_REDIRECT')) throw e
-    return <CheckoutError message={`Stripe error: ${e.message}`} />
+    return <CheckoutError message={`خطأ من Stripe: ${e.message}`} />
   }
 }
 
@@ -81,20 +81,20 @@ function CheckoutError({ message }: { message: string }) {
   return (
     <main className="min-h-[calc(100vh-68px)] bg-surface px-6 py-16">
       <div className="mx-auto max-w-md rounded-2xl border border-token bg-white p-8 shadow-soft-sm">
-        <h1 className="text-xl font-semibold text-foreground">We couldn&apos;t start checkout</h1>
+        <h1 className="text-xl font-semibold text-foreground">تعذّر بدء عملية الدفع</h1>
         <p className="mt-2 text-sm text-muted">{message}</p>
         <div className="mt-6 flex gap-3">
           <Link
             href="/pricing"
             className="rounded-md border border-token bg-background px-4 py-2 text-sm font-medium text-muted hover:bg-black/5"
           >
-            Back to pricing
+            العودة إلى الأسعار
           </Link>
           <Link
             href="mailto:support@zenya.app"
             className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90"
           >
-            Contact support
+            التواصل مع الدعم
           </Link>
         </div>
       </div>

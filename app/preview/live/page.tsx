@@ -48,7 +48,7 @@ export default function LivePreviewPage() {
     <div className="bg-white h-screen w-full overflow-y-auto overflow-x-hidden no-scrollbar">
       <div className="w-full max-w-full overflow-hidden">
         <ThemePreview 
-          name={name || 'Product Name'}
+          name={name || 'اسم المنتج'}
           images={images}
           primaryColor={primary}
           secondaryColor={secondary}

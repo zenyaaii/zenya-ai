@@ -113,7 +113,7 @@ export function Collapsible({
           <button
             type="button"
             onClick={onRemove}
-            title="Remove"
+            title="إزالة"
             className="rounded border border-token bg-white p-1 text-muted hover:bg-[rgba(220,38,38,0.06)] hover:text-[#b91c1c]"
           >
             <Trash2 className="h-3 w-3" />
@@ -155,7 +155,7 @@ export function FieldImage({
         <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
         {value && (
           <button type="button" onClick={() => onChange('')} className="text-[10.5px] text-[#b91c1c] hover:underline">
-            Clear
+            مسح
           </button>
         )}
       </div>
@@ -164,12 +164,12 @@ export function FieldImage({
           type="button"
           onClick={() => setPickerOpen(true)}
           className="group mb-1.5 block w-full overflow-hidden rounded-md border border-token transition hover:border-primary"
-          title="Click to change"
+          title="انقر للتغيير"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt={label} className="block h-32 w-full object-cover" />
           <span className="block bg-black/60 px-2 py-1 text-center text-[10.5px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            Click to change
+            انقر للتغيير
           </span>
         </button>
       ) : (
@@ -180,7 +180,7 @@ export function FieldImage({
         >
           <div className="flex flex-col items-center gap-1">
             <Upload className="h-4 w-4" strokeWidth={2} />
-            <span className="text-[11.5px] font-medium">Choose image</span>
+            <span className="text-[11.5px] font-medium">اختر صورة</span>
           </div>
         </button>
       )}
@@ -191,7 +191,7 @@ export function FieldImage({
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
         >
           <ImageIcon className="h-3 w-3" strokeWidth={2.25} />
-          {value ? 'Change image' : 'Open gallery'}
+          {value ? 'تغيير الصورة' : 'فتح المعرض'}
         </button>
       </div>
       {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
@@ -215,7 +215,7 @@ export function InlineImage({
         type="button"
         onClick={() => setPickerOpen(true)}
         className="group relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-token bg-white transition hover:border-primary"
-        title={value ? 'Click to change' : 'Choose image'}
+        title={value ? 'انقر للتغيير' : 'اختر صورة'}
       >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -235,7 +235,7 @@ export function InlineImage({
         <Upload className="h-3 w-3 flex-shrink-0 text-muted" strokeWidth={2.25} />
       </button>
       {value && (
-        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="Clear">
+        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="مسح">
           <Trash2 className="h-3 w-3" />
         </button>
       )}
@@ -257,7 +257,7 @@ function truncateUrl(u: string): string {
 
 /** Legacy export — kept for back-compat with any caller still using it. */
 export function UploadButton({
-  label = 'Upload', small = false, onUploaded,
+  label = 'رفع', small = false, onUploaded,
 }: { label?: string; small?: boolean; onUploaded: (url: string) => void }) {
   const [open, setOpen] = useState(false)
   return (
@@ -285,7 +285,7 @@ export function UploadButton({
  * ────────────────────────────────────────────────────────────────────── */
 
 export function StringList({
-  label, value, onChange, placeholder, addLabel = 'Add item',
+  label, value, onChange, placeholder, addLabel = 'إضافة عنصر',
 }: {
   label?: string
   value: string[]
@@ -348,7 +348,7 @@ export function ColorRow({
           <span className="text-[11px] font-semibold text-foreground">{label}</span>
           {overridden && (
             <span className="rounded bg-primary/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wider text-primary">
-              custom
+              مخصّص
             </span>
           )}
         </div>
@@ -373,7 +373,7 @@ export function ColorRow({
         <button
           type="button"
           onClick={onReset}
-          title="Revert to preset"
+          title="العودة إلى النمط الجاهز"
           className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5"
         >
           <RotateCcw className="h-3 w-3" />

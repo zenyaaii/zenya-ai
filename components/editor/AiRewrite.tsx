@@ -41,12 +41,12 @@ export function useAiCopy(): AiCopyContextValue | null {
 type Mode = 'improve' | 'shorter' | 'longer' | 'punchier' | 'professional' | 'playful'
 
 const MODES: Array<{ id: Mode; label: string }> = [
-  { id: 'improve',      label: 'Improve' },
-  { id: 'shorter',      label: 'Shorter' },
-  { id: 'longer',       label: 'Longer' },
-  { id: 'punchier',     label: 'Punchier' },
-  { id: 'professional', label: 'Professional' },
-  { id: 'playful',      label: 'Playful' },
+  { id: 'improve',      label: 'تحسين' },
+  { id: 'shorter',      label: 'أقصر' },
+  { id: 'longer',       label: 'أطول' },
+  { id: 'punchier',     label: 'أكثر تأثيرًا' },
+  { id: 'professional', label: 'احترافي' },
+  { id: 'playful',      label: 'مرح' },
 ]
 
 /**
@@ -71,8 +71,8 @@ export function useAiRewrite(opts: {
     <button
       type="button"
       onClick={() => setOpen((o) => !o)}
-      title="Rewrite with AI"
-      aria-label="Rewrite with AI"
+      title="إعادة الصياغة بالذكاء الاصطناعي"
+      aria-label="إعادة الصياغة بالذكاء الاصطناعي"
       className={
         'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider transition ' +
         (open
@@ -119,7 +119,7 @@ function AiRewritePanel({
   async function run(mode: Mode | 'custom') {
     if (loading) return
     if (mode === 'custom' && !instruction.trim()) {
-      setErr('Type what you want changed first.')
+      setErr('اكتب أولًا ما تريد تغييره.')
       return
     }
     setLoading(true)
@@ -143,12 +143,12 @@ function AiRewritePanel({
         }),
       })
       const j = await r.json()
-      if (!r.ok) throw new Error(j?.message || j?.error || 'Rewrite failed')
+      if (!r.ok) throw new Error(j?.message || j?.error || 'فشلت إعادة الصياغة')
       const list: string[] = Array.isArray(j?.variants) ? j.variants : []
-      if (list.length === 0) throw new Error('No usable copy came back. Try again.')
+      if (list.length === 0) throw new Error('لم يصل نص قابل للاستخدام. حاول مرة أخرى.')
       setVariants(list)
     } catch (e: any) {
-      setErr(e?.message || 'Rewrite failed.')
+      setErr(e?.message || 'فشلت إعادة الصياغة.')
     } finally {
       setLoading(false)
     }
@@ -158,13 +158,13 @@ function AiRewritePanel({
     <div className="mt-1.5 rounded-lg border border-primary/30 bg-[rgba(94,106,210,0.05)] p-2.5">
       <div className="flex items-center justify-between">
         <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3 w-3" strokeWidth={2.25} /> AI rewrite
+          <Sparkles className="h-3 w-3" strokeWidth={2.25} /> إعادة صياغة بالذكاء الاصطناعي
         </span>
         <button
           type="button"
           onClick={onClose}
           className="rounded p-0.5 text-muted hover:text-foreground"
-          aria-label="Close AI rewrite"
+          aria-label="إغلاق إعادة الصياغة بالذكاء الاصطناعي"
         >
           <X className="h-3 w-3" />
         </button>
@@ -189,7 +189,7 @@ function AiRewritePanel({
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); run('custom') } }}
-          placeholder="Or tell the AI what to change…"
+          placeholder="أو أخبر الذكاء الاصطناعي بما تريد تغييره…"
           disabled={loading}
           className="flex-1 rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary disabled:opacity-50"
         />
@@ -199,7 +199,7 @@ function AiRewritePanel({
           onClick={() => run('custom')}
           className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white disabled:opacity-50"
         >
-          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Go'}
+          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'تنفيذ'}
         </button>
       </div>
 
@@ -211,7 +211,7 @@ function AiRewritePanel({
 
       {loading && variants.length === 0 && (
         <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-muted">
-          <Loader2 className="h-3 w-3 animate-spin" /> Writing in your theme’s voice…
+          <Loader2 className="h-3 w-3 animate-spin" /> جارٍ الكتابة بأسلوب قالبك…
         </p>
       )}
 
@@ -219,7 +219,7 @@ function AiRewritePanel({
         <div className="mt-2 space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-              Tap one to use it
+              انقر على واحد لاستخدامه
             </span>
             <button
               type="button"
@@ -227,7 +227,7 @@ function AiRewritePanel({
               onClick={() => run('improve')}
               className="inline-flex items-center gap-1 text-[10.5px] font-medium text-muted hover:text-primary disabled:opacity-50"
             >
-              <RotateCcw className="h-3 w-3" /> Regenerate
+              <RotateCcw className="h-3 w-3" /> إعادة التوليد
             </button>
           </div>
           {variants.map((v, i) => (

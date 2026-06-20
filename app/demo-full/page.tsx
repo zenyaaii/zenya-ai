@@ -4,7 +4,7 @@ import ThemeActions from '@/components/ThemeActions'
 
 export default function DemoFullPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>جارٍ التحميل…</div>}>
       <DemoFullContent />
     </Suspense>
   )
@@ -13,78 +13,78 @@ export default function DemoFullPage() {
 function DemoFullContent() {
   const mockContent = {
     hero: {
-      headline: "The Last Vacuum You'll Ever Need",
-      subheadline: "Engineered with military-grade suction and whisper-quiet technology. Experience the future of cleaning today.",
-      cta: "Get 50% Off Now"
+      headline: "آخر مكنسة كهربائية ستحتاج إليها",
+      subheadline: "مصمَّمة بقوة شفط احترافية وتقنية هادئة للغاية. اختبر مستقبل التنظيف اليوم.",
+      cta: "احصل على خصم 50% الآن"
     },
     features: [
-      { title: "Whisper Quiet", desc: "Clean your home without waking the baby. operates at less than 40dB.", icon: "volume-x" },
-      { title: "All-Day Battery", desc: "One charge lasts up to 120 minutes. Enough to clean your entire home twice.", icon: "battery-charging" },
-      { title: "Pet Hair Eraser", desc: "Specialized brushes designed to lift stubborn pet hair from any surface.", icon: "dog" }
+      { title: "هدوء تام", desc: "نظّف منزلك دون إيقاظ الصغار. تعمل بأقل من 40 ديسيبل.", icon: "volume-x" },
+      { title: "بطارية طوال اليوم", desc: "شحنة واحدة تدوم حتى 120 دقيقة. تكفي لتنظيف منزلك بالكامل مرتين.", icon: "battery-charging" },
+      { title: "ممحاة شعر الحيوانات", desc: "فُرَش متخصّصة لرفع شعر الحيوانات العنيد من أي سطح.", icon: "dog" }
     ],
     problem: {
-      headline: "Sick of bulky, weak vacuums?",
-      text: "Traditional vacuums are heavy, loud, and lose suction after a few months. You shouldn't have to wrestle with your cleaning tools."
+      headline: "سئمت المكانس الثقيلة والضعيفة؟",
+      text: "المكانس التقليدية ثقيلة وصاخبة وتفقد قوة الشفط بعد بضعة أشهر. لا ينبغي أن تصارع أدوات التنظيف لديك."
     },
     solution: {
-      headline: "Meet the Zenya V2",
-      text: "Featherlight design meets industrial power. We've reimagined what a vacuum should be, making cleaning effortless and even enjoyable."
+      headline: "تعرّف على زينيا V2",
+      text: "تصميم خفيف كالريشة يلتقي بقوة صناعية. أعدنا تصوّر ما يجب أن تكون عليه المكنسة، لنجعل التنظيف سهلًا بل وممتعًا."
     },
     testimonials: [
-      { name: "Sarah Jenkins", text: "I can't believe how much dust this thing picked up. My carpets look brand new!", location: "Denver, CO", rating: 5 },
-      { name: "Mike Ross", text: "Finally, a vacuum that doesn't hurt my back. Worth every penny.", location: "New York, NY", rating: 5 },
-      { name: "Emily Chen", text: "The battery life is insane. I cleaned my whole 2-story house on one charge.", location: "Seattle, WA", rating: 5 }
+      { name: "سارة المنصور", text: "لا أصدّق كمّ الغبار الذي التقطته. سجادي يبدو جديدًا تمامًا!", location: "الرياض", rating: 5 },
+      { name: "محمد العتيبي", text: "أخيرًا، مكنسة لا تؤلم ظهري. تستحق كل ريال.", location: "جدة", rating: 5 },
+      { name: "ليلى الخالدي", text: "عمر البطارية مذهل. نظّفت منزلي المكوّن من طابقين بشحنة واحدة.", location: "الدمام", rating: 5 }
     ],
     faq: [
-      { q: "Does it work on hardwood floors?", a: "Yes! The soft-roller head is specifically designed to polish hard floors while cleaning." },
-      { q: "How long is the warranty?", a: "We offer an industry-leading 5-year warranty on the motor and battery." },
-      { q: "Is the filter washable?", a: "Absolutely. Just rinse it under cold water once a month to maintain peak performance." },
-      { q: "What is the return policy?", a: "Try it risk-free for 30 days. If you don't love it, we'll pay for return shipping." }
+      { q: "هل تعمل على الأرضيات الخشبية؟", a: "نعم! رأس الأسطوانة الناعمة مصمّم خصيصًا لتلميع الأرضيات الصلبة أثناء التنظيف." },
+      { q: "ما مدة الضمان؟", a: "نقدّم ضمانًا رائدًا في القطاع لمدة 5 سنوات على المحرّك والبطارية." },
+      { q: "هل الفلتر قابل للغسل؟", a: "بالتأكيد. اشطفه فقط بالماء البارد مرة شهريًا للحفاظ على أعلى أداء." },
+      { q: "ما سياسة الإرجاع؟", a: "جرّبها دون مخاطرة لمدة 30 يومًا. إن لم تعجبك، سنتحمّل تكلفة شحن الإرجاع." }
     ],
     guarantee: {
-      title: "30-Day Risk-Free Guarantee",
-      text: "We are so confident you'll love the Zenya V2 that we're letting you try it in your own home for 30 days. No strings attached.",
+      title: "ضمان استرداد دون مخاطرة لمدة 30 يومًا",
+      text: "نحن واثقون تمامًا أنك ستحب زينيا V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
       days: 30
     },
     scrolling_text: [
-      "Free 2-Day Shipping", "5-Year Warranty Included", "Over 50,000 Happy Customers", "Rated #1 by CleanHome Magazine"
+      "شحن مجاني خلال يومين", "ضمان 5 سنوات مشمول", "أكثر من 50,000 عميل سعيد", "الأفضل تقييمًا من مجلة CleanHome"
     ],
     slideshow: [
-      { 
-        heading: "Clean Smarter, Not Harder", 
-        subheading: "The most advanced cordless vacuum on the market.", 
-        cta: "Shop Now",
+      {
+        heading: "نظّف بذكاء لا بجهد",
+        subheading: "أكثر مكنسة لاسلكية تطوّرًا في السوق.",
+        cta: "تسوّق الآن",
         image: "https://images.unsplash.com/photo-1558317374-a309d244678e?q=80&w=1920&auto=format&fit=crop"
       },
-      { 
-        heading: "Pet Owners Love Us", 
-        subheading: "Say goodbye to pet hair forever with our patented tangle-free brush.", 
-        cta: "See Features",
+      {
+        heading: "أصحاب الحيوانات يحبّوننا",
+        subheading: "ودّع شعر الحيوانات للأبد مع فرشاتنا الحاصلة على براءة اختراع المقاومة للتشابك.",
+        cta: "اطّلع على المزايا",
         image: "https://images.unsplash.com/photo-1527515545081-5db817172677?q=80&w=1920&auto=format&fit=crop"
       }
     ],
     rich_text: {
-      title: "Engineered for Real Life",
-      text: "We didn't just build another vacuum. We studied how people actually clean. The result is a machine that anticipates your needs, adapts to your floor type, and filters out 99.9% of allergens."
+      title: "مصمّمة للحياة الواقعية",
+      text: "لم نكتفِ ببناء مكنسة أخرى. درسنا كيف ينظّف الناس فعليًا. والنتيجة آلة تتوقّع احتياجاتك، وتتكيّف مع نوع أرضيتك، وتُرشّح 99.9% من مسبّبات الحساسية."
     },
     image_text: {
-      title: "Laser Dust Detection",
-      text: "A precisely angled laser reveals invisible dust on hard floors, so you don't miss a thing. See what you're cleaning in real-time.",
-      cta: "Learn Technology"
+      title: "كشف الغبار بالليزر",
+      text: "ليزر بزاوية دقيقة يكشف الغبار غير المرئي على الأرضيات الصلبة، فلا يفوتك شيء. شاهد ما تنظّفه لحظيًا.",
+      cta: "تعرّف على التقنية"
     },
     multicolumn: [
-      { title: "HEPA Filtration", text: "Traps 99.99% of microscopic particles as small as 0.3 microns." },
-      { title: "60-Min Run Time", text: "Fade-free power to clean here, there, and everywhere." },
-      { title: "Hygienic Bin Emptying", text: "Point and shoot mechanism ejects dust and debris deep into your bin." }
+      { title: "فلترة HEPA", text: "تحبس 99.99% من الجسيمات المجهرية الصغيرة حتى 0.3 ميكرون." },
+      { title: "تشغيل 60 دقيقة", text: "قوة ثابتة دون تراجع للتنظيف هنا وهناك وفي كل مكان." },
+      { title: "تفريغ صحّي للحاوية", text: "آلية بضغطة زر تقذف الغبار والأوساخ عميقًا داخل سلّتك." }
     ],
     video_hero: {
-      heading: "See It In Action",
-      subheading: "Watch how the Zenya V2 tackles the toughest messes with ease.",
-      cta: "Watch Demo"
+      heading: "شاهدها أثناء العمل",
+      subheading: "شاهد كيف تتعامل زينيا V2 مع أصعب الفوضى بسهولة.",
+      cta: "مشاهدة العرض"
     },
     newsletter: {
-      heading: "Unlock 10% Off",
-      text: "Join our email list to get a discount code instantly sent to your inbox."
+      heading: "احصل على خصم 10%",
+      text: "انضمّ إلى قائمتنا البريدية ليصلك رمز خصم فورًا إلى بريدك."
     }
   }
 

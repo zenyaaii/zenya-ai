@@ -15,25 +15,25 @@
  */
 export const COMPANY = {
   // Brand
-  BRAND_NAME: 'Zenya',
-  PRODUCT_NAME: 'Zenya AI',
-  TAGLINE: 'AI website generator for every business',
+  BRAND_NAME: 'زينيا',
+  PRODUCT_NAME: 'زينيا AI',
+  TAGLINE: 'مولّد المواقع بالذكاء الاصطناعي لكل نشاط تجاري',
 
   // Legal entity — Dutch eenmanszaak operating under the trade name "Musannef".
   // For an eenmanszaak the legal entity IS the natural person; the owner's
   // identity is on file with the KvK and publicly retrievable by KvK number.
   LEGAL_NAME: 'Musannef',
   TRADE_NAME: 'Musannef',
-  ENTITY_TYPE: 'Dutch eenmanszaak',
-  OWNER_DISCLOSURE: 'The natural person operating Musannef is identifiable via the Dutch Chamber of Commerce (KvK) public register using the KvK number below. The owner is the data controller for purposes of GDPR.',
-  COUNTRY: 'The Netherlands',
-  JURISDICTION: 'The Netherlands',
-  GOVERNING_LAW: 'Dutch law',
-  COMPETENT_COURT: 'the courts of Amsterdam, The Netherlands',
+  ENTITY_TYPE: 'مؤسسة فردية هولندية (eenmanszaak)',
+  OWNER_DISCLOSURE: 'الشخص الطبيعي الذي يدير Musannef يمكن التعرّف عليه عبر السجل العام للغرفة التجارية الهولندية (KvK) باستخدام رقم KvK أدناه. المالك هو المتحكّم في البيانات لأغراض اللائحة العامة لحماية البيانات (GDPR).',
+  COUNTRY: 'هولندا',
+  JURISDICTION: 'هولندا',
+  GOVERNING_LAW: 'القانون الهولندي',
+  COMPETENT_COURT: 'محاكم أمستردام في هولندا',
 
   // Registrations
   KVK_NUMBER: '42070030',
-  VAT_NUMBER: 'Pending registration (BTW)',       // Update once BTW arrives
+  VAT_NUMBER: 'قيد التسجيل (ضريبة القيمة المضافة BTW)',       // Update once BTW arrives
 
   // Address — Musannef's registered KvK address. Only the postcode is
   // disclosed publicly; the full street is available via the KvK public
@@ -54,7 +54,7 @@ export const COMPANY = {
   APP_URL: 'https://zenyaai.co',
 
   // Pricing
-  PRICE_DISPLAY: '$9.99 one-time (€9.99 in Europe)',
+  PRICE_DISPLAY: '9.99 دولار دفعة واحدة (9.99 يورو في أوروبا)',
   TRIAL_DAYS: 0,
   CURRENCY: 'USD',
 

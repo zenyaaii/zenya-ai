@@ -2,86 +2,85 @@ import type { Metadata } from 'next'
 import { COMPANY } from '@/lib/company'
 
 export const metadata: Metadata = {
-  title: `Refund Policy — ${COMPANY.BRAND_NAME}`,
-  description: `When and how you can request a refund for your ${COMPANY.PRODUCT_NAME} one-time purchase.`,
+  title: `سياسة الاسترداد — ${COMPANY.BRAND_NAME}`,
+  description: `متى وكيف يمكنك طلب استرداد مقابل شرائك لمرة واحدة في ${COMPANY.PRODUCT_NAME}.`,
   alternates: { canonical: '/refund' },
 }
 
 export default function RefundPolicy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 prose prose-neutral">
-      <h1>Refund Policy</h1>
-      <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
+      <h1>سياسة الاسترداد</h1>
+      <p className="text-sm text-muted">آخر تحديث: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        {COMPANY.PRODUCT_NAME} Pro is a <strong>one-time purchase</strong> ({COMPANY.PRICE_DISPLAY}).
-        There is no subscription, no auto-renewal, and no recurring charge. This policy
-        explains your refund rights. It complements (and does not override) your
-        mandatory rights under EU and Dutch consumer law.
+        {COMPANY.PRODUCT_NAME} Pro عبارة عن <strong>شراء لمرة واحدة</strong> ({COMPANY.PRICE_DISPLAY}).
+        لا يوجد اشتراك ولا تجديد تلقائي ولا رسوم متكرّرة. توضّح هذه السياسة
+        حقوقك في الاسترداد. وهي تُكمّل (ولا تتجاوز) حقوقك الإلزامية بموجب قانون
+        المستهلك في الاتحاد الأوروبي وهولندا.
       </p>
 
-      <h2>1. 14-day money-back guarantee</h2>
+      <h2>١. ضمان استرداد المبلغ خلال ١٤ يومًا</h2>
       <p>
-        If {COMPANY.PRODUCT_NAME} Pro doesn&rsquo;t work for you, email us within{' '}
-        <strong>14 days</strong> of purchase and we&rsquo;ll refund the full amount —
-        no questions asked. The refund covers the price plus any VAT collected.
+        إذا لم يناسبك {COMPANY.PRODUCT_NAME} Pro، راسلنا خلال{' '}
+        <strong>١٤ يومًا</strong> من الشراء وسنسترد المبلغ كاملًا — دون أي
+        أسئلة. ويشمل الاسترداد السعر بالإضافة إلى أي ضريبة قيمة مضافة محصّلة.
       </p>
 
-      <h2>2. EU 14-day right of withdrawal</h2>
+      <h2>٢. حق الانسحاب خلال ١٤ يومًا في الاتحاد الأوروبي</h2>
       <p>
-        Consumers in the EU/EEA have a 14-day right of withdrawal under Article
-        6:230o of the Dutch Civil Code, transposing Directive 2011/83/EU.
+        يتمتع المستهلكون في الاتحاد الأوروبي/المنطقة الاقتصادية الأوروبية بحق
+        انسحاب لمدة ١٤ يومًا بموجب المادة 6:230o من القانون المدني الهولندي،
+        المنفّذ للتوجيه 2011/83/EU.
       </p>
       <p>
-        <strong>Important exception:</strong> When you check the &ldquo;I consent
-        to immediate access&rdquo; box at signup, you expressly request immediate
-        performance and waive your withdrawal right for any digital content
-        already delivered to you. In practice this means: any theme you have
-        generated using Pro is non-refundable. Our voluntary 14-day money-back
-        guarantee above is more generous than the statutory minimum.
+        <strong>استثناء مهم:</strong> عند تحديدك لخانة «أوافق على الوصول
+        الفوري» عند التسجيل، فإنك تطلب صراحةً الأداء الفوري وتتنازل عن حقك في
+        الانسحاب بالنسبة لأي محتوى رقمي تم تسليمه لك بالفعل. وعمليًا يعني هذا:
+        أي قالب ولّدته باستخدام Pro غير قابل للاسترداد. وضمان استرداد المبلغ
+        الطوعي لمدة ١٤ يومًا أعلاه أكثر سخاءً من الحدّ الأدنى القانوني.
       </p>
 
-      <h2>3. After 14 days</h2>
+      <h2>٣. بعد ١٤ يومًا</h2>
       <p>
-        Outside the 14-day window, refunds are issued only in these situations:
+        خارج نافذة الـ ١٤ يومًا، تُصدَر المبالغ المستردة فقط في هذه الحالات:
       </p>
       <ul>
-        <li><strong>Service outage:</strong> if the Service is substantially unavailable for &gt;48 hours due to our fault, we&rsquo;ll issue a partial or full refund on request.</li>
-        <li><strong>Billing error:</strong> any double-charge or amount error is refunded immediately upon verification.</li>
+        <li><strong>انقطاع الخدمة:</strong> إذا كانت الخدمة غير متاحة جوهريًا لأكثر من ٤٨ ساعة بسبب خطأ منّا، سنُصدر استردادًا جزئيًا أو كاملًا عند الطلب.</li>
+        <li><strong>خطأ في الفوترة:</strong> يُسترد أي خصم مزدوج أو خطأ في المبلغ فورًا عند التحقّق.</li>
       </ul>
       <p>
-        We do <strong>not</strong> refund purchases where the Service was used
-        (themes generated, store published, ZIPs downloaded) after the 14-day
-        window unless one of the conditions above applies.
+        نحن <strong>لا</strong> نسترد المبالغ عن عمليات الشراء التي استُخدمت
+        فيها الخدمة (توليد قوالب، نشر متجر، تنزيل ملفات ZIP) بعد نافذة الـ ١٤
+        يومًا ما لم ينطبق أحد الشرطين أعلاه.
       </p>
 
-      <h2>4. How to request a refund</h2>
+      <h2>٤. كيفية طلب الاسترداد</h2>
       <p>
-        Email{' '}
+        راسلنا على{' '}
         <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a>{' '}
-        with subject &ldquo;Refund request&rdquo; and include:
+        بعنوان «Refund request» وأرفق ما يلي:
       </p>
       <ul>
-        <li>Account email</li>
-        <li>Date of the charge you want refunded</li>
-        <li>Reason for the request (optional within 14 days)</li>
+        <li>البريد الإلكتروني للحساب</li>
+        <li>تاريخ الخصم الذي تريد استرداده</li>
+        <li>سبب الطلب (اختياري خلال ١٤ يومًا)</li>
       </ul>
       <p>
-        We respond within 5 business days. Approved refunds are issued via
-        Stripe to your original payment method and typically appear in 5-10
-        business days depending on your bank.
+        نردّ خلال ٥ أيام عمل. وتُصدَر المبالغ المستردة المعتمدة عبر Stripe إلى
+        وسيلة الدفع الأصلية، وتظهر عادةً خلال ٥ إلى ١٠ أيام عمل حسب بنكك.
       </p>
 
-      <h2>5. Chargebacks</h2>
+      <h2>٥. ردود المبالغ المدفوعة (Chargebacks)</h2>
       <p>
-        Please contact us before initiating a chargeback with your bank — we
-        almost always resolve disputes faster and more fairly directly.
-        Unsubstantiated chargebacks may result in account termination.
+        يُرجى التواصل معنا قبل بدء ردّ المبلغ عبر بنكك — فنحن نحلّ النزاعات دائمًا
+        تقريبًا بشكل أسرع وأكثر إنصافًا بشكل مباشر. وقد تؤدي ردود المبالغ غير
+        المبرّرة إلى إنهاء الحساب.
       </p>
 
-      <h2>6. Contact</h2>
+      <h2>٦. التواصل</h2>
       <p>
-        Billing &amp; refunds:{' '}
+        الفوترة والاسترداد:{' '}
         <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a>
       </p>
     </main>

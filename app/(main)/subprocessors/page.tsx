@@ -2,58 +2,58 @@ import type { Metadata } from 'next'
 import { COMPANY } from '@/lib/company'
 
 export const metadata: Metadata = {
-  title: `Subprocessors — ${COMPANY.BRAND_NAME}`,
-  description: `Third-party service providers that process data on behalf of ${COMPANY.PRODUCT_NAME}.`,
+  title: `المعالجون الفرعيون — ${COMPANY.BRAND_NAME}`,
+  description: `مزوّدو الخدمات الخارجيون الذين يعالجون البيانات نيابةً عن ${COMPANY.PRODUCT_NAME}.`,
   alternates: { canonical: '/subprocessors' },
 }
 
 const SUBPROCESSORS = [
   {
     name: 'Supabase',
-    role: 'Database, authentication, file storage',
-    data: 'User account data, generated themes, scrape history, subscription records',
-    location: 'Ireland (EU)',
-    safeguard: 'EU-hosted; SCCs in DPA',
+    role: 'قاعدة البيانات والمصادقة وتخزين الملفات',
+    data: 'بيانات حساب المستخدم، القوالب المُولّدة، سجلّ الاستخلاص، سجلّات الاشتراك',
+    location: 'أيرلندا (الاتحاد الأوروبي)',
+    safeguard: 'مُستضاف في الاتحاد الأوروبي؛ بنود تعاقدية قياسية في اتفاقية معالجة البيانات',
     url: 'https://supabase.com/privacy',
   },
   {
     name: 'Vercel',
-    role: 'Hosting, edge CDN, deployment',
-    data: 'All HTTP traffic, request logs, deployment metadata',
-    location: 'USA (with EU edge)',
-    safeguard: 'EU-U.S. Data Privacy Framework + SCCs',
+    role: 'الاستضافة وشبكة توصيل المحتوى الطرفية والنشر',
+    data: 'كل حركة HTTP، سجلّات الطلبات، بيانات نشر وصفية',
+    location: 'الولايات المتحدة (مع حافة في الاتحاد الأوروبي)',
+    safeguard: 'إطار خصوصية البيانات بين الاتحاد الأوروبي والولايات المتحدة + بنود تعاقدية قياسية',
     url: 'https://vercel.com/legal/privacy-policy',
   },
   {
     name: 'Stripe',
-    role: 'Payment processing, subscription billing, customer portal',
-    data: 'Name, email, billing address, payment-method details (card via Stripe, not us), transaction history',
-    location: 'USA / Ireland (EU subsidiary)',
-    safeguard: 'EU-U.S. Data Privacy Framework + SCCs',
+    role: 'معالجة المدفوعات وفوترة الاشتراكات وبوابة العملاء',
+    data: 'الاسم، البريد الإلكتروني، عنوان الفوترة، تفاصيل وسيلة الدفع (البطاقة عبر Stripe وليس عبرنا)، سجلّ المعاملات',
+    location: 'الولايات المتحدة / أيرلندا (شركة تابعة في الاتحاد الأوروبي)',
+    safeguard: 'إطار خصوصية البيانات بين الاتحاد الأوروبي والولايات المتحدة + بنود تعاقدية قياسية',
     url: 'https://stripe.com/privacy',
   },
   {
     name: 'OpenAI',
-    role: 'Large-language-model generation of theme content',
-    data: 'The business brief you submit (no account identifiers attached)',
-    location: 'USA',
-    safeguard: 'API data not used for training (per OpenAI API ToS) + SCCs',
+    role: 'توليد محتوى القوالب عبر النماذج اللغوية الكبيرة',
+    data: 'وصف النشاط التجاري الذي تُرسله (دون إرفاق أي معرّفات حساب)',
+    location: 'الولايات المتحدة',
+    safeguard: 'بيانات الواجهة لا تُستخدم للتدريب (وفق شروط واجهة OpenAI) + بنود تعاقدية قياسية',
     url: 'https://openai.com/policies/privacy-policy',
   },
   {
     name: 'ScraperAPI',
-    role: 'Product-page scraping (only when direct fetch fails)',
-    data: 'The product URL you submit',
-    location: 'USA',
-    safeguard: 'SCCs',
+    role: 'استخلاص صفحات المنتجات (فقط عند فشل الجلب المباشر)',
+    data: 'رابط المنتج الذي تُرسله',
+    location: 'الولايات المتحدة',
+    safeguard: 'بنود تعاقدية قياسية',
     url: 'https://www.scraperapi.com/privacy-policy',
   },
   {
     name: 'Shopify',
-    role: 'OAuth + product/theme APIs (only if you connect a store)',
-    data: 'Shop domain, shop owner email, product data, theme data',
-    location: 'Canada (adequacy decision under GDPR Art. 45)',
-    safeguard: 'EU-Canada Adequacy Decision',
+    role: 'المصادقة (OAuth) وواجهات المنتجات/القوالب (فقط إن ربطت متجرًا)',
+    data: 'نطاق المتجر، بريد مالك المتجر، بيانات المنتجات، بيانات القالب',
+    location: 'كندا (قرار كفاية بموجب المادة ٤٥ من GDPR)',
+    safeguard: 'قرار الكفاية بين الاتحاد الأوروبي وكندا',
     url: 'https://www.shopify.com/legal/privacy',
   },
 ] as const
@@ -61,26 +61,26 @@ const SUBPROCESSORS = [
 export default function SubprocessorsPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 prose prose-neutral">
-      <h1>Subprocessors</h1>
-      <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
+      <h1>المعالجون الفرعيون</h1>
+      <p className="text-sm text-muted">آخر تحديث: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        {COMPANY.PRODUCT_NAME} engages the following third-party services to
-        operate the Service. Each acts as a data processor under EU GDPR.
-        Personal data is shared only to the extent necessary, governed by a
-        Data Processing Agreement (DPA) where applicable, and protected with
-        appropriate transfer safeguards.
+        يستعين {COMPANY.PRODUCT_NAME} بخدمات الأطراف الخارجية التالية لتشغيل
+        الخدمة. ويتصرّف كلٌّ منها بصفته معالجًا للبيانات بموجب اللائحة العامة
+        لحماية البيانات في الاتحاد الأوروبي (GDPR). ولا تُشارَك البيانات الشخصية
+        إلا بالقدر اللازم، وتحكمها اتفاقية معالجة بيانات (DPA) حيثما تنطبق،
+        ومحميّة بضمانات نقل مناسبة.
       </p>
 
       <table>
         <thead>
           <tr>
-            <th>Provider</th>
-            <th>Role</th>
-            <th>Data shared</th>
-            <th>Location</th>
-            <th>Safeguard</th>
-            <th>Privacy</th>
+            <th>المزوّد</th>
+            <th>الدور</th>
+            <th>البيانات المُشاركة</th>
+            <th>الموقع</th>
+            <th>الضمان</th>
+            <th>الخصوصية</th>
           </tr>
         </thead>
         <tbody>
@@ -91,17 +91,17 @@ export default function SubprocessorsPage() {
               <td>{s.data}</td>
               <td>{s.location}</td>
               <td>{s.safeguard}</td>
-              <td><a href={s.url} target="_blank" rel="noopener">link</a></td>
+              <td><a href={s.url} target="_blank" rel="noopener">رابط</a></td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2>Changes</h2>
+      <h2>التغييرات</h2>
       <p>
-        We notify customers of new subprocessors by updating this page at
-        least <strong>15 days</strong> before they begin processing personal
-        data, allowing time to object via{' '}
+        نُشعِر العملاء بأي معالجين فرعيين جُدد عبر تحديث هذه الصفحة قبل{' '}
+        <strong>١٥ يومًا</strong> على الأقل من بدئهم معالجة البيانات الشخصية،
+        مع إتاحة الوقت للاعتراض عبر{' '}
         <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a>.
       </p>
     </main>

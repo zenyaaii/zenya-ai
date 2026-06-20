@@ -2,108 +2,105 @@ import type { Metadata } from 'next'
 import { COMPANY } from '@/lib/company'
 
 export const metadata: Metadata = {
-  title: `Cookie Policy — ${COMPANY.BRAND_NAME}`,
-  description: `How and why ${COMPANY.PRODUCT_NAME} uses cookies and similar technologies.`,
+  title: `سياسة ملفات تعريف الارتباط — ${COMPANY.BRAND_NAME}`,
+  description: `كيف ولماذا يستخدم ${COMPANY.PRODUCT_NAME} ملفات تعريف الارتباط والتقنيات المشابهة.`,
   alternates: { canonical: '/cookies' },
 }
 
 export default function CookiePolicy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 prose prose-neutral">
-      <h1>Cookie Policy</h1>
-      <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
+      <h1>سياسة ملفات تعريف الارتباط</h1>
+      <p className="text-sm text-muted">آخر تحديث: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        This Cookie Policy explains how {COMPANY.LEGAL_NAME} (&ldquo;we&rdquo;)
-        uses cookies and similar tracking technologies on{' '}
+        توضّح سياسة ملفات تعريف الارتباط هذه كيف تستخدم {COMPANY.LEGAL_NAME}
+        («نحن») ملفات تعريف الارتباط وتقنيات التتبّع المشابهة على{' '}
         <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a>.
       </p>
 
-      <h2>1. What are cookies?</h2>
+      <h2>١. ما هي ملفات تعريف الارتباط؟</h2>
       <p>
-        Cookies are small text files stored on your device by your browser.
-        They let websites remember you and your preferences. We also use
-        similar technologies such as <code>localStorage</code> for
-        client-side preferences.
+        ملفات تعريف الارتباط هي ملفات نصية صغيرة يخزّنها متصفّحك على جهازك. وهي
+        تتيح للمواقع تذكّرك وتذكّر تفضيلاتك. كما نستخدم تقنيات مشابهة مثل{' '}
+        <code>localStorage</code> لحفظ التفضيلات على جانب العميل.
       </p>
 
-      <h2>2. The categories we use</h2>
+      <h2>٢. الفئات التي نستخدمها</h2>
 
-      <h3>2.1 Strictly necessary (always on)</h3>
+      <h3>٢.١ ضرورية تمامًا (مفعّلة دائمًا)</h3>
       <p>
-        These are required for the Service to work. We do not ask consent for
-        them under EU law because you cannot opt out without breaking the
-        Service.
+        هذه مطلوبة لعمل الخدمة. ولا نطلب موافقة عليها بموجب قانون الاتحاد
+        الأوروبي لأنه لا يمكنك إيقافها دون تعطيل الخدمة.
       </p>
       <table>
         <thead>
-          <tr><th>Name</th><th>Purpose</th><th>Duration</th></tr>
+          <tr><th>الاسم</th><th>الغرض</th><th>المدة</th></tr>
         </thead>
         <tbody>
           <tr>
             <td><code>sb-*-auth-token</code></td>
-            <td>Supabase authentication session</td>
-            <td>1 year (renewed)</td>
+            <td>جلسة مصادقة Supabase</td>
+            <td>سنة واحدة (تُجدَّد)</td>
           </tr>
           <tr>
             <td><code>zenya_return_to</code></td>
-            <td>Remember where to return you after Shopify OAuth</td>
-            <td>10 minutes</td>
+            <td>تذكّر المكان الذي نعيدك إليه بعد مصادقة Shopify (OAuth)</td>
+            <td>١٠ دقائق</td>
           </tr>
           <tr>
             <td><code>zenya_consent</code> (localStorage)</td>
-            <td>Remember your cookie-banner choice</td>
-            <td>12 months</td>
+            <td>تذكّر اختيارك في شريط ملفات تعريف الارتباط</td>
+            <td>١٢ شهرًا</td>
           </tr>
           <tr>
             <td><code>zenya_last_email</code> (localStorage)</td>
-            <td>Pre-fill the login form on this device</td>
-            <td>Until cleared</td>
+            <td>تعبئة نموذج تسجيل الدخول مسبقًا على هذا الجهاز</td>
+            <td>حتى المسح</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>2.2 Functional (consent required)</h3>
+      <h3>٢.٢ وظيفية (تتطلّب موافقة)</h3>
       <p>
-        Enhance the Service (e.g. dark-mode preference). Currently we use{' '}
-        <code>localStorage</code> for these and set them only after you
-        actively use the feature.
+        تُحسّن الخدمة (مثل تفضيل الوضع الداكن). نستخدم حاليًا{' '}
+        <code>localStorage</code> لهذه ولا نضبطها إلا بعد استخدامك الفعلي
+        للميزة.
       </p>
 
-      <h3>2.3 Analytics (consent required — currently OFF by default)</h3>
+      <h3>٢.٣ تحليلية (تتطلّب موافقة — معطّلة افتراضيًا حاليًا)</h3>
       <p>
-        If/when we enable product analytics (e.g. Plausible, Vercel
-        Analytics), we will list each provider here and only load them after
-        you accept analytics cookies in the banner.
+        إذا/عندما نُفعّل تحليلات المنتج (مثل Plausible أو Vercel Analytics)،
+        سندرج كل مزوّد هنا ولن نُحمّلها إلا بعد قبولك لملفات تعريف الارتباط
+        التحليلية في الشريط.
       </p>
 
-      <h3>2.4 Marketing (consent required — not used)</h3>
+      <h3>٢.٤ تسويقية (تتطلّب موافقة — غير مستخدمة)</h3>
       <p>
-        We do not currently use any advertising or remarketing cookies. If
-        this changes, this page will be updated and you&rsquo;ll see a
-        banner re-prompt.
+        لا نستخدم حاليًا أي ملفات تعريف ارتباط للإعلانات أو إعادة الاستهداف.
+        وإذا تغيّر ذلك، ستُحدَّث هذه الصفحة وسترى الشريط يطلب الموافقة من جديد.
       </p>
 
-      <h2>3. Third-party cookies set on payment / checkout</h2>
+      <h2>٣. ملفات تعريف الارتباط من أطراف خارجية عند الدفع</h2>
       <p>
-        When you go through Stripe Checkout, Stripe may set its own cookies
-        on the <code>checkout.stripe.com</code> domain for fraud prevention
-        and session management. These are governed by{' '}
+        عند إتمام الدفع عبر Stripe Checkout، قد تضبط Stripe ملفات تعريف الارتباط
+        الخاصة بها على نطاق <code>checkout.stripe.com</code> لمنع الاحتيال
+        وإدارة الجلسات. وتخضع هذه لـ{' '}
         <a href="https://stripe.com/cookies-policy/legal" target="_blank" rel="noopener">
-          Stripe&rsquo;s cookie policy
+          سياسة ملفات تعريف الارتباط الخاصة بـ Stripe
         </a>.
       </p>
 
-      <h2>4. Managing your choices</h2>
+      <h2>٤. إدارة اختياراتك</h2>
       <ul>
-        <li>Use the &ldquo;Cookie preferences&rdquo; link in the footer to change your consent.</li>
-        <li>Most browsers let you block cookies in settings, but blocking strictly-necessary cookies will break login.</li>
-        <li>You can clear cookies and localStorage at any time from your browser.</li>
+        <li>استخدم رابط «تفضيلات ملفات تعريف الارتباط» في التذييل لتغيير موافقتك.</li>
+        <li>تتيح لك معظم المتصفّحات حظر ملفات تعريف الارتباط من الإعدادات، لكن حظر الملفات الضرورية تمامًا سيُعطّل تسجيل الدخول.</li>
+        <li>يمكنك مسح ملفات تعريف الارتباط وlocalStorage في أي وقت من متصفّحك.</li>
       </ul>
 
-      <h2>5. Contact</h2>
+      <h2>٥. التواصل</h2>
       <p>
-        Questions about cookies?{' '}
+        أسئلة حول ملفات تعريف الارتباط؟{' '}
         <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a>
       </p>
     </main>

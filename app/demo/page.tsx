@@ -5,37 +5,37 @@ import { Suspense } from 'react'
 export default function DemoPage() {
   const mockContent = {
     hero: {
-      headline: "The Last Vacuum You'll Ever Need",
-      subheadline: "Engineered with military-grade suction and whisper-quiet technology. Experience the future of cleaning today.",
-      cta: "Get 50% Off Now"
+      headline: "آخر مكنسة كهربائية ستحتاج إليها",
+      subheadline: "مصمَّمة بقوة شفط احترافية وتقنية هادئة للغاية. اختبر مستقبل التنظيف اليوم.",
+      cta: "احصل على خصم 50% الآن"
     },
     features: [
-      { title: "Whisper Quiet", desc: "Clean your home without waking the baby. operates at less than 40dB.", icon: "volume-x" },
-      { title: "All-Day Battery", desc: "One charge lasts up to 120 minutes. Enough to clean your entire home twice.", icon: "battery-charging" },
-      { title: "Pet Hair Eraser", desc: "Specialized brushes designed to lift stubborn pet hair from any surface.", icon: "dog" }
+      { title: "هدوء تام", desc: "نظّف منزلك دون إيقاظ الصغار. تعمل بأقل من 40 ديسيبل.", icon: "volume-x" },
+      { title: "بطارية طوال اليوم", desc: "شحنة واحدة تدوم حتى 120 دقيقة. تكفي لتنظيف منزلك بالكامل مرتين.", icon: "battery-charging" },
+      { title: "ممحاة شعر الحيوانات", desc: "فُرَش متخصّصة لرفع شعر الحيوانات العنيد من أي سطح.", icon: "dog" }
     ],
     problem: {
-      headline: "Sick of bulky, weak vacuums?",
-      text: "Traditional vacuums are heavy, loud, and lose suction after a few months. You shouldn't have to wrestle with your cleaning tools."
+      headline: "سئمت المكانس الثقيلة والضعيفة؟",
+      text: "المكانس التقليدية ثقيلة وصاخبة وتفقد قوة الشفط بعد بضعة أشهر. لا ينبغي أن تصارع أدوات التنظيف لديك."
     },
     solution: {
-      headline: "Meet the Zenya V2",
-      text: "Featherlight design meets industrial power. We've reimagined what a vacuum should be, making cleaning effortless and even enjoyable."
+      headline: "تعرّف على زينيا V2",
+      text: "تصميم خفيف كالريشة يلتقي بقوة صناعية. أعدنا تصوّر ما يجب أن تكون عليه المكنسة، لنجعل التنظيف سهلًا بل وممتعًا."
     },
     testimonials: [
-      { name: "Sarah Jenkins", text: "I can't believe how much dust this thing picked up. My carpets look brand new!", location: "Denver, CO", rating: 5 },
-      { name: "Mike Ross", text: "Finally, a vacuum that doesn't hurt my back. Worth every penny.", location: "New York, NY", rating: 5 },
-      { name: "Emily Chen", text: "The battery life is insane. I cleaned my whole 2-story house on one charge.", location: "Seattle, WA", rating: 5 }
+      { name: "سارة المنصور", text: "لا أصدّق كمّ الغبار الذي التقطته. سجادي يبدو جديدًا تمامًا!", location: "الرياض", rating: 5 },
+      { name: "محمد العتيبي", text: "أخيرًا، مكنسة لا تؤلم ظهري. تستحق كل ريال.", location: "جدة", rating: 5 },
+      { name: "ليلى الخالدي", text: "عمر البطارية مذهل. نظّفت منزلي المكوّن من طابقين بشحنة واحدة.", location: "الدمام", rating: 5 }
     ],
     faq: [
-      { q: "Does it work on hardwood floors?", a: "Yes! The soft-roller head is specifically designed to polish hard floors while cleaning." },
-      { q: "How long is the warranty?", a: "We offer an industry-leading 5-year warranty on the motor and battery." },
-      { q: "Is the filter washable?", a: "Absolutely. Just rinse it under cold water once a month to maintain peak performance." },
-      { q: "What is the return policy?", a: "Try it risk-free for 30 days. If you don't love it, we'll pay for return shipping." }
+      { q: "هل تعمل على الأرضيات الخشبية؟", a: "نعم! رأس الأسطوانة الناعمة مصمّم خصيصًا لتلميع الأرضيات الصلبة أثناء التنظيف." },
+      { q: "ما مدة الضمان؟", a: "نقدّم ضمانًا رائدًا في القطاع لمدة 5 سنوات على المحرّك والبطارية." },
+      { q: "هل الفلتر قابل للغسل؟", a: "بالتأكيد. اشطفه فقط بالماء البارد مرة شهريًا للحفاظ على أعلى أداء." },
+      { q: "ما سياسة الإرجاع؟", a: "جرّبها دون مخاطرة لمدة 30 يومًا. إن لم تعجبك، سنتحمّل تكلفة شحن الإرجاع." }
     ],
     guarantee: {
-      title: "30-Day Risk-Free Guarantee",
-      text: "We are so confident you'll love the Zenya V2 that we're letting you try it in your own home for 30 days. No strings attached.",
+      title: "ضمان استرداد دون مخاطرة لمدة 30 يومًا",
+      text: "نحن واثقون تمامًا أنك ستحب زينيا V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
       days: 30
     }
   }
@@ -49,9 +49,9 @@ export default function DemoPage() {
       {/* Header with Paywall Actions */}
       <div className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="font-bold text-xl">Zenya Theme Demo</div>
+          <div className="font-bold text-xl">عرض قالب زينيا التوضيحي</div>
           <div className="hidden md:block">
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>جارٍ التحميل…</div>}>
               <ThemeActions 
                 themeId="demo-theme-id" 
                 isPro={false} // Force locked state for demo
@@ -77,7 +77,7 @@ export default function DemoPage() {
 
       {/* Mobile Sticky Paywall Actions */}
       <div className="md:hidden">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>جارٍ التحميل…</div>}>
           <ThemeActions 
             themeId="demo-theme-id" 
             isPro={false} // Force locked state for demo

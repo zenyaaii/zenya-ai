@@ -18,10 +18,10 @@ export default function DraftPreviewPage() {
       try {
         setTheme(JSON.parse(draft))
       } catch (e) {
-        setError('Invalid draft data found.')
+        setError('بيانات المسودة غير صالحة.')
       }
     } else {
-      setError('No draft found. Please generate a theme first.')
+      setError('لا توجد مسودة. يُرجى توليد قالب أولًا.')
     }
   }, [])
 
@@ -33,7 +33,7 @@ export default function DraftPreviewPage() {
       saveAs(blob, `${theme.productName.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`)
     } catch (e) {
       console.error(e)
-      alert('Failed to generate theme')
+      alert('فشل توليد القالب')
     } finally {
       setIsGenerating(false)
     }
@@ -43,12 +43,12 @@ export default function DraftPreviewPage() {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 p-8 text-center">
         <div className="text-xl font-bold text-red-500">{error}</div>
-        <p className="text-gray-600">Please go back and try generating the theme again.</p>
+        <p className="text-gray-600">يُرجى الرجوع ومحاولة توليد القالب من جديد.</p>
       </div>
     )
   }
 
-  if (!theme) return <div className="flex h-screen items-center justify-center text-muted">Loading draft...</div>
+  if (!theme) return <div className="flex h-screen items-center justify-center text-muted">جارٍ تحميل المسودة…</div>
 
   return (
     <main className="min-h-screen pb-24 md:pb-10 bg-white">
@@ -62,25 +62,25 @@ export default function DraftPreviewPage() {
                <div className="h-3 w-3 rounded-full bg-green-400"></div>
              </div>
              <div className="hidden rounded-md bg-gray-100 px-3 py-1 text-xs text-gray-500 md:block">
-               {theme.shopName || theme.productName || 'My Store'} - Live Preview
+               {theme.shopName || theme.productName || 'متجري'} - معاينة مباشرة
              </div>
           </div>
           <div className="flex items-center gap-3">
              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
-               Draft Mode
+               وضع المسودة
              </span>
              <button 
                onClick={handleDownload}
                disabled={isGenerating}
                className="rounded-full bg-black px-4 py-1.5 text-xs font-bold text-white transition hover:bg-gray-800 disabled:opacity-50"
              >
-               {isGenerating ? 'Generating...' : 'Download Test Theme'}
+               {isGenerating ? 'جارٍ التوليد…' : 'تنزيل القالب التجريبي'}
              </button>
-             <button 
+             <button
                onClick={() => window.close()}
                className="text-xs font-bold text-gray-500 hover:text-gray-900"
              >
-               Close Preview
+               إغلاق المعاينة
              </button>
           </div>
         </div>

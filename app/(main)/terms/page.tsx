@@ -2,210 +2,201 @@ import type { Metadata } from 'next'
 import { COMPANY, formatAddress } from '@/lib/company'
 
 export const metadata: Metadata = {
-  title: `Terms of Service — ${COMPANY.BRAND_NAME}`,
-  description: `Terms governing your use of ${COMPANY.PRODUCT_NAME}.`,
+  title: `شروط الخدمة — ${COMPANY.BRAND_NAME}`,
+  description: `الشروط التي تحكم استخدامك لـ ${COMPANY.PRODUCT_NAME}.`,
   alternates: { canonical: '/terms' },
 }
 
 export default function TermsOfService() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 prose prose-neutral">
-      <h1>Terms of Service</h1>
-      <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
+      <h1>شروط الخدمة</h1>
+      <p className="text-sm text-muted">آخر تحديث: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and
-        use of the website <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a>{' '}
-        and the {COMPANY.PRODUCT_NAME} service (collectively, the &ldquo;Service&rdquo;)
-        operated by <strong>{COMPANY.LEGAL_NAME}</strong> ({COMPANY.ENTITY_TYPE},
-        registered with the Dutch Chamber of Commerce under number{' '}
-        {COMPANY.KVK_NUMBER}). By creating an account or using the Service you
-        agree to be bound by these Terms.
+        تحكم شروط الخدمة هذه («الشروط») وصولك إلى الموقع{' '}
+        <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a> وخدمة
+        {' '}{COMPANY.PRODUCT_NAME} (يُشار إليهما معًا بـ«الخدمة») واستخدامك لهما،
+        وهي مُشغّلة من قِبل <strong>{COMPANY.LEGAL_NAME}</strong> ({COMPANY.ENTITY_TYPE}،
+        مسجّلة لدى الغرفة التجارية الهولندية برقم{' '}
+        {COMPANY.KVK_NUMBER}). بإنشائك حسابًا أو استخدامك الخدمة فإنك توافق على
+        الالتزام بهذه الشروط.
       </p>
 
-      <h2>1. Definitions</h2>
+      <h2>١. التعريفات</h2>
       <ul>
-        <li>&ldquo;<strong>We</strong>&rdquo;, &ldquo;<strong>us</strong>&rdquo;, &ldquo;<strong>our</strong>&rdquo; — {COMPANY.LEGAL_NAME}.</li>
-        <li>&ldquo;<strong>You</strong>&rdquo;, &ldquo;<strong>your</strong>&rdquo; — the individual or entity using the Service.</li>
-        <li>&ldquo;<strong>Generated Content</strong>&rdquo; — themes, copy, images, and other output the Service produces from your inputs.</li>
-        <li>&ldquo;<strong>Pro</strong>&rdquo; — the one-time paid licence you purchase to access premium features for the lifetime of your account.</li>
+        <li>«<strong>نحن</strong>»، «<strong>لنا</strong>»، «<strong>خاصتنا</strong>» — {COMPANY.LEGAL_NAME}.</li>
+        <li>«<strong>أنت</strong>»، «<strong>خاصتك</strong>» — الفرد أو الكيان الذي يستخدم الخدمة.</li>
+        <li>«<strong>المحتوى المُولّد</strong>» — القوالب والنصوص والصور وغيرها من المخرجات التي تنتجها الخدمة من مدخلاتك.</li>
+        <li>«<strong>Pro</strong>» — الترخيص المدفوع لمرة واحدة الذي تشتريه للوصول إلى الميزات المميّزة طوال عمر حسابك.</li>
       </ul>
 
-      <h2>2. Eligibility</h2>
+      <h2>٢. الأهلية</h2>
       <p>
-        You must be at least 16 years old and capable of forming a binding
-        contract under the law of your country of residence. If you use the
-        Service on behalf of a company, you represent that you have authority
-        to bind that company.
+        يجب أن يكون عمرك ١٦ عامًا على الأقل وأن تكون قادرًا على إبرام عقد مُلزم
+        بموجب قانون بلد إقامتك. إذا كنت تستخدم الخدمة نيابةً عن شركة، فإنك تُقرّ
+        بأن لديك صلاحية إلزام تلك الشركة.
       </p>
 
-      <h2>3. The Service</h2>
+      <h2>٣. الخدمة</h2>
       <p>
-        {COMPANY.PRODUCT_NAME} is an AI-assisted website and Shopify theme
-        generator. You provide inputs (business brief, product URLs, brand
-        details); we generate content and visual designs using third-party AI
-        models. Output quality, accuracy, and suitability for your specific
-        purpose are <strong>not guaranteed</strong>; you are responsible for
-        reviewing Generated Content before publishing it.
+        {COMPANY.PRODUCT_NAME} مولّد لمواقع الويب وقوالب Shopify بمساعدة الذكاء
+        الاصطناعي. تقدّم أنت المدخلات (وصف النشاط التجاري، روابط المنتجات،
+        تفاصيل العلامة التجارية)؛ ونولّد نحن المحتوى والتصاميم البصرية باستخدام
+        نماذج ذكاء اصطناعي من أطراف خارجية. جودة المخرجات ودقتها وملاءمتها
+        لغرضك المحدّد <strong>غير مضمونة</strong>؛ وأنت مسؤول عن مراجعة المحتوى
+        المُولّد قبل نشره.
       </p>
 
-      <h2>4. Account</h2>
+      <h2>٤. الحساب</h2>
       <ul>
-        <li>You must provide accurate registration information.</li>
-        <li>You are responsible for safeguarding your password.</li>
-        <li>You are responsible for all activity under your account.</li>
-        <li>One account per person/entity. Sharing credentials is not permitted.</li>
-        <li>You can delete your account at any time at <a href="/settings">/settings</a>.</li>
+        <li>يجب أن تقدّم معلومات تسجيل دقيقة.</li>
+        <li>أنت مسؤول عن حماية كلمة مرورك.</li>
+        <li>أنت مسؤول عن جميع الأنشطة التي تتم عبر حسابك.</li>
+        <li>حساب واحد لكل شخص/كيان. مشاركة بيانات الاعتماد غير مسموح بها.</li>
+        <li>يمكنك حذف حسابك في أي وقت من <a href="/settings">/settings</a>.</li>
       </ul>
 
-      <h2>5. Acceptable Use</h2>
-      <p>You must not, and must not allow others to:</p>
+      <h2>٥. الاستخدام المقبول</h2>
+      <p>يجب ألا تقوم، وألا تسمح لغيرك بالقيام بما يلي:</p>
       <ul>
-        <li>Use the Service to create content that is illegal, defamatory, infringing, discriminatory, sexually explicit involving minors, or harmful.</li>
-        <li>Generate content impersonating real people or brands without permission.</li>
-        <li>Scrape, reverse-engineer, or extract our prompts, models, or proprietary logic.</li>
-        <li>Resell or sublicense the Service or Generated Content as a competing AI service.</li>
-        <li>Bypass quota or rate limits, including by creating multiple accounts.</li>
-        <li>Submit content that violates third-party rights (copyright, trademark, privacy).</li>
-        <li>Use the Service to spam, phish, distribute malware, or run any unlawful business.</li>
+        <li>استخدام الخدمة لإنشاء محتوى غير قانوني أو تشهيري أو منتهِك أو تمييزي أو جنسي صريح يتعلّق بقُصّر أو ضار.</li>
+        <li>توليد محتوى ينتحل شخصية أشخاص حقيقيين أو علامات تجارية دون إذن.</li>
+        <li>استخلاص أو الهندسة العكسية أو استخراج موجّهاتنا أو نماذجنا أو منطقنا المملوك.</li>
+        <li>إعادة بيع أو ترخيص الخدمة أو المحتوى المُولّد من الباطن كخدمة ذكاء اصطناعي منافسة.</li>
+        <li>تجاوز حدود الحصة أو المعدّل، بما في ذلك عبر إنشاء حسابات متعددة.</li>
+        <li>تقديم محتوى ينتهك حقوق أطراف خارجية (حقوق النشر، العلامات التجارية، الخصوصية).</li>
+        <li>استخدام الخدمة للرسائل المزعجة أو التصيّد أو توزيع البرمجيات الخبيثة أو إدارة أي نشاط غير قانوني.</li>
       </ul>
       <p>
-        Violations may result in immediate suspension or termination without
-        refund.
+        قد تؤدي الانتهاكات إلى تعليق فوري أو إنهاء دون استرداد للمبالغ.
       </p>
 
-      <h2>6. Pricing &amp; Billing</h2>
+      <h2>٦. التسعير والفوترة</h2>
       <ul>
-        <li><strong>Free tier:</strong> up to 3 themes per account.</li>
-        <li><strong>Pro:</strong> {COMPANY.PRICE_DISPLAY} — a single one-time payment that unlocks lifetime Pro access on your account. No subscription, no auto-renewal.</li>
-        <li>Currency is selected by your country: USD outside the EEA/UK, EUR inside the EEA/UK.</li>
-        <li>The displayed price is VAT-inclusive where applicable. Stripe Tax calculates and itemises any BTW / VAT / sales tax on the receipt.</li>
-        <li>Payment is processed by Stripe. By purchasing, you also agree to{' '}
-          <a href="https://stripe.com/legal/consumer" target="_blank" rel="noopener">Stripe&rsquo;s Terms</a>.
+        <li><strong>الباقة المجانية:</strong> حتى ٣ قوالب لكل حساب.</li>
+        <li><strong>Pro:</strong> {COMPANY.PRICE_DISPLAY} — دفعة واحدة فقط تفتح وصول Pro مدى الحياة على حسابك. لا اشتراك ولا تجديد تلقائي.</li>
+        <li>تُحدَّد العملة حسب بلدك: الدولار الأمريكي خارج المنطقة الاقتصادية الأوروبية/المملكة المتحدة، واليورو داخلهما.</li>
+        <li>السعر المعروض شامل لضريبة القيمة المضافة حيثما تنطبق. يحسب Stripe Tax أي ضريبة قيمة مضافة (BTW/VAT) أو ضريبة مبيعات ويُدرجها في الإيصال.</li>
+        <li>تُعالَج المدفوعات بواسطة Stripe. بالشراء، فإنك توافق أيضًا على{' '}
+          <a href="https://stripe.com/legal/consumer" target="_blank" rel="noopener">شروط Stripe</a>.
         </li>
-        <li>We may change the price of future purchases at any time, but anything you have already paid for is not affected.</li>
+        <li>قد نُغيّر سعر عمليات الشراء المستقبلية في أي وقت، لكن ما دفعته بالفعل لا يتأثر.</li>
       </ul>
 
-      <h2>7. Refunds &amp; Right of Withdrawal</h2>
+      <h2>٧. الاسترداد وحق الانسحاب</h2>
       <p>
-        Full details: <a href="/refund">Refund Policy</a>. Summary: EU consumers
-        have a 14-day right of withdrawal under Article 6:230o of the Dutch
-        Civil Code. By starting to use the Service (including generating a
-        theme) you expressly request immediate performance and acknowledge
-        that, once a theme has been generated using your paid Pro features,
-        the right of withdrawal is lost in respect of that performance.
+        التفاصيل الكاملة: <a href="/refund">سياسة الاسترداد</a>. ملخّص: يتمتع
+        المستهلكون في الاتحاد الأوروبي بحق انسحاب لمدة ١٤ يومًا بموجب المادة
+        6:230o من القانون المدني الهولندي. وببدء استخدامك للخدمة (بما في ذلك
+        توليد قالب) فإنك تطلب صراحةً الأداء الفوري وتُقرّ بأنه، بمجرد توليد قالب
+        باستخدام ميزات Pro المدفوعة الخاصة بك، يسقط حق الانسحاب فيما يتعلّق بذلك
+        الأداء.
       </p>
 
-      <h2>8. Generated Content — ownership &amp; licence</h2>
+      <h2>٨. المحتوى المُولّد — الملكية والترخيص</h2>
       <ul>
-        <li>You retain ownership of your <strong>inputs</strong> (brief, product data, brand materials).</li>
-        <li>To the extent the law allows, you own the <strong>outputs</strong> generated for you, and may use them commercially for your own business.</li>
-        <li>We retain ownership of the Service, the underlying AI prompts, the templates, the platform code, and the brand &ldquo;{COMPANY.BRAND_NAME}&rdquo;.</li>
-        <li>AI-generated content is not copyrightable in all jurisdictions; we make no warranty of exclusivity. Other users may receive similar outputs from similar inputs.</li>
-        <li>You grant us a worldwide, royalty-free, non-exclusive licence to host, display, and process your inputs and outputs solely to provide the Service.</li>
+        <li>تحتفظ بملكية <strong>مدخلاتك</strong> (الوصف، بيانات المنتجات، مواد العلامة التجارية).</li>
+        <li>إلى الحد الذي يسمح به القانون، تملك <strong>المخرجات</strong> المُولّدة لك، ويمكنك استخدامها تجاريًا لنشاطك الخاص.</li>
+        <li>نحتفظ بملكية الخدمة، والموجّهات الأساسية للذكاء الاصطناعي، والقوالب، وشيفرة المنصّة، والعلامة التجارية «{COMPANY.BRAND_NAME}».</li>
+        <li>المحتوى المُولّد بالذكاء الاصطناعي غير قابل لحماية حقوق النشر في جميع الولايات القضائية؛ ولا نقدّم أي ضمان بالحصرية. وقد يتلقّى مستخدمون آخرون مخرجات مماثلة من مدخلات مماثلة.</li>
+        <li>تمنحنا ترخيصًا عالميًا غير حصري ومعفى من الإتاوات لاستضافة مدخلاتك ومخرجاتك وعرضها ومعالجتها لغرض تقديم الخدمة فقط.</li>
       </ul>
 
-      <h2>9. Third-party services</h2>
+      <h2>٩. خدمات الأطراف الخارجية</h2>
       <p>
-        The Service integrates with OpenAI, Stripe, Supabase, Vercel,
-        ScraperAPI, and (optionally) Shopify. Your use of those integrations
-        is subject to their own terms. We are not responsible for their
-        availability, content, or actions. If you connect a Shopify store you
-        also agree to Shopify&rsquo;s App Store and Partner Program Agreements.
+        تتكامل الخدمة مع OpenAI وStripe وSupabase وVercel وScraperAPI و(اختياريًا)
+        Shopify. ويخضع استخدامك لتلك التكاملات لشروطها الخاصة. ولسنا مسؤولين عن
+        توافرها أو محتواها أو تصرّفاتها. وإذا ربطت متجر Shopify فإنك توافق أيضًا
+        على اتفاقيتَي متجر تطبيقات Shopify وبرنامج الشركاء.
       </p>
 
-      <h2>10. AI &amp; output disclaimer</h2>
+      <h2>١٠. إخلاء المسؤولية عن الذكاء الاصطناعي والمخرجات</h2>
       <p>
-        The Service uses large language models that can produce inaccurate,
-        biased, or fabricated content (&ldquo;hallucinations&rdquo;). You must
-        review Generated Content for accuracy, legality, and suitability
-        before publishing it. <strong>We are not liable for any consequence
-        of using unreviewed Generated Content</strong>, including but not
-        limited to factual errors, IP infringement claims by third parties,
-        or regulatory violations on your live website.
+        تستخدم الخدمة نماذج لغوية كبيرة قد تُنتج محتوى غير دقيق أو متحيّز أو
+        مُختلَق («هلوسات»). يجب عليك مراجعة المحتوى المُولّد للتأكد من دقته
+        وقانونيته وملاءمته قبل نشره. <strong>ولسنا مسؤولين عن أي نتيجة تترتّب
+        على استخدام محتوى مُولّد غير مُراجَع</strong>، بما في ذلك على سبيل المثال
+        لا الحصر الأخطاء الواقعية، أو دعاوى انتهاك الملكية الفكرية من أطراف
+        خارجية، أو المخالفات التنظيمية على موقعك المنشور.
       </p>
 
-      <h2>11. Service availability</h2>
+      <h2>١١. توافر الخدمة</h2>
       <p>
-        We target high availability but do not guarantee uninterrupted
-        Service. We may perform maintenance, update features, or suspend the
-        Service for security. We are not liable for downtime caused by
-        third-party providers (Vercel, Supabase, Stripe, OpenAI, etc.) or
-        force majeure events.
+        نستهدف توافرًا عاليًا لكننا لا نضمن خدمة دون انقطاع. وقد نُجري صيانة، أو
+        نُحدّث الميزات، أو نُعلّق الخدمة لأغراض الأمان. ولسنا مسؤولين عن أي توقّف
+        ناتج عن مزوّدين خارجيين (Vercel وSupabase وStripe وOpenAI، إلخ) أو عن
+        أحداث قوة قاهرة.
       </p>
 
-      <h2>12. Termination</h2>
+      <h2>١٢. الإنهاء</h2>
       <ul>
-        <li>You may terminate by deleting your account at any time.</li>
-        <li>We may suspend or terminate your account immediately, without refund, for breach of these Terms or applicable law.</li>
-        <li>We may terminate inactive free accounts after 12 months of no activity (with email notice).</li>
-        <li>Upon termination, your access ends. Personal data is handled per the <a href="/privacy">Privacy Policy</a>.</li>
+        <li>يمكنك الإنهاء بحذف حسابك في أي وقت.</li>
+        <li>قد نُعلّق حسابك أو نُنهيه فورًا، دون استرداد، عند انتهاك هذه الشروط أو القانون المعمول به.</li>
+        <li>قد نُنهي الحسابات المجانية غير النشطة بعد ١٢ شهرًا من عدم النشاط (مع إشعار بالبريد الإلكتروني).</li>
+        <li>عند الإنهاء، ينتهي وصولك. وتُعالَج البيانات الشخصية وفق <a href="/privacy">سياسة الخصوصية</a>.</li>
       </ul>
 
-      <h2>13. Limitation of liability</h2>
+      <h2>١٣. تحديد المسؤولية</h2>
       <p>
-        To the maximum extent permitted by law, the Service is provided
-        &ldquo;as is&rdquo; without warranties of merchantability, fitness for
-        a particular purpose, or non-infringement. To the maximum extent
-        permitted by Dutch law, our total liability for any claim arising out
-        of these Terms or the Service is limited to the greater of (a) the
-        fees you paid us in the 12 months preceding the event, or (b)
-        €100. We are not liable for indirect, incidental, consequential,
-        special, or punitive damages, including lost profits or data loss.
+        إلى أقصى حدٍّ يسمح به القانون، تُقدَّم الخدمة «كما هي» دون ضمانات قابلية
+        التسويق أو الملاءمة لغرض معيّن أو عدم الانتهاك. وإلى أقصى حدٍّ يسمح به
+        القانون الهولندي، تقتصر مسؤوليتنا الإجمالية عن أي مطالبة ناشئة عن هذه
+        الشروط أو الخدمة على الأكبر من (أ) الرسوم التي دفعتها لنا في الـ ١٢ شهرًا
+        السابقة للحدث، أو (ب) ١٠٠ يورو. ولسنا مسؤولين عن أي أضرار غير مباشرة أو
+        عرضية أو تبعية أو خاصة أو عقابية، بما في ذلك خسارة الأرباح أو فقدان
+        البيانات.
       </p>
       <p>
-        Nothing in these Terms limits liability for death, personal injury
-        caused by negligence, fraud, or any other liability that cannot be
-        excluded under Dutch law.
-      </p>
-
-      <h2>14. Indemnification</h2>
-      <p>
-        You agree to indemnify and hold us harmless from any claim, damage,
-        or expense (including reasonable legal fees) arising from (a) your
-        use of the Service, (b) your inputs or published Generated Content,
-        (c) your breach of these Terms, or (d) your violation of any law or
-        third-party right.
+        لا شيء في هذه الشروط يحدّ من المسؤولية عن الوفاة أو الإصابة الجسدية
+        الناجمة عن الإهمال أو الاحتيال أو أي مسؤولية أخرى لا يمكن استبعادها
+        بموجب القانون الهولندي.
       </p>
 
-      <h2>15. Changes to the Service or Terms</h2>
+      <h2>١٤. التعويض</h2>
       <p>
-        We may modify the Service or these Terms at any time. Material changes
-        will be announced by email to registered users at least 30 days
-        before they take effect. Continued use after the effective date means
-        you accept the changes. If you do not accept, you may terminate your
-        account before they take effect.
+        توافق على تعويضنا وإبراء ذمّتنا من أي مطالبة أو ضرر أو نفقة (بما في ذلك
+        الأتعاب القانونية المعقولة) ناشئة عن (أ) استخدامك للخدمة، أو (ب) مدخلاتك
+        أو المحتوى المُولّد المنشور، أو (ج) انتهاكك لهذه الشروط، أو (د) انتهاكك
+        لأي قانون أو حق لطرف خارجي.
       </p>
 
-      <h2>16. Governing law &amp; disputes</h2>
+      <h2>١٥. التغييرات على الخدمة أو الشروط</h2>
       <p>
-        These Terms are governed by {COMPANY.GOVERNING_LAW}, excluding its
-        conflict-of-laws rules. The UN Convention on Contracts for the
-        International Sale of Goods does not apply. Any dispute will be
-        submitted to the exclusive jurisdiction of {COMPANY.COMPETENT_COURT},
-        subject to consumers&rsquo; mandatory right to bring proceedings in
-        their country of residence under EU law.
+        قد نُعدّل الخدمة أو هذه الشروط في أي وقت. وسيُعلَن عن التغييرات الجوهرية
+        بالبريد الإلكتروني للمستخدمين المسجّلين قبل ٣٠ يومًا على الأقل من نفاذها.
+        ويعني استمرارك في الاستخدام بعد تاريخ النفاذ قبولك للتغييرات. وإذا لم
+        تقبلها، يمكنك إنهاء حسابك قبل نفاذها.
+      </p>
+
+      <h2>١٦. القانون الحاكم والنزاعات</h2>
+      <p>
+        تخضع هذه الشروط لـ{COMPANY.GOVERNING_LAW}، باستثناء قواعد تنازع القوانين
+        الخاصة به. ولا تنطبق اتفاقية الأمم المتحدة بشأن عقود البيع الدولي للبضائع.
+        وتُحال أي نزاعات إلى الاختصاص القضائي الحصري لـ{COMPANY.COMPETENT_COURT}،
+        مع مراعاة الحق الإلزامي للمستهلكين في رفع الدعاوى في بلد إقامتهم بموجب
+        قانون الاتحاد الأوروبي.
       </p>
       <p>
-        EU consumers may also use the European Commission&rsquo;s{' '}
+        يمكن للمستهلكين في الاتحاد الأوروبي أيضًا استخدام{' '}
         <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener">
-          Online Dispute Resolution platform
-        </a>.
+          منصّة تسوية النزاعات عبر الإنترنت
+        </a>{' '}التابعة للمفوّضية الأوروبية.
       </p>
 
-      <h2>17. Miscellaneous</h2>
+      <h2>١٧. أحكام متفرّقة</h2>
       <ul>
-        <li><strong>Severability:</strong> if any clause is unenforceable, the rest stays in force.</li>
-        <li><strong>No waiver:</strong> failure to enforce a right is not a waiver.</li>
-        <li><strong>Assignment:</strong> you may not assign your rights without our consent; we may assign in case of merger/acquisition.</li>
-        <li><strong>Entire agreement:</strong> these Terms plus the <a href="/privacy">Privacy Policy</a>, <a href="/cookies">Cookie Policy</a>, and <a href="/refund">Refund Policy</a> form the entire agreement.</li>
+        <li><strong>قابلية الفصل:</strong> إذا تعذّر إنفاذ أي بند، يبقى الباقي ساري المفعول.</li>
+        <li><strong>عدم التنازل:</strong> عدم إنفاذ حق لا يُعدّ تنازلًا عنه.</li>
+        <li><strong>التنازل:</strong> لا يجوز لك التنازل عن حقوقك دون موافقتنا؛ ويجوز لنا التنازل في حالة الاندماج/الاستحواذ.</li>
+        <li><strong>الاتفاق الكامل:</strong> تشكّل هذه الشروط مع <a href="/privacy">سياسة الخصوصية</a> و<a href="/cookies">سياسة ملفات تعريف الارتباط</a> و<a href="/refund">سياسة الاسترداد</a> الاتفاق الكامل.</li>
       </ul>
 
-      <h2>18. Contact</h2>
+      <h2>١٨. التواصل</h2>
       <ul>
-        <li>Legal: <a href={`mailto:${COMPANY.LEGAL_EMAIL}`}>{COMPANY.LEGAL_EMAIL}</a></li>
-        <li>Support: <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a></li>
-        <li>Postal: {formatAddress()}</li>
+        <li>الشؤون القانونية: <a href={`mailto:${COMPANY.LEGAL_EMAIL}`}>{COMPANY.LEGAL_EMAIL}</a></li>
+        <li>الدعم: <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a></li>
+        <li>البريد: {formatAddress()}</li>
       </ul>
     </main>
   )

@@ -22,24 +22,24 @@ const STYLE_PRESETS: Array<{
 }> = [
   {
     id: 'clean_light',
-    name: 'Clean Light',
-    description: 'Soft premium',
+    name: 'فاتح أنيق',
+    description: 'فخامة ناعمة',
     p: '#4f46e5',
     s: '#06b6d4',
     sectionStyles: { heroPanel: 'soft', marketing: 'soft', socialProof: 'soft', faq: 'soft', productMedia: 'soft', countdown: 'glass', volume: 'soft', upsellBundles: 'soft', frequentlyBought: 'soft', guaranteeBar: 'soft', stickyAtc: 'glass' }
   },
   {
     id: 'bold_gradient',
-    name: 'Bold Gradient',
-    description: 'Vivid glass',
+    name: 'تدرّج جريء',
+    description: 'زجاج نابض',
     p: '#7c3aed',
     s: '#06b6d4',
     sectionStyles: { heroPanel: 'glass', marketing: 'glass', socialProof: 'glass', faq: 'soft', productMedia: 'glass', countdown: 'glass', volume: 'glass', upsellBundles: 'glass', frequentlyBought: 'glass', guaranteeBar: 'soft', stickyAtc: 'glass' }
   },
   {
     id: 'luxury_dark',
-    name: 'Luxury Dark',
-    description: 'Minimal luxe',
+    name: 'داكن فاخر',
+    description: 'بساطة فاخرة',
     p: '#111827',
     s: '#334155',
     sectionStyles: { heroPanel: 'minimal', marketing: 'minimal', socialProof: 'minimal', faq: 'minimal', productMedia: 'minimal', countdown: 'minimal', volume: 'minimal', upsellBundles: 'minimal', frequentlyBought: 'minimal', guaranteeBar: 'minimal', stickyAtc: 'minimal' }
@@ -93,14 +93,14 @@ function CreateWizardContent() {
   }, [shopDomain])
 
   const PALETTES = [
-    { name: 'Modern Tech', p: '#4f46e5', s: '#06b6d4' },
-    { name: 'Nature', p: '#059669', s: '#10b981' },
-    { name: 'Energetic', p: '#dc2626', s: '#f87171' },
-    { name: 'Warmth', p: '#d97706', s: '#fbbf24' },
-    { name: 'Trust', p: '#2563eb', s: '#60a5fa' },
-    { name: 'Royal', p: '#7c3aed', s: '#a78bfa' },
-    { name: 'Playful', p: '#db2777', s: '#f472b6' },
-    { name: 'Minimal', p: '#111827', s: '#6b7280' },
+    { name: 'تقنية عصرية', p: '#4f46e5', s: '#06b6d4' },
+    { name: 'طبيعة', p: '#059669', s: '#10b981' },
+    { name: 'حيوية', p: '#dc2626', s: '#f87171' },
+    { name: 'دفء', p: '#d97706', s: '#fbbf24' },
+    { name: 'ثقة', p: '#2563eb', s: '#60a5fa' },
+    { name: 'ملكية', p: '#7c3aed', s: '#a78bfa' },
+    { name: 'مرحة', p: '#db2777', s: '#f472b6' },
+    { name: 'بسيطة', p: '#111827', s: '#6b7280' },
   ]
 
   function applyStylePreset(presetId: StylePresetId) {
@@ -139,7 +139,7 @@ function CreateWizardContent() {
     try {
       const r = await fetch('/api/scrape', { method: 'POST', body: JSON.stringify({ url }), headers: { 'Content-Type': 'application/json' } })
       const j = await safeReadJson(r)
-      if (!r.ok || j.error) throw new Error(j.message || j.error || 'Failed to scrape')
+      if (!r.ok || j.error) throw new Error(j.message || j.error || 'فشل الاستخلاص')
       setName(j.name)
       setScrapedDescription(j.description || '')
       setProductFacts(j.productFacts || null)
@@ -149,7 +149,7 @@ function CreateWizardContent() {
       if (j.originalPrice) setOriginalPrice(String(j.originalPrice))
       setStep(2)
     } catch (e: any) {
-      alert(e?.message || 'Failed to scrape. Try another URL.')
+      alert(e?.message || 'فشل الاستخلاص. جرّب رابطًا آخر.')
     } finally {
       setLoading(false)
     }
@@ -173,7 +173,7 @@ function CreateWizardContent() {
         headers: { 'Content-Type': 'application/json' },
       })
       const generated = await safeReadJson(r)
-      if (!r.ok || generated.error) throw new Error(generated.message || generated.error || 'Failed to generate content')
+      if (!r.ok || generated.error) throw new Error(generated.message || generated.error || 'فشل توليد المحتوى')
       if (typeof generated?._meta?.source === 'string' && generated._meta.source.startsWith('fallback')) {
         console.warn('AI generation returned fallback content', generated?._meta)
       }
@@ -195,7 +195,7 @@ function CreateWizardContent() {
       saveAs(blob, fileName)
       setDownloadedFileName(fileName)
     } catch (e: any) {
-      alert(e?.message || 'Error generating and downloading theme.')
+      alert(e?.message || 'حدث خطأ أثناء توليد القالب وتنزيله.')
     } finally {
       setLoading(false)
     }
@@ -219,7 +219,7 @@ function CreateWizardContent() {
         headers: { 'Content-Type': 'application/json' },
       })
       const generated = await safeReadJson(r)
-      if (!r.ok || generated.error) throw new Error(generated.message || generated.error || 'Failed to generate product preview')
+      if (!r.ok || generated.error) throw new Error(generated.message || generated.error || 'فشل توليد معاينة المنتج')
       if (typeof generated?._meta?.source === 'string' && generated._meta.source.startsWith('fallback')) {
         console.warn('AI generation returned fallback content', generated?._meta)
       }
@@ -231,7 +231,7 @@ function CreateWizardContent() {
       })
       setStep(3)
     } catch (e: any) {
-      alert(e?.message || 'Failed to generate product preview.')
+      alert(e?.message || 'فشل توليد معاينة المنتج.')
     } finally {
       setLoading(false)
     }
@@ -241,8 +241,8 @@ function CreateWizardContent() {
     <main className="mx-auto max-w-5xl px-6 py-12">
       <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Create New Theme</h1>
-          <p className="mt-2 text-muted">Go from product link to a downloadable theme zip in minutes.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">إنشاء قالب جديد</h1>
+          <p className="mt-2 text-muted">انتقل من رابط منتج إلى ملف قالب جاهز للتنزيل في دقائق.</p>
         </div>
         <StepProgress step={step} total={3} />
       </div>
@@ -252,15 +252,16 @@ function CreateWizardContent() {
           <div className="mx-auto max-w-lg space-y-6 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">🔗</div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Start with your product</h2>
-              <p className="mt-2 text-muted">Paste the URL of your product (AliExpress, Amazon, Shopify, etc).</p>
+              <h2 className="text-xl font-bold text-foreground">ابدأ بمنتجك</h2>
+              <p className="mt-2 text-muted">الصق رابط منتجك (AliExpress، Amazon، Shopify، إلخ).</p>
             </div>
             <div className="relative">
               <input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://..."
-                className="w-full rounded-xl border border-token bg-surface px-5 py-4 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                dir="ltr"
+                className="w-full rounded-xl border border-token bg-surface px-5 py-4 text-start text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
@@ -268,7 +269,7 @@ function CreateWizardContent() {
               onClick={scrape}
               className="w-full rounded-full bg-primary py-4 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02] disabled:opacity-70"
             >
-              {loading ? 'Analyzing Product...' : 'Start Building'}
+              {loading ? 'جارٍ تحليل المنتج…' : 'ابدأ البناء'}
             </button>
           </div>
         )}
@@ -277,22 +278,22 @@ function CreateWizardContent() {
           <div className="space-y-6">
             <div className="rounded-xl bg-green-500/10 p-4 flex items-center gap-3 text-green-600 dark:text-green-400 border border-green-500/20">
               <span className="text-xl">✅</span>
-              <span className="font-medium">Success! We found your product details.</span>
+              <span className="font-medium">تم! وجدنا تفاصيل منتجك.</span>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-foreground">Product Name</label>
+              <label className="text-sm font-bold text-foreground">اسم المنتج</label>
               <div className="flex gap-3">
-                <input 
+                <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Enter product name..."
+                  placeholder="أدخل اسم المنتج…"
                 />
                 <button
                   onClick={async () => {
-                    const baseContext = scrapedDescription || name || "an ecommerce product";
-                    setName("Generating...");
+                    const baseContext = scrapedDescription || name || "منتج تجارة إلكترونية";
+                    setName("جارٍ التوليد…");
                     try {
                       const res = await fetch('/api/generate-name', {
                         method: 'POST',
@@ -300,7 +301,7 @@ function CreateWizardContent() {
                         body: JSON.stringify({ context: baseContext.substring(0, 500) })
                       });
                       const data = await res.json();
-                      setName(data.name || "Premium Product");
+                      setName(data.name || "منتج مميّز");
                     } catch (e) {
                       setName("");
                     }
@@ -308,40 +309,42 @@ function CreateWizardContent() {
                   disabled={loading}
                   className="flex shrink-0 items-center gap-2 rounded-xl bg-gradient-primary px-5 py-3 font-bold text-white shadow-sm transition hover:scale-[1.02] active:scale-95 disabled:opacity-70"
                 >
-                  <span>✨</span> Auto-Name
+                  <span>✨</span> اسم تلقائي
                 </button>
               </div>
-              <p className="text-xs text-muted">Edit the name to make it look professional (e.g., remove &quot;2024 New&quot; or brand tags).</p>
+              <p className="text-xs text-muted">عدّل الاسم ليبدو احترافيًا (مثل إزالة «2024 New» أو وسوم العلامة التجارية).</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Original Price ($)</label>
+                <label className="text-sm font-bold text-foreground">السعر الأصلي ($)</label>
                 <input
                   type="number"
                   value={originalPrice}
                   onChange={(e) => setOriginalPrice(e.target.value)}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  dir="ltr"
+                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-start text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="99.99"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Sale Price ($)</label>
+                <label className="text-sm font-bold text-foreground">سعر البيع ($)</label>
                 <input
                   type="number"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  dir="ltr"
+                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-start text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="49.99"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-foreground">Store Name</label>
+                <label className="text-sm font-bold text-foreground">اسم المتجر</label>
                 <input
                   value={shopName}
                   onChange={(e) => setShopName(e.target.value)}
                   className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="e.g. Zenya Store"
+                  placeholder="مثال: متجر زينيا"
                 />
               </div>
             </div>
@@ -349,29 +352,29 @@ function CreateWizardContent() {
             <div className="pt-4">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold text-foreground">Select Images</h2>
-                  <p className="text-sm text-muted">Choose the best photos for your store.</p>
+                  <h2 className="text-xl font-bold text-foreground">اختر الصور</h2>
+                  <p className="text-sm text-muted">اختر أفضل الصور لمتجرك.</p>
                 </div>
-                <span className="text-sm font-medium bg-surface px-3 py-1 rounded-full border border-token">{selectedImages.length} selected</span>
+                <span className="text-sm font-medium bg-surface px-3 py-1 rounded-full border border-token">{selectedImages.length} محدّدة</span>
               </div>
               <ImageSelector images={images} selected={selectedImages} onChange={setSelectedImages} />
             </div>
 
             <div className="flex justify-between pt-6">
-              <button onClick={() => setStep(1)} className="rounded-full border border-token px-6 py-2.5 font-medium text-muted transition hover:bg-surface hover:text-foreground">Back</button>
+              <button onClick={() => setStep(1)} className="rounded-full border border-token px-6 py-2.5 font-medium text-muted transition hover:bg-surface hover:text-foreground">رجوع</button>
               <div className="flex flex-col items-end gap-2">
                 <button
                   disabled={selectedImages.length < 5 || !name.trim() || loading}
                   onClick={generateProductPreview}
                   className="rounded-full bg-primary px-8 py-2.5 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 disabled:opacity-70 disabled:hover:scale-100"
                 >
-                  {loading ? 'Generating Product Preview...' : 'Generate Product Preview'}
+                  {loading ? 'جارٍ توليد معاينة المنتج…' : 'توليد معاينة المنتج'}
                 </button>
                 {selectedImages.length < 5 && (
-                  <span className="text-xs font-medium text-red-500">Please select at least 5 images to proceed. ({selectedImages.length}/5)</span>
+                  <span className="text-xs font-medium text-red-500">يُرجى اختيار 5 صور على الأقل للمتابعة. ({selectedImages.length}/5)</span>
                 )}
                 {!name.trim() && selectedImages.length >= 5 && (
-                  <span className="text-xs font-medium text-red-500">Please provide a product name to proceed.</span>
+                  <span className="text-xs font-medium text-red-500">يُرجى إدخال اسم المنتج للمتابعة.</span>
                 )}
               </div>
             </div>
@@ -381,15 +384,15 @@ function CreateWizardContent() {
         {step === 3 && (
           <div className="mx-auto max-w-4xl space-y-10">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-foreground">Design Your Store</h2>
-              <p className="mt-2 text-lg text-muted">Choose a starting palette and fine-tune your colors.</p>
+              <h2 className="text-3xl font-bold text-foreground">صمّم متجرك</h2>
+              <p className="mt-2 text-lg text-muted">اختر لوحة ألوان للبداية واضبط ألوانك بدقّة.</p>
             </div>
 
             {downloadedFileName && (
               <div className="rounded-xl bg-green-500/10 p-4 flex items-center justify-between gap-3 text-green-600 dark:text-green-400 border border-green-500/20">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">✅</span>
-                  <span className="font-medium">Downloaded: {downloadedFileName}</span>
+                  <span className="font-medium">تم التنزيل: {downloadedFileName}</span>
                 </div>
               </div>
             )}
@@ -398,8 +401,8 @@ function CreateWizardContent() {
               <div className="space-y-8 lg:col-span-7">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-foreground">Theme Style Presets</h3>
-                    <span className="text-xs text-muted">One click full style</span>
+                    <h3 className="text-sm font-bold text-foreground">أنماط جاهزة للقالب</h3>
+                    <span className="text-xs text-muted">نمط كامل بنقرة واحدة</span>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-3">
                     {STYLE_PRESETS.map((preset) => {
@@ -459,7 +462,7 @@ function CreateWizardContent() {
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex h-6 w-6 items-center justify-center rounded-md bg-token text-xs">🎨</div>
-                      <h3 className="font-bold text-foreground">Custom Colors</h3>
+                      <h3 className="font-bold text-foreground">ألوان مخصّصة</h3>
                     </div>
                     <button
                       disabled={isExtracting}
@@ -499,18 +502,18 @@ function CreateWizardContent() {
                     >
                       {isExtracting ? (
                         <>
-                          <span className="animate-spin">⏳</span> Analyzing...
+                          <span className="animate-spin">⏳</span> جارٍ التحليل…
                         </>
                       ) : (
                         <>
-                          Magic Match ✨
+                          مطابقة سحرية ✨
                         </>
                       )}
                     </button>
                   </div>
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">Primary Color</label>
+                      <label className="block text-sm font-bold text-foreground mb-2">اللون الأساسي</label>
                       <div className="flex items-center gap-3">
                         <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
                           <input
@@ -531,11 +534,11 @@ function CreateWizardContent() {
                           />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-muted">Used for buttons, links, and highlights.</p>
+                      <p className="mt-2 text-xs text-muted">يُستخدم للأزرار والروابط والعناصر المميّزة.</p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-bold text-foreground mb-2">Accent Color</label>
+                      <label className="block text-sm font-bold text-foreground mb-2">اللون الثانوي</label>
                       <div className="flex items-center gap-3">
                         <div className="relative h-12 w-16 overflow-hidden rounded-lg shadow-sm ring-1 ring-black/10">
                           <input
@@ -556,7 +559,7 @@ function CreateWizardContent() {
                           />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-muted">Used for sales tags, alerts, and secondary actions.</p>
+                      <p className="mt-2 text-xs text-muted">يُستخدم لوسوم الخصم والتنبيهات والإجراءات الثانوية.</p>
                     </div>
                   </div>
                 </div>
@@ -581,7 +584,7 @@ function CreateWizardContent() {
 
             <div className="flex justify-between pt-8 border-t border-token">
               <button onClick={() => setStep(2)} className="flex items-center gap-2 rounded-full border border-token px-8 py-3 font-bold text-muted transition hover:bg-surface hover:text-foreground">
-                <span>←</span> Back
+                <span className="rtl-flip">←</span> رجوع
               </button>
               <button
                 onClick={generateAndDownload}
@@ -590,11 +593,11 @@ function CreateWizardContent() {
               >
                 {loading ? (
                   <>
-                    <span className="animate-spin">⏳</span> Generating Theme...
+                    <span className="animate-spin">⏳</span> جارٍ توليد القالب…
                   </>
                 ) : (
                   <>
-                    Download Theme Zip <span>→</span>
+                    تنزيل ملف القالب <span className="rtl-flip">→</span>
                   </>
                 )}
               </button>
@@ -608,7 +611,7 @@ function CreateWizardContent() {
 
 export default function CreateThemeWizard() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">جارٍ التحميل…</div>}>
       <CreateWizardContent />
     </Suspense>
   )

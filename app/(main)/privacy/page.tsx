@@ -2,254 +2,252 @@ import type { Metadata } from 'next'
 import { COMPANY, formatAddress } from '@/lib/company'
 
 export const metadata: Metadata = {
-  title: `Privacy Policy — ${COMPANY.BRAND_NAME}`,
-  description: `How ${COMPANY.PRODUCT_NAME} collects, uses, and protects your personal data. GDPR-compliant.`,
+  title: `سياسة الخصوصية — ${COMPANY.BRAND_NAME}`,
+  description: `كيف يجمع ${COMPANY.PRODUCT_NAME} بياناتك الشخصية ويستخدمها ويحميها. متوافق مع اللائحة العامة لحماية البيانات (GDPR).`,
   alternates: { canonical: '/privacy' },
 }
 
 export default function PrivacyPolicy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 prose prose-neutral">
-      <h1>Privacy Policy</h1>
+      <h1>سياسة الخصوصية</h1>
       <p className="text-sm text-muted">
-        Last updated: <strong>{COMPANY.LAST_UPDATED}</strong>
+        آخر تحديث: <strong>{COMPANY.LAST_UPDATED}</strong>
       </p>
 
       <p>
-        This Privacy Policy explains how <strong>{COMPANY.LEGAL_NAME}</strong>,
-        operating as <strong>{COMPANY.PRODUCT_NAME}</strong> (&ldquo;we&rdquo;,
-        &ldquo;us&rdquo;, &ldquo;our&rdquo;) collects, uses, stores, and
-        protects your personal data when you use{' '}
-        <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a> and the
-        {' '}{COMPANY.PRODUCT_NAME} service (the &ldquo;Service&rdquo;).
+        توضّح سياسة الخصوصية هذه كيف تقوم <strong>{COMPANY.LEGAL_NAME}</strong>،
+        التي تعمل باسم <strong>{COMPANY.PRODUCT_NAME}</strong> («نحن»، «لنا»،
+        «خاصتنا») بجمع بياناتك الشخصية واستخدامها وتخزينها وحمايتها عند استخدامك{' '}
+        <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a> وخدمة
+        {' '}{COMPANY.PRODUCT_NAME} («الخدمة»).
       </p>
 
       <p>
-        We act as the <strong>data controller</strong> for personal data of
-        people who sign up for the Service, and as a{' '}
-        <strong>data processor</strong> for data that Shopify merchants give us
-        about their customers (rare; see §4).
+        نتصرّف بصفتنا <strong>المتحكّم في البيانات</strong> فيما يخص البيانات
+        الشخصية للأشخاص الذين يسجّلون في الخدمة، وبصفتنا{' '}
+        <strong>معالجًا للبيانات</strong> فيما يخص البيانات التي يزوّدنا بها
+        تجّار Shopify عن عملائهم (نادرًا؛ راجع البند ٤).
       </p>
 
-      <h2>1. Who we are</h2>
+      <h2>١. من نحن</h2>
       <ul>
         <li>
-          <strong>Controller:</strong> {COMPANY.LEGAL_NAME}
+          <strong>المتحكّم في البيانات:</strong> {COMPANY.LEGAL_NAME}
           {' '}({COMPANY.ENTITY_TYPE})
         </li>
         <li>
-          <strong>Registered:</strong> Dutch Chamber of Commerce (KvK), number{' '}
-          <strong>{COMPANY.KVK_NUMBER}</strong>. The natural person operating
-          Musannef and acting as data controller is publicly identifiable via
-          the KvK register using this number, or on request via the privacy
-          contact below.
+          <strong>التسجيل:</strong> الغرفة التجارية الهولندية (KvK)، رقم{' '}
+          <strong>{COMPANY.KVK_NUMBER}</strong>. يمكن التعرّف علنًا على الشخص
+          الطبيعي الذي يدير Musannef ويتصرّف بصفته المتحكّم في البيانات عبر سجل
+          KvK باستخدام هذا الرقم، أو عند الطلب عبر جهة اتصال الخصوصية أدناه.
         </li>
         <li>
-          <strong>VAT:</strong> {COMPANY.VAT_NUMBER}
+          <strong>ضريبة القيمة المضافة:</strong> {COMPANY.VAT_NUMBER}
         </li>
         <li>
-          <strong>Address:</strong> {formatAddress()}
+          <strong>العنوان:</strong> {formatAddress()}
         </li>
         <li>
-          <strong>Contact for privacy questions:</strong>{' '}
+          <strong>جهة الاتصال لأسئلة الخصوصية:</strong>{' '}
           <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a>
         </li>
       </ul>
 
-      <h2>2. What data we collect</h2>
+      <h2>٢. البيانات التي نجمعها</h2>
 
-      <h3>2.1 Data you give us directly</h3>
+      <h3>٢.١ بيانات تقدّمها لنا مباشرة</h3>
       <ul>
         <li>
-          <strong>Account data:</strong> email address, password (stored hashed
-          by Supabase), full name (optional).
+          <strong>بيانات الحساب:</strong> عنوان البريد الإلكتروني، وكلمة المرور
+          (مخزّنة مُجزّأة عبر Supabase)، والاسم الكامل (اختياري).
         </li>
         <li>
-          <strong>Payment data:</strong> handled by Stripe. We never see or
-          store your card number, CVC, or bank details. We receive a
-          customer ID, last 4 digits of the card, country, and subscription
-          status.
+          <strong>بيانات الدفع:</strong> تتولّاها Stripe. لا نرى ولا نخزّن رقم
+          بطاقتك أو رمز التحقق (CVC) أو تفاصيلك المصرفية أبدًا. نستلم معرّف
+          العميل، وآخر ٤ أرقام من البطاقة، والدولة، وحالة الاشتراك.
         </li>
         <li>
-          <strong>Content you create:</strong> business briefs, product URLs
-          you submit for scraping, theme designs you generate.
+          <strong>المحتوى الذي تنشئه:</strong> أوصاف نشاطك التجاري، وروابط
+          المنتجات التي تُرسلها للاستخلاص، وتصاميم القوالب التي تولّدها.
         </li>
         <li>
-          <strong>Support correspondence:</strong> emails you send us.
+          <strong>مراسلات الدعم:</strong> الرسائل التي تُرسلها إلينا.
         </li>
       </ul>
 
-      <h3>2.2 Data collected automatically</h3>
+      <h3>٢.٢ بيانات تُجمع تلقائيًا</h3>
       <ul>
         <li>
-          <strong>Technical data:</strong> IP address, browser type, device
-          type, OS, referring URL, timestamps. Used for security and abuse
-          prevention.
+          <strong>البيانات التقنية:</strong> عنوان IP، ونوع المتصفّح، ونوع
+          الجهاز، ونظام التشغيل، والرابط المُحيل، والطوابع الزمنية. تُستخدم للأمان
+          ومنع إساءة الاستخدام.
         </li>
         <li>
-          <strong>Usage data:</strong> features used, themes generated,
-          generation count (for free-tier quota enforcement).
+          <strong>بيانات الاستخدام:</strong> الميزات المُستخدمة، والقوالب
+          المُولّدة، وعدد مرات التوليد (لتطبيق حصة الباقة المجانية).
         </li>
         <li>
-          <strong>Cookies and similar:</strong> see our{' '}
-          <a href="/cookies">Cookie Policy</a>.
+          <strong>ملفات تعريف الارتباط وما شابهها:</strong> راجع{' '}
+          <a href="/cookies">سياسة ملفات تعريف الارتباط</a>.
         </li>
       </ul>
 
-      <h3>2.3 Data we get from Shopify (only if you connect a store)</h3>
+      <h3>٢.٣ بيانات نحصل عليها من Shopify (فقط إن ربطت متجرًا)</h3>
       <ul>
-        <li>Shop domain, shop owner email, shop owner name.</li>
-        <li>Product data (title, description, images, price) — read to
-          generate themes that match your catalog.</li>
-        <li>Theme data — read/write to install generated themes.</li>
+        <li>نطاق المتجر، والبريد الإلكتروني لمالك المتجر، واسم مالك المتجر.</li>
+        <li>بيانات المنتجات (العنوان، الوصف، الصور، السعر) — تُقرأ لتوليد قوالب
+          تتطابق مع كتالوجك.</li>
+        <li>بيانات القالب — تُقرأ/تُكتب لتثبيت القوالب المُولّدة.</li>
       </ul>
       <p>
-        We do <strong>not</strong> read or store Shopify customer data
-        (orders, customer profiles, addresses). Our scopes are
+        نحن <strong>لا</strong> نقرأ أو نخزّن بيانات عملاء Shopify (الطلبات،
+        ملفات العملاء، العناوين). نطاقات صلاحياتنا هي{' '}
         <code>read_products, read_themes, write_products, write_themes</code>.
       </p>
 
-      <h2>3. Why we use your data (legal bases under GDPR Article 6)</h2>
+      <h2>٣. لماذا نستخدم بياناتك (الأسس القانونية بموجب المادة ٦ من GDPR)</h2>
       <table>
         <thead>
           <tr>
-            <th>Purpose</th>
-            <th>Legal basis</th>
+            <th>الغرض</th>
+            <th>الأساس القانوني</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Provide the Service (account, theme generation, hosting)</td>
-            <td>Contract (Art. 6(1)(b))</td>
+            <td>تقديم الخدمة (الحساب، توليد القوالب، الاستضافة)</td>
+            <td>تنفيذ العقد (المادة ٦(١)(ب))</td>
           </tr>
           <tr>
-            <td>Process payments and billing</td>
-            <td>Contract + legal obligation (tax law)</td>
+            <td>معالجة المدفوعات والفوترة</td>
+            <td>العقد + التزام قانوني (قانون الضرائب)</td>
           </tr>
           <tr>
-            <td>Security, abuse prevention, fraud detection</td>
-            <td>Legitimate interest (Art. 6(1)(f))</td>
+            <td>الأمان ومنع إساءة الاستخدام وكشف الاحتيال</td>
+            <td>المصلحة المشروعة (المادة ٦(١)(و))</td>
           </tr>
           <tr>
-            <td>Service emails (e.g. password reset, receipts)</td>
-            <td>Contract</td>
+            <td>رسائل الخدمة (مثل إعادة تعيين كلمة المرور، الإيصالات)</td>
+            <td>العقد</td>
           </tr>
           <tr>
-            <td>Marketing emails (only if you opt in)</td>
-            <td>Consent (Art. 6(1)(a))</td>
+            <td>الرسائل التسويقية (فقط إن وافقت صراحةً)</td>
+            <td>الموافقة (المادة ٦(١)(أ))</td>
           </tr>
           <tr>
-            <td>Analytics / improving the product</td>
-            <td>Consent (cookie banner)</td>
+            <td>التحليلات / تحسين المنتج</td>
+            <td>الموافقة (شريط ملفات تعريف الارتباط)</td>
           </tr>
           <tr>
-            <td>Comply with legal obligations (e.g. tax retention)</td>
-            <td>Legal obligation (Art. 6(1)(c))</td>
+            <td>الامتثال للالتزامات القانونية (مثل الاحتفاظ الضريبي)</td>
+            <td>التزام قانوني (المادة ٦(١)(ج))</td>
           </tr>
         </tbody>
       </table>
 
-      <h2>4. Who we share data with (subprocessors)</h2>
+      <h2>٤. مع من نشارك البيانات (المعالجون الفرعيون)</h2>
       <p>
-        We share only what&rsquo;s necessary, only with vetted providers. Full
-        list with versions and locations: <a href="/subprocessors">Subprocessors</a>.
-        Summary:
+        نشارك فقط ما هو ضروري، ومع مزوّدين موثوقين فقط. القائمة الكاملة مع
+        الإصدارات والمواقع: <a href="/subprocessors">المعالجون الفرعيون</a>.
+        ملخّص:
       </p>
       <ul>
-        <li><strong>Supabase</strong> (Ireland, EU) — database, authentication, file storage.</li>
-        <li><strong>Vercel</strong> (USA, with EU edge) — hosting, CDN.</li>
-        <li><strong>Stripe</strong> (USA, EU subsidiary) — payment processing.</li>
-        <li><strong>OpenAI</strong> (USA) — AI generation of theme content (sends your business brief; does <em>not</em> use your data for model training per their API terms).</li>
-        <li><strong>ScraperAPI</strong> (USA) — product-page scraping (sends the URL you submitted).</li>
-        <li><strong>Shopify</strong> (Canada) — only if you connect a store.</li>
+        <li><strong>Supabase</strong> (أيرلندا، الاتحاد الأوروبي) — قاعدة البيانات والمصادقة وتخزين الملفات.</li>
+        <li><strong>Vercel</strong> (الولايات المتحدة، مع حافة في الاتحاد الأوروبي) — الاستضافة وشبكة توصيل المحتوى.</li>
+        <li><strong>Stripe</strong> (الولايات المتحدة، بشركة تابعة في الاتحاد الأوروبي) — معالجة المدفوعات.</li>
+        <li><strong>OpenAI</strong> (الولايات المتحدة) — توليد محتوى القوالب بالذكاء الاصطناعي (يُرسل وصف نشاطك التجاري؛ <em>ولا</em> يستخدم بياناتك لتدريب النماذج وفق شروط واجهة برمجة التطبيقات الخاصة بهم).</li>
+        <li><strong>ScraperAPI</strong> (الولايات المتحدة) — استخلاص صفحات المنتجات (يُرسل الرابط الذي أرسلته).</li>
+        <li><strong>Shopify</strong> (كندا) — فقط إن ربطت متجرًا.</li>
       </ul>
       <p>
-        For transfers outside the EU/EEA we rely on the EU Commission&rsquo;s{' '}
-        <strong>Standard Contractual Clauses</strong> and (for US providers) the{' '}
-        <strong>EU–U.S. Data Privacy Framework</strong>.
+        بالنسبة للنقل خارج الاتحاد الأوروبي/المنطقة الاقتصادية الأوروبية نعتمد
+        على <strong>البنود التعاقدية القياسية</strong> الصادرة عن المفوّضية
+        الأوروبية و(بالنسبة لمزوّدي الولايات المتحدة) على{' '}
+        <strong>إطار خصوصية البيانات بين الاتحاد الأوروبي والولايات المتحدة</strong>.
       </p>
       <p>
-        We <strong>never sell</strong> your personal data. We do not share it
-        for advertising.
+        نحن <strong>لا نبيع</strong> بياناتك الشخصية أبدًا. ولا نشاركها لأغراض
+        الإعلانات.
       </p>
 
-      <h2>5. How long we keep your data</h2>
+      <h2>٥. مدة احتفاظنا ببياناتك</h2>
       <ul>
-        <li><strong>Account data:</strong> while your account is active, then deleted within 30 days of account deletion.</li>
-        <li><strong>Generated themes &amp; designs:</strong> deleted with your account; you can delete individual themes at any time.</li>
-        <li><strong>Payment records / invoices:</strong> retained for 7 years to comply with Dutch tax law (Algemene wet inzake rijksbelastingen art. 52).</li>
-        <li><strong>Backups:</strong> rolling 30-day backup window, after which deletions propagate.</li>
-        <li><strong>Logs (security, error):</strong> 90 days.</li>
+        <li><strong>بيانات الحساب:</strong> طوال فترة نشاط حسابك، ثم تُحذف خلال ٣٠ يومًا من حذف الحساب.</li>
+        <li><strong>القوالب والتصاميم المُولّدة:</strong> تُحذف مع حسابك؛ ويمكنك حذف القوالب الفردية في أي وقت.</li>
+        <li><strong>سجلّات الدفع / الفواتير:</strong> يُحتفظ بها لمدة ٧ سنوات امتثالًا لقانون الضرائب الهولندي (المادة ٥٢ من القانون العام للضرائب الحكومية).</li>
+        <li><strong>النسخ الاحتياطية:</strong> نافذة نسخ احتياطي متجدّدة مدتها ٣٠ يومًا، تنتشر بعدها عمليات الحذف.</li>
+        <li><strong>السجلّات (الأمان، الأخطاء):</strong> ٩٠ يومًا.</li>
       </ul>
 
-      <h2>6. Your rights under GDPR</h2>
-      <p>You have the right to:</p>
+      <h2>٦. حقوقك بموجب اللائحة العامة لحماية البيانات (GDPR)</h2>
+      <p>يحق لك:</p>
       <ul>
-        <li><strong>Access</strong> your personal data and get a copy (Art. 15).</li>
-        <li><strong>Rectify</strong> incorrect data (Art. 16).</li>
-        <li><strong>Erase</strong> your account and data (Art. 17) — self-service in <a href="/settings">Settings → Delete Account</a>.</li>
-        <li><strong>Restrict</strong> processing (Art. 18).</li>
-        <li><strong>Portability</strong> — export your themes as JSON (Art. 20).</li>
-        <li><strong>Object</strong> to processing based on legitimate interest (Art. 21).</li>
-        <li><strong>Withdraw consent</strong> at any time (e.g. unsubscribe, revoke cookie consent).</li>
-        <li><strong>Lodge a complaint</strong> with your local data protection authority. For the Netherlands: <a href="https://autoriteitpersoonsgegevens.nl" target="_blank" rel="noopener">Autoriteit Persoonsgegevens</a>.</li>
+        <li><strong>الوصول</strong> إلى بياناتك الشخصية والحصول على نسخة منها (المادة ١٥).</li>
+        <li><strong>تصحيح</strong> البيانات غير الصحيحة (المادة ١٦).</li>
+        <li><strong>محو</strong> حسابك وبياناتك (المادة ١٧) — خدمة ذاتية في <a href="/settings">الإعدادات ← حذف الحساب</a>.</li>
+        <li><strong>تقييد</strong> المعالجة (المادة ١٨).</li>
+        <li><strong>نقل البيانات</strong> — تصدير قوالبك بصيغة JSON (المادة ٢٠).</li>
+        <li><strong>الاعتراض</strong> على المعالجة المبنيّة على المصلحة المشروعة (المادة ٢١).</li>
+        <li><strong>سحب الموافقة</strong> في أي وقت (مثل إلغاء الاشتراك، أو إلغاء موافقة ملفات تعريف الارتباط).</li>
+        <li><strong>تقديم شكوى</strong> إلى هيئة حماية البيانات المحلية لديك. بالنسبة لهولندا: <a href="https://autoriteitpersoonsgegevens.nl" target="_blank" rel="noopener">Autoriteit Persoonsgegevens</a>.</li>
       </ul>
       <p>
-        To exercise any right, email{' '}
+        لممارسة أيٍّ من هذه الحقوق، راسلنا على{' '}
         <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a>.
-        We respond within 30 days.
+        نردّ خلال ٣٠ يومًا.
       </p>
 
-      <h2>7. Security</h2>
+      <h2>٧. الأمان</h2>
       <ul>
-        <li>All traffic is TLS-encrypted (HTTPS).</li>
-        <li>Passwords are hashed with bcrypt (handled by Supabase Auth).</li>
-        <li>Database access uses Postgres Row-Level Security; users can only see their own rows.</li>
-        <li>Secrets stored encrypted at rest in Vercel.</li>
-        <li>We follow the principle of least privilege for staff access.</li>
+        <li>جميع البيانات المنقولة مشفّرة عبر TLS (HTTPS).</li>
+        <li>كلمات المرور مُجزّأة باستخدام bcrypt (تتولّاها Supabase Auth).</li>
+        <li>يستخدم الوصول إلى قاعدة البيانات أمان مستوى الصف في Postgres؛ ولا يرى المستخدمون إلا صفوفهم الخاصة.</li>
+        <li>الأسرار مخزّنة مشفّرة في حالة السكون داخل Vercel.</li>
+        <li>نتّبع مبدأ الحدّ الأدنى من الصلاحيات لوصول الموظفين.</li>
       </ul>
       <p>
-        If you discover a security vulnerability, please email{' '}
+        إذا اكتشفت ثغرة أمنية، يُرجى مراسلتنا على{' '}
         <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a>{' '}
-        with subject &ldquo;Security&rdquo;. We do not currently run a bug bounty
-        but we&rsquo;ll acknowledge responsible disclosure.
+        بعنوان «Security». لا نُشغّل حاليًا برنامج مكافآت اكتشاف الثغرات لكننا
+        سنُقرّ بالإفصاح المسؤول.
       </p>
 
-      <h2>8. Data breaches</h2>
+      <h2>٨. خروقات البيانات</h2>
       <p>
-        In the event of a personal data breach, we will notify the Dutch{' '}
-        Autoriteit Persoonsgegevens within 72 hours where required, and
-        affected users without undue delay if there is a high risk to your
-        rights.
+        في حال وقوع خرق للبيانات الشخصية، سنُبلّغ هيئة حماية البيانات الهولندية
+        (Autoriteit Persoonsgegevens) خلال ٧٢ ساعة حيثما يلزم، وسنُبلّغ
+        المستخدمين المتأثرين دون تأخير لا مبرّر له إذا كان هناك خطر مرتفع على
+        حقوقك.
       </p>
 
-      <h2>9. Children</h2>
+      <h2>٩. الأطفال</h2>
       <p>
-        The Service is not intended for users under 16. If you believe a child
-        has provided us personal data, contact us and we will delete it.
+        الخدمة ليست موجّهة للمستخدمين دون سن ١٦ عامًا. إذا كنت تعتقد أن طفلًا قد
+        زوّدنا ببيانات شخصية، تواصل معنا وسنحذفها.
       </p>
 
-      <h2>10. AI processing</h2>
+      <h2>١٠. المعالجة بالذكاء الاصطناعي</h2>
       <p>
-        When you request a generated theme, we send your business brief and
-        any related text to OpenAI&rsquo;s API. Per OpenAI&rsquo;s API data
-        usage policy, this data is <strong>not used to train models</strong>{' '}
-        and is retained for up to 30 days for abuse-prevention only. We do
-        not send your name, email, or any account identifiers to OpenAI.
+        عند طلبك قالبًا مُولّدًا، نُرسل وصف نشاطك التجاري وأي نص متعلّق به إلى
+        واجهة برمجة التطبيقات الخاصة بـ OpenAI. ووفقًا لسياسة استخدام بيانات
+        واجهة OpenAI، فإن هذه البيانات <strong>لا تُستخدم لتدريب النماذج</strong>{' '}
+        ويُحتفظ بها لمدة تصل إلى ٣٠ يومًا لمنع إساءة الاستخدام فقط. ولا نُرسل
+        اسمك أو بريدك الإلكتروني أو أي معرّفات حساب إلى OpenAI.
       </p>
 
-      <h2>11. Changes to this policy</h2>
+      <h2>١١. التغييرات على هذه السياسة</h2>
       <p>
-        If we make material changes, we will email registered users and update
-        the &ldquo;Last updated&rdquo; date above. Continued use after changes
-        means you accept the updated policy.
+        إذا أجرينا تغييرات جوهرية، سنُراسل المستخدمين المسجّلين عبر البريد
+        الإلكتروني ونُحدّث تاريخ «آخر تحديث» أعلاه. ويعني استمرارك في الاستخدام
+        بعد التغييرات قبولك للسياسة المُحدّثة.
       </p>
 
-      <h2>12. Contact</h2>
+      <h2>١٢. التواصل</h2>
       <ul>
-        <li>Privacy questions: <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a></li>
-        <li>General support: <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a></li>
-        <li>Postal: {formatAddress()}</li>
+        <li>أسئلة الخصوصية: <a href={`mailto:${COMPANY.PRIVACY_EMAIL}`}>{COMPANY.PRIVACY_EMAIL}</a></li>
+        <li>الدعم العام: <a href={`mailto:${COMPANY.SUPPORT_EMAIL}`}>{COMPANY.SUPPORT_EMAIL}</a></li>
+        <li>البريد: {formatAddress()}</li>
       </ul>
     </main>
   )

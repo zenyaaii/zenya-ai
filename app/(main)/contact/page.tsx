@@ -32,27 +32,27 @@ type Topic = 'support' | 'request' | 'sales' | 'other'
 type TopicMeta = { id: Topic; label: string; icon: LucideIcon }
 
 const TOPICS: TopicMeta[] = [
-  { id: 'support', label: 'Support',           icon: LifeBuoy      },
-  { id: 'request', label: 'Request a template', icon: Sparkles     },
-  { id: 'sales',   label: 'Sales',             icon: Briefcase     },
-  { id: 'other',   label: 'Something else',    icon: MessageCircle },
+  { id: 'support', label: 'الدعم',             icon: LifeBuoy      },
+  { id: 'request', label: 'طلب قالب',          icon: Sparkles     },
+  { id: 'sales',   label: 'المبيعات',          icon: Briefcase     },
+  { id: 'other',   label: 'شيء آخر',           icon: MessageCircle },
 ]
 
 const TOPIC_SUCCESS: Record<Topic, string> = {
   support:
-    "Thanks — we'll get back within one business day, usually faster. Check the spam folder if you don't see a reply.",
+    'شكرًا لك — سنردّ خلال يوم عمل واحد، وغالبًا أسرع. تحقّق من مجلد البريد العشوائي إن لم تجد ردًّا.',
   request:
-    "Got it. We review template requests every Monday and bump the most-requested categories to the top of the roadmap. We'll email you when yours ships.",
+    'تمّ استلام طلبك. نراجع طلبات القوالب كل يوم اثنين ونرفع الفئات الأكثر طلبًا إلى أعلى خارطة الطريق. سنراسلك عند إطلاق قالبك.',
   sales:
-    "Thanks — a member of the team will reach out within one business day to talk about your needs.",
+    'شكرًا لك — سيتواصل معك أحد أعضاء الفريق خلال يوم عمل واحد لمناقشة احتياجاتك.',
   other:
-    "Thanks — message received. We'll get back to you shortly.",
+    'شكرًا لك — تمّ استلام رسالتك. سنردّ عليك قريبًا.',
 }
 
 const CHANNELS: { label: string; value: string; href: string; icon: LucideIcon }[] = [
-  { label: 'Email',  value: 'support@zenyaai.co', href: 'mailto:support@zenyaai.co', icon: Mail       },
-  { label: 'X',      value: '@zenyaai',         href: '#',                       icon: XIcon      },
-  { label: 'GitHub', value: 'zenyaai',          href: '#',                       icon: GithubIcon },
+  { label: 'البريد الإلكتروني', value: 'support@zenyaai.co', href: 'mailto:support@zenyaai.co', icon: Mail       },
+  { label: 'منصّة X',           value: '@zenyaai',          href: '#',                        icon: XIcon      },
+  { label: 'GitHub',           value: 'zenyaai',           href: '#',                        icon: GithubIcon },
 ]
 
 /**
@@ -97,11 +97,11 @@ function ContactPageInner() {
       // Even if the backend isn't fully wired (e.g. Resend not configured),
       // we treat 200 as success and surface anything else as the topic-specific
       // copy. The route currently logs to console + returns 200.
-      if (!res.ok) throw new Error('Could not deliver — please email us directly.')
+      if (!res.ok) throw new Error('تعذّر الإرسال — يُرجى مراسلتنا مباشرةً.')
       setSent(true)
     } catch (err: any) {
       // Show the error inline instead of the success state.
-      alert(err.message || 'Something went wrong; please email support@zenyaai.co directly.')
+      alert(err.message || 'حدث خطأ ما؛ يُرجى مراسلتنا مباشرةً على support@zenyaai.co.')
     } finally {
       setSubmitting(false)
     }
@@ -125,14 +125,14 @@ function ContactPageInner() {
           className="mb-12 max-w-xl"
         >
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-            Contact
+            تواصل معنا
           </p>
           <h1 className="text-[44px] font-[590] leading-[1.08] tracking-[-1.6px] text-foreground sm:text-[56px] sm:tracking-[-2px]">
-            Tell us what you&rsquo;re building.
+            أخبِرنا بما تبنيه.
           </h1>
           <p className="mt-4 text-[16px] leading-[1.65] text-muted">
-            Support, template requests, sales, or just a hello — pick a topic and we&rsquo;ll
-            get back within one business day.
+            الدعم، أو طلبات القوالب، أو المبيعات، أو حتى مجرّد تحية — اختر موضوعًا وسنردّ
+            خلال يوم عمل واحد.
           </p>
         </motion.div>
 
@@ -158,7 +158,7 @@ function ContactPageInner() {
                   {/* Topic chips */}
                   <div>
                     <label className="mb-2.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                      What&rsquo;s this about?
+                      ما موضوع رسالتك؟
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {TOPICS.map((t) => {
@@ -186,37 +186,38 @@ function ContactPageInner() {
 
                   {/* Name + Email */}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Your name">
+                    <Field label="اسمك">
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Jane Designer"
+                        placeholder="مثال: أحمد المصمّم"
                         className={inputCls}
                       />
                     </Field>
-                    <Field label="Email" required>
+                    <Field label="البريد الإلكتروني" required>
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className={inputCls}
+                        dir="ltr"
+                        className={cn(inputCls, 'text-start')}
                       />
                     </Field>
                   </div>
 
                   {/* Message */}
-                  <Field label="Message" required>
+                  <Field label="الرسالة" required>
                     <textarea
                       required
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={
                         topic === 'request'
-                          ? "What kind of business template would help your work? Be specific — 'a barbershop template' beats 'a service template'."
-                          : 'Tell us a bit about what you need.'
+                          ? 'أي نوع من قوالب الأعمال سيساعد عملك؟ كن محدّدًا — «قالب صالون حلاقة» أفضل من «قالب خدمات».'
+                          : 'أخبرنا قليلًا عمّا تحتاجه.'
                       }
                       className={cn(inputCls, 'min-h-[140px] resize-y')}
                     />
@@ -231,11 +232,11 @@ function ContactPageInner() {
                       'disabled:cursor-not-allowed disabled:opacity-60'
                     )}
                   >
-                    {submitting ? 'Sending…' : 'Send message'}
+                    {submitting ? 'جارٍ الإرسال…' : 'إرسال الرسالة'}
                     <Send
                       className={cn(
-                        'h-3.5 w-3.5 transition-transform duration-150',
-                        !submitting && 'group-hover:translate-x-0.5'
+                        'h-3.5 w-3.5 transition-transform duration-150 rtl-flip',
+                        !submitting && 'group-hover:-translate-x-0.5'
                       )}
                       strokeWidth={2.5}
                     />
@@ -253,7 +254,7 @@ function ContactPageInner() {
                     <CheckCircle2 className="h-6 w-6" strokeWidth={1.75} />
                   </div>
                   <h2 className="text-[22px] font-[590] tracking-[-0.6px] text-foreground">
-                    Message received.
+                    تمّ استلام رسالتك.
                   </h2>
                   <p className="max-w-md text-[14px] leading-[1.65] text-muted">
                     {TOPIC_SUCCESS[topic]}
@@ -263,7 +264,7 @@ function ContactPageInner() {
                     onClick={reset}
                     className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-token bg-background px-4 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground"
                   >
-                    Send another
+                    إرسال رسالة أخرى
                   </button>
                 </motion.div>
               )}
@@ -279,7 +280,7 @@ function ContactPageInner() {
           >
             <div className="rounded-2xl border border-token bg-white/80 p-6 backdrop-blur-md">
               <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                Other channels
+                قنوات أخرى
               </p>
               <ul className="space-y-3">
                 {CHANNELS.map(({ label, value, href, icon: Icon }) => (
@@ -308,12 +309,12 @@ function ContactPageInner() {
 
             <div className="rounded-2xl border border-token bg-white/80 p-6 backdrop-blur-md">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                Response time
+                وقت الاستجابة
               </p>
               <p className="text-[13.5px] leading-[1.6] text-muted">
-                Most messages get a real reply within{' '}
-                <strong className="font-[590] text-foreground">one business day</strong>.
-                Pro subscribers are prioritized — we usually answer those within hours.
+                تحصل معظم الرسائل على ردّ حقيقي خلال{' '}
+                <strong className="font-[590] text-foreground">يوم عمل واحد</strong>.
+                ويحظى مشتركو Pro بالأولوية — وعادةً ما نردّ عليهم خلال ساعات.
               </p>
             </div>
           </motion.aside>

@@ -15,7 +15,7 @@ export default function StudioPreviewPage() {
   const [presetId, setPresetId] = useState<string>('ink')
   const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
   const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
-  const [name, setName] = useState<string>('Brand Story')
+  const [name, setName] = useState<string>('قصة علامة تجارية')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,11 +32,11 @@ export default function StudioPreviewPage() {
         .eq('id', params.id)
         .single()
       if (cancelled) return
-      if (error || !data) { setError('Theme not found or you do not have access.'); setLoading(false); return }
+      if (error || !data) { setError('القالب غير موجود أو لا تملك صلاحية الوصول.'); setLoading(false); return }
 
       const stored = data.content as any
       if (stored?.business_type !== 'studio' || !stored?.studio) {
-        setError('This theme is not a Studio theme.')
+        setError('هذا القالب ليس قالب استوديو.')
         setLoading(false)
         return
       }
@@ -45,7 +45,7 @@ export default function StudioPreviewPage() {
       setPresetId(stored.style_preset || 'ink')
       setTypographyPreset(stored.typography_preset || undefined)
       setColorOverrides(stored.color_overrides || undefined)
-      setName(data.product_name || 'Brand Story')
+      setName(data.product_name || 'قصة علامة تجارية')
       setLoading(false)
     }
     load()
@@ -57,7 +57,7 @@ export default function StudioPreviewPage() {
       <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-stone-700" />
-          <p className="text-sm uppercase tracking-[0.25em] text-stone-400">Loading your brand page...</p>
+          <p className="text-sm uppercase tracking-[0.25em] text-stone-400">جارٍ تحميل صفحة علامتك…</p>
         </div>
       </div>
     )
@@ -66,9 +66,9 @@ export default function StudioPreviewPage() {
   if (error || !content) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-white text-stone-900">
-        <p className="text-lg">{error || 'Something went wrong.'}</p>
+        <p className="text-lg">{error || 'حدث خطأ ما.'}</p>
         <Link href="/dashboard" className="rounded-full bg-stone-900 px-6 py-2.5 text-sm font-bold text-white">
-          Back to dashboard
+          العودة إلى لوحة التحكم
         </Link>
       </div>
     )
@@ -89,7 +89,7 @@ export default function StudioPreviewPage() {
           }}
         >
           <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.5)' : '#0a0a0a' }} />
-          <span className="uppercase tracking-[0.2em] opacity-50">Live preview ·</span>
+          <span className="uppercase tracking-[0.2em] opacity-50">معاينة مباشرة ·</span>
           <span className="font-semibold">{name}</span>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
@@ -98,7 +98,7 @@ export default function StudioPreviewPage() {
             className="rounded-full px-4 py-2 text-xs font-semibold backdrop-blur-md transition hover:scale-105"
             style={{ background: isDark ? 'white' : '#0a0a0a', color: isDark ? '#0a0a0a' : 'white' }}
           >
-            Open editor
+            فتح المحرّر
           </Link>
           <Link
             href="/dashboard"
@@ -109,7 +109,7 @@ export default function StudioPreviewPage() {
               color: isDark ? 'white' : '#1a1a1a'
             }}
           >
-            Dashboard
+            لوحة التحكم
           </Link>
         </div>
       </div>

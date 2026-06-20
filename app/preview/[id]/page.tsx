@@ -35,15 +35,15 @@ export default async function PreviewPage({
     return (
       <main className="flex min-h-screen items-center justify-center bg-surface px-6 py-10">
         <div className="max-w-md rounded-2xl border border-token bg-white p-8 text-center">
-          <h1 className="text-xl font-bold text-foreground">Theme not found</h1>
+          <h1 className="text-xl font-bold text-foreground">القالب غير موجود</h1>
           <p className="mt-2 text-sm text-muted">
-            It may have been deleted, or you might not have access to it.
+            ربما حُذف، أو قد لا تملك صلاحية الوصول إليه.
           </p>
           <Link
             href="/dashboard/sites"
             className="mt-5 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white"
           >
-            Back to your sites
+            العودة إلى مواقعك
           </Link>
         </div>
       </main>
@@ -92,7 +92,7 @@ export default async function PreviewPage({
             <span className="text-sm font-medium text-muted">{theme.product_name}</span>
           </div>
           <div className="hidden md:block">
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>جارٍ التحميل…</div>}>
               <ThemeActions
                 themeId={theme.id}
                 isPro={isPro}
@@ -123,7 +123,7 @@ export default async function PreviewPage({
       </div>
 
       <div className="md:hidden">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>جارٍ التحميل…</div>}>
           <ThemeActions
             themeId={theme.id}
             isPro={isPro}

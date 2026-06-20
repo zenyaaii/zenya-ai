@@ -37,10 +37,10 @@ import { cn } from '@/lib/utils';
 type View = 'overview' | 'templates' | 'stores' | 'account';
 
 const NAV: { id: View; label: string; icon: LucideIcon }[] = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'templates', label: 'Templates', icon: LayoutGrid },
-  { id: 'stores', label: 'My stores', icon: Store },
-  { id: 'account', label: 'Account', icon: Settings },
+  { id: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
+  { id: 'templates', label: 'القوالب', icon: LayoutGrid },
+  { id: 'stores', label: 'متاجري', icon: Store },
+  { id: 'account', label: 'الحساب', icon: Settings },
 ];
 
 /* ── Ecommerce templates. `status: live` installs into the store today;
@@ -62,10 +62,10 @@ type Template = {
 const TEMPLATES: Template[] = [
   {
     id: 'one_product',
-    name: 'Storefront',
-    tagline: 'One-product · Dropshipping',
+    name: 'واجهة المتجر',
+    tagline: 'منتج واحد · دروبشيبينغ',
     description:
-      'Conversion-first single-product theme. Hero funnel, sticky add-to-cart, bundles, comparison, FAQ, urgency, real imported reviews, and a full product page — installed straight into this store.',
+      'قالب منتج واحد يركّز على التحويل. قمع رئيسي، وزر إضافة للسلة ثابت، وحزم، ومقارنة، وأسئلة شائعة، وعناصر إلحاح، ومراجعات حقيقية مستوردة، وصفحة منتج كاملة — يُثبَّت مباشرةً في هذا المتجر.',
     sections: 24,
     presets: 3,
     icon: ShoppingBag,
@@ -74,10 +74,10 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'collective',
-    name: 'Catalog',
-    tagline: 'Catalog · Multi-product',
+    name: 'الكتالوج',
+    tagline: 'كتالوج · متعدّد المنتجات',
     description:
-      'Multi-product storefront for stores with a full catalog — curated collection grid, new arrivals, bestsellers, brand promise, and newsletter. Installs into your store and renders your real products.',
+      'واجهة متجر متعدّد المنتجات للمتاجر ذات الكتالوج الكامل — شبكة تشكيلات منسّقة، ووافدات جديدة، والأكثر مبيعًا، ووعد العلامة التجارية، ونشرة بريدية. يُثبَّت في متجرك ويعرض منتجاتك الحقيقية.',
     sections: 10,
     presets: 4,
     icon: Store,
@@ -86,10 +86,10 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'lookbook',
-    name: 'Lookbook',
-    tagline: 'Lookbook · Fashion',
+    name: 'دفتر الإطلالات',
+    tagline: 'دفتر إطلالات · أزياء',
     description:
-      'Editorial fashion storefront — full-bleed hero, shoppable lookbook grid, product collection, and brand story. An ecommerce design we’re porting into a real Shopify theme; you’ll edit it right inside Shopify.',
+      'واجهة أزياء تحريرية — قسم رئيسي بعرض كامل، وشبكة إطلالات قابلة للتسوّق، وتشكيلة منتجات، وقصة العلامة التجارية. تصميم تجارة إلكترونية ننقله إلى قالب Shopify حقيقي؛ وستحرّره داخل Shopify مباشرةً.',
     sections: 12,
     presets: 5,
     icon: Shirt,
@@ -127,7 +127,7 @@ function DashboardContent() {
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const storeName = shop ? shop.replace('.myshopify.com', '') : 'your store';
+  const storeName = shop ? shop.replace('.myshopify.com', '') : 'متجرك';
 
   useEffect(() => {
     async function checkUser() {
@@ -163,7 +163,7 @@ function DashboardContent() {
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        alert('Account created! Please check your email to confirm.');
+        alert('تم إنشاء الحساب! يُرجى التحقّق من بريدك الإلكتروني للتأكيد.');
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -192,7 +192,7 @@ function DashboardContent() {
       saveAs(blob, fileName);
     } catch (e) {
       console.error(e);
-      alert('Download failed.');
+      alert('فشل التنزيل.');
     } finally {
       setDownloadingId(null);
     }
@@ -205,7 +205,7 @@ function DashboardContent() {
         <AuroraBackground fixed intensity={0.7} />
         <div className="relative flex items-center gap-3 text-muted">
           <span className="h-2.5 w-2.5 animate-ping rounded-full bg-[#6366f1]" />
-          <span className="text-sm font-medium">Loading your studio…</span>
+          <span className="text-sm font-medium">جارٍ تحميل الاستوديو…</span>
         </div>
       </div>
     );
@@ -228,26 +228,27 @@ function DashboardContent() {
               <Sparkles className="h-5 w-5" strokeWidth={2.25} />
             </div>
             <h1 className="text-[26px] font-[590] tracking-[-0.6px] text-foreground">
-              Welcome to <span className="gradient-text">Zenya AI</span>
+              مرحبًا بك في <span className="gradient-text">زينيا AI</span>
             </h1>
             <p className="mt-2 text-[13.5px] text-muted">
-              {isSignUp ? 'Create an account to save your stores.' : 'Sign in to build & install themes into your store.'}
+              {isSignUp ? 'أنشئ حسابًا لحفظ متاجرك.' : 'سجّل الدخول لبناء القوالب وتثبيتها في متجرك.'}
             </p>
           </div>
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="mb-1 block text-[13px] font-semibold text-foreground">Email</label>
+              <label className="mb-1 block text-[13px] font-semibold text-foreground">البريد الإلكتروني</label>
               <input
                 type="email"
                 required
-                className="w-full rounded-xl border border-token bg-white px-4 py-2.5 text-foreground outline-none transition focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/15"
+                dir="ltr"
+                className="w-full rounded-xl border border-token bg-white px-4 py-2.5 text-start text-foreground outline-none transition focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/15"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label className="mb-1 block text-[13px] font-semibold text-foreground">Password</label>
+              <label className="mb-1 block text-[13px] font-semibold text-foreground">كلمة المرور</label>
               <input
                 type="password"
                 required
@@ -266,14 +267,14 @@ function DashboardContent() {
               disabled={authLoading}
               className="w-full rounded-full bg-foreground py-3 text-[14px] font-semibold text-white shadow-soft-md transition hover:scale-[1.01] disabled:opacity-50"
             >
-              {authLoading ? 'Please wait…' : isSignUp ? 'Create account' : 'Sign in'}
+              {authLoading ? 'يُرجى الانتظار…' : isSignUp ? 'إنشاء حساب' : 'تسجيل الدخول'}
             </button>
           </form>
 
           <div className="mt-6 text-center text-[13px] text-muted">
-            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {isSignUp ? 'لديك حساب بالفعل؟' : 'ليس لديك حساب؟'}{' '}
             <button onClick={() => setIsSignUp(!isSignUp)} className="font-semibold text-[#6366f1] hover:underline">
-              {isSignUp ? 'Sign in' : 'Sign up'}
+              {isSignUp ? 'تسجيل الدخول' : 'إنشاء حساب'}
             </button>
           </div>
         </motion.div>
@@ -386,27 +387,27 @@ function OverviewView({
 }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      <SectionHeader title={`Welcome back, ${storeName}`} subtitle="Build a conversion-ready store and install it in a few clicks." />
+      <SectionHeader title={`مرحبًا بعودتك، ${storeName}`} subtitle="ابنِ متجرًا جاهزًا للتحويل وثبّته ببضع نقرات." />
 
       {/* Hero CTA */}
       <div className="relative overflow-hidden rounded-3xl border border-token bg-white/80 p-7 shadow-soft-md backdrop-blur-md sm:p-9">
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 100% at 100% 0%, rgba(99,102,241,0.14), transparent 60%)' }} />
         <div className="relative max-w-xl">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-3 py-1 text-[11.5px] font-medium text-muted">
-            <Sparkles className="h-3 w-3 text-[#6366f1]" strokeWidth={2.25} /> AI store builder
+            <Sparkles className="h-3 w-3 text-[#6366f1]" strokeWidth={2.25} /> مُنشئ المتاجر بالذكاء الاصطناعي
           </div>
           <h2 className="text-[28px] font-[590] leading-[1.1] tracking-[-1px] text-foreground sm:text-[34px]">
-            Turn a product link into a <span className="gradient-text">live Shopify store.</span>
+            حوّل رابط منتج إلى <span className="gradient-text">متجر Shopify مباشر.</span>
           </h2>
           <p className="mt-3 text-[14.5px] leading-[1.6] text-muted">
-            Paste a product URL — Zenya writes the copy, imports real reviews, designs the page, and installs the theme + product straight into your store.
+            الصق رابط منتج — تكتب زينيا النصوص، وتستورد مراجعات حقيقية، وتصمّم الصفحة، وتثبّت القالب والمنتج مباشرةً في متجرك.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href={`/shopify/new${queryString}${queryString ? '&' : '?'}type=one_product`} className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-[14px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
-              <Plus className="h-4 w-4" strokeWidth={2.5} /> Build a new store
+              <Plus className="h-4 w-4" strokeWidth={2.5} /> بناء متجر جديد
             </Link>
             <button onClick={onBrowse} className="inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-6 py-3 text-[14px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white">
-              Browse templates <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
+              تصفّح القوالب <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2.25} />
             </button>
           </div>
         </div>
@@ -414,9 +415,9 @@ function OverviewView({
 
       {/* Stats */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <StatCard icon={Store} label="Stores built" value={String(themesCount)} />
-        <StatCard icon={Check} label="Live templates" value={String(liveCount)} accent />
-        <StatCard icon={Clock} label="Coming to Shopify" value={String(soonCount)} />
+        <StatCard icon={Store} label="متاجر مبنيّة" value={String(themesCount)} />
+        <StatCard icon={Check} label="قوالب جاهزة" value={String(liveCount)} accent />
+        <StatCard icon={Clock} label="قادم إلى Shopify" value={String(soonCount)} />
       </div>
     </motion.div>
   );
@@ -437,7 +438,7 @@ function StatCard({ icon: Icon, label, value, accent }: { icon: LucideIcon; labe
 function TemplatesView({ queryString }: { queryString: string }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      <SectionHeader title="Templates" subtitle="Ecommerce themes that install directly into your Shopify store." />
+      <SectionHeader title="القوالب" subtitle="قوالب تجارة إلكترونية تُثبَّت مباشرةً في متجر Shopify الخاص بك." />
       <div className="grid gap-6 sm:grid-cols-2">
         {TEMPLATES.map((t, i) => (
           <TemplateCard key={t.id} template={t} index={i} queryString={queryString} />
@@ -453,9 +454,9 @@ function TemplatesView({ queryString }: { queryString: string }) {
               <Sparkles className="h-5 w-5" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="text-[15px] font-[590] tracking-[-0.3px] text-foreground">Need a different kind of site?</h3>
+              <h3 className="text-[15px] font-[590] tracking-[-0.3px] text-foreground">تحتاج نوعًا مختلفًا من المواقع؟</h3>
               <p className="mt-0.5 max-w-md text-[13px] leading-[1.55] text-muted">
-                Restaurants, SaaS, fashion, services and more — build them on the Zenya website. Only ecommerce store themes install here.
+                مطاعم، وبرمجيات كخدمة، وأزياء، وخدمات وغيرها — ابنِها على موقع زينيا. لا تُثبَّت هنا إلا قوالب متاجر التجارة الإلكترونية.
               </p>
             </div>
           </div>
@@ -465,7 +466,7 @@ function TemplatesView({ queryString }: { queryString: string }) {
             rel="noreferrer"
             className="inline-flex shrink-0 items-center gap-2 rounded-full border border-token bg-white px-5 py-2.5 text-[13.5px] font-semibold text-foreground transition hover:bg-foreground hover:text-white"
           >
-            Generate more on our website
+            أنشئ المزيد على موقعنا
             <ExternalLink className="h-3.5 w-3.5" strokeWidth={2.25} />
           </a>
         </div>
@@ -507,11 +508,11 @@ function TemplateCard({ template, index, queryString }: { template: Template; in
         <div className="absolute right-4 top-4">
           {isLive ? (
             <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white" style={{ background: tint.accent }}>
-              <Check className="h-2.5 w-2.5" strokeWidth={3} /> Installs in store
+              <Check className="h-2.5 w-2.5" strokeWidth={3} /> يُثبَّت في المتجر
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
-              <Clock className="h-2.5 w-2.5" strokeWidth={3} /> Coming soon
+              <Clock className="h-2.5 w-2.5" strokeWidth={3} /> قريبًا
             </span>
           )}
         </div>
@@ -530,26 +531,26 @@ function TemplateCard({ template, index, queryString }: { template: Template; in
             <Icon className="h-2.5 w-2.5" strokeWidth={2.25} /> {template.tagline.split(' · ')[0]}
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
-            <Layers className="h-2.5 w-2.5" strokeWidth={2} /> {template.sections} sections
+            <Layers className="h-2.5 w-2.5" strokeWidth={2} /> {template.sections} قسمًا
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
-            <Palette className="h-2.5 w-2.5" strokeWidth={2} /> {template.presets} presets
+            <Palette className="h-2.5 w-2.5" strokeWidth={2} /> {template.presets} أنماط
           </span>
         </div>
 
         <div className="mt-auto pt-5">
           {isLive ? (
             <Link href={buildHref} className="group/btn flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13.5px] font-semibold text-white transition hover:scale-[1.02]" style={{ background: tint.accent }}>
-              Build &amp; install
-              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" strokeWidth={2.5} />
+              بناء وتثبيت
+              <ArrowUpRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover/btn:-translate-x-0.5 group-hover/btn:-translate-y-0.5" strokeWidth={2.5} />
             </Link>
           ) : (
             <div className="flex items-center gap-2">
               <button disabled className="flex flex-1 cursor-not-allowed items-center justify-center gap-1.5 rounded-full border border-token bg-foreground/5 px-4 py-2.5 text-[13px] font-semibold text-muted">
-                <Clock className="h-3.5 w-3.5" strokeWidth={2} /> Shopify version in progress
+                <Clock className="h-3.5 w-3.5" strokeWidth={2} /> نسخة Shopify قيد الإعداد
               </button>
-              <a href={demoHref} target="_blank" rel="noreferrer" className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground transition hover:bg-white" aria-label={`Preview ${template.name} demo`}>
-                Demo
+              <a href={demoHref} target="_blank" rel="noreferrer" className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground transition hover:bg-white" aria-label={`معاينة عرض ${template.name}`}>
+                عرض توضيحي
               </a>
             </div>
           )}
@@ -567,11 +568,11 @@ function StoresView({
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
       <SectionHeader
-        title="My stores"
-        subtitle="Everything you've generated with Zenya."
+        title="متاجري"
+        subtitle="كل ما أنشأته باستخدام زينيا."
         action={
           <Link href={`/shopify/new${queryString}`} className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-[13px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> New store
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> متجر جديد
           </Link>
         }
       />
@@ -581,10 +582,10 @@ function StoresView({
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#6366f1]/10 text-[#6366f1]">
             <Sparkles className="h-6 w-6" strokeWidth={2} />
           </div>
-          <h3 className="text-[17px] font-[590] tracking-[-0.4px] text-foreground">No stores yet</h3>
-          <p className="mx-auto mt-1.5 max-w-md text-[14px] text-muted">Build your first one-product store from the Storefront template.</p>
+          <h3 className="text-[17px] font-[590] tracking-[-0.4px] text-foreground">لا توجد متاجر بعد</h3>
+          <p className="mx-auto mt-1.5 max-w-md text-[14px] text-muted">ابنِ أول متجر منتج واحد لك من قالب واجهة المتجر.</p>
           <button onClick={onBrowse} className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:scale-[1.02]">
-            Browse templates <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
+            تصفّح القوالب <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2.25} />
           </button>
         </div>
       ) : (
@@ -606,10 +607,10 @@ function StoresView({
               <h3 className="text-[17px] font-[590] tracking-[-0.4px] text-foreground">{t.product_name}</h3>
               <div className="mt-auto flex gap-2 pt-5">
                 <Link href={`/preview/${t.id}${queryString}`} className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-token bg-white/70 px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-white">
-                  <Eye className="h-3.5 w-3.5" strokeWidth={2} /> Preview
+                  <Eye className="h-3.5 w-3.5" strokeWidth={2} /> معاينة
                 </Link>
                 <button onClick={() => onDownload(t)} disabled={downloadingId === t.id} className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-[12.5px] font-semibold text-white transition hover:scale-[1.02] disabled:opacity-50">
-                  <Download className="h-3.5 w-3.5" strokeWidth={2} /> {downloadingId === t.id ? '…' : 'Download'}
+                  <Download className="h-3.5 w-3.5" strokeWidth={2} /> {downloadingId === t.id ? '…' : 'تنزيل'}
                 </button>
               </div>
             </motion.div>
@@ -623,7 +624,7 @@ function StoresView({
 function AccountView({ email, storeName, shop, onSignOut }: { email: string; storeName: string; shop: string | null; onSignOut: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      <SectionHeader title="Account" subtitle="Your Zenya account and connected store." />
+      <SectionHeader title="الحساب" subtitle="حساب زينيا الخاص بك والمتجر المرتبط." />
       <div className="space-y-4">
         <div className="rounded-2xl border border-token bg-white/80 p-6 shadow-soft-md backdrop-blur-md">
           <div className="flex items-center gap-4">
@@ -633,25 +634,25 @@ function AccountView({ email, storeName, shop, onSignOut }: { email: string; sto
             <div className="min-w-0">
               <p className="truncate text-[17px] font-[590] tracking-[-0.3px] text-foreground">{email}</p>
               <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Zenya account
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> حساب زينيا
               </p>
             </div>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <InfoRow label="Connected store" value={shop || '—'} />
-          <InfoRow label="Store name" value={storeName} />
+          <InfoRow label="المتجر المرتبط" value={shop || '—'} />
+          <InfoRow label="اسم المتجر" value={storeName} />
         </div>
 
         <div className="rounded-2xl border border-token bg-white/70 p-5 shadow-soft-md backdrop-blur-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[14px] font-semibold text-foreground">Sign out</p>
-              <p className="mt-0.5 text-[12.5px] text-muted">End your session in this browser.</p>
+              <p className="text-[14px] font-semibold text-foreground">تسجيل الخروج</p>
+              <p className="mt-0.5 text-[12.5px] text-muted">إنهاء جلستك في هذا المتصفّح.</p>
             </div>
             <button onClick={onSignOut} className="inline-flex items-center gap-2 rounded-full border border-token bg-white px-5 py-2.5 text-[13px] font-semibold text-foreground transition hover:bg-foreground hover:text-white">
-              <LogOut className="h-3.5 w-3.5" strokeWidth={2} /> Sign out
+              <LogOut className="h-3.5 w-3.5 rtl-flip" strokeWidth={2} /> تسجيل الخروج
             </button>
           </div>
         </div>
@@ -671,7 +672,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export default function ShopifyDashboard() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-muted">Loading…</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-muted">جارٍ التحميل…</div>}>
       <DashboardContent />
     </Suspense>
   );

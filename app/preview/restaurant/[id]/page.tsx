@@ -14,7 +14,7 @@ export default function RestaurantPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<RestaurantContent | null>(null)
   const [presetId, setPresetId] = useState<string>('onyx')
-  const [name, setName] = useState<string>('Restaurant')
+  const [name, setName] = useState<string>('مطعم')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,19 +34,19 @@ export default function RestaurantPreviewPage() {
         .single()
       if (cancelled) return
       if (error || !data) {
-        setError('Theme not found or you do not have access.')
+        setError('القالب غير موجود أو لا تملك صلاحية الوصول.')
         setLoading(false)
         return
       }
       const c = data.content as any
       if (c?.business_type !== 'restaurant' || !c?.restaurant) {
-        setError('This theme is not a restaurant theme.')
+        setError('هذا القالب ليس قالب مطعم.')
         setLoading(false)
         return
       }
       setContent(c.restaurant as RestaurantContent)
       setPresetId(c.style_preset || 'onyx')
-      setName(data.product_name || 'Restaurant')
+      setName(data.product_name || 'مطعم')
       setLoading(false)
     }
     load()
@@ -60,7 +60,7 @@ export default function RestaurantPreviewPage() {
       <div className="flex min-h-screen items-center justify-center bg-black text-white/80">
         <div className="text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
-          <p className="text-sm uppercase tracking-[0.25em] text-amber-300">Loading your site…</p>
+          <p className="text-sm uppercase tracking-[0.25em] text-amber-300">جارٍ تحميل موقعك…</p>
         </div>
       </div>
     )
@@ -69,9 +69,9 @@ export default function RestaurantPreviewPage() {
   if (error || !content) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-black text-white">
-        <p className="text-lg">{error || 'Something went wrong.'}</p>
+        <p className="text-lg">{error || 'حدث خطأ ما.'}</p>
         <Link href="/dashboard" className="rounded-full bg-amber-400 px-6 py-2.5 text-sm font-bold text-black">
-          Back to dashboard
+          العودة إلى لوحة التحكم
         </Link>
       </div>
     )
@@ -83,7 +83,7 @@ export default function RestaurantPreviewPage() {
       <div className="fixed top-4 left-4 right-4 z-50 flex items-center justify-between gap-3 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/75 px-4 py-2 text-xs text-white backdrop-blur-md border border-white/15">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="uppercase tracking-[0.2em] text-white/70">Live preview ·</span>
+          <span className="uppercase tracking-[0.2em] text-white/70">معاينة مباشرة ·</span>
           <span className="font-semibold">{name}</span>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
@@ -95,13 +95,13 @@ export default function RestaurantPreviewPage() {
             href={`/preview/restaurant/${params.id}/edit`}
             className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
           >
-            Open editor
+            فتح المحرّر
           </Link>
           <Link
             href="/dashboard"
             className="rounded-full bg-amber-400 px-4 py-2 text-xs font-bold text-black backdrop-blur-md transition hover:scale-105"
           >
-            Dashboard
+            لوحة التحكم
           </Link>
         </div>
       </div>
