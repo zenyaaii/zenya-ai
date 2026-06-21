@@ -2,6 +2,10 @@
 /* ── Arabic typeface — Tajawal: geometric, modern, full weight range.
    Primary UI + display face for the whole RTL product. ── */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+/* ── Brand display face — Reem Kufi: geometric modern Kufic, used ONLY for the
+   giant زينيا signature so the wordmark reads as a designed logotype, not body
+   text. Kept off the rest of the UI on purpose. ── */
+@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -351,6 +355,23 @@
     background-size: 44px 44px;
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 75%);
     mask-image: radial-gradient(ellipse 70% 60% at 50% 35%, #000 30%, transparent 75%);
+  }
+
+  /* Full-page variant of the hero grid — the same "boxes", but masked to read
+     as one continuous, evenly-lit texture behind the WHOLE page (used by the
+     fixed PageBackground) rather than vignetted to a single hero viewport. */
+  .grid-fade-page {
+    background-image:
+      linear-gradient(rgba(28,28,28,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(28,28,28,0.04) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 30%, #000 55%, transparent 100%);
+    mask-image: radial-gradient(ellipse 120% 90% at 50% 30%, #000 55%, transparent 100%);
+  }
+
+  /* Brand signature face — the giant footer زينيا only. */
+  .font-brandmark {
+    font-family: 'Reem Kufi', 'Tajawal', system-ui, sans-serif;
   }
 
   /* ── Animated conic glow used behind hero mockup ── */

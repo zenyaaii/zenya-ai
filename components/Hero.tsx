@@ -17,8 +17,8 @@ import {
   Star,
   type LucideIcon,
 } from 'lucide-react'
-import AuroraBackground from '@/components/marketing/AuroraBackground'
 import CursorGlow from '@/components/marketing/CursorGlow'
+import HeroWordmark from '@/components/marketing/HeroWordmark'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
 
@@ -69,12 +69,14 @@ export default function Hero() {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden pt-24 pb-36">
-      {/* Aurora orb wash (default Zenya tint) */}
-      <AuroraBackground intensity={0.9} />
+      {/* The grid + aurora backdrop now lives at the page level (PageBackground)
+          so the whole home page shares one continuous background. The hero keeps
+          only its own flourishes on top: the cursor glow + the ghost wordmark. */}
       {/* Cursor-following glow — scoped to hero only, skipped on touch + reduced motion */}
       <CursorGlow size={520} color="rgba(94,106,210,0.22)" />
-      {/* Fine grid, radially faded — premium structural backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 grid-fade opacity-70" />
+      {/* Giant Arabic "زينيا" — a ghost in the background that lights up
+          under the cursor. Sits above the grid (-z-5) but below the copy. */}
+      <HeroWordmark />
 
       <div className="relative mx-auto max-w-6xl px-6">
         {/* ── Copy column ── */}

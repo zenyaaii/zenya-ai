@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Eye, Pencil } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import WellnessPreview from '@/components/theme/wellness/WellnessPreview'
@@ -18,6 +20,17 @@ export default function WellnessPreviewPage() {
   const [name, setName] = useState<string>('استوديو عافية')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Celebration overlay shown right after a fresh build (?created=1).
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      // Drop the query param so a refresh/back doesn't replay the celebration.
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -98,6 +111,67 @@ export default function WellnessPreviewPage() {
         colorOverrides={colorOverrides}
         typographyPreset={typographyPreset}
       />
+
+      <AnimatePresence>
+        {celebrate && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4"
+            style={{ background: 'rgba(10,10,14,0.78)', backdropFilter: 'blur(12px)' }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+              className="w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-white p-8 text-center shadow-2xl"
+            >
+              {/* Animated check medallion */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, type: 'spring', stiffness: 260, damping: 16 }}
+                className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+                style={{ background: 'radial-gradient(circle at 35% 30%, #b9b8ff, #5e6ad2 60%, #4f5ab8)', boxShadow: '0 0 40px rgba(94,106,210,0.5)' }}
+              >
+                <Check className="h-8 w-8 text-white" strokeWidth={3} />
+              </motion.div>
+
+              <h2 className="mt-5 text-2xl font-extrabold tracking-tight text-foreground">
+                تم إنشاء موقعك! 🎉
+              </h2>
+              <p className="mt-2 text-sm text-muted">
+                موقع <span className="font-semibold text-foreground">{name}</span> جاهز.
+                عاينه كما يراه زوّارك، أو افتح المحرّر لتخصيص كل التفاصيل.
+              </p>
+
+              <div className="mt-7 grid gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setCelebrate(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-white transition hover:scale-[1.02]"
+                >
+                  <Eye className="h-4 w-4" /> معاينة الموقع
+                </button>
+                <Link
+                  href={`/preview/wellness/${params.id}/edit`}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-token bg-white px-6 py-3 text-sm font-bold text-foreground transition hover:bg-black/5"
+                >
+                  <Pencil className="h-4 w-4" /> فتح المحرّر
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="mt-1 text-xs font-medium text-muted transition hover:text-foreground"
+                >
+                  الذهاب إلى لوحة التحكم
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
+import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
 import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 
 const TYPE_META: Record<
@@ -70,45 +71,41 @@ const TYPE_META: Record<
   },
 }
 
-/** Faux template thumbnail — a tasteful, per-type abstraction of a page so
- *  the card reads as a real preview without shipping a heavy screenshot. */
-function PreviewThumb({ accent, orb, Icon }: { accent: string; orb: string; Icon: LucideIcon }) {
+/** Real template thumbnail — the actual theme screenshot inside a tiny
+ *  browser frame. Resolves through `themePreview()` (local file → curated
+ *  fallback) so dropping a screenshot into public/theme-previews/ is all it
+ *  takes; `onError` keeps a missing image from ever showing a broken frame. */
+function PreviewThumb({ id, accent, Icon }: { id: string; accent: string; Icon: LucideIcon }) {
   return (
-    <div
-      className="relative h-32 overflow-hidden"
-      style={{ background: `linear-gradient(160deg, ${accent}14, #ffffff 65%)` }}
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full blur-2xl"
-        style={{ background: orb }}
-      />
+    <div className="relative h-40 overflow-hidden bg-[#f7f4ed]">
       {/* mini browser chrome */}
-      <div className="flex items-center gap-1 px-3 pt-3">
+      <div
+        className="flex items-center gap-1 px-3 py-2"
+        style={{ background: '#faf8f3', borderBottom: '1px solid #f0ede6' }}
+      >
         <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fca5a5' }} />
         <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fcd34d' }} />
         <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#86efac' }} />
+        <span
+          className="ms-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-[3px]"
+          style={{ background: `${accent}1a`, color: accent }}
+        >
+          <Icon className="h-2.5 w-2.5" strokeWidth={2.25} />
+        </span>
       </div>
-      {/* faux layout */}
-      <div className="relative px-3 pt-3">
-        <div className="flex items-center gap-2">
-          <div
-            className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{ background: `${accent}1a`, color: accent, border: `1px solid ${accent}2e` }}
-          >
-            <Icon className="h-3 w-3" strokeWidth={2} />
-          </div>
-          <div className="h-2 w-16 rounded-full" style={{ background: `${accent}55` }} />
-          <div className="ms-auto h-4 w-10 rounded-full" style={{ background: `${accent}` , opacity: 0.9 }} />
-        </div>
-        <div className="mt-3 h-1.5 w-28 rounded-full bg-black/10" />
-        <div className="mt-1.5 h-1.5 w-20 rounded-full bg-black/[0.07]" />
-        <div className="mt-3 grid grid-cols-3 gap-1.5">
-          <div className="h-7 rounded-md bg-black/[0.05]" />
-          <div className="h-7 rounded-md bg-black/[0.05]" />
-          <div className="h-7 rounded-md bg-black/[0.05]" />
-        </div>
-      </div>
+      {/* the real screenshot */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={themePreview(id)}
+        alt=""
+        loading="lazy"
+        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
+        style={{ height: 'calc(100% - 28px)' }}
+        onError={(e) => {
+          const fb = themePreviewFallback(id)
+          if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+        }}
+      />
       {/* bottom fade into the card body */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent" />
     </div>
@@ -149,7 +146,7 @@ export default function ShowcaseSection() {
                 style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
               >
                 <div className="transition-transform duration-300 group-hover:-translate-y-0.5">
-                  <PreviewThumb accent={tint.accent} orb={tint.orb1} Icon={Icon} />
+                  <PreviewThumb id={key} accent={tint.accent} Icon={Icon} />
                 </div>
 
                 <div className="relative flex flex-1 flex-col gap-2.5 p-5">

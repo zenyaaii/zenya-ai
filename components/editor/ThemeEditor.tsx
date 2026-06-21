@@ -37,7 +37,7 @@ import ClickToEditOverlay from './ClickToEditOverlay'
 import PreviewFrame, { type PreviewDevice } from './PreviewFrame'
 import { AiCopyProvider, type AiCopyContextValue, type AiBrand } from './AiRewrite'
 import {
-  getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES,
+  getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES, panelInView, panelViews,
   type EditorConfig, type EditorFieldDef, type EditorPage, type EditorPanel,
   type SectionStyles, type SectionStyle, type SectionTextAlign,
 } from '@/utils/theme-editor-types'
@@ -311,7 +311,7 @@ export default function ThemeEditor({
   useEffect(() => {
     if (selected === '__style__' || selected === '__typography__') return
     if (config.globalPanels.some((p) => p.id === selected)) return
-    const visiblePanels = config.panels.filter((p) => !p.page || p.page === view)
+    const visiblePanels = config.panels.filter((p) => panelInView(p, view))
     if (visiblePanels.some((p) => p.id === selected)) return
     if (visiblePanels.length > 0) setSelected(visiblePanels[0].id)
   }, [view, selected, config.panels, config.globalPanels])
@@ -443,7 +443,7 @@ export default function ThemeEditor({
       {/* Body */}
       <div className="hidden flex-1 overflow-hidden lg:flex">
         {/* Left rail */}
-        <aside className="w-64 flex-shrink-0 overflow-y-auto border-r border-token bg-white">
+        <aside className="w-64 flex-shrink-0 overflow-y-auto border-e border-token bg-white">
           <div className="border-b border-token px-3 py-3">
             <div className="flex items-baseline justify-between px-1.5 pb-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">الأقسام</span>
@@ -455,7 +455,7 @@ export default function ThemeEditor({
             </div>
             <div className="space-y-0.5">
               {config.panels
-                .filter((p) => !p.page || p.page === view)
+                .filter((p) => panelInView(p, view))
                 .map((p) => {
                   const Icon = p.icon || Settings
                   const active = selected === p.id
@@ -465,7 +465,7 @@ export default function ThemeEditor({
                       type="button"
                       onClick={() => setSelected(p.id)}
                       className={
-                        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition ' +
+                        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start transition ' +
                         (active ? 'bg-[rgba(28,28,28,0.06)] text-foreground' : 'text-muted hover:bg-black/[0.03] hover:text-foreground')
                       }
                     >
@@ -484,7 +484,7 @@ export default function ThemeEditor({
                 type="button"
                 onClick={() => setSelected('__style__')}
                 className={
-                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition ' +
+                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start transition ' +
                   (selected === '__style__' ? 'bg-[rgba(28,28,28,0.06)] text-foreground' : 'text-muted hover:bg-black/[0.03] hover:text-foreground')
                 }
               >
@@ -495,7 +495,7 @@ export default function ThemeEditor({
                 type="button"
                 onClick={() => setSelected('__typography__')}
                 className={
-                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition ' +
+                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start transition ' +
                   (selected === '__typography__' ? 'bg-[rgba(28,28,28,0.06)] text-foreground' : 'text-muted hover:bg-black/[0.03] hover:text-foreground')
                 }
               >
@@ -511,7 +511,7 @@ export default function ThemeEditor({
                     type="button"
                     onClick={() => setSelected(p.id)}
                     className={
-                      'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition ' +
+                      'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start transition ' +
                       (active ? 'bg-[rgba(28,28,28,0.06)] text-foreground' : 'text-muted hover:bg-black/[0.03] hover:text-foreground')
                     }
                   >
@@ -548,16 +548,19 @@ export default function ThemeEditor({
           <ClickToEditOverlay
             doc={iframeDoc}
             iframe={iframeEl}
+            currentView={view}
             onPick={setSelected}
-            panelToView={Object.fromEntries(
-              config.panels.filter((p) => p.page).map((p) => [p.id, p.page as string])
+            panelToViews={Object.fromEntries(
+              config.panels
+                .map((p) => [p.id, panelViews(p)] as const)
+                .filter(([, v]) => v !== null) as Array<[string, string[]]>
             )}
             onViewChange={(v) => setView(v)}
           />
         </main>
 
         {/* Right rail — fields */}
-        <aside className="w-80 flex-shrink-0 overflow-y-auto border-l border-token bg-white" style={{ boxShadow: '-1px 0 0 #f0ede6' }}>
+        <aside className="w-80 flex-shrink-0 overflow-y-auto border-s border-token bg-white">
           <div className="sticky top-0 z-10 border-b border-token bg-white px-4 py-3" style={{ boxShadow: '0 1px 0 #f0ede6' }}>
             <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">قيد التحرير</div>
             <div className="mt-0.5 text-[15px] font-semibold text-foreground">
@@ -776,7 +779,7 @@ function ColorsPanel({
               type="button"
               onClick={() => setPresetId(p.id)}
               className={
-                'group relative overflow-hidden rounded-lg border-2 p-3 text-left transition ' +
+                'group relative overflow-hidden rounded-lg border-2 p-3 text-start transition ' +
                 (selected ? 'border-foreground' : 'border-token hover:border-foreground/40')
               }
               style={{ background: cols.background || '#fff', color: cols.text || '#000' }}
@@ -852,7 +855,7 @@ function TypographyPanel({ value, onChange }: { value: string; onChange: (v: str
               type="button"
               onClick={() => onChange(p.id)}
               className={
-                'relative w-full rounded-lg border-2 px-3 py-2.5 text-left transition ' +
+                'relative w-full rounded-lg border-2 px-3 py-2.5 text-start transition ' +
                 (selected ? 'border-foreground bg-[rgba(28,28,28,0.03)]' : 'border-token bg-white hover:border-foreground/40')
               }
             >
@@ -1043,7 +1046,9 @@ function pruneSectionStyles(s: SectionStyles): SectionStyles {
     if (typeof v.text_scale === 'number' && v.text_scale > 0 && v.text_scale !== 1) {
       next.text_scale = v.text_scale
     }
-    if (v.text_align && v.text_align !== 'left') {
+    // Keep every explicit alignment — including 'left'. In an RTL theme the
+    // inherited default is right, so 'left' is a real override that must persist.
+    if (v.text_align) {
       next.text_align = v.text_align
     }
     if (Object.keys(next).length > 0) out[k] = next
@@ -1101,7 +1106,9 @@ function SectionStyleHeader({
   onClear: () => void
 }) {
   const activeScale = value?.text_scale ?? 1
-  const activeAlign: SectionTextAlign = value?.text_align ?? 'left'
+  // No explicit alignment ⇒ none highlighted (the section inherits the theme's
+  // own default, which is start/right in RTL). Each button sets its literal value.
+  const activeAlign: SectionTextAlign | undefined = value?.text_align
   const hasOverride = (value && (value.text_scale != null || value.text_align != null)) || false
 
   return (
@@ -1161,7 +1168,7 @@ function SectionStyleHeader({
               <button
                 key={id}
                 type="button"
-                onClick={() => onPatch({ text_align: id === 'left' ? undefined : id })}
+                onClick={() => onPatch({ text_align: activeAlign === id ? undefined : id })}
                 className={
                   'flex flex-1 items-center justify-center rounded transition ' +
                   (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')

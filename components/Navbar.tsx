@@ -20,9 +20,8 @@ const GUEST_NAV: NavItem[] = [
 ]
 
 const USER_NAV: NavItem[] = [
-  { href: '/dashboard',  label: 'لوحة التحكم' },
-  { href: '/theme/new',  label: 'موقع جديد'   },
-  { href: '/themes',     label: 'القوالب'     },
+  { href: '/dashboard', label: 'لوحة التحكم' },
+  { href: '/themes',    label: 'القوالب'     },
 ]
 
 const DROPDOWN_EASE = [0.22, 1, 0.36, 1] as const

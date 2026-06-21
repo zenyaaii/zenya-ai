@@ -51,7 +51,7 @@ export default function StepsSection() {
         </Reveal>
 
         {/* Steps */}
-        <div ref={ref} className="relative grid gap-px md:grid-cols-3">
+        <div ref={ref} className="relative">
           {/* Connecting line (desktop) — draws as you scroll */}
           <div
             aria-hidden
@@ -68,7 +68,7 @@ export default function StepsSection() {
             />
           </div>
 
-          <RevealGroup className="contents">
+          <RevealGroup className="grid gap-px md:grid-cols-3">
             {STEPS.map((step, i) => {
               const Icon = step.icon
               return (

@@ -184,43 +184,91 @@ export default function WellnessPreview({
 // ─── NavBar ───────────────────────────────────────────────────────────────────
 function NavBar({ content, isDark, view, setView }: { content: WellnessContent; isDark: boolean; view: WellnessView; setView: (v: WellnessView) => void }) {
   const navLinks: { label: string; view: WellnessView }[] = [
+    { label: 'الرئيسية', view: 'home' },
     { label: 'الجلسات', view: 'treatments' },
     { label: 'مساحتنا', view: 'space' },
     { label: 'الفريق', view: 'team' },
     { label: 'من نحن', view: 'about' },
   ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Close the mobile menu whenever the page changes.
+  const go = (v: WellnessView) => { setView(v); setMenuOpen(false) }
   return (
     <nav
-      className="sticky top-0 z-50 flex items-center justify-between gap-4 px-8 py-4 backdrop-blur-xl"
+      className="sticky top-0 z-50 px-8 py-4 backdrop-blur-xl"
       style={{
         background: isDark ? 'rgba(14,14,14,0.92)' : 'rgba(255,255,255,0.88)',
         borderBottom: `1px solid var(--wl-border)`
       }}
     >
-      <button onClick={() => setView('home')} style={{ fontFamily: 'var(--wl-heading)' }}>
-        <span className="text-xl font-semibold tracking-wide" style={{ color: 'var(--wl-text)' }}>
-          {content.brand.name}
-        </span>
-        <span className="ml-2 hidden text-xs uppercase tracking-[0.2em] opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
-          {content.brand.type}
-        </span>
-      </button>
-      <div className="hidden items-center gap-7 sm:flex">
-        {navLinks.map((item) => (
-          <button key={item.view} onClick={() => setView(item.view)} className="text-xs uppercase tracking-[0.18em] transition hover:opacity-100" style={{ color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)', opacity: view === item.view ? 1 : 0.6, fontWeight: view === item.view ? 600 : 400 }}>
-            {item.label}
+      <div className="flex items-center justify-between gap-4">
+        <button onClick={() => go('home')} style={{ fontFamily: 'var(--wl-heading)' }}>
+          <span className="text-xl font-semibold tracking-wide" style={{ color: 'var(--wl-text)' }}>
+            {content.brand.name}
+          </span>
+          <span className="ml-2 hidden text-xs uppercase tracking-[0.2em] opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
+            {content.brand.type}
+          </span>
+        </button>
+        {/* Desktop nav — drop 'home' (the wordmark already returns home). */}
+        <div className="hidden items-center gap-7 sm:flex">
+          {navLinks.filter((l) => l.view !== 'home').map((item) => (
+            <button key={item.view} onClick={() => go(item.view)} className="text-xs uppercase tracking-[0.18em] transition hover:opacity-100" style={{ color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)', opacity: view === item.view ? 1 : 0.6, fontWeight: view === item.view ? 600 : 400 }}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => go('contact')}
+            className="rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] shadow-sm"
+            style={{ background: 'var(--wl-accent)', color: isDark ? '#0e0e0e' : 'var(--wl-primary)' }}
+          >
+            {content.hero.cta_primary}
+          </motion.button>
+          {/* Hamburger — only below sm, where the inline nav is hidden. */}
+          <button
+            type="button"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-9 w-9 items-center justify-center rounded-full sm:hidden"
+            style={{ border: '1px solid var(--wl-border)', color: 'var(--wl-text)' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              {menuOpen
+                ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
           </button>
-        ))}
+        </div>
       </div>
-      <motion.button
-        whileHover={{ scale: 1.04 }}
-        whileTap={{ scale: 0.97 }}
-        onClick={() => setView('contact')}
-        className="rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] shadow-sm"
-        style={{ background: 'var(--wl-accent)', color: isDark ? '#0e0e0e' : 'var(--wl-primary)' }}
-      >
-        {content.hero.cta_primary}
-      </motion.button>
+
+      {/* Mobile dropdown — the page list that was previously unreachable < sm. */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 flex flex-col gap-1 sm:hidden"
+        >
+          {navLinks.map((item) => (
+            <button
+              key={item.view}
+              onClick={() => go(item.view)}
+              className="rounded-xl px-4 py-3 text-right text-sm uppercase tracking-[0.16em] transition"
+              style={{
+                color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)',
+                background: view === item.view ? 'color-mix(in srgb, var(--wl-accent) 12%, transparent)' : 'transparent',
+                fontWeight: view === item.view ? 600 : 400,
+              }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </motion.div>
+      )}
     </nav>
   )
 }

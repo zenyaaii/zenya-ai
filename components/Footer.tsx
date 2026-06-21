@@ -57,7 +57,7 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer className="relative pt-20 pb-10 border-t border-token bg-white">
+    <footer className="relative overflow-hidden pt-20 pb-10 border-t border-token bg-white">
       {/* Subtle aurora wash at the very top of the footer for depth */}
       <div
         aria-hidden
@@ -216,6 +216,51 @@ export default function Footer() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* ── Giant brand signature — زينيا stretched edge-to-edge across the
+          foot of the page as one continuous line, set in a geometric Kufic
+          logotype face with the brand gradient flowing through it. Rendered as
+          SVG so the word scales to the FULL footer width at every screen size
+          (a short Arabic word can't fill a wide page with plain CSS). The thin
+          rule above it ties the mark to the page. Purely decorative. */}
+      <div aria-hidden className="relative z-10 mt-16 w-full select-none">
+        <div
+          className="mx-6 mb-3 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(94,106,210,0.30), transparent)' }}
+        />
+        <svg
+          viewBox="0 0 1200 320"
+          width="100%"
+          preserveAspectRatio="xMidYMid meet"
+          className="block w-full"
+          style={{ filter: 'drop-shadow(0 10px 44px rgba(94,106,210,0.20))' }}
+        >
+          <defs>
+            <linearGradient id="zenyaFooterMark" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#4f5ab8" />
+              <stop offset="30%" stopColor="#5e6ad2" />
+              <stop offset="50%" stopColor="#b9b8ff" />
+              <stop offset="70%" stopColor="#7170ff" />
+              <stop offset="100%" stopColor="#4f5ab8" />
+            </linearGradient>
+          </defs>
+          <text
+            x="600"
+            y="245"
+            textAnchor="middle"
+            direction="rtl"
+            fontSize="300"
+            fontWeight="700"
+            textLength="1150"
+            lengthAdjust="spacingAndGlyphs"
+            className="font-brandmark"
+            style={{ fontFamily: "'Reem Kufi', 'Tajawal', sans-serif" }}
+            fill="url(#zenyaFooterMark)"
+          >
+            زينيا
+          </text>
+        </svg>
       </div>
     </footer>
   )

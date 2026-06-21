@@ -9,10 +9,13 @@ import Testimonials from "@/components/Testimonials"
 import CTA from "@/components/CTA"
 import TemplateStackSection from "@/components/marketing/TemplateStackSection"
 import ScrollProgress from "@/components/marketing/ScrollProgress"
+import PageBackground from "@/components/marketing/PageBackground"
 
 export default function Page() {
   return (
-    <main>
+    <main className="relative">
+      {/* One continuous backdrop (hero grid + aurora) behind the whole page. */}
+      <PageBackground />
       <ScrollProgress />
       <Hero />
       <Logos />

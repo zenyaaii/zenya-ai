@@ -40,7 +40,26 @@ export type EditorPanel = {
   icon?: LucideIcon
   /** Optional page id for themes whose preview supports view switching. */
   page?: string
+  /** Some sections render on more than one page (e.g. a philosophy block shown
+   *  on both Home and About). List every view the section appears in so the
+   *  left rail shows it on each, and click-to-edit doesn't force a page switch
+   *  for a section that's already visible. Takes precedence over `page`. */
+  pages?: string[]
   fields: EditorFieldDef[]
+}
+
+/** Which views a panel should appear in. A panel with neither `page` nor
+ *  `pages` is global to every view (e.g. Brand). */
+export function panelViews(panel: EditorPanel): string[] | null {
+  if (panel.pages && panel.pages.length) return panel.pages
+  if (panel.page) return [panel.page]
+  return null // null ⇒ visible on every page
+}
+
+/** Is this panel shown in the given view? */
+export function panelInView(panel: EditorPanel, view: string): boolean {
+  const views = panelViews(panel)
+  return views === null || views.includes(view)
 }
 
 export type EditorPage = {

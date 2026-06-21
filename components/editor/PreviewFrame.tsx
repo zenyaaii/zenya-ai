@@ -86,6 +86,15 @@ export default function PreviewFrame({
     const d = iframe?.contentDocument
     if (!iframe || !d || !d.body) return
 
+    // Mirror the parent document's direction + language into the iframe so the
+    // preview renders exactly like the published (Arabic-first, RTL) site. The
+    // iframe starts life as a blank LTR document; without this the whole theme
+    // would lay out left-to-right inside the editor even though it's RTL live.
+    const rootDir = document.documentElement.getAttribute('dir') || 'rtl'
+    const rootLang = document.documentElement.getAttribute('lang') || 'ar'
+    d.documentElement.setAttribute('dir', rootDir)
+    d.documentElement.setAttribute('lang', rootLang)
+
     // Clear any prior setup left in this (reused) document.
     d.querySelectorAll('#zenya-base,#zenya-section-styles,#zenya-root,[data-zenya-style-clone]')
       .forEach((n) => n.remove())

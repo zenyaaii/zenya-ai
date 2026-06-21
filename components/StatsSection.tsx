@@ -14,7 +14,7 @@ const STATS: Stat[] = [
 
 export default function StatsSection() {
   return (
-    <section className="relative border-b border-token bg-white py-16">
+    <section className="relative border-b border-token py-16">
       {/* hairline top sheen */}
       <div
         aria-hidden

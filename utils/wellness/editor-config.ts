@@ -63,7 +63,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'philosophy', label: 'Philosophy', icon: Leaf, page: 'home',
+      id: 'philosophy', label: 'Philosophy', icon: Leaf, pages: ['home', 'about'],
       fields: [
         { type: 'text',     path: 'philosophy.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'philosophy.heading',    label: 'Heading', rows: 2 },
@@ -101,7 +101,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'journey', label: 'Journey', icon: Sparkles, page: 'treatments',
+      id: 'journey', label: 'Journey', icon: Sparkles, pages: ['treatments', 'about'],
       fields: [
         { type: 'textarea', path: 'journey.heading',    label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'journey.subheading', label: 'Subheading', rows: 2 },
@@ -174,7 +174,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'booking_cta', label: 'Booking CTA', icon: Calendar, page: 'home',
+      id: 'booking_cta', label: 'Booking CTA', icon: Calendar, pages: ['home', 'contact'],
       fields: [
         { type: 'text',     path: 'booking_cta.eyebrow',    label: 'Eyebrow' },
         { type: 'textarea', path: 'booking_cta.heading',    label: 'Heading', rows: 2 },

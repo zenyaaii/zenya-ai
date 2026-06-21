@@ -40,7 +40,8 @@ export default function ClickToEditOverlay({
   doc,
   iframe,
   onPick,
-  panelToView,
+  panelToViews,
+  currentView,
   onViewChange,
 }: {
   /** The iframe's document (null until the preview is ready). */
@@ -48,8 +49,13 @@ export default function ClickToEditOverlay({
   /** The iframe element, for translating rects into the parent viewport. */
   iframe: HTMLIFrameElement | null
   onPick: (panelId: string) => void
-  /** Map panelId → view id, so clicking a section on another page also switches the page. */
-  panelToView?: Record<string, string>
+  /** Map panelId → every view the section appears in. Clicking a section only
+   *  switches the page when the section is NOT already on the current view —
+   *  sections shared across pages (e.g. Philosophy on Home + About) must not
+   *  yank the user away from the page they're editing. */
+  panelToViews?: Record<string, string[]>
+  /** The view currently shown in the preview. */
+  currentView?: string
   onViewChange?: (view: string) => void
 }) {
   const [hovered, setHovered] = useState<{ panelId: string; rect: Rect } | null>(null)
@@ -103,7 +109,11 @@ export default function ClickToEditOverlay({
       if (!panelId) return
       e.preventDefault()
       e.stopPropagation()
-      if (panelToView && panelToView[panelId] && onViewChange) onViewChange(panelToView[panelId])
+      // Only switch the page if the clicked section isn't on the current view.
+      const views = panelToViews?.[panelId]
+      if (views && views.length && onViewChange && (!currentView || !views.includes(currentView))) {
+        onViewChange(views[0])
+      }
       onPick(panelId)
     }
 
@@ -128,7 +138,7 @@ export default function ClickToEditOverlay({
       window.removeEventListener('scroll', reposition, true)
       window.removeEventListener('resize', reposition)
     }
-  }, [doc, iframe, onPick, panelToView, onViewChange])
+  }, [doc, iframe, onPick, panelToViews, currentView, onViewChange])
 
   if (!hovered) return null
   const { rect } = hovered

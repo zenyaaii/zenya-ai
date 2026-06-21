@@ -47,7 +47,7 @@ const TEMPLATES: Template[] = [
     gradient: 'linear-gradient(135deg, #5e6ad2 0%, #7170ff 100%)',
     image: themePreview('one_product'),
     demoHref: '/demo',
-    buildHref: '/theme/new',
+    buildHref: '/build',
   },
   {
     id: 'atlas',

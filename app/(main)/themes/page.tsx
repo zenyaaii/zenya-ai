@@ -2,10 +2,8 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import {
   ArrowUpRight,
-  Sparkles,
   Layers,
   Palette,
   Utensils,
@@ -19,206 +17,172 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
+import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 import { auroraTints, BUSINESS_TYPE_ORDER, type AuroraTint } from '@/lib/aurora-tints'
 import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
 import { cn } from '@/lib/utils'
 
 type ThemeCard = {
-  /** Internal business_type key. Drives aurora tint lookup. */
+  /** Internal business_type key. Drives aurora tint + cover lookup. */
   id: keyof typeof auroraTints
-  /** Display name shown on the card. */
-  name: string
-  /** Short business descriptor. */
+  /** Short business descriptor shown above the title. */
   tagline: string
-  /** Long description for the card body. */
+  /** One-line description for the card body. */
   description: string
-  /** Cover photo URL. */
-  cover: string
-  /** Number of style presets the user can pick from in the wizard. */
+  /** Number of style presets the wizard offers. */
   presets: number
   /** Number of pre-built sections in the template. */
   sections: number
   /** No-auth live preview URL. */
   demoHref: string
-  /** Wizard URL that lets a logged-in user start building. */
+  /** Where "ابنِ بهذا" goes — the real wizard / builder for this template. */
   createHref: string
   /** Icon shown in the card chip. */
   icon: LucideIcon
-  /** When true, this card gets the large spotlight treatment. */
-  featured?: boolean
+  /** When true, this is the Shopify-exportable template (vs hosted site). */
+  shopify?: boolean
 }
 
-const THEMES: ThemeCard[] = [
-  {
-    id: 'restaurant',
-    name: 'مطعم',
-    tagline: 'مطاعم راقية · فاخر',
+/**
+ * The 8 canonical templates — one entry per business_type, ordered to match the
+ * marketing surface. Build links point straight at each template's wizard (or
+ * /build for the Shopify one-product flow) so this page IS the single picker —
+ * there's no second gallery to keep in sync.
+ */
+const THEMES: Record<keyof typeof auroraTints, Omit<ThemeCard, 'id'>> = {
+  one_product: {
+    tagline: 'متجر شوبيفاي · منتج واحد',
     description:
-      'موقع مطعم تحريري للمطاعم وقاعات التذوّق وطاولات الشيف. قائمة بتبويبات، ومعرض، وحجوزات، وساعات عمل، وحائط صحافة — متجاوب بالكامل.',
-    cover: themePreview('restaurant'),
-    presets: 4,
-    sections: 13,
-    demoHref: '/demo/restaurant',
-    createHref: '/theme/new?type=restaurant',
-    icon: Utensils,
-    featured: true,
-  },
-  {
-    id: 'one_product',
-    name: 'متجر',
-    tagline: 'منتج واحد · دروبشيبينغ',
-    description:
-      'ثيم شوبيفاي بمنتج واحد يركّز على التحويل. مسار بيع، وزر إضافة ثابت، وحزم، ومقارنة، وأسئلة شائعة، وإلحاح، وصفحة منتج كاملة التصميم. يُصدَّر كملف شوبيفاي OS 2.0.',
-    cover: themePreview('one_product'),
+      'ثيم شوبيفاي بمنتج واحد يركّز على التحويل: مسار بيع، وزر إضافة ثابت، وحزم، ومقارنة، وأسئلة شائعة، وإلحاح. يُصدَّر كثيم OS 2.0.',
     presets: 3,
     sections: 24,
     demoHref: '/demo',
-    createHref: '/theme/new',
+    createHref: '/build',
     icon: ShoppingBag,
+    shopify: true,
   },
-  {
-    id: 'atlas',
-    name: 'تطبيق',
-    tagline: 'تطبيقات · برمجيات',
+  restaurant: {
+    tagline: 'مطعم · قائمة · حجوزات',
     description:
-      'قالب صفحة هبوط عصري للبرمجيات. واجهة منتج، وشبكة مزايا، وباقات أسعار، وتكاملات، وشريط ثقة أمني، ودعوة لعرض توضيحي.',
-    cover: themePreview('atlas'),
-    presets: 4,
-    sections: 12,
-    demoHref: '/demo/atlas',
-    createHref: '/theme/new/atlas',
-    icon: LayoutDashboard,
-  },
-  {
-    id: 'services',
-    name: 'خدمات',
-    tagline: 'خدمات محلية · حِرف',
-    description:
-      'للسبّاكين والصالونات وشركات التنظيف والخدمات المنزلية والوكالات. واجهة فاخرة، وخدمات، وإثبات، وقبل/بعد، ومناطق الخدمة، وتقييمات، وأسئلة شائعة، ومسار طلب عرض سعر.',
-    cover: themePreview('services'),
-    presets: 4,
-    sections: 13,
-    demoHref: '/demo/services',
-    createHref: '/theme/new/services',
-    icon: Wrench,
-  },
-  {
-    id: 'collective',
-    name: 'تشكيلة',
-    tagline: 'كتالوج · منتجات متعددة',
-    description:
-      'متجر فاخر متعدد العلامات بواجهة مضيئة، وشبكة مجموعات منسّقة، ووافدون جدد، والأكثر مبيعًا، ووعد العلامة، وشهادات، ونشرة بريدية.',
-    cover: themePreview('collective'),
-    presets: 4,
-    sections: 10,
-    demoHref: '/demo/collective',
-    createHref: '/theme/new/collective',
-    icon: Store,
-  },
-  {
-    id: 'studio',
-    name: 'ستوديو',
-    tagline: 'قصة علامة · تحرير',
-    description:
-      'صفحة قصة علامة تحريرية بخط عرض ضخم، ورسالة المؤسّس، وخط زمني، وقيم، ومنهجية، وفريق، وحائط صحافة، وإحصاءات مجتمع.',
-    cover: themePreview('studio'),
-    presets: 4,
-    sections: 12,
-    demoHref: '/demo/studio',
-    createHref: '/theme/new/studio',
-    icon: Feather,
-  },
-  {
-    id: 'lookbook',
-    name: 'أزياء',
-    tagline: 'أزياء · ملابس',
-    description:
-      'قالب أزياء راقٍ بلوك بوك تحريري بملء الشاشة، ولافتة إصدار، وشبكة الأكثر مبيعًا، وقصة علامة، وحائط صحافة، وتقييمات، ونشرة بريدية.',
-    cover: themePreview('lookbook'),
-    presets: 4,
-    sections: 11,
-    demoHref: '/demo/lookbook',
-    createHref: '/theme/new/lookbook',
-    icon: Shirt,
-  },
-  {
-    id: 'wellness',
-    name: 'عافية',
-    tagline: 'سبا · عافية · ستوديو',
-    description:
-      'قالب هادئ للسبا واستوديوهات اليوغا وعلامات العافية. قائمة جلسات، وحجز، ومدرّبون، وجداول، وبطاقات هدايا.',
-    cover: themePreview('wellness'),
-    presets: 3,
-    sections: 12,
-    demoHref: '/demo/wellness',
-    createHref: '/theme/new/wellness',
-    icon: Leaf,
-  },
-  {
-    id: 'restaurant',
-    name: 'مقهى',
-    tagline: 'مطعم · مقهى · بار',
-    description:
-      'قالب شهيّ للمطاعم والمقاهي والبارات. واجهة بدعوة للحجز، وقائمة، وقصة، ومعرض، وساعات عمل، وتواصل، وشريط صحافة.',
-    cover: themePreview('restaurant'),
+      'موقع مطعم تحريري راقٍ: قائمة بتبويبات، ومعرض صور، وساعات عمل، وحجوزات، وحائط صحافة، وقصة الشيف — متجاوب بالكامل.',
     presets: 4,
     sections: 13,
     demoHref: '/demo/restaurant',
     createHref: '/theme/new/restaurant',
     icon: Utensils,
   },
-]
+  atlas: {
+    tagline: 'تطبيق · برمجيات · B2B',
+    description:
+      'صفحة هبوط عصرية للبرمجيات: واجهة منتج، وشبكة مزايا، وباقات أسعار، وتكاملات، وشريط ثقة أمني، ودعوة لعرض توضيحي.',
+    presets: 4,
+    sections: 12,
+    demoHref: '/demo/atlas',
+    createHref: '/theme/new/atlas',
+    icon: LayoutDashboard,
+  },
+  lookbook: {
+    tagline: 'أزياء · ملابس · علامة',
+    description:
+      'قالب أزياء راقٍ بلوك بوك تحريري بملء الشاشة، ولافتة إصدار، وشبكة الأكثر مبيعًا، وقصة علامة، وحائط صحافة، ونشرة بريدية.',
+    presets: 4,
+    sections: 11,
+    demoHref: '/demo/lookbook',
+    createHref: '/theme/new/lookbook',
+    icon: Shirt,
+  },
+  collective: {
+    tagline: 'كتالوج · منتجات متعددة',
+    description:
+      'متجر فاخر متعدد العلامات بواجهة مضيئة، وشبكة مجموعات منسّقة، ووافدون جدد، والأكثر مبيعًا، ووعد العلامة، ونشرة بريدية.',
+    presets: 4,
+    sections: 10,
+    demoHref: '/demo/collective',
+    createHref: '/theme/new/collective',
+    icon: Store,
+  },
+  studio: {
+    tagline: 'قصة علامة · تحرير',
+    description:
+      'صفحة قصة علامة تحريرية بخط عرض ضخم، ورسالة المؤسّس، وخط زمني، وقيم، ومنهجية، وفريق، وحائط صحافة، وإحصاءات مجتمع.',
+    presets: 4,
+    sections: 12,
+    demoHref: '/demo/studio',
+    createHref: '/theme/new/studio',
+    icon: Feather,
+  },
+  services: {
+    tagline: 'خدمات محلية · حِرف',
+    description:
+      'موقع خدمات فاخر: واجهة، وخدمات، وإثبات، وقبل/بعد، ومناطق الخدمة، وتقييمات، وأسئلة شائعة، ومسار طلب عرض سعر.',
+    presets: 4,
+    sections: 13,
+    demoHref: '/demo/services',
+    createHref: '/theme/new/services',
+    icon: Wrench,
+  },
+  wellness: {
+    tagline: 'سبا · يوغا · عافية',
+    description:
+      'قالب هادئ للسبا واستوديوهات اليوغا وعلامات العافية: قائمة جلسات، وحجز، ومدرّبون، وجداول، وبطاقات هدايا.',
+    presets: 3,
+    sections: 12,
+    demoHref: '/demo/wellness',
+    createHref: '/theme/new/wellness',
+    icon: Leaf,
+  },
+}
+
+/** Materialize the ordered card list from the canonical map + tint labels. */
+const THEME_CARDS: ThemeCard[] = BUSINESS_TYPE_ORDER.map((id) => ({
+  id,
+  ...THEMES[id],
+}))
 
 type Category = 'all' | 'sites' | 'shopify'
 
 const FILTERS: { id: Category; label: string }[] = [
-  { id: 'all',     label: 'كل القوالب'       },
-  { id: 'sites',   label: 'مواقع مُستضافة'   },
-  { id: 'shopify', label: 'تصدير شوبيفاي'    },
+  { id: 'all',     label: 'كل القوالب'     },
+  { id: 'sites',   label: 'مواقع مُستضافة' },
+  { id: 'shopify', label: 'تصدير شوبيفاي'  },
 ]
 
 export default function ThemesPage() {
   const [filter, setFilter] = useState<Category>('all')
 
   const visible = useMemo(() => {
-    if (filter === 'shopify') return THEMES.filter((t) => t.id === 'one_product')
-    if (filter === 'sites')   return THEMES.filter((t) => t.id !== 'one_product')
-    return THEMES
+    if (filter === 'shopify') return THEME_CARDS.filter((t) => t.shopify)
+    if (filter === 'sites')   return THEME_CARDS.filter((t) => !t.shopify)
+    return THEME_CARDS
   }, [filter])
 
-  const featured = THEMES.find((t) => t.featured)
-  const total = THEMES.length
+  const total = THEME_CARDS.length
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Global cream + indigo aurora wash (fixed so it sits behind the long scroll) */}
+      {/* Global cream + indigo aurora wash, fixed behind the long scroll */}
       <AuroraBackground fixed intensity={0.85} />
 
-      <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
-        {/* ── Header ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-12 text-center"
-        >
+      <main className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
+        {/* ── Page header ── */}
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-token bg-white/60 px-3 py-1.5 text-[12px] font-medium text-muted backdrop-blur-md">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            جميع القوالب الـ{total} متاحة · والمزيد شهريًا
+            القوالب الـ{total} متاحة · والمزيد شهريًا
           </div>
-          <h1 className="text-[52px] font-[590] leading-[1.12] tracking-[-1.6px] text-foreground sm:text-[64px] sm:tracking-[-2px]">
+          <h1 className="heading-ar text-[clamp(40px,6vw,64px)] text-foreground">
             <span className="gradient-text">قوالب</span> لكل نشاط تجاري.
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-[16px] leading-[1.85] text-muted">
-            ثمانية قوالب مواقع مصمّمة بإتقان. اختر واحدًا، اكتب نبذتك، ويكتب ذكاء
-            زينيا الاصطناعي المحتوى ويصمّم الصفحة ويسلّمك معاينة مباشرة يمكنك نشرها اليوم.
+          <p className="mx-auto mt-5 max-w-xl text-[16px] leading-[1.85] text-muted">
+            ثمانية قوالب مصمَّمة بإتقان. اختر واحدًا، اكتب نبذتك، ويكتب ذكاء زينيا
+            المحتوى ويصمّم الصفحة ويسلّمك معاينة مباشرة جاهزة للنشر اليوم.
           </p>
 
           {/* Filters */}
-          <div className="mt-10 inline-flex items-center gap-1 rounded-full border border-token bg-white/60 p-1 backdrop-blur-md shadow-soft-md">
+          <div className="mt-9 inline-flex items-center gap-1 rounded-full border border-token bg-white/60 p-1 shadow-soft-md backdrop-blur-md">
             {FILTERS.map((f) => (
               <button
                 key={f.id}
@@ -234,21 +198,14 @@ export default function ThemesPage() {
               </button>
             ))}
           </div>
-        </motion.div>
+        </Reveal>
 
-        {/* ── Featured spotlight ── */}
-        {featured && filter !== 'shopify' && (
-          <FeaturedCard theme={featured} tint={auroraTints[featured.id]} />
-        )}
-
-        {/* ── Grid ── */}
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visible
-            .filter((t) => !(filter !== 'shopify' && t.id === featured?.id))
-            .map((t, i) => (
-              <ThemeGridCard key={t.id} theme={t} tint={auroraTints[t.id]} index={i} />
-            ))}
-        </div>
+        {/* ── All templates grid ── */}
+        <RevealGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((t) => (
+            <ThemeGridCard key={t.id} theme={t} tint={auroraTints[t.id]} />
+          ))}
+        </RevealGroup>
 
         {/* ── Bottom CTA ── */}
         <BottomCTA />
@@ -259,151 +216,27 @@ export default function ThemesPage() {
 
 /* ────────────────────────────────────────────────────────────── */
 
-function FeaturedCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
+function ThemeGridCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
   const Icon = theme.icon
+  const accentText = tint.accent === '#1c1c1c' ? '#1c1c1c' : tint.accent
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="relative overflow-hidden rounded-[28px] border border-token bg-white shadow-soft-lg"
-    >
-      {/* Per-type aurora wash behind the whole card */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: `radial-gradient(ellipse 70% 100% at 100% 0%, ${tint.orb1}, transparent 60%)`,
-        }}
-      />
-
-      <div className="relative grid lg:grid-cols-[1.15fr_1fr]">
-        <div className="relative h-[360px] sm:h-[440px] lg:h-auto">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={theme.cover}
-            alt={theme.name}
-            className="absolute inset-0 h-full w-full object-cover"
-            onError={(e) => {
-              const fb = themePreviewFallback(theme.id)
-              if (e.currentTarget.src !== fb) e.currentTarget.src = fb
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
-          <div className="absolute start-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/30 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
-            <Sparkles className="h-3 w-3" strokeWidth={2.25} />
-            مميّز · إصدار جديد
-          </div>
-          <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-3 text-white">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-white/80">{theme.tagline}</p>
-              <h2 className="mt-1 text-[40px] font-[590] tracking-[-1.4px] sm:text-[48px]">{theme.name}</h2>
-            </div>
-            <span
-              className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
-              style={{ background: tint.accent, color: '#0a0a0c' }}
-            >
-              مباشر
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-center p-8 sm:p-10 lg:p-12">
-          <div
-            className="mb-4 inline-flex w-fit items-center gap-2 rounded-full bg-foreground/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-foreground"
-          >
-            <Icon className="h-3 w-3" strokeWidth={2.25} style={{ color: tint.accent }} />
-            {theme.tagline.split(' · ')[0]}
-          </div>
-          <h3 className="text-[32px] font-[590] leading-[1.15] tracking-[-1.1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
-            تميّزٌ يسكنه الهدوء.
-          </h3>
-          <p className="mt-4 text-[14.5px] leading-[1.85] text-muted">{theme.description}</p>
-
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <Stat label="أنماط جاهزة" value={String(theme.presets)} icon={Palette} />
-            <Stat label="أقسام"       value={String(theme.sections)} icon={Layers} />
-            <Stat label="بالذكاء الاصطناعي" value="100%"            icon={Sparkles} />
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href={theme.demoHref}
-              className="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-semibold transition-all hover:scale-[1.02]"
-              style={{
-                background: tint.accent,
-                color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c',
-                boxShadow: 'rgba(28,28,28,0.10) 0px 1px 3px 0px',
-              }}
-            >
-              شاهد العرض الحي
-              <ArrowUpRight className="h-3 w-3 rtl-flip transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
-            </Link>
-            <Link
-              href={theme.createHref}
-              className="inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-5 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
-            >
-              ابنِ بهذا
-            </Link>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string
-  value: string
-  icon: LucideIcon
-}) {
-  return (
-    <div className="rounded-xl border border-token bg-white/70 p-3 backdrop-blur-md">
-      <div className="mb-1 flex items-center gap-1.5 text-muted">
-        <Icon className="h-3 w-3" strokeWidth={2} />
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em]">{label}</p>
-      </div>
-      <p className="text-[20px] font-[590] tracking-[-0.5px] text-foreground">{value}</p>
-    </div>
-  )
-}
-
-function ThemeGridCard({
-  theme,
-  tint,
-  index,
-}: {
-  theme: ThemeCard
-  tint: AuroraTint
-  index: number
-}) {
-  const Icon = theme.icon
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.04 * index, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white shadow-soft-md backdrop-blur-md transition-all duration-200 hover:-translate-y-1 hover:shadow-soft-lg"
+    <RevealItem
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white shadow-soft-md ring-hover card-sheen transition-transform duration-300 hover:-translate-y-1"
     >
       {/* Per-type aurora wash on hover */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${tint.orb1}, transparent 70%)`,
-        }}
+        style={{ background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${tint.orb1}, transparent 70%)` }}
       />
 
       {/* Cover */}
       <div className="relative aspect-[16/10] overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={theme.cover}
-          alt={theme.name}
+          src={themePreview(theme.id)}
+          alt={tint.label}
+          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
           onError={(e) => {
             const fb = themePreviewFallback(theme.id)
@@ -412,10 +245,7 @@ function ThemeGridCard({
         />
         <div
           className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)',
-          }}
+          style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.55) 100%)' }}
         />
         {/* Accent stripe */}
         <div className="absolute left-0 top-0 h-1 w-full" style={{ background: tint.accent }} />
@@ -425,14 +255,14 @@ function ThemeGridCard({
             className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
             style={{ background: tint.accent, color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c' }}
           >
-            مباشر
+            {theme.shopify ? 'شوبيفاي' : 'مباشر'}
           </span>
         </div>
         {/* Bottom title overlay */}
-        <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between text-white">
+        <div className="absolute bottom-4 right-5 left-5 flex items-end justify-between text-white">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-white/80">{theme.tagline}</p>
-            <h3 className="mt-0.5 text-[24px] font-[590] tracking-[-0.6px]">{theme.name}</h3>
+            <h3 className="mt-0.5 text-[24px] font-[590] tracking-[-0.6px]">{tint.label}</h3>
           </div>
         </div>
       </div>
@@ -444,56 +274,50 @@ function ThemeGridCard({
         <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em]">
           <span
             className="inline-flex items-center gap-1 rounded-full px-2.5 py-1"
-            style={{ background: `${tint.accent}1a`, color: tint.accent === '#1c1c1c' ? '#1c1c1c' : tint.accent }}
+            style={{ background: `${tint.accent}1a`, color: accentText }}
           >
             <Icon className="h-2.5 w-2.5" strokeWidth={2.25} />
             {theme.tagline.split(' · ')[0]}
           </span>
-          <span className="rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
-            {theme.sections} أقسام
+          <span className="inline-flex items-center gap-1 rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
+            <Layers className="h-2.5 w-2.5" strokeWidth={2.25} />
+            {theme.sections} قسمًا
           </span>
-          <span className="rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
+          <span className="inline-flex items-center gap-1 rounded-full border border-token bg-white/60 px-2.5 py-1 text-muted">
+            <Palette className="h-2.5 w-2.5" strokeWidth={2.25} />
             {theme.presets} أنماط
           </span>
         </div>
 
-        <div className="mt-auto pt-5">
-          <div className="flex items-center gap-2">
-            <Link
-              href={theme.demoHref}
-              className="flex-1 rounded-full px-4 py-2.5 text-center text-[13px] font-semibold transition hover:scale-[1.02]"
-              style={{
-                background: tint.accent,
-                color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c',
-                boxShadow: 'rgba(28,28,28,0.08) 0px 1px 2px 0px',
-              }}
-            >
-              شاهد العرض
-            </Link>
-            <Link
-              href={theme.createHref}
-              className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
-              aria-label={`ابنِ بقالب ${theme.name}`}
-            >
-              ابنِ
-            </Link>
-          </div>
+        <div className="mt-auto flex items-center gap-2 pt-5">
+          <Link
+            href={theme.demoHref}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold transition hover:scale-[1.02]"
+            style={{
+              background: tint.accent,
+              color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c',
+              boxShadow: 'rgba(28,28,28,0.08) 0px 1px 2px 0px',
+            }}
+          >
+            شاهد العرض
+            <ArrowUpRight className="h-3 w-3 rtl-flip transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
+          </Link>
+          <Link
+            href={theme.createHref}
+            className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
+            aria-label={`ابنِ بقالب ${tint.label}`}
+          >
+            ابنِ
+          </Link>
         </div>
       </div>
-    </motion.div>
+    </RevealItem>
   )
 }
 
 function BottomCTA() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mt-20 overflow-hidden rounded-3xl border border-token bg-white/70 p-10 text-center backdrop-blur-xl"
-    >
-      {/* Soft indigo wash, monochromatic — no fuchsia */}
+    <Reveal className="relative mt-20 overflow-hidden rounded-3xl border border-token bg-white/70 p-10 text-center backdrop-blur-xl">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -502,11 +326,8 @@ function BottomCTA() {
             'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(94,106,210,0.10), transparent 65%), radial-gradient(ellipse 60% 80% at 50% 100%, rgba(217,119,6,0.06), transparent 70%)',
         }}
       />
-
       <div className="relative">
-        <h2 className="text-[28px] font-[590] tracking-[-0.8px] text-foreground sm:text-[36px] sm:tracking-[-1.2px]">
-          لا تجد نوع نشاطك؟
-        </h2>
+        <h2 className="heading-ar text-[clamp(28px,4vw,40px)] text-foreground">لا تجد نوع نشاطك؟</h2>
         <p className="mx-auto mt-3 max-w-xl text-[15px] text-muted">
           نضيف قوالب جديدة كل شهر. أخبرنا بما تحتاجه وسنمنحه الأولوية.
         </p>
@@ -518,13 +339,13 @@ function BottomCTA() {
             اطلب قالبًا
           </Link>
           <Link
-            href="/theme/new"
+            href="/build"
             className="rounded-full border border-token bg-white/70 px-6 py-3 text-[13.5px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
           >
             ابدأ الإنشاء الآن
           </Link>
         </div>
       </div>
-    </motion.div>
+    </Reveal>
   )
 }

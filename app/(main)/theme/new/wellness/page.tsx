@@ -8,6 +8,7 @@ import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
 import type { WellnessInput } from '@/utils/wellness/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import GenerationOverlay from '@/components/GenerationOverlay'
 
 type Treatment = { id: string; name: string; category: string; duration: string; price: string; description: string; badge: string }
 type TeamMember = { id: string; name: string; title: string; specialty: string; bio: string; image_url: string }
@@ -144,6 +145,10 @@ export default function WellnessWizardPage() {
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Honesty gate: the user must acknowledge that parts of the generated site
+  // are AI-invented placeholders before we build it.
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [acked, setAcked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -263,6 +268,16 @@ export default function WellnessWizardPage() {
     }
   }
 
+  // Entry point from the CTA: validate first, then make the user pass the
+  // honesty gate once before the build runs.
+  function startGenerate() {
+    setError(null)
+    const err = validate()
+    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!acked) { setDisclaimerOpen(true); return }
+    void handleGenerate()
+  }
+
   async function handleGenerate() {
     setError(null)
     const err = validate()
@@ -299,7 +314,7 @@ export default function WellnessWizardPage() {
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/wellness'); return }
       if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
-      router.push(`/preview/wellness/${saveJson.id}`)
+      router.push(`/preview/wellness/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
@@ -573,7 +588,7 @@ export default function WellnessWizardPage() {
             <button
               type="button"
               disabled={loading}
-              onClick={handleGenerate}
+              onClick={startGenerate}
               className="whitespace-nowrap rounded-full px-8 py-3.5 text-sm font-bold transition hover:scale-[1.02] disabled:opacity-60"
               style={{ background: selectedPreset.colors.accent, color: selectedPreset.id === 'noir' ? '#0e0e0e' : selectedPreset.colors.text }}
             >
@@ -582,6 +597,91 @@ export default function WellnessWizardPage() {
           </div>
         </div>
       </main>
+
+      {/* Honesty gate — shown once before the first build. */}
+      <AiContentDisclaimer
+        open={disclaimerOpen}
+        onClose={() => setDisclaimerOpen(false)}
+        onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+      />
+
+      {/* Building animation — sections mix into a dot while we generate. */}
+      <GenerationOverlay open={loading} />
+    </div>
+  )
+}
+
+/* ─── AI-content honesty gate ──────────────────────────────────────────
+ * Wellness sites lean on invented copy: therapist bios, testimonials,
+ * ratings, certifications. The merchant must own verifying/replacing it. */
+function AiContentDisclaimer({
+  open, onClose, onConfirm,
+}: { open: boolean; onClose: () => void; onConfirm: () => void }) {
+  if (!open) return null
+  const items = [
+    'سِيَر الفريق وأسماؤهم وتخصّصاتهم',
+    'التقييمات وآراء العملاء',
+    'متوسط التقييم وعدد المراجعات',
+    'الشهادات والعضويات',
+    'أي وصف أو نصّ يُترك فارغًا فيكتبه الذكاء الاصطناعي',
+  ]
+  return (
+    <div
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="تنبيه بمحتوى مولَّد بالذكاء الاصطناعي"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+      >
+        <div className="border-b border-token bg-amber-50 px-6 py-5">
+          <h2 className="text-base font-bold text-foreground">
+            تنبيه — بعض محتوى القالب من إنشاء الذكاء الاصطناعي
+          </h2>
+          <p className="mt-1 text-[12.5px] text-muted">
+            نملأ الفراغات بأمثلة واقعية حتى يكتمل تصميم موقعك — لكنها ليست معلومات حقيقية.
+          </p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <p className="text-[13px] text-muted">قد يشمل المحتوى المولَّد:</p>
+          <ul className="mt-3 space-y-2">
+            {items.map((t) => (
+              <li key={t} className="flex items-start gap-2.5 rounded-xl border border-token bg-surface/60 p-3 text-[13px] text-foreground">
+                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="border-t border-token px-6 py-4">
+          <p className="mb-3 text-[12px] leading-relaxed text-muted">
+            بالمتابعة، تُقرّ بأن هذه التفاصيل أمثلة مولَّدة لإكمال تصميم الموقع فقط، وأن
+            مسؤوليتك مراجعتها واستبدالها بمعلوماتك الحقيقية قبل النشر. زينيا غير مسؤولة عن
+            أي ضرر ينتج عن نشر معلومات غير صحيحة.
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+            >
+              رجوع
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="rounded-full bg-foreground px-6 py-2.5 text-[13.5px] font-semibold text-white transition hover:scale-[1.02]"
+            >
+              فهمت — أكمل التوليد
+            </button>
+          </div>
+        </div>
+      </motion.div>
     </div>
   )
 }
