@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils'
  * mark appears (footer signature, payment screen, etc.).
  */
 
-/** Drop the official logo here. Change to '/brand/wordmark.png' if you export PNG. */
-const LOGO_SRC = '/brand/wordmark.svg'
+/** Drop the official logo here. Change to '/brand/wordmark.svg' if you export SVG. */
+const LOGO_SRC = '/brand/wordmark.png'
 
 export default function BrandLogo({
   className,
