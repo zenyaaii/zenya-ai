@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -9,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, LayoutDashboard, Settings, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import ZenyaWordmark from '@/components/ZenyaWordmark'
+import ZenyaMark from '@/components/ZenyaMark'
 
 type NavItem = { href: string; label: string }
 
@@ -103,20 +102,10 @@ export default function Navbar() {
                  guests stay on the marketing site ── */}
           <Link
             href={user ? '/dashboard' : '/'}
-            className="group flex items-center gap-2.5"
+            className="group flex items-center"
             aria-label={user ? 'الذهاب إلى لوحة التحكم' : 'الصفحة الرئيسية لزينيا'}
           >
-            <div
-              className="relative h-7 w-7 overflow-hidden rounded-lg transition-transform duration-200 group-hover:scale-[1.04]"
-              style={{
-                background: '#5e6ad2',
-                boxShadow:
-                  'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
-              }}
-            >
-              <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
-            </div>
-            <ZenyaWordmark className="text-[17px]" />
+            <ZenyaMark className="h-5 text-[#16171b] transition-transform duration-200 group-hover:scale-[1.03]" />
           </Link>
 
           {/* ── Desktop nav ── */}
