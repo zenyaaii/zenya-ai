@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
 import ServicesPreview from '@/components/theme/services/ServicesPreview'
 import type { ServiceContent } from '@/utils/services/types'
 
@@ -18,6 +19,15 @@ export default function ServicesPreviewPage() {
   const [name, setName] = useState<string>('خدمة محلية')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -103,6 +113,12 @@ export default function ServicesPreviewPage() {
         presetId={presetId}
         colorOverrides={colorOverrides}
         typographyPreset={typographyPreset}
+      />
+      <BuildSuccessOverlay
+        open={celebrate}
+        name={name}
+        editHref={`/preview/services/${params.id}/edit`}
+        onPreview={() => setCelebrate(false)}
       />
     </div>
   )

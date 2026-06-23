@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
+import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
 import RestaurantPreview from '@/components/theme/restaurant/RestaurantPreview'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import type { RestaurantContent } from '@/utils/restaurant/types'
@@ -17,6 +18,15 @@ export default function RestaurantPreviewPage() {
   const [name, setName] = useState<string>('مطعم')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -113,6 +123,12 @@ export default function RestaurantPreviewPage() {
         />
       )}
       <RestaurantPreview content={content} presetId={presetId} />
+      <BuildSuccessOverlay
+        open={celebrate}
+        name={name}
+        editHref={`/preview/restaurant/${params.id}/edit`}
+        onPreview={() => setCelebrate(false)}
+      />
     </div>
   )
 }

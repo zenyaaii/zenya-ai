@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
 import CollectivePreview from '@/components/theme/collective/CollectivePreview'
 import type { CollectiveContent } from '@/utils/collective/types'
 
@@ -16,6 +17,15 @@ export default function CollectivePreviewPage() {
   const [name, setName] = useState<string>('متجر كتالوج')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -95,6 +105,11 @@ export default function CollectivePreviewPage() {
         </div>
       </div>
       <CollectivePreview content={content} presetId={presetId} />
+      <BuildSuccessOverlay
+        open={celebrate}
+        name={name}
+        onPreview={() => setCelebrate(false)}
+      />
     </div>
   )
 }

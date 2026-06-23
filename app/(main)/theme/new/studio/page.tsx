@@ -8,6 +8,8 @@ import { STUDIO_PRESETS } from '@/utils/studio/presets'
 import type { StudioInput } from '@/utils/studio/input'
 import type { StudioStylePresetId } from '@/utils/studio/types'
 import DevFillButton from '@/components/DevFillButton'
+import GenerationOverlay from '@/components/GenerationOverlay'
+import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -107,6 +109,8 @@ export default function StudioWizardPage() {
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -192,6 +196,14 @@ export default function StudioWizardPage() {
     }
   }
 
+  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function startGenerate() {
+    const err = validate()
+    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!acked) { setDisclaimerOpen(true); return }
+    void handleGenerate()
+  }
+
   async function handleGenerate() {
     setError(null)
     const err = validate()
@@ -228,7 +240,7 @@ export default function StudioWizardPage() {
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/studio'); return }
       if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
-      router.push(`/preview/studio/${saveJson.id}`)
+      router.push(`/preview/studio/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
@@ -517,7 +529,7 @@ export default function StudioWizardPage() {
           <motion.div {...sectionMotion} className="flex flex-col items-center gap-4 pt-4">
             <button
               type="button"
-              onClick={handleGenerate}
+              onClick={startGenerate}
               disabled={loading}
               className="flex items-center gap-3 rounded-full bg-gradient-to-r from-stone-800 to-stone-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-500/25 transition hover:scale-105 hover:shadow-stone-500/40 disabled:opacity-60 disabled:hover:scale-100"
             >
@@ -533,6 +545,13 @@ export default function StudioWizardPage() {
           </motion.div>
         </div>
       </main>
+
+      <AiContentDisclaimer
+        open={disclaimerOpen}
+        onClose={() => setDisclaimerOpen(false)}
+        onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+      />
+      <GenerationOverlay open={loading} />
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { SERVICE_PRESETS } from '@/utils/services/presets'
 import type { ServiceInput } from '@/utils/services/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import GenerationOverlay from '@/components/GenerationOverlay'
+import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
 type Form = {
   brand_name: string
@@ -133,6 +135,8 @@ export default function ServicesWizardPage() {
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [acked, setAcked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -253,6 +257,20 @@ export default function ServicesWizardPage() {
     }
   }
 
+  // Entry point from the CTA: validate, then make the user pass the honesty
+  // gate once before the build runs.
+  function startGenerate() {
+    setError(null)
+    const validationError = validate()
+    if (validationError) {
+      setError(validationError)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (!acked) { setDisclaimerOpen(true); return }
+    void handleGenerate()
+  }
+
   async function handleGenerate() {
     setError(null)
     const validationError = validate()
@@ -305,7 +323,7 @@ export default function ServicesWizardPage() {
       if (!saveRes.ok || !saveJson?.id) {
         throw new Error(saveJson?.error || 'فشل الحفظ')
       }
-      router.push(`/preview/services/${saveJson.id}`)
+      router.push(`/preview/services/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما أثناء توليد موقعك.')
       setLoading(false)
@@ -556,7 +574,7 @@ export default function ServicesWizardPage() {
             <button
               type="button"
               disabled={loading}
-              onClick={handleGenerate}
+              onClick={startGenerate}
               className="rounded-full bg-sky-400 px-8 py-3.5 text-sm font-bold text-slate-950 transition hover:scale-[1.02] disabled:opacity-60"
             >
               {loading ? 'جارٍ توليد موقعك...' : 'ولّد قالب الحِرَف'}
@@ -564,6 +582,13 @@ export default function ServicesWizardPage() {
           </div>
         </div>
       </main>
+
+      <AiContentDisclaimer
+        open={disclaimerOpen}
+        onClose={() => setDisclaimerOpen(false)}
+        onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+      />
+      <GenerationOverlay open={loading} />
     </div>
   )
 }

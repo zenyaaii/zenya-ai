@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
 import StudioPreview from '@/components/theme/studio/StudioPreview'
 import type { StudioContent } from '@/utils/studio/types'
 
@@ -18,6 +19,15 @@ export default function StudioPreviewPage() {
   const [name, setName] = useState<string>('قصة علامة تجارية')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -118,6 +128,12 @@ export default function StudioPreviewPage() {
         presetId={presetId}
         colorOverrides={colorOverrides}
         typographyPreset={typographyPreset}
+      />
+      <BuildSuccessOverlay
+        open={celebrate}
+        name={name}
+        editHref={`/preview/studio/${params.id}/edit`}
+        onPreview={() => setCelebrate(false)}
       />
     </div>
   )

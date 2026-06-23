@@ -7,6 +7,8 @@ import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import type { RestaurantInput, RestaurantTypeId } from '@/utils/restaurant/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import GenerationOverlay from '@/components/GenerationOverlay'
+import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
@@ -250,6 +252,8 @@ export default function RestaurantWizardPage() {
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [restoredDraft, setRestoredDraft] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // ── Auth + draft restore ────────────────────────────────────────────
@@ -451,6 +455,14 @@ export default function RestaurantWizardPage() {
     return { total, valid, dropped: total - valid }
   })()
 
+  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function startGenerate() {
+    const err = validate()
+    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!acked) { setDisclaimerOpen(true); return }
+    void handleGenerate()
+  }
+
   async function handleGenerate() {
     setError(null)
     const err = validate()
@@ -515,7 +527,7 @@ export default function RestaurantWizardPage() {
       // Keep the draft in localStorage so the user can come back and
       // tweak / regenerate — we don't clear it until they explicitly
       // hit "Start fresh".
-      router.push(`/preview/restaurant/${saveJson.id}`)
+      router.push(`/preview/restaurant/${saveJson.id}?created=1`)
     } catch (e: any) {
       setError(e?.message || 'حدث خطأ ما أثناء توليد موقعك.')
       setLoading(false)
@@ -983,7 +995,7 @@ export default function RestaurantWizardPage() {
             <button
               type="button"
               disabled={loading}
-              onClick={handleGenerate}
+              onClick={startGenerate}
               className="rounded-full bg-amber-400 px-8 py-3.5 text-sm font-bold text-black shadow-soft-md transition hover:scale-[1.02] disabled:opacity-60"
             >
               {loading ? 'جارٍ توليد موقعك…' : 'ولّد موقعي'}
@@ -991,6 +1003,13 @@ export default function RestaurantWizardPage() {
           </div>
         </div>
       </main>
+
+      <AiContentDisclaimer
+        open={disclaimerOpen}
+        onClose={() => setDisclaimerOpen(false)}
+        onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+      />
+      <GenerationOverlay open={loading} />
     </div>
   )
 }

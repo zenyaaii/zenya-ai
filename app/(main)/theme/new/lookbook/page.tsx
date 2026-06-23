@@ -8,6 +8,8 @@ import { LOOKBOOK_PRESETS } from '@/utils/lookbook/presets'
 import type { LookbookStylePresetId } from '@/utils/lookbook/types'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import GenerationOverlay from '@/components/GenerationOverlay'
+import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -99,6 +101,8 @@ export default function LookbookWizardPage() {
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false)
+  const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -145,6 +149,14 @@ export default function LookbookWizardPage() {
     const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
     if (validProducts.length < 1) return 'أضف منتجًا واحدًا على الأقل لملء اللوك بوك.'
     return null
+  }
+
+  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function startGenerate() {
+    const err = validate()
+    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (!acked) { setDisclaimerOpen(true); return }
+    void handleGenerate()
   }
 
   async function handleGenerate() {
@@ -213,7 +225,7 @@ export default function LookbookWizardPage() {
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/lookbook'); return }
       if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
-      router.push(`/preview/lookbook/${saveJson.id}`)
+      router.push(`/preview/lookbook/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
       setLoading(false)
@@ -413,7 +425,7 @@ export default function LookbookWizardPage() {
 
           {/* ── Generate ───────────────────────────────────────── */}
           <motion.div {...sm} className="flex flex-col items-center gap-4 pt-4">
-            <button type="button" onClick={handleGenerate} disabled={loading}
+            <button type="button" onClick={startGenerate} disabled={loading}
               className="flex items-center gap-3 rounded-full bg-stone-900 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-900/20 transition hover:scale-105 hover:bg-stone-800 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
@@ -426,6 +438,13 @@ export default function LookbookWizardPage() {
           </motion.div>
         </div>
       </main>
+
+      <AiContentDisclaimer
+        open={disclaimerOpen}
+        onClose={() => setDisclaimerOpen(false)}
+        onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+      />
+      <GenerationOverlay open={loading} />
     </div>
   )
 }

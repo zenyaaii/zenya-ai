@@ -5,10 +5,10 @@ import AuroraBackground from '@/components/marketing/AuroraBackground'
 /**
  * PageBackground — one continuous backdrop for an entire marketing page.
  *
- * It lifts the hero's own backdrop (the fine "boxes" grid + the aurora orb
- * wash) out to the page level and *fixes* it to the viewport, so every section
- * scrolls over the same texture instead of each one painting its own. The
- * result reads as a single unified background top-to-bottom.
+ * The hero's own backdrop (the fine "boxes" grid + the aurora orb wash) lifted
+ * to the page level and *fixed* to the viewport, so every section scrolls over
+ * the same texture instead of each one painting its own. Reads as a single
+ * unified background top-to-bottom.
  *
  * Sits at -z-10, pointer-events:none, so it never intercepts clicks. Sections
  * stay transparent (most already are) and show through; only opaque section

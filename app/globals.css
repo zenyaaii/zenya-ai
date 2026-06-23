@@ -2,10 +2,11 @@
 /* ── Arabic typeface — Tajawal: geometric, modern, full weight range.
    Primary UI + display face for the whole RTL product. ── */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
-/* ── Brand display face — Reem Kufi: geometric modern Kufic, used ONLY for the
-   giant زينيا signature so the wordmark reads as a designed logotype, not body
-   text. Kept off the rest of the UI on purpose. ── */
-@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&display=swap');
+/* ── Brand display face — Cairo: rounded, modern, fully-connected Arabic.
+   Used for the giant زينيا signature so the wordmark reads as a designed,
+   legible logotype (not the broken/blocky Kufic stretch). Kept off the rest
+   of the UI on purpose. ── */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -369,9 +370,24 @@
     mask-image: radial-gradient(ellipse 120% 90% at 50% 30%, #000 55%, transparent 100%);
   }
 
+  /* ── Soft "clouds" wash — the unified page backdrop ──
+     Layered, heavily-feathered radial gradients that read as soft luminous
+     clouds drifting over the cream canvas: cool indigo up top, warm peach/amber
+     toward the foot. No hard edges, no grid "boxes" — the whole page floats on
+     one continuous, calm gradient. Used fixed behind home + /themes so every
+     surface shares the same sky. */
+  .aurora-clouds {
+    background:
+      radial-gradient(ellipse 95% 60% at 50% -12%,  rgba(94,106,210,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 65% 50% at 10% 16%,   rgba(113,112,255,0.14) 0%, transparent 62%),
+      radial-gradient(ellipse 70% 55% at 88% 26%,   rgba(151,149,255,0.13) 0%, transparent 64%),
+      radial-gradient(ellipse 80% 50% at 50% 62%,   rgba(94,106,210,0.06)  0%, transparent 60%),
+      radial-gradient(ellipse 110% 60% at 50% 112%, rgba(217,119,6,0.12)   0%, transparent 60%);
+  }
+
   /* Brand signature face — the giant footer زينيا only. */
   .font-brandmark {
-    font-family: 'Reem Kufi', 'Tajawal', system-ui, sans-serif;
+    font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
   }
 
   /* ── Animated conic glow used behind hero mockup ── */

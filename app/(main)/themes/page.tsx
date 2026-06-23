@@ -160,8 +160,10 @@ export default function ThemesPage() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Global cream + indigo aurora wash, fixed behind the long scroll */}
-      <AuroraBackground fixed intensity={0.85} />
+      {/* Same unified backdrop as the home page: aurora orbs + the fine "boxes"
+          grid, fixed behind the long scroll. */}
+      <AuroraBackground fixed intensity={0.7} />
+      <div aria-hidden className="grid-fade-page pointer-events-none fixed inset-0 -z-10 opacity-70" />
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
         {/* ── Page header ── */}
@@ -221,7 +223,15 @@ function ThemeGridCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) 
   const accentText = tint.accent === '#1c1c1c' ? '#1c1c1c' : tint.accent
   return (
     <RevealItem
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white shadow-soft-md ring-hover card-sheen transition-transform duration-300 hover:-translate-y-1"
+      className="group relative flex flex-col overflow-hidden rounded-[26px] ring-hover card-sheen transition-transform duration-300 hover:-translate-y-1"
+      style={{
+        background: 'rgba(255,255,255,0.62)',
+        backdropFilter: 'blur(18px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(18px) saturate(150%)',
+        border: '1px solid rgba(255,255,255,0.7)',
+        boxShadow:
+          '0 30px 70px -30px rgba(40,44,92,0.42), 0 2px 8px rgba(40,44,92,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+      }}
     >
       {/* Per-type aurora wash on hover */}
       <div

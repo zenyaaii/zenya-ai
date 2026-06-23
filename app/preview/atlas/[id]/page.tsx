@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
 import AtlasPreview from '@/components/theme/atlas/AtlasPreview'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { sectionStylesToCss, type SectionStyles } from '@/utils/theme-editor-types'
@@ -20,6 +21,15 @@ export default function AtlasPreviewPage() {
   const [name, setName] = useState<string>('تطبيق SaaS')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (new URLSearchParams(window.location.search).get('created') === '1') {
+      setCelebrate(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -112,6 +122,12 @@ export default function AtlasPreviewPage() {
         presetId={presetId}
         colorOverrides={colorOverrides}
         typographyPreset={typographyPreset}
+      />
+      <BuildSuccessOverlay
+        open={celebrate}
+        name={name}
+        editHref={`/preview/atlas/${params.id}/edit`}
+        onPreview={() => setCelebrate(false)}
       />
     </div>
   )
