@@ -2,21 +2,20 @@
 
 import { useEffect, useRef } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import ZenyaMark from '@/components/ZenyaMark'
 
 /**
- * HeroWordmark — a giant Arabic "زينيا" set behind the hero copy.
+ * HeroWordmark — the giant زينيا logo mark set behind the hero copy.
  *
- * Two stacked copies of the word:
- *   • base   — barely-there ghost, always present (the word is "hidden" by
- *              default, just a faint shape in the background).
- *   • reveal — a brighter gradient copy clipped to a soft radial spotlight
- *              that follows the cursor, so the wordmark only lights up
- *              *where the mouse is* — "appears a little bit" on hover.
+ * Two stacked copies of the vector wordmark ({@link ZenyaMark}):
+ *   • base   — a barely-there blue ghost, always present.
+ *   • reveal — a brighter blue copy clipped to a soft radial spotlight that
+ *              follows the cursor, so the mark only lights up *where the mouse
+ *              is*.
  *
- * Everything is driven imperatively through refs (no React state) so moving
- * the mouse never triggers a re-render — the spotlight stays buttery and the
- * cursor position is never reset by a render. Pointer-events: none so it can
- * never steal clicks from the hero CTAs. Disabled on touch / reduced-motion
+ * Driven imperatively through refs (no React state) so moving the mouse never
+ * triggers a re-render — the spotlight stays buttery. Pointer-events: none so it
+ * never steals clicks from the hero CTAs. Disabled on touch / reduced-motion
  * (the base ghost still renders).
  *
  * REQUIRES a positioned parent (the hero <section> is `relative`).
@@ -24,7 +23,6 @@ import { useReducedMotion } from 'framer-motion'
 export default function HeroWordmark() {
   const reduce = useReducedMotion()
   const rootRef = useRef<HTMLDivElement>(null)
-  const revealRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     if (reduce) return
@@ -32,9 +30,8 @@ export default function HeroWordmark() {
     if (window.matchMedia('(pointer: coarse)').matches) return
 
     const root = rootRef.current
-    const reveal = revealRef.current
     const parent = root?.parentElement
-    if (!root || !reveal || !parent) return
+    if (!root || !parent) return
 
     const onMove = (e: MouseEvent) => {
       const rect = root.getBoundingClientRect()
@@ -42,7 +39,7 @@ export default function HeroWordmark() {
       const y = ((e.clientY - rect.top) / rect.height) * 100
       root.style.setProperty('--mx', `${x}%`)
       root.style.setProperty('--my', `${y}%`)
-      root.style.setProperty('--reveal', '0.55')
+      root.style.setProperty('--reveal', '0.7')
     }
     const onLeave = () => {
       root.style.setProperty('--reveal', '0')
@@ -56,7 +53,7 @@ export default function HeroWordmark() {
     }
   }, [reduce])
 
-  const SIZE = 'clamp(150px, 26vw, 400px)'
+  const WIDTH = 'clamp(340px, 72vw, 1040px)'
 
   return (
     <div
@@ -64,32 +61,27 @@ export default function HeroWordmark() {
       aria-hidden
       className="pointer-events-none absolute inset-0 -z-[5] flex items-center justify-center overflow-hidden [--mx:50%] [--my:38%] [--reveal:0]"
     >
-      {/* Base ghost — the word is there but almost invisible. */}
-      <span
-        className="display-ar select-none whitespace-nowrap leading-none text-foreground"
-        style={{ fontSize: SIZE, opacity: 0.04, letterSpacing: '-0.02em' }}
-      >
-        زينيا
-      </span>
+      {/* Base ghost — the mark is there but almost invisible. */}
+      <div className="select-none" style={{ width: WIDTH, opacity: 0.05 }}>
+        <ZenyaMark className="!w-full text-[#5e6ad2]" />
+      </div>
 
-      {/* Spotlight reveal — same word, brighter, clipped to a radius around
+      {/* Spotlight reveal — same mark, brighter blue, clipped to a radius around
           the cursor. Opacity is toggled imperatively on mousemove/leave. */}
       {!reduce && (
-        <span
-          ref={revealRef}
-          className="gradient-text display-ar absolute select-none whitespace-nowrap leading-none transition-opacity duration-500"
+        <div
+          className="absolute select-none transition-opacity duration-500"
           style={{
-            fontSize: SIZE,
-            letterSpacing: '-0.02em',
+            width: WIDTH,
             opacity: 'var(--reveal)',
             WebkitMaskImage:
-              'radial-gradient(circle 210px at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.55) 38%, transparent 72%)',
+              'radial-gradient(circle 230px at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.55) 38%, transparent 72%)',
             maskImage:
-              'radial-gradient(circle 210px at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.55) 38%, transparent 72%)',
+              'radial-gradient(circle 230px at var(--mx) var(--my), #000 0%, rgba(0,0,0,0.55) 38%, transparent 72%)',
           }}
         >
-          زينيا
-        </span>
+          <ZenyaMark className="!w-full text-[#6b78ff]" />
+        </div>
       )}
     </div>
   )

@@ -1,11 +1,10 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
 import { X as XIcon, Heart, ArrowUpRight } from 'lucide-react'
 import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
 import { openConsent } from '@/components/CookieConsent'
-import ZenyaWordmark from '@/components/ZenyaWordmark'
+import ZenyaMark from '@/components/ZenyaMark'
 import BrandLogo from '@/components/BrandLogo'
 
 /**
@@ -73,18 +72,8 @@ export default function Footer() {
         <div className="grid gap-10 md:grid-cols-12 md:gap-8">
           {/* ── Brand ── */}
           <div className="md:col-span-5">
-            <Link href="/" className="mb-4 flex w-fit items-center gap-2.5">
-              <div
-                className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-lg"
-                style={{
-                  background: '#5e6ad2',
-                  boxShadow:
-                    'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
-                }}
-              >
-                <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
-              </div>
-              <ZenyaWordmark className="text-[19px]" />
+            <Link href="/" className="mb-4 flex w-fit items-center">
+              <ZenyaMark className="h-6 text-[#5e6ad2]" />
             </Link>
 
             <p className="max-w-sm text-[14px] leading-[1.85] text-muted">

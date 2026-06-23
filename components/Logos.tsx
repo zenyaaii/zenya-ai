@@ -2,109 +2,130 @@
 
 import { cn } from '@/lib/utils'
 
-type StackItem = { name: string; icon: React.ReactNode }
+/**
+ * Logos — "the modern commerce + AI stack that powers Zenya".
+ *
+ * A premium two-row marquee of the real tools behind the product, each shown
+ * as an elevated chip with the brand's own icon in its own colour. The rows
+ * drift in opposite directions and pause on hover; soft edge fades blend the
+ * motion into the page background. Styled to match the cream marketing theme.
+ */
+type Brand = { name: string; color: string; viewBox: string; path: React.ReactNode }
 
-const STACK: StackItem[] = [
-  {
-    name: 'Shopify',
-    icon: (
-      <svg viewBox="0 0 109 124" className="h-4 w-4" fill="currentColor">
-        <path d="M74.7 14.8s-.3-1.2-1.5-1.2c0 0-11.4-.7-11.4-.7s-7.6-7.4-8.4-8.1c-.8-.7-2.3-.5-2.9-.3l-4 1.2C45.1 3.6 43 3 40.7 3c-7.2 0-10.7 9-11.8 13.6-2.8.9-4.8 1.5-5.1 1.6-1.6.5-1.6.5-1.8 2-.2 1.1-9 69.3-9 69.3l67.6 11.7 29.1-7.3L74.7 14.8zm-22.4-6.2c-1.9.6-4 1.2-6.2 1.9 1.2-4.6 3.6-6.8 5.7-7.7.6 1.5 1.2 3.7.5 5.8z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'OpenAI',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Stripe',
-    icon: (
-      <svg viewBox="0 0 60 25" className="h-3 w-8" fill="currentColor">
-        <path d="M59.64 10.28c0-5.3-3.95-9.67-9.67-9.67-6.03 0-9.87 4.2-9.87 9.87 0 3.3 1.3 5.76 3.4 7.3l-2.07 3.3c-2.4-1.9-4.3-5.5-4.3-10.6C37.13 4.2 41.53 0 47.97 0c8.2 0 13.8 5.7 13.8 13.6 0 1.2-.1 2.3-.3 3.3H41.53c.4 4.1 3.5 6.4 7.4 6.4 2.5 0 4.5-1 5.9-2.6l2.7 2.8z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Supabase',
-    icon: (
-      <svg viewBox="0 0 109 113" className="h-4 w-4" fill="currentColor">
-        <path d="M63.7 110.284c-2.788 3.507-8.397 1.571-8.543-2.938l-1.905-65.956H98.765c7.576 0 11.784 8.763 7.043 14.72L63.7 110.284z" />
-        <path
-          opacity=".5"
-          d="M45.317 2.716c2.788-3.507 8.397-1.571 8.543 2.938l1.905 65.956H10.235C2.659 71.61-1.549 62.847 3.192 56.89L45.317 2.716z"
-        />
-      </svg>
-    ),
-  },
-  {
-    name: 'Next.js',
-    icon: (
-      <svg viewBox="0 0 180 180" className="h-4 w-4" fill="currentColor">
-        <mask id="mnl" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="180">
-          <circle cx="90" cy="90" r="90" fill="black" />
-        </mask>
-        <g mask="url(#mnl)">
-          <circle cx="90" cy="90" r="90" fill="black" />
-          <path d="M149.508 157.52L69.142 54H54V125.97H66.1V69.677L139.504 164.544z" fill="white" />
-          <rect x="115" y="54" width="12" height="72" fill="white" />
-        </g>
-      </svg>
-    ),
-  },
-  {
-    name: 'Vercel',
-    icon: (
-      <svg viewBox="0 0 76 65" className="h-3.5 w-4" fill="currentColor">
-        <path d="M37.5274 0L75.0548 65H0L37.5274 0Z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Claude',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-      </svg>
-    ),
-  },
-]
+const ICON = (b: Brand) => (
+  <svg
+    viewBox={b.viewBox}
+    className="h-[18px] w-auto shrink-0"
+    style={{ color: b.color }}
+    fill="currentColor"
+    aria-hidden
+  >
+    {b.path}
+  </svg>
+)
+
+const SHOPIFY: Brand = {
+  name: 'Shopify', color: '#95BF47', viewBox: '0 0 24 24',
+  path: <path d="M15.337 23.979l7.216-1.561s-2.604-17.613-2.625-17.73c-.018-.116-.114-.192-.211-.192s-1.929-.136-1.929-.136-1.275-1.274-1.439-1.411c-.045-.037-.075-.057-.121-.074l-.914 21.106.023-.002zM11.71 4.39s-.81.25-1.7.526c-.052-.171-.13-.382-.24-.601-.355-.677-.878-1.034-1.508-1.034h-.013c-.043 0-.086.004-.13.007l-.05-.06C7.694 2.79 7.19 2.602 6.587 2.62c-1.165.033-2.324.873-3.263 2.363-.66 1.048-1.163 2.365-1.306 3.386-1.337.414-2.27.704-2.292.71-.674.212-.696.232-.783.866C-.022 11.16-.49 24.985-.49 24.985l16.36 2.785V4.39h-.001zm-3.43.534c-.711.22-1.488.46-2.268.701.219-.838.633-1.673 1.143-2.221.189-.204.456-.43.771-.561.297.619.36 1.49.354 2.081zm-1.689-3.18c.253 0 .468.055.65.171-.291.151-.573.369-.838.654-.677.726-1.196 1.851-1.401 2.937-.645.2-1.276.395-1.857.575.365-1.705 1.793-4.288 3.446-4.337z"/>,
+}
+const NEXT: Brand = {
+  name: 'Next.js', color: '#000000', viewBox: '0 0 24 24',
+  path: <path d="M11.572 0c-.176 0-.31.001-.358.007a19.76 19.76 0 0 1-.364.033C7.443.346 4.25 2.185 2.228 5.012a11.875 11.875 0 0 0-2.119 5.243c-.096.659-.108.854-.108 1.747s.012 1.089.108 1.748c.652 4.506 3.86 8.292 8.209 9.695.779.25 1.6.422 2.534.525.363.04 1.935.04 2.299 0 1.611-.178 2.977-.577 4.323-1.264.207-.106.247-.134.219-.158-.02-.013-.9-1.193-1.955-2.62l-1.919-2.592-2.404-3.558a338.739 338.739 0 0 0-2.422-3.556c-.009-.002-.018 1.579-.023 3.51-.007 3.38-.01 3.515-.052 3.595a.426.426 0 0 1-.206.214c-.075.037-.14.044-.495.044H7.81l-.108-.068a.438.438 0 0 1-.157-.171l-.05-.106.006-4.703.007-4.705.072-.092a.645.645 0 0 1 .174-.143c.096-.047.134-.051.54-.051.478 0 .558.018.682.154.035.038 1.337 1.999 2.895 4.361a10760.433 10760.433 0 0 0 4.735 7.17l1.9 2.879.096-.063a12.317 12.317 0 0 0 2.466-2.163 11.944 11.944 0 0 0 2.824-6.134c.096-.66.108-.854.108-1.748 0-.893-.012-1.088-.108-1.747-.652-4.506-3.859-8.292-8.208-9.695a12.597 12.597 0 0 0-2.499-.523A33.119 33.119 0 0 0 11.573 0zm4.069 7.217c.347 0 .408.005.486.047a.473.473 0 0 1 .237.277c.018.06.023 1.365.018 4.304l-.006 4.218-.744-1.14-.746-1.14v-3.066c0-1.982.01-3.097.023-3.15a.478.478 0 0 1 .233-.296c.096-.05.13-.054.482-.054z"/>,
+}
+const VERCEL: Brand = {
+  name: 'Vercel', color: '#000000', viewBox: '0 0 24 24',
+  path: <path d="M24 22.525H0l12-21.05 12 21.05z"/>,
+}
+const SUPABASE: Brand = {
+  name: 'Supabase', color: '#3ECF8E', viewBox: '0 0 24 24',
+  path: <path d="M21.362 9.354H12V.396a.396.396 0 0 0-.716-.233L2.203 12.424l-.401.562a1.04 1.04 0 0 0 .836 1.659H12v8.959a.396.396 0 0 0 .716.233l9.081-12.261.401-.562a1.04 1.04 0 0 0-.836-1.66z"/>,
+}
+const STRIPE: Brand = {
+  name: 'Stripe', color: '#635BFF', viewBox: '0 0 24 24',
+  path: <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305l.297.01z"/>,
+}
+const OPENAI: Brand = {
+  name: 'OpenAI', color: '#000000', viewBox: '0 0 24 24',
+  path: <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.1419.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/>,
+}
+const ANTHROPIC: Brand = {
+  name: 'Anthropic', color: '#D97757', viewBox: '0 0 24 24',
+  path: <path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.541Zm-.3712 10.2232 2.2932-5.9456 2.2932 5.9456Z"/>,
+}
+const TAILWIND: Brand = {
+  name: 'Tailwind CSS', color: '#06B6D4', viewBox: '0 0 24 24',
+  path: <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"/>,
+}
+const TYPESCRIPT: Brand = {
+  name: 'TypeScript', color: '#3178C6', viewBox: '0 0 24 24',
+  path: <path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.392.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>,
+}
+const FRAMER: Brand = {
+  name: 'Framer Motion', color: '#0055FF', viewBox: '0 0 24 24',
+  path: <path d="M4 0h16v8h-8zM4 8h8l8 8H4zM4 16h8v8z"/>,
+}
+
+const ROW_A: Brand[] = [SHOPIFY, OPENAI, NEXT, STRIPE, SUPABASE, VERCEL, ANTHROPIC]
+const ROW_B: Brand[] = [TYPESCRIPT, TAILWIND, FRAMER, SHOPIFY, ANTHROPIC, SUPABASE, OPENAI]
+
+function Chip({ b }: { b: Brand }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2.5 rounded-xl border border-token bg-white px-4 py-2.5',
+        'shadow-[0_1px_2px_rgba(28,28,28,0.05)] transition-all duration-200',
+        'hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.30)] hover:shadow-[0_10px_26px_-12px_rgba(28,28,28,0.22)]'
+      )}
+    >
+      {ICON(b)}
+      <span className="text-[13px] font-semibold text-foreground font-latin" dir="ltr">
+        {b.name}
+      </span>
+    </div>
+  )
+}
+
+function Row({ items, reverse }: { items: Brand[]; reverse?: boolean }) {
+  return (
+    <div className="relative overflow-hidden py-2">
+      <div
+        className="flex w-max items-center gap-4 marquee-track hover:[animation-play-state:paused]"
+        style={reverse ? { animationDirection: 'reverse', animationDuration: '42s' } : { animationDuration: '36s' }}
+      >
+        {[...items, ...items].map((b, i) => (
+          <Chip key={`${b.name}-${i}`} b={b} />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export default function Logos() {
   return (
-    <section className="relative border-y border-token py-10">
-      <div className="mx-auto max-w-5xl px-6">
-        <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-          مبنيّ على منظومة التجارة والذكاء الاصطناعي الحديثة
-        </p>
-        <div className="relative overflow-hidden">
-          <div className="flex items-center gap-12 marquee-track" style={{ width: 'max-content' }}>
-            {[...STACK, ...STACK].map((logo, i) => (
-              <div
-                key={i}
-                className={cn(
-                  'flex items-center gap-2 whitespace-nowrap text-muted opacity-60 transition-all duration-200',
-                  'hover:text-foreground hover:opacity-100'
-                )}
-              >
-                {logo.icon}
-                <span className="text-[13px] font-medium font-latin" dir="ltr">{logo.name}</span>
-              </div>
-            ))}
-          </div>
-          {/* Fade edges */}
+    <section className="relative border-y border-token py-16">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="mb-9 text-center">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5e6ad2]">
+            منظومة عالمية المستوى
+          </p>
+          <h2 className="display-ar text-[clamp(22px,3.4vw,30px)] text-foreground">
+            مبنيّة على الأدوات التي تثق بها أفضل الشركات
+          </h2>
+        </div>
+
+        <div className="relative space-y-4">
+          <Row items={ROW_A} />
+          <Row items={ROW_B} reverse />
+
+          {/* Edge fades blend the motion into the page background */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-0 w-16"
+            className="pointer-events-none absolute inset-y-0 left-0 w-24 md:w-40"
             style={{ background: 'linear-gradient(90deg,#f7f4ed,transparent)' }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-0 w-16"
+            className="pointer-events-none absolute inset-y-0 right-0 w-24 md:w-40"
             style={{ background: 'linear-gradient(-90deg,#f7f4ed,transparent)' }}
           />
         </div>
