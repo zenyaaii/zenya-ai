@@ -94,40 +94,52 @@ export function domainExpiringEmail(args: {
   retailUsd: number
 }): { subject: string; text: string; html: string } {
   const { domain, daysUntil, renewUrl, retailUsd } = args
-  const urgency = daysUntil <= 7 ? 'URGENT — ' : ''
-  const subject = `${urgency}${domain} expires in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`
+  const dayWord = daysUntil === 1 ? 'يوم واحد' : daysUntil === 2 ? 'يومين' : `${daysUntil} أيام`
+  const urgency = daysUntil <= 7 ? 'عاجل — ' : ''
+  const subject = `${urgency}نطاقك ${domain} ينتهي خلال ${dayWord}`
 
   const text = [
-    `Hi,`,
+    `مرحبًا،`,
     ``,
-    `Your domain ${domain} expires in ${daysUntil} day${daysUntil === 1 ? '' : 's'}.`,
+    `نطاقك ${domain} ينتهي خلال ${dayWord}.`,
     ``,
-    `Renew now for $${retailUsd.toFixed(2)}/year and keep your site live without interruption:`,
+    `جدِّده الآن مقابل $${retailUsd.toFixed(2)}/سنة لإبقاء موقعك مباشرًا دون انقطاع:`,
     renewUrl,
     ``,
-    `If you don't renew, the domain will stop resolving and someone else can register it after a short grace period.`,
+    `إن لم تجدِّده، سيتوقف النطاق عن العمل ويمكن لشخص آخر تسجيله بعد فترة سماح قصيرة.`,
     ``,
-    `— Zenya`,
+    `— زينيا`,
   ].join('\n')
 
   const html = `
 <!doctype html>
-<html><body style="font-family: -apple-system, system-ui, sans-serif; background:#f7f4ed; padding:24px; color:#1c1c1c;">
-  <div style="max-width:520px; margin:0 auto; background:#fff; border:1px solid #e5e2d9; border-radius:12px; padding:28px;">
-    <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.14em; color:#5f5f5d;">Renewal reminder</div>
-    <h1 style="margin:8px 0 16px; font-size:20px; font-weight:600; letter-spacing:-0.01em;">
-      ${domain} expires in ${daysUntil} day${daysUntil === 1 ? '' : 's'}
-    </h1>
-    <p style="font-size:14px; line-height:1.55; color:#5f5f5d; margin:0 0 20px;">
-      Renew now to keep your site live without interruption. Auto-renewal kicks in if you don't act, but renewing manually locks in another year today.
-    </p>
-    <a href="${renewUrl}" style="display:inline-block; background:#5e6ad2; color:#fff; padding:10px 18px; border-radius:999px; font-size:13px; font-weight:600; text-decoration:none;">
-      Renew ${domain} · $${retailUsd.toFixed(2)}/yr
-    </a>
-    <p style="font-size:12px; line-height:1.5; color:#9b9b9b; margin:24px 0 0;">
-      Sent because your domain ${domain} is approaching its expiry date. Manage at <a href="https://zenyaai.co/dashboard/domains" style="color:#5e6ad2;">zenyaai.co/dashboard/domains</a>.
-    </p>
-  </div>
+<html lang="ar" dir="rtl"><body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:#f7f4ed; color:#16171b; direction:rtl;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f4ed;padding:40px 16px;direction:rtl;"><tr><td align="center">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e5e2d9;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(28,28,28,0.14);">
+    <tr><td align="center" style="padding:28px 40px;background:#ffffff;border-bottom:1px solid #f0ede6;">
+      <img src="https://zenyaai.co/brand/wordmark.png" alt="زينيا" width="128" style="display:block;border:0;height:auto;width:128px;" />
+    </td></tr>
+    <tr><td style="padding:40px;text-align:right;">
+      <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:0.04em; color:#5e6ad2;">تذكير بالتجديد</p>
+      <h1 style="margin:0 0 16px; font-size:24px; line-height:1.4; font-weight:800; letter-spacing:-0.01em; color:#16171b;">
+        نطاقك ${domain} ينتهي خلال ${dayWord}
+      </h1>
+      <p style="font-size:16px; line-height:1.85; color:#5f5f5d; margin:0 0 26px;">
+        جدِّده الآن لإبقاء موقعك مباشرًا دون انقطاع. يبدأ التجديد التلقائي إن لم تتحرّك، لكن التجديد يدويًا يضمن لك سنة إضافية اليوم.
+      </p>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr>
+        <td style="border-radius:999px;background:#5e6ad2;box-shadow:0 10px 28px -10px rgba(94,106,210,0.55);">
+          <a href="${renewUrl}" style="display:inline-block; padding:14px 34px; font-size:15px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:999px;">
+            تجديد ${domain} · $${retailUsd.toFixed(2)}/سنة
+          </a>
+        </td>
+      </tr></table>
+      <p style="font-size:12px; line-height:1.7; color:#9b9b94; margin:0; border-top:1px solid #ececf2; padding-top:22px;">
+        أُرسلت هذه الرسالة لأن نطاقك ${domain} يقترب من تاريخ انتهائه. أدِر نطاقاتك من <a href="https://zenyaai.co/dashboard/domains" style="color:#5e6ad2;text-decoration:none;">zenyaai.co/dashboard/domains</a>.
+      </p>
+    </td></tr>
+  </table>
+  </td></tr></table>
 </body></html>`.trim()
 
   return { subject, text, html }
