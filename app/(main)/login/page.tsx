@@ -1,13 +1,12 @@
 "use client"
 import { useState, useEffect, Suspense } from 'react'
-import Image from 'next/image'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
-import ZenyaWordmark from '@/components/ZenyaWordmark'
+import ZenyaMark from '@/components/ZenyaMark'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -111,18 +110,8 @@ function LoginForm() {
     >
       {/* Logo */}
       <div className="text-center mb-7">
-        <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <div
-            className="relative h-7 w-7 overflow-hidden rounded-lg"
-            style={{
-              background: '#5e6ad2',
-              boxShadow:
-                'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
-            }}
-          >
-            <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
-          </div>
-          <ZenyaWordmark className="text-[17px]" />
+        <Link href="/" className="inline-flex items-center mb-6">
+          <ZenyaMark className="h-6 text-[#16171b]" />
         </Link>
 
         <AnimatePresence mode="wait">

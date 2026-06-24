@@ -2,6 +2,7 @@
 
 import { TitleBar } from '@shopify/app-bridge-react';
 import Link from 'next/link';
+import ZenyaMark from '@/components/ZenyaMark';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -295,11 +296,9 @@ function DashboardContent() {
         {/* Sidebar */}
         <aside className="md:w-60 md:shrink-0">
           <div className="md:sticky md:top-8 flex flex-col gap-4">
-            <div className="flex items-center gap-2.5 px-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Zenya" className="h-8 w-8 rounded-lg object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-              <span className="text-[16px] font-semibold tracking-tight text-foreground">Zenya</span>
-              <span className="ml-1 rounded-full bg-[#6366f1]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6366f1]">AI</span>
+            <div className="flex items-center gap-2 px-2">
+              <ZenyaMark className="h-5 text-[#16171b]" />
+              <span className="rounded-full bg-[#6366f1]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6366f1]">AI</span>
             </div>
 
             <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-token bg-white/70 p-1.5 backdrop-blur-md shadow-soft-md md:flex-col">

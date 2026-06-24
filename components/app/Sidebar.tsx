@@ -1,14 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Users, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import ZenyaWordmark from '@/components/ZenyaWordmark'
+import ZenyaMark from '@/components/ZenyaMark'
 
 type NavItem = {
   href: string
@@ -63,19 +62,10 @@ export default function Sidebar({
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex h-14 items-center gap-2 border-b border-token px-4"
+        className="flex h-14 items-center border-b border-token px-4"
         onClick={onMobileClose}
       >
-        <div
-          className="relative h-7 w-7 overflow-hidden rounded-lg"
-          style={{
-            background: '#5e6ad2',
-            boxShadow: 'rgba(255,255,255,0.20) 0px 0.5px 0px inset, rgba(94,106,210,0.35) 0px 0px 0px 0.5px inset',
-          }}
-        >
-          <Image src="/logo.png" alt="زينيا" fill className="object-cover" />
-        </div>
-        <ZenyaWordmark className="text-[17px]" />
+        <ZenyaMark className="h-5 text-[#16171b]" />
       </Link>
 
       {/* Nav */}
