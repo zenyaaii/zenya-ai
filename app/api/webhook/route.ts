@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 import { registerDomain, createDnsRecord, PorkbunError } from '@/lib/porkbun'
 import { addDomainToProject } from '@/lib/vercel-domains'
-import { sendEmail, domainPurchasedEmail } from '@/lib/email'
+import { sendEmail, domainPurchasedEmail, planPurchasedEmail } from '@/lib/email'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -129,6 +129,23 @@ async function recordOneTimePurchase(
     currency: session.currency,
     country,
   })
+
+  // Welcome / thank-you email. Best-effort — never fail the webhook over mail.
+  const buyerEmail = session.customer_details?.email || session.customer_email || null
+  if (buyerEmail) {
+    try {
+      const tmpl = planPurchasedEmail({ plan: 'onetime', manageUrl: 'https://zenyaai.co/dashboard' })
+      await sendEmail({
+        to: buyerEmail,
+        subject: tmpl.subject,
+        text: tmpl.text,
+        html: tmpl.html,
+        tags: [{ name: 'type', value: 'plan_onetime' }],
+      })
+    } catch (e) {
+      console.error('[webhook] one-time purchase email failed (non-fatal):', e)
+    }
+  }
 }
 
 // ---------- hosting subscription ------------------------------------------
@@ -630,6 +647,24 @@ export async function POST(req: NextRequest) {
         } else if (session.mode === 'subscription' && typeof session.subscription === 'string') {
           const sub = await stripe.subscriptions.retrieve(session.subscription)
           await upsertHostingSubscription(supabase, sub, userId)
+
+          // First-activation welcome email. This branch only fires on the
+          // initial subscription checkout — renewals/updates come through
+          // invoice.* and customer.subscription.* events — so it won't spam.
+          if (email) {
+            try {
+              const tmpl = planPurchasedEmail({ plan: 'hosting', manageUrl: 'https://zenyaai.co/dashboard' })
+              await sendEmail({
+                to: email,
+                subject: tmpl.subject,
+                text: tmpl.text,
+                html: tmpl.html,
+                tags: [{ name: 'type', value: 'plan_hosting' }],
+              })
+            } catch (e) {
+              console.error('[webhook] hosting welcome email failed (non-fatal):', e)
+            }
+          }
         }
         break
       }

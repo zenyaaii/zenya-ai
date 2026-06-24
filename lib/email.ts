@@ -191,6 +191,57 @@ export function domainPurchasedEmail(args: {
   return { subject, text, html }
 }
 
+/**
+ * Sent right after a plan purchase clears (Stripe webhook). Two flavours:
+ *   - 'onetime'  → the $9.99 lifetime Pro purchase
+ *   - 'hosting'  → the $19.99/mo full-hosting subscription (first activation)
+ */
+export function planPurchasedEmail(args: {
+  plan: 'onetime' | 'hosting'
+  manageUrl: string
+}): { subject: string; text: string; html: string } {
+  const { plan, manageUrl } = args
+  const isHosting = plan === 'hosting'
+
+  const subject = isHosting
+    ? 'تم تفعيل الاستضافة الكاملة في زينيا 🎉'
+    : 'أهلًا بك في زينيا برو 🎉'
+
+  const heading = isHosting ? 'تم تفعيل اشتراكك' : 'أهلًا بك في زينيا برو'
+  const eyebrow = isHosting ? 'الاستضافة الكاملة' : 'ترقية'
+  const intro = isHosting
+    ? 'شكرًا لك! اشتراك الاستضافة الكاملة نشطٌ الآن. مواقعك مستضافة ومُدارة بالكامل مع التحديثات التلقائية والنسخ الاحتياطية ودعم الأولوية.'
+    : 'شكرًا لك! تم تفعيل خطتك مدى الحياة بنجاح. يمكنك الآن إنشاء ونشر مواقع احترافية بكل ميزات زينيا — بدفعة واحدة فقط، إلى الأبد.'
+
+  const text = [
+    `شكرًا لك!`,
+    ``,
+    isHosting
+      ? `تم تفعيل اشتراك الاستضافة الكاملة في زينيا.`
+      : `تم تفعيل خطة زينيا برو مدى الحياة في حسابك.`,
+    ``,
+    `ابدأ من لوحة التحكم: ${manageUrl}`,
+    ``,
+    `— زينيا`,
+  ].join('\n')
+
+  const html = emailShell({
+    title: subject.replace(' 🎉', ''),
+    eyebrow,
+    heading,
+    bodyHtml: `<p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">${intro}</p>`,
+    ctaHref: manageUrl,
+    ctaLabel: isHosting ? 'الذهاب إلى لوحة التحكم' : 'ابدأ الإنشاء',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">${
+      isHosting
+        ? 'يمكنك إدارة اشتراكك أو إلغاءه في أي وقت من صفحة الفوترة في لوحة التحكم.'
+        : 'تحتاج مساعدة في إطلاق أول موقع؟ راسلنا في أي وقت — يسعدنا أن نساعدك.'
+    }</p>`,
+  })
+
+  return { subject, text, html }
+}
+
 export function domainExpiringEmail(args: {
   domain: string
   daysUntil: number
