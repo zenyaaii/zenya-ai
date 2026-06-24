@@ -85,7 +85,111 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
 /* ── Templates ───────────────────────────────────────────────────────── */
 /* Kept inline to avoid a templates/ folder for two-three emails. If we
    grow past five templates, lift them into separate files and switch to
-   react-email for component-based authoring. */
+   react-email for component-based authoring.
+
+   All templates share the website look: cream #f7f4ed page, white card with a
+   #e5e2d9 border, ink #16171b headings, indigo #5e6ad2 accent + pill CTA, and
+   the hosted pixel wordmark logo. Arabic / RTL to match the site. */
+
+/** Shared chrome so every transactional email matches the auth templates. */
+function emailShell(opts: {
+  title: string
+  eyebrow: string
+  heading: string
+  bodyHtml: string
+  ctaHref: string
+  ctaLabel: string
+  footnoteHtml?: string
+}): string {
+  const { title, eyebrow, heading, bodyHtml, ctaHref, ctaLabel, footnoteHtml } = opts
+  return `
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><title>${title}</title></head>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:#f7f4ed; color:#16171b; direction:rtl;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f4ed;padding:40px 16px;direction:rtl;"><tr><td align="center">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e5e2d9;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(28,28,28,0.14);">
+    <tr><td align="center" style="padding:28px 40px;background:#ffffff;border-bottom:1px solid #f0ede6;">
+      <img src="https://zenyaai.co/brand/wordmark.png" alt="زينيا" width="128" style="display:block;border:0;height:auto;width:128px;" />
+    </td></tr>
+    <tr><td style="padding:40px;text-align:right;">
+      <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:0.04em; color:#5e6ad2;">${eyebrow}</p>
+      <h1 style="margin:0 0 16px; font-size:26px; line-height:1.35; font-weight:800; letter-spacing:-0.01em; color:#16171b;">${heading}</h1>
+      ${bodyHtml}
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr>
+        <td style="border-radius:999px;background:#5e6ad2;box-shadow:0 10px 28px -10px rgba(94,106,210,0.55);">
+          <a href="${ctaHref}" style="display:inline-block; padding:14px 34px; font-size:15px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:999px;">${ctaLabel}</a>
+        </td>
+      </tr></table>
+      ${footnoteHtml ? `<div style="border-top:1px solid #ececf2;padding-top:22px;margin-top:8px;">${footnoteHtml}</div>` : ''}
+    </td></tr>
+    <tr><td style="padding:24px 40px;background:#faf8f3;border-top:1px solid #ececf2;text-align:right;">
+      <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#9b9b94;">أُرسلت من <strong style="color:#5f5f5d;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي</p>
+      <p style="margin:0;font-size:12px;line-height:1.6;color:#9b9b94;">
+        <a href="https://zenyaai.co" style="color:#5e6ad2;text-decoration:none;">zenyaai.co</a> &nbsp;·&nbsp;
+        <a href="https://zenyaai.co/privacy" style="color:#9b9b94;text-decoration:underline;">الخصوصية</a> &nbsp;·&nbsp;
+        <a href="https://zenyaai.co/terms" style="color:#9b9b94;text-decoration:underline;">الشروط</a>
+      </p>
+    </td></tr>
+  </table>
+  </td></tr></table>
+</body></html>`.trim()
+}
+
+/**
+ * Sent right after a domain is registered + attached (webhook
+ * fulfillDomainPurchase). A thank-you + "your domain is live" confirmation.
+ */
+export function domainPurchasedEmail(args: {
+  domain: string
+  years: number
+  expiresAt: string
+  manageUrl: string
+}): { subject: string; text: string; html: string } {
+  const { domain, years, expiresAt, manageUrl } = args
+  const yearWord = years === 1 ? 'سنة واحدة' : years === 2 ? 'سنتان' : `${years} سنوات`
+  let expiry = expiresAt
+  try {
+    expiry = new Date(expiresAt).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch { /* keep ISO fallback */ }
+
+  const subject = `تم تسجيل نطاقك ${domain} 🎉`
+
+  const text = [
+    `شكرًا لك!`,
+    ``,
+    `تم تسجيل نطاقك ${domain} بنجاح وربطه بموقعك على زينيا.`,
+    `المدة: ${yearWord} · ينتهي في: ${expiry}`,
+    ``,
+    `قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.`,
+    `أدِر نطاقاتك من: ${manageUrl}`,
+    ``,
+    `— زينيا`,
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      شكرًا لك! تم تسجيل نطاقك <strong style="color:#16171b;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 6px;font-size:13px;color:#8a8a83;">النطاق: <strong style="color:#16171b;direction:ltr;display:inline-block;">${domain}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8a8a83;">المدة: <strong style="color:#16171b;">${yearWord}</strong></p>
+        <p style="margin:0;font-size:13px;color:#8a8a83;">ينتهي في: <strong style="color:#16171b;">${expiry}</strong></p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: `تم تسجيل نطاقك ${domain}`,
+    eyebrow: 'تم التسجيل',
+    heading: 'تهانينا! نطاقك جاهز',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'إدارة نطاقاتي',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">يتم تجديد النطاق تلقائيًا قبل انتهائه حتى يبقى موقعك مباشرًا. يمكنك إدارة ذلك في أي وقت من لوحة التحكم.</p>`,
+  })
+
+  return { subject, text, html }
+}
 
 export function domainExpiringEmail(args: {
   domain: string

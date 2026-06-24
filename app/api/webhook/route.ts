@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 import { registerDomain, createDnsRecord, PorkbunError } from '@/lib/porkbun'
 import { addDomainToProject } from '@/lib/vercel-domains'
+import { sendEmail, domainPurchasedEmail } from '@/lib/email'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -456,6 +457,30 @@ async function fulfillDomainPurchase(
     theme_id: themeId,
     vercel_domain_id: vercelDomainId,
   })
+
+  // Thank-you / "your domain is live" email. Best-effort — the registration
+  // already succeeded, so a mail failure must never fail the webhook.
+  const buyerEmail =
+    session.customer_details?.email || session.customer_email || null
+  if (buyerEmail) {
+    try {
+      const tmpl = domainPurchasedEmail({
+        domain,
+        years,
+        expiresAt: expiresAt.toISOString(),
+        manageUrl: 'https://zenyaai.co/dashboard/sites',
+      })
+      await sendEmail({
+        to: buyerEmail,
+        subject: tmpl.subject,
+        text: tmpl.text,
+        html: tmpl.html,
+        tags: [{ name: 'type', value: 'domain_purchased' }],
+      })
+    } catch (e) {
+      console.error('[webhook] domain purchase email failed (non-fatal):', e)
+    }
+  }
 }
 
 /**
