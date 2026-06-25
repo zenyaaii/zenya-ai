@@ -11,6 +11,12 @@ const token = process.env.SUPABASE_ACCESS_TOKEN
 const ref = process.env.SUPABASE_PROJECT_REF || 'cacvmeykpljvdpypjviy'
 if (!token) throw new Error('Set SUPABASE_ACCESS_TOKEN')
 
+// Leaked-password protection (HaveIBeenPwned) requires the Supabase Pro
+// plan. On a Free project the PATCH rejects the whole body if this is
+// `true`, so we only opt in when ENABLE_HIBP=1 is passed. Once the
+// project is Pro, run with ENABLE_HIBP=1 to satisfy the security advisor.
+const hibp = process.env.ENABLE_HIBP === '1'
+
 const body = {
   site_url: 'https://zenyaai.co',
   uri_allow_list: [
@@ -21,25 +27,26 @@ const body = {
     'http://localhost:3000/auth/callback',
     'http://localhost:3000/auth/reset-password',
   ].join(','),
-  // password_hibp_enabled requires Supabase Pro plan — flip in dashboard after upgrade.
   password_min_length: 8,
+  ...(hibp ? { password_hibp_enabled: true } : {}),
 
-  mailer_subjects_confirmation: 'Confirm your Zenya account',
+  // Subjects match the Arabic / RTL template bodies below.
+  mailer_subjects_confirmation: 'أكِّد حسابك في زينيا',
   mailer_templates_confirmation_content: read('confirm-signup.html'),
 
-  mailer_subjects_recovery: 'Reset your Zenya password',
+  mailer_subjects_recovery: 'إعادة تعيين كلمة المرور في زينيا',
   mailer_templates_recovery_content: read('reset-password.html'),
 
-  mailer_subjects_magic_link: 'Your Zenya sign-in link',
+  mailer_subjects_magic_link: 'رابط الدخول إلى زينيا',
   mailer_templates_magic_link_content: read('magic-link.html'),
 
-  mailer_subjects_invite: "You're invited to Zenya",
+  mailer_subjects_invite: 'دعوة للانضمام إلى زينيا',
   mailer_templates_invite_content: read('invite-user.html'),
 
-  mailer_subjects_email_change: 'Confirm your new Zenya email',
+  mailer_subjects_email_change: 'أكِّد بريدك الجديد في زينيا',
   mailer_templates_email_change_content: read('change-email.html'),
 
-  mailer_subjects_reauthentication: 'Your Zenya verification code',
+  mailer_subjects_reauthentication: 'رمز التحقق من زينيا',
   mailer_templates_reauthentication_content: read('reauthentication.html'),
 }
 

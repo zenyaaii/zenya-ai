@@ -25,14 +25,17 @@ For each template below, paste the **Subject** into the "Subject heading" field 
 
 | Template in dashboard | File | Subject |
 | --- | --- | --- |
-| **Confirm signup** | [`confirm-signup.html`](confirm-signup.html) | `Confirm your Zenya account` |
-| **Invite user** | [`invite-user.html`](invite-user.html) | `You're invited to Zenya` |
-| **Magic Link** | [`magic-link.html`](magic-link.html) | `Your Zenya sign-in link` |
-| **Change Email Address** | [`change-email.html`](change-email.html) | `Confirm your new Zenya email` |
-| **Reset Password** | [`reset-password.html`](reset-password.html) | `Reset your Zenya password` |
-| **Reauthentication** | [`reauthentication.html`](reauthentication.html) | `Your Zenya verification code` |
+| **Confirm signup** | [`confirm-signup.html`](confirm-signup.html) | `أكِّد حسابك في زينيا` |
+| **Invite user** | [`invite-user.html`](invite-user.html) | `دعوة للانضمام إلى زينيا` |
+| **Magic Link** | [`magic-link.html`](magic-link.html) | `رابط الدخول إلى زينيا` |
+| **Change Email Address** | [`change-email.html`](change-email.html) | `أكِّد بريدك الجديد في زينيا` |
+| **Reset Password** | [`reset-password.html`](reset-password.html) | `إعادة تعيين كلمة المرور في زينيا` |
+| **Reauthentication** | [`reauthentication.html`](reauthentication.html) | `رمز التحقق من زينيا` |
 
-All six templates use Zenya's brand gradient (`#7c3aed → #06b6d4`), a clean light layout that renders well in Gmail / Outlook / Apple Mail, and Supabase template variables (`{{ .ConfirmationURL }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`).
+All six templates share the **site look** — cream `#f7f4ed` page, white card with an `#e5e2d9` border, ink `#16171b` headings, indigo `#5e6ad2` accent + pill CTA, and the hosted زينيا wordmark — fully Arabic / RTL to match the app and the Resend transactional emails in `lib/email.ts`. They render well in Gmail / Outlook / Apple Mail and use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`).
+
+> **Fastest way to apply everything:** `SUPABASE_ACCESS_TOKEN=sbp_… node supabase/email-templates/_apply.mjs`
+> (add `ENABLE_HIBP=1` once the project is on the Pro plan to turn on leaked-password protection). The manual dashboard steps below are an alternative.
 
 ---
 

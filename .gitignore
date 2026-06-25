@@ -63,3 +63,6 @@ tsc_recent.txt
 
 # Codex working dir (not committed; tool-managed)
 .codex/
+
+# local email render output (dev preview only)
+.email-previews/

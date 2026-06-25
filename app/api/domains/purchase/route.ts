@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { stripe } from '@/lib/stripe'
-import { checkDomainCached, retailPrice, PorkbunError } from '@/lib/porkbun'
+import {
+  checkDomainCached,
+  retailPrice,
+  getRegistrationRequirements,
+  registerDomain,
+  PorkbunError,
+} from '@/lib/porkbun'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -67,7 +73,10 @@ export async function POST(req: NextRequest) {
 
   const domain = String(body?.domain || '').trim().toLowerCase()
   const themeId = body?.theme_id ? String(body.theme_id) : null
-  const years = Math.max(1, Math.min(10, Number(body?.years) || 1))
+  // Client may ask for multiple years, but Porkbun's API registers a
+  // fixed term per TLD (almost always 1y) — the create endpoint has no
+  // duration param. We re-derive the real term from the registry below
+  // so we never charge for years we can't actually deliver.
 
   if (!HOSTNAME.test(domain)) {
     return NextResponse.json({ error: 'invalid_domain' }, { status: 400 })
@@ -117,10 +126,67 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Confirm the TLD can actually be registered through the API and on
+  // what term. apiRegisterable:false means it can only be bought on
+  // porkbun.com — never take the customer's money for that.
+  let years = 1
+  try {
+    const reqs = await getRegistrationRequirements(domain)
+    if (!reqs.apiRegisterable) {
+      return NextResponse.json(
+        {
+          error: 'tld_not_registerable',
+          message: `${domain} can't be registered automatically. Please pick a .com, .shop, .store or another supported extension.`,
+        },
+        { status: 422 }
+      )
+    }
+    years = reqs.registrationDurationYears || 1
+  } catch (e: any) {
+    // A requirements hiccup shouldn't block the buy — fall through with
+    // the safe default term; the dry run below is the real gate.
+    console.error('[/api/domains/purchase] getRegistrationRequirements failed:', e?.message || e)
+  }
+
   const retail = retailPrice(wholesale)
   const totalWholesale = +(wholesale * years).toFixed(2)
   const totalRetail = +(retail * years).toFixed(2)
   const amountCents = Math.round(totalRetail * 100)
+  // Exact penny figure Porkbun expects for the create call. Sourced from
+  // the same fresh price lookup and carried through Stripe metadata so
+  // fulfillment registers at precisely the validated price.
+  const costCents = Math.round(wholesale * 100)
+
+  // Pre-charge gate: dry-run the registration. This validates
+  // availability, exact price, registry eligibility, our account funds
+  // and the monthly spend limit WITHOUT charging or registering. If it
+  // won't go through, we stop here and the customer is never billed.
+  try {
+    const preview = await registerDomain({ domain, costCents, dryRun: true })
+    if (preview.wouldSucceed === false) {
+      console.error(
+        '[/api/domains/purchase] dry-run wouldSucceed=false — check Porkbun balance/spend limit:',
+        preview.message
+      )
+      return NextResponse.json(
+        {
+          error: 'registrar_unavailable',
+          message: 'Domain registration is temporarily unavailable. Please try again shortly — you have not been charged.',
+        },
+        { status: 503 }
+      )
+    }
+  } catch (e: any) {
+    const err = e as PorkbunError
+    console.error('[/api/domains/purchase] dry-run failed:', err)
+    return NextResponse.json(
+      {
+        error: err.code || 'preflight_failed',
+        message: err.message || `${domain} can't be registered right now. You have not been charged.`,
+      },
+      { status: err.code === 'rate_limited' ? 429 : 422 }
+    )
+  }
 
   // Insert pending row so we have a stable id to reference from Stripe
   // metadata. The webhook will look this row up by domain_purchase_id.
@@ -176,6 +242,7 @@ export async function POST(req: NextRequest) {
       user_id: user.id,
       domain,
       years: String(years),
+      cost_cents: String(costCents),
       theme_id: themeId || '',
     },
     payment_intent_data: {

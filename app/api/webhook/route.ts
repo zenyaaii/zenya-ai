@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
-import { registerDomain, createDnsRecord, PorkbunError } from '@/lib/porkbun'
+import { registerDomain, createDnsRecord, checkDomainCached, PorkbunError } from '@/lib/porkbun'
 import { addDomainToProject } from '@/lib/vercel-domains'
-import { sendEmail, domainPurchasedEmail, planPurchasedEmail } from '@/lib/email'
+import { sendEmail, domainPurchasedEmail, domainRefundEmail, planPurchasedEmail } from '@/lib/email'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -325,7 +325,7 @@ const VERCEL_CNAME_TARGET = 'cname.vercel-dns.com'
 async function fulfillDomainPurchase(
   supabase: Admin,
   session: Stripe.Checkout.Session,
-  meta: { domain_purchase_id: string; user_id: string; domain: string; years: string; theme_id: string }
+  meta: { domain_purchase_id: string; user_id: string; domain: string; years: string; cost_cents: string; theme_id: string }
 ) {
   const purchaseId = meta.domain_purchase_id
   const domain = meta.domain.toLowerCase()
@@ -358,12 +358,26 @@ async function fulfillDomainPurchase(
     })
     .eq('id', purchaseId)
 
+  // Exact penny price Porkbun's create endpoint requires. Prefer the
+  // value validated by the pre-charge dry run (carried in metadata); fall
+  // back to a fresh price lookup for any session created before that
+  // field existed.
+  let costCents = Math.round(Number(meta.cost_cents) || 0)
+  if (!costCents || !Number.isFinite(costCents)) {
+    try {
+      const r = await checkDomainCached(domain)
+      if (r.price != null) costCents = Math.round(r.price * 100)
+    } catch {
+      /* let registerDomain surface the price/availability error below */
+    }
+  }
+
   // 1. Register at Porkbun. If this fails (insufficient funds, premium
-  //    mismatch, registry rejection), the user has already paid — so
-  //    we auto-refund and write the failure into the row. No human in
-  //    the loop for the unhappy path.
+  //    mismatch, registry rejection, price drift), the user has already
+  //    paid — so we auto-refund, write the failure into the row, and
+  //    email the customer so the refund never looks like a silent scam.
   try {
-    await registerDomain({ domain, years })
+    await registerDomain({ domain, costCents })
   } catch (e: any) {
     const err = e as PorkbunError
     let refundIssued = false
@@ -401,6 +415,29 @@ async function fulfillDomainPurchase(
       auto_refunded: refundIssued,
       refund_error: refundError,
     })
+
+    // Branded "we couldn't register it, you've been refunded" email.
+    // Best-effort — never let a mail failure mask the refund.
+    const buyerEmail = session.customer_details?.email || session.customer_email || null
+    if (refundIssued && buyerEmail) {
+      try {
+        const refundUsd = (session.amount_total ?? 0) / 100
+        const tmpl = domainRefundEmail({
+          domain,
+          amountUsd: refundUsd,
+          manageUrl: 'https://zenyaai.co/dashboard/sites',
+        })
+        await sendEmail({
+          to: buyerEmail,
+          subject: tmpl.subject,
+          text: tmpl.text,
+          html: tmpl.html,
+          tags: [{ name: 'type', value: 'domain_refund' }],
+        })
+      } catch (mailErr) {
+        console.error('[webhook] domain refund email failed (non-fatal):', mailErr)
+      }
+    }
     return
   }
 
@@ -630,6 +667,7 @@ export async function POST(req: NextRequest) {
             user_id: (session.metadata?.user_id as string) || userId || '',
             domain: (session.metadata?.domain as string) || '',
             years: (session.metadata?.years as string) || '1',
+            cost_cents: (session.metadata?.cost_cents as string) || '',
             theme_id: (session.metadata?.theme_id as string) || '',
           })
         } else if (

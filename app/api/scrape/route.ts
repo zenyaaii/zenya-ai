@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as cheerio from 'cheerio'
 import { scrapeInputSchema } from '@/utils/validators'
 import { createClient } from '@/utils/supabase/server'
+import { assertPublicHttpUrl, BlockedUrlError } from '@/lib/ssrf'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -152,6 +153,27 @@ export async function POST(req: NextRequest) {
   const parsed = scrapeInputSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: 'invalid' }, { status: 400 })
   const url = parsed.data.url
+
+  // Only logged-in users may drive the server-side fetcher. Without this the
+  // route is an open proxy anyone on the internet can abuse.
+  const authClient = createClient()
+  const { data: { user: requester } } = await authClient.auth.getUser()
+  if (!requester) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
+  // SSRF guard: refuse non-http(s) schemes and any URL that resolves to a
+  // private/internal address (localhost, RFC-1918, 169.254 cloud metadata…).
+  // This validates the entered URL; the .js / direct fetches below all reuse
+  // the same host, so one check covers them.
+  try {
+    await assertPublicHttpUrl(url)
+  } catch (e) {
+    if (e instanceof BlockedUrlError) {
+      return NextResponse.json({ error: 'blocked_url', message: e.message }, { status: 400 })
+    }
+    return NextResponse.json({ error: 'invalid_url' }, { status: 400 })
+  }
   const key = process.env.SCRAPERAPI_KEY
   let html = ''
   let method = 'direct'

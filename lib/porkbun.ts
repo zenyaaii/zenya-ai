@@ -230,74 +230,135 @@ export async function getPricing(): Promise<Record<string, PorkbunTldPricing>> {
   return out
 }
 
+/* ── TLD registration requirements ──────────────────────────────────── */
+
+export type PorkbunTldRequirements = {
+  tld: string
+  /** False for TLDs with registry eligibility the API can't submit. */
+  apiRegisterable: boolean
+  /** Fixed term (years) the create endpoint registers for — usually 1. */
+  registrationDurationYears: number
+  maxRegistrationYears: number | null
+  whoisPrivacySupported: boolean
+  registrantOnly: boolean
+}
+
+/**
+ * Extract the registry suffix used by getRegistrationRequirements.
+ * "musannef.shop" → "shop", "foo.co.uk" → "co.uk".
+ */
+function tldOf(domain: string): string {
+  const d = domain.trim().toLowerCase().replace(/\.$/, '')
+  const dot = d.indexOf('.')
+  return dot === -1 ? d : d.slice(dot + 1)
+}
+
+/**
+ * Ask Porkbun whether a TLD can be registered via the API and on what
+ * terms. Call this BEFORE charging — `apiRegisterable: false` means we
+ * must not take the customer's money (the registration can only be done
+ * on porkbun.com, not via API).
+ */
+export async function getRegistrationRequirements(
+  domainOrTld: string
+): Promise<PorkbunTldRequirements> {
+  const tld = domainOrTld.includes('.') ? tldOf(domainOrTld) : domainOrTld.toLowerCase()
+  const j = await pb<any>(`/domain/getRegistrationRequirements/${encodeURIComponent(tld)}`)
+  return {
+    tld: j.tld || tld,
+    apiRegisterable: !!j.apiRegisterable,
+    registrationDurationYears: Number(j.registrationDurationYears) || 1,
+    maxRegistrationYears: j.maxRegistrationYears != null ? Number(j.maxRegistrationYears) : null,
+    whoisPrivacySupported: !!j.whoisPrivacySupported,
+    registrantOnly: !!j.registrantOnly,
+  }
+}
+
 /* ── Registration ───────────────────────────────────────────────────── */
 
 export type PorkbunRegisterArgs = {
   /** Lowercase root domain, e.g. "mycoolstore.com". */
   domain: string
-  /** Years to register for. Porkbun max is 10. */
-  years: number
-  /** Optional WHOIS contacts; if omitted, Porkbun uses your account default. */
-  contacts?: {
-    registrant?: PorkbunContact
-    admin?: PorkbunContact
-    tech?: PorkbunContact
-    billing?: PorkbunContact
-  }
   /**
-   * Nameservers to set immediately on registration. Pass Vercel's NS
-   * here so the domain is ready to attach as soon as it registers.
-   * Vercel's NS: ns1.vercel-dns.com, ns2.vercel-dns.com
+   * Registration cost in pennies (USD cents). MUST exactly equal
+   * Porkbun's price for the minimum registration term — get it from
+   * checkDomain()/checkDomainCached().price (× 100, rounded). A mismatch
+   * is rejected by the registry, so we always source it from a fresh
+   * price lookup, never a stored value.
    */
-  nameservers?: string[]
+  costCents: number
+  /**
+   * Force WHOIS privacy on/off. Omit to use the account default (enabled
+   * on Zenya's Porkbun account), which is what we want for end users.
+   */
+  whoisPrivacy?: boolean
+  /**
+   * When true, runs every pre-flight check (availability, price match,
+   * eligibility, account funds, monthly spend limit) and returns a
+   * preview WITHOUT registering or charging — and without consuming the
+   * create rate-limit budget. We use this as a pre-charge gate so we
+   * never bill a customer for a registration that would fail.
+   */
+  dryRun?: boolean
 }
 
-export type PorkbunContact = {
-  firstName: string
-  lastName: string
-  organization?: string
-  email: string
-  phone: string
-  address1: string
-  city: string
-  state?: string
-  country: string  // ISO-2
-  zipcode: string
+export type PorkbunRegisterResult = {
+  domain: string
+  /** Pennies actually charged (live) or that would be charged (dry run). */
+  cost: number
+  /** Internal Porkbun order id — present on a live registration only. */
+  orderId?: number
+  /** True when this was a dry-run preview. */
+  dryRun?: boolean
+  /** Dry run only: whether it would succeed given funds + spend limit. */
+  wouldSucceed?: boolean
+  /** Term in years that was / would be registered. */
+  duration?: number
+  /** Remaining Porkbun account balance in pennies. */
+  balance?: number
+  message?: string
 }
 
 /**
- * Register a domain. Requires:
- *   • API access enabled on the account
- *   • Sufficient account balance to cover Porkbun's wholesale price
- * On success, the domain is registered to the Porkbun account that
- * owns the API key — we are the registrant of record, the end user is
- * a soft-tenant.
+ * Register a domain via Porkbun's current API.
+ *
+ * Endpoint: POST /domain/create/{domain} (the v3.7 registration API).
+ * The legacy /domain/register path this used to call no longer exists
+ * and 404s — that was the bug behind "paid but no domain".
+ *
+ * Requires:
+ *   • API domain registration enabled on the account
+ *   • `cost` matching Porkbun's current price to the penny
+ *   • Sufficient account balance (checked up-front via dryRun)
+ *
+ * Hard validation failures (unavailable / wrong price / ineligible TLD)
+ * come back as a thrown PorkbunError. A soft failure (not enough funds)
+ * on a dry run returns `wouldSucceed: false` instead of throwing.
+ *
+ * On a live success the domain is registered to Zenya's Porkbun account
+ * (we are registrant of record; the end user is a soft-tenant), with
+ * account-default nameservers — we then point DNS at Vercel separately.
  */
-export async function registerDomain(args: PorkbunRegisterArgs): Promise<{ domain: string }> {
+export async function registerDomain(args: PorkbunRegisterArgs): Promise<PorkbunRegisterResult> {
+  const domain = args.domain.toLowerCase()
   const body: Record<string, any> = {
-    domain: args.domain.toLowerCase(),
-    years: args.years,
+    cost: Math.round(args.costCents),
+    agreeToTerms: 'yes',
   }
-  if (args.nameservers && args.nameservers.length) {
-    args.nameservers.slice(0, 4).forEach((ns, i) => {
-      body[`ns${i + 1}`] = ns
-    })
+  if (typeof args.whoisPrivacy === 'boolean') body.whoisPrivacy = args.whoisPrivacy
+  if (args.dryRun) body.dryRun = true
+
+  const j = await pb<any>(`/domain/create/${encodeURIComponent(domain)}`, body)
+  return {
+    domain: j.domain || domain,
+    cost: typeof j.cost === 'number' ? j.cost : Math.round(args.costCents),
+    orderId: typeof j.orderId === 'number' ? j.orderId : undefined,
+    dryRun: !!j.dryRun,
+    wouldSucceed: typeof j.wouldSucceed === 'boolean' ? j.wouldSucceed : undefined,
+    duration: typeof j.duration === 'number' ? j.duration : undefined,
+    balance: typeof j.balance === 'number' ? j.balance : undefined,
+    message: typeof j.message === 'string' ? j.message : undefined,
   }
-  if (args.contacts) {
-    // Porkbun flattens contact fields into `<type>FirstName`, etc.
-    const types: (keyof NonNullable<PorkbunRegisterArgs['contacts']>)[] = [
-      'registrant', 'admin', 'tech', 'billing',
-    ]
-    for (const t of types) {
-      const c = args.contacts[t]
-      if (!c) continue
-      const prefix = t
-      for (const [k, v] of Object.entries(c)) {
-        body[`${prefix}${k.charAt(0).toUpperCase()}${k.slice(1)}`] = v
-      }
-    }
-  }
-  return pb<{ status: 'SUCCESS' } & { domain: string }>('/domain/register', body)
 }
 
 /* ── Listing / inventory ────────────────────────────────────────────── */

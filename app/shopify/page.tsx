@@ -162,8 +162,15 @@ function DashboardContent() {
     setAuthLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
+        // Duplicate signup with "Confirm email" on returns an empty
+        // identities array (no error, no mail) — tell the user instead
+        // of promising an email that never arrives.
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setAuthError('هذا البريد مسجّل بالفعل. سجّل الدخول بدلاً من ذلك.');
+          return;
+        }
         alert('تم إنشاء الحساب! يُرجى التحقّق من بريدك الإلكتروني للتأكيد.');
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });

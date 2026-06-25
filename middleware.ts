@@ -16,6 +16,56 @@ function isOwnHost(host: string) {
   return false
 }
 
+// ── Rate limiting ──────────────────────────────────────────────────────────
+// Expensive endpoints that call paid APIs (OpenAI / ScraperAPI). Without a
+// throttle, anyone can loop these and run up the bill. Enforced here at the
+// edge, before the route runs, keyed by client IP.
+const RATE_LIMITED_PREFIXES = [
+  '/api/scrape',
+  '/api/generate-',
+  '/api/ai/',
+]
+const RATE_LIMIT_MAX = 60       // requests
+const RATE_LIMIT_WINDOW = 60    // seconds
+
+function clientIp(request: NextRequest): string {
+  const xff = request.headers.get('x-forwarded-for')
+  if (xff) return xff.split(',')[0].trim()
+  return (request as any).ip || request.headers.get('x-real-ip') || 'unknown'
+}
+
+/**
+ * Returns true if the request is allowed, false if it has blown the limit.
+ * Fails OPEN: if the limiter itself errors (DB hiccup, missing env), we let
+ * the request through rather than take legit users down — abuse protection
+ * is best-effort, availability isn't.
+ */
+async function rateLimitOk(key: string): Promise<boolean> {
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const svcKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!baseUrl || !svcKey) return true
+  try {
+    const r = await fetch(`${baseUrl}/rest/v1/rpc/check_rate_limit`, {
+      method: 'POST',
+      headers: {
+        apikey: svcKey,
+        Authorization: `Bearer ${svcKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_key: key,
+        p_limit: RATE_LIMIT_MAX,
+        p_window_seconds: RATE_LIMIT_WINDOW,
+      }),
+    })
+    if (!r.ok) return true
+    const allowed = await r.json()
+    return allowed !== false
+  } catch {
+    return true
+  }
+}
+
 type LookupResult = { slug: string } | null
 
 /**
@@ -56,6 +106,20 @@ async function lookupCustomDomain(host: string): Promise<LookupResult> {
 export async function middleware(request: NextRequest) {
   const host = (request.headers.get('host') || '').toLowerCase()
   const pathname = request.nextUrl.pathname
+
+  // ---- RATE LIMIT (paid endpoints) ---------------------------------------
+  if (
+    request.method === 'POST' &&
+    RATE_LIMITED_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
+    const ok = await rateLimitOk(`mw:${clientIp(request)}`)
+    if (!ok) {
+      return NextResponse.json(
+        { error: 'rate_limited', message: 'Too many requests. Slow down and try again shortly.' },
+        { status: 429, headers: { 'Retry-After': String(RATE_LIMIT_WINDOW) } }
+      )
+    }
+  }
 
   // ---- CUSTOM DOMAIN PATH ------------------------------------------------
   if (!isOwnHost(host)) {

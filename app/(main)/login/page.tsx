@@ -74,6 +74,20 @@ function LoginForm() {
           },
         })
         if (error) throw error
+        // When "Confirm email" is on, Supabase doesn't error on a
+        // duplicate signup (to avoid leaking which emails exist) — it
+        // returns a user with an empty identities array and sends no
+        // mail. Detect that and guide the user to sign in instead of
+        // leaving them staring at a "check your email" that never comes.
+        const alreadyRegistered =
+          !!data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0
+        if (alreadyRegistered) {
+          setStatus({
+            type: 'error',
+            message: 'هذا البريد مسجّل بالفعل. سجّل الدخول، أو أعد تعيين كلمة المرور إن نسيتها.',
+          })
+          return
+        }
         localStorage.setItem('zenya_last_email', email)
         if (data.session) {
           localStorage.setItem('zenya_email', email)

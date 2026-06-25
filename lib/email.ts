@@ -192,6 +192,60 @@ export function domainPurchasedEmail(args: {
 }
 
 /**
+ * Sent when a domain registration could NOT be completed after payment
+ * and we auto-refunded the customer (webhook fulfillDomainPurchase
+ * failure path). The whole point is that a silent refund feels like a
+ * scam — this explains what happened, confirms the full refund, and
+ * invites them to try again.
+ */
+export function domainRefundEmail(args: {
+  domain: string
+  amountUsd: number
+  manageUrl: string
+}): { subject: string; text: string; html: string } {
+  const { domain, amountUsd, manageUrl } = args
+  const amount = `$${amountUsd.toFixed(2)}`
+
+  const subject = `تعذّر تسجيل النطاق ${domain} — وتمت إعادة مبلغك بالكامل`
+
+  const text = [
+    `مرحبًا،`,
+    ``,
+    `حاولنا تسجيل النطاق ${domain}، لكن لم تكتمل العملية لدى جهة التسجيل.`,
+    `لذلك أعدنا إليك كامل المبلغ ${amount} تلقائيًا — لم نأخذ منك شيئًا.`,
+    ``,
+    `قد يستغرق ظهور المبلغ في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.`,
+    `يمكنك تجربة نطاق آخر في أي وقت من: ${manageUrl}`,
+    ``,
+    `نعتذر عن الإزعاج، ونحن هنا للمساعدة إن احتجت أي شيء.`,
+    `— زينيا`,
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      حاولنا تسجيل النطاق <strong style="color:#16171b;direction:ltr;display:inline-block;">${domain}</strong>، لكن لم تكتمل العملية لدى جهة التسجيل — لذلك أعدنا إليك كامل المبلغ تلقائيًا. لم نأخذ منك شيئًا.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#f3f7f3;border:1px solid #d9e7d9;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 6px;font-size:13px;color:#5f8a5f;">المبلغ المُعاد: <strong style="color:#1f6f3f;">${amount}</strong></p>
+        <p style="margin:0;font-size:13px;color:#8a8a83;">قد يستغرق ظهوره في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.</p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: `تعذّر تسجيل النطاق ${domain}`,
+    eyebrow: 'تمت إعادة المبلغ',
+    heading: 'أعدنا إليك مبلغك بالكامل',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'جرّب نطاقًا آخر',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">نعتذر عن الإزعاج. إن تكرّر الأمر أو كانت لديك أي أسئلة، راسلنا وسنساعدك فورًا.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
  * Sent right after a plan purchase clears (Stripe webhook). Two flavours:
  *   - 'onetime'  → the $9.99 lifetime Pro purchase
  *   - 'hosting'  → the $19.99/mo full-hosting subscription (first activation)

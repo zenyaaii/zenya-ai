@@ -49,7 +49,15 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: "frame-ancestors 'self' https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;"
-          }
+          },
+          // Force HTTPS for 2 years incl. subdomains — kills SSL-strip / downgrade.
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          // Stop browsers MIME-sniffing a response into something executable.
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Don't leak full URLs (with tokens/paths) to third parties.
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // Deny powerful browser APIs we never use.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
         ]
       }
     ]
