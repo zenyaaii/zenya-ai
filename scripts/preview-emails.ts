@@ -12,6 +12,7 @@ import {
   domainRefundEmail,
   paymentReceiptEmail,
   domainExpiringEmail,
+  announcementEmail,
 } from '../lib/email'
 
 const outDir = join(process.cwd(), '.email-previews')
@@ -64,6 +65,11 @@ const samples: { file: string; label: string; tmpl: { subject: string; html: str
       dateIso: new Date().toISOString(),
       manageUrl: 'https://zenyaai.co/dashboard',
     }),
+  },
+  {
+    file: 'announcement.html',
+    label: 'إعلان إعادة الإطلاق (لكل المستخدمين)',
+    tmpl: announcementEmail({ firstName: 'محمد', manageUrl: 'https://zenyaai.co/dashboard' }),
   },
   {
     file: 'domain-expiring.html',

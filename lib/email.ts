@@ -307,6 +307,55 @@ export function planPurchasedEmail(args: {
 }
 
 /**
+ * One-off broadcast: "Zenya has a new look" announcement. Sent to the
+ * existing user base after the 2026 rebrand so they see the new identity
+ * and come back. Generic enough to reuse for future announcements via the
+ * `headline` / `bodyHtml` overrides, but ships with sensible defaults.
+ */
+export function announcementEmail(args?: {
+  manageUrl?: string
+  firstName?: string | null
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args?.manageUrl || 'https://zenyaai.co/dashboard'
+  const greeting = args?.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+
+  const subject = 'زينيا بحُلّة جديدة ✨'
+
+  const text = [
+    greeting,
+    '',
+    'جدّدنا زينيا بالكامل — هوية جديدة، تصميم أوضح، ورسائل أجمل.',
+    'وأضفنا زر «جرّب مثالاً جاهزًا» في منشئ المواقع: ابدأ من مثال جاهز، عدّله، وولّد موقعك في ثوانٍ.',
+    '',
+    `عُد وجرّبها الآن: ${manageUrl}`,
+    '',
+    'لأي استفسار راسلنا على noreply@zenyaai.co',
+    '— زينيا (Musannef)',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      جدّدنا <strong style="color:#16171b;">زينيا</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
+    </p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      والأهم: أضفنا زر <strong style="color:#16171b;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
+    </p>`
+
+  const html = emailShell({
+    title: 'زينيا بحُلّة جديدة',
+    eyebrow: 'جديد',
+    heading: 'زينيا بحُلّة جديدة ✨',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'عُد إلى زينيا',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
  * Branded payment receipt — replaces Stripe's generic auto-receipt.
  * Sent right after a purchase clears (one-time Pro, or first month of
  * hosting). Doubles as a thank-you so we don't send two emails. All the
