@@ -19,6 +19,15 @@ import { Resend } from 'resend'
 
 const DEFAULT_FROM = 'Zenya <noreply@zenyaai.co>'
 
+/** Format a minor-unit amount (cents) with a sensible currency symbol.
+ *  Amount stays LTR even inside an RTL email so "€9.99" never flips. */
+function fmtMoney(cents: number, currency: string): string {
+  const cur = (currency || 'usd').toUpperCase()
+  const n = (Math.max(0, cents) / 100).toFixed(2)
+  const sym: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', AED: 'د.إ', SAR: 'ر.س' }
+  return sym[cur] ? `${sym[cur]}${n}` : `${n} ${cur}`
+}
+
 export type SendEmailArgs = {
   to: string | string[]
   subject: string
@@ -124,11 +133,12 @@ function emailShell(opts: {
     </td></tr>
     <tr><td style="padding:24px 40px;background:#faf8f3;border-top:1px solid #ececf2;text-align:right;">
       <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#9b9b94;">أُرسلت من <strong style="color:#5f5f5d;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي</p>
-      <p style="margin:0;font-size:12px;line-height:1.6;color:#9b9b94;">
+      <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#9b9b94;">
         <a href="https://zenyaai.co" style="color:#5e6ad2;text-decoration:none;">zenyaai.co</a> &nbsp;·&nbsp;
         <a href="https://zenyaai.co/privacy" style="color:#9b9b94;text-decoration:underline;">الخصوصية</a> &nbsp;·&nbsp;
         <a href="https://zenyaai.co/terms" style="color:#9b9b94;text-decoration:underline;">الشروط</a>
       </p>
+      <p style="margin:0;font-size:12px;line-height:1.6;color:#b3b3ab;">زينيا علامة تجارية مملوكة لشركة Musannef · للتواصل: <a href="mailto:noreply@zenyaai.co" style="color:#9b9b94;text-decoration:underline;">noreply@zenyaai.co</a></p>
     </td></tr>
   </table>
   </td></tr></table>
@@ -291,6 +301,123 @@ export function planPurchasedEmail(args: {
         ? 'يمكنك إدارة اشتراكك أو إلغاءه في أي وقت من صفحة الفوترة في لوحة التحكم.'
         : 'تحتاج مساعدة في إطلاق أول موقع؟ راسلنا في أي وقت — يسعدنا أن نساعدك.'
     }</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Branded payment receipt — replaces Stripe's generic auto-receipt.
+ * Sent right after a purchase clears (one-time Pro, or first month of
+ * hosting). Doubles as a thank-you so we don't send two emails. All the
+ * figures come from the Stripe Checkout Session, so the totals always
+ * match what was actually charged.
+ */
+export function paymentReceiptEmail(args: {
+  plan: 'onetime' | 'hosting'
+  amountCents: number
+  taxCents?: number
+  currency: string
+  country?: string | null
+  receiptNumber: string
+  dateIso?: string
+  manageUrl: string
+}): { subject: string; text: string; html: string } {
+  const { plan, amountCents, currency, receiptNumber, manageUrl } = args
+  const taxCents = Math.max(0, args.taxCents ?? 0)
+  const isHosting = plan === 'hosting'
+  const subtotalCents = Math.max(0, amountCents - taxCents)
+
+  const total = fmtMoney(amountCents, currency)
+  const subtotal = fmtMoney(subtotalCents, currency)
+  const tax = fmtMoney(taxCents, currency)
+
+  const rate = subtotalCents > 0 ? Math.round((taxCents / subtotalCents) * 100) : 0
+  const taxLabel = taxCents > 0 ? `ضريبة القيمة المضافة (${rate}% شامل)` : ''
+
+  const itemName = isHosting
+    ? 'الاستضافة الكاملة — اشتراك شهري'
+    : 'زينيا برو — وصول مدى الحياة'
+
+  let dateStr = ''
+  try {
+    dateStr = new Date(args.dateIso || Date.now()).toLocaleDateString('ar', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    })
+  } catch { /* leave empty */ }
+
+  const intro = isHosting
+    ? 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.'
+    : 'شكرًا لك! تم استلام دفعتك وتفعيل خطتك مدى الحياة. هذا إيصال رسمي بعمليتك.'
+
+  const subject = `إيصال الدفع من زينيا — ${total}`
+
+  const text = [
+    'شكرًا لك! تم استلام دفعتك.',
+    '',
+    itemName,
+    `المجموع الفرعي: ${subtotal}`,
+    taxCents > 0 ? `${taxLabel}: ${tax}` : null,
+    `المبلغ المدفوع: ${total}`,
+    '',
+    `رقم الإيصال: ${receiptNumber}`,
+    dateStr ? `التاريخ: ${dateStr}` : null,
+    '',
+    `لوحة التحكم: ${manageUrl}`,
+    'لأي استفسار: noreply@zenyaai.co',
+    '',
+    '— زينيا (Musannef)',
+  ].filter((l) => l !== null).join('\n')
+
+  const summary = `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="font-size:14px;color:#16171b;text-align:right;padding:6px 0;">${itemName}</td>
+            <td style="font-size:14px;color:#16171b;text-align:left;padding:6px 0;direction:ltr;white-space:nowrap;">${subtotal}</td>
+          </tr>
+          ${taxCents > 0 ? `<tr>
+            <td style="font-size:13px;color:#8a8a83;text-align:right;padding:8px 0;border-top:1px solid #ececf2;">${taxLabel}</td>
+            <td style="font-size:13px;color:#8a8a83;text-align:left;padding:8px 0;border-top:1px solid #ececf2;direction:ltr;white-space:nowrap;">${tax}</td>
+          </tr>` : ''}
+          <tr>
+            <td style="font-size:15px;font-weight:800;color:#16171b;text-align:right;padding:12px 0 4px;border-top:2px solid #e5e2d9;">المبلغ المدفوع</td>
+            <td style="font-size:15px;font-weight:800;color:#16171b;text-align:left;padding:12px 0 4px;border-top:2px solid #e5e2d9;direction:ltr;white-space:nowrap;">${total}</td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>`
+
+  const bodyHtml = `
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">${intro}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;">
+      <tr>
+        <td style="text-align:right;vertical-align:top;padding:0 0 8px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#9b9b94;">المبلغ المدفوع</p>
+          <p style="margin:0;font-size:22px;font-weight:800;color:#16171b;direction:ltr;text-align:right;">${total}</p>
+        </td>
+        <td style="text-align:left;vertical-align:top;padding:0 0 8px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#9b9b94;">التاريخ</p>
+          <p style="margin:0;font-size:14px;color:#16171b;">${dateStr}</p>
+        </td>
+      </tr>
+    </table>
+    ${summary}
+    <p style="margin:0;font-size:12px;color:#9b9b94;">رقم الإيصال: <strong style="color:#5f5f5d;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
+
+  const html = emailShell({
+    title: `إيصال الدفع من زينيا`,
+    eyebrow: 'إيصال الدفع',
+    heading: 'شكرًا لك! تم استلام دفعتك',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'الذهاب إلى لوحة التحكم',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">${
+      isHosting
+        ? 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.'
+        : 'هذا إيصال عن شرائك خطة زينيا برو مدى الحياة.'
+    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
   })
 
   return { subject, text, html }

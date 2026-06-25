@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 import { registerDomain, createDnsRecord, checkDomainCached, PorkbunError } from '@/lib/porkbun'
 import { addDomainToProject } from '@/lib/vercel-domains'
-import { sendEmail, domainPurchasedEmail, domainRefundEmail, planPurchasedEmail } from '@/lib/email'
+import { sendEmail, domainPurchasedEmail, domainRefundEmail, paymentReceiptEmail } from '@/lib/email'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -24,6 +24,17 @@ type Admin = ReturnType<typeof admin>
 function toIsoOrNull(unix: number | null | undefined): string | null {
   if (!unix || !Number.isFinite(unix)) return null
   return new Date(unix * 1000).toISOString()
+}
+
+/** A short, human-readable receipt number derived from the Stripe ids so
+ *  it's stable across webhook retries (Stripe's own receipt_number isn't
+ *  exposed on the Checkout Session). */
+function receiptNumber(session: Stripe.Checkout.Session): string {
+  const base =
+    (typeof session.payment_intent === 'string' ? session.payment_intent : '') ||
+    session.id
+  const tail = base.replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase()
+  return tail.length >= 8 ? `${tail.slice(0, 4)}-${tail.slice(4)}` : tail || 'ZENYA'
 }
 
 async function logEvent(
@@ -130,20 +141,30 @@ async function recordOneTimePurchase(
     country,
   })
 
-  // Welcome / thank-you email. Best-effort — never fail the webhook over mail.
+  // Branded receipt + thank-you (replaces Stripe's generic auto-receipt).
+  // Best-effort — never fail the webhook over mail.
   const buyerEmail = session.customer_details?.email || session.customer_email || null
   if (buyerEmail) {
     try {
-      const tmpl = planPurchasedEmail({ plan: 'onetime', manageUrl: 'https://zenyaai.co/dashboard' })
+      const tmpl = paymentReceiptEmail({
+        plan: 'onetime',
+        amountCents: session.amount_total ?? 0,
+        taxCents: taxAmount,
+        currency: session.currency || 'usd',
+        country,
+        receiptNumber: receiptNumber(session),
+        dateIso: new Date().toISOString(),
+        manageUrl: 'https://zenyaai.co/dashboard',
+      })
       await sendEmail({
         to: buyerEmail,
         subject: tmpl.subject,
         text: tmpl.text,
         html: tmpl.html,
-        tags: [{ name: 'type', value: 'plan_onetime' }],
+        tags: [{ name: 'type', value: 'receipt_onetime' }],
       })
     } catch (e) {
-      console.error('[webhook] one-time purchase email failed (non-fatal):', e)
+      console.error('[webhook] one-time purchase receipt email failed (non-fatal):', e)
     }
   }
 }
@@ -686,21 +707,30 @@ export async function POST(req: NextRequest) {
           const sub = await stripe.subscriptions.retrieve(session.subscription)
           await upsertHostingSubscription(supabase, sub, userId)
 
-          // First-activation welcome email. This branch only fires on the
+          // First-activation receipt + welcome. This branch only fires on the
           // initial subscription checkout — renewals/updates come through
           // invoice.* and customer.subscription.* events — so it won't spam.
           if (email) {
             try {
-              const tmpl = planPurchasedEmail({ plan: 'hosting', manageUrl: 'https://zenyaai.co/dashboard' })
+              const tmpl = paymentReceiptEmail({
+                plan: 'hosting',
+                amountCents: session.amount_total ?? 0,
+                taxCents: session.total_details?.amount_tax ?? 0,
+                currency: session.currency || 'usd',
+                country: session.customer_details?.address?.country || null,
+                receiptNumber: receiptNumber(session),
+                dateIso: new Date().toISOString(),
+                manageUrl: 'https://zenyaai.co/dashboard',
+              })
               await sendEmail({
                 to: email,
                 subject: tmpl.subject,
                 text: tmpl.text,
                 html: tmpl.html,
-                tags: [{ name: 'type', value: 'plan_hosting' }],
+                tags: [{ name: 'type', value: 'receipt_hosting' }],
               })
             } catch (e) {
-              console.error('[webhook] hosting welcome email failed (non-fatal):', e)
+              console.error('[webhook] hosting welcome receipt email failed (non-fatal):', e)
             }
           }
         }

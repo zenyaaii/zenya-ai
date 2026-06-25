@@ -10,7 +10,7 @@ import { join } from 'path'
 import {
   domainPurchasedEmail,
   domainRefundEmail,
-  planPurchasedEmail,
+  paymentReceiptEmail,
   domainExpiringEmail,
 } from '../lib/email'
 
@@ -38,14 +38,32 @@ const samples: { file: string; label: string; tmpl: { subject: string; html: str
     }),
   },
   {
-    file: 'plan-onetime.html',
-    label: 'ترقية برو (دفعة واحدة)',
-    tmpl: planPurchasedEmail({ plan: 'onetime', manageUrl: 'https://zenyaai.co/dashboard' }),
+    file: 'receipt-onetime.html',
+    label: 'إيصال الدفع (برو — دفعة واحدة)',
+    tmpl: paymentReceiptEmail({
+      plan: 'onetime',
+      amountCents: 999,
+      taxCents: 173,
+      currency: 'eur',
+      country: 'NL',
+      receiptNumber: '1415-5399',
+      dateIso: new Date().toISOString(),
+      manageUrl: 'https://zenyaai.co/dashboard',
+    }),
   },
   {
-    file: 'plan-hosting.html',
-    label: 'تفعيل الاستضافة',
-    tmpl: planPurchasedEmail({ plan: 'hosting', manageUrl: 'https://zenyaai.co/dashboard' }),
+    file: 'receipt-hosting.html',
+    label: 'إيصال الدفع (الاستضافة الشهرية)',
+    tmpl: paymentReceiptEmail({
+      plan: 'hosting',
+      amountCents: 1999,
+      taxCents: 347,
+      currency: 'eur',
+      country: 'NL',
+      receiptNumber: '2208-7710',
+      dateIso: new Date().toISOString(),
+      manageUrl: 'https://zenyaai.co/dashboard',
+    }),
   },
   {
     file: 'domain-expiring.html',
