@@ -8,6 +8,7 @@ import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
 import type { WellnessInput } from '@/utils/wellness/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
@@ -339,6 +340,7 @@ export default function WellnessWizardPage() {
       <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
+      <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-teal-700">قالب استوديو العافية</p>

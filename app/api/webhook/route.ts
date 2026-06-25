@@ -26,15 +26,29 @@ function toIsoOrNull(unix: number | null | undefined): string | null {
   return new Date(unix * 1000).toISOString()
 }
 
-/** A short, human-readable receipt number derived from the Stripe ids so
- *  it's stable across webhook retries (Stripe's own receipt_number isn't
- *  exposed on the Checkout Session). */
-function receiptNumber(session: Stripe.Checkout.Session): string {
-  const base =
-    (typeof session.payment_intent === 'string' ? session.payment_intent : '') ||
-    session.id
-  const tail = base.replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase()
+/** A short, human-readable receipt number derived from a Stripe id so it's
+ *  stable across webhook retries. */
+function shortReceipt(base: string): string {
+  const tail = (base || '').replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase()
   return tail.length >= 8 ? `${tail.slice(0, 4)}-${tail.slice(4)}` : tail || 'ZENYA'
+}
+
+/** Receipt number for a Checkout Session (Stripe's own number isn't exposed
+ *  on the session). Prefers the payment_intent id, falls back to session id. */
+function receiptNumber(session: Stripe.Checkout.Session): string {
+  return shortReceipt(
+    (typeof session.payment_intent === 'string' ? session.payment_intent : '') ||
+      session.id
+  )
+}
+
+/** Total tax on an invoice, tolerant of API-version field differences
+ *  (`tax` was deprecated in favour of the `total_tax_amounts` array). */
+function invoiceTaxCents(inv: Stripe.Invoice): number {
+  const flat = (inv as any).tax
+  if (typeof flat === 'number') return flat
+  const amounts = (inv as any).total_tax_amounts as Array<{ amount?: number }> | undefined
+  return (amounts || []).reduce((s, t) => s + (t.amount || 0), 0)
 }
 
 async function logEvent(
@@ -763,13 +777,54 @@ export async function POST(req: NextRequest) {
         break
       }
 
-      case 'invoice.payment_failed':
+      case 'invoice.payment_failed': {
+        const inv = event.data.object as Stripe.Invoice
+        const subId = (inv as any).subscription
+        if (typeof subId === 'string') {
+          const sub = await stripe.subscriptions.retrieve(subId)
+          await upsertHostingSubscription(supabase, sub)
+        }
+        break
+      }
+
       case 'invoice.payment_succeeded': {
         const inv = event.data.object as Stripe.Invoice
         const subId = (inv as any).subscription
         if (typeof subId === 'string') {
           const sub = await stripe.subscriptions.retrieve(subId)
           await upsertHostingSubscription(supabase, sub)
+        }
+
+        // Renewal receipt. Only on recurring cycles — the first month's
+        // receipt is already sent from checkout.session.completed, so we
+        // skip billing_reason 'subscription_create' to avoid a duplicate.
+        // (The whole handler is idempotent via stripe_events, so a Stripe
+        // retry of this event won't re-send either.)
+        const reason = (inv as any).billing_reason
+        const email = inv.customer_email || null
+        if (email && reason === 'subscription_cycle') {
+          try {
+            const created = (inv.created ?? Math.floor(Date.now() / 1000)) as number
+            const tmpl = paymentReceiptEmail({
+              plan: 'hosting',
+              amountCents: inv.amount_paid ?? inv.total ?? 0,
+              taxCents: invoiceTaxCents(inv),
+              currency: inv.currency || 'usd',
+              country: (inv as any).customer_address?.country || null,
+              receiptNumber: inv.number || shortReceipt(inv.id || ''),
+              dateIso: new Date(created * 1000).toISOString(),
+              manageUrl: 'https://zenyaai.co/dashboard',
+            })
+            await sendEmail({
+              to: email,
+              subject: tmpl.subject,
+              text: tmpl.text,
+              html: tmpl.html,
+              tags: [{ name: 'type', value: 'receipt_hosting_renewal' }],
+            })
+          } catch (e) {
+            console.error('[webhook] renewal receipt email failed (non-fatal):', e)
+          }
         }
         break
       }

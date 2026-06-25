@@ -8,6 +8,7 @@ import { LOOKBOOK_PRESETS } from '@/utils/lookbook/presets'
 import type { LookbookStylePresetId } from '@/utils/lookbook/types'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
@@ -246,6 +247,7 @@ export default function LookbookWizardPage() {
       <div className="absolute inset-0 z-0 bg-white/60 backdrop-blur-2xl" />
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
+      <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sm} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-stone-500">لوك بوك · قالب الأزياء المحتشمة</p>

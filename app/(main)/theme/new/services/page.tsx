@@ -8,6 +8,7 @@ import { SERVICE_PRESETS } from '@/utils/services/presets'
 import type { ServiceInput } from '@/utils/services/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
@@ -344,6 +345,7 @@ export default function ServicesWizardPage() {
       <div className="absolute inset-0 z-0 bg-white/50 backdrop-blur-2xl" />
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
+      <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-10">
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700">قالب الخدمات المحلية · حِرَف</p>

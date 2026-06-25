@@ -7,6 +7,7 @@ import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import type { RestaurantInput, RestaurantTypeId } from '@/utils/restaurant/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
+import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
@@ -543,6 +544,28 @@ export default function RestaurantWizardPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // "Try an example" — fills the whole form with a ready sample restaurant
+  // so a first-time user gets an instant starting point to tweak (change
+  // the name, prices, a dish or two) instead of facing a blank form.
+  // Generation still goes through the normal flow, so it counts against the
+  // user's quota exactly like a hand-typed build.
+  function fillExample() {
+    const hasContent =
+      form.brand_name.trim().length > 0 ||
+      form.story_brief.trim().length > 0 ||
+      form.categories.some((c) => c.items.some((i) => i.name.trim().length > 0))
+    if (
+      hasContent &&
+      !confirm('سيُملأ النموذج بمثال جاهز (مطعم «دار نُور») ويستبدل ما أدخلته. هل تريد المتابعة؟')
+    ) {
+      return
+    }
+    setForm(buildSampleForm())
+    setRestoredDraft(false)
+    setError(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (!authReady) {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل…</div>
@@ -559,6 +582,7 @@ export default function RestaurantWizardPage() {
       <div className="absolute inset-0 z-0 bg-white/50 backdrop-blur-2xl" />
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
+      <ExampleFillButton onFill={fillExample} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <div className="mb-10">
           <p className="text-xs uppercase tracking-[0.3em] text-amber-700">قالب المطاعم · دار</p>
