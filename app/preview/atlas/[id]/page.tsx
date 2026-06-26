@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
+import PreviewToolbar from '@/components/PreviewToolbar'
 import AtlasPreview from '@/components/theme/atlas/AtlasPreview'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { sectionStylesToCss, type SectionStyles } from '@/utils/theme-editor-types'
@@ -89,28 +90,7 @@ export default function AtlasPreviewPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Floating preview bar */}
-      <div className="pointer-events-none fixed left-4 right-4 top-4 z-50 flex items-center justify-between gap-3">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/15 bg-black/75 px-4 py-2 text-xs text-white backdrop-blur-md">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400" />
-          <span className="uppercase tracking-[0.2em] text-white/70">معاينة مباشرة ·</span>
-          <span className="font-semibold">{name}</span>
-        </div>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <Link
-            href={`/preview/atlas/${params.id}/edit`}
-            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
-          >
-            فتح المحرّر
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-indigo-500 px-4 py-2 text-xs font-bold text-white transition hover:scale-105"
-          >
-            لوحة التحكم
-          </Link>
-        </div>
-      </div>
+      <PreviewToolbar name={name} editHref={`/preview/atlas/${params.id}/edit`} />
       {sectionStyles && Object.keys(sectionStyles).length > 0 && (
         <style
           // eslint-disable-next-line react/no-danger

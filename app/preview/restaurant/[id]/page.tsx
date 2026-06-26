@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
+import PreviewToolbar from '@/components/PreviewToolbar'
 import RestaurantPreview from '@/components/theme/restaurant/RestaurantPreview'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import type { RestaurantContent } from '@/utils/restaurant/types'
@@ -89,32 +90,7 @@ export default function RestaurantPreviewPage() {
 
   return (
     <div className="relative min-h-screen" style={{ background: '#0a0a0c' }}>
-      {/* Floating action bar */}
-      <div className="fixed top-4 left-4 right-4 z-50 flex items-center justify-between gap-3 pointer-events-none">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-black/75 px-4 py-2 text-xs text-white backdrop-blur-md border border-white/15">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="uppercase tracking-[0.2em] text-white/70">معاينة مباشرة ·</span>
-          <span className="font-semibold">{name}</span>
-        </div>
-        <div className="pointer-events-auto flex items-center gap-2">
-          {/* Single editor entry — everything (text, images, colors,
-              typography, sections) is editable from /edit. The old "Edit
-              details" → /theme/new path was for first-time creation, not
-              post-launch tweaks, so it's been retired. */}
-          <Link
-            href={`/preview/restaurant/${params.id}/edit`}
-            className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105"
-          >
-            فتح المحرّر
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-amber-400 px-4 py-2 text-xs font-bold text-black backdrop-blur-md transition hover:scale-105"
-          >
-            لوحة التحكم
-          </Link>
-        </div>
-      </div>
+      <PreviewToolbar name={name} editHref={`/preview/restaurant/${params.id}/edit`} />
 
       {content.section_styles && Object.keys(content.section_styles).length > 0 && (
         <style

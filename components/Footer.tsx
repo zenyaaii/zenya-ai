@@ -70,15 +70,21 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden pt-20 pb-10 border-t border-token bg-white">
+    <footer className="relative overflow-hidden pt-20 pb-10 bg-[#0b0b0d] text-white">
       {/* Subtle aurora wash at the very top of the footer for depth */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[260px] -z-0 opacity-50"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[300px] -z-0 opacity-100"
         style={{
           background:
-            'radial-gradient(ellipse 60% 100% at 30% 0%, rgba(94,106,210,0.10), transparent 70%), radial-gradient(ellipse 50% 90% at 75% 0%, rgba(217,119,6,0.07), transparent 70%)',
+            'radial-gradient(ellipse 60% 100% at 25% 0%, rgba(94,106,210,0.22), transparent 70%), radial-gradient(ellipse 50% 90% at 80% 0%, rgba(217,119,6,0.12), transparent 70%)',
         }}
+      />
+      {/* Hairline top edge */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent)' }}
       />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6">
@@ -86,10 +92,10 @@ export default function Footer() {
           {/* ── Brand ── */}
           <div className="md:col-span-5">
             <Link href="/" className="mb-4 flex w-fit items-center">
-              <ZenyaMark className="h-6 text-[#5e6ad2]" />
+              <ZenyaMark className="h-6 text-white" />
             </Link>
 
-            <p className="max-w-sm text-[14px] leading-[1.85] text-muted">
+            <p className="max-w-sm text-[14px] leading-[1.85] text-white/55">
               منشئ مواقع بالذكاء الاصطناعي للأنشطة التجارية الحقيقية. ثمانية قوالب
               احترافية — مطاعم، أزياء، صفحات هبوط للتطبيقات، قصص علامات تجارية،
               ومحرّك متكامل لمتاجر شوبيفاي بمنتج واحد. اكتب نبذة، واحصل على موقع مباشر.
@@ -99,7 +105,7 @@ export default function Footer() {
               {['HTTPS', 'متوافق مع GDPR', 'قاعدة بيانات في أوروبا'].map((badge) => (
                 <span
                   key={badge}
-                  className="inline-flex items-center rounded-full border border-token bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted"
+                  className="inline-flex items-center rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-medium text-white/55"
                 >
                   {badge}
                 </span>
@@ -112,10 +118,12 @@ export default function Footer() {
                 <Link
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-md border border-token bg-background text-muted transition-colors duration-150',
-                    'hover:border-[rgba(94,106,210,0.30)] hover:text-primary'
+                    'flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-white/[0.06] text-white/65 transition-colors duration-150',
+                    'hover:border-[rgba(94,106,210,0.55)] hover:bg-white/10 hover:text-white'
                   )}
                 >
                   <Icon className="h-[15px] w-[15px]" />
@@ -126,7 +134,7 @@ export default function Footer() {
 
           {/* ── Templates (new — communicates the 8 business types) ── */}
           <div className="md:col-span-4">
-            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               القوالب
             </h3>
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
@@ -138,8 +146,8 @@ export default function Footer() {
                     <Link
                       href={href}
                       className={cn(
-                        'group inline-flex items-center gap-2 text-[13.5px] text-muted transition-colors duration-150',
-                        'hover:text-foreground'
+                        'group inline-flex items-center gap-2 text-[13.5px] text-white/55 transition-colors duration-150',
+                        'hover:text-white'
                       )}
                     >
                       <span
@@ -161,7 +169,7 @@ export default function Footer() {
 
           {/* ── Product ── */}
           <div className="md:col-span-2">
-            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               المنتج
             </h3>
             <ul className="space-y-2.5">
@@ -169,7 +177,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-[13.5px] text-muted transition-colors duration-150 hover:text-foreground"
+                    className="text-[13.5px] text-white/55 transition-colors duration-150 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -180,7 +188,7 @@ export default function Footer() {
 
           {/* ── Legal ── */}
           <div className="md:col-span-1">
-            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+            <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/40">
               قانوني
             </h3>
             <ul className="space-y-2.5">
@@ -188,7 +196,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-[13.5px] text-muted transition-colors duration-150 hover:text-foreground"
+                    className="text-[13.5px] text-white/55 transition-colors duration-150 hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -199,22 +207,22 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom bar ── */}
-        <div className="mt-14 flex flex-col gap-3 border-t border-token pt-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-[12.5px] text-muted">
+        <div className="mt-14 flex flex-col gap-3 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
+          <p className="text-[12.5px] text-white/45">
             © {new Date().getFullYear()} زينيا. تُدار كمؤسسة فردية هولندية.
             جميع الحقوق محفوظة.
           </p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-white/45">
             <button
               onClick={openConsent}
-              className="transition-colors hover:text-foreground"
+              className="transition-colors hover:text-white"
             >
               تفضيلات ملفات الارتباط
             </button>
             <span aria-hidden>·</span>
             <span className="inline-flex items-center gap-1.5">
               صُنع بحبّ
-              <Heart className="h-3.5 w-3.5 text-[#dc2626]" aria-hidden fill="currentColor" />
+              <Heart className="h-3.5 w-3.5 text-[#f87171]" aria-hidden fill="currentColor" />
               في الاتحاد الأوروبي.
             </span>
           </div>
@@ -229,9 +237,9 @@ export default function Footer() {
       <div aria-hidden className="relative z-10 mt-16 w-full select-none">
         <div
           className="mx-6 mb-4 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(94,106,210,0.30), transparent)' }}
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.20), transparent)' }}
         />
-        <BrandLogo className="mx-auto w-full max-w-5xl px-6" />
+        <BrandLogo className="mx-auto w-full max-w-5xl px-6" markClassName="text-white/[0.07]" />
       </div>
     </footer>
   )

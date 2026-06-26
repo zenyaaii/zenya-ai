@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import WellnessPreview from '@/components/theme/wellness/WellnessPreview'
 import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
+import PreviewToolbar from '@/components/PreviewToolbar'
 import type { WellnessContent } from '@/utils/wellness/types'
 
 export default function WellnessPreviewPage() {
@@ -88,22 +89,7 @@ export default function WellnessPreviewPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Floating preview bar */}
-      <div className="pointer-events-none fixed left-4 right-4 top-4 z-50 flex items-center justify-between gap-3">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/15 bg-black/75 px-4 py-2 text-xs text-white backdrop-blur-md">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
-          <span className="uppercase tracking-[0.2em] text-white/70">معاينة مباشرة ·</span>
-          <span className="font-semibold">{name}</span>
-        </div>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <Link href={`/preview/wellness/${params.id}/edit`} className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-black backdrop-blur-md transition hover:scale-105">
-            فتح المحرّر
-          </Link>
-          <Link href="/dashboard" className="rounded-full bg-teal-400 px-4 py-2 text-xs font-bold text-stone-950 transition hover:scale-105">
-            لوحة التحكم
-          </Link>
-        </div>
-      </div>
+      <PreviewToolbar name={name} editHref={`/preview/wellness/${params.id}/edit`} />
       <WellnessPreview
         content={content}
         presetId={presetId}

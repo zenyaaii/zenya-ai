@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
+import PreviewToolbar from '@/components/PreviewToolbar'
 import CollectivePreview from '@/components/theme/collective/CollectivePreview'
 import type { CollectiveContent } from '@/utils/collective/types'
 
@@ -82,28 +83,7 @@ export default function CollectivePreviewPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Floating preview bar */}
-      <div className="pointer-events-none fixed left-4 right-4 top-4 z-[200] flex items-center justify-between gap-3">
-        <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-emerald-400/20 bg-black/75 px-4 py-2 text-xs text-white backdrop-blur-md">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          <span className="uppercase tracking-[0.2em] text-white/60">معاينة مباشرة ·</span>
-          <span className="font-semibold">{name}</span>
-        </div>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <Link
-            href="/theme/new/collective"
-            className="rounded-full border border-white/20 bg-black/60 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-black/80"
-          >
-            تعديل التفاصيل
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-emerald-500 px-4 py-2 text-xs font-bold text-black transition hover:scale-105"
-          >
-            لوحة التحكم
-          </Link>
-        </div>
-      </div>
+      <PreviewToolbar name={name} editHref="/theme/new/collective" />
       <CollectivePreview content={content} presetId={presetId} />
       <BuildSuccessOverlay
         open={celebrate}

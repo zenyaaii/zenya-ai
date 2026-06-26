@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import BuildSuccessOverlay from '@/components/BuildSuccessOverlay'
+import PreviewToolbar from '@/components/PreviewToolbar'
 import StudioPreview from '@/components/theme/studio/StudioPreview'
 import type { StudioContent } from '@/utils/studio/types'
 
@@ -88,41 +89,7 @@ export default function StudioPreviewPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Floating preview bar */}
-      <div className="pointer-events-none fixed left-4 right-4 top-4 z-[200] flex items-center justify-between gap-3">
-        <div
-          className="pointer-events-auto flex items-center gap-2 rounded-full px-4 py-2 text-xs backdrop-blur-md"
-          style={{
-            background: isDark ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.85)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)'}`,
-            color: isDark ? 'white' : '#1a1a1a'
-          }}
-        >
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full" style={{ background: isDark ? 'rgba(255,255,255,0.5)' : '#0a0a0a' }} />
-          <span className="uppercase tracking-[0.2em] opacity-50">معاينة مباشرة ·</span>
-          <span className="font-semibold">{name}</span>
-        </div>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <Link
-            href={`/preview/studio/${params.id}/edit`}
-            className="rounded-full px-4 py-2 text-xs font-semibold backdrop-blur-md transition hover:scale-105"
-            style={{ background: isDark ? 'white' : '#0a0a0a', color: isDark ? '#0a0a0a' : 'white' }}
-          >
-            فتح المحرّر
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full px-4 py-2 text-xs font-bold backdrop-blur-md transition"
-            style={{
-              background: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}`,
-              color: isDark ? 'white' : '#1a1a1a'
-            }}
-          >
-            لوحة التحكم
-          </Link>
-        </div>
-      </div>
+      <PreviewToolbar name={name} editHref={`/preview/studio/${params.id}/edit`} />
       <StudioPreview
         content={content}
         presetId={presetId}
