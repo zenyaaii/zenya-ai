@@ -299,13 +299,22 @@ export default function Navbar() {
                   )
                 })}
                 {!user && (
-                  <Link
-                    href="/login?mode=signup"
-                    onClick={() => setMobileOpen(false)}
-                    className="mt-2 rounded-md bg-primary px-4 py-3 text-center text-[14px] font-semibold text-white btn-shadow-primary"
-                  >
-                    ابدأ مجانًا
-                  </Link>
+                  <>
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="mt-2 rounded-md border border-token px-4 py-3 text-center text-[14px] font-medium text-foreground transition-colors hover:bg-[rgba(28,28,28,0.04)]"
+                    >
+                      تسجيل الدخول
+                    </Link>
+                    <Link
+                      href="/login?mode=signup"
+                      onClick={() => setMobileOpen(false)}
+                      className="mt-1.5 rounded-md bg-primary px-4 py-3 text-center text-[14px] font-semibold text-white btn-shadow-primary"
+                    >
+                      ابدأ مجانًا
+                    </Link>
+                  </>
                 )}
               </nav>
             </motion.div>

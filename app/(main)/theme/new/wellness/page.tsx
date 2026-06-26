@@ -404,30 +404,36 @@ export default function WellnessWizardPage() {
             <p className="mb-4 text-xs text-muted/80">حدّد أوقات الفتح / الإغلاق لكل يوم. أشِّر على «مغلق» للأيام التي تكون فيها مغلقًا.</p>
             <div className="divide-y divide-token">
               {form.hours.map((h, idx) => (
-                <div key={h.day} className="grid grid-cols-[110px_1fr_1fr_80px] items-center gap-3 py-3">
-                  <span className="text-sm font-medium text-foreground">{h.label}</span>
-                  <input
-                    className={inputCls + ' py-2'}
-                    placeholder="9:00 ص"
-                    value={h.open}
-                    onChange={(e) => updateHour(idx, { open: e.target.value })}
-                    disabled={h.closed}
-                  />
-                  <input
-                    className={inputCls + ' py-2'}
-                    placeholder="8:00 م"
-                    value={h.close}
-                    onChange={(e) => updateHour(idx, { close: e.target.value })}
-                    disabled={h.closed}
-                  />
-                  <label className="flex items-center justify-end gap-2 text-xs text-muted">
+                <div key={h.day} className="flex flex-col gap-2 py-3 sm:grid sm:grid-cols-[110px_1fr_1fr_80px] sm:items-center sm:gap-3">
+                  {/* Day + closed toggle: same row on mobile, separate grid cells on sm+ */}
+                  <div className="flex items-center justify-between sm:contents">
+                    <span className="text-sm font-medium text-foreground">{h.label}</span>
+                    <label className="flex items-center gap-2 text-xs text-muted sm:order-last sm:justify-end">
+                      <input
+                        type="checkbox"
+                        checked={!!h.closed}
+                        onChange={(e) => updateHour(idx, { closed: e.target.checked, ...(e.target.checked ? { open: '', close: '' } : {}) })}
+                      />
+                      مغلق
+                    </label>
+                  </div>
+                  {/* Open / close inputs: side-by-side on mobile, inline on sm+ */}
+                  <div className="grid grid-cols-2 gap-3 sm:contents">
                     <input
-                      type="checkbox"
-                      checked={!!h.closed}
-                      onChange={(e) => updateHour(idx, { closed: e.target.checked, ...(e.target.checked ? { open: '', close: '' } : {}) })}
+                      className={inputCls + ' py-2'}
+                      placeholder="9:00 ص"
+                      value={h.open}
+                      onChange={(e) => updateHour(idx, { open: e.target.value })}
+                      disabled={h.closed}
                     />
-                    مغلق
-                  </label>
+                    <input
+                      className={inputCls + ' py-2'}
+                      placeholder="8:00 م"
+                      value={h.close}
+                      onChange={(e) => updateHour(idx, { close: e.target.value })}
+                      disabled={h.closed}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

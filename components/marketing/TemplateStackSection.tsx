@@ -260,12 +260,16 @@ export default function TemplateStackSection() {
             type="button"
             aria-label={`اذهب إلى قالب ${t.name}`}
             onClick={() => setIndex(i)}
-            className="h-2 rounded-full transition-all duration-300"
-            style={{
-              width: i === index ? 22 : 8,
-              background: i === index ? 'var(--primary)' : 'rgba(28,28,28,0.18)',
-            }}
-          />
+            className="flex h-6 min-w-[24px] items-center justify-center"
+          >
+            <span
+              className="block h-2 rounded-full transition-all duration-300"
+              style={{
+                width: i === index ? 22 : 8,
+                background: i === index ? 'var(--primary)' : 'rgba(28,28,28,0.18)',
+              }}
+            />
+          </button>
         ))}
       </div>
 
