@@ -20,6 +20,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { motion, useReducedMotion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { openConsent } from '@/components/CookieConsent'
 import {
@@ -54,6 +55,18 @@ function useStatus(resetAfter = 3500) {
   return { status, msg, set }
 }
 
+/* ── Motion variants ─────────────────────────────────────────────── */
+
+const EASE = [0.22, 1, 0.36, 1] as const
+const containerV = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+const sectionV = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+}
+
 /* ── Presentational atoms ────────────────────────────────────────── */
 
 function Section({
@@ -62,6 +75,7 @@ function Section({
   subtitle,
   children,
   tone,
+  accent = '#5e6ad2',
   action,
 }: {
   icon: React.ElementType
@@ -69,20 +83,27 @@ function Section({
   subtitle?: string
   children: ReactNode
   tone?: 'danger'
+  /** Icon-chip accent so each card has its own colour. */
+  accent?: string
   action?: ReactNode
 }) {
   const danger = tone === 'danger'
   return (
-    <section
-      className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md ${
+    <motion.section
+      variants={sectionV}
+      whileHover={{ y: -2 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+      className={`group overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-[0_18px_40px_-22px_rgba(28,28,28,0.30)] ${
         danger ? 'border-red-200' : 'border-[#e8e5de]'
       }`}
     >
       <div className={`flex items-center gap-4 border-b p-5 ${danger ? 'border-red-100' : 'border-[#f0ede6]'}`}>
         <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
-            danger ? 'bg-red-50 text-red-500' : 'bg-[#eef0fb] text-[#5e6ad2]'
-          }`}
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+          style={{
+            background: danger ? 'rgba(220,38,38,0.08)' : `${accent}16`,
+            color: danger ? '#ef4444' : accent,
+          }}
         >
           <Icon className="h-5 w-5" strokeWidth={1.8} />
         </div>
@@ -93,7 +114,7 @@ function Section({
         {action}
       </div>
       <div className="p-5">{children}</div>
-    </section>
+    </motion.section>
   )
 }
 
@@ -166,6 +187,7 @@ function Note({ status, msg }: { status: Status; msg: string }) {
 export default function AccountSettings() {
   const router = useRouter()
   const supabase = createClient()
+  const reduce = useReducedMotion()
 
   const [email, setEmail] = useState('')
   const [plan, setPlan] = useState<string | null>(null)
@@ -305,20 +327,45 @@ export default function AccountSettings() {
     ? plan === 'pro_hosting' ? 'Pro + استضافة' : 'Pro'
     : plan === 'admin' ? 'مشرف' : 'مجانية'
 
+  const initial = newName?.trim()?.[0] || email?.[0] || '؟'
+
   return (
     <div className="mx-auto max-w-2xl" dir="rtl">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[28px] font-bold tracking-tight text-foreground">الإعدادات</h1>
-        <p className="mt-1 text-[13.5px] text-muted">
-          أدِر حسابك وأمانك وبياناتك — مُسجَّل الدخول باسم{' '}
-          <span dir="ltr" className="font-medium text-foreground">{email || '…'}</span>
-        </p>
-      </div>
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="mb-8 flex items-center gap-4"
+      >
+        <div
+          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold text-white shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #5e6ad2 0%, #8b94e8 100%)',
+            boxShadow: '0 12px 28px -10px rgba(94,106,210,0.55)',
+          }}
+        >
+          {initial.toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-[28px] font-bold tracking-tight text-foreground">
+            الإعدادات
+          </h1>
+          <p className="mt-0.5 truncate text-[13.5px] text-muted">
+            مُسجَّل الدخول باسم{' '}
+            <span dir="ltr" className="font-medium text-foreground">{email || '…'}</span>
+          </p>
+        </div>
+      </motion.div>
 
-      <div className="space-y-5">
+      <motion.div
+        className="space-y-5"
+        variants={containerV}
+        initial={reduce ? false : 'hidden'}
+        animate="show"
+      >
         {/* Profile */}
-        <Section icon={User} title="الملف الشخصي" subtitle="اسمك كما يظهر في حسابك ورسائلنا">
+        <Section icon={User} accent="#5e6ad2" title="الملف الشخصي" subtitle="اسمك كما يظهر في حسابك ورسائلنا">
           <form onSubmit={saveName} className="space-y-4">
             <Field label="الاسم الكامل">
               <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="اكتب اسمك" />
@@ -331,7 +378,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Email */}
-        <Section icon={Mail} title="البريد الإلكتروني" subtitle="عنوان تسجيل الدخول وإرسال الإشعارات">
+        <Section icon={Mail} accent="#0ea5e9" title="البريد الإلكتروني" subtitle="عنوان تسجيل الدخول وإرسال الإشعارات">
           <form onSubmit={saveEmail} className="space-y-4">
             <Field label="البريد الإلكتروني">
               <Input
@@ -350,7 +397,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Password */}
-        <Section icon={Lock} title="كلمة المرور" subtitle="غيّرها مباشرةً — أنت مسجّل الدخول بالفعل">
+        <Section icon={Lock} accent="#16a34a" title="كلمة المرور" subtitle="غيّرها مباشرةً — أنت مسجّل الدخول بالفعل">
           <form onSubmit={savePassword} className="space-y-4">
             <Field label="كلمة المرور الجديدة">
               <div className="relative">
@@ -391,6 +438,7 @@ export default function AccountSettings() {
         {/* Plan & billing */}
         <Section
           icon={CreditCard}
+          accent="#d97706"
           title="الخطة والفوترة"
           subtitle="زينيا Pro شراء لمرة واحدة — لا اشتراك متكرّر"
           action={
@@ -421,7 +469,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Appearance */}
-        <Section icon={Sun} title="المظهر" subtitle="يُحفظ على هذا الجهاز فقط">
+        <Section icon={Sun} accent="#a855f7" title="المظهر" subtitle="يُحفظ على هذا الجهاز فقط">
           <button
             type="button"
             onClick={toggleDark}
@@ -435,7 +483,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Privacy */}
-        <Section icon={Shield} title="الخصوصية والأمان">
+        <Section icon={Shield} accent="#0d9488" title="الخصوصية والأمان">
           <ul className="-my-1 divide-y divide-[#f0ede6]">
             <li>
               <button onClick={openConsent} className="flex w-full items-center justify-between py-3 text-[13.5px] font-medium text-foreground transition hover:text-[#5e6ad2]">
@@ -458,7 +506,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Data */}
-        <Section icon={Database} title="بياناتك" subtitle="نزّل نسخة كاملة — وفق المادتين ١٥ و٢٠ من GDPR">
+        <Section icon={Database} accent="#2563eb" title="بياناتك" subtitle="نزّل نسخة كاملة — وفق المادتين ١٥ و٢٠ من GDPR">
           <p className="mb-4 text-[13px] leading-relaxed text-muted">
             يشمل التصدير ملفك الشخصي وقوالبك وسجلّ الاستخلاص ومشترياتك.
           </p>
@@ -504,7 +552,7 @@ export default function AccountSettings() {
             </div>
           )}
         </Section>
-      </div>
+      </motion.div>
     </div>
   )
 }
