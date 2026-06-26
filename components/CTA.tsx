@@ -60,7 +60,7 @@ export default function CTA() {
               className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
-              انضمّ إلى أكثر من 2,400 مؤسّس وصاحب عمل
+              ثمانية قوالب احترافية · جاهزة الآن
             </motion.p>
 
             <motion.h2
@@ -81,8 +81,8 @@ export default function CTA() {
               className="mx-auto mt-4 max-w-sm text-[16px] leading-[1.6]"
               style={{ color: 'rgba(255,255,255,0.78)' }}
             >
-              اختر أحد القوالب الثمانية، اكتب نبذة، واحصل على موقع مباشر في أقل
-              من دقيقة. دون أي عمل تصميمي أو برمجي.
+              اختر أحد القوالب الثمانية، اكتب نبذة، واحصل على موقع مباشر في
+              دقائق. دون أي عمل تصميمي أو برمجي.
             </motion.p>
 
             <motion.div

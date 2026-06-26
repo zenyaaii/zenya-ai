@@ -12,6 +12,7 @@ import {
   Sparkles,
   Briefcase,
   MessageCircle,
+  MessageSquareQuote,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -27,15 +28,16 @@ const GithubIcon: LucideIcon = ((props: React.SVGProps<SVGSVGElement>) => (
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 
-type Topic = 'support' | 'request' | 'sales' | 'other'
+type Topic = 'support' | 'request' | 'sales' | 'review' | 'other'
 
 type TopicMeta = { id: Topic; label: string; icon: LucideIcon }
 
 const TOPICS: TopicMeta[] = [
-  { id: 'support', label: 'الدعم',             icon: LifeBuoy      },
-  { id: 'request', label: 'طلب قالب',          icon: Sparkles     },
-  { id: 'sales',   label: 'المبيعات',          icon: Briefcase     },
-  { id: 'other',   label: 'شيء آخر',           icon: MessageCircle },
+  { id: 'support', label: 'الدعم',             icon: LifeBuoy           },
+  { id: 'request', label: 'طلب قالب',          icon: Sparkles          },
+  { id: 'review',  label: 'مشاركة تجربة',      icon: MessageSquareQuote },
+  { id: 'sales',   label: 'المبيعات',          icon: Briefcase          },
+  { id: 'other',   label: 'شيء آخر',           icon: MessageCircle      },
 ]
 
 const TOPIC_SUCCESS: Record<Topic, string> = {
@@ -45,6 +47,8 @@ const TOPIC_SUCCESS: Record<Topic, string> = {
     'تمّ استلام طلبك. نراجع طلبات القوالب كل يوم اثنين ونرفع الفئات الأكثر طلبًا إلى أعلى خارطة الطريق. سنراسلك عند إطلاق قالبك.',
   sales:
     'شكرًا لك — سيتواصل معك أحد أعضاء الفريق خلال يوم عمل واحد لمناقشة احتياجاتك.',
+  review:
+    'شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة بزينيا.',
   other:
     'شكرًا لك — تمّ استلام رسالتك. سنردّ عليك قريبًا.',
 }
@@ -217,6 +221,8 @@ function ContactPageInner() {
                       placeholder={
                         topic === 'request'
                           ? 'أي نوع من قوالب الأعمال سيساعد عملك؟ كن محدّدًا — «قالب صالون حلاقة» أفضل من «قالب خدمات».'
+                          : topic === 'review'
+                          ? 'ما الذي أعجبك؟ وما الذي يمكن تحسينه؟ إن أمكن، أرفِق رابط موقعك الذي أنشأته مع زينيا.'
                           : 'أخبرنا قليلًا عمّا تحتاجه.'
                       }
                       className={cn(inputCls, 'min-h-[140px] resize-y')}

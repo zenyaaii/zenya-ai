@@ -5,11 +5,13 @@ import Counter from '@/components/marketing/Counter'
 
 type Stat = { value: string; label: string; color: string }
 
+/* Honest, verifiable facts about the product — no fabricated traffic or
+   uptime numbers. Every value here is something we can stand behind. */
 const STATS: Stat[] = [
-  { value: '8',              label: 'قوالب متاحة',          color: '#5e6ad2' },
-  { value: '2,400+',         label: 'موقع تم إطلاقه',       color: '#d97706' },
-  { value: 'أقل من دقيقة',   label: 'متوسط وقت الإطلاق',    color: '#27a644' },
-  { value: '99.9%',          label: 'وقت التشغيل، 30 يومًا', color: '#5e6ad2' },
+  { value: '8',        label: 'قوالب احترافية جاهزة',     color: '#5e6ad2' },
+  { value: 'دقائق',    label: 'من الفكرة إلى موقع مباشر',  color: '#d97706' },
+  { value: 'OS 2.0',   label: 'تصدير شوبيفاي قياسي',       color: '#27a644' },
+  { value: 'أوروبا',   label: 'استضافة وبيانات داخل الـ EU', color: '#5e6ad2' },
 ]
 
 export default function StatsSection() {

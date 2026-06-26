@@ -1,118 +1,68 @@
 'use client'
 
-import { Star, Quote } from 'lucide-react'
-import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
+import Link from 'next/link'
+import { MessageSquareQuote, Gift, ArrowLeft } from 'lucide-react'
+import { Reveal } from '@/components/marketing/Reveal'
 
-type Testimonial = {
-  name: string
-  role: string
-  text: string
-  /** Brand accent for the avatar — matches the relevant business-type tint where possible. */
-  color: string
-}
-
-const TESTIMONIALS: Testimonial[] = [
-  {
-    name: 'أحمد العلي',
-    role: 'علامة بمنتج واحد · الرياض',
-    text: "أطلقته في عطلة نهاية أسبوع. تصدير قالب المتجر وصل إلى شوبيفاي نظيفًا — أقسام وبلوكات وإعدادات، كلها موجودة.",
-    color: '#5e6ad2',
-  },
-  {
-    name: 'إيلاف منصور',
-    role: 'شيف · مطعم لمعة، دبي',
-    text: "جعل قالب المطعم قائمتنا أخيرًا تليق بالمكان. ارتفعت الحجوزات في الشهر الأول — دون أي وكالة.",
-    color: '#c8a96a',
-  },
-  {
-    name: 'نورة سالم',
-    role: 'مؤسِّسة · مستخدمة قالب التطبيق، جدة',
-    text: "وفّر علينا قالب التطبيق أسابيع من التطوير. والمحتوى الذي كتبه الذكاء الاصطناعي فهم باقاتنا السعرية فعلًا — وهذا فاجأني.",
-    color: '#5e6ad2',
-  },
-  {
-    name: 'مايا خالد',
-    role: 'علامة أزياء · عمّان',
-    text: "قالب الأزياء مذهل. يسألنا العملاء باستمرار من صمّم موقعنا. استحقّ الاشتراك من أول عملية بيع.",
-    color: '#1c1c1c',
-  },
-  {
-    name: 'سارة إبراهيم',
-    role: 'مركز عافية · المنامة',
-    text: "توقّعت شيئًا بسيطًا، فحصلت على قالب عافية يدير الجلسات والمدرّبين وبطاقات الهدايا جاهزًا. كنا نستقبل الحجوزات خلال يوم.",
-    color: '#14b8a6',
-  },
-  {
-    name: 'يوسف حدّاد',
-    role: 'خدمات محلية · الدوحة',
-    text: "أتقن قالب الخدمات مسار طلب عرض السعر. جرّبت ثلاثة منشئات أخرى قبله — لا شيء يقترب.",
-    color: '#f59e0b',
-  },
-]
-
+/**
+ * Honest "first reviews" invitation.
+ *
+ * We deliberately do NOT ship invented testimonials. Zenya is early, so
+ * instead of faking social proof we invite real founders to share their
+ * experience in exchange for a thank-you discount. Once real, approved
+ * reviews exist they'll render here in place of this invite.
+ *
+ * (Full DB-backed review submission + automatic coupon issuance is tracked
+ * as a follow-up; for now the CTA routes to our contact channel.)
+ */
 export default function Testimonials() {
   return (
-    <section className="relative py-28 border-b border-token">
-      <div className="mx-auto max-w-6xl px-6">
-        {/* Header */}
-        <Reveal className="mb-14">
-          <p className="kicker mb-4">آراء العملاء</p>
-          <h2 className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground">
-            موثوق من{' '}
-            <span className="gradient-text">أكثر من 2,400 مؤسّس وصاحب عمل.</span>
-          </h2>
-        </Reveal>
-
-        {/* Cards */}
-        <RevealGroup className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
-            <RevealItem
-              key={t.name}
-              className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white p-6 ring-hover card-sheen"
-              style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
-            >
-              {/* watermark quote */}
-              <Quote
-                aria-hidden
-                className="absolute -top-1 left-5 h-12 w-12 rtl-flip opacity-[0.06]"
-                style={{ color: t.color }}
-                strokeWidth={1.5}
-              />
-              {/* top accent line on hover */}
-              <div
-                aria-hidden
-                className="absolute inset-x-0 top-0 h-[2px] origin-right scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
-                style={{ background: `linear-gradient(90deg, ${t.color}, transparent)` }}
-              />
-
-              {/* Stars */}
-              <div className="relative mb-4 flex gap-0.5">
-                {Array(5).fill(0).map((_, si) => (
-                  <Star key={si} className="h-3.5 w-3.5" fill="#d97706" stroke="none" />
-                ))}
+    <section className="relative border-b border-token py-28">
+      <div className="mx-auto max-w-3xl px-6">
+        <Reveal>
+          <div className="relative overflow-hidden rounded-3xl border border-token bg-white p-8 text-center shadow-soft-md sm:p-12">
+            {/* soft brand wash */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-70"
+              style={{
+                background:
+                  'radial-gradient(ellipse 70% 90% at 50% 0%, rgba(94,106,210,0.10), transparent 70%)',
+              }}
+            />
+            <div className="relative">
+              <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
+                <MessageSquareQuote className="h-6 w-6 text-primary" strokeWidth={1.75} />
               </div>
 
-              {/* Quote */}
-              <p className="relative mb-5 text-[14.5px] leading-[1.8] text-foreground">
-                &ldquo;{t.text}&rdquo;
+              <p className="kicker mb-3">آراء العملاء</p>
+              <h2 className="heading-ar text-[clamp(26px,4.5vw,40px)] text-foreground">
+                كن من <span className="gradient-text">أوائل من يشارك تجربته.</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.85] text-muted">
+                زينيا منصّة جديدة، ونؤمن بأن نعرض آراءً حقيقية فقط — لا شهادات
+                مُختلَقة. أطلقت موقعك معنا؟ شاركنا رأيك الصادق، وسنشكرك بخصمٍ على
+                خطوتك القادمة.
               </p>
 
-              {/* Author */}
-              <div className="relative mt-auto flex items-center gap-2.5 border-t border-[#f0ede6] pt-4">
-                <div
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white"
-                  style={{ background: `linear-gradient(135deg, ${t.color}, ${t.color}cc)` }}
-                >
-                  {t.name[0]}
-                </div>
-                <div>
-                  <div className="text-[13px] font-bold text-foreground">{t.name}</div>
-                  <div className="text-[12px] text-muted">{t.role}</div>
-                </div>
+              {/* incentive chip */}
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-[rgba(217,119,6,0.25)] bg-[rgba(217,119,6,0.08)] px-4 py-1.5 text-[13px] font-medium text-[#b45309]">
+                <Gift className="h-3.5 w-3.5" strokeWidth={2} />
+                خصم شكرًا لأوّل المراجِعين
               </div>
-            </RevealItem>
-          ))}
-        </RevealGroup>
+
+              <div className="mt-8">
+                <Link
+                  href="/contact?topic=review"
+                  className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[14px] font-semibold text-white shadow-soft-md transition hover:-translate-y-0.5 hover:shadow-soft-lg"
+                >
+                  شارك تجربتك
+                  <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" strokeWidth={2.5} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

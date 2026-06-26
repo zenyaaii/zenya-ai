@@ -14,7 +14,7 @@ import {
   Wrench,
   Leaf,
   ShoppingBag,
-  Star,
+  Check,
   type LucideIcon,
 } from 'lucide-react'
 import CursorGlow from '@/components/marketing/CursorGlow'
@@ -150,34 +150,19 @@ export default function Hero() {
             </Link>
           </motion.div>
 
-          {/* Social proof */}
-          <motion.div {...fade(0.3)} className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <div className="flex items-center gap-2.5">
-              <div className="flex -space-x-2">
-                {['#5e6ad2', '#c8a96a', '#27a644', '#dc2626', '#7170ff'].map((c, i) => (
-                  <div
-                    key={i}
-                    className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                    style={{ background: c, border: '2px solid #f7f4ed', zIndex: 5 - i }}
-                  >
-                    {String.fromCharCode(65 + i)}
-                  </div>
-                ))}
-              </div>
-              <span className="text-[13px] text-muted">
-                <strong className="font-semibold text-foreground tnum">+2,400</strong> موقع تم إطلاقه
+          {/* Trust signals — honest, verifiable guarantees instead of
+              fabricated user counts or ratings. */}
+          <motion.div {...fade(0.3)} className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
+            {[
+              'ادفع مرة واحدة · بلا اشتراك',
+              'تصدير شوبيفاي OS 2.0',
+              'استضافة أوروبية متوافقة مع GDPR',
+            ].map((label) => (
+              <span key={label} className="inline-flex items-center gap-1.5 text-[13px] text-muted">
+                <Check className="h-3.5 w-3.5 text-[#27a644]" strokeWidth={2.5} />
+                {label}
               </span>
-            </div>
-
-            <div className="hidden h-3.5 w-px bg-[#e5e2d9] sm:block" />
-
-            <div className="flex items-center gap-1">
-              {Array(5).fill(0).map((_, i) => (
-                <Star key={i} className="h-3.5 w-3.5" fill="#d97706" stroke="none" />
-              ))}
-              <span className="ms-1 text-[13px] font-medium text-foreground tnum">4.9</span>
-              <span className="text-[13px] text-muted">&nbsp;· محبوب من المؤسّسين وأصحاب الأعمال</span>
-            </div>
+            ))}
           </motion.div>
         </div>
 
