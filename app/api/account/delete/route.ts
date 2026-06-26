@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { sendEmail, accountDeletedEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -48,7 +49,13 @@ export async function POST(_req: NextRequest) {
     }
   }
 
-  // 2. Delete the auth.users row (admin API — service role only).
+  // 2. Send confirmation email BEFORE deleting the auth row (email gone after).
+  if (user.email) {
+    const mail = accountDeletedEmail({ email: user.email })
+    await sendEmail({ to: user.email, subject: mail.subject, html: mail.html, text: mail.text })
+  }
+
+  // 3. Delete the auth.users row (admin API — service role only).
   const { error: delErr } = await admin.auth.admin.deleteUser(user.id)
   if (delErr) {
     console.error('[delete-account] auth.admin.deleteUser failed:', delErr)

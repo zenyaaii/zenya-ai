@@ -529,3 +529,52 @@ export function domainExpiringEmail(args: {
 
   return { subject, text, html }
 }
+
+/**
+ * Sent to a user right before their account is permanently deleted so they
+ * have a written record that the erasure was processed.
+ */
+export function accountDeletedEmail(args: {
+  email: string
+}): { subject: string; text: string; html: string } {
+  const subject = 'تم حذف حسابك في زينيا'
+
+  const text = [
+    `مرحبًا،`,
+    ``,
+    `تم حذف حسابك في زينيا (${args.email}) نهائيًا وفق طلبك.`,
+    ``,
+    `ما تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.`,
+    `ما يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).`,
+    ``,
+    `إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت.`,
+    ``,
+    `— زينيا`,
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      تم حذف حسابك المرتبط بـ <strong style="color:#16171b;">${args.email}</strong> نهائيًا وفق طلبك.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 8px;font-size:13px;color:#8a8a83;">✅ &nbsp;تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.</p>
+        <p style="margin:0;font-size:13px;color:#8a8a83;">🔒 &nbsp;يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).</p>
+      </td></tr>
+    </table>
+    <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#8a8a83;">
+      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://zenyaai.co/signup" style="color:#5e6ad2;text-decoration:none;">zenyaai.co</a>.
+    </p>`
+
+  const html = emailShell({
+    title: 'تم حذف حسابك في زينيا',
+    eyebrow: 'طلب الحذف',
+    heading: 'تم حذف حسابك',
+    bodyHtml,
+    ctaHref: 'https://zenyaai.co/signup',
+    ctaLabel: 'إنشاء حساب جديد',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a> فورًا.</p>`,
+  })
+
+  return { subject, text, html }
+}

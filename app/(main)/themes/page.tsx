@@ -203,7 +203,7 @@ export default function ThemesPage() {
         </Reveal>
 
         {/* ── All templates grid ── */}
-        <RevealGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealGroup key={filter} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((t) => (
             <ThemeGridCard key={t.id} theme={t} tint={auroraTints[t.id]} />
           ))}
