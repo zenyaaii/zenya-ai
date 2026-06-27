@@ -1,0 +1,17 @@
+# Scratch / vendored directories — gitignored, not part of the Zenya app.
+# ESLint v8 doesn't read .gitignore, so they must be listed here or they
+# pollute the lint with thousands of irrelevant findings.
+tmp-open-design/
+tmp-build-theme/
+tmp-v3-theme-check/
+node_modules/
+.next/
+out/
+build/
+public/
+shopify-theme/
+shopify-theme-v2/
+extensions/
+
+# Generated theme zips / artifacts
+*.zip

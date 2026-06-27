@@ -4,7 +4,7 @@ const path = require('path');
 const themeDir = path.join(__dirname, 'shopify-theme-v3');
 
 const files = {
-  'layout/theme.liquid': \`<!doctype html>
+  'layout/theme.liquid': `<!doctype html>
 <html class="no-js" lang="{{ request.locale.iso_code }}">
   <head>
     <meta charset="utf-8">
@@ -20,8 +20,8 @@ const files = {
     </main>
     {% sections 'footer-group' %}
   </body>
-</html>\`,
-  'layout/password.liquid': \`<!doctype html>
+</html>`,
+  'layout/password.liquid': `<!doctype html>
 <html class="no-js" lang="{{ request.locale.iso_code }}">
   <head>
     <meta charset="utf-8">
@@ -34,28 +34,28 @@ const files = {
       {{ content_for_layout }}
     </main>
   </body>
-</html>\`,
-  'templates/404.json': \`{
+</html>`,
+  'templates/404.json': `{
   "sections": { "main": { "type": "main-404" } },
   "order": ["main"]
-}\`,
-  'templates/article.json': \`{
+}`,
+  'templates/article.json': `{
   "sections": { "main": { "type": "main-article" } },
   "order": ["main"]
-}\`,
-  'templates/blog.json': \`{
+}`,
+  'templates/blog.json': `{
   "sections": { "main": { "type": "main-blog" } },
   "order": ["main"]
-}\`,
-  'templates/cart.json': \`{
+}`,
+  'templates/cart.json': `{
   "sections": { "main": { "type": "main-cart" } },
   "order": ["main"]
-}\`,
-  'templates/collection.json': \`{
+}`,
+  'templates/collection.json': `{
   "sections": { "main": { "type": "main-collection" } },
   "order": ["main"]
-}\`,
-  'templates/index.json': \`{
+}`,
+  'templates/index.json': `{
   "sections": {
     "hero": { "type": "v3-hero-video" },
     "benefits": { "type": "v3-benefits-bar" },
@@ -65,39 +65,39 @@ const files = {
     "faq": { "type": "v3-faq" }
   },
   "order": ["hero", "benefits", "featured_product", "comparison", "social_proof", "faq"]
-}\`,
-  'templates/list-collections.json': \`{
+}`,
+  'templates/list-collections.json': `{
   "sections": { "main": { "type": "main-list-collections" } },
   "order": ["main"]
-}\`,
-  'templates/page.json': \`{
+}`,
+  'templates/page.json': `{
   "sections": { "main": { "type": "main-page" } },
   "order": ["main"]
-}\`,
-  'templates/page.contact.json': \`{
+}`,
+  'templates/page.contact.json': `{
   "sections": {
     "main": { "type": "main-page" },
     "form": { "type": "contact-form" }
   },
   "order": ["main", "form"]
-}\`,
-  'templates/password.json': \`{
+}`,
+  'templates/password.json': `{
   "sections": { "main": { "type": "main-password" } },
   "order": ["main"]
-}\`,
-  'templates/product.json': \`{
+}`,
+  'templates/product.json': `{
   "sections": {
     "main": { "type": "v3-main-product" },
     "upsell": { "type": "v3-upsell-bundles" },
     "sticky_atc": { "type": "v3-sticky-atc" }
   },
   "order": ["main", "upsell", "sticky_atc"]
-}\`,
-  'templates/search.json': \`{
+}`,
+  'templates/search.json': `{
   "sections": { "main": { "type": "main-search" } },
   "order": ["main"]
-}\`,
-  'templates/gift_card.liquid': \`<!doctype html>
+}`,
+  'templates/gift_card.liquid': `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -109,8 +109,8 @@ const files = {
       <h1>Here is your gift card!</h1>
     </main>
   </body>
-</html>\`,
-  'config/settings_schema.json': \`[
+</html>`,
+  'config/settings_schema.json': `[
   {
     "name": "theme_info",
     "theme_name": "Zenya V3 One Product",
@@ -130,8 +130,8 @@ const files = {
       }
     ]
   }
-]\`,
-  'locales/en.default.json': \`{
+]`,
+  'locales/en.default.json': `{
   "general": {
     "404": {
       "title": "Page not found",
@@ -139,11 +139,11 @@ const files = {
       "link": "Continue shopping"
     }
   }
-}\`,
-  'assets/base.css': \`body { margin: 0; font-family: sans-serif; background: var(--bg, #fff); color: var(--text, #000); }
+}`,
+  'assets/base.css': `body { margin: 0; font-family: sans-serif; background: var(--bg, #fff); color: var(--text, #000); }
 .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 .btn { display: inline-block; padding: 10px 20px; background: var(--primary, #000); color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-\`
+`
 };
 
 const sections = [
@@ -157,7 +157,7 @@ const sections = [
 sections.forEach(sec => {
   if (sec === 'header-group' || sec === 'footer-group') {
     const typeName = sec.split('-')[0];
-    files[\`sections/\${sec}.json\`] = \`{
+    files[`sections/\${sec}.json`] = `{
   "name": "\${sec}",
   "type": "\${typeName}",
   "sections": {
@@ -166,10 +166,10 @@ sections.forEach(sec => {
     }
   },
   "order": ["main"]
-}\`;
+}`;
   } else {
     const readableName = sec.replace(/-/g, ' ');
-    files[\`sections/\${sec}.liquid\`] = \`<section class="container">
+    files[`sections/\${sec}.liquid`] = `<section class="container">
   <h2>\${readableName}</h2>
 </section>
 {% schema %}
@@ -179,7 +179,7 @@ sections.forEach(sec => {
   "presets": [{"name": "\${readableName}"}]
 }
 {% endschema %}
-\`;
+`;
   }
 });
 

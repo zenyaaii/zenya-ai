@@ -4,6 +4,11 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { themeCreateSchema } from '@/utils/validators'
 import { extractImageUrls } from '@/lib/extract-image-urls'
 
+// Uses the service-role key — pin to the Node runtime so it never runs on the
+// edge (where the secret shouldn't live) and force-dynamic since it reads auth.
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 function admin() {
   return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
