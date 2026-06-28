@@ -70,6 +70,7 @@ export default function FullScreenPreview({
           content={content}
           shopName={shopName}
           iframeId="preview-frame-final"
+          mode="full"
         />
       ) : (
         <div className="w-full max-w-[1200px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-2xl">

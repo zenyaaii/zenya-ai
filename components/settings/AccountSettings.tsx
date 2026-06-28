@@ -208,7 +208,6 @@ export default function AccountSettings() {
 
   // one-off actions
   const [exporting, setExporting] = useState(false)
-  const [portalBusy, setPortalBusy] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const [deleting, setDeleting] = useState(false)
@@ -273,20 +272,6 @@ export default function AccountSettings() {
     pwS.set('success', 'تم تحديث كلمة المرور.')
   }
 
-  async function openPortal() {
-    setPortalBusy(true)
-    try {
-      const res = await fetch('/api/account/portal', { method: 'POST' })
-      const j = await res.json().catch(() => ({}))
-      if (res.status === 409) { router.push('/dashboard/billing'); return }
-      if (!res.ok || !j.url) throw new Error(j.message || 'تعذّر فتح بوابة الفوترة')
-      window.location.href = j.url
-    } catch (e: any) {
-      alert(e.message || 'تعذّر فتح بوابة الفوترة')
-      setPortalBusy(false)
-    }
-  }
-
   async function exportData() {
     setExporting(true)
     try {
@@ -331,30 +316,45 @@ export default function AccountSettings() {
 
   return (
     <div className="mx-auto max-w-2xl" dir="rtl">
-      {/* Header */}
+      {/* Header — premium brand banner */}
       <motion.div
         initial={reduce ? false : { opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: EASE }}
-        className="mb-8 flex items-center gap-4"
+        className="relative mb-8 overflow-hidden rounded-3xl border border-[#e8e5de] bg-white p-6 shadow-[0_18px_50px_-30px_rgba(28,28,28,0.4)]"
       >
+        {/* soft brand wash */}
         <div
-          className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold text-white shadow-lg"
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, #5e6ad2 0%, #8b94e8 100%)',
-            boxShadow: '0 12px 28px -10px rgba(94,106,210,0.55)',
+            background:
+              'radial-gradient(120% 140% at 100% 0%, rgba(94,106,210,0.14), transparent 55%), radial-gradient(90% 120% at 0% 100%, rgba(139,148,232,0.10), transparent 60%)',
           }}
-        >
-          {initial.toUpperCase()}
-        </div>
-        <div className="min-w-0">
-          <h1 className="text-[28px] font-bold tracking-tight text-foreground">
-            الإعدادات
-          </h1>
-          <p className="mt-0.5 truncate text-[13.5px] text-muted">
-            مُسجَّل الدخول باسم{' '}
-            <span dir="ltr" className="font-medium text-foreground">{email || '…'}</span>
-          </p>
+        />
+        <div className="relative flex items-center gap-4">
+          <div
+            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold text-white"
+            style={{
+              background: 'linear-gradient(135deg, #5e6ad2 0%, #8b94e8 100%)',
+              boxShadow: '0 12px 28px -10px rgba(94,106,210,0.55)',
+            }}
+          >
+            {initial.toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[26px] font-bold tracking-tight text-foreground">
+              الإعدادات
+            </h1>
+            <p className="mt-0.5 truncate text-[13.5px] text-muted">
+              مُسجَّل الدخول باسم{' '}
+              <span dir="ltr" className="font-medium text-foreground">{email || '…'}</span>
+            </p>
+          </div>
+          <span className="hidden flex-shrink-0 items-center gap-1.5 self-start rounded-full bg-[#eef0fb] px-3 py-1 text-[12px] font-bold text-[#5e6ad2] sm:inline-flex">
+            {isPro && <Sparkles className="h-3 w-3" />}
+            {planLabel}
+          </span>
         </div>
       </motion.div>
 
@@ -456,10 +456,6 @@ export default function AccountSettings() {
               تفاصيل الخطة والفواتير
               <ChevronLeft className="h-4 w-4" />
             </Link>
-            <GhostButton onClick={openPortal} disabled={portalBusy}>
-              {portalBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {portalBusy ? 'جارٍ الفتح…' : 'بوابة Stripe الآمنة'}
-            </GhostButton>
           </div>
           <p className="mt-3 text-[12.5px] leading-relaxed text-muted">
             تريد استردادًا؟ راجع{' '}

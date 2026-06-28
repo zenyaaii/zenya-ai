@@ -132,11 +132,8 @@ const structuredData = [
         description: '3 عمليات توليد بالذكاء الاصطناعي لتجربة زينيا. جميع القوالب الـ8 متاحة.',
       },
     ],
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '2400',
-    },
+    // No aggregateRating: Zenya is early and we never publish invented ratings.
+    // When real, approved reviews exist this can be populated from them.
   },
   {
     '@context': 'https://schema.org',

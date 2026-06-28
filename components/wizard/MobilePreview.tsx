@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface MobilePreviewProps {
   name: string;
@@ -31,27 +31,46 @@ export default function MobilePreview({
 }: MobilePreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Update iframe when state changes
+  // Single source of truth for the message we send into the iframe. Kept in a
+  // ref so the PREVIEW_READY listener always posts the latest data without
+  // re-subscribing on every prop change.
+  const buildPayload = useCallback(() => ({
+    name,
+    price: parseFloat(price.toString()) || 49.99,
+    originalPrice: parseFloat(originalPrice.toString()) || 99.99,
+    images,
+    primary,
+    secondary,
+    content,
+    shopName,
+    mode,
+    lockToProduct,
+  }), [name, price, originalPrice, images, primary, secondary, content, shopName, mode, lockToProduct]);
+
+  const payloadRef = useRef(buildPayload());
+  payloadRef.current = buildPayload();
+
+  const post = useCallback(() => {
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: 'UPDATE_PREVIEW', payload: payloadRef.current },
+      '*'
+    );
+  }, []);
+
+  // Push fresh data whenever props change.
+  useEffect(() => { post(); }, [post, buildPayload]);
+
+  // The iframe announces PREVIEW_READY once its own message listener is wired.
+  // Without responding here, a race let the iframe keep rendering its default
+  // placeholder theme — which looked like "a completely different theme" on
+  // mobile. Re-post on that signal so the real theme always lands.
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({
-        type: 'UPDATE_PREVIEW',
-        payload: {
-          name,
-          price: parseFloat(price.toString()) || 49.99,
-          originalPrice: parseFloat(originalPrice.toString()) || 99.99,
-          images,
-          primary,
-          secondary,
-          content,
-          shopName,
-          mode,
-          lockToProduct
-        }
-      }, '*');
-    }
-  }, [name, price, originalPrice, images, primary, secondary, content, shopName, mode, lockToProduct]);
+    const onMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'PREVIEW_READY') post();
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [post]);
 
   return (
     <div className="sticky top-24 mx-auto w-[375px] overflow-hidden rounded-[3rem] border-[8px] border-gray-900 bg-white shadow-2xl ring-1 ring-black/5">
@@ -81,25 +100,7 @@ export default function MobilePreview({
           src="/preview/live"
           className="w-full h-full border-none"
           title="Live Preview"
-          onLoad={(e) => {
-            // Initial sync
-            const iframe = e.currentTarget;
-            iframe.contentWindow?.postMessage({
-              type: 'UPDATE_PREVIEW',
-              payload: {
-                name,
-                price: parseFloat(price.toString()) || 49.99,
-                originalPrice: parseFloat(originalPrice.toString()) || 99.99,
-                images,
-                primary,
-                secondary,
-                content,
-                shopName,
-                mode,
-                lockToProduct
-              }
-            }, '*');
-          }}
+          onLoad={post}
         />
       </div>
       
