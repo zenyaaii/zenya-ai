@@ -205,6 +205,9 @@ function NavBar({ content, isDark, view, setView }: { content: ServiceContent; i
     { label: 'آلية العمل', view: 'process' },
     { label: 'تواصل', view: 'contact' },
   ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Close the mobile menu whenever the page changes.
+  const go = (v: ServiceView) => { setView(v); setMenuOpen(false) }
 
   return (
     <div
@@ -231,14 +234,54 @@ function NavBar({ content, isDark, view, setView }: { content: ServiceContent; i
             </button>
           ))}
         </nav>
-        <button
-          onClick={() => setView('contact')}
-          className="rounded-full px-5 py-3 text-sm font-bold transition hover:-translate-y-0.5"
-          style={{ background: 'var(--sv-accent)', color: '#08111d' }}
-        >
-          {content.hero.primary_cta}
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setView('contact')}
+            className="rounded-full px-5 py-3 text-sm font-bold transition hover:-translate-y-0.5"
+            style={{ background: 'var(--sv-accent)', color: '#08111d' }}
+          >
+            {content.hero.primary_cta}
+          </button>
+          {/* Hamburger — only below md, where the inline nav is hidden. */}
+          <button
+            type="button"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl md:hidden"
+            style={{ border: '1px solid var(--sv-border)', color: 'var(--sv-text)' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              {menuOpen
+                ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        </div>
       </Container>
+
+      {/* Mobile dropdown — the page list, unreachable below md without this. */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="overflow-hidden border-t md:hidden"
+          style={{ borderColor: 'var(--sv-border)' }}
+        >
+          <Container className="flex flex-col py-2">
+            {links.map((link) => (
+              <button
+                key={link.view}
+                onClick={() => go(link.view)}
+                className="py-3 text-right text-[0.95rem] font-medium transition"
+                style={{ color: view === link.view ? 'var(--sv-accent)' : 'var(--sv-text)', fontWeight: view === link.view ? 700 : 500 }}
+              >
+                {link.label}
+              </button>
+            ))}
+          </Container>
+        </motion.div>
+      )}
     </div>
   )
 }

@@ -96,6 +96,12 @@ export type RestaurantContent = {
     accent_image?: string
   }
   signature_dishes: RestaurantSignatureDish[]
+  /**
+   * Heading for the signature-dishes section. Optional so older generated
+   * sites (which stored only the array) keep working — the renderer falls
+   * back to an Arabic default when absent. Editable from the editor.
+   */
+  signature_dishes_heading?: string
   menu: {
     heading: string
     subheading: string

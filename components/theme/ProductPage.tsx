@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 export default function ProductPage({
   primaryColor,
-  productName = 'Premium Bundle',
+  productName = 'الباقة المميّزة',
   price = 49.99,
   originalPrice = 99.99,
   images = [],

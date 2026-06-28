@@ -239,7 +239,7 @@ export default function Footer() {
           className="mx-6 mb-4 h-px"
           style={{ background: 'linear-gradient(90deg, transparent, rgba(28,28,28,0.12), transparent)' }}
         />
-        <BrandLogo className="mx-auto w-full max-w-5xl px-6" markClassName="text-[rgba(28,28,28,0.06)]" />
+        <BrandLogo className="mx-auto w-full max-w-5xl px-6" markClassName="text-[#0d0d0e]" />
       </div>
     </footer>
   )

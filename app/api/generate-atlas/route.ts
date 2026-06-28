@@ -158,7 +158,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
   },
   "footer": {
     "tagline": "Short brand tagline",
-    "legal": "© 2025 ${input.brand.name}. All rights reserved.",
+    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
     "email": "hello@${input.brand.name.toLowerCase().replace(/\\s+/g, '')}.io"
   },
   "seo": {

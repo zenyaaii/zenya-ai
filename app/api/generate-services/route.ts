@@ -285,7 +285,7 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
   const testimonials =
     Array.isArray(ai?.testimonials?.items) && ai.testimonials.items.length >= 3
       ? ai.testimonials.items.slice(0, 3).map((item: any) => ({
-          name: String(item?.name || 'Verified customer'),
+          name: String(item?.name || 'عميل موثّق'),
           text: String(item?.text || ''),
           source: item?.source ? String(item.source) : undefined,
           rating: typeof item?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(item.rating))) : 5
@@ -315,8 +315,8 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
       eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
-      primary_cta: String(ai?.hero?.primary_cta || (input.contact.booking_url ? 'Book a visit' : 'Request a quote')),
-      secondary_cta: String(ai?.hero?.secondary_cta || 'See services'),
+      primary_cta: String(ai?.hero?.primary_cta || (input.contact.booking_url ? 'احجز زيارة' : 'اطلب عرض سعر')),
+      secondary_cta: String(ai?.hero?.secondary_cta || 'تصفّح الخدمات'),
       image: heroImage,
       stats:
         Array.isArray(ai?.hero?.stats) && ai.hero.stats.length >= 3
@@ -325,22 +325,22 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
               label: String(item?.label || '')
             }))
           : [
-              { value: `${(input.social_proof.review_rating || 4.9).toFixed(1)}/5`, label: 'Average rating' },
-              { value: input.brand.years_in_business || '10+ yrs', label: 'In business' },
-              { value: input.contact.response_time || 'Fast response', label: 'Typical reply' }
+              { value: `${(input.social_proof.review_rating || 4.9).toFixed(1)}/5`, label: 'متوسط التقييم' },
+              { value: input.brand.years_in_business || '+10 سنوات', label: 'في السوق' },
+              { value: input.contact.response_time || 'رد سريع', label: 'وقت الرد' }
             ]
     },
     trust_bar: {
       items: fallbackTrust.slice(0, 4)
     },
     services: {
-      heading: String(ai?.services?.heading || 'What we can help with'),
+      heading: String(ai?.services?.heading || 'كيف يمكننا مساعدتك'),
       subheading: String(ai?.services?.subheading || mock.services.subheading),
       items: services
     },
     story: {
-      eyebrow: String(ai?.story?.eyebrow || 'About the business'),
-      heading: String(ai?.story?.heading || 'Built to feel more reliable from the first call.'),
+      eyebrow: String(ai?.story?.eyebrow || 'عن العمل'),
+      heading: String(ai?.story?.heading || 'بُنينا لنكون أكثر موثوقية منذ أول اتصال.'),
       body: String(ai?.story?.body || input.story.brief),
       owner_name: input.brand.owner_name,
       owner_title: input.story.owner_title,
@@ -355,8 +355,8 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
     before_after: {
       heading: String(ai?.before_after?.heading || mock.before_after.heading),
       subheading: String(ai?.before_after?.subheading || mock.before_after.subheading),
-      before_label: 'Before',
-      after_label: 'After',
+      before_label: 'قبل',
+      after_label: 'بعد',
       before_image: beforeImage,
       after_image: afterImage,
       highlights:
@@ -370,21 +370,21 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
       steps: processSteps
     },
     areas: {
-      heading: String(ai?.areas?.heading || `Serving ${input.brand.city} and nearby areas`),
-      subheading: String(ai?.areas?.subheading || 'Local coverage helps us move faster and follow through better.'),
+      heading: String(ai?.areas?.heading || `نخدم ${input.brand.city} والمناطق المجاورة`),
+      subheading: String(ai?.areas?.subheading || 'التغطية المحلية تساعدنا على التحرّك أسرع والمتابعة بشكل أفضل.'),
       areas_served: input.areas_served,
-      response_time: String(ai?.areas?.response_time || input.contact.response_time || 'Fast local response'),
-      availability: String(ai?.areas?.availability || input.contact.availability || 'Appointments available during the week')
+      response_time: String(ai?.areas?.response_time || input.contact.response_time || 'استجابة محلية سريعة'),
+      availability: String(ai?.areas?.availability || input.contact.availability || 'المواعيد متاحة خلال أيام الأسبوع')
     },
     offer: {
-      badge: input.social_proof.promo_offer ? 'Current offer' : String(ai?.offer?.badge || mock.offer.badge),
+      badge: input.social_proof.promo_offer ? 'عرض حالي' : String(ai?.offer?.badge || mock.offer.badge),
       heading: String(ai?.offer?.heading || input.social_proof.promo_offer || mock.offer.heading),
       subheading: String(ai?.offer?.subheading || mock.offer.subheading),
       points:
         Array.isArray(ai?.offer?.points) && ai.offer.points.length >= 3
           ? ai.offer.points.slice(0, 3).map((item: any) => String(item))
           : (input.social_proof.guarantees || mock.offer.points).slice(0, 3),
-      cta_label: String(ai?.offer?.cta_label || (input.contact.booking_url ? 'Book my visit' : 'Request my quote'))
+      cta_label: String(ai?.offer?.cta_label || (input.contact.booking_url ? 'احجز زيارتي' : 'اطلب عرض سعري'))
     },
     testimonials: {
       heading: String(ai?.testimonials?.heading || mock.testimonials.heading),
@@ -397,13 +397,13 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
       items: testimonials
     },
     faq: {
-      heading: 'Frequently asked before booking',
+      heading: 'أسئلة شائعة قبل الحجز',
       items: faqItems
     },
     final_cta: {
       heading: String(ai?.final_cta?.heading || mock.final_cta.heading),
       subheading: String(ai?.final_cta?.subheading || ai?.final_cta?.subheadline || mock.final_cta.subheading),
-      cta_label: String(ai?.final_cta?.cta_label || (input.contact.booking_url ? 'Book now' : 'Get a quote')),
+      cta_label: String(ai?.final_cta?.cta_label || (input.contact.booking_url ? 'احجز الآن' : 'اطلب عرض سعر')),
       secondary_text: String(ai?.final_cta?.secondary_text || mock.final_cta.secondary_text)
     },
     gallery: {
@@ -412,7 +412,7 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
     },
     footer: {
       tagline: String(ai?.footer?.tagline || mock.footer.tagline),
-      legal: `© ${new Date().getFullYear()} ${input.brand.name}. All rights reserved.`,
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
       phone: input.contact.phone,
       email: input.contact.email,
       address: input.contact.address
@@ -421,7 +421,7 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
       title: String(ai?.seo?.title || `${input.brand.name} · ${input.brand.category} · ${input.brand.city}`),
       description: String(
         ai?.seo?.description ||
-          `${input.brand.name} offers ${input.brand.category.toLowerCase()} in ${input.brand.city}${input.brand.region ? `, ${input.brand.region}` : ''}.`
+          `${input.brand.name} يقدّم ${input.brand.category} في ${input.brand.city}${input.brand.region ? `، ${input.brand.region}` : ''}.`
       )
     }
   }

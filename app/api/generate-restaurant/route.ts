@@ -301,14 +301,14 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   // CTA label
   const defaultCta =
     r.provider_type === 'opentable'
-      ? 'Book on OpenTable'
+      ? 'احجز عبر OpenTable'
       : r.provider_type === 'resy'
-      ? 'Book on Resy'
+      ? 'احجز عبر Resy'
       : r.provider_type === 'sevenrooms'
-      ? 'Book on SevenRooms'
+      ? 'احجز عبر SevenRooms'
       : r.provider_type === 'phone'
-      ? 'Call to Reserve'
-      : 'Request a Booking'
+      ? 'اتصل للحجز'
+      : 'اطلب حجزًا'
 
   const content: RestaurantContent = {
     brand: {
@@ -322,12 +322,12 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
-      primary_cta: String(ai?.hero?.primary_cta || 'Reserve a Table'),
-      secondary_cta: String(ai?.hero?.secondary_cta || 'See the Menu'),
+      primary_cta: String(ai?.hero?.primary_cta || 'احجز طاولة'),
+      secondary_cta: String(ai?.hero?.secondary_cta || 'شاهد القائمة'),
       image: hero_image
     },
     story: {
-      eyebrow: String(ai?.story?.eyebrow || 'Our story'),
+      eyebrow: String(ai?.story?.eyebrow || 'قصتنا'),
       heading: String(ai?.story?.heading || mock.story.heading),
       body: String(ai?.story?.body || input.story.brief || mock.story.body),
       chef_name: input.story.chef_name,
@@ -337,10 +337,11 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       accent_image: accent_image
     },
     signature_dishes,
+    signature_dishes_heading: String(ai?.signature_dishes_heading || mock.signature_dishes_heading),
     menu: {
-      heading: 'À la carte',
+      heading: String(ai?.menu?.heading || 'قائمة الطعام'),
       subheading: String(
-        ai?.menu?.subheading || `Served at our ${input.brand.neighborhood || input.brand.city} dining room.`
+        ai?.menu?.subheading || `تُقدَّم في قاعة الطعام في ${input.brand.neighborhood || input.brand.city}.`
       ),
       categories: menuCategories
     },
@@ -353,7 +354,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       attribution: galleryUrls.length > 0 ? 'from_venue' : 'from_unsplash',
     },
     hours_location: {
-      heading: String(ai?.hours_location?.heading || 'Find us.'),
+      heading: String(ai?.hours_location?.heading || 'تجدنا هنا.'),
       subheading: String(
         ai?.hours_location?.subheading ||
           `${input.location.address}${input.brand.neighborhood ? `, ${input.brand.neighborhood}` : ''}`
@@ -365,15 +366,15 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       hours: input.location.hours
     },
     reservations: {
-      heading: String(ai?.reservations?.heading || 'Reserve your evening.'),
+      heading: String(ai?.reservations?.heading || 'احجز أمسيتك.'),
       subheading: String(ai?.reservations?.subheading || mock.reservations.subheading),
       cta_label: String(ai?.reservations?.cta_label || defaultCta),
       provider,
       note: input.reservations.note
     },
     reviews: {
-      heading: String(ai?.reviews?.heading || 'In the room.'),
-      subheading: String(ai?.reviews?.subheading || 'A few words from recent guests.'),
+      heading: String(ai?.reviews?.heading || 'في القاعة.'),
+      subheading: String(ai?.reviews?.subheading || 'كلماتٌ من ضيوفٍ زارونا مؤخّرًا.'),
       overall_rating:
         typeof ai?.reviews?.overall_rating === 'number'
           ? Math.max(4.0, Math.min(5.0, ai.reviews.overall_rating))
@@ -382,7 +383,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       testimonials:
         Array.isArray(ai?.reviews?.testimonials) && ai.reviews.testimonials.length >= 3
           ? ai.reviews.testimonials.slice(0, 4).map((t: any) => ({
-              name: String(t?.name || 'Verified guest'),
+              name: String(t?.name || 'ضيف موثّق'),
               text: String(t?.text || ''),
               source: t?.source ? String(t.source) : undefined,
               rating:
@@ -391,16 +392,16 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
           : mock.reviews.testimonials
     },
     press: {
-      heading: 'In the press.',
+      heading: String(ai?.press_heading || 'في الصحافة.'),
       items: press_items
     },
     newsletter: {
-      heading: String(ai?.newsletter?.heading || 'Seasonal letter.'),
+      heading: String(ai?.newsletter?.heading || 'رسالة الموسم.'),
       subheading: String(ai?.newsletter?.subheading || mock.newsletter.subheading),
-      button_label: 'Subscribe'
+      button_label: String(ai?.newsletter?.button_label || 'اشترك')
     },
     faq: {
-      heading: 'Before you come.',
+      heading: String(ai?.faq_heading || 'قبل أن تأتي.'),
       items:
         Array.isArray(ai?.faq) && ai.faq.length >= 4
           ? ai.faq.slice(0, 7).map((f: any) => ({ q: String(f?.q || ''), a: String(f?.a || '') }))
@@ -408,7 +409,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     },
     footer: {
       tagline: String(ai?.footer?.tagline || mock.footer.tagline),
-      legal: `© ${new Date().getFullYear()} ${input.brand.name}. All rights reserved.`
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`
     },
     seo: {
       title: String(

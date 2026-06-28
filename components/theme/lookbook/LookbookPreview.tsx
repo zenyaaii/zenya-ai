@@ -107,34 +107,88 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
     { label: 'لوك بوك', view: 'lookbook' },
     { label: 'من نحن', view: 'about' },
   ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Close the mobile menu whenever the page changes.
+  const go = (v: LookbookView) => { setView(v); setMenuOpen(false) }
 
   return (
-    <nav
-      className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-5 backdrop-blur-md"
+    <div
+      className="sticky top-0 left-0 right-0 z-50 backdrop-blur-md"
       style={{ fontFamily: bodyFont, background: `${colors.background}e8`, borderBottom: `1px solid ${colors.border}` }}
     >
-      {/* Nav links left */}
-      <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
-        {leftLinks.map((item) => (
-          <button key={item.view} onClick={() => setView(item.view)} className="cursor-pointer transition hover:opacity-100" style={{ opacity: view === item.view ? 1 : 0.7, color: view === item.view ? colors.text : colors.muted, fontWeight: view === item.view ? 700 : 600 }}>{item.label}</button>
-        ))}
-      </div>
+      <nav className="relative flex items-center justify-between px-6 py-5 md:px-8">
+        {/* Hamburger — mobile only (start side). */}
+        <button
+          type="button"
+          aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+          className="flex h-9 w-9 items-center justify-center md:hidden"
+          style={{ color: colors.text }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+            {menuOpen
+              ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+              : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
+          </svg>
+        </button>
 
-      {/* Brand center */}
-      <button
-        onClick={() => setView('home')}
-        className="absolute left-1/2 -translate-x-1/2 text-2xl font-black tracking-[0.18em] uppercase"
-        style={{ fontFamily: headingFont, color: colors.text, letterSpacing: '0.22em' }}
-      >
-        {content.brand.name}
-      </button>
+        {/* Nav links left */}
+        <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
+          {leftLinks.map((item) => (
+            <button key={item.view} onClick={() => setView(item.view)} className="cursor-pointer transition hover:opacity-100" style={{ opacity: view === item.view ? 1 : 0.7, color: view === item.view ? colors.text : colors.muted, fontWeight: view === item.view ? 700 : 600 }}>{item.label}</button>
+          ))}
+        </div>
 
-      {/* Nav right */}
-      <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
-        <button onClick={() => setView('shop')} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.7 }}>تخفيضات</button>
-        <button className="text-lg" style={{ color: colors.text }}>🛍</button>
-      </div>
-    </nav>
+        {/* Brand center */}
+        <button
+          onClick={() => setView('home')}
+          className="absolute left-1/2 -translate-x-1/2 text-2xl font-black tracking-[0.18em] uppercase"
+          style={{ fontFamily: headingFont, color: colors.text, letterSpacing: '0.22em' }}
+        >
+          {content.brand.name}
+        </button>
+
+        {/* Nav right */}
+        <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
+          <button onClick={() => setView('shop')} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.7 }}>تخفيضات</button>
+          <button className="text-lg" style={{ color: colors.text }}>🛍</button>
+        </div>
+
+        {/* Cart — mobile only (end side), keeps the brand centered. */}
+        <button onClick={() => go('shop')} className="text-lg md:hidden" style={{ color: colors.text }} aria-label="المتجر">🛍</button>
+      </nav>
+
+      {/* Mobile dropdown — the page list, unreachable below md without this. */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="overflow-hidden md:hidden"
+          style={{ borderTop: `1px solid ${colors.border}` }}
+        >
+          <div className="flex flex-col px-6 py-2">
+            {leftLinks.map((item) => (
+              <button
+                key={item.view}
+                onClick={() => go(item.view)}
+                className="py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] transition"
+                style={{ color: view === item.view ? colors.text : colors.muted, fontWeight: view === item.view ? 700 : 600 }}
+              >
+                {item.label}
+              </button>
+            ))}
+            <button
+              onClick={() => go('shop')}
+              className="py-3 text-right text-xs font-semibold uppercase tracking-[0.18em] transition"
+              style={{ color: colors.muted }}
+            >
+              تخفيضات
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </div>
   )
 }
 
@@ -296,7 +350,7 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
             className="rounded-full px-3 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-white"
             style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
           >
-            {look.tag || 'Shop this look'}
+            {look.tag || 'تسوّق هذه الإطلالة'}
           </span>
         </motion.div>
         <p className="text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-white/70">{look.title}</p>
@@ -321,7 +375,7 @@ function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { conte
           </h2>
         </div>
         <span className="hidden cursor-pointer text-sm font-semibold underline underline-offset-4 md:block" style={{ color: colors.muted }}>
-          View all →
+          عرض الكل ←
         </span>
       </motion.div>
 
@@ -593,9 +647,9 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   const links = {
-    Shop: ['New arrivals', 'Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Accessories'],
-    Help: ['Size guide', 'Shipping', 'Returns', 'FAQ', 'Contact'],
-    Brand: ['Our story', 'Sustainability', 'Press', 'Careers', 'Stores']
+    'التسوّق': ['وصل حديثًا', 'فساتين', 'بلوزات', 'تنانير', 'معاطف', 'إكسسوارات'],
+    'المساعدة': ['دليل المقاسات', 'الشحن', 'الإرجاع', 'الأسئلة الشائعة', 'تواصل'],
+    'العلامة': ['قصتنا', 'الاستدامة', 'الصحافة', 'الوظائف', 'المتاجر']
   }
 
   return (
@@ -629,7 +683,7 @@ function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: L
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row" style={{ borderColor: colors.border }}>
           <p className="text-xs" style={{ color: colors.muted, opacity: 0.55 }}>{content.footer.legal}</p>
           <div className="flex gap-6 text-xs" style={{ color: colors.muted, opacity: 0.55 }}>
-            {['Privacy', 'Terms', 'Accessibility'].map((l) => (
+            {['الخصوصية', 'الشروط', 'إمكانية الوصول'].map((l) => (
               <span key={l} className="cursor-pointer hover:opacity-100">{l}</span>
             ))}
           </div>

@@ -127,6 +127,7 @@ export default function RestaurantPreview({
   return (
     <div
       className={className}
+      dir="rtl"
       style={{
         ...cssVars,
         background: 'var(--rb-bg)',
@@ -270,8 +271,8 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
     const map = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
     const today = content.hours_location.hours.find((h) => h.day === map[idx])
     if (!today) return ''
-    if (today.closed) return `Closed today`
-    return `Today · ${today.open} – ${today.close}`
+    if (today.closed) return `مغلق اليوم`
+    return `اليوم · ${today.open} – ${today.close}`
   }, [content.hours_location.hours])
 
   return (
@@ -308,6 +309,9 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
     { label: 'زورونا', view: 'visit' },
     { label: 'الآراء', view: 'reviews' },
   ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Close the mobile menu whenever the page changes.
+  const go = (v: RestaurantView) => { setView(v); setMenuOpen(false) }
   return (
     <motion.div
       className="sticky top-0 z-30 backdrop-blur-md border-b"
@@ -339,22 +343,63 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
             </button>
           ))}
         </nav>
-        <motion.button
-          onClick={() => setView('visit')}
-          className="inline-flex items-center px-5 py-2.5 text-[0.72rem] uppercase"
-          style={{
-            background: 'var(--rb-accent)',
-            color: isDark ? '#0a0a0c' : '#ffffff',
-            letterSpacing: '0.22em',
-            fontWeight: 600
-          }}
-          whileHover={{ y: -2 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ duration: 0.2, ease: EASE_OUT }}
-        >
-          احجز
-        </motion.button>
+        <div className="flex items-center gap-2.5">
+          <motion.button
+            onClick={() => setView('visit')}
+            className="inline-flex items-center px-5 py-2.5 text-[0.72rem] uppercase"
+            style={{
+              background: 'var(--rb-accent)',
+              color: isDark ? '#0a0a0c' : '#ffffff',
+              letterSpacing: '0.22em',
+              fontWeight: 600
+            }}
+            whileHover={{ y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2, ease: EASE_OUT }}
+          >
+            احجز
+          </motion.button>
+          {/* Hamburger — only below md, where the inline nav is hidden. */}
+          <button
+            type="button"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-10 w-10 items-center justify-center md:hidden"
+            style={{ border: '1px solid var(--rb-border)', color: 'var(--rb-text)' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              {menuOpen
+                ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        </div>
       </Container>
+
+      {/* Mobile dropdown — the page list, unreachable below md without this. */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="overflow-hidden border-t md:hidden"
+          style={{ borderColor: 'var(--rb-border)' }}
+        >
+          <Container className="flex flex-col py-2">
+            {links.map((l) => (
+              <button
+                key={l.view}
+                onClick={() => go(l.view)}
+                className="py-3 text-right text-[0.85rem] uppercase transition"
+                style={{ color: view === l.view ? 'var(--rb-accent)' : 'var(--rb-text)', letterSpacing: '0.2em', fontWeight: view === l.view ? 600 : 500 }}
+              >
+                {l.label}
+              </button>
+            ))}
+          </Container>
+        </motion.div>
+      )}
     </motion.div>
   )
 }
@@ -513,7 +558,7 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
           <Eyebrow className="mb-5">أطباق التوقيع</Eyebrow>
           <Heading size="lg" className="mb-5">
-            Dishes the kitchen is known for.
+            {content.signature_dishes_heading || 'الأطباق التي يشتهر بها مطبخنا'}
           </Heading>
           <Divider />
         </Reveal>
@@ -565,9 +610,9 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
     <section id="menu" data-section="menu" className="py-24 md:py-36">
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-14">
-          <Eyebrow className="mb-5">{content.menu.heading}</Eyebrow>
+          <Eyebrow className="mb-5">القائمة</Eyebrow>
           <Heading size="xl" className="mb-5">
-            The full menu.
+            {content.menu.heading}
           </Heading>
           <p style={{ color: 'var(--rb-muted)', lineHeight: 1.6 }}>{content.menu.subheading}</p>
         </Reveal>
@@ -739,13 +784,13 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
             <div className="space-y-5 mb-10">
               <div>
                 <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-                  Address
+                  العنوان
                 </p>
                 <p style={{ color: 'var(--rb-text)' }}>{content.hours_location.address}</p>
               </div>
               <div>
                 <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-                  Phone
+                  الهاتف
                 </p>
                 <a href={`tel:${content.hours_location.phone}`} style={{ color: 'var(--rb-text)' }}>
                   {content.hours_location.phone}
@@ -753,7 +798,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
               </div>
               <div>
                 <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-                  Email
+                  البريد الإلكتروني
                 </p>
                 <a href={`mailto:${content.hours_location.email}`} style={{ color: 'var(--rb-text)' }}>
                   {content.hours_location.email}
@@ -772,7 +817,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.2, ease: EASE_OUT }}
               >
-                Open in Maps
+                افتح في الخرائط
               </motion.a>
             )}
           </Reveal>
@@ -780,7 +825,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
           <Reveal className="lg:col-span-7" delay={0.08}>
             <div className="p-8 md:p-10" style={{ background: 'var(--rb-surface)', border: `1px solid var(--rb-border)` }}>
               <p className="text-[0.72rem] uppercase mb-6" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-                Hours
+                ساعات العمل
               </p>
               <div className="divide-y" style={{ borderColor: 'var(--rb-border)' }}>
                 {content.hours_location.hours.map((h) => (
@@ -795,7 +840,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
                       {h.label}
                     </span>
                     <span style={{ color: h.closed ? 'var(--rb-muted)' : 'var(--rb-text)' }} className="text-sm">
-                      {h.closed ? 'Closed' : `${h.open} – ${h.close}`}
+                      {h.closed ? 'مغلق' : `${h.open} – ${h.close}`}
                     </span>
                   </div>
                 ))}
@@ -876,7 +921,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
             </span>
           </div>
           <p style={{ color: 'var(--rb-muted)' }} className="text-sm">
-            Based on {r.review_count} verified guest reviews
+            بناءً على {r.review_count} تقييم موثّق من ضيوفنا
           </p>
         </Reveal>
         <motion.div
@@ -980,7 +1025,8 @@ function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: b
             <input
               type="email"
               required
-              placeholder="your@email.com"
+              dir="ltr"
+              placeholder="name@email.com"
               className="flex-1 px-5 py-3.5 text-sm focus:outline-none"
               style={{
                 background: 'var(--rb-surface)',
@@ -1096,7 +1142,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
           </div>
           <div>
             <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-              Visit
+              زورونا
             </p>
             <p style={{ color: 'var(--rb-text)' }} className="text-sm mb-1">
               {content.hours_location.address}
@@ -1107,7 +1153,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
           </div>
           <div>
             <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
-              Connect
+              تواصل معنا
             </p>
             <div className="space-y-1.5 text-sm">
               {/* Editor-driven social links — only show what the owner
@@ -1148,13 +1194,13 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
                   {content.social_links.website && (
                     <a href={content.social_links.website} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      Website
+                      الموقع الإلكتروني
                     </a>
                   )}
                 </>
               )}
               <a href={`mailto:${content.hours_location.email}`} className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                Press inquiries
+                استفسارات الصحافة
               </a>
             </div>
           </div>
@@ -1164,7 +1210,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
             {content.footer.legal}
           </p>
           <p className="text-[0.7rem] uppercase" style={{ color: 'var(--rb-muted)', letterSpacing: '0.24em' }}>
-            Crafted with Zenya
+صُنع بواسطة زينيا
           </p>
         </div>
       </Container>

@@ -213,37 +213,80 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
     { label: 'التكاملات', view: 'integrations' },
     { label: 'التوثيق', view: 'docs' },
   ]
+  const [menuOpen, setMenuOpen] = useState(false)
+  // Close the mobile menu whenever the page changes.
+  const go = (v: AtlasView) => { setView(v); setMenuOpen(false) }
   return (
-    <nav
-      className="sticky top-0 z-50 flex items-center justify-between border-b px-6 py-4 backdrop-blur-xl"
+    <div
+      className="sticky top-0 z-50 border-b backdrop-blur-xl"
       style={{
         background: `${colors.background}cc`,
         borderColor: colors.border,
         fontFamily: font
       }}
     >
-      <button onClick={() => setView('home')} className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-black" style={{ background: colors.gradient }}>
-          {content.brand.name[0]}
-        </div>
-        <span className="text-base font-black tracking-tight" style={{ color: colors.text }}>{content.brand.name}</span>
-      </button>
-      <div className="hidden items-center gap-8 text-sm font-medium md:flex" style={{ color: colors.muted }}>
-        {navLinks.map((item) => (
-          <button key={item.view} onClick={() => setView(item.view)} className="cursor-pointer transition hover:opacity-100" style={{ opacity: view === item.view ? 1 : 0.75, color: view === item.view ? colors.primary : colors.muted, fontWeight: view === item.view ? 700 : 500 }}>{item.label}</button>
-        ))}
-      </div>
-      <div className="flex items-center gap-3">
-        <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
-        <button
-          onClick={() => setView('pricing')}
-          className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
-          style={{ background: colors.primary }}
-        >
-          Get started
+      <nav className="flex items-center justify-between px-6 py-4">
+        <button onClick={() => setView('home')} className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-black" style={{ background: colors.gradient }}>
+            {content.brand.name[0]}
+          </div>
+          <span className="text-base font-black tracking-tight" style={{ color: colors.text }}>{content.brand.name}</span>
         </button>
-      </div>
-    </nav>
+        <div className="hidden items-center gap-8 text-sm font-medium md:flex" style={{ color: colors.muted }}>
+          {navLinks.map((item) => (
+            <button key={item.view} onClick={() => setView(item.view)} className="cursor-pointer transition hover:opacity-100" style={{ opacity: view === item.view ? 1 : 0.75, color: view === item.view ? colors.primary : colors.muted, fontWeight: view === item.view ? 700 : 500 }}>{item.label}</button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
+          <button
+            onClick={() => setView('pricing')}
+            className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
+            style={{ background: colors.primary }}
+          >
+            ابدأ الآن
+          </button>
+          {/* Hamburger — only below md, where the inline nav is hidden. */}
+          <button
+            type="button"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg md:hidden"
+            style={{ border: `1px solid ${colors.border}`, color: colors.text }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              {menuOpen
+                ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile dropdown — the page list, unreachable below md without this. */}
+      {menuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="overflow-hidden md:hidden"
+          style={{ borderTop: `1px solid ${colors.border}` }}
+        >
+          <div className="flex flex-col px-6 py-2">
+            {navLinks.map((item) => (
+              <button
+                key={item.view}
+                onClick={() => go(item.view)}
+                className="py-3 text-right text-sm font-medium transition"
+                style={{ color: view === item.view ? colors.primary : colors.text, fontWeight: view === item.view ? 700 : 500 }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </div>
   )
 }
 
@@ -503,7 +546,7 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
     >
       {tier.highlighted && (
         <div className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white">
-          Most popular
+          الأكثر شيوعًا
         </div>
       )}
       <div className={tier.highlighted ? 'text-white' : ''}>
@@ -765,7 +808,7 @@ function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors:
             <p className="mt-2 text-sm" style={{ color: colors.muted }}>{content.footer.tagline}</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: colors.muted }}>
-            {['Product', 'Pricing', 'Docs', 'Blog', 'Privacy', 'Terms'].map((link) => (
+            {['المنتج', 'الأسعار', 'التوثيق', 'المدوّنة', 'الخصوصية', 'الشروط'].map((link) => (
               <span key={link} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.65 }}>{link}</span>
             ))}
           </div>

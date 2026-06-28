@@ -48,7 +48,7 @@ export default function Newsletter({
             type="submit" 
             className="px-8 py-3 rounded-full font-bold bg-white text-slate-900 hover:bg-slate-100 transition"
           >
-            Subscribe
+            اشتراك
           </button>
         </motion.form>
       </div>

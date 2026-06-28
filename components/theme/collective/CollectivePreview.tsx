@@ -187,7 +187,7 @@ function ProductCard({ product, index, colors, fonts }: {
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.2 }}
             >
-              Quick Add
+              إضافة سريعة
             </motion.button>
           )}
         </AnimatePresence>
@@ -346,7 +346,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           {content.brand.name}
         </button>
         <nav className="hidden items-center gap-8 md:flex">
-          {([['Collections', 'collections'], ['New Arrivals', 'arrivals'], ['About', 'about']] as [string, CollectiveView][]).map(([label, page]) => (
+          {([['التشكيلات', 'collections'], ['وصل حديثًا', 'arrivals'], ['من نحن', 'about']] as [string, CollectiveView][]).map(([label, page]) => (
             <button key={page} className="text-sm transition-colors hover:opacity-100" style={{ color: view === page ? colors.primary : colors.muted, fontFamily: fonts.body, fontWeight: view === page ? 600 : 400 }} onClick={() => setView(page)}>
               {label}
             </button>
@@ -384,8 +384,8 @@ export default function CollectivePreview({ content, presetId, className = '' }:
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {([['Collections', 'collections'], ['New Arrivals', 'arrivals'], ['About', 'about']] as [string, CollectiveView][]).map(([label, page]) => (
-              <button key={page} className="block w-full py-3 text-left text-sm" style={{ color: colors.text, borderBottom: `1px solid ${colors.border}`, fontFamily: fonts.body }} onClick={() => { setView(page); setNavOpen(false) }}>
+            {([['التشكيلات', 'collections'], ['وصل حديثًا', 'arrivals'], ['من نحن', 'about']] as [string, CollectiveView][]).map(([label, page]) => (
+              <button key={page} className="block w-full py-3 text-right text-sm" style={{ color: view === page ? colors.primary : colors.text, borderBottom: `1px solid ${colors.border}`, fontFamily: fonts.body }} onClick={() => { setView(page); setNavOpen(false) }}>
                 {label}
               </button>
             ))}
@@ -516,7 +516,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 </h2>
               </div>
               <button className="hidden text-sm font-medium underline underline-offset-4 transition-opacity hover:opacity-60 md:block" style={{ color: colors.text, fontFamily: fonts.body }}>
-                View all
+                عرض الكل
               </button>
             </motion.div>
 
@@ -689,7 +689,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
               <span className="mt-1 block text-sm" style={{ color: colors.muted, fontFamily: fonts.body }}>{content.footer.tagline}</span>
             </div>
             <div className="flex gap-8">
-              {['Collections', 'About', 'Returns', 'Contact'].map((link) => (
+              {['التشكيلات', 'من نحن', 'الإرجاع', 'تواصل'].map((link) => (
                 <button key={link} className="text-sm transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {link}
                 </button>

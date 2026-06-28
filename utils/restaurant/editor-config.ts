@@ -49,6 +49,7 @@ export const RESTAURANT_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'signature_dishes', label: 'Signature dishes', icon: Star, page: 'home',
       fields: [
+        { type: 'textarea', path: 'signature_dishes_heading', label: 'Heading', rows: 2 },
         {
           type: 'array', path: 'signature_dishes',
           label: 'Dishes', itemLabel: 'dish', itemTitle: 'name',

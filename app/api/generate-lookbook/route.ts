@@ -122,7 +122,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
   },
   "footer": {
     "tagline": "Keep brand tagline",
-    "legal": "© 2025 ${input.brand.name}. All rights reserved.",
+    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
     "email": "hello@${input.brand.name.toLowerCase().replace(/\\s+/g, '')}.co"
   },
   "seo": {
@@ -201,7 +201,7 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
     },
     footer: {
       tagline: ai.footer?.tagline || input.brand.tagline,
-      legal: ai.footer?.legal || `© 2025 ${input.brand.name}. All rights reserved.`,
+      legal: ai.footer?.legal || `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
       email: ai.footer?.email || `hello@${input.brand.name.toLowerCase().replace(/\s+/g, '')}.co`
     },
     seo: {

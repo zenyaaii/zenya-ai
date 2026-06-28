@@ -447,16 +447,16 @@ function PhilosophySection({ content, isDark }: { content: WellnessContent; isDa
 // ─── Treatments ───────────────────────────────────────────────────────────────
 function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
-  const [activeCategory, setActiveCategory] = useState<string>('All')
-  const categories = ['All', ...Array.from(new Set(content.treatments.items.map((t) => t.category).filter(Boolean)))]
-  const filtered = activeCategory === 'All' ? content.treatments.items : content.treatments.items.filter((t) => t.category === activeCategory)
+  const [activeCategory, setActiveCategory] = useState<string>('الكل')
+  const categories = ['الكل', ...Array.from(new Set(content.treatments.items.map((t) => t.category).filter(Boolean)))]
+  const filtered = activeCategory === 'الكل' ? content.treatments.items : content.treatments.items.filter((t) => t.category === activeCategory)
 
   return (
     <section id="treatments" data-section="treatments" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
           <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
-            What we offer
+            ما نقدّمه
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.treatments.heading}
@@ -600,7 +600,7 @@ function TeamSection({ content, isDark }: { content: WellnessContent; isDark: bo
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
           <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
-            The people behind the practice
+            من يقف خلف المركز
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.team.heading}
@@ -665,7 +665,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
         <div className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end">
           <div>
             <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
-              The environment
+              المكان
             </motion.p>
             <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light leading-snug sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
               {content.space.heading}
@@ -719,7 +719,7 @@ function TestimonialsSection({ content, isDark }: { content: WellnessContent; is
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
           <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
-            Client stories
+            قصص عملائنا
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
             {content.testimonials.heading}
@@ -778,7 +778,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
   return (
     <section data-section="booking_cta" className="relative overflow-hidden px-8 py-28">
       <div className="absolute inset-0 z-0">
-        <img src={content.booking_cta.image} alt="Book" className="h-full w-full object-cover" />
+        <img src={content.booking_cta.image} alt="احجز" className="h-full w-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
       </div>
       <div className="relative z-10 mx-auto max-w-3xl text-center">
@@ -872,7 +872,7 @@ function FooterSection({ content, isDark }: { content: WellnessContent; isDark: 
           {/* Contact */}
           <div>
             <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
-              Contact
+              تواصل
             </p>
             <div className="space-y-2 text-sm font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
               <p>{content.footer.phone}</p>
@@ -883,16 +883,16 @@ function FooterSection({ content, isDark }: { content: WellnessContent; isDark: 
           {/* Hours */}
           <div>
             <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
-              Hours
+              ساعات العمل
             </p>
             <p className="text-sm font-light leading-relaxed" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
-              {content.footer.hours || 'Contact us for hours'}
+              {content.footer.hours || 'تواصل معنا لمعرفة المواعيد'}
             </p>
             {content.footer.booking_url && (
               <a href={content.footer.booking_url}
                 className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em]"
                 style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
-                Book now
+                احجز الآن
               </a>
             )}
           </div>

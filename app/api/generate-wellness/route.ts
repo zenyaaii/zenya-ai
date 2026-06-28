@@ -258,7 +258,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   const testimonials =
     Array.isArray(ai?.testimonials?.items) && ai.testimonials.items.length >= 3
       ? ai.testimonials.items.slice(0, 3).map((t: any) => ({
-          name: String(t?.name || 'Verified client'),
+          name: String(t?.name || 'عميل موثّق'),
           text: String(t?.text || ''),
           treatment: t?.treatment ? String(t.treatment) : undefined,
           rating: typeof t?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
@@ -294,8 +294,8 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
-      cta_primary: String(ai?.hero?.cta_primary || (input.contact.booking_url ? 'Book a session' : 'Contact us')),
-      cta_secondary: String(ai?.hero?.cta_secondary || 'Explore treatments'),
+      cta_primary: String(ai?.hero?.cta_primary || (input.contact.booking_url ? 'احجز جلسة' : 'تواصل معنا')),
+      cta_secondary: String(ai?.hero?.cta_secondary || 'تصفّح الجلسات'),
       image: heroImage,
       badge: ai?.hero?.badge ? String(ai.hero.badge) : undefined
     },
@@ -341,7 +341,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       eyebrow: String(ai?.booking_cta?.eyebrow || mock.booking_cta.eyebrow),
       heading: String(ai?.booking_cta?.heading || mock.booking_cta.heading),
       subheading: String(ai?.booking_cta?.subheading || mock.booking_cta.subheading),
-      cta_label: String(ai?.booking_cta?.cta_label || (input.contact.booking_url ? 'Book your session' : 'Get in touch')),
+      cta_label: String(ai?.booking_cta?.cta_label || (input.contact.booking_url ? 'احجز جلستك' : 'تواصل معنا')),
       note: String(ai?.booking_cta?.note || mock.booking_cta.note),
       image: bookingImage
     },
@@ -351,7 +351,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     },
     footer: {
       tagline: String(ai?.footer?.tagline || mock.footer.tagline),
-      legal: `© ${new Date().getFullYear()} ${input.brand.name}. All rights reserved.`,
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
       phone: input.contact.phone,
       email: input.contact.email,
       address: input.contact.address,
@@ -362,7 +362,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       title: String(ai?.seo?.title || `${input.brand.name} · ${input.brand.type} · ${input.brand.city}`),
       description: String(
         ai?.seo?.description ||
-          `${input.brand.name} offers ${input.brand.type.toLowerCase()} in ${input.brand.city}${input.brand.region ? `, ${input.brand.region}` : ''}.`
+          `${input.brand.name} يقدّم ${input.brand.type} في ${input.brand.city}${input.brand.region ? `، ${input.brand.region}` : ''}.`
       )
     }
   }

@@ -5,15 +5,17 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 
 /**
  * GenerationOverlay — the full-screen "building" animation shown while a theme
- * is generated. The brand word زينيا melts into liquid droplets that pool into
- * a ball, then build themselves up through a series of shapes (tower → page
- * layout → content rows) and re-form back into the word — a literal "we're
- * assembling your site" metaphor. Text and droplets live under one shared goo
- * filter, so the word and the blobs are the SAME liquid.
+ * is generated. The Square-Kufic زينيا wordmark melts into liquid droplets that
+ * pool into a ball, then build themselves up through a series of shapes (tower →
+ * page layout → content rows) and re-form back into the word — a literal "we're
+ * assembling your site" metaphor. The wordmark and droplets live under one
+ * shared goo filter, so the word and the blobs are the SAME liquid.
  *
- * Ported from the Cloud-Design "Build Sequence Loader". Self-contained and
- * theme-agnostic so it can front any generator (wellness wizard, /build,
- * future templates). Status copy cycles underneath so the wait feels alive.
+ * Ported 1:1 from the Cloud-Design "Build Sequence Loader". The wordmark is
+ * traced as kufigraph rects (not a <text> glyph) and the blobs are tweened by
+ * requestAnimationFrame attribute-animation with an organic per-droplet stagger
+ * — CSS geometry props on <rect> aren't reliably honored, so geometry is driven
+ * in JS. Self-contained and theme-agnostic so it can front any generator.
  *
  * Under prefers-reduced-motion it shows the word, calm and still, with a label.
  */
@@ -26,9 +28,60 @@ const DEFAULT_MESSAGES = [
   'نضيف اللمسات الأخيرة…',
 ]
 
+type BlobGeom = { x: number; y: number; w: number; h: number; rx: number }
+
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 // smootherstep — zero velocity AND acceleration at both ends = silky.
 const smooth = (t: number) => t * t * t * (t * (t * 6 - 15) + 10)
+
+// Blob phase targets — each is the 5 droplets' geometry for that shape.
+const PHASES: Record<string, BlobGeom[]> = {
+  seed: [0, 1, 2, 3, 4].map(() => ({ x: 190, y: 194, w: 0, h: 0, rx: 0 })),
+  // p0 — round cluster / ball
+  '0': [
+    { x: 158, y: 155, w: 56, h: 56, rx: 28 }, { x: 184, y: 168, w: 46, h: 46, rx: 23 },
+    { x: 150, y: 176, w: 50, h: 50, rx: 25 }, { x: 186, y: 188, w: 46, h: 46, rx: 23 },
+    { x: 167, y: 183, w: 48, h: 48, rx: 24 },
+  ],
+  // p1 — tower
+  '1': [
+    { x: 138, y: 270, w: 104, h: 26, rx: 13 }, { x: 150, y: 238, w: 80, h: 26, rx: 13 },
+    { x: 163, y: 206, w: 54, h: 26, rx: 13 }, { x: 172, y: 174, w: 36, h: 26, rx: 13 },
+    { x: 178, y: 142, w: 24, h: 26, rx: 12 },
+  ],
+  // p2 — page layout
+  '2': [
+    { x: 100, y: 94, w: 180, h: 26, rx: 10 }, { x: 100, y: 132, w: 180, h: 62, rx: 10 },
+    { x: 100, y: 206, w: 84, h: 52, rx: 10 }, { x: 196, y: 206, w: 84, h: 52, rx: 10 },
+    { x: 100, y: 270, w: 72, h: 22, rx: 10 },
+  ],
+  // p3 — content rows
+  '3': [
+    { x: 96, y: 108, w: 188, h: 20, rx: 10 }, { x: 96, y: 140, w: 188, h: 20, rx: 10 },
+    { x: 96, y: 172, w: 144, h: 20, rx: 10 }, { x: 96, y: 204, w: 188, h: 20, rx: 10 },
+    { x: 96, y: 236, w: 108, h: 20, rx: 10 },
+  ],
+  // p4 — horizontal liquid bar matching the word's footprint
+  '4': [
+    { x: 246, y: 164, w: 74, h: 74, rx: 37 }, { x: 200, y: 158, w: 82, h: 82, rx: 41 },
+    { x: 150, y: 162, w: 80, h: 80, rx: 40 }, { x: 102, y: 158, w: 82, h: 82, rx: 41 },
+    { x: 58, y: 164, w: 74, h: 74, rx: 37 },
+  ],
+}
+const STAGGER = [0, 70, 30, 90, 45] // ms — organic offset per droplet
+
+// زينيا — Square-Kufic (kufigraph) wordmark, traced from the brand mark. Sits
+// under the same melt + goo filters as the blobs so it liquefies like batter.
+const BRAND_RECTS: Array<[number, number, number, number]> = [
+  [40.0, 159.0, 9.9, 62.0], [92.1, 159.0, 64.5, 9.9], [186.3, 159.0, 9.9, 9.9],
+  [226.0, 159.0, 62.0, 9.9], [330.1, 159.0, 9.9, 9.9], [92.1, 168.9, 9.9, 27.3],
+  [146.6, 168.9, 9.9, 27.3], [226.0, 168.9, 9.9, 27.3], [278.0, 168.9, 9.9, 52.1],
+  [67.3, 186.3, 24.8, 9.9], [119.3, 186.3, 9.9, 9.9], [156.5, 186.3, 24.8, 9.9],
+  [198.7, 186.3, 27.3, 9.9], [250.7, 186.3, 9.9, 9.9], [330.1, 186.3, 9.9, 34.7],
+  [67.3, 196.2, 9.9, 24.8], [171.4, 196.2, 9.9, 24.8], [198.7, 196.2, 9.9, 24.8],
+  [49.9, 211.1, 17.4, 9.9], [119.3, 211.1, 9.9, 9.9], [181.3, 211.1, 17.4, 9.9],
+  [250.7, 211.1, 9.9, 9.9], [305.3, 211.1, 24.8, 9.9],
+]
 
 export default function GenerationOverlay({
   open,
@@ -42,7 +95,7 @@ export default function GenerationOverlay({
   const reduce = useReducedMotion()
   const [msgIndex, setMsgIndex] = useState(0)
 
-  const brandRef = useRef<SVGTextElement>(null)
+  const brandRef = useRef<SVGGElement>(null)
   const blobsRef = useRef<SVGGElement>(null)
   const meltRef = useRef<SVGFEGaussianBlurElement>(null)
   const gooRef = useRef<SVGFEGaussianBlurElement>(null)
@@ -72,9 +125,12 @@ export default function GenerationOverlay({
     const goo = gooRef.current
     if (!brand || !blobs || !melt || !goo) return
 
+    const BLOBS = Array.from(blobs.querySelectorAll<SVGRectElement>('.zbuild-b'))
+
     let alive = true
     let timer: number | undefined
     let raf: number | undefined
+    let phaseToken = 0
 
     const wait = (ms: number) =>
       new Promise<void>((res) => { timer = window.setTimeout(res, ms) })
@@ -94,8 +150,46 @@ export default function GenerationOverlay({
         raf = requestAnimationFrame(frame)
       })
 
-    const setPhase = (p: string) =>
-      blobs.setAttribute('class', p === 'seed' ? 'zbuild-blobs zbuild-seed' : `zbuild-blobs zbuild-p${p}`)
+    const applyBlob = (el: SVGRectElement, g: BlobGeom) => {
+      el.setAttribute('x', g.x.toFixed(2))
+      el.setAttribute('y', g.y.toFixed(2))
+      el.setAttribute('width', Math.max(0, g.w).toFixed(2))
+      el.setAttribute('height', Math.max(0, g.h).toFixed(2))
+      el.setAttribute('rx', g.rx.toFixed(2))
+    }
+    const readBlob = (el: SVGRectElement): BlobGeom => ({
+      x: +el.getAttribute('x')! || 0, y: +el.getAttribute('y')! || 0,
+      w: +el.getAttribute('width')! || 0, h: +el.getAttribute('height')! || 0,
+      rx: +el.getAttribute('rx')! || 0,
+    })
+
+    // seed everything immediately so the first frame isn't a flash.
+    BLOBS.forEach((el) => applyBlob(el, { x: 190, y: 194, w: 0, h: 0, rx: 0 }))
+
+    // Tween every droplet to the phase target with an organic per-droplet
+    // stagger. A token guards against an earlier phase still running.
+    const setPhase = (p: string) => {
+      const target = PHASES[p]
+      const fromGeom = BLOBS.map(readBlob)
+      const dur = 1150
+      const my = ++phaseToken
+      const t0 = performance.now()
+      const frame = (now: number) => {
+        if (my !== phaseToken || !alive) return
+        let done = true
+        BLOBS.forEach((el, i) => {
+          const t = Math.min(Math.max(now - t0 - STAGGER[i], 0) / dur, 1)
+          if (t < 1) done = false
+          const e = smooth(t), f = fromGeom[i], g = target[i]
+          applyBlob(el, {
+            x: lerp(f.x, g.x, e), y: lerp(f.y, g.y, e),
+            w: lerp(f.w, g.w, e), h: lerp(f.h, g.h, e), rx: lerp(f.rx, g.rx, e),
+          })
+        })
+        if (!done) requestAnimationFrame(frame)
+      }
+      requestAnimationFrame(frame)
+    }
 
     // liquid amount 0..1 drives BOTH the letter-melt and metaball-fusion blur.
     const setLiquid = (a: number) => {
@@ -150,6 +244,7 @@ export default function GenerationOverlay({
 
     return () => {
       alive = false
+      phaseToken++
       if (timer) clearTimeout(timer)
       if (raf) cancelAnimationFrame(raf)
     }
@@ -191,19 +286,14 @@ export default function GenerationOverlay({
               </defs>
 
               <g filter="url(#zgoo)">
-                <text
-                  ref={brandRef}
-                  className="zbuild-brand"
-                  x="190" y="210"
-                  textAnchor="middle" dominantBaseline="middle"
-                  fontSize="104" direction="rtl"
-                  filter="url(#zmelt)"
-                  style={{ fontFamily: "'Cairo', 'Tajawal', sans-serif" }}
-                >
-                  زينيا
-                </text>
+                {/* زينيا — kufigraph wordmark, melts under #zmelt like the blobs */}
+                <g ref={brandRef} className="zbuild-brand" filter="url(#zmelt)">
+                  {BRAND_RECTS.map(([x, y, w, h], i) => (
+                    <rect key={i} x={x} y={y} width={w} height={h} />
+                  ))}
+                </g>
 
-                <g ref={blobsRef} className="zbuild-blobs zbuild-seed">
+                <g ref={blobsRef}>
                   <rect className="zbuild-b" />
                   <rect className="zbuild-b" />
                   <rect className="zbuild-b" />
@@ -237,70 +327,19 @@ export default function GenerationOverlay({
   )
 }
 
-/* Scoped CSS for the liquid loader. Blob position/size/radius are animated via
-   CSS presentation attributes (x/y/width/height/rx) so the metaball morph is
-   pure CSS transitions; the JS only swaps the phase class + drives the blur. */
+/* Scoped CSS for the liquid loader. The wordmark and droplets share fill =
+   currentColor so both pick up the overlay's foreground. Blob geometry is
+   driven entirely in JS (see effect); CSS here only handles the wordmark's
+   breathe/settle transforms. */
 const ZBUILD_CSS = `
 .zbuild-brand{
-  fill: currentColor; font-weight:900; letter-spacing:.01em;
-  transform-box: fill-box; transform-origin:center; will-change:transform;
+  fill: currentColor; transform-box: fill-box; transform-origin:center;
+  will-change:transform;
 }
 .zbuild-brand.settle{ animation: zbuild-settle 1s cubic-bezier(.32,1.5,.5,1); }
 .zbuild-brand.breathe{ animation: zbuild-breathe 4s ease-in-out infinite; }
 @keyframes zbuild-settle{ 0%{transform:scale(.94)} 55%{transform:scale(1.035)} 100%{transform:scale(1)} }
 @keyframes zbuild-breathe{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.018)} }
 
-.zbuild-b{
-  fill: currentColor;
-  transition:
-    x 1.3s cubic-bezier(.42,.02,.18,1),
-    y 1.3s cubic-bezier(.42,.02,.18,1),
-    width 1.3s cubic-bezier(.42,.02,.18,1),
-    height 1.3s cubic-bezier(.42,.02,.18,1),
-    rx 1.1s ease-in-out;
-}
-.zbuild-b:nth-child(1){ transition-delay:0s }
-.zbuild-b:nth-child(2){ transition-delay:.05s }
-.zbuild-b:nth-child(3){ transition-delay:.02s }
-.zbuild-b:nth-child(4){ transition-delay:.07s }
-.zbuild-b:nth-child(5){ transition-delay:.03s }
-
-.zbuild-seed .zbuild-b{ x:190px; y:194px; width:0; height:0; rx:0; }
-
-.zbuild-p0 .zbuild-b{ rx:99px }
-.zbuild-p0 .zbuild-b:nth-child(1){ x:158px; y:155px; width:56px; height:56px }
-.zbuild-p0 .zbuild-b:nth-child(2){ x:184px; y:168px; width:46px; height:46px }
-.zbuild-p0 .zbuild-b:nth-child(3){ x:150px; y:176px; width:50px; height:50px }
-.zbuild-p0 .zbuild-b:nth-child(4){ x:186px; y:188px; width:46px; height:46px }
-.zbuild-p0 .zbuild-b:nth-child(5){ x:167px; y:183px; width:48px; height:48px }
-
-.zbuild-p1 .zbuild-b{ rx:14px }
-.zbuild-p1 .zbuild-b:nth-child(1){ x:138px; y:270px; width:104px; height:26px }
-.zbuild-p1 .zbuild-b:nth-child(2){ x:150px; y:238px; width:80px;  height:26px }
-.zbuild-p1 .zbuild-b:nth-child(3){ x:163px; y:206px; width:54px;  height:26px }
-.zbuild-p1 .zbuild-b:nth-child(4){ x:172px; y:174px; width:36px;  height:26px }
-.zbuild-p1 .zbuild-b:nth-child(5){ x:178px; y:142px; width:24px;  height:26px }
-
-.zbuild-p2 .zbuild-b{ rx:10px }
-.zbuild-p2 .zbuild-b:nth-child(1){ x:100px; y:94px;  width:180px; height:26px }
-.zbuild-p2 .zbuild-b:nth-child(2){ x:100px; y:132px; width:180px; height:62px }
-.zbuild-p2 .zbuild-b:nth-child(3){ x:100px; y:206px; width:84px;  height:52px }
-.zbuild-p2 .zbuild-b:nth-child(4){ x:196px; y:206px; width:84px;  height:52px }
-.zbuild-p2 .zbuild-b:nth-child(5){ x:100px; y:270px; width:72px;  height:22px }
-
-.zbuild-p3 .zbuild-b{ rx:10px }
-.zbuild-p3 .zbuild-b:nth-child(1){ x:96px; y:108px; width:188px; height:20px }
-.zbuild-p3 .zbuild-b:nth-child(2){ x:96px; y:140px; width:188px; height:20px }
-.zbuild-p3 .zbuild-b:nth-child(3){ x:96px; y:172px; width:144px; height:20px }
-.zbuild-p3 .zbuild-b:nth-child(4){ x:96px; y:204px; width:188px; height:20px }
-.zbuild-p3 .zbuild-b:nth-child(5){ x:96px; y:236px; width:108px; height:20px }
-
-.zbuild-p4 .zbuild-b{ rx:99px }
-.zbuild-p4 .zbuild-b:nth-child(1){ x:246px; y:164px; width:74px; height:74px }
-.zbuild-p4 .zbuild-b:nth-child(2){ x:200px; y:158px; width:82px; height:82px }
-.zbuild-p4 .zbuild-b:nth-child(3){ x:150px; y:162px; width:80px; height:80px }
-.zbuild-p4 .zbuild-b:nth-child(4){ x:102px; y:158px; width:82px; height:82px }
-.zbuild-p4 .zbuild-b:nth-child(5){ x:58px;  y:164px; width:74px; height:74px }
-
-@media (prefers-reduced-motion: reduce){ .zbuild-b{ transition:none } }
+.zbuild-b{ fill: currentColor; }
 `

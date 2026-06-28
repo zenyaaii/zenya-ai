@@ -164,7 +164,7 @@ Return ONLY valid JSON, no markdown, no prose:
   },
   "footer": {
     "tagline": "${input.brand.tagline}",
-    "legal": "© 2025 ${input.brand.name}. All rights reserved.",
+    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
     "email": "hello@${input.brand.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.co"
   },
   "seo": {

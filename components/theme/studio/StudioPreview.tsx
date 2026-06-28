@@ -146,11 +146,11 @@ export default function StudioPreview({
             {content.brand.name}
           </span>
           {content.brand.founded && (
-            <span className="ml-2 text-[10px] tracking-widest" style={{ color: colors.muted }}>Est. {content.brand.founded}</span>
+            <span className="ml-2 text-[10px] tracking-widest" style={{ color: colors.muted }}>تأسّس {content.brand.founded}</span>
           )}
         </button>
         <nav className="hidden items-center gap-10 md:flex">
-          {([['Story', 'about'], ['Process', 'process'], ['Team', 'team'], ['Contact', 'contact']] as [string, StudioView][]).map(([label, page]) => (
+          {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
             <button key={page} onClick={() => setView(page)} className="text-xs font-medium tracking-widest uppercase transition-opacity hover:opacity-60" style={{ color: view === page ? colors.accent : colors.text, fontFamily: fonts.body, opacity: view === page ? 1 : undefined }}>
               {label}
             </button>
@@ -182,9 +182,14 @@ export default function StudioPreview({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            {['Work', 'Story', 'Process', 'Team'].map((item) => (
-              <button key={item} className="block w-full py-4 text-left text-sm uppercase tracking-widest" style={{ color: colors.text, borderBottom: `1px solid ${colors.border}`, fontFamily: fonts.body }}>
-                {item}
+            {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
+              <button
+                key={page}
+                onClick={() => { setView(page); setNavOpen(false) }}
+                className="block w-full py-4 text-right text-sm uppercase tracking-widest transition"
+                style={{ color: view === page ? colors.accent : colors.text, borderBottom: `1px solid ${colors.border}`, fontFamily: fonts.body }}
+              >
+                {label}
               </button>
             ))}
           </motion.nav>
@@ -692,7 +697,7 @@ export default function StudioPreview({
               </span>
             </div>
             <div className="flex flex-wrap gap-8">
-              {['Story', 'Process', 'Team', 'Press', 'Contact'].map((link) => (
+              {['قصتنا', 'آلية العمل', 'الفريق', 'الصحافة', 'تواصل'].map((link) => (
                 <button key={link} className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {link}
                 </button>

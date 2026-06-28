@@ -2,133 +2,133 @@ import type { WellnessContent } from './types'
 
 export const WELLNESS_MOCK_CONTENT: WellnessContent = {
   brand: {
-    name: 'Sōla Wellness Studio',
-    type: 'Holistic Spa & Wellness',
-    city: 'Austin',
-    region: 'Texas',
-    tagline: 'A sanctuary designed to restore your mind, body, and presence.'
+    name: 'سُولا للعافية',
+    type: 'سبا وعافية شاملة',
+    city: 'الرياض',
+    region: 'منطقة الرياض',
+    tagline: 'ملاذٌ صُمِّم ليعيد إليك صفاء عقلك وجسدك وحضورك.'
   },
   hero: {
-    eyebrow: 'Austin\'s Premier Wellness Studio',
-    headline: 'Where stillness\nbecomes your\nsuperpower.',
+    eyebrow: 'استوديو العافية الأبرز في الرياض',
+    headline: 'حيث يغدو السكون\nهو قوّتك\nالخفيّة.',
     subheadline:
-      'Sōla brings together expert practitioners, intentional spaces, and deeply personalised treatments — so you leave lighter than you arrived.',
-    cta_primary: 'Book a session',
-    cta_secondary: 'Explore treatments',
+      'تجمع «سُولا» نخبةً من المعالجين، ومساحاتٍ مدروسة، وجلساتٍ مصمَّمة لك خصّيصًا — فتغادر أخفّ ممّا دخلت.',
+    cta_primary: 'احجز جلسة',
+    cta_secondary: 'تصفّح الجلسات',
     image:
       'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=2400&q=85',
-    badge: 'Now booking June'
+    badge: 'الحجز متاح الآن'
   },
   trust_bar: {
     items: [
-      'Licensed practitioners',
-      'Organic products only',
-      '500+ 5-star sessions',
-      'Private treatment rooms',
-      'Free consultation'
+      'معالجون مرخّصون',
+      'منتجات عضوية فقط',
+      '+500 جلسة بخمس نجوم',
+      'غرف علاج خاصة',
+      'استشارة مجانية'
     ]
   },
   philosophy: {
-    eyebrow: 'Our philosophy',
-    heading: 'Wellness that goes\ndeeper than the surface.',
+    eyebrow: 'فلسفتنا',
+    heading: 'عافيةٌ تذهب\nأعمق من السطح.',
     subheading:
-      'We believe real restoration happens when evidence-based practice meets intuitive care — in spaces built for it.',
+      'نؤمن أن الاستعادة الحقيقية تحدث حين تلتقي الممارسة المبنيّة على الدليل بالعناية الحدسيّة — في مساحاتٍ صُمِّمت لذلك.',
     pillars: [
       {
         icon: '🌿',
-        title: 'Holistic by design',
-        text: 'Every treatment considers the whole person — physical tension, mental load, and emotional state.'
+        title: 'شموليّة بالتصميم',
+        text: 'كل جلسة تراعي الإنسان كاملًا — التوتر الجسدي، والعبء الذهني، والحالة الشعورية.'
       },
       {
         icon: '✦',
-        title: 'Intentional spaces',
-        text: 'Our rooms are designed around stillness: low light, curated scent, temperature-controlled warmth.'
+        title: 'مساحات مقصودة',
+        text: 'صُمِّمت غرفنا حول السكينة: إضاءة خافتة، وعطرٌ منتقى، ودفءٌ متحكَّم به.'
       },
       {
         icon: '◎',
-        title: 'Expert practitioners',
-        text: 'All our therapists hold advanced certifications and bring a minimum of five years of hands-on practice.'
+        title: 'معالجون خبراء',
+        text: 'يحمل جميع معالجينا شهاداتٍ متقدّمة وخبرةً لا تقلّ عن خمس سنوات من الممارسة العمليّة.'
       }
     ]
   },
   treatments: {
-    heading: 'Our treatments',
-    subheading: 'Each session is tailored to where you are today — not a fixed protocol.',
+    heading: 'جلساتنا',
+    subheading: 'كل جلسة مصمَّمة لما تحتاجه اليوم — لا بروتوكول جامد.',
     items: [
       {
-        name: 'Signature Restore Massage',
-        category: 'Massage',
-        duration: '90 min',
-        price: 'From $145',
+        name: 'تدليك الاستعادة المميّز',
+        category: 'تدليك',
+        duration: '90 دقيقة',
+        price: 'تبدأ من 145$',
         description:
-          'A deep-tissue and Swedish fusion that releases chronic tension while recalibrating your nervous system.',
-        badge: 'Most popular'
+          'مزيجٌ من الأنسجة العميقة والتدليك السويدي يحرّر التوتر المزمن ويعيد ضبط جهازك العصبي.',
+        badge: 'الأكثر طلبًا'
       },
       {
-        name: 'Radiance Facial',
-        category: 'Facial',
-        duration: '60 min',
-        price: 'From $120',
+        name: 'جلسة نضارة البشرة',
+        category: 'العناية بالبشرة',
+        duration: '60 دقيقة',
+        price: 'تبدأ من 120$',
         description:
-          'Organic actives, lymphatic massage, and LED therapy combine to deliver visible glow in a single session.',
-        badge: 'Bestseller'
+          'مكوّناتٌ عضويّة فعّالة، وتدليكٌ لمفاوي، وعلاج LED تتضافر لنضارةٍ ظاهرة في جلسة واحدة.',
+        badge: 'الأكثر مبيعًا'
       },
       {
-        name: 'Yin & Restore Flow',
-        category: 'Yoga',
-        duration: '75 min',
-        price: 'From $35',
+        name: 'تدفّق يين والاستعادة',
+        category: 'يوغا',
+        duration: '75 دقيقة',
+        price: 'تبدأ من 35$',
         description:
-          'A slow, floor-based practice designed to soften the connective tissue and calm an overactive mind.',
+          'ممارسةٌ بطيئة على الأرض تُليّن الأنسجة الضامّة وتهدّئ العقل المُجهَد.',
         badge: ''
       },
       {
-        name: 'Hot Stone Journey',
-        category: 'Massage',
-        duration: '75 min',
-        price: 'From $135',
+        name: 'رحلة الحجر الساخن',
+        category: 'تدليك',
+        duration: '75 دقيقة',
+        price: 'تبدأ من 135$',
         description:
-          'Heated basalt stones melt muscular resistance while grounding energy — deeply restorative and ceremonial.',
-        badge: 'Signature'
+          'حجارة بازلتيّة دافئة تُذيب مقاومة العضلات وتُرسّخ الطاقة — استعادةٌ عميقة وطقسٌ مريح.',
+        badge: 'مميّز'
       },
       {
-        name: 'Breathwork & Sound Bath',
-        category: 'Mindfulness',
-        duration: '60 min',
-        price: 'From $55',
+        name: 'تمارين التنفّس وحمّام الصوت',
+        category: 'اليقظة',
+        duration: '60 دقيقة',
+        price: 'تبدأ من 55$',
         description:
-          'Guided pranayama followed by a crystal bowl sound bath — a reset for the nervous system and clarity of mind.',
-        badge: 'New'
+          'تمارين تنفّس موجّهة يتبعها حمّام صوتٍ بأوعية كريستالية — إعادةُ ضبطٍ للجهاز العصبي وصفاءٌ للذهن.',
+        badge: 'جديد'
       },
       {
-        name: 'Couples Ritual',
-        category: 'Couples',
-        duration: '90 min',
-        price: 'From $280',
+        name: 'طقس الثنائي',
+        category: 'للثنائي',
+        duration: '90 دقيقة',
+        price: 'تبدأ من 280$',
         description:
-          'A shared massage experience in our private couples suite — a ritual for connection and mutual restoration.',
-        badge: 'Limited spots'
+          'تجربة تدليك مشتركة في جناح الثنائي الخاص — طقسٌ للتواصل والاستعادة المتبادلة.',
+        badge: 'مقاعد محدودة'
       }
     ]
   },
   journey: {
-    heading: 'Your path to restoration',
-    subheading: 'Three steps that take you from first visit to lasting practice.',
+    heading: 'طريقك إلى الاستعادة',
+    subheading: 'ثلاث خطوات تأخذك من أول زيارة إلى ممارسةٍ دائمة.',
     steps: [
       {
         step: '01',
-        title: 'Book your session',
-        text: 'Choose a treatment that calls to you, or reach out and we will recommend one based on your goals.'
+        title: 'احجز جلستك',
+        text: 'اختر الجلسة التي تناديك، أو تواصل معنا وسنرشّح لك واحدةً بحسب أهدافك.'
       },
       {
         step: '02',
-        title: 'Arrive and settle',
-        text: 'You are greeted, offered herbal tea, and given time to transition before your practitioner takes over.'
+        title: 'احضر واستقرّ',
+        text: 'نستقبلك، ونقدّم لك شايًا عشبيًّا، ونمنحك وقتًا للانتقال قبل أن يتولّى معالجك.'
       },
       {
         step: '03',
-        title: 'Leave lighter',
-        text: 'After your session, rest in our lounge, receive aftercare notes, and book your next visit at a member rate.'
+        title: 'غادر أخفّ',
+        text: 'بعد جلستك، استرح في صالتنا، واحصل على إرشادات العناية، واحجز زيارتك القادمة بسعر العضوية.'
       }
     ]
   },
@@ -182,90 +182,90 @@ export const WELLNESS_MOCK_CONTENT: WellnessContent = {
       }
     ],
     amenities: [
-      'Four private treatment rooms',
-      'Infrared sauna',
-      'Himalayan salt float pod',
-      'Tea & aftercare lounge',
-      'Private couples suite',
-      'Organic product boutique'
+      'أربع غرف علاج خاصة',
+      'ساونا بالأشعة تحت الحمراء',
+      'كبسولة طفو بملح الهيمالايا',
+      'صالة شاي وعناية لاحقة',
+      'جناح خاص للثنائي',
+      'متجر منتجات عضوية'
     ]
   },
   testimonials: {
-    heading: 'What our clients say',
-    subheading: 'Real words from people who walk out lighter than they walked in.',
+    heading: 'ماذا يقول عملاؤنا',
+    subheading: 'كلماتٌ صادقة من أناسٍ غادروا أخفّ ممّا دخلوا.',
     average_rating: 5.0,
-    review_count: '340+',
+    review_count: '+340',
     items: [
       {
-        name: 'Lauren M.',
-        text: 'The Signature Restore Massage is unlike anything I have had before. Maya somehow found tension I didn\'t know I was carrying. I left in a completely different state — and slept better than I had in months.',
-        treatment: 'Signature Restore Massage',
+        name: 'لمياء المطيري',
+        text: 'تدليك الاستعادة المميّز لا يشبه أي شيء جرّبته من قبل. وجد المعالج توترًا لم أكن أعلم أنني أحمله. غادرت في حالةٍ مختلفة تمامًا — ونمت أفضل ممّا نمت منذ أشهر.',
+        treatment: 'تدليك الاستعادة المميّز',
         rating: 5
       },
       {
-        name: 'Daniel R.',
-        text: 'I was skeptical about the sound bath but James made the experience feel completely natural. The combination of breathwork and the crystal bowls was genuinely transformative. I\'ve been back four times.',
-        treatment: 'Breathwork & Sound Bath',
+        name: 'عبدالله الراشد',
+        text: 'كنت متشكّكًا في حمّام الصوت، لكنّ المعالج جعل التجربة تبدو طبيعيّة تمامًا. مزيج تمارين التنفّس والأوعية الكريستالية كان تحوّليًّا بحقّ. عدت أربع مرّات.',
+        treatment: 'تمارين التنفّس وحمّام الصوت',
         rating: 5
       },
       {
-        name: 'Priya S.',
-        text: 'Sofia\'s Radiance Facial gave me the best skin of my life — and she explained every step so I actually understood what my skin needs. The space is calm and gorgeous. I\'ve already rebooked.',
-        treatment: 'Radiance Facial',
+        name: 'ريم الشهري',
+        text: 'منحتني جلسة نضارة البشرة أفضل بشرةٍ في حياتي — وشرح لي المعالج كل خطوة حتى فهمت ما تحتاجه بشرتي حقًّا. المكان هادئ وجميل. حجزت موعدي التالي بالفعل.',
+        treatment: 'جلسة نضارة البشرة',
         rating: 5
       }
     ]
   },
   booking_cta: {
-    eyebrow: 'Reserve your session',
-    heading: 'Your body has been asking for this.',
+    eyebrow: 'احجز جلستك',
+    heading: 'جسدك يطلب هذا منذ زمن.',
     subheading:
-      'Availability fills fast. Book now and we\'ll handle the rest — from room prep to personalised aftercare.',
-    cta_label: 'Book your session',
-    note: 'Free cancellation up to 24 hours before · No card required to hold',
+      'المواعيد تمتلئ بسرعة. احجز الآن وسنتولّى الباقي — من تجهيز الغرفة إلى العناية اللاحقة المخصّصة.',
+    cta_label: 'احجز جلستك',
+    note: 'إلغاء مجاني حتى 24 ساعة قبل الموعد · لا حاجة لبطاقة للحجز',
     image:
       'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=2000&q=80'
   },
   faq: {
-    heading: 'Questions before you book',
+    heading: 'أسئلة قبل أن تحجز',
     items: [
       {
-        q: 'Do I need to have any prior experience for yoga or mindfulness sessions?',
-        a: 'Not at all. Our classes are designed for all levels. Just let us know it\'s your first time and your practitioner will guide you through everything.'
+        q: 'هل أحتاج خبرة سابقة لجلسات اليوغا أو اليقظة؟',
+        a: 'إطلاقًا. صُمِّمت جلساتنا لجميع المستويات. أخبرنا فقط أنها زيارتك الأولى وسيرشدك معالجك في كل شيء.'
       },
       {
-        q: 'What should I wear or bring to my appointment?',
-        a: 'For massage sessions, nothing. We provide robes, slippers, and all linens. For yoga and movement classes, comfortable fitted clothes are ideal.'
+        q: 'ماذا ألبس أو أُحضر لموعدي؟',
+        a: 'لجلسات التدليك، لا شيء. نوفّر الأرواب والنعال وكل المفروشات. لجلسات اليوغا والحركة، الملابس المريحة المناسبة مثاليّة.'
       },
       {
-        q: 'How early should I arrive for my session?',
-        a: 'We recommend arriving 10–15 minutes early to settle in, fill a brief intake form, and receive your welcome tea before the session begins.'
+        q: 'كم يجب أن أصل مبكّرًا لجلستي؟',
+        a: 'ننصح بالوصول قبل 10–15 دقيقة للاستقرار، وتعبئة استمارة موجزة، وتناول شاي الترحيب قبل بدء الجلسة.'
       },
       {
-        q: 'Can I gift a session to someone?',
-        a: 'Yes. We offer e-gift cards for any amount and printed gift cards that can be sent directly to the recipient. Contact us to arrange a custom package.'
+        q: 'هل يمكنني إهداء جلسة لشخصٍ ما؟',
+        a: 'نعم. نوفّر بطاقات هدايا إلكترونية بأي قيمة وبطاقات مطبوعة تُرسَل مباشرة للمُهدى إليه. تواصل معنا لترتيب باقة مخصّصة.'
       },
       {
-        q: 'What is your cancellation policy?',
-        a: 'We ask for 24 hours\' notice for cancellations or rescheduling. Same-day cancellations are charged 50% of the session fee.'
+        q: 'ما سياسة الإلغاء لديكم؟',
+        a: 'نطلب إشعارًا قبل 24 ساعة للإلغاء أو إعادة الجدولة. الإلغاء في اليوم نفسه يُحتسب بنصف قيمة الجلسة.'
       },
       {
-        q: 'Do you offer membership or multi-session packages?',
-        a: 'Yes. Members receive 20% off all treatments, priority booking, and a complimentary session each quarter. Ask at reception or enquire via email.'
+        q: 'هل تقدّمون عضويّات أو باقات متعدّدة الجلسات؟',
+        a: 'نعم. يحصل الأعضاء على خصم 20٪ على كل الجلسات، وأولويّة في الحجز، وجلسة مجانيّة كل ربع سنة. اسأل عند الاستقبال أو استفسر عبر البريد.'
       }
     ]
   },
   footer: {
-    tagline: 'Designed for stillness. Built for you.',
-    legal: `© ${new Date().getFullYear()} Sōla Wellness Studio. All rights reserved.`,
-    phone: '+1 (512) 555-0182',
-    email: 'hello@solawellness.com',
-    address: '2210 South Lamar Blvd, Austin, TX 78704',
-    hours: 'Mon–Sat 9am–8pm · Sun 10am–5pm'
+    tagline: 'صُمِّم للسكينة. بُني من أجلك.',
+    legal: `© ${new Date().getFullYear()} سُولا للعافية. جميع الحقوق محفوظة.`,
+    phone: '+966 11 555 0182',
+    email: 'hello@sola.sa',
+    address: 'طريق الأمير تركي، حي الياسمين، الرياض',
+    hours: 'السبت–الخميس 9 ص – 8 م · الجمعة 2 م – 8 م'
   },
   seo: {
-    title: 'Sōla Wellness Studio · Spa & Holistic Treatments · Austin TX',
+    title: 'سُولا للعافية · سبا وجلسات عناية شاملة · الرياض',
     description:
-      'Sōla Wellness Studio offers expert massage, facials, yoga, and mindfulness sessions in Austin, TX. Book your restorative session today.'
+      'تقدّم «سُولا للعافية» جلسات تدليك وعناية بالبشرة ويوغا ويقظة على يد خبراء في الرياض. احجز جلستك الاستعادية اليوم.'
   }
 }

@@ -1,7 +1,7 @@
 "use client"
 
 export default function AnnouncementBar({ 
-  text = "Free Shipping Worldwide ✈️ + 50% OFF Today Only!",
+  text = "شحن مجاني لكل العالم ✈️ + خصم 50٪ اليوم فقط!",
   primaryColor 
 }: { 
   text?: string

@@ -28,6 +28,7 @@ export function FieldText({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        dir="auto"
         className="w-full rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
       />
       {ai.panel}
@@ -50,6 +51,7 @@ export function FieldTextArea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        dir="auto"
         wrap="soft"
         className="block w-full resize-y break-words rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
         style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}

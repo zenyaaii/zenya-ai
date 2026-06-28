@@ -62,6 +62,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
         'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
     }
   ],
+  signature_dishes_heading: 'الأطباق التي يشتهر بها مطبخنا',
   menu: {
     heading: 'قائمة الطعام',
     subheading: 'تُقدَّم من الثلاثاء إلى السبت، من 5:30 إلى 10:00 مساءً. قائمة التذوّق تتغيّر أسبوعيًا.',
