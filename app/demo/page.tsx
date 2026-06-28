@@ -1,6 +1,5 @@
 import ThemePreview from '@/components/ThemePreview'
-import ThemeActions from '@/components/ThemeActions'
-import { Suspense } from 'react'
+import DemoStorefrontToolbar from '@/components/DemoStorefrontToolbar'
 
 export default function DemoPage() {
   const mockContent = {
@@ -45,48 +44,23 @@ export default function DemoPage() {
   const colors = { primary: "#3b82f6", secondary: "#10b981" }
 
   return (
-    <div className="min-h-screen bg-white pb-24 md:pb-0">
-      {/* Header with Paywall Actions */}
-      <div className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 px-6 py-4 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="font-bold text-xl">عرض قالب زينيا التوضيحي</div>
-          <div className="hidden md:block">
-            <Suspense fallback={<div>جارٍ التحميل…</div>}>
-              <ThemeActions 
-                themeId="demo-theme-id" 
-                isPro={false} // Force locked state for demo
-                content={mockContent}
-                colors={colors}
-                name="Zenya V2"
-              />
-            </Suspense>
-          </div>
-        </div>
-      </div>
-      
-      {/* Main Theme Preview */}
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        <ThemePreview 
-          name="Zenya V2"
-          images={[mockImage, mockImage]}
-          primaryColor={colors.primary}
-          secondaryColor={colors.secondary}
-          content={mockContent}
-        />
-      </div>
-
-      {/* Mobile Sticky Paywall Actions */}
-      <div className="md:hidden">
-        <Suspense fallback={<div>جارٍ التحميل…</div>}>
-          <ThemeActions 
-            themeId="demo-theme-id" 
-            isPro={false} // Force locked state for demo
-            content={mockContent}
-            colors={colors}
-            name="Zenya V2"
-          />
-        </Suspense>
-      </div>
+    // Full-bleed storefront preview — matches the 7 branded demos
+    // (/demo/restaurant, /demo/studio, …): no boxed container, no mismatched
+    // top toolbar. Actions live in the shared bottom pill instead.
+    <div className="min-h-screen bg-white">
+      <ThemePreview
+        name="Zenya V2"
+        images={[mockImage, mockImage]}
+        primaryColor={colors.primary}
+        secondaryColor={colors.secondary}
+        content={mockContent}
+      />
+      <DemoStorefrontToolbar
+        name="Zenya V2"
+        content={mockContent}
+        colors={colors}
+        images={[mockImage, mockImage]}
+      />
     </div>
   )
 }
