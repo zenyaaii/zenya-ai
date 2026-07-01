@@ -10,7 +10,7 @@ type Stat = { value: string; label: string; color: string }
 const STATS: Stat[] = [
   { value: '8',        label: 'قوالب احترافية جاهزة',     color: '#5e6ad2' },
   { value: 'دقائق',    label: 'من الفكرة إلى موقع مباشر',  color: '#d97706' },
-  { value: 'OS 2.0',   label: 'تصدير شوبيفاي قياسي',       color: '#27a644' },
+  { value: 'مجاني',    label: 'ابدأ بدون بطاقة ائتمان',      color: '#27a644' },
   { value: 'أوروبا',   label: 'استضافة وبيانات داخل الـ EU', color: '#5e6ad2' },
 ]
 

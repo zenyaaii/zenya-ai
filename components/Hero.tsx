@@ -102,9 +102,9 @@ export default function Hero() {
             {...fade(0.06)}
             className="display-ar display-ar-tight text-[clamp(44px,8vw,82px)] text-foreground"
           >
-            كل نشاط تجاري يستحقّ
+            موقع غير احترافي يُبعد عملاءك.
             <br />
-            <span className="gradient-text">موقعًا استثنائيًا.</span>
+            <span className="gradient-text">زينيا يستعيدهم بدقائق.</span>
           </motion.h1>
 
           {/* Sub */}
@@ -112,9 +112,11 @@ export default function Hero() {
             {...fade(0.12)}
             className="lead-ar mx-auto mt-7 max-w-2xl text-[17.5px] text-muted"
           >
-            مطعم، أو لوك بوك أزياء، أو صفحة هبوط لتطبيق، أو قصة علامة تجارية، أو
-            مركز عافية، أو متجر بمنتجات متعددة، أو حِرف محلية، أو متجر شوبيفاي —
-            اختر قالبًا، اكتب نبذة، وتتكفّل زينيا بكتابة المحتوى ونشر الموقع.
+            تصميم قديم، أو موقع يبدو مبنيًا بالهواة، يفقدك ثقة الزوّار ومبيعاتك —
+            حتى لو كنت تدفع مقابله كل شهر. مطعم، أو لوك بوك أزياء، أو صفحة هبوط
+            لتطبيق، أو قصة علامة تجارية، أو مركز عافية، أو متجر بمنتجات متعددة،
+            أو حِرف محلية، أو متجر شوبيفاي — اختر قالبًا، اكتب نبذة، وزينيا يبني
+            لك موقعًا احترافيًا بالذكاء الاصطناعي بجزء بسيط من تكلفة الوكالة.
           </motion.p>
 
           {/* Price line — set apart for rhythm */}
@@ -122,8 +124,8 @@ export default function Hero() {
             {...fade(0.16)}
             className="mt-3 text-[13.5px] text-subtle"
           >
-            <span className="font-latin" dir="ltr">‎$9.99</span> مدى الحياة · أو{' '}
-            <span className="font-latin" dir="ltr">$19.99</span> شهريًا مع استضافة كاملة
+            <span className="font-latin" dir="ltr">‎$14.99</span> شهريًا · Starter · أو{' '}
+            <span className="font-latin" dir="ltr">$24.99</span> شهريًا · Pro مع استضافة كاملة
           </motion.p>
 
           {/* CTAs */}
@@ -154,9 +156,9 @@ export default function Hero() {
               fabricated user counts or ratings. */}
           <motion.div {...fade(0.3)} className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
             {[
-              'ادفع مرة واحدة · بلا اشتراك',
-              'تصدير شوبيفاي OS 2.0',
-              'استضافة أوروبية متوافقة مع GDPR',
+              'جرّب مجانًا · بلا بطاقة',
+              'نطاق مجاني 5 أشهر مع Pro',
+              'استضافة أوروبية · GDPR',
             ].map((label) => (
               <span key={label} className="inline-flex items-center gap-1.5 text-[13px] text-muted">
                 <Check className="h-3.5 w-3.5 text-[#27a644]" strokeWidth={2.5} />

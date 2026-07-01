@@ -3,57 +3,57 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import * as Accordion from '@radix-ui/react-accordion'
-import { Check, ChevronDown, ArrowRight } from 'lucide-react'
+import { Check, ChevronDown, ArrowRight, Globe } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 import { affiliateClickHref } from '@/lib/affiliate'
 
 const FAQS = [
   {
-    q: 'ما الفرق بين الخطة لمرة واحدة وخطة الاستضافة؟',
-    a: 'تفتح خطة 9.99$ لمرة واحدة توليدًا وتصديرًا غير محدودين بالذكاء الاصطناعي — لقالبَي التجارة الإلكترونية (المتجر والتشكيلة) تربطهما أو ترفعهما إلى متجر شوبيفاي؛ أما القوالب الأخرى فتنزّل ملف المشروع المضغوط وتستضيفه أينما شئت. وتضيف خطة 19.99$ شهريًا استضافة زينيا لقوالب العرض (رابط مباشر، ونطاق مخصّص، وبلا شارة زينيا) إلى جانب كل ما في الخطة لمرة واحدة، وتُحاسَب شهريًا.',
+    q: 'ما الفرق بين خطة Starter وخطة Pro؟',
+    a: 'تفتح خطة Starter (14.99$ شهريًا) توليدًا وتصديرًا غير محدودين بالذكاء الاصطناعي — لقالبَي التجارة الإلكترونية (المتجر والتشكيلة) تربطهما أو ترفعهما إلى متجر شوبيفاي؛ أما القوالب الأخرى فتنزّل ملف المشروع المضغوط وتستضيفه أينما شئت. وتضيف خطة Pro (24.99$ شهريًا) استضافة زينيا الكاملة لقوالب العرض (رابط مباشر، ونطاق مخصّص، وبلا شارة زينيا) إلى جانب كل ما في خطة Starter.',
   },
   {
-    q: 'هل الدفعة الواحدة فعلًا لمرة واحدة؟',
-    a: 'نعم. ادفع 9.99$ (أو 9.99€ في أوروبا شاملة الضريبة) مرة واحدة ويصبح المنشئ ملكك مدى الحياة. بلا تجديد. وصول دائم لتوليد وتصدير غير محدودين بالذكاء الاصطناعي.',
+    q: 'هل يمكنني إلغاء اشتراكي؟',
+    a: 'نعم، في أي وقت من لوحة التحكم. يبقى اشتراكك فعّالًا حتى نهاية الفترة المدفوعة الحالية، ثم يتوقف التجديد. تبقى القوالب والتصديرات التي أنشأتها محفوظة في حسابك.',
   },
   {
     q: 'ماذا تشمل استضافة زينيا؟',
     a: 'موقع مباشر على zenya.app/s/الاسم-المختصر لأي قالب عرض (تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم)، ونطاق مخصّص واحد متصل (مثل mystore.com)، وشهادة SSL تلقائية، وتسليم سريع عبر شبكة CDN، وإزالة تذييل «صُنع بزينيا». أما قوالب التجارة الإلكترونية (المتجر والتشكيلة) فلا تُستضاف على زينيا — بل تذهب إلى شوبيفاي.',
   },
   {
-    q: 'هل يمكنني إلغاء خطة الاستضافة؟',
-    a: 'نعم، في أي وقت من لوحة التحكم. تبقى الاستضافة فعّالة حتى نهاية شهر الفوترة الحالي، ثم يتوقف موقعك عن العمل. وتبقى القوالب والتصديرات التي أنشأتها محفوظة في حسابك.',
+    q: 'هل يمكنني الترقية أو التراجع بين الخطتين؟',
+    a: 'نعم. الترقية من Starter إلى Pro تبدأ فورًا من لوحة التحكم. للتراجع من Pro إلى Starter، ألغِ اشتراك Pro وابدأ اشتراك Starter — تبقى مواقعك المستضافة تعمل حتى نهاية الفترة المدفوعة الحالية.',
   },
   {
     q: 'هل لديكم سياسة استرداد؟',
-    a: 'نعم. ضمان استرداد المال خلال 14 يومًا على الخطة لمرة واحدة، ويمكنك إلغاء خطة الاستضافة في أي وقت. راجع سياسة الاسترداد الكاملة للتفاصيل.',
+    a: 'لا يوجد استرداد تلقائي على الفترة الحالية، لكن يمكنك إلغاء اشتراكك في أي وقت قبل موعد التجديد لتفادي رسوم الشهر التالي. لأي مشكلة في الفوترة، تواصل معنا وسنساعدك.',
   },
   {
     q: 'أي القوالب يعمل وأين؟',
-    a: 'يُصدَّر قالبا التجارة الإلكترونية — المتجر والتشكيلة — كثيمات شوبيفاي OS 2.0 ويعملان على شوبيفاي (يتولّى شوبيفاي السلة والدفع والمنتجات والمدفوعات). لا تملك متجر شوبيفاي بعد؟ يمكنك بدء تجربة مجانية عبر رابط الإحالة أدناه. أما القوالب الأخرى — تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم — فهي مواقع عرض يمكن لزينيا استضافتها مباشرة على خطة 19.99$ شهريًا.',
+    a: 'يُصدَّر قالبا التجارة الإلكترونية — المتجر والتشكيلة — كثيمات شوبيفاي OS 2.0 ويعملان على شوبيفاي (يتولّى شوبيفاي السلة والدفع والمنتجات والمدفوعات). لا تملك متجر شوبيفاي بعد؟ يمكنك بدء تجربة مجانية عبر رابط الإحالة أدناه. أما القوالب الأخرى — تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم — فهي مواقع عرض يمكن لزينيا استضافتها مباشرة على خطة Pro.',
   },
 ] as const
 
 const COMPARE = [
-  { feature: 'السعر',              zenya: '9.99$ مرة / 19.99$ شهريًا', other: '+29$ شهريًا', agency: '+2,000$' },
+  { feature: 'السعر',              zenya: '14.99$ / 24.99$ شهريًا',    other: '+29$ شهريًا', agency: '+2,000$' },
   { feature: 'وقت الإعداد',        zenya: 'أقل من 60 ثانية',           other: 'دقائق',       agency: 'أسابيع' },
   { feature: 'القوالب',            zenya: '8 قوالب',                   other: '1–2',         agency: 'مخصّص' },
-  { feature: 'الاستضافة مشمولة',   zenya: 'في خطة 19.99$',             other: 'في معظمها',   agency: 'تتولّاها بنفسك' },
-  { feature: 'نطاق مخصّص',         zenya: 'في خطة 19.99$',             other: 'في معظمها',   agency: 'نعم' },
+  { feature: 'الاستضافة مشمولة',   zenya: 'في خطة Pro',                other: 'في معظمها',   agency: 'تتولّاها بنفسك' },
+  { feature: 'نطاق مخصّص',         zenya: 'في خطة Pro',                other: 'في معظمها',   agency: 'نعم' },
   { feature: 'تصدير شوبيفاي',      zenya: 'في الخطتين المدفوعتين',     other: 'نادر',        agency: 'مخصّص' },
   { feature: 'الارتباط بالمنصّة',  zenya: 'لا يوجد',                   other: 'مرتفع',       agency: 'لا يوجد' },
 ] as const
 
 const FREE_FEATURES = [
-  '3 عمليات توليد إجمالًا بالذكاء الاصطناعي',
-  'جميع القوالب الثمانية متاحة',
+  'توليد واحد بالذكاء الاصطناعي (للتجربة)',
+  'جميع القوالب الثمانية للمعاينة',
   'معاينة موقعك على zenya.app',
   'تخصيص أساسي',
   'دعم المجتمع',
 ]
 
-const ONETIME_FEATURES = [
+const STARTER_FEATURES = [
   'توليد غير محدود بالذكاء الاصطناعي',
   'جميع القوالب الثمانية الاحترافية',
   'ملف شوبيفاي OS 2.0 (المتجر + التشكيلة)',
@@ -63,10 +63,10 @@ const ONETIME_FEATURES = [
   'وصول مبكر للقوالب الجديدة',
 ]
 
-const HOSTING_FEATURES = [
-  'كل ما في الخطة لمرة واحدة، بالإضافة إلى:',
+const PRO_FEATURES = [
+  'كل ما في خطة Starter، بالإضافة إلى:',
   'تستضيف زينيا مواقع العرض الخاصة بك',
-  'نطاق مخصّص واحد متصل',
+  'نطاق مخصّص مجاني لمدة 5 أشهر',
   'شهادة SSL تلقائية + تسليم عبر CDN',
   'إزالة شارة «صُنع بزينيا»',
   'تحليلات الموقع في لوحة تحكمك',
@@ -94,7 +94,7 @@ export default function PricingPage() {
             <span className="gradient-text">وتوسّع عند الجاهزية.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.85] text-muted">
-            منشئ واحد بالذكاء الاصطناعي، وثلاث طرق للإطلاق. مجاني للتجربة. ادفع مرة واحدة للمنشئ، أو اشترك للحصول على استضافة زينيا الكاملة.
+            منشئ واحد بالذكاء الاصطناعي، وخطتان مدفوعتان. مجاني للتجربة. اشترك شهريًا في Starter أو Pro، وألغِ في أي وقت.
           </p>
         </motion.div>
 
@@ -138,7 +138,7 @@ export default function PricingPage() {
             </Link>
           </motion.div>
 
-          {/* One-time */}
+          {/* Starter */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -161,19 +161,19 @@ export default function PricingPage() {
 
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
-                مرة واحدة
+                Starter
               </p>
               <div className="mb-2 flex items-baseline gap-1">
                 <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] gradient-text">
-                  $9.99
+                  $14.99
                 </span>
-                <span className="text-[15px] text-muted">لمرة واحدة</span>
+                <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
-              <p className="text-[13.5px] text-muted">منشئ مدى الحياة. صدّر أينما شئت.</p>
+              <p className="text-[13.5px] text-muted">منشئ كامل بلا حدود، شهريًا. صدّر أينما شئت.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
-              {ONETIME_FEATURES.map((feat) => (
+              {STARTER_FEATURES.map((feat) => (
                 <li key={feat} className="flex items-start gap-2.5">
                   <CheckChip color="#5e6ad2" />
                   <span className="text-[13px] font-medium text-foreground">{feat}</span>
@@ -182,21 +182,21 @@ export default function PricingPage() {
             </ul>
 
             <Link
-              href="/checkout?plan=onetime"
+              href="/checkout?plan=starter"
               className={cn(
                 'group inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-[14px] font-semibold text-white transition-all duration-150',
                 'btn-shadow-primary hover:opacity-90 active:scale-[0.99]'
               )}
             >
-              احصل على وصول مدى الحياة
+              اشترك في Starter
               <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <p className="mt-2.5 text-center text-[12px] text-muted">
-              دفعة واحدة · ضمان استرداد خلال 14 يومًا
+              ألغِ في أي وقت
             </p>
           </motion.div>
 
-          {/* Hosting */}
+          {/* Pro */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -205,17 +205,28 @@ export default function PricingPage() {
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                استضافة
+                Pro
               </p>
               <div className="mb-2 flex items-baseline gap-1">
-                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$19.99</span>
+                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$24.99</span>
                 <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
               <p className="text-[13.5px] text-muted">نحن نستضيف. أنت توجّه نطاقك. وانتهى الأمر.</p>
             </div>
 
+            {/* Free domain offer badge */}
+            <div
+              className="mb-5 flex items-center gap-2 rounded-lg px-3 py-2.5"
+              style={{ background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.18)' }}
+            >
+              <Globe className="h-3.5 w-3.5 flex-shrink-0 text-amber-600" strokeWidth={2} />
+              <span className="text-[12.5px] font-medium text-amber-700">
+                نطاق مخصّص مجاني 5 أشهر، ثم بسعرنا المخفّض
+              </span>
+            </div>
+
             <ul className="mb-7 flex-1 space-y-3">
-              {HOSTING_FEATURES.map((feat) => (
+              {PRO_FEATURES.map((feat) => (
                 <li key={feat} className="flex items-start gap-2.5">
                   <CheckChip color="#5e6ad2" />
                   <span className="text-[13px] text-foreground">{feat}</span>
@@ -224,14 +235,14 @@ export default function PricingPage() {
             </ul>
 
             <Link
-              href="/checkout?plan=hosting"
+              href="/checkout?plan=pro"
               className={cn(
                 'group inline-flex w-full items-center justify-center gap-2 rounded-md border border-token bg-white py-3 text-[14px] font-semibold text-foreground transition-all duration-150',
                 'hover:bg-black/5 active:scale-[0.99]'
               )}
               style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
             >
-              ابدأ الاستضافة
+              اشترك في Pro
               <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
             </Link>
             <p className="mt-2.5 text-center text-[12px] text-muted">

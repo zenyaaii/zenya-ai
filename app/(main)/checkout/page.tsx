@@ -16,7 +16,8 @@ function getOrigin() {
 
 function parsePlan(raw: string | string[] | undefined): PlanId {
   const v = Array.isArray(raw) ? raw[0] : raw
-  return v === 'hosting' ? 'hosting' : 'onetime'
+  if (v === 'hosting' || v === 'starter' || v === 'pro') return v
+  return 'onetime'
 }
 
 export default async function CheckoutPage({
@@ -51,6 +52,12 @@ export default async function CheckoutPage({
   }
   if (plan === 'hosting' && profile?.has_hosting) {
     redirect('/dashboard?already_hosting=1')
+  }
+  if (plan === 'starter' && (profile?.plan === 'starter' || profile?.plan === 'pro')) {
+    redirect('/dashboard?already_pro=1')
+  }
+  if (plan === 'pro' && profile?.plan === 'pro') {
+    redirect('/dashboard?already_pro=1')
   }
 
   const h = headers()

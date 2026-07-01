@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
-type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'admin'
+type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
 type Profile = {
   plan: Plan
@@ -45,6 +45,8 @@ const PLAN_LABEL: Record<Plan, string> = {
   free:        'الباقة المجانية',
   pro_onetime: 'برو · مدى الحياة',
   pro_hosting: 'برو · استضافة',
+  starter:     'Starter',
+  pro:         'Pro',
   admin:       'مشرف',
 }
 
@@ -52,6 +54,8 @@ const PLAN_TINT: Record<Plan, { bg: string; ring: string; fg: string }> = {
   free:        { bg: 'rgba(28,28,28,0.06)',   ring: 'rgba(28,28,28,0.18)',   fg: '#6b6b6b' },
   pro_onetime: { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
   pro_hosting: { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
+  starter:     { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
+  pro:         { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
   admin:       { bg: 'rgba(200,169,106,0.16)', ring: 'rgba(200,169,106,0.45)', fg: '#9b6f00' },
 }
 
@@ -253,6 +257,35 @@ function PlanCard({
       </div>
     )
   }
+  if (plan === 'starter') {
+    return (
+      <div className="rounded-2xl border border-token bg-white p-5">
+        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
+          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
+          Starter نشط
+        </div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
+        <Link href="/checkout?plan=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+          الترقية إلى Pro · 24.99$ شهريًا
+          <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
+        </Link>
+      </div>
+    )
+  }
+  if (plan === 'pro') {
+    const renews = hostingEnd ? new Date(hostingEnd) : null
+    const formatted = renews ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+    return (
+      <div className="rounded-2xl border border-token bg-white p-5">
+        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
+          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
+          Pro نشط · استضافة مشمولة
+        </div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">24.99$ / شهريًا</div>
+        <div className="mt-1 text-[12px] text-muted">يتجدّد {formatted}</div>
+      </div>
+    )
+  }
   if (plan === 'admin') {
     return (
       <div className="rounded-2xl border border-token bg-white p-5">
@@ -276,8 +309,8 @@ function PlanCard({
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#5e6ad2' }} />
       </div>
-      <Link href="/checkout?plan=onetime" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-        احصل على برو · 9.99$ مرة واحدة
+      <Link href="/checkout?plan=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+        اشترك في Starter · 14.99$ شهريًا
         <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
     </div>
@@ -497,7 +530,7 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
 }
 
 function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: number }) {
-  if (plan === 'pro_hosting' || plan === 'admin') return null
+  if (plan === 'pro_hosting' || plan === 'pro' || plan === 'admin') return null
   if (plan === 'pro_onetime') {
     return (
       <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
@@ -512,19 +545,33 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
       </div>
     )
   }
+  if (plan === 'starter') {
+    return (
+      <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">الترقية إلى Pro</div>
+        <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
+          انشر قوالب العرض على زينيا بنطاق مخصّص. 24.99$ شهريًا، ألغِ في أي وقت.
+        </p>
+        <Link href="/checkout?plan=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+          الترقية إلى Pro
+          <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
+        </Link>
+      </div>
+    )
+  }
   // free
   return (
     <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-        {trialRemaining === 0 ? 'انتهت التجربة' : 'الترقية إلى برو'}
+        {trialRemaining === 0 ? 'انتهت التجربة' : 'الترقية إلى Starter'}
       </div>
       <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
         {trialRemaining === 0
-          ? 'استخدمت عملياتك الثلاث المجانية. احصل على توليد غير محدود بدفعة واحدة 9.99$.'
-          : 'ادفع مرة واحدة، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع مدى الحياة.'}
+          ? 'استخدمت عملياتك الثلاث المجانية. اشترك في Starter لتوليد غير محدود.'
+          : 'اشترك شهريًا، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع.'}
       </p>
-      <Link href="/checkout?plan=onetime" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
-        احصل على برو · 9.99$
+      <Link href="/checkout?plan=starter" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+        اشترك في Starter · 14.99$
         <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
     </div>

@@ -363,7 +363,7 @@ export function announcementEmail(args?: {
  * match what was actually charged.
  */
 export function paymentReceiptEmail(args: {
-  plan: 'onetime' | 'hosting'
+  plan: 'onetime' | 'hosting' | 'starter' | 'pro'
   amountCents: number
   taxCents?: number
   currency: string
@@ -374,7 +374,6 @@ export function paymentReceiptEmail(args: {
 }): { subject: string; text: string; html: string } {
   const { plan, amountCents, currency, receiptNumber, manageUrl } = args
   const taxCents = Math.max(0, args.taxCents ?? 0)
-  const isHosting = plan === 'hosting'
   const subtotalCents = Math.max(0, amountCents - taxCents)
 
   const total = fmtMoney(amountCents, currency)
@@ -384,9 +383,12 @@ export function paymentReceiptEmail(args: {
   const rate = subtotalCents > 0 ? Math.round((taxCents / subtotalCents) * 100) : 0
   const taxLabel = taxCents > 0 ? `ضريبة القيمة المضافة (${rate}% شامل)` : ''
 
-  const itemName = isHosting
-    ? 'الاستضافة الكاملة — اشتراك شهري'
-    : 'زينيا برو — وصول مدى الحياة'
+  const itemName = {
+    onetime: 'زينيا برو — وصول مدى الحياة',
+    hosting: 'الاستضافة الكاملة — اشتراك شهري',
+    starter: 'زينيا Starter — اشتراك شهري',
+    pro: 'زينيا Pro — اشتراك شهري مع الاستضافة',
+  }[plan]
 
   let dateStr = ''
   try {
@@ -395,9 +397,12 @@ export function paymentReceiptEmail(args: {
     })
   } catch { /* leave empty */ }
 
-  const intro = isHosting
-    ? 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.'
-    : 'شكرًا لك! تم استلام دفعتك وتفعيل خطتك مدى الحياة. هذا إيصال رسمي بعمليتك.'
+  const intro = {
+    onetime: 'شكرًا لك! تم استلام دفعتك وتفعيل خطتك مدى الحياة. هذا إيصال رسمي بعمليتك.',
+    hosting: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.',
+    starter: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Starter. هذا إيصال رسمي بعمليتك.',
+    pro: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Pro. هذا إيصال رسمي بعمليتك.',
+  }[plan]
 
   const subject = `إيصال الدفع من زينيا — ${total}`
 
@@ -463,9 +468,12 @@ export function paymentReceiptEmail(args: {
     ctaHref: manageUrl,
     ctaLabel: 'الذهاب إلى لوحة التحكم',
     footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">${
-      isHosting
-        ? 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.'
-        : 'هذا إيصال عن شرائك خطة زينيا برو مدى الحياة.'
+      {
+        onetime: 'هذا إيصال عن شرائك خطة زينيا برو مدى الحياة.',
+        hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
+        starter: 'هذا إيصال عن اشتراكك الشهري في خطة Starter.',
+        pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
+      }[plan]
     } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
   })
 

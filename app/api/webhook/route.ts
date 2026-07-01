@@ -213,6 +213,12 @@ async function upsertHostingSubscription(
   const price = item?.price
   const customerId = typeof sub.customer === 'string' ? sub.customer : null
 
+  // Which subscription tier this is — set at checkout time in
+  // subscription_data.metadata (lib/checkout.ts) and persisted on the Stripe
+  // subscription object itself, so it's readable on every later webhook
+  // event too (renewals, cancellations, etc.), not just the first one.
+  const tier = (sub.metadata?.plan as string | undefined) || 'hosting'
+
   const row = {
     id: sub.id,
     user_id: userId,
@@ -257,8 +263,15 @@ async function upsertHostingSubscription(
     return
   }
 
+  // Tier → profile plan label + whether it includes Zenya hosting.
+  //   hosting (legacy, grandfathered): pro_hosting, hosting included
+  //   starter (new, $14.99/mo):        starter,     no hosting
+  //   pro     (new, $24.99/mo):        pro,         hosting included
+  const planForTier = tier === 'starter' ? 'starter' : tier === 'pro' ? 'pro' : 'pro_hosting'
+  const tierIncludesHosting = tier !== 'starter'
+
   const updates: Record<string, unknown> = {
-    has_hosting: active,
+    has_hosting: active && tierIncludesHosting,
     hosting_subscription_id: sub.id,
     hosting_status: sub.status,
     hosting_current_period_end: row.current_period_end,
@@ -272,12 +285,12 @@ async function upsertHostingSubscription(
       : new Date().toISOString()
     // Upgrade plan label unless this is an admin.
     if (existing?.plan !== 'admin') {
-      updates.plan = 'pro_hosting'
+      updates.plan = planForTier
       updates.is_pro = true
     }
-  } else if (existing?.plan === 'pro_hosting') {
-    // Sub ended → drop the hosting label. Keep is_pro=true if they ever paid
-    // the one-time (they still own that), otherwise back to free.
+  } else if (existing?.plan === planForTier) {
+    // Sub ended → drop the plan label. Keep is_pro=true if they ever paid
+    // the legacy one-time (they still own that), otherwise back to free.
     const { data: hadOneTime } = await supabase
       .from('purchases')
       .select('id')
@@ -724,10 +737,11 @@ export async function POST(req: NextRequest) {
           // First-activation receipt + welcome. This branch only fires on the
           // initial subscription checkout — renewals/updates come through
           // invoice.* and customer.subscription.* events — so it won't spam.
+          const receiptTier = (sub.metadata?.plan as 'hosting' | 'starter' | 'pro' | undefined) || 'hosting'
           if (email) {
             try {
               const tmpl = paymentReceiptEmail({
-                plan: 'hosting',
+                plan: receiptTier,
                 amountCents: session.amount_total ?? 0,
                 taxCents: session.total_details?.amount_tax ?? 0,
                 currency: session.currency || 'usd',
@@ -790,8 +804,10 @@ export async function POST(req: NextRequest) {
       case 'invoice.payment_succeeded': {
         const inv = event.data.object as Stripe.Invoice
         const subId = (inv as any).subscription
+        let renewalTier: 'hosting' | 'starter' | 'pro' = 'hosting'
         if (typeof subId === 'string') {
           const sub = await stripe.subscriptions.retrieve(subId)
+          renewalTier = (sub.metadata?.plan as typeof renewalTier | undefined) || 'hosting'
           await upsertHostingSubscription(supabase, sub)
         }
 
@@ -806,7 +822,7 @@ export async function POST(req: NextRequest) {
           try {
             const created = (inv.created ?? Math.floor(Date.now() / 1000)) as number
             const tmpl = paymentReceiptEmail({
-              plan: 'hosting',
+              plan: renewalTier,
               amountCents: inv.amount_paid ?? inv.total ?? 0,
               taxCents: invoiceTaxCents(inv),
               currency: inv.currency || 'usd',

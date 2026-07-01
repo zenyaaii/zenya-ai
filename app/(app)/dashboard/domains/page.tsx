@@ -359,12 +359,12 @@ export default function DomainsPage() {
               <Lock className="h-4 w-4 text-primary" strokeWidth={2} />
             </div>
             <div>
-              <div className="text-[14px] font-semibold text-foreground">النطاقات المخصصة تتطلب باقة الاستضافة</div>
-              <p className="mt-1 text-[12.5px] text-muted">19.99$ شهريًا. وجِّه أي نطاق إلى موقعك على زينيا.</p>
+              <div className="text-[14px] font-semibold text-foreground">النطاقات المخصصة تتطلب خطة Pro</div>
+              <p className="mt-1 text-[12.5px] text-muted">24.99$ شهريًا. وجِّه أي نطاق إلى موقعك على زينيا.</p>
             </div>
           </div>
-          <Link href="/checkout?plan=hosting" className="rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
-            ابدأ الاستضافة ←
+          <Link href="/checkout?plan=pro" className="rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+            الترقية إلى Pro ←
           </Link>
         </div>
       )}

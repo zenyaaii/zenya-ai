@@ -2,14 +2,14 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
-  title: 'Pricing — $9.99 lifetime or $19.99/mo with hosting',
+  title: 'Pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',
   description:
-    'Free to try (3 generations). $9.99 one-time for unlimited AI generations + Shopify export + project ZIP. $19.99/month adds Zenya hosting, custom domain, SSL, and analytics. VAT-inclusive prices for EU customers.',
+    'Free to try (3 generations). Starter $14.99/month for unlimited AI generations + Shopify export + project ZIP. Pro $24.99/month adds Zenya hosting, custom domain, SSL, and analytics. Cancel anytime. VAT-inclusive prices for EU customers.',
   alternates: { canonical: '/pricing' },
   openGraph: {
-    title: 'Zenya pricing — $9.99 lifetime or $19.99/mo with hosting',
+    title: 'Zenya pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',
     description:
-      'Pay $9.99 once and own the generator forever, or $19.99/month for full Zenya hosting. Free tier always available.',
+      'Starter at $14.99/month for the full generator, or Pro at $24.99/month for full Zenya hosting. Cancel anytime. Free tier always available.',
     url: 'https://zenyaai.co/pricing',
   },
 }
@@ -20,20 +20,20 @@ const PRICING_FAQ_SCHEMA = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'What’s the difference between the one-time plan and the hosting plan?',
+      name: 'What’s the difference between Starter and Pro?',
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'The one-time $9.99 unlocks unlimited AI generations and exports — for the two e-commerce templates (Storefront, Collective) you connect or upload to your Shopify store; for the other templates you download the project ZIP and host wherever you like. The $19.99/month hosting plan adds Zenya hosting for the brochure templates (live URL, custom domain, no Zenya badge) plus everything in the one-time plan, billed monthly.',
+          'Starter ($14.99/month) unlocks unlimited AI generations and exports — for the two e-commerce templates (Storefront, Collective) you connect or upload to your Shopify store; for the other templates you download the project ZIP and host wherever you like. Pro ($24.99/month) adds Zenya hosting for the brochure templates (live URL, custom domain, no Zenya badge) plus everything in Starter.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Is the one-time payment really one-time?',
+      name: 'Can I cancel my subscription?',
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'Yes. Pay $9.99 (or €9.99 in Europe, VAT included) once and the generator is yours for life. No renewal. Lifetime access to unlimited AI generations and exports.',
+          'Yes, any time from your dashboard. Your plan stays active until the end of the current billing period, then it won’t renew. Themes and exports you have generated stay in your account.',
       },
     },
     {
@@ -47,11 +47,11 @@ const PRICING_FAQ_SCHEMA = {
     },
     {
       '@type': 'Question',
-      name: 'Can I cancel the hosting plan?',
+      name: 'Can I switch between Starter and Pro?',
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'Yes, any time from your dashboard. Hosting stays active until the end of the current billing month, then your site stops resolving. Themes and exports you have generated stay in your account.',
+          'Yes. Upgrading from Starter to Pro takes effect immediately from your dashboard. To move back down, cancel Pro and start a Starter subscription — hosted sites stay live until the end of the current billing period.',
       },
     },
     {
@@ -60,7 +60,7 @@ const PRICING_FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          '14-day money-back guarantee on the one-time plan, and you can cancel the hosting plan at any time. See the full Refund Policy for details.',
+          'No automatic refund on the current billing period, but you can cancel any time before renewal to avoid the next charge. Contact us if you run into a billing issue.',
       },
     },
     {
@@ -69,7 +69,7 @@ const PRICING_FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify. The other six templates (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison) are brochure sites that Zenya can host directly.',
+          'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify. The other six templates (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison) are brochure sites that Zenya can host directly on the Pro plan.',
       },
     },
   ],

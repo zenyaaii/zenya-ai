@@ -24,7 +24,7 @@ const DISMISS_KEY = 'zenya:review-cta-dismissed'
 const SEEN_KEY = 'zenya:review-cta-seen'
 
 // Routes where the CTA is redundant or in the way.
-const HIDDEN_PREFIXES = ['/contact', '/login', '/checkout', '/auth']
+const HIDDEN_PREFIXES = ['/contact', '/login', '/checkout', '/auth', '/dashboard', '/theme', '/editor', '/builder']
 
 export default function ReviewFloatingButton() {
   const pathname = usePathname() || '/'

@@ -235,9 +235,9 @@ export default function SiteCard({
             <div className="flex items-start gap-2">
               <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
               <div>
-                <div className="font-medium text-foreground">باقة الاستضافة تفتح النشر</div>
-                <Link href="/checkout?plan=hosting" className="text-primary hover:underline">
-                  أضف الاستضافة · 19.99$ شهريًا ←
+                <div className="font-medium text-foreground">خطة Pro تفتح النشر</div>
+                <Link href="/checkout?plan=pro" className="text-primary hover:underline">
+                  الترقية إلى Pro · 24.99$ شهريًا ←
                 </Link>
               </div>
             </div>

@@ -9,7 +9,7 @@ const EUR_COUNTRIES = new Set([
   'GB',
 ])
 
-export type PlanId = 'onetime' | 'hosting'
+export type PlanId = 'onetime' | 'hosting' | 'starter' | 'pro'
 
 type Picked = { priceId: string; currency: 'usd' | 'eur' }
 
@@ -33,7 +33,25 @@ export function pickPriceId(
     return { error: 'No one-time price configured (STRIPE_PRICE_ID / _EUR).' }
   }
 
-  // hosting (recurring monthly)
+  if (plan === 'starter') {
+    const usd = process.env.STRIPE_PRICE_ID_STARTER_USD || ''
+    const eur = process.env.STRIPE_PRICE_ID_STARTER_EUR || ''
+    if (isEu && eur) return { priceId: eur, currency: 'eur' }
+    if (usd) return { priceId: usd, currency: 'usd' }
+    if (eur) return { priceId: eur, currency: 'eur' }
+    return { error: 'No Starter price configured (STRIPE_PRICE_ID_STARTER_*).' }
+  }
+
+  if (plan === 'pro') {
+    const usd = process.env.STRIPE_PRICE_ID_PRO_USD || ''
+    const eur = process.env.STRIPE_PRICE_ID_PRO_EUR || ''
+    if (isEu && eur) return { priceId: eur, currency: 'eur' }
+    if (usd) return { priceId: usd, currency: 'usd' }
+    if (eur) return { priceId: eur, currency: 'eur' }
+    return { error: 'No Pro price configured (STRIPE_PRICE_ID_PRO_*).' }
+  }
+
+  // hosting (legacy recurring monthly — grandfathered customers only)
   const usd = process.env.STRIPE_PRICE_ID_HOSTING_USD || ''
   const eur = process.env.STRIPE_PRICE_ID_HOSTING_EUR || ''
   if (isEu && eur) return { priceId: eur, currency: 'eur' }
@@ -78,7 +96,7 @@ export async function createCheckoutSession(opts: {
     ...baseCommon,
     mode: 'subscription',
     subscription_data: {
-      metadata: { user_id: opts.userId, plan: 'hosting' },
+      metadata: { user_id: opts.userId, plan: opts.plan },
     },
   })
 }

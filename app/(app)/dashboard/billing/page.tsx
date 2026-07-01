@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
-type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'admin'
+type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
 type Profile = {
   plan: Plan
@@ -85,20 +85,24 @@ export default function BillingPage() {
           <section className="rounded-2xl border border-token bg-white p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                {plan === 'pro_hosting' && <PlanHeader icon="✓" tint="#15803d" label="الاستضافة نشطة" />}
-                {plan === 'pro_onetime' && <PlanHeader icon="★" tint="#5e6ad2" label="برو · مدى الحياة" />}
+                {plan === 'pro_hosting' && <PlanHeader icon="✓" tint="#15803d" label="الاستضافة نشطة (خطة سابقة)" />}
+                {plan === 'pro_onetime' && <PlanHeader icon="★" tint="#5e6ad2" label="برو · مدى الحياة (خطة سابقة)" />}
+                {plan === 'starter' && <PlanHeader icon="★" tint="#5e6ad2" label="Starter · نشط" />}
+                {plan === 'pro' && <PlanHeader icon="✓" tint="#15803d" label="Pro · نشط" />}
                 {plan === 'admin' && <PlanHeader icon="★" tint="#9b6f00" label="مشرف · كل المزايا" />}
                 {plan === 'free' && <PlanHeader icon=" " tint="#6b6b6b" label="الباقة المجانية" />}
 
                 <div className="mt-2 text-[26px] font-bold tracking-tight text-foreground">
                   {plan === 'pro_hosting' && '19.99$ / شهريًا'}
                   {plan === 'pro_onetime' && '9.99$ دُفعت مرة واحدة'}
+                  {plan === 'starter' && '14.99$ / شهريًا'}
+                  {plan === 'pro' && '24.99$ / شهريًا'}
                   {plan === 'admin' && 'بلا رسوم'}
                   {plan === 'free' && '$0'}
                 </div>
 
                 <div className="mt-1 text-[13px] text-muted">
-                  {plan === 'pro_hosting' && renews && <>يتجدّد {renews.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
+                  {(plan === 'pro_hosting' || plan === 'starter' || plan === 'pro') && renews && <>يتجدّد {renews.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
                   {plan === 'pro_onetime' && purchased && <>وصول مدى الحياة · تم الشراء {purchased.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
                   {plan === 'free' && '3 عمليات توليد مجانية عند التسجيل. بلا اشتراك.'}
                   {plan === 'admin' && 'حساب فريق داخلي'}
@@ -109,14 +113,14 @@ export default function BillingPage() {
               <div className="flex flex-col gap-2">
                 {plan === 'free' && (
                   <>
-                    <Link href="/checkout?plan=onetime"
+                    <Link href="/checkout?plan=starter"
                           className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
-                      احصل على برو · 9.99$
+                      اشترك في Starter · 14.99$/شهريًا
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
-                    <Link href="/checkout?plan=hosting"
+                    <Link href="/checkout?plan=pro"
                           className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
-                      ابدأ الاستضافة · 19.99$ شهريًا
+                      اشترك في Pro · 24.99$ شهريًا
                     </Link>
                   </>
                 )}
@@ -127,7 +131,21 @@ export default function BillingPage() {
                     <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                   </Link>
                 )}
-                {plan === 'pro_hosting' && (
+                {plan === 'starter' && (
+                  <>
+                    <Link href="/checkout?plan=pro"
+                          className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
+                      الترقية إلى Pro · 24.99$ شهريًا
+                      <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
+                    </Link>
+                    <button onClick={openPortal} disabled={portalBusy}
+                            className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                      <CreditCard className="h-3 w-3" />
+                      {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
+                    </button>
+                  </>
+                )}
+                {(plan === 'pro_hosting' || plan === 'pro') && (
                   <button onClick={openPortal} disabled={portalBusy}
                           className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                     <CreditCard className="h-3 w-3" />
@@ -139,7 +157,7 @@ export default function BillingPage() {
           </section>
 
           {/* Stripe portal + invoices */}
-          {(plan === 'pro_onetime' || plan === 'pro_hosting') && (
+          {(plan === 'pro_onetime' || plan === 'pro_hosting' || plan === 'starter' || plan === 'pro') && (
             <section className="mt-4 rounded-2xl border border-token bg-white p-6">
               <h2 className="text-[15px] font-semibold tracking-tight text-foreground">الفواتير وطرق الدفع</h2>
               <p className="mt-1 text-[12.5px] text-muted">
@@ -162,9 +180,9 @@ export default function BillingPage() {
               <Included on={plan !== 'free'}       label="برو · توليد غير محدود" />
               <Included on={plan !== 'free'}       label="برو · تصدير شوبيفاي OS 2.0" />
               <Included on={plan !== 'free'}       label="برو · ملفات المشاريع للقوالب غير الشوبيفاي" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · مباشر على zenya.app/s/{slug}" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · نطاق مخصّص + SSL تلقائي" />
-              <Included on={plan === 'pro_hosting' || plan === 'admin'} label="استضافة · تعديل المحتوى والتصميم دون إعادة التوليد" />
+              <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · مباشر على zenya.app/s/{slug}" />
+              <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · نطاق مخصّص + SSL تلقائي" />
+              <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · تعديل المحتوى والتصميم دون إعادة التوليد" />
             </ul>
           </section>
         </>
