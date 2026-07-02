@@ -28,7 +28,7 @@
  * generated theme for the merchant-facing summary.
  */
 
-import { buildTemplate, collectClaims } from './seed'
+import { buildTemplate, collectClaims, includeSection } from './seed'
 
 /** A real product review scraped from the source listing. */
 export type ProductReview = {
@@ -435,7 +435,7 @@ function fileIndexTemplate(c: BuildConfig): string {
       { id: 'newsletter',   type: 'ds-newsletter' },
       { id: 'cta',          type: 'ds-cta' },
       { id: 'sticky',       type: 'ds-sticky-atc' },
-    ],
+    ].filter((r) => includeSection(r.type, c)),
     c,
   )
   return JSON.stringify(t, null, 2)
@@ -467,7 +467,7 @@ function fileProductTemplate(c: BuildConfig): string {
       { id: 'cta',        type: 'ds-cta' },
       { id: 'sticky',     type: 'ds-sticky-atc' },
       { id: 'recently',   type: 'ds-recently-bought' },
-    ],
+    ].filter((r) => includeSection(r.type, c)),
     c,
   )
   return JSON.stringify(t, null, 2)
@@ -2171,15 +2171,29 @@ function assetThemeJs(_c: BuildConfig): string {
   /* ── Sticky ATC visibility ────────────────────────────────────────── */
   var sticky = document.querySelector('[data-ds-sticky]');
   var product = document.getElementById('product');
+  // Reserve space at the bottom of the page so the fixed sticky bar never
+  // overlaps the last section / footer. We pad the scroll container by the
+  // real bar height (recomputed on resize) whenever the bar is showing.
+  function dsStickyReserve(on) {
+    if (!sticky) return;
+    document.body.style.paddingBottom = on ? (sticky.offsetHeight + 'px') : '';
+  }
+  if (sticky) {
+    window.addEventListener('resize', function () {
+      if (sticky.classList.contains('is-visible')) dsStickyReserve(true);
+    });
+  }
   if (sticky && product && 'IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           sticky.classList.remove('is-visible');
           sticky.setAttribute('aria-hidden', 'true');
+          dsStickyReserve(false);
         } else if (entry.boundingClientRect.top < 0) {
           sticky.classList.add('is-visible');
           sticky.setAttribute('aria-hidden', 'false');
+          dsStickyReserve(true);
         }
       });
     }, { threshold: 0 });

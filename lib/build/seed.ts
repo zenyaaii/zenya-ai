@@ -123,6 +123,26 @@ export function hasRealReviews(c: BuildConfig): boolean {
   return realReviews(c).length >= 3
 }
 
+/**
+ * Whether a homepage/product section should be emitted for THIS product.
+ * Keeps the generated theme honest: photo-driven social proof only ships
+ * when we actually scraped real customer photos (never faked with product
+ * shots), and the review/star sections only when we have real reviews.
+ */
+export function includeSection(type: string, c: BuildConfig): boolean {
+  const realPhotos = reviewPhotos(c).length >= 4
+  switch (type) {
+    // UGC grids are ONLY meaningful with real reviewer photos. No real
+    // photos → drop the section rather than paste product shots under
+    // invented @handles / "Verified buyer" names.
+    case 'ds-ugc-gallery':
+    case 'ds-customer-photos':
+      return realPhotos
+    default:
+      return true
+  }
+}
+
 /** All photo URLs attached to the scraped reviews, deduped. */
 function reviewPhotos(c: BuildConfig): Array<{ url: string; name: string }> {
   const out: Array<{ url: string; name: string }> = []

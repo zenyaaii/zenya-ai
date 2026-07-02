@@ -315,7 +315,25 @@ export const productExtraSections: SectionMap = {
 {% endschema %}
 `,
 
-  'ds-size-chart': () => `<section class="ds-sizechart">
+  'ds-size-chart': () => `{%- liquid
+  assign sc_p = product
+  if sc_p == blank or sc_p.id == blank
+    assign sc_p = collections.all.products.first
+  endif
+  assign sc_has_size = false
+  if sc_p != blank and sc_p.id != blank
+    for sc_opt in sc_p.options_with_values
+      assign sc_name = sc_opt.name | downcase
+      if sc_name contains 'size' or sc_name contains 'مقاس' or sc_name contains 'حجم'
+        assign sc_has_size = true
+      endif
+    endfor
+  else
+    assign sc_has_size = true
+  endif
+-%}
+{%- if sc_has_size -%}
+<section class="ds-sizechart">
   <div class="ds-container ds-sizechart__inner">
     <details class="ds-sizechart__panel" open>
       <summary>
@@ -340,6 +358,7 @@ export const productExtraSections: SectionMap = {
     </details>
   </div>
 </section>
+{%- endif -%}
 <style>
   .ds-sizechart { padding: 2rem 0; }
   .ds-sizechart__inner { max-width: 760px; }
