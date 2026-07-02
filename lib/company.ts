@@ -59,7 +59,7 @@ export const COMPANY = {
   CURRENCY: 'USD',
 
   // Maintenance
-  LAST_UPDATED: '2026-05-31',
+  LAST_UPDATED: '2026-07-02',
 } as const
 
 export const formatAddress = () => {

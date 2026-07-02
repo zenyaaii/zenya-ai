@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { shopify } from '@/lib/shopify';
+import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+function admin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
 
 export async function POST(req: NextRequest) {
   const topic = req.headers.get('x-shopify-topic') || '';
@@ -47,9 +56,12 @@ export async function POST(req: NextRequest) {
 
       case 'shop/redact':
       case 'app/uninstalled': {
-        // Wipe everything tied to this shop: stored Shopify sessions.
-        // (Themes & generated content live under Zenya user accounts, not
-        // shop accounts, so they're untouched here.)
+        // Wipe everything tied to this shop: stored Shopify sessions AND the
+        // shop→account link. Removing the link means the theme app extension's
+        // license check (/app/license) can no longer resolve an active
+        // subscription for this shop, so the premium Zenya content degrades to
+        // its "reconnect to restore" state. (Themes & generated content live
+        // under Zenya user accounts, not shop accounts, so they're untouched.)
         if (shop) {
           try {
             const sessions = await shopify.config.sessionStorage.findSessionsByShop(shop);
@@ -59,6 +71,16 @@ export async function POST(req: NextRequest) {
             }
           } catch (err) {
             console.error(`[Webhook] Failed cleaning sessions for ${shop}:`, err);
+          }
+          try {
+            const { error } = await admin()
+              .from('shopify_connections')
+              .delete()
+              .eq('shop', shop);
+            if (error) throw error;
+            console.log(`[Webhook] Removed shop→account link(s) for ${shop}`);
+          } catch (err) {
+            console.error(`[Webhook] Failed removing connection for ${shop}:`, err);
           }
         }
         break;
