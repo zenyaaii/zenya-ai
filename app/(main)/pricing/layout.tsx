@@ -69,7 +69,7 @@ const PRICING_FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'Two e-commerce templates — Storefront and Collective — export as Shopify OS 2.0 themes and run on Shopify. The other six templates (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison) are brochure sites that Zenya can host directly on the Pro plan.',
+          'Two e-commerce templates — Storefront and Collective — export as ready Shopify themes and run on Shopify. The other six templates (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison) are brochure sites that Zenya can host directly on the Pro plan.',
       },
     },
   ],

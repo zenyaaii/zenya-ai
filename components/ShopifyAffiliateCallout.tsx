@@ -92,7 +92,7 @@ export default function ShopifyAffiliateCallout({
             ألا تملك متجر Shopify بعد؟
           </h3>
           <p className="mt-1 text-xs text-muted leading-relaxed">
-            أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب زينيا بصيغة OS 2.0
+            أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب زينيا
             من{' '}
             <strong>المتجر الإلكتروني ← القوالب ← إضافة ← رفع</strong>. يتولّى Shopify
             السلّة والدفع والمدفوعات والمخزون — وتتولّى زينيا المظهر.

@@ -25,7 +25,7 @@ const STEPS = [
     num: '03',
     icon: Rocket,
     title: 'انطلق فورًا',
-    desc: 'احصل على موقع معاينة مُستضاف يمكنك نشره اليوم — أو نزّل ملف ثيم شوبيفاي OS 2.0 كاملًا. كل شيء قابل للتعديل.',
+    desc: 'احصل على موقع معاينة مُستضاف يمكنك نشره اليوم — أو نزّل ملف ثيم شوبيفاي كاملًا. كل شيء قابل للتعديل.',
     color: '#27a644',
   },
 ] as const
@@ -114,7 +114,7 @@ export default function StepsSection() {
         <Reveal delay={0.1} className="mx-auto mt-16 max-w-2xl">
           <p className="text-center text-[12.5px] text-muted">
             يُصدَّر قالب <strong className="font-bold text-foreground">المتجر</strong> بمنتج واحد كملف ثيم
-            شوبيفاي OS&nbsp;2.0. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق زينيا.
+            شوبيفاي جاهز. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق زينيا.
           </p>
         </Reveal>
       </div>

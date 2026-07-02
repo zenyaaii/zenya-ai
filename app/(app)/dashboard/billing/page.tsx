@@ -178,7 +178,7 @@ export default function BillingPage() {
             <ul className="mt-3 space-y-2 text-[13px]">
               <Included on={true}                  label="مجاني · موقعان بالذكاء الاصطناعي" />
               <Included on={plan !== 'free'}       label="برو · توليد غير محدود" />
-              <Included on={plan !== 'free'}       label="برو · تصدير شوبيفاي OS 2.0" />
+              <Included on={plan !== 'free'}       label="برو · تصدير ثيم شوبيفاي جاهز" />
               <Included on={plan !== 'free'}       label="برو · ملفات المشاريع للقوالب غير الشوبيفاي" />
               <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · مباشر على zenya.app/s/{slug}" />
               <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · نطاق مخصّص + SSL تلقائي" />
