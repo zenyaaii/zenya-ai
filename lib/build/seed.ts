@@ -229,7 +229,7 @@ function seedFooter(c: BuildConfig): SeededSection {
       // Label|URL — every link must land somewhere real. Homepage anchors
       // (#bundle, #faq…) are rendered by the sections themselves; 'mailto:'
       // expands to the store owner's email in liquid.
-      'col-shop': { type: 'column', settings: { heading: 'Shop', links: `${c.productName}|/#product\nBundle & save|/#bundle\nAll products|/collections/all` } },
+      'col-shop': { type: 'column', settings: { heading: 'Shop', links: `${c.productName}|/#product\nBundle & save|/#bundle\nReviews|/#reviews` } },
       'col-help': { type: 'column', settings: { heading: 'Help', links: 'FAQ|/#faq\nShipping & delivery|/#faq\nReturns & guarantee|/#guarantee\nContact us|mailto:' } },
       'col-co':   { type: 'column', settings: { heading: 'Company', links: 'Our story|/#our-story\nReviews|/#reviews\nCustomer photos|/#customer-photos\nIn the press|/#press' } },
       'news':     { type: 'newsletter', settings: { heading: 'Get the drop', copy: 'Restock alerts and members-only deals. No spam.' } },

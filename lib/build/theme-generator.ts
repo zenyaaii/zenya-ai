@@ -776,7 +776,7 @@ function sectionFooter(_c: BuildConfig): string {
       "name": "Link column",
       "settings": [
         { "type": "text", "id": "heading", "label": "Heading", "default": "Shop" },
-        { "type": "textarea", "id": "links", "label": "Links — one per line, Label|URL", "default": "Bestsellers|/collections/all\\nBundle deals|/#bundle" }
+        { "type": "textarea", "id": "links", "label": "Links — one per line, Label|URL", "default": "Shop now|/#product\\nBundle deals|/#bundle" }
       ]
     },
     {
@@ -792,7 +792,7 @@ function sectionFooter(_c: BuildConfig): string {
   "max_blocks": 5,
   "default": {
     "blocks": [
-      { "type": "column", "settings": { "heading": "Shop", "links": "Bestsellers|/collections/all\\nBundle deals|/#bundle" } },
+      { "type": "column", "settings": { "heading": "Shop", "links": "Shop now|/#product\\nBundle deals|/#bundle" } },
       { "type": "column", "settings": { "heading": "Help", "links": "FAQ|/#faq\\nReturns|/#guarantee\\nContact us|mailto:" } },
       { "type": "newsletter", "settings": {} }
     ]
