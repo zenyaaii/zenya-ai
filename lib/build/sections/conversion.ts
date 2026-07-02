@@ -25,13 +25,13 @@ export const conversionSections: SectionMap = {
       <div class="ds-countdown__title">{{ section.settings.title }}</div>
     </div>
     <div class="ds-countdown__timer" data-ds-countdown data-end="{{ section.settings.end_iso }}">
-      <div class="ds-countdown__cell"><span data-d>00</span><label>days</label></div>
+      <div class="ds-countdown__cell"><span data-d>00</span><label>يوم</label></div>
       <div class="ds-countdown__sep">:</div>
-      <div class="ds-countdown__cell"><span data-h>00</span><label>hrs</label></div>
+      <div class="ds-countdown__cell"><span data-h>00</span><label>ساعة</label></div>
       <div class="ds-countdown__sep">:</div>
-      <div class="ds-countdown__cell"><span data-m>00</span><label>min</label></div>
+      <div class="ds-countdown__cell"><span data-m>00</span><label>دقيقة</label></div>
       <div class="ds-countdown__sep">:</div>
-      <div class="ds-countdown__cell"><span data-s>00</span><label>sec</label></div>
+      <div class="ds-countdown__cell"><span data-s>00</span><label>ثانية</label></div>
     </div>
     {%- if section.settings.cta_label != blank -%}
       <a href="{{ section.settings.cta_url | default: '#product' }}" class="ds-btn ds-btn-on-primary ds-btn-sm">{{ section.settings.cta_label }}</a>
@@ -185,9 +185,9 @@ export const conversionSections: SectionMap = {
     <div class="ds-ship-bar__inner">
       <div class="ds-ship-bar__copy" data-ds-shipbar-copy aria-live="polite">
         {%- if remaining > 0 -%}
-          You're <strong>{{ remaining | money }}</strong> away from free shipping 🚚
+          يتبقّى <strong>{{ remaining | money }}</strong> على الشحن المجاني 🚚
         {%- else -%}
-          🎉 You unlocked <strong>free shipping</strong>!
+          🎉 حصلت على <strong>الشحن المجاني</strong>!
         {%- endif -%}
       </div>
       <div class="ds-ship-bar__track">

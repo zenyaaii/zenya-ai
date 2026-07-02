@@ -799,12 +799,12 @@ export const marketingSections: SectionMap = {
         </div>
       {%- endif -%}
       <div class="ds-cf__row">
-        <label>Name<input type="text" name="contact[name]" required></label>
-        <label>Email<input type="email" name="contact[email]" required></label>
+        <label>الاسم<input type="text" name="contact[name]" required></label>
+        <label>البريد الإلكتروني<input type="email" name="contact[email]" required></label>
       </div>
-      <label>Subject<input type="text" name="contact[subject]"></label>
-      <label>Message<textarea name="contact[body]" rows="5" required></textarea></label>
-      <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg">Send message</button>
+      <label>الموضوع<input type="text" name="contact[subject]"></label>
+      <label>الرسالة<textarea name="contact[body]" rows="5" required></textarea></label>
+      <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg">إرسال الرسالة</button>
     {% endform %}
   </div>
 </section>
@@ -926,14 +926,14 @@ export const marketingSections: SectionMap = {
       </div>
     {%- endif -%}
     <div class="ds-art__share">
-      <span>Share</span>
-      <a href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ article.url }}&text={{ article.title | url_encode }}" target="_blank" rel="noreferrer">Twitter</a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ article.url }}" target="_blank" rel="noreferrer">Facebook</a>
-      <a href="mailto:?subject={{ article.title }}&body={{ shop.url }}{{ article.url }}">Email</a>
+      <span>شارك</span>
+      <a href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ article.url }}&text={{ article.title | url_encode }}" target="_blank" rel="noreferrer">تويتر</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ article.url }}" target="_blank" rel="noreferrer">فيسبوك</a>
+      <a href="mailto:?subject={{ article.title }}&body={{ shop.url }}{{ article.url }}">البريد</a>
     </div>
     {%- if article.comments_enabled? -%}
       <section class="ds-art__comments">
-        <h2>Comments ({{ article.comments_count }})</h2>
+        <h2>التعليقات ({{ article.comments_count }})</h2>
         {%- for c in article.comments -%}
           <div class="ds-art__c">
             <strong>{{ c.author }}</strong>
@@ -942,10 +942,10 @@ export const marketingSections: SectionMap = {
           </div>
         {%- endfor -%}
         {% form 'new_comment', article, class: 'ds-art__cform' %}
-          <input type="text" name="comment[author]" placeholder="Name" required>
-          <input type="email" name="comment[email]" placeholder="Email" required>
-          <textarea name="comment[body]" placeholder="Your thoughts…" required></textarea>
-          <button type="submit" class="ds-btn ds-btn-primary">Post comment</button>
+          <input type="text" name="comment[author]" placeholder="الاسم" required>
+          <input type="email" name="comment[email]" placeholder="البريد الإلكتروني" required>
+          <textarea name="comment[body]" placeholder="رأيك…" required></textarea>
+          <button type="submit" class="ds-btn ds-btn-primary">أضِف تعليقًا</button>
         {% endform %}
       </section>
     {%- endif -%}

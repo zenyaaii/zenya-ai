@@ -402,7 +402,7 @@ export const storytellingSections: SectionMap = {
         <div class="ds-ba__label ds-ba__label--before">{{ section.settings.before_label }}</div>
       </div>
       <div class="ds-ba__label ds-ba__label--after">{{ section.settings.after_label }}</div>
-      <input type="range" min="0" max="100" value="50" class="ds-ba__slider" data-ds-ba-slider aria-label="Compare slider">
+      <input type="range" min="0" max="100" value="50" class="ds-ba__slider" data-ds-ba-slider aria-label="شريط المقارنة">
       <div class="ds-ba__handle" data-ds-ba-handle><span>↔</span></div>
     </div>
   </div>

@@ -362,25 +362,25 @@ function fileLocales(_c: BuildConfig): string {
     {
       general: {
         accessibility: {
-          skip_to_text: 'Skip to content',
-          close: 'Close',
-          open: 'Open',
-          next: 'Next',
-          previous: 'Previous',
+          skip_to_text: 'تخطَّ إلى المحتوى',
+          close: 'إغلاق',
+          open: 'فتح',
+          next: 'التالي',
+          previous: 'السابق',
         },
         cart: {
-          title: 'Your cart',
-          empty: 'Your cart is empty',
-          checkout: 'Checkout',
-          subtotal: 'Subtotal',
+          title: 'سلتك',
+          empty: 'سلتك فارغة',
+          checkout: 'إتمام الشراء',
+          subtotal: 'الإجمالي الفرعي',
         },
         product: {
-          add_to_cart: 'Add to cart',
-          sold_out: 'Sold out',
-          unavailable: 'Unavailable',
-          quantity: 'Quantity',
-          on_sale: 'Sale',
-          from_lowest_price: 'From {{ lowest_price }}',
+          add_to_cart: 'أضِف إلى السلة',
+          sold_out: 'نفدت الكمية',
+          unavailable: 'غير متوفّر',
+          quantity: 'الكمية',
+          on_sale: 'تخفيض',
+          from_lowest_price: 'ابتداءً من {{ lowest_price }}',
         },
       },
     },
@@ -578,9 +578,9 @@ function fileSearchTemplate(c: BuildConfig): string {
 function file404Template(_c: BuildConfig): string {
   // 404 must be a .liquid template per Shopify spec (not JSON).
   return `<section class="ds-container ds-404">
-  <h1>Page not found</h1>
-  <p>The page you’re looking for isn’t here. Head back to the homepage.</p>
-  <a class="ds-btn ds-btn-primary" href="{{ routes.root_url }}">Take me home</a>
+  <h1>الصفحة غير موجودة</h1>
+  <p>الصفحة التي تبحث عنها غير موجودة. عُد إلى الصفحة الرئيسية.</p>
+  <a class="ds-btn ds-btn-primary" href="{{ routes.root_url }}">العودة للرئيسية</a>
 </section>
 <style>
   .ds-404 { text-align:center; padding: 6rem 1.5rem; }
@@ -649,19 +649,19 @@ function sectionHeader(_c: BuildConfig): string {
         <span class="ds-header__brand-text">{{ settings.brand_name | default: shop.name }}</span>
       {%- endif -%}
     </a>
-    <nav class="ds-header__nav" aria-label="Primary">
+    <nav class="ds-header__nav" aria-label="القائمة الرئيسية">
       {%- for link in linklists.main-menu.links limit: 5 -%}
         <a href="{{ link.url }}" class="ds-header__link">{{ link.title }}</a>
       {%- endfor -%}
     </nav>
-    <a href="{{ routes.cart_url }}" class="ds-header__cart" aria-label="Cart">
+    <a href="{{ routes.cart_url }}" class="ds-header__cart" aria-label="السلة">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
         <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path>
       </svg>
       {%- if cart.item_count > 0 -%}
-        <span class="ds-header__count" aria-label="{{ cart.item_count }} items">{{ cart.item_count }}</span>
+        <span class="ds-header__count" aria-label="{{ cart.item_count }} عنصر">{{ cart.item_count }}</span>
       {%- endif -%}
     </a>
   </div>
@@ -730,7 +730,7 @@ function sectionFooter(_c: BuildConfig): string {
             {% form 'customer', class: 'ds-footer__form' %}
               <input type="hidden" name="contact[tags]" value="newsletter">
               <input type="email" name="contact[email]" placeholder="you@example.com" required>
-              <button type="submit" class="ds-btn ds-btn-primary ds-btn-sm">Subscribe</button>
+              <button type="submit" class="ds-btn ds-btn-primary ds-btn-sm">اشترك</button>
             {% endform %}
           </div>
         {%- endcase -%}
@@ -738,11 +738,11 @@ function sectionFooter(_c: BuildConfig): string {
     </div>
   </div>
   <div class="ds-container ds-footer__bottom">
-    <div>© {{ 'now' | date: '%Y' }} {{ settings.brand_name | default: shop.name }}. All rights reserved.</div>
+    <div>© {{ 'now' | date: '%Y' }} {{ settings.brand_name | default: shop.name }}. جميع الحقوق محفوظة.</div>
     <div class="ds-footer__legal">
-      <a href="/policies/privacy-policy">Privacy</a>
-      <a href="/policies/terms-of-service">Terms</a>
-      <a href="/policies/refund-policy">Refunds</a>
+      <a href="/policies/privacy-policy">الخصوصية</a>
+      <a href="/policies/terms-of-service">الشروط</a>
+      <a href="/policies/refund-policy">الاسترداد</a>
     </div>
   </div>
 </footer>
@@ -944,8 +944,8 @@ function sectionProductMain(c: BuildConfig): string {
 
     <div class="ds-product__info">
       <div class="ds-product__rating">
-        <span class="ds-stars" aria-label="{{ section.settings.rating }} stars">★★★★★</span>
-        <span class="ds-product__rating-text">{{ section.settings.rating }} · {{ section.settings.review_count }} reviews</span>
+        <span class="ds-stars" aria-label="{{ section.settings.rating }} نجوم">★★★★★</span>
+        <span class="ds-product__rating-text">{{ section.settings.rating }}{% if section.settings.review_count != blank %} · {{ section.settings.review_count }} تقييم{% endif %}</span>
       </div>
 
       <h1 class="ds-product__title">
@@ -963,24 +963,24 @@ function sectionProductMain(c: BuildConfig): string {
           {%- if v.compare_at_price > v.price -%}
             <span class="ds-product__price-compare">{{ v.compare_at_price | money }}</span>
             {%- assign d = v.compare_at_price | minus: v.price | times: 100 | divided_by: v.compare_at_price -%}
-            <span class="ds-product__discount">Save {{ d }}%</span>
+            <span class="ds-product__discount">وفّر {{ d }}%</span>
           {%- endif -%}
         {%- else -%}
           <span class="ds-product__price-sale">{{ ${fallbackPriceCents} | money }}</span>
           {%- if ${fallbackComparePriceCents} > ${fallbackPriceCents} -%}
             <span class="ds-product__price-compare">{{ ${fallbackComparePriceCents} | money }}</span>
-            <span class="ds-product__discount">Save ${dp}%</span>
+            <span class="ds-product__discount">وفّر ${dp}%</span>
           {%- endif -%}
         {%- endif -%}
       </div>
 
       {%- if settings.show_klarna_note -%}
-        <div class="ds-product__klarna">Or 4 interest-free payments. Available at checkout.</div>
+        <div class="ds-product__klarna">أو 4 دفعات دون فوائد. متاحة عند إتمام الشراء.</div>
       {%- endif -%}
 
       <div class="ds-product__stock">
         <span class="ds-stock-dot"></span>
-        In stock · ships in 24h
+        متوفّر · يُشحن خلال 24 ساعة
       </div>
 
       {%- liquid
@@ -997,7 +997,7 @@ function sectionProductMain(c: BuildConfig): string {
       -%}
       {%- if has_tiers -%}
         <div class="ds-product__tiers" data-ds-pm-tiers>
-          <div class="ds-product__tiers-label">Bundle &amp; save</div>
+          <div class="ds-product__tiers-label">اختر الكمية ووفّر</div>
           {%- for block in section.blocks -%}
             {%- if block.type == 'tier' -%}
               {%- assign tier_units = block.settings.units | default: 1 -%}
@@ -1034,26 +1034,26 @@ function sectionProductMain(c: BuildConfig): string {
           {%- endif -%}
           <div class="ds-product__qty-row">
             <label class="ds-product__qty">
-              <button type="button" class="ds-qty-btn" data-step="-1" aria-label="Decrease">−</button>
+              <button type="button" class="ds-qty-btn" data-step="-1" aria-label="إنقاص">−</button>
               <input type="number" name="quantity" value="1" min="1" inputmode="numeric" data-ds-pm-qty>
-              <button type="button" class="ds-qty-btn" data-step="1" aria-label="Increase">+</button>
+              <button type="button" class="ds-qty-btn" data-step="1" aria-label="زيادة">+</button>
             </label>
             <button type="submit" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">
-              Add to cart · <span data-ds-atc-price data-unit-cents="{{ unit_cents }}">{{ unit_cents | money }}</span>
+              أضِف إلى السلة · <span data-ds-atc-price data-unit-cents="{{ unit_cents }}">{{ unit_cents | money }}</span>
             </button>
           </div>
           {{ form | payment_button }}
         {% endform %}
-        <div class="ds-product__payments" aria-label="Accepted payment methods">
+        <div class="ds-product__payments" aria-label="طرق الدفع المقبولة">
           {%- for type in shop.enabled_payment_types limit: 7 -%}
             {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
           {%- endfor -%}
-          <span class="ds-product__payments-note">Secure 256-bit encrypted checkout</span>
+          <span class="ds-product__payments-note">دفع آمن مشفّر 256-بت</span>
         </div>
       {%- else -%}
         <div class="ds-product__form">
-          <a href="#bundle" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">Add to cart</a>
-          <p class="ds-product__placeholder-note">Add your product in Shopify admin to enable live checkout — this button activates automatically.</p>
+          <a href="#bundle" class="ds-btn ds-btn-primary ds-btn-xl ds-product__atc">أضِف إلى السلة</a>
+          <p class="ds-product__placeholder-note">أضِف منتجك من لوحة تحكّم شوبيفاي لتفعيل الدفع المباشر — يُفعَّل هذا الزر تلقائيًا.</p>
         </div>
       {%- endif -%}
 
@@ -1071,7 +1071,7 @@ function sectionProductMain(c: BuildConfig): string {
       <div class="ds-product__accordions">
         {%- if use_real and p.description != blank -%}
           <details class="ds-product__acc">
-            <summary>Description<span class="ds-product__acc-icon" aria-hidden="true"></span></summary>
+            <summary>الوصف<span class="ds-product__acc-icon" aria-hidden="true"></span></summary>
             <div class="ds-product__acc-body">{{ p.description }}</div>
           </details>
         {%- endif -%}
@@ -1697,7 +1697,7 @@ function sectionCart(_c: BuildConfig): string {
   // wiring lives in theme.js, keyed off data-ds-cart-* attributes.
   return `<section class="ds-cart-page" data-ds-cart>
   <div class="ds-container">
-    <h1 class="ds-cart__title">{{ 'general.cart.title' | t }} <span class="ds-cart__countpill" data-ds-cart-count-pill {% if cart.item_count == 0 %}hidden{% endif %}><span data-ds-cart-count>{{ cart.item_count }}</span> items</span></h1>
+    <h1 class="ds-cart__title">{{ 'general.cart.title' | t }} <span class="ds-cart__countpill" data-ds-cart-count-pill {% if cart.item_count == 0 %}hidden{% endif %}><span data-ds-cart-count>{{ cart.item_count }}</span> عنصر</span></h1>
     <div data-ds-cart-filled {% if cart.item_count == 0 %}hidden{% endif %}>
       <div class="ds-cart__layout">
         <div>
@@ -1719,11 +1719,11 @@ function sectionCart(_c: BuildConfig): string {
                 </div>
                 <div class="ds-cart__controls">
                   <div class="ds-cart__qty" data-ds-cart-qty>
-                    <button type="button" class="ds-qty-btn" data-ds-cart-step="-1" aria-label="Decrease quantity">−</button>
+                    <button type="button" class="ds-qty-btn" data-ds-cart-step="-1" aria-label="إنقاص الكمية">−</button>
                     <span class="ds-cart__qty-num" data-ds-cart-qty-num>{{ item.quantity }}</span>
-                    <button type="button" class="ds-qty-btn" data-ds-cart-step="1" aria-label="Increase quantity">+</button>
+                    <button type="button" class="ds-qty-btn" data-ds-cart-step="1" aria-label="زيادة الكمية">+</button>
                   </div>
-                  <button type="button" class="ds-cart__remove" data-ds-cart-remove aria-label="Remove {{ item.product.title | escape }}">Remove</button>
+                  <button type="button" class="ds-cart__remove" data-ds-cart-remove aria-label="إزالة {{ item.product.title | escape }}">إزالة</button>
                 </div>
               </li>
             {%- endfor -%}
@@ -1736,14 +1736,14 @@ function sectionCart(_c: BuildConfig): string {
                 <strong>{{ section.settings.addmore_title }}</strong>
                 <span>{{ section.settings.addmore_sub }}</span>
               </div>
-              <button type="button" class="ds-btn ds-btn-sm" data-ds-cart-add-more data-variant-id="{{ first_item.variant_id }}">+ Add one more</button>
+              <button type="button" class="ds-btn ds-btn-sm" data-ds-cart-add-more data-variant-id="{{ first_item.variant_id }}">+ أضِف واحدة أخرى</button>
             </div>
           {%- endif -%}
 
           {%- if section.settings.show_note -%}
             <label class="ds-cart__note">
-              <span>Order note (optional)</span>
-              <textarea name="note" rows="2" placeholder="Gift message, delivery instructions…" data-ds-cart-note>{{ cart.note }}</textarea>
+              <span>ملاحظة على الطلب (اختياري)</span>
+              <textarea name="note" rows="2" placeholder="رسالة إهداء، تعليمات التوصيل…" data-ds-cart-note>{{ cart.note }}</textarea>
             </label>
           {%- endif -%}
         </div>
@@ -1755,25 +1755,25 @@ function sectionCart(_c: BuildConfig): string {
               <strong data-ds-cart-subtotal>{{ cart.total_price | money }}</strong>
             </div>
             <div class="ds-cart__row ds-cart__row--muted" data-ds-cart-savings {% if cart.total_discount <= 0 %}hidden{% endif %}>
-              <span>You saved</span>
+              <span>وفّرت</span>
               <strong data-ds-cart-savings-amount>{{ cart.total_discount | money }}</strong>
             </div>
             <div class="ds-cart__row ds-cart__row--muted">
-              <span>Shipping</span>
-              <span>Calculated at checkout</span>
+              <span>الشحن</span>
+              <span>يُحتسب عند الدفع</span>
             </div>
             <form action="{{ routes.cart_url }}" method="post" novalidate>
               <button type="submit" name="checkout" class="ds-btn ds-btn-primary ds-btn-xl ds-cart__checkout">{{ 'general.cart.checkout' | t }} · <span data-ds-cart-subtotal>{{ cart.total_price | money }}</span></button>
             </form>
-            <div class="ds-cart__payments" aria-label="Accepted payment methods">
+            <div class="ds-cart__payments" aria-label="طرق الدفع المقبولة">
               {%- for type in shop.enabled_payment_types limit: 7 -%}
                 {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
               {%- endfor -%}
             </div>
             <ul class="ds-cart__assurance">
-              <li>🔒 Secure 256-bit encrypted checkout</li>
-              <li>↩️ 30-day money-back guarantee</li>
-              <li>🚚 Tracked shipping with live updates</li>
+              <li>🔒 دفع آمن مشفّر 256-بت</li>
+              <li>↩️ ضمان استرداد المال خلال 30 يومًا</li>
+              <li>🚚 شحن مُتتبَّع مع تحديثات مباشرة</li>
             </ul>
           </div>
         </aside>
@@ -1865,7 +1865,7 @@ function sectionCollection(_c: BuildConfig): string {
           <div class="ds-collection__price">{{ p.price | money }}</div>
         </a>
       {%- else -%}
-        <p>No products in this collection yet.</p>
+        <p>لا توجد منتجات في هذه المجموعة بعد.</p>
       {%- endfor -%}
     </div>
   </div>
@@ -1908,13 +1908,13 @@ function sectionPage(_c: BuildConfig): string {
 function sectionSearch(_c: BuildConfig): string {
   return `<section class="ds-search">
   <div class="ds-container">
-    <h1>Search</h1>
+    <h1>بحث</h1>
     <form action="{{ routes.search_url }}" method="get">
-      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Search products…">
-      <button type="submit" class="ds-btn ds-btn-primary">Search</button>
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="ابحث عن المنتجات…">
+      <button type="submit" class="ds-btn ds-btn-primary">بحث</button>
     </form>
     {%- if search.performed -%}
-      <p class="ds-search__count">{{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %} for "{{ search.terms | escape }}"</p>
+      <p class="ds-search__count">{{ search.results_count }} نتيجة لـ "{{ search.terms | escape }}"</p>
       <div class="ds-search__grid">
         {%- for item in search.results -%}
           <a href="{{ item.url }}" class="ds-search__card">
@@ -2064,8 +2064,8 @@ function assetThemeJs(_c: BuildConfig): string {
       if (fill) fill.style.width = pct + '%';
       if (copy) {
         copy.innerHTML = cart.total_price >= threshold
-          ? '🎉 You unlocked <strong>free shipping</strong>!'
-          : "You're <strong>" + fmtMoney(threshold - cart.total_price) + '</strong> away from free shipping 🚚';
+          ? '🎉 حصلت على <strong>الشحن المجاني</strong>!'
+          : 'يتبقّى <strong>' + fmtMoney(threshold - cart.total_price) + '</strong> على الشحن المجاني 🚚';
       }
     });
   }
@@ -2330,7 +2330,7 @@ function assetThemeJs(_c: BuildConfig): string {
       if (!variantId) return;
       cta.disabled = true;
       var prev = cta.textContent;
-      cta.textContent = 'Adding…';
+      cta.textContent = 'جارٍ الإضافة…';
       dsCart.add(variantId, units).then(function () {
         cta.disabled = false;
         cta.textContent = prev;
@@ -2418,7 +2418,7 @@ function assetThemeJs(_c: BuildConfig): string {
     btn.addEventListener('click', function () {
       btn.disabled = true;
       var prev = btn.textContent;
-      btn.textContent = 'Adding…';
+      btn.textContent = 'جارٍ الإضافة…';
       dsCart.add(btn.getAttribute('data-variant-id'), 1).then(function () {
         if (cartRoot) { window.location.reload(); return; }
         btn.disabled = false;

@@ -122,7 +122,7 @@ export const productExtraSections: SectionMap = {
     </div>
     <div class="ds-fbt__foot">
       <div>
-        <div class="ds-fbt__label">Bundle total</div>
+        <div class="ds-fbt__label">إجمالي الباقة</div>
         <div class="ds-fbt__total">{{ section.settings.bundle_total }}</div>
       </div>
       <a href="#product" class="ds-btn ds-btn-primary ds-btn-lg">{{ section.settings.cta }}</a>
@@ -287,9 +287,9 @@ export const productExtraSections: SectionMap = {
       {%- if section.settings.video != blank -%}
         {{ section.settings.video | video_tag: controls: true, image_size: '1500x' }}
       {%- elsif section.settings.video_url != blank -%}
-        <iframe src="{{ section.settings.video_url }}" title="Product video" loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+        <iframe src="{{ section.settings.video_url }}" title="فيديو المنتج" loading="lazy" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
       {%- else -%}
-        <div class="ds-pvideo__placeholder">Add a video in the section settings.</div>
+        <div class="ds-pvideo__placeholder">أضِف فيديو من إعدادات القسم.</div>
       {%- endif -%}
     </div>
   </div>
@@ -343,7 +343,7 @@ export const productExtraSections: SectionMap = {
       <p class="ds-sizechart__note">{{ section.settings.note }}</p>
       <div class="ds-sizechart__table">
         <div class="ds-sizechart__row ds-sizechart__row--head">
-          <div>Size</div>
+          <div>المقاس</div>
           {%- for h in section.settings.headers -%}<div>{{ h }}</div>{%- endfor -%}
         </div>
         {%- for block in section.blocks -%}
@@ -592,9 +592,9 @@ export const productExtraSections: SectionMap = {
       <input type="hidden" name="form_type" value="contact">
       <input type="hidden" name="utf8" value="✓">
       <input type="hidden" name="contact[tags]" value="product-question">
-      <input type="email" name="contact[email]" placeholder="Your email" required>
-      <textarea name="contact[body]" placeholder="Ask anything about this product…" required></textarea>
-      <button type="submit" class="ds-btn ds-btn-primary">Send question</button>
+      <input type="email" name="contact[email]" placeholder="بريدك الإلكتروني" required>
+      <textarea name="contact[body]" placeholder="اسأل أي شيء عن هذا المنتج…" required></textarea>
+      <button type="submit" class="ds-btn ds-btn-primary">أرسل السؤال</button>
     </form>
   </div>
 </section>
