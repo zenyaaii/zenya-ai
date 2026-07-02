@@ -1219,8 +1219,6 @@ function sectionProductMain(c: BuildConfig): string {
 
 function sectionBundle(c: BuildConfig): string {
   const single = moneyCents(c.salePrice)
-  const twoFree = moneyCents(c.salePrice * 2)
-  const threeFree = moneyCents(c.salePrice * 3)
   return `{%- liquid
   assign bp = product
   if bp == blank or bp.id == blank
@@ -1308,8 +1306,8 @@ function sectionBundle(c: BuildConfig): string {
   "max_blocks": 4,
   "presets": [{ "name": "Bundle", "blocks": [
       { "type": "tier", "settings": { "qty": "1×", "units": 1, "name": "Single", "price": "${j(`$${(single / 100).toFixed(2)}`)}", "subtext": "Try it out" } },
-      { "type": "tier", "settings": { "qty": "2× + 1 free", "units": 2, "name": "Best value", "price": "${j(`$${(twoFree / 100).toFixed(2)}`)}", "subtext": "${j(`Save vs $${(threeFree / 100).toFixed(2)}`)}", "featured": true, "ribbon": "Most popular" } },
-      { "type": "tier", "settings": { "qty": "3× + 2 free", "units": 3, "name": "Bulk", "price": "${j(`$${((single * 3) / 100).toFixed(2)}`)}", "subtext": "Stock the shelf" } }
+      { "type": "tier", "settings": { "qty": "2×", "units": 2, "name": "Double up", "price": "${j(`$${((single * 2 * 0.85) / 100).toFixed(2)}`)}", "subtext": "Save 15%", "featured": true, "ribbon": "Most popular" } },
+      { "type": "tier", "settings": { "qty": "3×", "units": 3, "name": "Best value", "price": "${j(`$${((single * 3 * 0.75) / 100).toFixed(2)}`)}", "subtext": "Save 25%" } }
     ] }]
 }
 {% endschema %}

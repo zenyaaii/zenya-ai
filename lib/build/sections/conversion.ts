@@ -228,7 +228,10 @@ export const conversionSections: SectionMap = {
       <p>{{ section.settings.body }}</p>
       <ul>
         {%- for block in section.blocks -%}
-          <li {{ block.shopify_attributes }}>✓ {{ block.settings.point }}</li>
+          <li {{ block.shopify_attributes }}>
+            <span class="ds-guarantee__check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+            <span>{{ block.settings.point }}</span>
+          </li>
         {%- endfor -%}
       </ul>
     </div>
@@ -242,7 +245,9 @@ export const conversionSections: SectionMap = {
   .ds-guarantee__days { font-size: 2.6rem; font-weight: 900; line-height: 1; color: var(--color-fg); margin-top: .25rem; letter-spacing: -0.02em; }
   .ds-guarantee__copy h2 { font-size: clamp(1.4rem, 3vw, 2rem); margin: 0 0 .8rem; }
   .ds-guarantee__copy p { color: var(--color-muted); margin: 0 0 1rem; line-height: 1.55; }
-  .ds-guarantee__copy ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; font-size: .92rem; }
+  .ds-guarantee__copy ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; font-size: .92rem; }
+  .ds-guarantee__copy li { display: flex; align-items: center; gap: .6rem; }
+  .ds-guarantee__check { flex: none; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--color-primary) 14%, transparent); color: var(--color-primary); }
   @media (max-width: 720px) {
     .ds-guarantee__inner { grid-template-columns: 1fr; text-align: center; justify-items: center; }
     .ds-guarantee__copy ul { text-align: left; }
@@ -310,7 +315,18 @@ export const conversionSections: SectionMap = {
     <div class="ds-trust__grid">
       {%- for block in section.blocks -%}
         <div class="ds-trust__item" {{ block.shopify_attributes }}>
-          <div class="ds-trust__icon">{{ block.settings.icon }}</div>
+          <div class="ds-trust__icon">
+            {%- assign ic = block.settings.icon | downcase | strip -%}
+            {%- case ic -%}
+              {%- when 'truck', 'shipping', 'delivery', '🚚' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              {%- when 'shield', 'returns', 'guarantee', 'refund', '🛡️', '🛡' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              {%- when 'lock', 'secure', 'checkout', 'safe', '🔒' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              {%- when 'chat', 'support', 'message', 'help', '💬' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {%- when 'star', 'rated', 'quality' -%}<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- when 'heart', 'love' -%}<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              {%- else -%}<span class="ds-trust__emoji">{{ block.settings.icon }}</span>
+            {%- endcase -%}
+          </div>
           <div class="ds-trust__h">{{ block.settings.heading }}</div>
           <div class="ds-trust__b">{{ block.settings.body }}</div>
         </div>
@@ -322,7 +338,9 @@ export const conversionSections: SectionMap = {
   .ds-trust { padding: 3rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
   .ds-trust__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
   .ds-trust__item { text-align: center; }
-  .ds-trust__icon { font-size: 1.8rem; margin-bottom: .5rem; line-height: 1; }
+  .ds-trust__icon { display: inline-grid; place-items: center; width: 52px; height: 52px; margin: 0 auto .7rem; border-radius: 16px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-primary); box-shadow: 0 6px 16px -8px rgba(0,0,0,.18); }
+  .ds-trust__icon svg { width: 24px; height: 24px; }
+  .ds-trust__emoji { font-size: 1.6rem; line-height: 1; }
   .ds-trust__h { font-weight: 800; color: var(--color-fg); font-size: .98rem; }
   .ds-trust__b { color: var(--color-muted); font-size: .85rem; line-height: 1.4; margin-top: .25rem; }
   @media (max-width: 720px) { .ds-trust__grid { grid-template-columns: 1fr 1fr; } }

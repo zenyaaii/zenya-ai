@@ -260,10 +260,13 @@ function seedProductMain(c: BuildConfig): SeededSection {
   })
   // Bundle tiers inside the buy box — prices render as units × the live
   // product price, the radio sets the add-to-cart quantity.
+  // Honest labels: the buy box charges the live product price × units (no
+  // invented discount), so the tiers are pure quantity choices — no
+  // "+N free" the customer never receives.
   const tiers = [
     { label: '1× — Single', units: 1 },
-    { label: '2× + 1 free', units: 2, badge: 'Most popular', featured: true },
-    { label: '3× + 2 free', units: 3, badge: 'Best deal' },
+    { label: '2× — Double up', units: 2, badge: 'Most popular', featured: true },
+    { label: '3× — Stock up', units: 3, badge: 'Best deal' },
   ]
   tiers.forEach((t, i) => {
     const id = `tier-${i + 1}`
@@ -305,24 +308,25 @@ function seedProductMain(c: BuildConfig): SeededSection {
 
 function seedBundle(c: BuildConfig): SeededSection {
   const p = c.salePrice
-  const single = p
-  const twoFree = p * 2
-  const threeFree = p * 3
-  const twoSaving = p * 3 - twoFree
+  // Honest, self-consistent tiers: the quantity headline == the units the
+  // CTA actually adds to the cart, and the discount is a real per-unit
+  // percentage (matching the volume-discount section) rather than a
+  // "+N free" promise that only appears if a Buy-X-get-Y discount exists.
+  // The merchant still creates the matching automatic discount in admin so
+  // the shown price applies at checkout — flagged in the claims checklist.
+  const two = p * 2 * 0.85 // 15% off
+  const three = p * 3 * 0.75 // 25% off
   return {
     settings: {
       eyebrow: 'Save more, get more',
       title: `Pick your ${c.productName} bundle`,
       cta: 'Continue to cart',
+      note: 'Discounts apply automatically at checkout · 30-day money-back guarantee',
     },
     blocks: {
-      // `units` is what the CTA really adds to the cart (paid units). The
-      // "+1 free" fulfilment needs a Buy-X-get-Y automatic discount in
-      // admin — flagged in the claims checklist until the merchant sets
-      // it up or edits the copy.
-      'tier-1': { type: 'tier', settings: { qty: '1×', units: 1, name: 'Single',     price: money(single),    subtext: 'Try it out' } },
-      'tier-2': { type: 'tier', settings: { qty: '2× + 1 free', units: 2, name: 'Best value', price: money(twoFree), subtext: `Save ${money(twoSaving)} vs single`, featured: true, ribbon: 'Most popular' } },
-      'tier-3': { type: 'tier', settings: { qty: '3× + 2 free', units: 3, name: 'Bulk',       price: money(threeFree), subtext: 'Stock the shelf' } },
+      'tier-1': { type: 'tier', settings: { qty: '1×', units: 1, name: 'Single',    price: money(p),     subtext: 'Try it out' } },
+      'tier-2': { type: 'tier', settings: { qty: '2×', units: 2, name: 'Double up',  price: money(two),   subtext: 'Save 15%', featured: true, ribbon: 'Most popular' } },
+      'tier-3': { type: 'tier', settings: { qty: '3×', units: 3, name: 'Best value', price: money(three), subtext: 'Save 25%' } },
     },
     block_order: ['tier-1', 'tier-2', 'tier-3'],
   }
@@ -342,14 +346,32 @@ function seedFeatures(c: BuildConfig): SeededSection {
 }
 
 function seedComparison(c: BuildConfig): SeededSection {
-  const rows = [
-    { feature: `Premium-grade ${c.productName.toLowerCase()}`, us: true, them: false },
-    { feature: 'Free 3-5 day shipping',                     us: true, them: false },
-    { feature: '30-day money-back guarantee',                us: true, them: false },
-    { feature: '12-month warranty',                          us: true, them: false },
-    { feature: 'Real-human support',                         us: true, them: false },
-    { feature: 'Honest, no-fee pricing',                     us: true, them: true  },
-  ]
+  // Build a comparison that is specific to THIS product, not boilerplate.
+  // Product-attribute rows come from the real scraped highlights/specs so
+  // the table reflects what the merchant is actually selling; the service
+  // rows below are the store's own differentiators vs. a bare listing.
+  const rows: Array<{ feature: string; us: boolean; them: boolean }> = []
+  const seen = new Set<string>()
+  const addRow = (label: string, cap: number) => {
+    const f = (label || '').replace(/\s+/g, ' ').trim()
+    if (!f) return
+    const key = f.toLowerCase()
+    if (seen.has(key) || rows.length >= cap) return
+    seen.add(key)
+    rows.push({ feature: f.length > 44 ? f.slice(0, 42).trimEnd() + '…' : f, us: true, them: false })
+  }
+  // Up to 3 real product attributes first.
+  for (const h of c.highlights || []) addRow(h, 3)
+  if (c.specs) for (const [k, v] of Object.entries(c.specs)) addRow(v && v.length < 24 ? `${k}: ${v}` : k, 3)
+  // Store service differentiators (merchant-owned, verifiable policies).
+  addRow('Free 3-5 day shipping', 7)
+  addRow('30-day money-back guarantee', 7)
+  addRow('12-month warranty', 7)
+  addRow('Real-human support', 7)
+  // Fallback so the table is never sparse for spec-less products.
+  addRow(`Premium-grade ${c.productName.toLowerCase()}`, 7)
+  // Both offer honest pricing — an honest "tie" row reads more credibly.
+  rows.push({ feature: 'Honest, no-fee pricing', us: true, them: true })
   const { blocks, order } = indexBlocks('row', rows.map((r) => ({ type: 'row', settings: r })))
   return {
     settings: {
@@ -658,10 +680,10 @@ function seedTrustBadges(_c: BuildConfig): SeededSection {
   return {
     settings: {},
     blocks: {
-      'b-1': { type: 'badge', settings: { icon: '🚚', heading: 'Free shipping',     body: 'Tracked delivery in 3-5 days.' } },
-      'b-2': { type: 'badge', settings: { icon: '🛡️', heading: '30-day returns',     body: 'We even pay the label.' } },
-      'b-3': { type: 'badge', settings: { icon: '🔒', heading: 'Secure checkout',    body: 'Stripe-grade encryption.' } },
-      'b-4': { type: 'badge', settings: { icon: '💬', heading: 'Real-human support', body: 'Reply in under 6 hours.' } },
+      'b-1': { type: 'badge', settings: { icon: 'truck',  heading: 'Free shipping',     body: 'Tracked delivery in 3-5 days.' } },
+      'b-2': { type: 'badge', settings: { icon: 'shield', heading: '30-day returns',     body: 'We even pay the label.' } },
+      'b-3': { type: 'badge', settings: { icon: 'lock',   heading: 'Secure checkout',    body: 'Stripe-grade encryption.' } },
+      'b-4': { type: 'badge', settings: { icon: 'chat',   heading: 'Real-human support', body: 'Reply in under 6 hours.' } },
     },
     block_order: ['b-1', 'b-2', 'b-3', 'b-4'],
   }
@@ -1396,10 +1418,10 @@ export function collectClaims(c: BuildConfig): ThemeClaim[] {
   claims.push({
     id: 'bundle-discount',
     severity: 'high',
-    location: 'Buy-box tiers + bundle picker ("2× + 1 free") + volume-discount tiers',
-    claim: 'Free-unit and percentage-off promises',
-    why: 'The bundle button adds the paid units to the cart, but Shopify only honors "+1 free" or "15% off" if you create the discount.',
-    fix: 'Shopify admin → Discounts → create automatic "Buy X get Y" / volume discounts that match the tiers, or edit the tier copy.',
+    location: 'Bundle picker ("Save 15% / 25%") + volume-discount tiers',
+    claim: 'Percentage-off bundle pricing',
+    why: 'The bundle button adds the right quantity to the cart, but Shopify only charges the discounted "Save 15% / 25%" price if you create the matching automatic discount. The buy-box quantity tiers charge full price × units (no discount) and are already honest.',
+    fix: 'Shopify admin → Discounts → create automatic volume discounts that match the bundle tiers (e.g. 15% off 2, 25% off 3), or edit the tier copy.',
   })
   claims.push({
     id: 'social-counts',
