@@ -51,6 +51,8 @@ const PRODUCT = [
   { href: '/themes',     label: 'تصفّح القوالب' },
   { href: '/pricing',    label: 'الأسعار'       },
   { href: '/theme/new',  label: 'ابدأ الإنشاء'  },
+  { href: '/about',      label: 'من نحن'        },
+  { href: '/faq',        label: 'الأسئلة الشائعة' },
   { href: '/contact',    label: 'تواصل معنا'    },
 ]
 
