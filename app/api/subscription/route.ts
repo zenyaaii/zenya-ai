@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest) {
       plan: data?.plan || 'free',
       trial_remaining: Math.max(
         0,
-        (data?.trial_themes_limit ?? 1) - (data?.trial_themes_used ?? 0)
+        (data?.trial_themes_limit ?? 2) - (data?.trial_themes_used ?? 0)
       ),
     })
   } catch {

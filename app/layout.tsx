@@ -143,7 +143,7 @@ const structuredData = [
         name: 'مجاني',
         price: '0',
         priceCurrency: 'USD',
-        description: '3 عمليات توليد بالذكاء الاصطناعي لتجربة زينيا. جميع القوالب الـ8 متاحة.',
+        description: 'توليدان مجانيان بالذكاء الاصطناعي لتجربة زينيا. جميع القوالب الـ8 متاحة.',
       },
     ],
     // No aggregateRating: Zenya is early and we never publish invented ratings.

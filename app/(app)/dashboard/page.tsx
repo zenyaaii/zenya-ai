@@ -96,7 +96,7 @@ export default function DashboardHomePage() {
   const plan: Plan = profile?.plan || 'free'
   const isPro = !!profile?.is_pro || plan === 'admin'
   const hasHosting = !!profile?.has_hosting || plan === 'admin'
-  const trialLimit = profile?.trial_themes_limit ?? 3
+  const trialLimit = profile?.trial_themes_limit ?? 2
   const trialUsed = profile?.trial_themes_used ?? 0
   const trialRemaining = Math.max(0, trialLimit - trialUsed)
 
@@ -567,7 +567,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
       </div>
       <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
         {trialRemaining === 0
-          ? 'استخدمت عملياتك الثلاث المجانية. اشترك في Starter لتوليد غير محدود.'
+          ? 'استخدمت توليدَيك المجانيين. اشترك في Starter لتوليد غير محدود.'
           : 'اشترك شهريًا، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع.'}
       </p>
       <Link href="/checkout?plan=starter" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">

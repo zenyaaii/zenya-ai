@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 export const metadata: Metadata = {
   title: 'Pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',
   description:
-    'Free to try (3 generations). Starter $14.99/month for unlimited AI generations + Shopify export + project ZIP. Pro $24.99/month adds Zenya hosting, custom domain, SSL, and analytics. Cancel anytime. VAT-inclusive prices for EU customers.',
+    'Free to try (2 generations). Starter $14.99/month for unlimited AI generations + Shopify export + project ZIP. Pro $24.99/month adds Zenya hosting, custom domain, SSL, and analytics. Cancel anytime. VAT-inclusive prices for EU customers.',
   alternates: { canonical: '/pricing' },
   openGraph: {
     title: 'Zenya pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',

@@ -157,7 +157,7 @@ export default function Hero() {
           <motion.div {...fade(0.3)} className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
             {[
               'جرّب مجانًا · بلا بطاقة',
-              'نطاق مجاني 5 أشهر مع Pro',
+              'نطاق مجاني شهرين مع Pro',
               'استضافة أوروبية · GDPR',
             ].map((label) => (
               <span key={label} className="inline-flex items-center gap-1.5 text-[13px] text-muted">
