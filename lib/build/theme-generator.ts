@@ -120,12 +120,15 @@ function fileLayout(_c: BuildConfig): string {
   // into {{ content_for_layout }}. settings.* CSS variables let
   // every section style with one source of truth.
   return `<!doctype html>
-<html class="no-js" lang="{{ request.locale.iso_code }}">
+<html class="no-js" lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="{{ settings.color_primary }}">
     <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 64 }}">
     {%- endif -%}
@@ -155,7 +158,7 @@ function fileLayout(_c: BuildConfig): string {
     </style>
   </head>
   <body class="ds-body">
-    <a class="ds-skip" href="#MainContent">Skip to content</a>
+    <a class="ds-skip" href="#MainContent">تخطَّ إلى المحتوى</a>
     {% sections 'header-group' %}
     <main id="MainContent" role="main">
       {{ content_for_layout }}
@@ -167,10 +170,10 @@ function fileLayout(_c: BuildConfig): string {
     client-side from /cart.js. {%- endcomment -%}
     <div class="ds-drawer" data-ds-drawer aria-hidden="true">
       <div class="ds-drawer__overlay" data-ds-drawer-close></div>
-      <aside class="ds-drawer__panel" role="dialog" aria-modal="true" aria-label="Shopping cart">
+      <aside class="ds-drawer__panel" role="dialog" aria-modal="true" aria-label="سلة التسوق">
         <header class="ds-drawer__head">
-          <div class="ds-drawer__title">Your cart <span class="ds-drawer__count" data-ds-drawer-count>{{ cart.item_count }}</span></div>
-          <button type="button" class="ds-drawer__close" data-ds-drawer-close aria-label="Close cart">×</button>
+          <div class="ds-drawer__title">سلتك <span class="ds-drawer__count" data-ds-drawer-count>{{ cart.item_count }}</span></div>
+          <button type="button" class="ds-drawer__close" data-ds-drawer-close aria-label="إغلاق السلة">×</button>
         </header>
         {%- assign ds_threshold = 5000 -%}
         {%- assign ds_pct = cart.total_price | times: 100 | divided_by: ds_threshold -%}
@@ -179,9 +182,9 @@ function fileLayout(_c: BuildConfig): string {
           <div class="ds-drawer__ship-copy" data-ds-shipbar-copy aria-live="polite">
             {%- assign ds_remaining = ds_threshold | minus: cart.total_price -%}
             {%- if ds_remaining > 0 -%}
-              You're <strong>{{ ds_remaining | money }}</strong> away from free shipping 🚚
+              يتبقّى <strong>{{ ds_remaining | money }}</strong> على الشحن المجاني 🚚
             {%- else -%}
-              🎉 You unlocked <strong>free shipping</strong>!
+              🎉 حصلت على <strong>الشحن المجاني</strong>!
             {%- endif -%}
           </div>
           <div class="ds-drawer__ship-track"><div class="ds-drawer__ship-fill" data-ds-shipbar-fill style="width: {{ ds_pct }}%"></div></div>
@@ -189,19 +192,19 @@ function fileLayout(_c: BuildConfig): string {
         <ul class="ds-drawer__lines" data-ds-drawer-lines></ul>
         <div class="ds-drawer__empty" data-ds-drawer-empty hidden>
           <div class="ds-drawer__empty-icon">🛒</div>
-          <p>Your cart is empty.</p>
-          <a href="/#product" class="ds-btn ds-btn-primary ds-btn-sm" data-ds-drawer-close>Shop the product</a>
+          <p>سلتك فارغة.</p>
+          <a href="/#product" class="ds-btn ds-btn-primary ds-btn-sm" data-ds-drawer-close>تسوّق المنتج</a>
         </div>
         <footer class="ds-drawer__foot">
           <div class="ds-drawer__row">
-            <span>Subtotal</span>
+            <span>الإجمالي الفرعي</span>
             <strong data-ds-cart-subtotal>{{ cart.total_price | money }}</strong>
           </div>
           <form action="{{ routes.cart_url }}" method="post">
-            <button type="submit" name="checkout" class="ds-btn ds-btn-primary ds-btn-lg ds-drawer__checkout">Checkout</button>
+            <button type="submit" name="checkout" class="ds-btn ds-btn-primary ds-btn-lg ds-drawer__checkout">إتمام الشراء</button>
           </form>
-          <a href="{{ routes.cart_url }}" class="ds-drawer__viewcart">View full cart</a>
-          <div class="ds-drawer__payments" aria-label="Accepted payment methods">
+          <a href="{{ routes.cart_url }}" class="ds-drawer__viewcart">عرض السلة كاملة</a>
+          <div class="ds-drawer__payments" aria-label="طرق الدفع المقبولة">
             {%- for type in shop.enabled_payment_types limit: 6 -%}
               {{ type | payment_type_svg_tag: class: 'ds-pay-icon' }}
             {%- endfor -%}
@@ -218,7 +221,7 @@ function fileLayout(_c: BuildConfig): string {
       .ds-drawer.is-open .ds-drawer__panel { transform: translateX(0); }
       .ds-drawer__head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--color-border); }
       .ds-drawer__title { font-weight: 800; font-size: 1.05rem; color: var(--color-fg); }
-      .ds-drawer__count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--color-primary); color: var(--color-primary-fg); font-size: .72rem; font-weight: 800; margin-left: .35rem; }
+      .ds-drawer__count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--color-primary); color: var(--color-primary-fg); font-size: .72rem; font-weight: 800; margin-inline-start: .35rem; }
       .ds-drawer__close { background: transparent; border: 0; font-size: 22px; line-height: 1; color: var(--color-muted); cursor: pointer; padding: .25rem .5rem; }
       .ds-drawer__ship { padding: .8rem 1.25rem; border-bottom: 1px solid var(--color-border); background: var(--color-surface); }
       .ds-drawer__ship-copy { font-size: .8rem; color: var(--color-fg); margin-bottom: .45rem; }
@@ -1321,7 +1324,16 @@ function sectionFeatures(_c: BuildConfig): string {
     <div class="ds-features__grid">
       {%- for block in section.blocks -%}
         <div class="ds-features__card" {{ block.shopify_attributes }}>
-          <div class="ds-features__icon">{{ block.settings.icon }}</div>
+          <div class="ds-features__icon">
+            {%- assign fic = block.settings.icon | downcase | strip -%}
+            {%- case fic -%}
+              {%- when 'truck', 'shipping', 'delivery', '🚚' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              {%- when 'shield', 'returns', 'guarantee', 'refund', '🛡️', '↩️' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              {%- when 'lock', 'secure', 'checkout', 'safe', '🔒' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              {%- when 'chat', 'support', 'message', 'help', '💬' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {%- else -%}<span class="ds-features__emoji">{{ block.settings.icon }}</span>
+            {%- endcase -%}
+          </div>
           <div class="ds-features__name">{{ block.settings.heading }}</div>
           <div class="ds-features__body">{{ block.settings.body }}</div>
         </div>
@@ -1334,7 +1346,9 @@ function sectionFeatures(_c: BuildConfig): string {
   .ds-features__title { text-align: center; font-size: clamp(1.4rem, 3vw, 2rem); margin: 0 0 2rem; letter-spacing: -0.01em; }
   .ds-features__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
   .ds-features__card { padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
-  .ds-features__icon { font-size: 1.6rem; line-height: 1; margin-bottom: .8rem; }
+  .ds-features__icon { display: inline-grid; place-items: center; width: 48px; height: 48px; margin-bottom: .8rem; border-radius: 14px; background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-primary); }
+  .ds-features__icon svg { width: 22px; height: 22px; }
+  .ds-features__emoji { font-size: 1.5rem; line-height: 1; }
   .ds-features__name { font-weight: 700; margin-bottom: .35rem; color: var(--color-fg); }
   .ds-features__body { color: var(--color-muted); font-size: .92rem; line-height: 1.45; }
   @media (max-width: 880px) {
@@ -1933,13 +1947,14 @@ function assetBaseCss(_c: BuildConfig): string {
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body.ds-body {
-  font-family: var(--font-body-family, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  font-family: "Tajawal", var(--font-body-family, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
   color: var(--color-fg);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.7;
 }
+h1, h2, h3, h4 { font-family: "Tajawal", var(--font-heading-family, inherit); }
 h1, h2, h3, h4 {
   font-family: var(--font-heading-family, inherit);
   font-weight: 800;
