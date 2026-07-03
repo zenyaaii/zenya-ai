@@ -27,7 +27,11 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-const MODEL = 'gpt-4o'
+// Try the strongest reader first, then fall back to a model we KNOW this key
+// can use (the generation route runs on gpt-4o-mini, which is also multimodal).
+// This survives keys that lack gpt-4o access — the previous single-model call
+// threw on such keys and the whole feature failed.
+const MODELS = ['gpt-4o', 'gpt-4o-mini'] as const
 const TIMEOUT_MS = 50_000
 // Wide menus are split client-side into left/right halves, so a 2–3 page menu
 // can arrive as up to 6 image parts.
@@ -188,23 +192,38 @@ export async function POST(req: NextRequest) {
       ),
     ]
 
-    const resp = await withTimeout(
-      openai.chat.completions.create({
-        model: MODEL,
-        temperature: 0.1,
-        max_tokens: 8000,
-        response_format: { type: 'json_object' as const },
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userContent },
-        ],
-      }),
-      TIMEOUT_MS,
-      'analyze_menu'
-    )
+    // Try each model in turn; move on if a model is unavailable on this key.
+    let resp: OpenAI.Chat.Completions.ChatCompletion | null = null
+    let usedModel = ''
+    let lastErr: any = null
+    for (const model of MODELS) {
+      try {
+        resp = await withTimeout(
+          openai.chat.completions.create({
+            model,
+            temperature: 0.1,
+            max_tokens: 8000,
+            response_format: { type: 'json_object' as const },
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              { role: 'user', content: userContent },
+            ],
+          }),
+          TIMEOUT_MS,
+          'analyze_menu'
+        )
+        usedModel = model
+        break
+      } catch (err: any) {
+        lastErr = err
+        console.error(`[/api/analyze-menu] model ${model} failed:`, err?.status || '', err?.message || err)
+      }
+    }
+
+    if (!resp) throw lastErr || new Error('all_models_failed')
 
     await logAiUsage(
-      { operation: 'analyze-menu', userId: user.id, model: MODEL, meta: { images: images.length } },
+      { operation: 'analyze-menu', userId: user.id, model: usedModel, meta: { images: images.length } },
       resp.usage
     )
 
@@ -232,7 +251,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       categories,
-      _meta: { source: 'openai', model: MODEL, categories: categories.length, items: itemCount },
+      _meta: { source: 'openai', model: usedModel, categories: categories.length, items: itemCount },
     })
   } catch (e: any) {
     return NextResponse.json(
