@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { X, Check, ArrowLeft } from 'lucide-react'
+import { X, Check } from 'lucide-react'
 import { Reveal } from '@/components/marketing/Reveal'
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -16,7 +16,7 @@ export default function BeforeAfterSection() {
     <section className="relative border-b border-token py-28">
       <div className="mx-auto max-w-5xl px-6">
         <Reveal>
-          <div className="mb-14 text-center">
+          <div className="mb-16 text-center">
             <p className="kicker mb-3">قبل وبعد</p>
             <h2 className="heading-ar text-[clamp(26px,4.5vw,42px)] text-foreground">
               الفرق الذي{' '}
@@ -29,79 +29,165 @@ export default function BeforeAfterSection() {
           </div>
         </Reveal>
 
-        <div className="grid items-center gap-6 md:grid-cols-[1fr_auto_1fr]">
-          {/* Before */}
+        {/* ── Diagonal laptop stage (desktop). RTL: "قبل" starts top-right,
+            the redesign "بعد" lands bottom-left — the eye travels the way
+            Arabic reads. ── */}
+        <div className="relative mx-auto hidden h-[520px] max-w-[840px] md:block">
+          {/* BEFORE — smaller, faded, receding, up in the start corner */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.5, ease: EASE }}
+            initial={{ opacity: 0, y: -24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6, ease: EASE }}
+            className="absolute start-0 top-0 z-10 w-[54%]"
           >
-            <MockWindow tone="bad" />
-            <ul className="mt-5 space-y-2.5">
-              {BEFORE.map((t) => (
-                <li key={t} className="flex items-start gap-2.5 text-[13.5px] text-muted">
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(220,38,38,0.10)]">
-                    <X className="h-3 w-3 text-[#dc2626]" strokeWidth={2.5} />
-                  </span>
-                  {t}
-                </li>
-              ))}
-            </ul>
+            <Label tone="bad" />
+            <Laptop tone="bad" />
           </motion.div>
 
-          {/* Arrow */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+          {/* Connector arrow, sweeping from BEFORE down to AFTER */}
+          <motion.svg
+            aria-hidden
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: 0.2, ease: EASE }}
-            className="mx-auto hidden h-11 w-11 items-center justify-center rounded-full bg-primary text-white shadow-soft-md md:flex"
+            transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
+            className="pointer-events-none absolute left-1/2 top-[38%] z-30 h-28 w-28 -translate-x-1/2"
+            viewBox="0 0 100 100"
+            fill="none"
           >
-            <ArrowLeft className="h-5 w-5" strokeWidth={2.5} />
-          </motion.div>
+            <path
+              d="M78 20 C 55 40, 45 55, 26 74"
+              stroke="#5e6ad2"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray="1 7"
+            />
+            <path d="M26 74 l 12 -3 M26 74 l 3 -12" stroke="#5e6ad2" strokeWidth="3" strokeLinecap="round" />
+          </motion.svg>
 
-          {/* After */}
+          {/* AFTER — larger, crisp, elevated, in the end corner */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6, delay: 0.18, ease: EASE }}
+            className="absolute bottom-0 end-0 z-20 w-[64%]"
           >
-            <MockWindow tone="good" />
-            <ul className="mt-5 space-y-2.5">
-              {AFTER.map((t) => (
-                <li key={t} className="flex items-start gap-2.5 text-[13.5px] font-medium text-foreground">
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(39,166,68,0.12)]">
-                    <Check className="h-3 w-3 text-[#27a644]" strokeWidth={2.5} />
-                  </span>
-                  {t}
-                </li>
-              ))}
-            </ul>
+            <Label tone="good" />
+            <Laptop tone="good" />
           </motion.div>
+        </div>
+
+        {/* ── Mobile: stacked laptops ── */}
+        <div className="space-y-8 md:hidden">
+          <div>
+            <Label tone="bad" />
+            <Laptop tone="bad" />
+          </div>
+          <div>
+            <Label tone="good" />
+            <Laptop tone="good" />
+          </div>
+        </div>
+
+        {/* ── The contrast, spelled out ── */}
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 md:mt-20">
+          <ul className="space-y-2.5">
+            {BEFORE.map((t) => (
+              <li key={t} className="flex items-start gap-2.5 text-[13.5px] text-muted">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(220,38,38,0.10)]">
+                  <X className="h-3 w-3 text-[#dc2626]" strokeWidth={2.5} />
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
+          <ul className="space-y-2.5">
+            {AFTER.map((t) => (
+              <li key={t} className="flex items-start gap-2.5 text-[13.5px] font-medium text-foreground">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(39,166,68,0.12)]">
+                  <Check className="h-3 w-3 text-[#27a644]" strokeWidth={2.5} />
+                </span>
+                {t}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
   )
 }
 
-/** Pure-CSS mock storefront — "bad" is deliberately cramped/clashing, "good"
- *  mirrors the clean Zenya aesthetic. No external images. */
-function MockWindow({ tone }: { tone: 'bad' | 'good' }) {
+/** Small pill label that sits above each laptop (our stand-in for the
+ *  reference's vertical BEFORE / AFTER type). */
+function Label({ tone }: { tone: 'bad' | 'good' }) {
+  const bad = tone === 'bad'
+  return (
+    <span
+      className="mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide"
+      style={
+        bad
+          ? { background: 'rgba(28,28,28,0.06)', color: 'rgba(28,28,28,0.45)' }
+          : { background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' }
+      }
+    >
+      {bad ? 'قبل' : 'بعد · مع زينيا'}
+    </span>
+  )
+}
+
+/** A CSS laptop: bezel + screen + silver base. Wraps the pure-CSS mock
+ *  storefront so there are no external images. "bad" is deliberately
+ *  cramped/clashing and desaturated; "good" mirrors the calm Zenya aesthetic. */
+function Laptop({ tone }: { tone: 'bad' | 'good' }) {
   const bad = tone === 'bad'
   return (
     <div
-      className="relative overflow-hidden rounded-2xl bg-white"
       style={{
-        border: '1px solid #e5e2d9',
-        boxShadow: bad
-          ? '0 8px 24px -12px rgba(28,28,28,0.18)'
-          : '0 24px 60px -24px rgba(94,106,210,0.35), 0 0 0 1px rgba(94,106,210,0.14)',
+        filter: bad ? 'grayscale(0.3) saturate(0.85)' : 'none',
+        opacity: bad ? 0.92 : 1,
       }}
     >
-      {/* chrome */}
-      <div className="flex items-center gap-1.5 px-3 py-2.5" style={{ borderBottom: '1px solid #f0ede6', background: '#faf8f3' }}>
+      {/* Lid / bezel */}
+      <div
+        className="rounded-[14px] p-2.5"
+        style={{
+          background: 'linear-gradient(160deg,#2a2b31,#17181c)',
+          boxShadow: bad
+            ? '0 18px 40px -22px rgba(28,28,28,0.4)'
+            : '0 40px 80px -34px rgba(94,106,210,0.55), 0 0 0 1px rgba(94,106,210,0.10)',
+        }}
+      >
+        <div className="overflow-hidden rounded-md bg-white" style={{ border: '1px solid rgba(0,0,0,0.35)' }}>
+          <Screen tone={tone} />
+        </div>
+      </div>
+      {/* Base / hinge */}
+      <div
+        className="relative mx-auto h-3 rounded-b-[10px]"
+        style={{
+          width: '112%',
+          marginInlineStart: '-6%',
+          background: 'linear-gradient(180deg,#d7d8dd,#a9abb3)',
+          boxShadow: '0 10px 18px -8px rgba(28,28,28,0.35)',
+        }}
+      >
+        <div
+          className="absolute left-1/2 top-0 h-1.5 w-16 -translate-x-1/2 rounded-b-lg"
+          style={{ background: 'linear-gradient(180deg,#9a9ca4,#c3c5cb)' }}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** The screen content — a tiny browser bar + a mock storefront. */
+function Screen({ tone }: { tone: 'bad' | 'good' }) {
+  const bad = tone === 'bad'
+  return (
+    <>
+      <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderBottom: '1px solid #f0ede6', background: '#faf8f3' }}>
         <span className="h-2 w-2 rounded-full" style={{ background: '#fca5a5' }} />
         <span className="h-2 w-2 rounded-full" style={{ background: '#fcd34d' }} />
         <span className="h-2 w-2 rounded-full" style={{ background: '#86efac' }} />
@@ -119,7 +205,7 @@ function MockWindow({ tone }: { tone: 'bad' | 'good' }) {
 
       {bad ? (
         // Amateur: clashing colors, cramped, misaligned
-        <div className="p-4" style={{ background: '#fffbe6', minHeight: 190 }}>
+        <div className="p-4" style={{ background: '#fffbe6', minHeight: 200 }}>
           <div className="mb-2 inline-block rounded px-2 py-1 text-[13px] font-black" style={{ background: '#ff00aa', color: '#00e0ff', transform: 'rotate(-2deg)' }}>
             متجــري !!!
           </div>
@@ -127,8 +213,8 @@ function MockWindow({ tone }: { tone: 'bad' | 'good' }) {
           <div className="mb-1.5 h-2 w-full rounded-sm" style={{ background: '#9ca3af' }} />
           <div className="mb-3 h-2 w-2/3 rounded-sm" style={{ background: '#9ca3af' }} />
           <div className="flex gap-1.5">
-            <div className="h-10 w-14 rounded" style={{ background: 'repeating-linear-gradient(45deg,#d1d5db,#d1d5db 4px,#e5e7eb 4px,#e5e7eb 8px)' }} />
-            <div className="h-10 flex-1 rounded" style={{ background: '#e5e7eb' }} />
+            <div className="h-11 w-16 rounded" style={{ background: 'repeating-linear-gradient(45deg,#d1d5db,#d1d5db 4px,#e5e7eb 4px,#e5e7eb 8px)' }} />
+            <div className="h-11 flex-1 rounded" style={{ background: '#e5e7eb' }} />
           </div>
           <div className="mt-3 inline-block rounded px-3 py-1 text-[11px] font-bold text-white" style={{ background: '#16a34a', border: '2px dashed #ef4444' }}>
             اشترِ الآن!!!
@@ -136,7 +222,7 @@ function MockWindow({ tone }: { tone: 'bad' | 'good' }) {
         </div>
       ) : (
         // Zenya: clean, calm, on-brand
-        <div className="p-5" style={{ background: '#f7f4ed', minHeight: 190 }}>
+        <div className="p-5" style={{ background: '#f7f4ed', minHeight: 200 }}>
           <div className="mb-4 flex items-center justify-between">
             <div className="h-3 w-16 rounded-full" style={{ background: 'linear-gradient(90deg,#5e6ad2,#8b93e0)' }} />
             <div className="flex gap-1.5">
@@ -147,14 +233,14 @@ function MockWindow({ tone }: { tone: 'bad' | 'good' }) {
           <div className="mb-1.5 h-2 w-full rounded-full bg-[rgba(28,28,28,0.10)]" />
           <div className="mb-4 h-2 w-5/6 rounded-full bg-[rgba(28,28,28,0.10)]" />
           <div className="flex gap-2">
-            <div className="h-14 flex-1 rounded-lg bg-white" style={{ boxShadow: '0 2px 8px rgba(28,28,28,0.06)' }} />
-            <div className="h-14 flex-1 rounded-lg bg-white" style={{ boxShadow: '0 2px 8px rgba(28,28,28,0.06)' }} />
+            <div className="h-16 flex-1 rounded-lg bg-white" style={{ boxShadow: '0 2px 8px rgba(28,28,28,0.06)' }} />
+            <div className="h-16 flex-1 rounded-lg bg-white" style={{ boxShadow: '0 2px 8px rgba(28,28,28,0.06)' }} />
           </div>
           <div className="mt-4 inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white" style={{ background: '#5e6ad2', boxShadow: '0 6px 16px -6px rgba(94,106,210,0.6)' }}>
             ابدأ الآن
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

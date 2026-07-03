@@ -1,8 +1,7 @@
 'use client'
 
-import { useRef } from 'react'
 import Link from 'next/link'
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Check } from 'lucide-react'
 import CursorGlow from '@/components/marketing/CursorGlow'
 import HeroWordmark from '@/components/marketing/HeroWordmark'
@@ -17,21 +16,8 @@ const fade = (delay = 0) => ({
 })
 
 export default function Hero() {
-  const sectionRef = useRef<HTMLElement>(null)
-  const reduce = useReducedMotion()
-
-  // Parallax: the product mockup drifts up and recedes slightly as the
-  // hero scrolls away, giving the page real depth on the first scroll.
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end start'],
-  })
-  const mockY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -90])
-  const mockScale = useTransform(scrollYProgress, [0, 1], [1, reduce ? 1 : 0.94])
-  const mockOpacity = useTransform(scrollYProgress, [0, 0.85], [1, reduce ? 1 : 0.35])
-
   return (
-    <section ref={sectionRef} className="relative overflow-hidden pt-24 pb-36">
+    <section className="relative overflow-hidden pt-24 pb-28">
       {/* The grid + aurora backdrop now lives at the page level (PageBackground)
           so the whole home page shares one continuous background. The hero keeps
           only its own flourishes on top: the cursor glow + the ghost wordmark. */}
@@ -41,9 +27,14 @@ export default function Hero() {
           under the cursor. Sits above the grid (-z-5) but below the copy. */}
       <HeroWordmark />
 
-      <div className="relative mx-auto max-w-6xl px-6">
-        {/* ── Copy column ── */}
-        <div className="mx-auto max-w-3xl text-center">
+      <div className="relative mx-auto max-w-7xl px-6">
+        {/* Stage: the copy sits centred (z-20) over the scatter of floating
+            preview cards + platform bubbles that flank it in the wide gutters
+            (xl+). Below xl the scatter collapses to a stacked grid under the
+            copy — see HeroConstellation. */}
+        <div className="relative xl:min-h-[720px]">
+          {/* ── Copy column ── */}
+          <div className="relative z-20 mx-auto max-w-2xl text-center xl:pt-6 xl:pb-40">
 
           {/* Badge */}
           <motion.div {...fade(0)} className="mb-8 inline-flex items-center gap-2">
@@ -129,17 +120,13 @@ export default function Hero() {
               </span>
             ))}
           </motion.div>
-        </div>
+          </div>
 
-        {/* ── In-hero constellation: the زينيا hub + connected floating
-            cards (real template previews, AI-copy card, analytics, platform
-            bubbles). Outer wrapper owns the scroll parallax. */}
-        <motion.div
-          style={{ y: mockY, scale: mockScale, opacity: mockOpacity }}
-          className="relative will-change-transform"
-        >
+          {/* ── The quso-style scatter: floating preview cards + platform
+              bubbles flanking the copy (xl+), or a stacked grid below it on
+              smaller screens. */}
           <HeroConstellation />
-        </motion.div>
+        </div>
       </div>
     </section>
   )

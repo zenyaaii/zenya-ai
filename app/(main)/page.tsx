@@ -10,7 +10,6 @@ import HomeFaq from "@/components/HomeFaq"
 import Testimonials from "@/components/Testimonials"
 import CTA from "@/components/CTA"
 import TemplateStackSection from "@/components/marketing/TemplateStackSection"
-import WorksWithSection from "@/components/marketing/WorksWithSection"
 import IncludedSection from "@/components/marketing/IncludedSection"
 import ScrollProgress from "@/components/marketing/ScrollProgress"
 import PageBackground from "@/components/marketing/PageBackground"
@@ -32,7 +31,6 @@ export default function Page() {
             click any card to open a preview box with Build / Live view CTAs. */}
         <TemplateStackSection />
         <ShowcaseSection />
-        <WorksWithSection />
         <StatsSection />
         <FeaturesSection />
         <IncludedSection />
