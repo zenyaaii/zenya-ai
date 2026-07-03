@@ -11,6 +11,7 @@ import Testimonials from "@/components/Testimonials"
 import CTA from "@/components/CTA"
 import TemplateStackSection from "@/components/marketing/TemplateStackSection"
 import WorksWithSection from "@/components/marketing/WorksWithSection"
+import IncludedSection from "@/components/marketing/IncludedSection"
 import ScrollProgress from "@/components/marketing/ScrollProgress"
 import PageBackground from "@/components/marketing/PageBackground"
 
@@ -34,6 +35,7 @@ export default function Page() {
         <WorksWithSection />
         <StatsSection />
         <FeaturesSection />
+        <IncludedSection />
         <Testimonials />
         {/* FAQ teaser — shared data with /faq, links through for SEO depth. */}
         <HomeFaq />
