@@ -40,14 +40,65 @@ const MAX_SHOTS = 3
 // the request-body limit at these settings (~0.5–0.8 MB each).
 const MAX_DIM = 1800
 const JPEG_QUALITY = 0.82
-// Hard cap on how many images we actually send (a 2-page tri-fold → 4 halves).
-const MAX_PARTS = 4
+// Cap on image parts sent. Each part is its own isolated request now, so this
+// is only a cost guard — a 3-page tri-fold → 6 halves still fits.
+const MAX_PARTS = 6
 // If a photo is wider than this ratio, treat it as a multi-column spread and
 // split it into left/right halves.
 const WIDE_RATIO = 1.2
 
 function newId() {
   return Math.random().toString(36).slice(2, 9)
+}
+
+/** Loose key for de-duping names across overlapping halves. Mirrors the server. */
+function normKey(s: string): string {
+  return (s || '')
+    .toLowerCase()
+    .replace(/[ـ\s]+/g, ' ')
+    .replace(/[.،؛:_-]+/g, '')
+    .trim()
+}
+
+/**
+ * Merge categories returned by several per-image calls into one clean menu.
+ * Categories fold by loose name; items de-dupe within a category, keeping the
+ * richer copy (fills a missing price/description from a duplicate). This is
+ * what lets overlapping halves reinforce each other instead of duplicating.
+ */
+function mergeExtracted(lists: ExtractedCategory[]): ExtractedCategory[] {
+  const cats = new Map<
+    string,
+    { name: string; description?: string; items: Map<string, ExtractedItem> }
+  >()
+  for (const cat of lists) {
+    const ck = normKey(cat?.name || '')
+    if (!ck) continue
+    let entry = cats.get(ck)
+    if (!entry) {
+      entry = { name: cat.name, description: cat.description, items: new Map() }
+      cats.set(ck, entry)
+    } else if (!entry.description && cat.description) {
+      entry.description = cat.description
+    }
+    for (const item of Array.isArray(cat.items) ? cat.items : []) {
+      const ik = normKey(item?.name || '')
+      if (!ik) continue
+      const existing = entry.items.get(ik)
+      if (!existing) {
+        entry.items.set(ik, { ...item })
+      } else {
+        if (!existing.price && item.price) existing.price = item.price
+        if (!existing.description && item.description) existing.description = item.description
+        if (!existing.badge && item.badge) existing.badge = item.badge
+      }
+    }
+  }
+  return Array.from(cats.values()).map((e) => ({
+    name: e.name,
+    description: e.description,
+    items: Array.from(e.items.values()),
+  }))
 }
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -134,6 +185,7 @@ export default function MenuImageAnalyzer({
   const [shots, setShots] = useState<Shot[]>([])
   const [preparing, setPreparing] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ categories: number; items: number } | null>(null)
 
@@ -170,38 +222,61 @@ export default function MenuImageAnalyzer({
     setResult(null)
   }
 
+  /** Read one image-part in its own request. Small + isolated → can't time out. */
+  async function readPart(image: string): Promise<{
+    categories: ExtractedCategory[]
+    unauth?: boolean
+    message?: string
+  }> {
+    try {
+      const r = await fetch('/api/analyze-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: [image], cuisine: cuisine || undefined }),
+      })
+      if (r.status === 401) return { categories: [], unauth: true }
+      const j = await r.json().catch(() => ({}))
+      return {
+        categories: Array.isArray(j?.categories) ? j.categories : [],
+        message: typeof j?.message === 'string' ? j.message : undefined,
+      }
+    } catch {
+      return { categories: [], message: undefined }
+    } finally {
+      setProgress((p) => (p ? { ...p, done: p.done + 1 } : p))
+    }
+  }
+
   async function analyze() {
     if (shots.length === 0 || analyzing) return
     setError(null)
     setResult(null)
     setAnalyzing(true)
+    const parts = shots.flatMap((s) => s.parts).slice(0, MAX_PARTS)
+    setProgress({ done: 0, total: parts.length })
     try {
-      const images = shots.flatMap((s) => s.parts).slice(0, MAX_PARTS)
-      const r = await fetch('/api/analyze-menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images, cuisine: cuisine || undefined }),
-      })
-      const j = await r.json().catch(() => ({}))
-      if (r.status === 401) {
+      // Every part goes out as its own parallel request. One slow/failed part
+      // doesn't sink the others — we merge whatever comes back.
+      const settled = await Promise.all(parts.map((p) => readPart(p)))
+
+      if (settled.some((s) => s.unauth)) {
         setError('انتهت جلستك. أعد تسجيل الدخول ثم حاول مجددًا.')
         return
       }
-      const categories: ExtractedCategory[] = Array.isArray(j?.categories) ? j.categories : []
-      if (!r.ok && categories.length === 0) {
-        setError(j?.message || 'تعذّرت قراءة القائمة. يمكنك إدخال الأصناف يدويًا.')
+
+      const merged = mergeExtracted(settled.flatMap((s) => s.categories))
+      if (merged.length === 0) {
+        const msg = settled.find((s) => s.message)?.message
+        setError(msg || 'لم نجد أصنافًا في الصور. جرّب صورة أوضح أو أدخل الأصناف يدويًا.')
         return
       }
-      if (categories.length === 0) {
-        setError(j?.message || 'لم نجد أصنافًا في الصورة. جرّب صورة أوضح أو أدخل الأصناف يدويًا.')
-        return
-      }
-      const applied = onExtract(categories)
+      const applied = onExtract(merged)
       setResult(applied)
-    } catch (e: any) {
+    } catch {
       setError('حدث خطأ في الشبكة أثناء قراءة القائمة. يمكنك إدخال الأصناف يدويًا.')
     } finally {
       setAnalyzing(false)
+      setProgress(null)
     }
   }
 
@@ -285,7 +360,11 @@ export default function MenuImageAnalyzer({
             className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
           >
             {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            {analyzing ? 'جارٍ قراءة قائمتك…' : 'اقرأ القائمة تلقائيًا'}
+            {analyzing
+              ? progress && progress.total > 1
+                ? `جارٍ قراءة الصفحة ${Math.min(progress.done + 1, progress.total)} من ${progress.total}…`
+                : 'جارٍ قراءة قائمتك…'
+              : 'اقرأ القائمة تلقائيًا'}
           </button>
         )}
       </div>
