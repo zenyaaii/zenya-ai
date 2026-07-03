@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import type { RestaurantInput, RestaurantTypeId } from '@/utils/restaurant/input'
 import ImageUploadField from '@/components/ImageUploadField'
+import MenuImageAnalyzer, { type ExtractedCategory } from '@/components/restaurant/MenuImageAnalyzer'
 import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
@@ -344,6 +345,52 @@ export default function RestaurantWizardPage() {
       ),
     }))
   }
+  /**
+   * Take categories extracted from an uploaded menu photo and drop them into
+   * the form. If the current menu is still the untouched default (empty), we
+   * replace it; otherwise we append so we never wipe hand-typed work. No dish
+   * images are set — extraction is text only, images stay owner-provided.
+   * Returns the applied counts so the analyzer can show a summary.
+   */
+  function applyExtractedMenu(extracted: ExtractedCategory[]): { categories: number; items: number } {
+    const mapped = extracted
+      .map((c) => ({
+        id: newId(),
+        name: (c.name || '').trim().slice(0, 40),
+        description: (c.description || '').trim().slice(0, 160),
+        items: (Array.isArray(c.items) ? c.items : [])
+          .map((it) => ({
+            id: newId(),
+            name: (it.name || '').trim().slice(0, 80),
+            description: (it.description || '').trim().slice(0, 220),
+            price: (it.price || '').trim().slice(0, 30),
+            badge: (it.badge || '').trim().slice(0, 20),
+            image_url: '',
+          }))
+          .filter((it) => it.name.length >= 1),
+      }))
+      .filter((c) => c.name.length >= 2 && c.items.length > 0)
+
+    if (mapped.length === 0) return { categories: 0, items: 0 }
+
+    setForm((prev) => {
+      const isDefaultEmpty = prev.categories.every(
+        (c) =>
+          c.name.trim() === '' &&
+          c.items.every((i) => i.name.trim() === '' && i.price.trim() === '')
+      )
+      return {
+        ...prev,
+        categories: isDefaultEmpty ? mapped : [...prev.categories, ...mapped],
+      }
+    })
+
+    return {
+      categories: mapped.length,
+      items: mapped.reduce((n, c) => n + c.items.length, 0),
+    }
+  }
+
   function setGalleryAt(idx: number, url: string) {
     setForm((prev) => {
       const next = [...prev.gallery_image_urls]
@@ -765,6 +812,7 @@ export default function RestaurantWizardPage() {
 
         {/* Section: Menu */}
         <Section title="القائمة" subtitle="حتى صنف واحد يكفي. أضف صورة لأي صنف — تظهر بجانب الاسم في موقعك المنشور.">
+          <MenuImageAnalyzer cuisine={form.cuisine} onExtract={applyExtractedMenu} />
           <div className="space-y-5">
             {form.categories.map((cat) => (
               <div key={cat.id} className="rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
