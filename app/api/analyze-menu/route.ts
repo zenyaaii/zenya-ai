@@ -29,7 +29,9 @@ export const maxDuration = 60
 
 const MODEL = 'gpt-4o'
 const TIMEOUT_MS = 50_000
-const MAX_IMAGES = 4
+// Wide menus are split client-side into left/right halves, so a 2–3 page menu
+// can arrive as up to 6 image parts.
+const MAX_IMAGES = 6
 // Generous per-image cap on the (base64) data URL. The client downscales to
 // ~1500px/JPEG before sending, so a real photo lands well under this; the cap
 // only guards against someone posting a raw multi-MB original.
@@ -37,8 +39,8 @@ const MAX_IMAGE_CHARS = 3_500_000
 
 // Schema-aligned clamps — mirror utils/restaurant/input.ts so whatever we
 // extract can flow straight through the wizard without tripping validation.
-const MAX_CATEGORIES = 8
-const MAX_ITEMS_PER_CAT = 20
+const MAX_CATEGORIES = 12
+const MAX_ITEMS_PER_CAT = 40
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -96,14 +98,21 @@ const SYSTEM_PROMPT = `You are a precise menu-digitising engine for a restaurant
 You are given one or more photographs of a real restaurant's printed menu.
 Your only job is to transcribe what is printed into clean structured data.
 
+READING DENSE / ARABIC MENUS (important — most menus look like this):
+- Menus are often laid out in MULTIPLE COLUMNS. Read every column, top to bottom, and don't stop after the first one. A single photo can hold 4+ separate sections.
+- Arabic and RTL menus read RIGHT-TO-LEFT: the dish NAME is on the right, the PRICE is on the left, usually joined by a row of dots (………). Pair each name with the number on its own line. Watch the dotted "leader" lines so you attach the right price to the right dish.
+- You may receive left/right HALVES of the same wide page as separate images (they overlap in the middle). Treat them as one page and merge; do not duplicate the overlapping items.
+- Numbers are prices even when written in Arabic-Indic digits (٢٥ = 25). Transcribe prices using Western digits (0-9).
+- Be thorough: a real menu often has 40–120 items. Extract them ALL, not just a sample.
+
 ABSOLUTE RULES:
 - Transcribe ONLY what you can actually read on the menu. Never invent, guess, or embellish a dish, a price, or a description. If a menu shows no descriptions, leave every description empty.
 - Preserve the menu's OWN language and the exact dish names as printed. Do NOT translate. Arabic menus stay in their Arabic; foreign dish names (e.g. "Risotto", "Sushi") keep their original spelling.
-- Keep prices exactly as printed, including the currency symbol or word if shown (e.g. "٤٥ ج.م", "$18", "12€"). If an item has no visible price, use an empty string.
-- Group items under the section headings the menu itself uses (Appetizers / المقبلات / Drinks / etc.). If the menu has no headings, put everything under one sensible category.
+- Keep prices exactly as printed. If the menu shows a currency, include it (e.g. "45 ج.م", "$18", "12€"); otherwise just the number. If an item has no visible price, use an empty string — never guess one.
+- Group items under the section headings the menu itself uses (Appetizers / المقبلات / المشروبات الساخنة / الحلويات اليمنية / etc.). If a block of items has no heading, put them under one sensible category.
 - If several photos are different pages of the same menu, merge them into one coherent set of categories. Do not duplicate items that appear on multiple photos.
 - Only set "badge" if the menu itself marks an item (e.g. "Chef's special", "جديد", "نباتي", "الأكثر طلبًا"). Otherwise leave it empty.
-- If an image is not a menu, or is unreadable, return an empty categories array.
+- If an image is genuinely not a menu, or is fully unreadable, return an empty categories array — but do not give up on a menu just because it is dense.
 
 Return STRICT JSON only, no prose, no markdown, matching exactly:
 {
@@ -183,7 +192,7 @@ export async function POST(req: NextRequest) {
       openai.chat.completions.create({
         model: MODEL,
         temperature: 0.1,
-        max_tokens: 4000,
+        max_tokens: 8000,
         response_format: { type: 'json_object' as const },
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },

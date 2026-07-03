@@ -59,11 +59,11 @@ export const restaurantInputSchema = z.object({
               })
             )
             .min(1)
-            .max(20)
+            .max(40)
         })
       )
       .min(1)
-      .max(8)
+      .max(12)
   }),
   story: z.object({
     brief: z.string().min(10).max(800),

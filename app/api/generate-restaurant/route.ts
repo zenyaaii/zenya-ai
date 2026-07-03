@@ -201,7 +201,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
 
 Requirements:
 - signature_dishes: exactly 4 items chosen from the strongest menu items
-- menu_descriptions: cover every menu item; copy existing description when already strong
+- menu_descriptions: write descriptions ONLY for items that currently have none. Cap at the 24 most prominent such items — do NOT list every item on a large menu (items you skip keep a sensible default). Never repeat items that already have a description.
 - testimonials: exactly 4
 - press: 4–6 items
 - faq: 5–7 items
@@ -467,7 +467,7 @@ export async function POST(req: NextRequest) {
       openai.chat.completions.create({
         model: 'gpt-4o-mini',
         temperature: 0.65,
-        max_tokens: 2400,
+        max_tokens: 4096,
         response_format: { type: 'json_object' as const },
         messages: [
           {

@@ -6,11 +6,16 @@ import { Camera, X, Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
 /**
  * MenuImageAnalyzer — "upload your menu, we'll type it for you".
  *
- * The owner snaps 1–4 photos of their printed menu (multiple pages OK). We
- * downscale each on the client (keeps the request small + OCR sharp), post
- * them to /api/analyze-menu, and hand the extracted categories back to the
- * wizard via onExtract. The wizard then pre-fills its normal category/item
- * fields, which the owner reviews and edits before generating.
+ * The owner snaps 1–3 photos of their printed menu (front/back/pages OK). We
+ * prepare each on the client and post them to /api/analyze-menu, which reads
+ * them with GPT-4o vision and returns the extracted categories. The wizard
+ * pre-fills its normal category/item fields, which the owner reviews + edits.
+ *
+ * Real restaurant menus are often WIDE tri-folds with 3–4 dense columns. If we
+ * send the whole page, the text ends up too small for the model to read (the
+ * vision API also shrinks wide images internally). So for wide photos we split
+ * each page into overlapping left/right halves — that roughly doubles the
+ * effective text size the model sees and is what makes dense menus readable.
  *
  * No dish images are ever attached — extraction is text only. Photos stay
  * opt-in and owner-provided elsewhere in the form.
@@ -28,43 +33,30 @@ export type ExtractedCategory = {
   items: ExtractedItem[]
 }
 
-type Shot = { id: string; dataUrl: string; name: string }
+type Shot = { id: string; preview: string; parts: string[]; name: string }
 
-const MAX_SHOTS = 4
-const MAX_DIM = 1500
-const JPEG_QUALITY = 0.72
+const MAX_SHOTS = 3
+// Per-part long-edge cap + JPEG quality. Halves of a wide menu stay well under
+// the request-body limit at these settings (~0.5–0.8 MB each).
+const MAX_DIM = 1800
+const JPEG_QUALITY = 0.82
+// Hard cap on how many images we actually send (a 2-page tri-fold → 4 halves).
+const MAX_PARTS = 4
+// If a photo is wider than this ratio, treat it as a multi-column spread and
+// split it into left/right halves.
+const WIDE_RATIO = 1.2
 
 function newId() {
   return Math.random().toString(36).slice(2, 9)
 }
 
-/**
- * Load a File, draw it onto a canvas scaled to fit MAX_DIM on its long edge,
- * and export a JPEG data URL. Downscaling here means the POST body stays a
- * few hundred KB per page instead of multi-MB phone originals.
- */
-function downscaleToDataUrl(file: File): Promise<string> {
+function loadImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
     img.onload = () => {
       URL.revokeObjectURL(url)
-      const { width, height } = img
-      const scale = Math.min(1, MAX_DIM / Math.max(width, height))
-      const w = Math.max(1, Math.round(width * scale))
-      const h = Math.max(1, Math.round(height * scale))
-      const canvas = document.createElement('canvas')
-      canvas.width = w
-      canvas.height = h
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        reject(new Error('canvas_unsupported'))
-        return
-      }
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, w, h)
-      ctx.drawImage(img, 0, 0, w, h)
-      resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY))
+      resolve(img)
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)
@@ -72,6 +64,62 @@ function downscaleToDataUrl(file: File): Promise<string> {
     }
     img.src = url
   })
+}
+
+/**
+ * Draw a source-rectangle of an image onto a canvas, scaled so its long edge
+ * is at most `maxDim`, and return a JPEG data URL.
+ */
+function cropToDataUrl(
+  img: HTMLImageElement,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  maxDim: number,
+  quality: number
+): string {
+  const scale = Math.min(1, maxDim / Math.max(sw, sh))
+  const w = Math.max(1, Math.round(sw * scale))
+  const h = Math.max(1, Math.round(sh * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('canvas_unsupported')
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, w, h)
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h)
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
+/**
+ * Turn a picked file into: a small preview + the hi-res part(s) we'll send.
+ * Wide photos are split into two overlapping halves; tall/square photos stay
+ * whole.
+ */
+async function fileToShot(file: File): Promise<Shot> {
+  const img = await loadImage(file)
+  const w = img.naturalWidth || img.width
+  const h = img.naturalHeight || img.height
+  const aspect = w / h
+
+  const preview = cropToDataUrl(img, 0, 0, w, h, 360, 0.7)
+
+  let parts: string[]
+  if (aspect > WIDE_RATIO) {
+    // 56% wide each → ~12% overlap in the middle so nothing on the fold is lost.
+    const halfW = Math.round(w * 0.56)
+    const rightX = w - halfW
+    parts = [
+      cropToDataUrl(img, 0, 0, halfW, h, MAX_DIM, JPEG_QUALITY),
+      cropToDataUrl(img, rightX, 0, halfW, h, MAX_DIM, JPEG_QUALITY),
+    ]
+  } else {
+    parts = [cropToDataUrl(img, 0, 0, w, h, MAX_DIM, JPEG_QUALITY)]
+  }
+
+  return { id: newId(), preview, parts, name: file.name || 'menu' }
 }
 
 export default function MenuImageAnalyzer({
@@ -101,8 +149,7 @@ export default function MenuImageAnalyzer({
       for (const f of picked) {
         if (!f.type.startsWith('image/')) continue
         try {
-          const dataUrl = await downscaleToDataUrl(f)
-          next.push({ id: newId(), dataUrl, name: f.name || 'menu' })
+          next.push(await fileToShot(f))
         } catch {
           /* skip an unreadable file, keep the rest */
         }
@@ -129,10 +176,11 @@ export default function MenuImageAnalyzer({
     setResult(null)
     setAnalyzing(true)
     try {
+      const images = shots.flatMap((s) => s.parts).slice(0, MAX_PARTS)
       const r = await fetch('/api/analyze-menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: shots.map((s) => s.dataUrl), cuisine: cuisine || undefined }),
+        body: JSON.stringify({ images, cuisine: cuisine || undefined }),
       })
       const j = await r.json().catch(() => ({}))
       if (r.status === 401) {
@@ -176,8 +224,12 @@ export default function MenuImageAnalyzer({
             عندك قائمة كبيرة؟ ارفع صورتها ودعنا نكتبها لك.
           </p>
           <p className="mt-0.5 text-[12px] leading-[1.55] text-muted">
-            صوّر قائمة مطعمك (حتى {MAX_SHOTS} صور للصفحات المتعدّدة) وسنستخرج الفئات والأصناف والأسعار
-            تلقائيًا. تراجعها وتعدّلها قبل التوليد. لا نضيف أي صور — نقرأ النص فقط.
+            صوّر قائمة مطعمك (حتى {MAX_SHOTS} صور — وجه وظهر أو صفحات) وسنستخرج الفئات والأصناف
+            والأسعار تلقائيًا. تراجعها وتعدّلها قبل التوليد. لا نضيف أي صور — نقرأ النص فقط.
+          </p>
+          <p className="mt-1 text-[11px] leading-[1.5] text-muted/80">
+            نصيحة: كلما كانت الصورة أوضح وأقرب، كانت القراءة أدقّ. القوائم العريضة نقسمها تلقائيًا
+            لنقرأ كل عمود بدقّة.
           </p>
         </div>
       </div>
@@ -195,9 +247,9 @@ export default function MenuImageAnalyzer({
       {shots.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2.5">
           {shots.map((s) => (
-            <div key={s.id} className="group relative h-24 w-20 overflow-hidden rounded-lg border border-token bg-white">
+            <div key={s.id} className="group relative h-24 w-32 overflow-hidden rounded-lg border border-token bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={s.dataUrl} alt={s.name} className="h-full w-full object-cover" />
+              <img src={s.preview} alt={s.name} className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeShot(s.id)}
