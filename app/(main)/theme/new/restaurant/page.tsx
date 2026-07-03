@@ -86,6 +86,13 @@ function newId() {
   return Math.random().toString(36).slice(2, 9)
 }
 
+// Progressive reveal for long menus: a category shows this many item rows,
+// then a "show more" button reveals the rest in batches. Purely visual — all
+// items are always in the form and always submit. Keeps a 100-item menu from
+// rendering as one endless wall.
+const ITEMS_COLLAPSED = 5
+const ITEMS_BATCH = 10
+
 function emptyItem(): MenuItem {
   return { id: newId(), name: '', description: '', price: '', badge: '', image_url: '' }
 }
@@ -252,6 +259,9 @@ export default function RestaurantWizardPage() {
   const [authReady, setAuthReady] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
+  // How many item rows are revealed per category (id → count). Missing = the
+  // collapsed default. Progressive-reveal is display-only; the form keeps all.
+  const [visibleByCat, setVisibleByCat] = useState<Record<string, number>>({})
   const [restoredDraft, setRestoredDraft] = useState(false)
   const [loading, setLoading] = useState(false)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
@@ -320,12 +330,19 @@ export default function RestaurantWizardPage() {
     }))
   }
   function addItem(catId: string) {
-    setForm((prev) => ({
-      ...prev,
-      categories: prev.categories.map((c) =>
-        c.id === catId ? { ...c, items: [...c.items, emptyItem()] } : c
-      ),
-    }))
+    setForm((prev) => {
+      const cat = prev.categories.find((c) => c.id === catId)
+      // Reveal through the new row so it isn't hidden behind "show more".
+      if (cat) {
+        setVisibleByCat((v) => ({ ...v, [catId]: cat.items.length + 1 }))
+      }
+      return {
+        ...prev,
+        categories: prev.categories.map((c) =>
+          c.id === catId ? { ...c, items: [...c.items, emptyItem()] } : c
+        ),
+      }
+    })
   }
   function removeItem(catId: string, itemId: string) {
     setForm((prev) => ({
@@ -841,7 +858,7 @@ export default function RestaurantWizardPage() {
                 />
 
                 <div className="space-y-4">
-                  {cat.items.map((item) => {
+                  {cat.items.slice(0, Math.min(visibleByCat[cat.id] ?? ITEMS_COLLAPSED, cat.items.length)).map((item) => {
                     const itemValid =
                       item.name.trim().length >= 2 && item.price.trim().length >= 1
                     return (
@@ -901,6 +918,45 @@ export default function RestaurantWizardPage() {
                     )
                   })}
                 </div>
+
+                {/* Progressive reveal — long menus stay short until asked to
+                    expand. All items are always saved regardless of what's shown. */}
+                {(() => {
+                  const shown = Math.min(visibleByCat[cat.id] ?? ITEMS_COLLAPSED, cat.items.length)
+                  const hidden = cat.items.length - shown
+                  if (hidden <= 0 && shown <= ITEMS_COLLAPSED) return null
+                  return (
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      {hidden > 0 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVisibleByCat((v) => ({
+                              ...v,
+                              [cat.id]: Math.min(shown + ITEMS_BATCH, cat.items.length),
+                            }))
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-full border border-token bg-elevated px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-surface"
+                        >
+                          عرض {Math.min(ITEMS_BATCH, hidden)} صنفًا آخر
+                          <span className="text-muted">({hidden} مخفية)</span>
+                        </button>
+                      )}
+                      {shown > ITEMS_COLLAPSED && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setVisibleByCat((v) => ({ ...v, [cat.id]: ITEMS_COLLAPSED }))
+                          }
+                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-muted transition hover:text-foreground"
+                        >
+                          طيّ
+                        </button>
+                      )}
+                    </div>
+                  )
+                })()}
+
                 <button
                   type="button"
                   onClick={() => addItem(cat.id)}

@@ -12,7 +12,6 @@ import CTA from "@/components/CTA"
 import TemplateStackSection from "@/components/marketing/TemplateStackSection"
 import ScrollProgress from "@/components/marketing/ScrollProgress"
 import PageBackground from "@/components/marketing/PageBackground"
-import Footer from "@/components/Footer"
 
 export default function Page() {
   return (
@@ -38,7 +37,6 @@ export default function Page() {
         <HomeFaq />
         <CTA />
       </main>
-      <Footer />
     </>
   )
 }
