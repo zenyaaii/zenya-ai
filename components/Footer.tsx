@@ -49,7 +49,9 @@ const DEMO_HREF: Record<string, string> = {
 
 const PRODUCT = [
   { href: '/themes',     label: 'تصفّح القوالب' },
+  { href: '/features',   label: 'الميزات'       },
   { href: '/pricing',    label: 'الأسعار'       },
+  { href: '/compare',    label: 'المقارنات'     },
   { href: '/theme/new',  label: 'ابدأ الإنشاء'  },
   { href: '/about',      label: 'من نحن'        },
   { href: '/faq',        label: 'الأسئلة الشائعة' },

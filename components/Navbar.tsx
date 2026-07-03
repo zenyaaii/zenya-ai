@@ -13,9 +13,11 @@ import ZenyaMark from '@/components/ZenyaMark'
 type NavItem = { href: string; label: string }
 
 const GUEST_NAV: NavItem[] = [
-  { href: '/',        label: 'الرئيسية' },
-  { href: '/pricing', label: 'الأسعار'  },
-  { href: '/themes',  label: 'القوالب'  },
+  { href: '/',         label: 'الرئيسية' },
+  { href: '/features', label: 'الميزات'  },
+  { href: '/themes',   label: 'القوالب'  },
+  { href: '/pricing',  label: 'الأسعار'  },
+  { href: '/compare',  label: 'المقارنات' },
 ]
 
 const USER_NAV: NavItem[] = [
