@@ -106,9 +106,11 @@ export const auroraTints: Record<string, AuroraTint> = {
 export const defaultTint: AuroraTint = {
   label: 'زينيا',
   accent: '#5e6ad2',
-  orb1: 'rgba(94,106,210,0.16)',
-  orb2: 'rgba(217,119,6,0.10)',
-  orb3: 'rgba(113,112,255,0.10)',
+  // Purple/indigo dialled way down — only a whisper of colour remains on the
+  // cream page (per request: keep just a very light touch, no purple wash).
+  orb1: 'rgba(94,106,210,0.06)',
+  orb2: 'rgba(217,119,6,0.07)',
+  orb3: 'rgba(113,112,255,0.03)',
 }
 
 /** Helper: safely fetch a tint by business_type key, falling back to default. */

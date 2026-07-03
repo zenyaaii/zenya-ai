@@ -18,7 +18,7 @@ export default function PageBackground() {
   return (
     <>
       {/* Aurora orb wash, pinned to the viewport so coverage is uniform. */}
-      <AuroraBackground fixed intensity={0.7} />
+      <AuroraBackground fixed intensity={0.55} />
       {/* The fine grid — the same "boxes" as the hero, across the whole page. */}
       <div
         aria-hidden

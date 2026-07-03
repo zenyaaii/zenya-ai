@@ -39,7 +39,7 @@ export default function HeroWordmark() {
       const y = ((e.clientY - rect.top) / rect.height) * 100
       root.style.setProperty('--mx', `${x}%`)
       root.style.setProperty('--my', `${y}%`)
-      root.style.setProperty('--reveal', '0.7')
+      root.style.setProperty('--reveal', '0.32')
     }
     const onLeave = () => {
       root.style.setProperty('--reveal', '0')
@@ -61,8 +61,9 @@ export default function HeroWordmark() {
       aria-hidden
       className="pointer-events-none absolute inset-0 -z-[5] flex items-center justify-center overflow-hidden [--mx:50%] [--my:38%] [--reveal:0]"
     >
-      {/* Base ghost — the mark is there but almost invisible. */}
-      <div className="select-none" style={{ width: WIDTH, opacity: 0.05 }}>
+      {/* Base ghost — the mark is there but almost invisible. Kept very faint
+          per request so it never competes with the hero copy/constellation. */}
+      <div className="select-none" style={{ width: WIDTH, opacity: 0.02 }}>
         <ZenyaMark className="!w-full text-[#5e6ad2]" />
       </div>
 
