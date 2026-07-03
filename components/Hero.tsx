@@ -3,23 +3,10 @@
 import { useRef } from 'react'
 import Link from 'next/link'
 import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
-import {
-  ArrowRight,
-  Sparkles,
-  Utensils,
-  Shirt,
-  LayoutDashboard,
-  Feather,
-  Store,
-  Wrench,
-  Leaf,
-  ShoppingBag,
-  Check,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowRight, Sparkles, Check } from 'lucide-react'
 import CursorGlow from '@/components/marketing/CursorGlow'
 import HeroWordmark from '@/components/marketing/HeroWordmark'
-import { auroraTints, BUSINESS_TYPE_ORDER } from '@/lib/aurora-tints'
+import HeroConstellation from '@/components/marketing/HeroConstellation'
 import { cn } from '@/lib/utils'
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -28,30 +15,6 @@ const fade = (delay = 0) => ({
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.6, delay, ease: EASE },
 })
-
-/** Icon per business type — shown in the in-hero template picker mockup. */
-const TYPE_ICON: Record<string, LucideIcon> = {
-  one_product: ShoppingBag,
-  restaurant:  Utensils,
-  atlas:       LayoutDashboard,
-  lookbook:    Shirt,
-  collective:  Store,
-  studio:      Feather,
-  services:    Wrench,
-  wellness:    Leaf,
-}
-
-/** Short tagline per type — keeps each mockup card legible at small size. */
-const TYPE_TAGLINE: Record<string, string> = {
-  one_product: 'مسار شوبيفاي',
-  restaurant:  'قائمة · حجوزات',
-  atlas:       'صفحة هبوط لتطبيق',
-  lookbook:    'أزياء · تحرير',
-  collective:  'منتجات متعددة',
-  studio:      'علامة · مؤسّس',
-  services:    'حِرف · صالونات',
-  wellness:    'سبا · ستوديو',
-}
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -168,116 +131,14 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* ── In-hero product mockup: the BusinessTypePicker preview ──
-            Outer wrapper owns the scroll parallax (motion values); the inner
-            wrapper owns the one-time entrance — kept separate so framer isn't
-            driving y/opacity from two sources at once. */}
+        {/* ── In-hero constellation: the زينيا hub + connected floating
+            cards (real template previews, AI-copy card, analytics, platform
+            bubbles). Outer wrapper owns the scroll parallax. */}
         <motion.div
           style={{ y: mockY, scale: mockScale, opacity: mockOpacity }}
-          className="relative mx-auto mt-20 max-w-4xl will-change-transform"
+          className="relative will-change-transform"
         >
-         <motion.div
-          initial={{ opacity: 0, y: 48 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.85, delay: 0.34, ease: EASE }}
-          className="relative"
-         >
-          {/* Rotating conic glow behind the window */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] conic-glow opacity-60 blur-3xl"
-          />
-          {/* Soft glow behind */}
-          <div
-            aria-hidden
-            className="absolute inset-x-8 top-4 bottom-0 rounded-2xl"
-            style={{
-              background: 'radial-gradient(ellipse at center, rgba(94,106,210,0.16) 0%, transparent 70%)',
-              filter: 'blur(28px)',
-            }}
-          />
-
-          {/* Browser window */}
-          <div
-            className="relative overflow-hidden rounded-2xl bg-white"
-            style={{
-              border: '1px solid #e5e2d9',
-              boxShadow: '0 40px 90px -30px rgba(28,28,28,0.28), 0 0 0 1px #e5e2d9',
-            }}
-          >
-            {/* Browser chrome */}
-            <div
-              className="flex items-center gap-2 px-4 py-3"
-              style={{ borderBottom: '1px solid #f0ede6', background: '#faf8f3' }}
-            >
-              <div className="flex gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#fca5a5' }} />
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#fcd34d' }} />
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: '#86efac' }} />
-              </div>
-              <div
-                dir="ltr"
-                className="mx-auto flex items-center gap-1.5 rounded-md px-3 py-1 text-[11px] text-muted font-latin"
-                style={{ background: '#ffffff', border: '1px solid #e5e2d9' }}
-              >
-                app.zenya.ai/theme/new
-              </div>
-            </div>
-
-            {/* Picker content (mirrors the real /theme/new BusinessTypePicker) */}
-            <div className="p-6 sm:p-8" style={{ background: '#f7f4ed', minHeight: 360 }}>
-              <div className="mb-5 flex items-end justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">الخطوة 1 من 2</p>
-                  <div className="mt-1 text-[15px] font-bold text-foreground">ما نوع نشاطك التجاري؟</div>
-                </div>
-                <span
-                  className="rounded-full px-2.5 py-1 text-[10px] font-medium"
-                  style={{ background: 'rgba(39,166,68,0.10)', color: '#27a644', border: '1px solid rgba(39,166,68,0.18)' }}
-                >
-                  8 قوالب متاحة
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                {BUSINESS_TYPE_ORDER.map((key, i) => {
-                  const tint = auroraTints[key]
-                  const Icon = TYPE_ICON[key]
-                  const tagline = TYPE_TAGLINE[key]
-                  return (
-                    <motion.div
-                      key={key}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.55 + i * 0.045, duration: 0.4, ease: EASE }}
-                      className="group relative overflow-hidden rounded-lg border border-token bg-white p-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_10px_28px_-12px_rgba(28,28,28,0.25)]"
-                      style={{ boxShadow: '0 1px 2px rgba(28,28,28,0.04)' }}
-                    >
-                      {/* Sheen sweep on hover */}
-                      <span className="card-sheen absolute inset-0" aria-hidden />
-                      {/* Per-type aurora wash, only visible on hover */}
-                      <div
-                        aria-hidden
-                        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                        style={{
-                          background: `radial-gradient(ellipse 80% 80% at 50% 0%, ${tint.orb1}, transparent 70%)`,
-                        }}
-                      />
-                      <div
-                        className="relative mb-2 flex h-7 w-7 items-center justify-center rounded-md transition-transform duration-200 group-hover:scale-[1.08]"
-                        style={{ background: `${tint.accent}10`, border: `1px solid ${tint.accent}20`, color: tint.accent }}
-                      >
-                        <Icon className="h-3.5 w-3.5" strokeWidth={1.75} />
-                      </div>
-                      <div className="relative text-[12px] font-bold text-foreground">{tint.label}</div>
-                      <div className="relative mt-0.5 text-[10.5px] text-muted">{tagline}</div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-         </motion.div>
+          <HeroConstellation />
         </motion.div>
       </div>
     </section>
