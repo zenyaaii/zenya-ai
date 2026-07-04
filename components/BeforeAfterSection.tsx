@@ -29,54 +29,15 @@ export default function BeforeAfterSection() {
           </div>
         </Reveal>
 
-        {/* ── Diagonal laptop stage — one composition at every width, scaled.
-            RTL: "قبل" starts top-right, the redesign "بعد" lands bottom-left,
-            so the eye travels the way Arabic reads. ── */}
-        <div className="relative mx-auto h-[340px] w-full max-w-[840px] sm:h-[450px] md:h-[520px]">
-          {/* BEFORE — smaller, faded, receding, up in the start corner */}
-          <motion.div
-            initial={{ opacity: 0, y: -24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.6, ease: EASE }}
-            className="absolute start-0 top-0 z-10 w-[54%]"
-          >
-            <Label tone="bad" />
-            <Laptop tone="bad" />
-          </motion.div>
-
-          {/* Connector arrow, sweeping from BEFORE down to AFTER */}
-          <motion.svg
-            aria-hidden
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
-            className="pointer-events-none absolute left-1/2 top-[38%] z-30 h-16 w-16 -translate-x-1/2 sm:h-24 sm:w-24 md:h-28 md:w-28"
-            viewBox="0 0 100 100"
-            fill="none"
-          >
-            <path
-              d="M78 20 C 55 40, 45 55, 26 74"
-              stroke="#5e6ad2"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="1 7"
-            />
-            <path d="M26 74 l 12 -3 M26 74 l 3 -12" stroke="#5e6ad2" strokeWidth="3" strokeLinecap="round" />
-          </motion.svg>
-
-          {/* AFTER — larger, crisp, elevated, in the end corner */}
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.6, delay: 0.18, ease: EASE }}
-            className="absolute bottom-0 end-0 z-20 w-[64%]"
-          >
-            <Label tone="good" />
-            <Laptop tone="good" />
-          </motion.div>
+        {/* ── Diagonal before→after. RTL: "قبل" starts top-right, the redesign
+            "بعد" lands bottom-left, so the eye travels the way Arabic reads.
+            Tablet & desktop show laptop mockups; phones show phone mockups so
+            each device frame fits its screen naturally. ── */}
+        <div className="relative mx-auto hidden h-[460px] w-full max-w-[840px] md:block lg:h-[520px]">
+          <Stage device="laptop" />
+        </div>
+        <div className="relative mx-auto h-[400px] w-full max-w-[330px] md:hidden">
+          <Stage device="phone" />
         </div>
 
         {/* ── The contrast, spelled out ── */}
@@ -125,72 +86,135 @@ function Label({ tone }: { tone: 'bad' | 'good' }) {
   )
 }
 
-/** A CSS laptop: bezel + screen + silver base. Wraps the pure-CSS mock
- *  storefront so there are no external images. "bad" is deliberately
- *  cramped/clashing and desaturated; "good" mirrors the calm Zenya aesthetic. */
+/** Renders the before→after diagonal with a given device frame. Laptop frames
+ *  on tablet/desktop; phone frames on phones — each device fits its own screen
+ *  naturally instead of a shrunken laptop. */
+function Stage({ device }: { device: 'laptop' | 'phone' }) {
+  const isPhone = device === 'phone'
+  const Frame = isPhone ? Phone : Laptop
+  const beforeW = isPhone ? 'w-[43%]' : 'w-[54%]'
+  const afterW = isPhone ? 'w-[50%]' : 'w-[64%]'
+  return (
+    <>
+      {/* BEFORE — smaller, faded, up in the start (right, RTL) corner */}
+      <motion.div
+        initial={{ opacity: 0, y: -24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.6, ease: EASE }}
+        className={`absolute start-0 top-0 z-10 ${beforeW}`}
+      >
+        <Label tone="bad" />
+        <Frame tone="bad" />
+      </motion.div>
+
+      {/* Connector arrow, sweeping from BEFORE down to AFTER */}
+      <motion.svg
+        aria-hidden
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
+        className="pointer-events-none absolute left-1/2 top-[40%] z-30 h-14 w-14 -translate-x-1/2 sm:h-20 sm:w-20 md:h-28 md:w-28"
+        viewBox="0 0 100 100"
+        fill="none"
+      >
+        <path d="M78 20 C 55 40, 45 55, 26 74" stroke="#5e6ad2" strokeWidth="3" strokeLinecap="round" strokeDasharray="1 7" />
+        <path d="M26 74 l 12 -3 M26 74 l 3 -12" stroke="#5e6ad2" strokeWidth="3" strokeLinecap="round" />
+      </motion.svg>
+
+      {/* AFTER — larger, crisp, in the end (left, RTL) corner */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.6, delay: 0.18, ease: EASE }}
+        className={`absolute bottom-0 end-0 z-20 ${afterW}`}
+      >
+        <Label tone="good" />
+        <Frame tone="good" />
+      </motion.div>
+    </>
+  )
+}
+
+/** Shared frame chrome tint. */
+function frameShadow(bad: boolean) {
+  return bad
+    ? '0 18px 40px -22px rgba(28,28,28,0.4)'
+    : '0 40px 80px -34px rgba(94,106,210,0.55), 0 0 0 1px rgba(94,106,210,0.10)'
+}
+
+/** A CSS laptop: bezel + browser chrome + storefront + silver base. */
 function Laptop({ tone }: { tone: 'bad' | 'good' }) {
   const bad = tone === 'bad'
   return (
-    <div
-      style={{
-        filter: bad ? 'grayscale(0.3) saturate(0.85)' : 'none',
-        opacity: bad ? 0.92 : 1,
-      }}
-    >
+    <div style={{ filter: bad ? 'grayscale(0.3) saturate(0.85)' : 'none', opacity: bad ? 0.92 : 1 }}>
       {/* Lid / bezel */}
       <div
         className="rounded-[14px] p-2.5"
-        style={{
-          background: 'linear-gradient(160deg,#2a2b31,#17181c)',
-          boxShadow: bad
-            ? '0 18px 40px -22px rgba(28,28,28,0.4)'
-            : '0 40px 80px -34px rgba(94,106,210,0.55), 0 0 0 1px rgba(94,106,210,0.10)',
-        }}
+        style={{ background: 'linear-gradient(160deg,#2a2b31,#17181c)', boxShadow: frameShadow(bad) }}
       >
         <div className="overflow-hidden rounded-md bg-white" style={{ border: '1px solid rgba(0,0,0,0.35)' }}>
-          <Screen tone={tone} />
+          <Chrome tone={tone} />
+          <StoreMock tone={tone} />
         </div>
       </div>
       {/* Base / hinge */}
       <div
         className="relative mx-auto h-3 rounded-b-[10px]"
-        style={{
-          width: '112%',
-          marginInlineStart: '-6%',
-          background: 'linear-gradient(180deg,#d7d8dd,#a9abb3)',
-          boxShadow: '0 10px 18px -8px rgba(28,28,28,0.35)',
-        }}
+        style={{ width: '112%', marginInlineStart: '-6%', background: 'linear-gradient(180deg,#d7d8dd,#a9abb3)', boxShadow: '0 10px 18px -8px rgba(28,28,28,0.35)' }}
       >
-        <div
-          className="absolute left-1/2 top-0 h-1.5 w-16 -translate-x-1/2 rounded-b-lg"
-          style={{ background: 'linear-gradient(180deg,#9a9ca4,#c3c5cb)' }}
-        />
+        <div className="absolute left-1/2 top-0 h-1.5 w-16 -translate-x-1/2 rounded-b-lg" style={{ background: 'linear-gradient(180deg,#9a9ca4,#c3c5cb)' }} />
       </div>
     </div>
   )
 }
 
-/** The screen content — a tiny browser bar + a mock storefront. */
-function Screen({ tone }: { tone: 'bad' | 'good' }) {
+/** A CSS phone: rounded body + notch + storefront. Used on phones. */
+function Phone({ tone }: { tone: 'bad' | 'good' }) {
+  const bad = tone === 'bad'
+  return (
+    <div style={{ filter: bad ? 'grayscale(0.3) saturate(0.85)' : 'none', opacity: bad ? 0.92 : 1 }}>
+      <div
+        className="rounded-[26px] p-[5px]"
+        style={{ background: 'linear-gradient(160deg,#2a2b31,#17181c)', boxShadow: frameShadow(bad) }}
+      >
+        <div className="relative overflow-hidden rounded-[22px] bg-white" style={{ border: '1px solid rgba(0,0,0,0.35)' }}>
+          {/* Notch */}
+          <div className="absolute left-1/2 top-1.5 z-10 h-1.5 w-11 -translate-x-1/2 rounded-full" style={{ background: 'rgba(0,0,0,0.5)' }} />
+          {/* Status-bar spacer so content clears the notch */}
+          <div className="h-5" style={{ background: bad ? '#fffbe6' : '#f7f4ed' }} />
+          <StoreMock tone={tone} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** The mac-style browser chrome bar (laptop only). */
+function Chrome({ tone }: { tone: 'bad' | 'good' }) {
+  const bad = tone === 'bad'
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderBottom: '1px solid #f0ede6', background: '#faf8f3' }}>
+      <span className="h-2 w-2 rounded-full" style={{ background: '#fca5a5' }} />
+      <span className="h-2 w-2 rounded-full" style={{ background: '#fcd34d' }} />
+      <span className="h-2 w-2 rounded-full" style={{ background: '#86efac' }} />
+      <span
+        className="ms-auto rounded px-2 py-0.5 text-[9px] font-semibold"
+        style={bad ? { background: 'rgba(220,38,38,0.10)', color: '#dc2626' } : { background: 'rgba(39,166,68,0.10)', color: '#27a644' }}
+      >
+        {bad ? 'موقع هاوٍ' : 'مع زينيا'}
+      </span>
+    </div>
+  )
+}
+
+/** The mock storefront content shared by both device frames. */
+function StoreMock({ tone }: { tone: 'bad' | 'good' }) {
   const bad = tone === 'bad'
   return (
     <>
-      <div className="flex items-center gap-1.5 px-3 py-2" style={{ borderBottom: '1px solid #f0ede6', background: '#faf8f3' }}>
-        <span className="h-2 w-2 rounded-full" style={{ background: '#fca5a5' }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: '#fcd34d' }} />
-        <span className="h-2 w-2 rounded-full" style={{ background: '#86efac' }} />
-        <span
-          className="ms-auto rounded px-2 py-0.5 text-[9px] font-semibold"
-          style={
-            bad
-              ? { background: 'rgba(220,38,38,0.10)', color: '#dc2626' }
-              : { background: 'rgba(39,166,68,0.10)', color: '#27a644' }
-          }
-        >
-          {bad ? 'موقع هاوٍ' : 'مع زينيا'}
-        </span>
-      </div>
-
       {bad ? (
         // Amateur: clashing colors, cramped, misaligned
         <div className="min-h-[122px] p-3 sm:min-h-[168px] sm:p-4 md:min-h-[200px]" style={{ background: '#fffbe6' }}>

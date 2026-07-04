@@ -48,7 +48,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
 
       {children}
 
-      <footer className="border-t border-token bg-[var(--card)] py-12">
+      <footer className="border-t border-token bg-[var(--background)] py-12">
         <div className="mx-auto max-w-6xl px-6">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div>

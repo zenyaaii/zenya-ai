@@ -74,7 +74,7 @@ function TemplateCard({ id, tint, className = '' }: { id: string; tint: string; 
         <span className="ms-auto h-1.5 w-8 rounded-full" style={{ background: `${tint}30` }} />
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={themePreview(id)} alt="" className="h-[112px] w-full object-cover object-top" loading="lazy" />
+      <img src={themePreview(id)} alt="" className="h-[80px] w-full object-cover object-top xl:h-[112px]" loading="lazy" />
     </div>
   )
 }
@@ -208,32 +208,33 @@ export default function HeroConstellation() {
         </div>
       </div>
 
-      {/* ── Mobile / tablet (below xl) — a composed cluster, not a flat grid:
-          a glowing زينيا hub, gently fanned preview cards, and one tidy row of
-          platform bubbles. Reads as "designed", scaled for small screens. ── */}
-      <div className="mt-12 xl:hidden">
+      {/* ── Mobile / tablet (below xl) — a small, tight composed cluster: a
+          glowing زينيا hub, gently fanned preview cards, and one row of platform
+          bubbles. Kept compact (capped width) so it stays neat on both phones
+          and tablets rather than ballooning. ── */}
+      <div className="mx-auto mt-10 max-w-[300px] xl:hidden">
         {/* Hub */}
         <div className="relative flex justify-center">
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{ background: 'radial-gradient(circle, rgba(94,106,210,0.22) 0%, transparent 70%)', filter: 'blur(8px)' }}
           />
           <div
-            className="relative flex h-[104px] w-[104px] flex-col items-center justify-center gap-1.5 rounded-3xl bg-white"
-            style={{ border: '1px solid #e8e5db', boxShadow: '0 26px 56px -24px rgba(94,106,210,0.5), 0 0 0 1px rgba(94,106,210,0.06)' }}
+            className="relative flex h-[74px] w-[74px] flex-col items-center justify-center gap-1 rounded-2xl bg-white"
+            style={{ border: '1px solid #e8e5db', boxShadow: '0 20px 44px -20px rgba(94,106,210,0.5), 0 0 0 1px rgba(94,106,210,0.06)' }}
           >
-            <span className="conic-glow pointer-events-none absolute -inset-px rounded-3xl opacity-40" aria-hidden />
-            <ZenyaMark className="relative h-5 text-[#16171b]" />
-            <span className="relative inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold" style={{ background: 'rgba(94,106,210,0.08)', color: '#5e6ad2' }}>
-              <Sparkles className="h-2.5 w-2.5" strokeWidth={2.25} />
+            <span className="conic-glow pointer-events-none absolute -inset-px rounded-2xl opacity-40" aria-hidden />
+            <ZenyaMark className="relative h-4 text-[#16171b]" />
+            <span className="relative inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[7.5px] font-semibold" style={{ background: 'rgba(94,106,210,0.08)', color: '#5e6ad2' }}>
+              <Sparkles className="h-2 w-2" strokeWidth={2.25} />
               الذكاء الاصطناعي
             </span>
           </div>
         </div>
 
-        {/* Preview cards — gently fanned for a designed feel */}
-        <div className="mx-auto mt-8 grid max-w-sm grid-cols-2 gap-x-4 gap-y-5">
+        {/* Preview cards — small, gently fanned for a designed feel */}
+        <div className="mt-6 grid grid-cols-2 gap-2.5">
           {[
             { id: 'restaurant', tint: '#c8a96a', rot: -2.5 },
             { id: 'atlas', tint: '#5e6ad2', rot: 2.5 },
@@ -247,16 +248,16 @@ export default function HeroConstellation() {
         </div>
 
         {/* Platform bubbles — one tidy centered row */}
-        <div className="mt-9 flex justify-center gap-3">
+        <div className="mt-6 flex justify-center gap-2">
           {PLATFORMS.map((p, i) => {
             const Icon = p.icon
             return (
               <div
                 key={i}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
-                style={{ boxShadow: '0 12px 26px -10px rgba(28,28,28,0.22), inset 0 1.5px 1.5px rgba(255,255,255,0.9)', border: '1px solid #efece3' }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white"
+                style={{ boxShadow: '0 10px 22px -10px rgba(28,28,28,0.22), inset 0 1.5px 1.5px rgba(255,255,255,0.9)', border: '1px solid #efece3' }}
               >
-                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} style={{ color: p.color }} />
+                <Icon className="h-[15px] w-[15px]" strokeWidth={1.75} style={{ color: p.color }} />
               </div>
             )
           })}

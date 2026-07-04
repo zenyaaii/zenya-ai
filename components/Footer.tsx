@@ -75,7 +75,7 @@ const SOCIALS = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-border bg-[var(--card)] pt-20 pb-10 text-foreground">
+    <footer className="relative overflow-hidden border-t border-border bg-[var(--background)] pt-20 pb-10 text-foreground">
       {/* Subtle aurora wash at the very top of the footer for depth */}
       <div
         aria-hidden
