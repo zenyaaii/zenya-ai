@@ -1,4 +1,5 @@
 import { COMPARISONS } from '@/lib/comparisons'
+import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import { AR_FAQS, EN_FAQS } from '@/app/(main)/faq/faq-data'
 
 /**
@@ -20,6 +21,10 @@ const SITE = 'https://zenyaai.co'
 function build(): string {
   const compareLines = COMPARISONS.map(
     (c) => `- Zenya vs ${c.themLatin} (${c.them}): ${c.summary}  →  ${SITE}/compare/${c.slug}`
+  ).join('\n')
+
+  const templateLines = TEMPLATE_PAGES.map(
+    (t) => `- ${t.name} (${t.label}) — for ${t.audience}  →  ${SITE}/websites/${t.slug}`
   ).join('\n')
 
   const arFaq = AR_FAQS.map((f) => `Q: ${f.q}\nA: ${f.a}`).join('\n\n')
@@ -67,6 +72,10 @@ wellness centers, service businesses, and online stores) who want a professional
 website written and hosted for them, quickly and affordably — instead of hiring
 an agency or hand-building on a general English-first platform.
 
+## Website types Zenya builds (one template per business)
+${templateLines}
+All website types: ${SITE}/websites
+
 ## How Zenya compares
 ${compareLines}
 Full comparison hub: ${SITE}/compare
@@ -74,6 +83,7 @@ Full comparison hub: ${SITE}/compare
 ## Key pages
 - Home: ${SITE}/
 - Features (hosting, domains, payments, AI content): ${SITE}/features
+- Website types (restaurant, app, store, services, wellness…): ${SITE}/websites
 - Pricing: ${SITE}/pricing
 - Templates: ${SITE}/themes
 - Comparisons: ${SITE}/compare
