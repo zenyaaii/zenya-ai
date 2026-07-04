@@ -20,7 +20,10 @@ export const metadata: Metadata = {
     'موقع مركز عافية',
     'منشئ مواقع بالذكاء الاصطناعي',
   ],
-  alternates: { canonical: `${SITE}/websites` },
+  alternates: {
+    canonical: `${SITE}/websites`,
+    languages: { ar: `${SITE}/websites`, en: `${SITE}/en/websites`, 'x-default': `${SITE}/websites` },
+  },
   openGraph: {
     title: 'أنواع المواقع التي تبنيها زينيا',
     description:

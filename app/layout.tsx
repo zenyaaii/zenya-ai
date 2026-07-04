@@ -61,6 +61,11 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_URL,
+    languages: {
+      ar: SITE_URL,
+      en: `${SITE_URL}/en`,
+      'x-default': SITE_URL,
+    },
   },
   robots: {
     index: true,

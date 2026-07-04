@@ -57,18 +57,30 @@ export function CompareHero({
 }
 
 /** Head-to-head table. `themName` labels the competitor column. */
-export function CompareTable({ themName, rows }: { themName: string; rows: CompareRow[] }) {
+export function CompareTable({
+  themName,
+  rows,
+  locale = 'ar',
+}: {
+  themName: string
+  rows: CompareRow[]
+  locale?: 'ar' | 'en'
+}) {
+  const t =
+    locale === 'en'
+      ? { caption: `Zenya vs ${themName} compared`, item: 'Feature', zenya: 'Zenya' }
+      : { caption: `مقارنة زينيا مقابل ${themName}`, item: 'البند', zenya: 'زينيا' }
   return (
     <div className="overflow-hidden rounded-2xl border border-token bg-white">
       <table className="w-full border-collapse text-start">
-        <caption className="sr-only">مقارنة زينيا مقابل {themName}</caption>
+        <caption className="sr-only">{t.caption}</caption>
         <thead>
           <tr className="border-b border-token bg-[var(--surface-2)]">
             <th scope="col" className="px-4 py-3 text-start text-[12.5px] font-semibold text-subtle">
-              البند
+              {t.item}
             </th>
             <th scope="col" className="px-4 py-3 text-start text-[13.5px] font-bold text-primary">
-              زينيا
+              {t.zenya}
             </th>
             <th scope="col" className="px-4 py-3 text-start text-[13.5px] font-bold text-foreground">
               {themName}
@@ -109,22 +121,28 @@ export function ChooseBlocks({
   themName,
   chooseZenya,
   chooseThem,
+  locale = 'ar',
 }: {
   themName: string
   chooseZenya: string
   chooseThem: string
+  locale?: 'ar' | 'en'
 }) {
+  const h =
+    locale === 'en'
+      ? { zenya: 'When to choose Zenya', them: `When to choose ${themName}` }
+      : { zenya: 'متى تختار زينيا', them: `متى تختار ${themName}` }
   return (
     <div className="mt-10 grid gap-4 md:grid-cols-2">
       <div
         className="rounded-2xl border p-5"
         style={{ borderColor: 'rgba(94,106,210,0.30)', background: 'rgba(94,106,210,0.05)' }}
       >
-        <h3 className="mb-2 text-[15px] font-bold text-primary">متى تختار زينيا</h3>
+        <h3 className="mb-2 text-[15px] font-bold text-primary">{h.zenya}</h3>
         <p className="text-[14px] leading-[1.9] text-foreground">{chooseZenya}</p>
       </div>
       <div className="rounded-2xl border border-token bg-white p-5">
-        <h3 className="mb-2 text-[15px] font-bold text-foreground">متى تختار {themName}</h3>
+        <h3 className="mb-2 text-[15px] font-bold text-foreground">{h.them}</h3>
         <p className="text-[14px] leading-[1.9] text-muted">{chooseThem}</p>
       </div>
     </div>
@@ -157,9 +175,15 @@ export function FaqList({ title, faqs }: { title: string; faqs: QA[] }) {
 export function CtaBand({
   title = 'جرّب زينيا مجانًا الآن',
   subtitle = 'اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.',
+  primaryLabel = 'ابدأ الإنشاء مجانًا',
+  secondaryLabel = 'شاهد الأسعار',
+  secondaryHref = '/pricing',
 }: {
   title?: string
   subtitle?: string
+  primaryLabel?: string
+  secondaryLabel?: string
+  secondaryHref?: string
 }) {
   return (
     <section className="mt-20 overflow-hidden rounded-3xl border border-token bg-white p-8 text-center sm:p-12">
@@ -170,13 +194,13 @@ export function CtaBand({
           href="/login?mode=signup"
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white btn-shadow-primary transition-all duration-200 hover:-translate-y-0.5"
         >
-          ابدأ الإنشاء مجانًا
+          {primaryLabel}
         </Link>
         <Link
-          href="/pricing"
+          href={secondaryHref}
           className="inline-flex items-center gap-2 rounded-lg border border-token bg-white px-7 py-3.5 text-[14.5px] font-medium text-muted transition-all duration-200 hover:text-foreground"
         >
-          شاهد الأسعار
+          {secondaryLabel}
         </Link>
       </div>
     </section>

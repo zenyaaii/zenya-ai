@@ -29,7 +29,10 @@ export const metadata: Metadata = {
     'استضافة GDPR أوروبا',
     'تصدير شوبيفاي',
   ],
-  alternates: { canonical: `${SITE}/features` },
+  alternates: {
+    canonical: `${SITE}/features`,
+    languages: { ar: `${SITE}/features`, en: `${SITE}/en/features`, 'x-default': `${SITE}/features` },
+  },
   openGraph: {
     title: 'ميزات زينيا — محتوى بالذكاء الاصطناعي، استضافة، نطاق، ودفع',
     description:

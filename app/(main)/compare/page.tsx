@@ -19,7 +19,10 @@ export const metadata: Metadata = {
     'زينيا مقابل ويكس',
     'مقارنة منشئات المواقع',
   ],
-  alternates: { canonical: `${SITE}/compare` },
+  alternates: {
+    canonical: `${SITE}/compare`,
+    languages: { ar: `${SITE}/compare`, en: `${SITE}/en/compare`, 'x-default': `${SITE}/compare` },
+  },
   openGraph: {
     title: 'زينيا مقابل المنافسين — مقارنات صريحة',
     description:

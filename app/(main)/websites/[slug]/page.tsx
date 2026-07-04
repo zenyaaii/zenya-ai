@@ -20,7 +20,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     title: t.title,
     description: t.metaDescription,
     keywords: t.keywords,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: { ar: url, en: `${SITE}/en/websites/${t.slug}`, 'x-default': url },
+    },
     openGraph: {
       title: t.title,
       description: t.metaDescription,

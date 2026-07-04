@@ -33,7 +33,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       'منشئ مواقع بالذكاء الاصطناعي',
       'منشئ مواقع عربي',
     ],
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      languages: { ar: url, en: `${SITE}/en/compare/${c.slug}`, 'x-default': url },
+    },
     openGraph: {
       title: c.title,
       description: c.metaDescription,

@@ -91,6 +91,14 @@ Full comparison hub: ${SITE}/compare
 - About: ${SITE}/about
 - Contact: ${SITE}/contact
 
+## English pages (same product, English language)
+- Home (EN): ${SITE}/en
+- Features (EN): ${SITE}/en/features
+- Website types (EN): ${SITE}/en/websites
+- Comparisons (EN): ${SITE}/en/compare
+Arabic pages are the default (x-default); English pages are hreflang="en"
+alternates of the same content.
+
 ## Frequently asked questions (Arabic)
 ${arFaq}
 
