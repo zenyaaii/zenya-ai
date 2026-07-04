@@ -24,8 +24,8 @@ const EASE = [0.22, 1, 0.36, 1] as const
 // Ring geometry, in % of the square stage. Bubbles sit on a circle around the
 // centre; a touch of per-index radius jitter keeps it organic (not clockwork).
 const COUNT = RING_BRANDS.length
-const RADIUS = 44 // %
-const JITTER = [0, 2.5, -2, 1.5, -3, 2, 0, -1.5, 3, -2.5, 1.5, -1] // per index
+const RADIUS = 41 // %
+const JITTER = [0, 2, -1.5, 1.5, -2, 1.5, 0, -1.5, 2, -2, 1.5, -1] // per index
 
 function ringPos(i: number) {
   // Start at the top (-90°) and go clockwise. Round to a fixed precision so the
@@ -47,7 +47,7 @@ function BubbleShell({
   children: React.ReactNode
   size?: 'sm' | 'md'
 }) {
-  const dim = size === 'sm' ? 'h-12 w-12' : 'h-14 w-14 sm:h-16 sm:w-16'
+  const dim = size === 'sm' ? 'h-12 w-12' : 'h-[46px] w-[46px] sm:h-14 sm:w-14 md:h-16 md:w-16'
   return (
     <div
       className={`flex ${dim} items-center justify-center rounded-full bg-white`}
@@ -84,7 +84,7 @@ function OrbitBubble({ brand, i }: { brand: Brand; i: number }) {
         <BubbleShell>
           <BrandMark
             brand={brand}
-            className="h-6 w-6 sm:h-7 sm:w-7"
+            className="h-[19px] w-[19px] sm:h-6 sm:w-6 md:h-7 md:w-7"
             // Calm dark silhouette, kept a touch soft so it never shouts.
             color="rgba(28,28,28,0.82)"
           />
@@ -97,16 +97,16 @@ function OrbitBubble({ brand, i }: { brand: Brand; i: number }) {
 function Center() {
   return (
     <Reveal>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-primary">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary sm:mb-3 sm:text-xs sm:tracking-[0.28em]">
         منظومة متكاملة
       </p>
-      <h2 className="display-ar text-[clamp(28px,4.4vw,46px)] leading-[1.14] text-foreground">
+      <h2 className="display-ar text-[clamp(19px,5.4vw,46px)] leading-[1.12] text-foreground">
         يعمل مع{' '}
         <span className="gradient-text">أدواتك المفضّلة.</span>
       </h2>
-      <p className="mx-auto mt-4 max-w-sm text-[14.5px] leading-[1.9] text-muted">
+      <p className="mx-auto mt-2.5 max-w-sm text-[11.5px] leading-[1.65] text-muted sm:mt-4 sm:text-[14.5px] sm:leading-[1.9]">
         مبنيّ على المنصّات التي تثق بها كبرى الشركات — ويتصل بمتجرك، وحساباتك على
-        التواصل، وخرائطك، ومدفوعاتك. كل ما يهمّ نشاطك في مكان واحد.
+        التواصل، وخرائطك، ومدفوعاتك في مكان واحد.
       </p>
     </Reveal>
   )
@@ -114,10 +114,12 @@ function Center() {
 
 export default function Logos() {
   return (
-    <section className="relative overflow-hidden border-y border-token py-20 sm:py-24">
+    <section className="relative overflow-hidden border-y border-token py-16 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
-        {/* ── Desktop ring ── */}
-        <div className="relative mx-auto hidden aspect-square w-full max-w-[620px] md:block">
+        {/* One responsive ring at every width — the % positions scale with the
+            square container, so phone/tablet show the same composition as
+            desktop, just smaller (no separate, weaker mobile layout). */}
+        <div className="relative mx-auto aspect-square w-full max-w-[clamp(340px,86vw,600px)]">
           {/* Faint guide circle behind the bubbles — subtle depth, like the ref. */}
           <div
             aria-hidden
@@ -131,22 +133,8 @@ export default function Logos() {
           {RING_BRANDS.map((b, i) => (
             <OrbitBubble key={b.name} brand={b} i={i} />
           ))}
-          <div className="absolute left-1/2 top-1/2 z-20 w-[380px] -translate-x-1/2 -translate-y-1/2 text-center">
+          <div className="absolute left-1/2 top-1/2 z-20 w-[62%] max-w-[380px] -translate-x-1/2 -translate-y-1/2 text-center sm:w-[300px] md:w-[380px]">
             <Center />
-          </div>
-        </div>
-
-        {/* ── Mobile: heading + wrapped bubbles ── */}
-        <div className="md:hidden">
-          <div className="text-center">
-            <Center />
-          </div>
-          <div className="mt-9 flex flex-wrap justify-center gap-x-5 gap-y-5">
-            {RING_BRANDS.map((b) => (
-              <BubbleShell key={b.name} size="sm">
-                <BrandMark brand={b} className="h-6 w-6" color="rgba(28,28,28,0.82)" />
-              </BubbleShell>
-            ))}
           </div>
         </div>
       </div>

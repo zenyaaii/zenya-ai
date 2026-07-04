@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Camera, MessageCircle, ShoppingBag, MapPin, Music2, Mail, PenLine, TrendingUp } from 'lucide-react'
+import { Camera, MessageCircle, ShoppingBag, MapPin, Music2, Mail, PenLine, TrendingUp, Sparkles } from 'lucide-react'
 import ZenyaMark from '@/components/ZenyaMark'
 import { themePreview } from '@/lib/theme-previews'
 
@@ -208,33 +208,55 @@ export default function HeroConstellation() {
         </div>
       </div>
 
-      {/* ── Mobile / tablet fallback (below xl) — hub + template grid ── */}
+      {/* ── Mobile / tablet (below xl) — a composed cluster, not a flat grid:
+          a glowing زينيا hub, gently fanned preview cards, and one tidy row of
+          platform bubbles. Reads as "designed", scaled for small screens. ── */}
       <div className="mt-12 xl:hidden">
-        <div className="flex justify-center">
+        {/* Hub */}
+        <div className="relative flex justify-center">
           <div
-            className="flex h-24 w-24 flex-col items-center justify-center gap-1.5 rounded-2xl bg-white"
-            style={{ border: '1px solid #e8e5db', boxShadow: '0 24px 50px -22px rgba(94,106,210,0.45)' }}
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(94,106,210,0.22) 0%, transparent 70%)', filter: 'blur(8px)' }}
+          />
+          <div
+            className="relative flex h-[104px] w-[104px] flex-col items-center justify-center gap-1.5 rounded-3xl bg-white"
+            style={{ border: '1px solid #e8e5db', boxShadow: '0 26px 56px -24px rgba(94,106,210,0.5), 0 0 0 1px rgba(94,106,210,0.06)' }}
           >
-            <ZenyaMark className="h-5 text-[#16171b]" />
-            <span className="text-[8.5px] font-semibold" style={{ color: '#5e6ad2' }}>الذكاء الاصطناعي</span>
+            <span className="conic-glow pointer-events-none absolute -inset-px rounded-3xl opacity-40" aria-hidden />
+            <ZenyaMark className="relative h-5 text-[#16171b]" />
+            <span className="relative inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold" style={{ background: 'rgba(94,106,210,0.08)', color: '#5e6ad2' }}>
+              <Sparkles className="h-2.5 w-2.5" strokeWidth={2.25} />
+              الذكاء الاصطناعي
+            </span>
           </div>
         </div>
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <TemplateCard id="restaurant" tint="#c8a96a" />
-          <TemplateCard id="atlas" tint="#5e6ad2" />
-          <TemplateCard id="wellness" tint="#14b8a6" />
-          <TemplateCard id="services" tint="#f59e0b" />
+
+        {/* Preview cards — gently fanned for a designed feel */}
+        <div className="mx-auto mt-8 grid max-w-sm grid-cols-2 gap-x-4 gap-y-5">
+          {[
+            { id: 'restaurant', tint: '#c8a96a', rot: -2.5 },
+            { id: 'atlas', tint: '#5e6ad2', rot: 2.5 },
+            { id: 'wellness', tint: '#14b8a6', rot: 2 },
+            { id: 'services', tint: '#f59e0b', rot: -2 },
+          ].map((c) => (
+            <div key={c.id} style={{ transform: `rotate(${c.rot}deg)` }}>
+              <TemplateCard id={c.id} tint={c.tint} />
+            </div>
+          ))}
         </div>
-        <div className="mt-7 flex flex-wrap justify-center gap-3.5">
+
+        {/* Platform bubbles — one tidy centered row */}
+        <div className="mt-9 flex justify-center gap-3">
           {PLATFORMS.map((p, i) => {
             const Icon = p.icon
             return (
               <div
                 key={i}
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white"
-                style={{ boxShadow: '0 12px 26px -10px rgba(28,28,28,0.22)', border: '1px solid #efece3' }}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+                style={{ boxShadow: '0 12px 26px -10px rgba(28,28,28,0.22), inset 0 1.5px 1.5px rgba(255,255,255,0.9)', border: '1px solid #efece3' }}
               >
-                <Icon className="h-5 w-5" strokeWidth={1.75} style={{ color: p.color }} />
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} style={{ color: p.color }} />
               </div>
             )
           })}

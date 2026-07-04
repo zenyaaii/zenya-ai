@@ -29,10 +29,10 @@ export default function BeforeAfterSection() {
           </div>
         </Reveal>
 
-        {/* ── Diagonal laptop stage (desktop). RTL: "قبل" starts top-right,
-            the redesign "بعد" lands bottom-left — the eye travels the way
-            Arabic reads. ── */}
-        <div className="relative mx-auto hidden h-[520px] max-w-[840px] md:block">
+        {/* ── Diagonal laptop stage — one composition at every width, scaled.
+            RTL: "قبل" starts top-right, the redesign "بعد" lands bottom-left,
+            so the eye travels the way Arabic reads. ── */}
+        <div className="relative mx-auto h-[340px] w-full max-w-[840px] sm:h-[450px] md:h-[520px]">
           {/* BEFORE — smaller, faded, receding, up in the start corner */}
           <motion.div
             initial={{ opacity: 0, y: -24 }}
@@ -52,7 +52,7 @@ export default function BeforeAfterSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
-            className="pointer-events-none absolute left-1/2 top-[38%] z-30 h-28 w-28 -translate-x-1/2"
+            className="pointer-events-none absolute left-1/2 top-[38%] z-30 h-16 w-16 -translate-x-1/2 sm:h-24 sm:w-24 md:h-28 md:w-28"
             viewBox="0 0 100 100"
             fill="none"
           >
@@ -77,18 +77,6 @@ export default function BeforeAfterSection() {
             <Label tone="good" />
             <Laptop tone="good" />
           </motion.div>
-        </div>
-
-        {/* ── Mobile: stacked laptops ── */}
-        <div className="space-y-8 md:hidden">
-          <div>
-            <Label tone="bad" />
-            <Laptop tone="bad" />
-          </div>
-          <div>
-            <Label tone="good" />
-            <Laptop tone="good" />
-          </div>
         </div>
 
         {/* ── The contrast, spelled out ── */}
@@ -205,7 +193,7 @@ function Screen({ tone }: { tone: 'bad' | 'good' }) {
 
       {bad ? (
         // Amateur: clashing colors, cramped, misaligned
-        <div className="p-4" style={{ background: '#fffbe6', minHeight: 200 }}>
+        <div className="min-h-[122px] p-3 sm:min-h-[168px] sm:p-4 md:min-h-[200px]" style={{ background: '#fffbe6' }}>
           <div className="mb-2 inline-block rounded px-2 py-1 text-[13px] font-black" style={{ background: '#ff00aa', color: '#00e0ff', transform: 'rotate(-2deg)' }}>
             متجــري !!!
           </div>
@@ -222,7 +210,7 @@ function Screen({ tone }: { tone: 'bad' | 'good' }) {
         </div>
       ) : (
         // Zenya: clean, calm, on-brand
-        <div className="p-5" style={{ background: '#f7f4ed', minHeight: 200 }}>
+        <div className="min-h-[122px] p-3.5 sm:min-h-[168px] sm:p-4 md:min-h-[200px] md:p-5" style={{ background: '#f7f4ed' }}>
           <div className="mb-4 flex items-center justify-between">
             <div className="h-3 w-16 rounded-full" style={{ background: 'linear-gradient(90deg,#5e6ad2,#8b93e0)' }} />
             <div className="flex gap-1.5">
