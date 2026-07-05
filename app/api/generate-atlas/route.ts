@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { atlasInputSchema, type AtlasInput } from '@/utils/atlas/input'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
@@ -276,9 +277,9 @@ export async function POST(req: NextRequest) {
 
     const completion = await withTimeout(
       openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL,
         temperature: 0.75,
-        max_tokens: 4000,
+        max_tokens: AI_MAX_TOKENS,
         messages: [
           {
             role: 'system',
@@ -296,7 +297,7 @@ export async function POST(req: NextRequest) {
       'openai_atlas'
     )
 
-    await logAiUsage({ operation: 'generate-atlas', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
+    await logAiUsage({ operation: 'generate-atlas', userId: await getUserIdSafe(), model: AI_MODEL }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

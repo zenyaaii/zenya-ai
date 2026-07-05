@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { generateContentSchema } from '@/utils/validators'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -864,7 +865,7 @@ ${(productFacts?.longDescription || '').slice(0, 1400) || 'N/A'}`
     const shouldRunAnalysis = !factsWeak && timeLeft() > 28_000
     if (shouldRunAnalysis) {
       try {
-        productAnalysis = await runJson('gpt-4o-mini', [
+        productAnalysis = await runJson(AI_MODEL, [
           {
             role: 'system',
             content:
@@ -1200,12 +1201,12 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
 
     let resp: any
     try {
-      resp = await run('gpt-4o-mini', { maxTokens: 2200, temperature: 0.7 })
+      resp = await run(AI_MODEL, { maxTokens: 2200, temperature: 0.7 })
     } catch (e) {
       return buildFallbackResponse(String((e as any)?.message || e), productAnalysis)
     }
 
-    await logAiUsage({ operation: 'generate-content', userId: usageUserId, model: 'gpt-4o-mini' }, resp?.usage)
+    await logAiUsage({ operation: 'generate-content', userId: usageUserId, model: AI_MODEL }, resp?.usage)
     
     const content = resp.choices[0]?.message?.content
     if (!content) throw new Error('No content from OpenAI')
@@ -1220,9 +1221,9 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
         const maxWait = Math.max(5_000, Math.min(REPAIR_TIMEOUT_MS, timeLeft() - 3_000))
         if (maxWait <= 0) throw new Error('route_budget_exceeded_before_repair')
         const repair = await withTimeout(openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+          model: AI_MODEL,
           temperature: 0,
-          max_tokens: 2400,
+          max_tokens: AI_MAX_TOKENS,
           messages: [
             {
               role: 'system',
@@ -1233,7 +1234,7 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
           ],
           response_format: { type: 'json_object' as const },
         }), maxWait, 'repair')
-        await logAiUsage({ operation: 'generate-content:repair', userId: usageUserId, model: 'gpt-4o-mini' }, repair.usage)
+        await logAiUsage({ operation: 'generate-content:repair', userId: usageUserId, model: AI_MODEL }, repair.usage)
         const repaired = repair.choices[0]?.message?.content || ''
         return parseModelJson(repaired)
       }
@@ -1243,7 +1244,7 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
         /unterminated|string|json|unexpected end|expected/i.test(errorMessage)
 
       if (shouldRetry && timeLeft() > 14_000) {
-        const retry = await run('gpt-4o-mini', { maxTokens: 2400, temperature: 0.2 })
+        const retry = await run(AI_MODEL, { maxTokens: 2400, temperature: 0.2 })
         const retryContent = retry.choices[0]?.message?.content || ''
         try {
           parsed = parseModelJson(retryContent)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { serviceInputSchema, type ServiceInput } from '@/utils/services/input'
 import type { ServiceContent } from '@/utils/services/types'
@@ -465,9 +466,9 @@ export async function POST(req: NextRequest) {
 
     const response = await withTimeout(
       openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL,
         temperature: 0.7,
-        max_tokens: 2600,
+        max_tokens: AI_MAX_TOKENS,
         response_format: { type: 'json_object' as const },
         messages: [
           {
@@ -483,7 +484,7 @@ export async function POST(req: NextRequest) {
       'services_ai'
     )
 
-    await logAiUsage({ operation: 'generate-services', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, response.usage)
+    await logAiUsage({ operation: 'generate-services', userId: await getUserIdSafe(), model: AI_MODEL }, response.usage)
 
     const raw = response.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}
@@ -495,7 +496,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       content: mergeIntoContent(input, aiJson),
-      _meta: { source: 'openai', model: 'gpt-4o-mini' }
+      _meta: { source: 'openai', model: AI_MODEL }
     })
   } catch (error: any) {
     return NextResponse.json(

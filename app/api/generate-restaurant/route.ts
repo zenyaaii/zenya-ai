@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { restaurantInputSchema, type RestaurantInput } from '@/utils/restaurant/input'
 import type { RestaurantContent } from '@/utils/restaurant/types'
@@ -465,9 +466,9 @@ export async function POST(req: NextRequest) {
 
     const resp = await withTimeout(
       openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL,
         temperature: 0.65,
-        max_tokens: 4096,
+        max_tokens: AI_MAX_TOKENS,
         response_format: { type: 'json_object' as const },
         messages: [
           {
@@ -483,7 +484,7 @@ export async function POST(req: NextRequest) {
       'restaurant_ai'
     )
 
-    await logAiUsage({ operation: 'generate-restaurant', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, resp.usage)
+    await logAiUsage({ operation: 'generate-restaurant', userId: await getUserIdSafe(), model: AI_MODEL }, resp.usage)
 
     const raw = resp.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}
@@ -496,7 +497,7 @@ export async function POST(req: NextRequest) {
     const content = mergeIntoContent(input, aiJson)
     return NextResponse.json({
       content,
-      _meta: { source: 'openai', model: 'gpt-4o-mini' }
+      _meta: { source: 'openai', model: AI_MODEL }
     })
   } catch (e: any) {
     return NextResponse.json(

@@ -22,4 +22,11 @@ LANGUAGE CONTRACT — THIS OVERRIDES EVERYTHING ELSE:
 - Testimonials: use real Arabic names (e.g. أحمد، فاطمة، خالد، نورة، يوسف) and Arab cities/countries (e.g. الرياض، السعودية · دبي، الإمارات · القاهرة، مصر · عمّان، الأردن).
 - Do NOT mix English words into the Arabic copy unless they are globally recognized brand names. No transliteration of generic English marketing words.
 - Avoid translated-English clichés. Write fresh, confident, culturally-natural Arabic.
+
+QUALITY & STRUCTURE — write like a senior copywriter, not a template filler:
+- Make every section specific and persuasive to THIS business from the brief. Never generic filler, padding, or repetition — if you don't have a real detail, write a compelling benefit, not lorem-style copy.
+- Match the tone to the business type and audience, and vary sentence rhythm so it reads human, not machine-generated.
+- Order and emphasize sections to drive conversion for THIS business type: lead with what matters most to its customers, and make the primary call-to-action obvious.
+- Only use concrete numbers, prices, names, or claims the user actually provided. Never invent statistics, ratings, awards, or reviews.
+- Keep the EXACT JSON structure and every key requested. Add richness WITHIN the values; do not add, rename, or remove keys.
 `.trim()

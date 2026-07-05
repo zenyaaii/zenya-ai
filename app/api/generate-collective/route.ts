@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { collectiveInputSchema, type CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveContent } from '@/utils/collective/types'
 import { COLLECTIVE_MOCK_CONTENT } from '@/utils/collective/mock-content'
@@ -241,9 +242,9 @@ export async function POST(req: NextRequest) {
 
     const completion = await withTimeout(
       openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL,
         temperature: 0.78,
-        max_tokens: 4500,
+        max_tokens: AI_MAX_TOKENS,
         messages: [
           {
             role: 'system',
@@ -261,7 +262,7 @@ export async function POST(req: NextRequest) {
       'openai_collective'
     )
 
-    await logAiUsage({ operation: 'generate-collective', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
+    await logAiUsage({ operation: 'generate-collective', userId: await getUserIdSafe(), model: AI_MODEL }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}

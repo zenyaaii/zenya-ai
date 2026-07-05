@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
+import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
 import { LOOKBOOK_MOCK_CONTENT } from '@/utils/lookbook/mock-content'
@@ -229,9 +230,9 @@ export async function POST(req: NextRequest) {
 
     const completion = await withTimeout(
       openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: AI_MODEL,
         temperature: 0.72,
-        max_tokens: 3500,
+        max_tokens: AI_MAX_TOKENS,
         messages: [
           { role: 'system', content: 'You are an expert fashion copywriter. Output only valid JSON.\n\n' + ARABIC_OUTPUT_DIRECTIVE },
           { role: 'user', content: buildPrompt(input) }
@@ -241,7 +242,7 @@ export async function POST(req: NextRequest) {
       'openai_lookbook'
     )
 
-    await logAiUsage({ operation: 'generate-lookbook', userId: await getUserIdSafe(), model: 'gpt-4o-mini' }, completion.usage)
+    await logAiUsage({ operation: 'generate-lookbook', userId: await getUserIdSafe(), model: AI_MODEL }, completion.usage)
 
     const raw = completion.choices[0]?.message?.content || ''
     let ai: any = {}
