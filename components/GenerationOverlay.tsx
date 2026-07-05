@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import ReviewOffer from '@/components/ReviewOffer'
 
 /**
  * GenerationOverlay — the full-screen "building" animation shown while a theme
@@ -258,7 +259,7 @@ export default function GenerationOverlay({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className="zbuild fixed inset-0 z-[100] flex flex-col items-center justify-center gap-10"
+          className="zbuild fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 overflow-y-auto py-6 sm:gap-8"
           style={{ background: 'var(--background)', color: 'var(--foreground)' }}
           role="status"
           aria-live="polite"
@@ -321,6 +322,9 @@ export default function GenerationOverlay({
               </AnimatePresence>
             </div>
           </div>
+
+          {/* Feedback-for-discount offer while they wait. */}
+          <ReviewOffer />
         </motion.div>
       )}
     </AnimatePresence>
