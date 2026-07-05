@@ -159,7 +159,7 @@ export default function Navbar() {
               <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
                 <DropdownMenu.Trigger asChild>
                   <button
-                    className="flex items-center gap-2 rounded-md border border-token px-2.5 py-1.5 transition-colors hover:bg-[rgba(28,28,28,0.05)]"
+                    className="hidden items-center gap-2 rounded-md border border-token px-2.5 py-1.5 transition-colors hover:bg-[rgba(28,28,28,0.05)] md:flex"
                     aria-label="فتح قائمة الحساب"
                   >
                     <div
@@ -300,7 +300,7 @@ export default function Navbar() {
                     </Link>
                   )
                 })}
-                {!user && (
+                {!user ? (
                   <>
                     <Link
                       href="/login"
@@ -317,6 +317,40 @@ export default function Navbar() {
                       ابدأ مجانًا
                     </Link>
                   </>
+                ) : (
+                  <div className="mt-2 border-t border-[#f0ede6] pt-2">
+                    {/* Account block — folded into the menu on mobile so the
+                        header stays just logo + menu. */}
+                    <div className="flex items-center gap-2.5 px-3 py-2">
+                      <div
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[12px] font-semibold text-white"
+                        style={{ background: '#5e6ad2' }}
+                      >
+                        {userInitial}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-semibold text-foreground">
+                          {user.user_metadata?.full_name || 'مستخدم'}
+                        </p>
+                        <p className="truncate text-[12px] text-muted">{user.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/settings"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2.5 text-[14px] font-medium text-muted transition-colors hover:text-foreground"
+                    >
+                      <Settings className="h-4 w-4" strokeWidth={2} />
+                      الإعدادات
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-start text-[14px] font-medium text-[#dc2626] transition-colors hover:bg-[rgba(220,38,38,0.06)]"
+                    >
+                      <LogOut className="h-4 w-4 rtl-flip" strokeWidth={2} />
+                      تسجيل الخروج
+                    </button>
+                  </div>
                 )}
               </nav>
             </motion.div>

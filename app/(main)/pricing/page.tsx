@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import * as Accordion from '@radix-ui/react-accordion'
-import { Check, ChevronDown, ArrowRight, Globe } from 'lucide-react'
+import { Check, ChevronDown, ArrowRight, Globe, Gift } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 import { affiliateClickHref } from '@/lib/affiliate'
@@ -249,6 +249,14 @@ export default function PricingPage() {
               ألغِ في أي وقت · يبقى الموقع مباشرًا حتى نهاية الشهر
             </p>
           </motion.div>
+        </div>
+
+        {/* Discount-code hint — where to use a promo code (e.g. SHUKRAN30) */}
+        <div className="mx-auto mb-20 flex justify-center px-6">
+          <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-token bg-white px-4 py-2 text-center text-[13px] text-muted shadow-soft-sm">
+            <Gift className="h-4 w-4 flex-shrink-0 text-primary" strokeWidth={2} />
+            عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
+          </span>
         </div>
 
         {/* Comparison table */}
