@@ -82,7 +82,7 @@ export default function Hero() {
           {/* CTAs */}
           <motion.div {...fade(0.22)} className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/login?mode=signup"
+              href="/themes"
               className={cn(
                 'group relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white transition-all duration-200',
                 'btn-shadow-primary hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-10px_rgba(94,106,210,0.6)] active:translate-y-0'
@@ -108,7 +108,7 @@ export default function Hero() {
           <motion.div {...fade(0.3)} className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
             {[
               'جرّب مجانًا · بلا بطاقة',
-              'نطاق مجاني شهرين مع Pro',
+              'نطاق مجاني لسنة مع Pro',
               'استضافة أوروبية · GDPR',
             ].map((label) => (
               <span key={label} className="inline-flex items-center gap-1.5 text-[13px] text-muted">

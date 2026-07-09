@@ -66,7 +66,7 @@ const STARTER_FEATURES = [
 const PRO_FEATURES = [
   'كل ما في خطة Starter، بالإضافة إلى:',
   'تستضيف زينيا مواقع العرض الخاصة بك',
-  'نطاق مخصّص مجاني لمدة شهرين',
+  'نطاق مخصّص مجاني لسنة كاملة (نطاق قياسي)',
   'شهادة SSL تلقائية + تسليم عبر CDN',
   'إزالة شارة «صُنع بزينيا»',
   'تحليلات الموقع في لوحة تحكمك',
@@ -128,7 +128,7 @@ export default function PricingPage() {
             </ul>
 
             <Link
-              href="/login?mode=signup"
+              href="/themes"
               className={cn(
                 'block w-full rounded-md border border-token bg-background py-3 text-center text-[14px] font-medium text-muted transition-all duration-150',
                 'hover:bg-black/5 active:scale-[0.99]'
@@ -170,6 +170,17 @@ export default function PricingPage() {
                 <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
               <p className="text-[13.5px] text-muted">منشئ كامل بلا حدود، شهريًا. صدّر أينما شئت.</p>
+            </div>
+
+            {/* Starter promo — matches Pro's badge pattern, delivered by ReviewOffer */}
+            <div
+              className="mb-5 flex items-center gap-2 rounded-lg px-3 py-2.5"
+              style={{ background: 'rgba(94,106,210,0.06)', border: '1px solid rgba(94,106,210,0.20)' }}
+            >
+              <Gift className="h-3.5 w-3.5 flex-shrink-0 text-primary" strokeWidth={2} />
+              <span className="text-[12.5px] font-medium text-primary">
+                خصم 20% على أول شهر — احصل على الكود بعد المعاينة
+              </span>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
@@ -221,7 +232,7 @@ export default function PricingPage() {
             >
               <Globe className="h-3.5 w-3.5 flex-shrink-0 text-amber-600" strokeWidth={2} />
               <span className="text-[12.5px] font-medium text-amber-700">
-                نطاق مخصّص مجاني لمدة شهرين، ثم بسعرنا المخفّض
+                نطاق مخصّص مجاني لسنة كاملة، وخصم 30% على ما بعدها
               </span>
             </div>
 
@@ -252,12 +263,16 @@ export default function PricingPage() {
         </div>
 
         {/* Discount-code hint — where to use a promo code (e.g. SHUKRAN30) */}
-        <div className="mx-auto mb-20 flex justify-center px-6">
+        <div className="mx-auto mb-14 flex justify-center px-6">
           <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-token bg-white px-4 py-2 text-center text-[13px] text-muted shadow-soft-sm">
             <Gift className="h-4 w-4 flex-shrink-0 text-primary" strokeWidth={2} />
             عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
           </span>
         </div>
+
+        {/* Cost calculator — what you'd pay if you built this yourself */}
+        <CostCalculator />
+
 
         {/* Comparison table */}
         <motion.div
@@ -406,6 +421,106 @@ export default function PricingPage() {
         </motion.div>
       </div>
     </main>
+  )
+}
+
+/**
+ * CostCalculator — itemizes what building a comparable site costs elsewhere:
+ * hosting, domain, template, developer, SSL & CDN. Compares the annual total
+ * against Zenya's Pro plan for the same year to make the savings concrete.
+ * Numbers are conservative market ranges, not fabricated data.
+ */
+const COST_ROWS = [
+  { label: 'استضافة احترافية',            monthly: 15,  yearly: 180, note: 'Vercel Pro / Kinsta / Netlify Business' },
+  { label: 'نطاق مخصّص',                   monthly: 1.25, yearly: 15,  note: 'com. / سنويًا حسب الامتداد' },
+  { label: 'قالب ووردبريس / Shopify مدفوع', monthly: 0,   yearly: 79,  note: 'دفعة واحدة سنويًا في المتوسط' },
+  { label: 'مطوّر أو وكالة (إعداد وتخصيص)',  monthly: 0,   yearly: 800, note: 'حدّ أدنى — الوكالات من 2000$+' },
+  { label: 'شهادة SSL + CDN',              monthly: 5,   yearly: 60,  note: 'Cloudflare Pro أو ما يعادلها' },
+  { label: 'كتابة المحتوى (نصوص عربية)',    monthly: 0,   yearly: 250, note: 'كاتب مستقل — صفحة رئيسية + 5 صفحات' },
+] as const
+
+function CostCalculator() {
+  const total = COST_ROWS.reduce((s, r) => s + r.yearly, 0)
+  const zenyaYearly = 24.99 * 12
+  const savings = total - zenyaYearly
+  const savingsPct = Math.round((savings / total) * 100)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="mx-auto mb-24 max-w-4xl"
+    >
+      <div className="mb-8 text-center">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+          احسبها بنفسك
+        </p>
+        <h2 className="text-[34px] font-[590] tracking-[-1px] text-foreground sm:text-[40px] sm:tracking-[-1.4px]">
+          كم كنت ستدفع لو بنيته وحدك؟
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-[15px] leading-[1.7] text-muted">
+          نطاق، واستضافة، وقالب، ومطوّر، وSSL، ومحتوى — إليك ما يكلّفك عادةً موقع
+          احترافي في أول سنة، مقارنةً بزينيا Pro.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-token bg-white shadow-soft-sm">
+        <table className="w-full min-w-[520px] text-start">
+          <thead>
+            <tr className="border-b border-token">
+              <th className="px-5 py-4 text-[11px] font-semibold uppercase tracking-[0.10em] text-muted">
+                البند
+              </th>
+              <th className="px-5 py-4 text-end text-[11px] font-semibold uppercase tracking-[0.10em] text-muted">
+                التكلفة السنوية
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {COST_ROWS.map((row, i) => (
+              <tr key={row.label} className={i < COST_ROWS.length - 1 ? 'border-b border-[#f0ede6]' : ''}>
+                <td className="px-5 py-3.5">
+                  <div className="text-[13.5px] font-medium text-foreground">{row.label}</div>
+                  <div className="mt-0.5 text-[12px] text-muted">{row.note}</div>
+                </td>
+                <td className="px-5 py-3.5 text-end text-[13.5px] font-[590] text-foreground">
+                  <span className="font-latin" dir="ltr">${row.yearly}</span>
+                </td>
+              </tr>
+            ))}
+            <tr className="border-t-2 border-token bg-[rgba(94,106,210,0.03)]">
+              <td className="px-5 py-4 text-[14px] font-bold text-foreground">
+                الإجمالي في السنة الأولى
+              </td>
+              <td className="px-5 py-4 text-end text-[16px] font-bold text-foreground">
+                <span className="font-latin" dir="ltr">≈ ${total}</span>
+              </td>
+            </tr>
+            <tr className="border-t border-token">
+              <td className="px-5 py-4">
+                <div className="text-[14px] font-bold text-primary">مع زينيا Pro</div>
+                <div className="mt-0.5 text-[12px] text-muted">
+                  <span className="font-latin" dir="ltr">$24.99</span> شهريًا · نطاق مجاني لسنة · استضافة كاملة · محتوى AI
+                </div>
+              </td>
+              <td className="px-5 py-4 text-end">
+                <div className="text-[16px] font-bold text-primary">
+                  <span className="font-latin" dir="ltr">${zenyaYearly.toFixed(2)}</span>
+                </div>
+                <div className="mt-0.5 text-[12px] font-semibold text-[#27a644]">
+                  توفير <span className="font-latin" dir="ltr">${savings.toFixed(0)}</span> ({savingsPct}%)
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-3 text-center text-[12px] text-muted">
+        الأرقام تقديرية بحسب أسعار السوق للسنة الأولى — تختلف بحسب مزوّد الاستضافة والامتداد.
+      </p>
+    </motion.div>
   )
 }
 

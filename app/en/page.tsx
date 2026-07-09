@@ -63,7 +63,7 @@ export default function EnHome() {
           </p>
           <p className="mt-3 text-[14px] text-subtle">Free to try · then $14.99/mo (Starter) or $24.99/mo with full hosting (Pro).</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/login?mode=signup" className="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white btn-shadow-primary transition-all duration-200 hover:-translate-y-0.5">
+            <Link href="/en/websites" className="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white btn-shadow-primary transition-all duration-200 hover:-translate-y-0.5">
               Start building free
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
             </Link>
@@ -72,7 +72,7 @@ export default function EnHome() {
             </Link>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2">
-            {['Free to try · no card', '2 months free domain on Pro', 'EU hosting · GDPR'].map((l) => (
+            {['Free to try · no card', '1 year free domain on Pro', 'EU hosting · GDPR'].map((l) => (
               <span key={l} className="inline-flex items-center gap-1.5 text-[13px] text-muted">
                 <Check className="h-3.5 w-3.5 text-[#27a644]" strokeWidth={2.5} />
                 {l}

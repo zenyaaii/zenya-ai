@@ -11,6 +11,7 @@ import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
+import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -109,6 +110,7 @@ export default function StudioWizardPage() {
   const supabase = createClient()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
+  useWizardDraft('studio', form, setForm)
   const [loading, setLoading] = useState(false)
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [acked, setAcked] = useState(false)
@@ -119,7 +121,7 @@ export default function StudioWizardPage() {
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
       if (cancelled) return
-      if (!user) { router.push('/login?mode=signup&next=/theme/new/studio'); return }
+      // Guests can browse and fill the wizard; the save/generate action gates on auth (401 handler below).
       setAuthReady(true)
     }
     checkAuth()
@@ -241,6 +243,7 @@ export default function StudioWizardPage() {
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/studio'); return }
       if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
+      clearWizardDraft('studio')
       router.push(`/preview/studio/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')

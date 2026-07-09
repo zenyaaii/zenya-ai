@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Mail,
-  X as XIcon,
+  Globe,
   CheckCircle2,
   Send,
   LifeBuoy,
@@ -15,16 +15,6 @@ import {
   MessageSquareQuote,
   type LucideIcon,
 } from 'lucide-react'
-
-/**
- * GitHub mark — inlined because lucide-react v1+ removed brand icons.
- * Typed as LucideIcon-compatible (accepts className + strokeWidth gracefully).
- */
-const GithubIcon: LucideIcon = ((props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
-    <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.9.58.1.79-.25.79-.56v-2.02c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.76 2.69 1.25 3.34.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.97 10.97 0 015.74 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.58.24 2.75.12 3.04.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.4-5.25 5.69.41.35.78 1.05.78 2.12v3.14c0 .31.21.67.8.56 4.56-1.52 7.85-5.82 7.85-10.9C23.5 5.65 18.35.5 12 .5z" />
-  </svg>
-)) as unknown as LucideIcon
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 
@@ -54,9 +44,8 @@ const TOPIC_SUCCESS: Record<Topic, string> = {
 }
 
 const CHANNELS: { label: string; value: string; href: string; icon: LucideIcon }[] = [
-  { label: 'البريد الإلكتروني', value: 'support@zenyaai.co', href: 'mailto:support@zenyaai.co', icon: Mail       },
-  { label: 'منصّة X',           value: '@zenyaai',          href: '#',                        icon: XIcon      },
-  { label: 'GitHub',           value: 'zenyaai',           href: '#',                        icon: GithubIcon },
+  { label: 'البريد الإلكتروني', value: 'support@zenyaai.co', href: 'mailto:support@zenyaai.co', icon: Mail   },
+  { label: 'موقعنا',            value: 'zenyaai.co',        href: 'https://zenyaai.co',       icon: Globe  },
 ]
 
 /**

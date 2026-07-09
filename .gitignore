@@ -30,6 +30,8 @@ pnpm-debug.log*
 
 .vercel
 .env*.local
+.env*.bak
+.env.*.testmode.bak
 
 
 # Ignore generated themes and test folders
@@ -72,3 +74,10 @@ audit-report/
 
 # Lead-generation toolkit — scraped third-party contact data (PII). Kept local, never committed.
 leads/
+
+# Playwright E2E — reports, traces, saved session, and test-mode secrets
+/playwright-report/
+/test-results/
+/playwright/.cache/
+/tests/e2e/.auth/
+.env.test

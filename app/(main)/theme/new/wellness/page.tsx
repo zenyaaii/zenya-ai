@@ -11,6 +11,7 @@ import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
+import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 
 type Treatment = { id: string; name: string; category: string; duration: string; price: string; description: string; badge: string }
 type TeamMember = { id: string; name: string; title: string; specialty: string; bio: string; image_url: string }
@@ -145,6 +146,7 @@ export default function WellnessWizardPage() {
   const supabase = createClient()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
+  useWizardDraft('wellness', form, setForm)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   // Honesty gate: the user must acknowledge that parts of the generated site
@@ -157,7 +159,7 @@ export default function WellnessWizardPage() {
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
       if (cancelled) return
-      if (!user) { router.push('/login?mode=signup&next=/theme/new/wellness'); return }
+      // Guests can browse and fill the wizard; the save/generate action gates on auth (401 handler below).
       setAuthReady(true)
     }
     checkAuth()
@@ -316,6 +318,7 @@ export default function WellnessWizardPage() {
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/wellness'); return }
       if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
+      clearWizardDraft('wellness')
       router.push(`/preview/wellness/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
