@@ -1,5 +1,6 @@
 import './globals.css'
 import { ReactNode } from 'react'
+import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import CookieConsent from '@/components/CookieConsent'
@@ -169,9 +170,24 @@ const structuredData = [
 ]
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // Shopify App Bridge must be the FIRST <script> in <head>, with no async
+  // or defer attributes — otherwise app-bridge.js throws on load. Inject a
+  // raw <script> only on /shopify/* so we don't ship it on the marketing
+  // site. Pathname comes from middleware via the x-pathname header.
+  const pathname = headers().get('x-pathname') || ''
+  const isShopifyRoute = pathname.startsWith('/shopify')
+  const shopifyApiKey = process.env.SHOPIFY_API_KEY || ''
+
   return (
     <html lang="ar" dir="rtl">
       <head>
+        {isShopifyRoute && shopifyApiKey && (
+          <>
+            <meta name="shopify-api-key" content={shopifyApiKey} />
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key={shopifyApiKey} />
+          </>
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

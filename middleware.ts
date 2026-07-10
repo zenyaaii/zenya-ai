@@ -107,6 +107,11 @@ export async function middleware(request: NextRequest) {
   const host = (request.headers.get('host') || '').toLowerCase()
   const pathname = request.nextUrl.pathname
 
+  // Expose the pathname to server components so the root layout can decide
+  // whether to inject the Shopify App Bridge script tag for /shopify/*.
+  const forwardedHeaders = new Headers(request.headers)
+  forwardedHeaders.set('x-pathname', pathname)
+
   // ---- RATE LIMIT (paid endpoints) ---------------------------------------
   if (
     request.method === 'POST' &&
@@ -140,17 +145,18 @@ export async function middleware(request: NextRequest) {
     // Unknown custom host (DNS pointed at us but no `domains` row yet) —
     // fall through to the normal app so they at least see Zenya rather
     // than a generic error.
-    return NextResponse.next()
+    return NextResponse.next({ request: { headers: forwardedHeaders } })
   }
 
   // ---- OWN-HOST PATH (existing behaviour) --------------------------------
   if (
     pathname.startsWith('/app') ||
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/shopify') ||
     pathname.startsWith('/api/shopify')
   ) {
     const response = NextResponse.next({
-      request: { headers: request.headers },
+      request: { headers: forwardedHeaders },
     })
     response.headers.delete('X-Frame-Options')
     response.headers.set(

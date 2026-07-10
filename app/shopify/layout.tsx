@@ -1,28 +1,18 @@
 import { ReactNode, Suspense } from 'react';
-import Script from 'next/script';
 import { ShopifyAppBridge } from '@/components/ShopifyAppBridge';
+
+// The App Bridge <script> tag is injected in the ROOT layout (app/layout.tsx)
+// for /shopify/* paths — it must be the first <script> in <head> with no
+// async/defer, which next/script and nested layouts can't guarantee.
 
 export default function ShopifyLayout({ children }: { children: ReactNode }) {
   const apiKey = process.env.SHOPIFY_API_KEY || '';
 
   return (
-    <>
-      {/* App Bridge script — head.tsx was dropped in Next.js 14 so we
-          inject it here with next/script. Without this, window.shopify
-          is undefined and every authenticatedFetch call throws
-          "App Bridge is not available". */}
-      {apiKey && (
-        <Script
-          src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
-          data-api-key={apiKey}
-          strategy="beforeInteractive"
-        />
-      )}
-      <Suspense fallback={null}>
-        <ShopifyAppBridge apiKey={apiKey}>
-          {children}
-        </ShopifyAppBridge>
-      </Suspense>
-    </>
+    <Suspense fallback={null}>
+      <ShopifyAppBridge apiKey={apiKey}>
+        {children}
+      </ShopifyAppBridge>
+    </Suspense>
   );
 }
