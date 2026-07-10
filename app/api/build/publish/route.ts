@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { RequestedTokenType } from '@shopify/shopify-api'
 import { createClient } from '@/utils/supabase/server'
 import { shopify } from '@/lib/shopify'
 import { createShopifyProduct } from '@/utils/shopify'
@@ -99,14 +100,37 @@ export async function POST(req: NextRequest) {
   }
   const config = parsed.config
 
-  // Offline access token from the app's session storage.
+  // Offline access token: try the stored session first, then fall back to
+  // Token Exchange for embedded installs (Managed Installation skips our
+  // /api/shopify/callback, so the Prisma session storage stays empty on
+  // first use — Token Exchange mints an offline token from the App Bridge
+  // session token and we cache it via sessionStorage for next time).
   let accessToken = ''
   try {
     const sessions = await shopify.config.sessionStorage.findSessionsByShop(shop)
-    accessToken = sessions?.[0]?.accessToken || ''
+    const offline = sessions?.find((s: any) => !s.isOnline && s.accessToken) || sessions?.[0]
+    accessToken = offline?.accessToken || ''
   } catch (e) {
     console.error('session storage lookup failed:', e)
   }
+
+  if (!accessToken && embedded && bearer) {
+    try {
+      const { session } = await shopify.auth.tokenExchange({
+        shop,
+        sessionToken: bearer,
+        requestedTokenType: RequestedTokenType.OfflineAccessToken,
+      })
+      accessToken = session.accessToken || ''
+      // Cache so future requests skip the exchange round-trip.
+      try { await shopify.config.sessionStorage.storeSession(session) } catch (e) {
+        console.warn('publish: sessionStorage.storeSession failed (non-fatal):', e)
+      }
+    } catch (e: any) {
+      console.error('publish: token exchange failed:', e?.message || e)
+    }
+  }
+
   if (!accessToken) {
     return NextResponse.json(
       {
