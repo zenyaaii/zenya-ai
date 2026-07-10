@@ -460,7 +460,59 @@ function NewThemeContent() {
                 </div>
               )}
 
-              {result?.ok && (
+              {result?.ok && result.needsManualInstall && (
+                <div className="rounded-3xl border border-amber-300 bg-gradient-to-br from-amber-50 to-white p-7 shadow-lg">
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 text-white">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    </span>
+                    <h2 className="text-lg font-extrabold text-gray-900">تثبيت يدوي — خطوة إضافية بسيطة</h2>
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-700">
+                    Shopify يشترط موافقة مسبقة على تطبيقات تثبيت القوالب تلقائيًا — طلب موافقتنا قيد المراجعة حاليًا.
+                    {result.product ? ' في الأثناء، أنشأنا المنتج في متجرك،' : ' في الأثناء،'}
+                    ونزّل ملف القالب واتّبع الخطوات أدناه لرفعه (أقل من دقيقة):
+                  </p>
+
+                  <button
+                    onClick={downloadZip}
+                    disabled={loading}
+                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/30 transition hover:scale-[1.02] disabled:opacity-60"
+                  >
+                    {loading ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                        جارٍ التحضير…
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                        تنزيل ملف القالب (.zip)
+                      </>
+                    )}
+                  </button>
+
+                  <ol className="mt-6 space-y-2.5 rounded-xl bg-white/80 p-4 text-sm text-gray-700 ring-1 ring-amber-200">
+                    <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white">١</span> نزّل ملف <code className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px]">.zip</code> بالضغط على الزر أعلاه.</li>
+                    <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white">٢</span> افتح <strong>Online Store → Themes</strong> في لوحة تحكم متجرك.</li>
+                    <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white">٣</span> اضغط <strong>Add theme → Upload zip file</strong>، ثم اختر الملف الذي نزّلته.</li>
+                    <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[11px] font-bold text-white">٤</span> بعد الانتهاء، اضغط <strong>Preview</strong> للاطلاع، أو <strong>Publish</strong> لتفعيله مباشرة على المتجر.</li>
+                  </ol>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {result.themesUrl && <a href={result.themesUrl} target="_blank" rel="noreferrer" className="rounded-full bg-gray-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-gray-800">فتح صفحة القوالب</a>}
+                    {result.product?.adminUrl && <a href={result.product.adminUrl} target="_blank" rel="noreferrer" className="rounded-full border border-gray-300 bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50">عرض المنتج</a>}
+                  </div>
+
+                  {result.productError && (
+                    <p className="mt-3 text-xs text-amber-700">ملاحظة عن المنتج: {result.productError}</p>
+                  )}
+
+                  <button onClick={() => router.push(`/shopify?host=${searchParams.get('host')}&shop=${shop}`)} className="mt-4 text-xs font-medium text-gray-500 underline hover:text-indigo-600">→ العودة إلى لوحة التحكم</button>
+                </div>
+              )}
+
+              {result?.ok && !result.needsManualInstall && (
                 <div className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-7 shadow-lg">
                   <h2 className="text-lg font-extrabold text-gray-900">✅ تم التثبيت في {result.shop}</h2>
                   <p className="mt-1 text-sm text-gray-600">

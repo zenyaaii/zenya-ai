@@ -162,6 +162,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 2. Generate + push the theme.
+  const storeHandleForFallback = shop.replace('.myshopify.com', '')
   let theme
   try {
     const files = generateTheme(config)
@@ -173,13 +174,42 @@ export async function POST(req: NextRequest) {
       themeName: `${safeStore}-zenya-theme`,
     })
   } catch (e: any) {
+    const msg = String(e?.message || '')
     console.error('publish: theme push failed:', e)
+
+    // Shopify locked themeCreate behind a per-app exemption in 2024. Until
+    // Zenya's exemption request is approved, `write_themes` alone can't
+    // install a new theme. Fall back gracefully: the product is already
+    // created; return a 200 with `needsManualInstall` so the client can
+    // hand the merchant a one-click ZIP download + upload instructions.
+    const isExemptionGate =
+      /themeCreate/i.test(msg) ||
+      /exemption from Shopify/i.test(msg) ||
+      /Access denied for themeCreate/i.test(msg)
+
+    if (isExemptionGate) {
+      return NextResponse.json({
+        ok: true,
+        needsManualInstall: true,
+        shop,
+        product: product
+          ? {
+              id: product.id,
+              handle: product.handle || null,
+              adminUrl: `https://admin.shopify.com/store/${storeHandleForFallback}/products/${product.id}`,
+            }
+          : null,
+        productError,
+        themesUrl: `https://admin.shopify.com/store/${storeHandleForFallback}/themes`,
+      })
+    }
+
     return NextResponse.json(
       {
         error: 'theme_push_failed',
         message: e?.message || 'Pushing the theme to Shopify failed.',
         product: product
-          ? { id: product.id, adminUrl: `https://admin.shopify.com/store/${shop.replace('.myshopify.com', '')}/products/${product.id}` }
+          ? { id: product.id, adminUrl: `https://admin.shopify.com/store/${storeHandleForFallback}/products/${product.id}` }
           : null,
       },
       { status: 502 },
