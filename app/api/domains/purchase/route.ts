@@ -9,6 +9,11 @@ import {
   registerDomain,
   PorkbunError,
 } from '@/lib/porkbun'
+import {
+  priceDomainFor,
+  FREE_DOMAIN_COUPON,
+  PRO_DOMAIN_COUPON,
+} from '@/lib/domain-entitlement'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -100,10 +105,12 @@ export async function POST(req: NextRequest) {
   // registrar's 1-per-10s window instead of failing with a rate-limit.
   let wholesale: number | null = null
   let available = false
+  let premium = false
   try {
     const r = await checkDomainCached(domain)
     available = r.available
     wholesale = r.price
+    premium = r.premium
   } catch (e: any) {
     const err = e as PorkbunError
     console.error('[/api/domains/purchase] porkbun check failed:', err)
@@ -152,6 +159,35 @@ export async function POST(req: NextRequest) {
   const totalWholesale = +(wholesale * years).toFixed(2)
   const totalRetail = +(retail * years).toFixed(2)
   const amountCents = Math.round(totalRetail * 100)
+
+  // Entitlement pricing — decided server-side from the fresh price + premium
+  // flag we just validated, never from anything the client sent. Pro accounts
+  // get ONE free standard domain, then 30% off every other domain.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan, has_hosting, is_pro, free_domain_claimed_at')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  // Free-perk gate is now the WHOLESALE first-year price (what Zenya pays
+  // Porkbun), capped at $4 by default — that's the rule the pricing page
+  // advertises. We pass retail for record-keeping only.
+  const pricing = priceDomainFor(profile, {
+    wholesale: totalWholesale,
+    retail: totalRetail,
+    premium,
+  })
+  const isFreeDomain = pricing === 'free'
+  const entitlementCoupon =
+    pricing === 'free' ? FREE_DOMAIN_COUPON
+    : pricing === 'pro' ? PRO_DOMAIN_COUPON
+    : null
+  // What the customer actually pays after the entitlement discount — stored
+  // on the row so the dashboard/receipts reflect the real charge.
+  const chargedRetail =
+    pricing === 'free' ? 0
+    : pricing === 'pro' ? +(totalRetail * 0.7).toFixed(2)
+    : totalRetail
   // Exact penny figure Porkbun expects for the create call. Sourced from
   // the same fresh price lookup and carried through Stripe metadata so
   // fulfillment registers at precisely the validated price.
@@ -200,7 +236,7 @@ export async function POST(req: NextRequest) {
       years,
       status: 'pending_payment',
       wholesale_usd: totalWholesale,
-      retail_usd_charged: totalRetail,
+      retail_usd_charged: chargedRetail,
     })
     .select('id')
     .single()
@@ -233,7 +269,12 @@ export async function POST(req: NextRequest) {
         },
       },
     ],
-    allow_promotion_codes: true,
+    // discounts and allow_promotion_codes are mutually exclusive in Stripe.
+    // When an entitlement coupon applies (free or Pro 30%), attach it and
+    // drop the manual promo-code box; otherwise keep the box open.
+    ...(entitlementCoupon
+      ? { discounts: [{ coupon: entitlementCoupon }] }
+      : { allow_promotion_codes: true }),
     billing_address_collection: 'required',
     automatic_tax: { enabled: true },
     metadata: {
@@ -244,6 +285,9 @@ export async function POST(req: NextRequest) {
       years: String(years),
       cost_cents: String(costCents),
       theme_id: themeId || '',
+      // Marks the one free-domain redemption so the webhook burns the
+      // account's entitlement only on a genuinely-free, successful reg.
+      free_domain: isFreeDomain ? '1' : '',
     },
     payment_intent_data: {
       metadata: {

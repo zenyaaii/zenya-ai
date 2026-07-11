@@ -117,3 +117,54 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   return NextResponse.json({ ok: true, theme: data })
 }
+
+/**
+ * DELETE /api/themes/[id] — permanently remove a theme.
+ *
+ * Cascade behaviour (per schema):
+ *   • site_views       → ON DELETE CASCADE (rows removed)
+ *   • domains.theme_id → ON DELETE SET NULL (row survives, unlinked so the
+ *                        user can detach it from /dashboard/domains)
+ *   • gallery_images   → not linked to theme; images stay in the user's gallery
+ *
+ * Ownership enforced; activity log on success.
+ */
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  const a = admin()
+  const { data: existing } = await a
+    .from('themes')
+    .select('id, user_id, slug, is_published, product_name')
+    .eq('id', params.id)
+    .maybeSingle()
+
+  if (!existing || existing.user_id !== user.id) {
+    return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
+  const { error } = await a
+    .from('themes')
+    .delete()
+    .eq('id', params.id)
+
+  if (error) {
+    console.error('[/api/themes/[id]] delete failed', error)
+    return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
+  }
+
+  await a.from('activity_logs').insert({
+    user_id: user.id,
+    event_type: 'theme.deleted',
+    metadata: {
+      theme_id: params.id,
+      slug: existing.slug,
+      was_published: !!existing.is_published,
+      product_name: existing.product_name,
+    } as any,
+  })
+
+  return NextResponse.json({ ok: true })
+}

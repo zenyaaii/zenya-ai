@@ -166,8 +166,8 @@ export default function PublishSiteModal({
               lineHeight: 1.55,
             }}
           >
-            يتطلّب النشر <strong>باقة الاستضافة (19.99$ شهريًا)</strong>.{' '}
-            <a href="/checkout?plan=hosting" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
+            يتطلّب النشر <strong>خطة Pro (24.99$ شهريًا)</strong>.{' '}
+            <a href="/pricing?upgrade=pro" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
               الترقية ←
             </a>
           </div>

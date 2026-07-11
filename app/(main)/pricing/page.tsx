@@ -1,12 +1,25 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import * as Accordion from '@radix-ui/react-accordion'
-import { Check, ChevronDown, ArrowRight, Globe, Gift } from 'lucide-react'
+import { Check, ChevronDown, ArrowRight, Globe, Gift, CheckCircle2, MessageSquareHeart, Sparkles, Copy } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 import { affiliateClickHref } from '@/lib/affiliate'
+import { createClient } from '@/utils/supabase/client'
+
+type ViewerProfile = {
+  plan?: string | null
+  is_pro?: boolean | null
+  has_hosting?: boolean | null
+}
+
+const REVIEW_UNLOCK_KEY = 'zenya:review-code-unlocked'
+const REVIEW_PROMO_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
+const REVIEW_URL = '/contact?topic=review'
 
 const FAQS = [
   {
@@ -66,7 +79,8 @@ const STARTER_FEATURES = [
 const PRO_FEATURES = [
   'كل ما في خطة Starter، بالإضافة إلى:',
   'تستضيف زينيا مواقع العرض الخاصة بك',
-  'نطاق مخصّص مجاني لسنة كاملة (نطاق قياسي)',
+  'نطاق مجاني لسنة على الامتدادات الاقتصادية (.store، .site، .online، .shop، …)',
+  'خصم 30% على النطاقات الأغلى (.com وأمثالها)',
   'شهادة SSL تلقائية + تسليم عبر CDN',
   'إزالة شارة «صُنع بزينيا»',
   'تحليلات الموقع في لوحة تحكمك',
@@ -74,6 +88,57 @@ const PRO_FEATURES = [
 ]
 
 export default function PricingPage() {
+  const searchParams = useSearchParams()
+  const rawUpgrade = (searchParams.get('upgrade') || '').toLowerCase()
+  const targetUpgrade: 'starter' | 'pro' | null =
+    rawUpgrade === 'starter' ? 'starter'
+    : rawUpgrade === 'pro' || rawUpgrade === 'hosting' ? 'pro'
+    : null
+
+  const supabase = useMemo(() => createClient(), [])
+  const [profile, setProfile] = useState<ViewerProfile | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
+  const [reviewed, setReviewed] = useState(false)
+
+  useEffect(() => {
+    let cancel = false
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { if (!cancel) setProfileLoaded(true); return }
+      const { data } = await supabase
+        .from('profiles')
+        .select('plan, is_pro, has_hosting')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (cancel) return
+      setProfile((data as ViewerProfile) || null)
+      setProfileLoaded(true)
+    })()
+    try { setReviewed(localStorage.getItem(REVIEW_UNLOCK_KEY) === '1') } catch {}
+    return () => { cancel = true }
+  }, [supabase])
+
+  const plan = String(profile?.plan || '')
+  const onStarter = plan === 'starter'
+  const onPro = plan === 'pro' || plan === 'pro_hosting' || plan === 'pro_onetime' || plan === 'admin'
+  const showReviewPitch = targetUpgrade === 'pro' && onStarter && !reviewed
+
+  // Once the profile is known, scroll the target card into view. Done in a
+  // setTimeout so we're after the initial paint / motion enter.
+  useEffect(() => {
+    if (!profileLoaded || !targetUpgrade) return
+    const id = targetUpgrade === 'starter' ? 'plan-starter' : 'plan-pro'
+    const t = setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 200)
+    return () => clearTimeout(t)
+  }, [profileLoaded, targetUpgrade])
+
+  const onReviewShared = () => {
+    try { localStorage.setItem(REVIEW_UNLOCK_KEY, '1') } catch {}
+    setReviewed(true)
+  }
+
   return (
     <main className="relative">
       <AuroraBackground fixed intensity={0.7} />
@@ -96,6 +161,12 @@ export default function PricingPage() {
           <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.85] text-muted">
             منشئ واحد بالذكاء الاصطناعي، وخطتان مدفوعتان. مجاني للتجربة. اشترك شهريًا في Starter أو Pro، وألغِ في أي وقت.
           </p>
+          {profileLoaded && (onStarter || onPro) && (
+            <CurrentPlanBanner
+              plan={onPro ? 'pro' : 'starter'}
+              wantUpgrade={targetUpgrade === 'pro' && onStarter}
+            />
+          )}
         </motion.div>
 
         {/* Pricing cards — three plans */}
@@ -140,10 +211,11 @@ export default function PricingPage() {
 
           {/* Starter */}
           <motion.div
+            id="plan-starter"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex flex-col rounded-xl bg-white p-7"
+            className="relative flex flex-col rounded-xl bg-white p-7 scroll-mt-24"
             style={{
               border: '1px solid #5e6ad2',
               boxShadow: '0 0 0 1px #5e6ad2, 0 8px 24px rgba(94,106,210,0.16)',
@@ -192,16 +264,12 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              href="/checkout?plan=starter"
-              className={cn(
-                'group inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary py-3 text-[14px] font-semibold text-white transition-all duration-150',
-                'btn-shadow-primary hover:opacity-90 active:scale-[0.99]'
-              )}
-            >
-              اشترك في Starter
-              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
-            </Link>
+            <PlanCTA
+              kind="starter"
+              plan={plan}
+              onStarter={onStarter}
+              onPro={onPro}
+            />
             <p className="mt-2.5 text-center text-[12px] text-muted">
               ألغِ في أي وقت
             </p>
@@ -209,10 +277,19 @@ export default function PricingPage() {
 
           {/* Pro */}
           <motion.div
+            id="plan-pro"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex flex-col rounded-xl border border-token bg-white p-7 shadow-soft-sm"
+            className={cn(
+              'relative flex flex-col rounded-xl border bg-white p-7 shadow-soft-sm scroll-mt-24',
+              targetUpgrade === 'pro' && !onPro ? 'border-primary/40' : 'border-token'
+            )}
+            style={
+              targetUpgrade === 'pro' && !onPro
+                ? { boxShadow: '0 0 0 1px rgba(94,106,210,0.35), 0 8px 24px rgba(94,106,210,0.16)' }
+                : undefined
+            }
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
@@ -227,14 +304,27 @@ export default function PricingPage() {
 
             {/* Free domain offer badge */}
             <div
-              className="mb-5 flex items-center gap-2 rounded-lg px-3 py-2.5"
+              className="mb-5 flex flex-col gap-1 rounded-lg px-3 py-2.5"
               style={{ background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.18)' }}
             >
-              <Globe className="h-3.5 w-3.5 flex-shrink-0 text-amber-600" strokeWidth={2} />
-              <span className="text-[12.5px] font-medium text-amber-700">
-                نطاق مخصّص مجاني لسنة كاملة، وخصم 30% على ما بعدها
+              <div className="flex items-center gap-2">
+                <Globe className="h-3.5 w-3.5 flex-shrink-0 text-amber-600" strokeWidth={2} />
+                <span className="text-[12.5px] font-medium text-amber-700">
+                  نطاق مجاني لسنة على الامتدادات الاقتصادية
+                </span>
+              </div>
+              <span className="ms-6 text-[11.5px] leading-[1.6] text-amber-700/85">
+                يشمل عادةً <span dir="ltr">.store .site .online .shop .xyz .club</span> — الأغلى (مثل .com) تحصل على خصم 30%.
               </span>
             </div>
+
+            {/* Review pitch — only for Starter users clicking upgrade→Pro who
+                haven't left a review yet. Marketing-shaped, but the reward is
+                the same one Pro already includes (free cheap-TLD domain +
+                30% off first month via SHUKRAN30) — nothing fake. */}
+            {showReviewPitch && (
+              <ReviewPitchCard onShared={onReviewShared} />
+            )}
 
             <ul className="mb-7 flex-1 space-y-3">
               {PRO_FEATURES.map((feat) => (
@@ -245,17 +335,12 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              href="/checkout?plan=pro"
-              className={cn(
-                'group inline-flex w-full items-center justify-center gap-2 rounded-md border border-token bg-white py-3 text-[14px] font-semibold text-foreground transition-all duration-150',
-                'hover:bg-black/5 active:scale-[0.99]'
-              )}
-              style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
-            >
-              اشترك في Pro
-              <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
-            </Link>
+            <PlanCTA
+              kind="pro"
+              plan={plan}
+              onStarter={onStarter}
+              onPro={onPro}
+            />
             <p className="mt-2.5 text-center text-[12px] text-muted">
               ألغِ في أي وقت · يبقى الموقع مباشرًا حتى نهاية الشهر
             </p>
@@ -520,6 +605,235 @@ function CostCalculator() {
       <p className="mt-3 text-center text-[12px] text-muted">
         الأرقام تقديرية بحسب أسعار السوق للسنة الأولى — تختلف بحسب مزوّد الاستضافة والامتداد.
       </p>
+    </motion.div>
+  )
+}
+
+/**
+ * CurrentPlanBanner — reassuring pill under the hero when the logged-in
+ * viewer already owns a paid plan. Prevents the "wait, am I on this?"
+ * moment when the dashboard's own upgrade CTA lands them here.
+ */
+function CurrentPlanBanner({
+  plan,
+  wantUpgrade,
+}: {
+  plan: 'starter' | 'pro'
+  wantUpgrade: boolean
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: 0.15 }}
+      className="mx-auto mt-8 inline-flex max-w-md items-center gap-2 rounded-full border px-4 py-2 text-[12.5px]"
+      style={{
+        background: 'rgba(21,128,61,0.06)',
+        borderColor: 'rgba(21,128,61,0.22)',
+        color: '#15803d',
+      }}
+    >
+      <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2.5} />
+      {plan === 'pro' ? (
+        <span className="font-medium">أنت مشترك في Pro — تشمل خطتك كل ما تراه هنا.</span>
+      ) : wantUpgrade ? (
+        <span className="font-medium">أنت الآن في Starter — إليك ما تضيفه الترقية إلى Pro.</span>
+      ) : (
+        <span className="font-medium">أنت مشترك في Starter — Pro يضيف الاستضافة والنطاق المجاني.</span>
+      )}
+    </motion.div>
+  )
+}
+
+/**
+ * PlanCTA — the "Subscribe" button under each paid card, with three states:
+ *
+ *   - Not signed in / free plan  → normal link to /checkout?plan=X
+ *   - Already on this exact plan → disabled "أنت على هذه الخطة" pill
+ *   - On a strictly higher plan  → disabled "خطتك تشملها" pill
+ *
+ * Keeps the two cards visually consistent — otherwise the Starter and Pro
+ * buttons would drift apart every time either got tweaked.
+ */
+function PlanCTA({
+  kind,
+  plan,
+  onStarter,
+  onPro,
+}: {
+  kind: 'starter' | 'pro'
+  plan: string
+  onStarter: boolean
+  onPro: boolean
+}) {
+  // Highlight = the "primary" state; Starter is highlighted by default
+  // (matches the pre-existing design). For Pro we keep it as the softer
+  // ghost button unless it's the current upgrade target.
+  const primary = kind === 'starter' || onStarter
+  const base =
+    'group inline-flex w-full items-center justify-center gap-2 rounded-md py-3 text-[14px] font-semibold transition-all duration-150'
+
+  // Gating: you own it, or you own a superset of it.
+  if (kind === 'starter' && (onStarter || onPro)) {
+    return (
+      <div
+        className={cn(base, 'cursor-not-allowed border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.06)] text-[#15803d]')}
+      >
+        <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
+        {onPro ? 'خطتك تشمل Starter' : 'أنت على هذه الخطة'}
+      </div>
+    )
+  }
+  if (kind === 'pro' && onPro) {
+    return (
+      <div
+        className={cn(base, 'cursor-not-allowed border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.06)] text-[#15803d]')}
+      >
+        <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
+        أنت على هذه الخطة
+      </div>
+    )
+  }
+
+  const href = `/checkout?plan=${kind}`
+  const label = kind === 'starter' ? 'اشترك في Starter' : (onStarter ? 'الترقية إلى Pro' : 'اشترك في Pro')
+  if (primary) {
+    return (
+      <Link
+        href={href}
+        className={cn(base, 'bg-primary text-white btn-shadow-primary hover:opacity-90 active:scale-[0.99]')}
+      >
+        {label}
+        <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
+      </Link>
+    )
+  }
+  return (
+    <Link
+      href={href}
+      className={cn(base, 'border border-token bg-white hover:bg-black/5 active:scale-[0.99]')}
+      style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
+    >
+      {label}
+      <ArrowRight className="h-3.5 w-3.5 rtl-flip transition-transform group-hover:-translate-x-0.5" strokeWidth={2.5} />
+    </Link>
+  )
+}
+
+/**
+ * ReviewPitchCard — appears on the Pro card only when a Starter user
+ * clicks upgrade→Pro AND hasn't already left a review. Two beats:
+ *
+ *   1. Pitch: "before you upgrade, share your honest feedback and here's
+ *      a 30%-off first-month code as a thank-you (on top of the free
+ *      domain year Pro already includes)."
+ *   2. After click: reveal SHUKRAN30 with copy-to-clipboard, plus a
+ *      "متابعة الترقية" reminder.
+ *
+ * The review link opens in a new tab so the user's Pro upgrade flow is
+ * never interrupted. Same UNLOCK_KEY as ReviewOffer, so if the user
+ * already unlocked the code during theme generation, this pitch never
+ * appears — no re-asking. This is a persuasion element, not a paywall:
+ * skipping straight to Pro still works.
+ */
+function ReviewPitchCard({ onShared }: { onShared: () => void }) {
+  const [unlocked, setUnlocked] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  function share() {
+    try { window.open(REVIEW_URL, '_blank', 'noopener,noreferrer') } catch {}
+    setUnlocked(true)
+    onShared()
+    // Persist to the account (best-effort) so the code lives in
+    // Settings → "أكواد الخصم" and survives navigation.
+    try {
+      fetch('/api/promo-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: REVIEW_PROMO_CODE }),
+        keepalive: true,
+      }).catch(() => {})
+    } catch {}
+  }
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(REVIEW_PROMO_CODE)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {}
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: 0.05 }}
+      className="mb-5 rounded-xl border p-3.5"
+      style={{
+        background: 'rgba(94,106,210,0.05)',
+        borderColor: 'rgba(94,106,210,0.25)',
+      }}
+    >
+      {!unlocked ? (
+        <>
+          <div className="flex items-center gap-2">
+            <span
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md"
+              style={{ background: 'rgba(94,106,210,0.14)', color: '#5e6ad2' }}
+            >
+              <MessageSquareHeart className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </span>
+            <span className="text-[12.5px] font-semibold text-primary">
+              قبل الترقية — لحظة واحدة من فضلك
+            </span>
+          </div>
+          <p className="mt-2 text-[12.5px] leading-[1.75] text-foreground">
+            زينيا مشروع صغير يعمل بجدّ. رأيك الصادق يساعدنا فعلًا على التحسّن.
+            <br />
+            <span className="font-semibold">شاركنا تجربتك،</span> ونشكرك بـ
+            <span className="font-semibold gradient-text"> 30% خصم على أول شهر Pro </span>
+            على نطاقك المجاني للسنة الأولى.
+          </p>
+          <button
+            type="button"
+            onClick={share}
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary py-2.5 text-[13px] font-semibold text-white transition-all hover:opacity-90"
+          >
+            <Sparkles className="h-3.5 w-3.5" strokeWidth={2.25} />
+            شاركنا رأيك (يفتح في تبويب جديد)
+          </button>
+          <p className="mt-2 text-center text-[11px] text-muted">
+            بلا شروط — الكود لك مهما كان رأيك.
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0 text-[#15803d]" strokeWidth={2.5} />
+            <span className="text-[12.5px] font-semibold text-[#15803d]">شكرًا لك 💛 هذا كودك:</span>
+          </div>
+          <button
+            type="button"
+            onClick={copy}
+            aria-label="نسخ كود الخصم"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-2.5 transition-colors hover:bg-[rgba(94,106,210,0.04)]"
+            style={{ borderColor: 'rgba(94,106,210,0.5)' }}
+          >
+            <span className="font-latin text-[16px] font-extrabold tracking-[0.12em] text-primary" dir="ltr">
+              {REVIEW_PROMO_CODE}
+            </span>
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-[#15803d]" strokeWidth={2.5} />
+            ) : (
+              <Copy className="h-3.5 w-3.5 text-muted" strokeWidth={2} />
+            )}
+          </button>
+          <p className="mt-2 text-center text-[11.5px] text-muted">
+            أدخِله في خانة «Promotion code» عند الدفع، ثم اضغط زر الترقية أدناه.
+          </p>
+        </>
+      )}
     </motion.div>
   )
 }

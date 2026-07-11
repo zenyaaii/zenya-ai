@@ -9,6 +9,12 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import AddDomainModal from '@/components/AddDomainModal'
+import {
+  priceDomainFor,
+  isProProfile,
+  PRO_DOMAIN_DISCOUNT_PCT,
+  type ProfileForEntitlement,
+} from '@/lib/domain-entitlement'
 
 type DomainRow = {
   id: string
@@ -75,6 +81,9 @@ export default function DomainsPage() {
   const supabase = createClient()
   const [hasHosting, setHasHosting] = useState(false)
   const [hostingChecked, setHostingChecked] = useState(false)
+  /** Profile fields used to preview the free/discounted domain price.
+   *  The real price is always re-decided server-side at checkout. */
+  const [entitlement, setEntitlement] = useState<ProfileForEntitlement | null>(null)
   const [domains, setDomains] = useState<DomainRow[]>([])
   const [themes, setThemes] = useState<Record<string, Theme>>({})
   const [loading, setLoading] = useState(true)
@@ -109,7 +118,7 @@ export default function DomainsPage() {
     if (!user) return
 
     const [profileRes, domainsRes, themesRes, purchasesRes] = await Promise.all([
-      supabase.from('profiles').select('plan, has_hosting').eq('id', user.id).maybeSingle(),
+      supabase.from('profiles').select('plan, has_hosting, is_pro, free_domain_claimed_at').eq('id', user.id).maybeSingle(),
       fetch('/api/domains').then((r) => (r.ok ? r.json() : { domains: [] })),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
       fetch('/api/domains/purchase').then((r) => (r.ok ? r.json() : { purchases: [] })),
@@ -117,6 +126,7 @@ export default function DomainsPage() {
 
     const profile = profileRes.data as any
     setHasHosting(!!profile?.has_hosting || profile?.plan === 'admin')
+    setEntitlement(profile || null)
     setHostingChecked(true)
     setDomains(domainsRes.domains || [])
     const map: Record<string, Theme> = {}
@@ -167,8 +177,14 @@ export default function DomainsPage() {
     checkGenRef.current++
     setAutoChecking(false)
     setChecking(null)
+    // If any of the user's themes is a restaurant, hint the search so
+    // .restaurant / .menu appear alongside the standard TLD list.
+    const forHint = Object.values(themes).some((t: any) => {
+      const bt = (t?.content?.business_type) || t?.template_type
+      return bt === 'restaurant'
+    }) ? '&for=restaurant' : ''
     try {
-      const r = await fetch(`/api/domains/search?q=${encodeURIComponent(q)}`)
+      const r = await fetch(`/api/domains/search?q=${encodeURIComponent(q)}${forHint}`)
       const j = await r.json()
       if (!r.ok) {
         setSearchError(friendlyError(j))
@@ -271,7 +287,7 @@ export default function DomainsPage() {
     if (!hasHosting) {
       // Custom domains need the hosting plan — push them to upgrade
       // instead of failing silently mid-checkout.
-      window.location.href = '/checkout?plan=hosting'
+      window.location.href = '/pricing?upgrade=pro'
       return
     }
     setBuying(domain)
@@ -363,7 +379,7 @@ export default function DomainsPage() {
               <p className="mt-1 text-[12.5px] text-muted">24.99$ شهريًا. وجِّه أي نطاق إلى موقعك على زينيا.</p>
             </div>
           </div>
-          <Link href="/checkout?plan=pro" className="rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+          <Link href="/pricing?upgrade=pro" className="rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
             الترقية إلى Pro ←
           </Link>
         </div>
@@ -378,6 +394,25 @@ export default function DomainsPage() {
         <p className="mt-1 text-[12.5px] text-muted">
           اكتب اسمًا، وشاهد المتاح، واشترِه بنقرة واحدة — التسجيل وDNS وSSL تُجهَّز لك تلقائيًا.
         </p>
+
+        {/* Free-domain entitlement banner — Pro accounts that haven't claimed
+            their one free cheap-TLD domain yet. */}
+        {isProProfile(entitlement) && !entitlement?.free_domain_claimed_at && (
+          <div
+            className="mt-3 flex flex-col gap-1 rounded-lg px-3 py-2.5"
+            style={{ background: 'rgba(21,128,61,0.06)', border: '1px solid rgba(21,128,61,0.18)' }}
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-[#15803d]" strokeWidth={2.5} />
+              <span className="text-[12.5px] font-medium text-[#15803d]">
+                🎁 نطاقك المجاني بانتظارك — سنة كاملة مجانًا مع Pro على الامتدادات الاقتصادية.
+              </span>
+            </div>
+            <span className="ms-6 text-[11.5px] text-[#15803d]/80">
+              تشمل عادةً <span dir="ltr">.store .site .online .shop .xyz</span> — تظهر بلا سعر تلقائيًا عند البحث. الامتدادات الأغلى (مثل .com) تحصل على خصم 30%.
+            </span>
+          </div>
+        )}
 
         <form
           onSubmit={(e) => { e.preventDefault(); search() }}
@@ -460,6 +495,18 @@ export default function DomainsPage() {
                 {results.map((r) => {
                   const isPending = buying === r.domain
                   const isCheckingThis = checking === r.domain
+                  // Preview the entitlement price for this row. Server re-decides
+                  // at checkout — this is display only.
+                  const deal =
+                    r.available === true &&
+                    r.retail_usd_year != null &&
+                    r.wholesale_usd_year != null
+                      ? priceDomainFor(entitlement, {
+                          wholesale: r.wholesale_usd_year,
+                          retail: r.retail_usd_year,
+                          premium: !!r.premium,
+                        })
+                      : 'standard'
                   // Row is queued if the loop is running but hasn't
                   // reached it yet. We keep it visually distinct from
                   // genuine failures so the user understands waiting is
@@ -510,9 +557,21 @@ export default function DomainsPage() {
                         )}
                       </td>
                       <td className="px-3 py-2 text-end tabular-nums text-foreground">
-                        {r.retail_usd_year != null
-                          ? `$${r.retail_usd_year.toFixed(2)}`
-                          : '—'}
+                        {r.retail_usd_year == null ? (
+                          '—'
+                        ) : deal === 'free' ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="text-muted line-through decoration-1">${r.retail_usd_year.toFixed(2)}</span>
+                            <span className="rounded-full bg-[rgba(21,128,61,0.10)] px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.06em] text-[#15803d]">مجاني · سنة</span>
+                          </span>
+                        ) : deal === 'pro' ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="text-muted line-through decoration-1">${r.retail_usd_year.toFixed(2)}</span>
+                            <span className="font-semibold text-foreground">${(r.retail_usd_year * (1 - PRO_DOMAIN_DISCOUNT_PCT / 100)).toFixed(2)}</span>
+                          </span>
+                        ) : (
+                          `$${r.retail_usd_year.toFixed(2)}`
+                        )}
                       </td>
                       <td className="px-3 py-2 text-end">
                         {r.available === true ? (
@@ -521,7 +580,7 @@ export default function DomainsPage() {
                             disabled={isPending}
                             className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                           >
-                            {isPending ? 'جارٍ التحميل…' : <>اشترِ الآن <ArrowRight className="h-3 w-3 rtl-flip" /></>}
+                            {isPending ? 'جارٍ التحميل…' : deal === 'free' ? <>احصل عليه مجانًا <ArrowRight className="h-3 w-3 rtl-flip" /></> : <>اشترِ الآن <ArrowRight className="h-3 w-3 rtl-flip" /></>}
                           </button>
                         ) : r.available === false ? (
                           <span className="text-[11.5px] text-muted">محجوز مسبقًا</span>

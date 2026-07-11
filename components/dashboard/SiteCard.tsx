@@ -84,6 +84,7 @@ export default function SiteCard({
   onPublish,
   onAddDomain,
   onUnpublish,
+  onDelete,
 }: {
   theme: SiteTheme
   hasHosting: boolean
@@ -92,6 +93,7 @@ export default function SiteCard({
   onPublish: () => void
   onAddDomain: () => void
   onUnpublish: () => void
+  onDelete: () => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const businessType =
@@ -236,7 +238,7 @@ export default function SiteCard({
               <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
               <div>
                 <div className="font-medium text-foreground">خطة Pro تفتح النشر</div>
-                <Link href="/checkout?plan=pro" className="text-primary hover:underline">
+                <Link href="/pricing?upgrade=pro" className="text-primary hover:underline">
                   الترقية إلى Pro · 24.99$ شهريًا ←
                 </Link>
               </div>
@@ -284,7 +286,7 @@ export default function SiteCard({
                 </button>
               ) : (
                 <Link
-                  href="/checkout?plan=hosting"
+                  href="/pricing?upgrade=pro"
                   className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
                 >
                   رقِّ للنشر
@@ -305,52 +307,62 @@ export default function SiteCard({
           )}
           {isEcom && !isPro && (
             <Link
-              href="/checkout?plan=onetime"
+              href="/pricing?upgrade=starter"
               className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
             >
               رقِّ للحصول على الملف
             </Link>
           )}
 
-          {/* Overflow menu — unpublish only (Edit is now a top-level action) */}
-          {publishedHere && (
-            <div className="relative ms-auto">
-              <button
-                onClick={() => setMenuOpen((v) => !v)}
-                className="rounded-md border border-token p-1.5 text-muted hover:bg-black/5"
-                aria-label="إجراءات إضافية"
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" strokeWidth={2.25} />
-              </button>
-              <AnimatePresence>
-                {menuOpen && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-20"
-                      onClick={() => setMenuOpen(false)}
-                      aria-hidden
-                    />
-                    <motion.div
-                      initial={{ opacity: 0, y: 4, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 4, scale: 0.98 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute end-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
-                      style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
+          {/* Overflow menu — unpublish (if live) + delete (always) */}
+          <div className="relative ms-auto">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="rounded-md border border-token p-1.5 text-muted hover:bg-black/5"
+              aria-label="إجراءات إضافية"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </button>
+            <AnimatePresence>
+              {menuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-20"
+                    onClick={() => setMenuOpen(false)}
+                    aria-hidden
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: 4, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute end-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
+                    style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
+                  >
+                    {publishedHere && (
+                      <>
+                        <button
+                          onClick={() => { setMenuOpen(false); onUnpublish() }}
+                          className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
+                        >
+                          <Trash2 className="h-3 w-3" strokeWidth={2.25} />
+                          إلغاء النشر
+                        </button>
+                        <div className="my-1 h-px bg-token" />
+                      </>
+                    )}
+                    <button
+                      onClick={() => { setMenuOpen(false); onDelete() }}
+                      className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
                     >
-                      <button
-                        onClick={() => { setMenuOpen(false); onUnpublish() }}
-                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
-                      >
-                        <Trash2 className="h-3 w-3" strokeWidth={2.25} />
-                        إلغاء النشر
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+                      <Trash2 className="h-3 w-3" strokeWidth={2.25} />
+                      حذف الموقع نهائيًا
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>

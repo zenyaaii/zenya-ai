@@ -113,19 +113,19 @@ export default function BillingPage() {
               <div className="flex flex-col gap-2">
                 {plan === 'free' && (
                   <>
-                    <Link href="/checkout?plan=starter"
+                    <Link href="/pricing?upgrade=starter"
                           className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
                       اشترك في Starter · 14.99$/شهريًا
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
-                    <Link href="/checkout?plan=pro"
+                    <Link href="/pricing?upgrade=pro"
                           className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                       اشترك في Pro · 24.99$ شهريًا
                     </Link>
                   </>
                 )}
                 {plan === 'pro_onetime' && (
-                  <Link href="/checkout?plan=hosting"
+                  <Link href="/pricing?upgrade=pro"
                         className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
                     أضف الاستضافة · 19.99$ شهريًا
                     <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
@@ -133,7 +133,7 @@ export default function BillingPage() {
                 )}
                 {plan === 'starter' && (
                   <>
-                    <Link href="/checkout?plan=pro"
+                    <Link href="/pricing?upgrade=pro"
                           className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
                       الترقية إلى Pro · 24.99$ شهريًا
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />

@@ -74,6 +74,21 @@ export default function SitesPage() {
     if (r.ok) refreshTheme(theme.id, { is_published: false })
   }
 
+  const deleteTheme = async (theme: SiteTheme) => {
+    const name = theme.product_name || 'موقعك'
+    if (!confirm(
+      `هل تريد حذف «${name}» نهائيًا؟\n\n` +
+      `سيُلغى النشر إن كان مباشرًا، ويُحذف الموقع من حسابك. لا يمكن التراجع عن هذا الإجراء.`
+    )) return
+    const r = await fetch(`/api/themes/${theme.id}`, { method: 'DELETE' })
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}))
+      alert(j?.message || 'تعذّر الحذف. حاول مجددًا.')
+      return
+    }
+    setThemes((prev) => prev.filter((t) => t.id !== theme.id))
+  }
+
   const plan: Plan = profile?.plan || 'free'
   const isPro = !!profile?.is_pro || plan === 'admin' || plan === 'pro_onetime' || plan === 'pro_hosting'
   // Belt-and-suspenders: trust plan first, then the cached flag. If a
@@ -199,6 +214,7 @@ export default function SitesPage() {
                 onPublish={() => setPublishingTheme(t)}
                 onAddDomain={() => setDomainTheme(t)}
                 onUnpublish={() => unpublishTheme(t)}
+                onDelete={() => deleteTheme(t)}
               />
             ))}
           </div>
@@ -214,6 +230,7 @@ export default function SitesPage() {
                 onPublish={() => setPublishingTheme(t)}
                 onAddDomain={() => setDomainTheme(t)}
                 onUnpublish={() => unpublishTheme(t)}
+                onDelete={() => deleteTheme(t)}
               />
             ))}
           </div>
@@ -408,7 +425,7 @@ function FilteredEmpty({
 /* ─── List-view row — denser alt layout ─────────────────────────────────── */
 
 function SiteRow({
-  theme, isFirst, hasHosting, isPro, onPublish, onAddDomain, onUnpublish,
+  theme, isFirst, hasHosting, isPro, onPublish, onAddDomain, onUnpublish, onDelete,
 }: {
   theme: SiteTheme
   isFirst: boolean
@@ -417,6 +434,7 @@ function SiteRow({
   onPublish: () => void
   onAddDomain: () => void
   onUnpublish: () => void
+  onDelete: () => void
 }) {
   const bt =
     (theme.content && typeof theme.content === 'object' && (theme.content as any).business_type) ||
@@ -481,6 +499,13 @@ function SiteRow({
             Unpublish
           </button>
         )}
+        <button
+          onClick={onDelete}
+          className="rounded-md border border-[rgba(220,38,38,0.20)] bg-white px-2.5 py-1 text-[11.5px] font-medium text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+          title="حذف الموقع نهائيًا"
+        >
+          حذف
+        </button>
       </div>
     </div>
   )

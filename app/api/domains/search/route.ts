@@ -14,17 +14,28 @@ export const dynamic = 'force-dynamic'
 const HOSTNAME = /^(?=.{4,253}$)(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/i
 
 /**
- * TLDs offered to a bare-name search. Ordered by relevance for a
- * Shopify/storefront audience: .com first, then store-friendly
- * extensions, then tech/personal-brand ones. Porkbun's 1-check/10-sec
- * rate limit means we DON'T pre-check all of these — we render them
- * with prices and let the user click "Check" per row.
+ * TLDs offered to a bare-name search. Ordered by our Pro free-domain
+ * economics first (cheapest wholesale, most likely to be free for a Pro
+ * subscriber), then the classic .com/.co/.net anchors, then a few
+ * higher-tier tech/personal ones. Porkbun's 1-check/10-sec rate limit
+ * means we DON'T pre-check all of these — we render them with prices
+ * and let the client rate-limit per-row availability checks.
  */
 const BARE_TLDS = [
-  'com', 'co', 'shop', 'store',
-  'net', 'io', 'app', 'ai',
-  'dev', 'me',
+  // Cheap promotional TLDs — usually free under Pro (wholesale ≤ $4)
+  'store', 'site', 'online', 'shop', 'xyz',
+  // Common .com/.co pair + net
+  'com', 'co', 'net',
+  // Popular tech/personal brands
+  'io', 'app', 'ai', 'dev', 'me',
 ]
+
+/** Extra TLDs to append when the user's template context suggests them
+ *  (e.g. .restaurant for a restaurant theme). Kept opt-in via the `for`
+ *  query param so we don't tack irrelevant options onto every search. */
+const CONTEXT_TLDS: Record<string, string[]> = {
+  restaurant: ['restaurant', 'menu'],
+}
 
 function normalize(raw: string): string {
   return raw.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '')
@@ -143,7 +154,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ query: q, results: [result] })
   }
 
-  const candidates = BARE_TLDS.map((tld) => `${q}.${tld}`).filter((c) => HOSTNAME.test(c))
+  // Blend in any context-specific TLDs the caller asked for (dedup keeps
+  // the list clean if the base and context overlap).
+  const forParam = (new URL(req.url).searchParams.get('for') || '').toLowerCase()
+  const extras = CONTEXT_TLDS[forParam] || []
+  const tldList = Array.from(new Set([...extras, ...BARE_TLDS]))
+  const candidates = tldList.map((tld) => `${q}.${tld}`).filter((c) => HOSTNAME.test(c))
   if (candidates.length === 0) {
     return NextResponse.json(
       { error: 'invalid_query', message: 'Use letters, numbers, and hyphens — no spaces.' },

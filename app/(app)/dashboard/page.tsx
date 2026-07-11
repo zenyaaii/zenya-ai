@@ -250,7 +250,7 @@ function PlanCard({
           برو مدى الحياة
         </div>
         <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
-        <Link href="/checkout?plan=hosting" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+        <Link href="/pricing?upgrade=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
           أضف الاستضافة · 19.99$ شهريًا
           <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
         </Link>
@@ -265,7 +265,7 @@ function PlanCard({
           Starter نشط
         </div>
         <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
-        <Link href="/checkout?plan=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+        <Link href="/pricing?upgrade=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
           الترقية إلى Pro · 24.99$ شهريًا
           <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
         </Link>
@@ -309,7 +309,7 @@ function PlanCard({
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
         <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#5e6ad2' }} />
       </div>
-      <Link href="/checkout?plan=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+      <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
         اشترك في Starter · 14.99$ شهريًا
         <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
@@ -538,7 +538,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
         <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 19.99$ شهريًا، ألغِ في أي وقت.
         </p>
-        <Link href="/checkout?plan=hosting" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+        <Link href="/pricing?upgrade=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
           ابدأ الاستضافة
           <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
         </Link>
@@ -552,7 +552,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
         <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 24.99$ شهريًا، ألغِ في أي وقت.
         </p>
-        <Link href="/checkout?plan=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+        <Link href="/pricing?upgrade=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
           الترقية إلى Pro
           <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
         </Link>
@@ -570,7 +570,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
           ? 'استخدمت توليدَيك المجانيين. اشترك في Starter لتوليد غير محدود.'
           : 'اشترك شهريًا، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع.'}
       </p>
-      <Link href="/checkout?plan=starter" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+      <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
         اشترك في Starter · 14.99$
         <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
