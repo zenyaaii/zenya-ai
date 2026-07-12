@@ -52,7 +52,7 @@ Category: AI website builder / no-code site generator for the Arab market.
 - Hosting: on the Pro plan, sites and data are hosted inside the European Union
   with automatic SSL and full GDPR compliance.
 - Custom domain: connect your own domain (e.g. mystore.com) on Pro, with SSL and
-  no Zenya badge. Pro includes a free custom domain for the first two months.
+  no Zenya badge. Pro includes a free custom domain for the first year (standard domain).
 - Payments / e-commerce: the two commerce templates export as ready Shopify
   themes; Shopify handles cart, secure checkout, and products. Other templates
   are brochure sites that Zenya hosts.
@@ -63,7 +63,7 @@ Category: AI website builder / no-code site generator for the Arab market.
 - Free trial: 2 AI generations, all 8 templates available.
 - Starter: $14.99/month — unlimited AI generation + export + project ZIP.
 - Pro: $24.99/month — everything in Starter plus full hosting, a custom domain
-  (2 months free), SSL, analytics, and no Zenya badge.
+  (1 year free), SSL, analytics, and no Zenya badge.
 - Cancel anytime; access continues until the end of the current billing period.
 
 ## Who Zenya is for

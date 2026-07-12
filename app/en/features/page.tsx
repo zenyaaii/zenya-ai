@@ -30,7 +30,7 @@ const FEATURES: Feature[] = [
   { icon: Languages, title: 'Arabic-first · right-to-left', body: 'Zenya is built for Arabic from the ground up: RTL layout, Arabic-designed fonts, and authentic content — not a bolted-on translation of an English template.' },
   { icon: LayoutTemplate, title: 'Eight templates per business type', body: 'Restaurant, fashion lookbook, app landing page, brand story, wellness center, services, multi-product store, and single-product storefront. Pick what fits and start.' },
   { icon: Server, title: 'EU hosting · SSL · GDPR', body: 'On the Pro plan, Zenya hosts your site inside the European Union with automatic SSL and full GDPR compliance — with no technical setup from you.' },
-  { icon: Globe, title: 'Free custom domain', body: 'Connect your own domain (like mystore.com) on Pro with SSL and no Zenya badge — and get a free custom domain for the first two months.' },
+  { icon: Globe, title: 'Free custom domain', body: 'Connect your own domain (like mystore.com) on Pro with SSL and no Zenya badge — and get a free custom domain for a full year (standard domain).' },
   { icon: CreditCard, title: 'E-commerce and secure payments', body: 'The store templates export as ready Shopify themes that run on your store, where Shopify handles the cart, secure checkout, and products. You get content written for you and reliable payments.' },
   { icon: PencilRuler, title: 'A simple live editor', body: 'Edit your site yourself with plain instructions, with undo/redo, autosave, and a responsive preview for every screen — no code.' },
   { icon: BarChart3, title: 'Visitor analytics', body: 'Track your site’s visitors, their sources, and their devices from a simple dashboard — so you know what works and improve it.' },
@@ -40,7 +40,7 @@ const FEATURES: Feature[] = [
 
 const FEATURE_FAQS: QA[] = [
   { q: 'Does Zenya host my site?', a: 'Yes, on the Pro plan. Zenya hosts your site inside the European Union with automatic SSL and GDPR compliance, with no technical setup from you.' },
-  { q: 'Can I connect my own domain?', a: 'Yes on Pro, with SSL and no Zenya badge. We also include a free custom domain for the first two months.' },
+  { q: 'Can I connect my own domain?', a: 'Yes on Pro, with SSL and no Zenya badge. We also include a free custom domain for a full year (standard domain), and 30% off any other domain.' },
   { q: 'Can my site accept payments?', a: 'For stores, the commerce template exports to Shopify, which handles the cart and secure checkout. Brochure sites (restaurants, services, wellness) are hosted by Zenya.' },
   { q: 'How much does Zenya cost?', a: 'Free to try (two generations), then Starter at $14.99/month, and Pro at $24.99/month adding full hosting and a custom domain.' },
 ]

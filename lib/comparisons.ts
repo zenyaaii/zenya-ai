@@ -11,7 +11,7 @@
  *
  * Facts about Zenya match the live product and the FAQ (single source of truth):
  * Arabic-first + RTL, AI writes the copy, 8 business templates, EU hosting +
- * SSL + GDPR, custom domain on Pro (2 months free), Shopify export for the two
+ * SSL + GDPR, custom domain on Pro (1 year free), Shopify export for the two
  * commerce templates, free trial = 2 generations, Starter $14.99/mo, Pro
  * $24.99/mo.
  */
@@ -44,7 +44,7 @@ const zContent = 'الذكاء الاصطناعي يكتب المحتوى كام
 const zTime = 'دقائق — من النبذة إلى موقع جاهز للنشر.'
 const zPrice = 'مجانًا للتجربة، ثم 14.99$–24.99$ شهريًا.'
 const zHosting = 'استضافة داخل الاتحاد الأوروبي + SSL تلقائي + التزام GDPR (خطة Pro).'
-const zDomain = 'نطاق مخصّص على Pro، مع شهرين مجانًا.'
+const zDomain = 'نطاق مخصّص على Pro، مع سنة كاملة مجانًا.'
 const zSkill = 'بلا برمجة وبلا تصميم — لأصحاب الأنشطة لا للمبرمجين.'
 
 export const COMPARISONS: Comparison[] = [

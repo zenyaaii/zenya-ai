@@ -37,6 +37,17 @@ export default function ReviewOffer() {
     } catch {}
     setUnlocked(true)
     try { localStorage.setItem(UNLOCK_KEY, '1') } catch {}
+    // Persist the code to the user's account (best-effort) so it lives in
+    // Settings → "أكواد الخصم" and survives this overlay being dismissed.
+    // Silently no-ops for logged-out visitors (401).
+    try {
+      fetch('/api/promo-codes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: PROMO_CODE }),
+        keepalive: true,
+      }).catch(() => {})
+    } catch {}
   }
 
   async function copy() {

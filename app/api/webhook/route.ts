@@ -373,7 +373,7 @@ const VERCEL_CNAME_TARGET = 'cname.vercel-dns.com'
 async function fulfillDomainPurchase(
   supabase: Admin,
   session: Stripe.Checkout.Session,
-  meta: { domain_purchase_id: string; user_id: string; domain: string; years: string; cost_cents: string; theme_id: string }
+  meta: { domain_purchase_id: string; user_id: string; domain: string; years: string; cost_cents: string; theme_id: string; free_domain: string }
 ) {
   const purchaseId = meta.domain_purchase_id
   const domain = meta.domain.toLowerCase()
@@ -552,6 +552,17 @@ async function fulfillDomainPurchase(
     })
     .eq('id', purchaseId)
 
+  // Burn the one-time free-domain entitlement — only now that the domain is
+  // genuinely registered and active. Guarded on the flag AND on the account
+  // not already having claimed one, so a Stripe retry can't double-spend it.
+  if (meta.free_domain === '1') {
+    await supabase
+      .from('profiles')
+      .update({ free_domain_claimed_at: new Date().toISOString(), free_domain: domain })
+      .eq('id', meta.user_id)
+      .is('free_domain_claimed_at', null)
+  }
+
   await logEvent(supabase, meta.user_id, 'domain_purchase.completed', {
     domain,
     purchase_id: purchaseId,
@@ -705,9 +716,16 @@ export async function POST(req: NextRequest) {
         // apart by metadata.purchase_type — set in /api/domains/purchase.
         const purchaseType = (session.metadata?.purchase_type as string | undefined) || ''
 
+        // A 100%-off (free Pro domain) checkout settles with
+        // payment_status 'no_payment_required' — Stripe never creates a
+        // PaymentIntent for a $0 total. Accept both so the free path fulfils.
+        const domainPaid =
+          session.payment_status === 'paid' ||
+          session.payment_status === 'no_payment_required'
+
         if (
           session.mode === 'payment' &&
-          session.payment_status === 'paid' &&
+          domainPaid &&
           purchaseType === 'domain'
         ) {
           await fulfillDomainPurchase(supabase, session, {
@@ -717,6 +735,7 @@ export async function POST(req: NextRequest) {
             years: (session.metadata?.years as string) || '1',
             cost_cents: (session.metadata?.cost_cents as string) || '',
             theme_id: (session.metadata?.theme_id as string) || '',
+            free_domain: (session.metadata?.free_domain as string) || '',
           })
         } else if (
           session.mode === 'payment' &&

@@ -40,7 +40,7 @@ export const AR_FAQS: QA[] = [
   },
   {
     q: 'هل يمكنني ربط نطاقي المخصّص؟',
-    a: 'نعم، على خطة Pro. تربط نطاقك الخاص (مثل mystore.com)، وتحصل على شهادة SSL تلقائية وإزالة شارة زينيا. كما نقدّم نطاقًا مخصّصًا مجانيًا لمدة شهرين مع خطة Pro.',
+    a: 'نعم، على خطة Pro. تربط نطاقك الخاص (مثل mystore.com)، وتحصل على شهادة SSL تلقائية وإزالة شارة زينيا. كما نقدّم نطاقًا مخصّصًا مجانيًا لسنة كاملة (نطاق قياسي) مع خطة Pro، وخصم 30% على النطاقات الأخرى.',
   },
   {
     q: 'هل يمكنني التصدير إلى شوبيفاي؟',
@@ -87,7 +87,7 @@ export const EN_FAQS: QA[] = [
   },
   {
     q: 'Can I connect my own custom domain?',
-    a: 'Yes, on the Pro plan. Connect your own domain (like mystore.com) with automatic SSL and no Zenya badge. Pro also includes a free custom domain for the first two months.',
+    a: 'Yes, on the Pro plan. Connect your own domain (like mystore.com) with automatic SSL and no Zenya badge. Pro also includes a free custom domain for a full year (standard domain), and 30% off any other domain.',
   },
   {
     q: 'Can I export to Shopify?',

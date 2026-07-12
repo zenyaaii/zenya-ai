@@ -34,7 +34,7 @@ const faqTime: QA = {
 }
 const faqDomain: QA = {
   q: 'Can I connect my own domain?',
-  a: 'Yes, on the Pro plan, with SSL and no Zenya badge, plus a free custom domain for the first two months. Hosting is inside the EU.',
+  a: 'Yes, on the Pro plan, with SSL and no Zenya badge, plus a free custom domain for a full year (standard domain). Hosting is inside the EU.',
 }
 const faqPayments: QA = {
   q: 'How does payment work for the store?',

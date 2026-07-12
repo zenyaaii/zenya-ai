@@ -30,7 +30,7 @@ const zContent = 'AI writes the full site content from a short brief.'
 const zTime = 'Minutes — from a brief to a publish-ready site.'
 const zPrice = 'Free to try, then $14.99–$24.99 per month.'
 const zHosting = 'Hosted inside the EU with automatic SSL and GDPR compliance (Pro plan).'
-const zDomain = 'Custom domain on Pro, with the first two months free.'
+const zDomain = 'Custom domain on Pro, with the first year free.'
 const zSkill = 'No coding, no design — built for business owners, not developers.'
 
 export const COMPARISONS_EN: ComparisonEn[] = [
