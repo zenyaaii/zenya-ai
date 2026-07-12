@@ -13,6 +13,9 @@ import {
   Briefcase,
   MessageCircle,
   MessageSquareQuote,
+  Gift,
+  Copy,
+  Check,
   type LucideIcon,
 } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
@@ -70,6 +73,8 @@ function ContactPageInner() {
   const [topic, setTopic] = useState<Topic>('support')
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [rewardCode, setRewardCode] = useState<string | null>(null)
+  const [codeCopied, setCodeCopied] = useState(false)
 
   /* Honor ?topic=request from the /themes "Request a template" link. */
   useEffect(() => {
@@ -91,6 +96,20 @@ function ContactPageInner() {
       // we treat 200 as success and surface anything else as the topic-specific
       // copy. The route currently logs to console + returns 200.
       if (!res.ok) throw new Error('تعذّر الإرسال — يُرجى مراسلتنا مباشرةً.')
+      const data = await res.json().catch(() => ({}))
+      if (topic === 'review' && data?.rewardCode) {
+        setRewardCode(data.rewardCode as string)
+        // Best-effort: save the code to the user's list too, so logged-in
+        // reviewers see it in Settings → أكواد الخصم. 401s silently for guests.
+        try {
+          fetch('/api/promo-codes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: data.rewardCode }),
+            keepalive: true,
+          }).catch(() => {})
+        } catch {}
+      }
       setSent(true)
     } catch (err: any) {
       // Show the error inline instead of the success state.
@@ -103,6 +122,17 @@ function ContactPageInner() {
   function reset() {
     setSent(false)
     setMessage('')
+    setRewardCode(null)
+    setCodeCopied(false)
+  }
+
+  async function copyCode() {
+    if (!rewardCode) return
+    try {
+      await navigator.clipboard.writeText(rewardCode)
+      setCodeCopied(true)
+      setTimeout(() => setCodeCopied(false), 1800)
+    } catch {}
   }
 
   return (
@@ -254,6 +284,52 @@ function ContactPageInner() {
                   <p className="max-w-md text-[14px] leading-[1.65] text-muted">
                     {TOPIC_SUCCESS[topic]}
                   </p>
+
+                  {rewardCode && (
+                    <div
+                      className="mt-2 w-full max-w-md rounded-2xl border p-5"
+                      style={{
+                        borderColor: 'rgba(94,106,210,0.28)',
+                        background:
+                          'linear-gradient(135deg, rgba(94,106,210,0.06) 0%, rgba(217,119,6,0.05) 100%)',
+                      }}
+                    >
+                      <div className="mb-2.5 flex items-center gap-2">
+                        <span
+                          className="flex h-8 w-8 items-center justify-center rounded-xl"
+                          style={{ background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' }}
+                        >
+                          <Gift className="h-4 w-4" strokeWidth={2} />
+                        </span>
+                        <p className="text-[13.5px] font-bold text-foreground">
+                          هذا كودك — 30% على أول شهر
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={copyCode}
+                        aria-label="نسخ كود الخصم"
+                        className="mt-2 flex items-center gap-3 rounded-xl border border-dashed px-4 py-2.5 transition-colors hover:bg-[rgba(94,106,210,0.06)]"
+                        style={{ borderColor: 'rgba(94,106,210,0.5)' }}
+                      >
+                        <span
+                          className="font-latin text-[18px] font-extrabold tracking-[0.14em] text-primary"
+                          dir="ltr"
+                        >
+                          {rewardCode}
+                        </span>
+                        {codeCopied ? (
+                          <Check className="h-4 w-4 text-[#27a644]" strokeWidth={2.5} />
+                        ) : (
+                          <Copy className="h-4 w-4 text-muted" strokeWidth={2} />
+                        )}
+                      </button>
+                      <p className="mt-2.5 text-[12px] leading-[1.7] text-muted">
+                        أدخِله في خانة «Promotion code» عند الاشتراك. صالح للعملاء الجدد على أول شهر.
+                      </p>
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     onClick={reset}

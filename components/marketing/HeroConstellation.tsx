@@ -1,8 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Camera, MessageCircle, ShoppingBag, MapPin, Music2, Mail, PenLine, TrendingUp, Sparkles } from 'lucide-react'
-import ZenyaMark from '@/components/ZenyaMark'
+import { Camera, MessageCircle, ShoppingBag, MapPin, Music2, Mail, PenLine, TrendingUp } from 'lucide-react'
 import { themePreview } from '@/lib/theme-previews'
 
 /**
@@ -208,61 +207,218 @@ export default function HeroConstellation() {
         </div>
       </div>
 
-      {/* ── Mobile / tablet (below xl) — a small, tight composed cluster: a
-          glowing زينيا hub, gently fanned preview cards, and one row of platform
-          bubbles. Kept compact (capped width) so it stays neat on both phones
-          and tablets rather than ballooning. ── */}
-      <div className="mx-auto mt-10 max-w-[300px] xl:hidden">
-        {/* Hub */}
-        <div className="relative flex justify-center">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(94,106,210,0.22) 0%, transparent 70%)', filter: 'blur(8px)' }}
-          />
-          <div
-            className="relative flex h-[74px] w-[74px] flex-col items-center justify-center gap-1 rounded-2xl bg-white"
-            style={{ border: '1px solid #e8e5db', boxShadow: '0 20px 44px -20px rgba(94,106,210,0.5), 0 0 0 1px rgba(94,106,210,0.06)' }}
-          >
-            <span className="conic-glow pointer-events-none absolute -inset-px rounded-2xl opacity-40" aria-hidden />
-            <ZenyaMark className="relative h-4 text-[#16171b]" />
-            <span className="relative inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[7.5px] font-semibold" style={{ background: 'rgba(94,106,210,0.08)', color: '#5e6ad2' }}>
-              <Sparkles className="h-2 w-2" strokeWidth={2.25} />
-              الذكاء الاصطناعي
-            </span>
-          </div>
-        </div>
+      {/* ── Mobile / tablet (below xl) — SCENIC layer.
+          The old design stacked the imagery BELOW the headline; that read
+          "template shop", not "premium tool". Now the same materials (real
+          template cards + platform bubbles) live BEHIND the copy: heavily
+          blurred, low-opacity, drifting. A soft radial in the middle
+          protects the display Arabic. Pointer events off so drag/tap on
+          the copy always wins.
+      */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden xl:hidden"
+      >
+        {/* Top-right anchor — big blurred template card, tilted */}
+        <ScenicCard
+          id="atlas"
+          tint="#5e6ad2"
+          x="82%"
+          y="10%"
+          size={190}
+          rotate={9}
+          blur={12}
+          delay={0.1}
+          amplitude={9}
+        />
 
-        {/* Preview cards — small, gently fanned for a designed feel */}
-        <div className="mt-6 grid grid-cols-2 gap-2.5">
-          {[
-            { id: 'restaurant', tint: '#c8a96a', rot: -2.5 },
-            { id: 'atlas', tint: '#5e6ad2', rot: 2.5 },
-            { id: 'wellness', tint: '#14b8a6', rot: 2 },
-            { id: 'services', tint: '#f59e0b', rot: -2 },
-          ].map((c) => (
-            <div key={c.id} style={{ transform: `rotate(${c.rot}deg)` }}>
-              <TemplateCard id={c.id} tint={c.tint} />
-            </div>
-          ))}
-        </div>
+        {/* Bottom-left anchor — smaller, opposite lean */}
+        <ScenicCard
+          id="restaurant"
+          tint="#c8a96a"
+          x="16%"
+          y="72%"
+          size={168}
+          rotate={-8}
+          blur={14}
+          delay={0.28}
+          amplitude={11}
+        />
 
-        {/* Platform bubbles — one tidy centered row */}
-        <div className="mt-6 flex justify-center gap-2">
+        {/* Small accent card top-left, extra faint */}
+        <ScenicCard
+          id="wellness"
+          tint="#14b8a6"
+          x="10%"
+          y="18%"
+          size={122}
+          rotate={-4}
+          blur={16}
+          delay={0.4}
+          amplitude={7}
+          opacity={0.34}
+        />
+
+        {/* Bottom-right little card, extra faint */}
+        <ScenicCard
+          id="lookbook"
+          tint="#be123c"
+          x="86%"
+          y="76%"
+          size={128}
+          rotate={7}
+          blur={16}
+          delay={0.5}
+          amplitude={6}
+          opacity={0.32}
+        />
+
+        {/* Legibility gate — a soft radial that lifts brightness right where
+            the copy sits, so the display Arabic stays sharp against the
+            scenic layer behind it. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(55% 45% at 50% 42%, rgba(247,244,237,0.85) 0%, rgba(247,244,237,0.55) 45%, transparent 78%)',
+          }}
+        />
+
+        {/* Platform bubbles — a faint arc along the bottom, low opacity so
+            they read as ambient rather than a menu. */}
+        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-2.5 opacity-55">
           {PLATFORMS.map((p, i) => {
             const Icon = p.icon
             return (
-              <div
-                key={i}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white"
-                style={{ boxShadow: '0 10px 22px -10px rgba(28,28,28,0.22), inset 0 1.5px 1.5px rgba(255,255,255,0.9)', border: '1px solid #efece3' }}
-              >
-                <Icon className="h-[15px] w-[15px]" strokeWidth={1.75} style={{ color: p.color }} />
-              </div>
+              <ScenicBubble key={i} delay={p.delay}>
+                <Icon
+                  className="h-[15px] w-[15px]"
+                  strokeWidth={1.75}
+                  style={{ color: p.color }}
+                />
+              </ScenicBubble>
             )
           })}
         </div>
       </div>
     </>
+  )
+}
+
+/* ────────── Scenic layer primitives (mobile/tablet only) ────────── */
+
+function ScenicCard({
+  id,
+  tint,
+  x,
+  y,
+  size,
+  rotate = 0,
+  blur = 10,
+  delay = 0,
+  amplitude = 8,
+  opacity = 0.5,
+}: {
+  id: string
+  tint: string
+  x: string
+  y: string
+  size: number
+  rotate?: number
+  blur?: number
+  delay?: number
+  amplitude?: number
+  opacity?: number
+}) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div
+      className="absolute"
+      style={{
+        left: x,
+        top: y,
+        width: size,
+        transform: 'translate(-50%, -50%)',
+        opacity,
+        filter: `blur(${blur}px)`,
+      }}
+      initial={{ opacity: 0, scale: 0.94 }}
+      animate={{ opacity, scale: 1 }}
+      transition={{ duration: 0.9, delay, ease: EASE }}
+    >
+      <motion.div
+        style={{ rotate }}
+        animate={reduce ? {} : { y: [0, -amplitude, 0] }}
+        transition={{
+          duration: 6 + amplitude * 0.25,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay,
+        }}
+      >
+        <div
+          className="overflow-hidden rounded-2xl bg-white"
+          style={{
+            border: '1px solid rgba(232,229,219,0.9)',
+            boxShadow: `0 30px 60px -22px ${tint}55`,
+          }}
+        >
+          <div
+            className="flex items-center gap-1 px-2.5 py-1.5"
+            style={{ background: '#faf8f3', borderBottom: '1px solid #f0ede6' }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fca5a5' }} />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#fcd34d' }} />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#86efac' }} />
+            <span
+              className="ms-auto h-1.5 w-8 rounded-full"
+              style={{ background: `${tint}30` }}
+            />
+          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={themePreview(id)}
+            alt=""
+            className="h-24 w-full object-cover object-top"
+            loading="lazy"
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+function ScenicBubble({
+  delay,
+  children,
+}: {
+  delay: number
+  children: React.ReactNode
+}) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.7, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: EASE }}
+    >
+      <motion.div
+        animate={reduce ? {} : { y: [0, -4, 0] }}
+        transition={{
+          duration: 4.5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay,
+        }}
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-white"
+        style={{
+          boxShadow:
+            '0 10px 22px -10px rgba(28,28,28,0.22), inset 0 1.5px 1.5px rgba(255,255,255,0.9)',
+          border: '1px solid #efece3',
+        }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
   )
 }

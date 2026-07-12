@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
+import { ARTICLE_KEYS } from '@/app/(main)/why/[type]/copy'
 
 const BASE = 'https://zenyaai.co'
 
@@ -22,6 +23,9 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
   { path: '/demo/studio',     priority: 0.6, freq: 'weekly' },
   { path: '/demo/services',   priority: 0.6, freq: 'weekly' },
   { path: '/demo/wellness',   priority: 0.6, freq: 'weekly' },
+  // Why-you-need-a-website articles — orphaned in nav (reachable only via
+  // the arc-carousel), but exposed here so Google indexes them.
+  ...ARTICLE_KEYS.map((k) => ({ path: `/why/${k}`, priority: 0.65, freq: 'monthly' as Freq })),
   // Legal
   { path: '/privacy',       priority: 0.5, freq: 'monthly' },
   { path: '/terms',         priority: 0.5, freq: 'monthly' },

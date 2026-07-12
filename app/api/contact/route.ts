@@ -7,9 +7,12 @@ export const dynamic = 'force-dynamic'
 const schema = z.object({
   name: z.string().max(120).optional(),
   email: z.string().email(),
-  topic: z.enum(['support', 'request', 'sales', 'other']),
+  topic: z.enum(['support', 'request', 'sales', 'review', 'other']),
   message: z.string().min(5).max(8000),
 })
+
+/** The one code we hand out to reviewers. Matches ReviewOffer.tsx. */
+const REVIEW_PROMO_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
 
 /**
  * Contact-form intake.
@@ -50,6 +53,13 @@ export async function POST(req: NextRequest) {
     received_at: new Date().toISOString(),
   })
 
+  // Reviewers get a discount code as a thank-you. The code itself is a real
+  // Stripe promotion code with a first-time-customer restriction, so it can
+  // never be redeemed twice. Returning it in the response keeps the promise
+  // honest even before Resend is wired up — the success screen reveals the
+  // code inline instead of hoping an email got through.
+  const rewardCode = topic === 'review' ? REVIEW_PROMO_CODE : null
+
   // --- Optional: real delivery via Resend ---
   // if (process.env.RESEND_API_KEY) {
   //   const { Resend } = await import('resend')
@@ -63,5 +73,5 @@ export async function POST(req: NextRequest) {
   //   })
   // }
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, rewardCode })
 }
