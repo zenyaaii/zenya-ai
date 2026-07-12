@@ -18,7 +18,7 @@ import SiteCard, {
   type SiteTheme,
 } from '@/components/dashboard/SiteCard'
 
-type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'admin'
+type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 type Profile = {
   plan: Plan
   is_pro: boolean
@@ -90,11 +90,22 @@ export default function SitesPage() {
   }
 
   const plan: Plan = profile?.plan || 'free'
-  const isPro = !!profile?.is_pro || plan === 'admin' || plan === 'pro_onetime' || plan === 'pro_hosting'
+  const isPro =
+    !!profile?.is_pro ||
+    plan === 'admin' ||
+    plan === 'pro_onetime' ||
+    plan === 'pro_hosting' ||
+    plan === 'starter' ||
+    plan === 'pro'
   // Belt-and-suspenders: trust plan first, then the cached flag. If a
   // Stripe webhook ever races the column out of sync, the user still sees
-  // the entitlement they paid for.
-  const hasHosting = plan === 'admin' || plan === 'pro_hosting' || !!profile?.has_hosting
+  // the entitlement they paid for. `pro` and `pro_hosting` include hosting;
+  // `starter` and `pro_onetime` do NOT.
+  const hasHosting =
+    plan === 'admin' ||
+    plan === 'pro_hosting' ||
+    plan === 'pro' ||
+    !!profile?.has_hosting
 
   const counts = useMemo(() => {
     const live    = themes.filter((t) => t.is_published && t.slug).length
@@ -211,6 +222,7 @@ export default function SitesPage() {
                 theme={t}
                 hasHosting={hasHosting}
                 isPro={isPro}
+                plan={plan}
                 onPublish={() => setPublishingTheme(t)}
                 onAddDomain={() => setDomainTheme(t)}
                 onUnpublish={() => unpublishTheme(t)}

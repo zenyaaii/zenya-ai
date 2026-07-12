@@ -38,6 +38,9 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  Gift,
+  Copy,
+  Check as CheckIcon,
 } from 'lucide-react'
 
 /* ── Status helper ───────────────────────────────────────────────── */
@@ -194,6 +197,12 @@ export default function AccountSettings() {
   const [isPro, setIsPro] = useState(false)
   const [dark, setDark] = useState(false)
 
+  // Saved discount codes (from the review offer, Pro perks, etc.)
+  type PromoCode = { id: string; code: string; label: string | null; description: string | null }
+  const [codes, setCodes] = useState<PromoCode[]>([])
+  const [codesLoaded, setCodesLoaded] = useState(false)
+  const [copiedCode, setCopiedCode] = useState<string | null>(null)
+
   // editable fields
   const [newName, setNewName] = useState('')
   const [newEmail, setNewEmail] = useState('')
@@ -233,8 +242,26 @@ export default function AccountSettings() {
         setPlan((data as any).plan ?? null)
         setIsPro(Boolean((data as any).is_pro))
       }
+
+      // Saved discount codes — best-effort; failure just leaves the empty state.
+      try {
+        const res = await fetch('/api/promo-codes')
+        if (res.ok) {
+          const j = await res.json()
+          setCodes(j.codes || [])
+        }
+      } catch {}
+      setCodesLoaded(true)
     })
   }, [router, supabase])
+
+  async function copyCode(code: string) {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopiedCode(code)
+      setTimeout(() => setCopiedCode((c) => (c === code ? null : c)), 1800)
+    } catch {}
+  }
 
   function toggleDark() {
     const next = !dark
@@ -308,9 +335,17 @@ export default function AccountSettings() {
     }
   }
 
-  const planLabel = isPro
-    ? plan === 'pro_hosting' ? 'Pro + استضافة' : 'Pro'
-    : plan === 'admin' ? 'مشرف' : 'مجانية'
+  // Show the actual tier — not a generic "Pro" — so a Starter user doesn't
+  // see themselves labelled "Pro" and get confused when the dashboard tells
+  // them to "الترقية إلى Pro". Same for legacy pro_onetime buyers.
+  const planLabel =
+    plan === 'admin'        ? 'مشرف' :
+    plan === 'pro'          ? 'Pro · نشط' :
+    plan === 'pro_hosting'  ? 'Pro + استضافة' :
+    plan === 'pro_onetime'  ? 'Pro · مدى الحياة' :
+    plan === 'starter'      ? 'Starter · نشط' :
+    isPro                   ? 'Pro' :
+    'مجانية'
 
   const initial = newName?.trim()?.[0] || email?.[0] || '؟'
 
@@ -440,7 +475,7 @@ export default function AccountSettings() {
           icon={CreditCard}
           accent="#d97706"
           title="الخطة والفوترة"
-          subtitle="زينيا Pro شراء لمرة واحدة — لا اشتراك متكرّر"
+          subtitle="اشتراك شهري — Starter 14.99$ أو Pro 24.99$. ألغِ في أي وقت."
           action={
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef0fb] px-3 py-1 text-[12px] font-bold text-[#5e6ad2]">
               {isPro && <Sparkles className="h-3 w-3" />}
@@ -462,6 +497,70 @@ export default function AccountSettings() {
             <Link href="/refund" className="text-[#5e6ad2] hover:underline">سياسة الاسترداد</Link>{' '}
             ثم <Link href="/contact" className="text-[#5e6ad2] hover:underline">تواصل معنا</Link> وسنعالج طلبك.
           </p>
+        </Section>
+
+        {/* Discount codes — persistent, so a code revealed once (e.g. the
+            review offer) is never lost. */}
+        <Section
+          icon={Gift}
+          accent="#e11d48"
+          title="أكواد الخصم"
+          subtitle="أكوادك محفوظة هنا — انسخها واستخدمها عند الدفع في أي وقت"
+        >
+          {!codesLoaded ? (
+            <div className="space-y-2">
+              {[0, 1].map((i) => (
+                <div key={i} className="h-14 animate-pulse rounded-xl bg-[#f4f2ec]" />
+              ))}
+            </div>
+          ) : codes.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#e8e5de] bg-[#faf8f3] p-5 text-center">
+              <p className="text-[13px] leading-relaxed text-muted">
+                لا أكواد بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على كود خصم 30% على أول شهر —
+                وسيظهر هنا تلقائيًا.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {codes.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[#e8e5de] bg-[#faf8f3] p-3.5"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <code
+                        dir="ltr"
+                        className="rounded-md border border-dashed border-[#5e6ad2]/50 bg-white px-2.5 py-1 text-[14px] font-extrabold tracking-[0.1em] text-[#5e6ad2]"
+                      >
+                        {c.code}
+                      </code>
+                      {c.label && <span className="truncate text-[13px] font-semibold text-foreground">{c.label}</span>}
+                    </div>
+                    {c.description && (
+                      <p className="mt-1.5 text-[12px] leading-relaxed text-muted">{c.description}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => copyCode(c.code)}
+                    aria-label={`نسخ ${c.code}`}
+                    className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[#e8e5de] bg-white px-3 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-[#f0ede6]"
+                  >
+                    {copiedCode === c.code ? (
+                      <>
+                        <CheckIcon className="h-3.5 w-3.5 text-emerald-600" /> تم النسخ
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" /> نسخ
+                      </>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </Section>
 
         {/* Appearance */}

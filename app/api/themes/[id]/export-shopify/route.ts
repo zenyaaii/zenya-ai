@@ -42,8 +42,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       {
         error: 'pro_required',
         message:
-          'Shopify export is a Pro feature. Get Lifetime Pro for $9.99 or the $19.99/mo hosting plan.',
-        cta: '/checkout?plan=onetime',
+          'Shopify export requires a paid plan. Subscribe to Starter ($14.99/mo) or Pro ($24.99/mo).',
+        cta: '/checkout?plan=starter',
       },
       { status: 402 }
     )

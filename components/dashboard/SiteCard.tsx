@@ -81,6 +81,7 @@ export default function SiteCard({
   theme,
   hasHosting,
   isPro,
+  plan,
   onPublish,
   onAddDomain,
   onUnpublish,
@@ -90,6 +91,10 @@ export default function SiteCard({
   hasHosting: boolean
   /** any pro entitlement (lifetime OR hosting OR admin) */
   isPro: boolean
+  /** raw plan value from profile — used to keep upsell copy honest
+   *  (a `pro_onetime` user is already "Pro"; telling them to "الترقية إلى Pro"
+   *  is confusing — they need hosting, not Pro). */
+  plan?: string | null
   onPublish: () => void
   onAddDomain: () => void
   onUnpublish: () => void
@@ -231,20 +236,29 @@ export default function SiteCard({
           <DomainsList themeId={theme.id} />
         )}
 
-        {/* Locked upsell for hostable + Pro Lifetime (not hosting) */}
-        {isHostable && !hasHosting && isPro && !publishedHere && (
-          <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[12.5px]">
-            <div className="flex items-start gap-2">
-              <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
-              <div>
-                <div className="font-medium text-foreground">خطة Pro تفتح النشر</div>
-                <Link href="/pricing?upgrade=pro" className="text-primary hover:underline">
-                  الترقية إلى Pro · 24.99$ شهريًا ←
-                </Link>
+        {/* Locked upsell for hostable + paid-but-no-hosting (Starter, pro_onetime). */}
+        {isHostable && !hasHosting && isPro && !publishedHere && (() => {
+          // Copy honesty: a pro_onetime user IS "Pro" — telling them to
+          // "الترقية إلى Pro" is misleading. They need hosting, not Pro.
+          const isOnetime = plan === 'pro_onetime'
+          const title = isOnetime ? 'أضف الاستضافة لنشر الموقع' : 'خطة Pro تفتح النشر'
+          const cta = isOnetime
+            ? 'أضف استضافة زينيا · 24.99$ شهريًا ←'
+            : 'الترقية إلى Pro · 24.99$ شهريًا ←'
+          return (
+            <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[12.5px]">
+              <div className="flex items-start gap-2">
+                <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
+                <div>
+                  <div className="font-medium text-foreground">{title}</div>
+                  <Link href="/pricing?upgrade=pro" className="text-primary hover:underline">
+                    {cta}
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Action row — sticks to bottom */}
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
@@ -295,7 +309,7 @@ export default function SiteCard({
             )
           )}
 
-          {/* E-com primary — ZIP download */}
+          {/* E-com primary — ZIP download. Starter includes Shopify export. */}
           {isEcom && isPro && (
             <a
               href={`/api/themes/${theme.id}/export-shopify`}
@@ -310,11 +324,11 @@ export default function SiteCard({
               href="/pricing?upgrade=starter"
               className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
             >
-              رقِّ للحصول على الملف
+              اشترك في Starter للتصدير
             </Link>
           )}
 
-          {/* Overflow menu — unpublish (if live) + delete (always) */}
+          {/* Overflow menu — preview thumbnail + open + unpublish + delete */}
           <div className="relative ms-auto">
             <button
               onClick={() => setMenuOpen((v) => !v)}
@@ -336,28 +350,71 @@ export default function SiteCard({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute end-0 z-30 mt-1 w-48 overflow-hidden rounded-lg border border-token bg-white p-1 shadow-lg"
+                    className="absolute end-0 z-30 mt-1 w-64 overflow-hidden rounded-lg border border-token bg-white shadow-lg"
                     style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
                   >
-                    {publishedHere && (
-                      <>
-                        <button
-                          onClick={() => { setMenuOpen(false); onUnpublish() }}
-                          className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
-                        >
-                          <Trash2 className="h-3 w-3" strokeWidth={2.25} />
-                          إلغاء النشر
-                        </button>
-                        <div className="my-1 h-px bg-token" />
-                      </>
-                    )}
-                    <button
-                      onClick={() => { setMenuOpen(false); onDelete() }}
-                      className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+                    {/* Screenshot thumbnail — what the user expects to see when
+                        they open the "more" menu. Clicking it opens the site
+                        preview in a new tab. */}
+                    <a
+                      href={publishedHere ? `/s/${theme.slug}` : `/preview/${theme.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className="group block"
+                      title="افتح المعاينة الكاملة"
                     >
-                      <Trash2 className="h-3 w-3" strokeWidth={2.25} />
-                      حذف الموقع نهائيًا
-                    </button>
+                      {hasPreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={themePreview(businessType)}
+                          alt={`لقطة ${theme.product_name || label}`}
+                          className="aspect-[16/9] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+                          onError={(e) => {
+                            const fb = themePreviewFallback(businessType)
+                            if (e.currentTarget.src !== fb) e.currentTarget.src = fb
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="flex aspect-[16/9] w-full items-center justify-center"
+                          style={{
+                            background: `linear-gradient(135deg, ${tint.bg} 0%, white 80%)`,
+                          }}
+                        >
+                          <Icon className="h-6 w-6" strokeWidth={1.75} style={{ color: tint.fg }} />
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between border-t border-token bg-white px-3 py-2 text-[11.5px] font-medium text-primary">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Eye className="h-3 w-3" strokeWidth={2.25} />
+                          افتح المعاينة الكاملة
+                        </span>
+                        <ExternalLink className="h-3 w-3 opacity-70" strokeWidth={2.25} />
+                      </div>
+                    </a>
+
+                    <div className="p-1">
+                      {publishedHere && (
+                        <>
+                          <button
+                            onClick={() => { setMenuOpen(false); onUnpublish() }}
+                            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
+                          >
+                            <Trash2 className="h-3 w-3" strokeWidth={2.25} />
+                            إلغاء النشر
+                          </button>
+                          <div className="my-1 h-px bg-token" />
+                        </>
+                      )}
+                      <button
+                        onClick={() => { setMenuOpen(false); onDelete() }}
+                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+                      >
+                        <Trash2 className="h-3 w-3" strokeWidth={2.25} />
+                        حذف الموقع نهائيًا
+                      </button>
+                    </div>
                   </motion.div>
                 </>
               )}

@@ -84,8 +84,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json(
       {
         error: 'hosting_required',
-        message: 'Zenya hosting is required to publish at /s/{slug}. Upgrade to the $19.99/mo plan.',
-        cta: '/checkout?plan=hosting',
+        message: 'Zenya hosting is required to publish at /s/{slug}. Upgrade to the Pro plan ($24.99/mo).',
+        cta: '/checkout?plan=pro',
       },
       { status: 402 }
     )

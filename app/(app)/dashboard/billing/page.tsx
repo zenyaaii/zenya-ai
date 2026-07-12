@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
-  CreditCard, CheckCircle2, Sparkles, ExternalLink, Receipt, ArrowRight,
+  CreditCard, CheckCircle2, Sparkles, ArrowRight,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -156,21 +156,11 @@ export default function BillingPage() {
             </div>
           </section>
 
-          {/* Stripe portal + invoices */}
-          {(plan === 'pro_onetime' || plan === 'pro_hosting' || plan === 'starter' || plan === 'pro') && (
-            <section className="mt-4 rounded-2xl border border-token bg-white p-6">
-              <h2 className="text-[15px] font-semibold tracking-tight text-foreground">الفواتير وطرق الدفع</h2>
-              <p className="mt-1 text-[12.5px] text-muted">
-                تتولّى بوابة عملاء Stripe الفواتير والإيصالات وتحديث طرق الدفع.
-              </p>
-              <button onClick={openPortal} disabled={portalBusy}
-                      className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5">
-                <Receipt className="h-3.5 w-3.5" strokeWidth={2.25} />
-                {portalBusy ? 'جارٍ فتح Stripe…' : 'افتح بوابة Stripe'}
-                <ExternalLink className="h-3 w-3 opacity-70" />
-              </button>
-            </section>
-          )}
+          {/* Removed the standalone "افتح بوابة Stripe" section — the small
+              "إدارة الاشتراك" button in the plan card above already covers
+              subscription management for paying users. Keeping two entry
+              points to the same portal was noisy and made billing feel
+              third-party rather than part of Zenya. */}
 
           {/* What's included */}
           <section className="mt-4 rounded-2xl border border-token bg-white p-6">
