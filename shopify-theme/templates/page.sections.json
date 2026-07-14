@@ -102,13 +102,65 @@
       }
     },
     "shoppable": {
-      "type": "zenya-shoppable-image"
+      "type": "zenya-shoppable-image",
+      "blocks": {
+        "hotspot_0": {
+          "type": "hotspot",
+          "settings": { "top": 30, "left": 40 }
+        },
+        "hotspot_1": {
+          "type": "hotspot",
+          "settings": { "top": 60, "left": 65 }
+        }
+      },
+      "block_order": ["hotspot_0", "hotspot_1"],
+      "settings": {}
     },
     "featured_collection": {
-      "type": "zenya-featured-collection"
+      "type": "zenya-featured-collection",
+      "settings": {
+        "title": "Best Sellers",
+        "limit": 4,
+        "full_width": false,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "gap": 24,
+        "heading_align": "center",
+        "heading_size": 30,
+        "show_view_all": true,
+        "view_all_label": "View All",
+        "view_all_style": "solid",
+        "view_all_align": "center",
+        "bg_color": "#ffffff",
+        "heading_color": "#0f172a",
+        "button_bg_color": "#3b82f6",
+        "button_text_color": "#ffffff",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     },
     "countdown": {
-      "type": "zenya-countdown-banner"
+      "type": "zenya-countdown-banner",
+      "settings": {
+        "heading": "Flash Sale Ends In",
+        "heading_size": 40,
+        "subheading": "Don't miss out on these exclusive offers. Limited time only.",
+        "subheading_size": 18,
+        "date": "2026-12-31",
+        "btn_label": "Shop Now",
+        "timer_style": "cards",
+        "bg_color": "#dc2626",
+        "overlay_opacity": 50,
+        "text_color": "#ffffff",
+        "timer_bg": "#ffffff",
+        "timer_text": "#dc2626",
+        "btn_bg": "#ffffff",
+        "btn_text": "#dc2626",
+        "btn_radius": 50,
+        "btn_text_size": 16,
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     },
     "problem_solution": {
       "type": "zenya-problem-solution",
@@ -139,7 +191,35 @@
       "type": "zenya-tabs"
     },
     "accordion": {
-      "type": "zenya-accordion"
+      "type": "zenya-accordion",
+      "settings": {
+        "title": "Frequently Asked Questions",
+        "button_text": "Contact Support"
+      },
+      "blocks": {
+        "item_0": {
+          "type": "item",
+          "settings": {
+            "title": "How long does shipping take?",
+            "text": "<p>Most orders arrive in 3-5 business days.</p>"
+          }
+        },
+        "item_1": {
+          "type": "item",
+          "settings": {
+            "title": "What's your return policy?",
+            "text": "<p>Free returns within 30 days of purchase.</p>"
+          }
+        },
+        "item_2": {
+          "type": "item",
+          "settings": {
+            "title": "Do you ship internationally?",
+            "text": "<p>Yes, we ship worldwide. Delivery times vary.</p>"
+          }
+        }
+      },
+      "block_order": ["item_0", "item_1", "item_2"]
     },
     "timeline": {
       "type": "zenya-timeline",
@@ -158,7 +238,11 @@
       ]
     },
     "map": {
-      "type": "zenya-map"
+      "type": "zenya-map",
+      "settings": {
+        "heading": "Visit Our Store",
+        "address": "123 Main St, New York, NY 10001"
+      }
     },
     "multicolumn": {
       "type": "zenya-multicolumn",
@@ -176,7 +260,16 @@
       ]
     },
     "video": {
-      "type": "zenya-video"
+      "type": "zenya-video",
+      "settings": {
+        "heading": "Watch Our Story",
+        "video_url": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
+        "bg_color": "#0f172a",
+        "text_color": "#ffffff",
+        "heading_color": "#ffffff",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
     },
     "testimonials": {
       "type": "zenya-testimonials",
@@ -210,7 +303,12 @@
       "type": "zenya-how-it-works"
     },
     "visual_showcase": {
-      "type": "zenya-visual-showcase"
+      "type": "zenya-visual-showcase",
+      "settings": {
+        "heading": "Experience Perfection",
+        "text": "Don't settle for less.",
+        "cta_text": "Get Yours Today"
+      }
     },
     "newsletter": {
       "type": "zenya-newsletter",

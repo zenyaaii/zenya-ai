@@ -2,7 +2,28 @@
   "sections": {
     "hero": {
       "type": "zenya-hero",
-      "settings": {}
+      "settings": {
+        "headline": "Welcome to Zenya",
+        "subheadline": "The Future of E-commerce",
+        "cta": "Shop Now",
+        "full_width": false,
+        "container_width": 1200,
+        "image_position": "right",
+        "text_alignment": "left",
+        "image_ratio": "4/3",
+        "image_radius": 20,
+        "button_style": "solid",
+        "button_radius": 22,
+        "heading_size": 56,
+        "subheadline_size": 20,
+        "bg_color": "#f8fafc",
+        "heading_color": "#0f172a",
+        "text_color": "#475569",
+        "button_bg_color": "#3b82f6",
+        "button_text_color": "#ffffff",
+        "padding_top": 84,
+        "padding_bottom": 84
+      }
     },
     "features": {
       "type": "zenya-features",

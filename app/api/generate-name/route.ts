@@ -6,7 +6,11 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { context } = await req.json();
+    const body = await req.json().catch(() => ({} as any));
+    const context = typeof body?.context === 'string' ? body.context.slice(0, 2000) : '';
+    if (!context) {
+      return NextResponse.json({ error: 'invalid_input', message: 'context (string) required' }, { status: 400 });
+    }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

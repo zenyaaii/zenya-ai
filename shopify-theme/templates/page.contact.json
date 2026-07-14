@@ -7,7 +7,11 @@
       "type": "zenya-contact"
     },
     "map": {
-      "type": "zenya-map"
+      "type": "zenya-map",
+      "settings": {
+        "heading": "Visit Our Store",
+        "address": "123 Main St, New York, NY 10001"
+      }
     },
     "faq": {
       "type": "zenya-accordion",

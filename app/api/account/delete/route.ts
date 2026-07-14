@@ -50,9 +50,14 @@ export async function POST(_req: NextRequest) {
   }
 
   // 2. Send confirmation email BEFORE deleting the auth row (email gone after).
+  //    Non-fatal: if the mail fails we still delete — user requested erasure.
   if (user.email) {
-    const mail = accountDeletedEmail({ email: user.email })
-    await sendEmail({ to: user.email, subject: mail.subject, html: mail.html, text: mail.text })
+    try {
+      const mail = accountDeletedEmail({ email: user.email })
+      await sendEmail({ to: user.email, subject: mail.subject, html: mail.html, text: mail.text })
+    } catch (mailErr) {
+      console.warn('[delete-account] confirmation email failed (non-fatal):', mailErr)
+    }
   }
 
   // 3. Delete the auth.users row (admin API — service role only).

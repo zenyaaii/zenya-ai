@@ -16,7 +16,11 @@
     },
     "cart-drawer": {
       "type": "zenya-cart-drawer",
-      "settings": {}
+      "settings": {
+        "show_upsells": true,
+        "free_shipping_threshold": 10000,
+        "custom_message": "Tax included. Shipping calculated at checkout."
+      }
     }
   },
   "order": [
