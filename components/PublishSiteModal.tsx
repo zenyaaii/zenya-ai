@@ -121,11 +121,10 @@ export default function PublishSiteModal({
           النشر على زينيا
         </h2>
         <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-          اختر معرّفًا للرابط. سيكون موقعك منشورًا على{' '}
-          <code dir="ltr" style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12 }}>
-            zenyaai.co/s/{slug || 'your-slug'}
+          اختر اسمًا لموقعك. سيكون عنوانك الخاص:{' '}
+          <code dir="ltr" style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12, color: '#5e6ad2', fontWeight: 600 }}>
+            {slug || 'your-name'}.zenya.co
           </code>
-          .
         </p>
 
         <label htmlFor="slug-input" style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
@@ -166,9 +165,10 @@ export default function PublishSiteModal({
               lineHeight: 1.55,
             }}
           >
-            يتطلّب النشر <strong>خطة Pro (24.99$ شهريًا)</strong>.{' '}
-            <a href="/pricing?upgrade=pro" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
-              الترقية ←
+            احصل على موقعك المباشر على <strong>اسمك.zenya.co</strong> مع{' '}
+            <strong>خطة Starter (14.99$ شهريًا)</strong>.{' '}
+            <a href="/pricing?upgrade=starter" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
+              ابدأ الآن ←
             </a>
           </div>
         )}

@@ -3,5 +3,17 @@
   "rules": {
     "@next/next/no-sync-scripts": "off",
     "react/no-unescaped-entities": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "components/theme/**/*.{ts,tsx}",
+        "components/ThemePreview.tsx"
+      ],
+      "rules": {
+        "@next/next/no-img-element": "off",
+        "@next/next/no-page-custom-font": "off"
+      }
+    }
+  ]
 }

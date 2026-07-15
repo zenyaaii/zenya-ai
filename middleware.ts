@@ -4,8 +4,17 @@ import { updateSession } from '@/utils/supabase/middleware'
 const OWN_HOSTS = new Set([
   'zenyaai.co',
   'www.zenyaai.co',
+  'zenya.co',
+  'www.zenya.co',
+  'accounts.zenya.co',
   'localhost',
   'localhost:3000',
+])
+
+// Subdomains of zenya.co that are reserved for the app (not customer sites)
+const ZENYA_CO_APP_SUBDOMAINS = new Set([
+  'www',
+  'accounts',
 ])
 
 function isOwnHost(host: string) {
@@ -14,6 +23,18 @@ function isOwnHost(host: string) {
   if (host.endsWith('.vercel.app')) return true
   if (host.startsWith('localhost:')) return true
   return false
+}
+
+/**
+ * If the host is a *.zenya.co wildcard subdomain (not a reserved one),
+ * return the subdomain slug so we can route to /s/[slug].
+ * e.g. "myrestaurant.zenya.co" → "myrestaurant"
+ */
+function getZenyaCoSlug(host: string): string | null {
+  if (!host.endsWith('.zenya.co')) return null
+  const sub = host.slice(0, -'.zenya.co'.length)
+  if (!sub || ZENYA_CO_APP_SUBDOMAINS.has(sub)) return null
+  return sub
 }
 
 // ── Rate limiting ──────────────────────────────────────────────────────────
@@ -125,6 +146,25 @@ export async function middleware(request: NextRequest) {
       )
     }
   }
+
+  // ---- WILDCARD *.zenya.co → customer site by slug -----------------------
+  // e.g. myrestaurant.zenya.co → /s/myrestaurant (no DB lookup needed)
+  const zenyaSlug = getZenyaCoSlug(host)
+  if (zenyaSlug) {
+    if (
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/s/')
+    ) {
+      return NextResponse.next()
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = `/s/${zenyaSlug}${pathname === '/' ? '' : pathname}`
+    return NextResponse.rewrite(url)
+  }
+
+  // ---- accounts.zenya.co → treat as own app host -------------------------
+  // Already in OWN_HOSTS so falls through to normal session handling below.
 
   // ---- CUSTOM DOMAIN PATH ------------------------------------------------
   if (!isOwnHost(host)) {

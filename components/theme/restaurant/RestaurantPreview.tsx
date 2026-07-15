@@ -82,8 +82,7 @@ export default function RestaurantPreview({
   onViewChange,
 }: Props) {
   const preset = getRestaurantPreset(presetId)
-  // Color overrides land on top of the preset palette, key-by-key.
-  const c = { ...preset.colors, ...(content.color_overrides || {}) }
+  const colorOverrides = content.color_overrides
   // Typography preset is independent of color preset. If the user hasn't
   // picked one we keep using the color preset's heading/body fonts so
   // legacy sites don't visually shift.
@@ -101,6 +100,13 @@ export default function RestaurantPreview({
   const [internalView, setInternalView] = useState<RestaurantView>('home')
   const view = controlledView ?? internalView
   const setView = onViewChange ?? setInternalView
+
+  // Merged palette lives inside useMemo so a re-render doesn't produce a
+  // fresh object that busts the memo on every tick.
+  const c = useMemo(
+    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
+    [preset, colorOverrides]
+  )
 
   const cssVars = useMemo(
     () =>

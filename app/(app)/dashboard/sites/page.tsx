@@ -103,6 +103,7 @@ export default function SitesPage() {
   // `starter` and `pro_onetime` do NOT.
   const hasHosting =
     plan === 'admin' ||
+    plan === 'starter' ||
     plan === 'pro_hosting' ||
     plan === 'pro' ||
     !!profile?.has_hosting
@@ -468,7 +469,7 @@ function SiteRow({
         <div className="min-w-0">
           <div className="truncate text-[13.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</div>
           <div className="truncate text-[11.5px] text-muted">
-            {live ? `zenyaai.co/s/${theme.slug}` : bt + (isEcom ? ' · Shopify' : ' · draft')}
+            {live ? `${theme.slug}.zenya.co` : bt + (isEcom ? ' · Shopify' : ' · draft')}
           </div>
         </div>
       </div>

@@ -116,7 +116,8 @@ export default function CheckoutPage() {
                     <div className="flex items-center justify-between gap-4">
                          <div className="relative">
                             <div className="w-16 h-16 border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200&auto=format&fit=crop" className="w-full h-full object-cover" />
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200&auto=format&fit=crop" alt="مكنسة زينيا V2" className="w-full h-full object-cover" />
                             </div>
                             <span className="absolute -top-2 -right-2 bg-slate-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">1</span>
                          </div>

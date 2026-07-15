@@ -80,12 +80,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .eq('id', user.id)
     .maybeSingle()
 
-  if (!profile || (!profile.has_hosting && profile.plan !== 'admin')) {
+  // Starter ($14.99) gets slug.zenya.co hosting. Pro ($24.99) adds custom domain + no badge.
+  const HOSTING_PLANS = new Set(['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
+  if (!profile || (!HOSTING_PLANS.has(profile.plan) && !profile.has_hosting)) {
     return NextResponse.json(
       {
         error: 'hosting_required',
-        message: 'Zenya hosting is required to publish at /s/{slug}. Upgrade to the Pro plan ($24.99/mo).',
-        cta: '/checkout?plan=pro',
+        message: 'يتطلّب النشر خطة Starter (14.99$ شهريًا) على الأقل للحصول على موقع مباشر على اسمك.zenya.co.',
+        cta: '/checkout?plan=starter',
       },
       { status: 402 }
     )
@@ -108,13 +110,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   // 4. Publish (service role to bypass RLS for the slug uniqueness path)
   const now = new Date().toISOString()
+  const siteUrl = `https://${slug}.zenya.co`
+
   const { error: updErr } = await a
     .from('themes')
     .update({
       slug,
       is_published: true,
       status: 'published',
-      published_url: `https://zenyaai.co/s/${slug}`,
+      published_url: siteUrl,
       published_at: now,
       unpublished_at: null,
     })
@@ -134,7 +138,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json({
     ok: true,
     slug,
-    url: `https://zenyaai.co/s/${slug}`,
+    url: siteUrl,
     published_at: now,
   })
 }
