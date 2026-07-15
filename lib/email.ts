@@ -480,6 +480,56 @@ export function paymentReceiptEmail(args: {
   return { subject, text, html }
 }
 
+/**
+ * Branded "your password was changed" security notification. Replaces the
+ * plain English default. This is the Resend-sendable twin of
+ * supabase/email-templates/password-changed.html — use it if we ever wire a
+ * post-password-change hook and want our look instead of Supabase's default.
+ */
+export function passwordChangedEmail(args: {
+  email: string
+  secureUrl?: string
+}): { subject: string; text: string; html: string } {
+  const { email } = args
+  const secureUrl = args.secureUrl || 'https://zenyaai.co/login'
+
+  const subject = 'تم تغيير كلمة مرور حسابك في زينيا'
+
+  const text = [
+    `مرحبًا،`,
+    ``,
+    `هذا تأكيد بأن كلمة المرور لحسابك (${email}) قد تغيّرت للتو.`,
+    `إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.`,
+    ``,
+    `لم تقم بهذا التغيير؟ أمّن حسابك فورًا بإعادة تعيين كلمة المرور من: ${secureUrl}`,
+    `وراسلنا على noreply@zenyaai.co`,
+    ``,
+    `— زينيا`,
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      هذا تأكيد بأن كلمة المرور لحسابك <strong style="color:#16171b;direction:ltr;display:inline-block;">${email}</strong> قد تغيّرت للتو. إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">🔒 &nbsp;لأمانك، لن نُرسل لك كلمة المرور أبدًا عبر البريد، ولن نطلبها منك.</p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'أمان الحساب',
+    heading: 'تم تغيير كلمة المرور',
+    bodyHtml,
+    ctaHref: secureUrl,
+    ctaLabel: 'تأمين حسابي',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;"><strong style="color:#5f5f5d;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
 export function domainExpiringEmail(args: {
   domain: string
   daysUntil: number

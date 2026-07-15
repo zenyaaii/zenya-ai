@@ -31,8 +31,21 @@ For each template below, paste the **Subject** into the "Subject heading" field 
 | **Change Email Address** | [`change-email.html`](change-email.html) | `أكِّد بريدك الجديد في زينيا` |
 | **Reset Password** | [`reset-password.html`](reset-password.html) | `إعادة تعيين كلمة المرور في زينيا` |
 | **Reauthentication** | [`reauthentication.html`](reauthentication.html) | `رمز التحقق من زينيا` |
+| **Password Changed**¹ | [`password-changed.html`](password-changed.html) | `تم تغيير كلمة مرور حسابك في زينيا` |
 
-All six templates share the **site look** — cream `#f7f4ed` page, white card with an `#e5e2d9` border, ink `#16171b` headings, indigo `#5e6ad2` accent + pill CTA, and the hosted زينيا wordmark — fully Arabic / RTL to match the app and the Resend transactional emails in `lib/email.ts`. They render well in Gmail / Outlook / Apple Mail and use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`).
+> **¹ Note on "Password Changed".** This is the branded version of the plain
+> *"Your password has been changed"* security email (the ugly English one).
+> It is **not** one of GoTrue's six config-API templates, so `_apply.mjs`
+> deliberately does **not** push it and it has no `{{ .TokenHash }}` link —
+> only `{{ .Email }}` and `{{ .SiteURL }}`. Apply it one of two ways:
+> 1. **If your project exposes it** under *Authentication → Emails*, paste the
+>    subject + body there.
+> 2. **Otherwise**, send it yourself from our own Resend system via
+>    `passwordChangedEmail()` in [`lib/email.ts`](../../lib/email.ts) after a
+>    password update, and leave Supabase's default off. That path is fully
+>    branded and under our control.
+
+All six OAuth templates share the **site look** — cream `#f7f4ed` page, white card with an `#e5e2d9` border, ink `#16171b` headings, indigo `#5e6ad2` accent + pill CTA, and the hosted زينيا wordmark — fully Arabic / RTL to match the app and the Resend transactional emails in `lib/email.ts`. They render well in Gmail / Outlook / Apple Mail and use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`).
 
 > **Fastest way to apply everything:** `SUPABASE_ACCESS_TOKEN=sbp_… node supabase/email-templates/_apply.mjs`
 > (add `ENABLE_HIBP=1` once the project is on the Pro plan to turn on leaked-password protection). The manual dashboard steps below are an alternative.

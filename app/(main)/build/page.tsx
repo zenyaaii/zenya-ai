@@ -77,6 +77,14 @@ export default function BuildPage() {
 
   const [step, setStep] = useState<Step>(1)
 
+  // Surfaced when the Shopify OAuth callback redirects back here on failure
+  // (the connect happens in a popped tab, which lands on /build?shopify_error).
+  const [shopifyError, setShopifyError] = useState<string | null>(null)
+  useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get('shopify_error')
+    if (e) setShopifyError(e)
+  }, [])
+
   // Step 1
   const [url, setUrl] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
@@ -341,6 +349,22 @@ export default function BuildPage() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
+        {shopifyError && (
+          <div className="mb-6 flex items-start gap-2 rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-4 py-3 text-[12.5px] text-[#b91c1c]">
+            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <span>
+              تعذّر إكمال الربط مع Shopify. أغلِق نافذة Shopify وحاول الضغط على «اتصال» مرة أخرى.
+              إن تكرّر الأمر، تأكّد من أنك سجّلت الدخول إلى المتجر الصحيح.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShopifyError(null)}
+              className="ms-auto flex-shrink-0 text-[11px] font-semibold text-[#b91c1c] underline-offset-2 hover:underline"
+            >
+              إخفاء
+            </button>
+          </div>
+        )}
         {step === 1 && (
           <UrlStep
             url={url}
@@ -513,8 +537,95 @@ function UrlStep({
   error: string | null
   onAnalyze: () => void
 }) {
+  // Ask up-front whether the user already has a Shopify store. If they do,
+  // connecting is the easy path (one-click install + product creation at the
+  // end); if not, they just generate + download a .zip here. Purely
+  // informational — it never blocks pasting a URL and generating.
+  const [hasStore, setHasStore] = useState<'yes' | 'no' | null>(null)
+  const shopifyAffiliate = 'https://www.shopify.com/free-trial?ref=zenya-ai'
+
   return (
     <div className="mx-auto max-w-2xl">
+      {/* Store question — sets expectations before the wizard begins */}
+      <div className="mb-5 rounded-3xl border border-token bg-white p-6 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+            <Store className="h-5 w-5 text-primary" strokeWidth={2.1} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[16px] font-bold text-foreground">هل لديك متجر Shopify؟</h2>
+            <p className="mt-1 text-[13px] leading-relaxed text-muted">
+              إن كان لديك متجر، فأسهل طريقة أن تربط زينيا به — سنثبّت القالب وننشئ المنتج
+              تلقائيًا بنقرة واحدة في نهاية الخطوات، دون أي رفع يدوي.
+            </p>
+
+            {hasStore === null && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHasStore('yes')}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
+                >
+                  <Store className="h-4 w-4" /> نعم، لديّ متجر
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHasStore('no')}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
+                >
+                  لا، سأكمل هنا
+                </button>
+              </div>
+            )}
+
+            {hasStore === 'yes' && (
+              <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-3.5 text-[12.5px]">
+                <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <Upload className="h-4 w-4 text-[#15803d]" /> رائع — سنربط متجرك في الخطوة الأخيرة
+                </div>
+                <p className="mt-1 leading-relaxed text-muted">
+                  الصق رابط المنتج بالأسفل وأكمل الخطوات. عند التوليد، اربط متجرك مرة واحدة
+                  وستتكفّل زينيا بالباقي: تثبيت القالب وإنشاء المنتج تلقائيًا — بلا تنزيل ولا رفع يدوي.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setHasStore(null)}
+                  className="mt-1.5 text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+                >
+                  → تغيير الإجابة
+                </button>
+              </div>
+            )}
+
+            {hasStore === 'no' && (
+              <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3.5 text-[12.5px]">
+                <p className="leading-relaxed text-muted">
+                  لا مشكلة — أكمل هنا وسنولّد لك قالبًا كاملاً تنزّله كملف ‎.zip‎ جاهز لـ Shopify.
+                  تحتاج متجرًا لاحقًا؟ ابدأ تجربة Shopify مجانية وعُد لرفعه بنقرة.
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <a
+                    href={shopifyAffiliate}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[12.5px] font-semibold text-white transition hover:scale-[1.02]"
+                  >
+                    ابدأ تجربة Shopify المجانية <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setHasStore(null)}
+                    className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+                  >
+                    → تغيير الإجابة
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-3xl border border-token bg-white p-10 shadow-sm">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
           <Link2 className="h-5 w-5 text-primary" strokeWidth={2.2} />
