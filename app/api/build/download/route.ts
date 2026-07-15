@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import JSZip from 'jszip'
 import { createClient } from '@/utils/supabase/server'
+import { userIsAdmin } from '@/lib/is-admin'
 import { generateTheme } from '@/lib/build/theme-generator'
 import { parseBuildConfig } from '@/lib/build/parse-config'
 
@@ -25,6 +26,16 @@ export async function POST(req: NextRequest) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+  // The one-product builder is admin-only while the new version is in the
+  // works — everyone else sees the "coming soon" screen. Enforce it here too
+  // so the gate can't be bypassed by calling the API directly.
+  if (!(await userIsAdmin(user.id))) {
+    return NextResponse.json(
+      { error: 'coming_soon', message: 'منشئ متجر المنتج الواحد قيد التطوير — نسخة جديدة كليًا قادمة قريبًا.' },
+      { status: 403 },
+    )
+  }
 
   let body: any
   try { body = await req.json() } catch { body = {} }

@@ -1,9 +1,11 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TitleBar } from '@shopify/app-bridge-react';
+import { createClient } from '@/utils/supabase/client';
+import ComingSoon from '@/components/build/ComingSoon';
 import ImageSelector from '@/components/ImageSelector';
 import { saveAs } from 'file-saver';
 import { useShopifyBridge } from '@/components/ShopifyAppBridge';
@@ -31,6 +33,30 @@ function NewThemeContent() {
   const searchParams = useSearchParams();
   const shop = searchParams.get('shop') || '';
   const { authenticatedFetch } = useShopifyBridge();
+  const supabase = useMemo(() => createClient(), []);
+
+  // Admin-only gate while the new one-product builder is in the works. We
+  // FAIL OPEN when no Supabase session is readable (e.g. the embedded iframe
+  // can't see it) so the admin is never locked out; a positively-identified
+  // non-admin sees the coming-soon screen.
+  const [gate, setGate] = useState<'loading' | 'ok' | 'soon'>('loading');
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!alive) return;
+        if (!user) { setGate('ok'); return; }
+        const { data: prof } = await supabase
+          .from('profiles').select('plan').eq('id', user.id).maybeSingle();
+        if (!alive) return;
+        setGate(prof?.plan === 'admin' ? 'ok' : 'soon');
+      } catch {
+        if (alive) setGate('ok');
+      }
+    })();
+    return () => { alive = false; };
+  }, [supabase]);
 
   const [step, setStep] = useState(1);
   const [url, setUrl] = useState('');
@@ -169,6 +195,31 @@ function NewThemeContent() {
 
   const canColors = selectedImages.length >= MIN_IMAGES && name.trim() && storeName.trim() && Number(price) > 0;
   const heroImage = selectedImages[0] || scraped?.images?.[0] || '';
+
+  if (gate === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F7F7FB]">
+        <TitleBar title="إنشاء قالب جديد" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (gate === 'soon') {
+    const qs = searchParams.toString();
+    return (
+      <div className="relative min-h-screen bg-[#F7F7FB] pb-24">
+        <TitleBar title="قريبًا" />
+        <div className="mx-auto max-w-5xl px-6 pt-8">
+          <ComingSoon
+            browseHref="https://zenyaai.co/themes"
+            browseTarget="_blank"
+            onBack={() => router.push(`/shopify${qs ? `?${qs}` : ''}`)}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#F7F7FB] pb-24">

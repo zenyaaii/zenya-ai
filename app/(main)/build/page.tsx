@@ -15,6 +15,7 @@ import {
 import { collectClaims, type ThemeClaim } from '@/lib/build/seed'
 import type { BuildConfig } from '@/lib/build/theme-generator'
 import PhoneMockup from '@/components/build/PhoneMockup'
+import ComingSoon from '@/components/build/ComingSoon'
 
 type Step = 1 | 2 | 3 | 4
 
@@ -74,6 +75,9 @@ export default function BuildPage() {
   const router = useRouter()
   const supabase = createClient()
   const [checkingAuth, setCheckingAuth] = useState(true)
+  // The one-product builder is admin-only while the new version is in the
+  // works; everyone else sees the ComingSoon screen.
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [step, setStep] = useState<Step>(1)
 
@@ -127,6 +131,15 @@ export default function BuildPage() {
         router.replace('/login?mode=signup&next=/build')
         return
       }
+      // Read the caller's own plan (RLS allows "view own profile") to decide
+      // whether to open the builder or show the coming-soon gate.
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (!alive) return
+      setIsAdmin(prof?.plan === 'admin')
       setCheckingAuth(false)
     })()
     return () => { alive = false }
@@ -326,6 +339,23 @@ export default function BuildPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
         <Loader2 className="h-5 w-5 animate-spin text-muted" />
+      </div>
+    )
+  }
+
+  // Non-admins: the builder is behind a "big new version coming" gate.
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-[var(--background)]">
+        <header className="border-b border-token bg-white">
+          <div className="mx-auto flex max-w-6xl items-center gap-2 px-6 py-4 text-[14px] font-semibold text-foreground">
+            <Sparkles className="h-4 w-4 text-primary" />
+            متجر المنتج الواحد
+          </div>
+        </header>
+        <main className="mx-auto max-w-6xl px-6">
+          <ComingSoon onBack={() => router.push('/themes')} />
+        </main>
       </div>
     )
   }
