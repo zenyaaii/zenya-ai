@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Hammer, Download, ChevronDown, Store, Loader2 } from 'lucide-react'
+import { Hammer, Download, ChevronDown, Store, Loader2, Clock } from 'lucide-react'
+import { useIsAdmin } from '@/lib/use-is-admin'
 import { generateShopifyTheme } from '@/utils/shopify-generator'
 import { saveAs } from 'file-saver'
 
@@ -30,6 +31,8 @@ export default function DemoStorefrontToolbar({
   const [collapsed, setCollapsed] = useState(false)
   const [loading, setLoading] = useState(false)
   const EASE = [0.22, 1, 0.36, 1] as const
+  // Admin keeps build/download; everyone else sees "coming soon".
+  const oneProductLive = useIsAdmin() === true
 
   async function handleDownload() {
     setLoading(true)
@@ -80,23 +83,32 @@ export default function DemoStorefrontToolbar({
               </span>
             </span>
 
-            <Link
-              href="/build"
-              className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition hover:bg-white/90"
-            >
-              <Hammer className="h-3.5 w-3.5" strokeWidth={2.25} />
-              ابنِ هذا القالب
-            </Link>
+            {oneProductLive ? (
+              <>
+                <Link
+                  href="/build"
+                  className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-[12.5px] font-semibold text-black transition hover:bg-white/90"
+                >
+                  <Hammer className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  ابنِ هذا القالب
+                </Link>
 
-            <button
-              type="button"
-              onClick={handleDownload}
-              disabled={loading}
-              className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[12.5px] font-medium text-white transition hover:bg-white/20 disabled:opacity-60"
-            >
-              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" strokeWidth={2} />}
-              <span className="hidden sm:inline">{loading ? 'جارٍ التحضير…' : 'تحميل'}</span>
-            </button>
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={loading}
+                  className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-[12.5px] font-medium text-white transition hover:bg-white/20 disabled:opacity-60"
+                >
+                  {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" strokeWidth={2} />}
+                  <span className="hidden sm:inline">{loading ? 'جارٍ التحضير…' : 'تحميل'}</span>
+                </button>
+              </>
+            ) : (
+              <span className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-[12.5px] font-semibold text-white/80">
+                <Clock className="h-3.5 w-3.5" strokeWidth={2.25} />
+                نسخة جديدة قريبًا
+              </span>
+            )}
 
             <button
               type="button"

@@ -20,6 +20,7 @@ import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
 import { auroraTints, BUSINESS_TYPE_ORDER, type AuroraTint } from '@/lib/aurora-tints'
 import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
+import { useIsAdmin } from '@/lib/use-is-admin'
 import { cn } from '@/lib/utils'
 
 type ThemeCard = {
@@ -149,6 +150,8 @@ const FILTERS: { id: Category; label: string }[] = [
 
 export default function ThemesPage() {
   const [filter, setFilter] = useState<Category>('all')
+  // Admin keeps the working one-product builder; everyone else sees "coming soon".
+  const isAdmin = useIsAdmin()
 
   const visible = useMemo(() => {
     if (filter === 'shopify') return THEME_CARDS.filter((t) => t.shopify)
@@ -205,7 +208,7 @@ export default function ThemesPage() {
         {/* ── All templates grid ── */}
         <RevealGroup key={filter} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((t) => (
-            <ThemeGridCard key={t.id} theme={t} tint={auroraTints[t.id]} />
+            <ThemeGridCard key={t.id} theme={t} tint={auroraTints[t.id]} isAdmin={isAdmin} />
           ))}
         </RevealGroup>
 
@@ -218,9 +221,12 @@ export default function ThemesPage() {
 
 /* ────────────────────────────────────────────────────────────── */
 
-function ThemeGridCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) {
+function ThemeGridCard({ theme, tint, isAdmin }: { theme: ThemeCard; tint: AuroraTint; isAdmin: boolean | null }) {
   const Icon = theme.icon
   const accentText = tint.accent === '#1c1c1c' ? '#1c1c1c' : tint.accent
+  // The one-product builder is being rebuilt — "coming soon" for everyone but
+  // the admin (loading counts as non-admin so no build CTA flashes).
+  const comingSoon = theme.id === 'one_product' && isAdmin !== true
   return (
     <RevealItem
       className="group relative flex flex-col overflow-hidden rounded-[26px] ring-hover card-sheen transition-transform duration-300 hover:-translate-y-1"
@@ -263,9 +269,13 @@ function ThemeGridCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) 
         <div className="absolute end-4 top-4">
           <span
             className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
-            style={{ background: tint.accent, color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c' }}
+            style={
+              comingSoon
+                ? { background: 'rgba(0,0,0,0.55)', color: '#ffffff', backdropFilter: 'blur(4px)' }
+                : { background: tint.accent, color: tint.accent === '#1c1c1c' ? '#ffffff' : '#0a0a0c' }
+            }
           >
-            {theme.shopify ? 'شوبيفاي' : 'مباشر'}
+            {comingSoon ? 'قريبًا' : theme.shopify ? 'شوبيفاي' : 'مباشر'}
           </span>
         </div>
         {/* Bottom title overlay */}
@@ -312,13 +322,23 @@ function ThemeGridCard({ theme, tint }: { theme: ThemeCard; tint: AuroraTint }) 
             شاهد العرض
             <ArrowUpRight className="h-3 w-3 rtl-flip transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
           </Link>
-          <Link
-            href={theme.createHref}
-            className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
-            aria-label={`ابنِ بقالب ${tint.label}`}
-          >
-            ابنِ
-          </Link>
+          {comingSoon ? (
+            <span
+              className="cursor-not-allowed rounded-full border border-token bg-white/50 px-4 py-2.5 text-[13px] font-semibold text-muted"
+              aria-label="نسخة جديدة قادمة قريبًا"
+              title="نعمل على نسخة جديدة كليًا — قريبًا"
+            >
+              قريبًا
+            </span>
+          ) : (
+            <Link
+              href={theme.createHref}
+              className="rounded-full border border-token bg-white/70 px-4 py-2.5 text-[13px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white"
+              aria-label={`ابنِ بقالب ${tint.label}`}
+            >
+              ابنِ
+            </Link>
+          )}
         </div>
       </div>
     </RevealItem>

@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { useIsAdmin } from '@/lib/use-is-admin';
 import { generateShopifyTheme } from '@/utils/shopify-generator';
 import { saveAs } from 'file-saver';
 import AuroraBackground from '@/components/marketing/AuroraBackground';
@@ -127,6 +128,20 @@ function DashboardContent() {
   const [authLoading, setAuthLoading] = useState(false);
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  // Admin keeps the working one-product builder; everyone else sees it as
+  // "coming soon" (loading counts as non-admin so no build CTA flashes).
+  const isAdmin = useIsAdmin();
+  const oneProductLive = isAdmin === true;
+  const templates = useMemo(
+    () =>
+      TEMPLATES.map((t) =>
+        t.id === 'one_product' && !oneProductLive
+          ? { ...t, status: 'soon' as const, type: null }
+          : t,
+      ),
+    [oneProductLive],
+  );
 
   const storeName = shop ? shop.replace('.myshopify.com', '') : 'متجرك';
 
@@ -290,8 +305,8 @@ function DashboardContent() {
     );
   }
 
-  const liveCount = TEMPLATES.filter((t) => t.status === 'live').length;
-  const soonCount = TEMPLATES.filter((t) => t.status === 'soon').length;
+  const liveCount = templates.filter((t) => t.status === 'live').length;
+  const soonCount = templates.filter((t) => t.status === 'soon').length;
 
   /* ── Authenticated app shell ── */
   return (
@@ -352,15 +367,17 @@ function DashboardContent() {
               liveCount={liveCount}
               soonCount={soonCount}
               queryString={queryString}
+              oneProductLive={oneProductLive}
               onBrowse={() => setView('templates')}
             />
           )}
-          {view === 'templates' && <TemplatesView queryString={queryString} />}
+          {view === 'templates' && <TemplatesView queryString={queryString} templates={templates} />}
           {view === 'stores' && (
             <StoresView
               themes={themes}
               queryString={queryString}
               downloadingId={downloadingId}
+              oneProductLive={oneProductLive}
               onDownload={handleDownload}
               onBrowse={() => setView('templates')}
             />
@@ -387,9 +404,9 @@ function SectionHeader({ title, subtitle, action }: { title: string; subtitle: s
 }
 
 function OverviewView({
-  storeName, themesCount, liveCount, soonCount, queryString, onBrowse,
+  storeName, themesCount, liveCount, soonCount, queryString, oneProductLive, onBrowse,
 }: {
-  storeName: string; themesCount: number; liveCount: number; soonCount: number; queryString: string; onBrowse: () => void;
+  storeName: string; themesCount: number; liveCount: number; soonCount: number; queryString: string; oneProductLive: boolean; onBrowse: () => void;
 }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
@@ -403,15 +420,27 @@ function OverviewView({
             <Sparkles className="h-3 w-3 text-[#6366f1]" strokeWidth={2.25} /> مُنشئ المتاجر بالذكاء الاصطناعي
           </div>
           <h2 className="text-[28px] font-[590] leading-[1.1] tracking-[-1px] text-foreground sm:text-[34px]">
-            حوّل رابط منتج إلى <span className="gradient-text">متجر Shopify مباشر.</span>
+            {oneProductLive ? (
+              <>حوّل رابط منتج إلى <span className="gradient-text">متجر Shopify مباشر.</span></>
+            ) : (
+              <>جيلٌ جديد من متاجر Shopify <span className="gradient-text">قادم قريبًا.</span></>
+            )}
           </h2>
           <p className="mt-3 text-[14.5px] leading-[1.6] text-muted">
-            الصق رابط منتج — تكتب زينيا النصوص، وتستورد مراجعات حقيقية، وتصمّم الصفحة، وتثبّت القالب والمنتج مباشرةً في متجرك.
+            {oneProductLive
+              ? 'الصق رابط منتج — تكتب زينيا النصوص، وتستورد مراجعات حقيقية، وتصمّم الصفحة، وتثبّت القالب والمنتج مباشرةً في متجرك.'
+              : 'نُعيد بناء منشئ متجر المنتج الواحد من الصفر — أسرع، وأسهل، وبقوالب أعلى تحويلًا. نضع اللمسات الأخيرة الآن.'}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href={`/shopify/new${queryString}${queryString ? '&' : '?'}type=one_product`} className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-[14px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
-              <Plus className="h-4 w-4" strokeWidth={2.5} /> بناء متجر جديد
-            </Link>
+            {oneProductLive ? (
+              <Link href={`/shopify/new${queryString}${queryString ? '&' : '?'}type=one_product`} className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-[14px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
+                <Plus className="h-4 w-4" strokeWidth={2.5} /> بناء متجر جديد
+              </Link>
+            ) : (
+              <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-foreground/10 px-6 py-3 text-[14px] font-semibold text-muted">
+                <Clock className="h-4 w-4" strokeWidth={2.25} /> قريبًا
+              </span>
+            )}
             <button onClick={onBrowse} className="inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-6 py-3 text-[14px] font-semibold text-foreground backdrop-blur-md transition hover:bg-white">
               تصفّح القوالب <ArrowRight className="h-4 w-4 rtl-flip" strokeWidth={2.25} />
             </button>
@@ -441,12 +470,12 @@ function StatCard({ icon: Icon, label, value, accent }: { icon: LucideIcon; labe
   );
 }
 
-function TemplatesView({ queryString }: { queryString: string }) {
+function TemplatesView({ queryString, templates }: { queryString: string; templates: Template[] }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
       <SectionHeader title="القوالب" subtitle="قوالب تجارة إلكترونية تُثبَّت مباشرةً في متجر Shopify الخاص بك." />
       <div className="grid gap-6 sm:grid-cols-2">
-        {TEMPLATES.map((t, i) => (
+        {templates.map((t, i) => (
           <TemplateCard key={t.id} template={t} index={i} queryString={queryString} />
         ))}
       </div>
@@ -567,9 +596,9 @@ function TemplateCard({ template, index, queryString }: { template: Template; in
 }
 
 function StoresView({
-  themes, queryString, downloadingId, onDownload, onBrowse,
+  themes, queryString, downloadingId, oneProductLive, onDownload, onBrowse,
 }: {
-  themes: any[]; queryString: string; downloadingId: string | null; onDownload: (t: any) => void; onBrowse: () => void;
+  themes: any[]; queryString: string; downloadingId: string | null; oneProductLive: boolean; onDownload: (t: any) => void; onBrowse: () => void;
 }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
@@ -577,9 +606,15 @@ function StoresView({
         title="متاجري"
         subtitle="كل ما أنشأته باستخدام زينيا."
         action={
-          <Link href={`/shopify/new${queryString}`} className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-[13px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
-            <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> متجر جديد
-          </Link>
+          oneProductLive ? (
+            <Link href={`/shopify/new${queryString}`} className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-[13px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> متجر جديد
+            </Link>
+          ) : (
+            <span className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full bg-foreground/10 px-4 py-2 text-[13px] font-semibold text-muted">
+              <Clock className="h-3.5 w-3.5" strokeWidth={2} /> قريبًا
+            </span>
+          )
         }
       />
 

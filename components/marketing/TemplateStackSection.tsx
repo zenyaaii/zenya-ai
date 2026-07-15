@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence, type PanInfo } from 'framer-motion'
 import Link from 'next/link'
 import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
+import { useIsAdmin } from '@/lib/use-is-admin'
 
 /**
  * Template carousel — inspired by the reference "Great ideas live here" gallery.
@@ -128,6 +129,9 @@ export default function TemplateStackSection() {
   // Start near the middle so both sides have neighbours to peek.
   const [index, setIndex] = useState(3)
   const [compact, setCompact] = useState(false)
+  // The one-product builder is admin-only while it's rebuilt; everyone else
+  // sees "coming soon" (loading counts as non-admin).
+  const oneProductLive = useIsAdmin() === true
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)')
@@ -236,6 +240,7 @@ export default function TemplateStackSection() {
                   template={t}
                   active={isCenter}
                   height={stageH - (compact ? 40 : 60)}
+                  comingSoon={t.id === 'one_product' && !oneProductLive}
                   onClick={() => (isCenter ? setActive(t) : setIndex(i))}
                 />
               </div>
@@ -294,7 +299,11 @@ export default function TemplateStackSection() {
 
       <AnimatePresence>
         {active && (
-          <TemplatePreviewModal template={active} onClose={() => setActive(null)} />
+          <TemplatePreviewModal
+            template={active}
+            comingSoon={active.id === 'one_product' && !oneProductLive}
+            onClose={() => setActive(null)}
+          />
         )}
       </AnimatePresence>
     </section>
@@ -307,11 +316,13 @@ function CarouselCard({
   template,
   active,
   height,
+  comingSoon,
   onClick,
 }: {
   template: Template
   active: boolean
   height: number
+  comingSoon?: boolean
   onClick: () => void
 }) {
   return (
@@ -344,8 +355,11 @@ function CarouselCard({
             {template.sections} قسمًا
           </span>
           <span className="flex items-center gap-1.5 text-[10.5px] font-medium text-muted">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
-            مباشر
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ background: comingSoon ? 'rgba(28,28,28,0.35)' : 'var(--accent)' }}
+            />
+            {comingSoon ? 'قريبًا' : 'مباشر'}
           </span>
         </div>
 
@@ -434,9 +448,11 @@ function CarouselArrow({
 
 function TemplatePreviewModal({
   template,
+  comingSoon,
   onClose,
 }: {
   template: Template
+  comingSoon?: boolean
   onClose: () => void
 }) {
   return (
@@ -497,12 +513,21 @@ function TemplatePreviewModal({
 
         {/* Two buttons under the box */}
         <div className="mt-5 flex gap-3">
-          <Link
-            href={template.buildHref}
-            className="flex-1 rounded-xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.99]"
-          >
-            أنشئ
-          </Link>
+          {comingSoon ? (
+            <span
+              className="flex-1 cursor-not-allowed rounded-xl bg-foreground/10 py-3 text-center text-sm font-semibold text-muted"
+              title="نعمل على نسخة جديدة كليًا — قريبًا"
+            >
+              قريبًا
+            </span>
+          ) : (
+            <Link
+              href={template.buildHref}
+              className="flex-1 rounded-xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:opacity-90 active:scale-[0.99]"
+            >
+              أنشئ
+            </Link>
+          )}
           <Link
             href={template.demoHref}
             target="_blank"
