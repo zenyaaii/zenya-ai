@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { RequestedTokenType } from '@shopify/shopify-api'
 import { createClient } from '@/utils/supabase/server'
+import { userIsAdmin } from '@/lib/is-admin'
 import { shopify } from '@/lib/shopify'
 import { createShopifyProduct } from '@/utils/shopify'
 import { generateTheme } from '@/lib/build/theme-generator'
@@ -58,6 +59,16 @@ export async function POST(req: NextRequest) {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+
+    // Admin-only while the new one-product builder is in the works. The
+    // embedded App Bridge path above is founder-controlled (custom app), so
+    // this gate covers the public website surface.
+    if (!(await userIsAdmin(user.id))) {
+      return NextResponse.json(
+        { error: 'coming_soon', message: 'منشئ متجر المنتج الواحد قيد التطوير — نسخة جديدة كليًا قادمة قريبًا.' },
+        { status: 403 },
+      )
+    }
 
     shop = shopify.utils.sanitizeShop(String(body?.shop || ''), true) || ''
     if (!shop) {
