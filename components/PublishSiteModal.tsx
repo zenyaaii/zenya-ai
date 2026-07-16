@@ -123,7 +123,7 @@ export default function PublishSiteModal({
         <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
           اختر اسمًا لموقعك. سيكون عنوانك الخاص:{' '}
           <code dir="ltr" style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12, color: '#5e6ad2', fontWeight: 600 }}>
-            {slug || 'your-name'}.zenya.co
+            {slug || 'your-name'}.zenyaai.co
           </code>
         </p>
 
@@ -165,7 +165,7 @@ export default function PublishSiteModal({
               lineHeight: 1.55,
             }}
           >
-            احصل على موقعك المباشر على <strong>اسمك.zenya.co</strong> مع{' '}
+            احصل على موقعك المباشر على <strong>اسمك.zenyaai.co</strong> مع{' '}
             <strong>خطة Starter (14.99$ شهريًا)</strong>.{' '}
             <a href="/pricing?upgrade=starter" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
               ابدأ الآن ←

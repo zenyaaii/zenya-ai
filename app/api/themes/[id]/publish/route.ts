@@ -86,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json(
       {
         error: 'hosting_required',
-        message: 'يتطلّب النشر خطة Starter (14.99$ شهريًا) على الأقل للحصول على موقع مباشر على اسمك.zenya.co.',
+        message: 'يتطلّب النشر خطة Starter (14.99$ شهريًا) على الأقل للحصول على موقع مباشر على اسمك.zenyaai.co.',
         cta: '/checkout?plan=starter',
       },
       { status: 402 }
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   // 4. Publish (service role to bypass RLS for the slug uniqueness path)
   const now = new Date().toISOString()
-  const siteUrl = `https://${slug}.zenya.co`
+  const siteUrl = `https://${slug}.zenyaai.co`
 
   const { error: updErr } = await a
     .from('themes')

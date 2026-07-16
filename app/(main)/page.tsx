@@ -1,4 +1,7 @@
 "use client"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/utils/supabase/client"
 import Hero from "@/components/Hero"
 import Logos from "@/components/Logos"
 import FeaturesSection from "@/components/FeaturesSection"
@@ -15,6 +18,16 @@ import ScrollProgress from "@/components/marketing/ScrollProgress"
 import PageBackground from "@/components/marketing/PageBackground"
 
 export default function Page() {
+  const router = useRouter()
+
+  // Logged-in users visiting the homepage go straight to their dashboard
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) router.replace('/dashboard')
+    })
+  }, [router])
+
   return (
     <>
       <main className="relative">

@@ -4,17 +4,15 @@ import { updateSession } from '@/utils/supabase/middleware'
 const OWN_HOSTS = new Set([
   'zenyaai.co',
   'www.zenyaai.co',
-  'zenya.co',
-  'www.zenya.co',
-  'accounts.zenya.co',
+  'dashboard.zenyaai.co',
   'localhost',
   'localhost:3000',
 ])
 
-// Subdomains of zenya.co that are reserved for the app (not customer sites)
-const ZENYA_CO_APP_SUBDOMAINS = new Set([
+// Subdomains of zenyaai.co that are reserved for the app (not customer sites)
+const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
-  'accounts',
+  'dashboard',
 ])
 
 function isOwnHost(host: string) {
@@ -26,14 +24,14 @@ function isOwnHost(host: string) {
 }
 
 /**
- * If the host is a *.zenya.co wildcard subdomain (not a reserved one),
+ * If the host is a *.zenyaai.co wildcard subdomain (not a reserved one),
  * return the subdomain slug so we can route to /s/[slug].
- * e.g. "myrestaurant.zenya.co" → "myrestaurant"
+ * e.g. "myrestaurant.zenyaai.co" → "myrestaurant"
  */
 function getZenyaCoSlug(host: string): string | null {
-  if (!host.endsWith('.zenya.co')) return null
-  const sub = host.slice(0, -'.zenya.co'.length)
-  if (!sub || ZENYA_CO_APP_SUBDOMAINS.has(sub)) return null
+  if (!host.endsWith('.zenyaai.co')) return null
+  const sub = host.slice(0, -'.zenyaai.co'.length)
+  if (!sub || ZENYAAI_CO_APP_SUBDOMAINS.has(sub)) return null
   return sub
 }
 
@@ -163,8 +161,46 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url)
   }
 
-  // ---- accounts.zenya.co → treat as own app host -------------------------
-  // Already in OWN_HOSTS so falls through to normal session handling below.
+  // ---- dashboard.zenyaai.co → dashboard portal (like Shopify admin) ---------
+  // Rewrites all paths to /dashboard/* internally so the URL bar shows
+  // dashboard.zenyaai.co/sites — never dashboard.zenyaai.co/dashboard/sites.
+  if (host === 'dashboard.zenyaai.co') {
+    if (
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/s/')
+    ) {
+      return NextResponse.next({ request: { headers: forwardedHeaders } })
+    }
+
+    // Refresh auth cookies so Supabase session stays alive
+    const sessionRes = await updateSession(request)
+
+    // If updateSession issued a redirect (e.g. unauthenticated → /login), honour it
+    if (sessionRes.headers.get('location')) return sessionRes
+
+    // Paths that already map to top-level routes (auth pages) — serve as-is
+    const alreadyRouted =
+      pathname.startsWith('/dashboard') ||
+      pathname.startsWith('/login') ||
+      pathname.startsWith('/auth') ||
+      pathname.startsWith('/sign')
+
+    if (!alreadyRouted) {
+      // Rewrite: dashboard.zenyaai.co/       → /dashboard
+      //          dashboard.zenyaai.co/sites   → /dashboard/sites
+      const url = request.nextUrl.clone()
+      url.pathname = pathname === '/' ? '/dashboard' : `/dashboard${pathname}`
+      const rewriteRes = NextResponse.rewrite(url)
+      // Forward session cookies onto the rewrite response
+      sessionRes.headers.getSetCookie?.().forEach(c =>
+        rewriteRes.headers.append('set-cookie', c)
+      )
+      return rewriteRes
+    }
+
+    return sessionRes
+  }
 
   // ---- CUSTOM DOMAIN PATH ------------------------------------------------
   if (!isOwnHost(host)) {
