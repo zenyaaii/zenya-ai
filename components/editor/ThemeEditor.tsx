@@ -35,6 +35,7 @@ import {
 } from './EditorFields'
 import ClickToEditOverlay from './ClickToEditOverlay'
 import PreviewFrame, { type PreviewDevice } from './PreviewFrame'
+import { useNotify } from '@/components/ui/Notify'
 import { AiCopyProvider, type AiCopyContextValue, type AiBrand } from './AiRewrite'
 import {
   getPath, setPath, sectionStylesToCss, SECTION_TEXT_SCALES, panelInView, panelViews,
@@ -646,6 +647,7 @@ function FieldsRenderer({
 function RenderField({
   field, content, patchPath, panelLabel,
 }: { field: EditorFieldDef; content: any; patchPath: (p: string, v: any) => void; panelLabel?: string }) {
+  const { confirm } = useNotify()
   if (field.type === 'note') {
     return <SmallNote>{field.content}</SmallNote>
   }
@@ -729,8 +731,13 @@ function RenderField({
                 key={i}
                 title={title}
                 defaultOpen={arr.length === 1}
-                onRemove={() => {
-                  if (confirm(`إزالة «${title}»؟`)) remove(i)
+                onRemove={async () => {
+                  const { confirmed } = await confirm({
+                    title: `إزالة «${title}»؟`,
+                    confirmText: 'إزالة',
+                    tone: 'danger',
+                  })
+                  if (confirmed) remove(i)
                 }}
               >
                 <FieldsRenderer

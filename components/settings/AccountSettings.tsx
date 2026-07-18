@@ -23,6 +23,7 @@ import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { openConsent } from '@/components/CookieConsent'
+import { useNotify } from '@/components/ui/Notify'
 import {
   User,
   Mail,
@@ -191,6 +192,7 @@ export default function AccountSettings() {
   const router = useRouter()
   const supabase = createClient()
   const reduce = useReducedMotion()
+  const { toast } = useNotify()
 
   const [email, setEmail] = useState('')
   const [plan, setPlan] = useState<string | null>(null)
@@ -312,7 +314,7 @@ export default function AccountSettings() {
       a.click()
       URL.revokeObjectURL(url)
     } catch (e: any) {
-      alert(`تعذّر التصدير: ${e.message || e}`)
+      toast({ type: 'error', message: 'تعذّر التصدير', description: e.message || String(e) })
     } finally {
       setExporting(false)
     }
@@ -330,7 +332,7 @@ export default function AccountSettings() {
       await supabase.auth.signOut()
       router.push('/?account_deleted=1')
     } catch (e: any) {
-      alert(`تعذّر الحذف: ${e.message || e}`)
+      toast({ type: 'error', message: 'تعذّر الحذف', description: e.message || String(e) })
       setDeleting(false)
     }
   }

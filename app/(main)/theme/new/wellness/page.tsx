@@ -10,6 +10,7 @@ import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
+import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 
@@ -144,6 +145,7 @@ const sectionMotion = {
 export default function WellnessWizardPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   useWizardDraft('wellness', form, setForm)
@@ -316,7 +318,7 @@ export default function WellnessWizardPage() {
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/wellness'); return }
-      if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
+      if (saveRes.status === 402) { toast({ type: 'warning', message: 'بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' }); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
       clearWizardDraft('wellness')
       router.push(`/preview/wellness/${saveJson.id}?created=1`)

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { useNotify } from '@/components/ui/Notify'
 
 type DomainRow = {
   id: string
@@ -23,6 +24,7 @@ const STATUS_LABEL: Record<DomainRow['status'], { label: string; color: string; 
 }
 
 export default function DomainsList({ themeId }: { themeId?: string }) {
+  const { confirm } = useNotify()
   const [domains, setDomains] = useState<DomainRow[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
@@ -59,7 +61,13 @@ export default function DomainsList({ themeId }: { themeId?: string }) {
   }, [domains, reload])
 
   async function remove(id: string, domain: string) {
-    if (!confirm(`هل تريد فصل ${domain}؟ سيتوقّف موقعك عن العمل على هذا النطاق.`)) return
+    const { confirmed } = await confirm({
+      title: `فصل ${domain}؟`,
+      message: 'سيتوقّف موقعك عن العمل على هذا النطاق.',
+      confirmText: 'فصل النطاق',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     setBusy(id)
     try {
       await fetch(`/api/domains/${id}`, { method: 'DELETE' })

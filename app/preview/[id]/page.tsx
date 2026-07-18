@@ -40,7 +40,7 @@ export default async function PreviewPage({
             ربما حُذف، أو قد لا تملك صلاحية الوصول إليه.
           </p>
           <Link
-            href="/dashboard/sites"
+            href="https://dashboard.zenyaai.co/sites"
             className="mt-5 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white"
           >
             العودة إلى مواقعك
@@ -87,7 +87,7 @@ export default async function PreviewPage({
       <div className="sticky top-0 z-10 border-b border-token bg-elevated/80 px-6 py-4 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-2xl font-bold tracking-tighter text-foreground">Zenya</Link>
+            <Link href="https://dashboard.zenyaai.co" className="text-2xl font-bold tracking-tighter text-foreground">Zenya</Link>
             <span className="h-6 w-px bg-token" />
             <span className="text-sm font-medium text-muted">{theme.product_name}</span>
           </div>

@@ -11,6 +11,7 @@ import ShopifyAffiliateCallout from '@/components/ShopifyAffiliateCallout'
 import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
+import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 
@@ -98,6 +99,7 @@ const sectionMotion = {
 export default function CollectiveWizardPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   useWizardDraft('collective', form, setForm)
@@ -215,7 +217,7 @@ export default function CollectiveWizardPage() {
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/collective'); return }
-      if (saveRes.status === 402) { alert('بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.'); router.push('/pricing'); return }
+      if (saveRes.status === 402) { toast({ type: 'warning', message: 'بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' }); router.push('/pricing'); return }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
       clearWizardDraft('collective')
       router.push(`/preview/collective/${saveJson.id}?created=1`)

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ImageIcon, Loader2, Search, Trash2, Upload, X, Link as LinkIcon } from 'lucide-react'
+import { useNotify } from '@/components/ui/Notify'
 
 /* ────────────────────────────────────────────────────────────────────── *
  * GalleryPicker — modal that lets the user pick an image from their       *
@@ -33,6 +34,7 @@ export default function GalleryPicker({
   onPick: (url: string) => void
   currentUrl?: string
 }) {
+  const { confirm } = useNotify()
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState<string | null>(null)
@@ -91,7 +93,13 @@ export default function GalleryPicker({
   }
 
   async function remove(img: GalleryImage) {
-    if (!confirm(`حذف هذه الصورة من معرضك؟\n\nإن كانت مستخدمة في أي موقع، سيُظهر الموقع صورة معطوبة.`)) return
+    const { confirmed } = await confirm({
+      title: 'حذف هذه الصورة من معرضك؟',
+      message: 'إن كانت مستخدمة في أي موقع، سيُظهر الموقع صورة معطوبة.',
+      confirmText: 'حذف الصورة',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     setDeletingId(img.id)
     try {
       const r = await fetch(`/api/gallery/${img.id}`, { method: 'DELETE' })

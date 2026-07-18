@@ -466,7 +466,7 @@ export default function BuildPage() {
             onBack={() => setStep(3)}
             onGenerate={generate}
             onPublish={publishToShopify}
-            onGoDashboard={() => router.push('/dashboard/sites')}
+            onGoDashboard={() => { window.location.href = 'https://dashboard.zenyaai.co/sites' }}
           />
         )}
       </main>

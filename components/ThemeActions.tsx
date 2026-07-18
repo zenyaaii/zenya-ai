@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { generateShopifyTheme } from '@/utils/shopify-generator'
 import { saveAs } from 'file-saver'
+import { useNotify } from '@/components/ui/Notify'
 
 type ThemeActionsProps = {
   themeId: string
@@ -28,10 +29,11 @@ export default function ThemeActions({
   description: _description = ''
 }: ThemeActionsProps) {
   const [loading, setLoading] = useState(false)
+  const { toast } = useNotify()
 
   async function handleDownload() {
     if (!content || !colors || !name) {
-      alert('Theme data is incomplete.')
+      toast({ type: 'error', message: 'بيانات القالب غير مكتملة.' })
       return
     }
 
@@ -41,7 +43,7 @@ export default function ThemeActions({
       saveAs(blob, `${name.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`)
     } catch (e) {
       console.error(e)
-      alert('Failed to generate theme files.')
+      toast({ type: 'error', message: 'تعذّر إنشاء ملفات القالب.' })
     } finally {
       setLoading(false)
     }
@@ -51,7 +53,7 @@ export default function ThemeActions({
     <div className="fixed bottom-0 left-0 right-0 border-t border-token bg-elevated p-4 md:static md:border-0 md:bg-transparent md:p-0">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
         <div className="hidden md:block">
-          <Link href="/dashboard" className="text-sm font-medium text-muted hover:text-foreground">
+          <Link href="https://dashboard.zenyaai.co" className="text-sm font-medium text-muted hover:text-foreground">
             &larr; Back to Dashboard
           </Link>
         </div>

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import CookieConsent from '@/components/CookieConsent'
+import { NotifyProvider } from '@/components/ui/Notify'
 
 const SITE_URL = 'https://zenyaai.co'
 
@@ -195,7 +196,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <SmoothScroll />
-        {children}
+        <NotifyProvider>
+          {children}
+        </NotifyProvider>
         <CookieConsent />
       </body>
     </html>

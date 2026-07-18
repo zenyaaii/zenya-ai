@@ -9,6 +9,7 @@ import ColorThief from 'colorthief'
 import MobilePreview from '@/components/wizard/MobilePreview'
 import { generateShopifyTheme } from '@/utils/shopify-generator'
 import { saveAs } from 'file-saver'
+import { useNotify } from '@/components/ui/Notify'
 
 type StylePresetId = 'clean_light' | 'bold_gradient' | 'luxury_dark'
 
@@ -47,6 +48,7 @@ const STYLE_PRESETS: Array<{
 ]
 
 function CreateWizardContent() {
+  const { toast } = useNotify()
   const searchParams = useSearchParams()
   const host = searchParams.get('host')
   const shopParam = searchParams.get('shop')
@@ -149,7 +151,7 @@ function CreateWizardContent() {
       if (j.originalPrice) setOriginalPrice(String(j.originalPrice))
       setStep(2)
     } catch (e: any) {
-      alert(e?.message || 'فشل الاستخلاص. جرّب رابطًا آخر.')
+      toast({ type: 'error', message: e?.message || 'فشل الاستخلاص. جرّب رابطًا آخر.' })
     } finally {
       setLoading(false)
     }
@@ -195,7 +197,7 @@ function CreateWizardContent() {
       saveAs(blob, fileName)
       setDownloadedFileName(fileName)
     } catch (e: any) {
-      alert(e?.message || 'حدث خطأ أثناء توليد القالب وتنزيله.')
+      toast({ type: 'error', message: e?.message || 'حدث خطأ أثناء توليد القالب وتنزيله.' })
     } finally {
       setLoading(false)
     }
@@ -231,7 +233,7 @@ function CreateWizardContent() {
       })
       setStep(3)
     } catch (e: any) {
-      alert(e?.message || 'فشل توليد معاينة المنتج.')
+      toast({ type: 'error', message: e?.message || 'فشل توليد معاينة المنتج.' })
     } finally {
       setLoading(false)
     }

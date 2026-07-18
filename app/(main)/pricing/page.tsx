@@ -79,7 +79,7 @@ const STARTER_FEATURES = [
 
 const PRO_FEATURES = [
   'كل ما في خطة Starter، بالإضافة إلى:',
-  'نطاق مخصّص مجاني لسنة (.store، .site، .online، .shop، …)',
+  'نطاق مخصّص مجاني لسنة (اختياري) — .store، .site، .online، .shop، …',
   'خصم 30% على النطاقات الأغلى (.com وأمثالها)',
   'إزالة شارة «صُنع بزينيا»',
   'تحليلات الموقع في لوحة تحكمك',
@@ -347,6 +347,9 @@ export default function PricingPage() {
           </motion.div>
         </div>
 
+        {/* Discount hacks — honest ways to earn a discount (review → code) */}
+        <DiscountHacks />
+
         {/* Discount-code hint — where to use a promo code (e.g. SHUKRAN30) */}
         <div className="mx-auto mb-14 flex justify-center px-6">
           <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-token bg-white px-4 py-2 text-center text-[13px] text-muted shadow-soft-sm">
@@ -606,6 +609,117 @@ function CostCalculator() {
         الأرقام تقديرية بحسب أسعار السوق للسنة الأولى — تختلف بحسب مزوّد الاستضافة والامتداد.
       </p>
     </motion.div>
+  )
+}
+
+/**
+ * DiscountHacks — honest, actionable ways to earn a discount. Each "hack" is a
+ * simple do-X → get-Y%-off card. For now there's one: leave an honest review
+ * and get 30% off your first month (the same SHUKRAN30 code Pro/Starter honor
+ * at checkout). Built as a list so more hacks can be added later without
+ * touching layout. Nothing here is fake — the reward is a real, working code.
+ */
+const DISCOUNT_HACKS = [
+  {
+    pct: 30,
+    code: REVIEW_PROMO_CODE,
+    title: 'قيّم تجربتك معنا',
+    desc: 'شاركنا رأيك الصادق عن زينيا — دقيقة واحدة تكفي — واحصل على خصم على أول شهر.',
+    href: REVIEW_URL,
+    cta: 'قيّمنا الآن',
+    icon: MessageSquareHeart,
+  },
+] as const
+
+function DiscountHacks() {
+  const [copied, setCopied] = useState<string | null>(null)
+
+  async function copy(code: string) {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(code)
+      setTimeout(() => setCopied((c) => (c === code ? null : c)), 1800)
+    } catch {}
+  }
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="mx-auto mb-16 max-w-4xl"
+    >
+      <div className="mb-8 text-center">
+        <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[rgba(217,119,6,0.22)] bg-[rgba(217,119,6,0.08)] px-3 py-1 text-[12px] font-medium text-amber-700">
+          <Gift className="h-3.5 w-3.5" strokeWidth={2.25} />
+          طرق تحصل بها على خصم
+        </span>
+        <h2 className="text-[30px] font-[590] tracking-[-1px] text-foreground sm:text-[36px] sm:tracking-[-1.4px]">
+          افعل هذا، ووفّر أكثر
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-[15px] leading-[1.7] text-muted">
+          نكافئ من يساعدنا على التحسّن. كل خطوة بالأسفل تمنحك كودًا حقيقيًا يعمل عند الدفع.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        {DISCOUNT_HACKS.map((hack) => {
+          const Icon = hack.icon
+          const isCopied = copied === hack.code
+          return (
+            <div
+              key={hack.code}
+              className="flex flex-col rounded-2xl border border-token bg-white p-5 shadow-soft-sm"
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <span
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' }}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={2} />
+                </span>
+                <div>
+                  <div className="text-[15px] font-semibold text-foreground">{hack.title}</div>
+                  <div className="text-[12px] font-semibold text-[#15803d]">خصم {hack.pct}% على أول شهر</div>
+                </div>
+              </div>
+
+              <p className="mb-4 flex-1 text-[13px] leading-[1.7] text-muted">{hack.desc}</p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={hack.href}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-[13px] font-semibold text-white transition hover:opacity-90"
+                >
+                  {hack.cta}
+                  <ArrowRight className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.5} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => copy(hack.code)}
+                  aria-label="نسخ كود الخصم"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-[13px] font-bold transition hover:bg-[rgba(94,106,210,0.04)]"
+                  style={{ borderColor: 'rgba(94,106,210,0.5)', color: '#5e6ad2' }}
+                >
+                  <span dir="ltr" className="font-latin tracking-[0.10em]">{hack.code}</span>
+                  {isCopied ? <Check className="h-3.5 w-3.5 text-[#15803d]" strokeWidth={2.5} /> : <Copy className="h-3.5 w-3.5 text-muted" strokeWidth={2} />}
+                </button>
+              </div>
+            </div>
+          )
+        })}
+
+        {/* Teaser: more hacks coming — keeps the grid balanced and hints at future rewards */}
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-token bg-[rgba(94,106,210,0.02)] p-5 text-center">
+          <Sparkles className="mb-2 h-5 w-5 text-primary" strokeWidth={2} />
+          <div className="text-[13.5px] font-semibold text-foreground">والمزيد قريبًا</div>
+          <p className="mt-1 text-[12px] leading-[1.6] text-muted">
+            نضيف طرقًا جديدة للحصول على خصومات باستمرار — تابعنا.
+          </p>
+        </div>
+      </div>
+    </motion.section>
   )
 }
 

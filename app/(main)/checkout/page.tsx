@@ -48,16 +48,16 @@ export default async function CheckoutPage({
     .maybeSingle()
 
   if (plan === 'onetime' && profile?.is_pro) {
-    redirect('/dashboard?already_pro=1')
+    redirect('https://dashboard.zenyaai.co?already_pro=1')
   }
   if (plan === 'hosting' && profile?.has_hosting) {
-    redirect('/dashboard?already_hosting=1')
+    redirect('https://dashboard.zenyaai.co?already_hosting=1')
   }
   if (plan === 'starter' && (profile?.plan === 'starter' || profile?.plan === 'pro')) {
-    redirect('/dashboard?already_pro=1')
+    redirect('https://dashboard.zenyaai.co?already_pro=1')
   }
   if (plan === 'pro' && profile?.plan === 'pro') {
-    redirect('/dashboard?already_pro=1')
+    redirect('https://dashboard.zenyaai.co?already_pro=1')
   }
 
   const h = headers()

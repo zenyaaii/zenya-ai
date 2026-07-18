@@ -7,24 +7,23 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { Star, X } from 'lucide-react'
 
 /**
- * Persistent "rate Zenya" launcher.
+ * Persistent "rate Zenya" launcher — refined, premium styling.
  *
  * Pinned to the bottom-start corner on every public page (mounted from the
  * marketing layout, so it never appears inside a generated/customer theme).
- * It links to our one honest review channel — /contact?topic=review — the same
- * destination as the homepage "share your experience" invite. We do NOT fake
- * reviews, so this simply makes the invitation reachable from anywhere.
+ * Links to our one honest review channel — /contact?topic=review. We do NOT
+ * fake reviews; this simply makes the invitation reachable from anywhere.
  *
- * - Dismissible; the choice is remembered in localStorage so it won't nag.
- * - Collapses to a single star FAB once the user has seen the label once.
- * - A gentle, infrequent wiggle draws the eye without being obnoxious.
+ * - Dismissible; remembered in localStorage so it won't nag.
+ * - Collapses to a compact medallion once the label has been seen.
+ * - A slow shimmer + soft glow draw the eye without being obnoxious.
  */
 
 const DISMISS_KEY = 'zenya:review-cta-dismissed'
 const SEEN_KEY = 'zenya:review-cta-seen'
 
 // Routes where the CTA is redundant or in the way.
-const HIDDEN_PREFIXES = ['/contact', '/login', '/checkout', '/auth', '/dashboard', '/theme', '/editor', '/builder']
+const HIDDEN_PREFIXES = ['/contact', '/login', '/checkout', '/auth', '/dashboard', '/accounts', '/theme', '/editor', '/builder']
 
 export default function ReviewFloatingButton() {
   const pathname = usePathname() || '/'
@@ -37,7 +36,6 @@ export default function ReviewFloatingButton() {
     setMounted(true)
     try {
       setDismissed(localStorage.getItem(DISMISS_KEY) === '1')
-      // After the first visit we keep it compact so it stays out of the way.
       setExpanded(localStorage.getItem(SEEN_KEY) !== '1')
     } catch {
       setDismissed(false)
@@ -64,38 +62,72 @@ export default function ReviewFloatingButton() {
     <AnimatePresence>
       {!hidden && (
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          initial={{ opacity: 0, y: 22, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.9 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.8 }}
+          exit={{ opacity: 0, y: 22, scale: 0.9 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.7 }}
+          onMouseEnter={() => setExpanded(true)}
           className="fixed bottom-5 start-5 z-40 print:hidden"
         >
           <Link
             href="/contact?topic=review"
             onClick={markSeen}
-            onMouseEnter={() => setExpanded(true)}
             aria-label="قيّم تجربتك مع زينيا"
-            className="group flex items-center gap-2.5 rounded-full bg-foreground py-2.5 ps-2.5 pe-4 text-white shadow-[0_14px_38px_-10px_rgba(28,28,28,0.55)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_20px_46px_-12px_rgba(94,106,210,0.6)]"
+            className="group relative flex items-center gap-3 overflow-hidden rounded-2xl py-2.5 ps-2.5 pe-4 transition-transform duration-200 hover:-translate-y-0.5"
+            style={{
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(94,106,210,0.22)',
+              boxShadow:
+                '0 10px 30px -10px rgba(94,106,210,0.45), 0 2px 6px rgba(28,28,28,0.06), 0 0 0 1px rgba(255,255,255,0.6) inset',
+            }}
           >
-            <motion.span
-              className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
-              style={{ background: 'linear-gradient(135deg, #f6c453 0%, #d97706 100%)' }}
-              animate={reduce ? undefined : { rotate: [0, -12, 12, -8, 0] }}
-              transition={reduce ? undefined : { duration: 0.9, ease: 'easeInOut', repeat: Infinity, repeatDelay: 5 }}
-            >
-              <Star className="h-4 w-4 fill-white text-white" strokeWidth={2} />
-            </motion.span>
+            {/* Slow shimmer sweep */}
+            {!reduce && (
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -inset-x-1/2 w-1/2 skew-x-[-18deg]"
+                style={{ background: 'linear-gradient(90deg, transparent, rgba(94,106,210,0.14), transparent)' }}
+                animate={{ x: ['-30%', '260%'] }}
+                transition={{ duration: 2.6, ease: 'easeInOut', repeat: Infinity, repeatDelay: 3.6 }}
+              />
+            )}
 
+            {/* Medallion with soft pulsing glow */}
+            <span className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center">
+              {!reduce && (
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: 'radial-gradient(circle, rgba(94,106,210,0.45), transparent 70%)' }}
+                  animate={{ scale: [1, 1.35, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 2.4, ease: 'easeInOut', repeat: Infinity }}
+                />
+              )}
+              <span
+                className="relative flex h-9 w-9 items-center justify-center rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, #6b78e0 0%, #5e6ad2 55%, #4954c9 100%)',
+                  boxShadow: '0 4px 12px -2px rgba(73,84,201,0.55), 0 0 0 1px rgba(255,255,255,0.25) inset',
+                }}
+              >
+                <Star className="h-4 w-4 fill-white text-white" strokeWidth={2} />
+              </span>
+            </span>
+
+            {/* Label */}
             <AnimatePresence initial={false}>
               {expanded && (
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
                   exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden whitespace-nowrap text-[13.5px] font-semibold"
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative flex flex-col overflow-hidden whitespace-nowrap leading-tight"
                 >
-                  قيّم تجربتك
+                  <span className="text-[13.5px] font-semibold text-foreground">قيّم تجربتك</span>
+                  <span className="text-[11px] font-medium text-primary">واحصل على خصم</span>
                 </motion.span>
               )}
             </AnimatePresence>
@@ -104,7 +136,7 @@ export default function ReviewFloatingButton() {
               type="button"
               onClick={dismiss}
               aria-label="إخفاء"
-              className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-white/45 transition hover:bg-white/10 hover:text-white"
+              className="relative flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-muted/60 transition hover:bg-[rgba(28,28,28,0.06)] hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" strokeWidth={2.25} />
             </button>

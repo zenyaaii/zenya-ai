@@ -20,11 +20,17 @@ type Availability =
 export default function PublishSiteModal({
   theme,
   hasHosting,
+  trialActive = false,
+  isPro = false,
   onClose,
   onPublished,
 }: {
   theme: Theme
   hasHosting: boolean
+  /** User is still inside their free 30-day hosting trial (any plan). */
+  trialActive?: boolean
+  /** User owns a Pro entitlement (hosting + custom domain). */
+  isPro?: boolean
   onClose: () => void
   onPublished: (slug: string, url: string) => void
 }) {
@@ -94,7 +100,9 @@ export default function PublishSiteModal({
     }
   }
 
-  const canSubmit = availability.state === 'ok' && hasHosting && !submitting
+  // Publishing is allowed with a hosting entitlement OR during the free trial.
+  const canHost = hasHosting || trialActive
+  const canSubmit = availability.state === 'ok' && canHost && !submitting
 
   return (
     <div
@@ -152,7 +160,25 @@ export default function PublishSiteModal({
           <AvailabilityHint state={availability} />
         </div>
 
-        {!hasHosting && (
+        {!hasHosting && trialActive && (
+          <div
+            style={{
+              marginTop: 14,
+              padding: '10px 12px',
+              background: 'rgba(21,128,61,0.07)',
+              border: '1px solid rgba(21,128,61,0.20)',
+              borderRadius: 8,
+              fontSize: 13,
+              color: '#15803d',
+              lineHeight: 1.6,
+            }}
+          >
+            🎁 موقعك المباشر مجاني خلال الشهر الأول! بعده، ستحتاج إلى{' '}
+            <strong>خطة Starter</strong> للإبقاء على موقعك.
+          </div>
+        )}
+
+        {!hasHosting && !trialActive && (
           <div
             style={{
               marginTop: 14,
@@ -209,6 +235,20 @@ export default function PublishSiteModal({
             {submitting ? 'جارٍ النشر…' : 'نشر الموقع'}
           </button>
         </div>
+
+        {/* For Pro users, a custom domain is an optional extra — slug.zenyaai.co
+            is already included. Point them to the Domains page instead of
+            forcing a domain step. */}
+        {isPro && (
+          <p style={{ margin: '14px 0 0', textAlign: 'center', fontSize: 12.5, color: '#6b6b6b' }}>
+            <a
+              href="https://dashboard.zenyaai.co/domains"
+              style={{ color: '#5e6ad2', textDecoration: 'none', fontWeight: 500 }}
+            >
+              هل تريد نطاقًا خاصًا؟ اربطه من صفحة النطاقات ←
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )

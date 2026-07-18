@@ -33,6 +33,7 @@ import { generateShopifyTheme } from '@/utils/shopify-generator';
 import { saveAs } from 'file-saver';
 import AuroraBackground from '@/components/marketing/AuroraBackground';
 import { auroraTints } from '@/lib/aurora-tints';
+import { useNotify } from '@/components/ui/Notify';
 import { themePreview, themePreviewFallback } from '@/lib/theme-previews';
 import { cn } from '@/lib/utils';
 
@@ -104,6 +105,7 @@ const TEMPLATES: Template[] = [
 const WEBSITE_TEMPLATES_URL = 'https://zenyaai.co/themes';
 
 function DashboardContent() {
+  const { toast } = useNotify();
   const searchParams = useSearchParams();
   const host = searchParams.get('host');
   const shop = searchParams.get('shop');
@@ -186,7 +188,7 @@ function DashboardContent() {
           setAuthError('هذا البريد مسجّل بالفعل. سجّل الدخول بدلاً من ذلك.');
           return;
         }
-        alert('تم إنشاء الحساب! يُرجى التحقّق من بريدك الإلكتروني للتأكيد.');
+        toast({ type: 'success', message: 'تم إنشاء الحساب! يُرجى التحقّق من بريدك الإلكتروني للتأكيد.' });
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -215,7 +217,7 @@ function DashboardContent() {
       saveAs(blob, fileName);
     } catch (e) {
       console.error(e);
-      alert('فشل التنزيل.');
+      toast({ type: 'error', message: 'فشل التنزيل.' });
     } finally {
       setDownloadingId(null);
     }

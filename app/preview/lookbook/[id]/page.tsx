@@ -78,7 +78,7 @@ export default function LookbookPreviewPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-black text-white">
         <p className="text-lg">{error || 'حدث خطأ ما.'}</p>
-        <Link href="/dashboard" className="rounded-full bg-white px-6 py-2.5 text-sm font-bold text-black">
+        <Link href="https://dashboard.zenyaai.co" className="rounded-full bg-white px-6 py-2.5 text-sm font-bold text-black">
           العودة إلى لوحة التحكم
         </Link>
       </div>

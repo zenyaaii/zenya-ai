@@ -5,6 +5,7 @@ const OWN_HOSTS = new Set([
   'zenyaai.co',
   'www.zenyaai.co',
   'dashboard.zenyaai.co',
+  'accounts.zenyaai.co',
   'localhost',
   'localhost:3000',
 ])
@@ -13,7 +14,18 @@ const OWN_HOSTS = new Set([
 const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
   'dashboard',
+  'accounts',
 ])
+
+/**
+ * Cheap "is this visitor logged in?" check for routing decisions — looks for
+ * the presence of a Supabase auth-token cookie (sb-<ref>-auth-token, possibly
+ * chunked). We don't validate it here; middleware just needs a signal to
+ * decide whether to send a returning visitor to the accounts portal.
+ */
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some((c) => /^sb-.*-auth-token(\.\d+)?$/.test(c.name))
+}
 
 function isOwnHost(host: string) {
   if (!host) return true // safety: treat unknown host as own to avoid blank rewrite loops
@@ -179,12 +191,36 @@ export async function middleware(request: NextRequest) {
     // If updateSession issued a redirect (e.g. unauthenticated → /login), honour it
     if (sessionRes.headers.get('location')) return sessionRes
 
-    // Paths that already map to top-level routes (auth pages) — serve as-is
+    // Paths that already map to top-level routes — serve as-is (no rewrite to
+    // /dashboard/*). This keeps the portal self-contained: the theme-creation
+    // wizard, template browser, live preview/editor, and pricing/checkout all
+    // live under app/(main)/* and would 404 if rewritten to /dashboard/<path>.
+    // Serving them as-is lets dashboard.zenyaai.co/theme/new (etc.) render the
+    // existing pages so users never bounce back to zenyaai.co.
+    const PORTAL_PASSTHROUGH_PREFIXES = [
+      '/login',
+      '/auth',
+      '/sign',
+      '/theme',    // /theme/new + per-template wizards (also covers /themes)
+      '/themes',   // template browser (explicit for clarity)
+      '/demo',      // template demos (/demo, /demo/restaurant, …)
+      '/demo-full', // full storefront demo
+      '/preview',  // live preview + in-app editor (/preview/[id], /preview/[type]/[id]/edit)
+      '/pricing',  // plan comparison / upgrade
+      '/checkout', // subscribe flow reached from pricing
+      '/build',    // one-product (Shopify) builder
+      '/contact',  // support + review flow (/contact?topic=review)
+      '/privacy',  // legal pages linked from settings
+      '/terms',
+      '/refund',
+      '/cookies',
+      '/subprocessors',
+      '/about',
+      '/faq',
+    ]
     const alreadyRouted =
       pathname.startsWith('/dashboard') ||
-      pathname.startsWith('/login') ||
-      pathname.startsWith('/auth') ||
-      pathname.startsWith('/sign')
+      PORTAL_PASSTHROUGH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
     if (!alreadyRouted) {
       // Rewrite: dashboard.zenyaai.co/       → /dashboard
@@ -194,6 +230,45 @@ export async function middleware(request: NextRequest) {
       const rewriteRes = NextResponse.rewrite(url)
       // Forward session cookies onto the rewrite response
       sessionRes.headers.getSetCookie?.().forEach(c =>
+        rewriteRes.headers.append('set-cookie', c)
+      )
+      return rewriteRes
+    }
+
+    return sessionRes
+  }
+
+  // ---- accounts.zenyaai.co → auth portal (login / signup / chooser) ---------
+  // Rewrites all paths to /accounts/* internally so the URL bar shows
+  // accounts.zenyaai.co/login, accounts.zenyaai.co/signup, etc. These ARE the
+  // auth pages, so we never redirect an unauthenticated visitor away.
+  if (host === 'accounts.zenyaai.co') {
+    if (
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/s/')
+    ) {
+      return NextResponse.next({ request: { headers: forwardedHeaders } })
+    }
+
+    // Refresh auth cookies (scoped to .zenyaai.co) so the session carries over
+    // to dashboard.zenyaai.co after the user signs in / picks an account.
+    const sessionRes = await updateSession(request)
+
+    // Already under /accounts (or framework auth callbacks) — serve as-is.
+    // Legal pages are allowed through so the signup consent links resolve on
+    // the accounts host instead of 404ing.
+    const ACCOUNTS_PASSTHROUGH = ['/terms', '/privacy', '/refund', '/cookies', '/subprocessors']
+    const alreadyRouted =
+      pathname.startsWith('/accounts') ||
+      pathname.startsWith('/auth') ||
+      ACCOUNTS_PASSTHROUGH.some((p) => pathname === p || pathname.startsWith(p + '/'))
+
+    if (!alreadyRouted) {
+      const url = request.nextUrl.clone()
+      url.pathname = pathname === '/' ? '/accounts' : `/accounts${pathname}`
+      const rewriteRes = NextResponse.rewrite(url)
+      sessionRes.headers.getSetCookie?.().forEach((c) =>
         rewriteRes.headers.append('set-cookie', c)
       )
       return rewriteRes
@@ -222,6 +297,18 @@ export async function middleware(request: NextRequest) {
     // fall through to the normal app so they at least see Zenya rather
     // than a generic error.
     return NextResponse.next({ request: { headers: forwardedHeaders } })
+  }
+
+  // ---- APEX: returning visitors → accounts portal ------------------------
+  // A visitor who has logged in before (auth cookie present) landing on the
+  // apex root is sent to accounts.zenyaai.co, which shows "continue as
+  // <account>" → dashboard. New visitors (no cookie) get the marketing home.
+  if (
+    (host === 'zenyaai.co' || host === 'www.zenyaai.co') &&
+    pathname === '/' &&
+    hasAuthCookie(request)
+  ) {
+    return NextResponse.redirect('https://accounts.zenyaai.co')
   }
 
   // ---- OWN-HOST PATH (existing behaviour) --------------------------------

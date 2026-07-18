@@ -7,6 +7,7 @@ import { Hammer, Download, ChevronDown, Store, Loader2, Clock } from 'lucide-rea
 import { useIsAdmin } from '@/lib/use-is-admin'
 import { generateShopifyTheme } from '@/utils/shopify-generator'
 import { saveAs } from 'file-saver'
+import { useNotify } from '@/components/ui/Notify'
 
 /**
  * Bottom-center action pill for the one-product (Shopify) demo at /demo.
@@ -28,6 +29,7 @@ export default function DemoStorefrontToolbar({
   colors: { primary: string; secondary: string }
   images?: string[]
 }) {
+  const { toast } = useNotify()
   const [collapsed, setCollapsed] = useState(false)
   const [loading, setLoading] = useState(false)
   const EASE = [0.22, 1, 0.36, 1] as const
@@ -41,7 +43,7 @@ export default function DemoStorefrontToolbar({
       saveAs(blob, `${name.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`)
     } catch (e) {
       console.error(e)
-      alert('تعذّر إنشاء ملفات القالب.')
+      toast({ type: 'error', message: 'تعذّر إنشاء ملفات القالب.' })
     } finally {
       setLoading(false)
     }

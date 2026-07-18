@@ -5,8 +5,10 @@ import ThemeActions from '@/components/ThemeActions'
 import Link from 'next/link'
 import { generateShopifyTheme } from '@/utils/shopify-generator'
 import { saveAs } from 'file-saver'
+import { useNotify } from '@/components/ui/Notify'
 
 export default function DraftPreviewPage() {
+  const { toast } = useNotify()
   const [theme, setTheme] = useState<any>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState('')
@@ -33,7 +35,7 @@ export default function DraftPreviewPage() {
       saveAs(blob, `${theme.productName.toLowerCase().replace(/\s+/g, '-')}-zenya-theme.zip`)
     } catch (e) {
       console.error(e)
-      alert('فشل توليد القالب')
+      toast({ type: 'error', message: 'فشل توليد القالب' })
     } finally {
       setIsGenerating(false)
     }

@@ -80,7 +80,7 @@ export default function WellnessPreviewPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-5 bg-stone-950 text-white">
         <p className="text-lg">{error || 'حدث خطأ ما.'}</p>
-        <Link href="/dashboard" className="rounded-full bg-teal-400 px-6 py-2.5 text-sm font-bold text-stone-950">
+        <Link href="https://dashboard.zenyaai.co" className="rounded-full bg-teal-400 px-6 py-2.5 text-sm font-bold text-stone-950">
           العودة إلى لوحة التحكم
         </Link>
       </div>

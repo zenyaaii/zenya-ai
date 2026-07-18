@@ -11,6 +11,7 @@ import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
+import { useNotify } from '@/components/ui/Notify'
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
@@ -256,6 +257,7 @@ function clearDraft(userId: string) {
 export default function RestaurantWizardPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { confirm, toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -538,10 +540,12 @@ export default function RestaurantWizardPage() {
     }
     // If we'll silently drop any rows, surface that to the user.
     if (counts.dropped > 0) {
-      const ok = window.confirm(
-        `سيُتخطّى ${counts.dropped} من أصناف قائمتك الـ ${counts.total} لأنها تفتقد اسمًا أو سعرًا.\n\nهل تريد التوليد على أي حال؟`
-      )
-      if (!ok) return
+      const { confirmed } = await confirm({
+        title: 'بعض الأصناف ستُتخطّى',
+        message: `سيُتخطّى ${counts.dropped} من أصناف قائمتك الـ ${counts.total} لأنها تفتقد اسمًا أو سعرًا. هل تريد التوليد على أي حال؟`,
+        confirmText: 'توليد على أي حال',
+      })
+      if (!confirmed) return
     }
     setLoading(true)
     try {
@@ -582,7 +586,7 @@ export default function RestaurantWizardPage() {
         return
       }
       if (saveRes.status === 402) {
-        alert('لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.')
+        toast({ type: 'warning', message: 'لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' })
         router.push('/pricing')
         return
       }
@@ -599,8 +603,14 @@ export default function RestaurantWizardPage() {
     }
   }
 
-  function startFresh() {
-    if (!confirm('مسح هذا النموذج والبدء من جديد؟ ستُحذف مسوّدتك.')) return
+  async function startFresh() {
+    const { confirmed } = await confirm({
+      title: 'مسح النموذج والبدء من جديد؟',
+      message: 'ستُحذف مسوّدتك الحالية.',
+      confirmText: 'ابدأ من جديد',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     if (userId) clearDraft(userId)
     setForm(INITIAL_FORM)
     setRestoredDraft(false)
@@ -613,16 +623,18 @@ export default function RestaurantWizardPage() {
   // the name, prices, a dish or two) instead of facing a blank form.
   // Generation still goes through the normal flow, so it counts against the
   // user's quota exactly like a hand-typed build.
-  function fillExample() {
+  async function fillExample() {
     const hasContent =
       form.brand_name.trim().length > 0 ||
       form.story_brief.trim().length > 0 ||
       form.categories.some((c) => c.items.some((i) => i.name.trim().length > 0))
-    if (
-      hasContent &&
-      !confirm('سيُملأ النموذج بمثال جاهز (مطعم «دار نُور») ويستبدل ما أدخلته. هل تريد المتابعة؟')
-    ) {
-      return
+    if (hasContent) {
+      const { confirmed } = await confirm({
+        title: 'تعبئة النموذج بمثال جاهز؟',
+        message: 'سيُملأ النموذج بمثال جاهز (مطعم «دار نُور») ويستبدل ما أدخلته.',
+        confirmText: 'تابع',
+      })
+      if (!confirmed) return
     }
     setForm(buildSampleForm())
     setRestoredDraft(false)

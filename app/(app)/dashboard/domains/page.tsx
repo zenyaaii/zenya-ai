@@ -15,6 +15,8 @@ import {
   PRO_DOMAIN_DISCOUNT_PCT,
   type ProfileForEntitlement,
 } from '@/lib/domain-entitlement'
+import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
+import { useNotify } from '@/components/ui/Notify'
 
 type DomainRow = {
   id: string
@@ -79,6 +81,7 @@ const STATUS: Record<DomainRow['status'], {
 
 export default function DomainsPage() {
   const supabase = createClient()
+  const { confirm, toast } = useNotify()
   const [hasHosting, setHasHosting] = useState(false)
   const [hostingChecked, setHostingChecked] = useState(false)
   /** Profile fields used to preview the free/discounted domain price.
@@ -160,7 +163,13 @@ export default function DomainsPage() {
     try { await fetch(`/api/domains/${id}`); await load() } finally { setBusyId(null) }
   }
   async function remove(id: string, domain: string) {
-    if (!confirm(`هل تريد فصل ${domain}؟ سيتوقّف موقعك عن العمل على هذا النطاق.`)) return
+    const { confirmed } = await confirm({
+      title: `فصل ${domain}؟`,
+      message: 'سيتوقّف موقعك عن العمل على هذا النطاق.',
+      confirmText: 'فصل النطاق',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     setBusyId(id)
     try { await fetch(`/api/domains/${id}`, { method: 'DELETE' }); await load() } finally { setBusyId(null) }
   }
@@ -328,12 +337,12 @@ export default function DomainsPage() {
       })
       const j = await r.json()
       if (!r.ok || !j?.url) {
-        alert(j?.message || j?.error || `تعذّر تجديد ${domain}.`)
+        toast({ type: 'error', message: `تعذّر تجديد ${domain}.`, description: j?.message || j?.error })
         return
       }
       window.location.href = j.url
     } catch (e: any) {
-      alert(`خطأ في الشبكة: ${e?.message || e}`)
+      toast({ type: 'error', message: 'خطأ في الشبكة', description: e?.message || String(e) })
     } finally {
       setRenewing(null)
     }
@@ -617,6 +626,45 @@ export default function DomainsPage() {
         )}
       </section>
 
+      {/* ── Free Zenya subdomains — every published site gets one, free ── */}
+      {eligibleThemes.length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">
+            نطاقاتك المجانية على زينيا
+          </h2>
+          <div className="space-y-2">
+            {eligibleThemes.map((t) => (
+              <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-white px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(21,128,61,0.10)' }}>
+                    <Globe className="h-4 w-4" strokeWidth={2} style={{ color: '#15803d' }} />
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <code dir="ltr" className="text-[14px] font-semibold text-foreground">{publicSiteHost(t.slug!)}</code>
+                      <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+                            style={{ background: 'rgba(21,128,61,0.10)', color: '#15803d', border: '1px solid rgba(21,128,61,0.30)' }}>
+                        مجاني · مشمول
+                      </span>
+                    </div>
+                    <div className="mt-1 text-[12px] text-muted">
+                      يشير إلى <strong className="text-foreground">{t.product_name}</strong>
+                    </div>
+                  </div>
+                </div>
+                <a href={publicSiteUrl(t.slug!)} target="_blank" rel="noreferrer"
+                   className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
+                  فتح <ExternalLink className="h-2.5 w-2.5 opacity-70" />
+                </a>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11.5px] text-muted">
+            كل موقع منشور يحصل على نطاق <span dir="ltr">اسمك.zenyaai.co</span> مجانًا. تريد نطاقك الخاص؟ اربطه أو اشترِه من الأعلى.
+          </p>
+        </section>
+      )}
+
       {/* ── Connected domains ─────────────────────────────────────────── */}
       <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.14em] text-muted">
         نطاقاتك المربوطة
@@ -658,7 +706,7 @@ export default function DomainsPage() {
                     </div>
                     <div className="mt-1 text-[12px] text-muted">
                       يشير إلى <strong className="text-foreground">{theme?.product_name || 'موقع غير معروف'}</strong>
-                      {theme?.slug && <> · zenyaai.co/s/{theme.slug}</>}
+                      {theme?.slug && <> · <span dir="ltr">{publicSiteHost(theme.slug)}</span></>}
                     </div>
                     {d.error_message && (
                       <div className="mt-1 text-[12px] text-[#b91c1c]">{d.error_message}</div>

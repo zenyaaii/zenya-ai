@@ -76,13 +76,29 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // 2. Verify hosting entitlement (admin bypass)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, has_hosting')
+    .select('plan, has_hosting, created_at')
     .eq('id', user.id)
     .maybeSingle()
 
+  // First 30 days: hosting is free on every plan (including the free plan).
+  // New users get their site live on slug.zenyaai.co immediately; after the
+  // trial window they need Starter+ to keep it online. We rely on date math
+  // off profiles.created_at — no extra flag column needed.
+  const TRIAL_DAYS = 30
+  const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000
+  const inTrial =
+    !!profile?.created_at &&
+    Date.now() < new Date(profile.created_at as string).getTime() + TRIAL_MS
+
   // Starter ($14.99) gets slug.zenya.co hosting. Pro ($24.99) adds custom domain + no badge.
   const HOSTING_PLANS = new Set(['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
-  if (!profile || (!HOSTING_PLANS.has(profile.plan) && !profile.has_hosting)) {
+  const hasHostingEntitlement =
+    !!profile && (HOSTING_PLANS.has(profile.plan) || !!profile.has_hosting)
+  const trialHosting = !hasHostingEntitlement && inTrial
+
+  // Allow publishing if the user has a hosting entitlement OR is still inside
+  // their free 30-day trial window.
+  if (!hasHostingEntitlement && !inTrial) {
     return NextResponse.json(
       {
         error: 'hosting_required',
@@ -132,7 +148,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   await a.from('activity_logs').insert({
     user_id: user.id,
     event_type: 'theme.published',
-    metadata: { theme_id: theme.id, slug, business_type: businessType } as any,
+    metadata: { theme_id: theme.id, slug, business_type: businessType, trial_hosting: trialHosting } as any,
   })
 
   return NextResponse.json({
@@ -140,6 +156,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     slug,
     url: siteUrl,
     published_at: now,
+    trial_hosting: trialHosting,
   })
 }
 

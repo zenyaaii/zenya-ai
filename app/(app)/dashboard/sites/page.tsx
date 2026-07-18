@@ -17,13 +17,18 @@ import SiteCard, {
   SHOPIFY_TYPES,
   type SiteTheme,
 } from '@/components/dashboard/SiteCard'
+import { useNotify } from '@/components/ui/Notify'
 
 type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 type Profile = {
   plan: Plan
   is_pro: boolean
   has_hosting: boolean
+  created_at: string
 }
+
+// First 30 days: hosting is free on every plan (kept in sync with the publish API).
+const TRIAL_DAYS = 30
 
 type Filter = 'all' | 'drafts' | 'live' | 'shopify'
 type ViewMode = 'grid' | 'list'
@@ -31,6 +36,7 @@ type ViewMode = 'grid' | 'list'
 export default function SitesPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { confirm, toast } = useNotify()
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [themes, setThemes] = useState<SiteTheme[]>([])
@@ -51,7 +57,7 @@ export default function SitesPage() {
     const [{ data: profileRow }, themesRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select('plan, is_pro, has_hosting')
+        .select('plan, is_pro, has_hosting, created_at')
         .eq('id', user.id)
         .maybeSingle(),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
@@ -69,24 +75,55 @@ export default function SitesPage() {
   }
 
   const unpublishTheme = async (theme: SiteTheme) => {
-    if (!confirm(`Unpublish "${theme.product_name}"? The site goes offline immediately.`)) return
+    const name = theme.product_name || 'موقعك'
+    const { confirmed } = await confirm({
+      title: `إلغاء نشر «${name}»؟`,
+      message: 'سيتوقّف الموقع عن العمل مباشرةً على الإنترنت. يمكنك نشره مجددًا في أي وقت.',
+      confirmText: 'إلغاء النشر',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     const r = await fetch(`/api/themes/${theme.id}/publish`, { method: 'DELETE' })
-    if (r.ok) refreshTheme(theme.id, { is_published: false })
+    if (r.ok) {
+      refreshTheme(theme.id, { is_published: false })
+      toast({ type: 'success', message: 'تم إلغاء نشر الموقع.' })
+    } else {
+      toast({ type: 'error', message: 'تعذّر إلغاء النشر. حاول مجددًا.' })
+    }
   }
 
   const deleteTheme = async (theme: SiteTheme) => {
     const name = theme.product_name || 'موقعك'
-    if (!confirm(
-      `هل تريد حذف «${name}» نهائيًا؟\n\n` +
-      `سيُلغى النشر إن كان مباشرًا، ويُحذف الموقع من حسابك. لا يمكن التراجع عن هذا الإجراء.`
-    )) return
-    const r = await fetch(`/api/themes/${theme.id}`, { method: 'DELETE' })
+    const { confirmed, checked } = await confirm({
+      title: `حذف «${name}» نهائيًا؟`,
+      message:
+        'سيُلغى النشر إن كان مباشرًا، ويُحذف الموقع من حسابك. لا يمكن التراجع عن هذا الإجراء.',
+      confirmText: 'حذف نهائيًا',
+      tone: 'danger',
+      checkbox: {
+        label: 'احذف أيضًا الصور التي استُخدمت في هذا الموقع من معرض الصور (ما لم تكن مستخدمة في موقع آخر).',
+      },
+    })
+    if (!confirmed) return
+    const r = await fetch(
+      `/api/themes/${theme.id}${checked ? '?deleteImages=1' : ''}`,
+      { method: 'DELETE' },
+    )
     if (!r.ok) {
       const j = await r.json().catch(() => ({}))
-      alert(j?.message || 'تعذّر الحذف. حاول مجددًا.')
+      toast({ type: 'error', message: j?.message || 'تعذّر الحذف. حاول مجددًا.' })
       return
     }
     setThemes((prev) => prev.filter((t) => t.id !== theme.id))
+    const j = await r.json().catch(() => ({} as any))
+    toast({
+      type: 'success',
+      message: 'تم حذف الموقع.',
+      description:
+        checked && typeof j?.deletedImages === 'number' && j.deletedImages > 0
+          ? `وحُذفت ${j.deletedImages} صورة من معرضك.`
+          : undefined,
+    })
   }
 
   const plan: Plan = profile?.plan || 'free'
@@ -107,6 +144,15 @@ export default function SitesPage() {
     plan === 'pro_hosting' ||
     plan === 'pro' ||
     !!profile?.has_hosting
+
+  // Free 30-day hosting trial: new accounts can publish on any plan (incl.
+  // free) until the window closes. `trialHosting` = live only *because* of the
+  // trial (no paid hosting yet) — those sites get a "تجربة مجانية" badge.
+  const inTrial =
+    !!profile?.created_at &&
+    Date.now() < new Date(profile.created_at).getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000
+  const canPublish = hasHosting || inTrial
+  const trialHosting = inTrial && !hasHosting
 
   const counts = useMemo(() => {
     const live    = themes.filter((t) => t.is_published && t.slug).length
@@ -222,6 +268,8 @@ export default function SitesPage() {
                 key={t.id}
                 theme={t}
                 hasHosting={hasHosting}
+                canPublish={canPublish}
+                trialHosting={trialHosting}
                 isPro={isPro}
                 plan={plan}
                 onPublish={() => setPublishingTheme(t)}
@@ -239,6 +287,8 @@ export default function SitesPage() {
                 theme={t}
                 isFirst={i === 0}
                 hasHosting={hasHosting}
+                canPublish={canPublish}
+                trialHosting={trialHosting}
                 isPro={isPro}
                 onPublish={() => setPublishingTheme(t)}
                 onAddDomain={() => setDomainTheme(t)}
@@ -262,10 +312,12 @@ export default function SitesPage() {
         <PublishSiteModal
           theme={publishingTheme}
           hasHosting={hasHosting}
+          trialActive={inTrial}
+          isPro={isPro}
           onClose={() => setPublishingTheme(null)}
           onPublished={(slug, url) => {
             refreshTheme(publishingTheme.id, { slug, is_published: true })
-            setTimeout(() => alert(`مباشر: ${url}`), 50)
+            toast({ type: 'success', message: 'موقعك الآن مباشر! 🎉', description: url })
           }}
         />
       )}
@@ -335,6 +387,23 @@ function Pill({ n }: { n: number }) {
   return (
     <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[10px] font-bold text-muted">
       {n}
+    </span>
+  )
+}
+
+/** Marks a site that's live only via the free 30-day hosting trial. */
+function TrialBadge() {
+  return (
+    <span
+      className="inline-flex flex-shrink-0 items-center gap-1 rounded-full px-1.5 py-0.5 text-[9.5px] font-bold"
+      style={{
+        background: 'rgba(217,119,6,0.10)',
+        color: '#b45309',
+        border: '1px solid rgba(217,119,6,0.20)',
+      }}
+      title="موقعك مباشر مجانًا خلال الشهر الأول. بعده تحتاج خطة Starter للإبقاء عليه."
+    >
+      تجربة مجانية
     </span>
   )
 }
@@ -438,11 +507,13 @@ function FilteredEmpty({
 /* ─── List-view row — denser alt layout ─────────────────────────────────── */
 
 function SiteRow({
-  theme, isFirst, hasHosting, isPro, onPublish, onAddDomain, onUnpublish, onDelete,
+  theme, isFirst, hasHosting, canPublish, trialHosting, isPro, onPublish, onAddDomain, onUnpublish, onDelete,
 }: {
   theme: SiteTheme
   isFirst: boolean
   hasHosting: boolean
+  canPublish: boolean
+  trialHosting: boolean
   isPro: boolean
   onPublish: () => void
   onAddDomain: () => void
@@ -467,7 +538,10 @@ function SiteRow({
           {(theme.product_name || '?').slice(0, 1)}
         </div>
         <div className="min-w-0">
-          <div className="truncate text-[13.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</div>
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-[13.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</span>
+            {live && trialHosting && <TrialBadge />}
+          </div>
           <div className="truncate text-[11.5px] text-muted">
             {live ? `${theme.slug}.zenyaai.co` : bt + (isEcom ? ' · Shopify' : ' · draft')}
           </div>
@@ -486,7 +560,7 @@ function SiteRow({
         >
           Preview
         </Link>
-        {isHostable && hasHosting && !live && (
+        {isHostable && canPublish && !live && (
           <button onClick={onPublish} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
             Publish
           </button>

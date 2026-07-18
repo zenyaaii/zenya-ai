@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RotateCcw } from 'lucide-react'
+import { useNotify } from '@/components/ui/Notify'
 
 /**
  * Operator-facing button that triggers a Stripe refund for a domain
@@ -18,12 +19,18 @@ export default function RefundButton({
   amount: number
 }) {
   const router = useRouter()
+  const { confirm, toast } = useNotify()
   const [busy, setBusy] = useState(false)
 
   async function refund() {
-    if (!confirm(`هل تريد استرداد $${amount.toFixed(2)} مقابل ${domain}؟\n\nسيُصدر هذا استردادًا كاملًا عبر Stripe ويضع علامة "مُسترد" على عملية الشراء. لا يُلغي المُسجِّل تسجيل النطاق تلقائيًا — تعامل مع ذلك بشكل منفصل عند الحاجة.`)) {
-      return
-    }
+    const { confirmed } = await confirm({
+      title: `استرداد $${amount.toFixed(2)} مقابل ${domain}؟`,
+      message:
+        'سيُصدر هذا استردادًا كاملًا عبر Stripe ويضع علامة "مُسترد" على عملية الشراء. لا يُلغي المُسجِّل تسجيل النطاق تلقائيًا — تعامل مع ذلك بشكل منفصل عند الحاجة.',
+      confirmText: 'إصدار الاسترداد',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     setBusy(true)
     try {
       const r = await fetch('/api/admin/refund-domain', {
@@ -33,12 +40,13 @@ export default function RefundButton({
       })
       const j = await r.json()
       if (!r.ok) {
-        alert(`فشل الاسترداد: ${j?.message || j?.error || r.statusText}`)
+        toast({ type: 'error', message: 'فشل الاسترداد', description: j?.message || j?.error || r.statusText })
         return
       }
+      toast({ type: 'success', message: 'تم إصدار الاسترداد.' })
       router.refresh()
     } catch (e: any) {
-      alert(`خطأ في الشبكة: ${e?.message || e}`)
+      toast({ type: 'error', message: 'خطأ في الشبكة', description: e?.message || String(e) })
     } finally {
       setBusy(false)
     }

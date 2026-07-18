@@ -10,6 +10,7 @@ import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
 import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
+import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 
 type Form = {
@@ -132,6 +133,7 @@ const sectionMotion = {
 export default function ServicesWizardPage() {
   const router = useRouter()
   const supabase = createClient()
+  const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
@@ -317,7 +319,7 @@ export default function ServicesWizardPage() {
         return
       }
       if (saveRes.status === 402) {
-        alert('لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.')
+        toast({ type: 'warning', message: 'لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' })
         router.push('/pricing')
         return
       }

@@ -16,10 +16,12 @@ import {
   Gift,
   Copy,
   Check,
+  Star,
   type LucideIcon,
 } from 'lucide-react'
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
+import { useNotify } from '@/components/ui/Notify'
 
 type Topic = 'support' | 'request' | 'sales' | 'review' | 'other'
 
@@ -67,10 +69,13 @@ export default function ContactPage() {
 
 function ContactPageInner() {
   const search = useSearchParams()
+  const { toast } = useNotify()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [topic, setTopic] = useState<Topic>('support')
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [rewardCode, setRewardCode] = useState<string | null>(null)
@@ -85,8 +90,28 @@ function ContactPageInner() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!email || !message || submitting) return
+    // A review needs a star rating — that's the whole point of the channel.
+    if (topic === 'review' && rating < 1) {
+      toast({ type: 'warning', message: 'يرجى اختيار عدد النجوم لتقييم تجربتك.' })
+      return
+    }
     setSubmitting(true)
     try {
+      // Reviews are persisted to Supabase (pending → founder-approved) so real
+      // feedback is never lost. This runs alongside the contact intake, which
+      // still returns the thank-you reward code.
+      if (topic === 'review') {
+        const rev = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: name || 'مستخدم زينيا', email, rating, body: message }),
+        })
+        if (!rev.ok) {
+          const j = await rev.json().catch(() => ({}))
+          throw new Error(j?.message || 'تعذّر حفظ مراجعتك — يُرجى المحاولة مجددًا.')
+        }
+      }
+
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -112,8 +137,11 @@ function ContactPageInner() {
       }
       setSent(true)
     } catch (err: any) {
-      // Show the error inline instead of the success state.
-      alert(err.message || 'حدث خطأ ما؛ يُرجى مراسلتنا مباشرةً على support@zenyaai.co.')
+      toast({
+        type: 'error',
+        message: err.message || 'حدث خطأ ما',
+        description: 'يُرجى مراسلتنا مباشرةً على support@zenyaai.co.',
+      })
     } finally {
       setSubmitting(false)
     }
@@ -122,6 +150,8 @@ function ContactPageInner() {
   function reset() {
     setSent(false)
     setMessage('')
+    setRating(0)
+    setHoverRating(0)
     setRewardCode(null)
     setCodeCopied(false)
   }
@@ -231,6 +261,55 @@ function ContactPageInner() {
                     </Field>
                   </div>
 
+                  {/* Star rating — only for the review channel. Saved to Supabase. */}
+                  <AnimatePresence initial={false}>
+                    {topic === 'review' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+                          تقييمك
+                          <span className="ml-1 text-[#dc2626]">*</span>
+                        </span>
+                        <div className="flex items-center gap-1.5" role="radiogroup" aria-label="التقييم بالنجوم">
+                          {[1, 2, 3, 4, 5].map((n) => {
+                            const filled = (hoverRating || rating) >= n
+                            return (
+                              <button
+                                key={n}
+                                type="button"
+                                role="radio"
+                                aria-checked={rating === n}
+                                aria-label={`${n} من 5`}
+                                onClick={() => setRating(n)}
+                                onMouseEnter={() => setHoverRating(n)}
+                                onMouseLeave={() => setHoverRating(0)}
+                                className="rounded-md p-1 transition-transform duration-150 hover:scale-110"
+                              >
+                                <Star
+                                  className={cn(
+                                    'h-7 w-7 transition-colors',
+                                    filled ? 'text-[#f5a623]' : 'text-muted/35',
+                                  )}
+                                  fill={filled ? '#f5a623' : 'none'}
+                                  strokeWidth={1.75}
+                                />
+                              </button>
+                            )
+                          })}
+                          {rating > 0 && (
+                            <span className="ms-2 text-[13px] font-semibold text-foreground">
+                              {rating}/5
+                            </span>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Message */}
                   <Field label="الرسالة" required>
                     <textarea
@@ -250,7 +329,7 @@ function ContactPageInner() {
 
                   <button
                     type="submit"
-                    disabled={!email || !message || submitting}
+                    disabled={!email || !message || submitting || (topic === 'review' && rating < 1)}
                     className={cn(
                       'group inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-[14px] font-semibold text-white transition-all duration-150',
                       'btn-shadow-primary hover:opacity-90 active:scale-[0.98]',

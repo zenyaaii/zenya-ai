@@ -9,6 +9,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, LayoutDashboard, Settings, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ZenyaMark from '@/components/ZenyaMark'
+import { dashboardUrl, accountsUrl } from '@/lib/portal-urls'
 
 type NavItem = { href: string; label: string }
 
@@ -36,6 +37,14 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  /* ── Portal URLs — resolve to real subdomains in prod, relative on dev.
+     Start relative (matches SSR) then upgrade after mount to avoid hydration
+     mismatch. ── */
+  const [portal, setPortal] = useState({ login: '/login', signup: '/login?mode=signup', dash: '/dashboard' })
+  useEffect(() => {
+    setPortal({ login: accountsUrl('/login'), signup: accountsUrl('/signup'), dash: dashboardUrl() })
+  }, [])
 
   /* ── Auth subscription ── */
   useEffect(() => {
@@ -103,7 +112,7 @@ export default function Navbar() {
           {/* ── Brand — logged-in users land in the dashboard;
                  guests stay on the marketing site ── */}
           <Link
-            href={user ? '/dashboard' : '/'}
+            href={user ? portal.dash : '/'}
             className="group flex items-center"
             aria-label={user ? 'الذهاب إلى لوحة التحكم' : 'الصفحة الرئيسية لزينيا'}
           >
@@ -114,10 +123,11 @@ export default function Navbar() {
           <nav className="hidden md:flex items-center gap-0.5">
             {navItems.map((item) => {
               const active = pathname === item.href
+              const href = item.href === '/dashboard' ? portal.dash : item.href
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={href}
                   className={cn(
                     'relative rounded-md px-3.5 py-2 text-[13.5px] font-medium transition-colors duration-150',
                     active ? 'text-foreground' : 'text-muted hover:text-foreground'
@@ -143,13 +153,13 @@ export default function Navbar() {
             ) : !user ? (
               <>
                 <Link
-                  href="/login"
+                  href={portal.login}
                   className="hidden rounded-md px-3.5 py-2 text-[13.5px] font-medium text-muted transition-colors hover:text-foreground sm:block"
                 >
                   تسجيل الدخول
                 </Link>
                 <Link
-                  href="/login?mode=signup"
+                  href={portal.signup}
                   className="rounded-md bg-primary px-4 py-2 text-[13.5px] font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98] btn-shadow-primary"
                 >
                   ابدأ الآن
@@ -212,7 +222,7 @@ export default function Navbar() {
                           </DropdownMenu.Label>
 
                           <div className="space-y-0.5">
-                            <DropdownMenuLink href="/dashboard" icon={LayoutDashboard} label="لوحة التحكم" onSelect={() => setMenuOpen(false)} />
+                            <DropdownMenuLink href="https://dashboard.zenyaai.co" icon={LayoutDashboard} label="لوحة التحكم" onSelect={() => setMenuOpen(false)} />
                             <DropdownMenuLink href="/settings"  icon={Settings}         label="الإعدادات"  onSelect={() => setMenuOpen(false)} />
                           </div>
 
@@ -284,10 +294,11 @@ export default function Navbar() {
               <nav className="mt-3 flex flex-col gap-0.5 border-t border-[#f0ede6] pb-4 pt-3">
                 {navItems.map((item) => {
                   const active = pathname === item.href
+                  const href = item.href === '/dashboard' ? portal.dash : item.href
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={href}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
                         'rounded-md px-3 py-2.5 text-[14px] font-medium transition-colors',
@@ -303,14 +314,14 @@ export default function Navbar() {
                 {!user ? (
                   <>
                     <Link
-                      href="/login"
+                      href={portal.login}
                       onClick={() => setMobileOpen(false)}
                       className="mt-2 rounded-md border border-token px-4 py-3 text-center text-[14px] font-medium text-foreground transition-colors hover:bg-[rgba(28,28,28,0.04)]"
                     >
                       تسجيل الدخول
                     </Link>
                     <Link
-                      href="/login?mode=signup"
+                      href={portal.signup}
                       onClick={() => setMobileOpen(false)}
                       className="mt-1.5 rounded-md bg-primary px-4 py-3 text-center text-[14px] font-semibold text-white btn-shadow-primary"
                     >

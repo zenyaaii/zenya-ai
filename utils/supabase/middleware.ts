@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { cookieDomainForHost } from '@/lib/cookie-domain'
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -7,6 +8,10 @@ export async function updateSession(request: NextRequest) {
       headers: request.headers,
     },
   })
+
+  // Scope auth cookies to .zenyaai.co so the session is shared across the
+  // accounts / dashboard / apex subdomains (host-only on localhost/preview).
+  const cookieDomain = cookieDomainForHost(request.headers.get('host'))
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,6 +27,7 @@ export async function updateSession(request: NextRequest) {
             ...options,
             sameSite: 'none' as const,
             secure: true,
+            ...(cookieDomain ? { domain: cookieDomain } : {}),
           }
 
           request.cookies.set({
@@ -46,6 +52,7 @@ export async function updateSession(request: NextRequest) {
             ...options,
             sameSite: 'none' as const,
             secure: true,
+            ...(cookieDomain ? { domain: cookieDomain } : {}),
           }
 
           request.cookies.set({

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Copy, Image as ImageIcon, Loader2, Search, Trash2, Upload } from 'lucide-react'
+import { useNotify } from '@/components/ui/Notify'
 
 type GalleryImage = {
   id: string
@@ -17,6 +18,7 @@ type GalleryImage = {
 }
 
 export default function GalleryPage() {
+  const { confirm } = useNotify()
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState<string | null>(null)
@@ -64,7 +66,13 @@ export default function GalleryPage() {
   }
 
   async function remove(img: GalleryImage) {
-    if (!confirm(`Delete this image? If any of your sites use it, the site will show a broken image.`)) return
+    const { confirmed } = await confirm({
+      title: 'حذف هذه الصورة؟',
+      message: 'إن كانت مستخدمة في أي من مواقعك، فسيظهر مكانها صورة معطوبة.',
+      confirmText: 'حذف الصورة',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     setDeletingId(img.id)
     try {
       const r = await fetch(`/api/gallery/${img.id}`, { method: 'DELETE' })

@@ -24,7 +24,7 @@ export default function Page() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.replace('/dashboard')
+      if (user) window.location.href = 'https://dashboard.zenyaai.co'
     })
   }, [router])
 

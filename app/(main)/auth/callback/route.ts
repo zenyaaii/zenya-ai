@@ -27,6 +27,19 @@ export async function GET(request: Request) {
 }
 
 function redirect(request: Request, origin: string, next: string) {
+  // Allow an absolute `next` as long as it stays within our own domain — this
+  // lets the accounts portal send a confirmed user straight to
+  // dashboard.zenyaai.co after email verification.
+  if (/^https?:\/\//i.test(next)) {
+    try {
+      const u = new URL(next)
+      const h = u.hostname.toLowerCase()
+      if (h === 'zenyaai.co' || h.endsWith('.zenyaai.co')) {
+        return NextResponse.redirect(next)
+      }
+    } catch { /* fall through to relative handling */ }
+  }
+
   const forwardedHost = request.headers.get('x-forwarded-host')
   const isLocalEnv = process.env.NODE_ENV === 'development'
   if (isLocalEnv) return NextResponse.redirect(`${origin}${next}`)

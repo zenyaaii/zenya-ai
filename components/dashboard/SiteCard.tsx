@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import DomainsList from '@/components/DomainsList'
 import { themePreview, themePreviewFallback, hasLocalThemePreview } from '@/lib/theme-previews'
+import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
 
 export type SiteTheme = {
   id: string
@@ -80,6 +81,8 @@ const TEMPLATE_TINT: Record<string, { bg: string; ring: string; fg: string }> = 
 export default function SiteCard({
   theme,
   hasHosting,
+  canPublish = false,
+  trialHosting = false,
   isPro,
   plan,
   onPublish,
@@ -89,6 +92,10 @@ export default function SiteCard({
 }: {
   theme: SiteTheme
   hasHosting: boolean
+  /** Can publish right now — paid hosting OR inside the free 30-day trial. */
+  canPublish?: boolean
+  /** Live only because of the free trial (no paid hosting) — shows a badge. */
+  trialHosting?: boolean
   /** any pro entitlement (lifetime OR hosting OR admin) */
   isPro: boolean
   /** raw plan value from profile — used to keep upsell copy honest
@@ -120,14 +127,17 @@ export default function SiteCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-token bg-white transition-all duration-200 hover:-translate-y-0.5"
+      className={
+        'group relative isolate flex flex-col rounded-2xl border border-token bg-white transition-all duration-200 hover:-translate-y-0.5 ' +
+        (menuOpen ? 'z-30' : '')
+      }
       style={{ boxShadow: '0 1px 0 #f0ede6, 0 8px 24px -16px rgba(28,28,28,0.10)' }}
     >
       {/* Top — visual + status overlay. Themes with a captured preview
           show the screenshot; everything else falls back to the icon-
           on-tinted-gradient placeholder. */}
       {hasPreview ? (
-        <div className="relative aspect-[16/9] overflow-hidden">
+        <div className="relative aspect-[16/9] overflow-hidden rounded-t-2xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={themePreview(businessType)}
@@ -156,7 +166,7 @@ export default function SiteCard({
         </div>
       ) : (
         <div
-          className="relative flex aspect-[16/9] items-center justify-center overflow-hidden"
+          className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-t-2xl"
           style={{
             background: `linear-gradient(135deg, ${tint.bg} 0%, white 80%)`,
           }}
@@ -210,19 +220,30 @@ export default function SiteCard({
         {/* URL block */}
         {publishedHere && (
           <a
-            href={`/s/${theme.slug}`}
+            href={publicSiteUrl(theme.slug!)}
             target="_blank"
             rel="noreferrer"
+            dir="ltr"
             className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[#15803d]/[0.06] px-2 py-1 text-[12px] font-medium text-[#15803d] transition hover:bg-[#15803d]/[0.10]"
           >
             <Globe className="h-3 w-3" strokeWidth={2.5} />
-            zenyaai.co/s/{theme.slug}
+            {publicSiteHost(theme.slug!)}
             <ExternalLink className="h-2.5 w-2.5 opacity-70" strokeWidth={2.5} />
           </a>
         )}
         {!publishedHere && isHostable && (
           <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(217,119,6,0.08)] px-2 py-1 text-[12px] font-medium text-[#b45309]">
             مسودّة · غير مباشر بعد
+          </div>
+        )}
+        {/* Free-trial hosting badge — this site is live only for the first month. */}
+        {publishedHere && trialHosting && (
+          <div
+            className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-[12px] font-medium"
+            style={{ background: 'rgba(217,119,6,0.10)', color: '#b45309', border: '1px solid rgba(217,119,6,0.20)' }}
+            title="موقعك مباشر مجانًا خلال الشهر الأول. بعده تحتاج خطة Starter للإبقاء عليه."
+          >
+            🎁 تجربة مجانية · مباشر خلال الشهر الأول
           </div>
         )}
         {isEcom && (
@@ -236,8 +257,9 @@ export default function SiteCard({
           <DomainsList themeId={theme.id} />
         )}
 
-        {/* Locked upsell for hostable + paid-but-no-hosting (Starter, pro_onetime). */}
-        {isHostable && !hasHosting && isPro && !publishedHere && (() => {
+        {/* Locked upsell for hostable + paid-but-no-hosting (Starter, pro_onetime).
+            Hidden during the free trial — those users can publish now. */}
+        {isHostable && !hasHosting && !canPublish && isPro && !publishedHere && (() => {
           // Copy honesty: a pro_onetime user IS "Pro" — telling them to
           // "الترقية إلى Pro" is misleading. They need hosting, not Pro.
           const isOnetime = plan === 'pro_onetime'
@@ -291,7 +313,7 @@ export default function SiteCard({
                 </button>
               ) : null
             ) : (
-              hasHosting ? (
+              canPublish ? (
                 <button
                   onClick={onPublish}
                   className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
@@ -350,14 +372,14 @@ export default function SiteCard({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute end-0 z-30 mt-1 w-64 overflow-hidden rounded-lg border border-token bg-white shadow-lg"
-                    style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
+                    className="absolute bottom-full end-0 z-40 mb-2 w-64 overflow-hidden rounded-lg border border-token bg-white shadow-lg"
+                    style={{ boxShadow: '0 12px 32px rgba(28,28,28,0.16), 0 0 0 1px #e5e2d9' }}
                   >
                     {/* Screenshot thumbnail — what the user expects to see when
                         they open the "more" menu. Clicking it opens the site
                         preview in a new tab. */}
                     <a
-                      href={publishedHere ? `/s/${theme.slug}` : `/preview/${theme.id}`}
+                      href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
                       target="_blank"
                       rel="noreferrer"
                       onClick={() => setMenuOpen(false)}

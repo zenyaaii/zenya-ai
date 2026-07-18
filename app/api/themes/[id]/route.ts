@@ -118,31 +118,64 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ ok: true, theme: data })
 }
 
+const GALLERY_BUCKET = 'theme-uploads'
+
 /**
  * DELETE /api/themes/[id] — permanently remove a theme.
+ *
+ * Query: ?deleteImages=1  → also remove the images this theme used from the
+ *        user's gallery (rows + storage objects), BUT only those not
+ *        referenced by any of the user's *other* themes, so a shared image is
+ *        never yanked out from under a site that still needs it.
  *
  * Cascade behaviour (per schema):
  *   • site_views       → ON DELETE CASCADE (rows removed)
  *   • domains.theme_id → ON DELETE SET NULL (row survives, unlinked so the
  *                        user can detach it from /dashboard/domains)
  *   • gallery_images   → not linked to theme; images stay in the user's gallery
+ *                        unless ?deleteImages=1 opts in (see above)
  *
  * Ownership enforced; activity log on success.
  */
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
+  const deleteImages = req.nextUrl.searchParams.get('deleteImages') === '1'
+
   const a = admin()
   const { data: existing } = await a
     .from('themes')
-    .select('id, user_id, slug, is_published, product_name')
+    .select('id, user_id, slug, is_published, product_name, content')
     .eq('id', params.id)
     .maybeSingle()
 
   if (!existing || existing.user_id !== user.id) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 })
+  }
+
+  // Work out which images are safe to delete BEFORE removing the theme.
+  let deletableUrls: string[] = []
+  if (deleteImages) {
+    try {
+      const theseUrls = extractImageUrls((existing as any).content)
+      if (theseUrls.length > 0) {
+        // Collect every image URL referenced by the user's OTHER themes.
+        const { data: others } = await a
+          .from('themes')
+          .select('content')
+          .eq('user_id', user.id)
+          .neq('id', params.id)
+        const stillInUse = new Set<string>()
+        for (const row of others || []) {
+          for (const u of extractImageUrls((row as any).content)) stillInUse.add(u)
+        }
+        deletableUrls = theseUrls.filter((u) => !stillInUse.has(u))
+      }
+    } catch (e) {
+      console.error('[/api/themes/[id]] image cleanup planning failed', e)
+    }
   }
 
   const { error } = await a
@@ -155,6 +188,35 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
   }
 
+  // Best-effort image cleanup — never fail the delete over it.
+  let deletedImages = 0
+  if (deleteImages && deletableUrls.length > 0) {
+    try {
+      const { data: rows } = await a
+        .from('gallery_images')
+        .select('id, url, path')
+        .eq('user_id', user.id)
+        .in('url', deletableUrls)
+
+      const paths = (rows || []).map((r: any) => r.path).filter(Boolean) as string[]
+      if (paths.length > 0) {
+        await a.storage.from(GALLERY_BUCKET).remove(paths).catch(() => null)
+      }
+      const ids = (rows || []).map((r: any) => r.id)
+      if (ids.length > 0) {
+        const { error: delErr } = await a
+          .from('gallery_images')
+          .delete()
+          .eq('user_id', user.id)
+          .in('id', ids)
+        if (!delErr) deletedImages = ids.length
+        else console.error('[/api/themes/[id]] gallery row delete failed', delErr)
+      }
+    } catch (e) {
+      console.error('[/api/themes/[id]] image cleanup failed', e)
+    }
+  }
+
   await a.from('activity_logs').insert({
     user_id: user.id,
     event_type: 'theme.deleted',
@@ -163,8 +225,9 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
       slug: existing.slug,
       was_published: !!existing.is_published,
       product_name: existing.product_name,
+      deleted_images: deletedImages,
     } as any,
   })
 
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, deletedImages })
 }
