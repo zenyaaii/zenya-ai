@@ -97,6 +97,45 @@ async function rateLimitOk(key: string): Promise<boolean> {
   }
 }
 
+const GOOGLE_FILE_RE = /^\/google[a-z0-9]+\.html$/i
+
+/**
+ * Serve Google Search Console's "HTML file" verification at the site root
+ * (slug.zenyaai.co/google<hash>.html) — but ONLY the exact filename the owner
+ * saved (content.seo.gscFile), so nobody can verify someone else's site.
+ * Returns a Response when the path is a google-file request (200 if it matches
+ * the owner's file, 404 otherwise), or null when the path isn't one.
+ */
+async function gscFileResponse(slug: string, pathname: string): Promise<NextResponse | null> {
+  if (!GOOGLE_FILE_RE.test(pathname)) return null
+  const file = pathname.slice(1).toLowerCase()
+  const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!baseUrl || !key) return new NextResponse('Not found', { status: 404 })
+  try {
+    const q = new URL(`${baseUrl}/rest/v1/themes`)
+    q.searchParams.set('slug', `ilike.${slug}`)
+    q.searchParams.set('is_published', 'eq.true')
+    q.searchParams.set('select', 'content')
+    q.searchParams.set('limit', '1')
+    const r = await fetch(q.toString(), {
+      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      cache: 'no-store',
+    })
+    if (!r.ok) return new NextResponse('Not found', { status: 404 })
+    const rows = (await r.json()) as Array<{ content?: any }>
+    const stored = String(rows?.[0]?.content?.seo?.gscFile || '').toLowerCase()
+    if (stored && stored === file) {
+      return new NextResponse(`google-site-verification: ${file}`, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300' },
+      })
+    }
+    return new NextResponse('Not found', { status: 404 })
+  } catch {
+    return new NextResponse('Not found', { status: 404 })
+  }
+}
+
 type LookupResult = { slug: string } | null
 
 /**
@@ -168,6 +207,9 @@ export async function middleware(request: NextRequest) {
     ) {
       return NextResponse.next()
     }
+    // Google HTML-file verification, served from the site root.
+    const gsc = await gscFileResponse(zenyaSlug, pathname)
+    if (gsc) return gsc
     const url = request.nextUrl.clone()
     url.pathname = `/s/${zenyaSlug}${pathname === '/' ? '' : pathname}`
     // Mark this as a customer site so the root layout suppresses Zenya's own
@@ -294,15 +336,15 @@ export async function middleware(request: NextRequest) {
     }
     const found = await lookupCustomDomain(host)
     if (found) {
+      // Google HTML-file verification, served from the domain root.
+      const gsc = await gscFileResponse(found.slug, pathname)
+      if (gsc) return gsc
+
       const url = request.nextUrl.clone()
-      // SEO files keep their path (so mydomain.com/sitemap.xml and /robots.txt
-      // resolve to the per-site handlers); everything else is a single-page
-      // brochure and serves the homepage.
-      const isSeoFile =
-        pathname === '/sitemap.xml' ||
-        pathname === '/robots.txt' ||
-        /^\/google[a-z0-9]+\.html$/i.test(pathname)
-      url.pathname = isSeoFile ? `/s/${found.slug}${pathname}` : `/s/${found.slug}`
+      // sitemap.xml / robots.txt keep their path (per-site handlers); every
+      // other path is a real page of the multi-page brochure and keeps its
+      // pathname too so slug pages (/menu, /about…) resolve.
+      url.pathname = `/s/${found.slug}${pathname === '/' ? '' : pathname}`
       const h = new Headers(request.headers)
       h.set('x-zenya-site', '1')
       return NextResponse.rewrite(url, { request: { headers: h } })

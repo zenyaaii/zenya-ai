@@ -1,6 +1,8 @@
 'use client'
 
 import { lazy, Suspense, type ComponentType } from 'react'
+import { useRouter } from 'next/navigation'
+import { slugForView } from '@/lib/site-pages'
 
 // Lazy-load each preview so a /s/[slug] visit only pulls the bundle for the
 // template that's actually being shown. Big win for cold-cache page weight.
@@ -20,6 +22,15 @@ type Props = {
   colorOverrides?: Record<string, string>
   /** Wrapper-level typography preset id. */
   typographyPreset?: string
+  /** Which template view/page to render (home by default). */
+  view?: string
+  /**
+   * When true (the public multi-page site), nav clicks navigate to the page's
+   * real URL (slug.zenyaai.co/<page>) instead of just flipping client state —
+   * so each page is a shareable, indexable URL. Left off for preview/demo,
+   * where the template keeps its internal client-side view state.
+   */
+  enableRouting?: boolean
 }
 
 const TEMPLATE_KEY: Record<string, string> = {
@@ -37,13 +48,16 @@ export default function PublicSiteRenderer({
   presetId,
   colorOverrides,
   typographyPreset,
+  view,
+  enableRouting,
 }: Props) {
+  const router = useRouter()
   const key = TEMPLATE_KEY[businessType]
   if (!key) {
     return <UnsupportedTemplate businessType={businessType} />
   }
 
-  // Each preview takes a loose Props shape: { content, presetId?, colorOverrides?, typographyPreset? }
+  // Each preview takes a loose Props shape: { content, presetId?, colorOverrides?, typographyPreset?, view?, onViewChange? }
   const Component: ComponentType<any> = (
     {
       restaurant: RestaurantPreview,
@@ -55,6 +69,16 @@ export default function PublicSiteRenderer({
     } as Record<string, ComponentType<any>>
   )[key]
 
+  // On the public site, a nav click routes to that page's real URL (soft nav,
+  // so it stays fast). Elsewhere (preview/demo) the template keeps internal
+  // view state and we don't touch the URL.
+  const onViewChange = enableRouting
+    ? (v: string) => {
+        const s = slugForView(businessType, v)
+        router.push(s ? `/${s}` : '/')
+      }
+    : undefined
+
   return (
     <Suspense fallback={<LoadingShell />}>
       <Component
@@ -62,6 +86,8 @@ export default function PublicSiteRenderer({
         presetId={presetId}
         colorOverrides={colorOverrides}
         typographyPreset={typographyPreset}
+        view={enableRouting ? view : undefined}
+        onViewChange={onViewChange}
       />
     </Suspense>
   )
