@@ -1,6 +1,29 @@
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
+import { sendWelcomeOnce } from '@/lib/lifecycle-email'
+
+/**
+ * Fire the once-only welcome email for a freshly-authenticated user.
+ * Skipped for password-recovery links (those are always returning users, and
+ * sendWelcomeOnce dedupes anyway). Awaited but never throws — a slow or failed
+ * send must not block the redirect into the dashboard.
+ */
+async function welcome(supabase: ReturnType<typeof createClient>, type: EmailOtpType | null) {
+  if (type === 'recovery') return
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await sendWelcomeOnce({
+        id: user.id,
+        email: user.email,
+        fullName: (user.user_metadata as any)?.full_name ?? null,
+      })
+    }
+  } catch (e) {
+    console.error('[auth/callback] welcome email failed:', e)
+  }
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -14,13 +37,19 @@ export async function GET(request: Request) {
   // Modern flow: token_hash + type (works across devices/browsers).
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
-    if (!error) return redirect(request, origin, next)
+    if (!error) {
+      await welcome(supabase, type)
+      return redirect(request, origin, next)
+    }
   }
 
   // PKCE flow: ?code=... (must be opened on the same device that initiated auth).
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) return redirect(request, origin, next)
+    if (!error) {
+      await welcome(supabase, type)
+      return redirect(request, origin, next)
+    }
   }
 
   return NextResponse.redirect(`${origin}/auth/auth-code-error`)

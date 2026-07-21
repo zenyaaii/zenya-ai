@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { themeCreateSchema } from '@/utils/validators'
 import { extractImageUrls } from '@/lib/extract-image-urls'
+import { sendQuotaEmailIfExhausted } from '@/lib/lifecycle-email'
 
 // Uses the service-role key — pin to the Node runtime so it never runs on the
 // edge (where the secret shouldn't live) and force-dynamic since it reads auth.
@@ -81,6 +82,11 @@ export async function POST(req: NextRequest) {
       image_count: (parsed.data.images || []).length,
     } as any,
   }).then(() => {})
+
+  // If that insert consumed the free user's last trial generation, nudge them
+  // to upgrade. Fire-and-forget + idempotent — the quota trigger has already
+  // run, so the profile now reflects the true used/limit counts.
+  sendQuotaEmailIfExhausted(user.id).catch(() => {})
 
   // Seed the user's gallery with every image referenced in the new theme so
   // they appear in the picker for re-use. Fire-and-forget — failure here

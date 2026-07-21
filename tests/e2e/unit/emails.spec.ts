@@ -7,6 +7,10 @@ import {
   domainExpiringEmail,
   accountDeletedEmail,
   announcementEmail,
+  welcomeEmail,
+  trialReminderEmail,
+  quotaReachedEmail,
+  hostingExpiringEmail,
 } from '../../../lib/email'
 
 // Every transactional email must render: Arabic + RTL, real injected data, a
@@ -92,4 +96,34 @@ test('account deleted email', () => {
 
 test('announcement email', () => {
   assertClean(announcementEmail(), [])
+})
+
+test('welcome email — named and anonymous', () => {
+  assertClean(welcomeEmail({ firstName: 'محمد', trialLimit: 2, manageUrl: 'https://zenyaai.co/dashboard' }), ['محمد'])
+  assertClean(welcomeEmail({}), [])
+})
+
+test('trial reminder email — pluralized remaining counts', () => {
+  for (const remaining of [1, 2, 3]) {
+    assertClean(trialReminderEmail({ firstName: 'سارة', remaining, manageUrl: 'https://zenyaai.co/dashboard' }), ['سارة'])
+  }
+})
+
+test('quota reached email', () => {
+  assertClean(quotaReachedEmail({ firstName: 'محمد', trialLimit: 2, upgradeUrl: 'https://zenyaai.co/pricing' }), ['محمد'])
+  assertClean(quotaReachedEmail({ trialLimit: 1 }), [])
+})
+
+test('hosting expiring email — across the reminder window', () => {
+  for (const daysUntil of [0, 1, 2, 5]) {
+    assertClean(
+      hostingExpiringEmail({
+        firstName: 'سارة',
+        daysUntil,
+        endDate: '2026-08-01T00:00:00Z',
+        manageUrl: 'https://zenyaai.co/dashboard/billing',
+      }),
+      []
+    )
+  }
 })

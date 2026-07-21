@@ -13,6 +13,10 @@ import {
   paymentReceiptEmail,
   domainExpiringEmail,
   announcementEmail,
+  welcomeEmail,
+  trialReminderEmail,
+  quotaReachedEmail,
+  hostingExpiringEmail,
 } from '../lib/email'
 
 const outDir = join(process.cwd(), '.email-previews')
@@ -70,6 +74,31 @@ const samples: { file: string; label: string; tmpl: { subject: string; html: str
     file: 'announcement.html',
     label: 'إعلان إعادة الإطلاق (لكل المستخدمين)',
     tmpl: announcementEmail({ firstName: 'محمد', manageUrl: 'https://zenyaai.co/dashboard' }),
+  },
+  {
+    file: 'welcome.html',
+    label: 'ترحيب بالتسجيل',
+    tmpl: welcomeEmail({ firstName: 'محمد', trialLimit: 2, manageUrl: 'https://zenyaai.co/dashboard' }),
+  },
+  {
+    file: 'trial-reminder.html',
+    label: 'تذكير منتصف التجربة',
+    tmpl: trialReminderEmail({ firstName: 'محمد', remaining: 1, manageUrl: 'https://zenyaai.co/dashboard' }),
+  },
+  {
+    file: 'quota-reached.html',
+    label: 'استنفاد التجربة المجانية',
+    tmpl: quotaReachedEmail({ firstName: 'محمد', trialLimit: 2, upgradeUrl: 'https://zenyaai.co/pricing' }),
+  },
+  {
+    file: 'hosting-expiring.html',
+    label: 'تنبيه انتهاء الاستضافة',
+    tmpl: hostingExpiringEmail({
+      firstName: 'محمد',
+      daysUntil: 3,
+      endDate: new Date(Date.now() + 3 * 864e5).toISOString(),
+      manageUrl: 'https://zenyaai.co/dashboard/billing',
+    }),
   },
   {
     file: 'domain-expiring.html',

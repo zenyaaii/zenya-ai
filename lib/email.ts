@@ -589,6 +589,220 @@ export function domainExpiringEmail(args: {
 }
 
 /**
+ * Sent once, right after a new account is confirmed (auth callback). A warm
+ * welcome that points the user straight at the builder and sets the "you get
+ * N free generations" expectation so the later quota / trial nudges land in
+ * context rather than out of nowhere.
+ */
+export function welcomeEmail(args: {
+  firstName?: string | null
+  trialLimit?: number
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const limit = Math.max(1, args.trialLimit ?? 2)
+  const genWord = limit === 1 ? 'موقع مجاني واحد' : limit === 2 ? 'موقعين مجانيين' : `${limit} مواقع مجانية`
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+
+  const subject = 'أهلًا بك في زينيا 👋'
+
+  const text = [
+    greeting,
+    '',
+    'يسعدنا انضمامك إلى زينيا — منشئ المواقع بالذكاء الاصطناعي.',
+    `حسابك جاهز، ولديك ${genWord} لتبدأ بها فورًا.`,
+    '',
+    'اكتب فكرتك، أو ابدأ من مثال جاهز، وولّد موقعًا احترافيًا في ثوانٍ.',
+    `ابدأ من هنا: ${manageUrl}`,
+    '',
+    'لأي سؤال راسلنا على noreply@zenyaai.co — نحن هنا للمساعدة.',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      يسعدنا انضمامك إلى <strong style="color:#16171b;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي. حسابك جاهز، ولديك <strong style="color:#16171b;">${genWord}</strong> لتبدأ بها فورًا.
+    </p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      اكتب فكرتك، أو ابدأ من <strong style="color:#16171b;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
+    </p>`
+
+  const html = emailShell({
+    title: 'أهلًا بك في زينيا',
+    eyebrow: 'مرحبًا',
+    heading: 'أهلًا بك في زينيا 👋',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'ابدأ إنشاء موقعك',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a> ويسعدنا أن نأخذ بيدك.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent once, mid-trial (~day 7), to a free user who still has free
+ * generations left but hasn't converted. A gentle "you've still got room —
+ * come finish what you started" nudge, not a hard sell.
+ */
+export function trialReminderEmail(args: {
+  firstName?: string | null
+  remaining: number
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const remaining = Math.max(0, args.remaining)
+  const remWord = remaining === 1 ? 'موقع مجاني واحد' : remaining === 2 ? 'موقعان مجانيان' : `${remaining} مواقع مجانية`
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+
+  const subject = `لا يزال لديك ${remWord} في زينيا`
+
+  const text = [
+    greeting,
+    '',
+    `تجربتك في زينيا ما زالت مفتوحة، ولا يزال لديك ${remWord}.`,
+    'لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك في ثوانٍ.',
+    '',
+    `تابع من حيث توقفت: ${manageUrl}`,
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      تجربتك في زينيا ما زالت مفتوحة، ولا يزال لديك <strong style="color:#16171b;">${remWord}</strong>. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
+    </p>`
+
+  const html = emailShell({
+    title: 'لا يزال لديك مواقع مجانية في زينيا',
+    eyebrow: 'تذكير بتجربتك',
+    heading: `لا يزال لديك ${remWord}`,
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'أكمل إنشاء موقعك',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن لديك تجربة مجانية نشطة في زينيا. عند الترقية تحصل على توليد غير محدود.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent once, the moment a free user consumes their LAST free generation
+ * (themes POST, after the quota trigger fires). Confirms they've used the
+ * whole trial and routes them to pricing for unlimited generation.
+ */
+export function quotaReachedEmail(args: {
+  firstName?: string | null
+  trialLimit: number
+  upgradeUrl?: string
+}): { subject: string; text: string; html: string } {
+  const upgradeUrl = args.upgradeUrl || 'https://zenyaai.co/pricing'
+  const limit = Math.max(1, args.trialLimit)
+  const genWord = limit === 1 ? 'موقعك المجاني' : limit === 2 ? 'موقعيك المجانيين' : `مواقعك المجانية الـ${limit}`
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+
+  const subject = 'استنفدت تجربتك المجانية في زينيا'
+
+  const text = [
+    greeting,
+    '',
+    `لقد استخدمت ${genWord} بالكامل — نأمل أن تكون النتائج أعجبتك!`,
+    'للاستمرار في توليد مواقع بلا حدود، بالإضافة إلى تصدير شوبيفاي وملفات المشاريع، اشترك في إحدى خططنا.',
+    '',
+    `طالع الخطط: ${upgradeUrl}`,
+    '',
+    'مواقعك التي أنشأتها تبقى محفوظة في حسابك.',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      لقد استخدمت <strong style="color:#16171b;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! للاستمرار في توليد مواقع <strong style="color:#16171b;">بلا حدود</strong>، مع تصدير شوبيفاي وملفات المشاريع، اشترك في إحدى خططنا.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">✅ &nbsp;مواقعك التي أنشأتها تبقى محفوظة في حسابك — لن تفقد أي عمل.</p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: 'استنفدت تجربتك المجانية في زينيا',
+    eyebrow: 'انتهت التجربة',
+    heading: 'استنفدت تجربتك المجانية',
+    bodyHtml,
+    ctaHref: upgradeUrl,
+    ctaLabel: 'طالع الخطط والترقية',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">لأي سؤال عن الخطط راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent when a hosting subscription is set to lapse — the user canceled (or
+ * payment won't renew) and the paid period is ending within the reminder
+ * window. The point is churn prevention: warn them their live sites will go
+ * offline unless they resubscribe, before it actually happens.
+ */
+export function hostingExpiringEmail(args: {
+  firstName?: string | null
+  daysUntil: number
+  endDate: string
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/billing'
+  const daysUntil = Math.max(0, args.daysUntil)
+  const dayWord = daysUntil === 0 ? 'اليوم' : daysUntil === 1 ? 'يوم واحد' : daysUntil === 2 ? 'يومين' : `${daysUntil} أيام`
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+  let endStr = args.endDate
+  try {
+    endStr = new Date(args.endDate).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch { /* keep ISO fallback */ }
+
+  const urgency = daysUntil <= 3 ? 'عاجل — ' : ''
+  const subject = `${urgency}استضافتك في زينيا تنتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}`
+
+  const text = [
+    greeting,
+    '',
+    `اشتراك الاستضافة الكاملة في حسابك ينتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`} (${endStr}).`,
+    'عند انتهائه، ستتوقف مواقعك المستضافة عن الظهور على الإنترنت.',
+    '',
+    `لإبقاء مواقعك مباشرة، جدّد اشتراكك من: ${manageUrl}`,
+    '',
+    'ملفاتك ومحتواك يبقى محفوظًا في حسابك — الاستضافة فقط هي ما يتوقف.',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      اشتراك الاستضافة الكاملة في حسابك ينتهي <strong style="color:#16171b;">${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}</strong>. عند انتهائه، ستتوقف مواقعك المستضافة عن الظهور على الإنترنت.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fdf4f0;border:1px solid #f0dcd2;border-radius:12px;">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 6px;font-size:13px;color:#a05a3a;">ينتهي في: <strong style="color:#8a3c1f;">${endStr}</strong></p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">ملفاتك ومحتواك يبقى محفوظًا في حسابك — الاستضافة فقط هي ما يتوقف.</p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: 'استضافتك في زينيا تقترب من الانتهاء',
+    eyebrow: 'تنبيه الاستضافة',
+    heading: `استضافتك تنتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}`,
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'جدّد الاستضافة الآن',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن اشتراك الاستضافة في حسابك مُجدوَل للإيقاف. لأي سؤال راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
  * Sent to a user right before their account is permanently deleted so they
  * have a written record that the erasure was processed.
  */

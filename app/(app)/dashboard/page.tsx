@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Sparkles, Plus, ArrowRight, Globe, CheckCircle2, Folder,
-  BarChart3, Eye, ExternalLink, Image as ImageIcon,
+  BarChart3, Eye, ExternalLink, Image as ImageIcon, AlertTriangle,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
@@ -21,6 +21,7 @@ type Profile = {
   trial_themes_used: number
   hosting_status: string | null
   hosting_current_period_end: string | null
+  hosting_canceled_at?: string | null
   full_name?: string | null
   email?: string | null
 }
@@ -80,7 +81,7 @@ export default function DashboardHomePage() {
     const [{ data: profileRow }, themesRes, analyticsRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select('plan, is_pro, has_hosting, trial_themes_limit, trial_themes_used, hosting_status, hosting_current_period_end, full_name, email')
+        .select('plan, is_pro, has_hosting, trial_themes_limit, trial_themes_used, hosting_status, hosting_current_period_end, hosting_canceled_at, full_name, email')
         .eq('id', user.id)
         .maybeSingle(),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
@@ -127,6 +128,17 @@ export default function DashboardHomePage() {
           <span className="text-[12.5px] text-muted">· {profile?.email || ''}</span>
         </div>
       </motion.div>
+
+      {/* Proactive warnings — hosting about to lapse, or trial spent */}
+      {!loading && (
+        <HostingExpiryBanner
+          hasHosting={hasHosting}
+          status={profile?.hosting_status}
+          canceledAt={profile?.hosting_canceled_at}
+          periodEnd={profile?.hosting_current_period_end}
+        />
+      )}
+      {!loading && plan === 'free' && trialRemaining === 0 && <TrialSpentBanner />}
 
       {/* Stat grid */}
       <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -217,6 +229,70 @@ function StatTile({
       </div>
       <div className="mt-2 text-[24px] font-bold tracking-tight text-foreground">{value}</div>
       {sub && <div className="mt-1 text-[12px] text-muted">{sub}</div>}
+    </div>
+  )
+}
+
+/**
+ * Warns when a hosting subscription is set to lapse — canceled + still active,
+ * with the paid period ending within 14 days. Silent otherwise (auto-renewing
+ * subscriptions and non-hosting plans show nothing).
+ */
+function HostingExpiryBanner({
+  hasHosting, status, canceledAt, periodEnd,
+}: {
+  hasHosting: boolean
+  status: string | null | undefined
+  canceledAt: string | null | undefined
+  periodEnd: string | null | undefined
+}) {
+  if (!hasHosting || status !== 'active' || !canceledAt || !periodEnd) return null
+  const end = new Date(periodEnd)
+  if (isNaN(end.getTime())) return null
+  const daysUntil = Math.round((end.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  if (daysUntil < 0 || daysUntil > 14) return null
+
+  const dayWord = daysUntil === 0 ? 'اليوم' : daysUntil === 1 ? 'خلال يوم واحد' : daysUntil === 2 ? 'خلال يومين' : `خلال ${daysUntil} أيام`
+  const endStr = end.toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
+
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(180,83,9,0.28)] bg-[rgba(180,83,9,0.06)] px-4 py-3.5">
+      <AlertTriangle className="h-5 w-5 shrink-0 text-[#b45309]" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[13.5px] font-semibold text-[#8a3c1f]">
+          تنتهي استضافتك {dayWord} ({endStr})
+        </p>
+        <p className="mt-0.5 text-[12.5px] leading-[1.55] text-[#a05a3a]">
+          عند انتهائها ستتوقف مواقعك المستضافة عن الظهور. جدّد اشتراكك لإبقائها مباشرة — محتواك يبقى محفوظًا.
+        </p>
+      </div>
+      <Link
+        href="/dashboard/billing"
+        className="shrink-0 rounded-full bg-[#b45309] px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-[#95440a]"
+      >
+        جدّد الاستضافة
+      </Link>
+    </div>
+  )
+}
+
+/** Shown to a free user who has spent every free generation. */
+function TrialSpentBanner() {
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(94,106,210,0.28)] bg-[rgba(94,106,210,0.06)] px-4 py-3.5">
+      <Sparkles className="h-5 w-5 shrink-0 text-primary" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[13.5px] font-semibold text-foreground">استنفدت تجربتك المجانية</p>
+        <p className="mt-0.5 text-[12.5px] leading-[1.55] text-muted">
+          اشترك لتوليد مواقع بلا حدود، مع تصدير شوبيفاي وملفات المشاريع. مواقعك الحالية تبقى محفوظة.
+        </p>
+      </div>
+      <Link
+        href="/pricing"
+        className="shrink-0 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:opacity-90"
+      >
+        طالع الخطط
+      </Link>
     </div>
   )
 }
