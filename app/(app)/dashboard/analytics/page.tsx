@@ -7,6 +7,7 @@ import {
   BarChart3, Eye, Folder, Globe, TrendingUp, RefreshCw,
   ArrowUpRight, ExternalLink, Users, DollarSign, Cpu, Repeat,
 } from 'lucide-react'
+import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
 
 type Analytics = {
   generated_at: string
@@ -252,7 +253,7 @@ export default function AnalyticsPage() {
                         <div className="min-w-0">
                           <div className="truncate font-medium text-foreground">{s.product_name}</div>
                           <div className="truncate text-[11.5px] text-muted">
-                            {s.is_published && s.slug ? `zenyaai.co/s/${s.slug}` : `${s.template_type} · مسودة`}
+                            {s.is_published && s.slug ? publicSiteHost(s.slug) : `${s.template_type} · مسودة`}
                           </div>
                         </div>
                       </div>
@@ -262,7 +263,7 @@ export default function AnalyticsPage() {
                     <td className="px-4 py-3 text-end">
                       {s.is_published && s.slug ? (
                         <a
-                          href={`/s/${s.slug}`}
+                          href={publicSiteUrl(s.slug)}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-[#15803d]"

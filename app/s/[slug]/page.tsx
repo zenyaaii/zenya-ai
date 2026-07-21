@@ -5,6 +5,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
+import { resolveSeo, buildJsonLd } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -105,20 +106,48 @@ export async function generateMetadata(
     }
   }
 
-  const name = theme.product_name || theme.slug
   const businessType =
     (theme.content && typeof theme.content === 'object' && (theme.content as any).business_type) ||
     theme.template_type
 
+  // Auto-derived (or owner-overridden) SEO — title, description, keywords,
+  // canonical on the *professional* subdomain URL, OG image, GSC tag.
+  const seo = resolveSeo({
+    product_name: theme.product_name,
+    slug: theme.slug,
+    content: theme.content,
+    template_type: theme.template_type,
+    is_published: true,
+  })
+
   return {
-    title: name,
-    description: `${name} — مبنيّ ومُستضاف على زينيا.`,
-    alternates: { canonical: `/s/${theme.slug}` },
+    // `absolute` bypasses the root layout's "%s · زينيا" template so the
+    // customer's Google title is clean and unbranded — their site, not ours.
+    title: { absolute: seo.title },
+    description: seo.description,
+    keywords: seo.keywords,
+    metadataBase: new URL(seo.canonical),
+    alternates: { canonical: seo.canonical },
+    robots: seo.index
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
+    ...(seo.gscVerification
+      ? { verification: { google: seo.gscVerification } }
+      : {}),
     openGraph: {
-      title: name,
-      description: `${name} — مبنيّ ومُستضاف على زينيا.`,
+      title: seo.title,
+      description: seo.description,
       type: 'website',
-      url: `https://zenyaai.co/s/${theme.slug}`,
+      url: seo.canonical,
+      siteName: theme.product_name || theme.slug,
+      locale: 'ar_AR',
+      ...(seo.ogImage ? { images: [{ url: seo.ogImage }] } : {}),
+    },
+    twitter: {
+      card: seo.ogImage ? 'summary_large_image' : 'summary',
+      title: seo.title,
+      description: seo.description,
+      ...(seo.ogImage ? { images: [seo.ogImage] } : {}),
     },
     other: { 'zenya-template': businessType },
   }
@@ -149,8 +178,29 @@ export default async function PublicSitePage(
   const templateContent =
     (typeof c === 'object' && (c as any)[businessType]) || c
 
+  // Structured data (JSON-LD) so Google can render a rich result for the site.
+  const seo = resolveSeo({
+    product_name: theme.product_name,
+    slug: theme.slug,
+    content: theme.content,
+    template_type: theme.template_type,
+    is_published: true,
+  })
+  const jsonLd = buildJsonLd(
+    { product_name: theme.product_name, slug: theme.slug, content: theme.content, template_type: theme.template_type },
+    seo,
+  )
+
   return (
     <>
+      {jsonLd.map((node, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(node) }}
+        />
+      ))}
       {sectionStyles && Object.keys(sectionStyles).length > 0 && (
         <style
           // eslint-disable-next-line react/no-danger

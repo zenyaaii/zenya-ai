@@ -175,8 +175,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   // or defer attributes — otherwise app-bridge.js throws on load. Inject a
   // raw <script> only on /shopify/* so we don't ship it on the marketing
   // site. Pathname comes from middleware via the x-pathname header.
-  const pathname = headers().get('x-pathname') || ''
+  const hdrs = headers()
+  const pathname = hdrs.get('x-pathname') || ''
   const isShopifyRoute = pathname.startsWith('/shopify')
+  // Customer sites (slug.zenyaai.co / custom domains) must NOT carry Zenya's
+  // own brand JSON-LD — that would tell Google their page is about Zenya.
+  // Middleware flags these requests; they inject their own correct schema.
+  const isCustomerSite = hdrs.get('x-zenya-site') === '1' || pathname.startsWith('/s/')
   const shopifyApiKey = process.env.SHOPIFY_API_KEY || ''
 
   return (
@@ -189,10 +194,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key={shopifyApiKey} />
           </>
         )}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        {!isCustomerSite && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
+        )}
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <SmoothScroll />

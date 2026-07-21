@@ -18,6 +18,7 @@ import SiteCard, {
   type SiteTheme,
 } from '@/components/dashboard/SiteCard'
 import { useNotify } from '@/components/ui/Notify'
+import { publicSiteUrl } from '@/lib/portal-urls'
 
 type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 type Profile = {
@@ -554,12 +555,14 @@ function SiteRow({
         >
           Edit
         </Link>
-        <Link
-          href={`/preview/${theme.id}`}
+        <a
+          href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
+          target="_blank"
+          rel="noreferrer"
           className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
         >
-          Preview
-        </Link>
+          {live ? 'زيارة' : 'معاينة'}
+        </a>
         {isHostable && canPublish && !live && (
           <button onClick={onPublish} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
             Publish

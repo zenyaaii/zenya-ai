@@ -310,8 +310,10 @@ function ThemeGridCard({ theme, tint, isAdmin }: { theme: ThemeCard; tint: Auror
         </div>
 
         <div className="mt-auto flex items-center gap-2 pt-5">
-          <Link
+          <a
             href={theme.demoHref}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold transition hover:scale-[1.02]"
             style={{
               background: tint.accent,
@@ -321,7 +323,7 @@ function ThemeGridCard({ theme, tint, isAdmin }: { theme: ThemeCard; tint: Auror
           >
             شاهد العرض
             <ArrowUpRight className="h-3 w-3 rtl-flip transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" strokeWidth={2.5} />
-          </Link>
+          </a>
           {comingSoon ? (
             <span
               className="cursor-not-allowed rounded-full border border-token bg-white/50 px-4 py-2.5 text-[13px] font-semibold text-muted"

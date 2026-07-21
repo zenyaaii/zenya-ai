@@ -170,7 +170,12 @@ export async function middleware(request: NextRequest) {
     }
     const url = request.nextUrl.clone()
     url.pathname = `/s/${zenyaSlug}${pathname === '/' ? '' : pathname}`
-    return NextResponse.rewrite(url)
+    // Mark this as a customer site so the root layout suppresses Zenya's own
+    // Organization/SoftwareApplication JSON-LD (which would otherwise tell
+    // Google the customer's page is "about Zenya").
+    const h = new Headers(request.headers)
+    h.set('x-zenya-site', '1')
+    return NextResponse.rewrite(url, { request: { headers: h } })
   }
 
   // ---- dashboard.zenyaai.co → dashboard portal (like Shopify admin) ---------
@@ -290,8 +295,17 @@ export async function middleware(request: NextRequest) {
     const found = await lookupCustomDomain(host)
     if (found) {
       const url = request.nextUrl.clone()
-      url.pathname = `/s/${found.slug}`
-      return NextResponse.rewrite(url)
+      // SEO files keep their path (so mydomain.com/sitemap.xml and /robots.txt
+      // resolve to the per-site handlers); everything else is a single-page
+      // brochure and serves the homepage.
+      const isSeoFile =
+        pathname === '/sitemap.xml' ||
+        pathname === '/robots.txt' ||
+        /^\/google[a-z0-9]+\.html$/i.test(pathname)
+      url.pathname = isSeoFile ? `/s/${found.slug}${pathname}` : `/s/${found.slug}`
+      const h = new Headers(request.headers)
+      h.set('x-zenya-site', '1')
+      return NextResponse.rewrite(url, { request: { headers: h } })
     }
     // Unknown custom host (DNS pointed at us but no `domains` row yet) —
     // fall through to the normal app so they at least see Zenya rather
@@ -309,6 +323,15 @@ export async function middleware(request: NextRequest) {
     hasAuthCookie(request)
   ) {
     return NextResponse.redirect('https://accounts.zenyaai.co')
+  }
+
+  // ---- DIRECT CUSTOMER-SITE ACCESS (zenyaai.co/s/slug) -------------------
+  // /s/* is exclusively the published-customer-site namespace. Flag it so the
+  // root layout drops Zenya's own brand JSON-LD (subdomain/custom-domain hits
+  // are flagged in their own branches above).
+  if (pathname.startsWith('/s/')) {
+    forwardedHeaders.set('x-zenya-site', '1')
+    return NextResponse.next({ request: { headers: forwardedHeaders } })
   }
 
   // ---- OWN-HOST PATH (existing behaviour) --------------------------------

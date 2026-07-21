@@ -42,7 +42,7 @@ const PRICING_FAQ_SCHEMA = {
       acceptedAnswer: {
         '@type': 'Answer',
         text:
-          'A live site at zenya.app/s/your-slug for any brochure template (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison), one connected custom domain, automatic SSL, fast CDN delivery, and removal of the Made with Zenya footer. E-commerce templates (Storefront, Collective) are not Zenya-hosted — they go to Shopify.',
+          'A live site at your-slug.zenyaai.co for any brochure template (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison), one connected custom domain, automatic SSL, fast CDN delivery, and removal of the Made with Zenya footer. E-commerce templates (Storefront, Collective) are not Zenya-hosted — they go to Shopify.',
       },
     },
     {

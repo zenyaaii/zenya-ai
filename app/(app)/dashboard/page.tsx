@@ -9,6 +9,7 @@ import {
   BarChart3, Eye, ExternalLink, Image as ImageIcon,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
+import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
 
 type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
@@ -332,8 +333,8 @@ function RecentRow({ theme }: { theme: Theme }) {
           <div className="text-[13.5px] font-semibold text-foreground">{theme.product_name}</div>
           <div className="text-[11.5px] text-muted">
             {live ? (
-              <a href={`/s/${theme.slug}`} target="_blank" rel="noreferrer" className="hover:text-primary">
-                zenyaai.co/s/{theme.slug} <ExternalLink className="inline-block h-2.5 w-2.5 opacity-70" />
+              <a href={publicSiteUrl(theme.slug!)} target="_blank" rel="noreferrer" className="hover:text-primary">
+                {publicSiteHost(theme.slug!)} <ExternalLink className="inline-block h-2.5 w-2.5 opacity-70" />
               </a>
             ) : (
               <>مسودّة — أُنشئت {new Date(theme.created_at).toLocaleDateString()}</>
@@ -341,12 +342,15 @@ function RecentRow({ theme }: { theme: Theme }) {
           </div>
         </div>
       </div>
-      <Link
-        href={`/preview/${theme.id}`}
-        className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+      <a
+        href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
       >
         فتح
-      </Link>
+        <ExternalLink className="h-3 w-3 opacity-70" strokeWidth={2.25} />
+      </a>
     </div>
   )
 }

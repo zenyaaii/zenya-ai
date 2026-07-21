@@ -170,7 +170,7 @@ export default function BillingPage() {
               <Included on={plan !== 'free'}       label="برو · توليد غير محدود" />
               <Included on={plan !== 'free'}       label="برو · تصدير ثيم شوبيفاي جاهز" />
               <Included on={plan !== 'free'}       label="برو · ملفات المشاريع للقوالب غير الشوبيفاي" />
-              <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · مباشر على zenya.app/s/{slug}" />
+              <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · مباشر على الاسم.zenyaai.co" />
               <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · نطاق مخصّص + SSL تلقائي" />
               <Included on={plan === 'pro_hosting' || plan === 'pro' || plan === 'admin'} label="استضافة · تعديل المحتوى والتصميم دون إعادة التوليد" />
             </ul>
