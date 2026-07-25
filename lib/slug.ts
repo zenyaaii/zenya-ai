@@ -78,8 +78,10 @@ export function slugErrorMessage(reason: Exclude<SlugCheck, { ok: true }>['reaso
  * (e.g. "pierres-bakery-2").
  */
 export function suggestSlugFrom(name: string): string {
-  const base = normalizeSlug(name || 'site')
-  if (base.length >= SLUG_MIN) return base
-  // Pad short bases — e.g. "ab" -> "ab-site" — to clear the length check.
-  return normalizeSlug(`${base}-site`)
+  const base = normalizeSlug(name || '')
+  if (base.length >= SLUG_MIN && !RESERVED.has(base)) return base
+  // Arabic / non-Latin names normalise to an empty or reserved base.
+  // Append a short timestamp fragment so we never land on a reserved word.
+  const suffix = Date.now().toString(36).slice(-4)
+  return base.length >= SLUG_MIN ? `${base}-${suffix}` : `site-${suffix}`
 }

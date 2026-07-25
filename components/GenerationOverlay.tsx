@@ -259,15 +259,18 @@ export default function GenerationOverlay({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
-          className="zbuild fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 overflow-y-auto py-6 sm:gap-8"
+          className="zbuild fixed inset-0 z-[100] overflow-y-auto"
           style={{ background: 'var(--background)', color: 'var(--foreground)' }}
           role="status"
           aria-live="polite"
           aria-label={title}
         >
           <style>{ZBUILD_CSS}</style>
+          {/* min-h-full ensures justify-center works correctly even when content
+              overflows on small phones — without this the top is unreachable. */}
+          <div className="flex min-h-full flex-col items-center justify-center gap-5 px-4 py-8 sm:gap-8">
 
-          <div className="relative flex h-[340px] w-[340px] items-center justify-center sm:h-[380px] sm:w-[380px]">
+          <div className="relative flex h-[260px] w-[260px] items-center justify-center sm:h-[340px] sm:w-[340px] lg:h-[380px] lg:w-[380px]">
             <svg viewBox="0 0 380 380" width="100%" height="100%" aria-hidden>
               <defs>
                 {/* metaball goo over the whole group → text + blobs are one liquid */}
@@ -325,6 +328,7 @@ export default function GenerationOverlay({
 
           {/* Feedback-for-discount offer while they wait. */}
           <ReviewOffer />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

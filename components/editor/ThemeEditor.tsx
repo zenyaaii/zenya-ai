@@ -410,22 +410,24 @@ export default function ThemeEditor({
             className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
             <ArrowLeft className="h-3 w-3 rtl-flip" strokeWidth={2.25} />
-            العودة إلى لوحة التحكم
+            <span className="hidden sm:inline">العودة إلى لوحة التحكم</span>
           </Link>
-          <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
+          <div className="hidden lg:flex">
+            <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
+          </div>
           <span className="hidden truncate text-[13px] text-muted xl:inline">
             تحرير <strong className="font-semibold text-foreground">{themeName}</strong>
           </span>
         </div>
 
-        <div className="flex flex-shrink-0 items-center gap-2">
+        <div className="hidden flex-shrink-0 items-center gap-2 lg:flex">
           {config.pages && config.pages.length > 0 && (
             <PageSwitcher pages={config.pages} view={view} onChange={(v) => setView(v)} />
           )}
           <DeviceToggle device={device} onChange={setDevice} />
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-3">
+        <div className="hidden min-w-0 flex-1 items-center justify-end gap-3 lg:flex">
           <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} now={nowTs} />
           <span className="hidden text-[11px] text-muted/70 sm:inline">
             <kbd className="rounded border border-token bg-surface px-1 py-px text-[10px]">⌘S</kbd> to save
