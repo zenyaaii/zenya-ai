@@ -81,3 +81,7 @@ leads/
 /playwright/.cache/
 /tests/e2e/.auth/
 .env.test
+
+# Scheduled-task outputs (auto-generated; committed on demand if needed)
+weekly-*.md
+revenue-brief-*.md
