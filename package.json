@@ -33,7 +33,6 @@
     "@shopify/app-bridge-types": "^0.5.3",
     "@shopify/shopify-api": "^12.2.0",
     "@shopify/shopify-app-session-storage-prisma": "^8.0.0",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.44.2",
     "autoprefixer": "^10.4.19",
