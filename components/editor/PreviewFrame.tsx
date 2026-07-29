@@ -62,6 +62,7 @@ export default function PreviewFrame({
   sectionStylesCss,
   render,
   onReady,
+  fullBleed = false,
 }: {
   device: PreviewDevice
   sectionStylesCss?: string
@@ -69,6 +70,9 @@ export default function PreviewFrame({
   render: (doc: Document) => ReactNode
   /** Fires once the iframe document + element are ready (for the overlay). */
   onReady?: (doc: Document, iframe: HTMLIFrameElement) => void
+  /** On phones the device IS the device — drop the simulated frame/padding and
+   *  let the iframe fill its container edge-to-edge, ignoring the device width. */
+  fullBleed?: boolean
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const rootRef = useRef<Root | null>(null)
@@ -175,7 +179,7 @@ export default function PreviewFrame({
     if (s) s.textContent = sectionStylesCss || ''
   }, [doc, sectionStylesCss])
 
-  const width = DEVICE_WIDTH[device]
+  const width = fullBleed ? null : DEVICE_WIDTH[device]
   const framed = width != null
 
   return (
