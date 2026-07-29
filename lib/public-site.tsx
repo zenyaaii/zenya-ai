@@ -3,9 +3,14 @@ import { headers } from 'next/headers'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
+import SiteBeacon from '@/components/site/SiteBeacon'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import { resolveSeo, buildJsonLd } from '@/lib/seo'
 import type { SitePage } from '@/lib/site-pages'
+import {
+  browserFromUA, deviceFromUA, isBotUA, osFromUA, pathFromLegacySlug, referrerHost,
+} from '@/lib/analytics-core'
+import { clientIpFrom, visitorHash } from '@/lib/analytics-server'
 
 /**
  * Shared server helpers for the public customer site. Used by both the home
@@ -63,23 +68,60 @@ export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | 
   }
 }
 
+/**
+ * Server-side pageview record.
+ *
+ * This fires on every render, including for visitors with JavaScript off, so
+ * it stays the reliable floor. It cannot see the referrer (stripped on most
+ * social/in-app navigations) or the session — the browser beacon fills those
+ * in afterwards by enriching this exact row rather than inserting a second
+ * one; see analytics_ingest_view().
+ *
+ * `slug` arrives as either "my-site" or "my-site/menu"; the page path is
+ * derived from it so per-page analytics works without a schema change at the
+ * call sites.
+ */
 export async function recordView(themeId: string, slug: string) {
   const h = headers()
   const country = h.get('x-vercel-ip-country') || null
   const referrer = h.get('referer') || null
   const userAgent = h.get('user-agent') || null
+  const bot = isBotUA(userAgent)
 
   const a = admin()
   try {
-    await Promise.all([
-      a.from('site_views').insert({ theme_id: themeId, slug, country, referrer, user_agent: userAgent }),
-      a.rpc('increment_theme_views', { p_theme_id: themeId }).then(
-        () => {},
-        async () => {
-          await a.from('themes').update({ last_viewed_at: new Date().toISOString() }).eq('id', themeId)
-        },
-      ),
-    ])
+    const writes: PromiseLike<unknown>[] = [
+      a.from('site_views').insert({
+        theme_id: themeId,
+        slug,
+        path: pathFromLegacySlug(slug),
+        country,
+        referrer,
+        referrer_host: referrerHost(referrer),
+        user_agent: userAgent,
+        is_bot: bot,
+        device: deviceFromUA(userAgent),
+        browser: browserFromUA(userAgent),
+        os: osFromUA(userAgent),
+        visitor_hash: visitorHash({ ip: clientIpFrom(h), userAgent, themeId }),
+      }),
+    ]
+
+    // Only humans move the public view counter. Googlebot hitting the site
+    // forty times is not forty customers, and that counter is shown to the
+    // owner as "المشاهدات".
+    if (!bot) {
+      writes.push(
+        a.rpc('increment_theme_views', { p_theme_id: themeId }).then(
+          () => {},
+          async () => {
+            await a.from('themes').update({ last_viewed_at: new Date().toISOString() }).eq('id', themeId)
+          },
+        ),
+      )
+    }
+
+    await Promise.all(writes)
   } catch {
     // intentionally swallow — analytics must never break rendering
   }
@@ -192,6 +234,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
         enableRouting
       />
       <MadeWithZenya hide={theme.owner_has_hosting} />
+      <SiteBeacon slug={theme.slug} />
     </>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Users, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, type LucideIcon,
@@ -30,7 +30,7 @@ const NAV: NavGroup[] = [
       { href: '/dashboard/sites',      label: 'المواقع',   icon: Folder },
       { href: '/dashboard/gallery',    label: 'المعرض',    icon: ImageIcon },
       { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3 },
-      { href: '/dashboard/visitors',   label: 'الزوّار',   icon: Users, pill: 'قريبًا' },
+      { href: '/dashboard/analytics?tab=realtime', label: 'الزوّار', icon: Users },
       { href: '/dashboard/seo',        label: 'السيو',     icon: Search },
       { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe },
     ],
@@ -51,10 +51,23 @@ export default function Sidebar({
   onMobileClose: () => void
 }) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
+  /**
+   * Analytics and Visitors are the same route now, separated only by ?tab —
+   * so a path-only check would light both rows at once. When a nav href
+   * carries a query, the current tab has to match it too.
+   */
   function isActive(href: string) {
-    if (href === '/dashboard') return pathname === '/dashboard'
-    return pathname === href || pathname.startsWith(href + '/')
+    const [path, query] = href.split('?')
+    if (path === '/dashboard' && !query) return pathname === '/dashboard'
+
+    const pathMatches = pathname === path || pathname.startsWith(path + '/')
+    if (!pathMatches) return false
+
+    const currentTab = searchParams.get('tab')
+    const wantedTab = query ? new URLSearchParams(query).get('tab') : null
+    return wantedTab ? currentTab === wantedTab : !currentTab
   }
 
   const body = (

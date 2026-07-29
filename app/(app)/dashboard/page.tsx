@@ -37,10 +37,16 @@ type Theme = {
   content?: any
 }
 
+// Mirrors the /api/analytics payload for its default (30-day) window. The
+// full shape is much larger — this is only what the home cards read.
 type AnalyticsSummary = {
-  totals: { views_7d: number; views_30d: number; lifetime_views: number; live_domains: number }
+  totals: { views: number; visitors: number }
+  site_counts: { lifetime_views: number; live_domains: number }
   series: Array<{ date: string; views: number }>
-  per_site: Array<{ id: string; product_name: string; slug: string | null; views_30d: number; lifetime_views: number; is_published: boolean }>
+  per_site: Array<{
+    id: string; product_name: string; slug: string | null
+    views: number; lifetime_views: number; is_published: boolean
+  }>
 }
 
 const PLAN_LABEL: Record<Plan, string> = {
@@ -520,8 +526,10 @@ function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan })
 
 function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | null; loading: boolean }) {
   const series = analytics?.series ?? []
-  const views7 = analytics?.totals.views_7d ?? 0
-  const views30 = analytics?.totals.views_30d ?? 0
+  const views30 = analytics?.totals.views ?? 0
+  // The API returns one bucket per day, so the last week is the tail of the
+  // series — no second request needed.
+  const views7 = series.slice(-7).reduce((s, p) => s + p.views, 0)
   const maxV = Math.max(1, ...series.map((s) => s.views))
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
@@ -565,7 +573,7 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
 
 function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | null; loading: boolean }) {
   const top = analytics?.per_site.slice(0, 3) ?? []
-  const liveDomains = analytics?.totals.live_domains ?? 0
+  const liveDomains = analytics?.site_counts.live_domains ?? 0
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
       <div className="flex items-baseline justify-between">
@@ -585,8 +593,8 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
       ) : (
         <ul className="mt-3 space-y-1.5">
           {top.map((s, i) => {
-            const max = top[0].views_30d || top[0].lifetime_views || 1
-            const v = s.views_30d || s.lifetime_views
+            const max = top[0].views || top[0].lifetime_views || 1
+            const v = s.views || s.lifetime_views
             const pct = Math.max(4, Math.round((v / max) * 100))
             return (
               <li key={s.id} className="rounded-md px-1 py-1">

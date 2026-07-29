@@ -16,7 +16,7 @@ const TITLES: Record<string, string> = {
   '/dashboard':            'الرئيسية',
   '/dashboard/sites':      'المواقع',
   '/dashboard/analytics':  'التحليلات',
-  '/dashboard/visitors':   'الزوّار',
+  '/dashboard/admin':      'الإدارة',
   '/dashboard/seo':        'السيو',
   '/dashboard/domains':    'النطاقات',
   '/dashboard/billing':    'الفوترة',
