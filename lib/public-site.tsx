@@ -4,6 +4,8 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
 import SiteBeacon from '@/components/site/SiteBeacon'
+import { BookingProvider } from '@/components/site/BookingContext'
+import { bookingAccess } from '@/lib/booking-entitlement'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import { resolveSeo, buildJsonLd } from '@/lib/seo'
 import type { SitePage } from '@/lib/site-pages'
@@ -35,6 +37,10 @@ export type PublicTheme = {
   template_type: string
   user_id: string
   owner_has_hosting: boolean
+  /** Whether the owner may run the interactive booking form (Pro or in the
+   *  one-month free trial). When false the templates fall back to their plain
+   *  CTA so the site still works. */
+  bookings_enabled: boolean
 }
 
 export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | null> {
@@ -51,11 +57,12 @@ export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | 
 
   const { data: profile } = await a
     .from('profiles')
-    .select('has_hosting, plan')
+    .select('has_hosting, plan, bookings_trial_started_at')
     .eq('id', data.user_id)
     .maybeSingle()
 
   const owner_has_hosting = !!profile?.has_hosting || profile?.plan === 'admin'
+  const bookings_enabled = bookingAccess(profile).entitled
 
   return {
     id: data.id,
@@ -65,6 +72,7 @@ export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | 
     template_type: data.template_type,
     user_id: data.user_id,
     owner_has_hosting,
+    bookings_enabled,
   }
 }
 
@@ -223,16 +231,18 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
           dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
         />
       )}
-      <PublicSiteRenderer
-        businessType={businessType}
-        content={templateContent}
-        presetId={presetId}
-        typographyPreset={typographyPreset}
-        colorOverrides={colorOverrides}
-        productName={theme.product_name || undefined}
-        view={view}
-        enableRouting
-      />
+      <BookingProvider slug={theme.slug} enabled={theme.bookings_enabled}>
+        <PublicSiteRenderer
+          businessType={businessType}
+          content={templateContent}
+          presetId={presetId}
+          typographyPreset={typographyPreset}
+          colorOverrides={colorOverrides}
+          productName={theme.product_name || undefined}
+          view={view}
+          enableRouting
+        />
+      </BookingProvider>
       <MadeWithZenya hide={theme.owner_has_hosting} />
       <SiteBeacon slug={theme.slug} />
     </>

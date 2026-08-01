@@ -19,6 +19,8 @@ import {
   buildGoogleFontsUrl,
   getTypographyPreset,
 } from '@/utils/restaurant/typography'
+import BookingForm from '@/components/site/BookingForm'
+import { useBookingContext } from '@/components/site/BookingContext'
 
 export type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
 
@@ -867,6 +869,11 @@ function reservationHref(p: RestaurantReservationProvider) {
 
 function Reservations({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const r = content.reservations
+  const { enabled } = useBookingContext()
+  // The `form` provider is the only one that captures into Zenya, and only when
+  // the owner is entitled (Pro / free trial). Every other provider (OpenTable,
+  // Resy, phone…) is an external link that works regardless.
+  const useForm = r.provider.type === 'form' && enabled
   return (
     <section id="reservations" data-section="reservations" className="py-24 md:py-32 relative overflow-hidden">
       <div
@@ -886,18 +893,24 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
           <p style={{ color: 'var(--rb-muted)', lineHeight: 1.7, fontSize: '1.05rem' }} className="mb-10">
             {r.subheading}
           </p>
-          <motion.a
-            href={reservationHref(r.provider)}
-            target={r.provider.type === 'phone' || r.provider.type === 'form' ? undefined : '_blank'}
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-9 py-4 text-[0.78rem] uppercase"
-            style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', letterSpacing: '0.26em', fontWeight: 600 }}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.2, ease: EASE_OUT }}
-          >
-            {r.cta_label}
-          </motion.a>
+          {useForm ? (
+            <div id="reservations-form" className="mx-auto mt-2 max-w-lg text-start">
+              <BookingForm type="reservation" palette={restaurantPalette(isDark)} />
+            </div>
+          ) : (
+            <motion.a
+              href={reservationHref(r.provider)}
+              target={r.provider.type === 'phone' || r.provider.type === 'form' ? undefined : '_blank'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-9 py-4 text-[0.78rem] uppercase"
+              style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', letterSpacing: '0.26em', fontWeight: 600 }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2, ease: EASE_OUT }}
+            >
+              {r.cta_label}
+            </motion.a>
+          )}
           {r.note && (
             <p className="mt-10 italic" style={{ color: 'var(--rb-muted)', fontSize: '0.92rem' }}>
               {r.note}
@@ -907,6 +920,20 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
       </Container>
     </section>
   )
+}
+
+function restaurantPalette(isDark: boolean) {
+  return {
+    accent: 'var(--rb-accent)',
+    accentText: isDark ? '#0a0a0c' : '#ffffff',
+    text: 'var(--rb-text)',
+    muted: 'var(--rb-muted)',
+    surface: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+    border: 'var(--rb-border)',
+    headingFont: 'var(--rb-heading-font)',
+    bodyFont: 'var(--rb-body-font)',
+    radius: 4,
+  }
 }
 
 function Reviews({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {

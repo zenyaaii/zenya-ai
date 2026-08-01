@@ -11,6 +11,7 @@ import type {
 } from '@/utils/studio/types'
 import { getStudioPreset } from '@/utils/studio/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
+import BookingSection from '@/components/site/BookingSection'
 
 type Props = {
   content: StudioContent
@@ -683,6 +684,26 @@ export default function StudioPreview({
           </motion.div>
         </section>
       )}
+
+      {/* ── BOOKING (Pro / free-trial only; renders null otherwise) ──────────── */}
+      <BookingSection
+        type="contact"
+        eyebrow="تواصل"
+        heading="احجز استشارة"
+        subheading="اترك تفاصيلك وسنعاود التواصل معك لتحديد موعد."
+        background={colors.surface}
+        palette={{
+          accent: colors.accent,
+          accentText: colors.background,
+          text: colors.text,
+          muted: colors.muted,
+          surface: colors.background,
+          border: colors.border,
+          headingFont: fonts.heading,
+          bodyFont: fonts.body,
+          radius: 4,
+        }}
+      />
 
       {/* ── FOOTER ───────────────────────────────────────────────────────────── */}
       <footer className="px-8 py-16 md:px-12" style={{ background: colors.background, borderTop: `1px solid ${colors.border}` }}>

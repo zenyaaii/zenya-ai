@@ -5,6 +5,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 import type { WellnessContent, WellnessTreatment, WellnessTeamMember, WellnessTestimonial, WellnessFaqItem } from '@/utils/wellness/types'
 import { getWellnessPreset } from '@/utils/wellness/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
+import BookingForm from '@/components/site/BookingForm'
+import { useBookingContext } from '@/components/site/BookingContext'
 
 type Props = {
   content: WellnessContent
@@ -775,6 +777,7 @@ function TestimonialCard({ testimonial: t, index, isDark }: { testimonial: Welln
 // ─── Booking CTA ──────────────────────────────────────────────────────────────
 function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
+  const { enabled } = useBookingContext()
   return (
     <section data-section="booking_cta" className="relative overflow-hidden px-8 py-28">
       <div className="absolute inset-0 z-0">
@@ -792,21 +795,53 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
         <motion.p {...revealAnim(rm,0.2)} className="mx-auto mt-5 max-w-lg text-base font-light text-white/75">
           {content.booking_cta.subheading}
         </motion.p>
-        <motion.div {...revealAnim(rm,0.3)} className="mt-10 flex flex-col items-center gap-4">
-          <motion.a
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            href={content.footer.booking_url || `mailto:${content.footer.email}`}
-            className="inline-block rounded-full px-12 py-4 text-sm font-bold uppercase tracking-[0.14em] shadow-2xl"
-            style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
+        {enabled ? (
+          <motion.div
+            {...revealAnim(rm, 0.3)}
+            className="mx-auto mt-10 w-full max-w-lg rounded-2xl p-6 text-start shadow-2xl backdrop-blur-md sm:p-8"
+            style={{
+              background: isDark ? 'rgba(18,18,20,0.88)' : 'rgba(255,255,255,0.95)',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+            }}
           >
-            {content.booking_cta.cta_label}
-          </motion.a>
-          <p className="text-xs text-white/50">{content.booking_cta.note}</p>
-        </motion.div>
+            <BookingForm type="appointment" palette={wellnessPalette(isDark)} />
+            {content.booking_cta.note && (
+              <p className="mt-4 text-center text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#6b6b6b' }}>
+                {content.booking_cta.note}
+              </p>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div {...revealAnim(rm,0.3)} className="mt-10 flex flex-col items-center gap-4">
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              href={content.footer.booking_url || `mailto:${content.footer.email}`}
+              className="inline-block rounded-full px-12 py-4 text-sm font-bold uppercase tracking-[0.14em] shadow-2xl"
+              style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
+            >
+              {content.booking_cta.cta_label}
+            </motion.a>
+            <p className="text-xs text-white/50">{content.booking_cta.note}</p>
+          </motion.div>
+        )}
       </div>
     </section>
   )
+}
+
+function wellnessPalette(isDark: boolean) {
+  return {
+    accent: 'var(--wl-accent)',
+    accentText: '#1a1a1a',
+    text: isDark ? '#f5f5f5' : '#1a1a1a',
+    muted: isDark ? 'rgba(245,245,245,0.62)' : '#6b6b6b',
+    surface: isDark ? 'rgba(255,255,255,0.05)' : '#ffffff',
+    border: isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.14)',
+    headingFont: 'var(--wl-heading)',
+    bodyFont: 'var(--wl-body)',
+    radius: 12,
+  }
 }
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────

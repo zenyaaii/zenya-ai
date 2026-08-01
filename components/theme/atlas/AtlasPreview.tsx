@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import type { AtlasContent, AtlasTestimonial, AtlasFaqItem, AtlasPricingTier, AtlasIntegration } from '@/utils/atlas/types'
 import { getAtlasPreset } from '@/utils/atlas/presets'
+import BookingSection from '@/components/site/BookingSection'
 import {
   TYPOGRAPHY_PRESETS,
   buildGoogleFontsUrl,
@@ -880,6 +881,25 @@ export default function AtlasPreview({
           <AtlasCta content={content} colors={colors} font={bodyFont} />
         </>
       )}
+
+      <BookingSection
+        type="contact"
+        eyebrow="ابدأ الآن"
+        heading="اطلب عرضًا توضيحيًا"
+        subheading="اترك بياناتك وسيتواصل معك فريقنا لعرض المنتج عليك."
+        background={colors.surface}
+        palette={{
+          accent: colors.primary,
+          accentText: '#ffffff',
+          text: colors.text,
+          muted: colors.muted,
+          surface: colors.background,
+          border: colors.border,
+          headingFont,
+          bodyFont,
+          radius: 12,
+        }}
+      />
 
       <AtlasFooter content={content} colors={colors} font={bodyFont} />
     </div>

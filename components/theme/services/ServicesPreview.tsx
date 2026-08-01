@@ -5,6 +5,8 @@ import { motion } from 'framer-motion'
 import type { ServiceContent } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
+import BookingForm from '@/components/site/BookingForm'
+import { useBookingContext } from '@/components/site/BookingContext'
 
 type Props = {
   content: ServiceContent
@@ -546,6 +548,7 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
 }
 
 function OfferSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  const { enabled } = useBookingContext()
   return (
     <section id="quote" data-section="offer" className="py-24 md:py-28">
       <Container>
@@ -569,20 +572,40 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
           </div>
           <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
             <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
-            <form className="mt-6 space-y-4" onSubmit={(event) => event.preventDefault()}>
-              <input className={fieldClass(isDark)} placeholder="الاسم" />
-              <input className={fieldClass(isDark)} placeholder="الهاتف أو البريد" />
-              <input className={fieldClass(isDark)} placeholder="الخدمة المطلوبة" />
-              <textarea className={`${fieldClass(isDark)} min-h-[120px] resize-none`} placeholder="أخبرنا بما تحتاج المساعدة فيه" />
-              <button type="submit" className="w-full rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-                {content.offer.cta_label}
-              </button>
-            </form>
+            {enabled ? (
+              <div className="mt-6">
+                <BookingForm type="quote" palette={servicesPalette(isDark)} />
+              </div>
+            ) : (
+              <form className="mt-6 space-y-4" onSubmit={(event) => event.preventDefault()}>
+                <input className={fieldClass(isDark)} placeholder="الاسم" />
+                <input className={fieldClass(isDark)} placeholder="الهاتف أو البريد" />
+                <input className={fieldClass(isDark)} placeholder="الخدمة المطلوبة" />
+                <textarea className={`${fieldClass(isDark)} min-h-[120px] resize-none`} placeholder="أخبرنا بما تحتاج المساعدة فيه" />
+                <button type="submit" className="w-full rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
+                  {content.offer.cta_label}
+                </button>
+              </form>
+            )}
           </div>
         </motion.div>
       </Container>
     </section>
   )
+}
+
+function servicesPalette(isDark: boolean) {
+  return {
+    accent: 'var(--sv-primary)',
+    accentText: '#ffffff',
+    text: 'var(--sv-text)',
+    muted: 'var(--sv-muted)',
+    surface: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.9)',
+    border: 'var(--sv-border)',
+    headingFont: 'var(--sv-heading-font)',
+    bodyFont: 'var(--sv-body-font)',
+    radius: 14,
+  }
 }
 
 function TestimonialsSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {

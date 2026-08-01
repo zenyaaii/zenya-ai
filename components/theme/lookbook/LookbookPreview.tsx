@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import type { LookbookContent, LookbookReview } from '@/utils/lookbook/types'
 import { getLookbookPreset } from '@/utils/lookbook/presets'
+import BookingSection from '@/components/site/BookingSection'
 import {
   TYPOGRAPHY_PRESETS,
   buildGoogleFontsUrl,
@@ -745,6 +746,25 @@ export default function LookbookPreview({
           <LookbookPress content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
         </>
       )}
+
+      <BookingSection
+        type="contact"
+        eyebrow="تواصل"
+        heading="احجز موعدًا خاصًا"
+        subheading="اترك تفاصيلك ونسّق معك موعدًا خاصًا أو استفسارًا عن القطع."
+        background={colors.surface}
+        palette={{
+          accent: colors.accent,
+          accentText: colors.background,
+          text: colors.text,
+          muted: colors.muted,
+          surface: colors.background,
+          border: colors.border,
+          headingFont,
+          bodyFont,
+          radius: 2,
+        }}
+      />
 
       <LookbookFooter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
     </div>

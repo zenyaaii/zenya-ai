@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Users, Search, Globe, Image as ImageIcon,
-  CreditCard, Settings, X, type LucideIcon,
+  CreditCard, Settings, X, CalendarCheck, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ZenyaMark from '@/components/ZenyaMark'
@@ -31,6 +31,7 @@ const NAV: NavGroup[] = [
       { href: '/dashboard/gallery',    label: 'المعرض',    icon: ImageIcon },
       { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3 },
       { href: '/dashboard/analytics?tab=realtime', label: 'الزوّار', icon: Users },
+      { href: '/dashboard/bookings',   label: 'الحجوزات',  icon: CalendarCheck },
       { href: '/dashboard/seo',        label: 'السيو',     icon: Search },
       { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe },
     ],
