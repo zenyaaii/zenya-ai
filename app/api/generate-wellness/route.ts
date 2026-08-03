@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { wellnessInputSchema, type WellnessInput } from '@/utils/wellness/input'
 import type { WellnessContent } from '@/utils/wellness/types'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
@@ -104,7 +105,7 @@ Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
     "heading": "Heading. Use \\n if needed.",
     "subheading": "1–2 sentences",
     "pillars": [
-      { "icon": "🌿", "title": "Short title", "text": "1 sentence" }
+      { "icon": "spa", "title": "Short title", "text": "1 sentence" }
     ]
   },
   "treatments": {
@@ -181,7 +182,10 @@ Requirements:
 - team.members: include all provided team members
 - space.amenities: 4–6 items (use provided amenities if any)
 - testimonials.items: exactly 3 items
-- faq: 5–7 items`
+- faq: 5–7 items
+
+${ICON_VOCAB_PROMPT}
+Every "icon" field (philosophy.pillars) MUST be one name from the list above — never an emoji.`
 }
 
 function splitLines(value: string): string[] {
@@ -241,7 +245,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   const philosophyPillars =
     Array.isArray(ai?.philosophy?.pillars) && ai.philosophy.pillars.length >= 3
       ? ai.philosophy.pillars.slice(0, 3).map((p: any) => ({
-          icon: String(p?.icon || '✦'),
+          icon: String(p?.icon || 'spa'),
           title: String(p?.title || ''),
           text: String(p?.text || '')
         }))

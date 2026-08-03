@@ -606,7 +606,7 @@ export const marketingSections: SectionMap = {
     <ul class="ds-iclist__list">
       {%- for block in section.blocks -%}
         <li {{ block.shopify_attributes }}>
-          <div class="ds-iclist__icon">{{ block.settings.icon }}</div>
+          <div class="ds-iclist__icon">{% render 'ds-icon', name: block.settings.icon %}</div>
           <div>
             <div class="ds-iclist__h">{{ block.settings.heading }}</div>
             <div class="ds-iclist__b">{{ block.settings.body }}</div>

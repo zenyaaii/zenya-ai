@@ -1325,14 +1325,7 @@ function sectionFeatures(_c: BuildConfig): string {
       {%- for block in section.blocks -%}
         <div class="ds-features__card" {{ block.shopify_attributes }}>
           <div class="ds-features__icon">
-            {%- assign fic = block.settings.icon | downcase | strip -%}
-            {%- case fic -%}
-              {%- when 'truck', 'shipping', 'delivery', '🚚' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              {%- when 'shield', 'returns', 'guarantee', 'refund', '🛡️', '↩️' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-              {%- when 'lock', 'secure', 'checkout', 'safe', '🔒' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              {%- when 'chat', 'support', 'message', 'help', '💬' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              {%- else -%}<span class="ds-features__emoji">{{ block.settings.icon }}</span>
-            {%- endcase -%}
+            {% render 'ds-icon', name: block.settings.icon %}
           </div>
           <div class="ds-features__name">{{ block.settings.heading }}</div>
           <div class="ds-features__body">{{ block.settings.body }}</div>
@@ -2488,6 +2481,7 @@ import { productExtraSections }   from './sections/product-extras'
 import { storytellingSections }   from './sections/storytelling'
 import { marketingSections }      from './sections/marketing'
 import { sanitizeTemplates }      from './validate'
+import { dsIconSnippet, DS_ICON_CSS } from './ds-icon.generated'
 
 export function generateTheme(c: BuildConfig): ThemeFiles {
   // Sections defined inline in this file (the original 16). Each is a
@@ -2541,8 +2535,9 @@ export function generateTheme(c: BuildConfig): ThemeFiles {
     'templates/article.json':         fileArticleTemplate(c),
     'templates/search.json':          fileSearchTemplate(c),
     'templates/404.liquid':           file404Template(c),
-    'assets/base.css':                assetBaseCss(c),
+    'assets/base.css':                assetBaseCss(c) + DS_ICON_CSS,
     'assets/theme.js':                assetThemeJs(c),
+    'snippets/ds-icon.liquid':        dsIconSnippet(),
     'README.md':                      readme(c),
   }
 

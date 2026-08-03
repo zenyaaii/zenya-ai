@@ -107,7 +107,7 @@ export const conversionSections: SectionMap = {
 
   'ds-recently-bought': () => `<div class="ds-recent {% if section.settings.position == 'right' %}ds-recent--right{% endif %}" data-ds-recent-root aria-hidden="true">
   <div class="ds-recent__card" aria-live="polite">
-    <div class="ds-recent__avatar">{{ section.settings.icon }}</div>
+    <div class="ds-recent__avatar">{% render 'ds-icon', name: section.settings.icon %}</div>
     <div class="ds-recent__copy">
       <div class="ds-recent__line" data-ds-recent>
         <strong>{{ section.blocks[0].settings.name }}</strong> {{ section.blocks[0].settings.action }} <em>{{ section.blocks[0].settings.product }}</em>
@@ -316,16 +316,7 @@ export const conversionSections: SectionMap = {
       {%- for block in section.blocks -%}
         <div class="ds-trust__item" {{ block.shopify_attributes }}>
           <div class="ds-trust__icon">
-            {%- assign ic = block.settings.icon | downcase | strip -%}
-            {%- case ic -%}
-              {%- when 'truck', 'shipping', 'delivery', '🚚' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              {%- when 'shield', 'returns', 'guarantee', 'refund', '🛡️', '🛡' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-              {%- when 'lock', 'secure', 'checkout', 'safe', '🔒' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              {%- when 'chat', 'support', 'message', 'help', '💬' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              {%- when 'star', 'rated', 'quality' -%}<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              {%- when 'heart', 'love' -%}<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              {%- else -%}<span class="ds-trust__emoji">{{ block.settings.icon }}</span>
-            {%- endcase -%}
+            {% render 'ds-icon', name: block.settings.icon %}
           </div>
           <div class="ds-trust__h">{{ block.settings.heading }}</div>
           <div class="ds-trust__b">{{ block.settings.body }}</div>
@@ -434,7 +425,7 @@ export const conversionSections: SectionMap = {
   <div class="ds-container ds-shipping__grid">
     {%- for block in section.blocks -%}
       <div class="ds-shipping__card" {{ block.shopify_attributes }}>
-        <div class="ds-shipping__icon">{{ block.settings.icon }}</div>
+        <div class="ds-shipping__icon">{% render 'ds-icon', name: block.settings.icon %}</div>
         <div>
           <div class="ds-shipping__h">{{ block.settings.heading }}</div>
           <div class="ds-shipping__b">{{ block.settings.body }}</div>

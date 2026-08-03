@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
@@ -487,7 +488,7 @@ export default function ServicesWizardPage() {
             style={{ background: 'rgba(14,165,233,0.06)', borderColor: 'rgba(14,165,233,0.25)' }}
           >
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-[18px]" style={{ background: 'rgba(14,165,233,0.12)' }}>
-              ✨
+              <Icon name="sparkles" size={18} animation="none" hover={false} />
             </div>
             <div className="text-[13px] leading-[1.55] text-foreground">
               <strong>كل ما ترفعه هنا يُحفَظ في معرضك أيضًا،</strong>{' '}

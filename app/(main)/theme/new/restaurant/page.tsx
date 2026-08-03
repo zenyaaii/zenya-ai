@@ -12,21 +12,22 @@ import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useNotify } from '@/components/ui/Notify'
+import { Icon } from '@/components/icons'
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string; icon: string }> = [
-  { id: 'fine_dining',     label: 'مطعم راقٍ',           icon: '🍽️' },
-  { id: 'bistro',          label: 'بيسترو',              icon: '🥖' },
-  { id: 'cafe',            label: 'مقهى',                icon: '☕' },
-  { id: 'coffee_takeaway', label: 'قهوة · سفري',         icon: '🥤' },
-  { id: 'bakery',          label: 'مخبز',                icon: '🥐' },
-  { id: 'pizzeria',        label: 'بيتزا',               icon: '🍕' },
-  { id: 'bar',             label: 'لاونج · عصائر',        icon: '🧃' },
-  { id: 'brunch',          label: 'فطور متأخّر · طوال اليوم', icon: '🥞' },
-  { id: 'cafeteria',       label: 'كافيتيريا',           icon: '🍱' },
-  { id: 'food_truck',      label: 'عربة طعام',           icon: '🚚' },
-  { id: 'dessert',         label: 'حلويات وباتيسري',      icon: '🍰' },
-  { id: 'other',           label: 'أخرى',                icon: '🍴' },
+  { id: 'fine_dining',     label: 'مطعم راقٍ',           icon: 'dining' },
+  { id: 'bistro',          label: 'بيسترو',              icon: 'bread' },
+  { id: 'cafe',            label: 'مقهى',                icon: 'coffee' },
+  { id: 'coffee_takeaway', label: 'قهوة · سفري',         icon: 'soda' },
+  { id: 'bakery',          label: 'مخبز',                icon: 'croissant' },
+  { id: 'pizzeria',        label: 'بيتزا',               icon: 'pizza' },
+  { id: 'bar',             label: 'لاونج · عصائر',        icon: 'juice' },
+  { id: 'brunch',          label: 'فطور متأخّر · طوال اليوم', icon: 'breakfast' },
+  { id: 'cafeteria',       label: 'كافيتيريا',           icon: 'table-service' },
+  { id: 'food_truck',      label: 'عربة طعام',           icon: 'delivery' },
+  { id: 'dessert',         label: 'حلويات وباتيسري',      icon: 'cake' },
+  { id: 'other',           label: 'أخرى',                icon: 'utensils' },
 ]
 
 type Hour = RestaurantInput['location']['hours'][number]
@@ -730,7 +731,7 @@ export default function RestaurantWizardPage() {
                         : 'border-token bg-surface text-foreground hover:border-foreground/40'
                     }`}
                   >
-                    <span className="text-[14px] leading-none">{t.icon}</span>
+                    <Icon name={t.icon} size={16} animation="pop" hover={false} />
                     {t.label}
                   </button>
                 )
@@ -901,7 +902,7 @@ export default function RestaurantWizardPage() {
                                 className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
                                 aria-label="إزالة الصنف"
                               >
-                                ✕
+                                <Icon name="close" size={14} animation="none" hover={false} />
                               </button>
                             )}
                           </div>
@@ -1051,7 +1052,7 @@ export default function RestaurantWizardPage() {
               className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-[18px]"
               style={{ background: 'rgba(94,106,210,0.12)' }}
             >
-              ✨
+              <Icon name="sparkles" size={18} animation="none" hover={false} />
             </div>
             <div className="text-[13px] leading-[1.55] text-foreground">
               <strong>لا صور؟ لا تقلق.</strong>{' '}

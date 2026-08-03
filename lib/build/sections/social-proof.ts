@@ -172,7 +172,7 @@ export const socialProofSections: SectionMap = {
     <div class="ds-awards__row">
       {%- for block in section.blocks -%}
         <div class="ds-awards__card" {{ block.shopify_attributes }}>
-          <div class="ds-awards__icon">{{ block.settings.icon }}</div>
+          <div class="ds-awards__icon">{% render 'ds-icon', name: block.settings.icon %}</div>
           <div class="ds-awards__year">{{ block.settings.year }}</div>
           <div class="ds-awards__name">{{ block.settings.name }}</div>
         </div>

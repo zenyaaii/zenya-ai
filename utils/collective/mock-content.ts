@@ -53,22 +53,22 @@ export const COLLECTIVE_MOCK_CONTENT: CollectiveContent = {
     heading: 'التي لا تبقى\nخارج المخزون طويلًا.',
     subheading: 'يُعاد طلبها قبل أن تنفد. وهذا يخبرك بشيء.',
     products: [
-      { name: 'قبّعة كشمير مضلّعة', price: '$145', category: 'الملابس', rating: 5, badge: '🔁 مفضّل لإعادة الطلب' },
+      { name: 'قبّعة كشمير مضلّعة', price: '$145', category: 'الملابس', rating: 5, badge: 'مفضّل لإعادة الطلب' },
       { name: 'شمعة «تشريح الراحة»', price: '$58', category: 'المنزل', rating: 5 },
       { name: 'روب قطن عضوي', price: '$195', category: 'العافية', rating: 5, badge: 'الأعلى تقييمًا' },
       { name: 'سيروم فيتامين C — 20%', price: '$88', original_price: '$110', category: 'الجمال', rating: 5 },
       { name: 'حزام جلدي — كونياك', price: '$120', category: 'إكسسوارات', rating: 5 },
       { name: 'غطاء لحاف كتان — رمادي', price: '$265', category: 'المنزل', rating: 5, badge: 'أوشك على النفاد' },
       { name: 'ترمس حراري ستانلس 1 لتر', price: '$75', category: 'المطبخ', rating: 5 },
-      { name: 'جوارب ميرينو — 3 أزواج', price: '$55', category: 'الملابس', rating: 5, badge: '🔁 مفضّل لإعادة الطلب' }
+      { name: 'جوارب ميرينو — 3 أزواج', price: '$55', category: 'الملابس', rating: 5, badge: 'مفضّل لإعادة الطلب' }
     ]
   },
   perks: {
     items: [
-      { icon: '📦', title: 'شحن مجاني فوق 150$', description: 'يُسلَّم خلال 3–5 أيام عمل. والتوصيل السريع متاح.' },
-      { icon: '↩️', title: 'إرجاع مجاني خلال 14 يومًا', description: 'بلا أسئلة، وبلا عناء. اطبع الملصق وسلّم الطرد.' },
-      { icon: '✓', title: 'كل منتج مُجرَّب', description: 'نستخدم كل ما نبيعه. وإن لم يجتَز المعيار، لا يُدرَج.' },
-      { icon: '🌿', title: 'مُدقّق بيئيًا', description: 'جميع المورّدين موثّقون من حيث المصادر الأخلاقية والإنتاج العادل.' }
+      { icon: 'shipping', title: 'شحن مجاني فوق 150$', description: 'يُسلَّم خلال 3–5 أيام عمل. والتوصيل السريع متاح.' },
+      { icon: 'returns', title: 'إرجاع مجاني خلال 14 يومًا', description: 'بلا أسئلة، وبلا عناء. اطبع الملصق وسلّم الطرد.' },
+      { icon: 'check', title: 'كل منتج مُجرَّب', description: 'نستخدم كل ما نبيعه. وإن لم يجتَز المعيار، لا يُدرَج.' },
+      { icon: 'eco', title: 'مُدقّق بيئيًا', description: 'جميع المورّدين موثّقون من حيث المصادر الأخلاقية والإنتاج العادل.' }
     ]
   },
   testimonials: {

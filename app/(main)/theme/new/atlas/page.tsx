@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
@@ -485,11 +486,11 @@ export default function AtlasWizardPage() {
             >
               {loading ? (
                 <>
-                  <span className="animate-spin">⏳</span> جارٍ توليد موقعك...
+                  <Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد موقعك...
                 </>
               ) : (
                 <>
-                  ✦ ولّد موقع أطلس
+                  <Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد موقع أطلس
                 </>
               )}
             </button>

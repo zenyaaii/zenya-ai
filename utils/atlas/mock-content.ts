@@ -27,38 +27,38 @@ export const ATLAS_MOCK_CONTENT: AtlasContent = {
       'كل ميزة مصمّمة لتقليل الاحتكاك وإبقاء فريقك في تدفّقه — لا في صراع مع البرمجيات.',
     items: [
       {
-        icon: '⚡',
+        icon: 'bolt',
         title: 'تخطيط بالذكاء الاصطناعي',
         description:
           'صِف مشروعك بلغة بسيطة، وتولّد «تدفّق» المراحل والمهام والجداول تلقائيًا — وتُحدّثها مع تطوّر نطاقك.',
         badge: 'ذكاء اصطناعي'
       },
       {
-        icon: '🔗',
+        icon: 'link',
         title: 'تعاون لحظي',
         description:
           'كل مؤشّر، وكل تعليق، وكل تحديث حالة — يُزامَن فورًا عبر فريقك كله بلا تأخير ولا تعارض.'
       },
       {
-        icon: '⚙️',
+        icon: 'settings',
         title: 'أتمتة سير العمل',
         description:
           'ابنِ أتمتة قوية بلا برمجة في دقائق. شغّل إجراءات عبر الأدوات عند تحرّك المهام أو اقتراب المواعيد أو دمج التحديثات.'
       },
       {
-        icon: '📊',
+        icon: 'analytics',
         title: 'تحليلات ذكية',
         description:
           'مخططات سرعة الإنجاز، وتتبّع زمن الدورة، وتقارير حرق المهام التي تساعد فعلًا — لا لوحات تبدو جميلة في العروض فقط.'
       },
       {
-        icon: '🔒',
+        icon: 'lock',
         title: 'أمان بمستوى المؤسسات',
         description:
           'معتمد SOC 2 من النوع الثاني، ومتوافق مع GDPR، ودخول موحّد مع كل مزوّد رئيسي، وتحكّم دقيق بالصلاحيات.'
       },
       {
-        icon: '🧩',
+        icon: 'plugins',
         title: 'أكثر من 80 تكاملًا',
         description:
           'GitHub وSlack وFigma وNotion وLinear وJira و75 غيرها. تعيش «تدفّق» حيث يعمل فريقك أصلًا.'
@@ -75,21 +75,21 @@ export const ATLAS_MOCK_CONTENT: AtlasContent = {
         title: 'اربط أدواتك',
         description:
           'اربط GitHub وSlack وأدواتك الحالية في أقل من دقيقتين. تسحب «تدفّق» سياقك تلقائيًا.',
-        icon: '🔌'
+        icon: 'connect'
       },
       {
         step: '02',
         title: 'دع الذكاء الاصطناعي يخطّط',
         description:
           'صِف هدفك، ويقسّمه ذكاؤنا إلى مراحل، ويوزّع المسؤوليات، ويرصد المخاطر قبل أن تصبح عوائق.',
-        icon: '🤖'
+        icon: 'bot'
       },
       {
         step: '03',
         title: 'أنجز وكرّر بسرعة',
         description:
           'تحديثات لحظية، واجتماعات غير متزامنة، وتقارير آلية تُبقي فريقك متوائمًا — حتى عبر المناطق الزمنية.',
-        icon: '🚀'
+        icon: 'rocket'
       }
     ]
   },
@@ -156,18 +156,18 @@ export const ATLAS_MOCK_CONTENT: AtlasContent = {
     heading: 'يعمل مع الأدوات\nالتي يحبّها فريقك أصلًا.',
     subheading: 'اربط بنقرة واحدة — بلا مفاتيح API، وبلا صيانة.',
     items: [
-      { name: 'GitHub', icon: '⚙️', category: 'تطوير' },
-      { name: 'Slack', icon: '💬', category: 'تواصل' },
-      { name: 'Figma', icon: '🎨', category: 'تصميم' },
-      { name: 'Notion', icon: '📝', category: 'مستندات' },
-      { name: 'Linear', icon: '◆', category: 'مهام' },
-      { name: 'Jira', icon: '🔷', category: 'مهام' },
-      { name: 'Vercel', icon: '▲', category: 'نشر' },
-      { name: 'Stripe', icon: '💳', category: 'فوترة' },
-      { name: 'Sentry', icon: '🛡️', category: 'مراقبة' },
-      { name: 'Datadog', icon: '📈', category: 'رصد' },
-      { name: 'Loom', icon: '🎥', category: 'فيديو' },
-      { name: 'Zapier', icon: '⚡', category: 'أتمتة' }
+      { name: 'GitHub', icon: 'version', category: 'تطوير' },
+      { name: 'Slack', icon: 'chat', category: 'تواصل' },
+      { name: 'Figma', icon: 'design', category: 'تصميم' },
+      { name: 'Notion', icon: 'document', category: 'مستندات' },
+      { name: 'Linear', icon: 'checklist', category: 'مهام' },
+      { name: 'Jira', icon: 'tasks', category: 'مهام' },
+      { name: 'Vercel', icon: 'rocket', category: 'نشر' },
+      { name: 'Stripe', icon: 'card', category: 'فوترة' },
+      { name: 'Sentry', icon: 'shield', category: 'مراقبة' },
+      { name: 'Datadog', icon: 'growth', category: 'رصد' },
+      { name: 'Loom', icon: 'video', category: 'فيديو' },
+      { name: 'Zapier', icon: 'automation', category: 'أتمتة' }
     ]
   },
   testimonials: {

@@ -182,7 +182,7 @@ export const productExtraSections: SectionMap = {
     <div class="ds-ph__grid">
       {%- for block in section.blocks -%}
         <div class="ds-ph__card" {{ block.shopify_attributes }}>
-          <div class="ds-ph__icon">{{ block.settings.icon }}</div>
+          <div class="ds-ph__icon">{% render 'ds-icon', name: block.settings.icon %}</div>
           <h3>{{ block.settings.heading }}</h3>
           <p>{{ block.settings.body }}</p>
         </div>
@@ -407,7 +407,7 @@ export const productExtraSections: SectionMap = {
 
   'ds-shipping-estimator': () => `<section class="ds-est">
   <div class="ds-container ds-est__inner">
-    <div class="ds-est__icon">📦</div>
+    <div class="ds-est__icon">{% render 'ds-icon', name: 'package' %}</div>
     <div class="ds-est__copy">
       <div class="ds-est__line">Order in the next <strong>{{ section.settings.cutoff }}</strong> for delivery by</div>
       <div class="ds-est__date" data-ds-est-date>{{ section.settings.deliver_label }}</div>

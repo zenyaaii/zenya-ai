@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
@@ -541,9 +542,9 @@ export default function StudioWizardPage() {
               className="flex items-center gap-3 rounded-full bg-gradient-to-r from-stone-800 to-stone-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-500/25 transition hover:scale-105 hover:shadow-stone-500/40 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> جارٍ صياغة قصتك...</>
+                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ صياغة قصتك...</>
               ) : (
-                <>✦ ولّد صفحة علامة ستوديو</>
+                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد صفحة علامة ستوديو</>
               )}
             </button>
             {loading && (

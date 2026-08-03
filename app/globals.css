@@ -491,3 +491,70 @@ html.lenis body {
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
+
+/* ==========================================================================
+   Animated icons (components/icons) — per-icon hover choreography.
+   Motion fires when the icon itself is hovered (.zi:hover) OR when an
+   ancestor with Tailwind's `group` class is hovered (.group:hover), so an
+   icon animates when you hover its whole card/row.
+   ========================================================================== */
+.zi { display: inline-flex; line-height: 0; }
+.zi svg { overflow: visible; }
+.zi svg * { transform-box: view-box; transform-origin: 12px 12px; }
+
+@keyframes zi-swing { 0%,100%{transform:rotate(0)} 18%{transform:rotate(-13deg)} 38%{transform:rotate(10deg)} 56%{transform:rotate(-8deg)} 72%{transform:rotate(6deg)} 86%{transform:rotate(-3deg)} }
+@keyframes zi-spin { to { transform: rotate(360deg) } }
+@keyframes zi-flip { to { transform: rotate(180deg) } }
+@keyframes zi-beat { 0%,100%{transform:scale(1)} 25%{transform:scale(1.18)} 45%{transform:scale(.94)} 70%{transform:scale(1.12)} }
+@keyframes zi-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+@keyframes zi-pop { 0%,100%{transform:scale(1)} 45%{transform:scale(1.22)} }
+@keyframes zi-popspin { 0%,100%{transform:rotate(0) scale(1)} 50%{transform:rotate(72deg) scale(1.2)} }
+@keyframes zi-tilt { 0%,100%{transform:rotate(0)} 35%{transform:rotate(-7deg)} 70%{transform:rotate(5deg)} }
+@keyframes zi-sway { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-8deg)} 55%{transform:rotate(6deg)} 80%{transform:rotate(-4deg)} }
+@keyframes zi-wobble { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-6deg) scale(1.05)} 60%{transform:rotate(5deg)} }
+@keyframes zi-shake { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-11deg)} 40%{transform:rotate(9deg)} 60%{transform:rotate(-7deg)} 80%{transform:rotate(5deg)} }
+@keyframes zi-wiggle { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-2px,2px)} 55%{transform:translate(2px,-1px)} 80%{transform:translate(-1px,1px)} }
+@keyframes zi-nudge { 0%,100%{transform:translateX(0)} 30%{transform:translateX(-1.5px)} 65%{transform:translateX(2px)} }
+@keyframes zi-slide { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3.5px)} }
+@keyframes zi-fly { 0%,100%{transform:translate(0,0)} 50%{transform:translate(3px,-3px)} }
+@keyframes zi-jump { 0%,100%{transform:translateY(0)} 40%{transform:translateY(-3px)} 70%{transform:translateY(1px)} }
+@keyframes zi-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+@keyframes zi-wave { 0%,100%{transform:rotate(0)} 25%{transform:rotate(6deg)} 75%{transform:rotate(-6deg)} }
+@keyframes zi-flash { 0%,100%{transform:scale(1);opacity:1} 40%{transform:scale(1.15);opacity:.5} }
+@keyframes zi-flicker { 0%,100%{transform:scale(1) rotate(0);opacity:1} 30%{transform:scale(1.08) rotate(-4deg);opacity:.75} 60%{transform:scale(.96) rotate(3deg);opacity:1} }
+@keyframes zi-lift { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-1.5px) scale(1.22)} }
+@keyframes zi-twinkle { 0%{transform:scale(.6);opacity:.4} 60%{transform:scale(1.3);opacity:1} 100%{transform:scale(1);opacity:1} }
+@keyframes zi-draw { from{stroke-dashoffset:1} to{stroke-dashoffset:0} }
+
+.zi-draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+.zi:hover .zi-swing,   .group:hover .zi-swing   { animation: zi-swing .9s ease-in-out; }
+.zi:hover .zi-spin,    .group:hover .zi-spin    { animation: zi-spin .7s cubic-bezier(.4,0,.2,1); }
+.zi:hover .zi-flip,    .group:hover .zi-flip    { animation: zi-flip .6s cubic-bezier(.4,0,.2,1); }
+.zi:hover .zi-beat,    .group:hover .zi-beat    { animation: zi-beat .7s ease-in-out; }
+.zi:hover .zi-pulse,   .group:hover .zi-pulse   { animation: zi-pulse .8s ease-in-out; }
+.zi:hover .zi-pop,     .group:hover .zi-pop     { animation: zi-pop .5s cubic-bezier(.2,1.4,.4,1); }
+.zi:hover .zi-popspin, .group:hover .zi-popspin { animation: zi-popspin .7s ease-in-out; }
+.zi:hover .zi-tilt,    .group:hover .zi-tilt    { animation: zi-tilt .8s ease-in-out; }
+.zi:hover .zi-sway,    .group:hover .zi-sway    { animation: zi-sway 1s ease-in-out; }
+.zi:hover .zi-wobble,  .group:hover .zi-wobble  { animation: zi-wobble .7s ease-in-out; }
+.zi:hover .zi-shake,   .group:hover .zi-shake   { animation: zi-shake .8s ease-in-out; }
+.zi:hover .zi-wiggle,  .group:hover .zi-wiggle  { animation: zi-wiggle .7s ease-in-out; }
+.zi:hover .zi-nudge,   .group:hover .zi-nudge   { animation: zi-nudge .7s ease-in-out; }
+.zi:hover .zi-slide,   .group:hover .zi-slide   { animation: zi-slide .6s ease-in-out; }
+.zi:hover .zi-fly,     .group:hover .zi-fly     { animation: zi-fly .7s ease-in-out; }
+.zi:hover .zi-jump,    .group:hover .zi-jump    { animation: zi-jump .6s ease-in-out; }
+.zi:hover .zi-bob,     .group:hover .zi-bob     { animation: zi-bob .5s ease-in-out; }
+.zi:hover .zi-bob2,    .group:hover .zi-bob2    { animation: zi-bob .5s ease-in-out .08s; }
+.zi:hover .zi-wave,    .group:hover .zi-wave    { animation: zi-wave .7s ease-in-out; }
+.zi:hover .zi-flash,   .group:hover .zi-flash   { animation: zi-flash .6s ease-in-out; }
+.zi:hover .zi-flicker, .group:hover .zi-flicker { animation: zi-flicker .7s ease-in-out; }
+.zi:hover .zi-lift,    .group:hover .zi-lift    { animation: zi-lift .6s ease-in-out; }
+.zi:hover .zi-draw,    .group:hover .zi-draw    { animation: zi-draw .55s ease-in-out; }
+.zi:hover .zi-twinkle, .group:hover .zi-twinkle { animation: zi-twinkle .6s ease-in-out; }
+.zi:hover .zi-twinkle2,.group:hover .zi-twinkle2{ animation: zi-twinkle .6s ease-in-out .1s; }
+.zi:hover .zi-twinkle3,.group:hover .zi-twinkle3{ animation: zi-twinkle .6s ease-in-out .18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .zi * { animation: none !important; }
+}

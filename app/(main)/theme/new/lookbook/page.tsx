@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
@@ -436,9 +437,9 @@ export default function LookbookWizardPage() {
               className="flex items-center gap-3 rounded-full bg-stone-900 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-900/20 transition hover:scale-105 hover:bg-stone-800 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> جارٍ توليد موقعك...</>
+                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد موقعك...</>
               ) : (
-                <>✦ ولّد موقع اللوك بوك</>
+                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد موقع اللوك بوك</>
               )}
             </button>
             {loading && <p className="text-sm text-muted">يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية.</p>}

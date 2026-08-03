@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import { Icon } from '@/components/icons'
 import type { WellnessContent, WellnessTreatment, WellnessTeamMember, WellnessTestimonial, WellnessFaqItem } from '@/utils/wellness/types'
 import { getWellnessPreset } from '@/utils/wellness/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
@@ -395,7 +396,7 @@ function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boole
             className="flex items-center gap-2.5 text-xs uppercase tracking-[0.2em]"
             style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.85)' }}
           >
-            <span className="text-base opacity-80" style={{ color: 'var(--wl-accent)' }}>✦</span>
+            <span className="opacity-80" style={{ color: 'var(--wl-accent)' }}><Icon name="sparkle" size={14} animation="none" hover={false} /></span>
             {item}
           </motion.div>
         ))}
@@ -433,7 +434,7 @@ function PhilosophySection({ content, isDark }: { content: WellnessContent; isDa
               className="rounded-3xl border p-8 text-center"
               style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}
             >
-              <div className="mb-5 text-4xl">{pillar.icon}</div>
+              <div className="mb-5"><Icon name={pillar.icon} size={40} animation="float" /></div>
               <h3 className="mb-3 text-lg font-semibold" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
                 {pillar.title}
               </h3>
@@ -682,7 +683,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
             {content.space.amenities.map((a, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-2xl border p-3"
                 style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--wl-bg)' }}>
-                <span className="text-sm" style={{ color: 'var(--wl-accent)' }}>✦</span>
+                <span style={{ color: 'var(--wl-accent)' }}><Icon name="sparkle" size={13} animation="none" hover={false} /></span>
                 <span className="text-xs font-light" style={{ color: 'var(--wl-text)' }}>{a}</span>
               </div>
             ))}

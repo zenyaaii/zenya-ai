@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { collectiveInputSchema, type CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveContent } from '@/utils/collective/types'
 import { COLLECTIVE_MOCK_CONTENT } from '@/utils/collective/mock-content'
@@ -113,7 +114,7 @@ Return ONLY valid JSON, no markdown, no prose:
   },
   "perks": {
     "items": [
-      { "icon": "📦", "title": "Perk title", "description": "1-2 sentence perk description" }
+      { "icon": "shipping", "title": "Perk title", "description": "1-2 sentence perk description" }
     ]
   },
   "testimonials": {
@@ -151,7 +152,10 @@ Requirements:
 - bestsellers.products: exactly 8 products with realistic names and prices
 - perks.items: exactly 4 perks covering shipping, returns, quality, sustainability
 - testimonials.items: exactly 3 testimonials with different avatar_letters
-- Each product name should be specific and elegant, not generic`
+- Each product name should be specific and elegant, not generic
+
+${ICON_VOCAB_PROMPT}
+Every "icon" field (perks.items) MUST be one name from the list above — never an emoji.`
 }
 
 function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {

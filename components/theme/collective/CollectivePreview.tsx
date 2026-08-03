@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
+import { Icon } from '@/components/icons'
 import type { CollectiveContent, CollectiveProduct, CollectiveCollection, CollectiveTestimonial } from '@/utils/collective/types'
 import { getCollectivePreset } from '@/utils/collective/presets'
 
@@ -436,8 +437,8 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           </motion.div>
 
           {content.hero.badge && (
-            <motion.p className="mt-6 text-xs" style={{ color: colors.muted, fontFamily: fonts.body }} {...fadeUpAnim(rm,0.5)}>
-              ✓ {content.hero.badge}
+            <motion.p className="mt-6 inline-flex items-center gap-1.5 text-xs" style={{ color: colors.muted, fontFamily: fonts.body }} {...fadeUpAnim(rm,0.5)}>
+              <Icon name="check" size={14} animation="none" hover={false} /> {content.hero.badge}
             </motion.p>
           )}
         </div>
@@ -600,7 +601,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
               >
-                <span className="text-2xl">{perk.icon}</span>
+                <span><Icon name={perk.icon} size={24} animation="pop" /></span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{perk.title}</p>
                   <p className="mt-1 text-xs leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{perk.description}</p>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
+import { Icon } from '@/components/icons'
 import type { AtlasContent, AtlasTestimonial, AtlasFaqItem, AtlasPricingTier, AtlasIntegration } from '@/utils/atlas/types'
 import { getAtlasPreset } from '@/utils/atlas/presets'
 import BookingSection from '@/components/site/BookingSection'
@@ -108,16 +109,16 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
       <div className="flex h-64 sm:h-80">
         {/* Sidebar */}
         <div className="flex w-16 flex-col items-center gap-3 border-r py-4" style={{ borderColor: colors.border, background: barBg }}>
-          {['◼', '⚡', '📊', '🔗', '⚙️'].map((icon, i) => (
+          {['boxes', 'bolt', 'analytics', 'link', 'settings'].map((icon, i) => (
             <div
               key={i}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-sm transition"
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition"
               style={{
                 background: i === 0 ? colors.primary : 'transparent',
                 color: i === 0 ? '#fff' : textColor
               }}
             >
-              {icon}
+              <Icon name={icon} size={16} animation="none" hover={false} />
             </div>
           ))}
         </div>
@@ -158,9 +159,9 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
           {/* Task list */}
           <div className="space-y-1.5">
             {[
-              { title: 'Design new onboarding flow', priority: '🔴', status: 'In Progress' },
-              { title: 'Integrate Stripe webhooks', priority: '🟡', status: 'In Review' },
-              { title: 'Write API documentation', priority: '🟢', status: 'Todo' },
+              { title: 'Design new onboarding flow', priority: '#ef4444', status: 'In Progress' },
+              { title: 'Integrate Stripe webhooks', priority: '#f59e0b', status: 'In Review' },
+              { title: 'Write API documentation', priority: '#22c55e', status: 'Todo' },
             ].map((task, i) => (
               <div
                 key={i}
@@ -169,7 +170,7 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
               >
                 <div className="h-3.5 w-3.5 rounded-full border-2 flex-shrink-0" style={{ borderColor: colors.primary }} />
                 <span className="flex-1 truncate text-[10px] font-medium" style={{ color: textStrong }}>{task.title}</span>
-                <span className="text-[9px]">{task.priority}</span>
+                <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: task.priority }} />
                 <span
                   className="rounded-full px-2 py-0.5 text-[8px] font-bold"
                   style={{ background: `${colors.primary}22`, color: colors.primary }}
@@ -430,7 +431,7 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
                     className="flex h-10 w-10 items-center justify-center rounded-xl text-xl"
                     style={{ background: colors.primaryMuted }}
                   >
-                    {feature.icon}
+                    <Icon name={feature.icon} size={20} animation="pop" />
                   </div>
                   {feature.badge && (
                     <span
@@ -489,7 +490,7 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
                   boxShadow: `0 0 0 6px ${colors.background}, 0 0 20px ${colors.glowPrimary}`
                 }}
               >
-                {step.icon}
+                <Icon name={step.icon} size={22} animation="spin" />
               </div>
               <div
                 className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1 rounded-full px-2 py-0.5 text-[0.6rem] font-black"
@@ -609,7 +610,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
               className="group flex flex-col items-center gap-2 rounded-2xl border p-4 transition hover:-translate-y-1 hover:shadow-lg"
               style={{ background: colors.surface, borderColor: colors.border }}
             >
-              <span className="text-2xl">{item.icon}</span>
+              <span style={{ color: colors.primary }}><Icon name={item.icon} size={24} animation="pop" /></span>
               <span className="text-[0.65rem] font-black" style={{ color: colors.text }}>{item.name}</span>
               <span
                 className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"

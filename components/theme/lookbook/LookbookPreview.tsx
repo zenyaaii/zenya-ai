@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
+import { Icon } from '@/components/icons'
 import type { LookbookContent, LookbookReview } from '@/utils/lookbook/types'
 import { getLookbookPreset } from '@/utils/lookbook/presets'
 import BookingSection from '@/components/site/BookingSection'
@@ -157,7 +158,7 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
         </div>
 
         {/* Cart — mobile only (end side), keeps the brand centered. */}
-        <button onClick={() => go('shop')} className="text-lg md:hidden" style={{ color: colors.text }} aria-label="المتجر">🛍</button>
+        <button onClick={() => go('shop')} className="md:hidden" style={{ color: colors.text }} aria-label="المتجر"><Icon name="shopping-bag" size={20} animation="none" /></button>
       </nav>
 
       {/* Mobile dropdown — the page list, unreachable below md without this. */}
@@ -207,7 +208,7 @@ function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; c
       <span className="hidden sm:block" style={{ opacity: 0.7 }}>·</span>
       <span className="hidden sm:block">{content.drop_banner.text}</span>
       <span className="cursor-pointer underline underline-offset-2">{content.drop_banner.cta}</span>
-      <button onClick={() => setVisible(false)} className="absolute right-4 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100">✕</button>
+      <button onClick={() => setVisible(false)} aria-label="إغلاق" className="absolute right-4 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"><Icon name="close" size={14} animation="none" hover={false} /></button>
     </div>
   )
 }
@@ -472,7 +473,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
           <div className="space-y-6">
             {content.brand_story.values.map((val, i) => (
               <motion.div key={i} {...revealAnim(rm,0.1 + 0.08 * i)} className="flex items-start gap-4">
-                <span className="mt-0.5 text-lg" style={{ color: colors.accent }}>{val.icon}</span>
+                <span className="mt-0.5" style={{ color: colors.accent }}><Icon name={val.icon} size={18} animation="pop" /></span>
                 <div>
                   <p className="text-sm font-black" style={{ color: colors.text }}>{val.title}</p>
                   <p className="mt-1 text-sm leading-relaxed" style={{ color: colors.muted }}>{val.text}</p>

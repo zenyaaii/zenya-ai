@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
 import { LOOKBOOK_MOCK_CONTENT } from '@/utils/lookbook/mock-content'
@@ -101,7 +102,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "heading": "Poetic heading with \\n (3 lines)",
     "body": "3–4 sentences, brand voice, specific and grounded",
     "values": [
-      { "icon": "◎", "title": "Short title", "text": "1 sentence" }
+      { "icon": "sparkle", "title": "Short title", "text": "1 sentence" }
     ]
   },
   "testimonials": {
@@ -137,7 +138,10 @@ Requirements:
 - bestsellers.products: include all ${input.products.length} provided products
 - brand_story.values: exactly 3 values
 - testimonials.items: exactly 3 reviews, each referencing a different product
-- newsletter.heading: use \\n for 2-line break`
+- newsletter.heading: use \\n for 2-line break
+
+${ICON_VOCAB_PROMPT}
+Every "icon" field (brand_story.values) MUST be one name from the list above — never an emoji.`
 }
 
 function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
@@ -502,9 +503,9 @@ export default function CollectiveWizardPage() {
               className="flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition hover:scale-105 hover:shadow-emerald-500/40 disabled:opacity-60 disabled:hover:scale-100"
             >
               {loading ? (
-                <><span className="animate-spin">⏳</span> جارٍ توليد متجرك...</>
+                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد متجرك...</>
               ) : (
-                <>✦ ولّد متجر نُخبة</>
+                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد متجر نُخبة</>
               )}
             </button>
             {loading && (

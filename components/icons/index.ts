@@ -1,0 +1,7 @@
+export { Icon, default } from './Icon'
+export type { IconProps, IconAnimation } from './Icon'
+export { resolveIcon, resolveIconKey, ICONS, ALIASES, ICON_KEYS, DEFAULT_ICON } from './registry'
+export type { LucideIcon } from './registry'
+export { ICON_VOCAB_PROMPT, ALL_ICON_NAMES } from './vocab'
+export { ANIMATED_KEYS, AnimatedIcon } from './animated'
+export type { AnimatedIconProps } from './animated'

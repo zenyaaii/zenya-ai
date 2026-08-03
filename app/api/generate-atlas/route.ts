@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { atlasInputSchema, type AtlasInput } from '@/utils/atlas/input'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
@@ -65,7 +66,7 @@ Hard rules:
 - Feature descriptions: 25–40 words, benefits-focused, avoid generic buzzwords
 - Testimonials: 40–60 words, specific metrics or outcomes, first-person voice
 - Pricing: create 3 tiers (Starter/free, Pro/paid, Enterprise/custom) with 6–8 features each
-- Integrations: list 12 realistic integrations with appropriate emoji icons and categories
+- Integrations: list 12 realistic integrations with an appropriate icon name (from the ICON NAMES list) and category
 - FAQ: exactly 6 questions covering setup, migration, AI features, trial end, discounts, security
 - Never invent certifications or compliance claims unless based on the brief
 
@@ -91,7 +92,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "heading": "Section heading with \\n",
     "subheading": "1–2 sentence description",
     "items": [
-      { "icon": "⚡", "title": "Feature title", "description": "25–40 word benefit description", "badge": "optional" }
+      { "icon": "bolt", "title": "Feature title", "description": "25–40 word benefit description", "badge": "optional" }
     ]
   },
   "how_it_works": {
@@ -99,7 +100,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "heading": "Heading with \\n",
     "subheading": "1 sentence",
     "steps": [
-      { "step": "01", "icon": "🔌", "title": "Step title", "description": "1–2 sentences" }
+      { "step": "01", "icon": "connect", "title": "Step title", "description": "1–2 sentences" }
     ]
   },
   "pricing": {
@@ -122,7 +123,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "heading": "Heading with \\n",
     "subheading": "1 sentence",
     "items": [
-      { "name": "Slack", "icon": "💬", "category": "Comms" }
+      { "name": "Slack", "icon": "chat", "category": "Comms" }
     ]
   },
   "testimonials": {
@@ -174,10 +175,13 @@ Requirements:
 - how_it_works.steps: exactly 3 steps
 - pricing.tiers: exactly 3 tiers — Starter (free), Pro (paid), Enterprise (custom)
 - pricing tiers: Starter has 6 features, Pro has 8 features, Enterprise has 8 features
-- integrations.items: exactly 12 items with relevant emoji icons
+- integrations.items: exactly 12 items with a relevant icon name from the ICON NAMES list
 - testimonials.items: exactly 3 testimonials, each with a different avatar_letter
 - security.items: exactly 6 items
-- faq.items: exactly 6 questions`
+- faq.items: exactly 6 questions
+
+${ICON_VOCAB_PROMPT}
+Every "icon" field above (features, how_it_works steps, integrations) MUST be one name from the list — never an emoji.`
 }
 
 function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {

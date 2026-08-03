@@ -271,7 +271,7 @@ export const storytellingSections: SectionMap = {
     <div class="ds-values__grid">
       {%- for block in section.blocks -%}
         <div class="ds-values__card" {{ block.shopify_attributes }}>
-          <div class="ds-values__icon">{{ block.settings.icon }}</div>
+          <div class="ds-values__icon">{% render 'ds-icon', name: block.settings.icon %}</div>
           <h3>{{ block.settings.heading }}</h3>
           <p>{{ block.settings.body }}</p>
         </div>
