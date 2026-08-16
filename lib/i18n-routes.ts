@@ -25,6 +25,17 @@ export const BILINGUAL_ROUTES = [
   '/compare',
   '/pricing',
   '/faq',
+  '/themes',
+  '/about',
+  '/contact',
+  // Legal. `/terms` and `/refund` are deliberately NOT here: the Arabic
+  // originals still describe the old one-time purchase model and contradict
+  // the subscriptions actually being sold, so publishing an English twin
+  // would spread an inaccurate commercial term to a new audience. They join
+  // this list once the Arabic source is corrected.
+  '/privacy',
+  '/cookies',
+  '/subprocessors',
 ] as const
 
 export type BilingualRoute = (typeof BILINGUAL_ROUTES)[number]

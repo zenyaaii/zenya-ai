@@ -12,13 +12,46 @@ import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
  * list of which pages actually have a twin.
  */
 
+/** Header stays lean enough to hold one line at desktop. */
 const NAV = [
-  { href: '/en', label: 'Home' },
+  { href: '/en/themes', label: 'Templates' },
   { href: '/en/features', label: 'Features' },
-  { href: '/en/websites', label: 'Templates' },
-  { href: '/en/compare', label: 'Compare' },
   { href: '/en/pricing', label: 'Pricing' },
+  { href: '/en/compare', label: 'Compare' },
   { href: '/en/faq', label: 'FAQ' },
+]
+
+/** The footer carries the full map, grouped. */
+const FOOTER_GROUPS: { heading: string; links: { href: string; label: string }[] }[] = [
+  {
+    heading: 'Product',
+    links: [
+      { href: '/en/themes', label: 'Templates' },
+      { href: '/en/websites', label: 'Website types' },
+      { href: '/en/features', label: 'Features' },
+      { href: '/en/pricing', label: 'Pricing' },
+      { href: '/en/compare', label: 'Compare' },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { href: '/en/about', label: 'About' },
+      { href: '/en/contact', label: 'Contact' },
+      { href: '/en/faq', label: 'FAQ' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { href: '/en/privacy', label: 'Privacy' },
+      { href: '/en/cookies', label: 'Cookies' },
+      { href: '/en/subprocessors', label: 'Subprocessors' },
+      // Terms and Refund exist in Arabic only for now — see lib/i18n-routes.
+      { href: '/terms', label: 'Terms (Arabic)' },
+      { href: '/refund', label: 'Refunds (Arabic)' },
+    ],
+  },
 ]
 
 export default function EnLayout({ children }: { children: ReactNode }) {
@@ -53,24 +86,39 @@ export default function EnLayout({ children }: { children: ReactNode }) {
 
       <footer className="border-t border-token bg-[var(--background)] py-12">
         <div className="mx-auto max-w-6xl px-6">
-          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-            <div>
+          <div className="grid gap-10 md:grid-cols-12 md:gap-8">
+            <div className="md:col-span-5">
               <ZenyaMark className="h-6 text-foreground" />
               <p className="mt-3 max-w-sm text-[13.5px] leading-[1.7] text-muted">
                 Zenya is an Arabic-first AI website builder. Pick a template, write a brief, and get a
                 professional site in minutes.
               </p>
+              <div className="mt-5">
+                <LanguageSwitcher variant="chip" />
+              </div>
             </div>
-            <nav className="flex flex-wrap gap-x-6 gap-y-2">
-              {NAV.map((n) => (
-                <Link key={n.href} href={n.href} className="text-[13px] text-muted transition-colors hover:text-foreground">
-                  {n.label}
-                </Link>
-              ))}
-              <LanguageSwitcher variant="inline" className="text-[13px] text-primary" />
-            </nav>
+
+            {FOOTER_GROUPS.map((group) => (
+              <div key={group.heading} className="md:col-span-2">
+                <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">
+                  {group.heading}
+                </h3>
+                <ul className="space-y-2.5">
+                  {group.links.map((l) => (
+                    <li key={l.href}>
+                      <Link
+                        href={l.href}
+                        className="text-[13px] text-muted transition-colors hover:text-foreground"
+                      >
+                        {l.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <p className="mt-8 border-t border-token pt-6 text-[12.5px] text-muted">
+          <p className="mt-10 border-t border-token pt-6 text-[12.5px] text-muted">
             © {new Date().getFullYear()} Zenya. Built in the EU.
           </p>
         </div>

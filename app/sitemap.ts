@@ -10,9 +10,6 @@ type Freq = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 /** Arabic-only routes (no English twin). */
 const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
-  { path: '/themes',   priority: 0.9, freq: 'weekly' },
-  { path: '/about',    priority: 0.7, freq: 'monthly' },
-  { path: '/contact',  priority: 0.7, freq: 'monthly' },
   // Demos (publicly browsable showcases)
   { path: '/demo',            priority: 0.7, freq: 'weekly' },
   { path: '/demo/restaurant', priority: 0.6, freq: 'weekly' },
@@ -25,12 +22,10 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
   // Why-you-need-a-website articles — orphaned in nav (reachable only via
   // the arc-carousel), but exposed here so Google indexes them.
   ...ARTICLE_KEYS.map((k) => ({ path: `/why/${k}`, priority: 0.65, freq: 'monthly' as Freq })),
-  // Legal
-  { path: '/privacy',       priority: 0.5, freq: 'monthly' },
+  // Legal that is Arabic-only. `/privacy`, `/cookies`, and `/subprocessors`
+  // are bilingual and live in PAIRED_STATIC below.
   { path: '/terms',         priority: 0.5, freq: 'monthly' },
-  { path: '/cookies',       priority: 0.4, freq: 'monthly' },
   { path: '/refund',        priority: 0.4, freq: 'monthly' },
-  { path: '/subprocessors', priority: 0.4, freq: 'monthly' },
 ]
 
 /** Bilingual routes — Arabic at `path`, English at `/en{path}` (or `/en` for
@@ -48,6 +43,12 @@ const PAIRED_STATIC: { path: BilingualRoute; priority: number; freq: Freq }[] = 
   { path: '/compare',  priority: 0.8, freq: 'monthly' },
   { path: '/pricing',  priority: 0.9, freq: 'monthly' },
   { path: '/faq',      priority: 0.8, freq: 'monthly' },
+  { path: '/themes',   priority: 0.9, freq: 'weekly'  },
+  { path: '/about',    priority: 0.7, freq: 'monthly' },
+  { path: '/contact',  priority: 0.7, freq: 'monthly' },
+  { path: '/privacy',       priority: 0.5, freq: 'monthly' },
+  { path: '/cookies',       priority: 0.4, freq: 'monthly' },
+  { path: '/subprocessors', priority: 0.4, freq: 'monthly' },
 ]
 
 /** Slug parity for both sections is verified: comparisons.ts / comparisons-en.ts
