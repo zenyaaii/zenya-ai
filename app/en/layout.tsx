@@ -1,12 +1,15 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import ZenyaMark from '@/components/ZenyaMark'
+import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 
 /**
- * English (LTR) section chrome. The root <html> stays lang="ar" dir="rtl" for
- * the primary Arabic site; here we flip the whole /en subtree to LTR + English
- * with a wrapper so English SEO pages render correctly. hreflang annotations on
- * each page tell Google these are the English alternates of the Arabic pages.
+ * English (LTR) section chrome. The document language itself is set on <html>
+ * by the root layout, which reads the pathname from middleware; the wrapper
+ * below repeats lang/dir so this subtree stays correct even if rendered
+ * outside that context. hreflang annotations on each page tell Google these
+ * are the English alternates of the Arabic pages, and lib/i18n-routes is the
+ * list of which pages actually have a twin.
  */
 
 const NAV = [
@@ -14,7 +17,8 @@ const NAV = [
   { href: '/en/features', label: 'Features' },
   { href: '/en/websites', label: 'Templates' },
   { href: '/en/compare', label: 'Compare' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/en/pricing', label: 'Pricing' },
+  { href: '/en/faq', label: 'FAQ' },
 ]
 
 export default function EnLayout({ children }: { children: ReactNode }) {
@@ -33,9 +37,8 @@ export default function EnLayout({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-[13px] font-medium text-muted transition-colors hover:text-foreground" hrefLang="ar">
-              العربية
-            </Link>
+            {/* Routes to this page's Arabic twin, not always the home page. */}
+            <LanguageSwitcher variant="inline" />
             <Link
               href="/login?mode=signup"
               className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-[13.5px] font-semibold text-white btn-shadow-primary transition-all duration-200 hover:-translate-y-0.5"
@@ -64,12 +67,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
                   {n.label}
                 </Link>
               ))}
-              <Link href="/faq" className="text-[13px] text-muted transition-colors hover:text-foreground">
-                FAQ
-              </Link>
-              <Link href="/" hrefLang="ar" className="text-[13px] font-medium text-primary transition-colors hover:text-foreground">
-                العربية
-              </Link>
+              <LanguageSwitcher variant="inline" className="text-[13px] text-primary" />
             </nav>
           </div>
           <p className="mt-8 border-t border-token pt-6 text-[12.5px] text-muted">

@@ -178,7 +178,8 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Expose the pathname to server components so the root layout can decide
-  // whether to inject the Shopify App Bridge script tag for /shopify/*.
+  // whether to inject the Shopify App Bridge script tag for /shopify/*, and
+  // whether the document is English (/en/*) or Arabic.
   const forwardedHeaders = new Headers(request.headers)
   forwardedHeaders.set('x-pathname', pathname)
 
@@ -393,7 +394,9 @@ export async function middleware(request: NextRequest) {
     )
     return response
   }
-  return await updateSession(request)
+  // Marketing path. Pass the augmented headers so `x-pathname` survives to the
+  // root layout, which needs it to set lang/dir for the English section.
+  return await updateSession(request, forwardedHeaders)
 }
 
 export const config = {

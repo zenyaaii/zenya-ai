@@ -9,6 +9,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { ChevronDown, LayoutDashboard, Settings, LogOut, Menu, X, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ZenyaMark from '@/components/ZenyaMark'
+import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 import { dashboardUrl, accountsUrl } from '@/lib/portal-urls'
 
 type NavItem = { href: string; label: string }
@@ -148,6 +149,9 @@ export default function Navbar() {
 
           {/* ── Right side ── */}
           <div className="flex items-center gap-2">
+            {/* Inline (not chip) so the nav stays on one line at desktop; hidden
+                below sm, where it lives in the mobile menu instead. */}
+            <LanguageSwitcher variant="inline" className="hidden sm:inline-flex" />
             {loading ? (
               <div className="h-8 w-20 animate-pulse rounded-md bg-[rgba(28,28,28,0.06)]" />
             ) : !user ? (
@@ -311,6 +315,9 @@ export default function Navbar() {
                     </Link>
                   )
                 })}
+                <div className="mt-1 border-t border-[#f0ede6] px-3 pt-3">
+                  <LanguageSwitcher variant="chip" />
+                </div>
                 {!user ? (
                   <>
                     <Link

@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import CookieConsent from '@/components/CookieConsent'
 import { NotifyProvider } from '@/components/ui/Notify'
+import { isEnglishPath } from '@/lib/i18n-routes'
 
 const SITE_URL = 'https://zenyaai.co'
 
@@ -184,8 +185,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const isCustomerSite = hdrs.get('x-zenya-site') === '1' || pathname.startsWith('/s/')
   const shopifyApiKey = process.env.SHOPIFY_API_KEY || ''
 
+  // The English section is the one place the document itself is not Arabic.
+  // Only the root layout may render <html>, so lang/dir are decided here from
+  // the middleware pathname; a wrapper div cannot fix the document language,
+  // and getting it wrong makes screen readers read English with Arabic
+  // pronunciation rules and weakens the hreflang signal to search engines.
+  // Everything outside /en stays Arabic-first.
+  const isEnglish = isEnglishPath(pathname)
+
   return (
-    <html lang="ar" dir="rtl">
+    <html lang={isEnglish ? 'en' : 'ar'} dir={isEnglish ? 'ltr' : 'rtl'}>
       <head>
         {isShopifyRoute && shopifyApiKey && (
           <>

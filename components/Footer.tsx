@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { openConsent } from '@/components/CookieConsent'
 import ZenyaMark from '@/components/ZenyaMark'
 import BrandLogo from '@/components/BrandLogo'
+import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 
 function TikTokIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -218,6 +219,9 @@ export default function Footer() {
             جميع الحقوق محفوظة.
           </p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-muted">
+            {/* Deliberately a chip, not a plain link: a visitor who cannot read
+                the Arabic around it needs the way out to stand out. */}
+            <LanguageSwitcher variant="chip" />
             <button
               onClick={openConsent}
               className="transition-colors hover:text-foreground"

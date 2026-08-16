@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { AR_FAQS, EN_FAQS } from './faq-data'
+import { AR_FAQS } from './faq-data'
 
 export const metadata: Metadata = {
   title: 'الأسئلة الشائعة',
@@ -14,7 +14,14 @@ export const metadata: Metadata = {
     'Zenya FAQ',
     'AI website builder questions',
   ],
-  alternates: { canonical: '/faq' },
+  alternates: {
+    canonical: '/faq',
+    languages: {
+      ar: 'https://zenyaai.co/faq',
+      en: 'https://zenyaai.co/en/faq',
+      'x-default': 'https://zenyaai.co/faq',
+    },
+  },
   openGraph: {
     title: 'الأسئلة الشائعة — زينيا',
     description: 'إجابات واضحة عن زينيا: كيف تعمل، القوالب، الأسعار، الاستضافة، والتصدير.',
@@ -23,12 +30,15 @@ export const metadata: Metadata = {
 }
 
 // FAQPage structured data — makes the Q&A eligible for rich results in
-// Google. Combines the Arabic and English questions from the shared data
-// module so the markup always matches the visible page.
+// Google. Arabic questions only: the English set is claimed by /en/faq, and
+// two URLs emitting FAQPage schema for the same questions would compete with
+// each other for the same rich result. The visible page still renders both
+// languages for bilingual readers.
 const FAQ_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [...AR_FAQS, ...EN_FAQS].map((f) => ({
+  inLanguage: 'ar',
+  mainEntity: AR_FAQS.map((f) => ({
     '@type': 'Question',
     name: f.q,
     acceptedAnswer: { '@type': 'Answer', text: f.a },

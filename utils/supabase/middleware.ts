@@ -9,10 +9,18 @@ import { cookieDomainForHost } from '@/lib/cookie-domain'
 // refresh-token cookie is kept, i.e. how long the user stays signed in.
 const SESSION_MAX_AGE = 60 * 60 * 24 * 90 // 90 days, in seconds
 
-export async function updateSession(request: NextRequest) {
+/**
+ * `forwardedHeaders` lets the caller pass request headers it has augmented
+ * (middleware.ts adds `x-pathname`, which the root layout reads to decide the
+ * document lang/dir). Without it those additions are dropped on the marketing
+ * path, since this builds its own NextResponse. Defaults to the untouched
+ * request headers, so existing callers behave exactly as before.
+ */
+export async function updateSession(request: NextRequest, forwardedHeaders?: Headers) {
+  const reqHeaders = forwardedHeaders ?? request.headers
   let response = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: reqHeaders,
     },
   })
 
@@ -46,7 +54,7 @@ export async function updateSession(request: NextRequest) {
           })
           response = NextResponse.next({
             request: {
-              headers: request.headers,
+              headers: reqHeaders,
             },
           })
           response.cookies.set({
@@ -71,7 +79,7 @@ export async function updateSession(request: NextRequest) {
           })
           response = NextResponse.next({
             request: {
-              headers: request.headers,
+              headers: reqHeaders,
             },
           })
           response.cookies.set({

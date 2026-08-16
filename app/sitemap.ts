@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import { ARTICLE_KEYS } from '@/app/(main)/why/[type]/copy'
+import type { BilingualRoute } from '@/lib/i18n-routes'
 
 const BASE = 'https://zenyaai.co'
 
@@ -10,9 +11,7 @@ type Freq = 'daily' | 'weekly' | 'monthly' | 'yearly'
 /** Arabic-only routes (no English twin). */
 const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
   { path: '/themes',   priority: 0.9, freq: 'weekly' },
-  { path: '/pricing',  priority: 0.9, freq: 'monthly' },
   { path: '/about',    priority: 0.7, freq: 'monthly' },
-  { path: '/faq',      priority: 0.8, freq: 'monthly' },
   { path: '/contact',  priority: 0.7, freq: 'monthly' },
   // Demos (publicly browsable showcases)
   { path: '/demo',            priority: 0.7, freq: 'weekly' },
@@ -36,12 +35,25 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
 
 /** Bilingual routes — Arabic at `path`, English at `/en{path}` (or `/en` for
  *  the home). Each emits both URLs with hreflang alternates so Google serves
- *  the right language and never treats them as duplicates. */
-const PAIRED: { path: string; priority: number; freq: Freq }[] = [
+ *  the right language and never treats them as duplicates.
+ *
+ *  `path` is typed as BilingualRoute on purpose: an hreflang alternate that
+ *  404s is worse than no alternate at all, so a page can only be listed here
+ *  once it is registered in lib/i18n-routes (which means `app/en{path}` exists
+ *  and the language switcher knows about it). */
+const PAIRED_STATIC: { path: BilingualRoute; priority: number; freq: Freq }[] = [
   { path: '/',         priority: 1.0, freq: 'weekly' },
   { path: '/features', priority: 0.9, freq: 'monthly' },
   { path: '/websites', priority: 0.9, freq: 'monthly' },
   { path: '/compare',  priority: 0.8, freq: 'monthly' },
+  { path: '/pricing',  priority: 0.9, freq: 'monthly' },
+  { path: '/faq',      priority: 0.8, freq: 'monthly' },
+]
+
+/** Slug parity for both sections is verified: comparisons.ts / comparisons-en.ts
+ *  and template-pages.tsx / template-pages-en.tsx publish the same slugs. */
+const PAIRED: { path: string; priority: number; freq: Freq }[] = [
+  ...PAIRED_STATIC,
   ...COMPARISONS.map((c) => ({ path: `/compare/${c.slug}`, priority: 0.75, freq: 'monthly' as Freq })),
   ...TEMPLATE_PAGES.map((t) => ({ path: `/websites/${t.slug}`, priority: 0.75, freq: 'monthly' as Freq })),
 ]
