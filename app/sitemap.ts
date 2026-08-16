@@ -1,8 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
-import { ARTICLE_KEYS } from '@/app/(main)/why/[type]/copy'
-import type { BilingualRoute } from '@/lib/i18n-routes'
+import { BILINGUAL_PAIRS, type BilingualRoute } from '@/lib/i18n-routes'
 
 const BASE = 'https://zenyaai.co'
 
@@ -19,13 +18,7 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
   { path: '/demo/studio',     priority: 0.6, freq: 'weekly' },
   { path: '/demo/services',   priority: 0.6, freq: 'weekly' },
   { path: '/demo/wellness',   priority: 0.6, freq: 'weekly' },
-  // Why-you-need-a-website articles — orphaned in nav (reachable only via
-  // the arc-carousel), but exposed here so Google indexes them.
-  ...ARTICLE_KEYS.map((k) => ({ path: `/why/${k}`, priority: 0.65, freq: 'monthly' as Freq })),
-  // Legal that is Arabic-only. `/privacy`, `/cookies`, and `/subprocessors`
-  // are bilingual and live in PAIRED_STATIC below.
-  { path: '/terms',         priority: 0.5, freq: 'monthly' },
-  { path: '/refund',        priority: 0.4, freq: 'monthly' },
+  // All legal pages are bilingual and live in PAIRED_STATIC below.
 ]
 
 /** Bilingual routes — Arabic at `path`, English at `/en{path}` (or `/en` for
@@ -49,6 +42,8 @@ const PAIRED_STATIC: { path: BilingualRoute; priority: number; freq: Freq }[] = 
   { path: '/privacy',       priority: 0.5, freq: 'monthly' },
   { path: '/cookies',       priority: 0.4, freq: 'monthly' },
   { path: '/subprocessors', priority: 0.4, freq: 'monthly' },
+  { path: '/terms',         priority: 0.5, freq: 'monthly' },
+  { path: '/refund',        priority: 0.4, freq: 'monthly' },
 ]
 
 /** Slug parity for both sections is verified: comparisons.ts / comparisons-en.ts
@@ -79,5 +74,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ]
   })
 
-  return [...paired, ...arOnly]
+  // The /why articles are bilingual but do NOT share a slug (Arabic uses the
+  // business_type key, English uses a keyword slug), so they pair via the
+  // explicit map in lib/i18n-routes rather than the /en{path} rule above.
+  const whyArticles: MetadataRoute.Sitemap = Object.entries(BILINGUAL_PAIRS).flatMap(([ar, en]) => {
+    const arUrl = `${BASE}${ar}`
+    const enUrl = `${BASE}${en}`
+    const languages = { ar: arUrl, en: enUrl }
+    return [
+      { url: arUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.65, alternates: { languages } },
+      { url: enUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.6, alternates: { languages } },
+    ]
+  })
+
+  return [...paired, ...whyArticles, ...arOnly]
 }

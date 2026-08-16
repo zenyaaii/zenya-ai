@@ -47,9 +47,8 @@ const FOOTER_GROUPS: { heading: string; links: { href: string; label: string }[]
       { href: '/en/privacy', label: 'Privacy' },
       { href: '/en/cookies', label: 'Cookies' },
       { href: '/en/subprocessors', label: 'Subprocessors' },
-      // Terms and Refund exist in Arabic only for now — see lib/i18n-routes.
-      { href: '/terms', label: 'Terms (Arabic)' },
-      { href: '/refund', label: 'Refunds (Arabic)' },
+      { href: '/en/terms', label: 'Terms' },
+      { href: '/en/refund', label: 'Refunds' },
     ],
   },
 ]

@@ -28,14 +28,11 @@ export const BILINGUAL_ROUTES = [
   '/themes',
   '/about',
   '/contact',
-  // Legal. `/terms` and `/refund` are deliberately NOT here: the Arabic
-  // originals still describe the old one-time purchase model and contradict
-  // the subscriptions actually being sold, so publishing an English twin
-  // would spread an inaccurate commercial term to a new audience. They join
-  // this list once the Arabic source is corrected.
   '/privacy',
   '/cookies',
   '/subprocessors',
+  '/terms',
+  '/refund',
 ] as const
 
 export type BilingualRoute = (typeof BILINGUAL_ROUTES)[number]
@@ -46,6 +43,31 @@ export type BilingualRoute = (typeof BILINGUAL_ROUTES)[number]
  * `lib/template-pages.tsx` / `lib/template-pages-en.tsx` (8 slugs).
  */
 export const BILINGUAL_SECTIONS = ['/compare/', '/websites/'] as const
+
+/**
+ * Pairs whose two languages do NOT share a slug, so the prefix rule cannot
+ * derive one from the other.
+ *
+ * The /why articles are the case: Arabic uses the internal business_type key
+ * (`/why/atlas`, `/why/one_product`), while the English articles use real
+ * keyword slugs (`/en/why/app-landing-page`) because that is what English
+ * search actually looks for. Keyed by Arabic path.
+ */
+export const BILINGUAL_PAIRS: Record<string, string> = {
+  '/why/restaurant': '/en/why/restaurant',
+  '/why/one_product': '/en/why/one-product-store',
+  '/why/atlas': '/en/why/app-landing-page',
+  '/why/lookbook': '/en/why/fashion-lookbook',
+  '/why/collective': '/en/why/online-store',
+  '/why/studio': '/en/why/brand-story',
+  '/why/services': '/en/why/services',
+  '/why/wellness': '/en/why/wellness',
+}
+
+/** Reverse of BILINGUAL_PAIRS, keyed by English path. */
+const REVERSE_PAIRS: Record<string, string> = Object.fromEntries(
+  Object.entries(BILINGUAL_PAIRS).map(([ar, en]) => [en, ar])
+)
 
 /** Trailing slashes off (root excepted) so '/features/' and '/features' match. */
 function normalize(pathname: string): string {
@@ -77,6 +99,7 @@ export function toEnglishPath(pathname: string): string {
 export function hasEnglishTwin(pathname: string): boolean {
   const p = normalize(pathname)
   if ((BILINGUAL_ROUTES as readonly string[]).includes(p)) return true
+  if (BILINGUAL_PAIRS[p]) return true
   return BILINGUAL_SECTIONS.some((s) => p.startsWith(s) && p.length > s.length)
 }
 
@@ -90,6 +113,7 @@ export function hasEnglishTwin(pathname: string): boolean {
  */
 export function counterpartPath(pathname: string): string {
   const p = normalize(pathname)
-  if (isEnglishPath(p)) return toArabicPath(p)
+  if (isEnglishPath(p)) return REVERSE_PAIRS[p] ?? toArabicPath(p)
+  if (BILINGUAL_PAIRS[p]) return BILINGUAL_PAIRS[p]
   return hasEnglishTwin(p) ? toEnglishPath(p) : EN_PREFIX
 }

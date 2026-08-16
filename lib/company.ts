@@ -53,13 +53,19 @@ export const COMPANY = {
   WEBSITE_URL: 'https://zenyaai.co',
   APP_URL: 'https://zenyaai.co',
 
-  // Pricing
-  PRICE_DISPLAY: '9.99 دولار دفعة واحدة (9.99 يورو في أوروبا)',
+  // Pricing — monthly subscriptions since 2026-07-02. One-time purchases made
+  // before that date are grandfathered and keep what they paid for.
+  STARTER_PRICE_DISPLAY: '14.99 دولارًا شهريًا',
+  PRO_PRICE_DISPLAY: '24.99 دولارًا شهريًا',
+  PRICE_DISPLAY: 'اشتراك شهري — 14.99 دولارًا لخطة Starter أو 24.99 دولارًا لخطة Pro',
+  FREE_GENERATIONS: 2,
   TRIAL_DAYS: 0,
   CURRENCY: 'USD',
+  /** Date the pricing model changed from one-time to subscription. */
+  SUBSCRIPTION_SINCE: '2026-07-02',
 
   // Maintenance
-  LAST_UPDATED: '2026-07-02',
+  LAST_UPDATED: '2026-08-17',
 } as const
 
 export const formatAddress = () => {
