@@ -33,7 +33,7 @@ const RANGES: RangeKey[] = ['24h', '7d', '30d', '90d', '12mo']
 const EXPORTS: Array<{ key: string; label: string }> = [
   { key: 'daily', label: 'الزيارات اليومية' },
   { key: 'pages', label: 'الصفحات' },
-  { key: 'sources', label: 'المصادر والحملات' },
+  { key: 'sources', label: 'المصادر' },
   { key: 'countries', label: 'الدول' },
   { key: 'devices', label: 'الأجهزة والمتصفحات' },
   { key: 'conversions', label: 'التحويلات' },
@@ -123,7 +123,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
           <div className="h-6 w-32 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
           <div className="mt-2 h-3 w-72 animate-pulse rounded bg-[rgba(28,28,28,0.04)]" />
         </div>
-        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
           {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonTile key={i} />)}
         </div>
         <div className="mt-8"><SkeletonBlock height="h-72" /></div>
@@ -199,7 +199,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       />
 
       {/* ---- KPI tiles (persist across tabs) ---- */}
-      <section className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+      <section className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
         <Tile
           label="الزوّار" value={t.visitors.toLocaleString('ar')} icon={Users} accent="#5e6ad2"
           delta={compare ? dl.visitors : undefined} spark={sparks}

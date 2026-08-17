@@ -255,20 +255,6 @@ export function SourcesPanel({ d }: { d: AnalyticsPayload }) {
           </Note>
         )}
       </Section>
-
-      <Section title="الحملات" hint="روابط تحمل وسوم UTM">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <PanelWithTitle title="اسم الحملة">
-            <BarList rows={d.campaigns} emptyLabel="لا توجد حملات موسومة" />
-          </PanelWithTitle>
-          <PanelWithTitle title="مصدر الحملة">
-            <BarList rows={d.utm_sources} emptyLabel="لا توجد مصادر موسومة" />
-          </PanelWithTitle>
-        </div>
-        <Note>
-          لقياس إعلان أو منشور بعينه، أضف <code className="rounded bg-black/[0.05] px-1">?utm_source=instagram&amp;utm_campaign=summer</code> إلى نهاية الرابط الذي تشاركه.
-        </Note>
-      </Section>
     </>
   )
 }

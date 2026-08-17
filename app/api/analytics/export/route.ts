@@ -80,10 +80,9 @@ export async function GET(req: NextRequest) {
       break
     }
     case 'sources': {
-      const [ch, refs, camps] = await Promise.all([
+      const [ch, refs] = await Promise.all([
         a.rpc('analytics_breakdown', { ...base, p_dimension: 'channel', p_limit: 20 }),
         a.rpc('analytics_breakdown', { ...base, p_dimension: 'referrer_host', p_limit: 200 }),
-        a.rpc('analytics_breakdown', { ...base, p_dimension: 'utm_campaign', p_limit: 200 }),
       ])
       rows = [['النوع', 'المصدر', 'المشاهدات', 'الجلسات', 'الزوّار']]
       for (const r of ch.data || []) {
@@ -92,10 +91,6 @@ export async function GET(req: NextRequest) {
       }
       for (const r of refs.data || []) {
         rows.push(['موقع محيل', (r as any).name, num(r, 'views'), num(r, 'sessions'), num(r, 'visitors')])
-      }
-      for (const r of camps.data || []) {
-        if ((r as any).name === 'unknown') continue
-        rows.push(['حملة', (r as any).name, num(r, 'views'), num(r, 'sessions'), num(r, 'visitors')])
       }
       break
     }
@@ -163,7 +158,36 @@ export async function GET(req: NextRequest) {
   }
 
   const stamp = from.toISOString().slice(0, 10) + '_' + to.toISOString().slice(0, 10)
-  return csv(`zenya-${dataset}-${stamp}`, rows)
+  const siteName = siteParam && owned.includes(siteParam)
+    ? (themes.find((t) => t.id === siteParam)?.product_name || 'موقع') : 'كل المواقع'
+  return csv(`zenya-${dataset}-${stamp}`, [...brandHeader(dataset, siteName, from, to), ...rows])
+}
+
+const DATASET_LABEL_AR: Record<Dataset, string> = {
+  daily: 'الزيارات اليومية',
+  pages: 'الصفحات',
+  sources: 'المصادر',
+  countries: 'الدول',
+  devices: 'الأجهزة والمتصفحات',
+  conversions: 'التحويلات',
+  sites: 'المواقع',
+}
+
+/**
+ * A short branded preamble so an exported file is unmistakably a Zenya report —
+ * name, what it covers, the date range, and when it was generated — before the
+ * raw data rows. Keeps the file identity ("تصميمنا") even as plain CSV.
+ */
+function brandHeader(dataset: Dataset, siteName: string, from: Date, to: Date): string[][] {
+  const d = (x: Date) => x.toISOString().slice(0, 10)
+  return [
+    ['زينيا · zenyaai.co'],
+    [`تقرير التحليلات — ${DATASET_LABEL_AR[dataset]}`],
+    ['الموقع', siteName],
+    ['النطاق الزمني', `${d(from)} ← ${d(to)}`],
+    ['أُنشئ في', new Date().toISOString().slice(0, 16).replace('T', ' ')],
+    [''],
+  ]
 }
 
 function num(r: any, key: string): string {

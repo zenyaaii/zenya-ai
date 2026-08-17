@@ -292,16 +292,21 @@ export default function SiteCard({
             <Edit3 className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
             تعديل
           </Link>
-          <a
-            href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
-          >
-            <Eye className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
-            معاينة
-            <ExternalLink className="ms-1 inline-block h-2.5 w-2.5 opacity-60" strokeWidth={2.25} />
-          </a>
+          {/* Storefront/Shopify themes are export-only (not a publish-ready
+              hosted site), so no misleading preview button — Edit + the ZIP
+              export are the real actions. Every other template keeps معاينة. */}
+          {!isEcom && (
+            <a
+              href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+            >
+              <Eye className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
+              معاينة
+              <ExternalLink className="ms-1 inline-block h-2.5 w-2.5 opacity-60" strokeWidth={2.25} />
+            </a>
+          )}
 
           {/* Hostable primary action */}
           {isHostable && (
@@ -380,7 +385,9 @@ export default function SiteCard({
                   >
                     {/* Screenshot thumbnail — what the user expects to see when
                         they open the "more" menu. Clicking it opens the site
-                        preview in a new tab. */}
+                        preview in a new tab. Storefront/Shopify themes have no
+                        publish-ready preview, so this is hidden for them. */}
+                    {!isEcom && (
                     <a
                       href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
                       target="_blank"
@@ -418,6 +425,7 @@ export default function SiteCard({
                         <ExternalLink className="h-3 w-3 opacity-70" strokeWidth={2.25} />
                       </div>
                     </a>
+                    )}
 
                     <div className="p-1">
                       {publishedHere && (

@@ -555,14 +555,19 @@ function SiteRow({
         >
           Edit
         </Link>
-        <a
-          href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
-        >
-          {live ? 'زيارة' : 'معاينة'}
-        </a>
+        {/* Storefront/Shopify themes aren't publish-ready as a hosted site, so
+            they get no preview button — only Edit + the Shopify ZIP export.
+            Every other template keeps its live/preview link. */}
+        {!isEcom && (
+          <a
+            href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+          >
+            {live ? 'زيارة' : 'معاينة'}
+          </a>
+        )}
         {isHostable && canPublish && !live && (
           <button onClick={onPublish} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
             Publish
