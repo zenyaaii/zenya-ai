@@ -1,5 +1,5 @@
 import { cookies, headers } from 'next/headers'
-import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from './config'
+import { DEFAULT_LOCALE, ENGLISH_ENABLED, LOCALE_COOKIE, isLocale, type Locale } from './config'
 import { isAppPath, isEnglishPath } from '@/lib/i18n-routes'
 import { translator } from './index'
 
@@ -14,6 +14,9 @@ import { translator } from './index'
  * `x-pathname` is set by middleware (see middleware.ts).
  */
 export function resolveLocale(): Locale {
+  // Paused: everything is Arabic, including any stale locale cookie.
+  if (!ENGLISH_ENABLED) return DEFAULT_LOCALE
+
   const pathname = headers().get('x-pathname') || ''
 
   // The English marketing section is English outright.

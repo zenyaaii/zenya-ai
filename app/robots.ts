@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -17,6 +18,8 @@ export default function robots(): MetadataRoute.Robots {
           '/checkout',
           '/preview/',
           '/shopify/',
+          // English edition is paused and 404s; keep crawlers off it.
+          ...(ENGLISH_ENABLED ? [] : ['/en']),
         ],
       },
     ],

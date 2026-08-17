@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
 import ZenyaMark from '@/components/ZenyaMark'
 import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
@@ -54,6 +56,9 @@ const FOOTER_GROUPS: { heading: string; links: { href: string; label: string }[]
 ]
 
 export default function EnLayout({ children }: { children: ReactNode }) {
+  // English is paused. One guard here hides the whole /en subtree.
+  if (!ENGLISH_ENABLED) notFound()
+
   return (
     <div lang="en" dir="ltr" className="min-h-dvh">
       <header className="sticky top-0 z-50 border-b border-token bg-[rgba(247,244,237,0.85)] backdrop-blur">

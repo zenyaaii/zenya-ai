@@ -17,6 +17,34 @@
  * should not silently flip to English because someone's browser is American.
  */
 
+/**
+ * Master switch for the English edition.
+ *
+ * The English work is paused, not abandoned — every page, the catalog, and the
+ * switcher all stay in the repo. While this is `false`:
+ *
+ *   • /en/* returns 404 (app/en/layout.tsx)
+ *   • the language switcher renders nothing, everywhere
+ *   • the sitemap advertises Arabic only, with no hreflang alternates
+ *   • robots.txt disallows /en
+ *   • the locale cookie cannot flip the app to English
+ *
+ * Flip to `true` to bring it all back. Nothing else needs editing.
+ */
+export const ENGLISH_ENABLED = false
+
+/**
+ * hreflang alternates for a page that has an English twin.
+ *
+ * Returns undefined while English is paused, so no page advertises an alternate
+ * that currently 404s. Callers keep their English URL written inline, so the
+ * mapping is still documented and comes back the moment the flag flips.
+ */
+export function hreflangAlternates(arUrl: string, enUrl: string) {
+  if (!ENGLISH_ENABLED) return undefined
+  return { ar: arUrl, en: enUrl, 'x-default': arUrl }
+}
+
 export const LOCALES = ['ar', 'en'] as const
 export type Locale = (typeof LOCALES)[number]
 

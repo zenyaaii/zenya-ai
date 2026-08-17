@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Check, ArrowLeft, Eye } from 'lucide-react'
@@ -22,7 +23,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     keywords: t.keywords,
     alternates: {
       canonical: url,
-      languages: { ar: url, en: `${SITE}/en/websites/${t.slug}`, 'x-default': url },
+      languages: hreflangAlternates(url, `${SITE}/en/websites/${t.slug}`),
     },
     openGraph: {
       title: t.title,

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: `${SITE}/websites`,
-    languages: { ar: `${SITE}/websites`, en: `${SITE}/en/websites`, 'x-default': `${SITE}/websites` },
+    languages: hreflangAlternates(`${SITE}/websites`, `${SITE}/en/websites`),
   },
   openGraph: {
     title: 'أنواع المواقع التي تبنيها زينيا',

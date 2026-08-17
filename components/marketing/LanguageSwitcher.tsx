@@ -6,7 +6,7 @@ import { Languages } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { counterpartPath, isAppPath, isEnglishPath } from '@/lib/i18n-routes'
 import { useLocale } from '@/components/i18n/LocaleProvider'
-import { LOCALE_LABEL } from '@/lib/i18n/config'
+import { ENGLISH_ENABLED, LOCALE_LABEL } from '@/lib/i18n/config'
 
 /**
  * ar ⇄ en switcher, used on both the marketing site and the app.
@@ -33,6 +33,9 @@ export default function LanguageSwitcher({
 }) {
   const pathname = usePathname() || '/'
   const { locale, setLocale } = useLocale()
+
+  // Paused: no entry point to the English edition anywhere in the UI.
+  if (!ENGLISH_ENABLED) return null
 
   const onEnglish = isEnglishPath(pathname) || locale === 'en'
   const target = onEnglish ? 'ar' : 'en'

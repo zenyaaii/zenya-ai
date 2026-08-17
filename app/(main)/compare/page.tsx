@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { COMPARISONS } from '@/lib/comparisons'
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: `${SITE}/compare`,
-    languages: { ar: `${SITE}/compare`, en: `${SITE}/en/compare`, 'x-default': `${SITE}/compare` },
+    languages: hreflangAlternates(`${SITE}/compare`, `${SITE}/en/compare`),
   },
   openGraph: {
     title: 'زينيا مقابل المنافسين — مقارنات صريحة',

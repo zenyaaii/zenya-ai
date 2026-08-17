@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import { BILINGUAL_PAIRS, type BilingualRoute } from '@/lib/i18n-routes'
+import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
 const BASE = 'https://zenyaai.co'
 
@@ -64,8 +65,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: r.priority,
   }))
 
+  // While ENGLISH_ENABLED is false the English edition is unpublished: the
+  // Arabic URLs still ship, but without their /en twin and without hreflang
+  // alternates, so nothing points a crawler at a page that 404s. The pairing
+  // logic below is untouched and comes straight back when the flag flips.
   const paired: MetadataRoute.Sitemap = PAIRED.flatMap((r) => {
     const arUrl = `${BASE}${r.path}`
+    if (!ENGLISH_ENABLED) {
+      return [{ url: arUrl, lastModified: now, changeFrequency: r.freq, priority: r.priority }]
+    }
     const enUrl = r.path === '/' ? `${BASE}/en` : `${BASE}/en${r.path}`
     const languages = { ar: arUrl, en: enUrl }
     return [
@@ -79,6 +87,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // explicit map in lib/i18n-routes rather than the /en{path} rule above.
   const whyArticles: MetadataRoute.Sitemap = Object.entries(BILINGUAL_PAIRS).flatMap(([ar, en]) => {
     const arUrl = `${BASE}${ar}`
+    if (!ENGLISH_ENABLED) {
+      return [{ url: arUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.65 }]
+    }
     const enUrl = `${BASE}${en}`
     const languages = { ar: arUrl, en: enUrl }
     return [

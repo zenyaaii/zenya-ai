@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import {
   Sparkles,
   Languages,
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: `${SITE}/features`,
-    languages: { ar: `${SITE}/features`, en: `${SITE}/en/features`, 'x-default': `${SITE}/features` },
+    languages: hreflangAlternates(`${SITE}/features`, `${SITE}/en/features`),
   },
   openGraph: {
     title: 'ميزات زينيا — محتوى بالذكاء الاصطناعي، استضافة، نطاق، ودفع',

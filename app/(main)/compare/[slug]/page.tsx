@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
@@ -35,7 +36,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     ],
     alternates: {
       canonical: url,
-      languages: { ar: url, en: `${SITE}/en/compare/${c.slug}`, 'x-default': url },
+      languages: hreflangAlternates(url, `${SITE}/en/compare/${c.slug}`),
     },
     openGraph: {
       title: c.title,

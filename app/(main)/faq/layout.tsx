@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
 import { AR_FAQS } from './faq-data'
 
@@ -16,11 +17,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: '/faq',
-    languages: {
-      ar: 'https://zenyaai.co/faq',
-      en: 'https://zenyaai.co/en/faq',
-      'x-default': 'https://zenyaai.co/faq',
-    },
+    languages: hreflangAlternates('https://zenyaai.co/faq', 'https://zenyaai.co/en/faq'),
   },
   openGraph: {
     title: 'الأسئلة الشائعة — زينيا',

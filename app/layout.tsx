@@ -1,4 +1,5 @@
 import './globals.css'
+import { hreflangAlternates } from '@/lib/i18n/config'
 import { ReactNode } from 'react'
 import { headers } from 'next/headers'
 import type { Metadata } from 'next'
@@ -66,11 +67,7 @@ const baseMetadata: Metadata = {
   },
   alternates: {
     canonical: SITE_URL,
-    languages: {
-      ar: SITE_URL,
-      en: `${SITE_URL}/en`,
-      'x-default': SITE_URL,
-    },
+    languages: hreflangAlternates(SITE_URL, `${SITE_URL}/en`),
   },
   robots: {
     index: true,
