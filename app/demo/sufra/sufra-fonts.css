@@ -1,0 +1,13 @@
+/* Sufra template faces — Arabic-first display + body pairings.
+   Kufic (Reem Kufi), Ruqaa (Aref Ruqaa) and Naskh (Amiri) carry the character
+   per palette; IBM Plex Sans Arabic / Almarai stay quiet for body copy.
+
+   Scoped to the Sufra demo on purpose: these five families must NOT sit in
+   globals.css, or every page of the app pays to fetch fonts it never renders.
+   When Sufra graduates to a real template, load them with next/font in that
+   template's own subtree instead. */
+@import url('https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&display=swap');

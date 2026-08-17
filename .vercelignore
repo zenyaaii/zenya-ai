@@ -1,2 +1,11 @@
 tmp-*
 **/tmp-*
+
+# ── Work in progress: never ships until the owner says so ───────────────────
+# The Sufra restaurant template is still under test. These paths stay in the
+# repo and run on the local dev server (/demo/sufra), but are excluded from
+# every deploy. Nothing outside these folders imports them, so the production
+# build is unaffected. Remove these lines only when the owner approves shipping.
+app/demo/sufra
+components/theme/sufra
+utils/sufra
