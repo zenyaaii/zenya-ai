@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
+import PublishingPlan from '@/components/app/PublishingPlan'
+import WelcomeTour from '@/components/app/WelcomeTour'
 
 type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
@@ -120,6 +122,9 @@ export default function DashboardHomePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
+      {/* One-time "get to know Zenya" welcome modal (first visit only) */}
+      <WelcomeTour />
+
       {/* Greeting + plan badge */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
@@ -195,6 +200,8 @@ export default function DashboardHomePage() {
         {/* Quick actions + getting started */}
         <aside className="space-y-4">
           <QuickActions hasHosting={hasHosting} plan={plan} />
+          {/* Small launch checklist — manual ticks, sits under Quick Actions */}
+          <PublishingPlan />
           <UpgradeNudge plan={plan} trialRemaining={trialRemaining} />
         </aside>
       </div>

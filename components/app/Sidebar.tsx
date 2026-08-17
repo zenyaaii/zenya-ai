@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import {
-  Home, Folder, BarChart3, Users, Search, Globe, Image as ImageIcon,
+  Home, Folder, BarChart3, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, CalendarCheck, type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,8 @@ type NavItem = {
   icon: LucideIcon
   /** Optional sub-label rendered as a small pill (e.g. "Soon") */
   pill?: string
+  /** Slug used by the welcome spotlight tour to target this row */
+  tour?: string
 }
 
 type NavGroup = {
@@ -26,14 +28,13 @@ const NAV: NavGroup[] = [
   {
     label: 'مساحة العمل',
     items: [
-      { href: '/dashboard',            label: 'الرئيسية',  icon: Home },
-      { href: '/dashboard/sites',      label: 'المواقع',   icon: Folder },
+      { href: '/dashboard',            label: 'الرئيسية',  icon: Home,          tour: 'home' },
+      { href: '/dashboard/sites',      label: 'المواقع',   icon: Folder,        tour: 'sites' },
       { href: '/dashboard/gallery',    label: 'المعرض',    icon: ImageIcon },
-      { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3 },
-      { href: '/dashboard/analytics?tab=realtime', label: 'الزوّار', icon: Users },
-      { href: '/dashboard/bookings',   label: 'الحجوزات',  icon: CalendarCheck },
-      { href: '/dashboard/seo',        label: 'السيو',     icon: Search },
-      { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe },
+      { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3,     tour: 'analytics' },
+      { href: '/dashboard/bookings',   label: 'الحجوزات',  icon: CalendarCheck, tour: 'bookings' },
+      { href: '/dashboard/seo',        label: 'السيو',     icon: Search,        tour: 'seo' },
+      { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe,         tour: 'domains' },
     ],
   },
   {
@@ -98,6 +99,7 @@ export default function Sidebar({
                     key={item.href}
                     href={item.href}
                     onClick={onMobileClose}
+                    data-tour={item.tour}
                     className={cn(
                       'group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors duration-150',
                       active

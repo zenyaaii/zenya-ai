@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import ZoomLock from './ZoomLock'
 
 /**
  * Logged-in app surface.
@@ -46,14 +47,28 @@ export default function AppShell({ children }: { children: ReactNode }) {
     )
   }
 
+  /*
+   * Shell height/scroll is deliberately responsive:
+   *
+   * Desktop (lg+) keeps the classic app frame — the shell is exactly one screen
+   * tall and only <main> scrolls, so the sidebar stays put.
+   *
+   * Phones/tablets must NOT do that. A root that is `h-screen overflow-hidden`
+   * cannot be panned once the reader pinch-zooms in: the content they zoomed
+   * toward is unreachable, so they have to zoom back out to see the page at all.
+   * On small screens the document itself scrolls (min-h, no clipping) and
+   * pinch-zoom pans anywhere, the way any normal web page behaves.
+   */
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f7f4ed]">
+    <div className="flex min-h-[100dvh] bg-[#f7f4ed] lg:h-screen lg:overflow-hidden">
+      {/* Caps the app's base UI size on touch devices (never fights pinch). */}
+      <ZoomLock />
       <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col lg:overflow-hidden">
         <Topbar user={user} onMobileMenuOpen={() => setMobileOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 lg:overflow-y-auto">
           {children}
         </main>
       </div>

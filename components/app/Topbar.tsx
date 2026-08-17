@@ -62,9 +62,12 @@ export default function Topbar({
     router.refresh()
   }
 
+  // Sticky on phones/tablets, where the document (not <main>) scrolls — without
+  // this the bar scrolls away and the menu becomes unreachable. On lg+ the shell
+  // is fixed-height so it stays put anyway.
   return (
     <header
-      className="flex h-14 flex-shrink-0 items-center justify-between border-b border-token bg-white px-4"
+      className="sticky top-0 z-30 flex h-14 flex-shrink-0 items-center justify-between border-b border-token bg-white px-4 lg:static"
       style={{ boxShadow: '0 1px 0 #f0ede6' }}
     >
       <div className="flex items-center gap-3">
