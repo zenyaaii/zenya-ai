@@ -7,7 +7,7 @@ import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Pricing — Zenya',
+  title: 'Pricing',
   description:
     'Zenya pricing in plain terms. Start free with two AI generations, then Starter at $14.99/month for unlimited generation and export, or Pro at $24.99/month with full EU hosting, a custom domain free for a year, and no Zenya badge.',
   keywords: ['Zenya pricing', 'AI website builder pricing', 'Arabic website builder cost'],

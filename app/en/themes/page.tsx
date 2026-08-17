@@ -9,7 +9,7 @@ import { CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Templates — Zenya',
+  title: 'Templates',
   description:
     'All eight Zenya templates, one per business type: restaurant, app landing page, fashion lookbook, multi-brand catalogue, brand story, services, wellness, and a single-product Shopify storefront. Preview any of them live.',
   keywords: ['Zenya templates', 'AI website templates', 'Arabic website templates', 'restaurant website template'],

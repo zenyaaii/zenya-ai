@@ -4,7 +4,7 @@ import { COMPANY } from '@/lib/company'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Cancellation & Refund Policy — Zenya',
+  title: 'Cancellation & Refund Policy',
   description: 'How to cancel your Zenya subscription, your EU 14-day right of withdrawal, when refunds are issued on monthly renewals, and how to request one.',
   alternates: {
     canonical: `${SITE}/en/refund`,

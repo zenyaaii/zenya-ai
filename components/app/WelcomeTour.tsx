@@ -15,6 +15,8 @@
  * card with the same explanation.
  */
 
+import { useT } from '@/components/i18n/LocaleProvider'
+import type { Messages } from '@/lib/i18n/messages'
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -24,19 +26,23 @@ const LS_KEY = 'zenya_welcome_seen_v2'
 
 type Step = { slug: string; title: string; desc: string }
 
-// One sentence each — matched to the real sidebar rows they highlight.
-const TOUR: Step[] = [
-  { slug: 'home',      title: 'لوحة التحكم', desc: 'مركزك الرئيسي — كل مواقعك وأرقامك وإجراءاتك السريعة في مكان واحد.' },
-  { slug: 'sites',     title: 'المواقع',     desc: 'كل موقع أنشأته — من هنا تحرّره أو تنشره أو تصدّره.' },
-  { slug: 'analytics', title: 'التحليلات',   desc: 'تعرف كم زائرًا وصلك ومن أين جاؤوا وما الذي يتفاعلون معه — وشاهد زوّارك لحظيًا من تبويب «الزوّار».' },
-  { slug: 'seo',       title: 'السيو',       desc: 'اضبط كيف يظهر موقعك في نتائج جوجل ليعثر عليك المزيد من العملاء.' },
-  { slug: 'bookings',  title: 'الحجوزات',    desc: 'استقبل حجوزات عملائك مباشرة من موقعك وتابعها كلها هنا (ميزة Pro).' },
-  { slug: 'domains',   title: 'النطاقات',    desc: 'اربط نطاقك الخاص (مجاني لسنة مع Pro) لهوية أكثر احترافية.' },
-]
+/** One sentence each, matched to the real sidebar rows they highlight. */
+function buildTour(t: Messages): Step[] {
+  return [
+    { slug: 'home',      title: t.nav.dashboard, desc: t.tour.dashboardBody },
+    { slug: 'sites',     title: t.nav.sites,     desc: t.tour.sitesBody },
+    { slug: 'analytics', title: t.nav.analytics, desc: t.tour.analyticsBody },
+    { slug: 'seo',       title: t.nav.seo,       desc: t.tour.seoBody },
+    { slug: 'bookings',  title: t.nav.bookings,  desc: t.tour.bookingsBody },
+    { slug: 'domains',   title: t.nav.domains,   desc: t.tour.domainsBody },
+  ]
+}
 
 const TIP_W = 300
 
 export default function WelcomeTour() {
+  const t = useT()
+  const TOUR = buildTour(t)
   const [stage, setStage] = useState<'hidden' | 'ask' | 'tour'>('hidden')
   const [mounted, setMounted] = useState(false)
   const [index, setIndex] = useState(0)
@@ -130,7 +136,7 @@ export default function WelcomeTour() {
             <button
               type="button" onClick={close}
               className="absolute end-3.5 top-3.5 rounded-full p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground"
-              aria-label="إغلاق"
+              aria-label={t.tour.close}
             >
               <X className="h-4 w-4" />
             </button>
@@ -141,24 +147,24 @@ export default function WelcomeTour() {
               <Sparkles className="h-7 w-7 text-primary" strokeWidth={1.75} />
             </div>
             <h2 className="display-ar text-[30px] font-bold leading-tight tracking-tight text-foreground">
-              أهلًا بك في زينيا 👋
+              {t.tour.welcomeTitle}
             </h2>
             <p className="mx-auto mt-3 max-w-sm text-[15px] leading-[1.6] text-muted">
-              هل تريد جولة سريعة نُريك فيها أين تجد كل صفحة في لوحة التحكم؟
+              {t.tour.welcomeBody}
             </p>
             <div className="mt-7 flex flex-col gap-2.5 sm:flex-row-reverse sm:justify-center">
               <button
                 type="button" onClick={() => { setIndex(0); setStage('tour') }}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 text-[15px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
               >
-                نعم، عرّفني على زينيا
+                {t.tour.welcomeYes}
                 <ArrowLeft className="h-4 w-4" strokeWidth={2.5} />
               </button>
               <button
                 type="button" onClick={close}
                 className="rounded-full border border-token px-7 py-3 text-[15px] font-medium text-muted transition hover:bg-black/[0.03] hover:text-foreground"
               >
-                لا، شكرًا
+                {t.tour.welcomeNo}
               </button>
             </div>
           </motion.div>
@@ -227,7 +233,7 @@ export default function WelcomeTour() {
           <button
             type="button" onClick={close}
             className="rounded-full p-1 text-muted transition hover:bg-black/5 hover:text-foreground"
-            aria-label="إنهاء الجولة"
+            aria-label={t.tour.finishTour}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -241,7 +247,7 @@ export default function WelcomeTour() {
             type="button" onClick={close}
             className="text-[12px] font-medium text-muted transition hover:text-foreground"
           >
-            تخطّي
+            {t.tour.skip}
           </button>
           <div className="flex items-center gap-2">
             {index > 0 && (
@@ -250,14 +256,14 @@ export default function WelcomeTour() {
                 className="inline-flex items-center gap-1 rounded-full border border-token px-3.5 py-1.5 text-[12.5px] font-semibold text-foreground transition hover:bg-black/[0.03]"
               >
                 <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-                السابق
+                {t.tour.previous}
               </button>
             )}
             <button
               type="button" onClick={next}
               className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm shadow-primary/25 transition hover:scale-[1.03]"
             >
-              {index >= TOUR.length - 1 ? 'إنهاء' : 'التالي'}
+              {index >= TOUR.length - 1 ? t.tour.finish : t.tour.next}
               {index < TOUR.length - 1 && <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />}
             </button>
           </div>

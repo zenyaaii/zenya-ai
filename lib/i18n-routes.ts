@@ -76,6 +76,33 @@ function normalize(pathname: string): string {
   return p === '' ? '/' : p
 }
 
+/**
+ * Authenticated / product surfaces. These have no `/en` twin by design: you
+ * cannot maintain two copies of a stateful dashboard, so they translate at
+ * runtime from the locale cookie instead (see lib/i18n).
+ *
+ * The language switcher uses this to decide whether it navigates to a twin
+ * page or simply flips the locale in place.
+ */
+const APP_PREFIXES = [
+  '/dashboard',
+  '/app',
+  '/accounts',
+  '/settings',
+  '/theme',
+  '/build',
+  '/shopify',
+  '/preview',
+  '/admin',
+  '/login',
+  '/signup',
+] as const
+
+export function isAppPath(pathname: string): boolean {
+  const p = normalize(pathname)
+  return APP_PREFIXES.some((prefix) => p === prefix || p.startsWith(`${prefix}/`))
+}
+
 export function isEnglishPath(pathname: string): boolean {
   const p = normalize(pathname)
   return p === EN_PREFIX || p.startsWith(`${EN_PREFIX}/`)

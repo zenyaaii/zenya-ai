@@ -4,7 +4,7 @@ import { COMPANY } from '@/lib/company'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Subprocessors — Zenya',
+  title: 'Subprocessors',
   description: 'The third-party providers that process data on behalf of Zenya, what each receives, where it sits, and the transfer safeguard that applies.',
   alternates: {
     canonical: `${SITE}/en/subprocessors`,

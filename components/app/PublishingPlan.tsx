@@ -9,6 +9,8 @@
  * clears the ticks to start over. Progress persists in localStorage.
  */
 
+import { useT } from '@/components/i18n/LocaleProvider'
+import type { Messages } from '@/lib/i18n/messages'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
@@ -19,17 +21,21 @@ const LS_KEY = 'zenya_launch_plan_v2'
 
 type StepKey = 'create' | 'edit' | 'publish' | 'seo' | 'domain'
 
-const STEPS: { key: StepKey; label: string; href: string; icon: LucideIcon }[] = [
-  { key: 'create',  label: 'أنشئ موقعك',   href: '/theme/new',         icon: Sparkles },
-  { key: 'edit',    label: 'خصّص محتواك',  href: '/dashboard/sites',   icon: Pencil },
-  { key: 'publish', label: 'انشُر موقعك',  href: '/dashboard/sites',   icon: Rocket },
-  { key: 'seo',     label: 'هيّئ السيو',   href: '/dashboard/seo',     icon: Search },
-  { key: 'domain',  label: 'اربط نطاقك',   href: '/dashboard/domains', icon: Globe },
-]
+function buildSteps(t: Messages): { key: StepKey; label: string; href: string; icon: LucideIcon }[] {
+  return [
+    { key: 'create',  label: t.launchPlan.createSite,    href: '/theme/new',         icon: Sparkles },
+    { key: 'edit',    label: t.launchPlan.customize,     href: '/dashboard/sites',   icon: Pencil },
+    { key: 'publish', label: t.launchPlan.publish,       href: '/dashboard/sites',   icon: Rocket },
+    { key: 'seo',     label: t.launchPlan.setupSeo,      href: '/dashboard/seo',     icon: Search },
+    { key: 'domain',  label: t.launchPlan.connectDomain, href: '/dashboard/domains', icon: Globe },
+  ]
+}
 
 type Done = Partial<Record<StepKey, boolean>>
 
 export default function PublishingPlan() {
+  const t = useT()
+  const STEPS = buildSteps(t)
   const [done, setDone] = useState<Done>({})
   const [hydrated, setHydrated] = useState(false)
 
@@ -80,7 +86,7 @@ export default function PublishingPlan() {
   return (
     <div className="rounded-2xl border border-token bg-white p-5">
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">خطة الإطلاق</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{t.launchPlan.title}</div>
         <div className="flex items-center gap-2">
           <span
             className={`text-[11px] font-bold tabular-nums ${allDone ? 'text-[#15803d]' : 'text-primary'}`}
@@ -92,10 +98,10 @@ export default function PublishingPlan() {
               type="button"
               onClick={reset}
               className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-[10.5px] font-medium text-muted transition hover:bg-black/[0.04] hover:text-foreground"
-              title="إعادة التحقق"
+              title={t.launchPlan.recheck}
             >
               <RotateCcw className="h-3 w-3" strokeWidth={2.25} />
-              إعادة
+              {t.launchPlan.recheckShort}
             </button>
           )}
         </div>
@@ -119,7 +125,7 @@ export default function PublishingPlan() {
                 type="button"
                 onClick={() => toggle(s.key)}
                 aria-pressed={isDone}
-                aria-label={isDone ? `تراجع عن ${s.label}` : `تحديد ${s.label} كمكتمل`}
+                aria-label={(isDone ? t.launchPlan.undoStep : t.launchPlan.markStepDone).replace('{step}', s.label)}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
                   isDone
                     ? 'border-[#15803d] bg-[#15803d] text-white'

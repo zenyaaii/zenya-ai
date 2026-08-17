@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
 import { motion } from 'framer-motion'
 import { LogOut, ArrowRight, UserPlus } from 'lucide-react'
 import Link from 'next/link'
@@ -20,6 +21,7 @@ export default function AccountsChooserPage() {
   const [user, setUser] = useState<any>(null)
   const [checking, setChecking] = useState(true)
   const [leaving, setLeaving] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     let mounted = true
@@ -61,7 +63,7 @@ export default function AccountsChooserPage() {
     )
   }
 
-  const name = user?.user_metadata?.full_name || 'مستخدم زينيا'
+  const name = user?.user_metadata?.full_name || t.accounts.zenyaUser
   const email = user?.email || ''
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
   const initial = (name?.charAt(0) || email.charAt(0) || '؟').toUpperCase()
@@ -86,9 +88,9 @@ export default function AccountsChooserPage() {
           <ZenyaMark className="h-6 text-[#16171b]" />
         </div>
         <h1 className="mb-1.5 text-[24px] font-semibold tracking-tight text-foreground" style={{ letterSpacing: '-0.02em' }}>
-          اختر حسابك
+          {t.accounts.chooseAccount}
         </h1>
-        <p className="text-[13.5px] text-muted">تابع إلى لوحة التحكم بالحساب الذي تريده.</p>
+        <p className="text-[13.5px] text-muted">{t.accounts.continueToDashboard}</p>
       </div>
 
       {/* Continue-as card */}
@@ -121,7 +123,7 @@ export default function AccountsChooserPage() {
           className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-[13.5px] font-medium text-muted transition-colors hover:bg-[rgba(28,28,28,0.04)] hover:text-foreground"
         >
           <UserPlus className="h-4 w-4" strokeWidth={2} />
-          الدخول بحساب آخر
+          {t.accounts.signInAnother}
         </Link>
         <button
           onClick={signOut}
@@ -129,7 +131,7 @@ export default function AccountsChooserPage() {
           className="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-start text-[13.5px] font-medium text-[#dc2626] transition-colors hover:bg-[rgba(220,38,38,0.06)] disabled:opacity-50"
         >
           <LogOut className="h-4 w-4 rtl-flip" strokeWidth={2} />
-          {leaving ? 'جارٍ تسجيل الخروج…' : 'تسجيل الخروج'}
+          {leaving ? t.accounts.signingOut : t.accounts.signOut}
         </button>
       </div>
     </motion.div>

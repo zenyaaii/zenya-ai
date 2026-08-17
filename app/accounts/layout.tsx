@@ -1,9 +1,14 @@
 import { ReactNode } from 'react'
 import AccountsBackground from '@/components/accounts/AccountsBackground'
+import { getT } from '@/lib/i18n/server'
 
-export const metadata = {
-  title: 'زينيا · الحساب',
-  robots: { index: false, follow: false },
+/** Title follows the viewer's locale; the portal is noindex either way. */
+export function generateMetadata() {
+  const { t } = getT()
+  return {
+    title: t.accounts.title,
+    robots: { index: false, follow: false },
+  }
 }
 
 export default function AccountsLayout({ children }: { children: ReactNode }) {

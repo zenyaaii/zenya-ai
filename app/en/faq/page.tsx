@@ -7,7 +7,7 @@ import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'FAQ — Zenya',
+  title: 'FAQ',
   description:
     'Answers about Zenya: how the AI builds your site, which templates exist, what it costs, where sites are hosted, custom domains, Shopify export, and cancelling.',
   keywords: ['Zenya FAQ', 'AI website builder questions', 'Arabic website builder FAQ'],

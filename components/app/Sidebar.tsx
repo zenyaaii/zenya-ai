@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ZenyaMark from '@/components/ZenyaMark'
+import { useT } from '@/components/i18n/LocaleProvider'
+import type { Messages } from '@/lib/i18n/messages'
 
 type NavItem = {
   href: string
@@ -24,27 +26,30 @@ type NavGroup = {
   items: NavItem[]
 }
 
-const NAV: NavGroup[] = [
-  {
-    label: 'مساحة العمل',
-    items: [
-      { href: '/dashboard',            label: 'الرئيسية',  icon: Home,          tour: 'home' },
-      { href: '/dashboard/sites',      label: 'المواقع',   icon: Folder,        tour: 'sites' },
-      { href: '/dashboard/gallery',    label: 'المعرض',    icon: ImageIcon },
-      { href: '/dashboard/analytics',  label: 'التحليلات', icon: BarChart3,     tour: 'analytics' },
-      { href: '/dashboard/bookings',   label: 'الحجوزات',  icon: CalendarCheck, tour: 'bookings' },
-      { href: '/dashboard/seo',        label: 'السيو',     icon: Search,        tour: 'seo' },
-      { href: '/dashboard/domains',    label: 'النطاقات',  icon: Globe,         tour: 'domains' },
-    ],
-  },
-  {
-    label: 'الحساب',
-    items: [
-      { href: '/dashboard/billing',  label: 'الفوترة',    icon: CreditCard },
-      { href: '/dashboard/settings', label: 'الإعدادات',  icon: Settings },
-    ],
-  },
-]
+/** Labels come from the active locale, so the nav is built per render. */
+function buildNav(t: Messages): NavGroup[] {
+  return [
+    {
+      label: t.nav.workspace,
+      items: [
+        { href: '/dashboard',            label: t.nav.home,      icon: Home,          tour: 'home' },
+        { href: '/dashboard/sites',      label: t.nav.sites,     icon: Folder,        tour: 'sites' },
+        { href: '/dashboard/gallery',    label: t.nav.gallery,   icon: ImageIcon },
+        { href: '/dashboard/analytics',  label: t.nav.analytics, icon: BarChart3,     tour: 'analytics' },
+        { href: '/dashboard/bookings',   label: t.nav.bookings,  icon: CalendarCheck, tour: 'bookings' },
+        { href: '/dashboard/seo',        label: t.nav.seo,       icon: Search,        tour: 'seo' },
+        { href: '/dashboard/domains',    label: t.nav.domains,   icon: Globe,         tour: 'domains' },
+      ],
+    },
+    {
+      label: t.nav.account,
+      items: [
+        { href: '/dashboard/billing',  label: t.nav.billing,  icon: CreditCard },
+        { href: '/dashboard/settings', label: t.nav.settings, icon: Settings },
+      ],
+    },
+  ]
+}
 
 export default function Sidebar({
   mobileOpen, onMobileClose,
@@ -54,6 +59,8 @@ export default function Sidebar({
 }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const t = useT()
+  const NAV = buildNav(t)
 
   /**
    * Analytics and Visitors are the same route now, separated only by ?tab —
@@ -160,7 +167,7 @@ export default function Sidebar({
               type="button"
               onClick={onMobileClose}
               className="absolute end-2 top-2 z-10 rounded-md p-1.5 text-muted hover:bg-black/5"
-              aria-label="إغلاق القائمة"
+              aria-label={t.nav.closeMenu}
             >
               <X className="h-4 w-4" />
             </button>

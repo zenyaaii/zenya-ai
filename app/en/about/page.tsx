@@ -6,7 +6,7 @@ import { CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'About — Zenya',
+  title: 'About',
   description:
     'Why Zenya exists: small businesses in the Arab world were stuck choosing between a cheap site that looks it and an agency that costs thousands. Zenya is the third option, built Arabic-first and hosted in the EU.',
   keywords: ['about Zenya', 'Arabic AI website builder', 'Zenya company'],

@@ -4,7 +4,7 @@ import { COMPANY } from '@/lib/company'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy — Zenya',
+  title: 'Cookie Policy',
   description: 'How and why Zenya uses cookies and similar technologies, which categories are set, and how to change your choices.',
   alternates: {
     canonical: `${SITE}/en/cookies`,

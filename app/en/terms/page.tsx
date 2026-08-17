@@ -4,7 +4,7 @@ import { COMPANY, formatAddress } from '@/lib/company'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Zenya',
+  title: 'Terms of Service',
   description: 'The terms governing your use of Zenya: eligibility, acceptable use, pricing and billing, ownership of generated content, liability, and governing law.',
   alternates: {
     canonical: `${SITE}/en/terms`,

@@ -4,7 +4,7 @@ import { COMPANY, formatAddress } from '@/lib/company'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Zenya',
+  title: 'Privacy Policy',
   description:
     'How Zenya collects, uses, stores, and protects your personal data: legal bases under GDPR, subprocessors, retention periods, your rights, and how to exercise them.',
   alternates: {

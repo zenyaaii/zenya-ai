@@ -8,7 +8,7 @@ import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Zenya — The Arabic-First AI Website Builder',
+  title: { absolute: 'Zenya — The Arabic-First AI Website Builder' },
   description:
     'Zenya is an Arabic-first AI website builder. Pick one of 8 business templates, write a short brief, and the AI writes the copy and designs a professional, publish-ready website in minutes. EU hosting, custom domain, and Shopify export included.',
   keywords: ['Arabic website builder', 'AI website builder', 'Arabic AI website builder', 'RTL website builder', 'no-code website builder'],

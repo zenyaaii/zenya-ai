@@ -91,7 +91,7 @@ const restaurant: ArticleEn = {
     'A direct WhatsApp or phone link',
   ],
   meta: {
-    title: 'Why your restaurant needs a website in 2026 | Zenya',
+    title: 'Why your restaurant needs a website in 2026',
     description:
       'A digital menu, a booking flow, and the chef story, with real figures from TripAdvisor, Stanford, and BrightLocal on why a professional restaurant website earns its keep.',
     keywords: ['restaurant website design', 'restaurant website template', 'online restaurant menu', 'restaurant booking website', 'restaurant marketing'],
@@ -151,7 +151,7 @@ const one_product: ArticleEn = {
     'A checkout you have completed yourself end to end',
   ],
   meta: {
-    title: 'Why a one-product store converts better | Zenya',
+    title: 'Why a one-product store converts better',
     description:
       'Cart abandonment, mobile load time, and objection handling: why a focused single-product Shopify storefront outperforms a general shop, with figures from Baymard, Google, and AWS.',
     keywords: ['one product store', 'single product shopify theme', 'ecommerce conversion rate', 'cart abandonment', 'shopify storefront'],
@@ -211,7 +211,7 @@ const atlas: ArticleEn = {
     'One primary call to action, repeated',
   ],
   meta: {
-    title: 'Why your app needs a landing page | Zenya',
+    title: 'Why your app needs a landing page',
     description:
       'Five seconds to be understood, a visible product, and the trust signals B2B buyers check, with figures from Nielsen Norman Group, Forrester, and the Adobe/McKinsey design index.',
     keywords: ['app landing page', 'saas landing page', 'software marketing site', 'b2b landing page', 'app website template'],
@@ -271,7 +271,7 @@ const lookbook: ArticleEn = {
     'Fast image loading on mobile',
   ],
   meta: {
-    title: 'Why a fashion brand needs a website | Zenya',
+    title: 'Why a fashion brand needs a website',
     description:
       'Visual decision-making, the risk of building on rented social land, and design as borrowed credibility, with figures from Justuno, Stanford, Nielsen Norman Group, and Adobe.',
     keywords: ['fashion brand website', 'fashion lookbook website', 'clothing brand site', 'fashion ecommerce template', 'lookbook design'],
@@ -331,7 +331,7 @@ const collective: ArticleEn = {
     'Product photography consistent across the catalogue',
   ],
   meta: {
-    title: 'Why curation beats a bigger catalogue | Zenya',
+    title: 'Why curation beats a bigger catalogue',
     description:
       'The paradox of choice, search and recommendation as revenue features, and same-session buying, with figures from Columbia University, McKinsey, Forrester, and Google.',
     keywords: ['online store website', 'multi product ecommerce', 'product catalogue site', 'curated storefront', 'ecommerce collections'],
@@ -391,7 +391,7 @@ const studio: ArticleEn = {
     'A clear next step at the end of the story',
   ],
   meta: {
-    title: 'Why your brand story is a commercial asset | Zenya',
+    title: 'Why your brand story is a commercial asset',
     description:
       'Trust, emotion, and authenticity as purchase drivers, and how to build a brand story page that earns them, with figures from Edelman, HBR, BuzzSumo, and Stackla.',
     keywords: ['brand story website', 'about us page design', 'brand storytelling', 'founder story page', 'editorial brand site'],
@@ -451,7 +451,7 @@ const services: ArticleEn = {
     'Licences or insurance stated if relevant',
   ],
   meta: {
-    title: 'Why local service businesses need a website | Zenya',
+    title: 'Why local service businesses need a website',
     description:
       'Local search intent, before-and-after proof, and a quote path that converts, with figures from BrightLocal, Google, Moz, and HomeAdvisor.',
     keywords: ['local services website', 'contractor website', 'trades website design', 'service business marketing', 'local seo'],
@@ -511,7 +511,7 @@ const wellness: ArticleEn = {
     'A cancellation policy stated up front',
   ],
   meta: {
-    title: 'Why a wellness studio needs online booking | Zenya',
+    title: 'Why a wellness studio needs online booking',
     description:
       'Booking completion, mobile out-of-hours decisions, and gift card revenue for spas and yoga studios, with figures from Mindbody, Booksy, Salesforce, and Blackhawk Network.',
     keywords: ['wellness studio website', 'spa website design', 'yoga studio booking', 'online booking website', 'salon booking site'],

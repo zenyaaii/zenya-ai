@@ -5,11 +5,13 @@ import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import CookieConsent from '@/components/CookieConsent'
 import { NotifyProvider } from '@/components/ui/Notify'
-import { isEnglishPath } from '@/lib/i18n-routes'
+import { resolveLocale } from '@/lib/i18n/server'
+import { dirFor } from '@/lib/i18n/config'
+import { LocaleProvider } from '@/components/i18n/LocaleProvider'
 
 const SITE_URL = 'https://zenyaai.co'
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي. 8 قوالب. جاهز خلال دقائق.',
@@ -85,6 +87,21 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
     apple: '/logo.png',
   },
+}
+
+/**
+ * The title template carries the brand wordmark, which differs by script: an
+ * English page ending in "· زينيا" looks like a mistake in the browser tab.
+ * Everything else about the root metadata describes the Arabic marketing site
+ * and is overridden per-page by the English section.
+ */
+export function generateMetadata(): Metadata {
+  const locale = resolveLocale()
+  if (locale !== 'en') return baseMetadata
+  return {
+    ...baseMetadata,
+    title: { default: 'Zenya — The Arabic-First AI Website Builder', template: '%s · Zenya' },
+  }
 }
 
 // JSON-LD: تُعرّف جوجل صراحةً بماهية زينيا — منصّة عربية لإنشاء المواقع
@@ -185,16 +202,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const isCustomerSite = hdrs.get('x-zenya-site') === '1' || pathname.startsWith('/s/')
   const shopifyApiKey = process.env.SHOPIFY_API_KEY || ''
 
-  // The English section is the one place the document itself is not Arabic.
-  // Only the root layout may render <html>, so lang/dir are decided here from
-  // the middleware pathname; a wrapper div cannot fix the document language,
-  // and getting it wrong makes screen readers read English with Arabic
-  // pronunciation rules and weakens the hreflang signal to search engines.
-  // Everything outside /en stays Arabic-first.
-  const isEnglish = isEnglishPath(pathname)
+  // Only the root layout may render <html>, so the document language is decided
+  // here. A wrapper div cannot fix it, and getting it wrong makes screen readers
+  // read English with Arabic pronunciation rules and weakens the hreflang signal.
+  //
+  // resolveLocale takes an /en/* path as English outright and otherwise honours
+  // the user's saved choice, defaulting to Arabic. Customer sites are excluded:
+  // a published site's language is a property of its content, not of whoever is
+  // browsing it, so a visitor's dashboard preference must never flip it.
+  const locale = isCustomerSite ? 'ar' : resolveLocale()
+  const dir = dirFor(locale)
 
   return (
-    <html lang={isEnglish ? 'en' : 'ar'} dir={isEnglish ? 'ltr' : 'rtl'}>
+    <html lang={locale} dir={dir}>
       <head>
         {isShopifyRoute && shopifyApiKey && (
           <>
@@ -212,9 +232,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <SmoothScroll />
-        <NotifyProvider>
-          {children}
-        </NotifyProvider>
+        <LocaleProvider locale={locale}>
+          <NotifyProvider>
+            {children}
+          </NotifyProvider>
+        </LocaleProvider>
         <CookieConsent />
       </body>
     </html>
