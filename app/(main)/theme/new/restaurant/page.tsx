@@ -151,7 +151,7 @@ function buildSampleForm(): Form {
     chef_name: 'الشيف سامي خوري',
     chef_title: 'الشيف · المالك',
     chef_bio_brief: 'تدرّب في كبرى مطابخ الشام. يؤمن بأن أفضل طبق هو الذي يبقى صادقًا لنكهته.',
-    booking: 'https://book.darnoor.com',
+    booking: '',
     reservation_note: 'للمناسبات الخاصة أو المجموعات من 8 أشخاص فأكثر، يُرجى المراسلة على events@darnoor.com.',
     hero_image_url: '',
     chef_photo_url: '',
@@ -195,11 +195,12 @@ const INITIAL_FORM: Form = {
 }
 
 /**
- * Detect reservation provider from a single free-text input.
- * - Resy / OpenTable / SevenRooms URL → that provider
- * - Any other URL → 'resy' (just a link; renderer treats it as a button)
- * - Phone-shaped string → 'phone'
- * - Empty → 'form' (Maison's built-in contact-form path)
+ * Reservations always run through Zenya's own booking system. The wizard only
+ * needs to know whether the owner supplied a fallback phone number (for the
+ * "call to reserve" button shown on non-Pro sites) — otherwise it's the
+ * built-in booking form that captures into the dashboard inbox.
+ * - Phone-shaped string → 'phone' (fallback call-to-reserve button)
+ * - Anything else / empty → 'form' (Zenya's own reservation form)
  */
 function detectBooking(raw: string): {
   type: RestaurantInput['reservations']['provider_type']
@@ -207,11 +208,6 @@ function detectBooking(raw: string): {
 } {
   const v = raw.trim()
   if (!v) return { type: 'form' }
-  const lower = v.toLowerCase()
-  if (lower.includes('resy.com'))       return { type: 'resy', value: v }
-  if (lower.includes('opentable.com'))  return { type: 'opentable', value: v }
-  if (lower.includes('sevenrooms.com')) return { type: 'sevenrooms', value: v }
-  if (/^https?:\/\//i.test(v))          return { type: 'resy', value: v }
   // very loose phone match: 6+ digits across the whole string, ignoring spaces
   const digits = v.replace(/\D/g, '')
   if (digits.length >= 6) return { type: 'phone', value: v }
@@ -1020,15 +1016,15 @@ export default function RestaurantWizardPage() {
         {/* Section: Reservations — single input, auto-detected */}
         <Section
           title="الحجوزات"
-          subtitle="الصق رابط منصّة الحجز، أو رقم هاتف، أو اتركه فارغًا. سنكتشفه تلقائيًا."
+          subtitle="تصل الحجوزات مباشرةً إلى لوحة تحكّمك في زينيا — بلا منصّات خارجية. أضف رقم هاتف احتياطيًا (اختياري) للزوّار على الباقة المجانية."
         >
-          <Field label="رابط الحجز أو الهاتف (اختياري)">
+          <Field label="رقم هاتف للحجز (احتياطي، اختياري)">
             <input
               className={inputCls}
               dir="ltr"
               value={form.booking}
               onChange={(e) => update('booking', e.target.value)}
-              placeholder="https://book.your-restaurant.com  ·  أو  ·  +961 1 555 0140"
+              placeholder="+961 1 555 0140"
             />
           </Field>
           <Field label="ملاحظة الحجز (اختياري)" className="mt-4">

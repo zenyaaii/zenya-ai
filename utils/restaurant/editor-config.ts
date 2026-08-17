@@ -171,10 +171,9 @@ export const RESTAURANT_EDITOR_CONFIG: EditorConfig = {
         { type: 'textarea', path: 'reservations.subheading', label: 'Subheading', rows: 2 },
         { type: 'text',     path: 'reservations.cta_label',  label: 'CTA label' },
         { type: 'textarea', path: 'reservations.note',       label: 'Note', rows: 2 },
-        { type: 'note', content: 'Provider type: opentable / resy / sevenrooms / phone / form. Plus the matching URL or phone number.' },
-        { type: 'text', path: 'reservations.provider.type', label: 'Provider type' },
-        { type: 'text', path: 'reservations.provider.url',  label: 'Provider URL (if web)' },
-        { type: 'text', path: 'reservations.provider.number', label: 'Phone number (if phone)' },
+        { type: 'note', content: 'Reservations run through Zenya\'s own booking system. Provider type is "form" (guests submit a request straight to your dashboard inbox) or "phone" (a call-to-reserve fallback for non-Pro sites). External platforms are not supported.' },
+        { type: 'text', path: 'reservations.provider.type', label: 'Provider type (form or phone)' },
+        { type: 'text', path: 'reservations.provider.number', label: 'Phone number (if phone fallback)' },
       ],
     },
 

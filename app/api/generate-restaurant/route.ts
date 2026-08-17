@@ -76,12 +76,10 @@ function buildPrompt(input: RestaurantInput) {
     )
     .join('\n\n')
 
-  const reservationsText = (() => {
-    const r = input.reservations
-    if (r.provider_type === 'phone') return `Phone reservations: ${r.provider_value || 'see contact'}`
-    if (r.provider_type === 'form') return 'Contact-form reservations on site'
-    return `${r.provider_type.toUpperCase()} reservations${r.provider_value ? `: ${r.provider_value}` : ''}`
-  })()
+  const reservationsText =
+    input.reservations.provider_type === 'phone'
+      ? `Phone reservations: ${input.reservations.provider_value || input.location.phone || 'see contact'}`
+      : "Reservations captured on-site via the restaurant's own booking form — guests submit a request and the owner receives it directly. No external platform."
 
   const restaurantType = (input.brand as any).restaurant_type as string | undefined
   const toneByType: Record<string, string> = {
@@ -135,6 +133,7 @@ Hard rules:
 - Do not invent specific dietary certifications, awards, or Michelin stars unless they are in the brief.
 - Do not use words like "delicious," "world-class," "best in the city."
 - Use specific produce, technique, region names where natural (e.g., "Hudson Valley duck," "brown butter," "fig leaf").
+- NEVER mention any external reservation platform (Resy, OpenTable, SevenRooms, Tock, etc.) in ANY field — not the reservations heading, subheading, cta_label, eyebrow, or note. Reservations run through this site's own booking form. Write reservation copy as if guests book directly with the restaurant.
 
 OUTPUT
 Return ONLY valid JSON matching this exact shape. No prose, no markdown.
@@ -170,7 +169,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
   "reservations": {
     "heading": "Reservations section headline (max 8 words)",
     "subheading": "1–2 sentences on booking policy, deposits, lead time.",
-    "cta_label": "CTA matching the provider (e.g. 'Book on Resy', 'Call to Reserve')"
+    "cta_label": "Short Arabic reservation CTA, e.g. 'احجز طاولتك' or 'اتصل للحجز'. NEVER name an external platform (no Resy/OpenTable/SevenRooms) — reservations run through the site's own booking form."
   },
   "reviews": {
     "heading": "Reviews section headline (max 6 words)",
@@ -266,14 +265,13 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
           image: pickNth(sigImages, i, FALLBACK_DISH_IMAGES[i % FALLBACK_DISH_IMAGES.length])
         }))
 
-  // Provider object
+  // Provider object — Zenya's own booking form by default; `phone` only as an
+  // opt-in call-to-reserve fallback. No external platforms.
   const r = input.reservations
   const provider: RestaurantContent['reservations']['provider'] =
     r.provider_type === 'phone'
       ? { type: 'phone', number: r.provider_value || input.location.phone }
-      : r.provider_type === 'form'
-      ? { type: 'form' }
-      : { type: r.provider_type as 'opentable' | 'resy' | 'sevenrooms', url: r.provider_value || '#' }
+      : { type: 'form' }
 
   // Press
   const pressFromAi = Array.isArray(ai?.press) ? ai.press : []
@@ -299,17 +297,9 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   const accent_image = input.visuals.accent_image_url || FALLBACK_ACCENT_IMAGE
   const chef_photo = input.visuals.chef_photo_url || (input.story.chef_name ? FALLBACK_CHEF_IMAGE : undefined)
 
-  // CTA label
-  const defaultCta =
-    r.provider_type === 'opentable'
-      ? 'احجز عبر OpenTable'
-      : r.provider_type === 'resy'
-      ? 'احجز عبر Resy'
-      : r.provider_type === 'sevenrooms'
-      ? 'احجز عبر SevenRooms'
-      : r.provider_type === 'phone'
-      ? 'اتصل للحجز'
-      : 'اطلب حجزًا'
+  // CTA label — reservations go through Zenya's own form; `phone` is the only
+  // call-out fallback.
+  const defaultCta = r.provider_type === 'phone' ? 'اتصل للحجز' : 'احجز طاولتك'
 
   const content: RestaurantContent = {
     brand: {

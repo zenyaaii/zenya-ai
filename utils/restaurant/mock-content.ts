@@ -147,8 +147,8 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
     heading: 'احجز أمسيتك.',
     subheading:
       'تُفتح الحجوزات قبل ثلاثين يومًا، كل صباح عند التاسعة. تُتاح طاولة الشيف وقاعة الطعام الخاصة في أول كل شهر.',
-    cta_label: 'احجز الآن',
-    provider: { type: 'resy', url: 'https://darnoor.sa/reserve' },
+    cta_label: 'احجز طاولتك',
+    provider: { type: 'form' },
     note: 'للمناسبات الخاصة أو الحجوزات لثمانية أشخاص فأكثر، يُرجى المراسلة على events@darnoor.sa.'
   },
   reviews: {

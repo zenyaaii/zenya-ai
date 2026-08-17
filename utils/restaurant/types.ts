@@ -62,12 +62,19 @@ export type RestaurantGalleryImage = {
   alt?: string
 }
 
+/**
+ * Reservations always run through Zenya's own booking system. Entitled
+ * (Pro / free-trial) owners get the interactive form that captures into their
+ * dashboard inbox; `phone` is only a graceful "call to reserve" fallback for
+ * sites that aren't entitled. External platforms (Resy / OpenTable /
+ * SevenRooms) are intentionally not supported — every reservation lands in the
+ * owner's Zenya inbox, never a competitor's. Older sites generated before this
+ * change may still carry an external provider in stored content; the renderer
+ * treats any non-`phone` provider as the Zenya form, so they upgrade cleanly.
+ */
 export type RestaurantReservationProvider =
-  | { type: 'opentable'; url: string }
-  | { type: 'resy'; url: string }
-  | { type: 'sevenrooms'; url: string }
-  | { type: 'phone'; number: string }
   | { type: 'form' }
+  | { type: 'phone'; number: string }
 
 export type RestaurantContent = {
   brand: {

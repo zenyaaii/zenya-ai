@@ -72,7 +72,10 @@ export const restaurantInputSchema = z.object({
     chef_bio_brief: z.string().max(500).optional()
   }),
   reservations: z.object({
-    provider_type: z.enum(['opentable', 'resy', 'sevenrooms', 'phone', 'form']),
+    // Reservations run through Zenya's own booking system: `form` (the default,
+    // captured into the owner's dashboard inbox) or `phone` (a call-to-reserve
+    // fallback). External platforms are intentionally not accepted.
+    provider_type: z.enum(['phone', 'form']),
     provider_value: z.string().max(300).optional(),
     note: z.string().max(300).optional()
   }),

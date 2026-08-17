@@ -422,19 +422,35 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
   const contentOpacity = useTransform(scrollYProgress, [0, 0.85], [1, reduce ? 1 : 0])
 
   return (
-    <section ref={ref} id="top" data-section="hero" className="relative overflow-hidden">
+    <section
+      ref={ref}
+      id="top"
+      data-section="hero"
+      className="relative flex min-h-[86vh] items-end overflow-hidden md:min-h-[92vh]"
+    >
       <motion.div className="absolute inset-0" style={{ y: imageY, scale: imageScale }}>
-        <img src={content.hero.image} alt="" className="w-full h-full object-cover" style={{ filter: isDark ? 'brightness(0.55)' : 'brightness(0.78)' }} />
+        <img src={content.hero.image} alt="" className="w-full h-full object-cover" style={{ filter: isDark ? 'brightness(0.5)' : 'brightness(0.72)' }} />
+        {/* Base bottom scrim — anchors the type and blends into the page. */}
         <div
           className="absolute inset-0"
           style={{
             background: isDark
-              ? 'linear-gradient(180deg, rgba(10,10,12,0.25) 0%, rgba(10,10,12,0.55) 60%, rgba(10,10,12,0.95) 100%)'
-              : 'linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.55) 100%)'
+              ? 'linear-gradient(180deg, rgba(10,10,12,0.30) 0%, rgba(10,10,12,0.45) 55%, rgba(10,10,12,0.96) 100%)'
+              : 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.60) 100%)'
+          }}
+        />
+        {/* Text-side scrim — the RTL headline sits on the right over busy plates;
+            this keeps it legible without dimming the whole photo. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isDark
+              ? 'linear-gradient(to left, rgba(10,10,12,0.74) 0%, rgba(10,10,12,0.20) 42%, transparent 68%)'
+              : 'linear-gradient(to left, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 45%, transparent 70%)'
           }}
         />
       </motion.div>
-      <Container className="relative py-32 md:py-48 lg:py-56">
+      <Container className="relative w-full pb-24 pt-32 md:pb-28">
         <motion.div
           className="max-w-3xl"
           style={{ y: contentY, opacity: contentOpacity }}
@@ -442,19 +458,24 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
           initial="hidden"
           animate="show"
         >
-          <motion.div variants={staggerChild}>
-            <Eyebrow className="mb-7">{content.hero.eyebrow}</Eyebrow>
+          {/* Eyebrow with an accent hairline — one refined kicker, not a stacked label. */}
+          <motion.div variants={staggerChild} className="mb-8 flex items-center gap-3">
+            <span className="h-px w-10" style={{ background: 'var(--rb-accent)' }} />
+            <span className="text-[0.72rem] uppercase" style={{ color: 'var(--rb-accent)', letterSpacing: '0.34em', fontWeight: 500 }}>
+              {content.hero.eyebrow}
+            </span>
           </motion.div>
           <motion.h1
             variants={staggerChild}
-            className="text-5xl md:text-7xl lg:text-[5.5rem] mb-8"
+            className="mb-8 text-6xl md:text-8xl lg:text-[6.5rem]"
             style={{
               fontFamily: 'var(--rb-heading-font)',
               color: '#ffffff',
-              lineHeight: 1.02,
-              letterSpacing: '-0.02em',
+              lineHeight: 1.0,
+              letterSpacing: '-0.03em',
               fontWeight: 500,
-              whiteSpace: 'pre-line'
+              whiteSpace: 'pre-line',
+              textShadow: '0 2px 40px rgba(0,0,0,0.35)'
             }}
           >
             {content.hero.headline}
@@ -462,16 +483,16 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
           <motion.p
             variants={staggerChild}
             className="text-base md:text-lg max-w-xl mb-10"
-            style={{ color: 'rgba(255,255,255,0.82)', lineHeight: 1.6 }}
+            style={{ color: 'rgba(255,255,255,0.85)', lineHeight: 1.65 }}
           >
             {content.hero.subheadline}
           </motion.p>
           <motion.div variants={staggerChild} className="flex flex-wrap items-center gap-4">
             <motion.a
               href="#reservations"
-              className="inline-flex items-center px-7 py-4 text-[0.78rem] uppercase"
+              className="inline-flex items-center px-8 py-4 text-[0.78rem] uppercase"
               style={{ background: 'var(--rb-accent)', color: '#0a0a0c', letterSpacing: '0.24em', fontWeight: 600 }}
-              whileHover={{ y: -2 }}
+              whileHover={{ y: -2, boxShadow: '0 16px 44px -14px var(--rb-accent)' }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
             >
@@ -479,8 +500,9 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
             </motion.a>
             <motion.a
               href="#menu"
-              className="inline-flex items-center px-7 py-4 text-[0.78rem] uppercase transition hover:bg-white/10"
-              style={{ border: '1px solid rgba(255,255,255,0.45)', color: '#ffffff', letterSpacing: '0.24em', fontWeight: 500 }}
+              className="inline-flex items-center px-8 py-4 text-[0.78rem] uppercase transition hover:bg-white/10"
+              style={{ border: '1px solid rgba(255,255,255,0.5)', color: '#ffffff', letterSpacing: '0.24em', fontWeight: 500 }}
+              whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
             >
@@ -861,19 +883,48 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
   )
 }
 
-function reservationHref(p: RestaurantReservationProvider) {
-  if (p.type === 'phone') return `tel:${p.number}`
-  if (p.type === 'form') return '#reservations-form'
-  return p.url
+const EXTERNAL_BOOKING_RE = /resy|opentable|sevenrooms|tock/i
+
+/**
+ * Scrub any external-platform branding (Resy / OpenTable / …) out of stored
+ * reservation copy at render time. This fixes sites generated before Zenya
+ * dropped external providers — their heading/subheading/CTA may still read
+ * "الحجز على RESY" — without needing a regeneration. When a field is *about*
+ * the platform (e.g. the whole heading is "الحجز على RESY"), stripping leaves
+ * too little, so we fall back to a clean Zenya-native default.
+ */
+function scrubExternal(text: string | undefined, fallback: string): string {
+  const t = (text || '').trim()
+  if (!t) return fallback
+  if (!EXTERNAL_BOOKING_RE.test(t)) return t
+  const cleaned = t
+    // "عبر / على / via / on RESY" → gone
+    .replace(/\s*(?:عبر|على|via|through|on)\s+(?:resy|opentable|sevenrooms|tock)\b/gi, '')
+    // any bare platform mention → gone
+    .replace(/\b(?:resy|opentable|sevenrooms|tock)\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([.،,؛])/g, '$1')
+    .trim()
+  return cleaned.length >= 6 ? cleaned : fallback
 }
 
 function Reservations({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const r = content.reservations
   const { enabled } = useBookingContext()
-  // The `form` provider is the only one that captures into Zenya, and only when
-  // the owner is entitled (Pro / free trial). Every other provider (OpenTable,
-  // Resy, phone…) is an external link that works regardless.
-  const useForm = r.provider.type === 'form' && enabled
+  // Reservations always run through Zenya's own booking system. Entitled
+  // owners (Pro / free trial) get the interactive form that captures straight
+  // into their dashboard inbox; everyone else falls back to a "call to reserve"
+  // button so the section still works on free sites. External platforms are no
+  // longer supported — a legacy `resy`/`opentable` provider simply degrades to
+  // the phone fallback (or the venue's own number).
+  const provider = r.provider as RestaurantReservationProvider
+  const fallbackPhone =
+    (provider?.type === 'phone' && provider.number) || content.hours_location.phone || ''
+  // Scrub any external-platform wording baked into older stored content.
+  const heading = scrubExternal(r.heading, 'احجز طاولتك')
+  const subheading = scrubExternal(r.subheading, 'تصلنا حجوزاتك مباشرةً ونعاود التواصل معك لتأكيدها.')
+  const note = scrubExternal(r.note, '')
+  const ctaLabel = scrubExternal(r.cta_label, 'اتصل للحجز')
   return (
     <section id="reservations" data-section="reservations" className="py-24 md:py-32 relative overflow-hidden">
       <div
@@ -888,32 +939,30 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
         <Reveal className="text-center max-w-2xl mx-auto">
           <Eyebrow className="mb-5">الحجوزات</Eyebrow>
           <Heading size="xl" className="mb-7">
-            {r.heading}
+            {heading}
           </Heading>
           <p style={{ color: 'var(--rb-muted)', lineHeight: 1.7, fontSize: '1.05rem' }} className="mb-10">
-            {r.subheading}
+            {subheading}
           </p>
-          {useForm ? (
+          {enabled ? (
             <div id="reservations-form" className="mx-auto mt-2 max-w-lg text-start">
               <BookingForm type="reservation" palette={restaurantPalette(isDark)} />
             </div>
-          ) : (
+          ) : fallbackPhone ? (
             <motion.a
-              href={reservationHref(r.provider)}
-              target={r.provider.type === 'phone' || r.provider.type === 'form' ? undefined : '_blank'}
-              rel="noopener noreferrer"
+              href={`tel:${fallbackPhone}`}
               className="inline-flex items-center px-9 py-4 text-[0.78rem] uppercase"
               style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', letterSpacing: '0.26em', fontWeight: 600 }}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
             >
-              {r.cta_label}
+              {ctaLabel}
             </motion.a>
-          )}
-          {r.note && (
+          ) : null}
+          {note && (
             <p className="mt-10 italic" style={{ color: 'var(--rb-muted)', fontSize: '0.92rem' }}>
-              {r.note}
+              {note}
             </p>
           )}
         </Reveal>
