@@ -130,9 +130,22 @@ export default function SearchPanel({
           <code className="mt-3 block rounded-lg bg-black/[0.04] px-3 py-2 text-[12.5px] text-foreground" dir="ltr">
             {perf.expectedProperty}
           </code>
-          <Link href="/dashboard/seo" className="mt-4 inline-block text-[12.5px] font-medium text-primary hover:underline">
-            دليل الإضافة خطوة بخطوة ←
-          </Link>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Link
+              href="/dashboard/seo"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90"
+            >
+              الإعداد التلقائي بنقرة في صفحة السيو ←
+            </Link>
+            <a
+              href={`https://search.google.com/search-console/welcome?resource_id=${encodeURIComponent(perf.expectedProperty || '')}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[12.5px] font-medium text-primary hover:underline"
+            >
+              أو أضِفه يدويًا
+            </a>
+          </div>
         </Panel>
       </Section>
     )

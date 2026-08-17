@@ -63,7 +63,17 @@ export default function SeoManager({ sites: initialSites }: { sites: SeoSite[] }
     if (!flag) return
     if (flag === 'connected') notify.toast({ type: 'success', message: 'تم ربط Google Search Console', description: 'بيانات البحث الحيّة ستظهر الآن لمواقعك المنشورة.' })
     else if (flag === 'denied') notify.toast({ type: 'warning', message: 'أُلغي الربط', description: 'لم تمنح زينيا صلاحية القراءة من Search Console.' })
-    else notify.toast({ type: 'error', message: 'تعذّر ربط Search Console', description: 'حاول مرة أخرى.' })
+    else {
+      const reason = searchParams.get('gsc_reason')
+      const detail = reason === 'redirect_uri_mismatch'
+        ? 'عنوان الإرجاع لا يطابق ما هو مسجّل في Google Cloud. تأكّد أن GOOGLE_OAUTH_REDIRECT_URI مطابق تمامًا للعنوان المسجّل.'
+        : reason === 'invalid_client'
+          ? 'بيانات عميل OAuth غير صحيحة. تحقّق من GOOGLE_OAUTH_CLIENT_ID و GOOGLE_OAUTH_CLIENT_SECRET.'
+          : reason
+            ? `سبب من جوجل: ${reason}`
+            : 'حاول مرة أخرى.'
+      notify.toast({ type: 'error', message: 'تعذّر ربط Search Console', description: detail })
+    }
     // clean the URL
     if (typeof window !== 'undefined') window.history.replaceState({}, '', '/dashboard/seo')
     if (flag === 'connected') refreshGsc()
@@ -71,7 +81,7 @@ export default function SeoManager({ sites: initialSites }: { sites: SeoSite[] }
   }, [searchParams])
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 border-b border-token pb-5">
         <h1 className="text-[24px] font-bold tracking-tight text-foreground">السيو</h1>
         <p className="mt-1 text-[13px] text-muted">
@@ -193,9 +203,9 @@ function SiteEditor({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_minmax(360px,420px)]">
-      {/* ── editor column ── */}
-      <div className="space-y-5">
+    <div className="grid gap-5 lg:gap-6 lg:grid-cols-[1fr_minmax(360px,420px)]">
+      {/* ── editor column ── (below the live preview on phone/iPad, beside it on desktop) */}
+      <div className="order-2 space-y-5 lg:order-1">
         <div className="rounded-2xl border border-token bg-white p-5">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" strokeWidth={2} />
@@ -291,9 +301,10 @@ function SiteEditor({
         />
       </div>
 
-      {/* ── live preview column ── */}
-      <div className="space-y-5">
-        <div className="sticky top-4">
+      {/* ── live preview column ── (shown first on phone/iPad so the Google-result
+          preview is what the owner sees; sticky beside the form on desktop) */}
+      <div className="order-1 space-y-5 lg:order-2">
+        <div className="lg:sticky lg:top-4">
           <SerpPreview
             host={site.host}
             title={effTitle}
@@ -644,7 +655,13 @@ function SearchConsoleCard({
           <StepHead n={1} title="أضف موقعك في Search Console" />
           <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
             افتح{' '}
-            <Link href="https://search.google.com/search-console/welcome" target="_blank" className="text-primary hover:underline">Search Console</Link>{' '}
+            <Link
+              href={site.url
+                ? `https://search.google.com/search-console/welcome?resource_id=${encodeURIComponent(site.url.endsWith('/') ? site.url : site.url + '/')}`
+                : 'https://search.google.com/search-console/welcome'}
+              target="_blank"
+              className="text-primary hover:underline"
+            >Search Console</Link>{' '}
             → «إضافة خاصية» → اختر <b>«بادئة عنوان URL»</b> والصق هذا العنوان بالضبط:
           </p>
           <CopyRow value={site.url ? site.url + (site.url.endsWith('/') ? '' : '/') : 'انشر الموقع أولًا'} />
@@ -778,18 +795,7 @@ function PerformancePanel({ site }: { site: SeoSite }) {
     return <PerfNote>انشر موقعك أولًا لتبدأ بيانات البحث بالتدفّق.</PerfNote>
   }
   if (data.reason === 'property_not_found') {
-    return (
-      <div className="mt-4 rounded-xl border border-token bg-surface/40 p-4">
-        <div className="text-[12.5px] font-semibold text-foreground">أضِف موقعك كخاصية في Search Console</div>
-        <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
-          حسابك مربوط، لكن هذا الموقع غير مُضاف بعد كـ «خاصية». افتح{' '}
-          <Link href="https://search.google.com/search-console" target="_blank" className="text-primary hover:underline">Search Console</Link>{' '}
-          → «إضافة خاصية» → «بادئة عنوان URL» والصق:
-        </p>
-        <div className="mt-2"><CopyRow value={data.expectedProperty || site.url || ''} /></div>
-        <p className="mt-2 text-[11px] text-muted">بعد إضافته والتحقّق منه، ارجع هنا وستظهر البيانات خلال يوم أو يومين.</p>
-      </div>
-    )
+    return <AutoSetupCard site={site} expectedProperty={data.expectedProperty || site.url || ''} onDone={load} />
   }
   if (data.reason === 'no_data_yet') {
     return <PerfNote>الموقع مربوط ✓ — لا توجد مرّات ظهور بعد. يحتاج جوجل بضعة أيام بعد فهرسة الموقع. ارجع قريبًا.</PerfNote>
@@ -830,6 +836,119 @@ function PerformancePanel({ site }: { site: SeoSite }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * One-click Search Console setup. Calls /api/gsc/setup, which adds the property,
+ * plants + verifies the ownership token on the live site, and submits the
+ * sitemap — no manual Google steps. Reports honestly what happened, and offers
+ * a manual fallback if auto-verify is still propagating or scopes are stale.
+ */
+function AutoSetupCard({
+  site, expectedProperty, onDone,
+}: {
+  site: SeoSite
+  expectedProperty: string
+  onDone: () => void
+}) {
+  const notify = useNotify()
+  const [status, setStatus] = useState<'idle' | 'running' | 'pending' | 'reconnect'>('idle')
+  const [detail, setDetail] = useState<string | null>(null)
+
+  const manualUrl = `https://search.google.com/search-console/welcome?resource_id=${encodeURIComponent(expectedProperty)}`
+
+  async function run() {
+    setStatus('running')
+    setDetail(null)
+    try {
+      const r = await fetch('/api/gsc/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId: site.id }),
+      })
+      const j = await r.json()
+      if (j.ok) {
+        notify.toast({ type: 'success', message: 'تم ربط الموقع بـ Search Console', description: 'أُضيف الموقع وتُحقّق منه وأُرسلت خريطته. ستظهر البيانات خلال يوم أو يومين.' })
+        setStatus('idle')
+        onDone()
+        return
+      }
+      if (j.reason === 'reconnect_required') {
+        setStatus('reconnect')
+        return
+      }
+      if (j.reason === 'verify_pending' || j.reason === 'partial') {
+        setStatus('pending')
+        setDetail(j?.steps?.verified?.error || null)
+        return
+      }
+      if (j.reason === 'not_published') {
+        setStatus('idle')
+        notify.toast({ type: 'warning', message: 'انشر الموقع أولًا', description: 'لا يمكن التحقّق من موقع غير منشور.' })
+        return
+      }
+      setStatus('idle')
+      notify.toast({ type: 'error', message: 'تعذّر الإعداد التلقائي', description: j?.error || 'حاول مرة أخرى، أو استخدم الطريقة اليدوية بالأسفل.' })
+    } catch (e: any) {
+      setStatus('idle')
+      notify.toast({ type: 'error', message: 'تعذّر الإعداد التلقائي', description: e?.message })
+    }
+  }
+
+  const running = status === 'running'
+
+  return (
+    <div className="mt-4 rounded-xl border border-token bg-surface/40 p-4">
+      <div className="text-[12.5px] font-semibold text-foreground">اربط الموقع بـ Search Console تلقائيًا</div>
+      <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+        حسابك مربوط. اضغط الزر وستتكفّل زينيا بكل شيء: إضافة الموقع كخاصية، إثبات الملكية، وإرسال خريطة الموقع — دون أي خطوة يدوية.
+      </p>
+
+      {status === 'reconnect' ? (
+        <div className="mt-3">
+          <p className="text-[11.5px] leading-[1.55] text-[#b45309]">
+            الإعداد التلقائي يحتاج صلاحيات إضافية من جوجل. أعِد الربط مرة واحدة للسماح بالإضافة والتحقّق تلقائيًا.
+          </p>
+          <a
+            href="/api/gsc/connect"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90"
+          >
+            <Link2 className="h-3.5 w-3.5" /> أعِد ربط جوجل لتفعيل الإعداد التلقائي
+          </a>
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={run}
+            disabled={running}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90 disabled:opacity-60"
+          >
+            {running ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+            {running ? 'جارٍ الإعداد…' : status === 'pending' ? 'أعد المحاولة' : 'اربط تلقائيًا الآن'}
+          </button>
+
+          {status === 'pending' && (
+            <p className="mt-2 text-[11px] leading-[1.55] text-muted">
+              خُزِّن رمز التحقّق على موقعك، لكن جوجل لم يلتقطه بعد (قد يستغرق دقيقة بعد النشر). أعد المحاولة بعد لحظات.
+              {detail ? <span className="block opacity-70">({detail})</span> : null}
+            </p>
+          )}
+        </>
+      )}
+
+      {/* Manual fallback — pre-filled Add-property deep link + copyable URL. */}
+      <details className="mt-3 text-[11px] text-muted">
+        <summary className="cursor-pointer hover:text-foreground">أو أضِفه يدويًا</summary>
+        <div className="mt-2">
+          <a href={manualUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+            <ExternalLink className="h-3 w-3" /> افتح «إضافة خاصية» في Search Console (الرابط مُعبّأ)
+          </a>
+          <div className="mt-2"><CopyRow value={expectedProperty} /></div>
+        </div>
+      </details>
     </div>
   )
 }

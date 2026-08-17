@@ -14,13 +14,14 @@ function admin() {
   )
 }
 
-/** Land the user back on the SEO page with a status flag. */
-function backToSeo(req: NextRequest, status: string) {
+/** Land the user back on the SEO page with a status flag (+ optional reason). */
+function backToSeo(req: NextRequest, status: string, reason?: string) {
   const host = req.headers.get('host') || 'dashboard.zenyaai.co'
   const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1')
   const base = isLocal ? `http://${host}` : `https://${host}`
   const url = new URL('/dashboard/seo', base)
   url.searchParams.set('gsc', status)
+  if (reason) url.searchParams.set('gsc_reason', reason.slice(0, 64))
   const res = NextResponse.redirect(url)
   res.cookies.delete('gsc_oauth_state')
   return res
@@ -52,8 +53,8 @@ export async function GET(req: NextRequest) {
   const redirectUri = callbackUrlFor(req.headers.get('host'))
   const tokens = await exchangeCode(code, redirectUri)
   if (!tokens.access_token || !tokens.refresh_token) {
-    console.error('[gsc/callback] token exchange failed', tokens.error, tokens.error_description)
-    return backToSeo(req, 'error')
+    console.error('[gsc/callback] token exchange failed', tokens.error, tokens.error_description, 'redirect_uri=', redirectUri)
+    return backToSeo(req, 'error', tokens.error)
   }
 
   const expiry = new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString()

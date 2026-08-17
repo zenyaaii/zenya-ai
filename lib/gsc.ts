@@ -15,10 +15,16 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 const WMX_BASE = 'https://www.googleapis.com/webmasters/v3'
+const SITEVERIFY_BASE = 'https://www.googleapis.com/siteVerification/v1'
 
-// webmasters.readonly → Search Console data. openid+email → show which account.
+// Full `webmasters` (read + add site + submit sitemap) and `siteverification`
+// (prove ownership) let Zenya set the property up end-to-end for the owner.
+// openid+email → show which account is connected. NOTE: broadening the scopes
+// means already-connected users must re-consent once for the write features;
+// reads keep working on the old token until they do.
 export const GSC_SCOPES = [
-  'https://www.googleapis.com/auth/webmasters.readonly',
+  'https://www.googleapis.com/auth/webmasters',
+  'https://www.googleapis.com/auth/siteverification',
   'openid',
   'email',
 ].join(' ')
@@ -27,10 +33,22 @@ export function gscConfigured(): boolean {
   return !!process.env.GOOGLE_OAUTH_CLIENT_ID && !!process.env.GOOGLE_OAUTH_CLIENT_SECRET
 }
 
-/** Build the exact callback URL for this request host (must match a registered URI). */
+/**
+ * The exact callback URL sent to Google. Must byte-for-byte match one of the
+ * "Authorized redirect URIs" registered on the OAuth client, or Google rejects
+ * the flow with redirect_uri_mismatch.
+ *
+ * If GOOGLE_OAUTH_REDIRECT_URI is set we use it verbatim — that's the value the
+ * owner registered in Google Cloud, so it always matches. We only fall back to
+ * deriving it from the request host (useful for localhost dev, where the env
+ * points at production).
+ */
 export function callbackUrlFor(host: string | null): string {
+  const configured = process.env.GOOGLE_OAUTH_REDIRECT_URI
+  const isLocal = (host || '').startsWith('localhost') || (host || '').startsWith('127.0.0.1')
+  if (configured && !isLocal) return configured
   const h = host || 'dashboard.zenyaai.co'
-  const proto = h.startsWith('localhost') || h.startsWith('127.0.0.1') ? 'http' : 'https'
+  const proto = isLocal ? 'http' : 'https'
   return `${proto}://${h}/api/gsc/callback`
 }
 
@@ -173,6 +191,82 @@ export async function querySearchAnalytics(
   if (!r.ok) return { ok: false, status: r.status, rows: [] }
   const j = await r.json()
   return { ok: true, status: 200, rows: (j.rows || []) as SearchAnalyticsRow[] }
+}
+
+type StepResult = { ok: boolean; status: number; error?: string; data?: any }
+
+/** Best-effort parse of Google's JSON error shape → a short reason string. */
+async function readError(r: Response): Promise<string | undefined> {
+  try {
+    const j = await r.json()
+    return j?.error?.errors?.[0]?.reason || j?.error?.status || j?.error?.message || undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Add a URL-prefix property to the connected account's Search Console. Requires
+ * the account to already be a verified owner (see verifySite). Idempotent —
+ * re-adding an existing property is a no-op success.
+ */
+export async function addSite(accessToken: string, siteUrl: string): Promise<StepResult> {
+  const r = await fetch(`${WMX_BASE}/sites/${encodeURIComponent(siteUrl)}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return { ok: r.ok, status: r.status, error: r.ok ? undefined : await readError(r) }
+}
+
+/**
+ * Ask Google for a verification token for `siteUrl`. For method 'META' the token
+ * comes back as (or inside) a `<meta name="google-site-verification" …>` tag.
+ * Returns the raw token string Google issued (caller normalises it).
+ */
+export async function getVerificationToken(
+  accessToken: string,
+  siteUrl: string,
+  method: 'META' | 'FILE' = 'META',
+): Promise<StepResult> {
+  const r = await fetch(`${SITEVERIFY_BASE}/token`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ verificationMethod: method, site: { type: 'SITE', identifier: siteUrl } }),
+  })
+  if (!r.ok) return { ok: false, status: r.status, error: await readError(r) }
+  const j = await r.json()
+  return { ok: true, status: 200, data: j?.token as string }
+}
+
+/**
+ * Tell Google to verify ownership of `siteUrl` now (it fetches the site and
+ * looks for the token planted via `method`). Must run AFTER the token is live
+ * on the site. Returns ok once the account is a verified owner.
+ */
+export async function verifySite(
+  accessToken: string,
+  siteUrl: string,
+  method: 'META' | 'FILE' = 'META',
+): Promise<StepResult> {
+  const r = await fetch(`${SITEVERIFY_BASE}/webResource?verificationMethod=${method}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ site: { type: 'SITE', identifier: siteUrl } }),
+  })
+  return { ok: r.ok, status: r.status, error: r.ok ? undefined : await readError(r) }
+}
+
+/** Submit a sitemap URL for a (verified) property. Idempotent. */
+export async function submitSitemap(
+  accessToken: string,
+  siteUrl: string,
+  sitemapUrl: string,
+): Promise<StepResult> {
+  const r = await fetch(
+    `${WMX_BASE}/sites/${encodeURIComponent(siteUrl)}/sitemaps/${encodeURIComponent(sitemapUrl)}`,
+    { method: 'PUT', headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+  return { ok: r.ok, status: r.status, error: r.ok ? undefined : await readError(r) }
 }
 
 /**
