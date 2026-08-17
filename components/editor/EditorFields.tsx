@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
 import {
   ChevronDown, ChevronRight, ImageIcon, Plus, RotateCcw, Trash2,
   Upload,
@@ -99,6 +100,7 @@ export function SmallNote({ children }: { children: React.ReactNode }) {
 export function Collapsible({
   title, defaultOpen = false, children, onRemove,
 }: { title: string; defaultOpen?: boolean; children: React.ReactNode; onRemove?: () => void }) {
+  const t = useT()
   const [open, setOpen] = useState(defaultOpen)
   return (
     <div className="rounded-lg border border-token bg-white">
@@ -115,7 +117,7 @@ export function Collapsible({
           <button
             type="button"
             onClick={onRemove}
-            title="إزالة"
+            title={t.editor.remove}
             className="rounded border border-token bg-white p-1 text-muted hover:bg-[rgba(220,38,38,0.06)] hover:text-[#b91c1c]"
           >
             <Trash2 className="h-3 w-3" />
@@ -150,6 +152,7 @@ export function AddRowButton({ label, onClick }: { label: string; onClick: () =>
 export function FieldImage({
   label, value, onChange, hint,
 }: { label: string; value: string; onChange: (v: string) => void; hint?: string }) {
+  const t = useT()
   const [pickerOpen, setPickerOpen] = useState(false)
   return (
     <div>
@@ -157,7 +160,7 @@ export function FieldImage({
         <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
         {value && (
           <button type="button" onClick={() => onChange('')} className="text-[10.5px] text-[#b91c1c] hover:underline">
-            مسح
+            {t.editor.clear}
           </button>
         )}
       </div>
@@ -166,12 +169,12 @@ export function FieldImage({
           type="button"
           onClick={() => setPickerOpen(true)}
           className="group mb-1.5 block w-full overflow-hidden rounded-md border border-token transition hover:border-primary"
-          title="انقر للتغيير"
+          title={t.editor.clickToChange}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt={label} className="block h-32 w-full object-cover" />
           <span className="block bg-black/60 px-2 py-1 text-center text-[10.5px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            انقر للتغيير
+            {t.editor.clickToChange}
           </span>
         </button>
       ) : (
@@ -182,7 +185,7 @@ export function FieldImage({
         >
           <div className="flex flex-col items-center gap-1">
             <Upload className="h-4 w-4" strokeWidth={2} />
-            <span className="text-[11.5px] font-medium">اختر صورة</span>
+            <span className="text-[11.5px] font-medium">{t.editor.chooseImage}</span>
           </div>
         </button>
       )}
@@ -193,7 +196,7 @@ export function FieldImage({
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
         >
           <ImageIcon className="h-3 w-3" strokeWidth={2.25} />
-          {value ? 'تغيير الصورة' : 'فتح المعرض'}
+          {value ? t.editor.changeImage : t.editor.openGallery}
         </button>
       </div>
       {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
@@ -210,6 +213,7 @@ export function FieldImage({
 export function InlineImage({
   label, value, onChange,
 }: { label: string; value: string; onChange: (v: string) => void }) {
+  const t = useT()
   const [pickerOpen, setPickerOpen] = useState(false)
   return (
     <div className="flex items-center gap-2">
@@ -217,7 +221,7 @@ export function InlineImage({
         type="button"
         onClick={() => setPickerOpen(true)}
         className="group relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-token bg-white transition hover:border-primary"
-        title={value ? 'انقر للتغيير' : 'اختر صورة'}
+        title={value ? t.editor.clickToChange : t.editor.chooseImage}
       >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -237,7 +241,7 @@ export function InlineImage({
         <Upload className="h-3 w-3 flex-shrink-0 text-muted" strokeWidth={2.25} />
       </button>
       {value && (
-        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title="مسح">
+        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title={t.editor.clear}>
           <Trash2 className="h-3 w-3" />
         </button>
       )}
@@ -259,9 +263,11 @@ function truncateUrl(u: string): string {
 
 /** Legacy export — kept for back-compat with any caller still using it. */
 export function UploadButton({
-  label = 'رفع', small = false, onUploaded,
+  label, small = false, onUploaded,
 }: { label?: string; small?: boolean; onUploaded: (url: string) => void }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
+  const buttonLabel = label ?? t.editor.upload
   return (
     <>
       <button
@@ -274,7 +280,7 @@ export function UploadButton({
         }
       >
         <Upload className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} strokeWidth={2.25} />
-        {label}
+        {buttonLabel}
       </button>
       <GalleryPicker open={open} onClose={() => setOpen(false)} onPick={(url) => onUploaded(url)} />
     </>
@@ -287,7 +293,7 @@ export function UploadButton({
  * ────────────────────────────────────────────────────────────────────── */
 
 export function StringList({
-  label, value, onChange, placeholder, addLabel = 'إضافة عنصر',
+  label, value, onChange, placeholder, addLabel,
 }: {
   label?: string
   value: string[]
@@ -295,6 +301,7 @@ export function StringList({
   placeholder?: string
   addLabel?: string
 }) {
+  const t = useT()
   function update(i: number, v: string) {
     onChange(value.map((s, idx) => (idx === i ? v : s)))
   }
@@ -318,7 +325,7 @@ export function StringList({
             </button>
           </div>
         ))}
-        <AddRowButton label={addLabel} onClick={() => onChange([...value, ''])} />
+        <AddRowButton label={addLabel ?? t.editor.addItem} onClick={() => onChange([...value, ''])} />
       </div>
     </div>
   )
@@ -337,6 +344,7 @@ export function ColorRow({
   onChange: (v: string) => void
   onReset: () => void
 }) {
+  const t = useT()
   const isHex = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(value)
   return (
     <div className="flex items-center gap-2 rounded-md border border-token bg-white px-2 py-1.5">
@@ -350,7 +358,7 @@ export function ColorRow({
           <span className="text-[11px] font-semibold text-foreground">{label}</span>
           {overridden && (
             <span className="rounded bg-primary/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wider text-primary">
-              مخصّص
+              {t.editor.custom}
             </span>
           )}
         </div>
@@ -375,7 +383,7 @@ export function ColorRow({
         <button
           type="button"
           onClick={onReset}
-          title="العودة إلى النمط الجاهز"
+          title={t.editor.backToPreset}
           className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5"
         >
           <RotateCcw className="h-3 w-3" />

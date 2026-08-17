@@ -24,6 +24,7 @@
  * ─────────────────────────────────────────────────────────────────────── */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
 import Link from 'next/link'
 import { motion, useMotionValue, animate, type PanInfo } from 'framer-motion'
 import {
@@ -91,6 +92,7 @@ export type MobileEditorProps = {
 }
 
 export default function MobileEditor(props: MobileEditorProps) {
+  const t = useT()
   const {
     themeName, backHref, config, Preview,
     content, presetId, colorOverrides, typographyPreset, sectionStyles,
@@ -206,9 +208,9 @@ export default function MobileEditor(props: MobileEditorProps) {
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
   const activePanel = allPanels.find((p) => p.id === selected)
   const activeLabel =
-    selected === STYLE_ID ? 'الألوان واللوحة' :
-    selected === TYPO_ID ? 'الطباعة' :
-    activePanel?.label || 'القسم'
+    selected === STYLE_ID ? t.editor.colorsPalette :
+    selected === TYPO_ID ? t.editor.typography :
+    activePanel?.label || t.editor.section
 
   const panelToViews = useMemo(() => Object.fromEntries(
     config.panels
@@ -227,7 +229,7 @@ export default function MobileEditor(props: MobileEditorProps) {
         <Link
           href={backHref}
           className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2 py-1.5 text-[12px] font-medium text-muted active:bg-black/5"
-          aria-label="العودة"
+          aria-label={t.editor.back}
         >
           <ArrowLeft className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.25} />
         </Link>
@@ -243,7 +245,7 @@ export default function MobileEditor(props: MobileEditorProps) {
           className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition active:scale-95 disabled:opacity-50"
         >
           <Save className="h-3 w-3" strokeWidth={2.5} />
-          حفظ
+          {t.editor.save}
         </button>
       </header>
 
@@ -279,7 +281,7 @@ export default function MobileEditor(props: MobileEditorProps) {
         {detent === 'peek' && (
           <div className="pointer-events-none absolute inset-x-0 bottom-[76px] flex justify-center">
             <span className="rounded-full bg-black/70 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">
-              انقر على أي قسم لتحريره
+              {t.editor.tapAnySection}
             </span>
           </div>
         )}
@@ -323,7 +325,7 @@ export default function MobileEditor(props: MobileEditorProps) {
             ) : (
               <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
                 <LayoutGrid className="h-4 w-4 text-muted" strokeWidth={2} />
-                تحرير {brandName}
+                {t.editor.editBrand.replace('{name}', brandName)}
               </span>
             )}
             <div className="flex items-center gap-1">
@@ -333,7 +335,7 @@ export default function MobileEditor(props: MobileEditorProps) {
                   onClick={() => openTo('full')}
                   className="rounded-md px-2 py-1 text-[11.5px] font-medium text-muted active:bg-black/5"
                 >
-                  توسيع
+                  {t.editor.expand}
                 </button>
               ) : (
                 <button
@@ -341,13 +343,13 @@ export default function MobileEditor(props: MobileEditorProps) {
                   onClick={() => openTo('mid')}
                   className="rounded-md px-2 py-1 text-[11.5px] font-medium text-muted active:bg-black/5"
                 >
-                  تصغير
+                  {t.editor.shrink}
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => openTo('peek')}
-                aria-label="إغلاق"
+                aria-label={t.editor.close}
                 className="rounded-md p-1 text-muted active:bg-black/5"
               >
                 <X className="h-4 w-4" strokeWidth={2.25} />
@@ -398,7 +400,7 @@ export default function MobileEditor(props: MobileEditorProps) {
               />
             </div>
           ) : (
-            <SmallNote>اختر قسمًا لبدء التحرير.</SmallNote>
+            <SmallNote>{t.editor.pickSectionToEdit}</SmallNote>
           )}
         </div>
       </motion.div>
@@ -423,6 +425,7 @@ function Picker({
   selected: string
   onPick: (id: string) => void
 }) {
+  const t = useT()
   const pagePanels = config.panels.filter((p) => panelInView(p, view))
   return (
     <div className="space-y-4">
@@ -452,7 +455,7 @@ function Picker({
 
       {/* Sections on this page */}
       <div>
-        <PickerLabel>الأقسام</PickerLabel>
+        <PickerLabel>{t.editor.sections}</PickerLabel>
         <div className="grid grid-cols-1 gap-1.5">
           {pagePanels.map((p) => (
             <PickerRow
@@ -468,10 +471,10 @@ function Picker({
 
       {/* Global + style */}
       <div>
-        <PickerLabel>عام · كل الصفحات</PickerLabel>
+        <PickerLabel>{t.editor.globalAllPages}</PickerLabel>
         <div className="grid grid-cols-1 gap-1.5">
-          <PickerRow icon={Palette} label="الألوان واللوحة" active={selected === STYLE_ID} onClick={() => onPick(STYLE_ID)} />
-          <PickerRow icon={TypeIcon} label="الطباعة" active={selected === TYPO_ID} onClick={() => onPick(TYPO_ID)} />
+          <PickerRow icon={Palette} label={t.editor.colorsPalette} active={selected === STYLE_ID} onClick={() => onPick(STYLE_ID)} />
+          <PickerRow icon={TypeIcon} label={t.editor.typography} active={selected === TYPO_ID} onClick={() => onPick(TYPO_ID)} />
           {config.globalPanels.map((p) => (
             <PickerRow
               key={p.id}

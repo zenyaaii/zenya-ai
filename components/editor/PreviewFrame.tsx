@@ -31,6 +31,7 @@
  * ────────────────────────────────────────────────────────────────────── */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
 import { createRoot, type Root } from 'react-dom/client'
 
 export type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
@@ -74,6 +75,7 @@ export default function PreviewFrame({
    *  let the iframe fill its container edge-to-edge, ignoring the device width. */
   fullBleed?: boolean
 }) {
+  const t = useT()
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const rootRef = useRef<Root | null>(null)
   const [doc, setDoc] = useState<Document | null>(null)
@@ -209,7 +211,7 @@ export default function PreviewFrame({
             to one device viewport instead of feeding a grow-forever loop. */}
         <iframe
           ref={iframeRef}
-          title="معاينة القالب"
+          title={t.editor.previewTitle}
           className="block h-full w-full border-0 bg-white"
         />
       </div>

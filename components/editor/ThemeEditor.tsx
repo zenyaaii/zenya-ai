@@ -22,6 +22,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
+import type { Messages } from '@/lib/i18n/messages'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -77,6 +79,7 @@ export default function ThemeEditor({
   Preview: ComponentType<PreviewProps>
   backHref: string
 }) {
+  const t = useT()
   const router = useRouter()
   const supabase = createClient()
   const isMobile = useIsMobile()
@@ -131,7 +134,7 @@ export default function ThemeEditor({
       }
       const r = await fetch(`/api/themes/${themeId}`)
       if (!r.ok) {
-        setError(r.status === 404 ? 'القالب غير موجود.' : 'لا تملك صلاحية الوصول إلى هذا القالب.')
+        setError(r.status === 404 ? t.editor.themeNotFound : t.editor.noAccess)
         setLoading(false)
         return
       }
@@ -139,7 +142,7 @@ export default function ThemeEditor({
       const c = j?.theme?.content
       const inner = c?.[config.contentKey]
       if (!inner) {
-        setError(`هذا القالب ليس قالب ${config.themeName} — لا يوجد محرّر متاح.`)
+        setError(t.editor.notThisTemplate.replace('{name}', config.themeName))
         setLoading(false)
         return
       }
@@ -208,7 +211,7 @@ export default function ThemeEditor({
       })
       if (!r.ok) {
         const j = await r.json().catch(() => ({}))
-        throw new Error(j?.message || j?.error || `فشل الحفظ (${r.status})`)
+        throw new Error(j?.message || j?.error || t.editor.saveFailedStatus.replace('{status}', String(r.status)))
       }
       setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles))
       setLastSavedAt(Date.now())
@@ -216,7 +219,7 @@ export default function ThemeEditor({
       setTimeout(() => setStatus('idle'), 1600)
     } catch (e: any) {
       setStatus('error')
-      setError(e?.message || 'فشل الحفظ.')
+      setError(e?.message || t.editor.saveFailedDot)
     }
   }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey])
 
@@ -366,7 +369,7 @@ export default function ThemeEditor({
   if (loading) {
     return (
       <main className="grid min-h-screen place-items-center text-[13px] text-muted">
-        جارٍ تحميل المحرّر…
+        {t.editor.loadingEditor}
       </main>
     )
   }
@@ -375,7 +378,7 @@ export default function ThemeEditor({
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-24 text-center">
         <p className="text-foreground">{error}</p>
         <Link href="/dashboard/sites" className="mt-4 inline-block text-sm text-primary hover:underline">
-          → العودة إلى المواقع
+          {t.editor.backToSites}
         </Link>
       </main>
     )
@@ -434,8 +437,8 @@ export default function ThemeEditor({
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
   const activePanel = allPanels.find((p) => p.id === selected)
   const activePanelLabel =
-    selected === '__style__' ? 'الألوان واللوحة' :
-    selected === '__typography__' ? 'الطباعة' :
+    selected === '__style__' ? t.editor.colorsPalette :
+    selected === '__typography__' ? t.editor.typography :
     activePanel?.label || ''
 
   return (
@@ -452,13 +455,13 @@ export default function ThemeEditor({
             className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
             <ArrowLeft className="h-3 w-3 rtl-flip" strokeWidth={2.25} />
-            <span className="hidden sm:inline">العودة إلى لوحة التحكم</span>
+            <span className="hidden sm:inline">{t.editor.backToDashboard}</span>
           </Link>
           <div className="hidden lg:flex">
             <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
           </div>
           <span className="hidden truncate text-[13px] text-muted xl:inline">
-            تحرير <strong className="font-semibold text-foreground">{themeName}</strong>
+            {t.editor.edit} <strong className="font-semibold text-foreground">{themeName}</strong>
           </span>
         </div>
 
@@ -480,7 +483,7 @@ export default function ThemeEditor({
             className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <Save className="h-3 w-3" strokeWidth={2.5} />
-            حفظ
+            {t.editor.save}
           </button>
         </div>
       </header>
@@ -491,7 +494,7 @@ export default function ThemeEditor({
         <aside className="w-64 flex-shrink-0 overflow-y-auto border-e border-token bg-white">
           <div className="border-b border-token px-3 py-3">
             <div className="flex items-baseline justify-between px-1.5 pb-1.5">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">الأقسام</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">{t.editor.sections}</span>
               {config.pages && config.pages.length > 0 && (
                 <span className="text-[10px] text-muted/60">
                   {config.pages.find((p) => p.id === view)?.label || ''}
@@ -523,7 +526,7 @@ export default function ThemeEditor({
           </div>
 
           <div className="px-3 py-3">
-            <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">عام · كل الصفحات</div>
+            <div className="px-1.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">{t.editor.globalAllPages}</div>
             <div className="space-y-0.5">
               <button
                 type="button"
@@ -534,7 +537,7 @@ export default function ThemeEditor({
                 }
               >
                 <Palette className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="text-[13px]">الألوان واللوحة</span>
+                <span className="text-[13px]">{t.editor.colorsPalette}</span>
               </button>
               <button
                 type="button"
@@ -545,7 +548,7 @@ export default function ThemeEditor({
                 }
               >
                 <TypeIcon className="h-3.5 w-3.5" strokeWidth={2} />
-                <span className="text-[13px]">الطباعة</span>
+                <span className="text-[13px]">{t.editor.typography}</span>
               </button>
               {config.globalPanels.map((p) => {
                 const Icon = p.icon || Settings
@@ -607,9 +610,9 @@ export default function ThemeEditor({
         {/* Right rail — fields */}
         <aside className="w-80 flex-shrink-0 overflow-y-auto border-s border-token bg-white">
           <div className="sticky top-0 z-10 border-b border-token bg-white px-4 py-3" style={{ boxShadow: '0 1px 0 #f0ede6' }}>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">قيد التحرير</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{t.editor.editing}</div>
             <div className="mt-0.5 text-[15px] font-semibold text-foreground">
-              {activePanelLabel || 'القسم'}
+              {activePanelLabel || t.editor.section}
             </div>
           </div>
 
@@ -644,7 +647,7 @@ export default function ThemeEditor({
                 />
               </>
             ) : (
-              <SmallNote>اختر قسمًا من الجهة لبدء التحرير.</SmallNote>
+              <SmallNote>{t.editor.pickSectionFromSide}</SmallNote>
             )}
           </div>
         </aside>
@@ -664,10 +667,11 @@ export default function ThemeEditor({
 function DeviceToggle({
   device, onChange,
 }: { device: PreviewDevice; onChange: (d: PreviewDevice) => void }) {
+  const t = useT()
   const items: Array<{ id: PreviewDevice; Icon: typeof Monitor; label: string }> = [
-    { id: 'desktop', Icon: Monitor,    label: 'سطح المكتب' },
-    { id: 'tablet',  Icon: Tablet,     label: 'لوحي' },
-    { id: 'mobile',  Icon: Smartphone, label: 'جوال' },
+    { id: 'desktop', Icon: Monitor,    label: t.editor.desktop },
+    { id: 'tablet',  Icon: Tablet,     label: t.editor.tablet },
+    { id: 'mobile',  Icon: Smartphone, label: t.editor.mobile },
   ]
   return (
     <div className="flex items-center gap-0.5 rounded-full border border-token bg-surface/60 p-0.5">
@@ -678,8 +682,8 @@ function DeviceToggle({
             key={id}
             type="button"
             onClick={() => onChange(id)}
-            title={`معاينة ${label}`}
-            aria-label={`معاينة ${label}`}
+            title={t.editor.previewLabel.replace('{label}', label)}
+            aria-label={t.editor.previewLabel.replace('{label}', label)}
             aria-pressed={active}
             className={
               'inline-flex items-center justify-center rounded-full px-2.5 py-1 transition ' +
@@ -702,6 +706,7 @@ function PageSwitcher({
   view: string
   onChange: (id: string) => void
 }) {
+  const t = useT()
   return (
     <div className="hidden min-w-0 max-w-full flex-shrink items-center gap-0.5 overflow-x-auto rounded-full border border-token bg-surface/60 p-0.5 md:flex">
       {pages.map((p) => {
@@ -718,7 +723,7 @@ function PageSwitcher({
                 ? 'bg-foreground text-white shadow-sm'
                 : 'text-muted hover:bg-black/[0.04] hover:text-foreground')
             }
-            title={`تحرير صفحة ${p.label}`}
+            title={t.editor.editPage.replace('{label}', p.label)}
           >
             <Icon className="h-3 w-3" strokeWidth={2.25} />
             {p.label}

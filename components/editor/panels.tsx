@@ -11,6 +11,8 @@
  */
 
 import { useState } from 'react'
+import { useT } from '@/components/i18n/LocaleProvider'
+import type { Messages } from '@/lib/i18n/messages'
 import {
   RotateCcw, AlignLeft, AlignCenter, AlignRight, Check, Undo2, Redo2,
 } from 'lucide-react'
@@ -48,6 +50,7 @@ export function FieldsRenderer({
 function RenderField({
   field, content, patchPath, panelLabel,
 }: { field: EditorFieldDef; content: any; patchPath: (p: string, v: any) => void; panelLabel?: string }) {
+  const t = useT()
   const { confirm } = useNotify()
   if (field.type === 'note') {
     return <SmallNote>{field.content}</SmallNote>
@@ -134,8 +137,8 @@ function RenderField({
                 defaultOpen={arr.length === 1}
                 onRemove={async () => {
                   const { confirmed } = await confirm({
-                    title: `إزالة «${title}»؟`,
-                    confirmText: 'إزالة',
+                    title: t.editor.removeConfirm.replace('{title}', title),
+                    confirmText: t.editor.remove,
                     tone: 'danger',
                   })
                   if (confirmed) remove(i)
@@ -150,7 +153,7 @@ function RenderField({
               </Collapsible>
             )
           })}
-          <AddRowButton label={`+ إضافة ${f.itemLabel}`} onClick={add} />
+          <AddRowButton label={t.editor.addItemNamed.replace('{item}', f.itemLabel)} onClick={add} />
         </div>
       </div>
     )
@@ -170,12 +173,13 @@ export function ColorsPanel({
   resetOverrides: () => void
   config: EditorConfig
 }) {
+  const t = useT()
   const basePreset = config.colorPresets.find((p) => p.id === presetId) || config.colorPresets[0]
   const merged: Record<string, string> = { ...basePreset.colors, ...colorOverrides }
   return (
     <>
       <SmallNote>
-        اختر إحدى لوحات الألوان المقترحة، ثم خصّص أي لون. تُعيد «إعادة التعيين» إلى النمط الجاهز.
+        {t.editor.paletteHelp}
       </SmallNote>
       <div className="grid grid-cols-2 gap-2">
         {config.colorPresets.map((p) => {
@@ -205,7 +209,7 @@ export function ColorsPanel({
               </div>
               {selected && (
                 <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  نشط
+                  {t.editor.active}
                 </span>
               )}
             </button>
@@ -213,7 +217,7 @@ export function ColorsPanel({
         })}
       </div>
 
-      <SectionLabel>ألوان مخصّصة</SectionLabel>
+      <SectionLabel>{t.editor.customColors}</SectionLabel>
       <div className="space-y-1.5">
         {config.colorTokens.map((tok) => (
           <ColorRow
@@ -233,7 +237,7 @@ export function ColorsPanel({
           onClick={resetOverrides}
           className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
         >
-          <RotateCcw className="h-3 w-3" /> إعادة كل الألوان إلى النمط الجاهز
+          <RotateCcw className="h-3 w-3" /> {t.editor.resetAllColors}
         </button>
       )}
     </>
@@ -243,13 +247,14 @@ export function ColorsPanel({
 /* ── Typography panel ────────────────────────────────────────────────── */
 
 export function TypographyPanel({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useT()
   const [mood, setMood] = useState<'all' | typeof TYPOGRAPHY_MOODS[number]>('all')
   const presets = mood === 'all' ? TYPOGRAPHY_PRESETS : TYPOGRAPHY_PRESETS.filter((p) => p.mood === mood)
   return (
     <>
-      <SmallNote>اختر زوج خطوط. تتحدّث العناوين والنصوص في كل مكان.</SmallNote>
+      <SmallNote>{t.editor.fontsHelp}</SmallNote>
       <div className="flex flex-wrap gap-1">
-        <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>الكل</MoodChip>
+        <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>{t.editor.all}</MoodChip>
         {TYPOGRAPHY_MOODS.map((m) => (
           <MoodChip key={m} active={mood === m} onClick={() => setMood(m)}>{m}</MoodChip>
         ))}
@@ -287,7 +292,7 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
               </div>
               {selected && (
                 <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  نشط
+                  {t.editor.active}
                 </span>
               )}
             </button>
@@ -296,7 +301,7 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
       </div>
       {value && (
         <button type="button" onClick={() => onChange('')} className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground">
-          <RotateCcw className="h-3 w-3" /> استخدام الخطوط الافتراضية للنمط
+          <RotateCcw className="h-3 w-3" /> {t.editor.usePresetFonts}
         </button>
       )}
     </>
@@ -307,14 +312,15 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
 export function UndoRedo({
   canUndo, canRedo, onUndo, onRedo,
 }: { canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void }) {
+  const t = useT()
   return (
     <div className="flex flex-shrink-0 items-center gap-0.5">
       <button
         type="button"
         onClick={onUndo}
         disabled={!canUndo}
-        title="تراجع (⌘Z)"
-        aria-label="تراجع"
+        title={t.editor.undoTitle}
+        aria-label={t.editor.undo}
         className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Undo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -323,8 +329,8 @@ export function UndoRedo({
         type="button"
         onClick={onRedo}
         disabled={!canRedo}
-        title="إعادة (⌘⇧Z)"
-        aria-label="إعادة"
+        title={t.editor.redoTitle}
+        aria-label={t.editor.redo}
         className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
       >
         <Redo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -338,30 +344,31 @@ export function UndoRedo({
 export function StatusPill({
   status, dirty, lastSavedAt, now,
 }: { status: Status; dirty: boolean; lastSavedAt: number | null; now: number }) {
-  if (status === 'saving') return <span className="text-[12px] font-medium text-muted">جارٍ الحفظ…</span>
+  const t = useT()
+  if (status === 'saving') return <span className="text-[12px] font-medium text-muted">{t.editor.saving}</span>
   if (status === 'saved') {
     return (
       <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#15803d]">
-        <Check className="h-3 w-3" strokeWidth={2.5} /> تم الحفظ
+        <Check className="h-3 w-3" strokeWidth={2.5} /> {t.editor.saved}
       </span>
     )
   }
-  if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">فشل الحفظ</span>
-  if (dirty) return <span className="text-[12px] font-medium text-muted">غير محفوظ · حفظ تلقائي…</span>
+  if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">{t.editor.saveFailed}</span>
+  if (dirty) return <span className="text-[12px] font-medium text-muted">{t.editor.unsaved}</span>
   if (lastSavedAt) {
-    return <span className="text-[12px] font-medium text-muted">حُفظ {relativeTime(lastSavedAt, now)}</span>
+    return <span className="text-[12px] font-medium text-muted">{t.editor.savedAgo.replace('{time}', relativeTime(lastSavedAt, now, t))}</span>
   }
-  return <span className="text-[12px] font-medium text-muted">كل التغييرات محفوظة</span>
+  return <span className="text-[12px] font-medium text-muted">{t.editor.allSaved}</span>
 }
 
-export function relativeTime(from: number, now: number): string {
+export function relativeTime(from: number, now: number, t: Messages): string {
   const s = Math.max(0, Math.round((now - from) / 1000))
-  if (s < 5) return 'الآن'
-  if (s < 60) return `قبل ${s} ثانية`
+  if (s < 5) return t.editor.now
+  if (s < 60) return t.editor.secondsAgo.replace('{n}', String(s))
   const m = Math.round(s / 60)
-  if (m < 60) return `قبل ${m} دقيقة`
+  if (m < 60) return t.editor.minutesAgo.replace('{n}', String(m))
   const h = Math.round(m / 60)
-  return `قبل ${h} ساعة`
+  return t.editor.hoursAgo.replace('{n}', String(h))
 }
 
 /* ── Per-section text size + alignment header ─────────────────────────── */
@@ -374,6 +381,7 @@ export function SectionStyleHeader({
   onPatch: (p: Partial<SectionStyle>) => void
   onClear: () => void
 }) {
+  const t = useT()
   const activeScale = value?.text_scale ?? 1
   // No explicit alignment ⇒ none highlighted (the section inherits the theme's
   // own default, which is start/right in RTL). Each button sets its literal value.
@@ -384,22 +392,22 @@ export function SectionStyleHeader({
     <div className="rounded-lg border border-token bg-[rgba(94,106,210,0.04)] p-2.5">
       <div className="flex items-baseline justify-between">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-          نمط القسم
+          {t.editor.sectionStyle}
         </span>
         {hasOverride && (
           <button
             type="button"
             onClick={onClear}
             className="text-[10.5px] font-medium text-muted hover:text-foreground"
-            title="إعادة تعيين هذا القسم"
+            title={t.editor.resetThisSection}
           >
-            إعادة تعيين
+            {t.editor.reset}
           </button>
         )}
       </div>
 
       <div className="mt-2 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">الحجم</span>
+        <span className="text-[10.5px] text-muted">{t.editor.size}</span>
         <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
           {SECTION_TEXT_SCALES.map((s) => {
             const selected = Math.abs(activeScale - s.value) < 0.01
@@ -413,7 +421,7 @@ export function SectionStyleHeader({
                   (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
                 }
                 style={{ padding: '3px 0' }}
-                title={`حجم النص ${s.label}`}
+                title={t.editor.textSize.replace('{label}', s.label)}
               >
                 {s.label}
               </button>
@@ -423,7 +431,7 @@ export function SectionStyleHeader({
       </div>
 
       <div className="mt-1.5 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">المحاذاة</span>
+        <span className="text-[10.5px] text-muted">{t.editor.alignment}</span>
         <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
           {(
             [
@@ -443,7 +451,7 @@ export function SectionStyleHeader({
                   (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
                 }
                 style={{ padding: '4px 0' }}
-                title={`محاذاة ${id}`}
+                title={t.editor.alignTo.replace('{id}', id)}
               >
                 <Icon className="h-3 w-3" strokeWidth={2.25} />
               </button>
@@ -453,7 +461,7 @@ export function SectionStyleHeader({
       </div>
 
       <p className="mt-2 text-[10.5px] leading-snug text-muted/80">
-        يُطبَّق على قسم <strong className="font-semibold text-foreground">{panelId}</strong>.
+        {t.editor.appliesToSection} <strong className="font-semibold text-foreground">{panelId}</strong>.
       </p>
     </div>
   )
