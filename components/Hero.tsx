@@ -56,9 +56,9 @@ export default function Hero() {
             {...fade(0.06)}
             className="display-ar display-ar-tight text-[clamp(44px,8vw,82px)] text-foreground"
           >
-            موقع غير احترافي يُبعد عملاءك.
+            ابنِ وأدِر وأنشِر
             <br />
-            <span className="gradient-text">زينيا يستعيدهم بدقائق.</span>
+            <span className="gradient-text">موقعك</span>
           </motion.h1>
 
           {/* Sub — one tight, benefit-led line */}
