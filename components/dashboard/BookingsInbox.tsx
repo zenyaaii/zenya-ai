@@ -132,7 +132,7 @@ export default function BookingsInbox({
         </div>
         {access.status === 'pro' && (
           <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(94,106,210,0.10)] px-2.5 py-1 text-[11px] font-semibold text-primary">
-            <Sparkles className="h-3 w-3" /> Pro
+            <Sparkles className="h-3 w-3" /> مفعّلة
           </span>
         )}
       </div>
@@ -196,10 +196,10 @@ function AccessBanner({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-token bg-[rgba(94,106,210,0.05)] px-4 py-3">
         <p className="text-sm text-foreground">
           <span className="font-semibold">تجربة مجانية</span> — تبقّى{' '}
-          <span className="font-bold text-primary">{access.daysLeft}</span> يومًا. الحجوزات ميزة في باقة Pro.
+          <span className="font-bold text-primary">{access.daysLeft}</span> يومًا. الحجوزات ميزة في باقة Starter.
         </p>
-        <Link href="/pricing" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
-          الترقية إلى Pro <ArrowUpRight className="h-3.5 w-3.5" />
+        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
+          الترقية إلى Starter <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     )
@@ -210,10 +210,10 @@ function AccessBanner({
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[rgba(220,38,38,0.25)] bg-[rgba(220,38,38,0.05)] px-4 py-3">
         <p className="text-sm text-foreground">
           <span className="font-semibold">انتهت تجربتك المجانية.</span>{' '}
-          توقّف استقبال الحجوزات الجديدة على مواقعك — رقِّ إلى Pro لإعادة تفعيلها.
+          توقّف استقبال الحجوزات الجديدة على مواقعك — رقِّ إلى Starter لإعادة تفعيلها.
         </p>
-        <Link href="/pricing" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
-          الترقية إلى Pro <ArrowUpRight className="h-3.5 w-3.5" />
+        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
+          الترقية إلى Starter <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     )
@@ -228,7 +228,7 @@ function AccessBanner({
       <h2 className="text-lg font-bold text-foreground">فعّل الحجوزات على مواقعك</h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
         استقبل حجوزات الطاولات والمواعيد وطلبات عروض الأسعار مباشرة من زوّار مواقعك، وتابعها كلها من هنا.
-        الحجوزات ميزة في باقة Pro — وتحصل على <span className="font-semibold text-foreground">شهر مجاني</span> لتجربتها.
+        الحجوزات ميزة في باقة Starter — وتحصل على <span className="font-semibold text-foreground">شهر مجاني</span> لتجربتها.
       </p>
       <button
         onClick={onStart}

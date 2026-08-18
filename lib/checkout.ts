@@ -9,7 +9,7 @@ const EUR_COUNTRIES = new Set([
   'GB',
 ])
 
-export type PlanId = 'onetime' | 'hosting' | 'starter' | 'pro'
+export type PlanId = 'onetime' | 'hosting' | 'starter' | 'pro' | 'entry'
 
 type Picked = { priceId: string; currency: 'usd' | 'eur' }
 
@@ -31,6 +31,16 @@ export function pickPriceId(
     if (usd) return { priceId: usd, currency: 'usd' }
     if (eur) return { priceId: eur, currency: 'eur' }
     return { error: 'No one-time price configured (STRIPE_PRICE_ID / _EUR).' }
+  }
+
+  if (plan === 'entry') {
+    // Entry: a one-time $0.50 unlock for AI generation (2 templates).
+    const usd = process.env.STRIPE_PRICE_ID_ENTRY_USD || ''
+    const eur = process.env.STRIPE_PRICE_ID_ENTRY_EUR || ''
+    if (isEu && eur) return { priceId: eur, currency: 'eur' }
+    if (usd) return { priceId: usd, currency: 'usd' }
+    if (eur) return { priceId: eur, currency: 'eur' }
+    return { error: 'No Entry price configured (STRIPE_PRICE_ID_ENTRY_*).' }
   }
 
   if (plan === 'starter') {
@@ -82,12 +92,14 @@ export async function createCheckoutSession(opts: {
     cancel_url: `${opts.origin}/pricing?checkout=cancelled&plan=${opts.plan}`,
   }
 
-  if (opts.plan === 'onetime') {
+  // One-time payment plans (no recurring subscription): the legacy 'onetime'
+  // Pro purchase and the new $0.50 'entry' generation unlock.
+  if (opts.plan === 'onetime' || opts.plan === 'entry') {
     return stripe.checkout.sessions.create({
       ...baseCommon,
       mode: 'payment',
       payment_intent_data: {
-        metadata: { user_id: opts.userId, plan: 'onetime' },
+        metadata: { user_id: opts.userId, plan: opts.plan },
       },
     })
   }

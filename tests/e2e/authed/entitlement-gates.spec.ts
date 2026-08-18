@@ -2,9 +2,10 @@ import { test, expect } from '@playwright/test'
 import { TEST_USER } from '../helpers/testUser'
 import { getUserIdByEmail, setProfile, insertTheme, deleteThemesByPrefix, adminDb } from '../helpers/db'
 
-// Behavioral proof of the two capability gates that separate the tiers:
-//   • Publish/host a site  → requires has_hosting (Pro only; Starter blocked)
-//   • Export to Shopify    → requires is_pro (any paid; Free blocked)
+// Behavioral proof of the capability gates that separate the tiers (2026-08-18):
+//   • Publish on subdomain → base tier (Entry unlocked / grandfathered / paid);
+//     a locked account (not entry_unlocked) is blocked.
+//   • Export to Shopify    → requires is_pro (any paid; Entry/Free blocked)
 // We flip the test user's plan via service-role and drive the real endpoints.
 
 const PREFIX = 'E2E-GATE-'
@@ -34,35 +35,43 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   await deleteThemesByPrefix(userId, PREFIX)
-  await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, trial_themes_used: 0, trial_themes_limit: 2 })
+  await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true, trial_themes_used: 0, trial_themes_limit: 2 })
 })
 
-test.describe('Publish / hosting gate (Pro-only)', () => {
-  test('STARTER is blocked from publishing (no hosting)', async ({ request }) => {
-    await setProfile(userId, { plan: 'starter', is_pro: true, has_hosting: false })
+test.describe('Publish gate (base tier can publish on subdomain)', () => {
+  test('LOCKED account (not entry-unlocked) is blocked from publishing', async ({ request }) => {
+    await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, entry_unlocked: false })
     const res = await request.post(`/api/themes/${hostableThemeId}/publish`, {
       data: { slug: `e2e-gate-${Date.now()}` },
     })
-    expect(res.status(), 'Starter must be denied hosting').toBe(402)
-    expect((await res.json()).error).toBe('hosting_required')
+    expect(res.status(), 'Locked account must be denied publish').toBe(402)
+    expect((await res.json()).error).toBe('entry_required')
   })
 
-  test('PRO can publish (has hosting)', async ({ request }) => {
+  test('ENTRY (unlocked) can publish on its subdomain', async ({ request }) => {
+    await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true })
+    const res = await request.post(`/api/themes/${hostableThemeId}/publish`, {
+      data: { slug: `e2e-gate-${Date.now()}` },
+    })
+    expect(res.status(), 'Entry must pass the publish gate').toBe(200)
+    expect((await res.json()).ok).toBeTruthy()
+  })
+
+  test('PRO can publish', async ({ request }) => {
     await setProfile(userId, { plan: 'pro', is_pro: true, has_hosting: true })
     const res = await request.post(`/api/themes/${hostableThemeId}/publish`, {
       data: { slug: `e2e-gate-${Date.now()}` },
     })
-    // Passes the gate → publishes (200). Not a 402/entitlement rejection.
-    expect(res.status(), 'Pro must pass the hosting gate').toBe(200)
+    expect(res.status(), 'Pro must pass the publish gate').toBe(200)
     expect((await res.json()).ok).toBeTruthy()
   })
 })
 
 test.describe('Shopify export gate (paid-only)', () => {
-  test('FREE is blocked from Shopify export', async ({ request }) => {
-    await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false })
+  test('ENTRY is blocked from Shopify export', async ({ request }) => {
+    await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true })
     const res = await request.get(`/api/themes/${hostableThemeId}/export-shopify`)
-    expect(res.status(), 'Free must be denied export').toBe(402)
+    expect(res.status(), 'Entry must be denied export').toBe(402)
     expect((await res.json()).error).toBe('pro_required')
   })
 

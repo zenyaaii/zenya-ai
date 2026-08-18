@@ -23,67 +23,67 @@ const REVIEW_URL = '/contact?topic=review'
 
 const FAQS = [
   {
-    q: 'ما الفرق بين خطة Starter وخطة Pro؟',
-    a: 'تفتح خطة Starter (14.99$ شهريًا) توليدًا وتصديرًا غير محدودين بالذكاء الاصطناعي — لقالبَي التجارة الإلكترونية (المتجر والتشكيلة) تربطهما أو ترفعهما إلى متجر شوبيفاي؛ أما القوالب الأخرى فتنزّل ملف المشروع المضغوط وتستضيفه أينما شئت. وتضيف خطة Pro (24.99$ شهريًا) استضافة زينيا الكاملة لقوالب العرض (رابط مباشر، ونطاق مخصّص، وبلا شارة زينيا) إلى جانب كل ما في خطة Starter.',
+    q: 'ما الفرق بين خطط Entry وStarter وPro؟',
+    a: 'خطة Entry (0.50$ لمرة واحدة) هي بوابة الدخول: تدفعها مرّة واحدة لتوليد قالبين (٢) بالذكاء الاصطناعي، ونشرهما على اسمك.zenyaai.co، مع كل أدوات التحرير وتجربة الحجوزات والتحليلات لمدة شهر. خطة Starter (14.99$ شهريًا) تفتح توليدًا غير محدود — يشمل تحديثات القوالب — والنشر على نطاقك الخاص، والحجوزات والتحليلات كاملة، وتصدير شوبيفاي. وتضيف خطة Pro (24.99$ شهريًا) نطاقًا مخصّصًا مجانيًا لسنة، وخصم 30% على النطاقات الأغلى، وإزالة شارة زينيا — إلى جانب كل ما في Starter.',
+  },
+  {
+    q: 'لماذا صار التوليد بـ 0.50$ بدل المجاني؟',
+    a: 'المعاينة وتصفّح القوالب الثمانية تبقى مجانية بالكامل. رسم الـ 0.50$ الرمزي لمرة واحدة يفتح توليد قالبين فعليين بالذكاء الاصطناعي — يساعدنا على تغطية تكلفة التوليد وإبقاء الجودة عالية. من كان لديه حساب مجاني سابق يحتفظ بوصوله دون دفع.',
   },
   {
     q: 'هل يمكنني إلغاء اشتراكي؟',
-    a: 'نعم، في أي وقت من لوحة التحكم. يبقى اشتراكك فعّالًا حتى نهاية الفترة المدفوعة الحالية، ثم يتوقف التجديد. تبقى القوالب والتصديرات التي أنشأتها محفوظة في حسابك.',
+    a: 'نعم، في أي وقت من لوحة التحكم. يبقى اشتراكك فعّالًا حتى نهاية الفترة المدفوعة الحالية، ثم يتوقف التجديد. تبقى القوالب والتصديرات التي أنشأتها محفوظة في حسابك. (خطة Entry دفعة واحدة، لا تجديد فيها.)',
   },
   {
-    q: 'ماذا تشمل استضافة زينيا؟',
-    a: 'موقع مباشر على الاسم-المختصر.zenyaai.co لأي قالب عرض (تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم)، ونطاق مخصّص واحد متصل (مثل mystore.com)، وشهادة SSL تلقائية، وتسليم سريع عبر شبكة CDN، وإزالة تذييل «صُنع بزينيا». أما قوالب التجارة الإلكترونية (المتجر والتشكيلة) فلا تُستضاف على زينيا — بل تذهب إلى شوبيفاي.',
+    q: 'ماذا يشمل النشر والاستضافة؟',
+    a: 'على Entry ينشر موقعك على اسمك.zenyaai.co لأي قالب عرض (تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم) مع SSL تلقائي وCDN سريع. على Starter تربط نطاقك الخاص (مثل mystore.com). وتضيف Pro نطاقًا مخصّصًا مجانيًا لسنة وإزالة شارة زينيا. أما قوالب التجارة الإلكترونية (المتجر والتشكيلة) فلا تُستضاف على زينيا — بل تذهب إلى شوبيفاي.',
   },
   {
-    q: 'هل يمكنني الترقية أو التراجع بين الخطتين؟',
-    a: 'نعم. الترقية من Starter إلى Pro تبدأ فورًا من لوحة التحكم. للتراجع من Pro إلى Starter، ألغِ اشتراك Pro وابدأ اشتراك Starter — تبقى مواقعك المستضافة تعمل حتى نهاية الفترة المدفوعة الحالية.',
-  },
-  {
-    q: 'هل لديكم سياسة استرداد؟',
-    a: 'لا يوجد استرداد تلقائي على الفترة الحالية، لكن يمكنك إلغاء اشتراكك في أي وقت قبل موعد التجديد لتفادي رسوم الشهر التالي. لأي مشكلة في الفوترة، تواصل معنا وسنساعدك.',
+    q: 'هل يمكنني تجربة الحجوزات والتحليلات؟',
+    a: 'نعم. كل حساب — بدءًا من Entry — يحصل على شهر تجربة كامل للحجوزات وتحليلات الموقع. بعد انتهاء الشهر، تحتاج خطة Starter أو أعلى للاستمرار في استخدامهما.',
   },
   {
     q: 'أي القوالب يعمل وأين؟',
-    a: 'يُصدَّر قالبا التجارة الإلكترونية — المتجر والتشكيلة — كثيمات شوبيفاي جاهزة ويعملان على شوبيفاي (يتولّى شوبيفاي السلة والدفع والمنتجات والمدفوعات). لا تملك متجر شوبيفاي بعد؟ يمكنك بدء تجربة مجانية عبر رابط الإحالة أدناه. أما القوالب الأخرى — تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم — فهي مواقع عرض يمكن لزينيا استضافتها مباشرة على خطة Pro.',
+    a: 'يُصدَّر قالبا التجارة الإلكترونية — المتجر والتشكيلة — كثيمات شوبيفاي جاهزة ويعملان على شوبيفاي (يتولّى شوبيفاي السلة والدفع والمنتجات والمدفوعات)، والتصدير متاح على Starter وPro. لا تملك متجر شوبيفاي بعد؟ يمكنك بدء تجربة مجانية عبر رابط الإحالة أدناه. أما القوالب الأخرى — تطبيق، ستوديو، أزياء، عافية، خدمات، مطعم — فهي مواقع عرض تستضيفها زينيا.',
   },
 ] as const
 
 const COMPARE = [
-  { feature: 'السعر',              zenya: '14.99$ / 24.99$ شهريًا',    other: '+29$ شهريًا', agency: '+2,000$' },
+  { feature: 'السعر',              zenya: '0.50$ / 14.99$ / 24.99$',   other: '+29$ شهريًا', agency: '+2,000$' },
   { feature: 'وقت الإعداد',        zenya: 'أقل من 60 ثانية',           other: 'دقائق',       agency: 'أسابيع' },
   { feature: 'القوالب',            zenya: '8 قوالب',                   other: '1–2',         agency: 'مخصّص' },
-  { feature: 'الاستضافة مشمولة',   zenya: 'في خطة Pro',                other: 'في معظمها',   agency: 'تتولّاها بنفسك' },
-  { feature: 'نطاق مخصّص',         zenya: 'في خطة Pro',                other: 'في معظمها',   agency: 'نعم' },
-  { feature: 'تصدير شوبيفاي',      zenya: 'في الخطتين المدفوعتين',     other: 'نادر',        agency: 'مخصّص' },
+  { feature: 'النشر مشمول',        zenya: 'من خطة Entry',              other: 'في معظمها',   agency: 'تتولّاها بنفسك' },
+  { feature: 'نطاق مخصّص',         zenya: 'من خطة Starter',            other: 'في معظمها',   agency: 'نعم' },
+  { feature: 'تصدير شوبيفاي',      zenya: 'من خطة Starter',            other: 'نادر',        agency: 'مخصّص' },
   { feature: 'الارتباط بالمنصّة',  zenya: 'لا يوجد',                   other: 'مرتفع',       agency: 'لا يوجد' },
 ] as const
 
-const FREE_FEATURES = [
-  'توليدان مجانيان بالذكاء الاصطناعي (للتجربة)',
+const ENTRY_FEATURES = [
+  'توليد قالبين (٢) بالذكاء الاصطناعي — دفعة واحدة',
   'جميع القوالب الثمانية للمعاينة',
-  'معاينة موقعك على zenya.app',
-  'تخصيص أساسي',
+  'انشر موقعك على اسمك.zenyaai.co',
+  'كل أدوات التحرير والإدارة',
+  'شهر تجربة للحجوزات وتحليلات الموقع',
   'دعم المجتمع',
 ]
 
 const STARTER_FEATURES = [
-  'توليد غير محدود بالذكاء الاصطناعي',
+  'توليد غير محدود — يشمل تحديثات القوالب',
   'جميع القوالب الثمانية الاحترافية',
-  'موقع مباشر على اسمك.zenyaai.co — مجاناً',
+  'انشر على نطاقك الخاص',
   'شهادة SSL تلقائية + CDN سريع',
+  'الحجوزات وتحليلات الموقع — كاملة',
   'ملف ثيم شوبيفاي جاهز (المتجر + التشكيلة)',
-  'أولوية في التوليد بالذكاء الاصطناعي',
-  'دعم ذو أولوية',
   'وصول مبكر للقوالب الجديدة',
+  'دعم ذو أولوية',
 ]
 
 const PRO_FEATURES = [
   'كل ما في خطة Starter، بالإضافة إلى:',
-  'نطاق مخصّص مجاني لسنة (اختياري) — .store، .site، .online، .shop، …',
+  'نطاق مخصّص مجاني لسنة — .store، .site، .online، .shop، …',
   'خصم 30% على النطاقات الأغلى (.com وأمثالها)',
   'إزالة شارة «صُنع بزينيا»',
-  'تحليلات الموقع في لوحة تحكمك',
-  'عدّل المحتوى في أي وقت عبر أوامر الذكاء الاصطناعي',
+  'إدارة كاملة لموقعك ونطاقك',
   'دعم أولوية قصوى',
 ]
 
@@ -119,6 +119,7 @@ export default function PricingPage() {
   }, [supabase])
 
   const plan = String(profile?.plan || '')
+  const onEntry = plan === 'entry' || plan === 'free'
   const onStarter = plan === 'starter'
   const onPro = plan === 'pro' || plan === 'pro_hosting' || plan === 'pro_onetime' || plan === 'admin'
   const showReviewPitch = targetUpgrade === 'pro' && onStarter && !reviewed
@@ -159,7 +160,7 @@ export default function PricingPage() {
             <span className="gradient-text">وتوسّع عند الجاهزية.</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-[17px] leading-[1.85] text-muted">
-            منشئ واحد بالذكاء الاصطناعي، وخطتان مدفوعتان. مجاني للتجربة. اشترك شهريًا في Starter أو Pro، وألغِ في أي وقت.
+            المعاينة مجانية. ابدأ التوليد بـ 0.50$ لمرة واحدة (Entry)، أو اشترك شهريًا في Starter أو Pro للبناء بلا حدود — وألغِ في أي وقت.
           </p>
           {profileLoaded && (onStarter || onPro) && (
             <CurrentPlanBanner
@@ -180,17 +181,17 @@ export default function PricingPage() {
           >
             <div className="mb-6">
               <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-                مجاني
+                Entry
               </p>
               <div className="mb-2 flex items-baseline gap-1">
-                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$0</span>
-                <span className="text-[15px] text-muted">/للأبد</span>
+                <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$0.50</span>
+                <span className="text-[15px] text-muted">/لمرة واحدة</span>
               </div>
-              <p className="text-[13.5px] text-muted">جرّب زينيا. شاهد ما يبنيه الذكاء الاصطناعي.</p>
+              <p className="text-[13.5px] text-muted">ابنِ، أدِر، وانشر — جرّب زينيا بأقل تكلفة.</p>
             </div>
 
             <ul className="mb-7 flex-1 space-y-3">
-              {FREE_FEATURES.map((feat) => (
+              {ENTRY_FEATURES.map((feat) => (
                 <li key={feat} className="flex items-start gap-2.5">
                   <CheckChip color="#5f5f5d" />
                   <span className="text-[13px] text-muted">{feat}</span>
@@ -198,15 +199,28 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link
-              href="/themes"
-              className={cn(
-                'block w-full rounded-md border border-token bg-background py-3 text-center text-[14px] font-medium text-muted transition-all duration-150',
-                'hover:bg-black/5 active:scale-[0.99]'
-              )}
-            >
-              ابدأ مجانًا
-            </Link>
+            {onEntry || onStarter || onPro ? (
+              <div
+                className={cn(
+                  'inline-flex w-full items-center justify-center gap-2 rounded-md py-3 text-[14px] font-semibold',
+                  'cursor-not-allowed border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.06)] text-[#15803d]'
+                )}
+              >
+                <CheckCircle2 className="h-4 w-4" strokeWidth={2.25} />
+                {onEntry ? 'أنت على هذه الخطة' : 'خطتك تشمل Entry'}
+              </div>
+            ) : (
+              <Link
+                href="/checkout?plan=entry"
+                className={cn(
+                  'block w-full rounded-md border py-3 text-center text-[14px] font-semibold transition-all duration-150',
+                  'hover:bg-[rgba(94,106,210,0.04)] active:scale-[0.99]'
+                )}
+                style={{ borderColor: '#5e6ad2', color: '#5e6ad2' }}
+              >
+                ابدأ بـ 0.50$
+              </Link>
+            )}
           </motion.div>
 
           {/* Starter */}
@@ -241,7 +255,7 @@ export default function PricingPage() {
                 </span>
                 <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
-              <p className="text-[13.5px] text-muted">منشئ كامل بلا حدود، شهريًا. صدّر أينما شئت.</p>
+              <p className="text-[13.5px] text-muted">ابنِ، أدِر، وانشر — بلا حدود، على نطاقك الخاص.</p>
             </div>
 
             {/* Starter promo — matches Pro's badge pattern, delivered by ReviewOffer */}
@@ -299,7 +313,7 @@ export default function PricingPage() {
                 <span className="text-[42px] font-[590] leading-none tracking-[-1.4px] text-foreground">$24.99</span>
                 <span className="text-[15px] text-muted">/شهريًا</span>
               </div>
-              <p className="text-[13.5px] text-muted">نحن نستضيف. أنت توجّه نطاقك. وانتهى الأمر.</p>
+              <p className="text-[13.5px] text-muted">ابنِ، أدِر، وانشر — كل شيء مشمول، بنطاق مجاني.</p>
             </div>
 
             {/* Free domain offer badge */}

@@ -1,18 +1,12 @@
 /**
  * Bookings entitlement — who can use the reservations/bookings feature.
  *
- * Product rule (set by the founder): bookings, and the email/notification
- * layer that will grow on top of them, are a PRO-PLAN feature. To let people
- * try it, every owner gets a ONE-MONTH free trial the first time they turn it
- * on — after that it's Pro only.
+ * Product rule (2026-08-18): bookings, and the email/notification layer that
+ * will grow on top of them, are a STARTER+ feature. To let people try it,
+ * every owner (Entry / grandfathered free) gets a ONE-MONTH free trial the
+ * first time they turn it on — after that it's Starter or Pro.
  *
- *   entitled  ==  Pro plan  OR  (trial started AND now < trial start + 30 days)
- *
- * We deliberately key "Pro" off the plan string + has_hosting, NOT the cached
- * `is_pro` boolean: the Stripe webhook sets is_pro=true for Starter ($14.99)
- * too, and this feature is reserved for Pro ($24.99) exactly like the domain
- * perks in lib/domain-entitlement.ts. Starter and free reach the feature only
- * through the trial.
+ *   entitled  ==  Starter/Pro plan  OR  (trial started AND now < trial start + 30 days)
  *
  * Pure + isomorphic: no DB, no secrets. Safe to import on the server (public
  * endpoint, site render) and in client components (dashboard banner).
@@ -21,9 +15,9 @@
 /** Length of the free trial, in days. */
 export const BOOKINGS_TRIAL_DAYS = 30
 
-/** Plans that count as Pro for the bookings feature. Mirrors the Pro set in
- *  lib/domain-entitlement.ts — Starter is intentionally excluded. */
-const PRO_PLANS = new Set(['pro', 'pro_hosting', 'pro_onetime', 'admin'])
+/** Plans that include bookings outright (no trial needed). Starter and above —
+ *  Entry / grandfathered free reach the feature only through the 1-month trial. */
+const INCLUDED_PLANS = new Set(['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
 
 export type BookingProfile = {
   plan?: string | null
@@ -52,10 +46,10 @@ export type BookingAccess = {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** Is this profile on a real Pro plan (ignoring the trial)? */
+/** Does this profile include bookings outright (Starter+), ignoring the trial? */
 export function isProForBookings(p: BookingProfile | null | undefined): boolean {
   if (!p) return false
-  return !!p.has_hosting || PRO_PLANS.has(String(p.plan || ''))
+  return !!p.has_hosting || INCLUDED_PLANS.has(String(p.plan || ''))
 }
 
 /**

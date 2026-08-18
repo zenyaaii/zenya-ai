@@ -60,7 +60,8 @@ export default function AboutPage() {
             <span className="gradient-text">موقع احترافي.</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-[17px] leading-[1.9] text-muted">
-            زينيا منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي. نؤمن أن كل نشاط تجاري —
+            زينيا <strong className="font-semibold text-foreground">أوّل شركة إسلامية</strong> لإنشاء
+            المواقع بالذكاء الاصطناعي — منصّة عربية لكل نشاط تجاري. نؤمن أن كل نشاط —
             مهما كان صغيرًا — يستحقّ موقعًا يبدو احترافيًا ويكسب ثقة العملاء، دون أن يدفع
             آلاف الدولارات لوكالة أو ينتظر أسابيع.
           </p>
@@ -152,8 +153,9 @@ export default function AboutPage() {
         >
           <h2 className="text-[24px] font-[590] tracking-[-0.6px] text-foreground">من يقف خلف زينيا</h2>
           <p className="mt-4 text-[15px] leading-[1.95] text-muted">
-            زينيا تُشغّلها <strong className="font-semibold text-foreground">Musannef</strong>، مؤسسة فردية
-            مسجّلة في هولندا لدى الغرفة التجارية الهولندية (KvK رقم 42070030). هذا يعني بنية أوروبية
+            زينيا هي <strong className="font-semibold text-foreground">أوّل شركة إسلامية</strong> متخصّصة
+            في بناء المواقع بالذكاء الاصطناعي. تُشغّلها <strong className="font-semibold text-foreground">Musannef</strong>،
+            مؤسسة فردية مسجّلة في هولندا لدى الغرفة التجارية الهولندية (KvK رقم 42070030). هذا يعني بنية أوروبية
             موثوقة لاستضافة مواقعك وحماية بياناتك، مع التزام كامل بلوائح حماية البيانات الأوروبية.
           </p>
         </motion.section>
@@ -194,10 +196,11 @@ export default function AboutPage() {
             We turn your idea into a professional website.
           </h2>
           <p className="mt-4 max-w-2xl text-[15px] leading-[1.9] text-muted">
-            Zenya is an AI website builder for the Arab market. We believe every
-            business — no matter how small — deserves a site that looks
-            professional and earns customer trust, without paying thousands to an
-            agency or waiting weeks. You write a short brief; our AI writes the
+            Zenya is the <strong className="font-semibold text-foreground">first Muslim company</strong> to
+            build AI websites — an AI website builder made for the Arab market. We
+            believe every business — no matter how small — deserves a site that
+            looks professional and earns customer trust, without paying thousands to
+            an agency or waiting weeks. You write a short brief; our AI writes the
             copy, picks the design, and lays out the sections.
           </p>
           <p className="mt-4 max-w-2xl text-[15px] leading-[1.9] text-muted">
@@ -211,7 +214,8 @@ export default function AboutPage() {
             compliance.
           </p>
           <p className="mt-4 max-w-2xl text-[15px] leading-[1.9] text-muted">
-            Zenya is operated by <strong className="font-semibold text-foreground">Musannef</strong>, a
+            Zenya is the first Muslim company dedicated to building AI websites. It
+            is operated by <strong className="font-semibold text-foreground">Musannef</strong>, a
             Dutch sole proprietorship registered with the Netherlands Chamber of
             Commerce (KvK no. 42070030).
           </p>

@@ -94,8 +94,8 @@ export default function EnLayout({ children }: { children: ReactNode }) {
             <div className="md:col-span-5">
               <ZenyaMark className="h-6 text-foreground" />
               <p className="mt-3 max-w-sm text-[13.5px] leading-[1.7] text-muted">
-                Zenya is an Arabic-first AI website builder. Pick a template, write a brief, and get a
-                professional site in minutes.
+                Zenya is the first Muslim company building AI websites — Arabic-first by design. Pick a
+                template, write a brief, and get a professional site in minutes.
               </p>
               <div className="mt-5">
                 <LanguageSwitcher variant="chip" />

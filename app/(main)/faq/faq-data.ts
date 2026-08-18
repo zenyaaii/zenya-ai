@@ -12,7 +12,7 @@ export type QA = { q: string; a: string }
 export const AR_FAQS: QA[] = [
   {
     q: 'ما هي زينيا؟',
-    a: 'زينيا منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي. تختار قالبًا مناسبًا لنوع نشاطك، وتكتب نبذة قصيرة، ويتكفّل الذكاء الاصطناعي بكتابة المحتوى واختيار التصميم وترتيب الأقسام — لتحصل على موقع احترافي جاهز للنشر خلال دقائق.',
+    a: 'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. تختار قالبًا مناسبًا لنوع نشاطك، وتكتب نبذة قصيرة، ويتكفّل الذكاء الاصطناعي بكتابة المحتوى واختيار التصميم وترتيب الأقسام — لتحصل على موقع احترافي جاهز للنشر خلال دقائق.',
   },
   {
     q: 'كيف تعمل زينيا؟',
@@ -48,7 +48,7 @@ export const AR_FAQS: QA[] = [
   },
   {
     q: 'كم تكلفة زينيا؟',
-    a: 'تبدأ التجربة مجانًا (عمليتا توليد). ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود وتصدير، وخطة Pro بـ 24.99$ شهريًا تضيف الاستضافة الكاملة والنطاق المخصّص. راجع صفحة الأسعار للتفاصيل.',
+    a: 'المعاينة مجانية. يفتح التوليد بخطة Entry (0.50$ لمرة واحدة) لقالبين ونشرهما على اسمك.zenyaai.co. ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاق مخصّص وحجوزات وتحليلات، وخطة Pro بـ 24.99$ شهريًا تضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. راجع صفحة الأسعار للتفاصيل.',
   },
   {
     q: 'هل يمكنني الإلغاء في أي وقت؟',
@@ -59,7 +59,7 @@ export const AR_FAQS: QA[] = [
 export const EN_FAQS: QA[] = [
   {
     q: 'What is Zenya?',
-    a: 'Zenya is an AI website builder for the Arab market. You pick a template that matches your business type, write a short brief, and the AI writes the copy, chooses the design, and lays out the sections — giving you a professional, publish-ready site in minutes.',
+    a: 'Zenya is the first Muslim company to build AI websites, made for the Arab market. You pick a template that matches your business type, write a short brief, and the AI writes the copy, chooses the design, and lays out the sections — giving you a professional, publish-ready site in minutes.',
   },
   {
     q: 'How does Zenya work?',
@@ -95,7 +95,7 @@ export const EN_FAQS: QA[] = [
   },
   {
     q: 'How much does Zenya cost?',
-    a: 'Start free (two generations). Then Starter is $14.99/month for unlimited generation and export, and Pro is $24.99/month adding full hosting and a custom domain. See the pricing page for details.',
+    a: 'Previewing is free. AI generation unlocks with Entry, a one-time $0.50 that gives you two templates and publishing on yourname.zenyaai.co. Then Starter is $14.99/month for unlimited generation, a custom domain, bookings and analytics, and Pro is $24.99/month adding a free domain for a year and no Zenya badge. See the pricing page for details.',
   },
   {
     q: 'Can I cancel anytime?',

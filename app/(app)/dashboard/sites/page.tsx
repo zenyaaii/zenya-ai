@@ -20,11 +20,12 @@ import SiteCard, {
 import { useNotify } from '@/components/ui/Notify'
 import { publicSiteUrl } from '@/lib/portal-urls'
 
-type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
+type Plan = 'free' | 'entry' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 type Profile = {
   plan: Plan
   is_pro: boolean
   has_hosting: boolean
+  entry_unlocked: boolean
   created_at: string
 }
 
@@ -58,7 +59,7 @@ export default function SitesPage() {
     const [{ data: profileRow }, themesRes] = await Promise.all([
       supabase
         .from('profiles')
-        .select('plan, is_pro, has_hosting, created_at')
+        .select('plan, is_pro, has_hosting, entry_unlocked, created_at')
         .eq('id', user.id)
         .maybeSingle(),
       fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
@@ -146,14 +147,16 @@ export default function SitesPage() {
     plan === 'pro' ||
     !!profile?.has_hosting
 
-  // Free 30-day hosting trial: new accounts can publish on any plan (incl.
-  // free) until the window closes. `trialHosting` = live only *because* of the
-  // trial (no paid hosting yet) — those sites get a "تجربة مجانية" badge.
+  // New model (2026-08-18): subdomain publishing is part of the base tier —
+  // any unlocked account (Entry / grandfathered free) can publish. Custom
+  // domains (Starter+) and a free domain (Pro) are the paid differentiators.
+  const baseTierCanPublish =
+    !!profile?.entry_unlocked || plan === 'entry' || plan === 'free'
   const inTrial =
     !!profile?.created_at &&
     Date.now() < new Date(profile.created_at).getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000
-  const canPublish = hasHosting || inTrial
-  const trialHosting = inTrial && !hasHosting
+  const canPublish = hasHosting || baseTierCanPublish || inTrial
+  const trialHosting = false
 
   const counts = useMemo(() => {
     const live    = themes.filter((t) => t.is_published && t.slug).length

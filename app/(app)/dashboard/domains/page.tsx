@@ -12,6 +12,7 @@ import AddDomainModal from '@/components/AddDomainModal'
 import {
   priceDomainFor,
   isProProfile,
+  canConnectCustomDomain,
   PRO_DOMAIN_DISCOUNT_PCT,
   type ProfileForEntitlement,
 } from '@/lib/domain-entitlement'
@@ -128,7 +129,8 @@ export default function DomainsPage() {
     ])
 
     const profile = profileRes.data as any
-    setHasHosting(!!profile?.has_hosting || profile?.plan === 'admin')
+    // "hasHosting" here now means "can connect a custom domain" = Starter+.
+    setHasHosting(canConnectCustomDomain(profile))
     setEntitlement(profile || null)
     setHostingChecked(true)
     setDomains(domainsRes.domains || [])

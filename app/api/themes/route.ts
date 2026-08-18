@@ -47,9 +47,25 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
-    // The enforce_theme_quota trigger raises P0001 with 'trial_limit_reached:'
-    // when a free user hits their cap. Surface that as a 402 so the UI can
-    // route them to /pricing.
+    // The enforce_theme_quota trigger raises P0001 for two paywalls:
+    //   'entry_locked:'        → account hasn't bought the $0.50 Entry unlock.
+    //   'trial_limit_reached:' → unlocked base tier used up its 2 templates.
+    // Surface both as 402 so the UI can route to checkout/pricing.
+    if (error.message?.startsWith('entry_locked')) {
+      admin().from('activity_logs').insert({
+        user_id: user.id,
+        event_type: 'theme.entry_locked_hit',
+        metadata: { product_name: parsed.data.productName } as any,
+      }).then(() => {})
+      return NextResponse.json(
+        {
+          error: 'entry_locked',
+          message: 'يتطلّب التوليد فتح خطة Entry (0.50$ لمرة واحدة).',
+          cta: '/checkout?plan=entry',
+        },
+        { status: 402 }
+      )
+    }
     if (error.message?.startsWith('trial_limit_reached')) {
       // Log the trial-limit hit so we can see how often it actually converts.
       admin().from('activity_logs').insert({
@@ -58,7 +74,7 @@ export async function POST(req: NextRequest) {
         metadata: { product_name: parsed.data.productName } as any,
       }).then(() => {})
       return NextResponse.json(
-        { error: 'limit_reached', message: error.message },
+        { error: 'limit_reached', message: error.message, cta: '/checkout?plan=starter' },
         { status: 402 }
       )
     }

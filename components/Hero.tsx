@@ -47,7 +47,7 @@ export default function Hero() {
               }}
             >
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.25} />
-              8 قوالب · بصياغة الذكاء الاصطناعي · جاهزة خلال دقائق
+              أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي
             </span>
           </motion.div>
 

@@ -40,6 +40,9 @@ export async function setProfile(
     plan: string
     is_pro: boolean
     has_hosting: boolean
+    entry_unlocked: boolean
+    entry_unlocked_at: string | null
+    analytics_trial_started_at: string | null
     trial_themes_used: number
     trial_themes_limit: number
     free_domain_claimed_at: string | null
@@ -95,7 +98,7 @@ export async function insertDomain(userId: string, domain: string, themeId?: str
 export async function getProfile(userId: string) {
   const { data } = await adminDb()
     .from('profiles')
-    .select('plan, is_pro, has_hosting, trial_themes_used, trial_themes_limit')
+    .select('plan, is_pro, has_hosting, entry_unlocked, trial_themes_used, trial_themes_limit')
     .eq('id', userId)
     .maybeSingle()
   return data

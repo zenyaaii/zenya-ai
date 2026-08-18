@@ -183,6 +183,109 @@ async function recordOneTimePurchase(
   }
 }
 
+// ---------- entry unlock (one-time $0.50 generation unlock) ---------------
+
+/**
+ * Entry: a one-time $0.50 payment that unlocks AI generation (2 templates)
+ * for a previously-locked account. It is NOT a Pro purchase — it does not set
+ * is_pro and never downgrades an existing paid plan. It just flips
+ * entry_unlocked=true and, for a brand-new locked account, labels the plan
+ * 'entry' so the quota trigger applies the 2-template trial cap.
+ */
+async function recordEntryUnlock(
+  supabase: Admin,
+  session: Stripe.Checkout.Session,
+  userId: string
+) {
+  const customerId = typeof session.customer === 'string' ? session.customer : null
+  const paymentIntentId =
+    typeof session.payment_intent === 'string' ? session.payment_intent : null
+  const taxAmount = session.total_details?.amount_tax ?? 0
+  const country = session.customer_details?.address?.country || null
+
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+    expand: ['data.price'],
+    limit: 1,
+  })
+  const priceId =
+    typeof lineItems.data[0]?.price === 'string'
+      ? lineItems.data[0].price
+      : lineItems.data[0]?.price?.id || null
+
+  // Record the payment (same purchases ledger, tagged as an entry unlock).
+  await supabase.from('purchases').upsert(
+    {
+      user_id: userId,
+      stripe_checkout_session_id: session.id,
+      stripe_payment_intent_id: paymentIntentId,
+      stripe_customer_id: customerId,
+      stripe_price_id: priceId,
+      amount_cents: session.amount_total ?? 0,
+      currency: (session.currency || 'usd').toLowerCase(),
+      tax_amount_cents: taxAmount,
+      tax_country: country,
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      raw_payload: session as any,
+    },
+    { onConflict: 'stripe_checkout_session_id' }
+  )
+
+  // Flip the unlock. Only relabel a still-locked/free account to 'entry';
+  // never touch a paid plan (starter/pro/admin/legacy).
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', userId)
+    .maybeSingle()
+
+  const keepPlan = ['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'].includes(
+    String(existing?.plan || '')
+  )
+
+  await supabase
+    .from('profiles')
+    .update({
+      entry_unlocked: true,
+      entry_unlocked_at: new Date().toISOString(),
+      stripe_customer_id: customerId,
+      ...(keepPlan ? {} : { plan: 'entry' }),
+    })
+    .eq('id', userId)
+
+  await logEvent(supabase, userId, 'entry.unlocked', {
+    session_id: session.id,
+    amount_cents: session.amount_total,
+    currency: session.currency,
+  })
+
+  // Branded receipt — best-effort.
+  const buyerEmail = session.customer_details?.email || session.customer_email || null
+  if (buyerEmail) {
+    try {
+      const tmpl = paymentReceiptEmail({
+        plan: 'entry',
+        amountCents: session.amount_total ?? 0,
+        taxCents: taxAmount,
+        currency: session.currency || 'usd',
+        country,
+        receiptNumber: receiptNumber(session),
+        dateIso: new Date().toISOString(),
+        manageUrl: 'https://zenyaai.co/dashboard',
+      })
+      await sendEmail({
+        to: buyerEmail,
+        subject: tmpl.subject,
+        text: tmpl.text,
+        html: tmpl.html,
+        tags: [{ name: 'type', value: 'receipt_entry' }],
+      })
+    } catch (e) {
+      console.error('[webhook] entry unlock receipt email failed (non-fatal):', e)
+    }
+  }
+}
+
 // ---------- hosting subscription ------------------------------------------
 
 async function upsertHostingSubscription(
@@ -747,6 +850,13 @@ export async function POST(req: NextRequest) {
             domain: (session.metadata?.domain as string) || '',
             years: (session.metadata?.years as string) || '1',
           })
+        } else if (
+          session.mode === 'payment' &&
+          session.payment_status === 'paid' &&
+          userId &&
+          (session.metadata?.plan as string | undefined) === 'entry'
+        ) {
+          await recordEntryUnlock(supabase, session, userId)
         } else if (session.mode === 'payment' && session.payment_status === 'paid' && userId) {
           await recordOneTimePurchase(supabase, session, userId)
         } else if (session.mode === 'subscription' && typeof session.subscription === 'string') {

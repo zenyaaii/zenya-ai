@@ -73,37 +73,30 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     )
   }
 
-  // 2. Verify hosting entitlement (admin bypass)
+  // 2. Verify publish entitlement (admin bypass)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, has_hosting, created_at')
+    .select('plan, has_hosting, entry_unlocked, created_at')
     .eq('id', user.id)
     .maybeSingle()
 
-  // First 30 days: hosting is free on every plan (including the free plan).
-  // New users get their site live on slug.zenyaai.co immediately; after the
-  // trial window they need Starter+ to keep it online. We rely on date math
-  // off profiles.created_at — no extra flag column needed.
-  const TRIAL_DAYS = 30
-  const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000
-  const inTrial =
-    !!profile?.created_at &&
-    Date.now() < new Date(profile.created_at as string).getTime() + TRIAL_MS
+  // New model: subdomain publishing (slug.zenyaai.co) is part of the base tier.
+  // Anyone who has unlocked generation — the $0.50 Entry unlock, a grandfathered
+  // free account, or any paid plan — can publish on their subdomain. Custom
+  // domains (Starter+) and a free domain (Pro) are the paid differentiators,
+  // not subdomain hosting itself.
+  const PUBLISH_PLANS = new Set(['entry', 'free', 'starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
+  const canPublish =
+    !!profile &&
+    (!!profile.entry_unlocked || !!profile.has_hosting || PUBLISH_PLANS.has(String(profile.plan)))
+  const trialHosting = false
 
-  // Starter ($14.99) gets slug.zenya.co hosting. Pro ($24.99) adds custom domain + no badge.
-  const HOSTING_PLANS = new Set(['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
-  const hasHostingEntitlement =
-    !!profile && (HOSTING_PLANS.has(profile.plan) || !!profile.has_hosting)
-  const trialHosting = !hasHostingEntitlement && inTrial
-
-  // Allow publishing if the user has a hosting entitlement OR is still inside
-  // their free 30-day trial window.
-  if (!hasHostingEntitlement && !inTrial) {
+  if (!canPublish) {
     return NextResponse.json(
       {
-        error: 'hosting_required',
-        message: 'يتطلّب النشر خطة Starter (14.99$ شهريًا) على الأقل للحصول على موقع مباشر على اسمك.zenyaai.co.',
-        cta: '/checkout?plan=starter',
+        error: 'entry_required',
+        message: 'يتطلّب النشر فتح خطة Entry (0.50$ لمرة واحدة) على الأقل.',
+        cta: '/checkout?plan=entry',
       },
       { status: 402 }
     )

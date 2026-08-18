@@ -6,6 +6,7 @@ import {
   fetchDomainSummary,
   VercelDomainError,
 } from '@/lib/vercel-domains'
+import { canConnectCustomDomain } from '@/lib/domain-entitlement'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -87,18 +88,18 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 2. Verify hosting entitlement
+  // 2. Verify custom-domain entitlement — Starter and above (2026-08-18 model).
   const { data: profile } = await supabase
     .from('profiles')
     .select('plan, has_hosting')
     .eq('id', user.id)
     .maybeSingle()
-  if (!profile || (!profile.has_hosting && profile.plan !== 'admin')) {
+  if (!canConnectCustomDomain(profile)) {
     return NextResponse.json(
       {
-        error: 'hosting_required',
-        message: 'Custom domains require the $19.99/mo Hosting plan.',
-        cta: '/checkout?plan=hosting',
+        error: 'starter_required',
+        message: 'ربط نطاقك الخاص يتطلّب خطة Starter (14.99$ شهريًا) على الأقل.',
+        cta: '/checkout?plan=starter',
       },
       { status: 402 }
     )

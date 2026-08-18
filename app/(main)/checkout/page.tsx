@@ -16,7 +16,7 @@ function getOrigin() {
 
 function parsePlan(raw: string | string[] | undefined): PlanId {
   const v = Array.isArray(raw) ? raw[0] : raw
-  if (v === 'hosting' || v === 'starter' || v === 'pro') return v
+  if (v === 'hosting' || v === 'starter' || v === 'pro' || v === 'entry') return v
   return 'onetime'
 }
 
@@ -43,9 +43,19 @@ export default async function CheckoutPage({
   // Skip the Stripe round-trip if the user already has what this plan would give them.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_pro, has_hosting, plan')
+    .select('is_pro, has_hosting, plan, entry_unlocked')
     .eq('id', user.id)
     .maybeSingle()
+
+  // Entry is a one-time generation unlock. Anyone who already unlocked it
+  // (grandfathered free user, paid Entry, or on any paid plan) skips it.
+  if (
+    plan === 'entry' &&
+    (profile?.entry_unlocked || profile?.is_pro ||
+      ['entry', 'starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'].includes(String(profile?.plan || '')))
+  ) {
+    redirect('https://dashboard.zenyaai.co?already_unlocked=1')
+  }
 
   if (plan === 'onetime' && profile?.is_pro) {
     redirect('https://dashboard.zenyaai.co?already_pro=1')

@@ -363,7 +363,7 @@ export function announcementEmail(args?: {
  * match what was actually charged.
  */
 export function paymentReceiptEmail(args: {
-  plan: 'onetime' | 'hosting' | 'starter' | 'pro'
+  plan: 'onetime' | 'hosting' | 'starter' | 'pro' | 'entry'
   amountCents: number
   taxCents?: number
   currency: string
@@ -388,6 +388,7 @@ export function paymentReceiptEmail(args: {
     hosting: 'الاستضافة الكاملة — اشتراك شهري',
     starter: 'زينيا Starter — اشتراك شهري',
     pro: 'زينيا Pro — اشتراك شهري مع الاستضافة',
+    entry: 'زينيا Entry — فتح التوليد (دفعة واحدة)',
   }[plan]
 
   let dateStr = ''
@@ -402,6 +403,7 @@ export function paymentReceiptEmail(args: {
     hosting: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.',
     starter: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Starter. هذا إيصال رسمي بعمليتك.',
     pro: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Pro. هذا إيصال رسمي بعمليتك.',
+    entry: 'شكرًا لك! تم استلام دفعتك وفتح التوليد بالذكاء الاصطناعي في حسابك. هذا إيصال رسمي بعمليتك.',
   }[plan]
 
   const subject = `إيصال الدفع من زينيا — ${total}`
@@ -473,6 +475,7 @@ export function paymentReceiptEmail(args: {
         hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
         starter: 'هذا إيصال عن اشتراكك الشهري في خطة Starter.',
         pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
+        entry: 'هذا إيصال عن فتح التوليد بالذكاء الاصطناعي (خطة Entry، دفعة واحدة).',
       }[plan]
     } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
   })

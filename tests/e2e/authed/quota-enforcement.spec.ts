@@ -25,29 +25,54 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  // Leave the account clean: remove test themes, reset to a fresh free trial.
+  // Leave the account clean: remove test themes, reset to a fresh unlocked Entry.
   await deleteThemesByPrefix(userId, PREFIX)
-  await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, trial_themes_used: 0, trial_themes_limit: 2 })
+  await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true, trial_themes_used: 0, trial_themes_limit: 2 })
 })
 
-test('FREE plan is hard-capped at the trial limit (2), enforced on save', async ({ request }) => {
+test('LOCKED account (not entry-unlocked) is blocked from generating', async ({ request }) => {
   await deleteThemesByPrefix(userId, PREFIX)
-  await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, trial_themes_used: 0, trial_themes_limit: 2 })
+  await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, entry_unlocked: false, trial_themes_used: 0, trial_themes_limit: 2 })
+
+  const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}locked-1`) })
+  expect(res.status(), 'locked account must be blocked before generating').toBe(402)
+  expect((await res.json()).error).toBe('entry_locked')
+
+  const prof = await getProfile(userId)
+  expect(prof?.trial_themes_used).toBe(0)
+})
+
+test('ENTRY (unlocked) is hard-capped at the trial limit (2), enforced on save', async ({ request }) => {
+  await deleteThemesByPrefix(userId, PREFIX)
+  await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true, trial_themes_used: 0, trial_themes_limit: 2 })
 
   // First two saves succeed and consume the trial.
   for (let i = 1; i <= 2; i++) {
-    const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}free-${i}`) })
-    expect(res.status(), `free save #${i} should succeed`).toBe(200)
+    const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}entry-${i}`) })
+    expect(res.status(), `entry save #${i} should succeed`).toBe(200)
   }
 
   // Third save must be rejected by the quota trigger (402 limit_reached).
-  const third = await request.post('/api/themes', { data: themeBody(`${PREFIX}free-3`) })
-  expect(third.status(), 'free save #3 must be blocked').toBe(402)
+  const third = await request.post('/api/themes', { data: themeBody(`${PREFIX}entry-3`) })
+  expect(third.status(), 'entry save #3 must be blocked').toBe(402)
   expect((await third.json()).error).toBe('limit_reached')
 
   // Counter landed exactly at the limit.
   const prof = await getProfile(userId)
   expect(prof?.trial_themes_used).toBe(2)
+})
+
+test('GRANDFATHERED free (unlocked) is also capped at 2', async ({ request }) => {
+  await deleteThemesByPrefix(userId, PREFIX)
+  await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, entry_unlocked: true, trial_themes_used: 0, trial_themes_limit: 2 })
+
+  for (let i = 1; i <= 2; i++) {
+    const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}gf-${i}`) })
+    expect(res.status(), `grandfathered save #${i} should succeed`).toBe(200)
+  }
+  const third = await request.post('/api/themes', { data: themeBody(`${PREFIX}gf-3`) })
+  expect(third.status()).toBe(402)
+  expect((await third.json()).error).toBe('limit_reached')
 })
 
 test('PRO plan generates unlimited themes (no cap)', async ({ request }) => {

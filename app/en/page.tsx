@@ -10,8 +10,8 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: { absolute: 'Zenya — The Arabic-First AI Website Builder' },
   description:
-    'Zenya is an Arabic-first AI website builder. Pick one of 8 business templates, write a short brief, and the AI writes the copy and designs a professional, publish-ready website in minutes. EU hosting, custom domain, and Shopify export included.',
-  keywords: ['Arabic website builder', 'AI website builder', 'Arabic AI website builder', 'RTL website builder', 'no-code website builder'],
+    'Zenya is the first Muslim company to build AI websites — an Arabic-first AI website builder. Pick one of 8 business templates, write a short brief, and the AI writes the copy and designs a professional, publish-ready website in minutes. EU hosting, custom domain, and Shopify export included.',
+  keywords: ['first Muslim AI website builder', 'Arabic website builder', 'AI website builder', 'Arabic AI website builder', 'RTL website builder', 'no-code website builder'],
   alternates: {
     canonical: `${SITE}/en`,
     languages: { en: `${SITE}/en`, ar: `${SITE}/`, 'x-default': `${SITE}/` },
@@ -40,7 +40,7 @@ export default function EnHome() {
     name: 'Zenya — The Arabic-first AI website builder',
     url: `${SITE}/en`,
     description:
-      'Zenya is an Arabic-first AI website builder: pick a template, write a brief, and get a professional site in minutes.',
+      'Zenya is the first Muslim company to build AI websites, and an Arabic-first AI website builder: pick a template, write a brief, and get a professional site in minutes.',
   }
 
   return (
@@ -51,7 +51,7 @@ export default function EnHome() {
         <div className="max-w-3xl">
           <span className="mb-6 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium" style={{ background: 'rgba(94,106,210,0.07)', border: '1px solid rgba(94,106,210,0.20)', color: '#5e6ad2' }}>
             <Sparkles className="h-3.5 w-3.5" strokeWidth={2.25} />
-            8 templates · AI-written · ready in minutes
+            The first Muslim company building AI websites
           </span>
           <h1 className="display-ar text-[clamp(34px,6vw,60px)] leading-[1.1] text-foreground">
             The Arabic-first <span className="gradient-text">AI website builder.</span>

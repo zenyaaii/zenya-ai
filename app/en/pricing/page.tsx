@@ -9,7 +9,7 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    'Zenya pricing in plain terms. Start free with two AI generations, then Starter at $14.99/month for unlimited generation and export, or Pro at $24.99/month with full EU hosting, a custom domain free for a year, and no Zenya badge.',
+    'Zenya pricing in plain terms. Preview free, unlock two AI generations for a one-time $0.50 (Entry), then Starter at $14.99/month for unlimited generation, a custom domain, bookings and analytics, or Pro at $24.99/month adding a free domain for a year and no Zenya badge.',
   keywords: ['Zenya pricing', 'AI website builder pricing', 'Arabic website builder cost'],
   alternates: {
     canonical: `${SITE}/en/pricing`,
@@ -39,33 +39,35 @@ type Plan = {
 /** Mirrors the Arabic pricing page (app/(main)/pricing/page.tsx). Keep in sync. */
 const PLANS: Plan[] = [
   {
-    name: 'Free',
-    price: '$0',
-    tagline: 'Enough to see whether the AI writes your business well.',
+    name: 'Entry',
+    price: '$0.50',
+    cadence: 'one-time',
+    tagline: 'Build, manage, and publish — try Zenya for next to nothing.',
     features: [
-      'Two free AI generations',
+      'Generate two (2) templates with AI — one-time',
       'All eight templates to preview',
-      'Preview your site on zenya.app',
-      'Basic customisation',
+      'Publish your site on yourname.zenyaai.co',
+      'Every editing and management tool',
+      'One-month trial of bookings and site analytics',
       'Community support',
     ],
-    cta: { label: 'Start free', href: '/login?mode=signup' },
-    note: 'No card required.',
+    cta: { label: 'Start for $0.50', href: '/checkout?plan=entry' },
+    note: 'One-time payment. Previewing templates is always free.',
   },
   {
     name: 'Starter',
     price: '$14.99',
     cadence: '/month',
-    tagline: 'The full builder, no limits. Export it wherever you want.',
+    tagline: 'Build, manage, and publish — no limits, on your own domain.',
     features: [
-      'Unlimited AI generation',
+      'Unlimited AI generation — includes template updates',
       'All eight professional templates',
-      'Live site on yourname.zenyaai.co, free',
+      'Publish on your own custom domain',
       'Automatic SSL and a fast CDN',
+      'Bookings and site analytics — full access',
       'Ready Shopify theme file (Storefront and Collective)',
-      'Priority AI generation',
-      'Priority support',
       'Early access to new templates',
+      'Priority support',
     ],
     cta: { label: 'Choose Starter', href: '/pricing#plan-starter' },
     note: 'Cancel anytime.',
@@ -75,14 +77,13 @@ const PLANS: Plan[] = [
     name: 'Pro',
     price: '$24.99',
     cadence: '/month',
-    tagline: 'We host it. You point your domain. That is the whole setup.',
+    tagline: 'Build, manage, and publish — everything included, domain on us.',
     features: [
       'Everything in Starter, plus:',
       'A custom domain free for one year on standard extensions',
       '30% off pricier domains such as .com',
       'The "Made with Zenya" badge removed',
-      'Site analytics in your dashboard',
-      'Edit your content anytime with AI instructions',
+      'Full management of your site and domain',
       'Top priority support',
     ],
     cta: { label: 'Choose Pro', href: '/pricing#plan-pro' },
@@ -125,8 +126,8 @@ export default function EnPricing() {
             Pricing, <span className="gradient-text">without the asterisks.</span>
           </h1>
           <p className="mt-6 text-[17px] leading-[1.9] text-muted">
-            Try it free with two AI generations. Upgrade only once you have seen the site the AI writes for
-            your business.
+            Preview the templates for free. Unlock two AI generations for a one-time $0.50, then upgrade to
+            Starter or Pro once you have seen the site the AI writes for your business.
           </p>
         </div>
 
@@ -261,9 +262,9 @@ export default function EnPricing() {
         </div>
 
         <CtaBand
-          title="Try Zenya free"
-          subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
-          primaryLabel="Start building free"
+          title="Start building with Zenya"
+          subtitle="Preview free, then unlock two AI generations for a one-time $0.50. Pick a template, write a brief, and see what the AI builds."
+          primaryLabel="Get started"
           secondaryLabel="Browse templates"
           secondaryHref="/en/websites"
         />

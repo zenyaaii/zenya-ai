@@ -52,11 +52,27 @@ export const FREE_DOMAIN_MAX_WHOLESALE_USD = Number(
  */
 export const FREE_DOMAIN_MAX_RETAIL_USD = FREE_DOMAIN_MAX_WHOLESALE_USD
 
-/** The plan labels that count as Pro for entitlement purposes.
+/** The plan labels that count as Pro for the FREE-DOMAIN + 30%-off perks.
  *  Includes legacy `pro_onetime` (grandfathered one-time Pro buyers) so they
- *  keep the domain perk. Deliberately EXCLUDES `starter`: the pricing page
- *  reserves custom/free domains for Pro, and Starter must not receive them. */
+ *  keep the perk. Deliberately EXCLUDES `starter`: the free domain and the
+ *  30% discount are Pro-only. (Starter CAN connect a custom domain it owns —
+ *  see canConnectCustomDomain — it just doesn't get one for free.) */
 const PRO_PLANS = new Set(['pro', 'pro_hosting', 'pro_onetime', 'admin'])
+
+/** Plans allowed to CONNECT a custom domain they already own (Starter+). This
+ *  is the 2026-08-18 model: custom domains moved down to Starter; Pro adds the
+ *  free-for-a-year domain and the 30% discount on top. */
+const CUSTOM_DOMAIN_PLANS = new Set(['starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
+
+/**
+ * May this profile connect a custom domain it already owns? Starter and above.
+ * Keyed off the plan set + has_hosting (never the cached is_pro, same rationale
+ * as isProProfile below).
+ */
+export function canConnectCustomDomain(p: ProfileForEntitlement | null | undefined): boolean {
+  if (!p) return false
+  return !!p.has_hosting || CUSTOM_DOMAIN_PLANS.has(String(p.plan || ''))
+}
 
 export type ProfileForEntitlement = {
   plan?: string | null

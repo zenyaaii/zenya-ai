@@ -8,8 +8,8 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Why Zenya exists: small businesses in the Arab world were stuck choosing between a cheap site that looks it and an agency that costs thousands. Zenya is the third option, built Arabic-first and hosted in the EU.',
-  keywords: ['about Zenya', 'Arabic AI website builder', 'Zenya company'],
+    'Zenya is the first Muslim company to build AI websites. Small businesses in the Arab world were stuck choosing between a cheap site that looks it and an agency that costs thousands. Zenya is the third option, built Arabic-first and hosted in the EU.',
+  keywords: ['about Zenya', 'first Muslim AI website builder', 'Arabic AI website builder', 'Zenya company'],
   alternates: {
     canonical: `${SITE}/en/about`,
     languages: { en: `${SITE}/en/about`, ar: `${SITE}/about`, 'x-default': `${SITE}/about` },
@@ -76,8 +76,9 @@ export default function EnAbout() {
             Every business deserves a <span className="gradient-text">professional website.</span>
           </h1>
           <p className="mt-6 text-[17px] leading-[1.9] text-muted">
-            Zenya turns a short brief into a finished, publish-ready website. Built for the Arab market,
-            hosted in Europe, and priced for businesses that are just getting started.
+            Zenya is the <strong className="font-semibold text-foreground">first Muslim company</strong> to
+            build AI websites. It turns a short brief into a finished, publish-ready website. Built for the
+            Arab market, hosted in Europe, and priced for businesses that are just getting started.
           </p>
         </div>
 
@@ -134,7 +135,8 @@ export default function EnAbout() {
         <section className="mt-16 rounded-2xl border border-token bg-[var(--surface-2)] p-6">
           <h2 className="text-[16px] font-bold text-foreground">Who is behind Zenya</h2>
           <p className="mt-2 text-[13.5px] leading-[1.8] text-muted">
-            Zenya is run as a Dutch sole proprietorship and operated from the European Union. If you want to
+            Zenya is the first Muslim company dedicated to building AI websites, run as a Dutch sole
+            proprietorship and operated from the European Union. If you want to
             reach a person rather than a form, write to{' '}
             <a href="mailto:support@zenyaai.co" className="font-medium text-primary hover:text-foreground">
               support@zenyaai.co
