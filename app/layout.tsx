@@ -9,6 +9,7 @@ import { NotifyProvider } from '@/components/ui/Notify'
 import { resolveLocale } from '@/lib/i18n/server'
 import { dirFor } from '@/lib/i18n/config'
 import { LocaleProvider } from '@/components/i18n/LocaleProvider'
+import { Analytics } from '@vercel/analytics/next'
 
 const SITE_URL = 'https://zenyaai.co'
 
@@ -235,6 +236,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </NotifyProvider>
         </LocaleProvider>
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   )
