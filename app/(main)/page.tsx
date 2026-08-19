@@ -16,6 +16,7 @@ import TemplateStackSection from "@/components/marketing/TemplateStackSection"
 import IncludedSection from "@/components/marketing/IncludedSection"
 import ScrollProgress from "@/components/marketing/ScrollProgress"
 import PageBackground from "@/components/marketing/PageBackground"
+import LiveUsersGlobe from "@/components/marketing/LiveUsersGlobe"
 
 export default function Page() {
   const router = useRouter()
@@ -51,6 +52,9 @@ export default function Page() {
         {/* FAQ teaser — shared data with /faq, links through for SEO depth. */}
         <HomeFaq />
         <CTA />
+        {/* Live-users dot-globe — real, country-level visitor activity across all
+            Zenya sites. Sits last so it crops ~40% under the footer. */}
+        <LiveUsersGlobe />
       </main>
     </>
   )
