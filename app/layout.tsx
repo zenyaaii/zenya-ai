@@ -4,6 +4,7 @@ import { ReactNode } from 'react'
 import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
+import PresenceBeacon from '@/components/marketing/PresenceBeacon'
 import CookieConsent from '@/components/CookieConsent'
 import { NotifyProvider } from '@/components/ui/Notify'
 import { resolveLocale } from '@/lib/i18n/server'
@@ -230,6 +231,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         <SmoothScroll />
+        {/* Presence heartbeat feeds the live-users globe — anyone on a Zenya
+            surface counts. Customer sites report via /api/insight instead. */}
+        {!isCustomerSite && <PresenceBeacon surface={pathname.startsWith('/dashboard') ? 'app' : 'marketing'} />}
         <LocaleProvider locale={locale}>
           <NotifyProvider>
             {children}

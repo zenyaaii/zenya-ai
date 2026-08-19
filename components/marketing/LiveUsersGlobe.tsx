@@ -214,7 +214,7 @@ export default function LiveUsersGlobe() {
 
       const showTip = (i: number) => {
         const u = markers[i].user as Country
-        const label = u.count > 1 ? `${u.count} زائرًا الآن` : 'زائر الآن'
+        const label = u.count > 1 ? `${u.count} متصل الآن` : 'متصل الآن'
         tip.innerHTML = `<div class="zg-city"><span class="zg-d"></span>${u.ar}</div><div class="zg-live">${label}</div>`
         const v = markers[i].node.position.clone().applyMatrix4(world.matrixWorld).project(camera)
         const gr = stage.getBoundingClientRect(), hr = holder.getBoundingClientRect()
@@ -292,9 +292,8 @@ export default function LiveUsersGlobe() {
   }, [])
 
   const activeNow = data?.active_now ?? 0
-  const reach = data?.countries?.length ?? 0
   const hasData = data != null
-  const empty = hasData && reach === 0
+  const empty = hasData && activeNow === 0
 
   return (
     <section className="zg-section" aria-labelledby="zg-heading">
@@ -304,15 +303,13 @@ export default function LiveUsersGlobe() {
           {!hasData ? (
             <span className="zg-count">—</span>
           ) : activeNow > 0 ? (
-            <><b className="zg-count">{activeNow.toLocaleString('ar-EG')}</b><span>مستخدم مباشر الآن</span></>
-          ) : reach > 0 ? (
-            <><b className="zg-count">{reach.toLocaleString('ar-EG')}</b><span>دولة يعمل فيها عملاء زينيا اليوم</span></>
+            <><b className="zg-count">{activeNow.toLocaleString('ar-EG')}</b><span>متصل الآن</span></>
           ) : (
             <span>حول العالم</span>
           )}
         </div>
         <h2 id="zg-heading">زينيا، مباشرةً حول العالم</h2>
-        <p>كل نقطة برتقالية هي عميلٌ من زينيا يعمل الآن. اسحب الكرة لتستكشف من أين يزورون.</p>
+        <p>كل نقطة برتقالية هي شخصٌ متصل بزينيا الآن. اسحب الكرة لتستكشف من أين يتصفّحون.</p>
       </div>
 
       <div className="zg-stage" ref={stageRef}>
@@ -320,8 +317,8 @@ export default function LiveUsersGlobe() {
           <canvas ref={canvasRef} className="zg-globe" aria-label="كرة أرضية تفاعلية، كل نقطة برتقالية دولة فيها زوار مباشرون لمواقع زينيا" />
           {empty && (
             <div className="zg-empty">
-              <b>لا يوجد زوّار مباشرون الآن</b>
-              <span>ستضيء أول نقطة هنا لحظة دخول زائر إلى أحد مواقع زينيا</span>
+              <b>لا أحد متصل الآن</b>
+              <span>ستضيء أول نقطة هنا لحظة دخول أيّ شخص إلى زينيا</span>
             </div>
           )}
         </div>
