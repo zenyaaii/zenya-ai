@@ -13,7 +13,7 @@ import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
 import PublishingPlan from '@/components/app/PublishingPlan'
 import WelcomeTour from '@/components/app/WelcomeTour'
 
-type Plan = 'free' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
+type Plan = 'free' | 'entry' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
 type Profile = {
   plan: Plan
@@ -53,6 +53,7 @@ type AnalyticsSummary = {
 
 const PLAN_LABEL: Record<Plan, string> = {
   free:        'الباقة المجانية',
+  entry:       'Entry',
   pro_onetime: 'برو · مدى الحياة',
   pro_hosting: 'برو · استضافة',
   starter:     'Starter',
@@ -62,6 +63,7 @@ const PLAN_LABEL: Record<Plan, string> = {
 
 const PLAN_TINT: Record<Plan, { bg: string; ring: string; fg: string }> = {
   free:        { bg: 'rgba(28,28,28,0.06)',   ring: 'rgba(28,28,28,0.18)',   fg: '#6b6b6b' },
+  entry:       { bg: 'rgba(13,148,136,0.10)', ring: 'rgba(13,148,136,0.30)', fg: '#0d9488' },
   pro_onetime: { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
   pro_hosting: { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
   starter:     { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
