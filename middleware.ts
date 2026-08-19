@@ -360,10 +360,16 @@ export async function middleware(request: NextRequest) {
   // A visitor who has logged in before (auth cookie present) landing on the
   // apex root is sent to accounts.zenyaai.co, which shows "continue as
   // <account>" → dashboard. New visitors (no cookie) get the marketing home.
+  //
+  // Exception: `?home=1` is the explicit "I actually want to see the marketing
+  // site" signal (e.g. the dashboard's "back to marketing site" link). Without
+  // it a logged-in user could never reach the homepage — they'd bounce straight
+  // to accounts every time.
   if (
     (host === 'zenyaai.co' || host === 'www.zenyaai.co') &&
     pathname === '/' &&
-    hasAuthCookie(request)
+    hasAuthCookie(request) &&
+    request.nextUrl.searchParams.get('home') !== '1'
   ) {
     return NextResponse.redirect('https://accounts.zenyaai.co')
   }

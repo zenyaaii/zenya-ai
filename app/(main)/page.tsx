@@ -21,8 +21,11 @@ import LiveUsersGlobe from "@/components/marketing/LiveUsersGlobe"
 export default function Page() {
   const router = useRouter()
 
-  // Logged-in users visiting the homepage go straight to their dashboard
+  // Logged-in users visiting the homepage go straight to their dashboard —
+  // UNLESS they arrived via ?home=1 ("back to marketing site"), in which case
+  // they explicitly want to browse the marketing page, so leave them here.
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('home') === '1') return
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) window.location.href = 'https://dashboard.zenyaai.co'

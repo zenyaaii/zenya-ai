@@ -135,8 +135,9 @@ export default function Sidebar({
       {/* Foot — small marketing link out */}
       <div className="border-t border-token p-3 text-[11.5px] text-muted">
         {/* Dashboard runs on dashboard.zenyaai.co, so this must be the absolute
-            apex URL — a relative "/" would just reload the dashboard root. */}
-        <a href="https://zenyaai.co" className="hover:text-foreground" onClick={onMobileClose}>
+            apex URL. ?home=1 tells the apex NOT to bounce a logged-in user back
+            to accounts/dashboard — they explicitly want to see the marketing site. */}
+        <a href="https://zenyaai.co/?home=1" className="hover:text-foreground" onClick={onMobileClose}>
           → العودة إلى الموقع التسويقي
         </a>
       </div>
