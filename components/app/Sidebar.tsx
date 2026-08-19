@@ -134,9 +134,11 @@ export default function Sidebar({
 
       {/* Foot — small marketing link out */}
       <div className="border-t border-token p-3 text-[11.5px] text-muted">
-        <Link href="/" className="hover:text-foreground" onClick={onMobileClose}>
+        {/* Dashboard runs on dashboard.zenyaai.co, so this must be the absolute
+            apex URL — a relative "/" would just reload the dashboard root. */}
+        <a href="https://zenyaai.co" className="hover:text-foreground" onClick={onMobileClose}>
           → العودة إلى الموقع التسويقي
-        </Link>
+        </a>
       </div>
     </>
   )
