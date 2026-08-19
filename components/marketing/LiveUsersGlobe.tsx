@@ -235,7 +235,6 @@ export default function LiveUsersGlobe() {
       raf = requestAnimationFrame(frame)
     }
     frame()
-    requestAnimationFrame(() => canvas.classList.add('in'))
 
     return () => {
       disposed = true
@@ -290,10 +289,9 @@ export default function LiveUsersGlobe() {
 
         .zg-stage { position: relative; width: min(1120px, 96vw); height: clamp(300px, 46vh, 500px); margin-top: 22px; }
         .zg-holder { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: min(1120px, 96vw); height: clamp(500px, 76vh, 834px); }
-        .zg-globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; opacity: 0; transition: opacity .7s cubic-bezier(.22,1,.36,1); }
+        .zg-globe { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: none; }
         .zg-globe:global(.dragging) { cursor: grabbing; }
         .zg-globe:global(.over) { cursor: pointer; }
-        .zg-globe:global(.in) { opacity: 1; }
 
         .zg-tip { position: absolute; z-index: 5; pointer-events: none; opacity: 0; transform: translate(50%, -100%) translateY(-9px); transition: opacity .15s cubic-bezier(.22,1,.36,1); background: var(--surface); border: 1px solid var(--border); border-radius: 11px; box-shadow: 0 12px 30px rgba(28,28,28,.14), 0 0 0 1px var(--border); padding: 7px 11px; }
         .zg-tip:global(.on) { opacity: 1; }
