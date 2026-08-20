@@ -3,44 +3,46 @@
 import { useEffect } from 'react'
 
 /**
- * ZoomLock — caps the BASE UI size on touch devices, for every Zenya-owned
- * surface (the marketing site AND the dashboard). Mounted once at the root
- * layout; customer-generated sites are excluded there.
+ * ZoomLock — caps the BASE UI size on EVERY browser and device, for every
+ * Zenya-owned surface (the marketing site AND the dashboard). Mounted once at
+ * the root layout; customer-generated sites are excluded there.
  *
- * The owner wanted a fixed maximum interface size on phones and iPads: the
- * page should render at ~85% and not keep growing. PC and laptop screens
- * are left alone entirely.
+ * The owner wanted a fixed maximum interface size everywhere — phones, tablets,
+ * laptops and desktops, in every browser (Chrome, Safari, Firefox, Edge): the
+ * page should render at ~85% and never keep growing when the user zooms the
+ * browser.
  *
  * ── The behaviour the owner asked for (Apple-style) ──────────────────────────
- * On Apple's site, zooming in mobile Safari magnifies the page as one piece —
- * the layout never reflows, elements never resize; you just pan around a bigger
+ * On Apple's site, zooming in Safari magnifies the page as one piece — the
+ * layout never reflows, elements never resize; you just pan around a bigger
  * picture ("zoom with your hands"). That is PINCH zoom, and it must keep
- * working untouched. What the owner does NOT want is Safari's PAGE zoom /
+ * working untouched. What the owner does NOT want is the browser's PAGE zoom /
  * text-size reflowing the layout so buttons and text grow and re-wrap. This
  * component neutralises PAGE zoom (holding the render at 85%) while leaving
  * PINCH zoom completely alone.
  *
- * ── What this must NOT do: fight pinch-zoom ──────────────────────────────────
- * There are two different "zooms" on a phone and they behave in opposite ways:
- *
+ * ── The two "zooms", and why we only cancel one ──────────────────────────────
  *   • PINCH zoom  → visual-viewport only. The browser magnifies the rendered
  *     pixels and lets the reader pan around. Layout is untouched: nothing
  *     re-wraps, no section moves. This is the reader deliberately magnifying
- *     something to read it.
+ *     something to read it. On a trackpad/desktop, pinch is reported as page
+ *     zoom instead, so it is locked too — which is what the owner wants.
  *   • PAGE zoom / text-size setting → changes the layout viewport, so the page
- *     genuinely re-lays out and text re-wraps.
+ *     genuinely re-lays out and text re-wraps. This is the one we cancel.
  *
- * An earlier version of this file read `visualViewport.scale` (pinch) and
- * responded by writing CSS `zoom` on the document — and CSS `zoom` REFLOWS.
- * So pinching to magnify made the whole page re-lay out and shrink instead:
- * sections rearranged and words re-wrapped under the reader's fingers, which is
- * the exact opposite of what pinch is supposed to do.
+ * `outerWidth / innerWidth` is a clean page-zoom proxy in every browser:
+ * `outerWidth` (the OS window) is fixed while zooming, and `innerWidth` (the CSS
+ * viewport) shrinks as the user zooms in — so the ratio grows purely with zoom.
+ * Dragging the window smaller shrinks both together, so a resize does NOT
+ * trigger a false cap. `visualViewport.scale` (pinch) is deliberately excluded.
  *
- * So: pinch is never touched, and while the reader is pinched in we don't write
- * anything at all. Only the base page zoom is capped.
+ * An earlier version read `visualViewport.scale` (pinch) and wrote CSS `zoom`
+ * in response — and CSS `zoom` REFLOWS. So pinching to magnify re-laid out and
+ * shrank the page under the reader's fingers, the exact opposite of pinch. So:
+ * pinch is never touched, and while the reader is pinched in we write nothing.
  */
 
-// Rendered ceiling for the app UI on touch devices (0.85 = 85%).
+// Rendered ceiling for the UI (0.85 = 85%). This is also the base render size.
 const MAX_SCALE = 0.85
 // Never shrink past this even at extreme zoom, so the UI stays usable.
 const MIN_SCALE = 0.35
@@ -48,9 +50,6 @@ const MIN_SCALE = 0.35
 export default function ZoomLock() {
   useEffect(() => {
     const root = document.documentElement
-    // Phones and iPads report a coarse primary pointer. A laptop — even a
-    // touchscreen one — reports fine, which keeps the cap off desktop.
-    const coarse = window.matchMedia('(pointer: coarse)')
 
     let raf = 0
 
@@ -70,13 +69,8 @@ export default function ZoomLock() {
     }
 
     function apply() {
-      // Non-touch (PC/laptop): never interfere, and clear anything we set.
-      if (!coarse.matches) {
-        ;(root.style as any).zoom = ''
-        return
-      }
-      // Mid-pinch: don't write anything. Writing `zoom` here would reflow the
-      // page while the reader is magnifying it.
+      // Mid-pinch (touch): don't write anything. Writing `zoom` here would
+      // reflow the page while the reader is magnifying it.
       if (isPinched()) return
 
       const z = pageZoom()
@@ -96,11 +90,9 @@ export default function ZoomLock() {
     // continuously during a pinch — subscribing to them is what caused the
     // page to re-lay out mid-gesture.
     window.addEventListener('resize', onResize)
-    coarse.addEventListener?.('change', apply)
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
-      coarse.removeEventListener?.('change', apply)
       ;(root.style as any).zoom = ''
     }
   }, [])
