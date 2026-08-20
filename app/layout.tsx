@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import PresenceBeacon from '@/components/marketing/PresenceBeacon'
+import ZoomLock from '@/components/ZoomLock'
 import CookieConsent from '@/components/CookieConsent'
 import { NotifyProvider } from '@/components/ui/Notify'
 import { resolveLocale } from '@/lib/i18n/server'
@@ -230,6 +231,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
       </head>
       <body className="min-h-dvh bg-background text-foreground antialiased">
+        {/* Caps the base UI at ~85% on touch devices and holds it there under
+            Safari page-zoom, so the site magnifies (pinch) instead of reflowing
+            — Apple-style. Zenya's own surfaces only; a customer's published site
+            keeps its own untouched zoom behaviour. */}
+        {!isCustomerSite && <ZoomLock />}
         <SmoothScroll />
         {/* Presence heartbeat feeds the live-users globe — anyone on a Zenya
             surface counts. Customer sites report via /api/insight instead. */}

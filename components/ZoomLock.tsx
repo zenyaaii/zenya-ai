@@ -3,11 +3,22 @@
 import { useEffect } from 'react'
 
 /**
- * ZoomLock — caps the app's BASE UI size on touch devices.
+ * ZoomLock — caps the BASE UI size on touch devices, for every Zenya-owned
+ * surface (the marketing site AND the dashboard). Mounted once at the root
+ * layout; customer-generated sites are excluded there.
  *
  * The owner wanted a fixed maximum interface size on phones and iPads: the
- * dashboard should render at ~85% and not keep growing. PC and laptop screens
+ * page should render at ~85% and not keep growing. PC and laptop screens
  * are left alone entirely.
+ *
+ * ── The behaviour the owner asked for (Apple-style) ──────────────────────────
+ * On Apple's site, zooming in mobile Safari magnifies the page as one piece —
+ * the layout never reflows, elements never resize; you just pan around a bigger
+ * picture ("zoom with your hands"). That is PINCH zoom, and it must keep
+ * working untouched. What the owner does NOT want is Safari's PAGE zoom /
+ * text-size reflowing the layout so buttons and text grow and re-wrap. This
+ * component neutralises PAGE zoom (holding the render at 85%) while leaving
+ * PINCH zoom completely alone.
  *
  * ── What this must NOT do: fight pinch-zoom ──────────────────────────────────
  * There are two different "zooms" on a phone and they behave in opposite ways:
