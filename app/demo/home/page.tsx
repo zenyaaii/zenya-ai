@@ -263,20 +263,70 @@ const PILL_REST = "380px"
 const PILL_THEMES = "min(94vw, 720px)"
 const PILL_ACCOUNT = "min(94vw, 470px)"
 
+/**
+ * The shell both corner controls are built from: one glass surface holding its
+ * own button, with the tray stacked above it so the surface grows upward out
+ * of the corner rather than off the bottom of the screen.
+ *
+ * `w-0 min-w-full` on the tray is what keeps the closed width honest: the
+ * contents fill whatever width the surface is currently at without their own
+ * intrinsic width deciding it.
+ */
+function Corner({
+  open,
+  restWidth,
+  openWidth,
+  onEnter,
+  onLeave,
+  button,
+  children,
+}: {
+  open: boolean
+  restWidth: string
+  openWidth: string
+  onEnter: () => void
+  onLeave: () => void
+  button: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className="zn-corner zn-glass overflow-hidden rounded-[20px]"
+      data-open={open}
+      style={{ width: open ? openWidth : restWidth }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <div
+        className="zn-drawer grid"
+        data-open={open}
+        style={{
+          gridTemplateRows: open ? "1fr" : "0fr",
+          visibility: open ? "visible" : "hidden",
+        }}
+      >
+        <div className="w-0 min-w-full overflow-hidden">{children}</div>
+      </div>
+      {button}
+    </div>
+  )
+}
+
 export default function Page() {
   const [user, setUser] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   /* Tablet and up: which tray the pill is currently extended to show. */
   const [panel, setPanel] = useState<PanelId | null>(null)
-  /* The rail, which side of it is showing, and the two things it sets. */
-  const [railOpen, setRailOpen] = useState(false)
-  const [railTab, setRailTab] = useState<"type" | "glow">("type")
+  /* The two corner controls: which one is extended, and whether a click
+     pinned it there. Hovering opens; leaving closes again unless the reader
+     committed to it with a click, which is also the only way in on a phone. */
+  const [corner, setCorner] = useState<null | "type" | "glow">(null)
+  const [pinned, setPinned] = useState(false)
   const [styleId, setStyleId] = useState(DEFAULT_TYPE)
   const [glowId, setGlowId] = useState(DEFAULT_GLOW)
-  /* The face on its way out, kept alive just long enough to leave. */
-  const [outgoing, setOutgoing] = useState<TypeStyle | null>(null)
   const headerRef = useRef<HTMLElement>(null)
-  const railRef = useRef<HTMLDivElement>(null)
+  const typeRef = useRef<HTMLDivElement>(null)
+  const glowRef = useRef<HTMLDivElement>(null)
 
   const type = STYLES.find((s) => s.id === styleId) ?? STYLES[0]
   const glow = GLOWS.find((g) => g.id === glowId) ?? GLOWS[0]
@@ -315,38 +365,37 @@ export default function Page() {
     } catch { /* private mode; the defaults are fine */ }
   }, [])
 
-  /* Picking a face hands the old one to `outgoing`, so for the length of one
-     swap both are mounted: the old line rises out of frame while the new one
-     comes up from under it. Two layers is the only way to animate something
-     that is leaving, since React would otherwise drop it the same frame. */
   const pickType = (id: string) => {
-    if (id === styleId) return
-    setOutgoing(type)
     setStyleId(id)
     try { localStorage.setItem(STORE_KEY, id) } catch { /* ignore */ }
   }
-
-  useEffect(() => {
-    if (!outgoing) return
-    const t = setTimeout(() => setOutgoing(null), 480)
-    return () => clearTimeout(t)
-  }, [outgoing])
 
   const pickGlow = (id: string) => {
     setGlowId(id)
     try { localStorage.setItem(STORE_GLOW, id) } catch { /* ignore */ }
   }
 
+  /* Hover extends, leaving retracts, a click holds it open. Toggling the same
+     control that is already pinned puts it away. */
+  const enterCorner = (id: "type" | "glow") => setCorner(id)
+  const leaveCorner = () => { if (!pinned) setCorner(null) }
+  const toggleCorner = (id: "type" | "glow") => {
+    if (corner === id && pinned) { setPinned(false); setCorner(null); return }
+    setCorner(id)
+    setPinned(true)
+  }
+
   /* Dismissal, shared by the phone menu, the desktop trays and the rail:
      Escape, a click outside the thing, or a breakpoint change (the header
      controls do not exist on the other side of it). */
   useEffect(() => {
-    if (!menuOpen && !panel && !railOpen) return
+    if (!menuOpen && !panel && !corner) return
+    const closeCorners = () => { setCorner(null); setPinned(false) }
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return
       setMenuOpen(false)
       setPanel(null)
-      setRailOpen(false)
+      closeCorners()
     }
     const onDown = (e: PointerEvent) => {
       const target = e.target as Node
@@ -354,7 +403,10 @@ export default function Page() {
         setMenuOpen(false)
         setPanel(null)
       }
-      if (railRef.current && !railRef.current.contains(target)) setRailOpen(false)
+      const inCorner =
+        (typeRef.current?.contains(target) ?? false) ||
+        (glowRef.current?.contains(target) ?? false)
+      if (!inCorner) closeCorners()
     }
     const closeHeader = () => { setMenuOpen(false); setPanel(null) }
     const mq = window.matchMedia("(min-width: 768px)")
@@ -366,7 +418,7 @@ export default function Page() {
       document.removeEventListener("pointerdown", onDown)
       mq.removeEventListener("change", closeHeader)
     }
-  }, [menuOpen, panel, railOpen])
+  }, [menuOpen, panel, corner, pinned])
 
   /* Which tray to render. On the way closed `panel` is already null, so the
      content is held at whatever was last open and the tray collapses on its
@@ -487,16 +539,6 @@ export default function Page() {
         .zn-words > span {
           animation: zn-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
         }
-        /* Changing the face is a swap, not a repaint: the old line leaves
-           upward while the new one arrives from below, both on the same curve
-           so they read as one movement passing through. The per-word entrance
-           is suppressed on a swap, or the words would carry two transforms. */
-        @keyframes zn-swap-in  { from { opacity: 0; transform: translateY(0.38em); } to { opacity: 1; transform: none; } }
-        @keyframes zn-swap-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-0.38em); } }
-        .zn-in  { animation: zn-swap-in 460ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-        .zn-out { animation: zn-swap-out 460ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        .zn-in > span, .zn-out > span { animation: none !important; }
-
         /* The light. Straight off the design file: a wide bar of oklch colour
            sitting mostly below the fold, blurred until it is only light, and
            breathing sideways and upward on a 19s cycle. The blur and the
@@ -524,7 +566,8 @@ export default function Page() {
            uncovering a box that never changes size, so nothing on the page
            shifts while it runs. The caret is a separate hairline walking the
            same steps, which is why the two stay in lockstep. */
-        #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 0.25rem); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 3.5rem); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        @media (min-width: 768px) { #zn-claim { bottom: calc(var(--inset) + 0.4rem); } }
         #zn-claim .line { position: relative; white-space: nowrap; }
         #zn-claim .line > .text {
           display: inline-block;
@@ -571,20 +614,50 @@ export default function Page() {
         }
         .zn-drawer[data-open="true"] { transition-delay: 0s, 0s; }
 
-        .zn-rail {
-          transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
-                      opacity 260ms ease,
-                      visibility 0s linear 460ms;
+        /* The two corner controls. Anchored to the bottom of the screen, so
+           height added by the tray pushes the surface upward, out of the
+           corner; width is animated on the same curve as the header pill so
+           every surface on the page opens the same way. */
+        .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+        /* The phone header's links, opening sideways with the pill around
+           them. Visibility is stepped, so the links are out of the focus
+           order until the row has finished opening. */
+        .zn-inline-nav {
+          transition: max-width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 220ms ease 60ms,
+                      visibility 0s linear 520ms;
         }
-        .zn-rail[data-open="true"] { transition-delay: 0s, 0s, 0s; }
-        .zn-rail-list { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
-        .zn-rail-list::-webkit-scrollbar { width: 6px; }
-        .zn-rail-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 3px; }
+        .zn-inline-nav[data-open="true"] { transition-delay: 0s, 140ms, 0s; }
+
+        /* Glass, and it means it: the light behind the page is what tints
+           these. saturate pulls the colour out of whatever the blur picked up,
+           so the control in the bottom corner takes on the animation rather
+           than sitting on top of it. */
+        .zn-glass {
+          background: rgba(255, 255, 255, 0.5);
+          -webkit-backdrop-filter: blur(22px) saturate(190%);
+          backdrop-filter: blur(22px) saturate(190%);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+                      0 0 0 1px rgba(0, 0, 0, 0.05),
+                      0 10px 34px rgba(17, 17, 17, 0.07);
+        }
+        /* Backdrop filters are a stated accessibility preference for some
+           readers, and unsupported in a few engines. Both land here. */
+        @media (prefers-reduced-transparency: reduce) {
+          .zn-glass { background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; }
+        }
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+          .zn-glass { background: rgba(255, 255, 255, 0.92); }
+        }
+
+        .zn-list { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
+        .zn-list::-webkit-scrollbar { width: 6px; }
+        .zn-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 3px; }
 
         @media (prefers-reduced-motion: reduce) {
           .zn-words > span { animation: none; }
-          .zn-pill, .zn-drawer, .zn-rail { transition: none; }
-          .zn-in, .zn-out { animation: none; }
+          .zn-pill, .zn-drawer, .zn-corner, .zn-inline-nav { transition: none; }
           #zn-glow i { animation: none; }
           #zn-claim .line > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
@@ -601,66 +674,65 @@ export default function Page() {
         dir="rtl"
         className={`${ui.className} fixed inset-x-0 top-[var(--inset)] z-50 flex justify-center px-[var(--gut)]`}
       >
-        <div className="w-full max-w-[520px] md:w-auto md:max-w-none">
+        <div className="w-full max-w-full md:w-auto">
 
-          {/* Phone: one surface. The bar and the menu share a single
-              container, ring and background, so opening extends the pill
-              downward instead of dropping a second object beneath it.
-              24px is the pill's own radius (half of its 48px height), so the
-              shape is unchanged when closed and merely taller when open. */}
+          {/* Phone: a small pill, not a bar across the top. Closed it is the
+              menu, the mark and the account and nothing else; tapping the menu
+              widens the same surface sideways and the pages arrive in a row
+              inside it, rather than dropping a panel down over the page. The
+              nav is what animates: max-width is the only thing a row of links
+              can be opened with, since their real width is not known here. */}
           <div
-            className="overflow-hidden rounded-[24px] backdrop-blur-[12px] md:hidden"
-            style={{ background: "rgba(255,255,255,0.72)", boxShadow: RING }}
+            className="zn-pill mx-auto overflow-hidden rounded-full backdrop-blur-[12px] md:hidden"
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              boxShadow: RING,
+              width: menuOpen ? "min(100%, 356px)" : "158px",
+            }}
           >
-            {/* Three slots. Menu physically left, mark centred, account
-                physically right. */}
-            <div className="grid h-12 grid-cols-3 items-center px-2">
-              <div className="flex justify-start">{accountControl}</div>
+            <div className="flex h-11 items-center gap-1 px-1.5">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-expanded={menuOpen}
+                aria-controls="pill-menu"
+                aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
+                style={{ color: OBSIDIAN }}
+              >
+                {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
+              </button>
 
-              <Link href="/?home=1" aria-label="زينيا" className="flex justify-center">
+              <Link href="/?home=1" aria-label="زينيا" className="flex shrink-0 items-center px-1.5">
                 {/* Pure black is permitted here: the reference reserves #000 for
                     logo marks and graphic glyphs, nowhere else. */}
-                <ZenyaMark className="h-[17px] text-black" />
+                <ZenyaMark className="h-[16px] text-black" />
               </Link>
 
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  aria-expanded={menuOpen}
-                  aria-controls="pill-menu"
-                  aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"}
-                  className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
-                  style={{ color: OBSIDIAN }}
-                >
-                  {menuOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
-                </button>
-              </div>
-            </div>
+              <nav
+                id="pill-menu"
+                className="zn-inline-nav flex items-center overflow-hidden"
+                data-open={menuOpen}
+                style={{
+                  maxWidth: menuOpen ? "190px" : "0px",
+                  opacity: menuOpen ? 1 : 0,
+                  visibility: menuOpen ? "visible" : "hidden",
+                }}
+              >
+                {NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="whitespace-nowrap rounded-full px-1.5 py-2 text-[12.5px] leading-none"
+                    style={{ color: STONE }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
 
-            <div
-              className="zn-drawer grid"
-              data-open={menuOpen}
-              style={{
-                gridTemplateRows: menuOpen ? "1fr" : "0fr",
-                visibility: menuOpen ? "visible" : "hidden",
-              }}
-            >
-              <div className="overflow-hidden">
-                <nav id="pill-menu" className="px-1.5 pb-1.5 pt-0.5">
-                  {NAV.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="block rounded-[6px] px-3 py-2.5 text-[15px] leading-none transition-colors duration-150 hover:bg-black/[0.04] hover:text-[#171717]"
-                      style={{ color: STONE }}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
+              <span className="ms-auto flex shrink-0 items-center">{accountControl}</span>
             </div>
           </div>
 
@@ -793,93 +865,110 @@ export default function Page() {
         </div>
       </header>
 
-      {/* The type rail. Physically left, and deliberately plain: it is a tool
-          for looking at the page rather than part of it. The container takes
-          no pointer events, so the paper underneath stays clickable while the
-          rail is shut. */}
+      {/* Two controls, one in each bottom corner: the face on the left, the
+          light on the right. Each is a glass surface that grows out of its own
+          button, upward and inward, because the surface is anchored to the
+          corner it sits in. Same curve as the header pill, so everything on
+          the page opens the same way. */}
       <div
-        ref={railRef}
+        ref={typeRef}
         dir="rtl"
-        className={`${ui.className} pointer-events-none fixed inset-y-0 left-0 z-40 flex items-center py-[var(--inset)] pl-[var(--gut)]`}
+        className={`${ui.className} fixed bottom-[var(--inset)] left-[var(--gut)] z-40`}
       >
-        <button
-          type="button"
-          onClick={() => setRailOpen(true)}
-          aria-expanded={railOpen}
-          aria-controls="type-rail"
-          aria-label="الخط واللون"
-          className="absolute left-[var(--gut)] top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-opacity duration-200"
-          style={{
-            background: "rgba(255,255,255,0.72)",
-            boxShadow: RING,
-            color: OBSIDIAN,
-            opacity: railOpen ? 0 : 1,
-            pointerEvents: railOpen ? "none" : "auto",
-          }}
-        >
-          <Type size={17} strokeWidth={1.5} />
-        </button>
-
-        <div
-          id="type-rail"
-          className="zn-rail flex h-full max-h-[540px] w-[228px] flex-col overflow-hidden rounded-[20px] backdrop-blur-[12px]"
-          data-open={railOpen}
-          style={{
-            background: "rgba(255,255,255,0.88)",
-            boxShadow: RING,
-            transform: railOpen ? "translateX(0)" : "translateX(calc(-100% - var(--gut)))",
-            opacity: railOpen ? 1 : 0,
-            visibility: railOpen ? "visible" : "hidden",
-            pointerEvents: railOpen ? "auto" : "none",
-          }}
-        >
-          <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-2.5">
-            {/* Two things to set, one rail. */}
-            <div
-              className="flex items-center gap-0.5 rounded-full p-0.5"
-              style={{ background: "rgba(0,0,0,0.045)" }}
-            >
-              {(["type", "glow"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setRailTab(t)}
-                  aria-pressed={railTab === t}
-                  className="rounded-full px-2.5 py-1 text-[11.5px] leading-none transition-colors duration-150"
-                  style={{
-                    background: railTab === t ? "#fff" : "transparent",
-                    color: railTab === t ? OBSIDIAN : STONE,
-                    boxShadow: railTab === t ? "0 0 0 1px rgba(0,0,0,0.06)" : "none",
-                  }}
-                >
-                  {t === "type" ? "الخط" : "اللون"}
-                </button>
-              ))}
-            </div>
+        <Corner
+          open={corner === "type"}
+          restWidth="104px"
+          openWidth="min(78vw, 246px)"
+          onEnter={() => enterCorner("type")}
+          onLeave={leaveCorner}
+          button={
             <button
               type="button"
-              onClick={() => setRailOpen(false)}
-              aria-label="إغلاق"
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
-              style={{ color: STONE }}
+              onClick={() => toggleCorner("type")}
+              aria-expanded={corner === "type"}
+              aria-controls="type-tray"
+              className="flex h-10 w-full items-center gap-1.5 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
+              style={{ color: OBSIDIAN }}
             >
-              <X size={14} strokeWidth={1.5} />
+              <Type size={14} strokeWidth={1.6} />
+              الخط
             </button>
-          </div>
-
+          }
+        >
           {/* Every row previews itself, which is the only honest way to pick a
-              face. That does mean opening the rail pulls all 50 files; they
-              are small, they cache, and none of them load until someone asks
-              to see the list. */}
-          <div className="zn-rail-list flex-1 overflow-y-auto px-1.5 pb-2">
-            {railTab === "glow" && GLOWS.map((g) => (
+              face. That does mean extending this pulls all 50 files; they are
+              small, they cache, and none of them load until it is opened. */}
+          <div id="type-tray" className="zn-list max-h-[min(52vh,340px)] overflow-y-auto px-1.5 pb-1 pt-1.5">
+            {STYLES.map((st) => (
+              <button
+                key={st.id}
+                type="button"
+                onClick={() => pickType(st.id)}
+                aria-pressed={st.id === styleId}
+                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-1.5 transition-colors duration-150 hover:bg-black/[0.06]"
+                style={{ background: st.id === styleId ? "rgba(0,0,0,0.06)" : "transparent" }}
+              >
+                <span
+                  className={st.cls}
+                  style={{ fontWeight: st.weight, color: OBSIDIAN, fontSize: 19, lineHeight: 1.6 }}
+                >
+                  ابن
+                </span>
+                <span
+                  dir="ltr"
+                  className="truncate text-[10px] leading-none"
+                  style={{ color: st.id === styleId ? OBSIDIAN : STONE }}
+                >
+                  {st.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </Corner>
+      </div>
+
+      <div
+        ref={glowRef}
+        dir="rtl"
+        className={`${ui.className} fixed bottom-[var(--inset)] right-[var(--gut)] z-40`}
+      >
+        <Corner
+          open={corner === "glow"}
+          restWidth="112px"
+          openWidth="min(72vw, 216px)"
+          onEnter={() => enterCorner("glow")}
+          onLeave={leaveCorner}
+          button={
+            <button
+              type="button"
+              onClick={() => toggleCorner("glow")}
+              aria-expanded={corner === "glow"}
+              aria-controls="glow-tray"
+              className="flex h-10 w-full items-center gap-2 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
+              style={{ color: OBSIDIAN }}
+            >
+              {/* The button wears the mix it is currently set to. */}
+              <span
+                className="h-3.5 w-3.5 shrink-0 rounded-full"
+                style={{
+                  background: glow.grad === "none" ? "transparent" : glow.grad,
+                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
+                }}
+                aria-hidden
+              />
+              اللون
+            </button>
+          }
+        >
+          <div id="glow-tray" className="px-1.5 pb-1 pt-1.5">
+            {GLOWS.map((g) => (
               <button
                 key={g.id}
                 type="button"
                 onClick={() => pickGlow(g.id)}
                 aria-pressed={g.id === glowId}
-                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-2 transition-colors duration-150 hover:bg-black/[0.04]"
-                style={{ background: g.id === glowId ? "rgba(0,0,0,0.055)" : "transparent" }}
+                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-2 transition-colors duration-150 hover:bg-black/[0.06]"
+                style={{ background: g.id === glowId ? "rgba(0,0,0,0.06)" : "transparent" }}
               >
                 <span
                   className="text-[13px] leading-none"
@@ -887,9 +976,8 @@ export default function Page() {
                 >
                   {g.name}
                 </span>
-                {/* The swatch is the same mix the light is made of, unblurred. */}
                 <span
-                  className="h-4 w-[76px] shrink-0 rounded-full"
+                  className="h-4 w-[68px] shrink-0 rounded-full"
                   style={{
                     background: g.grad === "none" ? "transparent" : g.grad,
                     boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
@@ -898,33 +986,8 @@ export default function Page() {
                 />
               </button>
             ))}
-
-            {railTab === "type" && STYLES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => pickType(s.id)}
-                aria-pressed={s.id === styleId}
-                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-1.5 transition-colors duration-150 hover:bg-black/[0.04]"
-                style={{ background: s.id === styleId ? "rgba(0,0,0,0.055)" : "transparent" }}
-              >
-                <span
-                  className={s.cls}
-                  style={{ fontWeight: s.weight, color: OBSIDIAN, fontSize: 19, lineHeight: 1.6 }}
-                >
-                  ابن
-                </span>
-                <span
-                  dir="ltr"
-                  className="truncate text-[10px] leading-none"
-                  style={{ color: s.id === styleId ? OBSIDIAN : STONE }}
-                >
-                  {s.name}
-                </span>
-              </button>
-            ))}
           </div>
-        </div>
+        </Corner>
       </div>
 
       {/* The hero is the whole page: bare paper, no rules, no grid, nothing
@@ -949,53 +1012,31 @@ export default function Page() {
           <div className="head"><i /></div>
         </div>
 
-        {/* Two layers, so a face can be seen leaving. The incoming line is the
-            one in flow and the one that sizes the box; the outgoing is laid
-            over it and pulled after half a second. */}
-        <div className="relative z-[1] flex items-center justify-center">
-          {outgoing && (
-            <h1
-              key={outgoing.id}
-              aria-hidden
-              className={`${outgoing.cls} zn-words zn-out pointer-events-none absolute inset-0 flex flex-wrap items-center justify-center gap-x-[0.3em] gap-y-1 text-center`}
-              style={{
-                color: OBSIDIAN,
-                fontWeight: outgoing.weight,
-                lineHeight: outgoing.lh,
-                "--scale": outgoing.scale,
-                "--lh": outgoing.lh,
-              } as React.CSSProperties}
+        {/* Revealed in sequence on the first load: the order is the product,
+            build then manage then publish. Slow and short-travelled so it
+            settles rather than announces itself. Changing the face swaps the
+            type in place, with no movement of its own. */}
+        <h1
+          id="hero-words"
+          className={`${type.cls} zn-words relative z-[1] flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center`}
+          style={{
+            color: OBSIDIAN,
+            fontWeight: type.weight,
+            lineHeight: type.lh,
+            "--scale": type.scale,
+            "--lh": type.lh,
+          } as React.CSSProperties}
+        >
+          {WORDS.map((word, i) => (
+            <span
+              key={word}
+              className="inline-block"
+              style={{ animationDelay: `${0.15 + i * 0.18}s` }}
             >
-              {WORDS.map((word) => <span key={word} className="inline-block">{word}</span>)}
-            </h1>
-          )}
-
-          {/* Revealed in sequence on the first load: the order is the product,
-              build then manage then publish. Slow and short-travelled so it
-              settles rather than announces itself. */}
-          <h1
-            id="hero-words"
-            key={type.id}
-            className={`${type.cls} zn-words relative flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center${outgoing ? " zn-in" : ""}`}
-            style={{
-              color: OBSIDIAN,
-              fontWeight: type.weight,
-              lineHeight: type.lh,
-              "--scale": type.scale,
-              "--lh": type.lh,
-            } as React.CSSProperties}
-          >
-            {WORDS.map((word, i) => (
-              <span
-                key={word}
-                className="inline-block"
-                style={{ animationDelay: `${0.15 + i * 0.18}s` }}
-              >
-                {word}
-              </span>
-            ))}
-          </h1>
-        </div>
+              {word}
+            </span>
+          ))}
+        </h1>
 
         {/* The claim, typed once over the light. Real content, not decoration,
             so it is in the document and readable with animation off. */}
