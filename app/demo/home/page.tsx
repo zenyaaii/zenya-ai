@@ -620,15 +620,10 @@ export default function Page() {
            every surface on the page opens the same way. */
         .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1); }
 
-        /* The phone header's links, opening sideways with the pill around
-           them. Visibility is stepped, so the links are out of the focus
-           order until the row has finished opening. */
-        .zn-inline-nav {
-          transition: max-width 520ms cubic-bezier(0.22, 1, 0.36, 1),
-                      opacity 220ms ease 60ms,
-                      visibility 0s linear 520ms;
-        }
-        .zn-inline-nav[data-open="true"] { transition-delay: 0s, 140ms, 0s; }
+        /* The phone pill widening from the middle. min-width rather than
+           width, so the closed size is still whatever the contents measure and
+           only the opening is a number. */
+        .zn-phone-pill { transition: min-width 520ms cubic-bezier(0.22, 1, 0.36, 1); }
 
         /* Glass, and it means it: the light behind the page is what tints
            these. saturate pulls the colour out of whatever the blur picked up,
@@ -657,7 +652,7 @@ export default function Page() {
 
         @media (prefers-reduced-motion: reduce) {
           .zn-words > span { animation: none; }
-          .zn-pill, .zn-drawer, .zn-corner, .zn-inline-nav { transition: none; }
+          .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill { transition: none; }
           #zn-glow i { animation: none; }
           #zn-claim .line > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
@@ -681,16 +676,23 @@ export default function Page() {
               widens the same surface sideways and the pages arrive in a row
               inside it, rather than dropping a panel down over the page.
 
-              The pill takes its width from its contents, and the nav's
-              max-width is the only thing animated: the pill is `fit-content`,
-              so it tracks the nav frame by frame as it opens and lands exactly
-              on its own content. Pinning a closed width here instead is what
-              clipped the call to action into the mark, because the row needs
-              whatever the mark, the menu and the account actually measure, and
-              that changes with the account state and with the font. */}
+              It opens on both axes at once: min-width pushes the pill wider
+              from the middle, so it reaches out to the left and the right
+              together, while the tray underneath takes the pages down.
+
+              Width comes from the contents, never from a number: the pill is
+              `fit-content` with min-width doing the opening, so the closed
+              state is exactly as wide as the mark, the menu and the account
+              actually measure. Pinning a closed width here instead is what
+              clipped the call to action into the mark, since that measurement
+              changes with the account state and with the font. */}
           <div
-            className="mx-auto w-fit max-w-full overflow-hidden rounded-full backdrop-blur-[12px] md:hidden"
-            style={{ background: "rgba(255,255,255,0.72)", boxShadow: RING }}
+            className="zn-phone-pill mx-auto w-fit max-w-full overflow-hidden rounded-[22px] backdrop-blur-[12px] md:hidden"
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              boxShadow: RING,
+              minWidth: menuOpen ? "min(86vw, 268px)" : "0px",
+            }}
           >
             <div className="flex h-11 items-center gap-1.5 px-1.5">
               <button
@@ -711,30 +713,34 @@ export default function Page() {
                 <ZenyaMark className="h-[16px] text-black" />
               </Link>
 
-              <nav
-                id="pill-menu"
-                className="zn-inline-nav flex items-center overflow-hidden"
-                data-open={menuOpen}
-                style={{
-                  maxWidth: menuOpen ? "260px" : "0px",
-                  opacity: menuOpen ? 1 : 0,
-                  visibility: menuOpen ? "visible" : "hidden",
-                }}
-              >
-                {NAV.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="whitespace-nowrap rounded-full px-1.5 py-2 text-[12.5px] leading-none"
-                    style={{ color: STONE }}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
+              <span className="ms-auto flex shrink-0 items-center">{accountControl}</span>
+            </div>
 
-              <span className="flex shrink-0 items-center">{accountControl}</span>
+            {/* The pages, taken down rather than squeezed into the row. Same
+                grid-rows technique as every other tray on the page. */}
+            <div
+              className="zn-drawer grid"
+              data-open={menuOpen}
+              style={{
+                gridTemplateRows: menuOpen ? "1fr" : "0fr",
+                visibility: menuOpen ? "visible" : "hidden",
+              }}
+            >
+              <div className="w-0 min-w-full overflow-hidden">
+                <nav id="pill-menu" className="px-1.5 pb-1.5 pt-0.5">
+                  {NAV.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block rounded-[10px] px-3 py-2.5 text-[14px] leading-none transition-colors duration-150 hover:bg-black/[0.04] hover:text-[#171717]"
+                      style={{ color: STONE }}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
             </div>
           </div>
 
