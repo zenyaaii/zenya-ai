@@ -4,10 +4,11 @@
  * Candidate homepage — one page, one screen. A floating pill header over bare
  * paper, and three words in the middle. Nothing else, no dividers anywhere.
  *
- * WORK IN PROGRESS. Lives at /demo/home and is listed in .vercelignore, so it
- * runs on the local dev server but never reaches a deploy. When it is approved,
- * move this file to app/(main)/page.tsx, restore the nav/footer/consent hiding
- * for that layout, and drop the .vercelignore entry.
+ * NOT the homepage. It ships as a standalone route at /demo/home so it can be
+ * reviewed on the real domain; app/(main)/page.tsx remains the homepage and is
+ * untouched. Do not wire this into `/`. If it is ever promoted, move the file
+ * to app/(main)/page.tsx and restore the nav/footer/consent hiding that the
+ * (main) layout needs.
  *
  * Visual language: the Vercel design system per the reference — "typeset
  * terminal on white paper". Light canvas (#fafafa), near-black type (#171717,
