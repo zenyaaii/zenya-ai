@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
-import ZoomLock from './ZoomLock'
 
 /**
  * Logged-in app surface.
@@ -61,8 +60,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
    */
   return (
     <div className="flex min-h-[100dvh] bg-[#f7f4ed] lg:h-screen lg:overflow-hidden">
-      {/* Caps the app's base UI size on touch devices (never fights pinch). */}
-      <ZoomLock />
+      {/* The base-UI zoom cap now lives globally in the root layout (ZoomLock),
+          so it covers the marketing site too — not just this dashboard. */}
       <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col lg:overflow-hidden">
