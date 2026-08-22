@@ -12,6 +12,9 @@ import { createClient } from '@/utils/supabase/client'
 import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
 import PublishingPlan from '@/components/app/PublishingPlan'
 import WelcomeTour from '@/components/app/WelcomeTour'
+import {
+  CheckoutCelebration, EntryWelcomeBanner, EntrySpentBanner,
+} from '@/components/app/EntryCelebration'
 
 type Plan = 'free' | 'entry' | 'pro_onetime' | 'pro_hosting' | 'starter' | 'pro' | 'admin'
 
@@ -124,6 +127,8 @@ export default function DashboardHomePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
+      {/* Post-checkout celebration — self-gates on ?checkout=success */}
+      <CheckoutCelebration />
       {/* One-time "get to know Zenya" welcome modal (first visit only) */}
       <WelcomeTour />
 
@@ -152,6 +157,12 @@ export default function DashboardHomePage() {
         />
       )}
       {!loading && plan === 'free' && trialRemaining === 0 && <TrialSpentBanner />}
+
+      {/* Entry-tier warmth: a one-time welcome, or a gentle "out of generations" nudge */}
+      {!loading && plan === 'entry' && trialRemaining > 0 && (
+        <EntryWelcomeBanner trialRemaining={trialRemaining} />
+      )}
+      {!loading && plan === 'entry' && trialRemaining === 0 && <EntrySpentBanner />}
 
       {/* Stat grid */}
       <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -387,6 +398,27 @@ function PlanCard({
         </div>
         <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">كل المزايا مفتوحة</div>
         <div className="mt-1 text-[12px] text-muted">الاستضافة + مدى الحياة مشمولان</div>
+      </div>
+    )
+  }
+  if (plan === 'entry') {
+    const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
+    return (
+      <div className="rounded-2xl border border-token bg-white p-5">
+        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#b8860b' }}>
+          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
+          خطة Entry
+        </div>
+        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
+          {trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'استخدمت قالبيك'}
+        </div>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
+          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#b8860b' }} />
+        </div>
+        <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
+          توليد بلا حدود · Starter 14.99$
+          <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
+        </Link>
       </div>
     )
   }
@@ -628,6 +660,8 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
 
 function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: number }) {
   if (plan === 'pro_hosting' || plan === 'pro' || plan === 'admin') return null
+  // Entry has its own dedicated welcome/meter + PlanCard nudge — no third CTA.
+  if (plan === 'entry') return null
   if (plan === 'pro_onetime') {
     return (
       <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
