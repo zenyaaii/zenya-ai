@@ -12,14 +12,26 @@
  *
  * Visual language: the Vercel design system per the reference, "typeset
  * terminal on white paper". Light canvas (#fafafa), near-black type (#171717,
- * never pure #000), strict grey ramp, hairline rings instead of shadows, no
- * colour at all. The page carries no rules and no dividers.
+ * never pure #000), strict grey ramp, hairline rings instead of shadows. The
+ * page carries no rules and no dividers, and every pixel of colour on it
+ * belongs to the light at the edges: nothing else is tinted.
  *
- * The three words are not locked to one face. A rail on the physical left
- * offers 50 typographic settings, every Arabic-subset family next/font can
- * serve, and the choice is remembered in localStorage. This is a chooser for
- * picking the real thing, so the rail is deliberately plain: a tool sitting
- * on the page, not part of the composition.
+ * Two things on the page are the reader's to set, both from one rail on the
+ * physical left, both remembered in localStorage: the face the three words are
+ * in (50 settings, every Arabic-subset family next/font can serve, Tajawal at
+ * 900 by default) and the colour of the light behind them (9 mixes, including
+ * one that turns it off). The rail is deliberately plain, a tool sitting on
+ * the page rather than part of the composition.
+ *
+ * The light itself is the background animation from the Claude Design file:
+ * a wide bar of oklch colour anchored mostly below the fold, blurred until it
+ * is only light, breathing sideways and upward on a 19s cycle. A fainter,
+ * slower, counter-running twin hangs off the top edge. Nothing was copied but
+ * the motion: the geometry, the blur ratio and the keyframe are the design's,
+ * the palettes and the second glow are ours.
+ *
+ * Over the foot of it sits the one claim the page makes, typed out once on
+ * load behind a moving caret.
  *
  * Two rules hold for all 50, because the type is Arabic:
  *   - no negative letter-spacing (the reference asks for -0.06em at display
@@ -42,10 +54,11 @@ import { createClient } from "@/utils/supabase/client"
 import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
 
 /* The default face for the three words, and the only one that is preloaded,
-   because it is what the page renders before anybody picks anything. */
-const display = Almarai({
+   because it is what the page renders before anybody picks anything. Both cuts
+   are declared here: the rail offers Tajawal at 900 and at 200. */
+const display = Tajawal({
   subsets: ["arabic"],
-  weight: ["400"],
+  weight: ["200", "900"],
   display: "swap",
 })
 
@@ -63,6 +76,7 @@ const ui = IBM_Plex_Sans_Arabic({
    moment something on the page is actually set in that face, so nothing is
    downloaded for a face nobody picks. */
 const fAlexandria = Alexandria({ subsets: ["arabic"], display: "swap", preload: false })
+const fAlmarai = Almarai({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
 const fAlkalami = Alkalami({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
 const fAmiri = Amiri({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
 const fAmiriQuran = Amiri_Quran({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
@@ -102,7 +116,6 @@ const fReemKufiInk = Reem_Kufi_Ink({ subsets: ["arabic"], weight: ["400"], displ
 const fRubik = Rubik({ subsets: ["arabic"], display: "swap", preload: false })
 const fRuwudu = Ruwudu({ subsets: ["arabic"], weight: ["500"], display: "swap", preload: false })
 const fScheherazadeNew = Scheherazade_New({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
-const fTajawal = Tajawal({ subsets: ["arabic"], weight: ["200", "900"], display: "swap", preload: false })
 const fVazirmatn = Vazirmatn({ subsets: ["arabic"], display: "swap", preload: false })
 const fVibes = Vibes({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
 const fZain = Zain({ subsets: ["arabic"], weight: ["300"], display: "swap", preload: false })
@@ -122,11 +135,11 @@ type TypeStyle = {
 /* Ordered by kind rather than alphabet: contemporary sans first, then the kufi
    and display faces, then naskh, with nastaliq last. */
 const STYLES: TypeStyle[] = [
-  { id: "almarai-400", name: "Almarai", cls: display.className, weight: 400, lh: 1.24, scale: 1.15 },
+  { id: "almarai-400", name: "Almarai", cls: fAlmarai.className, weight: 400, lh: 1.24, scale: 1.15 },
   { id: "cairo-900", name: "Cairo", cls: fCairo.className, weight: 900, lh: 1.3, scale: 1.09 },
   { id: "cairo-200", name: "Cairo", cls: fCairo.className, weight: 200, lh: 1.3, scale: 1.38 },
-  { id: "tajawal-900", name: "Tajawal", cls: fTajawal.className, weight: 900, lh: 1.28, scale: 1.02 },
-  { id: "tajawal-200", name: "Tajawal", cls: fTajawal.className, weight: 200, lh: 1.28, scale: 1.29 },
+  { id: "tajawal-900", name: "Tajawal", cls: display.className, weight: 900, lh: 1.28, scale: 1.02 },
+  { id: "tajawal-200", name: "Tajawal", cls: display.className, weight: 200, lh: 1.28, scale: 1.29 },
   { id: "ibm-plex-sans-arabic-500", name: "IBM Plex Sans Arabic", cls: ui.className, weight: 500, lh: 1.3, scale: 1.29 },
   { id: "noto-sans-arabic-500", name: "Noto Sans Arabic", cls: fNotoSansArabic.className, weight: 500, lh: 1.3, scale: 1.19 },
   { id: "noto-kufi-arabic-900", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 900, lh: 1.34, scale: 0.92 },
@@ -177,6 +190,33 @@ const STYLES: TypeStyle[] = [
 /* Remembered across reloads, so a face someone liked is still there when they
    come back to look at it again. */
 const STORE_KEY = "zenya-demo-type"
+const STORE_GLOW = "zenya-demo-glow"
+
+/* What the page opens with. */
+const DEFAULT_TYPE = "tajawal-900"
+const DEFAULT_GLOW = "aurora"
+
+type Glow = {
+  id: string
+  name: string
+  /** The four stops the light is mixed from, in oklch so the ramps stay even. */
+  grad: string
+}
+
+/* The colour behind the words. The first is the one the design was drawn with;
+   the rest keep its shape, four stops walking around the hue wheel, and only
+   move where they start. "بلا" is the way back to bare paper. */
+const GLOWS: Glow[] = [
+  { id: "aurora", name: "شفق", grad: "linear-gradient(100deg, oklch(.74 .13 252) 0%, oklch(.72 .15 330) 34%, oklch(.75 .15 42) 68%, oklch(.78 .12 92) 100%)" },
+  { id: "dawn", name: "فجر", grad: "linear-gradient(100deg, oklch(.82 .10 28) 0%, oklch(.76 .13 350) 36%, oklch(.74 .12 300) 70%, oklch(.84 .09 62) 100%)" },
+  { id: "sea", name: "بحر", grad: "linear-gradient(100deg, oklch(.80 .10 198) 0%, oklch(.73 .12 232) 38%, oklch(.68 .13 262) 72%, oklch(.82 .08 186) 100%)" },
+  { id: "palm", name: "نخيل", grad: "linear-gradient(100deg, oklch(.82 .11 128) 0%, oklch(.76 .12 158) 35%, oklch(.72 .10 190) 70%, oklch(.85 .11 108) 100%)" },
+  { id: "dusk", name: "غروب", grad: "linear-gradient(100deg, oklch(.77 .16 42) 0%, oklch(.70 .17 20) 34%, oklch(.66 .16 350) 68%, oklch(.81 .13 72) 100%)" },
+  { id: "berry", name: "توت", grad: "linear-gradient(100deg, oklch(.73 .15 330) 0%, oklch(.68 .16 300) 36%, oklch(.70 .14 268) 70%, oklch(.79 .12 348) 100%)" },
+  { id: "sand", name: "رمل", grad: "linear-gradient(100deg, oklch(.86 .07 82) 0%, oklch(.80 .09 62) 36%, oklch(.76 .08 40) 70%, oklch(.88 .06 96) 100%)" },
+  { id: "ash", name: "رماد", grad: "linear-gradient(100deg, oklch(.74 0 0) 0%, oklch(.60 0 0) 34%, oklch(.78 0 0) 68%, oklch(.55 0 0) 100%)" },
+  { id: "none", name: "بلا", grad: "none" },
+]
 
 const WORDS = ["ابن", "ادر", "انشر"]
 
@@ -228,13 +268,18 @@ export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false)
   /* Tablet and up: which tray the pill is currently extended to show. */
   const [panel, setPanel] = useState<PanelId | null>(null)
-  /* The type rail, and the setting the three words are currently in. */
+  /* The rail, which side of it is showing, and the two things it sets. */
   const [railOpen, setRailOpen] = useState(false)
-  const [styleId, setStyleId] = useState(STYLES[0].id)
+  const [railTab, setRailTab] = useState<"type" | "glow">("type")
+  const [styleId, setStyleId] = useState(DEFAULT_TYPE)
+  const [glowId, setGlowId] = useState(DEFAULT_GLOW)
+  /* The face on its way out, kept alive just long enough to leave. */
+  const [outgoing, setOutgoing] = useState<TypeStyle | null>(null)
   const headerRef = useRef<HTMLElement>(null)
   const railRef = useRef<HTMLDivElement>(null)
 
   const type = STYLES.find((s) => s.id === styleId) ?? STYLES[0]
+  const glow = GLOWS.find((g) => g.id === glowId) ?? GLOWS[0]
 
   /* Portal URLs resolve to real subdomains in prod, relative on dev. Start
      relative to match SSR, then upgrade after mount to avoid a hydration
@@ -259,18 +304,37 @@ export default function Page() {
     }
   }, [])
 
-  /* The remembered face is restored after mount, never during render: the
+  /* Remembered choices are restored after mount, never during render: the
      server has no localStorage, and the first paint has to match it. */
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORE_KEY)
-      if (saved && STYLES.some((s) => s.id === saved)) setStyleId(saved)
-    } catch { /* private mode; the default face is fine */ }
+      const face = localStorage.getItem(STORE_KEY)
+      if (face && STYLES.some((s) => s.id === face)) setStyleId(face)
+      const light = localStorage.getItem(STORE_GLOW)
+      if (light && GLOWS.some((g) => g.id === light)) setGlowId(light)
+    } catch { /* private mode; the defaults are fine */ }
   }, [])
 
+  /* Picking a face hands the old one to `outgoing`, so for the length of one
+     swap both are mounted: the old line rises out of frame while the new one
+     comes up from under it. Two layers is the only way to animate something
+     that is leaving, since React would otherwise drop it the same frame. */
   const pickType = (id: string) => {
+    if (id === styleId) return
+    setOutgoing(type)
     setStyleId(id)
     try { localStorage.setItem(STORE_KEY, id) } catch { /* ignore */ }
+  }
+
+  useEffect(() => {
+    if (!outgoing) return
+    const t = setTimeout(() => setOutgoing(null), 480)
+    return () => clearTimeout(t)
+  }, [outgoing])
+
+  const pickGlow = (id: string) => {
+    setGlowId(id)
+    try { localStorage.setItem(STORE_GLOW, id) } catch { /* ignore */ }
   }
 
   /* Dismissal, shared by the phone menu, the desktop trays and the rail:
@@ -390,7 +454,7 @@ export default function Page() {
            of clearance, and the words wrap the moment anything renders wide.
            --scale is the per-setting optical correction, since a nastaliq and
            a geometric kufi do not occupy the same space at the same em. */
-        #hero-words {
+        .zn-words {
           --display: clamp(2.5rem, 14vw, 6.5rem);
           /* Width sets the size, until height would lose. The second term caps
              the rendered line at 60vh whatever the setting asks for, which is
@@ -406,7 +470,7 @@ export default function Page() {
           text-rendering: optimizeLegibility;
         }
         @media (min-width: 768px) {
-          #hero-words { --display: clamp(6.5rem, 15vw, 20rem); }
+          .zn-words { --display: clamp(6.5rem, 15vw, 20rem); }
         }
 
         body:has(#blank-home) ::selection { background: #171717; color: #fafafa; }
@@ -420,9 +484,74 @@ export default function Page() {
           from { opacity: 0; transform: translateY(0.09em); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        #hero-words > span {
+        .zn-words > span {
           animation: zn-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
         }
+        /* Changing the face is a swap, not a repaint: the old line leaves
+           upward while the new one arrives from below, both on the same curve
+           so they read as one movement passing through. The per-word entrance
+           is suppressed on a swap, or the words would carry two transforms. */
+        @keyframes zn-swap-in  { from { opacity: 0; transform: translateY(0.38em); } to { opacity: 1; transform: none; } }
+        @keyframes zn-swap-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-0.38em); } }
+        .zn-in  { animation: zn-swap-in 460ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        .zn-out { animation: zn-swap-out 460ms cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .zn-in > span, .zn-out > span { animation: none !important; }
+
+        /* The light. Straight off the design file: a wide bar of oklch colour
+           sitting mostly below the fold, blurred until it is only light, and
+           breathing sideways and upward on a 19s cycle. The blur and the
+           opacity live on the outer box, the colour and the movement on the
+           inner one, so the filter is rasterised once instead of every frame.
+           A fainter, slower, counter-running twin hangs off the top edge so
+           the screen is lit from both ends. */
+        #zn-glow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        #zn-glow > div { position: absolute; left: -8%; right: -8%; }
+        #zn-glow .foot { bottom: -22vh; height: 34vh; filter: blur(9vh); opacity: 0.72; }
+        #zn-glow .head { top: -24vh; height: 28vh; filter: blur(10vh); opacity: 0.3; }
+        #zn-glow i {
+          position: absolute;
+          inset: 0;
+          background: var(--glow, none);
+          animation: zn-breathe 19s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        #zn-glow .head i { animation-duration: 26s; animation-direction: reverse; }
+        @keyframes zn-breathe {
+          0%, 100% { transform: translateX(-4%) scaleY(1);    opacity: 0.7; }
+          50%      { transform: translateX(4%)  scaleY(1.22); opacity: 1; }
+        }
+
+        /* The line over the light. It types itself once, right to left, by
+           uncovering a box that never changes size, so nothing on the page
+           shifts while it runs. The caret is a separate hairline walking the
+           same steps, which is why the two stay in lockstep. */
+        #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 0.25rem); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        #zn-claim .line { position: relative; white-space: nowrap; }
+        #zn-claim .line > .text {
+          display: inline-block;
+          animation: zn-type 3.6s steps(50, end) 900ms backwards;
+        }
+        #zn-claim .line > .caret {
+          position: absolute;
+          top: 0.1em; bottom: 0.1em; left: 0;
+          width: 1px;
+          background: currentColor;
+          animation: zn-type-caret 3.6s steps(50, end) 900ms backwards,
+                     zn-blink 1.05s steps(1) infinite;
+        }
+        /* Uncovered, never covered: the resting state of both is the finished
+           one, and the keyframes borrow the hidden state for their own
+           duration. A browser that never runs the animation shows the line in
+           full rather than clipping it away forever. The words are built the
+           same way, for the same reason. */
+        @keyframes zn-type {
+          from { clip-path: inset(0 0 0 100%); }
+          to   { clip-path: inset(0 0 0 0); }
+        }
+        @keyframes zn-type-caret {
+          from { left: 100%; }
+          to   { left: 0; }
+        }
+        @keyframes zn-blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
 
         /* The pill grows on two axes at once. Width is a layout property and
            normally off limits, but this is a single fixed-position element
@@ -453,8 +582,12 @@ export default function Page() {
         .zn-rail-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 3px; }
 
         @media (prefers-reduced-motion: reduce) {
-          #hero-words > span { animation: none; }
+          .zn-words > span { animation: none; }
           .zn-pill, .zn-drawer, .zn-rail { transition: none; }
+          .zn-in, .zn-out { animation: none; }
+          #zn-glow i { animation: none; }
+          #zn-claim .line > .text { animation: none; clip-path: none; }
+          #zn-claim .line > .caret { display: none; }
         }
       ` }} />
 
@@ -674,7 +807,7 @@ export default function Page() {
           onClick={() => setRailOpen(true)}
           aria-expanded={railOpen}
           aria-controls="type-rail"
-          aria-label="اختيار الخط"
+          aria-label="الخط واللون"
           className="absolute left-[var(--gut)] top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-opacity duration-200"
           style={{
             background: "rgba(255,255,255,0.72)",
@@ -700,13 +833,34 @@ export default function Page() {
             pointerEvents: railOpen ? "auto" : "none",
           }}
         >
-          <div className="flex shrink-0 items-center justify-between px-3 py-2.5">
-            <span className="text-[13px] leading-none" style={{ color: OBSIDIAN }}>الخط</span>
+          <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-2.5">
+            {/* Two things to set, one rail. */}
+            <div
+              className="flex items-center gap-0.5 rounded-full p-0.5"
+              style={{ background: "rgba(0,0,0,0.045)" }}
+            >
+              {(["type", "glow"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setRailTab(t)}
+                  aria-pressed={railTab === t}
+                  className="rounded-full px-2.5 py-1 text-[11.5px] leading-none transition-colors duration-150"
+                  style={{
+                    background: railTab === t ? "#fff" : "transparent",
+                    color: railTab === t ? OBSIDIAN : STONE,
+                    boxShadow: railTab === t ? "0 0 0 1px rgba(0,0,0,0.06)" : "none",
+                  }}
+                >
+                  {t === "type" ? "الخط" : "اللون"}
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               onClick={() => setRailOpen(false)}
               aria-label="إغلاق"
-              className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
               style={{ color: STONE }}
             >
               <X size={14} strokeWidth={1.5} />
@@ -718,7 +872,34 @@ export default function Page() {
               are small, they cache, and none of them load until someone asks
               to see the list. */}
           <div className="zn-rail-list flex-1 overflow-y-auto px-1.5 pb-2">
-            {STYLES.map((s) => (
+            {railTab === "glow" && GLOWS.map((g) => (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => pickGlow(g.id)}
+                aria-pressed={g.id === glowId}
+                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-2 transition-colors duration-150 hover:bg-black/[0.04]"
+                style={{ background: g.id === glowId ? "rgba(0,0,0,0.055)" : "transparent" }}
+              >
+                <span
+                  className="text-[13px] leading-none"
+                  style={{ color: g.id === glowId ? OBSIDIAN : STONE }}
+                >
+                  {g.name}
+                </span>
+                {/* The swatch is the same mix the light is made of, unblurred. */}
+                <span
+                  className="h-4 w-[76px] shrink-0 rounded-full"
+                  style={{
+                    background: g.grad === "none" ? "transparent" : g.grad,
+                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+                  }}
+                  aria-hidden
+                />
+              </button>
+            ))}
+
+            {railTab === "type" && STYLES.map((s) => (
               <button
                 key={s.id}
                 type="button"
@@ -762,30 +943,69 @@ export default function Page() {
         className="fixed inset-0 flex items-center justify-center"
         style={{ background: PAPER }}
       >
-        {/* Revealed in sequence: the order is the product, build then manage
-            then publish. Slow and short-travelled so it settles rather than
-            announces itself. */}
-        <h1
-          id="hero-words"
-          className={`${type.cls} relative flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center`}
-          style={{
-            color: OBSIDIAN,
-            fontWeight: type.weight,
-            lineHeight: type.lh,
-            "--scale": type.scale,
-            "--lh": type.lh,
-          } as React.CSSProperties}
-        >
-          {WORDS.map((word, i) => (
-            <span
-              key={word}
-              className="inline-block"
-              style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+        {/* The light, behind everything and taking no pointer events. */}
+        <div id="zn-glow" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
+          <div className="foot"><i /></div>
+          <div className="head"><i /></div>
+        </div>
+
+        {/* Two layers, so a face can be seen leaving. The incoming line is the
+            one in flow and the one that sizes the box; the outgoing is laid
+            over it and pulled after half a second. */}
+        <div className="relative z-[1] flex items-center justify-center">
+          {outgoing && (
+            <h1
+              key={outgoing.id}
+              aria-hidden
+              className={`${outgoing.cls} zn-words zn-out pointer-events-none absolute inset-0 flex flex-wrap items-center justify-center gap-x-[0.3em] gap-y-1 text-center`}
+              style={{
+                color: OBSIDIAN,
+                fontWeight: outgoing.weight,
+                lineHeight: outgoing.lh,
+                "--scale": outgoing.scale,
+                "--lh": outgoing.lh,
+              } as React.CSSProperties}
             >
-              {word}
-            </span>
-          ))}
-        </h1>
+              {WORDS.map((word) => <span key={word} className="inline-block">{word}</span>)}
+            </h1>
+          )}
+
+          {/* Revealed in sequence on the first load: the order is the product,
+              build then manage then publish. Slow and short-travelled so it
+              settles rather than announces itself. */}
+          <h1
+            id="hero-words"
+            key={type.id}
+            className={`${type.cls} zn-words relative flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center${outgoing ? " zn-in" : ""}`}
+            style={{
+              color: OBSIDIAN,
+              fontWeight: type.weight,
+              lineHeight: type.lh,
+              "--scale": type.scale,
+              "--lh": type.lh,
+            } as React.CSSProperties}
+          >
+            {WORDS.map((word, i) => (
+              <span
+                key={word}
+                className="inline-block"
+                style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+              >
+                {word}
+              </span>
+            ))}
+          </h1>
+        </div>
+
+        {/* The claim, typed once over the light. Real content, not decoration,
+            so it is in the document and readable with animation off. */}
+        <p id="zn-claim" className={`${ui.className} text-[12px] md:text-[13px]`} style={{ color: STONE }}>
+          <span className="h-[5px] w-[5px] shrink-0 rounded-full" style={{ background: OBSIDIAN }} aria-hidden />
+          <span className="line leading-none">
+            <span className="text">أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي</span>
+            <span className="caret" aria-hidden />
+          </span>
+        </p>
       </main>
     </>
   )
