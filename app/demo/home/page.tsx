@@ -1,8 +1,8 @@
 "use client"
 
 /**
- * Candidate homepage — one page, one screen. A floating pill header over bare
- * paper, and three words in the middle. Nothing else, no dividers anywhere.
+ * Candidate homepage - one page, one screen. A floating pill header over bare
+ * paper, and three words in the middle.
  *
  * NOT the homepage. It ships as a standalone route at /demo/home so it can be
  * reviewed on the real domain; app/(main)/page.tsx remains the homepage and is
@@ -10,58 +10,177 @@
  * to app/(main)/page.tsx and restore the nav/footer/consent hiding that the
  * (main) layout needs.
  *
- * Visual language: the Vercel design system per the reference — "typeset
+ * Visual language: the Vercel design system per the reference, "typeset
  * terminal on white paper". Light canvas (#fafafa), near-black type (#171717,
- * never pure #000), strict grey ramp, hairline rings instead of shadows,
- * 0% colorfulness.
+ * never pure #000), strict grey ramp, hairline rings instead of shadows, no
+ * colour at all. The page carries no rules and no dividers.
  *
- * Display type is Almarai: a geometric Kufi-influenced Arabic with flat
- * terminals and square dots. It ran at 800 first; at the current display size
- * that read as a slab, so the weight is back to 400, which also lands where
- * the Vercel spec wants headlines (450 and under).
+ * The three words are not locked to one face. A rail on the physical left
+ * offers 50 typographic settings, every Arabic-subset family next/font can
+ * serve, and the choice is remembered in localStorage. This is a chooser for
+ * picking the real thing, so the rail is deliberately plain: a tool sitting
+ * on the page, not part of the composition.
  *
- * A hairline frame holds the composition: two rules dropping from the top
- * corners, closed by a rule at the foot of the screen. They are the only
- * moving parts, drawn in once on load with one slow gleam travelling down
- * each vertical after that.
- *
- * Two further departures, both because the type is Arabic:
+ * Two rules hold for all 50, because the type is Arabic:
  *   - no negative letter-spacing (the reference asks for -0.06em at display
  *     sizes; Arabic letterforms connect and break apart when tracked in)
- *   - leading stays above 1.0 so descenders are not clipped
+ *   - leading stays well above 1.0 so descenders are not clipped, which is
+ *     why every setting carries its own line-height and optical scale
  *
  * Header layout splits at md (768px), so tablets get the full laptop bar and
- * only phones fall back to the three-slot arrangement.
+ * only phones fall back to the three-slot arrangement. On the wide bar the
+ * pill grows in both directions at once: sideways from the centre, and
+ * downward into its tray.
  */
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { Almarai, IBM_Plex_Sans_Arabic } from "next/font/google"
-import { Menu, X } from "lucide-react"
+import { Almarai, IBM_Plex_Sans_Arabic, Alexandria, Alkalami, Amiri, Amiri_Quran, Aref_Ruqaa, Aref_Ruqaa_Ink, Baloo_Bhaijaan_2, Blaka, Blaka_Hollow, Blaka_Ink, Cairo, Cairo_Play, Changa, El_Messiri, Gulzar, Handjet, Harmattan, Jomhuria, Katibeh, Kufam, Lalezar, Lateef, Lemonada, Mada, Marhey, Markazi_Text, Mirza, Noto_Kufi_Arabic, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Noto_Sans_Arabic, Qahiri, Rakkas, Readex_Pro, Reem_Kufi, Reem_Kufi_Fun, Reem_Kufi_Ink, Rubik, Ruwudu, Scheherazade_New, Tajawal, Vazirmatn, Vibes, Zain } from "next/font/google"
+import { Menu, Type, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
 import { createClient } from "@/utils/supabase/client"
 import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
 
-/* Display face for the three words. Set at 400, not 800: at the size the words
-   now run, the heavy cut turned the line into a black slab. The regular cut
-   holds the same geometric skeleton while letting the paper through. */
+/* The default face for the three words, and the only one that is preloaded,
+   because it is what the page renders before anybody picks anything. */
 const display = Almarai({
   subsets: ["arabic"],
   weight: ["400"],
   display: "swap",
 })
 
-/* UI face for the header — neutral and quiet, so the words stay the only
-   thing with weight on the page. */
+/* UI face for the header and the rail: neutral and quiet, so the words stay
+   the only thing on the page with any weight. */
 const ui = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500"],
   display: "swap",
 })
 
+/* The 50 faces: every Arabic-subset family next/font can serve, four of them
+   twice at opposite weights. preload: false throughout, because declaring a
+   family only writes its @font-face rule. The browser fetches a file the
+   moment something on the page is actually set in that face, so nothing is
+   downloaded for a face nobody picks. */
+const fAlexandria = Alexandria({ subsets: ["arabic"], display: "swap", preload: false })
+const fAlkalami = Alkalami({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fAmiri = Amiri({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fAmiriQuran = Amiri_Quran({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fArefRuqaa = Aref_Ruqaa({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fArefRuqaaInk = Aref_Ruqaa_Ink({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fBalooBhaijaan2 = Baloo_Bhaijaan_2({ subsets: ["arabic"], display: "swap", preload: false })
+const fBlaka = Blaka({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fBlakaHollow = Blaka_Hollow({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fBlakaInk = Blaka_Ink({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fCairo = Cairo({ subsets: ["arabic"], display: "swap", preload: false })
+const fCairoPlay = Cairo_Play({ subsets: ["arabic"], display: "swap", preload: false })
+const fChanga = Changa({ subsets: ["arabic"], display: "swap", preload: false })
+const fElMessiri = El_Messiri({ subsets: ["arabic"], display: "swap", preload: false })
+const fGulzar = Gulzar({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fHandjet = Handjet({ subsets: ["arabic"], display: "swap", preload: false })
+const fHarmattan = Harmattan({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fJomhuria = Jomhuria({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fKatibeh = Katibeh({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fKufam = Kufam({ subsets: ["arabic"], display: "swap", preload: false })
+const fLalezar = Lalezar({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fLateef = Lateef({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fLemonada = Lemonada({ subsets: ["arabic"], display: "swap", preload: false })
+const fMada = Mada({ subsets: ["arabic"], display: "swap", preload: false })
+const fMarhey = Marhey({ subsets: ["arabic"], display: "swap", preload: false })
+const fMarkaziText = Markazi_Text({ subsets: ["arabic"], display: "swap", preload: false })
+const fMirza = Mirza({ subsets: ["arabic"], weight: ["500"], display: "swap", preload: false })
+const fNotoKufiArabic = Noto_Kufi_Arabic({ subsets: ["arabic"], display: "swap", preload: false })
+const fNotoNaskhArabic = Noto_Naskh_Arabic({ subsets: ["arabic"], display: "swap", preload: false })
+const fNotoNastaliqUrdu = Noto_Nastaliq_Urdu({ subsets: ["arabic"], display: "swap", preload: false })
+const fNotoSansArabic = Noto_Sans_Arabic({ subsets: ["arabic"], display: "swap", preload: false })
+const fQahiri = Qahiri({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fRakkas = Rakkas({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fReadexPro = Readex_Pro({ subsets: ["arabic"], display: "swap", preload: false })
+const fReemKufi = Reem_Kufi({ subsets: ["arabic"], display: "swap", preload: false })
+const fReemKufiFun = Reem_Kufi_Fun({ subsets: ["arabic"], display: "swap", preload: false })
+const fReemKufiInk = Reem_Kufi_Ink({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fRubik = Rubik({ subsets: ["arabic"], display: "swap", preload: false })
+const fRuwudu = Ruwudu({ subsets: ["arabic"], weight: ["500"], display: "swap", preload: false })
+const fScheherazadeNew = Scheherazade_New({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fTajawal = Tajawal({ subsets: ["arabic"], weight: ["200", "900"], display: "swap", preload: false })
+const fVazirmatn = Vazirmatn({ subsets: ["arabic"], display: "swap", preload: false })
+const fVibes = Vibes({ subsets: ["arabic"], weight: ["400"], display: "swap", preload: false })
+const fZain = Zain({ subsets: ["arabic"], weight: ["300"], display: "swap", preload: false })
+
+type TypeStyle = {
+  id: string
+  /** The family's own name, shown beside its preview. */
+  name: string
+  cls: string
+  weight: number
+  /** Leading. The naskh and nastaliq faces need far more of it than the sans. */
+  lh: number
+  /** Optical correction: these families do not agree on what 1em looks like. */
+  scale: number
+}
+
+/* Ordered by kind rather than alphabet: contemporary sans first, then the kufi
+   and display faces, then naskh, with nastaliq last. */
+const STYLES: TypeStyle[] = [
+  { id: "almarai-400", name: "Almarai", cls: display.className, weight: 400, lh: 1.24, scale: 1.15 },
+  { id: "cairo-900", name: "Cairo", cls: fCairo.className, weight: 900, lh: 1.3, scale: 1.09 },
+  { id: "cairo-200", name: "Cairo", cls: fCairo.className, weight: 200, lh: 1.3, scale: 1.38 },
+  { id: "tajawal-900", name: "Tajawal", cls: fTajawal.className, weight: 900, lh: 1.28, scale: 1.02 },
+  { id: "tajawal-200", name: "Tajawal", cls: fTajawal.className, weight: 200, lh: 1.28, scale: 1.29 },
+  { id: "ibm-plex-sans-arabic-500", name: "IBM Plex Sans Arabic", cls: ui.className, weight: 500, lh: 1.3, scale: 1.29 },
+  { id: "noto-sans-arabic-500", name: "Noto Sans Arabic", cls: fNotoSansArabic.className, weight: 500, lh: 1.3, scale: 1.19 },
+  { id: "noto-kufi-arabic-900", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 900, lh: 1.34, scale: 0.92 },
+  { id: "noto-kufi-arabic-200", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 200, lh: 1.34, scale: 1.29 },
+  { id: "alexandria-800", name: "Alexandria", cls: fAlexandria.className, weight: 800, lh: 1.28, scale: 0.98 },
+  { id: "alexandria-100", name: "Alexandria", cls: fAlexandria.className, weight: 100, lh: 1.28, scale: 1.35 },
+  { id: "readex-pro-400", name: "Readex Pro", cls: fReadexPro.className, weight: 400, lh: 1.3, scale: 1.09 },
+  { id: "vazirmatn-400", name: "Vazirmatn", cls: fVazirmatn.className, weight: 400, lh: 1.3, scale: 1.24 },
+  { id: "rubik-500", name: "Rubik", cls: fRubik.className, weight: 500, lh: 1.28, scale: 1.15 },
+  { id: "mada-500", name: "Mada", cls: fMada.className, weight: 500, lh: 1.28, scale: 1.27 },
+  { id: "changa-500", name: "Changa", cls: fChanga.className, weight: 500, lh: 1.28, scale: 1.17 },
+  { id: "zain-300", name: "Zain", cls: fZain.className, weight: 300, lh: 1.28, scale: 1.18 },
+  { id: "reem-kufi-500", name: "Reem Kufi", cls: fReemKufi.className, weight: 500, lh: 1.3, scale: 1.32 },
+  { id: "reem-kufi-fun-500", name: "Reem Kufi Fun", cls: fReemKufiFun.className, weight: 500, lh: 1.3, scale: 1.32 },
+  { id: "reem-kufi-ink-400", name: "Reem Kufi Ink", cls: fReemKufiInk.className, weight: 400, lh: 1.3, scale: 1.35 },
+  { id: "kufam-600", name: "Kufam", cls: fKufam.className, weight: 600, lh: 1.32, scale: 1.03 },
+  { id: "qahiri-400", name: "Qahiri", cls: fQahiri.className, weight: 400, lh: 1.24, scale: 1.22 },
+  { id: "el-messiri-600", name: "El Messiri", cls: fElMessiri.className, weight: 600, lh: 1.32, scale: 1.17 },
+  { id: "marhey-500", name: "Marhey", cls: fMarhey.className, weight: 500, lh: 1.32, scale: 1.17 },
+  { id: "lemonada-500", name: "Lemonada", cls: fLemonada.className, weight: 500, lh: 1.34, scale: 0.96 },
+  { id: "cairo-play-600", name: "Cairo Play", cls: fCairoPlay.className, weight: 600, lh: 1.3, scale: 1.24 },
+  { id: "baloo-bhaijaan-2-600", name: "Baloo Bhaijaan 2", cls: fBalooBhaijaan2.className, weight: 600, lh: 1.36, scale: 1.19 },
+  { id: "lalezar-400", name: "Lalezar", cls: fLalezar.className, weight: 400, lh: 1.26, scale: 1.35 },
+  { id: "rakkas-400", name: "Rakkas", cls: fRakkas.className, weight: 400, lh: 1.32, scale: 1.48 },
+  { id: "handjet-500", name: "Handjet", cls: fHandjet.className, weight: 500, lh: 1.3, scale: 1.48 },
+  { id: "blaka-400", name: "Blaka", cls: fBlaka.className, weight: 400, lh: 1.34, scale: 1.63 },
+  { id: "blaka-ink-400", name: "Blaka Ink", cls: fBlakaInk.className, weight: 400, lh: 1.34, scale: 1.63 },
+  { id: "blaka-hollow-400", name: "Blaka Hollow", cls: fBlakaHollow.className, weight: 400, lh: 1.34, scale: 1.63 },
+  { id: "jomhuria-400", name: "Jomhuria", cls: fJomhuria.className, weight: 400, lh: 1.16, scale: 1.77 },
+  { id: "vibes-400", name: "Vibes", cls: fVibes.className, weight: 400, lh: 1.38, scale: 1.86 },
+  { id: "amiri-400", name: "Amiri", cls: fAmiri.className, weight: 400, lh: 1.52, scale: 1.46 },
+  { id: "amiri-quran-400", name: "Amiri Quran", cls: fAmiriQuran.className, weight: 400, lh: 1.7, scale: 1.48 },
+  { id: "scheherazade-new-400", name: "Scheherazade New", cls: fScheherazadeNew.className, weight: 400, lh: 1.56, scale: 1.34 },
+  { id: "lateef-400", name: "Lateef", cls: fLateef.className, weight: 400, lh: 1.52, scale: 1.78 },
+  { id: "harmattan-400", name: "Harmattan", cls: fHarmattan.className, weight: 400, lh: 1.46, scale: 1.53 },
+  { id: "markazi-text-600", name: "Markazi Text", cls: fMarkaziText.className, weight: 600, lh: 1.42, scale: 1.42 },
+  { id: "mirza-500", name: "Mirza", cls: fMirza.className, weight: 500, lh: 1.5, scale: 1.59 },
+  { id: "katibeh-400", name: "Katibeh", cls: fKatibeh.className, weight: 400, lh: 1.46, scale: 1.69 },
+  { id: "noto-naskh-arabic-500", name: "Noto Naskh Arabic", cls: fNotoNaskhArabic.className, weight: 500, lh: 1.52, scale: 1.29 },
+  { id: "ruwudu-500", name: "Ruwudu", cls: fRuwudu.className, weight: 500, lh: 1.46, scale: 1.29 },
+  { id: "alkalami-400", name: "Alkalami", cls: fAlkalami.className, weight: 400, lh: 1.54, scale: 1.54 },
+  { id: "aref-ruqaa-400", name: "Aref Ruqaa", cls: fArefRuqaa.className, weight: 400, lh: 1.6, scale: 1.48 },
+  { id: "aref-ruqaa-ink-400", name: "Aref Ruqaa Ink", cls: fArefRuqaaInk.className, weight: 400, lh: 1.6, scale: 1.48 },
+  { id: "gulzar-400", name: "Gulzar", cls: fGulzar.className, weight: 400, lh: 1.8, scale: 1.53 },
+  { id: "noto-nastaliq-urdu-500", name: "Noto Nastaliq Urdu", cls: fNotoNastaliqUrdu.className, weight: 500, lh: 2.1, scale: 1.3 },
+]
+
+/* Remembered across reloads, so a face someone liked is still there when they
+   come back to look at it again. */
+const STORE_KEY = "zenya-demo-type"
+
 const WORDS = ["ابن", "ادر", "انشر"]
 
-/* Only القوالب carries a panel. الأسعار and تواصل are single destinations, so
+/* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
 const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
   { href: "/themes", label: "القوالب", panel: "themes" },
@@ -85,7 +204,7 @@ const TEMPLATES = [
   { href: "/demo/wellness", label: "عافية" },
 ]
 
-/* Shared row inside either panel. */
+/* Shared row inside either tray. */
 const ROW =
   "block rounded-[6px] px-3 py-2 text-[13.5px] leading-none transition-colors duration-150 hover:bg-black/[0.04] hover:text-[#171717]"
 
@@ -97,16 +216,29 @@ const STONE = "#666666"
 /* The reference's elevation recipe: stacked hairline rings, never a shadow. */
 const RING = "0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55)"
 
+/* How wide the wide bar sits at rest, and how far it reaches for each tray.
+   A definite closed width is what makes the sideways growth animatable at
+   all: `width: auto` gives the transition nothing to move between. */
+const PILL_REST = "380px"
+const PILL_THEMES = "min(94vw, 720px)"
+const PILL_ACCOUNT = "min(94vw, 470px)"
+
 export default function Page() {
   const [user, setUser] = useState<any>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   /* Tablet and up: which tray the pill is currently extended to show. */
   const [panel, setPanel] = useState<PanelId | null>(null)
+  /* The type rail, and the setting the three words are currently in. */
+  const [railOpen, setRailOpen] = useState(false)
+  const [styleId, setStyleId] = useState(STYLES[0].id)
   const headerRef = useRef<HTMLElement>(null)
+  const railRef = useRef<HTMLDivElement>(null)
+
+  const type = STYLES.find((s) => s.id === styleId) ?? STYLES[0]
 
   /* Portal URLs resolve to real subdomains in prod, relative on dev. Start
      relative to match SSR, then upgrade after mount to avoid a hydration
-     mismatch — same approach the shared Navbar uses. */
+     mismatch, the same approach the shared Navbar uses. */
   const [portal, setPortal] = useState({ login: "/login", signup: "/login?mode=signup", dash: "/dashboard" })
   useEffect(() => {
     setPortal({ login: accountsUrl("/login"), signup: accountsUrl("/signup"), dash: dashboardUrl() })
@@ -127,26 +259,50 @@ export default function Page() {
     }
   }, [])
 
-  /* Dismissal, shared by both the phone menu and the desktop trays: Escape, a
-     click outside the header, or a breakpoint change (either control is gone
-     on the other side of it). */
+  /* The remembered face is restored after mount, never during render: the
+     server has no localStorage, and the first paint has to match it. */
   useEffect(() => {
-    if (!menuOpen && !panel) return
-    const close = () => { setMenuOpen(false); setPanel(null) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close() }
-    const onDown = (e: PointerEvent) => {
-      if (headerRef.current && !headerRef.current.contains(e.target as Node)) close()
+    try {
+      const saved = localStorage.getItem(STORE_KEY)
+      if (saved && STYLES.some((s) => s.id === saved)) setStyleId(saved)
+    } catch { /* private mode; the default face is fine */ }
+  }, [])
+
+  const pickType = (id: string) => {
+    setStyleId(id)
+    try { localStorage.setItem(STORE_KEY, id) } catch { /* ignore */ }
+  }
+
+  /* Dismissal, shared by the phone menu, the desktop trays and the rail:
+     Escape, a click outside the thing, or a breakpoint change (the header
+     controls do not exist on the other side of it). */
+  useEffect(() => {
+    if (!menuOpen && !panel && !railOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return
+      setMenuOpen(false)
+      setPanel(null)
+      setRailOpen(false)
     }
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node
+      if (headerRef.current && !headerRef.current.contains(target)) {
+        setMenuOpen(false)
+        setPanel(null)
+      }
+      if (railRef.current && !railRef.current.contains(target)) setRailOpen(false)
+    }
+    const closeHeader = () => { setMenuOpen(false); setPanel(null) }
     const mq = window.matchMedia("(min-width: 768px)")
     document.addEventListener("keydown", onKey)
     document.addEventListener("pointerdown", onDown)
-    mq.addEventListener("change", close)
+    mq.addEventListener("change", closeHeader)
     return () => {
       document.removeEventListener("keydown", onKey)
       document.removeEventListener("pointerdown", onDown)
-      mq.removeEventListener("change", close)
+      mq.removeEventListener("change", closeHeader)
     }
-  }, [menuOpen, panel])
+  }, [menuOpen, panel, railOpen])
 
   /* Which tray to render. On the way closed `panel` is already null, so the
      content is held at whatever was last open and the tray collapses on its
@@ -210,7 +366,7 @@ export default function Page() {
   return (
     <>
       {/* /demo/* sits outside the (main) group, so there is no Navbar, Footer
-          or review button to hide here — only the consent dialog, which the
+          or review button to hide here, only the consent dialog, which the
           root layout mounts on every route. Suppressed so the page reads as
           genuinely empty; it must be restored if this ever becomes a real
           route that ships. */}
@@ -224,70 +380,33 @@ export default function Page() {
         body:has(#blank-home) [aria-labelledby="cookie-consent-title"] { display: none !important; }
         body:has(#blank-home) { background: ${PAPER}; overflow: hidden; }
 
-        /* One set of measurements for the whole composition, held on the body
-           so the header and the hero can both read them: the frame's side
-           gutter, and the inset shared by the header at the top and the foot
-           rule at the bottom, so the words sit centred between them. On a
-           phone the gutter is also the header's padding, which lands the
-           pill's two edges exactly on the two vertical rules. */
+        /* Two measurements, held on the body so the header, the rail and the
+           hero all read the same ones: the side gutter everything hangs off,
+           and the inset the header floats at. */
         body:has(#blank-home) { --gut: clamp(1.25rem, 4.5vw, 4rem); --inset: 2rem; }
 
         /* Display scale. Two stops rather than one clamp: a single aggressive
            vw ratio that fills a desktop line leaves phones with a few pixels
            of clearance, and the words wrap the moment anything renders wide.
-           Both stops sit just inside the frame, so the line reaches for the
-           rules without ever touching them. */
+           --scale is the per-setting optical correction, since a nastaliq and
+           a geometric kufi do not occupy the same space at the same em. */
         #hero-words {
-          font-size: clamp(2.5rem, 14vw, 6.5rem);
+          --display: clamp(2.5rem, 14vw, 6.5rem);
+          /* Width sets the size, until height would lose. The second term caps
+             the rendered line at 60vh whatever the setting asks for, which is
+             what keeps a nastaliq at 2.1 leading on the screen when the window
+             is wide and short. */
+          font-size: min(
+            calc(var(--display) * var(--scale, 1)),
+            calc(60vh / var(--lh, 1.24))
+          );
           padding-inline: calc(var(--gut) + 1.25rem);
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
           text-rendering: optimizeLegibility;
         }
         @media (min-width: 768px) {
-          #hero-words { font-size: clamp(6.5rem, 15vw, 20rem); }
-        }
-
-        /* ── The frame ──────────────────────────────────────────────────
-           Not decoration for its own sake: the two verticals set the page's
-           gutter and the foot rule closes the screen, so the words have
-           something to be centred inside. All four ends meet. */
-        #zn-frame { position: absolute; inset: 0; pointer-events: none; }
-        #zn-frame span {
-          position: absolute;
-          background: rgba(0,0,0,0.07);
-          overflow: hidden;
-        }
-        #zn-frame .v {
-          top: 0; bottom: var(--inset); width: 1px;
-          transform-origin: top;
-          animation: zn-drop 1100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms backwards;
-        }
-        #zn-frame .v.s { inset-inline-start: var(--gut); }
-        #zn-frame .v.e { inset-inline-end: var(--gut); animation-delay: 220ms; }
-        #zn-frame .h {
-          inset-inline: var(--gut); bottom: var(--inset); height: 1px;
-          transform-origin: center;
-          animation: zn-draw 900ms cubic-bezier(0.22, 1, 0.36, 1) 700ms backwards;
-        }
-        @keyframes zn-drop { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-        @keyframes zn-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-
-        /* The one thing that keeps moving: a short segment of darker rule
-           sliding down each vertical, slow enough to read as light rather
-           than as an animation. Transform only, so it stays off the main
-           thread. */
-        #zn-frame .v i {
-          position: absolute;
-          inset-inline: 0;
-          height: 22%;
-          background: linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.20), rgba(0,0,0,0));
-          animation: zn-gleam 11s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-        }
-        #zn-frame .v.e i { animation-delay: -5.5s; }
-        @keyframes zn-gleam {
-          from { transform: translateY(-110%); }
-          to   { transform: translateY(465%); }
+          #hero-words { --display: clamp(6.5rem, 15vw, 20rem); }
         }
 
         body:has(#blank-home) ::selection { background: #171717; color: #fafafa; }
@@ -304,26 +423,45 @@ export default function Page() {
         #hero-words > span {
           animation: zn-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
         }
-        /* The header extending. Visibility is stepped so the links leave the
-           focus order only once the drawer has finished closing. */
+
+        /* The pill grows on two axes at once. Width is a layout property and
+           normally off limits, but this is a single fixed-position element
+           with nothing below it in flow, and it is the only way the bar can
+           open outward from its own centre. The curve is shared with the
+           height so the two read as one movement. */
+        .zn-pill { transition: width 520ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+        /* The height half. Animating grid-template-rows between 0fr and 1fr
+           is the one way to transition to an auto height in CSS without
+           hard-coding a pixel value the contents would eventually outgrow.
+           Visibility is stepped so tray links leave the focus order only once
+           the tray has finished closing. */
         .zn-drawer {
-          transition: grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1),
-                      visibility 0s linear 320ms;
+          transition: grid-template-rows 520ms cubic-bezier(0.22, 1, 0.36, 1),
+                      visibility 0s linear 520ms;
         }
-        .zn-drawer[style*="1fr"] { transition-delay: 0s, 0s; }
+        .zn-drawer[data-open="true"] { transition-delay: 0s, 0s; }
+
+        .zn-rail {
+          transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 260ms ease,
+                      visibility 0s linear 460ms;
+        }
+        .zn-rail[data-open="true"] { transition-delay: 0s, 0s, 0s; }
+        .zn-rail-list { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
+        .zn-rail-list::-webkit-scrollbar { width: 6px; }
+        .zn-rail-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 3px; }
+
         @media (prefers-reduced-motion: reduce) {
           #hero-words > span { animation: none; }
-          .zn-drawer { transition: none; }
-          #zn-frame .v, #zn-frame .h { animation: none; }
-          #zn-frame .v i { display: none; }
+          .zn-pill, .zn-drawer, .zn-rail { transition: none; }
         }
       ` }} />
 
-      {/* ── Header ──────────────────────────────────────────────────────────
-          A floating pill rather than a bar: it sits on the paper with a
-          hairline ring and no underline, so nothing divides the page. Fixed,
-          so it costs the hero no vertical space and the words stay dead
-          centre in the viewport. */}
+      {/* Header. A floating pill rather than a bar: it sits on the paper with
+          a hairline ring and no underline, so nothing divides the page.
+          Fixed, so it costs the hero no vertical space and the words stay
+          dead centre in the viewport. */}
       <header
         id="pill-header"
         ref={headerRef}
@@ -367,13 +505,9 @@ export default function Page() {
               </div>
             </div>
 
-            {/* The extension. Animating grid-template-rows between 0fr and 1fr
-                is the one way to transition to an auto height in CSS without
-                hard-coding a pixel value the links would eventually outgrow.
-                visibility carries the collapsed state to focus order and
-                screen readers. */}
             <div
               className="zn-drawer grid"
+              data-open={menuOpen}
               style={{
                 gridTemplateRows: menuOpen ? "1fr" : "0fr",
                 visibility: menuOpen ? "visible" : "hidden",
@@ -397,23 +531,28 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Tablet and up: the same one-surface idea as the phone. The bar
-              and its tray share a container, ring and background, so the pill
-              extends downward instead of dropping a menu underneath itself.
-              24px is the bar's own radius, so the closed shape is unchanged. */}
+          {/* Tablet and up: the same one surface, growing on both axes. The
+              bar keeps a definite resting width so the sideways movement has
+              something to animate, and justify-between hands the slack to the
+              gaps: opening pushes the mark and the account apart while the
+              tray comes down. */}
           <div
-            className="hidden overflow-hidden rounded-[24px] backdrop-blur-[12px] md:block"
-            style={{ background: "rgba(255,255,255,0.72)", boxShadow: RING }}
+            className="zn-pill hidden overflow-hidden rounded-[24px] backdrop-blur-[12px] md:block"
+            style={{
+              background: "rgba(255,255,255,0.72)",
+              boxShadow: RING,
+              width: panel === "themes" ? PILL_THEMES : panel === "account" ? PILL_ACCOUNT : PILL_REST,
+            }}
             /* Leaving the surface closes a hover-opened tray. A tray the
                reader opened by clicking their account stays put until they
                dismiss it. */
             onMouseLeave={() => setPanel((p) => (p === "themes" ? null : p))}
           >
-            <div className="flex h-12 items-center gap-0.5 pe-1.5 ps-3">
+            <div className="flex h-12 items-center justify-between gap-2 pe-1.5 ps-3">
               <Link
                 href="/?home=1"
                 aria-label="زينيا"
-                className="flex items-center px-1"
+                className="flex shrink-0 items-center px-1"
                 onMouseEnter={() => setPanel(null)}
               >
                 <ZenyaMark className="h-[17px] text-black" />
@@ -427,6 +566,7 @@ export default function Page() {
                     onMouseEnter={() => setPanel(item.panel ?? null)}
                     onFocus={() => setPanel(item.panel ?? null)}
                     aria-expanded={item.panel ? panel === item.panel : undefined}
+                    aria-controls={item.panel ? "pill-tray" : undefined}
                     className="rounded-full px-3 py-2 text-[14px] leading-none transition-colors duration-150 hover:text-[#171717]"
                     style={{ color: panel === item.panel ? OBSIDIAN : STONE }}
                   >
@@ -435,26 +575,25 @@ export default function Page() {
                 ))}
               </nav>
 
-              <span className="mx-1.5 h-5 w-px" style={{ background: "rgba(0,0,0,0.07)" }} aria-hidden />
-
               {/* Reaching the account control puts the templates tray away,
                   the same as reaching any other item in the bar. Wrapped
                   rather than handled on the control itself, because signed
                   out it is a plain link and signed in it is a button. */}
               <span
-                className="flex items-center"
+                className="flex shrink-0 items-center"
                 onMouseEnter={() => setPanel((p) => (p === "themes" ? null : p))}
               >
+                <span className="me-1.5 h-5 w-px" style={{ background: "rgba(0,0,0,0.07)" }} aria-hidden />
                 {desktopAccount}
               </span>
             </div>
 
-            {/* The tray. Same grid-template-rows technique as the phone menu,
-                so the height animates to auto without a hard-coded pixel
-                value. `w-0 min-w-full` lets the content fill the pill without
-                its own intrinsic width widening the closed bar. */}
+            {/* `w-0 min-w-full` lets the tray fill whatever width the pill is
+                currently at, without its own contents deciding that width. */}
             <div
+              id="pill-tray"
               className="zn-drawer grid"
+              data-open={!!panel}
               style={{
                 gridTemplateRows: panel ? "1fr" : "0fr",
                 visibility: panel ? "visible" : "hidden",
@@ -469,28 +608,30 @@ export default function Page() {
                     >
                       {user.email}
                     </div>
-                    <Link
-                      href={portal.dash}
-                      role="menuitem"
-                      onClick={() => setPanel(null)}
-                      className={ROW}
-                      style={{ color: OBSIDIAN }}
-                    >
-                      لوحة التحكم
-                    </Link>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={signOut}
-                      className={`${ROW} w-full text-start`}
-                      style={{ color: STONE }}
-                    >
-                      تسجيل الخروج
-                    </button>
+                    <div className="grid grid-cols-2 gap-1">
+                      <Link
+                        href={portal.dash}
+                        role="menuitem"
+                        onClick={() => setPanel(null)}
+                        className={ROW}
+                        style={{ color: OBSIDIAN }}
+                      >
+                        لوحة التحكم
+                      </Link>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={signOut}
+                        className={`${ROW} w-full text-start`}
+                        style={{ color: STONE }}
+                      >
+                        تسجيل الخروج
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="px-1.5 pb-1.5 pt-0.5">
-                    <div className="grid grid-cols-2 gap-x-1">
+                    <div className="grid grid-cols-4 gap-x-1">
                       {TEMPLATES.map((t) => (
                         <Link
                           key={t.href}
@@ -519,42 +660,121 @@ export default function Page() {
         </div>
       </header>
 
-      {/* ── Hero ────────────────────────────────────────────────────────────
-          The whole page. Bare paper, no grid, no divider, no background
-          shift — the words are centred in the full viewport. */}
+      {/* The type rail. Physically left, and deliberately plain: it is a tool
+          for looking at the page rather than part of it. The container takes
+          no pointer events, so the paper underneath stays clickable while the
+          rail is shut. */}
+      <div
+        ref={railRef}
+        dir="rtl"
+        className={`${ui.className} pointer-events-none fixed inset-y-0 left-0 z-40 flex items-center py-[var(--inset)] pl-[var(--gut)]`}
+      >
+        <button
+          type="button"
+          onClick={() => setRailOpen(true)}
+          aria-expanded={railOpen}
+          aria-controls="type-rail"
+          aria-label="اختيار الخط"
+          className="absolute left-[var(--gut)] top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full transition-opacity duration-200"
+          style={{
+            background: "rgba(255,255,255,0.72)",
+            boxShadow: RING,
+            color: OBSIDIAN,
+            opacity: railOpen ? 0 : 1,
+            pointerEvents: railOpen ? "none" : "auto",
+          }}
+        >
+          <Type size={17} strokeWidth={1.5} />
+        </button>
+
+        <div
+          id="type-rail"
+          className="zn-rail flex h-full max-h-[540px] w-[228px] flex-col overflow-hidden rounded-[20px] backdrop-blur-[12px]"
+          data-open={railOpen}
+          style={{
+            background: "rgba(255,255,255,0.88)",
+            boxShadow: RING,
+            transform: railOpen ? "translateX(0)" : "translateX(calc(-100% - var(--gut)))",
+            opacity: railOpen ? 1 : 0,
+            visibility: railOpen ? "visible" : "hidden",
+            pointerEvents: railOpen ? "auto" : "none",
+          }}
+        >
+          <div className="flex shrink-0 items-center justify-between px-3 py-2.5">
+            <span className="text-[13px] leading-none" style={{ color: OBSIDIAN }}>الخط</span>
+            <button
+              type="button"
+              onClick={() => setRailOpen(false)}
+              aria-label="إغلاق"
+              className="flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
+              style={{ color: STONE }}
+            >
+              <X size={14} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Every row previews itself, which is the only honest way to pick a
+              face. That does mean opening the rail pulls all 50 files; they
+              are small, they cache, and none of them load until someone asks
+              to see the list. */}
+          <div className="zn-rail-list flex-1 overflow-y-auto px-1.5 pb-2">
+            {STYLES.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => pickType(s.id)}
+                aria-pressed={s.id === styleId}
+                className="flex w-full items-center justify-between gap-2 rounded-[8px] px-2.5 py-1.5 transition-colors duration-150 hover:bg-black/[0.04]"
+                style={{ background: s.id === styleId ? "rgba(0,0,0,0.055)" : "transparent" }}
+              >
+                <span
+                  className={s.cls}
+                  style={{ fontWeight: s.weight, color: OBSIDIAN, fontSize: 19, lineHeight: 1.6 }}
+                >
+                  ابن
+                </span>
+                <span
+                  dir="ltr"
+                  className="truncate text-[10px] leading-none"
+                  style={{ color: s.id === styleId ? OBSIDIAN : STONE }}
+                >
+                  {s.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* The hero is the whole page: bare paper, no rules, no grid, nothing
+          but the words.
+
+          Fixed rather than h-[100dvh]. The root ZoomLock writes CSS `zoom` on
+          <html>, and viewport units resolve BEFORE that scale is applied: at
+          the 85% cap a 720px window gives a 573px "100dvh" box, which parked
+          the words a slab above true centre. A fixed layer is measured
+          against the real viewport, so they are centred on the reader's
+          screen at any zoom. Safe here because the page is one screen and the
+          body already has overflow: hidden. */}
       <main
         id="blank-home"
         dir="rtl"
-        /* Fixed rather than h-[100dvh]. The root ZoomLock writes CSS `zoom` on
-           <html>, and viewport units resolve BEFORE that scale is applied: at
-           the 85% cap a 720px window gives a 573px "100dvh" box, which parked
-           the words a slab above true centre and lifted the foot rule off the
-           bottom edge. A fixed layer is measured against the real viewport, so
-           the words are centred on the reader's screen at any zoom. Safe here
-           because the page is one screen and the body already has
-           overflow: hidden. */
         className="fixed inset-0 flex items-center justify-center"
         style={{ background: PAPER }}
       >
-        {/* The frame is drawn behind everything and takes no pointer events,
-            so it can never sit between the reader and the words. */}
-        <div id="zn-frame" aria-hidden>
-          <span className="v s"><i /></span>
-          <span className="v e"><i /></span>
-          <span className="h" />
-        </div>
-
-        {/* Revealed in sequence: the order is the product — build, then
-            manage, then publish. Slow and short-travelled so it settles
-            rather than announces itself. */}
+        {/* Revealed in sequence: the order is the product, build then manage
+            then publish. Slow and short-travelled so it settles rather than
+            announces itself. */}
         <h1
           id="hero-words"
-          className={`${display.className} relative flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center`}
+          className={`${type.cls} relative flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 text-center`}
           style={{
             color: OBSIDIAN,
-            fontWeight: 400,
-            lineHeight: 1.24,
-          }}
+            fontWeight: type.weight,
+            lineHeight: type.lh,
+            "--scale": type.scale,
+            "--lh": type.lh,
+          } as React.CSSProperties}
         >
           {WORDS.map((word, i) => (
             <span
