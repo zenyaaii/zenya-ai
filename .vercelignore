@@ -9,3 +9,10 @@ tmp-*
 app/demo/sufra
 components/theme/sufra
 utils/sufra
+
+# ── Work in progress: candidate one-screen homepage ─────────────────────────
+# Runs locally at /demo/home, never ships. Nothing outside this folder imports
+# it, so the production build is unaffected and app/(main)/page.tsx keeps
+# serving the real 13-section homepage. Remove this line only when the owner
+# approves moving it to app/(main)/page.tsx.
+app/demo/home
