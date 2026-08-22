@@ -679,18 +679,20 @@ export default function Page() {
           {/* Phone: a small pill, not a bar across the top. Closed it is the
               menu, the mark and the account and nothing else; tapping the menu
               widens the same surface sideways and the pages arrive in a row
-              inside it, rather than dropping a panel down over the page. The
-              nav is what animates: max-width is the only thing a row of links
-              can be opened with, since their real width is not known here. */}
+              inside it, rather than dropping a panel down over the page.
+
+              The pill takes its width from its contents, and the nav's
+              max-width is the only thing animated: the pill is `fit-content`,
+              so it tracks the nav frame by frame as it opens and lands exactly
+              on its own content. Pinning a closed width here instead is what
+              clipped the call to action into the mark, because the row needs
+              whatever the mark, the menu and the account actually measure, and
+              that changes with the account state and with the font. */}
           <div
-            className="zn-pill mx-auto overflow-hidden rounded-full backdrop-blur-[12px] md:hidden"
-            style={{
-              background: "rgba(255,255,255,0.72)",
-              boxShadow: RING,
-              width: menuOpen ? "min(100%, 356px)" : "158px",
-            }}
+            className="mx-auto w-fit max-w-full overflow-hidden rounded-full backdrop-blur-[12px] md:hidden"
+            style={{ background: "rgba(255,255,255,0.72)", boxShadow: RING }}
           >
-            <div className="flex h-11 items-center gap-1 px-1.5">
+            <div className="flex h-11 items-center gap-1.5 px-1.5">
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
@@ -714,7 +716,7 @@ export default function Page() {
                 className="zn-inline-nav flex items-center overflow-hidden"
                 data-open={menuOpen}
                 style={{
-                  maxWidth: menuOpen ? "190px" : "0px",
+                  maxWidth: menuOpen ? "260px" : "0px",
                   opacity: menuOpen ? 1 : 0,
                   visibility: menuOpen ? "visible" : "hidden",
                 }}
@@ -732,7 +734,7 @@ export default function Page() {
                 ))}
               </nav>
 
-              <span className="ms-auto flex shrink-0 items-center">{accountControl}</span>
+              <span className="flex shrink-0 items-center">{accountControl}</span>
             </div>
           </div>
 
