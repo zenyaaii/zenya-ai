@@ -9,7 +9,7 @@ import { Breadcrumbs, CompareHero, CtaBand } from '@/components/marketing/Compar
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'أنواع المواقع: مطعم، تطبيق، متجر، خدمات، عافية والمزيد',
+  title: 'أنواع المواقع: مطعم، تطبيق، متجر، خدمات، عافية',
   description:
     'أيًّا كان نشاطك، لزينيا قالب له: موقع مطعم، صفحة هبوط لتطبيق، متجر إلكتروني، موقع أزياء، موقع خدمات، مركز عافية، قصة علامة، أو متجر بمنتج واحد. اختر نوعك وأطلق موقعك بالذكاء الاصطناعي خلال دقائق.',
   keywords: [

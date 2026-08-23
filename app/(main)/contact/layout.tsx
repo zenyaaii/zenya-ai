@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
-  title: 'تواصل معنا',
+  title: 'تواصل معنا — الدعم والمبيعات والاقتراحات',
   description:
     'تواصل مع فريق زينيا — أسئلة عن القوالب، أو الفوترة، أو الدعم، أو شارك تجربتك. نردّ بأسرع ما يمكن.',
   alternates: { canonical: '/contact' },

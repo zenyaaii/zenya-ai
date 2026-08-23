@@ -8,7 +8,7 @@ import { Breadcrumbs, CompareHero, CtaBand } from '@/components/marketing/Compar
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'زينيا مقابل المنافسين: ويكس، شوبيفاي، ووردبريس، سكوير سبيس والوكالات',
+  title: 'مقارنة مع ويكس وشوبيفاي وووردبريس وسكوير سبيس',
   description:
     'كيف تقارن زينيا بأشهر منشئات المواقع والبدائل؟ مقارنات صريحة مع ويكس (Wix)، شوبيفاي، ووردبريس، سكوير سبيس، والوكالات — في اللغة العربية وRTL، كتابة المحتوى بالذكاء الاصطناعي، السعر، ووقت الإطلاق.',
   keywords: [

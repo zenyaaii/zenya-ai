@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
-  title: 'من نحن — قصة زينيا',
+  title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
   description:
     'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. ثمانية قوالب احترافية — مطاعم، أزياء، تطبيقات، عافية، خدمات، متاجر إلكترونية والمزيد. اكتب نبذة، واحصل على موقع كامل خلال دقائق، باستضافة أوروبية متوافقة مع GDPR.',
   keywords: [
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: '/about' },
   openGraph: {
-    title: 'من نحن — قصة زينيا',
+    title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري: ثمانية قوالب، محتوى بالعربية، واستضافة أوروبية.',
     url: 'https://zenyaai.co/about',
@@ -34,8 +34,14 @@ const ABOUT_SCHEMA = {
   inLanguage: 'ar',
   mainEntity: {
     '@type': 'Organization',
+    // Same @id as the node in app/layout.tsx on purpose. Without it this page
+    // announced a SECOND organization that merely happened to share a name —
+    // which is the exact splitting we are trying to undo. Matching ids tells a
+    // consumer these are one entity described twice, so the address and email
+    // here enrich the root node instead of competing with it.
+    '@id': 'https://zenyaai.co/#organization',
     name: 'زينيا',
-    alternateName: 'Zenya',
+    alternateName: ['Zenya', 'Zenya AI'],
     url: 'https://zenyaai.co',
     logo: 'https://zenyaai.co/logo.png',
     description:

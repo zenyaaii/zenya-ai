@@ -12,13 +12,14 @@ import { resolveLocale } from '@/lib/i18n/server'
 import { dirFor } from '@/lib/i18n/config'
 import { LocaleProvider } from '@/components/i18n/LocaleProvider'
 import { Analytics } from '@vercel/analytics/next'
+import { TEMPLATE_PAGES } from '@/lib/template-pages'
 
 const SITE_URL = 'https://zenyaai.co'
 
 const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي. 8 قوالب. جاهز خلال دقائق.',
+    default: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
     template: '%s · زينيا',
   },
   description:
@@ -54,7 +55,7 @@ const baseMetadata: Metadata = {
     locale: 'ar_SA',
     url: SITE_URL,
     siteName: 'زينيا',
-    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي. 8 قوالب. جاهز خلال دقائق.',
+    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
     description:
       '8 قوالب مواقع احترافية مبنية بالذكاء الاصطناعي للمطاعم والأزياء والتطبيقات والعافية والخدمات ومتاجر شوبيفاي. اكتب نبذة → احصل على موقع كامل: نصوص وتصميم وصور جاهزة للنشر.',
     images: [
@@ -63,7 +64,7 @@ const baseMetadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي. 8 قوالب. جاهز خلال دقائق.',
+    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
     description:
       'اكتب نبذة → احصل على موقع كامل. 8 قوالب مبنية بالذكاء الاصطناعي لكل نشاط تجاري. ‎14.99$ شهريًا (Starter) أو 24.99$ شهريًا مع استضافة (Pro).',
     images: ['/opengraph-image'],
@@ -141,6 +142,15 @@ const structuredData = [
     image: `${SITE_URL}/opengraph-image`,
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
+    // schema.org's purpose-built field for telling apart entities that share a
+    // name. "Zenya" is crowded — a Dutch healthcare-quality company, a Taiwanese
+    // network-equipment distributor, an investment firm — and the name is one
+    // letter from Xenia and Zenia. So this states what THIS Zenya is, in the
+    // terms a reader would use to tell it from the others: the language, the
+    // market, the domain, and the fact that it builds sites for every kind of
+    // business rather than one kind.
+    disambiguatingDescription:
+      'زينيا (Zenya AI) منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي على النطاق zenyaai.co. تُنشئ وتدير وتنشر مواقع كاملة لكل أنواع الأنشطة التجارية — مطاعم، علامات أزياء، تطبيقات، مراكز عافية، شركات خدمات، ومتاجر إلكترونية — وليست متجرًا إلكترونيًا ولا أداة لإنشاء متاجر المنتج الواحد فقط.',
     slogan: 'اكتب نبذة، واحصل على موقع.',
     foundingDate: '2025',
     knowsLanguage: ['ar', 'en'],
@@ -151,6 +161,27 @@ const structuredData = [
       'تحسين محركات البحث',
       'استضافة المواقع',
     ],
+    // Every business type Zenya builds for, as a machine-readable catalogue.
+    // The single strongest correction available for the category Google
+    // currently has on file: an index entry still calls this a "One-Product
+    // Store Builder", and a list of eight distinct verticals is a much harder
+    // signal to misread than prose saying "for any business".
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'أنواع المواقع التي تبنيها زينيا',
+      itemListElement: TEMPLATE_PAGES.map((t) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: t.name,
+          serviceType: 'إنشاء موقع إلكتروني بالذكاء الاصطناعي',
+          url: `${SITE_URL}/websites/${t.slug}`,
+          provider: { '@id': ORG_ID },
+          areaServed: 'الوطن العربي',
+          availableLanguage: ['ar', 'en'],
+        },
+      })),
+    },
     sameAs: SOCIAL_PROFILES,
     contactPoint: {
       '@type': 'ContactPoint',

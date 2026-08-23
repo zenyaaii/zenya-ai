@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { AR_FAQS } from './faq-data'
 
 export const metadata: Metadata = {
-  title: 'الأسئلة الشائعة',
+  title: 'أسئلة شائعة عن إنشاء موقع بالذكاء الاصطناعي',
   description:
     'كل ما تريد معرفته عن زينيا — كيف تعمل، القوالب الثمانية، الأسعار، الاستضافة الأوروبية، ربط النطاق، التصدير إلى شوبيفاي، ولغة المحتوى. إجابات واضحة بالعربية والإنجليزية.',
   keywords: [

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
-  title: 'قوالب المواقع الثمانية',
+  title: '8 قوالب مواقع احترافية جاهزة بالعربية',
   description:
     'ثمانية قوالب مواقع احترافية مبنية بالذكاء الاصطناعي — مطعم، لوك بوك أزياء، صفحة هبوط لتطبيق، قصة علامة تجارية، مركز عافية، خدمات، متجر بمنتجات متعددة، ومتجر شوبيفاي بمنتج واحد. اختر قالبًا، اكتب نبذة، واحصل على موقع كامل خلال دقائق.',
   alternates: { canonical: '/themes' },
