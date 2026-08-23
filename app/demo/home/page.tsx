@@ -1133,23 +1133,32 @@ export default function Page() {
            runs, a reader still sees every template the product offers. */
         .zn-picker { height: 100%; display: flex; flex-direction: column; justify-content: center; }
         .zn-picker h2 { font-size: 15px; font-weight: 500; color: ${OBSIDIAN}; margin: 0 2px 14px; }
-        /* Rows sized to their contents, not stretched to fill the window. A
-           template here is a name and what it is for; stretching eight of them
-           over the whole frame turns that into eight empty boxes with a label
-           in the corner, which reads as a picture that failed to load. */
+        /* Rows sized to their contents, not stretched to fill the window: the
+           cover sets the height and the two lines under it follow. */
         .zn-grid {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 9px;
         }
         .zn-tile {
-          position: relative; border-radius: 13px; padding: 13px 14px;
+          position: relative; border-radius: 13px; padding: 9px 9px 12px;
           display: flex; flex-direction: column; gap: 2px;
           text-decoration: none; overflow: hidden;
           background: rgba(255, 255, 255, 0.46);
           box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
           transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
                       background 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        /* The one place on the page that carries colour of its own. What a
+           template looks like is the information a picker owes the reader, and
+           eight tiles that only name themselves cannot give it. Ringed rather
+           than shadowed, like every other surface here. */
+        .zn-tile .cover {
+          display: block; width: 100%; height: 96px;
+          object-fit: cover; object-position: top center;
+          border-radius: 8px; margin-bottom: 8px;
+          background: rgba(0, 0, 0, 0.04);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
         }
         .zn-tile[data-on="true"] {
           background: rgba(255, 255, 255, 0.88);

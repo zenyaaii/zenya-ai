@@ -268,9 +268,20 @@ Three things the composition needs:
 - **Slots take fixed heights, not aspect ratios.** Square upload slots on a
   730px card are 170px tall, and five of them overran the window by a row —
   which, on a centred card, is cut off the bottom.
-- **Picker rows size to their contents.** Stretched over the frame, eight
-  templates become eight empty boxes with a label in the corner, which reads as
-  a picture that failed to load.
+- **Picker rows size to their contents.** The cover sets the tile height and
+  the two lines under it follow; stretched over the frame instead, the eight
+  become empty boxes with a label in the corner.
+
+**The picker covers are the one place on the page that carries colour of its
+own.** What a template looks like is the information a picker owes the reader,
+and eight tiles that only name themselves cannot give it. They come through
+`themePreview()`, the same resolver `/themes` uses, so a screenshot dropped
+into `public/theme-previews` lands here too. `collective` and `one_product` had
+no local file and were resolving to Unsplash stock — one of which was a
+photograph of a woman — so both were shot from their own live demos. **Never
+let a tile fall back to Unsplash**; shoot the demo instead, with the cookie
+banner dismissed and the dev indicator hidden, since those files feed `/themes`
+and the dashboard at full size too.
 
 Typing is real typing — one more character per beat into a field the cursor is
 sitting in, and the caret belongs to that field alone. Arabic reshaping as it
@@ -317,10 +328,8 @@ The hero and section two are built, at `app/demo/home/`, live at
 the palette they name, but what the card is for here is the animation choosing
 one of them, and that is all it needs to do. Settled — do not re-open it.
 
-One open question: **the picker tiles carry no preview.** `/themes` shows a
-cover image in each card and `lib/theme-previews` would serve them, but they
-are colour photographs and this page has no colour but the light. The tiles are
-compact text for now.
+**The picker tiles carry their real covers**, at full colour — settled, and the
+two missing screenshots have been shot. See the section above.
 
 Next are the other two words — ادر and انشر — which are not built.
 

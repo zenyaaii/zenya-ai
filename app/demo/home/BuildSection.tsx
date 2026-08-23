@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import MenuImageAnalyzer, { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
+import { themePreview, themePreviewFallback } from "@/lib/theme-previews"
 
 /* ─────────────────────────────────────────────────────────────────────────
    Section two: ابن — the build step.
@@ -438,6 +439,20 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
               <div className="zn-grid">
                 {TEMPLATES.map((t) => (
                   <a key={t.id} href={t.href} data-t={`tpl-${t.id}`} className="zn-tile" data-on={hover === t.id}>
+                    {/* The same cover /themes shows, through the same resolver,
+                        so a screenshot dropped into public/theme-previews lands
+                        here too. This is the one place on the page that carries
+                        colour of its own: what a template looks like IS the
+                        information a picker owes the reader, and eight tiles
+                        that only name themselves cannot give it.
+                        eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className="cover"
+                      src={themePreview(t.id)}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = themePreviewFallback(t.id) }}
+                    />
                     <span className="tag">{t.tag}</span>
                     <span className="name">{t.label}</span>
                     <span className="go" data-t={hover === t.id ? "tpl-go" : undefined}>ابنِ بهذا</span>
