@@ -245,9 +245,20 @@ than asks, and it is there because the change from `/themes` to
 **The animation is per card, never one long take.** A card comes forward, the
 cursor moves into it, types or picks, the card finishes, the cursor leaves, a
 beat plays, and only then does the next card arrive. Eight cards, eight
-animations, about 54 seconds end to end and then round again — each card
-between 3.5 and 10 seconds, which is long enough to follow and short enough
-not to wait on.
+animations, then a ninth beat, about 58 seconds end to end and then round
+again — each card between 3.5 and 10 seconds, which is long enough to follow
+and short enough not to wait on.
+
+**The ninth beat is the wizard's closing bar**, which is not a card because it
+is not one in the wizard either: it is sticky at the foot of the whole form. It
+rises into the window once the last card is done, carrying its copy verbatim,
+and the cursor presses ولّد موقعي; the button takes its real working label and
+the section rests there before going round. Obsidian, which is the one
+inversion this page already uses for the account control and a chosen chip.
+
+**Nothing is generated.** A real run is twenty to forty seconds of paid work
+per visitor, and showing a site that was never built would misrepresent the
+form the reader just watched being filled in.
 
 Three things the composition needs:
 
@@ -302,15 +313,14 @@ nothing and sits out the whole timeout every time.
 The hero and section two are built, at `app/demo/home/`, live at
 `zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
 
-Two open questions on section two, both deliberately left for a decision:
+**The Style card stays achromatic.** The wizard's four presets are swatches of
+the palette they name, but what the card is for here is the animation choosing
+one of them, and that is all it needs to do. Settled — do not re-open it.
 
-- **The picker tiles carry no preview.** `/themes` shows a cover image in each
-  card and `lib/theme-previews` would serve them, but they are colour
-  photographs and this page has no colour but the light. The tiles are compact
-  text for now.
-- **The Style card shows no colour.** The wizard's four presets are swatches of
-  the palette they name; here they are the name and the vibe only, for the same
-  reason.
+One open question: **the picker tiles carry no preview.** `/themes` shows a
+cover image in each card and `lib/theme-previews` would serve them, but they
+are colour photographs and this page has no colour but the light. The tiles are
+compact text for now.
 
 Next are the other two words — ادر and انشر — which are not built.
 
