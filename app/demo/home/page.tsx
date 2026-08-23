@@ -236,9 +236,13 @@ const CLAIMS = [
   { id: "en", dir: "ltr" as const, text: "The first Muslim company building websites with AI" },
 ]
 
-/* Typing, then the pause before the other language takes over. */
+/* One full turn of the claim: it types, holds long enough to be read twice,
+   then the sentence rolls away while the dot walks to the middle, the dot
+   blinks out, and the other language starts from the opposite side. */
 const CLAIM_TYPE = 3600
 const CLAIM_HOLD = 10000
+const CLAIM_EXIT = 440
+const CLAIM_GAP = 280
 
 /* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
@@ -413,9 +417,10 @@ export default function Page() {
         (parseFloat(cs.paddingInlineStart) || 0) -
         (parseFloat(cs.paddingInlineEnd) || 0)
       if (natural <= 0 || avail <= 0) return
-      /* 0.94 keeps a margin so the line never sits flush against the edge, and
-         the ceiling stops a narrow face from being blown up past the clamp. */
-      el.style.setProperty("--fit", String(Math.min(1.1, (avail * 0.94) / natural)))
+      /* 0.86 leaves real air at both ends rather than filling the line to the
+         gutters, and the ceiling stops a narrow face being blown up past the
+         clamp it was given. */
+      el.style.setProperty("--fit", String(Math.min(1.05, (avail * 0.86) / natural)))
     }
     const schedule = () => {
       cancelAnimationFrame(frame)
@@ -434,16 +439,30 @@ export default function Page() {
     }
   }, [styleId])
 
-  /* The claim swaps languages on its own clock, keyed so the typing replays
-     from the first character each time rather than cutting in mid-sentence. */
+  /* The claim's own clock. Three beats per language: the sentence types and
+     holds with the dot at its own edge, then the sentence rolls away and the
+     dot walks to the middle, then the dot blinks out and the other language
+     starts from the opposite side. The dot only ever changes sides while it is
+     invisible, so it never slides across the sentence it is introducing. */
   const [claim, setClaim] = useState(0)
+  const [beat, setBeat] = useState<"read" | "leave" | "between">("read")
   useEffect(() => {
-    const t = setTimeout(
-      () => setClaim((c) => (c + 1) % CLAIMS.length),
-      CLAIM_TYPE + CLAIM_HOLD,
-    )
-    return () => clearTimeout(t)
+    const leave = setTimeout(() => setBeat("leave"), CLAIM_TYPE + CLAIM_HOLD)
+    const between = setTimeout(() => setBeat("between"), CLAIM_TYPE + CLAIM_HOLD + CLAIM_EXIT)
+    const next = setTimeout(() => {
+      setClaim((c) => (c + 1) % CLAIMS.length)
+      setBeat("read")
+    }, CLAIM_TYPE + CLAIM_HOLD + CLAIM_EXIT + CLAIM_GAP)
+    return () => {
+      clearTimeout(leave)
+      clearTimeout(between)
+      clearTimeout(next)
+    }
   }, [claim])
+
+  /* Right for Arabic, left for English, middle while it is changing over. */
+  const dotSide =
+    beat === "read" ? (CLAIMS[claim].dir === "rtl" ? "right" : "left") : "middle"
 
   /* Which row is showing, and which one is on its way out. Both live in one
      piece of state so the updater stays pure: React can call it twice in
@@ -608,7 +627,7 @@ export default function Page() {
              which is what keeps a nastaliq at 2.1 leading on screen when the
              window is wide and short. */
           font-size: min(
-            calc(var(--display) * var(--fit, 0.6)),
+            calc(var(--display) * var(--fit, 0.5)),
             calc(60vh / var(--lh, 1.24))
           );
           padding-inline: calc(var(--gut) + 1.25rem);
@@ -702,21 +721,57 @@ export default function Page() {
            uncovering a box that never changes size, so nothing on the page
            shifts while it runs. The caret is a separate hairline walking the
            same steps, which is why the two stay in lockstep. */
-        #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 3.5rem); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 3.5rem); display: flex; align-items: center; justify-content: center; }
         @media (min-width: 768px) { #zn-claim { bottom: calc(var(--inset) + 0.4rem); } }
-        #zn-claim .line { position: relative; white-space: nowrap; }
-        #zn-claim .line > .text {
+        #zn-claim .wrap { position: relative; display: inline-grid; }
+        #zn-claim .line { grid-area: 1 / 1; position: relative; white-space: nowrap; }
+
+        /* The sentence not on stage is simply not lit. Opacity is React state
+           here, not an animation, so a frozen page still shows the one that is
+           current rather than an empty line. */
+        #zn-claim .line[data-state="idle"] { opacity: 0; pointer-events: none; }
+        #zn-claim .line[data-state="leave"],
+        #zn-claim .line[data-state="between"] {
+          opacity: 0;
+          transform: translateY(-130%);
+          transition: transform 300ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 180ms linear;
+          pointer-events: none;
+        }
+        /* Typing only runs for the sentence being read: the animation starts
+           because the rule starts matching, so no remount is needed. */
+        #zn-claim .line[data-state="read"] > .text {
           display: inline-block;
-          animation: zn-type 3.6s steps(50, end) 900ms backwards;
+          animation: zn-type 3.6s steps(50, end) 500ms backwards;
         }
         #zn-claim .line > .caret {
           position: absolute;
           top: 0.1em; bottom: 0.1em; left: 0;
           width: 1px;
           background: currentColor;
-          animation: zn-type-caret 3.6s steps(50, end) 900ms backwards,
+          opacity: 0;
+        }
+        #zn-claim .line[data-state="read"] > .caret {
+          animation: zn-type-caret 3.6s steps(50, end) 500ms backwards,
                      zn-blink 1.05s steps(1) infinite;
         }
+
+        /* The dot's three anchors. It crosses to the far side only while it is
+           out, so it never travels over the sentence. */
+        #zn-claim .dot {
+          position: absolute;
+          top: 50%;
+          width: 5px; height: 5px;
+          border-radius: 999px;
+          background: #171717;
+          transform: translate(-50%, -50%);
+          transition: left 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 220ms linear;
+        }
+        #zn-claim .dot[data-side="right"] { left: calc(100% + 11px); }
+        #zn-claim .dot[data-side="middle"] { left: 50%; }
+        #zn-claim .dot[data-side="left"] { left: -11px; }
+        #zn-claim .dot[data-lit="false"] { opacity: 0; transition: opacity 200ms linear; }
         /* Uncovered, never covered: the resting state of both is the finished
            one, and the keyframes borrow the hidden state for their own
            duration. A browser that never runs the animation shows the line in
@@ -732,8 +787,8 @@ export default function Page() {
         }
         /* Latin types the other way round: the reveal starts at the left edge
            and the caret walks right. */
-        #zn-claim .line[dir="ltr"] > .text { animation-name: zn-type-ltr; }
-        #zn-claim .line[dir="ltr"] > .caret { animation-name: zn-type-caret-ltr, zn-blink; }
+        #zn-claim .line[dir="ltr"][data-state="read"] > .text { animation-name: zn-type-ltr; }
+        #zn-claim .line[dir="ltr"][data-state="read"] > .caret { animation-name: zn-type-caret-ltr, zn-blink; }
         @keyframes zn-type-ltr {
           from { clip-path: inset(0 100% 0 0); }
           to   { clip-path: inset(0 0 0 0); }
@@ -826,8 +881,9 @@ export default function Page() {
           .zn-w { transition: none; }
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
-          #zn-claim .line > .text { animation: none; clip-path: none; }
+          #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
+          #zn-claim .line, #zn-claim .dot { transition: none; }
         }
       ` }} />
 
@@ -1201,7 +1257,7 @@ export default function Page() {
         <h1
           id="hero-words"
           ref={wordsRef}
-          className={`${type.cls} zn-words relative z-[1] flex flex-nowrap items-baseline justify-center gap-x-[0.3em] text-center`}
+          className={`${type.cls} zn-words relative z-[1] flex flex-nowrap items-baseline justify-center gap-x-[0.22em] text-center`}
           style={{
             color: OBSIDIAN,
             fontWeight: type.weight,
@@ -1246,10 +1302,22 @@ export default function Page() {
           className={`${ui.className} text-[12px] md:text-[13px]`}
           style={{ color: STONE }}
         >
-          <span className="h-[5px] w-[5px] shrink-0 rounded-full" style={{ background: OBSIDIAN }} aria-hidden />
-          <span key={CLAIMS[claim].id} className="line leading-none" dir={CLAIMS[claim].dir}>
-            <span className="text">{CLAIMS[claim].text}</span>
-            <span className="caret" aria-hidden />
+          {/* Both sentences share one grid cell, so the box is as wide as the
+              longer of them and the dot's three anchors never move under it. */}
+          <span className="wrap">
+            {CLAIMS.map((c, i) => (
+              <span
+                key={c.id}
+                className="line leading-none"
+                dir={c.dir}
+                data-state={i === claim ? beat : "idle"}
+                aria-hidden={i !== claim}
+              >
+                <span className="text">{c.text}</span>
+                <span className="caret" aria-hidden />
+              </span>
+            ))}
+            <span className="dot" data-side={dotSide} data-lit={beat !== "between"} aria-hidden />
           </span>
         </p>
       </main>
