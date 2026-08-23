@@ -1,80 +1,99 @@
 import type { Metadata } from 'next'
 import { hreflangAlternates } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
+import { FAQS } from './faqs'
+
+/**
+ * This route is the ARABIC pricing page — /en/pricing is the English twin.
+ * Its title, description and FAQ markup were all still English, so the Arabic
+ * SERP entry read as a foreign-language page and the FAQPage schema described
+ * questions no visitor could find on the page. Both are Arabic now, and the
+ * schema is generated from the same array the accordion renders.
+ */
+
+const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'Pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',
+  title: 'الأسعار — Entry بـ 0.50$ مرّة واحدة، Starter بـ 14.99$ شهريًا، Pro بـ 24.99$',
   description:
-    'Free to try (2 generations). Starter $14.99/month for unlimited AI generations + Shopify export + project ZIP. Pro $24.99/month adds Zenya hosting, custom domain, SSL, and analytics. Cancel anytime. VAT-inclusive prices for EU customers.',
+    'ابدأ بخطة Entry: 0.50$ لمرة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على اسمك.zenyaai.co. Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاقك الخاص والحجوزات والتحليلات وتصدير شوبيفاي. Pro بـ 24.99$ شهريًا يضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. الإلغاء متاح في أي وقت.',
+  keywords: [
+    'أسعار منشئ المواقع',
+    'كم تكلفة إنشاء موقع',
+    'اشتراك منشئ مواقع بالذكاء الاصطناعي',
+    'أرخص طريقة لعمل موقع',
+    'تكلفة تصميم موقع إلكتروني',
+    'استضافة موقع بالعربية',
+  ],
   alternates: {
-    canonical: '/pricing',
-    languages: hreflangAlternates('https://zenyaai.co/pricing', 'https://zenyaai.co/en/pricing'),
+    canonical: `${SITE}/pricing`,
+    languages: hreflangAlternates(`${SITE}/pricing`, `${SITE}/en/pricing`),
   },
   openGraph: {
-    title: 'Zenya pricing — Starter $14.99/mo or Pro $24.99/mo with hosting',
+    type: 'website',
+    locale: 'ar_SA',
+    title: 'أسعار زينيا — من 0.50$ لمرة واحدة إلى 24.99$ شهريًا مع الاستضافة',
     description:
-      'Starter at $14.99/month for the full generator, or Pro at $24.99/month for full Zenya hosting. Cancel anytime. Free tier always available.',
-    url: 'https://zenyaai.co/pricing',
+      'ثلاث خطط واضحة: Entry لمرة واحدة، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
+    url: `${SITE}/pricing`,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'أسعار زينيا — من 0.50$ لمرة واحدة إلى 24.99$ شهريًا مع الاستضافة',
+    description: 'ثلاث خطط واضحة، بلا عقود، والإلغاء في أي وقت.',
   },
 }
 
+// Built from FAQS so the markup can never describe a question the page does
+// not show — that mismatch is what disqualifies a page from FAQ rich results.
 const PRICING_FAQ_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [
+  inLanguage: 'ar',
+  mainEntity: FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: { '@type': 'Answer', text: faq.a },
+  })),
+}
+
+// The three plans as machine-readable offers, so a price can surface directly
+// in the result instead of only inside the page body.
+const PRICING_OFFER_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: 'زينيا — منشئ المواقع بالذكاء الاصطناعي',
+  description:
+    'منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي: 8 قوالب احترافية، توليد المحتوى بالعربية، نشر واستضافة ونطاق مخصّص.',
+  brand: { '@type': 'Brand', name: 'زينيا' },
+  url: `${SITE}/pricing`,
+  offers: [
     {
-      '@type': 'Question',
-      name: 'What’s the difference between Starter and Pro?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'Starter ($14.99/month) unlocks unlimited AI generations and exports — for the two e-commerce templates (Storefront, Collective) you connect or upload to your Shopify store; for the other templates you download the project ZIP and host wherever you like. Pro ($24.99/month) adds Zenya hosting for the brochure templates (live URL, custom domain, no Zenya badge) plus everything in Starter.',
-      },
+      '@type': 'Offer',
+      name: 'Entry',
+      price: '0.50',
+      priceCurrency: 'USD',
+      url: `${SITE}/pricing`,
+      availability: 'https://schema.org/InStock',
+      description: 'دفعة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
     },
     {
-      '@type': 'Question',
-      name: 'Can I cancel my subscription?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'Yes, any time from your dashboard. Your plan stays active until the end of the current billing period, then it won’t renew. Themes and exports you have generated stay in your account.',
-      },
+      '@type': 'Offer',
+      name: 'Starter',
+      price: '14.99',
+      priceCurrency: 'USD',
+      url: `${SITE}/pricing`,
+      availability: 'https://schema.org/InStock',
+      description: 'اشتراك شهري: توليد غير محدود، نطاقك الخاص، حجوزات وتحليلات، وتصدير شوبيفاي.',
     },
     {
-      '@type': 'Question',
-      name: 'What does Zenya hosting include?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'A live site at your-slug.zenyaai.co for any brochure template (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison), one connected custom domain, automatic SSL, fast CDN delivery, and removal of the Made with Zenya footer. E-commerce templates (Storefront, Collective) are not Zenya-hosted — they go to Shopify.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Can I switch between Starter and Pro?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'Yes. Upgrading from Starter to Pro takes effect immediately from your dashboard. To move back down, cancel Pro and start a Starter subscription — hosted sites stay live until the end of the current billing period.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Do you offer a refund policy?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'No automatic refund on the current billing period, but you can cancel any time before renewal to avoid the next charge. Contact us if you run into a billing issue.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Which templates work where?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text:
-          'Two e-commerce templates — Storefront and Collective — export as ready Shopify themes and run on Shopify. The other six templates (Atlas, Studio, Lookbook, Wellness, Trade, Restaurant, Maison) are brochure sites that Zenya can host directly on the Pro plan.',
-      },
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '24.99',
+      priceCurrency: 'USD',
+      url: `${SITE}/pricing`,
+      availability: 'https://schema.org/InStock',
+      description: 'كل ما في Starter، مع نطاق مخصّص مجاني لسنة وإزالة شارة زينيا.',
     },
   ],
 }
@@ -84,7 +103,7 @@ export default function PricingLayout({ children }: { children: ReactNode }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(PRICING_FAQ_SCHEMA) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([PRICING_FAQ_SCHEMA, PRICING_OFFER_SCHEMA]) }}
       />
       {children}
     </>

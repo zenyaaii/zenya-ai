@@ -37,15 +37,29 @@ function XIcon2(props: React.SVGProps<SVGSVGElement>) {
  * once if needed. The one-product demo lives at `/demo` (no suffix); the
  * other seven live at `/demo/{type}`.
  */
-const DEMO_HREF: Record<string, string> = {
-  one_product: '/demo',
-  restaurant: '/demo/restaurant',
-  atlas: '/demo/atlas',
-  lookbook: '/demo/lookbook',
-  collective: '/demo/collective',
-  studio: '/demo/studio',
-  services: '/demo/services',
-  wellness: '/demo/wellness',
+/**
+ * Where a template row in the footer points.
+ *
+ * This used to go straight to /demo/<key>. The demos are still linked — from
+ * /websites/<slug> and from /themes — but they were the ONLY internal link the
+ * eight verticals had, which left /websites/<slug> reachable from a single hub
+ * page and nowhere else. Those eight pages are the ones written to rank for
+ * "موقع مطعم", "صفحة هبوط لتطبيق" and the rest, so starving them of internal
+ * links was starving exactly the pages that needed them. Pointing the footer
+ * here gives each one a link from every page on the site, and the landing page
+ * hands the visitor on to the live demo anyway.
+ *
+ * Keys match auroraTints / business_type; slugs match lib/template-pages.tsx.
+ */
+const WEBSITE_HREF: Record<string, string> = {
+  one_product: '/websites/one-product-store',
+  restaurant: '/websites/restaurant',
+  atlas: '/websites/app-landing-page',
+  lookbook: '/websites/fashion-lookbook',
+  collective: '/websites/online-store',
+  studio: '/websites/brand-story',
+  services: '/websites/services',
+  wellness: '/websites/wellness',
 }
 
 const PRODUCT = [
@@ -147,7 +161,7 @@ export default function Footer() {
             <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5">
               {BUSINESS_TYPE_ORDER.map((key) => {
                 const t = auroraTints[key]
-                const href = DEMO_HREF[key] || '/themes'
+                const href = WEBSITE_HREF[key] || '/themes'
                 return (
                   <li key={key}>
                     <Link

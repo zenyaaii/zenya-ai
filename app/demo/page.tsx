@@ -1,5 +1,11 @@
 import ThemePreview from '@/components/ThemePreview'
 import DemoStorefrontToolbar from '@/components/DemoStorefrontToolbar'
+import { demoMetadata } from '@/lib/demo-seo'
+
+// Unique title/description/canonical for the demo index. It ships in
+// sitemap.xml, so inheriting the root title made it a duplicate of the
+// homepage in Google's eyes. See lib/demo-seo.ts.
+export const metadata = demoMetadata('')
 
 export default function DemoPage() {
   const mockContent = {

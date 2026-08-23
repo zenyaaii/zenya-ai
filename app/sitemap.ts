@@ -6,6 +6,20 @@ import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
 const BASE = 'https://zenyaai.co'
 
+/**
+ * One timestamp, captured when the module is first evaluated, rather than a
+ * fresh `new Date()` per URL per request.
+ *
+ * Every URL used to report a lastmod of the exact moment the crawler asked,
+ * which says "all 43 pages changed one second ago" on every single fetch.
+ * Google treats a lastmod that always reads "now" as noise and stops using it
+ * — so the field stopped earning us anything, including on the occasions when
+ * a page really had just changed. Pinning it to build time makes the value
+ * honest: it moves when a deploy actually could have changed the page, and
+ * holds still in between.
+ */
+const BUILD_DATE = new Date()
+
 type Freq = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 /** Arabic-only routes (no English twin). */
@@ -56,7 +70,7 @@ const PAIRED: { path: string; priority: number; freq: Freq }[] = [
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date()
+  const now = BUILD_DATE
 
   const arOnly: MetadataRoute.Sitemap = AR_ONLY.map((r) => ({
     url: `${BASE}${r.path}`,

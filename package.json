@@ -13,6 +13,7 @@
     "start": "node --disable-warning=DEP0169 ./node_modules/next/dist/bin/next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "seo:ping": "node scripts/indexnow.mjs",
     "shopify": "shopify",
     "dev:shopify": "concurrently \"npm run dev\" \"shopify app dev\"",
     "test:e2e": "playwright test",

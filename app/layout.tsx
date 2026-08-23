@@ -106,33 +106,85 @@ export function generateMetadata(): Metadata {
 
 // JSON-LD: تُعرّف جوجل صراحةً بماهية زينيا — أوّل شركة إسلامية لإنشاء المواقع
 // بالذكاء الاصطناعي، ومنصّة عربية موجَّهة للسوق العربي.
+//
+// البنية هنا رسم بياني (@id) وليست ثلاث بطاقات منفصلة: المؤسسة عقدة واحدة
+// يشير إليها كلٌّ من التطبيق والموقع كـ publisher. هكذا تفهم جوجل أنها كيان
+// واحد بثلاثة أوجه، بدل ثلاثة كيانات متشابهة الاسم — وهذا شرط ظهور بطاقة
+// المعرفة (Knowledge Panel) لاسم العلامة.
+const ORG_ID = `${SITE_URL}/#organization`
+const SITE_ID = `${SITE_URL}/#website`
+
+// حسابات حقيقية فقط. sameAs هو أقوى إشارة تربط اسم العلامة بكيانٍ واحد لدى
+// جوجل، ويجب أن تطابق الروابط الظاهرة في التذييل (components/Footer.tsx).
+const SOCIAL_PROFILES = [
+  'https://www.tiktok.com/@zenyaai.co',
+  'https://www.instagram.com/zenyaai.co',
+  'https://x.com/zenyaaico',
+]
+
 const structuredData = [
   {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': ORG_ID,
     name: 'زينيا',
+    // النطق الإنجليزي للاسم. هذا ما يجعل جوجل تعرف أن "Zenya" و"Zenya AI"
+    // — الاسم الذي ما زال مفهرسًا من الإصدار السابق — هما نفس الكيان الذي
+    // يُسمّى اليوم "زينيا"، فتُدمج الإشارتان بدل أن تتنافسا.
+    alternateName: ['Zenya', 'Zenya AI', 'زينيا للذكاء الاصطناعي', 'Zenya AI Website Builder'],
     url: SITE_URL,
-    logo: `${SITE_URL}/logo.png`,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/logo.png`,
+      caption: 'زينيا',
+    },
+    image: `${SITE_URL}/opengraph-image`,
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
+    slogan: 'اكتب نبذة، واحصل على موقع.',
     foundingDate: '2025',
-    sameAs: [],
+    knowsLanguage: ['ar', 'en'],
+    knowsAbout: [
+      'إنشاء المواقع بالذكاء الاصطناعي',
+      'قوالب المواقع العربية',
+      'التجارة الإلكترونية',
+      'تحسين محركات البحث',
+      'استضافة المواقع',
+    ],
+    sameAs: SOCIAL_PROFILES,
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'support@zenyaai.co',
-      availableLanguage: ['Arabic'],
+      url: `${SITE_URL}/contact`,
+      availableLanguage: ['Arabic', 'English'],
     },
   },
   {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
+    '@id': `${SITE_URL}/#software`,
     name: 'زينيا',
+    alternateName: ['Zenya', 'Zenya AI'],
     operatingSystem: 'Web Browser',
     applicationCategory: 'BusinessApplication',
+    applicationSubCategory: 'Website Builder',
+    inLanguage: 'ar',
+    publisher: { '@id': ORG_ID },
     description:
       'منشئ مواقع بالذكاء الاصطناعي. اختر قالبًا، اكتب نبذة، واحصل على موقع متكامل بالنصوص والتصميم والصور — جاهز للنشر.',
     url: SITE_URL,
+    screenshot: `${SITE_URL}/opengraph-image`,
+    featureList: [
+      'توليد نصوص الموقع بالعربية بالذكاء الاصطناعي',
+      '8 قوالب احترافية جاهزة',
+      'محرّر مباشر بدون برمجة',
+      'استضافة داخل الاتحاد الأوروبي مع شهادة SSL',
+      'ربط نطاق مخصّص',
+      'تصدير قالب شوبيفاي',
+      'تحليلات زوّار بدون كوكيز',
+      'أدوات تحسين محركات البحث وربط Search Console',
+    ],
     offers: [
       {
         '@type': 'Offer',
@@ -177,9 +229,12 @@ const structuredData = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': SITE_ID,
     name: 'زينيا',
+    alternateName: ['Zenya', 'Zenya AI'],
     url: SITE_URL,
     inLanguage: 'ar',
+    publisher: { '@id': ORG_ID },
     potentialAction: {
       '@type': 'SearchAction',
       target: `${SITE_URL}/themes?q={search_term_string}`,

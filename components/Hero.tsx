@@ -51,14 +51,20 @@ export default function Hero() {
             </span>
           </motion.div>
 
-          {/* Headline — Arabic display weight, zero tracking (connected script) */}
+          {/* Headline — Arabic display weight, zero tracking (connected script).
+              The break falls after "موقعك" so the two lines carry near-equal
+              width (22 / 17 characters) instead of the old 15 / 5 imbalance,
+              and the whole line now reads as the phrase people actually search
+              for — the previous headline named no product and no keyword at
+              all, which left the single strongest element on the page doing
+              nothing for the query it should own. */}
           <motion.h1
             {...fade(0.06)}
             className="display-ar display-ar-tight text-[clamp(44px,8vw,82px)] text-foreground"
           >
-            ابنِ وأدِر وأنشِر
+            ابنِ وأدِر وأنشِر موقعك
             <br />
-            <span className="gradient-text">موقعك</span>
+            <span className="gradient-text">بالذكاء الاصطناعي</span>
           </motion.h1>
 
           {/* Sub — one tight, benefit-led line */}

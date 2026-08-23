@@ -144,6 +144,37 @@ export default function TemplateLandingPage({ params }: { params: { slug: string
 
         <FaqList title={`أسئلة شائعة عن ${t.name}`} faqs={t.faqs} />
 
+        {/* Editorial cross-link to the matching /why article.
+            Those articles were reachable from one card in the home-page arc
+            carousel — and because the carousel only mounts the active card,
+            exactly one of the eight ever appeared in the server HTML. The other
+            seven were invisible to a crawler that does not run the carousel.
+            This page is the natural parent for its own article: same vertical,
+            same reader, one step further down the funnel. `t.key` is the /why
+            route segment (both are the business_type key). */}
+        <section className="mt-10">
+          <Link
+            href={`/why/${t.key}`}
+            className="group flex items-center justify-between gap-4 rounded-2xl border border-token bg-[var(--surface-2)] p-6 transition-all hover:border-[rgba(94,106,210,0.30)] sm:p-8"
+          >
+            <span>
+              <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">
+                مقال مطوّل
+              </span>
+              <span className="heading-ar block text-[19px] text-foreground">
+                لماذا يحتاج نشاطك إلى {t.name}؟
+              </span>
+              <span className="mt-1.5 block text-[14px] leading-[1.85] text-muted">
+                دليل مفصّل بالأرقام والمصادر عمّا يكسبه صاحب النشاط من موقع احترافي — وما يخسره بدونه.
+              </span>
+            </span>
+            <ArrowLeft
+              className="h-5 w-5 flex-shrink-0 text-muted transition-transform group-hover:-translate-x-1"
+              strokeWidth={2.25}
+            />
+          </Link>
+        </section>
+
         {/* Cross-links to the other template pages */}
         <section className="mt-16">
           <h2 className="heading-ar mb-5 text-[20px] text-foreground">أنواع مواقع أخرى</h2>

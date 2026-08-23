@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react'
 import { ARTICLES, type Article } from './copy'
+import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import { auroraTints } from '@/lib/aurora-tints'
 import { themePreview, themePreviewFallback } from '@/lib/theme-previews'
 
@@ -39,7 +40,11 @@ export function generateMetadata({ params }: Params): Metadata {
   const article = ARTICLES[params.type as Article['key']]
   if (!article) return { title: 'زينيا' }
   return {
-    title: article.meta.title,
+    // `absolute` on purpose: every meta.title already ends in "| زينيا", and the
+    // root layout's template appends "· زينيا" on top of it. The live pages were
+    // shipping "…| زينيا · زينيا", which Google truncates and readers read as a
+    // bug. absolute suppresses the template and the copy keeps its own wordmark.
+    title: { absolute: article.meta.title },
     description: article.meta.description,
     keywords: article.meta.keywords,
     alternates: { canonical: `${SITE}/why/${article.key}` },
@@ -48,6 +53,11 @@ export function generateMetadata({ params }: Params): Metadata {
       description: article.meta.description,
       url: `${SITE}/why/${article.key}`,
       type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.meta.title,
+      description: article.meta.description,
     },
     robots: { index: true, follow: true },
   }
@@ -208,6 +218,16 @@ export default function Page({ params }: Params) {
           </section>
         </div>
 
+        {/* Related reading — the landing page for this same vertical, plus the
+            other seven articles.
+            Until now every /why article was a dead end: nothing linked out of
+            it and only one linked in. A crawler that reached one of these had
+            no path to the other seven, and no path back to the commercial page
+            for the same vertical. Wiring the eight to each other and to their
+            /websites twin turns eight isolated pages into one cluster that
+            reads as coverage of a subject rather than eight strays. */}
+        <RelatedReading article={article} tint={tint} />
+
         {/* CTA */}
         <section
           className="mt-16 overflow-hidden rounded-3xl border border-token p-8 sm:p-10"
@@ -249,6 +269,66 @@ export default function Page({ params }: Params) {
         </section>
       </article>
     </main>
+  )
+}
+
+/* ────────────────── related reading ────────────────── */
+
+/**
+ * The commercial landing page for the same vertical, then the seven sibling
+ * articles. `Article['key']` and `TemplatePage.key` are both the business_type
+ * key, so they join directly.
+ */
+function RelatedReading({
+  article,
+  tint,
+}: {
+  article: Article
+  tint: { accent: string; orb1: string; orb2: string }
+}) {
+  const twin = TEMPLATE_PAGES.find((t) => t.key === article.key)
+  const siblings = Object.values(ARTICLES).filter((a) => a.key !== article.key)
+
+  return (
+    <section className="mt-16">
+      {twin && (
+        <Link
+          href={`/websites/${twin.slug}`}
+          className="group flex items-center justify-between gap-4 rounded-2xl border border-token bg-[var(--surface-2)] p-6 transition-all hover:border-[rgba(94,106,210,0.30)] sm:p-8"
+        >
+          <span>
+            <span
+              className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em]"
+              style={{ color: tint.accent }}
+            >
+              القالب نفسه
+            </span>
+            <span className="heading-ar block text-[19px] text-foreground">{twin.name} من زينيا</span>
+            <span className="mt-1.5 block text-[14px] leading-[1.85] text-muted">
+              ما الذي يشمله القالب، ولمن هو، وكيف تنشئه — مع عرض حيّ قابل للتصفّح.
+            </span>
+          </span>
+          <ArrowLeft
+            className="h-5 w-5 flex-shrink-0 text-muted transition-transform group-hover:-translate-x-1"
+            strokeWidth={2.25}
+          />
+        </Link>
+      )}
+
+      <h2 className="heading-ar mb-5 mt-12 text-[20px] text-foreground">اقرأ أيضًا</h2>
+      <div className="flex flex-wrap gap-2.5">
+        {siblings.map((s) => (
+          <Link
+            key={s.key}
+            href={`/why/${s.key}`}
+            className="group inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-medium text-muted transition-all hover:border-[rgba(94,106,210,0.30)] hover:text-foreground"
+          >
+            {s.templateName}
+            <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" strokeWidth={2.25} />
+          </Link>
+        ))}
+      </div>
+    </section>
   )
 }
 
