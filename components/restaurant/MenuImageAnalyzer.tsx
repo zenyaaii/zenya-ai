@@ -175,9 +175,17 @@ async function fileToShot(file: File): Promise<Shot> {
 
 export default function MenuImageAnalyzer({
   cuisine,
+  demo,
   onExtract,
 }: {
   cuisine?: string
+  /**
+   * Set only by the public build demo on /demo/home, which mounts this
+   * component on a page nobody is signed in to. It tells /api/analyze-menu
+   * to answer from its memoised demo read instead of returning 401. Off
+   * everywhere else, so the wizard is unaffected.
+   */
+  demo?: boolean
   /** Called with the parsed categories. Returns how many items were applied. */
   onExtract: (categories: ExtractedCategory[]) => { categories: number; items: number }
 }) {
@@ -232,7 +240,11 @@ export default function MenuImageAnalyzer({
       const r = await fetch('/api/analyze-menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: [image], cuisine: cuisine || undefined }),
+        body: JSON.stringify({
+          images: [image],
+          cuisine: cuisine || undefined,
+          demo: demo || undefined,
+        }),
       })
       if (r.status === 401) return { categories: [], unauth: true }
       const j = await r.json().catch(() => ({}))

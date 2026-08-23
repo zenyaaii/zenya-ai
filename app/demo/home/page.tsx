@@ -52,6 +52,7 @@ import { Menu, Type, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
 import { createClient } from "@/utils/supabase/client"
 import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
+import BuildSection from "./BuildSection"
 
 /* The default face for the three words, and the only one that is preloaded,
    because it is what the page renders before anybody picks anything. Both cuts
@@ -269,6 +270,17 @@ const TEMPLATES = [
   { href: "/demo/services", label: "خدمات" },
   { href: "/demo/wellness", label: "عافية" },
 ]
+
+/* The deck: how long one screen takes to replace the other, and how long the
+   page stays deaf afterwards. The quiet is what a trackpad needs — one flick
+   keeps sending wheel events for the better part of a second, and without a
+   window of silence the deck would run twice on a single gesture. */
+const DECK_MOVE = 1020
+const DECK_QUIET = 320
+/* Past this much of a wheel notch or a swipe, the gesture counts. Below it,
+   nothing happens: a graze should not move the page a whole screen. */
+const DECK_WHEEL = 14
+const DECK_SWIPE = 44
 
 /* Shared row inside either tray. */
 const ROW =
@@ -541,6 +553,94 @@ export default function Page() {
     phaseRef.current = phase.cur
     applyRef.current()
   }, [phase.cur])
+
+  /* ── The deck ──────────────────────────────────────────────────────────
+     The hero does not scroll away by degrees. One downward gesture — wheel,
+     swipe or key — lifts the whole of it and brings the build section up in
+     its place, as a single move from one screen to the next, and the same
+     going back up. There is no free scrolling on this page at all: the body
+     has been overflow: hidden since the hero was one screen, and the deck
+     moves by transform instead.
+
+     The lock is the whole trick. A gesture past the threshold moves the deck
+     and then closes it for the length of the move; every event that arrives
+     while it is closed pushes the reopening further out, so the tail of a
+     trackpad flick is swallowed rather than counted as a second gesture. A
+     reader who wants the next screen has to stop and gesture again, which is
+     what "one gesture, one screen" means. */
+  const [deck, setDeck] = useState(0)
+  const deckAt = useRef(0)
+  const deckShut = useRef(0)
+  useEffect(() => {
+    const PANELS = 2
+    const go = (dir: number) => {
+      const now = Date.now()
+      if (now < deckShut.current) {
+        /* Still inside a gesture. Keep the door shut until it truly stops. */
+        deckShut.current = now + DECK_QUIET
+        return
+      }
+      const next = Math.min(PANELS - 1, Math.max(0, deckAt.current + dir))
+      if (next === deckAt.current) return
+      deckAt.current = next
+      setDeck(next)
+      deckShut.current = now + DECK_MOVE + DECK_QUIET
+    }
+
+    const onWheel = (e: WheelEvent) => {
+      /* The one thing on the page that legitimately scrolls is the list of
+         fifty faces inside the type tray. Anything with its own overflow
+         keeps its wheel; everything else belongs to the deck. */
+      const el = e.target as HTMLElement | null
+      if (el?.closest?.(".zn-list")) return
+      e.preventDefault()
+      if (Math.abs(e.deltaY) < DECK_WHEEL) return
+      go(e.deltaY > 0 ? 1 : -1)
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      const tag = el?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA" || el?.isContentEditable) return
+      if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(1) }
+      else if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); go(-1) }
+      else if (e.key === "Home") { e.preventDefault(); go(-1) }
+      else if (e.key === "End") { e.preventDefault(); go(1) }
+    }
+
+    /* A swipe is measured from where the finger went down to where it came
+       up, so the deck moves once at the end of the gesture rather than
+       chasing the finger. Moving is prevented throughout, or iOS answers the
+       drag with its own rubber band over a page that cannot scroll. */
+    let startY: number | null = null
+    const onStart = (e: TouchEvent) => { startY = e.touches[0]?.clientY ?? null }
+    const onMove = (e: TouchEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el?.closest?.(".zn-list")) return
+      if (e.cancelable) e.preventDefault()
+    }
+    const onEnd = (e: TouchEvent) => {
+      if (startY == null) return
+      const endY = e.changedTouches[0]?.clientY ?? startY
+      const travel = startY - endY
+      startY = null
+      if (Math.abs(travel) < DECK_SWIPE) return
+      go(travel > 0 ? 1 : -1)
+    }
+
+    window.addEventListener("wheel", onWheel, { passive: false })
+    window.addEventListener("keydown", onKey)
+    window.addEventListener("touchstart", onStart, { passive: true })
+    window.addEventListener("touchmove", onMove, { passive: false })
+    window.addEventListener("touchend", onEnd, { passive: true })
+    return () => {
+      window.removeEventListener("wheel", onWheel)
+      window.removeEventListener("keydown", onKey)
+      window.removeEventListener("touchstart", onStart)
+      window.removeEventListener("touchmove", onMove)
+      window.removeEventListener("touchend", onEnd)
+    }
+  }, [])
 
   const pickType = (id: string) => {
     setStyleId(id)
@@ -982,7 +1082,273 @@ export default function Page() {
         .zn-list::-webkit-scrollbar { width: 6px; }
         .zn-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.16); border-radius: 3px; }
 
+        /* ── The deck ─────────────────────────────────────────────────────
+           Percentages, never viewport units. The root ZoomLock writes CSS
+           zoom and vh resolves BEFORE that scale is applied, so a "100dvh"
+           panel in an 85%-zoomed window is short by a seventh and the two
+           screens would never line up. The deck is a fixed box measured
+           against the real viewport; a panel at half of a track at twice
+           the deck is exactly one screen at any zoom. */
+        #zn-deck { position: fixed; inset: 0; overflow: hidden; }
+        #zn-track {
+          position: absolute; inset: 0; height: 200%;
+          transform: translateY(calc(var(--deck, 0) * -50%));
+          transition: transform 1020ms cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform;
+        }
+        .zn-panel { position: relative; height: 50%; }
+
+        /* ── Section two ──────────────────────────────────────────────────
+           A window onto the product, on the same lit paper as the hero and
+           built out of the same three values: the header pill's surface, the
+           header pill's hairline ring, and nothing else. Every rule below is
+           achromatic; the only colour on this page is still the light. */
+        .zn-build {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.4rem);
+        }
+        .zn-app {
+          position: relative;
+          width: min(100%, 900px); height: 100%; max-height: 596px;
+          border-radius: 26px;
+          background: rgba(255, 255, 255, 0.72);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+          box-shadow: ${RING};
+          overflow: hidden;
+          display: grid; grid-template-rows: auto minmax(0, 1fr);
+        }
+        /* Where this is. Not chrome for its own sake: the path is what says
+           the picker really did open the wizard, and it is the only thing on
+           the surface that reports rather than asks. */
+        .zn-path {
+          padding: 15px 22px 9px;
+          font-size: 11px; line-height: 1; color: ${STONE};
+        }
+        .zn-path b { font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-stage { position: relative; min-height: 0; padding: 6px 22px 22px; }
+
+        /* The eight. This is also what the section rests as: if nothing ever
+           runs, a reader still sees every template the product offers. */
+        .zn-picker { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .zn-picker h2 { font-size: 15px; font-weight: 500; color: ${OBSIDIAN}; margin: 0 2px 14px; }
+        /* Rows sized to their contents, not stretched to fill the window. A
+           template here is a name and what it is for; stretching eight of them
+           over the whole frame turns that into eight empty boxes with a label
+           in the corner, which reads as a picture that failed to load. */
+        .zn-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 9px;
+        }
+        .zn-tile {
+          position: relative; border-radius: 13px; padding: 13px 14px;
+          display: flex; flex-direction: column; gap: 2px;
+          text-decoration: none; overflow: hidden;
+          background: rgba(255, 255, 255, 0.46);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+          transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+                      background 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-tile[data-on="true"] {
+          background: rgba(255, 255, 255, 0.88);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.32);
+        }
+        .zn-tile .name { display: block; font-size: 15px; font-weight: 500; line-height: 1.3; color: ${OBSIDIAN}; }
+        .zn-tile .tag { display: block; font-size: 10px; line-height: 1.5; color: ${STONE}; }
+        /* A hover affordance, so its hidden state is a state and not an
+           entrance: with no pointer on the tile there is nothing to show. It
+           takes the row it is given rather than floating over the name. */
+        .zn-tile .go {
+          display: block; margin-top: 8px;
+          font-size: 10.5px; line-height: 1; color: ${OBSIDIAN};
+          opacity: 0; transform: translateY(-3px);
+          transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                      transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-tile[data-on="true"] .go { opacity: 1; transform: none; }
+
+        /* One card, forward. The keyframe borrows the hidden state for its
+           own duration and rests visible, the same rule the words and the
+           claim are built on. */
+        /* Centred in the window, not stacked against the top of it. The eight
+           cards are wildly different heights — a phone number is one field and
+           the menu is a whole read — and anchoring them to the top leaves the
+           short ones stranded above a half-empty frame. Centred, every card
+           sits in the same place and the window reads as roomy rather than
+           unfinished. */
+        .zn-card { height: 100%; display: flex; flex-direction: column; justify-content: center;
+                   animation: zn-card-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        @keyframes zn-card-in {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: none; }
+        }
+        .zn-head { padding: 2px 2px 15px; }
+        .zn-head h2 { font-size: 16px; font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-head p { margin-top: 4px; font-size: 11.5px; line-height: 1.6; color: ${STONE}; }
+        .zn-body { flex: 0 1 auto; min-height: 0; }
+
+        .zn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .zn-f { display: block; }
+        .zn-f.wide { grid-column: 1 / -1; }
+        .zn-f .lab {
+          display: block; margin-bottom: 5px;
+          font-size: 9.5px; font-weight: 500; letter-spacing: 0.16em; color: ${STONE};
+        }
+        .zn-in {
+          display: block; min-height: 37px; padding: 9px 12px;
+          border-radius: 11px;
+          background: rgba(255, 255, 255, 0.6);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          font-size: 12.5px; line-height: 1.5; color: ${OBSIDIAN};
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-in.area { min-height: 76px; white-space: pre-wrap; }
+        .zn-in[data-on="true"] { box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.42); }
+        .zn-in i { font-style: normal; color: rgba(102, 102, 102, 0.5); }
+        .zn-in em { font-style: normal; }
+        /* The caret belongs to the field being written and to no other, and
+           it is the only thing on the page besides the claim that blinks. */
+        .zn-in[data-on="true"] em::after {
+          content: ""; display: inline-block;
+          width: 1px; height: 1em; margin-inline-start: 1px;
+          vertical-align: -0.14em; background: ${OBSIDIAN};
+          animation: zn-blink 1.05s steps(1) infinite;
+        }
+
+        .zn-lab { margin: 17px 0 8px; font-size: 9.5px; font-weight: 500; letter-spacing: 0.16em; color: ${STONE}; }
+        .zn-lab span { letter-spacing: 0; opacity: 0.6; }
+        .zn-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .zn-chip {
+          padding: 6px 12px; border-radius: 999px;
+          font-size: 11.5px; line-height: 1; color: ${OBSIDIAN};
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-chip[data-on="true"] { background: ${OBSIDIAN}; color: ${PAPER}; box-shadow: none; }
+
+        .zn-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .zn-preset {
+          min-height: 124px; padding: 16px 15px; border-radius: 14px;
+          display: flex; flex-direction: column; justify-content: flex-end; gap: 5px;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.46);
+          transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+                      background 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-preset[data-on="true"] {
+          background: rgba(255, 255, 255, 0.9);
+          box-shadow: inset 0 0 0 1.5px ${OBSIDIAN};
+        }
+        .zn-preset b { font-size: 15px; font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-preset i { font-style: normal; font-size: 10px; letter-spacing: 0.08em; color: ${STONE}; }
+
+        .zn-hours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 20px; }
+        .zn-hour {
+          display: grid; grid-template-columns: 58px 1fr 14px;
+          align-items: center; gap: 10px; padding: 5px 2px; font-size: 11.5px;
+        }
+        .zn-hour b { font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-hour i { font-style: normal; color: ${STONE}; }
+        .zn-hour[data-off="true"] i { color: ${OBSIDIAN}; }
+        .zn-hour u {
+          width: 14px; height: 14px; border-radius: 4px; text-decoration: none;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16);
+          transition: background 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-hour u[data-on="true"] { background: ${OBSIDIAN}; box-shadow: none; }
+
+        /* What came back from the read. The rows arrive in order rather than
+           all at once, so the menu is watched filling rather than found full. */
+        .zn-menu { margin-top: 15px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 22px; }
+        .zn-cat { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .zn-cat > b { margin-bottom: 2px; font-size: 11.5px; font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-dish {
+          display: flex; justify-content: space-between; gap: 12px;
+          font-size: 11.5px; line-height: 1.5; color: ${STONE}; min-width: 0;
+          animation: zn-dish-in 440ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn-dish em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .zn-dish i { font-style: normal; color: ${OBSIDIAN}; }
+        .zn-cat:nth-child(2) .zn-dish { animation-delay: 90ms; }
+        .zn-cat:nth-child(3) .zn-dish { animation-delay: 180ms; }
+        .zn-cat:nth-child(4) .zn-dish { animation-delay: 270ms; }
+        @keyframes zn-dish-in {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: none; }
+        }
+
+        .zn-note { margin-bottom: 15px; font-size: 11.5px; line-height: 1.6; color: ${STONE}; }
+        .zn-note b { font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-shots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        /* Fixed heights, not an aspect ratio. A square slot on a 730px card is
+           170px tall, and five of them plus the banner overran the window by
+           about the height of one row — which, on a centred card, gets cut off
+           the bottom. */
+        .zn-shot {
+          height: 94px; border-radius: 12px;
+          background: rgba(255, 255, 255, 0.4);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+        }
+        .zn-shot.hero { grid-column: 1 / -1; height: 132px; }
+
+        /* The product's own analyzer, mounted whole rather than reproduced.
+           The page takes the wizard's amber off it and changes nothing else:
+           that palette belongs to the wizard, and this page has no colour but
+           the light. Its emoji tile and its second tip go with the colour —
+           the card has to stay small. */
+        .zn-analyzer > div {
+          margin-bottom: 0 !important; padding: 15px !important;
+          border-radius: 14px !important; border-color: rgba(0, 0, 0, 0.1) !important;
+          background: rgba(255, 255, 255, 0.55) !important;
+          -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+        }
+        .zn-analyzer > div > div:first-child > div:first-child { display: none !important; }
+        .zn-analyzer > div > div:first-child > div:last-child > p:nth-child(3) { display: none !important; }
+        .zn-analyzer p { color: ${STONE} !important; font-size: 11.5px !important; line-height: 1.6 !important; }
+        .zn-analyzer p:first-child { color: ${OBSIDIAN} !important; font-weight: 500 !important; }
+        .zn-analyzer > div > p { color: ${OBSIDIAN} !important; }
+        .zn-analyzer button {
+          border-color: transparent !important;
+          background: rgba(255, 255, 255, 0.82) !important; color: ${OBSIDIAN} !important;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12) !important;
+        }
+        .zn-analyzer button.bg-foreground {
+          background: ${OBSIDIAN} !important; color: ${PAPER} !important; box-shadow: none !important;
+        }
+        .zn-analyzer img { filter: saturate(0.15); }
+
+        /* The pointer. Obsidian on a paper outline, so it reads over a field,
+           over a chip and over the analyzer's own dark button alike. */
+        .zn-cursor {
+          position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none;
+          transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-cursor svg {
+          display: block; transform-origin: 1px 1px;
+          transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-cursor[data-press="true"] svg { transform: scale(0.78); }
+
+        @media (max-width: 767px) {
+          .zn-build { padding-top: calc(var(--inset) + 3.9rem); }
+          .zn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn-row, .zn-hours, .zn-menu { grid-template-columns: minmax(0, 1fr); }
+          .zn-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
+          #zn-track { transition: none; }
+          .zn-card, .zn-dish { animation: none; }
+          .zn-cursor, .zn-cursor svg, .zn-tile, .zn-tile .go, .zn-chip,
+          .zn-preset, .zn-hour u, .zn-in { transition: none; }
+          .zn-in[data-on="true"] em::after { animation: none; }
           .zn-words > span { animation: none; }
           .zn-w, .zn-slot { transition: none; }
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
@@ -1344,17 +1710,27 @@ export default function Page() {
           against the real viewport, so they are centred on the reader's
           screen at any zoom. Safe here because the page is one screen and the
           body already has overflow: hidden. */}
-      <main
-        id="blank-home"
-        dir="rtl"
-        className="fixed inset-0 flex items-center justify-center"
-        style={{ background: PAPER }}
-      >
-        {/* The light, behind everything and taking no pointer events. */}
+      {/* The deck. Two screens on one track, a gesture apart. Fixed rather
+          than any height in viewport units, for the reason below; the track
+          is twice the deck and each panel is half the track, so a panel is
+          exactly one screen whatever zoom the root is writing. */}
+      <div id="zn-deck" style={{ background: PAPER }}>
+        {/* The light, behind BOTH screens and taking no pointer events. It
+            belongs to the page rather than to the hero, so it holds still
+            while the deck travels over it. */}
         <div id="zn-glow" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
           <div className="foot"><i /></div>
           <div className="head"><i /></div>
         </div>
+
+        <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
+        <div className="zn-panel">
+      <main
+        id="blank-home"
+        dir="rtl"
+        className="absolute inset-0 flex items-center justify-center"
+        aria-hidden={deck !== 0}
+      >
 
         {/* Revealed in sequence on the first load: the order is the product,
             build then manage then publish. Slow and short-travelled so it
@@ -1426,6 +1802,17 @@ export default function Page() {
           </span>
         </p>
       </main>
+        </div>
+
+        {/* Section two: ابن, the first of the three words, shown rather than
+            argued for. It drives the product's own path — the eight
+            templates, the wizard behind the one that is picked, and that
+            wizard's own form filling itself in, one card at a time. */}
+        <div className="zn-panel" aria-hidden={deck !== 1}>
+          <BuildSection active={deck === 1} uiClass={ui.className} />
+        </div>
+        </div>
+      </div>
     </>
   )
 }

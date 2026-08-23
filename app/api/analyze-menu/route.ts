@@ -185,12 +185,53 @@ Return STRICT JSON only, no prose, no markdown:
   ]
 }`
 
+/* ────────────────────────────────────────────────────────────────────── *
+ * The public build demo.                                                   *
+ *                                                                          *
+ * /demo/home shows the restaurant wizard filling itself in, and its Menu    *
+ * card drives THIS route through the wizard's own analyzer component — the  *
+ * same file, the same client-side preparation, the same request. But the    *
+ * page is public and the reader is not signed in, so it announces itself    *
+ * with `demo: true`.                                                        *
+ *                                                                          *
+ * A flag anyone could send cannot be allowed to buy vision calls, so a demo *
+ * read is bounded twice over:                                               *
+ *                                                                           *
+ *  1. It reads the BUNDLED SAMPLE, never the posted image. The demo answer   *
+ *     is one shared object, so honouring whatever arrived would let one      *
+ *     caller's photograph become what every visitor after them watches fill  *
+ *     in — and would put an open vision endpoint behind a boolean.           *
+ *  2. It is memoised per server instance. The first demo read is a real      *
+ *     model call and every read after it is handed that same answer, so the  *
+ *     route is worth exactly one call per instance however hard it is        *
+ *     hammered.                                                              *
+ *                                                                           *
+ * What the demo shows is therefore a real GPT-4o read of a real photograph,  *
+ * made by this route. A signed-in caller never touches any of this.          *
+ * ────────────────────────────────────────────────────────────────────── */
+const DEMO_SAMPLE = '/demo/menu-sample.jpg'
+const DEMO_CUISINE = 'مأكولات شامية عصرية'
+let demoRead: Promise<{ categories: Category[]; ok: boolean; error?: string }[]> | null = null
+
+/**
+ * The demo's own read: fetch the bundled sample over the request's own
+ * origin (public assets are not reliably on the lambda's filesystem, but they
+ * are always on the CDN) and put it through the same single vision call the
+ * wizard would. Runs at most once per server instance.
+ */
+async function readDemoSample(openai: OpenAI, origin: string) {
+  const res = await fetch(new URL(DEMO_SAMPLE, origin).toString())
+  if (!res.ok) throw new Error(`demo_sample_${res.status}`)
+  const image = `data:image/jpeg;base64,${Buffer.from(await res.arrayBuffer()).toString('base64')}`
+  return Promise.all([analyzeOne(openai, image, DEMO_CUISINE, null)])
+}
+
 /** One vision call for a single image/half. Returns [] on any failure. */
 async function analyzeOne(
   openai: OpenAI,
   image: string,
   cuisine: string | undefined,
-  userId: string
+  userId: string | null
 ): Promise<{ categories: Category[]; ok: boolean; error?: string }> {
   const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
     {
@@ -238,18 +279,20 @@ async function analyzeOne(
 }
 
 export async function POST(req: NextRequest) {
-  // Auth-gate: this burns vision tokens and the wizard already requires login.
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
-  }
-
   let body: any
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
+  }
+
+  // Auth-gate: this burns vision tokens and the wizard already requires login.
+  // The public demo is the one exception, and it is memoised — see above.
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const demo = !user && body?.demo === true
+  if (!user && !demo) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
   const rawImages = Array.isArray(body?.images) ? body.images : []
@@ -260,7 +303,9 @@ export async function POST(req: NextRequest) {
     .filter((s: string) => s.length <= MAX_IMAGE_CHARS)
     .slice(0, MAX_IMAGES)
 
-  if (images.length === 0) {
+  // A demo read supplies its own image, so it is allowed to arrive without
+  // one — which is also how the page warms this route before it needs it.
+  if (images.length === 0 && !demo) {
     return NextResponse.json(
       { error: 'no_images', message: 'ارفع صورة واحدة واضحة على الأقل لقائمتك.' },
       { status: 400 }
@@ -281,8 +326,20 @@ export async function POST(req: NextRequest) {
   try {
     const openai = new OpenAI({ apiKey })
 
-    // Fire every image concurrently; a slow/failed slice doesn't sink the rest.
-    const results = await Promise.all(images.map((img) => analyzeOne(openai, img, cuisine, user.id)))
+    let results
+    if (demo) {
+      // The bundled sample, read once per server instance and then shared.
+      if (!demoRead) {
+        demoRead = readDemoSample(openai, req.nextUrl.origin)
+          .catch((e) => { demoRead = null; throw e })
+      }
+      results = await demoRead
+      // Never keep a failure: the next visitor should get a fresh attempt.
+      if (!results.some((r) => r.ok)) demoRead = null
+    } else {
+      // Fire every image concurrently; a slow/failed slice doesn't sink the rest.
+      results = await Promise.all(images.map((img) => analyzeOne(openai, img, cuisine, user!.id)))
+    }
 
     const categories = mergeResults(results.map((r) => r.categories))
     const itemCount = categories.reduce((n, c) => n + c.items.length, 0)
@@ -303,9 +360,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       categories,
       _meta: {
-        source: 'openai',
+        source: demo ? 'openai:demo-sample' : 'openai',
         model: MODEL,
-        images: images.length,
+        images: demo ? 1 : images.length,
         categories: categories.length,
         items: itemCount,
         partial: errors.length > 0 ? errors : undefined,
