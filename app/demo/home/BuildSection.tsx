@@ -149,6 +149,10 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
   /* The cursor is the one thing here that is decoration, so it stays out of
      the document until a card is actually being driven. */
   const [cursor, setCursor] = useState<{ x: number; y: number; press: boolean } | null>(null)
+  /* The wizard's own closing bar, and whether its button has been pressed.
+     It is the ninth beat rather than a card: in the wizard it is sticky at
+     the foot of the whole form, not a section of it. */
+  const [finish, setFinish] = useState<false | "ready" | "going">(false)
   /* Bumped to run the sequence again from the picker. */
   const [take, setTake] = useState(0)
 
@@ -176,6 +180,7 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
       /* Back to the state the section rests in when nothing has run: the
          eight templates, which are real content on their own. */
       setView("picker"); setCard(0); setForm(EMPTY); setHover(null); setCursor(null); setFocus(null)
+      setFinish(false)
       return
     }
     let dead = false
@@ -388,10 +393,24 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
       /* ── 8 · الصحافة والجوائز ────────────────────────────────────────── */
       setCard(7); await wait(600)
       await type("press", SAMPLE.press)
-      await beat(2800)
+      await beat(520)
+
+      /* ── The ninth beat: the wizard's closing bar. ───────────────────── */
+      /* Not a card. In the wizard this bar is sticky at the foot of the whole
+         form, so here it rises into the window once the last card is done. */
+      setFinish("ready")
+      await wait(760)
+      await move("generate", 0.5, 0.5)
+      await click()
+      setFinish("going")
+      /* Held on the button's real working label. Nothing is generated: a run
+         takes the wizard twenty to forty seconds of paid work per visitor,
+         and showing a site that was never built would be a lie about what
+         the reader just watched being filled in. */
+      await beat(2600)
 
       /* Round again, from the eight. */
-      setView("picker"); setCard(0); setForm(EMPTY)
+      setView("picker"); setCard(0); setForm(EMPTY); setFinish(false)
       await wait(1500)
       if (!dead) setTake((t) => t + 1)
     }
@@ -440,6 +459,20 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
             </div>
           )}
         </div>
+
+        {/* The wizard's closing bar, verbatim. It arrives once the eighth
+            card is done and rests visible, like everything else here. */}
+        {finish && (
+          <div className="zn-finish" data-going={finish === "going"}>
+            <div>
+              <p className="head">جاهزون متى كنت مستعدًّا.</p>
+              <p className="sub">يستغرق نحو 20 إلى 40 ثانية. سننقلك إلى معاينتك الحيّة.</p>
+            </div>
+            <span className="go" data-t="generate">
+              {finish === "going" ? "جارٍ توليد موقعك…" : "ولّد موقعي"}
+            </span>
+          </div>
+        )}
 
         {cursor && (
           <span

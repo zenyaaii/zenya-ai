@@ -1323,6 +1323,31 @@ export default function Page() {
         }
         .zn-analyzer img { filter: saturate(0.15); }
 
+        /* The wizard's closing bar. Obsidian, which is the one place on this
+           page the ramp inverts — the same inversion the account control and a
+           chosen chip already use, so it reads as the end of the form rather
+           than as a new colour. Rises into the window and rests there. */
+        .zn-finish {
+          position: absolute; inset-inline: 22px; bottom: 20px; z-index: 4;
+          display: flex; align-items: center; justify-content: space-between; gap: 18px;
+          padding: 14px 16px; border-radius: 18px;
+          background: ${OBSIDIAN}; color: ${PAPER};
+          animation: zn-finish-in 560ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        @keyframes zn-finish-in {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: none; }
+        }
+        .zn-finish .head { font-size: 12px; font-weight: 500; line-height: 1.3; }
+        .zn-finish .sub { margin-top: 3px; font-size: 10.5px; line-height: 1.4; opacity: 0.62; }
+        .zn-finish .go {
+          flex: 0 0 auto; padding: 9px 20px; border-radius: 999px;
+          background: ${PAPER}; color: ${OBSIDIAN};
+          font-size: 11.5px; font-weight: 500; line-height: 1;
+          transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-finish[data-going="true"] .go { opacity: 0.6; }
+
         /* The pointer. Obsidian on a paper outline, so it reads over a field,
            over a chip and over the analyzer's own dark button alike. */
         .zn-cursor {
@@ -1345,7 +1370,8 @@ export default function Page() {
 
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
-          .zn-card, .zn-dish { animation: none; }
+          .zn-card, .zn-dish, .zn-finish { animation: none; }
+          .zn-finish .go { transition: none; }
           .zn-cursor, .zn-cursor svg, .zn-tile, .zn-tile .go, .zn-chip,
           .zn-preset, .zn-hour u, .zn-in { transition: none; }
           .zn-in[data-on="true"] em::after { animation: none; }
