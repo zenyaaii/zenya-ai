@@ -402,7 +402,7 @@ export default function Page() {
   useEffect(() => {
     const el = wordsRef.current
     if (!el) return
-    let frame = 0
+    let frame: ReturnType<typeof setTimeout>
     const fit = () => {
       const parent = el.parentElement
       if (!parent) return
@@ -422,19 +422,23 @@ export default function Page() {
          clamp it was given. */
       el.style.setProperty("--fit", String(Math.min(1.05, (avail * 0.86) / natural)))
     }
+    /* Measured straight away, not on the next animation frame: a page opened in
+       a background tab never gets one, and the line would sit at its small
+       default until something else moved. Later passes are merely debounced,
+       on a timer for the same reason. */
     const schedule = () => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(fit)
+      clearTimeout(frame)
+      frame = setTimeout(fit, 90)
     }
-    schedule()
+    fit()
     /* The viewport is what is observed, never the line itself: fitting changes
        the line's own width, and observing that is a loop. */
     const stage = document.getElementById("blank-home")
     const ro = stage ? new ResizeObserver(schedule) : null
     if (stage && ro) ro.observe(stage)
-    document.fonts?.ready.then(schedule).catch(() => { /* no font API */ })
+    document.fonts?.ready.then(fit).catch(() => { /* no font API */ })
     return () => {
-      cancelAnimationFrame(frame)
+      clearTimeout(frame)
       ro?.disconnect()
     }
   }, [styleId])
@@ -460,9 +464,15 @@ export default function Page() {
     }
   }, [claim])
 
-  /* Right for Arabic, left for English, middle while it is changing over. */
+  /* Right for Arabic, left for English. It walks to the middle as the sentence
+     leaves, then takes the far side during the dark beat — while it is still
+     invisible and carries no transition on the move, so it jumps rather than
+     sliding back across the sentence it is about to introduce. */
+  const sideOf = (i: number) => (CLAIMS[i].dir === "rtl" ? "right" : "left")
   const dotSide =
-    beat === "read" ? (CLAIMS[claim].dir === "rtl" ? "right" : "left") : "middle"
+    beat === "read" ? sideOf(claim)
+      : beat === "leave" ? "middle"
+        : sideOf((claim + 1) % CLAIMS.length)
 
   /* Which row is showing, and which one is on its way out. Both live in one
      piece of state so the updater stays pure: React can call it twice in
