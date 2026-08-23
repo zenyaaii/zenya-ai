@@ -227,12 +227,17 @@ types or picks, the card completes, the animation ends, a thinking or
 confirmation beat plays, and only then does the next card come forward with its
 own animation. One card, one animation, in sequence.
 
-**The Menu card is the one worth building well.** It carries
-`components/restaurant/MenuImageAnalyzer.tsx`, which reads a photo of a real
-menu and extracts the categories and dishes into the form. Its animation should
-show that: choosing an image, uploading it, and the whole menu filling itself
-in from the photo. That is the moment the product sells itself, so the image
-selection and the fill are both worth animating properly.
+**The Menu card carries the idea, and should stay small.** It holds
+`components/restaurant/MenuImageAnalyzer.tsx`, which reads a photo of a menu
+and extracts categories and dishes into the form. The animation is: a small
+sample image is picked, it uploads, the analysis runs, the menu fills itself
+in. Nothing more elaborate than that.
+
+Keep the result modest and predictable: **four categories, two dishes in each**.
+The analyzer can return a dozen categories and forty items from a real menu,
+which is far too much to watch fill and makes the beat unpredictable. Use a
+sample image that yields about that, or trim what comes back to that shape for
+the demo.
 
 ## Working notes
 
