@@ -206,17 +206,33 @@ The page makes exactly one claim: أوّل شركة إسلامية لإنشاء 
 The hero is done and lives at `app/demo/home/page.tsx`, live at
 `zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
 
-Next is the second section, which is not built:
+Next is the second section, which is not built.
 
-- The hero should not scroll away by degrees. One gesture down lifts the whole
-  hero up and brings the next section in.
-- That section is `ابن`, the first of the three words: a real template
-  generator form, with an animation in which a cursor moves to each field,
-  fills it, and presses generate.
-- **Open question, unanswered:** does that form drive the real generator (the
-  wizard at `/theme/new/...`), or replay a staged path that always runs
-  perfectly? The animation is the same either way; how much of it is real
-  changes the work substantially.
+**Movement.** The hero does not scroll away by degrees. One downward gesture
+lifts the whole hero up and brings section two in as a single move, one screen
+to the next. The same going back up.
+
+**The section is `ابن`**, the first of the three words: the build step. It is
+the real generator, not a mock. The path is the real one a customer takes.
+
+1. Pick a template from the eight (`app/(main)/themes/page.tsx` holds the
+   canonical list and each one's `createHref`).
+2. That opens the real wizard, e.g. `/theme/new/restaurant`.
+3. The real form appears, and the animation drives it.
+
+**The animation is per card, never one long take.** The restaurant wizard is
+eight cards: Basics, Style, Location and Hours, Menu, Story, Reservations,
+Visuals, Press. Each card gets its own short animation: a cursor moves in,
+types or picks, the card completes, the animation ends, a thinking or
+confirmation beat plays, and only then does the next card come forward with its
+own animation. One card, one animation, in sequence.
+
+**The Menu card is the one worth building well.** It carries
+`components/restaurant/MenuImageAnalyzer.tsx`, which reads a photo of a real
+menu and extracts the categories and dishes into the form. Its animation should
+show that: choosing an image, uploading it, and the whole menu filling itself
+in from the photo. That is the moment the product sells itself, so the image
+selection and the fill are both worth animating properly.
 
 ## Working notes
 
