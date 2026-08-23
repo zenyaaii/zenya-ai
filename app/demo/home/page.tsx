@@ -730,11 +730,12 @@ export default function Page() {
           display: inline-grid;
           padding-block: 0.2em;
           margin-block: -0.2em;
-          /* Vertically only. The words in the wings must be cut off above and
-             below, but never at the sides: a column is only as wide as the word
-             currently in it, so a wider word on its way out would be shaved
-             mid-flight by an ordinary overflow: hidden. */
-          clip-path: inset(0 -100vw);
+          /* Clipped on both axes, and it has to be. A column is only as wide as
+             the word currently in it, so while that width is moving the word
+             inside overhangs it, and an unclipped column puts that overhang
+             straight over the neighbouring word. The padding above and below
+             is what keeps ascenders and descenders out of the vertical cut. */
+          overflow: hidden;
           /* Never shrink. flex-nowrap stops the LINE breaking, but flex items
              still shrink below their content by default, and a squeezed column
              breaks its word across two lines instead. It also corrupted the
@@ -742,11 +743,13 @@ export default function Page() {
              fitted the type too large, every time. */
           flex: 0 0 auto;
           white-space: nowrap;
-          /* The column follows the word inside it. Same curve and the same
-             per-column delay as the roll, so a column widening and its word
-             arriving are one movement, not two. */
-          transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
-          transition-delay: calc(var(--i) * 90ms + 60ms);
+          /* The column follows the word inside it, and leads it slightly: it
+             starts 60ms before the word begins to rise and is done well before
+             the word lands, so the room is already made and nothing is cut on
+             the way in. Same curve as the roll, so the two read as one
+             movement. */
+          transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition-delay: calc(var(--i) * 90ms);
         }
         .zn-w {
           grid-area: 1 / 1;
