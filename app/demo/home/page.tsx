@@ -669,9 +669,17 @@ export default function Page() {
           overflow: hidden;
           padding-block: 0.2em;
           margin-block: -0.2em;
+          /* Never shrink. flex-nowrap stops the LINE breaking, but flex items
+             still shrink below their content by default, and a squeezed column
+             breaks its word across two lines instead. It also corrupted the
+             measurement below, which read the squeezed width as natural and so
+             fitted the type too large, every time. */
+          flex: 0 0 auto;
+          white-space: nowrap;
         }
         .zn-w {
           grid-area: 1 / 1;
+          white-space: nowrap;
           transition: transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
                       opacity 100ms linear;
         }
@@ -723,13 +731,9 @@ export default function Page() {
            same steps, which is why the two stay in lockstep. */
         #zn-claim { position: absolute; inset-inline: 0; bottom: calc(var(--inset) + 3.5rem); display: flex; align-items: center; justify-content: center; }
         @media (min-width: 768px) { #zn-claim { bottom: calc(var(--inset) + 0.4rem); } }
-        #zn-claim .wrap { position: relative; display: inline-grid; }
-        #zn-claim .line { grid-area: 1 / 1; position: relative; white-space: nowrap; }
+        #zn-claim .wrap { position: relative; display: inline-block; }
+        #zn-claim .line { position: relative; display: inline-block; white-space: nowrap; }
 
-        /* The sentence not on stage is simply not lit. Opacity is React state
-           here, not an animation, so a frozen page still shows the one that is
-           current rather than an empty line. */
-        #zn-claim .line[data-state="idle"] { opacity: 0; pointer-events: none; }
         #zn-claim .line[data-state="leave"],
         #zn-claim .line[data-state="between"] {
           opacity: 0;
@@ -1302,21 +1306,20 @@ export default function Page() {
           className={`${ui.className} text-[12px] md:text-[13px]`}
           style={{ color: STONE }}
         >
-          {/* Both sentences share one grid cell, so the box is as wide as the
-              longer of them and the dot's three anchors never move under it. */}
+          {/* Only the sentence being read is on the page, so the box is its
+              width: the caret ends where the words end, and the dot sits
+              against the sentence rather than against a box sized for the
+              other language. The key restarts the typing on each change. */}
           <span className="wrap">
-            {CLAIMS.map((c, i) => (
-              <span
-                key={c.id}
-                className="line leading-none"
-                dir={c.dir}
-                data-state={i === claim ? beat : "idle"}
-                aria-hidden={i !== claim}
-              >
-                <span className="text">{c.text}</span>
-                <span className="caret" aria-hidden />
-              </span>
-            ))}
+            <span
+              key={CLAIMS[claim].id}
+              className="line leading-none"
+              dir={CLAIMS[claim].dir}
+              data-state={beat}
+            >
+              <span className="text">{CLAIMS[claim].text}</span>
+              <span className="caret" aria-hidden />
+            </span>
             <span className="dot" data-side={dotSide} data-lit={beat !== "between"} aria-hidden />
           </span>
         </p>
