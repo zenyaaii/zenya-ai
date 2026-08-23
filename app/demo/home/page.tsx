@@ -226,8 +226,10 @@ const WORD_SETS = [
   ["تحسين", "إشراف", "زبائن"],
 ]
 
-/* How long a row holds before the next one rolls up. */
-const WORD_HOLD = 3400
+/* How long a row rests before the next one rolls up. The change itself runs
+   about 1.5s end to end, because the three columns go one at a time rather than
+   together, so the rest is set well clear of it. */
+const WORD_HOLD = 4600
 
 /* The one claim the page makes, in both languages. It types itself out, holds
    long enough to be read twice over, then retypes in the other language. */
@@ -761,29 +763,37 @@ export default function Page() {
              widening under it clipped the word, and a clipped word reads as two
              words running together. The order per column is now strict: the old
              word leaves, the column moves, the new word arrives. */
-          transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
-          transition-delay: calc(var(--i) * 70ms + 120ms);
+          transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition-delay: calc(var(--i) * var(--beat) + 260ms);
         }
+        /* The distance between one column changing and the next. Long enough
+           that a reader sees one word change, then the next, then the next,
+           instead of three words changing at once in slightly different
+           places. */
+        .zn-words { --beat: 320ms; }
         .zn-w {
           grid-area: 1 / 1;
           /* Each word keeps its own width rather than stretching to the column,
              which is what lets the column be measured against it. */
           justify-self: center;
           white-space: nowrap;
-          transition: transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
-                      opacity 100ms linear;
+          /* Long and soft on the way in, with the fade riding the whole travel
+             rather than snapping on at the start. That is most of what makes
+             the arrival read as smooth rather than as a swap. */
+          transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1),
+                      opacity 300ms cubic-bezier(0.33, 1, 0.68, 1);
         }
         /* Arrives after its column has finished making room. */
         .zn-w[data-state="in"] {
-          transition-delay: calc(var(--i) * 70ms + 330ms);
+          transition-delay: calc(var(--i) * var(--beat) + 520ms);
         }
-        /* Leaves first, before its column moves. */
+        /* Leaves first, before its column moves, gathering speed as it goes. */
         .zn-w[data-state="out"] {
           opacity: 0;
           transform: translateY(-130%);
-          transition: transform 200ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
-                      opacity 110ms linear;
-          transition-delay: calc(var(--i) * 70ms);
+          transition: transform 300ms cubic-bezier(0.55, 0.055, 0.675, 0.19),
+                      opacity 220ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+          transition-delay: calc(var(--i) * var(--beat));
           pointer-events: none;
         }
         /* Everything not on stage waits below, out of the clip. The row that
