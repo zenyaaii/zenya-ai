@@ -465,7 +465,9 @@ export default function Page() {
       if (!el2 || !widths.length) return
       el2.querySelectorAll<HTMLElement>(".zn-slot").forEach((slot, c) => {
         const w = widths[c]?.[phaseRef.current]
-        if (w) slot.style.width = `${w}px`
+        /* offsetWidth rounds down, so the column gets a pixel back: a column a
+           fraction narrower than its word would shave a stem. */
+        if (w) slot.style.width = `${w + 1}px`
       })
     }
     applyRef.current = applyWidths
@@ -728,14 +730,24 @@ export default function Page() {
            in the wings still are. */
         .zn-slot {
           display: inline-grid;
+          /* The track has to follow the column, not the widest word in it. An
+             auto track is sized to max-content, so every word sat centred in a
+             track as wide as the longest of the four no matter what width the
+             column itself was given, hanging a hundred pixels out each side.
+             That is what was being cut, and what was landing on the neighbours.
+             minmax(0, 1fr) makes the track the column. */
+          grid-template-columns: minmax(0, 1fr);
           padding-block: 0.2em;
           margin-block: -0.2em;
-          /* Clipped on both axes, and it has to be. A column is only as wide as
-             the word currently in it, so while that width is moving the word
-             inside overhangs it, and an unclipped column puts that overhang
-             straight over the neighbouring word. The padding above and below
-             is what keeps ascenders and descenders out of the vertical cut. */
-          overflow: hidden;
+          /* Cut above and below, never at the sides. The words waiting in the
+             wings have to be hidden, but a side cut takes letters off the word
+             being read, and a clipped letter is worse than anything it was
+             protecting against. Nothing needs cutting sideways any more: the
+             sequence below means a word is only ever visible while its column
+             is already at that word's width, so there is no overhang to trim.
+             The padding above and below keeps ascenders and descenders clear of
+             the vertical cut. */
+          clip-path: inset(0 -100vw);
           /* Never shrink. flex-nowrap stops the LINE breaking, but flex items
              still shrink below their content by default, and a squeezed column
              breaks its word across two lines instead. It also corrupted the
