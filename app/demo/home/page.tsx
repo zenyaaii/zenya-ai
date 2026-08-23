@@ -743,13 +743,14 @@ export default function Page() {
              fitted the type too large, every time. */
           flex: 0 0 auto;
           white-space: nowrap;
-          /* The column follows the word inside it, and leads it slightly: it
-             starts 60ms before the word begins to rise and is done well before
-             the word lands, so the room is already made and nothing is cut on
-             the way in. Same curve as the roll, so the two read as one
-             movement. */
+          /* The column re-spaces in the gap between the two words, while it is
+             empty. Overlapping the two was the mistake: the incoming word is
+             fully opaque long before it finishes rising, so a column still
+             widening under it clipped the word, and a clipped word reads as two
+             words running together. The order per column is now strict: the old
+             word leaves, the column moves, the new word arrives. */
           transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
-          transition-delay: calc(var(--i) * 90ms);
+          transition-delay: calc(var(--i) * 70ms + 120ms);
         }
         .zn-w {
           grid-area: 1 / 1;
@@ -760,15 +761,17 @@ export default function Page() {
           transition: transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
                       opacity 100ms linear;
         }
+        /* Arrives after its column has finished making room. */
         .zn-w[data-state="in"] {
-          transition-delay: calc(var(--i) * 90ms + 60ms);
+          transition-delay: calc(var(--i) * 70ms + 330ms);
         }
+        /* Leaves first, before its column moves. */
         .zn-w[data-state="out"] {
           opacity: 0;
           transform: translateY(-130%);
-          transition: transform 260ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
-                      opacity 120ms linear;
-          transition-delay: calc(var(--i) * 90ms + 60ms);
+          transition: transform 200ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 110ms linear;
+          transition-delay: calc(var(--i) * 70ms);
           pointer-events: none;
         }
         /* Everything not on stage waits below, out of the clip. The row that
