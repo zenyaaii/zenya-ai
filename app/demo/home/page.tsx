@@ -135,56 +135,56 @@ type TypeStyle = {
 /* Ordered by kind rather than alphabet: contemporary sans first, then the kufi
    and display faces, then naskh, with nastaliq last. */
 const STYLES: TypeStyle[] = [
-  { id: "almarai-400", name: "Almarai", cls: fAlmarai.className, weight: 400, lh: 1.24, scale: 1.15 },
-  { id: "cairo-900", name: "Cairo", cls: fCairo.className, weight: 900, lh: 1.3, scale: 1.09 },
-  { id: "cairo-200", name: "Cairo", cls: fCairo.className, weight: 200, lh: 1.3, scale: 1.38 },
-  { id: "tajawal-900", name: "Tajawal", cls: display.className, weight: 900, lh: 1.28, scale: 1.02 },
-  { id: "tajawal-200", name: "Tajawal", cls: display.className, weight: 200, lh: 1.28, scale: 1.29 },
-  { id: "ibm-plex-sans-arabic-500", name: "IBM Plex Sans Arabic", cls: ui.className, weight: 500, lh: 1.3, scale: 1.29 },
-  { id: "noto-sans-arabic-500", name: "Noto Sans Arabic", cls: fNotoSansArabic.className, weight: 500, lh: 1.3, scale: 1.19 },
-  { id: "noto-kufi-arabic-900", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 900, lh: 1.34, scale: 0.92 },
-  { id: "noto-kufi-arabic-200", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 200, lh: 1.34, scale: 1.29 },
-  { id: "alexandria-800", name: "Alexandria", cls: fAlexandria.className, weight: 800, lh: 1.28, scale: 0.98 },
-  { id: "alexandria-100", name: "Alexandria", cls: fAlexandria.className, weight: 100, lh: 1.28, scale: 1.35 },
-  { id: "readex-pro-400", name: "Readex Pro", cls: fReadexPro.className, weight: 400, lh: 1.3, scale: 1.09 },
-  { id: "vazirmatn-400", name: "Vazirmatn", cls: fVazirmatn.className, weight: 400, lh: 1.3, scale: 1.24 },
-  { id: "rubik-500", name: "Rubik", cls: fRubik.className, weight: 500, lh: 1.28, scale: 1.15 },
-  { id: "mada-500", name: "Mada", cls: fMada.className, weight: 500, lh: 1.28, scale: 1.27 },
-  { id: "changa-500", name: "Changa", cls: fChanga.className, weight: 500, lh: 1.28, scale: 1.17 },
-  { id: "zain-300", name: "Zain", cls: fZain.className, weight: 300, lh: 1.28, scale: 1.18 },
-  { id: "reem-kufi-500", name: "Reem Kufi", cls: fReemKufi.className, weight: 500, lh: 1.3, scale: 1.32 },
-  { id: "reem-kufi-fun-500", name: "Reem Kufi Fun", cls: fReemKufiFun.className, weight: 500, lh: 1.3, scale: 1.32 },
-  { id: "reem-kufi-ink-400", name: "Reem Kufi Ink", cls: fReemKufiInk.className, weight: 400, lh: 1.3, scale: 1.35 },
-  { id: "kufam-600", name: "Kufam", cls: fKufam.className, weight: 600, lh: 1.32, scale: 1.03 },
-  { id: "qahiri-400", name: "Qahiri", cls: fQahiri.className, weight: 400, lh: 1.24, scale: 1.22 },
-  { id: "el-messiri-600", name: "El Messiri", cls: fElMessiri.className, weight: 600, lh: 1.32, scale: 1.17 },
-  { id: "marhey-500", name: "Marhey", cls: fMarhey.className, weight: 500, lh: 1.32, scale: 1.17 },
-  { id: "lemonada-500", name: "Lemonada", cls: fLemonada.className, weight: 500, lh: 1.34, scale: 0.96 },
-  { id: "cairo-play-600", name: "Cairo Play", cls: fCairoPlay.className, weight: 600, lh: 1.3, scale: 1.24 },
-  { id: "baloo-bhaijaan-2-600", name: "Baloo Bhaijaan 2", cls: fBalooBhaijaan2.className, weight: 600, lh: 1.36, scale: 1.19 },
-  { id: "lalezar-400", name: "Lalezar", cls: fLalezar.className, weight: 400, lh: 1.26, scale: 1.35 },
-  { id: "rakkas-400", name: "Rakkas", cls: fRakkas.className, weight: 400, lh: 1.32, scale: 1.48 },
-  { id: "handjet-500", name: "Handjet", cls: fHandjet.className, weight: 500, lh: 1.3, scale: 1.48 },
-  { id: "blaka-400", name: "Blaka", cls: fBlaka.className, weight: 400, lh: 1.34, scale: 1.63 },
-  { id: "blaka-ink-400", name: "Blaka Ink", cls: fBlakaInk.className, weight: 400, lh: 1.34, scale: 1.63 },
-  { id: "blaka-hollow-400", name: "Blaka Hollow", cls: fBlakaHollow.className, weight: 400, lh: 1.34, scale: 1.63 },
-  { id: "jomhuria-400", name: "Jomhuria", cls: fJomhuria.className, weight: 400, lh: 1.16, scale: 1.77 },
-  { id: "vibes-400", name: "Vibes", cls: fVibes.className, weight: 400, lh: 1.38, scale: 1.86 },
-  { id: "amiri-400", name: "Amiri", cls: fAmiri.className, weight: 400, lh: 1.52, scale: 1.46 },
-  { id: "amiri-quran-400", name: "Amiri Quran", cls: fAmiriQuran.className, weight: 400, lh: 1.7, scale: 1.48 },
-  { id: "scheherazade-new-400", name: "Scheherazade New", cls: fScheherazadeNew.className, weight: 400, lh: 1.56, scale: 1.34 },
-  { id: "lateef-400", name: "Lateef", cls: fLateef.className, weight: 400, lh: 1.52, scale: 1.78 },
-  { id: "harmattan-400", name: "Harmattan", cls: fHarmattan.className, weight: 400, lh: 1.46, scale: 1.53 },
-  { id: "markazi-text-600", name: "Markazi Text", cls: fMarkaziText.className, weight: 600, lh: 1.42, scale: 1.42 },
-  { id: "mirza-500", name: "Mirza", cls: fMirza.className, weight: 500, lh: 1.5, scale: 1.59 },
-  { id: "katibeh-400", name: "Katibeh", cls: fKatibeh.className, weight: 400, lh: 1.46, scale: 1.69 },
-  { id: "noto-naskh-arabic-500", name: "Noto Naskh Arabic", cls: fNotoNaskhArabic.className, weight: 500, lh: 1.52, scale: 1.29 },
-  { id: "ruwudu-500", name: "Ruwudu", cls: fRuwudu.className, weight: 500, lh: 1.46, scale: 1.29 },
-  { id: "alkalami-400", name: "Alkalami", cls: fAlkalami.className, weight: 400, lh: 1.54, scale: 1.54 },
-  { id: "aref-ruqaa-400", name: "Aref Ruqaa", cls: fArefRuqaa.className, weight: 400, lh: 1.6, scale: 1.48 },
-  { id: "aref-ruqaa-ink-400", name: "Aref Ruqaa Ink", cls: fArefRuqaaInk.className, weight: 400, lh: 1.6, scale: 1.48 },
-  { id: "gulzar-400", name: "Gulzar", cls: fGulzar.className, weight: 400, lh: 1.8, scale: 1.53 },
-  { id: "noto-nastaliq-urdu-500", name: "Noto Nastaliq Urdu", cls: fNotoNastaliqUrdu.className, weight: 500, lh: 2.1, scale: 1.3 },
+  { id: "almarai-400", name: "Almarai", cls: fAlmarai.className, weight: 400, lh: 1.24, scale: 0.68 },
+  { id: "cairo-900", name: "Cairo", cls: fCairo.className, weight: 900, lh: 1.3, scale: 0.62 },
+  { id: "cairo-200", name: "Cairo", cls: fCairo.className, weight: 200, lh: 1.3, scale: 0.8 },
+  { id: "tajawal-900", name: "Tajawal", cls: display.className, weight: 900, lh: 1.28, scale: 0.6 },
+  { id: "tajawal-200", name: "Tajawal", cls: display.className, weight: 200, lh: 1.28, scale: 0.71 },
+  { id: "ibm-plex-sans-arabic-500", name: "IBM Plex Sans Arabic", cls: ui.className, weight: 500, lh: 1.3, scale: 0.75 },
+  { id: "noto-sans-arabic-500", name: "Noto Sans Arabic", cls: fNotoSansArabic.className, weight: 500, lh: 1.3, scale: 0.69 },
+  { id: "noto-kufi-arabic-900", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 900, lh: 1.34, scale: 0.56 },
+  { id: "noto-kufi-arabic-200", name: "Noto Kufi Arabic", cls: fNotoKufiArabic.className, weight: 200, lh: 1.34, scale: 0.74 },
+  { id: "alexandria-800", name: "Alexandria", cls: fAlexandria.className, weight: 800, lh: 1.28, scale: 0.58 },
+  { id: "alexandria-100", name: "Alexandria", cls: fAlexandria.className, weight: 100, lh: 1.28, scale: 0.78 },
+  { id: "readex-pro-400", name: "Readex Pro", cls: fReadexPro.className, weight: 400, lh: 1.3, scale: 0.64 },
+  { id: "vazirmatn-400", name: "Vazirmatn", cls: fVazirmatn.className, weight: 400, lh: 1.3, scale: 0.72 },
+  { id: "rubik-500", name: "Rubik", cls: fRubik.className, weight: 500, lh: 1.28, scale: 0.69 },
+  { id: "mada-500", name: "Mada", cls: fMada.className, weight: 500, lh: 1.28, scale: 0.74 },
+  { id: "changa-500", name: "Changa", cls: fChanga.className, weight: 500, lh: 1.28, scale: 0.69 },
+  { id: "zain-300", name: "Zain", cls: fZain.className, weight: 300, lh: 1.28, scale: 0.67 },
+  { id: "reem-kufi-500", name: "Reem Kufi", cls: fReemKufi.className, weight: 500, lh: 1.3, scale: 0.87 },
+  { id: "reem-kufi-fun-500", name: "Reem Kufi Fun", cls: fReemKufiFun.className, weight: 500, lh: 1.3, scale: 0.87 },
+  { id: "reem-kufi-ink-400", name: "Reem Kufi Ink", cls: fReemKufiInk.className, weight: 400, lh: 1.3, scale: 0.88 },
+  { id: "kufam-600", name: "Kufam", cls: fKufam.className, weight: 600, lh: 1.32, scale: 0.65 },
+  { id: "qahiri-400", name: "Qahiri", cls: fQahiri.className, weight: 400, lh: 1.24, scale: 0.93 },
+  { id: "el-messiri-600", name: "El Messiri", cls: fElMessiri.className, weight: 600, lh: 1.32, scale: 0.68 },
+  { id: "marhey-500", name: "Marhey", cls: fMarhey.className, weight: 500, lh: 1.32, scale: 0.68 },
+  { id: "lemonada-500", name: "Lemonada", cls: fLemonada.className, weight: 500, lh: 1.34, scale: 0.56 },
+  { id: "cairo-play-600", name: "Cairo Play", cls: fCairoPlay.className, weight: 600, lh: 1.3, scale: 0.71 },
+  { id: "baloo-bhaijaan-2-600", name: "Baloo Bhaijaan 2", cls: fBalooBhaijaan2.className, weight: 600, lh: 1.36, scale: 0.72 },
+  { id: "lalezar-400", name: "Lalezar", cls: fLalezar.className, weight: 400, lh: 1.26, scale: 0.78 },
+  { id: "rakkas-400", name: "Rakkas", cls: fRakkas.className, weight: 400, lh: 1.32, scale: 1 },
+  { id: "handjet-500", name: "Handjet", cls: fHandjet.className, weight: 500, lh: 1.3, scale: 0.88 },
+  { id: "blaka-400", name: "Blaka", cls: fBlaka.className, weight: 400, lh: 1.34, scale: 0.99 },
+  { id: "blaka-ink-400", name: "Blaka Ink", cls: fBlakaInk.className, weight: 400, lh: 1.34, scale: 0.99 },
+  { id: "blaka-hollow-400", name: "Blaka Hollow", cls: fBlakaHollow.className, weight: 400, lh: 1.34, scale: 0.99 },
+  { id: "jomhuria-400", name: "Jomhuria", cls: fJomhuria.className, weight: 400, lh: 1.16, scale: 1.09 },
+  { id: "vibes-400", name: "Vibes", cls: fVibes.className, weight: 400, lh: 1.38, scale: 1.07 },
+  { id: "amiri-400", name: "Amiri", cls: fAmiri.className, weight: 400, lh: 1.52, scale: 0.88 },
+  { id: "amiri-quran-400", name: "Amiri Quran", cls: fAmiriQuran.className, weight: 400, lh: 1.7, scale: 0.89 },
+  { id: "scheherazade-new-400", name: "Scheherazade New", cls: fScheherazadeNew.className, weight: 400, lh: 1.56, scale: 0.78 },
+  { id: "lateef-400", name: "Lateef", cls: fLateef.className, weight: 400, lh: 1.52, scale: 1.19 },
+  { id: "harmattan-400", name: "Harmattan", cls: fHarmattan.className, weight: 400, lh: 1.46, scale: 0.9 },
+  { id: "markazi-text-600", name: "Markazi Text", cls: fMarkaziText.className, weight: 600, lh: 1.42, scale: 0.86 },
+  { id: "mirza-500", name: "Mirza", cls: fMirza.className, weight: 500, lh: 1.5, scale: 0.94 },
+  { id: "katibeh-400", name: "Katibeh", cls: fKatibeh.className, weight: 400, lh: 1.46, scale: 0.95 },
+  { id: "noto-naskh-arabic-500", name: "Noto Naskh Arabic", cls: fNotoNaskhArabic.className, weight: 500, lh: 1.52, scale: 0.76 },
+  { id: "ruwudu-500", name: "Ruwudu", cls: fRuwudu.className, weight: 500, lh: 1.46, scale: 0.82 },
+  { id: "alkalami-400", name: "Alkalami", cls: fAlkalami.className, weight: 400, lh: 1.54, scale: 1.02 },
+  { id: "aref-ruqaa-400", name: "Aref Ruqaa", cls: fArefRuqaa.className, weight: 400, lh: 1.6, scale: 0.96 },
+  { id: "aref-ruqaa-ink-400", name: "Aref Ruqaa Ink", cls: fArefRuqaaInk.className, weight: 400, lh: 1.6, scale: 0.96 },
+  { id: "gulzar-400", name: "Gulzar", cls: fGulzar.className, weight: 400, lh: 1.8, scale: 0.99 },
+  { id: "noto-nastaliq-urdu-500", name: "Noto Nastaliq Urdu", cls: fNotoNastaliqUrdu.className, weight: 500, lh: 2.1, scale: 0.82 },
 ]
 
 /* Remembered across reloads, so a face someone liked is still there when they
@@ -218,7 +218,18 @@ const GLOWS: Glow[] = [
   { id: "none", name: "بلا", grad: "none" },
 ]
 
-const WORDS = ["ابن", "ادر", "انشر"]
+/* Three columns, four rows. The line cycles down the rows and each column
+   changes on its own beat, so the reader reads a sentence that keeps
+   rewriting itself rather than three words blinking at once. */
+const WORD_SETS = [
+  ["ابن", "ادر", "انشر"],
+  ["تبني", "تدير", "تنشر"],
+  ["بناء", "اداره", "نشر"],
+  ["تحسين", "اشراف", "زباين"],
+]
+
+/* How long a row holds before the next one rolls up. */
+const WORD_HOLD = 3400
 
 /* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
@@ -363,6 +374,18 @@ export default function Page() {
       const light = localStorage.getItem(STORE_GLOW)
       if (light && GLOWS.some((g) => g.id === light)) setGlowId(light)
     } catch { /* private mode; the defaults are fine */ }
+  }, [])
+
+  /* Which row is showing, and which one is on its way out. Both live in one
+     piece of state so the updater stays pure: React can call it twice in
+     development and the pair still moves together. */
+  const [phase, setPhase] = useState<{ cur: number; prev: number | null }>({ cur: 0, prev: null })
+  useEffect(() => {
+    const id = setInterval(
+      () => setPhase((p) => ({ cur: (p.cur + 1) % WORD_SETS.length, prev: p.cur })),
+      WORD_HOLD,
+    )
+    return () => clearInterval(id)
   }, [])
 
   const pickType = (id: string) => {
@@ -539,6 +562,47 @@ export default function Page() {
         .zn-words > span {
           animation: zn-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
         }
+
+        /* The word change, borrowed wholesale from the Ventriloc button: the
+           outgoing word rolls up out of the clip on the fast ease-in curve
+           while the incoming one rises from 130% below on the slower ease-out,
+           and each column is delayed by its own index so the line rewrites
+           itself left to right rather than all at once.
+
+           The clip is what sells it. Padding buys the slot enough room for
+           Arabic ascenders and descenders and the negative margin takes that
+           room back out of the layout, so glyphs are never cut while the words
+           in the wings still are. */
+        .zn-slot {
+          display: inline-grid;
+          overflow: hidden;
+          padding-block: 0.2em;
+          margin-block: -0.2em;
+        }
+        .zn-w {
+          grid-area: 1 / 1;
+          transition: transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
+                      opacity 100ms linear;
+        }
+        .zn-w[data-state="in"] {
+          transition-delay: calc(var(--i) * 90ms + 60ms);
+        }
+        .zn-w[data-state="out"] {
+          opacity: 0;
+          transform: translateY(-130%);
+          transition: transform 260ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 120ms linear;
+          transition-delay: calc(var(--i) * 90ms + 60ms);
+          pointer-events: none;
+        }
+        /* Everything not on stage waits below, out of the clip. The row that
+           is showing has no rule of its own, so its resting state is visible:
+           a browser that never runs a transition still reads the line. */
+        .zn-w[data-state="idle"] {
+          opacity: 0;
+          transform: translateY(130%);
+          pointer-events: none;
+        }
         /* The light. Straight off the design file: a wide bar of oklch colour
            sitting mostly below the fold, blurred until it is only light, and
            breathing sideways and upward on a 19s cycle. The blur and the
@@ -620,10 +684,22 @@ export default function Page() {
            every surface on the page opens the same way. */
         .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1); }
 
-        /* The phone pill widening from the middle. min-width rather than
-           width, so the closed size is still whatever the contents measure and
-           only the opening is a number. */
-        .zn-phone-pill { transition: min-width 520ms cubic-bezier(0.22, 1, 0.36, 1); }
+        /* The phone header opens in two beats: out to the sides first, then
+           down. Closing runs it backwards, the pages folding away before the
+           pill narrows, so the two movements never fight over the same
+           moment. The delays are what sequence them: on the way open the
+           width goes first and the tray waits; on the way closed the tray
+           goes first and the width waits.
+
+           min-width rather than width, so the closed size is still whatever
+           the contents measure and only the opening is a number. */
+        .zn-phone-pill { transition: min-width 420ms cubic-bezier(0.22, 1, 0.36, 1) 260ms; }
+        .zn-phone-pill[data-open="true"] { transition-delay: 0s; }
+        .zn-phone-drawer {
+          transition: grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1),
+                      visibility 0s linear 340ms;
+        }
+        .zn-phone-drawer[data-open="true"] { transition-delay: 240ms, 240ms; }
 
         /* Glass, and it means it: the light behind the page is what tints
            these. saturate pulls the colour out of whatever the blur picked up,
@@ -652,7 +728,8 @@ export default function Page() {
 
         @media (prefers-reduced-motion: reduce) {
           .zn-words > span { animation: none; }
-          .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill { transition: none; }
+          .zn-w { transition: none; }
+          .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
           #zn-claim .line > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
@@ -688,13 +765,14 @@ export default function Page() {
               changes with the account state and with the font. */}
           <div
             className="zn-phone-pill mx-auto w-fit max-w-full overflow-hidden rounded-[22px] backdrop-blur-[12px] md:hidden"
+            data-open={menuOpen}
             style={{
               background: "rgba(255,255,255,0.72)",
               boxShadow: RING,
-              minWidth: menuOpen ? "min(86vw, 268px)" : "0px",
+              minWidth: menuOpen ? "min(86vw, 268px)" : "184px",
             }}
           >
-            <div className="flex h-11 items-center gap-1.5 px-1.5">
+            <div className="grid h-11 grid-cols-[1fr_auto_1fr] items-center gap-1.5 px-1.5">
               <button
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
@@ -707,19 +785,20 @@ export default function Page() {
                 {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
               </button>
 
-              <Link href="/?home=1" aria-label="زينيا" className="flex shrink-0 items-center px-1.5">
+              <Link href="/?home=1" aria-label="زينيا" className="flex shrink-0 items-center justify-self-center px-1.5">
                 {/* Pure black is permitted here: the reference reserves #000 for
                     logo marks and graphic glyphs, nowhere else. */}
                 <ZenyaMark className="h-[16px] text-black" />
               </Link>
 
-              <span className="ms-auto flex shrink-0 items-center">{accountControl}</span>
+              <span className="flex shrink-0 items-center justify-self-end">{accountControl}</span>
             </div>
 
             {/* The pages, taken down rather than squeezed into the row. Same
-                grid-rows technique as every other tray on the page. */}
+                grid-rows technique as every other tray on the page, but on its
+                own timing so it waits for the width. */}
             <div
-              className="zn-drawer grid"
+              className="zn-phone-drawer grid"
               data-open={menuOpen}
               style={{
                 gridTemplateRows: menuOpen ? "1fr" : "0fr",
@@ -1035,13 +1114,29 @@ export default function Page() {
             "--lh": type.lh,
           } as React.CSSProperties}
         >
-          {WORDS.map((word, i) => (
+          {[0, 1, 2].map((col) => (
             <span
-              key={word}
-              className="inline-block"
-              style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+              key={col}
+              className="zn-slot"
+              style={{
+                animationDelay: `${0.15 + col * 0.18}s`,
+                "--i": col,
+              } as React.CSSProperties}
             >
-              {word}
+              {/* All four words for this column are stacked in one grid cell,
+                  so the column is always as wide as its widest word and the
+                  line never reflows mid-change. Only one of them is ever in
+                  view; the rest wait below the clip. */}
+              {WORD_SETS.map((row, r) => (
+                <span
+                  key={r}
+                  className="zn-w"
+                  data-state={r === phase.cur ? "in" : r === phase.prev ? "out" : "idle"}
+                  aria-hidden={r !== phase.cur}
+                >
+                  {row[col]}
+                </span>
+              ))}
             </span>
           ))}
         </h1>
