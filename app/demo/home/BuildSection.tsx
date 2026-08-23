@@ -57,13 +57,24 @@ const CARDS = [
   { id: "press",   title: "الصحافة والجوائز",     sub: "اختياري. واحدة في كل سطر." },
 ]
 
-/* The four style presets the wizard offers, from utils/restaurant/presets. */
+/* The four style presets the wizard offers, with the palettes they actually
+   name, from utils/restaurant/presets. This card is the one place in the
+   window that has to carry colour: a style picker whose styles are all the
+   same colour is not showing the reader anything. */
 const PRESETS = [
-  { id: "onyx",      name: "Onyx",      vibe: "cinematic luxury" },
-  { id: "trattoria", name: "Trattoria", vibe: "rustic warm" },
-  { id: "coastal",   name: "Coastal",   vibe: "breezy refined" },
-  { id: "forest",    name: "Forest",    vibe: "earthy elevated" },
+  { id: "onyx",      name: "Onyx",      vibe: "cinematic luxury",
+    dots: ["#0e0e10", "#c8a96a", "#f4ecd8"], paper: "#0a0a0c", ink: "#f4ecd8" },
+  { id: "trattoria", name: "Trattoria", vibe: "rustic warm",
+    dots: ["#a8323a", "#d4915a", "#ffffff"], paper: "#f5ebd8", ink: "#2a1d18" },
+  { id: "coastal",   name: "Coastal",   vibe: "breezy refined",
+    dots: ["#1e5566", "#d8a657", "#ffffff"], paper: "#f4ede0", ink: "#172a30" },
+  { id: "forest",    name: "Forest",    vibe: "earthy elevated",
+    dots: ["#3f5d3a", "#b89968", "#ffffff"], paper: "#ebe6d8", ink: "#1f2a1d" },
 ]
+
+/* The build word, cycling the hero's first column on the hero's own roll. */
+const WORDS = ["ابن", "تبني", "بناء", "تحسين"]
+const WORD_HOLD = 4600
 
 /* Five of the wizard's twelve type chips — the card only needs enough of the
    row to be picked from. */
@@ -97,11 +108,14 @@ const SAMPLE = {
 /* Timings. The cursor is slow enough to be followed and the typing fast
    enough not to be waited on; the beat between cards is what makes this read
    as eight short animations rather than one long take. */
-const MOVE = 560
-const PRESS = 150
-const SETTLE = 210
-const KEY = 26
-const THINK = 780
+const MOVE = 620
+const PRESS = 170
+const SETTLE = 260
+/* Milliseconds a keystroke. It ran at 26 and read as a machine filling a form
+   rather than a person typing into one; the beats around it were tight for the
+   same reason. Everything here is deliberately unhurried. */
+const KEY = 46
+const THINK = 900
 
 type Item = { name: string; price: string }
 type Cat = { name: string; items: Item[] }
@@ -135,7 +149,20 @@ const EMPTY: Form = {
    Caught by the runner itself, and means nothing else. */
 const HALT = Symbol("halt")
 
-export default function BuildSection({ active, uiClass }: { active: boolean; uiClass: string }) {
+export default function BuildSection({
+  active,
+  uiClass,
+  wordClass,
+  wordWeight,
+  wordLh,
+}: {
+  active: boolean
+  uiClass: string
+  /* The hero's chosen face, so the build word changes with it. */
+  wordClass: string
+  wordWeight: number
+  wordLh: number
+}) {
   const frameRef = useRef<HTMLDivElement>(null)
   const analyzerRef = useRef<HTMLDivElement>(null)
 
@@ -156,6 +183,18 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
   const [finish, setFinish] = useState<false | "ready" | "going">(false)
   /* Bumped to run the sequence again from the picker. */
   const [take, setTake] = useState(0)
+
+  /* The build word's own clock, on the hero's hold and the hero's roll: the
+     word leaving goes up on the fast curve while the next rises from below. */
+  const [word, setWord] = useState<{ cur: number; prev: number | null }>({ cur: 0, prev: null })
+  useEffect(() => {
+    if (!active) { setWord({ cur: 0, prev: null }); return }
+    const id = setInterval(
+      () => setWord((w) => ({ cur: (w.cur + 1) % WORDS.length, prev: w.cur })),
+      WORD_HOLD,
+    )
+    return () => clearInterval(id)
+  }, [active])
 
   /* Where the analyzer hands its result back: the wizard's own
      applyExtractedMenu, narrowed to what this card shows. What it returns is
@@ -266,9 +305,17 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
       await wait(260)
     }
 
-    /* The beat between one card finishing and the next arriving. The cursor
-       leaves before the card does, so the two movements never overlap. */
-    const beat = async (ms = THINK) => { setCursor(null); await wait(ms) }
+    /* The beat between one card finishing and the next arriving.
+
+       The cursor STAYS. It used to be taken off the page here, which read as
+       the pointer blinking out of existence every few seconds — a person
+       filling a form does not vanish between fields. It drifts to where the
+       next card will want it instead, and the card changes underneath it. */
+    const beat = async (ms = THINK) => {
+      setFocus(null)
+      setCursor((c) => (c ? { ...c, press: false } : c))
+      await wait(ms)
+    }
 
     /* The Menu card, driven through the product's own component rather than
        around it: a real JPEG is handed to the real file input, the component's
@@ -321,7 +368,9 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
         if (frameRef.current?.querySelector('[data-done="true"]')) break
         if (Date.now() > until) break
       }
-      setCursor(null)
+      /* The cursor stays and moves off the button rather than disappearing;
+         the menu filling in below is what the reader should be watching. */
+      await moveEl(frameRef.current?.querySelector(".zn-menu") ?? null, 0.5, 0.4)
       await wait(1100)
     }
 
@@ -424,6 +473,25 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
 
   return (
     <div className={`${uiClass} zn-build`} dir="rtl">
+      {/* The word first, because dir is rtl and the word belongs on the right.
+          Four forms of the one word this section is, on the hero's own roll —
+          the old one leaves upward before the next rises, never together. */}
+      <h2
+        className={`${wordClass} zn-word`}
+        style={{ fontWeight: wordWeight, lineHeight: wordLh } as React.CSSProperties}
+      >
+        {WORDS.map((w, i) => (
+          <span
+            key={w}
+            data-state={i === word.cur ? "in" : i === word.prev ? "out" : "idle"}
+            aria-hidden={i !== word.cur}
+          >
+            {w}
+          </span>
+        ))}
+      </h2>
+
+      <div className="zn-stagebox">
       <div className="zn-app" ref={frameRef}>
         {/* Where this is. The path changes on the click, which is the point of
             the first beat: the picker really does open the wizard. */}
@@ -439,19 +507,32 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
               <div className="zn-grid">
                 {TEMPLATES.map((t) => (
                   <a key={t.id} href={t.href} data-t={`tpl-${t.id}`} className="zn-tile" data-on={hover === t.id}>
-                    {/* The same cover /themes shows, through the same resolver,
-                        so a screenshot dropped into public/theme-previews lands
-                        here too. This is the one place on the page that carries
-                        colour of its own: what a template looks like IS the
-                        information a picker owes the reader, and eight tiles
-                        that only name themselves cannot give it.
+                    {/* The template's real cover. What a template looks like is
+                        the information a picker owes the reader, and eight
+                        tiles that only name themselves cannot give it.
+
+                        Served from the 560px thumbnails, NOT from the full
+                        screenshots behind themePreview(). The originals run to
+                        1.2MB apiece and eight of them decoding as the panel
+                        arrives was a 600–900ms stall on the one frame budget
+                        this page cannot afford — the whole reason the move
+                        felt like it lagged. Regenerate them whenever a cover
+                        changes; the resolver is still the fallback, so a
+                        missing thumbnail degrades rather than breaks.
                         eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       className="cover"
-                      src={themePreview(t.id)}
+                      src={`/theme-previews/thumb/${t.id}.webp`}
                       alt=""
-                      loading="lazy"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = themePreviewFallback(t.id) }}
+                      width={560}
+                      height={350}
+                      loading="eager"
+                      decoding="async"
+                      onError={(e) => {
+                        const el = e.currentTarget as HTMLImageElement
+                        el.src = el.dataset.tried ? themePreviewFallback(t.id) : themePreview(t.id)
+                        el.dataset.tried = "1"
+                      }}
                     />
                     <span className="tag">{t.tag}</span>
                     <span className="name">{t.label}</span>
@@ -507,6 +588,7 @@ export default function BuildSection({ active, uiClass }: { active: boolean; uiC
             </svg>
           </span>
         )}
+      </div>
       </div>
     </div>
   )
@@ -571,7 +653,18 @@ function renderCard(
       return (
         <div className="zn-presets">
           {PRESETS.map((p) => (
-            <span key={p.id} data-t={`preset-${p.id}`} className="zn-preset" data-on={f.preset === p.id}>
+            <span
+              key={p.id}
+              data-t={`preset-${p.id}`}
+              className="zn-preset"
+              data-on={f.preset === p.id}
+              style={{ background: p.paper, color: p.ink } as React.CSSProperties}
+            >
+              <span className="dots">
+                {p.dots.map((d) => (
+                  <em key={d} style={{ background: d }} />
+                ))}
+              </span>
               <b>{p.name}</b>
               <i>{p.vibe}</i>
             </span>

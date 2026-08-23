@@ -569,8 +569,17 @@ export default function Page() {
      reader who wants the next screen has to stop and gesture again, which is
      what "one gesture, one screen" means. */
   const [deck, setDeck] = useState(0)
+  /* Whether the deck has finished travelling. Section two's script waits for
+     this: the move is the one moment on the page that has to be perfect, and
+     it should not be sharing its frames with anything. */
+  const [settled, setSettled] = useState(true)
   const deckAt = useRef(0)
   const deckShut = useRef(0)
+  useEffect(() => {
+    setSettled(false)
+    const id = setTimeout(() => setSettled(true), DECK_MOVE + 60)
+    return () => clearTimeout(id)
+  }, [deck])
   useEffect(() => {
     const PANELS = 2
     const go = (dir: number) => {
@@ -1096,27 +1105,104 @@ export default function Page() {
           transition: transform 1020ms cubic-bezier(0.22, 1, 0.36, 1);
           will-change: transform;
         }
-        .zn-panel { position: relative; height: 50%; }
+        /* Each panel is its own compositing layer. Without this the move is a
+           repaint of two full screens per frame — one of them carrying a 9vh
+           blur — instead of two ready-made layers being slid. */
+        .zn-panel {
+          position: relative; height: 50%;
+          transform: translateZ(0);
+          contain: layout paint;
+        }
+        /* The light is the single most expensive thing on the page to paint,
+           and it now travels. Rasterise it once and move the result. */
+        #zn-glow { will-change: transform; transform: translateZ(0); }
+        /* Its breathing stops for the length of the move. A 9vh blur over an
+           animating box has to be re-rasterised on every frame, and doing that
+           while the deck is also travelling is what dragged the move down to a
+           dozen frames. Nobody can see a nineteen-second breath during a
+           one-second move; everybody can see the move stutter. */
+        #zn-deck[data-moving="true"] #zn-glow i { animation-play-state: paused; }
+
+        /* The face and the light: hero furniture, gone once the hero is. Kept
+           in the document and faded rather than unmounted, so the trays do not
+           have to rebuild themselves on the way back up. */
+        .zn-hero-only {
+          transition: opacity 380ms cubic-bezier(0.22, 1, 0.36, 1),
+                      transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+                      visibility 0s linear 0s;
+        }
+        .zn-hero-only[data-lit="false"] {
+          opacity: 0; visibility: hidden; pointer-events: none;
+          transform: translateY(14px);
+          transition-delay: 0s, 0s, 380ms;
+        }
 
         /* ── Section two ──────────────────────────────────────────────────
            A window onto the product, on the same lit paper as the hero and
            built out of the same three values: the header pill's surface, the
            header pill's hairline ring, and nothing else. Every rule below is
            achromatic; the only colour on this page is still the light. */
+        /* Two columns. The window is the left one and the word the right —
+           dir is rtl here, so the word is the FIRST child and the window the
+           second. The word takes the top of its column rather than its middle,
+           so it reads against the head of the window rather than its waist. */
         .zn-build {
           position: absolute; inset: 0;
-          display: flex; align-items: center; justify-content: center;
+          display: grid;
+          grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+          /* An explicit row, because the stage inside it asks for height:100%
+             and 100% of an auto row is circular. */
+          grid-template-rows: minmax(0, 1fr);
+          align-items: center; justify-content: center;
+          gap: clamp(1rem, 3vw, 3rem);
           padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.4rem);
         }
+        .zn-stagebox { width: min(100%, 820px); height: 100%; display: flex; align-items: center; }
+
+        /* The build word, in the hero's own face and cycling the same four
+           forms on the same roll. Glass rather than ink: it is lit from behind
+           like everything else here, so it sits in the paper instead of on it. */
+        .zn-word {
+          align-self: start; margin-top: clamp(1rem, 7vh, 4.5rem);
+          justify-self: center;
+          display: inline-grid; grid-template-columns: minmax(0, 1fr);
+          padding-block: 0.18em; margin-block: -0.18em;
+          clip-path: inset(0 -100vw);
+          font-size: clamp(3.2rem, 8vw, 8.5rem);
+          line-height: 1.24; white-space: nowrap;
+          /* Glass, not ink. A tinted fill on bare paper is just grey type;
+             hollowing the letter and keeping only a hairline edge is what
+             makes it read as something you look THROUGH — and a hairline is
+             what this page uses everywhere else instead of weight. */
+          color: rgba(23, 23, 23, 0.07);
+          -webkit-text-stroke: 1.1px rgba(23, 23, 23, 0.32);
+          -webkit-font-smoothing: antialiased;
+        }
+        .zn-word > span {
+          grid-area: 1 / 1; justify-self: center; white-space: nowrap;
+          transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 620ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-word > span[data-state="idle"] { opacity: 0; transform: translateY(130%); pointer-events: none; }
+        .zn-word > span[data-state="out"] {
+          opacity: 0; transform: translateY(-130%);
+          transition: transform 420ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 260ms linear;
+        }
+        .zn-word > span[data-state="in"] { opacity: 1; transform: none; }
         .zn-app {
           position: relative;
-          width: min(100%, 900px); height: 100%; max-height: 596px;
+          width: 100%; height: 100%; max-height: 596px;
           border-radius: 26px;
-          background: rgba(255, 255, 255, 0.72);
-          -webkit-backdrop-filter: blur(12px);
-          backdrop-filter: blur(12px);
+          /* No backdrop-filter. The window used to blur what was behind it,
+             which meant every frame of the deck move re-ran a full-surface
+             blur — the single biggest cause of the lag going down. The light
+             behind it was already blurred to 9vh, so a flat translucent white
+             is indistinguishable and costs nothing. */
+          background: rgba(255, 255, 255, 0.78);
           box-shadow: ${RING};
           overflow: hidden;
+          contain: layout paint;
           display: grid; grid-template-rows: auto minmax(0, 1fr);
         }
         /* Where this is. Not chrome for its own sake: the path is what says
@@ -1240,21 +1326,32 @@ export default function Page() {
         }
         .zn-chip[data-on="true"] { background: ${OBSIDIAN}; color: ${PAPER}; box-shadow: none; }
 
+        /* The one card that has to carry colour. A style picker whose four
+           styles are all the same colour shows the reader nothing, so each
+           preset wears the palette it names — its own paper, its own ink and
+           the three swatches the wizard puts on it. */
         .zn-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        /* Edges are drawn in the card's OWN ink, not in black. Onyx is a black
+           card with ivory type: a black hairline round its ivory swatch, and a
+           black ring round the card itself, are both invisible on it. */
         .zn-preset {
-          min-height: 124px; padding: 16px 15px; border-radius: 14px;
-          display: flex; flex-direction: column; justify-content: flex-end; gap: 5px;
-          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-          background: rgba(255, 255, 255, 0.46);
+          min-height: 128px; padding: 15px 14px; border-radius: 14px;
+          display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
           transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
-                      background 300ms cubic-bezier(0.22, 1, 0.36, 1);
+                      transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .zn-preset[data-on="true"] {
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: inset 0 0 0 1.5px ${OBSIDIAN};
+          box-shadow: inset 0 0 0 1px currentColor, 0 0 0 1.5px ${OBSIDIAN};
+          transform: translateY(-2px);
         }
-        .zn-preset b { font-size: 15px; font-weight: 500; color: ${OBSIDIAN}; }
-        .zn-preset i { font-style: normal; font-size: 10px; letter-spacing: 0.08em; color: ${STONE}; }
+        .zn-preset .dots { display: flex; gap: 5px; margin-bottom: auto; }
+        .zn-preset .dots em {
+          display: block; width: 15px; height: 15px; border-radius: 999px;
+          box-shadow: inset 0 0 0 1px currentColor;
+        }
+        .zn-preset b { font-size: 15px; font-weight: 500; color: inherit; }
+        .zn-preset i { font-style: normal; font-size: 10px; letter-spacing: 0.08em; opacity: 0.65; }
 
         .zn-hours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 20px; }
         .zn-hour {
@@ -1369,18 +1466,54 @@ export default function Page() {
         }
         .zn-cursor[data-press="true"] svg { transform: scale(0.78); }
 
+        /* Below the laptop the two columns stack: the word takes the top and
+           the window sits under it, smaller, because at this width a window
+           sized to the screen is the whole screen and the word has nowhere to
+           be. Same order either way — word first, window second. */
+        @media (max-width: 1023px) {
+          .zn-build {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto minmax(0, 1fr);
+            align-content: center; gap: clamp(0.5rem, 2vh, 1.5rem);
+            padding-top: calc(var(--inset) + 3.9rem);
+          }
+          .zn-word {
+            align-self: center; margin-top: 0;
+            font-size: clamp(2.6rem, 13vw, 5rem);
+          }
+          /* Stacked, the window hangs from the word rather than floating in
+             the middle of what is left: centred in its row it sat a couple of
+             hundred pixels below the word with nothing in between. */
+          .zn-stagebox { width: 100%; align-items: center; justify-content: center; }
+          .zn-app { max-height: min(100%, 620px); }
+        }
+        /* On a phone the window hangs straight off the word. Centred in what
+           is left it sat a couple of hundred pixels below it with nothing in
+           between; a tablet has the room for that gap to read as air, a
+           phone does not. */
         @media (max-width: 767px) {
-          .zn-build { padding-top: calc(var(--inset) + 3.9rem); }
+          .zn-stagebox { align-items: flex-start; }
+        }
+        @media (max-width: 767px) {
           .zn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .zn-row, .zn-hours, .zn-menu { grid-template-columns: minmax(0, 1fr); }
           .zn-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .zn-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn-app { max-height: min(100%, 560px); }
+          .zn-path { padding: 12px 16px 7px; }
+          .zn-stage { padding: 4px 16px 16px; }
+          /* The cards have to fit a phone-sized window, so the furniture that
+             only exists to be looked at gives up its room first. */
+          .zn-preset { min-height: 96px; padding: 12px; }
+          .zn-shot { height: 66px; }
+          .zn-shot.hero { height: 92px; }
+          .zn-in.area { min-height: 62px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
           .zn-card, .zn-dish, .zn-finish { animation: none; }
-          .zn-finish .go { transition: none; }
+          .zn-finish .go, .zn-word > span, .zn-hero-only { transition: none; }
           .zn-cursor, .zn-cursor svg, .zn-tile, .zn-tile .go, .zn-chip,
           .zn-preset, .zn-hour u, .zn-in { transition: none; }
           .zn-in[data-on="true"] em::after { animation: none; }
@@ -1615,10 +1748,15 @@ export default function Page() {
           button, upward and inward, because the surface is anchored to the
           corner it sits in. Same curve as the header pill, so everything on
           the page opens the same way. */}
+      {/* Both controls belong to the hero: the face and the light are what the
+          hero is made of, and neither has anything to say about the build
+          section. They go out with the light rather than following the reader
+          down the page. */}
       <div
         ref={typeRef}
         dir="rtl"
-        className={`${ui.className} fixed bottom-[var(--inset)] left-[var(--gut)] z-40`}
+        data-lit={deck === 0}
+        className={`${ui.className} zn-hero-only fixed bottom-[var(--inset)] left-[var(--gut)] z-40`}
       >
         <Corner
           open={corner === "type"}
@@ -1675,7 +1813,8 @@ export default function Page() {
       <div
         ref={glowRef}
         dir="rtl"
-        className={`${ui.className} fixed bottom-[var(--inset)] right-[var(--gut)] z-40`}
+        data-lit={deck === 0}
+        className={`${ui.className} zn-hero-only fixed bottom-[var(--inset)] right-[var(--gut)] z-40`}
       >
         <Corner
           open={corner === "glow"}
@@ -1749,15 +1888,7 @@ export default function Page() {
           than any height in viewport units, for the reason below; the track
           is twice the deck and each panel is half the track, so a panel is
           exactly one screen whatever zoom the root is writing. */}
-      <div id="zn-deck" style={{ background: PAPER }}>
-        {/* The light, behind BOTH screens and taking no pointer events. It
-            belongs to the page rather than to the hero, so it holds still
-            while the deck travels over it. */}
-        <div id="zn-glow" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
-          <div className="foot"><i /></div>
-          <div className="head"><i /></div>
-        </div>
-
+      <div id="zn-deck" data-moving={!settled} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
       <main
@@ -1766,6 +1897,15 @@ export default function Page() {
         className="absolute inset-0 flex items-center justify-center"
         aria-hidden={deck !== 0}
       >
+        {/* The light belongs to the hero, not to the page. It sits inside the
+            hero's own panel so it travels up with it: the colour leaves when
+            the hero does, rather than sitting under the whole site for ever.
+            Promoted to its own layer, or the deck would have to re-rasterise
+            a 9vh blur on every frame of the move. */}
+        <div id="zn-glow" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
+          <div className="foot"><i /></div>
+          <div className="head"><i /></div>
+        </div>
 
         {/* Revealed in sequence on the first load: the order is the product,
             build then manage then publish. Slow and short-travelled so it
@@ -1844,7 +1984,17 @@ export default function Page() {
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
         <div className="zn-panel" aria-hidden={deck !== 1}>
-          <BuildSection active={deck === 1} uiClass={ui.className} />
+          {/* Held until the deck has actually landed. Starting the script on
+              the gesture put a cursor animation, a network prefetch and eight
+              cards' worth of React on the same frames as the move, which is
+              what the move was competing with. */}
+          <BuildSection
+            active={deck === 1 && settled}
+            uiClass={ui.className}
+            wordClass={type.cls}
+            wordWeight={type.weight}
+            wordLh={type.lh}
+          />
         </div>
         </div>
       </div>

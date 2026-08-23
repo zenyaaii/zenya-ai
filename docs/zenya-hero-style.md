@@ -226,8 +226,34 @@ Anything with its own overflow keeps its wheel — the rule is
 `e.target.closest(".zn-list")`, which is what leaves the fifty-face tray
 scrollable inside a page that has taken the wheel over.
 
-The light belongs to the page, not to the hero: `#zn-glow` sits at deck level
-and holds still while the two screens travel over it.
+**The light belongs to the hero, not to the page.** `#zn-glow` lives inside the
+hero's own panel, so the colour travels up and leaves with it rather than
+sitting under the whole site for ever. The two corner controls go with it —
+the face and the light are what the hero is made of and have nothing to say
+about the build section, so they fade out rather than following the reader
+down. Section two is bare paper.
+
+**The move is the one moment on this page that has to be perfect**, and three
+things were stealing its frames. All three are load-bearing:
+
+1. **The picker's covers must be thumbnails.** The screenshots behind
+   `themePreview()` run to 1.2MB apiece, and eight of them decoding as the
+   panel arrives was a 600–900ms stall — a single frame swallowing the whole
+   transition. `public/theme-previews/thumb/*.webp` at 560px is 108kB for all
+   eight. Regenerate them whenever a cover changes.
+2. **The window carries no `backdrop-filter`.** It used to blur what was behind
+   it, so every frame re-ran a full-surface blur. The light behind it is
+   already blurred to 9vh; flat translucent white is indistinguishable.
+3. **The light stops breathing for the length of the move.** A 9vh blur over an
+   animating box re-rasterises every frame. Nobody can see a nineteen-second
+   breath during a one-second move; everybody can see the move stutter.
+
+Section two's script also waits for the deck to land (`settled`) rather than
+starting on the gesture, so a cursor animation, a network prefetch and eight
+cards of React are not on the same frames as the move.
+
+Measured, GPU-composited, across the move: **11 frames before, 83 after** —
+worst frame 933ms down to 117ms.
 
 ## Section two: ابن
 
@@ -242,9 +268,19 @@ The path line at the top is the only thing on the surface that reports rather
 than asks, and it is there because the change from `/themes` to
 `/theme/new/restaurant` is what says the picker really did open the wizard.
 
+**The section is two columns:** the window on the left, and on the right the
+build word — ابن، تبني، بناء، تحسين — cycling the hero's first column on the
+hero's own roll and in the hero's own face, set toward the top of its column.
+It is glass, not ink: the letter is hollowed to a hairline edge, because a
+tinted fill on bare paper is just grey type. Below 1024px the two stack, word
+above window, and on a phone the window hangs straight off the word.
+
 **The animation is per card, never one long take.** A card comes forward, the
-cursor moves into it, types or picks, the card finishes, the cursor leaves, a
-beat plays, and only then does the next card arrive. Eight cards, eight
+cursor moves into it, types or picks, the card finishes, a beat plays, and
+only then does the next card arrive. **The cursor never leaves.** It used to be
+taken off the page between cards, which read as the pointer blinking out of
+existence every few seconds; a person filling in a form does not vanish
+between fields. Eight cards, eight
 animations, then a ninth beat, about 58 seconds end to end and then round
 again — each card between 3.5 and 10 seconds, which is long enough to follow
 and short enough not to wait on.
@@ -324,9 +360,11 @@ nothing and sits out the whole timeout every time.
 The hero and section two are built, at `app/demo/home/`, live at
 `zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
 
-**The Style card stays achromatic.** The wizard's four presets are swatches of
-the palette they name, but what the card is for here is the animation choosing
-one of them, and that is all it needs to do. Settled — do not re-open it.
+**The Style card carries its real palettes.** Each preset wears the paper, the
+ink and the three swatches it actually names — a style picker whose four styles
+are all the same colour shows the reader nothing. Its edges are drawn in the
+card's OWN ink via `currentColor`: Onyx is a black card with ivory type, and a
+black hairline round its ivory swatch is invisible.
 
 **The picker tiles carry their real covers**, at full colour — settled, and the
 two missing screenshots have been shot. See the section above.
