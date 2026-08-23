@@ -399,33 +399,76 @@ export default function Page() {
      It re-runs when the face changes, when the window resizes and once the
      webfont has landed, since a fallback face measures differently. */
   const wordsRef = useRef<HTMLHeadingElement>(null)
+  /* Every word's width at the fitted size: [column][row]. The columns are
+     driven from this, so a row change is a width the browser can animate to
+     rather than a reflow it does instantly. */
+  const wordWidths = useRef<number[][]>([])
+  /* The row on screen, and the way back into the width writer, both held in
+     refs so the measuring effect does not have to re-run on every row. */
+  const phaseRef = useRef(0)
+  const applyRef = useRef<() => void>(() => {})
   useEffect(() => {
     const el = wordsRef.current
     if (!el) return
     let frame: ReturnType<typeof setTimeout>
+    /* offsetWidth, not a bounding rect. The root ZoomLock writes CSS `zoom`, so
+       a rect comes back in rendered pixels while clientWidth, the gap and any
+       width written back are CSS pixels. Mixing the two shrinks every column by
+       the zoom factor. offsetWidth is CSS pixels, like everything else here. */
+    const measure = (slots: NodeListOf<HTMLElement>) =>
+      Array.from(slots, (slot) =>
+        Array.from(slot.querySelectorAll<HTMLElement>(".zn-w"), (w) => w.offsetWidth),
+      )
     const fit = () => {
       const parent = el.parentElement
       if (!parent) return
       el.style.setProperty("--fit", "1")
-      const cs = getComputedStyle(el)
+      /* Columns go back to auto for the measurement, or the last fit's widths
+         would be measured instead of the type's own. */
       const slots = el.querySelectorAll<HTMLElement>(".zn-slot")
       if (!slots.length) return
-      let natural = (parseFloat(cs.columnGap) || 0) * (slots.length - 1)
-      slots.forEach((slot) => { natural += slot.getBoundingClientRect().width })
+      slots.forEach((slot) => { slot.style.width = "" })
+      const cs = getComputedStyle(el)
+      const gap = parseFloat(cs.columnGap) || 0
       const avail =
         parent.clientWidth -
         (parseFloat(cs.paddingInlineStart) || 0) -
         (parseFloat(cs.paddingInlineEnd) || 0)
+
+      /* The type is sized against the WIDEST row, not the row on screen, so a
+         row change never has to resize the type to stay on one line. */
+      const raw = measure(slots)
+      const rows = raw[0]?.length ?? 0
+      let natural = 0
+      for (let r = 0; r < rows; r += 1) {
+        let row = gap * (slots.length - 1)
+        for (let c = 0; c < raw.length; c += 1) row += raw[c][r] ?? 0
+        natural = Math.max(natural, row)
+      }
       if (natural <= 0 || avail <= 0) return
       /* 0.86 leaves real air at both ends rather than filling the line to the
          gutters, and the ceiling stops a narrow face being blown up past the
          clamp it was given. */
       el.style.setProperty("--fit", String(Math.min(1.05, (avail * 0.86) / natural)))
+      /* Re-read at the size it will actually run at: metrics scale with the
+         font size, but reading them beats trusting that they do. */
+      wordWidths.current = measure(slots)
+      applyWidths()
     }
     /* Measured straight away, not on the next animation frame: a page opened in
        a background tab never gets one, and the line would sit at its small
        default until something else moved. Later passes are merely debounced,
        on a timer for the same reason. */
+    function applyWidths() {
+      const el2 = wordsRef.current
+      const widths = wordWidths.current
+      if (!el2 || !widths.length) return
+      el2.querySelectorAll<HTMLElement>(".zn-slot").forEach((slot, c) => {
+        const w = widths[c]?.[phaseRef.current]
+        if (w) slot.style.width = `${w}px`
+      })
+    }
+    applyRef.current = applyWidths
     const schedule = () => {
       clearTimeout(frame)
       frame = setTimeout(fit, 90)
@@ -485,6 +528,15 @@ export default function Page() {
     )
     return () => clearInterval(id)
   }, [])
+
+  /* Each row hands its columns their new widths, and the browser animates the
+     way there: a short word lets its neighbours close in, a long one pushes
+     them apart, and the line stays centred throughout because it is centred by
+     its container rather than by anything measured. */
+  useEffect(() => {
+    phaseRef.current = phase.cur
+    applyRef.current()
+  }, [phase.cur])
 
   const pickType = (id: string) => {
     setStyleId(id)
@@ -676,9 +728,13 @@ export default function Page() {
            in the wings still are. */
         .zn-slot {
           display: inline-grid;
-          overflow: hidden;
           padding-block: 0.2em;
           margin-block: -0.2em;
+          /* Vertically only. The words in the wings must be cut off above and
+             below, but never at the sides: a column is only as wide as the word
+             currently in it, so a wider word on its way out would be shaved
+             mid-flight by an ordinary overflow: hidden. */
+          clip-path: inset(0 -100vw);
           /* Never shrink. flex-nowrap stops the LINE breaking, but flex items
              still shrink below their content by default, and a squeezed column
              breaks its word across two lines instead. It also corrupted the
@@ -686,9 +742,17 @@ export default function Page() {
              fitted the type too large, every time. */
           flex: 0 0 auto;
           white-space: nowrap;
+          /* The column follows the word inside it. Same curve and the same
+             per-column delay as the roll, so a column widening and its word
+             arriving are one movement, not two. */
+          transition: width 300ms cubic-bezier(0.22, 1, 0.36, 1);
+          transition-delay: calc(var(--i) * 90ms + 60ms);
         }
         .zn-w {
           grid-area: 1 / 1;
+          /* Each word keeps its own width rather than stretching to the column,
+             which is what lets the column be measured against it. */
+          justify-self: center;
           white-space: nowrap;
           transition: transform 250ms cubic-bezier(0.215, 0.61, 0.355, 1),
                       opacity 100ms linear;
@@ -892,7 +956,7 @@ export default function Page() {
 
         @media (prefers-reduced-motion: reduce) {
           .zn-words > span { animation: none; }
-          .zn-w { transition: none; }
+          .zn-w, .zn-slot { transition: none; }
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
           #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
