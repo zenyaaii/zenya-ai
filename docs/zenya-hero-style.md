@@ -69,11 +69,61 @@ Two rules hold for all fifty, because the type is Arabic:
   It runs from 1.24 on the geometric sans to 2.1 on Nastaliq.
 
 **Size is measured, never tuned.** The line is laid out at its natural size and
-a `--fit` ratio scales it to fill 94% of the width it actually has, re-run on
+a `--fit` ratio scales it to fill 86% of the width it actually has, re-run on
 face change, on resize, and once the webfont lands. `flex-nowrap` means the
 browser cannot answer an overflow by breaking the line, so the only way out is
 the size. A second term caps the rendered line at `60vh / leading`, which is
-what keeps a Nastaliq on screen in a wide, short window.
+what keeps a Nastaliq on screen in a wide, short window. The size is set
+against the WIDEST row, so changing row never resizes the type.
+
+Fifty hand-tuned per-face numbers were tried first and are the wrong shape of
+solution: they cannot survive a change to the words, and did not.
+
+## The three words
+
+Three columns, four rows, cycling. The rows are `ابن ادر انشر`, `تبني تدير
+تنشر`, `بناء إدارة نشر`, `تحسين إشراف زبائن`. All four words of a column live
+stacked in one grid cell; only one is ever on stage.
+
+Each column is exactly as wide as the word currently in it, written from a
+measured matrix of every word at the fitted size, and animates to the next
+width. A short word lets its neighbours close in, a long one pushes them apart,
+and the line stays centred because its container centres it.
+
+Per column the order is strict, and the reason is hard-won: **the old word
+leaves, then the column re-spaces while it is empty, then the new word
+arrives.** Overlapping any two of those is what produced every bug in this
+section. Columns are `320ms` apart (`--beat`), so a reader sees one word
+change, then the next, then the next, rather than one blurred event. The whole
+change runs 1540ms inside a 4600ms hold.
+
+Four traps, all of which shipped at least once:
+
+- **The grid track must be `minmax(0, 1fr)`.** An `auto` track is sized to
+  max-content, so every word sat centred in a track as wide as the longest of
+  that column's four words, hanging ~110px past its own column. Clipped, that
+  sliced letters off; unclipped, it put words on top of each other. Neither
+  symptom was the disease.
+- **Columns must not shrink** (`flex: 0 0 auto`). `flex-nowrap` stops the line
+  wrapping but flex items still shrink below their content, which breaks a word
+  across two lines and corrupts the measurement that reads it.
+- **Clip vertically only.** The words in the wings must be hidden, but a side
+  cut takes letters off the word being read. Nothing needs cutting sideways
+  once the sequence above holds.
+- **Measure with `offsetWidth`, never a bounding rect.** The root ZoomLock
+  writes CSS `zoom`; a rect is in rendered pixels while `clientWidth`, the gap
+  and any width written back are CSS pixels. Mixing them shrinks every column
+  by the zoom factor.
+
+## The claim
+
+One sentence at the foot of the light, alternating Arabic and English, each
+typed out. Three beats: it reads with the dot on its own side (right for
+Arabic, left for English), then the sentence rolls away upward while the dot
+walks to the middle, then the dot blinks out and the other language types in
+from the opposite side. The dot only ever crosses sides while invisible and
+with no transition on the move, so it never slides across the sentence it is
+introducing.
 
 ## Motion
 
@@ -150,3 +200,33 @@ The page makes exactly one claim: أوّل شركة إسلامية لإنشاء 
 - Rules and dividers as decoration
 - Inter, and slate-900 as a neutral
 - Any motion whose resting state is invisible
+
+## Where this stands, and what is next
+
+The hero is done and lives at `app/demo/home/page.tsx`, live at
+`zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
+
+Next is the second section, which is not built:
+
+- The hero should not scroll away by degrees. One gesture down lifts the whole
+  hero up and brings the next section in.
+- That section is `ابن`, the first of the three words: a real template
+  generator form, with an animation in which a cursor moves to each field,
+  fills it, and presses generate.
+- **Open question, unanswered:** does that form drive the real generator (the
+  wizard at `/theme/new/...`), or replay a staged path that always runs
+  perfectly? The animation is the same either way; how much of it is real
+  changes the work substantially.
+
+## Working notes
+
+- **Check localhost after every change.** Reasoning about this layout has been
+  wrong more often than measuring it. The browser pane used for checking never
+  advances CSS transitions, so states can be verified but motion cannot.
+- **Editing this file auto-deploys.** A Write/Edit marks a deploy and the Stop
+  hook ships `vercel --prod` from the local tree, so fetch and merge origin
+  first or the deploy reverts production.
+- **If the page renders as raw unstyled HTML**, the dev server's `.next` cache
+  has corrupted (`Cannot find module './NNNN.js'`), usually from a build
+  running while the dev server was live. Stop the server, delete `.next`,
+  restart.
