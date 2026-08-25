@@ -268,12 +268,30 @@ The path line at the top is the only thing on the surface that reports rather
 than asks, and it is there because the change from `/themes` to
 `/theme/new/restaurant` is what says the picker really did open the wizard.
 
-**The section is two columns:** the window on the left, and on the right the
-build word — ابن، تبني، بناء، تحسين — cycling the hero's first column on the
-hero's own roll and in the hero's own face, set toward the top of its column.
-It is glass, not ink: the letter is hollowed to a hairline edge, because a
-tinted fill on bare paper is just grey type. Below 1024px the two stack, word
-above window, and on a phone the window hangs straight off the word.
+**One stage, layered.** The build word — ابن، تبني، بناء، تحسين — is the
+ground, and the window stands on it: the word runs large behind the window and
+out past its top and its side, cycling the hero's first column on the hero's
+own roll and in the hero's own face.
+
+Three rules the word earned the hard way:
+
+- **Solid, never outlined.** It was hollowed to a hairline edge first, and on
+  Arabic that is wrong twice over: the stroke draws the seam where each letter
+  joins the next, so a connected word reads as separate letters wired together
+  — the opposite of what the script does. One soft fill is one continuous
+  shape, which is what the word is.
+- **Anchored to its start edge, never centred.** The four words share one grid
+  cell, so the cell is as wide as the LONGEST of them; centre a three-letter
+  word in a six-letter cell and it floats a hundred and fifty pixels off the
+  edge it is meant to sit against. Same trap as the hero's columns.
+- **Below the header on narrow screens.** On a phone the word and the pill
+  share the same strip, and at the top of the panel the word lands on the pill
+  and loses its ascenders off the edge.
+
+**The seam.** The light belongs to the hero and leaves with it, but a fainter,
+shorter, still wash of the same palette spills over the top edge of section two
+(`.zn-lightfall`) so the second screen reads as the same room rather than a
+different page.
 
 **The animation is per card, never one long take.** A card comes forward, the
 cursor moves into it, types or picks, the card finishes, a beat plays, and
@@ -304,6 +322,11 @@ Three things the composition needs:
 - **Slots take fixed heights, not aspect ratios.** Square upload slots on a
   730px card are 170px tall, and five of them overran the window by a row —
   which, on a centred card, is cut off the bottom.
+- **The Visuals card picks real pictures.** Five empty rectangles the cursor
+  hovered past read as a card that failed to load, not as an upload step. The
+  template ships its own photographs (`utils/restaurant/mock-content`), pulled
+  down small to `public/demo/restaurant/*.webp` — 236kB for nine, and no
+  third-party request on the page whose whole problem was frame budget.
 - **Picker rows size to their contents.** The cover sets the tile height and
   the two lines under it follow; stretched over the frame instead, the eight
   become empty boxes with a label in the corner.

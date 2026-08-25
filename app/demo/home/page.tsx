@@ -1146,40 +1146,59 @@ export default function Page() {
            dir is rtl here, so the word is the FIRST child and the window the
            second. The word takes the top of its column rather than its middle,
            so it reads against the head of the window rather than its waist. */
+        /* The last of the hero's light coming over the seam, so the second
+           screen reads as the same room. Same recipe as the hero's head glow,
+           fainter and shorter, and it does not breathe — one still wash. */
+        .zn-lightfall {
+          position: absolute; left: -8%; right: -8%; top: -20vh; height: 30vh;
+          filter: blur(10vh); opacity: 0.34; pointer-events: none; z-index: 0;
+          transform: translateZ(0);
+        }
+        .zn-lightfall i {
+          position: absolute; inset: 0; display: block;
+          background: var(--glow); border-radius: 50%;
+        }
+
+        /* One stage, layered. The window sits ON the word rather than beside
+           it: the word is the ground and the product is what stands on it. */
         .zn-build {
           position: absolute; inset: 0;
-          display: grid;
-          grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-          /* An explicit row, because the stage inside it asks for height:100%
-             and 100% of an auto row is circular. */
-          grid-template-rows: minmax(0, 1fr);
-          align-items: center; justify-content: center;
-          gap: clamp(1rem, 3vw, 3rem);
+          display: grid; place-items: center;
           padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.4rem);
         }
-        .zn-stagebox { width: min(100%, 820px); height: 100%; display: flex; align-items: center; }
+        .zn-stagebox {
+          position: relative; z-index: 1;
+          width: min(100%, 960px); height: 100%;
+          display: flex; align-items: center; justify-content: center;
+        }
 
         /* The build word, in the hero's own face and cycling the same four
-           forms on the same roll. Glass rather than ink: it is lit from behind
-           like everything else here, so it sits in the paper instead of on it. */
+           forms on the same roll. Behind the window, running out past its top
+           and its side.
+
+           Solid, and one piece. It was hollowed to a hairline edge first, and
+           on Arabic that is wrong twice over: the stroke draws the seam where
+           each letter joins the next, so a connected word reads as separate
+           letters wired together — the opposite of what the script does. A
+           single soft fill is one continuous shape, which is what the word is. */
         .zn-word {
-          align-self: start; margin-top: clamp(1rem, 7vh, 4.5rem);
-          justify-self: center;
+          position: absolute; z-index: 0; pointer-events: none;
+          top: clamp(0.5rem, 3vh, 2.5rem); inset-inline-start: clamp(0.5rem, 2vw, 3rem);
           display: inline-grid; grid-template-columns: minmax(0, 1fr);
-          padding-block: 0.18em; margin-block: -0.18em;
+          padding-block: 0.2em; margin-block: -0.2em;
           clip-path: inset(0 -100vw);
-          font-size: clamp(3.2rem, 8vw, 8.5rem);
+          font-size: clamp(5.5rem, 15vw, 15rem);
           line-height: 1.24; white-space: nowrap;
-          /* Glass, not ink. A tinted fill on bare paper is just grey type;
-             hollowing the letter and keeping only a hairline edge is what
-             makes it read as something you look THROUGH — and a hairline is
-             what this page uses everywhere else instead of weight. */
-          color: rgba(23, 23, 23, 0.07);
-          -webkit-text-stroke: 1.1px rgba(23, 23, 23, 0.32);
+          color: rgba(23, 23, 23, 0.12);
           -webkit-font-smoothing: antialiased;
         }
+        /* Anchored to the start edge, never centred. The four words share one
+           grid cell, so the cell is as wide as the LONGEST of them — centre a
+           three-letter word in a six-letter cell and it floats a hundred and
+           fifty pixels off the edge it is supposed to be sitting against.
+           Same trap the hero's columns hit, and the same tell. */
         .zn-word > span {
-          grid-area: 1 / 1; justify-self: center; white-space: nowrap;
+          grid-area: 1 / 1; justify-self: start; white-space: nowrap;
           transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
                       opacity 620ms cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -1192,7 +1211,7 @@ export default function Page() {
         .zn-word > span[data-state="in"] { opacity: 1; transform: none; }
         .zn-app {
           position: relative;
-          width: 100%; height: 100%; max-height: 596px;
+          width: 100%; height: 100%; max-height: 640px;
           border-radius: 26px;
           /* No backdrop-filter. The window used to blur what was behind it,
              which meant every frame of the deck move re-ran a full-surface
@@ -1397,11 +1416,25 @@ export default function Page() {
            about the height of one row — which, on a centred card, gets cut off
            the bottom. */
         .zn-shot {
+          position: relative; overflow: hidden;
           height: 94px; border-radius: 12px;
           background: rgba(255, 255, 255, 0.4);
           box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .zn-shot.hero { grid-column: 1 / -1; height: 132px; }
+        .zn-shot[data-filled="true"] { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16); }
+        /* The picture lands rather than blinks: it rests visible, and the
+           keyframe borrows the hidden state for its own duration only. */
+        .zn-shot img {
+          position: absolute; inset: 0;
+          width: 100%; height: 100%; object-fit: cover;
+          animation: zn-shot-in 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        @keyframes zn-shot-in {
+          from { opacity: 0; transform: scale(1.05); }
+          to   { opacity: 1; transform: none; }
+        }
 
         /* The product's own analyzer, mounted whole rather than reproduced.
            The page takes the wizard's amber off it and changes nothing else:
@@ -1471,28 +1504,19 @@ export default function Page() {
            sized to the screen is the whole screen and the word has nowhere to
            be. Same order either way — word first, window second. */
         @media (max-width: 1023px) {
-          .zn-build {
-            grid-template-columns: minmax(0, 1fr);
-            grid-template-rows: auto minmax(0, 1fr);
-            align-content: center; gap: clamp(0.5rem, 2vh, 1.5rem);
-            padding-top: calc(var(--inset) + 3.9rem);
-          }
-          .zn-word {
-            align-self: center; margin-top: 0;
-            font-size: clamp(2.6rem, 13vw, 5rem);
-          }
-          /* Stacked, the window hangs from the word rather than floating in
-             the middle of what is left: centred in its row it sat a couple of
-             hundred pixels below the word with nothing in between. */
-          .zn-stagebox { width: 100%; align-items: center; justify-content: center; }
+          .zn-build { padding-top: calc(var(--inset) + 3.9rem); }
+          .zn-stagebox { width: 100%; }
           .zn-app { max-height: min(100%, 620px); }
-        }
-        /* On a phone the window hangs straight off the word. Centred in what
-           is left it sat a couple of hundred pixels below it with nothing in
-           between; a tablet has the room for that gap to read as air, a
-           phone does not. */
-        @media (max-width: 767px) {
-          .zn-stagebox { align-items: flex-start; }
+          /* Narrower screens have no room beside the window, so the word runs
+             behind it rather than out past it — still one piece, still the
+             ground the window stands on, just further under. It starts below
+             the header rather than at the top of the panel: on a phone the two
+             share the same strip of screen, and the word was landing on the
+             pill and losing its own ascenders off the top edge. */
+          .zn-word {
+            font-size: clamp(4.5rem, 22vw, 9rem);
+            top: calc(var(--inset) + 2.4rem);
+          }
         }
         @media (max-width: 767px) {
           .zn-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1984,6 +2008,14 @@ export default function Page() {
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
         <div className="zn-panel" aria-hidden={deck !== 1}>
+          {/* A spill of the hero's own light over the top edge, in whatever
+              palette the hero is set to. The light itself belongs to the hero
+              and leaves with it; this is the last of it coming over the seam,
+              so the second screen reads as the same room rather than a
+              different page. Fainter and shorter than the hero's own head. */}
+          <div className="zn-lightfall" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
+            <i />
+          </div>
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is

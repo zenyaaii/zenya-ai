@@ -76,6 +76,20 @@ const PRESETS = [
 const WORDS = ["ابن", "تبني", "بناء", "تحسين"]
 const WORD_HOLD = 4600
 
+/* The restaurant template's OWN photographs, from utils/restaurant/mock-content
+   — the hero, the chef, the accent and the dishes it ships with. Pulled down to
+   small local webp under public/demo/restaurant rather than linked, so the one
+   card in the section with nine images on it costs 236kB and no third-party
+   request. The Visuals card was five empty rectangles without them: a picture
+   picker with nothing to pick reads as a card that failed to load. */
+const SHOTS = [
+  { id: "hero", src: "/demo/restaurant/hero.webp" },
+  { id: "2", src: "/demo/restaurant/dish-1.webp" },
+  { id: "3", src: "/demo/restaurant/chef.webp" },
+  { id: "4", src: "/demo/restaurant/room-1.webp" },
+  { id: "5", src: "/demo/restaurant/dish-3.webp" },
+]
+
 /* Five of the wizard's twelve type chips — the card only needs enough of the
    row to be picked from. */
 const KINDS = [
@@ -137,12 +151,14 @@ type Form = {
   chef_title: string
   booking: string
   press: string
+  /* Which picture slots the cursor has filled. */
+  shots: string[]
 }
 
 const EMPTY: Form = {
   brand_name: "", cuisine: "", city: "", neighborhood: "", kind: "", preset: "",
   address: "", phone: "", email: "", closed: false, cats: [],
-  story: "", chef_name: "", chef_title: "", booking: "", press: "",
+  story: "", chef_name: "", chef_title: "", booking: "", press: "", shots: [],
 }
 
 /* Thrown to unwind the script when the section goes off screen or unmounts.
@@ -430,14 +446,17 @@ export default function BuildSection({
       await beat()
 
       /* ── 7 · الصور ───────────────────────────────────────────────────── */
-      /* The one card with nothing to do. Its own subtitle says a blank slot
-         gets filled for you, so the cursor reads the slots and moves on —
-         which is the real path for an owner with no photographs yet. */
-      setCard(6); await wait(600)
-      await move("shot-hero", 0.5, 0.5)
-      await wait(440)
-      await move("shot-3", 0.5, 0.5)
-      await wait(400)
+      /* Pictures actually get picked. The card was five empty rectangles the
+         cursor hovered past, which reads as a card that failed to load rather
+         than as an upload step; the template ships its own photographs, so
+         those are what land in the slots. */
+      setCard(6); await wait(620)
+      for (const s of SHOTS) {
+        await move(`shot-${s.id}`, 0.5, 0.5)
+        await click()
+        setForm((f) => ({ ...f, shots: [...f.shots, s.id] }))
+        await wait(300)
+      }
       await beat()
 
       /* ── 8 · الصحافة والجوائز ────────────────────────────────────────── */
@@ -757,9 +776,18 @@ function renderCard(
             <b>لا صور؟ لا تقلق.</b> اترك أي خانة فارغة وسنملؤها بصور جميلة خالية من الحقوق.
           </p>
           <div className="zn-shots">
-            <span className="zn-shot hero" data-t="shot-hero" />
-            {[2, 3, 4, 5].map((n) => (
-              <span key={n} className="zn-shot" data-t={`shot-${n}`} />
+            {SHOTS.map((s) => (
+              <span
+                key={s.id}
+                className={`zn-shot${s.id === "hero" ? " hero" : ""}`}
+                data-t={`shot-${s.id}`}
+                data-filled={f.shots.includes(s.id)}
+              >
+                {f.shots.includes(s.id) && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={s.src} alt="" loading="lazy" decoding="async" />
+                )}
+              </span>
             ))}
           </div>
         </>
