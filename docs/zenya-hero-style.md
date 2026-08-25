@@ -278,8 +278,12 @@ Three rules the word earned the hard way:
 - **Solid, never outlined.** It was hollowed to a hairline edge first, and on
   Arabic that is wrong twice over: the stroke draws the seam where each letter
   joins the next, so a connected word reads as separate letters wired together
-  — the opposite of what the script does. One soft fill is one continuous
-  shape, which is what the word is.
+  — the opposite of what the script does.
+- **Faded as a LAYER, never as a colour.** `opacity` on the element, not alpha
+  in `color`. A semi-transparent colour is painted per glyph, and connected
+  Arabic letters overlap at every join — so each join composited twice and came
+  out visibly darker than the strokes either side of it. Element opacity
+  flattens the word first and fades the result: one even tone throughout.
 - **Anchored to its start edge, never centred.** The four words share one grid
   cell, so the cell is as wide as the LONGEST of them; centre a three-letter
   word in a six-letter cell and it floats a hundred and fifty pixels off the
@@ -288,10 +292,17 @@ Three rules the word earned the hard way:
   share the same strip, and at the top of the panel the word lands on the pill
   and loses its ascenders off the edge.
 
-**The seam.** The light belongs to the hero and leaves with it, but a fainter,
-shorter, still wash of the same palette spills over the top edge of section two
-(`.zn-lightfall`) so the second screen reads as the same room rather than a
-different page.
+**The seam is one light, not two.** The foot glow deliberately hangs 22vh below
+the hero, and nothing clips it any more: `#zn-glow` is `overflow: visible` and
+the panels carry `contain: layout` only, never `paint`. That overhang lands on
+the top of section two, so the two screens share the hero's own light and the
+join disappears. Clipping either one is what put a ruled line across the page
+and made the second screen look guillotined off the first. `#zn-deck` still
+clips everything at the viewport, which is the only clip that belongs here.
+
+A second, separately-tuned wash was tried first and is the wrong shape of
+answer: two lights that have to be made to match will never quite match. One
+light that is allowed to cross always does.
 
 **The animation is per card, never one long take.** A card comes forward, the
 cursor moves into it, types or picks, the card finishes, a beat plays, and
@@ -404,11 +415,16 @@ nothing and sits out the whole timeout every time.
 The hero and section two are built, at `app/demo/home/`, live at
 `zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
 
-**The Style card carries its real palettes.** Each preset wears the paper, the
-ink and the three swatches it actually names — a style picker whose four styles
-are all the same colour shows the reader nothing. Its edges are drawn in the
-card's OWN ink via `currentColor`: Onyx is a black card with ivory type, and a
-black hairline round its ivory swatch is invisible.
+**The Style card is the wizard's card.** Not a version of it — the presets are
+IMPORTED from `utils/restaurant/presets` and `utils/services/presets`, and the
+card is built the way those wizards build it: three swatches at the top in
+primary / accent / surface order, the vibe in the accent colour, the name in
+the preset's own heading font, the description in its muted colour, and the
+محدّد badge on the chosen one. A palette can never drift between the demo and
+the real form because there is only one copy of it.
+
+The three lines are Latin inside an RTL card and carry their own `dir="ltr"`.
+Laid out RTL, every sentence put its full stop on the wrong end.
 
 **The picker tiles carry their real covers**, at full colour — settled, and the
 two missing screenshots have been shot. See the section above.

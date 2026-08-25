@@ -1,6 +1,8 @@
 "use client"
 
 import MenuImageAnalyzer, { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
+import { RESTAURANT_PRESETS } from "@/utils/restaurant/presets"
+import { SERVICE_PRESETS } from "@/utils/services/presets"
 
 /* ─────────────────────────────────────────────────────────────────────────
    What section two drives.
@@ -88,7 +90,13 @@ export function Field({ label, t, on, value, ph, wide, ltr, area }: {
   )
 }
 
-/** A row of preset cards, each wearing the palette it names. */
+/**
+ * The style card, built the way the wizard builds it — same three swatches in
+ * the same order, the vibe in the accent colour, the name in the preset's own
+ * heading font, the description in its muted colour, and the "محدّد" badge on
+ * the chosen one. The presets themselves are IMPORTED from the wizard's own
+ * files, so a palette can never drift between the demo and the real form.
+ */
 function Presets({ list, chosen }: { list: Preset[]; chosen: string }) {
   return (
     <div className="zn-presets">
@@ -98,20 +106,38 @@ function Presets({ list, chosen }: { list: Preset[]; chosen: string }) {
           data-t={`preset-${p.id}`}
           className="zn-preset"
           data-on={chosen === p.id}
-          style={{ background: p.paper, color: p.ink } as React.CSSProperties}
+          style={{
+            background: p.colors.background,
+            color: p.colors.text,
+            borderColor: chosen === p.id ? p.colors.text : p.colors.border,
+          } as React.CSSProperties}
         >
           <span className="dots">
-            {p.dots.map((d) => <em key={d} style={{ background: d }} />)}
+            <em style={{ background: p.colors.primary }} />
+            <em style={{ background: p.colors.accent }} />
+            <em style={{ background: p.colors.surface, borderColor: p.colors.border }} />
           </span>
-          <b>{p.name}</b>
-          <i>{p.vibe}</i>
+          {/* The three lines are Latin inside an RTL card, so they carry
+              their own direction — laid out RTL, every sentence put its full
+              stop on the wrong end. */}
+          <i className="vibe" dir="ltr" style={{ color: p.colors.accent, fontFamily: p.heading_font }}>{p.vibe}</i>
+          <b dir="ltr" style={{ fontFamily: p.heading_font, color: p.colors.text }}>{p.name}</b>
+          <span className="desc" dir="ltr" style={{ color: p.colors.muted }}>{p.description}</span>
+          {chosen === p.id && <span className="picked">محدّد</span>}
         </span>
       ))}
     </div>
   )
 }
 
-type Preset = { id: string; name: string; vibe: string; dots: string[]; paper: string; ink: string }
+type Preset = {
+  id: string
+  name: string
+  description: string
+  vibe: string
+  heading_font: string
+  colors: { primary: string; accent: string; background: string; surface: string; text: string; muted: string; border: string }
+}
 
 /** The picture slots, filling one at a time as the cursor presses them. */
 function Shots({ list, filled }: { list: { id: string; src: string }[]; filled: string[] }) {
@@ -139,16 +165,7 @@ function Shots({ list, filled }: { list: { id: string; src: string }[]; filled: 
    app/(main)/theme/new/restaurant/page.tsx
    ═══════════════════════════════════════════════════════════════════════ */
 
-const R_PRESETS: Preset[] = [
-  { id: "onyx",      name: "Onyx",      vibe: "cinematic luxury",
-    dots: ["#0e0e10", "#c8a96a", "#f4ecd8"], paper: "#0a0a0c", ink: "#f4ecd8" },
-  { id: "trattoria", name: "Trattoria", vibe: "rustic warm",
-    dots: ["#a8323a", "#d4915a", "#ffffff"], paper: "#f5ebd8", ink: "#2a1d18" },
-  { id: "coastal",   name: "Coastal",   vibe: "breezy refined",
-    dots: ["#1e5566", "#d8a657", "#ffffff"], paper: "#f4ede0", ink: "#172a30" },
-  { id: "forest",    name: "Forest",    vibe: "earthy elevated",
-    dots: ["#3f5d3a", "#b89968", "#ffffff"], paper: "#ebe6d8", ink: "#1f2a1d" },
-]
+const R_PRESETS: Preset[] = RESTAURANT_PRESETS
 
 const R_KINDS = [
   { id: "fine_dining", label: "مطعم راقٍ" },
@@ -430,16 +447,7 @@ async function runMenuCard(c: Ctx) {
    the template rather than the other way round.
    ═══════════════════════════════════════════════════════════════════════ */
 
-const S_PRESETS: Preset[] = [
-  { id: "cobalt",   name: "Cobalt",   vibe: "trusted modern",
-    dots: ["#0f4c81", "#22c7f2", "#ffffff"], paper: "#f4f8fc", ink: "#10233c" },
-  { id: "graphite", name: "Graphite", vibe: "premium dark",
-    dots: ["#111827", "#f59e0b", "#f8fafc"], paper: "#090c12", ink: "#f8fafc" },
-  { id: "amber",    name: "Amber",    vibe: "warm premium",
-    dots: ["#8a4b12", "#f7b23b", "#ffffff"], paper: "#fbf5ec", ink: "#332016" },
-  { id: "emerald",  name: "Emerald",  vibe: "calm elevated",
-    dots: ["#0f5f55", "#37c9a8", "#ffffff"], paper: "#eef9f6", ink: "#15312d" },
-]
+const S_PRESETS: Preset[] = SERVICE_PRESETS
 
 const S_SHOTS = [
   { id: "hero", src: "/demo/services/hero.webp" },

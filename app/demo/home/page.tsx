@@ -931,7 +931,13 @@ export default function Page() {
            inner one, so the filter is rasterised once instead of every frame.
            A fainter, slower, counter-running twin hangs off the top edge so
            the screen is lit from both ends. */
-        #zn-glow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        /* No overflow clip. The foot glow deliberately hangs 22vh BELOW the
+           hero, and clipping it there is what made the second screen look
+           guillotined off the first. Unclipped, that overhang lands on the top
+           of section two and the two screens share one light — which is what
+           they are: one light, not two that have to be matched. #zn-deck still
+           clips everything at the viewport. */
+        #zn-glow { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
         #zn-glow > div { position: absolute; left: -8%; right: -8%; }
         #zn-glow .foot { bottom: -22vh; height: 34vh; filter: blur(9vh); opacity: 0.72; }
         #zn-glow .head { top: -24vh; height: 28vh; filter: blur(10vh); opacity: 0.3; }
@@ -1118,11 +1124,17 @@ export default function Page() {
         }
         /* Each panel is its own compositing layer. Without this the move is a
            repaint of two full screens per frame — one of them carrying a 9vh
-           blur — instead of two ready-made layers being slid. */
+           blur — instead of two ready-made layers being slid.
+
+           Layout containment only, never paint: paint containment clips a
+           panel's contents to its own box, which cut the hero's light dead
+           along the seam and left a ruled line between the two screens. The
+           light has to be allowed to cross. (No backticks in here — this
+           whole block is a template literal, and one would end it.) */
         .zn-panel {
           position: relative; height: 50%;
           transform: translateZ(0);
-          contain: layout paint;
+          contain: layout;
         }
         /* The light is the single most expensive thing on the page to paint,
            and it now travels. Rasterise it once and move the result. */
@@ -1157,18 +1169,6 @@ export default function Page() {
            dir is rtl here, so the word is the FIRST child and the window the
            second. The word takes the top of its column rather than its middle,
            so it reads against the head of the window rather than its waist. */
-        /* The last of the hero's light coming over the seam, so the second
-           screen reads as the same room. Same recipe as the hero's head glow,
-           fainter and shorter, and it does not breathe — one still wash. */
-        .zn-lightfall {
-          position: absolute; left: -8%; right: -8%; top: -20vh; height: 30vh;
-          filter: blur(10vh); opacity: 0.34; pointer-events: none; z-index: 0;
-          transform: translateZ(0);
-        }
-        .zn-lightfall i {
-          position: absolute; inset: 0; display: block;
-          background: var(--glow); border-radius: 50%;
-        }
 
         /* One stage, layered. The window sits ON the word rather than beside
            it: the word is the ground and the product is what stands on it. */
@@ -1200,7 +1200,13 @@ export default function Page() {
           clip-path: inset(0 -100vw);
           font-size: clamp(5.5rem, 15vw, 15rem);
           line-height: 1.24; white-space: nowrap;
-          color: rgba(23, 23, 23, 0.20);
+          /* Solid ink, faded as a LAYER. A semi-transparent colour is painted
+             per glyph, and connected Arabic letters overlap at every join — so
+             each join composited twice and came out visibly darker than the
+             strokes either side of it. Element opacity flattens the word first
+             and fades the result, which is one even tone throughout. */
+          color: ${OBSIDIAN};
+          opacity: 0.20;
           -webkit-font-smoothing: antialiased;
         }
         /* Anchored to the start edge, never centred. The four words share one
@@ -1360,33 +1366,42 @@ export default function Page() {
         }
         .zn-chip[data-on="true"] { background: ${OBSIDIAN}; color: ${PAPER}; box-shadow: none; }
 
-        /* The one card that has to carry colour. A style picker whose four
-           styles are all the same colour shows the reader nothing, so each
-           preset wears the palette it names — its own paper, its own ink and
-           the three swatches the wizard puts on it. */
+        /* The style card, built the way the WIZARD builds it: three swatches
+           at the top in primary / accent / surface order, the vibe in the
+           accent colour and the preset's own heading font, the name under it
+           in that same face, the description in the preset's muted colour,
+           and a "محدّد" badge on the chosen one. Same card in both templates,
+           because it is the same card in both wizards. */
         .zn-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-        /* Edges are drawn in the card's OWN ink, not in black. Onyx is a black
-           card with ivory type: a black hairline round its ivory swatch, and a
-           black ring round the card itself, are both invisible on it. */
         .zn-preset {
-          min-height: 128px; padding: 15px 14px; border-radius: 14px;
-          display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
-          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
-          transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
-                      transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+          position: relative; overflow: hidden;
+          min-height: 150px; padding: 14px; border-radius: 16px;
+          display: flex; flex-direction: column; align-items: flex-start;
+          border: 2px solid transparent;
+          transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+                      border-color 300ms cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .zn-preset[data-on="true"] {
-          box-shadow: inset 0 0 0 1px currentColor, 0 0 0 1.5px ${OBSIDIAN};
-          transform: translateY(-2px);
-        }
-        .zn-preset .dots { display: flex; gap: 5px; margin-bottom: auto; }
+        .zn-preset[data-on="true"] { transform: translateY(-3px); }
+        .zn-preset .dots { display: flex; gap: 5px; margin-bottom: 14px; }
         .zn-preset .dots em {
-          display: block; width: 15px; height: 15px; border-radius: 999px;
-          box-shadow: inset 0 0 0 1px currentColor;
+          display: block; width: 20px; height: 20px; border-radius: 999px;
+          border: 1px solid transparent;
         }
-        .zn-preset b { font-size: 15px; font-weight: 500; color: inherit; }
-        /* Latin, so tracking is allowed here and nowhere else on this surface. */
-        .zn-preset i { font-style: normal; font-size: 10px; letter-spacing: 0.08em; opacity: 0.65; }
+        /* Latin, in the preset's own display face — tracking is allowed here
+           and nowhere else on this surface, because none of it is Arabic. */
+        .zn-preset .vibe, .zn-preset b, .zn-preset .desc { text-align: left; align-self: stretch; }
+        .zn-preset .vibe {
+          font-style: normal; font-size: 9.5px; line-height: 1.2;
+          text-transform: uppercase; letter-spacing: 0.2em;
+        }
+        .zn-preset b { margin-top: 3px; font-size: 17px; font-weight: 400; line-height: 1.2; }
+        .zn-preset .desc { margin-top: 6px; font-size: 10px; line-height: 1.45; opacity: 0.85; }
+        .zn-preset .picked {
+          position: absolute; inset-inline-end: 10px; top: 10px;
+          padding: 2px 7px; border-radius: 999px;
+          background: ${OBSIDIAN}; color: ${PAPER};
+          font-size: 8.5px; line-height: 1.4;
+        }
 
         .zn-hours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 20px; }
         .zn-hour {
@@ -2064,14 +2079,6 @@ export default function Page() {
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
         <div className="zn-panel" aria-hidden={deck !== 1}>
-          {/* A spill of the hero's own light over the top edge, in whatever
-              palette the hero is set to. The light itself belongs to the hero
-              and leaves with it; this is the last of it coming over the seam,
-              so the second screen reads as the same room rather than a
-              different page. Fainter and shorter than the hero's own head. */}
-          <div className="zn-lightfall" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
-            <i />
-          </div>
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is
