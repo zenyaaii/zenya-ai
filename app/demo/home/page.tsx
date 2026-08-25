@@ -59,7 +59,18 @@ import BuildSection from "./BuildSection"
    are declared here: the rail offers Tajawal at 900 and at 200. */
 const display = Tajawal({
   subsets: ["arabic"],
-  weight: ["200", "900"],
+  weight: ["200", "500", "700", "900"],
+  display: "swap",
+})
+
+/* The build window's own face. It shows the real wizard, and the real app
+   sets Arabic in Tajawal (app/globals.css) — so the window uses what the
+   product uses. Plex Sans Arabic is the hero's furniture face and reads thin
+   and foreign at wizard sizes; this is the same type a customer sees in the
+   form the window is showing. */
+const appUi = Tajawal({
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
   display: "swap",
 })
 
@@ -1189,7 +1200,7 @@ export default function Page() {
           clip-path: inset(0 -100vw);
           font-size: clamp(5.5rem, 15vw, 15rem);
           line-height: 1.24; white-space: nowrap;
-          color: rgba(23, 23, 23, 0.12);
+          color: rgba(23, 23, 23, 0.20);
           -webkit-font-smoothing: antialiased;
         }
         /* Anchored to the start edge, never centred. The four words share one
@@ -1308,7 +1319,11 @@ export default function Page() {
         .zn-f.wide { grid-column: 1 / -1; }
         .zn-f .lab {
           display: block; margin-bottom: 5px;
-          font-size: 9.5px; font-weight: 500; letter-spacing: 0.16em; color: ${STONE};
+          /* No tracking. The house rule bans NEGATIVE letter-spacing on Arabic
+             because the letterforms connect — and positive tracking breaks the
+             same joins from the other side, which is exactly what made these
+             labels read as amateur. Arabic is set solid, at every size. */
+          font-size: 10.5px; font-weight: 500; color: ${STONE};
         }
         .zn-in {
           display: block; min-height: 37px; padding: 9px 12px;
@@ -1332,8 +1347,8 @@ export default function Page() {
           animation: zn-blink 1.05s steps(1) infinite;
         }
 
-        .zn-lab { margin: 17px 0 8px; font-size: 9.5px; font-weight: 500; letter-spacing: 0.16em; color: ${STONE}; }
-        .zn-lab span { letter-spacing: 0; opacity: 0.6; }
+        .zn-lab { margin: 17px 0 8px; font-size: 10.5px; font-weight: 500; color: ${STONE}; }
+        .zn-lab span { opacity: 0.6; }
         .zn-chips { display: flex; flex-wrap: wrap; gap: 6px; }
         .zn-chip {
           padding: 6px 12px; border-radius: 999px;
@@ -1370,6 +1385,7 @@ export default function Page() {
           box-shadow: inset 0 0 0 1px currentColor;
         }
         .zn-preset b { font-size: 15px; font-weight: 500; color: inherit; }
+        /* Latin, so tracking is allowed here and nowhere else on this surface. */
         .zn-preset i { font-style: normal; font-size: 10px; letter-spacing: 0.08em; opacity: 0.65; }
 
         .zn-hours { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 20px; }
@@ -2022,10 +2038,16 @@ export default function Page() {
               what the move was competing with. */}
           <BuildSection
             active={deck === 1 && settled}
-            uiClass={ui.className}
-            wordClass={type.cls}
-            wordWeight={type.weight}
-            wordLh={type.lh}
+            uiClass={appUi.className}
+            /* Tajawal 500, not the hero's chosen face and not its 900. The
+               hero's line is sized to fill a screen, where 900 reads as
+               authority; the same cut blown up to 200px behind a window is a
+               slab, and Arabic at that scale wants stroke contrast rather than
+               mass. The face rail is hero furniture and is hidden here anyway,
+               so this word is not its to set. */
+            wordClass={display.className}
+            wordWeight={500}
+            wordLh={1.28}
           />
         </div>
         </div>
