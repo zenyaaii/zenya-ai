@@ -1424,6 +1424,46 @@ export default function Page() {
           to   { opacity: 1; transform: none; }
         }
 
+        /* The services list. This template's centrepiece is the list being
+           built rather than a photograph being read, so each service arrives
+           as its own small block and the "add another" control stays under
+           them the whole time — the cursor really does press it. */
+        .zn-services { display: flex; flex-direction: column; gap: 8px; }
+        .zn-service {
+          display: grid; grid-template-columns: 64px minmax(0, 1fr);
+          align-items: start; gap: 12px;
+          padding: 11px 13px; border-radius: 13px;
+          background: rgba(255, 255, 255, 0.6);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          animation: zn-service-in 480ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        @keyframes zn-service-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: none; }
+        }
+        .zn-service .no { font-size: 9.5px; color: ${STONE}; padding-top: 3px; }
+        .zn-service .body {
+          display: grid; grid-template-columns: minmax(0, 1fr) auto;
+          align-items: baseline; gap: 2px 10px; min-width: 0;
+        }
+        .zn-service b { font-size: 12.5px; font-weight: 500; color: ${OBSIDIAN}; }
+        .zn-service i { font-style: normal; font-size: 11.5px; color: ${OBSIDIAN}; }
+        .zn-service .desc {
+          grid-column: 1 / -1; font-size: 11px; line-height: 1.5; color: ${STONE};
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .zn-service .badge {
+          grid-column: 1 / -1; justify-self: start; margin-top: 4px;
+          padding: 3px 8px; border-radius: 999px;
+          font-size: 9.5px; line-height: 1; color: ${OBSIDIAN};
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+        }
+        .zn-addservice {
+          display: block; padding: 11px; border-radius: 13px; text-align: center;
+          font-size: 11.5px; color: ${STONE};
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+        }
+
         .zn-note { margin-bottom: 15px; font-size: 11.5px; line-height: 1.6; color: ${STONE}; }
         .zn-note b { font-weight: 500; color: ${OBSIDIAN}; }
         .zn-shots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
@@ -1552,7 +1592,7 @@ export default function Page() {
 
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
-          .zn-card, .zn-dish, .zn-finish { animation: none; }
+          .zn-card, .zn-dish, .zn-finish, .zn-service, .zn-shot img { animation: none; }
           .zn-finish .go, .zn-word > span, .zn-hero-only { transition: none; }
           .zn-cursor, .zn-cursor svg, .zn-tile, .zn-tile .go, .zn-chip,
           .zn-preset, .zn-hour u, .zn-in { transition: none; }

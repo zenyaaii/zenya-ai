@@ -342,6 +342,27 @@ let a tile fall back to Unsplash**; shoot the demo instead, with the cookie
 banner dismissed and the dev indicator hidden, since those files feed `/themes`
 and the dashboard at full size too.
 
+**Two templates, taking turns.** `BuildSection.tsx` is the stage — the window,
+the picker, the cursor and the clock. What gets filled in, and in what order,
+belongs to each template and lives in `templates.tsx`. A run picks one, opens
+its wizard and walks its cards; the next run picks the next, so the picker
+really does lead somewhere different. Restaurant runs ~73s, services ~80s.
+
+**The rule for adding a template: read its wizard and follow it.** The cards
+are its cards, the order is its order, the labels are its labels. Services
+puts the style preset LAST rather than second, and the animation puts it last
+too. A demo that invents a form the product does not have is worth nothing.
+
+Each template needs a centrepiece — the beat that carries its idea. The
+restaurant's is the menu photograph being read. The services template's is the
+services LIST being built: one service filled in, the cursor pressing "add
+another", the next arriving. That growing list is what that wizard is for.
+
+**Nothing is invented to fill a field.** The services wizard asks for an
+average rating and a review count; the demo leaves both alone, because that
+business has no reviews and typing a number into that box would be making one
+up. An optional field left blank is honest; a filled one is not.
+
 Typing is real typing — one more character per beat into a field the cursor is
 sitting in, and the caret belongs to that field alone. Arabic reshaping as it
 connects is what a reader typing here would see, so unlike the claim there is
