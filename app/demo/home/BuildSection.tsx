@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
 import { themePreview, themePreviewFallback } from "@/lib/theme-previews"
 import { TEMPLATE_RUNS, type Ctx, type Form } from "./templates"
+import Composer, { EMPTY_LAYOUT, layoutVars, loadLayout, type Layout } from "./Composer"
 
 /* ─────────────────────────────────────────────────────────────────────────
    Section two: ابن — the build step.
@@ -62,13 +63,17 @@ export default function BuildSection({
   wordClass,
   wordWeight,
   wordLh,
+  edit = false,
 }: {
   active: boolean
   uiClass: string
   wordClass: string
   wordWeight: number
   wordLh: number
+  /** ?edit=1 only. The composer never mounts for an ordinary visitor. */
+  edit?: boolean
 }) {
+  const buildRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const analyzerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -105,6 +110,27 @@ export default function BuildSection({
   const [cursor, setCursor] = useState<{ x: number; y: number; press: boolean } | null>(null)
   /* The wizard's closing bar, and whether its button has been pressed. */
   const [finish, setFinish] = useState<false | "ready" | "going">(false)
+
+  /* Placement, and where it comes from. An ordinary visitor has no composer
+     and no stored layout, so this stays EMPTY and every rule falls back to the
+     stylesheet's own numbers — the page renders exactly as it would without
+     any of this. */
+  const [wide, setWide] = useState(true)
+  const [layout, setLayout] = useState<Layout>(EMPTY_LAYOUT)
+  useEffect(() => {
+    if (!edit) return
+    const mq = window.matchMedia("(min-width: 1024px)")
+    const sync = () => { setWide(mq.matches); setLayout(loadLayout(mq.matches)) }
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
+  }, [edit])
+
+  /* Kept as it is dragged, so a reload comes back to the same composition. */
+  const writeLayout = useCallback((l: Layout) => {
+    setLayout(l)
+    try { localStorage.setItem(`zn-compose-${wide ? "wide" : "narrow"}`, JSON.stringify(l)) } catch { /* private mode */ }
+  }, [wide])
 
   /* The build word's own clock, on the hero's hold and the hero's roll. */
   const [word, setWord] = useState<{ cur: number; prev: number | null }>({ cur: 0, prev: null })
@@ -371,7 +397,13 @@ export default function BuildSection({
   const T = tpl.cards[Math.min(card, tpl.cards.length - 1)]
 
   return (
-    <div className={`${uiClass} zn-build`} dir="rtl">
+    <div
+      className={`${uiClass} zn-build`}
+      dir="rtl"
+      ref={buildRef}
+      data-edit={edit || undefined}
+      style={edit ? layoutVars(layout) : undefined}
+    >
       {/* The build word: the ground the window stands on. Four forms of the
           one word this section is, on the hero's own roll — the old one
           leaves upward before the next rises, never together. */}
@@ -504,6 +536,10 @@ export default function BuildSection({
         ))}
       </div>
       </div>
+
+      {edit && (
+        <Composer layout={layout} setLayout={writeLayout} scope={buildRef} wide={wide} />
+      )}
     </div>
   )
 }

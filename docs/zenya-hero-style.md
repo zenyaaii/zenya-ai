@@ -455,6 +455,36 @@ The completion beat watches the frame, not the analyzer — what the read
 produces renders beside the analyzer, so looking inside its subtree finds
 nothing and sits out the whole timeout every time.
 
+## The composer
+
+A placement tool at `/demo/home?edit=1`, in `app/demo/home/Composer.tsx`. It
+exists so the composition can be found by moving it rather than by describing
+it: drag the window or the word, pull a corner to resize, nudge with the arrow
+keys, read the numbers, copy the CSS out and paste it into `page.tsx`.
+
+**It is not part of the page.** It mounts only at `?edit=1`, and every value it
+touches is read through a CSS variable that falls back to the stylesheet's own
+number — so a page without it renders exactly as it did before it existed.
+Verified: no `?edit`, no `.zn-compose` in the DOM and no inline style on
+`.zn-build`. Nothing it produces should become load-bearing; the output is
+meant to be pasted in and the stored layout thrown away.
+
+Three things it had to get right, and one it got wrong first:
+
+- **Read the base size ONCE, at pointer-down.** Reading it live each frame is a
+  feedback loop — the thing grows, the next frame measures the grown thing and
+  grows it again. One small drag took the word from 216px to 863px before this
+  was captured.
+- **Convert through the zoom.** Rects come back rendered, the offsets written
+  back are CSS pixels; the scope's rect over its `offsetWidth` is the bridge —
+  the same one the cursor uses. `offsetWidth` and computed `font-size` are
+  already CSS pixels and need no conversion.
+- **The word lies behind the window**, so where they overlap its outline cannot
+  be reached by a pointer. The panel carries an explicit pair of buttons, and
+  the picked outline comes forward.
+- **Layouts are kept per width class**, wide and narrow, because the two are
+  laid out differently and a number that suits a laptop is wrong on a phone.
+
 ## Where this stands, and what is next
 
 The hero and section two are built, at `app/demo/home/`, live at

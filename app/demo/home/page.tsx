@@ -580,6 +580,14 @@ export default function Page() {
      reader who wants the next screen has to stop and gesture again, which is
      what "one gesture, one screen" means. */
   const [deck, setDeck] = useState(0)
+  /* ?edit=1 turns on the composer. Read after mount, never during render: the
+     server has no query string to look at and the first paint has to match it.
+     Without it nothing about the composer reaches the browser. */
+  const [edit, setEdit] = useState(false)
+  useEffect(() => {
+    try { setEdit(new URLSearchParams(window.location.search).get("edit") === "1") } catch { /* ignore */ }
+  }, [])
+
   /* Whether the deck has finished travelling. Section two's script waits for
      this: the move is the one moment on the page that has to be perfect, and
      it should not be sharing its frames with anything. */
@@ -1200,7 +1208,11 @@ export default function Page() {
         }
         .zn-stagebox {
           position: relative; z-index: 1;
-          width: min(100%, 960px); height: 100%;
+          /* Every number the composer can move is read through a variable that
+             falls back to what is here today, so a page with no composer on it
+             renders exactly as it did before the composer existed. */
+          width: var(--app-w, min(100%, 960px)); height: 100%;
+          transform: translate(var(--app-x, 0px), var(--app-y, 0px));
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: 12px;
         }
@@ -1240,7 +1252,8 @@ export default function Page() {
           display: inline-grid; grid-template-columns: minmax(0, 1fr);
           padding-block: 0.2em; margin-block: -0.2em;
           clip-path: inset(0 -100vw);
-          font-size: clamp(5.5rem, 15vw, 15rem);
+          font-size: var(--word-size, clamp(5.5rem, 15vw, 15rem));
+          transform: translate(var(--word-x, 0px), var(--word-y, 0px));
           line-height: 1.24; white-space: nowrap;
           /* Solid ink, faded as a LAYER. A semi-transparent colour is painted
              per glyph, and connected Arabic letters overlap at every join — so
@@ -1272,7 +1285,7 @@ export default function Page() {
           position: relative;
           /* Basis, not height. The switcher is its sibling now, and a window
              at height:100% leaves it nothing to stand on. */
-          width: 100%; flex: 0 1 640px; min-height: 0;
+          width: 100%; flex: 0 1 var(--app-h, 640px); min-height: 0;
           border-radius: 26px;
           /* No backdrop-filter. The window used to blur what was behind it,
              which meant every frame of the deck move re-ran a full-surface
@@ -1636,7 +1649,7 @@ export default function Page() {
              padding buys it that strip outright. */
           .zn-build { padding-top: calc(var(--inset) + 6rem); }
           .zn-stagebox { width: 100%; justify-content: flex-end; }
-          .zn-app { flex-basis: 520px; }
+          .zn-app { flex-basis: var(--app-h, 520px); }
           /* Narrower screens have no room beside the window, so the word runs
              behind it rather than out past it — still one piece, still the
              ground the window stands on, just further under. It starts below
@@ -1644,7 +1657,7 @@ export default function Page() {
              share the same strip of screen, and the word was landing on the
              pill and losing its own ascenders off the top edge. */
           .zn-word {
-            font-size: clamp(4.5rem, 22vw, 9rem);
+            font-size: var(--word-size, clamp(4.5rem, 22vw, 9rem));
             top: calc(var(--inset) + 2.4rem);
           }
         }
@@ -1656,7 +1669,7 @@ export default function Page() {
           /* Tall enough to reach up under the word and just touch it. Nothing
              can be cut any more — the fit pass scales whatever is inside to
              the room it has — so the window is free to take the space. */
-          .zn-app { flex-basis: 660px; }
+          .zn-app { flex-basis: var(--app-h, 660px); }
           .zn-path { padding: 12px 16px 7px; }
           .zn-stage { padding: 4px 16px 16px; }
           /* The cards have to fit a phone-sized window, so the furniture that
@@ -1666,6 +1679,65 @@ export default function Page() {
           .zn-shot.hero { height: 92px; }
           .zn-in.area { min-height: 62px; }
         }
+
+        /* ── The composer ─────────────────────────────────────────────────
+           A placement tool at ?edit=1, not part of the page. It deliberately
+           looks like a tool — dashed outlines, a mono readout — so it can
+           never be mistaken for something that ships. */
+        .zn-compose { position: absolute; inset: 0; z-index: 60; pointer-events: none; }
+        .zn-compose-box {
+          position: absolute; pointer-events: auto; cursor: grab;
+          outline: 1px dashed rgba(23, 23, 23, 0.45); outline-offset: 2px;
+          border-radius: 4px;
+        }
+        .zn-compose-box:active { cursor: grabbing; }
+        /* The picked one comes forward, so its grip is reachable even where
+           the two overlap — the word lies behind the window. */
+        .zn-compose-box[data-on="true"] { outline-color: #171717; outline-width: 1.5px; z-index: 2; }
+        .zn-compose-box .tag {
+          position: absolute; inset-inline-start: 0; top: -19px;
+          padding: 2px 7px; border-radius: 5px;
+          background: #171717; color: #fafafa;
+          font-size: 10px; line-height: 1.4; white-space: nowrap;
+        }
+        .zn-compose-box .grip {
+          position: absolute; inset-inline-end: -7px; bottom: -7px;
+          width: 14px; height: 14px; border-radius: 3px;
+          background: #fafafa; box-shadow: inset 0 0 0 1.5px #171717;
+          cursor: nwse-resize;
+        }
+        .zn-compose-panel {
+          position: absolute; inset-inline-start: 12px; bottom: 12px;
+          width: 216px; padding: 12px; border-radius: 12px;
+          pointer-events: auto;
+          background: rgba(255, 255, 255, 0.94);
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+          font-size: 11px; color: #171717;
+        }
+        .zn-compose-panel .head { font-weight: 500; margin-bottom: 8px; }
+        .zn-compose-panel .row { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; color: #666666; }
+        .zn-compose-panel .row b { font-weight: 500; color: #171717; }
+        .zn-compose-panel .pick { display: flex; gap: 6px; margin-bottom: 9px; }
+        .zn-compose-panel .pick button {
+          flex: 1; padding: 5px; border-radius: 7px; cursor: pointer;
+          font-size: 10.5px; color: #666666;
+          background: #fafafa; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+        }
+        .zn-compose-panel .pick button[data-on="true"] { background: #171717; color: #fafafa; box-shadow: none; }
+        .zn-compose-panel .acts { display: flex; gap: 6px; margin: 10px 0 8px; }
+        .zn-compose-panel .acts button {
+          flex: 1; padding: 6px; border-radius: 7px; cursor: pointer;
+          font-size: 10.5px; color: #171717;
+          background: #fafafa; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+        }
+        .zn-compose-panel pre {
+          max-height: 132px; overflow: auto; padding: 8px; border-radius: 7px;
+          background: #171717; color: #fafafa;
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 9.5px; line-height: 1.5; white-space: pre-wrap;
+          direction: ltr; text-align: left;
+        }
+        .zn-compose-panel .hint { margin-top: 8px; color: #666666; line-height: 1.5; }
 
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
@@ -2157,6 +2229,7 @@ export default function Page() {
             wordClass={display.className}
             wordWeight={500}
             wordLh={1.28}
+            edit={edit}
           />
         </div>
         </div>
