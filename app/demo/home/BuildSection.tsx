@@ -72,9 +72,24 @@ export default function BuildSection({
   const frameRef = useRef<HTMLDivElement>(null)
   const analyzerRef = useRef<HTMLDivElement>(null)
 
-  /* Which run we are on. Each run is one template, and they take turns. */
+  /* Which run we are on. Left alone, the templates take turns; the switcher
+     lets a reader jump straight to the one they want to watch instead of
+     waiting a minute for it to come round. */
   const [take, setTake] = useState(0)
   const tpl = TEMPLATE_RUNS[take % TEMPLATE_RUNS.length]
+
+  /* Restarting on a reader's pick rather than on the loop's own clock. The
+     take is advanced to the next index that lands on the wanted template, so
+     the run always begins at its picker beat and never mid-form. */
+  const choose = (id: string) => {
+    const want = TEMPLATE_RUNS.findIndex((t) => t.id === id)
+    if (want < 0) return
+    setTake((prev) => {
+      const next = prev + 1
+      const rounds = TEMPLATE_RUNS.length
+      return next + ((want - (next % rounds)) + rounds) % rounds
+    })
+  }
 
   const [view, setView] = useState<"picker" | "wizard">("picker")
   const [card, setCard] = useState(0)
@@ -386,6 +401,24 @@ export default function BuildSection({
             </svg>
           </span>
         )}
+      </div>
+
+      {/* Which one is being watched. Two real choices rather than a minute of
+          waiting for the other to come round — and the only control in the
+          section, so it stays as quiet as the rest of the page. */}
+      <div className="zn-switch" role="tablist" aria-label="القالب المعروض">
+        {TEMPLATE_RUNS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={t.id === tpl.id}
+            data-on={t.id === tpl.id}
+            onClick={() => choose(t.id)}
+          >
+            {TEMPLATES.find((x) => x.id === t.id)?.label ?? t.id}
+          </button>
+        ))}
       </div>
       </div>
     </div>

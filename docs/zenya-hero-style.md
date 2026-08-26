@@ -353,11 +353,26 @@ let a tile fall back to Unsplash**; shoot the demo instead, with the cookie
 banner dismissed and the dev indicator hidden, since those files feed `/themes`
 and the dashboard at full size too.
 
-**Two templates, taking turns.** `BuildSection.tsx` is the stage — the window,
-the picker, the cursor and the clock. What gets filled in, and in what order,
-belongs to each template and lives in `templates.tsx`. A run picks one, opens
-its wizard and walks its cards; the next run picks the next, so the picker
-really does lead somewhere different. Restaurant runs ~73s, services ~80s.
+**Two templates, taking turns — and a switcher.** `BuildSection.tsx` is the
+stage — the window, the picker, the cursor and the clock. What gets filled in,
+and in what order, belongs to each template and lives in `templates.tsx`. Left
+alone the runs alternate (restaurant ~73s, services ~80s); the pill pair under
+the window lets a reader jump straight to the one they want rather than waiting
+a minute for it to come round. A pick advances the take to the next index that
+lands on that template, so a run always begins at its picker beat and never
+mid-form. It is the only control in the section, and stays as quiet as the rest
+of the page.
+
+**Declare the stage's single grid cell.** The window asks for its size in per
+cent, and a per cent of an auto-sized row is circular — the row sizes to the
+window and the window sizes to the row, so the cap silently stops applying. The
+tallest card (the picker, eight tiles) then pushed the window off the bottom of
+the screen and it snapped back when a shorter card replaced it, which is what
+the first scroll on a phone looked like. `grid-template-rows: minmax(0, 1fr)`,
+always.
+
+**The window is a flex BASIS, not a height.** The switcher is its sibling; a
+window at `height: 100%` leaves it nothing to stand on.
 
 **The rule for adding a template: read its wizard and follow it.** The cards
 are its cards, the order is its order, the labels are its labels. Services

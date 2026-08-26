@@ -1172,15 +1172,46 @@ export default function Page() {
 
         /* One stage, layered. The window sits ON the word rather than beside
            it: the word is the ground and the product is what stands on it. */
+        /* The single cell is declared, never left to auto. The window inside
+           asks for a height in per cent, and a per cent of an auto-sized row
+           is circular: the row sizes to the window and the window sizes to the
+           row, so the cap stops applying and the tallest card — the picker,
+           with eight tiles — pushes the window off the bottom of the screen
+           and then snaps back when a shorter card replaces it. That snap is
+           what the first scroll looked like. */
         .zn-build {
           position: absolute; inset: 0;
-          display: grid; place-items: center;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          place-items: center;
           padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.4rem);
         }
         .zn-stagebox {
           position: relative; z-index: 1;
           width: min(100%, 960px); height: 100%;
-          display: flex; align-items: center; justify-content: center;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: 12px;
+        }
+
+        /* The only control in the section. Two real choices instead of a
+           minute of waiting for the other template to come round, and quiet
+           enough to belong on this page: a hairline pill, obsidian when it is
+           the one being watched. */
+        .zn-switch { display: flex; gap: 6px; flex: 0 0 auto; }
+        .zn-switch button {
+          padding: 7px 16px; border-radius: 999px;
+          font-size: 11.5px; line-height: 1; color: ${STONE};
+          background: rgba(255, 255, 255, 0.6);
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          cursor: pointer;
+          transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-switch button:hover { color: ${OBSIDIAN}; }
+        .zn-switch button[data-on="true"] {
+          background: ${OBSIDIAN}; color: ${PAPER}; box-shadow: none;
         }
 
         /* The build word, in the hero's own face and cycling the same four
@@ -1228,7 +1259,9 @@ export default function Page() {
         .zn-word > span[data-state="in"] { opacity: 1; transform: none; }
         .zn-app {
           position: relative;
-          width: 100%; height: 100%; max-height: 640px;
+          /* Basis, not height. The switcher is its sibling now, and a window
+             at height:100% leaves it nothing to stand on. */
+          width: 100%; flex: 0 1 640px; min-height: 0;
           border-radius: 26px;
           /* No backdrop-filter. The window used to blur what was behind it,
              which meant every frame of the deck move re-ran a full-surface
@@ -1575,9 +1608,13 @@ export default function Page() {
            sized to the screen is the whole screen and the word has nowhere to
            be. Same order either way — word first, window second. */
         @media (max-width: 1023px) {
-          .zn-build { padding-top: calc(var(--inset) + 3.9rem); }
-          .zn-stagebox { width: 100%; }
-          .zn-app { max-height: min(100%, 620px); }
+          /* The window drops well below the word rather than sitting on it.
+             At this width the two are fighting over the same strip of screen,
+             and the word — which is the point of the section — was losing. The
+             padding buys it that strip outright. */
+          .zn-build { padding-top: calc(var(--inset) + 8.5rem); }
+          .zn-stagebox { width: 100%; justify-content: flex-end; }
+          .zn-app { flex-basis: 520px; }
           /* Narrower screens have no room beside the window, so the word runs
              behind it rather than out past it — still one piece, still the
              ground the window stands on, just further under. It starts below
@@ -1594,7 +1631,7 @@ export default function Page() {
           .zn-row, .zn-hours, .zn-menu { grid-template-columns: minmax(0, 1fr); }
           .zn-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .zn-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .zn-app { max-height: min(100%, 560px); }
+          .zn-app { flex-basis: 452px; }
           .zn-path { padding: 12px 16px 7px; }
           .zn-stage { padding: 4px 16px 16px; }
           /* The cards have to fit a phone-sized window, so the furniture that
