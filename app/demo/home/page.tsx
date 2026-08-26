@@ -1199,6 +1199,13 @@ export default function Page() {
            and then snaps back when a shorter card replaces it. That snap is
            what the first scroll looked like. */
         .zn-build {
+          /* The composed placement, held as four nudges and a height so that a
+             screen without the room for them can decline them one at a time.
+             The defaults here are the SAFE ones — dead centre, nothing pushed
+             — and the queries below hand out the placed values only where they
+             actually fit. Straight px nudges pushed the window 53px off the
+             left edge at 1024 and the switcher off the bottom at 800 tall. */
+          --nx: 0px; --ny: 0px; --wx: 0px; --wy: 0px; --appbasis: 640px;
           position: absolute; inset: 0;
           display: grid;
           grid-template-columns: minmax(0, 1fr);
@@ -1211,8 +1218,11 @@ export default function Page() {
           /* Every number the composer can move is read through a variable that
              falls back to what is here today, so a page with no composer on it
              renders exactly as it did before the composer existed. */
-          width: var(--app-w, min(100%, 960px)); height: 100%;
-          transform: translate(var(--app-x, 0px), var(--app-y, 0px));
+          /* Composed by hand at ?edit=1 and baked here. The width is capped
+             rather than fixed, so a laptop narrower than the one it was placed
+             on shrinks the window instead of pushing it off the gutter. */
+          width: var(--app-w, min(100%, 1198px)); height: 100%;
+          transform: translate(var(--app-x, var(--nx)), var(--app-y, var(--ny)));
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: 12px;
         }
@@ -1252,8 +1262,11 @@ export default function Page() {
           display: inline-grid; grid-template-columns: minmax(0, 1fr);
           padding-block: 0.2em; margin-block: -0.2em;
           clip-path: inset(0 -100vw);
-          font-size: var(--word-size, clamp(5.5rem, 15vw, 15rem));
-          transform: translate(var(--word-x, 0px), var(--word-y, 0px));
+          /* 308px is the placed size; the vw term only ever takes over on a
+             screen too narrow to carry it, so the composition holds on the
+             laptop it was made for and degrades rather than overflows below. */
+          font-size: var(--word-size, min(308px, 24vw));
+          transform: translate(var(--word-x, var(--wx)), var(--word-y, var(--wy)));
           line-height: 1.24; white-space: nowrap;
           /* Solid ink, faded as a LAYER. A semi-transparent colour is painted
              per glyph, and connected Arabic letters overlap at every join — so
@@ -1285,7 +1298,7 @@ export default function Page() {
           position: relative;
           /* Basis, not height. The switcher is its sibling now, and a window
              at height:100% leaves it nothing to stand on. */
-          width: 100%; flex: 0 1 var(--app-h, 640px); min-height: 0;
+          width: 100%; flex: 0 1 var(--app-h, var(--appbasis)); min-height: 0;
           border-radius: 26px;
           /* No backdrop-filter. The window used to blur what was behind it,
              which meant every frame of the deck move re-ran a full-surface
@@ -1642,12 +1655,27 @@ export default function Page() {
            the window sits under it, smaller, because at this width a window
            sized to the screen is the whole screen and the word has nowhere to
            be. Same order either way — word first, window second. */
+        /* Sideways first: the window is capped at 1198px, so below about
+           1200 the gutter is all the slack there is and shifting it left puts
+           it through the edge. */
+        @media (min-width: 1200px) { .zn-build { --nx: -109px; --wx: -7px; } }
+        /* Then downward, which needs height rather than width: on a short
+           laptop the taller window plus the drop put the switcher off the
+           bottom of the screen. */
+        @media (min-width: 1200px) and (min-height: 840px) {
+          .zn-build { --ny: 69px; --wy: 72px; --appbasis: 719px; }
+        }
+
         @media (max-width: 1023px) {
           /* The window drops well below the word rather than sitting on it.
              At this width the two are fighting over the same strip of screen,
              and the word — which is the point of the section — was losing. The
              padding buys it that strip outright. */
-          .zn-build { padding-top: calc(var(--inset) + 6rem); }
+          /* Its own placement — a number that suits a laptop is wrong here. */
+          .zn-build { padding-top: calc(var(--inset) + 6rem); --nx: -11px; --ny: 32px; }
+          /* Placed separately at ?edit=1 — a number that suits a laptop is
+             wrong here, and the wide nudges have to be undone rather than
+             inherited. */
           .zn-stagebox { width: 100%; justify-content: flex-end; }
           .zn-app { flex-basis: var(--app-h, 520px); }
           /* Narrower screens have no room beside the window, so the word runs

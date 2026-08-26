@@ -485,6 +485,30 @@ Three things it had to get right, and one it got wrong first:
 - **Layouts are kept per width class**, wide and narrow, because the two are
   laid out differently and a number that suits a laptop is wrong on a phone.
 
+## The placement
+
+Composed by hand at `?edit=1` and baked into `page.tsx`. The window is 1198px
+wide and 719px tall, shifted 109px left and 69px down; the word is 308px,
+nudged 7px left and 72px down. On a phone the window drops 32px and moves 11px
+left, and everything else is left alone.
+
+**The nudges are handed out, never simply applied.** They live as five
+variables on `.zn-build` (`--nx --ny --wx --wy --appbasis`) whose defaults are
+the SAFE ones — dead centre, nothing pushed — and the media queries give out
+the placed values only where there is room:
+
+- **Sideways above 1200px.** The window is capped at 1198px wide, so below
+  about 1200 the gutter is all the slack there is; applied flat, the shift put
+  the window 53px through the left edge at 1024.
+- **Downward above 1200 × 840.** This one needs HEIGHT, not width: on an
+  800px-tall laptop the taller window plus the drop put the switcher off the
+  bottom of the screen.
+
+Verified at 1728×1080, 1440×900, 1280×800, 1024×768 and 390×844: nothing off
+any edge, nothing clipped. A composition made on one screen has to be told
+which screens it is allowed on, or it is only correct on the one it was made
+on.
+
 ## Where this stands, and what is next
 
 The hero and section two are built, at `app/demo/home/`, live at
