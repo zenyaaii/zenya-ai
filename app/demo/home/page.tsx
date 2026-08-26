@@ -1672,7 +1672,10 @@ export default function Page() {
              and the word — which is the point of the section — was losing. The
              padding buys it that strip outright. */
           /* Its own placement — a number that suits a laptop is wrong here. */
-          .zn-build { padding-top: calc(var(--inset) + 6rem); --nx: -11px; --ny: 32px; }
+          .zn-build {
+            padding-top: calc(var(--inset) + 6rem);
+            --nx: -11px; --ny: 32px; --wx: -2px; --wy: -9px;
+          }
           /* Placed separately at ?edit=1 — a number that suits a laptop is
              wrong here, and the wide nudges have to be undone rather than
              inherited. */

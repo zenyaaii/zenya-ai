@@ -490,7 +490,7 @@ Three things it had to get right, and one it got wrong first:
 Composed by hand at `?edit=1` and baked into `page.tsx`. The window is 1198px
 wide and 719px tall, shifted 109px left and 69px down; the word is 308px,
 nudged 7px left and 72px down. On a phone the window drops 32px and moves 11px
-left, and everything else is left alone.
+left and the word moves 2px left and 9px up; both keep their own size.
 
 **The nudges are handed out, never simply applied.** They live as five
 variables on `.zn-build` (`--nx --ny --wx --wy --appbasis`) whose defaults are
