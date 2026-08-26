@@ -374,6 +374,36 @@ always.
 **The window is a flex BASIS, not a height.** The switcher is its sibling; a
 window at `height: 100%` leaves it nothing to stand on.
 
+**Nothing in the window is ever cut — the content is measured and scaled.** The
+cards are wildly different sizes: four fields, or a week of opening hours, or
+eight template tiles. A window sized for the largest is mostly empty for the
+rest; a window sized for the rest slices the largest in half, and on a phone it
+sliced both — the picker lost the row the cursor was choosing from, and the
+hours card lost four days off the bottom.
+
+So `.zn-fit` does to the card what `--fit` does to the hero's three words: lay
+it out at its natural size, read that size, write the ratio that makes it fit.
+Three rules make it work:
+
+- **It only ever scales DOWN.** A four-field card is not blown up to fill the
+  frame; it sits at its own size, which is what it should do.
+- **The child must size to its CONTENT, never stretch.** A card stretched to
+  the window measures as the window and the ratio always comes back 1. The
+  centring belongs to `.zn-fit` (`align-content: center`), not to the card.
+- **Measure against the stage's CONTENT box.** `clientHeight` counts the
+  padding, and measuring against that lets the card bleed into it and clip at
+  the window's edge.
+
+The observer watches the card's LAYOUT box, which a transform does not touch,
+so scaling cannot feed back into the measurement. That is what keeps it from
+being a loop. The cursor needs no adjustment: it reads targets by bounding
+rect, which already carries the scale.
+
+**One finger, two meanings.** A swipe that travelled further DOWN than across
+belongs to the deck and moves a screen; one that travelled further ACROSS
+belongs to the window and changes template. Both sides test the same way, so
+neither has to know about the other.
+
 **The rule for adding a template: read its wizard and follow it.** The cards
 are its cards, the order is its order, the labels are its labels. Services
 puts the style preset LAST rather than second, and the animation puts it last

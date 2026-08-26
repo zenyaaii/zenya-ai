@@ -71,6 +71,8 @@ export default function BuildSection({
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
   const analyzerRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const fitRef = useRef<HTMLDivElement>(null)
 
   /* Which run we are on. Left alone, the templates take turns; the switcher
      lets a reader jump straight to the one they want to watch instead of
@@ -287,6 +289,85 @@ export default function BuildSection({
      fields rather than the last one's. */
   useEffect(() => { setForm(tpl.empty) }, [tpl])
 
+  /* Nothing in this window is ever cut. The cards are wildly different sizes —
+     four fields, or a week of opening hours, or eight template tiles — and a
+     window sized for the largest is mostly empty for the rest, while a window
+     sized for the rest slices the largest in half. So the content is MEASURED
+     and scaled to the room it actually has, exactly the way the hero sizes its
+     three words: lay it out at its natural size, read that size, and write the
+     ratio that makes it fit.
+
+     It only ever scales DOWN. A four-field card is not blown up to fill the
+     frame; it just sits there at its own size, which is what it should do.
+
+     The observer watches the card's LAYOUT box, which a transform does not
+     touch — so scaling it cannot feed back into the measurement. That is what
+     keeps this from being a loop. */
+  /* Swipe sideways on the window to change template. The deck owns the
+     VERTICAL swipe — that is how a reader gets between the two screens — so
+     this only claims a gesture that travelled further across than down, and
+     the deck stands down on the same test. One finger, two meanings, decided
+     by which way it actually went. */
+  useEffect(() => {
+    const box = frameRef.current
+    if (!box) return
+    let x0 = 0, y0 = 0
+    const start = (e: TouchEvent) => {
+      const t = e.touches[0]
+      if (!t) return
+      x0 = t.clientX; y0 = t.clientY
+    }
+    const end = (e: TouchEvent) => {
+      const t = e.changedTouches[0]
+      if (!t) return
+      const dx = t.clientX - x0
+      const dy = t.clientY - y0
+      if (Math.abs(dx) < 46 || Math.abs(dx) <= Math.abs(dy)) return
+      /* RTL: a swipe that travels LEFT goes forward through the list. */
+      const dir = dx < 0 ? 1 : -1
+      const here = TEMPLATE_RUNS.findIndex((t2) => t2.id === tpl.id)
+      const n = TEMPLATE_RUNS.length
+      choose(TEMPLATE_RUNS[(here + dir + n) % n].id)
+    }
+    box.addEventListener("touchstart", start, { passive: true })
+    box.addEventListener("touchend", end, { passive: true })
+    return () => {
+      box.removeEventListener("touchstart", start)
+      box.removeEventListener("touchend", end)
+    }
+  }, [tpl])
+
+  useEffect(() => {
+    const stage = stageRef.current
+    const fit = fitRef.current
+    if (!stage || !fit) return
+    const inner = fit.firstElementChild as HTMLElement | null
+    if (!inner) return
+
+    const measure = () => {
+      fit.style.setProperty("--fit", "1")
+      const h = inner.offsetHeight
+      const w = inner.offsetWidth
+      /* The stage's CONTENT box, not its padding box: clientHeight counts the
+         padding, and measuring against that lets the card bleed a few pixels
+         into it and get clipped at the window's edge. */
+      const cs = getComputedStyle(stage)
+      const availH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+      const availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
+      if (!h || !w || availH <= 0 || availW <= 0) return
+      const k = Math.min(1, availH / h, availW / w)
+      /* Rounded, so a stray sub-pixel does not rewrite the transform on every
+         keystroke and force a fresh composite for nothing. */
+      fit.style.setProperty("--fit", String(Math.floor(k * 1000) / 1000))
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(inner)
+    ro.observe(stage)
+    return () => ro.disconnect()
+  }, [tpl, view, card, finish])
+
   const T = tpl.cards[Math.min(card, tpl.cards.length - 1)]
 
   return (
@@ -318,7 +399,8 @@ export default function BuildSection({
           <b>{view === "picker" ? "/themes" : tpl.path}</b>
         </div>
 
-        <div className="zn-stage">
+        <div className="zn-stage" ref={stageRef}>
+          <div className="zn-fit" ref={fitRef}>
           {view === "picker" ? (
             <div className="zn-picker">
               <h2>اختر قالبًا.</h2>
@@ -367,6 +449,7 @@ export default function BuildSection({
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {/* The wizard's closing bar, verbatim. It arrives once the last card

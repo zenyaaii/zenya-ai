@@ -633,7 +633,11 @@ export default function Page() {
        chasing the finger. Moving is prevented throughout, or iOS answers the
        drag with its own rubber band over a page that cannot scroll. */
     let startY: number | null = null
-    const onStart = (e: TouchEvent) => { startY = e.touches[0]?.clientY ?? null }
+    let startX = 0
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0]?.clientY ?? null
+      startX = e.touches[0]?.clientX ?? 0
+    }
     const onMove = (e: TouchEvent) => {
       const el = e.target as HTMLElement | null
       if (el?.closest?.(".zn-list")) return
@@ -642,8 +646,15 @@ export default function Page() {
     const onEnd = (e: TouchEvent) => {
       if (startY == null) return
       const endY = e.changedTouches[0]?.clientY ?? startY
+      const endX = e.changedTouches[0]?.clientX ?? startX
       const travel = startY - endY
+      const across = endX - startX
       startY = null
+      /* A gesture that went further across than down belongs to the build
+         window, which uses it to change template. One finger, two meanings,
+         decided by which way it actually travelled — and both sides agree on
+         the same test. */
+      if (Math.abs(across) > Math.abs(travel)) return
       if (Math.abs(travel) < DECK_SWIPE) return
       go(travel > 0 ? 1 : -1)
     }
@@ -1282,11 +1293,22 @@ export default function Page() {
           font-size: 11px; line-height: 1; color: ${STONE};
         }
         .zn-path b { font-weight: 500; color: ${OBSIDIAN}; }
-        .zn-stage { position: relative; min-height: 0; padding: 6px 22px 22px; }
+        .zn-stage { position: relative; min-height: 0; padding: 6px 22px 22px; display: grid; }
+        /* The measured fit. Content is laid out at its natural size, read, and
+           scaled by the ratio that makes it sit inside the window — so nothing
+           is ever cut, whatever the card holds or how small the screen is.
+           align-content: center rather than a stretched child, because a child
+           stretched to the window measures as the window and the ratio would
+           always come back 1. */
+        .zn-fit {
+          min-height: 0; display: grid; align-content: center; justify-items: stretch;
+          transform: scale(var(--fit, 1));
+          transform-origin: center center;
+        }
 
         /* The eight. This is also what the section rests as: if nothing ever
            runs, a reader still sees every template the product offers. */
-        .zn-picker { height: 100%; display: flex; flex-direction: column; justify-content: center; }
+        .zn-picker { display: flex; flex-direction: column; }
         .zn-picker h2 { font-size: 15px; font-weight: 500; color: ${OBSIDIAN}; margin: 0 2px 14px; }
         /* Rows sized to their contents, not stretched to fill the window: the
            cover sets the height and the two lines under it follow. */
@@ -1342,7 +1364,7 @@ export default function Page() {
            short ones stranded above a half-empty frame. Centred, every card
            sits in the same place and the window reads as roomy rather than
            unfinished. */
-        .zn-card { height: 100%; display: flex; flex-direction: column; justify-content: center;
+        .zn-card { display: flex; flex-direction: column;
                    animation: zn-card-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
         @keyframes zn-card-in {
           from { opacity: 0; transform: translateY(16px); }
@@ -1351,7 +1373,7 @@ export default function Page() {
         .zn-head { padding: 2px 2px 15px; }
         .zn-head h2 { font-size: 16px; font-weight: 500; color: ${OBSIDIAN}; }
         .zn-head p { margin-top: 4px; font-size: 11.5px; line-height: 1.6; color: ${STONE}; }
-        .zn-body { flex: 0 1 auto; min-height: 0; }
+        .zn-body { flex: 0 0 auto; }
 
         .zn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
         .zn-f { display: block; }
@@ -1612,7 +1634,7 @@ export default function Page() {
              At this width the two are fighting over the same strip of screen,
              and the word — which is the point of the section — was losing. The
              padding buys it that strip outright. */
-          .zn-build { padding-top: calc(var(--inset) + 8.5rem); }
+          .zn-build { padding-top: calc(var(--inset) + 6rem); }
           .zn-stagebox { width: 100%; justify-content: flex-end; }
           .zn-app { flex-basis: 520px; }
           /* Narrower screens have no room beside the window, so the word runs
@@ -1631,7 +1653,10 @@ export default function Page() {
           .zn-row, .zn-hours, .zn-menu { grid-template-columns: minmax(0, 1fr); }
           .zn-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .zn-shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .zn-app { flex-basis: 452px; }
+          /* Tall enough to reach up under the word and just touch it. Nothing
+             can be cut any more — the fit pass scales whatever is inside to
+             the room it has — so the window is free to take the space. */
+          .zn-app { flex-basis: 660px; }
           .zn-path { padding: 12px 16px 7px; }
           .zn-stage { padding: 4px 16px 16px; }
           /* The cards have to fit a phone-sized window, so the furniture that
