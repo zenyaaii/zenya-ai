@@ -528,7 +528,59 @@ Laid out RTL, every sentence put its full stop on the wrong end.
 **The picker tiles carry their real covers**, at full colour — settled, and the
 two missing screenshots have been shot. See the section above.
 
-Next are the other two words — ادر and انشر — which are not built.
+## Next: section three, ادر
+
+The second of the three words: the manage step. Not built. This is the brief.
+
+**It is the third panel of the same deck.** One more `.zn-panel` in the track,
+one more gesture down. Everything section two needed already exists and is
+generic: the deck takes another panel, the fit pass scales whatever is put in
+the window, the cursor engine drives anything with a `data-t` on it, and the
+composer will place it. Do not build a second set of any of that.
+
+**Follow the product, the way ابن does.** ابن is worth watching because it is
+the real wizard, in its own order, with its own labels — a demo that invents a
+screen the product does not have is worth nothing. ادر has real surfaces and
+they are all built:
+
+- `app/(app)/dashboard/bookings` — the reservations inbox. `site_bookings`,
+  `POST /api/bookings`. A booking ARRIVING is the strongest single beat
+  available: the owner's site takes a reservation and it lands in their inbox
+  while they watch.
+- `components/editor/ThemeEditor.tsx` and its panel set — click-to-edit on a
+  live preview, undo/redo, autosave, inline AI rewrite (`AiRewrite.tsx`). The
+  cursor changing a headline on the real site is the other strong beat.
+- `app/(app)/dashboard/analytics` — the unified analytics, eight tabs.
+- `app/(app)/dashboard/seo` — live SERP preview.
+- `app/(app)/dashboard/domains`, `billing`, `settings`.
+
+**Pick ONE centrepiece and build the rest around it**, the way the Menu card
+carries ابن. The booking arriving and the editor rewrite are the two
+candidates; the editor is the more honest match for the word ادر, and the
+booking is the more surprising. Ask before choosing.
+
+**What ابن learned, which ادر should not relearn:**
+
+- Read the surface's own labels and order. Do not paraphrase them.
+- Never invent a number to fill a field. Ratings, counts, revenue, visitor
+  totals — analytics is full of boxes that want a figure, and putting one in is
+  fabricating data about a business that does not exist. Show the empty state
+  or leave the field alone. This is the rule most at risk on a dashboard.
+- One card, one animation, in sequence. The cursor never disappears between
+  them.
+- Every entrance rests in its finished state.
+- Measure on localhost after every change; never trust the reasoning.
+
+**Two things worth doing before ادر**, both of which make it land harder:
+
+1. **A scroll cue on the hero.** There is no affordance anywhere that a second
+   screen exists — the body is `overflow: hidden`, the wheel is hijacked, there
+   is no scrollbar. Every screen added after this one inherits that problem.
+2. **The finished site as the payoff for ابن.** The section shows the input for
+   seventy seconds and never the output; `/demo/restaurant` and
+   `/demo/services` are live and need no login.
+
+After ادر, انشر — publishing, the subdomain, the live site.
 
 ## Working notes
 
