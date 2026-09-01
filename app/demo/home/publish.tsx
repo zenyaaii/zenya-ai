@@ -74,6 +74,12 @@ const NAME = "darnoor"
 const SUB = NAME + ".zenyaai.co"
 const BOUGHT = NAME + ".site"
 
+/* The one photograph either surface uses. room-1 is the dining room, NOT the
+   template's own hero: that file is Unsplash stock with wine glasses across
+   the foreground and bare arms, and is wrong for this brand. An interior also
+   says what a restaurant is in a way a plate does not. */
+const SHOT = "/demo/restaurant/room-1.webp"
+
 /* ═══════════════════════════════════════════════════════════════════════
    النطاق — buying the address
    app/(app)/dashboard/domains/page.tsx
@@ -315,12 +321,6 @@ export const domains: SurfaceDef = {
    one set of colours, across three screens. */
 const ONYX = RESTAURANT_PRESETS.find((p) => p.id === "onyx")!.colors
 
-/* The hero photograph is room-1, NOT the template's own hero: that file is
-   Unsplash stock with wine glasses across the foreground and bare arms, and
-   is wrong for this brand. An interior also says what a restaurant is in a
-   way a plate does not. */
-const SHOT = "/demo/restaurant/room-1.webp"
-
 export const publish: SurfaceDef = {
   id: "publish",
   label: "النشر",
@@ -340,8 +340,15 @@ export const publish: SurfaceDef = {
 
         <div className="zn4-site" data-t="card">
           <div className="cover">
+            {/* NOT the picker's own screenshot. That file is a picture of the
+                restaurant template's live demo, whose hero is the Unsplash
+                stock the style doc rules out twice over — wine glasses across
+                the foreground and bare arms — so putting it on the card would
+                put it back on this page by the side door. The dining room is
+                the better cover for a restaurant anyway: an interior says
+                what the place is and a plate does not. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/theme-previews/thumb/restaurant.webp" alt="" />
+            <img src={SHOT} alt="" />
             <span className="stripe" />
             <span className="status" data-live={f.live} data-t="status">
               {f.live ? <><i className="dot" /> مباشر</> : "مسودّة"}
