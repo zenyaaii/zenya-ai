@@ -248,7 +248,7 @@ function StatTile({
   icon: typeof Folder
 }) {
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="flex items-start justify-between">
         <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
         <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
@@ -335,7 +335,7 @@ function PlanCard({
     const renews = hostingEnd ? new Date(hostingEnd) : null
     const formatted = renews ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
           <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
           الاستضافة نشطة
@@ -347,7 +347,7 @@ function PlanCard({
   }
   if (plan === 'pro_onetime') {
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
           برو مدى الحياة
@@ -362,7 +362,7 @@ function PlanCard({
   }
   if (plan === 'starter') {
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
           Starter نشط
@@ -379,7 +379,7 @@ function PlanCard({
     const renews = hostingEnd ? new Date(hostingEnd) : null
     const formatted = renews ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
           <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
           Pro نشط · استضافة مشمولة
@@ -391,7 +391,7 @@ function PlanCard({
   }
   if (plan === 'admin') {
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#9b6f00]">
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
           مشرف
@@ -404,7 +404,7 @@ function PlanCard({
   if (plan === 'entry') {
     const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
     return (
-      <div className="rounded-2xl border border-token bg-white p-5">
+      <div className="rounded-2xl zy-card p-5">
         <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#b8860b' }}>
           <Sparkles className="h-3 w-3" strokeWidth={2.5} />
           خطة Entry
@@ -425,7 +425,7 @@ function PlanCard({
   // free
   const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الباقة المجانية</div>
       <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
         {trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'انتهت التجربة'}
@@ -444,7 +444,7 @@ function PlanCard({
 function RecentRow({ theme }: { theme: Theme }) {
   const live = theme.is_published && theme.slug
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-token bg-white px-4 py-3">
+    <div className="flex items-center justify-between rounded-2xl zy-card px-4 py-3">
       <div className="flex items-center gap-3">
         <div
           className="flex h-9 w-9 items-center justify-center rounded-lg"
@@ -469,7 +469,7 @@ function RecentRow({ theme }: { theme: Theme }) {
         href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+        className="inline-flex items-center gap-1 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
       >
         فتح
         <ExternalLink className="h-3 w-3 opacity-70" strokeWidth={2.25} />
@@ -482,7 +482,7 @@ function RecentSkeleton() {
   return (
     <div className="space-y-2">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex animate-pulse items-center gap-3 rounded-2xl border border-token bg-white px-4 py-3">
+        <div key={i} className="flex animate-pulse items-center gap-3 rounded-2xl zy-card px-4 py-3">
           <div className="h-9 w-9 rounded-lg bg-[rgba(28,28,28,0.06)]" />
           <div className="flex-1 space-y-2">
             <div className="h-3 w-2/3 rounded bg-[rgba(28,28,28,0.06)]" />
@@ -497,7 +497,7 @@ function RecentSkeleton() {
 function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boolean }) {
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-dashed border-token bg-white p-8 text-center"
+      className="relative overflow-hidden rounded-2xl zy-card-dashed p-8 text-center"
       style={{ background: 'radial-gradient(80% 60% at 50% 0%, rgba(94,106,210,0.08), transparent 70%)' }}
     >
       <div
@@ -529,7 +529,7 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
 
 function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan }) {
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">إجراءات سريعة</div>
       <div className="mt-3 space-y-2">
         <Link href="/theme/new" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
@@ -573,7 +573,7 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   const views7 = series.slice(-7).reduce((s, p) => s + p.views, 0)
   const maxV = Math.max(1, ...series.map((s) => s.views))
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="flex items-baseline justify-between">
         <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">مشاهدات · آخر 30 يومًا</div>
         <Link href="/dashboard/analytics" className="text-[11.5px] font-medium text-primary hover:underline">
@@ -616,7 +616,7 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   const top = analytics?.per_site.slice(0, 3) ?? []
   const liveDomains = analytics?.site_counts.live_domains ?? 0
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="flex items-baseline justify-between">
         <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">أفضل المواقع أداءً</div>
         <span className="text-[11.5px] text-muted">{liveDomains > 0 ? `${liveDomains} نطاق مخصّص` : 'آخر 30 يومًا'}</span>

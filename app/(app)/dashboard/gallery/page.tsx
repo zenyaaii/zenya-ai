@@ -119,7 +119,7 @@ export default function GalleryPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث في الصور"
-              className="w-56 rounded-full border border-token bg-white py-1.5 ps-7 pe-3 text-[12.5px] outline-none focus:border-primary"
+              className="w-56 rounded-full zy-card py-1.5 ps-7 pe-3 text-[12.5px] outline-none focus:border-primary"
             />
           </div>
           <button
@@ -167,7 +167,7 @@ export default function GalleryPage() {
           {filtered.map((img) => (
             <div
               key={img.id}
-              className="group relative aspect-square overflow-hidden rounded-xl border border-token bg-white shadow-sm"
+              className="group relative aspect-square overflow-hidden rounded-xl zy-card shadow-sm"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -216,14 +216,14 @@ export default function GalleryPage() {
 function Empty({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: boolean }) {
   if (hasQuery) {
     return (
-      <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
+      <div className="rounded-2xl zy-card-dashed p-12 text-center">
         <ImageIcon className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
         <p className="mt-3 text-[13px] text-muted">لا صور تطابق بحثك.</p>
       </div>
     )
   }
   return (
-    <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
+    <div className="rounded-2xl zy-card-dashed p-12 text-center">
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
         <ImageIcon className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>

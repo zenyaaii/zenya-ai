@@ -35,7 +35,7 @@ export function Section({
 
 export function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={'rounded-2xl border border-token bg-white ' + className}>{children}</div>
+    <div className={'rounded-2xl zy-card ' + className}>{children}</div>
   )
 }
 
@@ -111,9 +111,11 @@ export function Tile({
       disabled={!interactive}
       aria-pressed={interactive ? !!active : undefined}
       className={
-        'group w-full rounded-2xl border bg-white p-4 text-start transition sm:p-5 ' +
-        (active ? 'border-primary shadow-[0_0_0_1px_var(--primary)] ' : 'border-token ') +
-        (interactive ? 'cursor-pointer hover:border-primary/40 ' : 'cursor-default ')
+        // The selected and hover states move from the border to the ring,
+        // because the card no longer has a border to colour.
+        'group w-full rounded-2xl zy-card p-4 text-start transition sm:p-5 ' +
+        (active ? 'shadow-[0_0_0_1px_var(--primary)] ' : '') +
+        (interactive ? 'cursor-pointer hover:shadow-[0_0_0_1px_var(--border-glow)] ' : 'cursor-default ')
       }
     >
       <div className="flex items-start justify-between gap-2">
@@ -272,7 +274,7 @@ export function EmptyState({
   cta?: { href: string; label: string }
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-token bg-white p-8 text-center sm:p-10">
+    <div className="rounded-2xl zy-card-dashed p-8 text-center sm:p-10">
       <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(94,106,210,0.10)]">
         <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
       </div>
@@ -293,7 +295,7 @@ export function EmptyState({
 
 export function SkeletonTile() {
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="h-2.5 w-20 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
       <div className="mt-3 h-6 w-24 animate-pulse rounded bg-[rgba(28,28,28,0.06)]" />
       <div className="mt-2 h-2.5 w-28 animate-pulse rounded bg-[rgba(28,28,28,0.04)]" />
@@ -302,7 +304,7 @@ export function SkeletonTile() {
 }
 
 export function SkeletonBlock({ height = 'h-64' }: { height?: string }) {
-  return <div className={`animate-pulse rounded-2xl border border-token bg-white ${height}`} />
+  return <div className={`animate-pulse rounded-2xl zy-card ${height}`} />
 }
 
 /** A short line that says where a number came from, so nothing looks magic. */

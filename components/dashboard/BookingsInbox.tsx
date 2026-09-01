@@ -221,7 +221,7 @@ function AccessBanner({
 
   // locked — never started
   return (
-    <div className="mb-6 rounded-2xl border border-token bg-white p-6 text-center sm:p-8">
+    <div className="mb-6 rounded-2xl zy-card p-6 text-center sm:p-8">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(94,106,210,0.10)]">
         <Lock className="h-5 w-5 text-primary" />
       </div>
@@ -259,7 +259,7 @@ function BookingCard({
       created.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <li className="rounded-xl border border-token bg-white p-4 sm:p-5">
+    <li className="rounded-xl zy-card p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -323,7 +323,7 @@ function BookingCard({
           value={b.status}
           disabled={saving}
           onChange={(e) => onStatus(e.target.value as StatusKey)}
-          className="rounded-md border border-token bg-white px-2 py-1 text-[12.5px] text-foreground outline-none focus:border-primary disabled:opacity-60"
+          className="rounded-md zy-card px-2 py-1 text-[12.5px] text-foreground outline-none focus:border-primary disabled:opacity-60"
         >
           {STATUS_ORDER.map((s) => (
             <option key={s} value={s}>{STATUS_AR[s]}</option>
@@ -336,7 +336,7 @@ function BookingCard({
 
 function EmptyState({ hasAny, hasSites }: { hasAny: boolean; hasSites: boolean }) {
   return (
-    <div className="rounded-2xl border border-dashed border-token bg-white px-6 py-14 text-center">
+    <div className="rounded-2xl zy-card-dashed px-6 py-14 text-center">
       <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(28,28,28,0.04)]">
         <CalendarCheck className="h-5 w-5 text-muted" />
       </div>

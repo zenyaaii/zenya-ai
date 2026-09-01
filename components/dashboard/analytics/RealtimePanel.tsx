@@ -62,7 +62,7 @@ export default function RealtimePanel({
   }, [load])
 
   if (loading && !data) {
-    return <div className="mt-8 h-64 animate-pulse rounded-2xl border border-token bg-white" />
+    return <div className="mt-8 h-64 animate-pulse rounded-2xl zy-card" />
   }
   if (error && !data) {
     return (

@@ -73,7 +73,7 @@ export default function BillingPage() {
       {loading ? (
         <div className="space-y-4">
           {[0, 1].map((i) => (
-            <div key={i} className="animate-pulse rounded-2xl border border-token bg-white p-6">
+            <div key={i} className="animate-pulse rounded-2xl zy-card p-6">
               <div className="h-4 w-1/3 rounded bg-[rgba(28,28,28,0.06)]" />
               <div className="mt-3 h-3 w-1/2 rounded bg-[rgba(28,28,28,0.04)]" />
             </div>
@@ -82,7 +82,7 @@ export default function BillingPage() {
       ) : (
         <>
           {/* Current plan card */}
-          <section className="rounded-2xl border border-token bg-white p-6">
+          <section className="rounded-2xl zy-card p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 {plan === 'pro_hosting' && <PlanHeader icon="✓" tint="#15803d" label="الاستضافة نشطة (خطة سابقة)" />}
@@ -119,7 +119,7 @@ export default function BillingPage() {
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
                     <Link href="/pricing?upgrade=pro"
-                          className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                          className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                       اشترك في Pro · 24.99$ شهريًا
                     </Link>
                   </>
@@ -139,7 +139,7 @@ export default function BillingPage() {
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
                     <button onClick={openPortal} disabled={portalBusy}
-                            className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                            className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                       <CreditCard className="h-3 w-3" />
                       {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
                     </button>
@@ -147,7 +147,7 @@ export default function BillingPage() {
                 )}
                 {(plan === 'pro_hosting' || plan === 'pro') && (
                   <button onClick={openPortal} disabled={portalBusy}
-                          className="inline-flex items-center justify-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                          className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
                     <CreditCard className="h-3 w-3" />
                     {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
                   </button>
@@ -163,7 +163,7 @@ export default function BillingPage() {
               third-party rather than part of Zenya. */}
 
           {/* What's included */}
-          <section className="mt-4 rounded-2xl border border-token bg-white p-6">
+          <section className="mt-4 rounded-2xl zy-card p-6">
             <h2 className="text-[15px] font-semibold tracking-tight text-foreground">ما هو مشمول</h2>
             <ul className="mt-3 space-y-2 text-[13px]">
               <Included on={true}                  label="مجاني · موقعان بالذكاء الاصطناعي" />

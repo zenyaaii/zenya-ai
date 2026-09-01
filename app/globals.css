@@ -59,6 +59,15 @@
     --shadow-md:      0 4px 8px rgba(28,28,28,0.06), 0 0 0 1px #e5e2d9;
     --shadow-lg:      0 8px 28px rgba(28,28,28,0.08), 0 0 0 1px #e5e2d9;
     --shadow-card:    0 2px 4px rgba(28,28,28,0.04), 0 0 0 1px #e5e2d9;
+    /* The card without a frame. #e5e2d9 is a visible line, and a grid of
+       boxes each wearing one reads as a wireframe rather than as content;
+       the card is already a fill (white on the warm #f7f4ed page), so the
+       value difference carries it and the line only has to hint. Roughly a
+       third of the old border's weight, plus a soft drop so the edge stays
+       readable where a card sits on white. */
+    --shadow-card-soft: 0 1px 2px rgba(28,28,28,0.04),
+                        0 4px 12px rgba(28,28,28,0.03),
+                        0 0 0 1px rgba(28,28,28,0.045);
     --shadow-glow:    0 0 0 3px rgba(94,106,210,0.16), 0 4px 20px rgba(94,106,210,0.18);
     --shadow-button:  rgba(255,255,255,0.20) 0px 0.5px 0px 0px inset,
                       rgba(0,0,0,0.18) 0px 0px 0px 0.5px inset,
@@ -196,6 +205,26 @@
 
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+
+  /* ── The dashboard card ──────────────────────────────────────────────
+     One definition, used by every card container in the dashboard, so the
+     treatment cannot drift between analytics, bookings, SEO and the rest.
+     Replaces the "rounded-* border border-token bg-white" trio; the radius
+     stays on the element, because the scale varies by surface.
+
+     Dividers and input borders deliberately keep border-token. A hairline
+     that separates two things is doing work; a hairline drawn around a card
+     that is already a different colour from the page is not. */
+  .zy-card {
+    background: var(--card);
+    box-shadow: var(--shadow-card-soft);
+  }
+  /* The empty-state variant keeps its dashed edge, because dashed is what
+     says "nothing here yet" rather than decoration. Lightened to match. */
+  .zy-card-dashed {
+    background: var(--card);
+    border: 1px dashed rgba(28,28,28,0.14);
   }
 
   /* ── Soft shadow utilities ── */

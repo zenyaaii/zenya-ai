@@ -212,7 +212,7 @@ export default function SitesPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/themes"
-            className="hidden items-center gap-1.5 rounded-full border border-token bg-white px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full zy-card px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
           >
             تصفّح القوالب
           </Link>
@@ -235,11 +235,11 @@ export default function SitesPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="ابحث في المواقع"
-              className="w-full rounded-full border border-token bg-white py-1.5 ps-9 pe-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+              className="w-full rounded-full zy-card py-1.5 ps-9 pe-3 text-[13px] text-foreground outline-none transition focus:border-primary"
             />
           </div>
 
-          <div className="inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
+          <div className="inline-flex items-center gap-1 rounded-full zy-card p-1">
             <FilterPill v="all"     cur={filter} onClick={setFilter}>الكل <Pill n={counts.all} /></FilterPill>
             <FilterPill v="live"    cur={filter} onClick={setFilter}>مباشر <Pill n={counts.live} /></FilterPill>
             <FilterPill v="drafts"  cur={filter} onClick={setFilter}>مسودّات <Pill n={counts.drafts} /></FilterPill>
@@ -248,7 +248,7 @@ export default function SitesPage() {
             )}
           </div>
 
-          <div className="ms-auto inline-flex items-center gap-1 rounded-full border border-token bg-white p-1">
+          <div className="ms-auto inline-flex items-center gap-1 rounded-full zy-card p-1">
             <ViewBtn cur={view} v="grid" onClick={setView} title="عرض شبكي"><LayoutGrid className="h-3.5 w-3.5" /></ViewBtn>
             <ViewBtn cur={view} v="list" onClick={setView} title="عرض قائمة"><List className="h-3.5 w-3.5" /></ViewBtn>
           </div>
@@ -284,7 +284,7 @@ export default function SitesPage() {
             ))}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-token bg-white">
+          <div className="overflow-hidden rounded-2xl zy-card">
             {visible.map((t, i) => (
               <SiteRow
                 key={t.id}
@@ -418,7 +418,7 @@ function SitesGridSkeleton() {
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <div
           key={i}
-          className="overflow-hidden rounded-2xl border border-token bg-white"
+          className="overflow-hidden rounded-2xl zy-card"
         >
           <div className="aspect-[16/9] animate-pulse bg-[rgba(28,28,28,0.04)]" />
           <div className="space-y-2.5 p-5">
@@ -441,7 +441,7 @@ function EmptyState() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-3xl border border-dashed border-token bg-white p-12 text-center"
+      className="relative overflow-hidden rounded-3xl zy-card-dashed p-12 text-center"
     >
       <div
         aria-hidden
@@ -554,7 +554,7 @@ function SiteRow({
       <div className="flex items-center gap-1.5">
         <Link
           href={editUrlFor(theme.id, bt)}
-          className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+          className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
         >
           Edit
         </Link>
@@ -566,7 +566,7 @@ function SiteRow({
             href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+            className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
           >
             {live ? 'زيارة' : 'معاينة'}
           </a>
@@ -592,7 +592,7 @@ function SiteRow({
         {live && (
           <button
             onClick={onUnpublish}
-            className="rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5"
+            className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5"
           >
             Unpublish
           </button>

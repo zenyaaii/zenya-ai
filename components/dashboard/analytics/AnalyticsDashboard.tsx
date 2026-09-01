@@ -172,7 +172,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
           {isAdmin && (
             <Link
               href="/dashboard/admin"
-              className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+              className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
             >
               <ShieldCheck className="h-3 w-3" /> لوحة الإدارة
             </Link>
@@ -180,7 +180,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
           >
             <RefreshCw className={'h-3 w-3 ' + (refreshing ? 'animate-spin' : '')} />
             <span className="hidden sm:inline">{refreshing ? 'جارٍ التحديث…' : 'تحديث'}</span>
@@ -355,7 +355,7 @@ function ControlBar({
           value={site}
           onChange={(e) => setSite(e.target.value)}
           aria-label="اختر الموقع"
-          className="max-w-[190px] rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] text-foreground outline-none transition focus:border-primary"
+          className="max-w-[190px] rounded-md zy-card px-2.5 py-1.5 text-[12.5px] text-foreground outline-none transition focus:border-primary"
         >
           <option value="">كل المواقع ({data.sites.length})</option>
           {data.sites.map((s) => (
@@ -386,7 +386,7 @@ function ControlBar({
           onClick={() => setExportOpen((v) => !v)}
           aria-expanded={exportOpen}
           aria-haspopup="menu"
-          className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+          className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
         >
           <Download className="h-3 w-3" />
           <span className="hidden sm:inline">تصدير</span>
@@ -394,7 +394,7 @@ function ControlBar({
         {exportOpen && (
           <div
             role="menu"
-            className="absolute end-0 z-20 mt-1 w-52 overflow-hidden rounded-lg border border-token bg-white py-1 shadow-lg"
+            className="absolute end-0 z-20 mt-1 w-52 overflow-hidden rounded-lg zy-card py-1 shadow-lg"
           >
             {EXPORTS.map((x) => (
               <a

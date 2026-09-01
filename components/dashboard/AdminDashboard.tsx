@@ -77,7 +77,7 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/analytics"
-            className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
           >
             تحليلات مواقعي
             <ArrowRight className="h-3 w-3 rtl-flip" />
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
           >
             <RefreshCw className={'h-3 w-3 ' + (refreshing ? 'animate-spin' : '')} />
             {refreshing ? 'جارٍ التحديث…' : 'تحديث'}

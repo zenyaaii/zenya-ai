@@ -380,7 +380,7 @@ export default function DomainsPage() {
       </header>
 
       {hostingChecked && !hasHosting && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-white p-5">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl zy-card p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg" style={{ background: 'rgba(94,106,210,0.10)' }}>
               <Lock className="h-4 w-4 text-primary" strokeWidth={2} />
@@ -397,7 +397,7 @@ export default function DomainsPage() {
       )}
 
       {/* ── Find a domain — availability + price via Vercel registrar API ─ */}
-      <section className="mb-8 rounded-2xl border border-token bg-white p-5">
+      <section className="mb-8 rounded-2xl zy-card p-5">
         <div className="flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
           <h2 className="text-[14px] font-semibold text-foreground">ابحث عن نطاق جديد</h2>
@@ -484,7 +484,7 @@ export default function DomainsPage() {
                 <select
                   value={buyForThemeId}
                   onChange={(e) => setBuyForThemeId(e.target.value)}
-                  className="rounded-md border border-token bg-white px-2 py-1 text-[12px] text-foreground outline-none focus:border-primary"
+                  className="rounded-md zy-card px-2 py-1 text-[12px] text-foreground outline-none focus:border-primary"
                 >
                   <option value="">أقرر بعد الشراء</option>
                   {eligibleThemes.map((t) => (
@@ -607,7 +607,7 @@ export default function DomainsPage() {
                                 ? 'حد المُسجِّل — حاول بعد ~10 ثوانٍ'
                                 : 'أعد فحص هذا الامتداد'
                             }
-                            className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition hover:bg-black/5"
+                            className="inline-flex items-center gap-1 rounded-full zy-card px-2.5 py-1 text-[11.5px] font-semibold text-foreground transition hover:bg-black/5"
                           >
                             إعادة المحاولة
                           </button>
@@ -636,7 +636,7 @@ export default function DomainsPage() {
           </h2>
           <div className="space-y-2">
             {eligibleThemes.map((t) => (
-              <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-white px-5 py-4">
+              <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl zy-card px-5 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: 'rgba(21,128,61,0.10)' }}>
                     <Globe className="h-4 w-4" strokeWidth={2} style={{ color: '#15803d' }} />
@@ -655,7 +655,7 @@ export default function DomainsPage() {
                   </div>
                 </div>
                 <a href={publicSiteUrl(t.slug!)} target="_blank" rel="noreferrer"
-                   className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
+                   className="inline-flex items-center gap-1 rounded-md zy-card px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
                   فتح <ExternalLink className="h-2.5 w-2.5 opacity-70" />
                 </a>
               </div>
@@ -675,7 +675,7 @@ export default function DomainsPage() {
       {loading ? (
         <div className="space-y-2">
           {[0, 1].map((i) => (
-            <div key={i} className="flex animate-pulse items-center gap-3 rounded-2xl border border-token bg-white p-5">
+            <div key={i} className="flex animate-pulse items-center gap-3 rounded-2xl zy-card p-5">
               <div className="h-9 w-9 rounded-lg bg-[rgba(28,28,28,0.06)]" />
               <div className="flex-1 space-y-2">
                 <div className="h-3 w-1/2 rounded bg-[rgba(28,28,28,0.06)]" />
@@ -693,7 +693,7 @@ export default function DomainsPage() {
             const Icon = s.icon
             const theme = themes[d.theme_id]
             return (
-              <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-white px-5 py-4">
+              <div key={d.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl zy-card px-5 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: s.tint }}>
                     <Icon className="h-4 w-4" strokeWidth={2} style={{ color: s.fg }} />
@@ -744,19 +744,19 @@ export default function DomainsPage() {
                   })()}
                   {d.status === 'live' && (
                     <a href={`https://${d.domain}`} target="_blank" rel="noreferrer"
-                       className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
+                       className="inline-flex items-center gap-1 rounded-md zy-card px-2.5 py-1.5 text-[11.5px] font-medium text-foreground hover:bg-black/5">
                       فتح <ExternalLink className="h-2.5 w-2.5 opacity-70" />
                     </a>
                   )}
                   {d.status !== 'live' && (
                     <button onClick={() => recheck(d.id)} disabled={busyId === d.id}
-                            className="inline-flex items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
+                            className="inline-flex items-center gap-1 rounded-md zy-card px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
                       <RefreshCw className={'h-3 w-3 ' + (busyId === d.id ? 'animate-spin' : '')} />
                       إعادة فحص
                     </button>
                   )}
                   <button onClick={() => remove(d.id, d.domain)} disabled={busyId === d.id}
-                          className="rounded-md border border-token bg-white px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
+                          className="rounded-md zy-card px-2.5 py-1.5 text-[11.5px] font-medium text-muted hover:bg-black/5">
                     إزالة
                   </button>
                 </div>
@@ -790,7 +790,7 @@ function friendlyError(j: any): string {
 
 function EmptyState({ hasHosting, hasEligible, onAdd }: { hasHosting: boolean; hasEligible: boolean; onAdd: () => void }) {
   return (
-    <div className="rounded-2xl border border-dashed border-token bg-white p-12 text-center">
+    <div className="rounded-2xl zy-card-dashed p-12 text-center">
       <Globe className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
       <h3 className="mt-4 text-[16px] font-semibold text-foreground">لا نطاقات مربوطة بعد</h3>
       {hasHosting && hasEligible ? (

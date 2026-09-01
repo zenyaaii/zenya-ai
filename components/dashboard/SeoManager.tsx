@@ -206,7 +206,7 @@ function SiteEditor({
     <div className="grid gap-5 lg:gap-6 lg:grid-cols-[1fr_minmax(360px,420px)]">
       {/* ── editor column ── (below the live preview on phone/iPad, beside it on desktop) */}
       <div className="order-2 space-y-5 lg:order-1">
-        <div className="rounded-2xl border border-token bg-white p-5">
+        <div className="rounded-2xl zy-card p-5">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" strokeWidth={2} />
             <h2 className="text-[15px] font-semibold tracking-tight text-foreground">بيانات البحث</h2>
@@ -372,7 +372,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full resize-none rounded-lg border border-token bg-white px-3 py-2 text-[13px] leading-[1.6] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
+          className="w-full resize-none rounded-lg zy-card px-3 py-2 text-[13px] leading-[1.6] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
         />
       ) : (
         <input
@@ -382,7 +382,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={
-            'w-full rounded-lg border border-token bg-white px-3 py-2 text-[13px] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)] ' +
+            'w-full rounded-lg zy-card px-3 py-2 text-[13px] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)] ' +
             (ltr ? 'text-left' : '')
           }
         />
@@ -405,7 +405,7 @@ function SerpPreview({
   noindex: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="mb-3 flex items-center gap-2">
         <Search className="h-4 w-4 text-primary" strokeWidth={2} />
         <h3 className="text-[13px] font-semibold text-foreground">معاينة نتيجة جوجل</h3>
@@ -413,7 +413,7 @@ function SerpPreview({
       </div>
 
       {/* the SERP snippet — LTR like a real Google result */}
-      <div dir="ltr" className="rounded-xl border border-token bg-white p-4" style={{ fontFamily: 'Arial, sans-serif' }}>
+      <div dir="ltr" className="rounded-xl zy-card p-4" style={{ fontFamily: 'Arial, sans-serif' }}>
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
@@ -458,7 +458,7 @@ function SocialPreview({
   host, title, description, image,
 }: { host: string | null; title: string; description: string; image: string | null }) {
   return (
-    <div className="mt-5 rounded-2xl border border-token bg-white p-5">
+    <div className="mt-5 rounded-2xl zy-card p-5">
       <div className="mb-3 flex items-center gap-2">
         <ExternalLink className="h-4 w-4 text-primary" strokeWidth={2} />
         <h3 className="text-[13px] font-semibold text-foreground">معاينة المشاركة (واتساب · تويتر)</h3>
@@ -486,7 +486,7 @@ function SocialPreview({
 
 function SitemapCard({ site }: { site: SeoSite }) {
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="flex items-center gap-2">
         <Map className="h-4 w-4 text-primary" strokeWidth={2} />
         <h2 className="text-[15px] font-semibold tracking-tight text-foreground">خريطة الموقع (Sitemap)</h2>
@@ -589,7 +589,7 @@ function SearchConsoleCard({
   const connected = connection?.connected ?? false
 
   return (
-    <div className="rounded-2xl border border-token bg-white p-5">
+    <div className="rounded-2xl zy-card p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-primary" strokeWidth={2} />
         <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Google Search Console</h2>
@@ -615,7 +615,7 @@ function SearchConsoleCard({
               type="button"
               onClick={disconnect}
               disabled={disconnecting}
-              className="inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-2.5 py-1 text-[11.5px] font-medium text-muted hover:text-foreground disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-muted hover:text-foreground disabled:opacity-50"
             >
               <Unlink className="h-3 w-3" /> فصل
             </button>
@@ -690,7 +690,7 @@ function SearchConsoleCard({
             value={verifyInput}
             onChange={(e) => setVerifyInput(e.target.value)}
             placeholder={'<meta name="google-site-verification" content="…" />   أو   googleXXXX.html'}
-            className="mt-2 w-full resize-none rounded-lg border border-token bg-white px-3 py-2 text-left font-mono text-[11.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted/50 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
+            className="mt-2 w-full resize-none rounded-lg zy-card px-3 py-2 text-left font-mono text-[11.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted/50 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
           />
           <div className="mt-1.5 flex items-center justify-between gap-2">
             <div className="min-w-0 text-[11px]">
@@ -1014,7 +1014,7 @@ function CopyRow({ value }: { value: string }) {
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border border-token bg-white p-10 text-center">
+    <div className="rounded-2xl zy-card p-10 text-center">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
         <Globe className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>

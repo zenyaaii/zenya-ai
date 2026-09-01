@@ -77,7 +77,7 @@ export default function SearchPanel({
   }
 
   if (loading) {
-    return <div className="mt-8 h-64 animate-pulse rounded-2xl border border-token bg-white" />
+    return <div className="mt-8 h-64 animate-pulse rounded-2xl zy-card" />
   }
 
   if (!status?.configured) {
@@ -109,7 +109,7 @@ export default function SearchPanel({
     <select
       value={active}
       onChange={(e) => onPickSite(e.target.value)}
-      className="rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] text-foreground outline-none focus:border-primary"
+      className="rounded-md zy-card px-2.5 py-1.5 text-[12.5px] text-foreground outline-none focus:border-primary"
       aria-label="اختر الموقع"
     >
       {published.map((s) => (

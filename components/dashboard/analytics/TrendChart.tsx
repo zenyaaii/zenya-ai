@@ -88,7 +88,7 @@ export default function TrendChart({
   const prevPoint = hover != null ? prevSeries[hover] : null
 
   return (
-    <div className="rounded-2xl border border-token bg-white p-4 sm:p-5">
+    <div className="rounded-2xl zy-card p-4 sm:p-5">
       {/* Metric switcher */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div
@@ -216,7 +216,7 @@ export default function TrendChart({
         {/* Tooltip. Positioned as a percentage so it tracks the point at any width. */}
         {point && (
           <div
-            className="pointer-events-none absolute top-1 z-10 min-w-[132px] -translate-x-1/2 rounded-lg border border-token bg-white p-2.5 shadow-lg"
+            className="pointer-events-none absolute top-1 z-10 min-w-[132px] -translate-x-1/2 rounded-lg zy-card p-2.5 shadow-lg"
             style={{ left: `${(x(hover!) / width) * 100}%` }}
           >
             <div className="text-[11px] font-medium text-muted">{fullDate(point.date)}</div>

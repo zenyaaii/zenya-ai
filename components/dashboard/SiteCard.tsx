@@ -128,7 +128,7 @@ export default function SiteCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       className={
-        'group relative isolate flex flex-col rounded-2xl border border-token bg-white transition-all duration-200 hover:-translate-y-0.5 ' +
+        'group relative isolate flex flex-col rounded-2xl zy-card transition-all duration-200 hover:-translate-y-0.5 ' +
         (menuOpen ? 'z-30' : '')
       }
       style={{ boxShadow: '0 1px 0 #f0ede6, 0 8px 24px -16px rgba(28,28,28,0.10)' }}
@@ -286,7 +286,7 @@ export default function SiteCard({
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
           <Link
             href={editUrlFor(theme.id, businessType)}
-            className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+            className="rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
             title="تعديل المحتوى"
           >
             <Edit3 className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
@@ -300,7 +300,7 @@ export default function SiteCard({
               href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-md border border-token bg-white px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+              className="rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
             >
               <Eye className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
               معاينة
@@ -380,7 +380,7 @@ export default function SiteCard({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute bottom-full end-0 z-40 mb-2 w-64 overflow-hidden rounded-lg border border-token bg-white shadow-lg"
+                    className="absolute bottom-full end-0 z-40 mb-2 w-64 overflow-hidden rounded-lg zy-card shadow-lg"
                     style={{ boxShadow: '0 12px 32px rgba(28,28,28,0.16), 0 0 0 1px #e5e2d9' }}
                   >
                     {/* Screenshot thumbnail — what the user expects to see when

@@ -62,7 +62,7 @@ export default async function AnalyticsPage() {
 function AnalyticsLocked() {
   return (
     <main className="mx-auto max-w-lg px-6 py-20 text-center">
-      <div className="rounded-2xl border border-token bg-white p-8 shadow-soft-sm">
+      <div className="rounded-2xl zy-card p-8 shadow-soft-sm">
         <h1 className="text-[22px] font-[590] tracking-[-0.5px] text-foreground">
           انتهت فترة تجربة التحليلات
         </h1>
