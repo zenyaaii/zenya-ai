@@ -213,7 +213,7 @@ at all: the body has been `overflow: hidden` since the hero was one screen, and
 the deck moves by transform instead.
 
 **Percentages, never viewport units.** `#zn-deck` is `fixed; inset: 0`, the
-track inside it is `height: 300%`, and each panel is `height: 33.3333%`. A panel
+track inside it is `height: 400%`, and each panel is `height: 25%`. A panel
 is therefore exactly one screen at any zoom — which matters, because the root
 ZoomLock writes CSS `zoom` and `vh` resolves *before* that scale is applied. At
 the 85% cap the travel measures `-1059px` on a 900px window; that is one screen
@@ -221,9 +221,17 @@ in CSS pixels, and reading it as "59px too far" is the mistake to avoid.
 
 **Adding a screen is four numbers, and they all live together:** the track's
 height, the panel's height, the step in
-`transform: translateY(calc(var(--deck) * -33.3333%))`, and `PANELS` in the
-gesture handler. Nothing else counts panels. Going from two screens to three
-touched those four and nothing else.
+`transform: translateY(calc(var(--deck) * -25%))`, and `PANELS` in the gesture
+handler. Nothing else counts panels. Going from two screens to three touched
+those four and nothing else; going from three to four touched the same four
+and one more — the header's `data-dark`, which was `deck === 2` and is now
+`deck >= 2`, because there are two dark screens and the pill must not flash
+back to paper between them.
+
+At four screens the track is `400%`, a panel is `25%`, and the step is `-25%`.
+Measured after: the four panels sit at exactly 0, 900, 1800 and 2700 on a
+900px window, down and back up again, with no horizontal overflow and no page
+errors on any of them.
 
 **The lock is the whole trick.** A gesture past the threshold moves the deck and
 then closes it for the length of the move; every event arriving while it is
@@ -557,9 +565,9 @@ on.
 
 ## Where this stands, and what is next
 
-The hero, section two (ابن) and section three (ادر) are built, at
-`app/demo/home/`, live at `zenyaai.co/demo/home`. It is NOT the homepage and
-must not be wired into `/`.
+The hero, ابن, ادر and انشر are built, at `app/demo/home/`, live at
+`zenyaai.co/demo/home`. Four screens. It is NOT the homepage and must not be
+wired into `/`.
 
 **The Style card is the wizard's card.** Not a version of it — the presets are
 IMPORTED from `utils/restaurant/presets` and `utils/services/presets`, and the
@@ -1183,25 +1191,206 @@ were written by someone who thought they were fine.
   not comparable to the 83 recorded above; only the two measured side by side
   are, and that harness is noisy enough that a single reading means little.)
 
+## Section four: انشر
+
+The last of the three words, and the one that closes the arc. ابن makes the
+site, ادر runs it, انشر puts it on the internet under an address somebody can
+type. It lives in `app/demo/home/` — `PublishSection.tsx` is the stage,
+`publish.tsx` is what it drives — and it is the fourth panel of the same deck,
+one more gesture down.
+
+No third set of machinery. The cursor engine and `writeValue` come from
+`runner.ts` exactly as ادر takes them; there is one copy of that code on this
+page and there goes on being one.
+
+### The colour, and why there is one
+
+**Section four is the page's SECOND deliberate colour, and the only one that is
+a whole screen rather than an accent on one.** The argument is the same one
+ادر's break rests on, and it is again not an invented palette:
+
+- **What this section is about is a site going LIVE, and the product already
+  has a colour for that.** `#15803d` is what the dashboard paints
+  منشور · SSL مفعّل, what the site card's مباشر pill is, what the free
+  subdomain block is, and what the Pro free-domain banner is. It was on the
+  page before this section existed.
+- **So the ground is that hue taken down to near-black, and the accent is the
+  product's exact value.** `#15803d` as a fill; text and hairlines take the
+  lifted stop `#62d391`, because the product value as *type* on this ground
+  measures 2.6:1 — the same split ادر makes between `#5e6ad2` and `#97a0ee`.
+- **One colour, and it means one.** There is no glow in this section, no second
+  wash, no tint on anything else. The only gradient in the whole panel is the
+  seam ramp below, and it exists because an edge is a cut.
+
+**The depth was measured, not argued about.** Three were built and reachable at
+`?ground=`, the way ادر's accent was: `pine` samples `12,42,30` and `deep` is
+darker still. Both are green on a chart and BLACK on a screen — a third
+near-black after obsidian is not a colour, it is one more absence of one. The
+default samples **`15,53,39`**: thirty-eight points between its green and its
+red, which is a green a reader sees from across a room, and still dark enough
+that paper type on it measures **12.9:1** and the section reads as serious
+rather than as a brand block.
+
+The card material is ادر's `lit` treatment, unchanged, and the three steps of
+paper type are ادر's. **The two dark sections are one family and the ground hue
+is the only thing that separates them** — giving this one its own card grammar
+as well would make it a different product rather than a different room.
+
+### The seam ramps from OBSIDIAN, not from transparent
+
+ادر's panel starts transparent at its own top and lets the deck's paper show
+through, because the screen above it really is paper. **The screen above انشر
+is obsidian, so that is where its ramp starts.** Left transparent, the ramp
+would have shown the deck through — and the deck is paper — putting a white
+band across the top of a panel sitting between two dark screens.
+
+Measured mid-move, sampling the column at `x=40` down the whole seam: obsidian
+`19,19,22` reaches the green with **a worst single-pixel step of 1 unit**.
+There is nothing to see. The ramp finishes at 8% of the panel, above the
+header, for the reason ادر's finishes at 10%.
+
+The header is now `data-dark={deck >= 2}` rather than `=== 2`, so the pill
+inverts once and stays inverted across both dark screens instead of flashing
+back to paper between them.
+
+### The object is a BROWSER
+
+ادر rises a device that is cut at the bottom, because what it shows is a screen
+somebody works on. **What this section shows is an ADDRESS**, so the object is a
+browser window — complete, all four corners, with the address bar as the
+subject rather than the furniture. The address is state, the cursor types in
+it, and what it reads at the end is the domain the reader watched being bought
+two beats earlier.
+
+Three sizing traps, all measured, all of which shipped here first:
+
+- **A flex-basis is a WIDTH in a row container.** The window was given ادر's
+  `flex: 0 1 var(--app-h)` while sitting inside a row, so a 560px basis with
+  shrink brought a 1200px browser back to **408px**. The basis belongs to the
+  item in the COLUMN.
+- **The shared `.zn-stagebox` centres its children on the cross axis**, which
+  makes a flex child shrink to fit — and a window whose width is `100%` of a
+  shrink-to-fit box resolves to its own content. That is the same 408px
+  arriving through a second door. `align-items: stretch`.
+- **The cap belongs to the WINDOW, not to the box holding it.** Fixed at the
+  cap, the domains screen filled it and the sites screen left three hundred
+  pixels of dead dark under a single card. Moving the cap to the outer box just
+  moved the void — that box stayed 660 tall and the short window sat at the top
+  of it, measured as **500 empty pixels** under the published site on a tablet.
+  The box takes the column; the window is capped and centred in it.
+
+Verified at 1728×1080, 1440×900, 1280×800, 1024×768, 1024×900, 900×700,
+768×1024, 430×932, 390×844 and 360×780, on both surfaces: no horizontal
+overflow anywhere, the window inside every edge at every size, the cursor
+inside the frame at every size, and no page errors.
+
+### The two surfaces
+
+**النطاق — buying the address** (`/dashboard/domains`). The real screen in its
+own order: the search card, the Pro free-domain banner in its own words, the
+results table with its four real columns, and — once something is taken — the
+connected-domain row underneath walking the product's real status ladder,
+بانتظار DNS → جارٍ إصدار SSL… → منشور · SSL مفعّل, with its own icons and its
+own colour for each rung, lifted for a dark ground.
+
+**النشر — publishing, and then the site** (`/dashboard/sites`). The real card,
+its real status pill, its real draft line, its real buttons. The cursor presses
+**انشر على زينيا**, the pill turns مباشر with the product's own pulsing dot, the
+free subdomain appears where SiteCard puts it — and then the address bar takes
+over, the browser goes to `darnoor.site`, and the SITE is on the other side of
+it. **That is the payoff this page has owed since ابن**, which shows seventy
+seconds of a form being filled in and never the website that comes out.
+
+The published site is the real template's own content in the onyx preset — the
+palette the wizard picks one screen up and the same one ادر's booking form is
+painted in. **One company, one site, across three screens.**
+
+### The price column is where "invent nothing" was hard
+
+A domain search screen carries three columns of fact: which extensions exist,
+whether each is free, and what it costs. The first two are checkable and were
+checked. **The third is a number Porkbun answers with at the moment of the
+search**, and this page has no session and no right to call that route, so
+there is no honest way to print a price on it.
+
+The answer is not to make one up and not to leave the column blank. It is to
+show **the search that needs no price**: the six extensions are the first six of
+the route's own `BARE_TLDS`, in its order; every *taken* row needs no figure at
+all; and both *available* rows are on the cheap list that Pro's free-domain
+entitlement covers, so their price cell reads what the real screen reads for
+that account — **مجاني · سنة**, which is an entitlement rather than a figure,
+and the button reads its real label, احصل عليه مجانًا. The reader sees
+availability, sees a price column doing its job, and **no number on that screen
+was imagined.**
+
+**The availability is real** and was checked over RDAP on 2026-09-01:
+`.store .online .shop .com` registered, `.site` and `.xyz` unregistered. A
+domain can be taken between then and now; re-check the six and swap the states
+if it matters. That is two minutes of `curl`, and it is why the check date is
+written into the file.
+
+**The published site carries no dish photographs, and that is a correction
+rather than a shortfall.** `public/demo/restaurant/dish-N.webp` are generic food
+pictures pulled down for section two's upload slots, where they are only ever
+shown as "some photographs" — they do **not** correspond to this template's
+signature dishes. Checked: `dish-1` is a pizza and `signature_dishes[0]` is
+hand-dived scallops. A name under a picture of something else is inventing, in
+the one way this page never does, so the list is typeset instead — real names,
+real descriptions, real prices, correctly paired.
+
+The site card's cover is `room-1.webp`, **not** the picker's own screenshot:
+that file is a picture of the restaurant template's live demo, whose hero is
+the Unsplash stock this document rules out twice over, so using it would put
+that photograph back on the page by the side door.
+
+### What the trace caught this time
+
+**Sampling `.zn4-cursor` every 150ms and reading the path is again the only
+thing that showed what the animation does.** Two findings, neither visible in
+the code:
+
+- **A move issued in the same tick as the state that renders its target finds
+  nothing.** `find` returns null, the cursor does not move, and it costs the
+  beat anyway — so after pressing احصل عليه مجانًا the cursor sat on the buy
+  button for **nine seconds**, through the entire status ladder. That is the
+  longest hold in the run, on a control, which is exactly the rule this page
+  keeps. A `wait` before the move is load-bearing.
+- **The cursor sat on تحقق من التوفّر for two and a half seconds** while the
+  table it had just summoned filled in somewhere else — the reader looking at
+  the wrong half of the screen. It moves onto the table as the rows arrive now.
+
+Traced afterwards, النطاق: 6 stops, 2871px of travel, the longest hold **7.5s
+on the linked domain row** while the ladder runs — the result. النشر: 8 stops,
+2340px, the longest hold **4.2s on the published site**. Neither path doubles
+back over itself, and every click is followed by a move OFF the control.
+
+The published site fits the window with **no scroll at all**, so its own header
+stays on screen — a scroll to a dish had been cutting the headline in half.
+
 ### Open
 
 - ادر shows three surfaces; the editor (`ThemeEditor.tsx`, click-to-edit and
   inline AI rewrite) is the strongest beat not built.
+- **The site card cover on انشر is `room-1.webp` rather than the template's
+  own screenshot**, which is the right call for this page and does not fix the
+  underlying thing: `utils/restaurant/mock-content.ts` still ships the Unsplash
+  hero, so it is still what a generated restaurant site shows, still what
+  `/demo/restaurant` shows, and still what `public/theme-previews/restaurant.webp`
+  is a picture of. A product problem, and not fixed.
 
 ### Still on the list
 
-Carried over, and none of it is done:
-
-1. **A scroll cue on the hero.** There is still no affordance anywhere that a
-   second screen exists — the body is `overflow: hidden`, the wheel is
-   hijacked, there is no scrollbar. Every screen added inherits that problem,
-   and there are three of them now.
-2. **The finished site as the payoff for ابن.** That section shows the input
-   for seventy seconds and never the output; `/demo/restaurant` and
-   `/demo/services` are live and need no login. ادر now shows the guest's side
-   of a published site, which makes the gap in ابن more obvious, not less.
-3. **انشر** — publishing, the subdomain, the live site. The third word, and the
-   fourth panel.
+1. **A scroll cue on the hero. This is now the only thing standing between the
+   page and a reader.** There is still no affordance anywhere that a second
+   screen exists — the body is `overflow: hidden`, the wheel is hijacked, there
+   is no scrollbar — and there are **four** screens behind it now. Three of them
+   are the whole argument the page makes, and nothing on the hero says they are
+   there. It is the highest-value item left by a distance.
+2. **The finished site as the payoff for ابن.** انشر now ends on the published
+   site at its own address, so the page as a whole does show the output — but
+   ابن itself still shows seventy seconds of input and never what comes out of
+   it, and it is the section where the gap is felt. `/demo/restaurant` and
+   `/demo/services` are live and need no login.
 
 ## Working notes
 

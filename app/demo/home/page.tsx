@@ -3211,16 +3211,19 @@ export default function Page() {
              column. Putting it on the window inside instead made the basis a
              WIDTH — that container is a row — and a 560px basis with shrink
              brought a 1200px browser back to 408. */
-          flex: 0 1 var(--app-h, var(--appbasis)); min-height: 0;
+          /* THE WINDOW FITS THE PAGE INSIDE IT, up to the cap, and the cap is
+             on the WINDOW rather than on this box. Fixed at the cap, the
+             domains screen filled it and the sites screen left three hundred
+             pixels of dead dark under a single card — which reads as a window
+             that failed to load rather than as a short page. Carrying the cap
+             here instead just moved the void: this box stayed 660 tall and
+             the short window sat at the top of it, measured as 500 empty
+             pixels under the published site on a tablet. So this box takes
+             the column and the window is centred in it. */
+          flex: 1 1 auto; min-height: 0;
           width: 100%;
           display: flex;
-          /* THE WINDOW FITS THE PAGE INSIDE IT, up to the cap. Fixed at the
-             cap, the domains screen filled it and the sites screen left three
-             hundred pixels of dead dark under a single card — which reads as
-             a window that failed to load rather than as a short page. A real
-             browser does have background under a short page; a floating
-             rectangle with a card in the corner does not look like one. */
-          align-items: flex-start;
+          align-items: center;
           /* The composed nudge belongs to the stagebox, which already applies
              it; repeating it here would move the window twice. What travels
              here is the arrival and nothing else. */
@@ -3233,7 +3236,7 @@ export default function Page() {
           position: relative;
           width: 100%; max-width: 1200px;
           flex: 1 1 auto;
-          min-height: 0; max-height: 100%;
+          min-height: 0; max-height: min(100%, var(--app-h, var(--appbasis)));
           margin-inline: auto;
           border-radius: 16px;
           background: var(--lift);
@@ -3558,13 +3561,19 @@ export default function Page() {
           background: var(--s-acc); color: var(--s-bg);
           font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
         }
-        .zn4-live .hero { position: relative; aspect-ratio: 21 / 9; overflow: hidden; }
+        /* Measured, not chosen: at 21:9 the hero alone was 571px of a 660px
+           window and the dishes below it were cut off the bottom — the page
+           the reader just published, showing one screen of itself. */
+        .zn4-live .hero { position: relative; aspect-ratio: 3.4 / 1; min-height: 190px; overflow: hidden; }
         .zn4-live .hero img { width: 100%; height: 100%; object-fit: cover; }
         .zn4-live .hero .over {
           position: absolute; inset: 0;
           display: flex; flex-direction: column; justify-content: center; align-items: center;
           gap: 9px; text-align: center; padding: 0 8%;
-          background: linear-gradient(180deg, rgba(10, 10, 12, 0.28) 0%, rgba(10, 10, 12, 0.72) 100%);
+          /* The photograph is already a dark room. At 0.28 to 0.72 the wash
+             took what was left of it and the hero read as a black rectangle
+             with type on it; this is as much as the type needs and no more. */
+          background: linear-gradient(180deg, rgba(10, 10, 12, 0.30) 0%, rgba(10, 10, 12, 0.62) 100%);
         }
         .zn4-live .eyebrow {
           font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s-acc);
@@ -3588,12 +3597,13 @@ export default function Page() {
           box-shadow: inset 0 0 0 1px var(--s-line);
           font-style: normal; font-size: 11px; color: var(--s-txt);
         }
-        .zn4-live .dishes { padding: 22px 22px 26px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-        .zn4-live .dishes .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; }
-        .zn4-live .dish img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
-        .zn4-live .dish .cap { margin-top: 7px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-        .zn4-live .dish b { font-size: 11px; font-weight: 500; color: var(--s-txt); }
-        .zn4-live .dish u { text-decoration: none; font-size: 11px; color: var(--s-acc); }
+        .zn4-live .dishes { padding: 24px 22px 28px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .zn4-live .dishes .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; width: 100%; }
+        .zn4-live .dish { padding-top: 11px; box-shadow: inset 0 1px 0 var(--s-line); }
+        .zn4-live .dish .cap { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .zn4-live .dish b { font-size: 12px; font-weight: 500; color: var(--s-txt); }
+        .zn4-live .dish u { text-decoration: none; font-size: 11.5px; color: var(--s-acc); }
+        .zn4-live .dish p { margin-top: 5px; font-size: 10.5px; line-height: 1.65; color: var(--s-mut); }
 
         /* ── Narrow ─────────────────────────────────────────────────────── */
         @media (max-width: 1023px) {
@@ -3610,9 +3620,25 @@ export default function Page() {
           .zn4-search { flex-wrap: wrap; }
           .zn4-tr { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 6px; padding: 7px 9px; font-size: 10.5px; }
           .zn4-tr > *:nth-child(3) { display: none; }
-          .zn4-live .dishes .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn4-live .dishes .grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
           .zn4-live .dish:last-child { display: none; }
           .zn4-domrow .acts { display: none; }
+          /* The published site, at phone width. Three things had to give, and
+             what gives is furniture — never a label, which is section three's
+             rule and holds here. The nav links ran straight out of the header
+             at 356px; the hero at 3.4:1 was 104px tall with 210px of type
+             centred in it, so the type spilled past the photograph; and the
+             subheadline is the one line on that hero a phone can do without,
+             because the headline and the CTA are what it is for. */
+          .zn4-live header { padding: 11px 14px; }
+          .zn4-live nav i { display: none; }
+          .zn4-live nav { gap: 10px; }
+          .zn4-live .hero { aspect-ratio: auto; min-height: 232px; }
+          .zn4-live .hero p { display: none; }
+          .zn4-live .hero .over { padding: 0 16px; gap: 7px; }
+          .zn4-live h1 { font-size: 22px; }
+          .zn4-live .ctas b, .zn4-live .ctas i { padding: 6px 14px; font-size: 10.5px; }
+          .zn4-live .dishes { padding: 16px 14px 18px; }
         }
 
         /* The composer inverts with the ground, exactly as it does on ادر: a

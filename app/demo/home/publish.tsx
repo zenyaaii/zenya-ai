@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  AlertCircle, CheckCircle2, Clock, Edit3, ExternalLink, Eye, Globe,
+  CheckCircle2, Clock, Edit3, ExternalLink, Eye, Globe,
   Lock, RefreshCw, Search, Sparkles,
 } from "lucide-react"
 import { RESTAURANT_MOCK_CONTENT as MOCK } from "@/utils/restaurant/mock-content"
@@ -264,7 +264,14 @@ export const domains: SurfaceDef = {
       searching: false,
       rows: TLDS.map((t) => ({ ...t, domain: NAME + "." + t.tld, state: "idle", buying: false })),
     })
-    await wait(560)
+    /* OFF THE BUTTON AS SOON AS THERE IS SOMETHING TO LOOK AT. Traced, the
+       cursor used to sit on تحقق من التوفّر for two and a half seconds while
+       the table it had just summoned filled in somewhere else — the reader is
+       looking at the wrong half of the screen. The wait before the move is
+       what lets React paint the rows first: a move to a target that does not
+       exist yet finds nothing, does not move, and costs the beat anyway. */
+    await wait(420)
+    await move("row-store", 0.5, 0.5)
 
     for (let i = 0; i < TLDS.length; i += 1) {
       set({ rows: (rows: any[]) => rows.map((r, j) => (j === i ? { ...r, state: "checking" } : r)) })
@@ -291,7 +298,16 @@ export const domains: SurfaceDef = {
     })
 
     /* And off the button immediately: the thing worth watching is the row
-       that just appeared underneath, not the control that made it. */
+       that just appeared underneath, not the control that made it.
+
+       THE WAIT IS LOAD-BEARING and cost nine seconds before it was traced.
+       The row is rendered by the state change on the line above, and a move
+       issued in the same tick looks for a target React has not painted yet:
+       find returns null, the cursor does not move, and it then sat on the
+       buy button through the whole status ladder — the longest hold in the
+       run, on a control, which is exactly the rule this page keeps. Reading
+       the code does not show that. Sampling the cursor does. */
+    await wait(320)
     await move("linked", 0.5, 0.5)
     await wait(1500)
     set({ step: 1 })
@@ -433,9 +449,13 @@ export const publish: SurfaceDef = {
     set({ site: true, loading: 0 })
     await wait(900)
 
-    /* Rest inside the site, on the thing a guest would press. */
+    /* Rest inside the site: the thing a guest presses, and then a look down
+       the page — which is what somebody does with a site of theirs that has
+       just gone up. */
     await move("book", 0.5, 0.5)
-    await beat(4200)
+    await beat(2600)
+    await move("dish", 0.5, 0.5)
+    await beat(3200)
   },
 }
 
@@ -455,7 +475,7 @@ function LiveSite() {
         <span className="mark">{BRAND}</span>
         <nav>
           <i>القائمة</i><i>قصتنا</i><i>الزيارة</i>
-          <b data-t="book">{MOCK.hero.primary_cta}</b>
+          <b>{MOCK.hero.primary_cta}</b>
         </nav>
       </header>
 
@@ -467,23 +487,33 @@ function LiveSite() {
           <h1>{MOCK.hero.headline}</h1>
           <p>{MOCK.hero.subheadline}</p>
           <span className="ctas">
-            <b>{MOCK.hero.primary_cta}</b>
+            {/* The cursor rests HERE — the thing a guest presses on the site
+                the reader just published, not the nav's copy of it. */}
+            <b data-t="book">{MOCK.hero.primary_cta}</b>
             <i>{MOCK.hero.secondary_cta}</i>
           </span>
         </div>
       </div>
 
+      {/* THE DISHES CARRY NO PHOTOGRAPHS, and that is a correction rather
+          than a shortfall. public/demo/restaurant/dish-N.webp are generic food
+          pictures pulled down for section two's upload slots, where they are
+          only ever shown as "some photographs" — they do NOT correspond to
+          this template's signature dishes. Checked: dish-1 is a pizza and
+          signature_dishes[0] is hand-dived scallops. Putting a name under a
+          picture of something else is inventing, in the one way this page
+          never does, so the list is typeset instead — real names, real
+          descriptions, real prices, correctly paired. */}
       <div className="dishes">
         <span className="eyebrow">{MOCK.signature_dishes_heading}</span>
         <div className="grid">
           {MOCK.signature_dishes.slice(0, 3).map((d: any, i: number) => (
-            <div className="dish" key={d.name}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/demo/restaurant/dish-${i + 1}.webp`} alt="" />
+            <div className="dish" key={d.name} data-t={i === 0 ? "dish" : undefined}>
               <div className="cap">
                 <b>{d.name}</b>
                 <u>{d.price}</u>
               </div>
+              <p>{d.description}</p>
             </div>
           ))}
         </div>
