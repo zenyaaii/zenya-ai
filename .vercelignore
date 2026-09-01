@@ -1,6 +1,15 @@
 tmp-*
 **/tmp-*
 
+# The dev server's build cache. Vercel builds from source on its own builders,
+# so this is never needed in an upload — and including it is actively harmful:
+# the deploy walks and uploads .next at the same moment the local dev server is
+# writing to it, which on Windows fails with "UNKNOWN: unknown error, open
+# .next\static\chunks\app\layout.js" and leaves the cache corrupt. That is what
+# has been making the dev server serve unstyled HTML with no hydration after a
+# deploy; the fix is to stop shipping the directory, not to keep deleting it.
+.next
+
 # ── Work in progress: never ships until the owner says so ───────────────────
 # The Sufra restaurant template is still under test. These paths stay in the
 # repo and run on the local dev server (/demo/sufra), but are excluded from
