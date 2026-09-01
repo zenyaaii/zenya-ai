@@ -600,8 +600,8 @@ export default function Page() {
      the only one that is a whole screen rather than an accent on one. Three
      depths of the same evergreen were built so the choice could be made by
      looking at them on the real page rather than in the abstract, which is
-     how ادر's accent was settled; ?ground=deep|emerald reaches the other two. */
-  const [ground, setGround] = useState<"pine" | "deep" | "emerald">("pine")
+     how ادر's accent was settled; ?ground=pine|deep reaches the darker two. */
+  const [ground, setGround] = useState<"emerald" | "pine" | "deep">("emerald")
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search)
@@ -3060,11 +3060,15 @@ export default function Page() {
            and for no other reason.
 
            Three depths were built so the choice could be made by looking at
-           them on the real page, which is how ادر's accent was settled:
-           ?ground=deep is a step darker and nearly obsidian, ?ground=emerald
-           a step lighter and unmistakably a colour. pine is the default —
-           dark enough to be serious, green enough to be read as green rather
-           than as another black. */
+           them on the real page, which is how ادر's accent was settled, and
+           it was settled by measuring the pixel rather than by arguing about
+           it. ?ground=pine samples 12,42,30 and ?ground=deep is darker still;
+           both are green on a chart and BLACK on a screen, and a third
+           near-black after obsidian is not a colour, it is one more absence
+           of one. The default samples 15,53,39 — thirty-eight points between
+           its green and its red, which is a green a reader sees from across a
+           room, and still dark enough that paper type on it measures 12.9:1
+           and the section reads as serious rather than as a brand block. */
         .zn4-panel {
           /* Type. The same three steps ادر measures, on a ground of almost
              the same value, so the same numbers hold: paper at 16:1, the
@@ -3074,7 +3078,7 @@ export default function Page() {
           --ink3: rgba(250, 250, 250, 0.52);
           --hair: rgba(250, 250, 250, 0.11);
           --hair2: rgba(250, 250, 250, 0.2);
-          --g: #0c2a1e;
+          --g: #0f3527;
           --prev: #131316;
           --lift: #14211b;
           --lift2: #1a2822;
@@ -3118,8 +3122,8 @@ export default function Page() {
           );
           color: var(--ink);
         }
+        .zn4-panel[data-ground="pine"] { --g: #0c2a1e; }
         .zn4-panel[data-ground="deep"] { --g: #081d15; }
-        .zn4-panel[data-ground="emerald"] { --g: #0f3527; }
 
         .zn-publish {
           --nx: 0px; --ny: 0px; --appbasis: 660px;
@@ -3210,6 +3214,13 @@ export default function Page() {
           flex: 0 1 var(--app-h, var(--appbasis)); min-height: 0;
           width: 100%;
           display: flex;
+          /* THE WINDOW FITS THE PAGE INSIDE IT, up to the cap. Fixed at the
+             cap, the domains screen filled it and the sites screen left three
+             hundred pixels of dead dark under a single card — which reads as
+             a window that failed to load rather than as a short page. A real
+             browser does have background under a short page; a floating
+             rectangle with a card in the corner does not look like one. */
+          align-items: flex-start;
           /* The composed nudge belongs to the stagebox, which already applies
              it; repeating it here would move the window twice. What travels
              here is the arrival and nothing else. */
@@ -3222,7 +3233,7 @@ export default function Page() {
           position: relative;
           width: 100%; max-width: 1200px;
           flex: 1 1 auto;
-          min-height: 0; height: 100%;
+          min-height: 0; max-height: 100%;
           margin-inline: auto;
           border-radius: 16px;
           background: var(--lift);
@@ -3369,7 +3380,7 @@ export default function Page() {
           flex: 0 0 auto;
           display: inline-flex; align-items: center; gap: 5px;
           border-radius: 999px; padding: 7px 15px;
-          background: var(--ink); color: #0c2a1e;
+          background: var(--ink); color: #0f3527;
           font-size: 11.5px; font-weight: 600;
           transition: opacity 240ms;
         }
@@ -3465,7 +3476,8 @@ export default function Page() {
 
         /* ── The site card, from SiteCard.tsx ───────────────────────────── */
         .zn4-site {
-          display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+          max-width: 760px;
+          display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr);
           border-radius: 13px; overflow: hidden;
           background: var(--card-bg); box-shadow: var(--card-ring);
         }
@@ -3608,10 +3620,10 @@ export default function Page() {
            tool, it is a guess. */
         .zn-publish .zn-compose-box { outline-color: rgba(250, 250, 250, 0.5); }
         .zn-publish .zn-compose-box[data-on="true"] { outline-color: #fafafa; }
-        .zn-publish .zn-compose-box .tag { background: #fafafa; color: #0c2a1e; }
+        .zn-publish .zn-compose-box .tag { background: #fafafa; color: #0f3527; }
         .zn-publish .zn-compose-box .grip { background: #fafafa; }
         .zn-publish .zn-compose-panel {
-          background: rgba(12, 42, 30, 0.92);
+          background: rgba(15, 53, 39, 0.92);
           box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.14);
         }
         .zn-publish .zn-compose-panel .row { color: rgba(250, 250, 250, 0.6); }
@@ -3628,7 +3640,7 @@ export default function Page() {
         .zn-publish .zn-compose-panel pre {
           background: rgba(0, 0, 0, 0.3); color: rgba(250, 250, 250, 0.7);
         }
-        .zn-publish .zn-compose-panel .save { background: #fafafa; color: #0c2a1e; }
+        .zn-publish .zn-compose-panel .save { background: #fafafa; color: #0f3527; }
         .zn-publish .zn-compose-panel .save[data-state="done"] { background: #4ade80; color: #08240f; }
         .zn-publish .zn-compose-panel .save[data-state="fail"] { background: #f08a8a; color: #2a0808; }
 
