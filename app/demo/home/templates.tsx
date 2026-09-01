@@ -180,10 +180,10 @@ const DAYS = ["السبت", "الأحد", "الإثنين", "الثلاثاء", 
 /* The template's own photographs, from utils/restaurant/mock-content, pulled
    down small so the card costs no third-party request. */
 const R_SHOTS = [
-  { id: "hero", src: "/demo/restaurant/hero.webp" },
+  { id: "hero", src: "/demo/restaurant/room-1.webp" },
   { id: "2", src: "/demo/restaurant/dish-1.webp" },
   { id: "3", src: "/demo/restaurant/chef.webp" },
-  { id: "4", src: "/demo/restaurant/room-1.webp" },
+  { id: "4", src: "/demo/restaurant/room-2.webp" },
   { id: "5", src: "/demo/restaurant/dish-3.webp" },
 ]
 

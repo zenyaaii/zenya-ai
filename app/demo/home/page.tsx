@@ -53,6 +53,8 @@ import ZenyaMark from "@/components/ZenyaMark"
 import { createClient } from "@/utils/supabase/client"
 import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
 import BuildSection from "./BuildSection"
+import ManageSection from "./ManageSection"
+import PublishSection from "./PublishSection"
 
 /* The default face for the three words, and the only one that is preloaded,
    because it is what the page renders before anybody picks anything. Both cuts
@@ -584,8 +586,32 @@ export default function Page() {
      server has no query string to look at and the first paint has to match it.
      Without it nothing about the composer reaches the browser. */
   const [edit, setEdit] = useState(false)
+  /* Section three carries the page's one deliberate colour, and it is the
+     dashboard's own primary. Chosen by looking at both on the real page;
+     ?accent=gold still reaches the other one, which is worth keeping for as
+     long as the choice is worth revisiting. */
+  const [accent, setAccent] = useState<"gold" | "violet">("violet")
+  /* How a card is made on the dark ground. The product's own dashboard uses a
+     bordered card, so dropping the boxes entirely would drift from the screen
+     this section is imitating; what changes is how the same card is
+     materialised. ?cards=fill|well|lit to compare on the real page. */
+  const [cards, setCards] = useState<"ring" | "fill" | "well" | "lit">("lit")
+  /* Section four's ground — the page's second and last deliberate colour, and
+     the only one that is a whole screen rather than an accent on one. Three
+     depths of the same evergreen were built so the choice could be made by
+     looking at them on the real page rather than in the abstract, which is
+     how ادر's accent was settled; ?ground=deep|emerald reaches the other two. */
+  const [ground, setGround] = useState<"pine" | "deep" | "emerald">("pine")
   useEffect(() => {
-    try { setEdit(new URLSearchParams(window.location.search).get("edit") === "1") } catch { /* ignore */ }
+    try {
+      const q = new URLSearchParams(window.location.search)
+      setEdit(q.get("edit") === "1")
+      if (q.get("accent") === "gold") setAccent("gold")
+      const c = q.get("cards")
+      if (c === "fill" || c === "well" || c === "lit" || c === "ring") setCards(c)
+      const g = q.get("ground")
+      if (g === "deep" || g === "emerald" || g === "pine") setGround(g)
+    } catch { /* ignore */ }
   }, [])
 
   /* Whether the deck has finished travelling. Section two's script waits for
@@ -600,7 +626,7 @@ export default function Page() {
     return () => clearTimeout(id)
   }, [deck])
   useEffect(() => {
-    const PANELS = 2
+    const PANELS = 4
     const go = (dir: number) => {
       const now = Date.now()
       if (now < deckShut.current) {
@@ -758,6 +784,7 @@ export default function Page() {
     <Link
       href={portal.dash}
       aria-label="حسابي"
+      data-cta="1"
       title={user.email}
       className="flex h-9 w-9 items-center justify-center rounded-full text-[14px] font-medium leading-none text-white transition-opacity duration-150 hover:opacity-85"
       style={{ background: OBSIDIAN }}
@@ -767,6 +794,7 @@ export default function Page() {
   ) : (
     <Link
       href={portal.signup}
+      data-cta="1"
       className="rounded-full px-4 py-2 text-[14px] leading-none text-white transition-opacity duration-150 hover:opacity-85"
       style={{ background: OBSIDIAN }}
     >
@@ -785,6 +813,7 @@ export default function Page() {
       aria-expanded={panel === "account"}
       aria-haspopup="menu"
       aria-label="حسابي"
+      data-cta="1"
       title={user.email}
       className="flex h-9 w-9 items-center justify-center rounded-full text-[14px] font-medium leading-none text-white transition-opacity duration-150 hover:opacity-85"
       style={{ background: OBSIDIAN }}
@@ -1132,12 +1161,15 @@ export default function Page() {
            zoom and vh resolves BEFORE that scale is applied, so a "100dvh"
            panel in an 85%-zoomed window is short by a seventh and the two
            screens would never line up. The deck is a fixed box measured
-           against the real viewport; a panel at half of a track at twice
-           the deck is exactly one screen at any zoom. */
+           against the real viewport; a panel at a quarter of a track at four
+           times the deck is exactly one screen at any zoom. Adding a screen
+           means three numbers, all here — the track's height, the panel's,
+           and the step the transform takes — plus PANELS in the gesture
+           handler, and nothing else on the page counts panels. */
         #zn-deck { position: fixed; inset: 0; overflow: hidden; }
         #zn-track {
-          position: absolute; inset: 0; height: 200%;
-          transform: translateY(calc(var(--deck, 0) * -50%));
+          position: absolute; inset: 0; height: 400%;
+          transform: translateY(calc(var(--deck, 0) * -25%));
           transition: transform 1020ms cubic-bezier(0.22, 1, 0.36, 1);
           will-change: transform;
         }
@@ -1151,7 +1183,7 @@ export default function Page() {
            light has to be allowed to cross. (No backticks in here — this
            whole block is a template literal, and one would end it.) */
         .zn-panel {
-          position: relative; height: 50%;
+          position: relative; height: 25%;
           transform: translateZ(0);
           contain: layout;
         }
@@ -1711,6 +1743,1199 @@ export default function Page() {
           .zn-in.area { min-height: 62px; }
         }
 
+        /* ── The header, crossing into ادر ────────────────────────────────
+           The pill is the one thing on this page that is on every screen, so
+           it takes the ground it is standing on. Everything here is
+           !important because the pill's surface, the mark's colour and the
+           call to action are inline styles on the elements themselves — a
+           stylesheet cannot reach past an inline style any other way.
+
+           It runs on the deck's own clock (1020ms) rather than a shorter one,
+           so the header, the ground and the light all land together: one
+           event, not a dark box arriving under a white pill. */
+        /* Named elements, never a descendant wildcard. A ".zn-pill *" rule
+           put a 1020ms transition on box-shadow and background across every node in
+           the bar, and all of it ran on the frames the deck was travelling —
+           measured, the move dropped from 52 frames to 36 and its worst frame
+           went from 153ms to 436ms. Only four things actually change colour
+           here, so only those four carry a transition. */
+        #pill-header .zn-pill,
+        #pill-header .zn-phone-pill {
+          transition-property: background-color, box-shadow, width, min-width;
+          transition-duration: 1020ms;
+          transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #pill-header svg,
+        #pill-header nav a,
+        #pill-header [data-cta],
+        #pill-header .zn-drawer a,
+        #pill-header .zn-phone-drawer a {
+          transition-property: color, background-color;
+          transition-duration: 1020ms;
+          transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        #pill-header[data-dark="true"] .zn-pill,
+        #pill-header[data-dark="true"] .zn-phone-pill {
+          background-color: rgba(32, 32, 38, 0.72) !important;
+          box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.12),
+                      0 0 0 4px rgba(19, 19, 22, 0.5) !important;
+        }
+        /* The mark fills with currentColor. Pure black is the rule on paper;
+           on obsidian its counterpart is paper, not a grey. */
+        #pill-header[data-dark="true"] svg { color: #fafafa !important; }
+        /* The pages, and the 1px separator the pill carries between the nav
+           and the account control. */
+        #pill-header[data-dark="true"] nav a,
+        #pill-header[data-dark="true"] .zn-phone-drawer a,
+        #pill-header[data-dark="true"] .zn-drawer a,
+        #pill-header[data-dark="true"] .zn-drawer span,
+        #pill-header[data-dark="true"] button[aria-label="القائمة"] {
+          color: rgba(250, 250, 250, 0.66) !important;
+          background: transparent !important;
+        }
+        #pill-header[data-dark="true"] nav a:hover,
+        #pill-header[data-dark="true"] .zn-phone-drawer a:hover,
+        #pill-header[data-dark="true"] .zn-drawer a:hover {
+          background: rgba(250, 250, 250, 0.07) !important;
+          color: #fafafa !important;
+        }
+        /* The call to action, and ONLY it. Matching a.rounded-full instead
+           caught every nav link — they are rounded-full too — and turned the
+           bar into a row of white pills. The control carries a data-cta so
+           the rule can name the thing it means. */
+        #pill-header[data-dark="true"] [data-cta] {
+          background: #fafafa !important;
+          color: #171717 !important;
+        }
+        #pill-header[data-dark="true"] .zn-drawer,
+        #pill-header[data-dark="true"] .zn-phone-drawer { color: rgba(250, 250, 250, 0.66); }
+        /* The one hairline this style allows: the separator between the nav
+           and the account control. */
+        #pill-header[data-dark="true"] .zn-pill [class*="border-"],
+        #pill-header[data-dark="true"] .zn-phone-pill [class*="border-"] {
+          border-color: rgba(250, 250, 250, 0.16) !important;
+        }
+
+        /* ── Section three: ادر ───────────────────────────────────────────
+           The one panel on this page that is not white paper, and the break
+           is deliberate. The hero and ابن are the outside — the paper the
+           site is drawn on. ادر is where the owner works once it exists, so
+           it reads as being INSIDE the product: obsidian, one accent, paper
+           type.
+
+           It is not an invented palette either. Section two's restaurant run
+           picks the onyx preset — #0a0a0c ground, #c8a96a brushed gold — so
+           the site the reader watched being built one screen up is a black
+           and gold site, and this is its dashboard. The gold also sits inside
+           the رمل palette's own hue band, and the real analytics dashboard
+           already paints its bookings tile with this exact value.
+
+           Every colour here is a variable and there is exactly one hue in the
+           set: ?accent=violet swaps it for the dashboard's own primary, so
+           the two can be compared on the page rather than in the abstract. */
+        .zn3-panel {
+          /* Type. Well clear of AA at every step — 16.5:1, 7.7:1 and 5.2:1
+             against the window — which is what "very good text visibility"
+             costs on a dark ground. */
+          --ink: #fafafa;
+          --ink2: rgba(250, 250, 250, 0.66);
+          --ink3: rgba(250, 250, 250, 0.50);
+          /* Hairline rings, inverted. Still rings, still never a shadow. */
+          --hair: rgba(250, 250, 250, 0.11);
+          --hair2: rgba(250, 250, 250, 0.2);
+          /* The window lifts off the ground the way the white one lifts off
+             paper — a step, not a border. */
+          --lift: #1a1a1f;
+          --lift2: #212127;
+          --acc: #c8a96a;
+          --acc-txt: #d8bd85;
+          --acc-on: #241b06;
+          --acc-soft: rgba(200, 169, 106, 0.14);
+          --acc-line: rgba(200, 169, 106, 0.5);
+          /* CHROMA, not lightness. The pale رمل stops were tried first and
+             came back as mud: measured at the top edge they landed on
+             80,70,58 — a brown-grey with barely twenty points between its red
+             and its blue. A light laid over a near-black ground at a third
+             opacity keeps only a third of what it started with, so a pale
+             stop arrives desaturated; what survives the mix is saturation.
+             These are غروب's own warm stops, in رمل's hue band — an existing
+             palette either way, and the same light on both sides of the seam
+             rather than one tuned per ground. */
+          --acc-glow: linear-gradient(100deg, oklch(.81 .13 72) 0%, oklch(.77 .16 42) 38%, oklch(.79 .14 62) 72%, oklch(.84 .12 88) 100%);
+          /* THE GROUND RAMPS, it does not start. A solid fill begins exactly
+             at the panel's edge, and an edge between paper and obsidian is a
+             cut — measured across the seam, 250,221,194 met 104,74,46 in a
+             single pixel, and no amount of glow over the top softens a step
+             that size. So the panel is transparent at its own top and reaches
+             full obsidian a fifth of the way down; what shows through is the
+             deck's paper, which is the screen the reader is arriving from.
+             Percentages of the panel, never vh, for the reason the deck
+             itself is built in percentages. */
+          background: linear-gradient(
+            to bottom,
+            rgba(19, 19, 22, 0) 0%,
+            rgba(19, 19, 22, 0.62) 3%,
+            rgba(19, 19, 22, 0.93) 6.5%,
+            #131316 10%
+          );
+          color: var(--ink);
+        }
+        .zn3-panel[data-accent="violet"] {
+          --acc: #5e6ad2;
+          /* The fill can be the product's exact primary; text and hairlines
+             at that value fall under 4.5:1 on this ground, so those take the
+             lifted stop of the same hue instead. */
+          --acc-txt: #97a0ee;
+          --acc-on: #ffffff;
+          --acc-soft: rgba(94, 106, 210, 0.2);
+          --acc-line: rgba(127, 138, 228, 0.55);
+          --acc-glow: linear-gradient(100deg, oklch(.71 .17 300) 0%, oklch(.68 .18 285) 38%, oklch(.72 .16 268) 72%, oklch(.75 .15 320) 100%);
+        }
+
+        /* The seam. This light hangs UPWARD out of the panel onto the foot of
+           ابن, the mirror of the hero's foot glow hanging down onto its head:
+           one light that is allowed to cross, never two that would have to be
+           made to match. The panels carry layout containment only, so nothing
+           clips it — clipping a light at a panel edge is what once put a ruled
+           line across this page. */
+        /* IT STAYS BELOW ابن. The light used to hang 21vh up out of this
+           panel, and because panel three comes after panel two in the DOM and
+           both are their own stacking contexts, that overhang painted OVER
+           the foot of the build screen — its window and its switcher sat in a
+           warm wash that belonged to the next screen. Measured, section two's
+           last two hundred pixels were 249,220,189 instead of paper.
+
+           The blend across the seam does not need it: the ground ramp below
+           starts transparent at this panel's own top, so what a reader sees
+           on the way down is paper meeting paper and then darkening. The
+           colour belongs to ادر, and it starts where ادر starts. */
+        .zn3-glow {
+          position: absolute; left: -8%; right: -8%; top: 2vh; height: 32vh;
+          filter: blur(9vh); opacity: 0.42; pointer-events: none; z-index: 0;
+          will-change: transform; transform: translateZ(0);
+        }
+        .zn3-glow i {
+          position: absolute; inset: 0; background: var(--acc-glow);
+          animation: zn-breathe 21s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        /* Same rule as the hero's: a 9vh blur over an animating box is
+           re-rasterised every frame, and nobody can see a breath during a
+           one-second move. */
+        #zn-deck[data-moving="true"] .zn3-glow i { animation-play-state: paused; }
+
+        .zn-manage {
+          --nx: 0px; --ny: 0px; --appbasis: 508px;
+          position: absolute; inset: 0; z-index: 1;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          place-items: center;
+          padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.4rem);
+        }
+
+        /* The manage word: the hero's SECOND column, on the hero's roll and
+           in the hero's face, inverted for the ground. Paper, faded as a
+           LAYER via opacity — never as alpha in the colour, because connected
+           Arabic letters overlap at every join and a translucent colour
+           composites each join twice, which shows as dark patches down the
+           word. */
+        .zn3-word {
+          position: absolute; z-index: 0; pointer-events: none;
+          top: clamp(0.5rem, 3vh, 2.5rem); inset-inline-start: clamp(0.5rem, 2vw, 3rem);
+          display: inline-grid; grid-template-columns: minmax(0, 1fr);
+          padding-block: 0.2em; margin-block: -0.2em;
+          clip-path: inset(0 -100vw);
+          font-size: var(--word-size, min(308px, 24vw));
+          transform: translate(var(--word-x, 0px), var(--word-y, 0px));
+          line-height: 1.24; white-space: nowrap;
+          color: #fafafa;
+          /* 0.12 was tried first and is invisible in practice: the theory
+             that light ink on a dark ground carries further than dark ink on
+             paper is true, but it does not survive a bright window sitting in
+             front of it. Section two's own value is 0.20; this sits a step
+             above it, because here the word competes with a lit surface
+             rather than with bare paper. */
+          opacity: 0.26;
+          -webkit-font-smoothing: antialiased;
+        }
+        /* Anchored to the start edge, never centred — the four words share one
+           grid cell, so the cell is as wide as the longest of them. */
+        .zn3-word > span {
+          grid-area: 1 / 1; justify-self: start; white-space: nowrap;
+          transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 620ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-word > span[data-state="idle"] { opacity: 0; transform: translateY(130%); pointer-events: none; }
+        .zn3-word > span[data-state="out"] {
+          opacity: 0; transform: translateY(-130%);
+          transition: transform 420ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 260ms linear;
+        }
+        .zn3-word > span[data-state="in"] { opacity: 1; transform: none; }
+
+        /* The window. Same grammar as section two's — one step lighter than
+           its ground instead of one step whiter than paper, ringed rather
+           than shadowed. No backdrop-filter, for the same reason: the move
+           cannot afford a full-surface blur on every frame. */
+        .zn3-app {
+          position: relative;
+          width: 100%; max-width: 1010px; flex: 0 1 var(--app-h, var(--appbasis)); min-height: 0;
+          margin-inline: auto;
+          border-radius: 26px;
+          background: var(--lift);
+          box-shadow: 0 0 0 1px var(--hair), 0 0 0 4px rgba(19, 19, 22, 0.55);
+          overflow: hidden;
+          contain: layout paint;
+          display: grid; grid-template-rows: auto minmax(0, 1fr);
+        }
+        .zn3-path {
+          padding: 15px 22px 9px;
+          font-size: 10px; line-height: 1; color: var(--ink3);
+        }
+        .zn3-path b { font-weight: 500; color: var(--ink); }
+        .zn3-stage { position: relative; min-height: 0; padding: 6px 22px 22px; display: grid; }
+        /* NOTHING FLOATS IN THE MIDDLE OF THE DISPLAY. The fit pass centred
+           the content and left whatever was over as empty screen, which on a
+           real device reads as a half-loaded page rather than as air. The
+           surfaces stretch to the glass instead, and the only space left is
+           the padding between the frame and where the content starts. */
+        .zn-manage .zn-fit { align-content: stretch; transform: none; }
+        /* Hidden, not auto: the reader is watching, not driving, so there is
+           no scrollbar and no gesture to hijack. Programmatic scrolling still
+           works, which is the only kind this screen does.
+
+           THE VIEWPORT IS THE PART ON THE PAGE. The screen fills the whole
+           machine and is cut with it, which is what a device running off an
+           edge looks like — but the content is bounded to the part a reader
+           can actually see, and scrolls inside that. Filling the whole screen
+           instead was tried and is worse than either: the content stretched
+           to the machine, so nothing ever overflowed, nothing ever scrolled,
+           and the last 120 pixels of every surface sat below the cut where
+           nobody could ever reach them. 100% minus the overhang IS the
+           visible part, exactly. */
+        .zn-manage .zn3-stage {
+          overflow: hidden;
+          max-height: calc(100% - var(--dev-body));
+        }
+        /* min-height, not height: a short surface still fills the screen so
+           there is no empty space, and a tall one is allowed to be tall and
+           scroll instead of being squeezed. */
+        .zn-manage .zn3-screen { min-height: 100%; align-self: stretch; }
+        .zn3-two { height: 100%; }
+        /* The chart takes whatever the tiles and the tabs do not. */
+        .zn3-analytics { height: 100%; grid-template-rows: auto auto auto auto auto minmax(0, 1fr); }
+        .zn3-analytics .zn3-chart { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+        .zn3-analytics .zn3-chart .plot { height: 100%; }
+        .zn3-analytics .zn3-chart svg { height: 100%; }
+        /* The inbox and the site fill their halves. */
+        .zn3-pane, .zn3-site { height: 100%; }
+        .zn3-two.seo .zn3-pane > .zn3-card:last-child { flex: 1 1 auto; }
+        /* One surface, forward. The keyframe borrows the hidden state for its
+           own duration and rests visible. */
+        /* Measured, not guessed: the three surfaces lay out at 357, 520 and
+           513 CSS pixels, so the window is sized to the two tall ones and the
+           short one is given a floor to reach rather than being left in the
+           middle of an empty frame. Section two has the opposite problem and
+           the opposite answer — there the cards are wildly different and the
+           fit pass scales them; here they are within twenty pixels of each
+           other, so a floor is the cheaper fix and it keeps every surface at
+           full size, which is what "very good text visibility" needs. */
+        /* NOTHING IN THIS WINDOW IS TOUCHABLE. The booking form is the
+           product's real component, with real inputs and a real submit — so
+           on a phone a tap landed in it, the keyboard came up, and a reader
+           found themselves filling in a form that belongs to a demo. It is
+           something to watch, not something to use.
+
+           pointer-events is on the SCREEN and not on the stage, so a touch
+           still reaches the frame underneath and the sideways swipe that
+           changes surface keeps working. The script drives the form through
+           the value setter and a programmatic click, neither of which
+           pointer-events can block. */
+        .zn3-screen {
+          pointer-events: none;
+          display: grid;
+          /* align-self, and it is load-bearing. The fit pass measures THIS
+             box, and a grid item defaults to stretching to its track — so
+             with the floor below it the box measured 610 while its content
+             was 825, the ratio came back 1, nothing was scaled and the form
+             was sliced off the bottom of a phone. offsetHeight has to equal
+             scrollHeight here or the fit pass is measuring the frame instead
+             of the card. Exactly the trap section two's notes describe; it
+             arrived by a different door. */
+          align-self: start;
+          animation: zn-card-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        /* No floor. It was added so the short surface would fill the window
+           instead of floating in it, and filling the window is exactly what
+           made the section read as oversized next to ابن — where a card sits
+           at its own size in a roomy frame and the frame is the composition.
+           The window came down instead, which is the same fix from the other
+           end and costs the type nothing. */
+
+        /* Two panes: the owner's side and the guest's side of the same event. */
+        .zn3-two { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 18px; }
+        .zn3-two.seo { grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); }
+        .zn3-pane { min-width: 0; display: flex; flex-direction: column; }
+
+        .zn3-head h2 {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 15px; font-weight: 500; line-height: 1.35; color: var(--ink);
+        }
+        .zn3-head p { margin-top: 5px; font-size: 10.5px; line-height: 1.7; color: var(--ink2); }
+        .zn3-head .ic { width: 15px; height: 15px; color: var(--acc-txt); }
+
+        /* The filter chips, with the inbox's own counts. */
+        .zn3-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 14px 0 11px; }
+        .zn3-chip {
+          padding: 5px 11px; border-radius: 999px;
+          font-size: 10px; line-height: 1.4; color: var(--ink2);
+          transition: background 300ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-chip i { font-style: normal; margin-inline-start: 6px; opacity: 0.6; }
+        .zn3-chip[data-on="true"] { background: var(--acc-soft); color: var(--acc-txt); }
+
+        /* The empty state, which is the honest state of a site published a
+           minute ago — and its words are the inbox's own. */
+        .zn3-empty {
+          flex: 1; display: grid; align-content: center; justify-items: center; gap: 9px;
+          border-radius: 16px; padding: 30px 20px;
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+        .zn3-empty .disc {
+          display: grid; place-items: center; width: 40px; height: 40px;
+          border-radius: 999px; background: rgba(250, 250, 250, 0.06);
+        }
+        .zn3-empty .ic { width: 17px; height: 17px; color: var(--ink3); }
+        .zn3-empty b { font-size: 11.5px; font-weight: 500; color: var(--ink); }
+        .zn3-empty p { max-width: 26ch; text-align: center; font-size: 10px; line-height: 1.7; color: var(--ink2); }
+
+        /* The row as it lands. The only thing in the section that arrives
+           while the reader is watching, so it is the only thing that gets the
+           accent — and it rests in its finished state like everything else. */
+        .zn3-rows { display: grid; gap: 9px; }
+        .zn3-row {
+          border-radius: 14px; padding: 13px 14px;
+          background: var(--lift2);
+          box-shadow: inset 0 0 0 1px var(--acc-line);
+          animation: zn3-land 720ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        @keyframes zn3-land {
+          from { opacity: 0; transform: translateY(-14px) scale(0.985); }
+          to   { opacity: 1; transform: none; }
+        }
+        .zn3-row .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .zn3-row .nm { font-size: 12px; font-weight: 500; color: var(--ink); }
+        .zn3-row .kind {
+          margin-inline-start: 7px; padding: 2px 8px; border-radius: 999px;
+          font-size: 9px; color: var(--ink2); background: rgba(250, 250, 250, 0.07);
+        }
+        .zn3-row .meta { margin-top: 4px; font-size: 9.5px; color: var(--ink3); }
+        .zn3-row .st {
+          flex: 0 0 auto; padding: 4px 10px; border-radius: 999px;
+          font-size: 9px; background: var(--acc-soft); color: var(--acc-txt);
+          transition: background 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-row .det {
+          display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 11px;
+          font-size: 10px; line-height: 1.5; color: var(--ink);
+        }
+        .zn3-row .det span { display: inline-flex; align-items: center; gap: 6px; }
+        .zn3-row .det .ic { width: 13px; height: 13px; color: var(--ink3); }
+        .zn3-row .msg {
+          margin-top: 11px; border-radius: 10px; padding: 9px 11px;
+          background: rgba(250, 250, 250, 0.05);
+          font-size: 10px; line-height: 1.7; color: var(--ink);
+        }
+        .zn3-row .ctl {
+          display: flex; align-items: center; gap: 9px; margin-top: 12px; padding-top: 11px;
+          box-shadow: inset 0 1px 0 var(--hair);
+        }
+        .zn3-row .ctl .lab { font-size: 9.5px; color: var(--ink3); }
+        /* The status control is a select in the inbox, so what a click on it
+           opens is the four statuses it actually offers. */
+        .zn3-row .sel {
+          position: relative; display: inline-flex; align-items: center; gap: 8px;
+          border-radius: 8px; padding: 5px 10px;
+          font-size: 10px; color: var(--ink);
+          box-shadow: inset 0 0 0 1px var(--hair2);
+        }
+        .zn3-row .sel > em {
+          width: 0; height: 0; border-inline: 3.5px solid transparent;
+          border-top: 4px solid var(--ink3);
+        }
+        .zn3-row .sel .menu {
+          position: absolute; top: calc(100% + 5px); inset-inline-start: 0; z-index: 3;
+          display: grid; min-width: 104px; padding: 4px; border-radius: 10px;
+          background: #26262d; box-shadow: 0 0 0 1px var(--hair);
+          animation: zn3-pop 200ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn3-row .sel .menu b {
+          padding: 6px 9px; border-radius: 6px;
+          font-size: 10px; font-weight: 400; color: var(--ink2);
+        }
+        .zn3-row .sel .menu b[data-on="true"] { color: var(--acc-txt); background: var(--acc-soft); }
+        @keyframes zn3-pop {
+          from { opacity: 0; transform: translateY(-5px); }
+          to   { opacity: 1; transform: none; }
+        }
+
+        /* The guest's side: the published site, in the palette section two
+           chose for it. Its own ground, because it is a different surface —
+           the reader is looking at two screens at once and they must not read
+           as one screen. */
+        .zn3-site {
+          flex: 1; display: flex; flex-direction: column;
+          border-radius: 14px; overflow: hidden;
+          background: #0a0a0c;
+          box-shadow: inset 0 0 0 1px rgba(200, 169, 106, 0.22);
+        }
+        .zn3-sitebar {
+          padding: 9px 13px; font-size: 9px; color: #a09587;
+          box-shadow: inset 0 -1px 0 rgba(200, 169, 106, 0.16);
+        }
+        /* The section keeps its height when the form is replaced by its
+           success card, and the card centres in what is left rather than
+           hanging from the top of a suddenly empty box. */
+        .zn3-sitebody { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 15px 15px 17px; }
+        .zn3-sitebody .eyebrow {
+          display: block; font-size: 9px; letter-spacing: 0.02em; color: #c8a96a;
+        }
+        .zn3-sitebody h3 {
+          margin: 6px 0 13px;
+          font-family: "Playfair Display", "Times New Roman", serif;
+          font-size: 18.5px; font-weight: 400; line-height: 1.35; color: #f4ecd8;
+        }
+        /* The product's own form, at the size this window can carry. It is
+           mounted, not reproduced, so everything below is size only — never a
+           colour and never a word. */
+        .zn3-sitebody form { gap: 0.55rem !important; }
+        .zn3-sitebody form label { font-size: 9px !important; margin-bottom: 0.2rem !important; }
+        .zn3-sitebody form input,
+        .zn3-sitebody form select,
+        .zn3-sitebody form textarea {
+          padding: 0.45rem 0.55rem !important; font-size: 10px !important;
+        }
+        .zn3-sitebody form textarea { min-height: 46px; }
+        .zn3-sitebody form button { padding: 0.6rem 1rem !important; font-size: 10.5px !important; }
+        /* The native date and time pickers paint their own indicator in the
+           engine's colour, which on this ground is a black icon on black. */
+        .zn3-sitebody form input::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.5; }
+
+        /* ── التحليلات ────────────────────────────────────────────────────
+           The one surface here that cannot carry a figure, and the figures
+           are not the point of it: what a reader learns is that everything
+           the site does is measured and this is where it lives. The tiles are
+           the real six in the real order; they read zero because a site
+           published today has had no visitors, and the dashboard says so
+           itself rather than making a number up. */
+        .zn3-analytics { display: grid; gap: 0; }
+        .zn3-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 14px 0 0; }
+        .zn3-pills {
+          display: inline-flex; gap: 2px; padding: 2px; border-radius: 999px;
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+        .zn3-pills b {
+          padding: 4px 10px; border-radius: 999px;
+          font-size: 9.5px; font-weight: 400; color: var(--ink2);
+          transition: background 280ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 280ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-pills b[data-on="true"] { background: var(--acc); color: var(--acc-on); }
+        .zn3-sel2, .zn3-tog, .zn3-out {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 5px 10px; border-radius: 8px;
+          font-size: 9.5px; color: var(--ink2);
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+        .zn3-sel2 > em {
+          width: 0; height: 0; border-inline: 3.5px solid transparent;
+          border-top: 4px solid var(--ink3);
+        }
+        .zn3-tog[data-on="true"] { color: var(--acc-txt); box-shadow: inset 0 0 0 1px var(--acc-line); }
+        .zn3-bar .ic { width: 12px; height: 12px; }
+        .zn3-out { position: relative; }
+        .zn3-out.ref { margin-inline-start: auto; }
+        .zn3-out .menu {
+          position: absolute; top: calc(100% + 6px); inset-inline-end: 0; z-index: 4;
+          display: grid; width: 176px; padding: 4px; border-radius: 11px;
+          background: #26262d; box-shadow: 0 0 0 1px var(--hair);
+          animation: zn3-pop 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn3-out .menu b {
+          padding: 6px 9px; border-radius: 6px;
+          font-size: 10px; font-weight: 400; color: var(--ink); text-align: start;
+        }
+        .zn3-out .menu i {
+          padding: 7px 9px 4px; font-style: normal; font-size: 9px; line-height: 1.6;
+          color: var(--ink3); box-shadow: inset 0 1px 0 var(--hair);
+        }
+
+        .zn3-tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+        .zn3-tile {
+          display: grid; align-content: start; gap: 6px;
+          border-radius: 14px; padding: 11px 11px 12px;
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+        .zn3-tile .t { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+        .zn3-tile .t em {
+          font-style: normal; font-size: 9px; letter-spacing: 0.1em; color: var(--ink2);
+        }
+        .zn3-tile .chip {
+          flex: 0 0 auto; display: grid; place-items: center;
+          width: 20px; height: 20px; border-radius: 6px; background: var(--acc-soft);
+        }
+        .zn3-tile .chip .ic { width: 11px; height: 11px; color: var(--acc-txt); }
+        .zn3-tile .v {
+          display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+          font-size: 18.5px; font-weight: 500; line-height: 1.1; color: var(--ink);
+        }
+        /* The dashboard's own Delta with no baseline to compare against: a
+           dash and the word "new". "+100%" against nothing would be a lie,
+           and the product already refuses to print it. */
+        /* The delta. Green when the number moved the way the owner wants and
+           red when it did not — and bounce rate is the one metric where down
+           is the good direction, which is why the caller decides the colour
+           and not the sign. */
+        .zn3-tile .v u { text-decoration: none; font-size: 9px; font-weight: 400; color: var(--ink3); }
+        .zn3-tile .v u[data-good="true"] { color: #6fbf8b; }
+        .zn3-tile .v u[data-good="false"] { color: #f08a8a; }
+        .zn3-tile .s { font-size: 9px; line-height: 1.5; color: var(--ink3); }
+
+        .zn3-note {
+          margin-top: 11px; border-radius: 10px; padding: 9px 11px;
+          font-size: 9.5px; line-height: 1.8; color: var(--ink2);
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+
+        .zn3-tabs { display: flex; gap: 2px; margin-top: 15px; box-shadow: inset 0 -1px 0 var(--hair); }
+        .zn3-tabs b {
+          position: relative; padding: 7px 10px 9px;
+          font-size: 10px; font-weight: 400; color: var(--ink3); white-space: nowrap;
+        }
+        .zn3-tabs b[data-on="true"] { color: var(--ink); }
+        .zn3-tabs b[data-on="true"]::after {
+          content: ""; position: absolute; inset-inline: 6px; bottom: -1px; height: 2px;
+          border-radius: 999px; background: var(--acc);
+        }
+
+        /* The search tab's panel. Same furniture as the inbox's empty state,
+           because it is the same kind of thing: a real screen with nothing in
+           it yet and a way to change that. */
+        .zn3-search { margin-top: 15px; display: grid; align-content: start; gap: 10px; }
+        .zn3-search h3 { font-size: 12px; font-weight: 500; color: var(--ink); }
+        .zn3-search .zn3-empty { padding: 22px 18px; }
+        /* The inbox's empty state holds one short line; this one holds a
+           sentence, and 26ch wrapped it into five. */
+        .zn3-search .zn3-empty p { max-width: 46ch; }
+        .zn3-search .cta {
+          margin-top: 4px; padding: 6px 14px; border-radius: 999px;
+          font-size: 10.5px; background: var(--acc); color: var(--acc-on);
+        }
+
+        .zn3-chart { margin-top: 14px; border-radius: 14px; padding: 12px; box-shadow: inset 0 0 0 1px var(--hair); }
+        .zn3-pills.small b { font-size: 9px; padding: 3px 9px; }
+        .zn3-chart .plot { position: relative; margin-top: 10px; }
+        .zn3-chart svg { display: block; width: 100%; height: 150px; }
+        .zn3-chart svg line { stroke: rgba(250, 250, 250, 0.09); stroke-width: 1; }
+        /* The curve draws itself when the range changes. Keyed on the range,
+           so it replays; backwards fill, so the resting state is the finished
+           one and a browser that never runs it still shows the whole line. */
+        .zn3-chart .line {
+          stroke-dashoffset: 0;
+          animation: zn3-draw 980ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn3-chart .area { animation: zn3-fade 980ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        @keyframes zn3-draw {
+          from { stroke-dasharray: 1400; stroke-dashoffset: 1400; }
+          to   { stroke-dasharray: 1400; stroke-dashoffset: 0; }
+        }
+        @keyframes zn3-fade { from { opacity: 0; } to { opacity: 1; } }
+        .zn3-chart .ys {
+          position: absolute; inset-block: 0; right: 2px;
+          display: flex; flex-direction: column; justify-content: space-between;
+          padding-block: 8px 26px;
+        }
+        .zn3-chart .ys i { font-style: normal; font-size: 9px; color: var(--ink3); }
+
+        /* The crosshair. The anchors carry no ink at all — they exist so the
+           cursor has a real target to travel to at each point on the curve. */
+        .zn3-chart .pt {
+          position: absolute; width: 1px; height: 1px;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+        }
+        .zn3-chart .cross {
+          position: absolute; top: 0; bottom: 18px; width: 1px;
+          background: var(--acc-line);
+          transform: translateX(-50%);
+          transition: left 420ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-chart .dot {
+          position: absolute; width: 8px; height: 8px; border-radius: 999px;
+          background: var(--acc-txt);
+          box-shadow: 0 0 0 2px #1a1a1f;
+          transform: translate(-50%, -50%);
+          transition: left 420ms cubic-bezier(0.22, 1, 0.36, 1),
+                      top 420ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        /* The reading. It follows the point rather than sitting in a corner,
+           and it is clamped away from the edges so it never leaves the plot. */
+        .zn3-chart .tip {
+          position: absolute; top: 2px;
+          display: grid; justify-items: end; gap: 1px;
+          min-width: 74px; padding: 7px 9px; border-radius: 9px;
+          background: #26262d;
+          box-shadow: 0 0 0 1px var(--hair);
+          transform: translateX(-50%);
+          transition: left 420ms cubic-bezier(0.22, 1, 0.36, 1);
+          animation: zn3-pop 220ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn3-chart .tip[data-low] { top: auto; bottom: 26px; }
+        .zn3-chart .tip i { font-style: normal; font-size: 9px; color: var(--ink3); }
+        .zn3-chart .tip b { font-size: 13px; font-weight: 500; color: var(--ink); }
+        .zn3-chart .tip u { text-decoration: none; font-size: 9px; color: var(--ink2); }
+        /* The chart's own empty line, which is the true one here. */
+        .zn3-chart .none {
+          position: absolute; inset: 0; display: grid; place-content: center;
+          max-width: 34ch; margin: 0 auto; text-align: center;
+          font-size: 10px; line-height: 1.7; color: var(--ink2);
+        }
+
+        /* ── SEO ─────────────────────────────────────────────────────────
+           Its own centrepiece, and it invents nothing: the Google result is
+           written from the fields as they are typed, and the counters are
+           counting characters the reader is watching arrive. */
+        .zn3-card { border-radius: 16px; padding: 15px 16px 16px; box-shadow: inset 0 0 0 1px var(--hair); }
+        .zn3-cardhead { display: flex; align-items: center; gap: 7px; }
+        .zn3-cardhead h3 { font-size: 12px; font-weight: 500; color: var(--ink); }
+        .zn3-cardhead .ic { width: 14px; height: 14px; color: var(--acc-txt); }
+        .zn3-cardhead .side { margin-inline-start: auto; font-size: 9px; color: var(--ink3); }
+        .zn3-cardsub { margin-top: 6px; font-size: 10px; line-height: 1.75; color: var(--ink2); }
+        .zn3-cardnote { margin-top: 11px; font-size: 9px; line-height: 1.7; color: var(--ink3); }
+
+        .zn3-field { margin-top: 14px; }
+        .zn3-field .lab { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+        .zn3-field label { font-size: 10px; font-weight: 500; color: var(--ink); }
+        .zn3-field .right { display: inline-flex; align-items: center; gap: 8px; }
+        .zn3-field .auto { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 400; color: var(--acc-txt); }
+        .zn3-field .auto .ic { width: 10px; height: 10px; }
+        .zn3-field .count { font-size: 9px; font-weight: 400; color: var(--ink3); }
+        .zn3-field .count[data-state="near"] { color: #e0a44a; }
+        .zn3-field .count[data-state="over"] { color: #f08a8a; }
+        .zn3-field .hint { margin-top: 5px; font-size: 9px; line-height: 1.6; color: var(--ink3); }
+        .zn3-inp {
+          display: block; min-height: 32px; border-radius: 9px; padding: 8px 10px;
+          font-size: 10.5px; line-height: 1.6; color: var(--ink);
+          background: rgba(250, 250, 250, 0.04);
+          box-shadow: inset 0 0 0 1px var(--hair);
+          transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-inp.area { min-height: 56px; }
+        .zn3-inp[data-on="true"] { box-shadow: inset 0 0 0 1.5px var(--acc-line); }
+        .zn3-inp i { font-style: normal; color: var(--ink3); }
+        .zn3-inp em { font-style: normal; }
+        /* The caret belongs to the field being written, and to no other. */
+        .zn3-inp[data-on="true"] em::after {
+          content: ""; display: inline-block; width: 1px; height: 1em;
+          margin-inline-start: 1px; vertical-align: -0.14em;
+          background: var(--ink); animation: zn-blink 1s steps(1) infinite;
+        }
+
+        .zn3-check { display: flex; gap: 10px; margin-top: 15px; border-radius: 12px; padding: 11px; box-shadow: inset 0 0 0 1px var(--hair); }
+        .zn3-check u { flex: 0 0 auto; width: 14px; height: 14px; margin-top: 2px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--hair2); }
+        .zn3-check b { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 400; color: var(--ink); }
+        .zn3-check .ic { width: 13px; height: 13px; }
+        .zn3-check .ic.ok { color: #6fbf8b; }
+        .zn3-check i { display: block; margin-top: 4px; font-style: normal; font-size: 9px; line-height: 1.6; color: var(--ink3); }
+
+        .zn3-save { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; }
+        .zn3-save span { font-size: 9px; color: var(--ink3); }
+        .zn3-save b {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 7px 14px; border-radius: 9px;
+          font-size: 10.5px; font-weight: 500;
+          background: var(--acc); color: var(--acc-on);
+          opacity: 0.4;
+          transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-save b[data-on="true"] { opacity: 1; }
+        .zn3-save .ic { width: 13px; height: 13px; }
+
+        /* A real Google result is a white card with a blue link, so this one
+           is too. It is the single surface in the section that keeps its own
+           colours: recoloured to the accent it would stop being a preview of
+           anything, and the preview is the whole reason the screen exists. */
+        .zn3-serp {
+          margin-top: 12px; border-radius: 12px; padding: 13px 14px;
+          background: #ffffff; font-family: Arial, sans-serif;
+        }
+        .zn3-serp .who { display: flex; align-items: center; gap: 9px; }
+        .zn3-serp .fav {
+          display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px;
+          background: #131316; color: #fafafa; font-size: 9px;
+        }
+        .zn3-serp .nm { font-size: 10px; line-height: 1.35; color: #202124; }
+        .zn3-serp .host { font-size: 10px; line-height: 1.35; color: #4d5156; }
+        .zn3-serp .ttl {
+          margin-top: 7px; font-size: 15px; line-height: 1.3; color: #1a0dab;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .zn3-serp .dsc { margin-top: 4px; font-size: 11px; line-height: 1.45; color: #4d5156; }
+
+        .zn3-card.social { margin-top: 14px; }
+        .zn3-social { margin-top: 12px; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--hair); }
+        .zn3-social img { display: block; width: 100%; height: 116px; object-fit: cover; }
+        .zn3-social .cap { padding: 10px 12px 12px; }
+        .zn3-social .host { font-size: 9px; letter-spacing: 0.06em; color: var(--ink3); }
+        .zn3-social .ttl {
+          margin-top: 3px; font-size: 11px; font-weight: 500; color: var(--ink);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .zn3-social .dsc {
+          margin-top: 3px; font-size: 9.5px; line-height: 1.5; color: var(--ink2);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* ── How a card is made ───────────────────────────────────────────
+           Every surface in this section is one of these boxes: the analytics
+           tiles, the chart, the note, the SEO cards, the share preview, the
+           inbox's empty state. They share one treatment so the section reads
+           as one material, and the treatment is switchable at ?cards= so it
+           can be chosen by looking rather than by arguing.
+
+           Dropping the boxes altogether is the move this kind of section
+           usually wants, and it is deliberately NOT offered: the product's own
+           dashboard puts its content in bordered cards, and a demo that
+           invents a screen the product does not have is worth nothing. What
+           varies is the material, never the structure.
+
+           Rings, never shadows, in all four. */
+        .zn3-panel {
+          /* ring — the default: a hairline on nothing. */
+          --card-bg: transparent;
+          --card-ring: inset 0 0 0 1px var(--hair);
+        }
+        /* fill — elevation by VALUE rather than by outline. Six outlined boxes
+           in a tile grid read as a wireframe; six filled ones read as a
+           product. No line at all, which is the point. */
+        .zn3-panel[data-cards="fill"] {
+          --card-bg: #1f1f25;
+          --card-ring: none;
+        }
+        /* well — the card is cut INTO the window rather than laid on it:
+           darker than its surround, with a single lit pixel along the top
+           edge where a real recess would catch the light. */
+        .zn3-panel[data-cards="well"] {
+          --card-bg: #151519;
+          --card-ring: inset 0 1px 0 rgba(250, 250, 250, 0.07);
+        }
+        /* lit — the hairline, but obeying the light this section already has
+           coming from above: bright along the top edge and fading to almost
+           nothing at the bottom. Costs no colour and no shadow. */
+        .zn3-panel[data-cards="lit"] {
+          --card-bg: rgba(250, 250, 250, 0.022);
+          --card-ring: inset 0 1px 0 rgba(250, 250, 250, 0.16),
+                       inset 0 0 0 1px rgba(250, 250, 250, 0.06);
+        }
+
+        .zn3-tile, .zn3-note, .zn3-chart, .zn3-card, .zn3-empty, .zn3-social {
+          background: var(--card-bg);
+          box-shadow: var(--card-ring);
+        }
+        /* The tile grid is the one place the outline fails: six of them in a
+           row read as a wireframe whatever the hairline is doing. Under the
+           default treatment they take the filled material instead, which is
+           the only per-element exception in the set. */
+        .zn3-panel[data-cards="lit"] .zn3-tile {
+          background: #1f1f25;
+          box-shadow: inset 0 1px 0 rgba(250, 250, 250, 0.05);
+        }
+        /* The arriving booking keeps the accent ring in every mode. It is the
+           one thing on the screen that is live, and that is what the accent
+           is for. */
+        .zn3-row { background: var(--lift2); box-shadow: inset 0 0 0 1px var(--acc-line); }
+        .zn3-panel[data-cards="fill"] .zn3-row { background: #24242b; }
+
+        /* ── The device ───────────────────────────────────────────────────
+           ادر shows a whole object. A screen rises from below the fold and
+           comes to rest as a COMPLETE device: all four corners, nothing
+           running off an edge. The first version cropped the body at the
+           bottom of the viewport, which reads as a screenshot that did not
+           finish loading rather than as a product shot.
+
+           Which device depends on the width, because that is what the reader
+           is holding, and each one is its real shape: a MacBook Pro display
+           is 16:10, an iPad is 4:3, a phone is 9:19.5. The ASPECT is on the
+           screen and the width is derived from the height, so the object has
+           real proportions instead of whatever the container happened to be.
+
+           Heights are a per cent of the box the section lays out in, never
+           vh: the panel is a third of a track at three times the deck, so a
+           per cent here is a per cent of one screen at any zoom, and vh
+           resolves before the root ZoomLock's scale. */
+        .zn-manage {
+          align-items: end;
+          justify-items: center;
+          /* Room under the device, because there is a bottom edge to see now. */
+          padding-bottom: calc(var(--inset) + 0.5rem);
+          --dev-seen: 67%;
+          --dev-body: 0px;
+        }
+        .zn-manage .zn-stagebox {
+          position: relative;
+          justify-content: flex-end;
+          gap: 0;
+        }
+        .zn3-switch { margin-bottom: 20px; position: relative; z-index: 2; }
+
+        .zn3-device {
+          position: relative;
+          z-index: 1;
+          /* Width comes from the screen's aspect, so this only ever shrinks
+             to the container and never stretches to it. */
+          width: auto;
+          max-width: 100%;
+          height: var(--dev-seen);
+          flex: 0 0 auto;
+          border-radius: 22px;
+          padding: 7px;
+          /* THE FRAME IS DARKER THAN THE SCREEN IT HOLDS, and darker than the
+             room as well: a bezel is the darkest thing in the picture and the
+             display is the only thing that is lit. Lit along its own top edge,
+             because the light in this section comes from above. */
+          background: linear-gradient(180deg, #16161c 0%, #0d0d11 100%);
+          box-shadow: inset 0 1px 0 rgba(250, 250, 250, 0.17),
+                      inset 0 0 0 1px rgba(250, 250, 250, 0.055),
+                      0 0 0 1px rgba(0, 0, 0, 0.62);
+          /* The rise. Long, arriving slowly, on the page's own curve, and
+             transform only so it composites. */
+          transition: transform 1180ms cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform;
+        }
+        /* The travelling state is the one that carries an attribute; at rest
+           there is nothing written, so a browser that never runs the
+           transition still finds the screen where it belongs. */
+        .zn3-device { transform: translateX(var(--dev-x, 0px)); }
+        .zn3-device[data-down] { transform: translateX(var(--dev-x, 0px)) translateY(128%); }
+
+        .zn3-device .zn3-app {
+          height: 100%;
+          width: auto;
+          flex: 1 1 auto;
+          /* NEVER WIDER THAN THE FRAME. The width is derived from the height
+             through the aspect, so on a tall viewport the derived width
+             outgrows the container and the screen paints straight over the
+             bezel and out past the corners. The aspect gives a little in that
+             case, which is the right thing to give: a slightly tall screen is
+             a rounding error, a screen hanging outside its own device is a
+             broken picture. */
+          max-width: 100%;
+          margin-inline: 0;
+          border-radius: 15px;
+          /* Seated INSIDE the frame rather than sitting on it. */
+          box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55);
+        }
+        /* Glass. A display is a sheet of it, and a sheet of glass under a
+           light coming from above catches that light near the top and nowhere
+           else. 0.055 paper at its strongest, which lifts the surface about
+           nine values and costs the type nothing. */
+        .zn3-device .zn3-app::after {
+          content: "";
+          position: absolute; inset: 0; z-index: 30;
+          pointer-events: none;
+          border-radius: inherit;
+          background: linear-gradient(
+            166deg,
+            rgba(250, 250, 250, 0.055) 0%,
+            rgba(250, 250, 250, 0.014) 24%,
+            rgba(250, 250, 250, 0) 44%
+          );
+        }
+
+        .zn3-cam { display: none; }
+
+        /* The light the screen throws into the room in FRONT of it, which
+           here is the strip the word lives in. */
+        .zn3-cast {
+          position: absolute;
+          left: 4%; right: 4%; bottom: calc(var(--dev-seen) + 10px);
+          height: 26%;
+          border-radius: 50%;
+          background: var(--acc);
+          opacity: 0.17;
+          filter: blur(11vh);
+          pointer-events: none;
+          z-index: 0;
+          will-change: transform;
+          transform: translateZ(0);
+          transition: opacity 1180ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-cast[data-down] { opacity: 0; }
+
+        /* ── The laptop ── */
+        @media (min-width: 1024px) {
+          /* THE LAPTOP IS CUT AT THE BOTTOM. A MacBook shown whole has to be
+             small enough to fit a screen, and small is the one thing this
+             object must not be — so it runs off the bottom edge and the
+             reader sees about sixty per cent of it, which is how a machine
+             this size actually meets a page.
+
+             --dev-seen is what shows; --dev-body is the rest of the frame,
+             in PIXELS, because a percentage margin resolves against the
+             containing block's width and would crop by a different amount on
+             every screen. The screen's content box is the visible part, so
+             nothing readable is ever below the cut. */
+          /* A TRUE 16:10 AT ANY HEIGHT.
+
+             The screen's width is derived from its height, so on a tall
+             window the derived width outgrew the container; the clamp that
+             stops it escaping the frame then squashed the aspect to 1.38, and
+             a fake 16:10 at full size is worse than a real one at ninety per
+             cent. So the height is capped by what the WIDTH can afford:
+             whatever the stagebox is, divided by the aspect. Below that cap
+             nothing changes, and above it the machine simply sits smaller and
+             stays a MacBook.
+
+             The vw term under-reads by the ZoomLock's factor, which makes the
+             cap slightly conservative — the safe direction. */
+          .zn-manage {
+            /* The budget is for the WHOLE screen, not the visible part of it.
+               The screen fills the machine and is cut with it, so it is
+               --dev-seen PLUS --dev-body tall, and sizing the cap against
+               only what shows left the hidden third to blow the width out
+               again: measured, 1.361 instead of 1.6. Subtracting the overhang
+               is what makes the sum fit. */
+            --dev-seen: min(66%, calc(
+              min(100vw - 2 * var(--gut), 1320px) / 1.62 + 18px - var(--dev-body)
+            ));
+            --dev-body: 150px;
+            padding-bottom: 0;
+          }
+          /* A wider box than section two gets. Its window holds a wizard card
+             and 1198 is right for that; this holds a 16:10 machine, and the
+             aspect turns every pixel of width into height it can use. Raising
+             the cap is what buys back the presence a true aspect costs,
+             instead of buying it by faking the shape. */
+          .zn-manage .zn-stagebox { width: var(--app-w, min(100%, 1320px)); }
+          .zn3-device {
+            height: calc(var(--dev-seen) + var(--dev-body));
+            margin-bottom: calc(-1 * var(--dev-body));
+            /* Uniform, so the screen fills the whole machine and is cut with
+               it rather than stopping at the fold. What keeps the content
+               reachable is the stage's max-height above, not this padding. */
+            padding: 9px;
+            border-radius: 17px;
+          }
+          .zn3-device .zn3-app {
+            aspect-ratio: 16 / 10;
+            border-radius: 9px;
+          }
+          /* The notch sits IN the display, so the top row of the screen has
+             to clear it. */
+          .zn3-cam {
+            display: block;
+            position: absolute; top: 9px; left: 50%;
+            width: 148px; margin-left: -74px; height: 19px;
+            border-radius: 0 0 10px 10px;
+            background: #0b0b0e;
+            z-index: 4;
+          }
+          .zn-manage .zn3-path { padding-top: 21px; }
+          /* No base. The machine is cut well above where it would be, and
+             drawing one below the fold is drawing something nobody sees. */
+        }
+
+        /* ── iPad ── */
+        @media (max-width: 1023px) and (min-width: 768px) {
+          .zn-manage { --dev-seen: 66%; }
+          .zn3-device {
+            border-radius: 30px;
+            padding: 14px;
+          }
+          .zn3-device .zn3-app { aspect-ratio: 4 / 3; border-radius: 18px; }
+          .zn3-cam {
+            display: block;
+            position: absolute; top: 5px; left: 50%;
+            width: 5px; height: 5px; margin-left: -2.5px;
+            border-radius: 999px;
+            background: rgba(250, 250, 250, 0.24);
+          }
+        }
+
+        /* ── Phone ── */
+        @media (max-width: 767px) {
+          /* A BIG phone, crossing the corner. Shown whole it had to be 292px
+             wide to fit the height, which is a toy: the screen inside was
+             narrower than the content wanted and everything had to scroll for
+             it. So the machine is half again as large, it runs off the bottom
+             the way the laptop does, and it is pushed left so it crosses that
+             corner rather than sitting in the middle of the panel. The word
+             lives top-right, so the object belongs bottom-left.
+
+             Unlike the laptop, the screen fills the WHOLE device here, past
+             the cut: the website is cut with the mockup, which is what a
+             phone lying past the edge of a page actually looks like. What
+             keeps that honest is the scrolling — the cursor puts whatever it
+             is working on into the top quarter of the screen, which is the
+             part still on the page. */
+          .zn-manage { --dev-seen: 82%; --dev-body: 360px; padding-bottom: 0; }
+          .zn3-device {
+            height: calc(var(--dev-seen) + var(--dev-body));
+            margin-bottom: calc(-1 * var(--dev-body));
+            /* Biased left, but only far enough that what the page edge takes
+               is bezel and a margin rather than words. At -10% it was eating
+               seventy pixels of the screen and the ends of every line with
+               it; the object still crosses the corner at -4%, and nothing
+               readable is on the wrong side of the edge. */
+            --dev-x: -4%;
+            /* The page edge does not chop the machine, it takes it. A mask
+               ramp along the leading edge means the object goes off the page
+               instead of stopping dead against it — the same reason the light
+               at the seam is blurred rather than ruled. */
+            -webkit-mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,0.55) 38px, #000 104px);
+            mask-image: linear-gradient(to right, transparent 0, rgba(0,0,0,0.55) 38px, #000 104px);
+            border-radius: 46px;
+            padding: 10px;
+          }
+          /* The clamp that stops the screen escaping its frame is lifted
+             HERE and only here. Everywhere else a device wider than its
+             container is a bug; on a phone it is the composition — the
+             machine is meant to be bigger than the page and to cross the
+             corner, so its true shape wins over the container's width. The
+             deck still clips at the viewport, so nothing scrolls sideways. */
+          .zn3-device { max-width: none; }
+          .zn3-device .zn3-app { aspect-ratio: 9 / 19.5; max-width: none; border-radius: 37px; }
+          /* The island, and the path line clears it. */
+          .zn3-cam {
+            display: block;
+            position: absolute; top: 14px; left: 50%;
+            width: 58px; height: 14px; margin-left: -29px;
+            border-radius: 999px;
+            background: #0b0b0e;
+            z-index: 4;
+          }
+          .zn-manage .zn3-path { padding-top: 34px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .zn3-device { transition: none; }
+          .zn3-device[data-down] { transform: none; }
+          .zn3-cast { transition: none; }
+          .zn3-cast[data-down] { opacity: 0.17; }
+        }
+
+        /* The cursor. Paper on obsidian rather than obsidian on paper — the
+           same shape, inverted, so it stays visible on this ground. */
+        /* left, PHYSICALLY, never inset-inline-start. The cursor's x is a
+           distance from the frame's physical left edge, so its anchor has to
+           be that same edge; the logical property resolves to right in an RTL
+           container and threw the pointer clean off the window — measured at
+           x=1468 on a frame ending at 1149. Logical properties are right for
+           content and wrong for a coordinate system measured in physical
+           pixels. Section two uses left: 0 for exactly this reason. */
+        .zn3-cursor {
+          position: absolute; top: 0; left: 0; z-index: 20;
+          pointer-events: none; will-change: transform;
+          transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-cursor svg {
+          display: block; transform-origin: 1px 1px;
+          transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-cursor[data-press="true"] svg { transform: scale(0.78); }
+
+        /* The switcher, in this section's own values. */
+        .zn3-switch { display: flex; gap: 6px; flex: 0 0 auto; }
+        .zn3-switch button {
+          padding: 7px 16px; border-radius: 999px;
+          font-size: 10px; line-height: 1; color: var(--ink2);
+          box-shadow: inset 0 0 0 1px var(--hair);
+          cursor: pointer;
+          transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn3-switch button:hover { color: var(--ink); }
+        .zn3-switch button[data-on="true"] {
+          background: var(--acc); color: var(--acc-on); box-shadow: none;
+        }
+
+        @media (min-width: 1200px) and (min-height: 840px) {
+          .zn-manage { --appbasis: 545px; }
+        }
+        @media (max-width: 1023px) {
+          .zn-manage { padding-top: calc(var(--inset) + 6rem); }
+          .zn-manage .zn-stagebox { width: 100%; }
+          .zn3-app { flex-basis: var(--app-h, 470px); }
+          .zn3-word {
+            font-size: var(--word-size, clamp(4.5rem, 22vw, 9rem));
+            top: calc(var(--inset) + 2.4rem);
+          }
+          .zn3-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 767px) {
+          /* The window was taking 660 of an 844px phone, which left the word
+             nowhere to be and made the whole screen read as one dense slab.
+             Smaller window, bigger word: on a phone the word is the thing
+             that says which of the three steps this is, and it was the thing
+             that had been squeezed out. */
+          /* A phone is the one place where the window cannot simply be made
+             smaller: the surfaces stack, so the content is 753px tall, and a
+             small window means the fit pass scales it into type nobody can
+             read. Measured, a 500px window put it at 0.598 — ten-pixel type
+             rendered at six. So the window keeps its height here and the
+             CONTENT is what comes down, which is the only lever that makes
+             the screen smaller without making it illegible. The word gets its
+             room from the trim rather than from the window. */
+          .zn3-app { flex-basis: var(--app-h, 640px); }
+          .zn3-word {
+            font-size: var(--word-size, clamp(5.5rem, 30vw, 11rem));
+            opacity: 0.3;
+          }
+          /* Furniture first, labels never. */
+          .zn3-chips { margin: 9px 0 8px; }
+          .zn3-empty { padding: 16px 14px; gap: 6px; }
+          .zn3-empty .disc { width: 32px; height: 32px; }
+          .zn3-sitebody h3 { margin: 3px 0 7px; }
+          .zn3-sitebody form { gap: 0.4rem !important; }
+          .zn3-sitebody form label { margin-bottom: 0.12rem !important; }
+          .zn3-sitebody form input,
+          .zn3-sitebody form select,
+          .zn3-sitebody form textarea { padding: 0.36rem 0.5rem !important; }
+          .zn3-sitebody form textarea { min-height: 30px; }
+          .zn3-sitebody form button { padding: 0.5rem 1rem !important; }
+          .zn3-row .det { margin-top: 8px; }
+          .zn3-row .msg { margin-top: 8px; padding: 7px 9px; }
+          .zn3-row .ctl { margin-top: 9px; padding-top: 8px; }
+          .zn3-path { padding: 12px 16px 7px; }
+          .zn3-stage { padding: 4px 16px 16px; }
+          /* The two panes stop being two: on a phone they are 150px each and
+             neither is readable. Stacked, the inbox is on top because it is
+             what the path says this screen is. */
+          .zn3-two, .zn3-two.seo { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+          .zn3-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+          /* Stacked, every surface is taller than the window and the fit pass
+             scales it — so what matters here is the RATIO, because that is
+             what decides whether the type can still be read. Section two's
+             own floor on a phone is 0.763 (the eight-tile picker), so that is
+             the bar: measured, these three came back 0.739, 0.786 and 0.583,
+             and the trims below put all of them at or above it.
+
+             THE SHARE PREVIEW IS BACK. It was hidden here to buy back a fit
+             ratio, and that trade does not exist any more: the screen scrolls
+             instead of scaling, so a surface is allowed to be taller than the
+             display and the cursor brings each field into view as it reaches
+             it. Nothing is hidden on a phone now; it is just further down,
+             which is where it is on the real screen too. */
+          .zn3-sitebody { padding: 12px 13px 13px; }
+          .zn3-sitebody h3 { font-size: 15px; margin: 5px 0 10px; }
+          .zn3-sitebody form { gap: 0.45rem !important; }
+          .zn3-sitebody form textarea { min-height: 38px; }
+        }
+
         /* ── The composer ─────────────────────────────────────────────────
            A placement tool at ?edit=1, not part of the page. It deliberately
            looks like a tool — dashed outlines, a mono readout — so it can
@@ -1770,6 +2995,645 @@ export default function Page() {
         }
         .zn-compose-panel .hint { margin-top: 8px; color: #666666; line-height: 1.5; }
 
+        /* Save, and it is the only control in the panel that changes the
+           page rather than the clipboard — so it is the only one with a
+           fill. It reports what happened instead of going quiet: a refusal
+           here is almost always the route answering 404 on a production
+           build, where the file cannot be written at all. */
+        .zn-compose-panel .save {
+          width: 100%; margin-top: 2px; padding: 8px; border-radius: 7px;
+          font-size: 11px; font-weight: 500; cursor: pointer;
+          background: #171717; color: #fafafa; box-shadow: none;
+          transition: background 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                      color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-compose-panel .save[data-state="saving"] { opacity: 0.6; }
+        .zn-compose-panel .save[data-state="done"] { background: #15803d; }
+        .zn-compose-panel .save[data-state="fail"] { background: #b91c1c; }
+
+        /* On ادر the tool is standing on obsidian, so it inverts with
+           everything else — a dashed near-black outline on a near-black
+           ground is not a placement tool, it is a guess. */
+        .zn-manage .zn-compose-box { outline-color: rgba(250, 250, 250, 0.5); }
+        .zn-manage .zn-compose-box[data-on="true"] { outline-color: #fafafa; }
+        .zn-manage .zn-compose-box .tag { background: #fafafa; color: #131316; }
+        .zn-manage .zn-compose-box .grip { background: #fafafa; }
+        .zn-manage .zn-compose-panel {
+          background: rgba(26, 26, 31, 0.94); color: #fafafa;
+          box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.14);
+        }
+        .zn-manage .zn-compose-panel .row { color: rgba(250, 250, 250, 0.6); }
+        .zn-manage .zn-compose-panel .row b { color: #fafafa; }
+        .zn-manage .zn-compose-panel .hint { color: rgba(250, 250, 250, 0.5); }
+        .zn-manage .zn-compose-panel .pick button,
+        .zn-manage .zn-compose-panel .acts button {
+          background: rgba(250, 250, 250, 0.08); color: #fafafa;
+          box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.16);
+        }
+        .zn-manage .zn-compose-panel .pick button[data-on="true"] {
+          background: #fafafa; color: #131316; box-shadow: none;
+        }
+        .zn-manage .zn-compose-panel pre {
+          background: #0c0c0e; color: #fafafa;
+          box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.1);
+        }
+        .zn-manage .zn-compose-panel .save { background: #fafafa; color: #131316; }
+        .zn-manage .zn-compose-panel .save[data-state="done"] { background: #4ade80; color: #08240f; }
+        .zn-manage .zn-compose-panel .save[data-state="fail"] { background: #f08a8a; color: #2a0808; }
+
+        /* ══ Section four: انشر ═════════════════════════════════════════
+           The publish step, and the page's SECOND deliberate colour — the
+           only one that is a whole screen rather than an accent on one.
+
+           The argument is the same one ادر's break rests on, and it is not an
+           invented palette. What this section is about is a site going LIVE,
+           and the product already has a colour for that: #15803d is what the
+           dashboard paints منشور · SSL مفعّل, what the site card's مباشر pill
+           is, what the free-subdomain block is, and what the Pro free-domain
+           banner is. It was on the page before this section existed. So the
+           ground is that hue taken down to near-black, and the accent is the
+           product's exact value.
+
+           ONE COLOUR, and it means one: there is no glow in this section, no
+           second wash, no tint on anything. The only gradient in the whole
+           panel is the seam ramp below, which exists because an edge is a cut
+           and for no other reason.
+
+           Three depths were built so the choice could be made by looking at
+           them on the real page, which is how ادر's accent was settled:
+           ?ground=deep is a step darker and nearly obsidian, ?ground=emerald
+           a step lighter and unmistakably a colour. pine is the default —
+           dark enough to be serious, green enough to be read as green rather
+           than as another black. */
+        .zn4-panel {
+          /* Type. The same three steps ادر measures, on a ground of almost
+             the same value, so the same numbers hold: paper at 16:1, the
+             second step at 7.5:1, the quietest at 5:1. */
+          --ink: #fafafa;
+          --ink2: rgba(250, 250, 250, 0.66);
+          --ink3: rgba(250, 250, 250, 0.52);
+          --hair: rgba(250, 250, 250, 0.11);
+          --hair2: rgba(250, 250, 250, 0.2);
+          --g: #0c2a1e;
+          --prev: #131316;
+          --lift: #14211b;
+          --lift2: #1a2822;
+          /* The fill takes the product's exact live green. As TYPE on this
+             ground #15803d measures 2.6:1, well under AA, so text and
+             hairlines take a lifted stop of the same hue instead — exactly
+             the split ادر makes between #5e6ad2 and #97a0ee. */
+          --acc: #15803d;
+          --acc-txt: #62d391;
+          --acc-on: #ffffff;
+          --acc-soft: rgba(21, 128, 61, 0.18);
+          --acc-line: rgba(98, 211, 145, 0.42);
+          /* The two other states the domain ladder has. The product uses
+             #b45309 for waiting and #5e6ad2 for working; both are lifted
+             here for the same reason the accent is. */
+          --wait: #e2a44a;
+          --wait-soft: rgba(226, 164, 74, 0.14);
+          --work: #97a0ee;
+          --work-soft: rgba(94, 106, 210, 0.2);
+          /* The card material is ادر's lit treatment, unchanged. The two dark
+             sections are one family and the ground hue is the only thing that
+             separates them; giving this one its own card grammar as well
+             would make it a different product rather than a different room. */
+          --card-bg: rgba(250, 250, 250, 0.022);
+          --card-ring: inset 0 1px 0 rgba(250, 250, 250, 0.16),
+                       inset 0 0 0 1px rgba(250, 250, 250, 0.06);
+          /* THE SEAM. It ramps FROM THE PREVIOUS GROUND, not from transparent:
+             transparent shows the deck through, and the deck is paper — which
+             would put a white band across the top of this panel, between two
+             dark screens. ادر ramps from transparent because the screen above
+             it really is paper. Here the screen above is obsidian, so that is
+             where the ramp starts. It finishes above the header, at 8% of the
+             panel, for the reason ادر's finishes at 10%: a longer one puts a
+             band of the old ground under the pill. */
+          background: linear-gradient(
+            to bottom,
+            var(--prev) 0%,
+            color-mix(in oklab, var(--prev), var(--g) 55%) 3.5%,
+            color-mix(in oklab, var(--prev), var(--g) 88%) 6%,
+            var(--g) 8%
+          );
+          color: var(--ink);
+        }
+        .zn4-panel[data-ground="deep"] { --g: #081d15; }
+        .zn4-panel[data-ground="emerald"] { --g: #0f3527; }
+
+        .zn-publish {
+          --nx: 0px; --ny: 0px; --appbasis: 660px;
+          position: absolute; inset: 0; z-index: 1;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          place-items: center;
+          padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.6rem);
+        }
+        .zn-publish .zn-stagebox {
+          position: relative;
+          display: flex; flex-direction: column;
+          /* STRETCH, not centre. The shared stagebox centres its children on
+             the cross axis, which makes a flex child shrink to fit — and a
+             window whose width is 100% of a shrink-to-fit box resolves to its
+             own content. Measured, that brought a 1200px browser back to 408
+             twice over, once through this and once through the basis. */
+          align-items: stretch;
+          width: var(--app-w, min(100%, 1200px));
+          height: 100%;
+          min-height: 0;
+        }
+
+        /* The publish word: the hero's THIRD column, on the hero's roll and
+           in the hero's face. Paper, faded as a LAYER via opacity — never as
+           alpha in the colour, because connected Arabic letters overlap at
+           every join and a translucent colour composites each join twice. */
+        .zn4-word {
+          position: absolute; z-index: 0; pointer-events: none;
+          /* Lower than ادر's word, and the reason is the word itself: انشر
+             carries the dots of ن and ش at the top of the line, and at ادر's
+             offset the panel edge took them off. Measured against the glyphs,
+             not against the other section's number. */
+          top: clamp(1rem, 6vh, 4.2rem); inset-inline-start: clamp(0.5rem, 2vw, 3rem);
+          display: inline-grid; grid-template-columns: minmax(0, 1fr);
+          padding-block: 0.2em; margin-block: -0.2em;
+          clip-path: inset(0 -100vw);
+          font-size: var(--word-size, min(258px, 21vw));
+          transform: translate(var(--word-x, 0px), var(--word-y, 0px));
+          line-height: 1.24; white-space: nowrap;
+          color: #fafafa;
+          opacity: 0.24;
+          -webkit-font-smoothing: antialiased;
+        }
+        .zn4-word > span {
+          grid-area: 1 / 1; justify-self: start; white-space: nowrap;
+          transition: transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 620ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn4-word > span[data-state="idle"] { opacity: 0; transform: translateY(130%); pointer-events: none; }
+        .zn4-word > span[data-state="out"] {
+          opacity: 0; transform: translateY(-130%);
+          transition: transform 420ms cubic-bezier(0.55, 0.085, 0.68, 0.53),
+                      opacity 260ms linear;
+        }
+        .zn4-word > span[data-state="in"] { opacity: 1; transform: none; }
+
+        .zn4-switch { display: flex; gap: 6px; flex: 0 0 auto; margin-bottom: 16px; position: relative; z-index: 2; }
+        .zn4-switch button {
+          border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 500;
+          color: var(--ink3); background: transparent;
+          box-shadow: inset 0 0 0 1px var(--hair);
+          transition: color 240ms, background-color 240ms, box-shadow 240ms;
+        }
+        .zn4-switch button:hover { color: var(--ink); }
+        .zn4-switch button[data-on="true"] {
+          color: var(--ink); background: rgba(250, 250, 250, 0.08);
+          box-shadow: inset 0 0 0 1px var(--hair2);
+        }
+
+        /* ── The browser ──────────────────────────────────────────────────
+           A COMPLETE window: all four corners, nothing running off an edge.
+           ادر rises a device that is cut, because what it shows is a screen
+           somebody works on and a machine that size meets a page by running
+           past it. What this section shows is an ADDRESS, and an address bar
+           cut off at an edge is not an address bar.
+
+           The arrival is a short rise, and the state that travels is the one
+           carrying the attribute: at rest nothing is written, so a browser
+           that never runs the transition still finds the window here. */
+        .zn4-win {
+          position: relative; z-index: 1;
+          /* The BASIS IS A HEIGHT, because this is the item in the stagebox's
+             column. Putting it on the window inside instead made the basis a
+             WIDTH — that container is a row — and a 560px basis with shrink
+             brought a 1200px browser back to 408. */
+          flex: 0 1 var(--app-h, var(--appbasis)); min-height: 0;
+          width: 100%;
+          display: flex;
+          /* The composed nudge belongs to the stagebox, which already applies
+             it; repeating it here would move the window twice. What travels
+             here is the arrival and nothing else. */
+          transition: transform 1180ms cubic-bezier(0.22, 1, 0.36, 1),
+                      opacity 900ms cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform;
+        }
+        .zn4-win[data-down] { opacity: 0; transform: translateY(7%); }
+        .zn4-app {
+          position: relative;
+          width: 100%; max-width: 1200px;
+          flex: 1 1 auto;
+          min-height: 0; height: 100%;
+          margin-inline: auto;
+          border-radius: 16px;
+          background: var(--lift);
+          box-shadow: 0 0 0 1px var(--hair), 0 0 0 4px rgba(8, 24, 18, 0.5);
+          overflow: hidden;
+          contain: layout paint;
+          display: grid; grid-template-rows: auto auto minmax(0, 1fr);
+        }
+        /* Glass, the same sheet ادر's display catches: a light from above
+           lands near the top and nowhere else. */
+        .zn4-app::after {
+          content: "";
+          position: absolute; inset: 0; z-index: 30;
+          pointer-events: none; border-radius: inherit;
+          background: linear-gradient(
+            166deg,
+            rgba(250, 250, 250, 0.05) 0%,
+            rgba(250, 250, 250, 0.012) 22%,
+            rgba(250, 250, 250, 0) 42%
+          );
+        }
+
+        .zn4-chrome {
+          display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+          align-items: center; gap: 12px;
+          padding: 9px 13px;
+          background: rgba(250, 250, 250, 0.035);
+          box-shadow: inset 0 -1px 0 var(--hair);
+        }
+        .zn4-chrome .lights { display: flex; gap: 5px; }
+        .zn4-chrome .lights i {
+          width: 8px; height: 8px; border-radius: 50%;
+          background: rgba(250, 250, 250, 0.16);
+        }
+        .zn4-chrome .pad { width: 34px; }
+        /* The address bar. The SUBJECT of this section, not its furniture:
+           the cursor types in it, and what it reads at the end is the domain
+           the reader watched being bought two beats earlier. */
+        .zn4-url {
+          justify-self: center;
+          display: inline-flex; align-items: center; gap: 6px;
+          min-width: min(340px, 60%);
+          padding: 4px 12px; border-radius: 999px;
+          background: rgba(0, 0, 0, 0.24);
+          box-shadow: inset 0 0 0 1px var(--hair);
+          font-size: 11.5px; color: var(--ink2);
+          transition: box-shadow 320ms, background-color 320ms;
+        }
+        .zn4-url .ic { width: 10px; height: 10px; color: var(--acc-txt); flex: 0 0 auto; }
+        .zn4-url b { font-weight: 500; color: var(--ink); letter-spacing: 0.01em; }
+        .zn4-url[data-typing] {
+          background: rgba(0, 0, 0, 0.34);
+          box-shadow: inset 0 0 0 1px var(--acc-line);
+        }
+
+        /* The load. On only while a page is actually being swapped. */
+        .zn4-load { height: 2px; background: transparent; }
+        .zn4-load[data-on] {
+          background: linear-gradient(90deg, var(--acc) 0%, var(--acc-txt) 100%);
+          animation: zn4-load 760ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          transform-origin: right center;
+        }
+        @keyframes zn4-load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+        /* Hidden, not auto: the reader is watching, not driving, so there is
+           no scrollbar and no gesture to hijack. Programmatic scrolling still
+           works, which is the only kind this window does — the cursor brings
+           each target into view before it moves to it. */
+        .zn4-stage { position: relative; min-height: 0; overflow: hidden; display: grid; }
+        /* NOTHING IN THIS WINDOW IS TOUCHABLE. pointer-events is on the
+           SCREEN and not on the stage, so a touch still reaches the frame
+           underneath and the sideways swipe that changes surface keeps
+           working. */
+        .zn4-screen {
+          pointer-events: none;
+          display: grid; align-self: start; min-height: 100%;
+          animation: zn-card-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn4-screen-in {
+          display: flex; flex-direction: column; gap: 13px;
+          padding: 20px 22px 22px;
+        }
+
+        .zn4-cursor {
+          position: absolute; left: 0; top: 0; z-index: 40; pointer-events: none;
+          transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform;
+        }
+        .zn4-cursor svg { display: block; transition: transform 170ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .zn4-cursor[data-press="true"] svg { transform: scale(0.78); }
+
+        /* ── The dashboard, on the green ─────────────────────────────────
+           The real screens, in ادر's material. Same cards, same hairlines,
+           same three steps of paper type. */
+        .zn4-head h2 {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 15px; font-weight: 700; color: var(--ink);
+        }
+        .zn4-head p { margin-top: 4px; font-size: 11.5px; color: var(--ink2); }
+        .zn4-head .ic { width: 14px; height: 14px; }
+        .zn4-label {
+          font-size: 10px; font-weight: 600; letter-spacing: 0.14em;
+          text-transform: uppercase; color: var(--ink3); margin-top: 2px;
+        }
+        .zn4-card {
+          border-radius: 13px; padding: 15px 16px;
+          background: var(--card-bg); box-shadow: var(--card-ring);
+        }
+        .zn4-cardhead { display: flex; align-items: center; gap: 6px; }
+        .zn4-cardhead h3 { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+        .zn4-cardhead .ic { width: 12px; height: 12px; }
+        .ic.acc { color: var(--acc-txt); }
+        .zn4-sub { margin-top: 4px; font-size: 11px; color: var(--ink2); }
+
+        .zn4-gift {
+          margin-top: 11px; display: flex; align-items: center; gap: 7px;
+          border-radius: 9px; padding: 8px 10px;
+          background: var(--acc-soft);
+          box-shadow: inset 0 0 0 1px var(--acc-line);
+          font-size: 11px; color: var(--acc-txt);
+        }
+        .zn4-gift .ic { width: 12px; height: 12px; flex: 0 0 auto; }
+
+        .zn4-search { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+        .zn4-field {
+          position: relative; flex: 1 1 auto; min-width: 0;
+          display: flex; align-items: center; gap: 7px;
+          border-radius: 999px; padding: 7px 12px;
+          background: rgba(0, 0, 0, 0.2);
+          box-shadow: inset 0 0 0 1px var(--hair);
+          font-size: 12px; color: var(--ink);
+          transition: box-shadow 240ms;
+        }
+        .zn4-field[data-on="true"] { box-shadow: inset 0 0 0 1px var(--acc-line); }
+        .zn4-field .ic { width: 12px; height: 12px; color: var(--ink3); flex: 0 0 auto; }
+        .zn4-field .val { min-height: 15px; display: inline-flex; align-items: center; }
+        .zn4-field .ph { color: var(--ink3); font-style: normal; }
+        .zn4-field em {
+          display: inline-block; width: 1px; height: 13px; margin-inline-start: 1px;
+          background: var(--acc-txt);
+          animation: zn-caret 1s steps(1) infinite;
+        }
+        .zn4-go {
+          flex: 0 0 auto;
+          display: inline-flex; align-items: center; gap: 5px;
+          border-radius: 999px; padding: 7px 15px;
+          background: var(--ink); color: #0c2a1e;
+          font-size: 11.5px; font-weight: 600;
+          transition: opacity 240ms;
+        }
+        .zn4-go[data-busy="true"] { opacity: 0.6; }
+        .zn4-go .ic { width: 11px; height: 11px; }
+
+        .zn4-table {
+          margin-top: 13px; border-radius: 10px; overflow: hidden;
+          box-shadow: inset 0 0 0 1px var(--hair);
+        }
+        .zn4-tr {
+          display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr) auto auto;
+          align-items: center; gap: 10px;
+          padding: 8px 12px; font-size: 11.5px;
+          box-shadow: inset 0 1px 0 var(--hair);
+          animation: zn-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn4-tr:first-child { box-shadow: none; }
+        .zn4-tr .end { text-align: end; justify-self: end; }
+        .zn4-th {
+          background: rgba(0, 0, 0, 0.18);
+          font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em;
+          text-transform: uppercase; color: var(--ink3);
+        }
+        .zn4-tr .dom { color: var(--ink); font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
+        .zn4-tr .price i { color: var(--ink3); font-style: normal; }
+        .zn4-tf {
+          padding: 8px 12px; font-size: 10.5px; color: var(--ink3);
+          background: rgba(0, 0, 0, 0.18);
+          box-shadow: inset 0 1px 0 var(--hair);
+        }
+        .zn4-muted { color: var(--ink3); font-style: normal; }
+
+        .zn4-pill {
+          display: inline-flex; align-items: center; gap: 4px;
+          border-radius: 999px; padding: 2px 8px;
+          font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em;
+          text-transform: uppercase;
+          background: rgba(250, 250, 250, 0.06); color: var(--ink3);
+        }
+        .zn4-pill .ic { width: 10px; height: 10px; }
+        .zn4-pill.live, .zn4-pill[data-tone="live"] { background: var(--acc-soft); color: var(--acc-txt); }
+        .zn4-pill.work, .zn4-pill[data-tone="work"] { background: var(--work-soft); color: var(--work); }
+        .zn4-pill[data-tone="wait"] { background: var(--wait-soft); color: var(--wait); }
+        .zn4-free {
+          display: inline-block; border-radius: 999px; padding: 2px 8px;
+          background: var(--acc-soft); color: var(--acc-txt);
+          font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+        }
+        .zn4-buy {
+          border-radius: 999px; padding: 4px 11px;
+          background: var(--acc); color: var(--acc-on);
+          font-size: 10.5px; font-weight: 600; white-space: nowrap;
+          transition: opacity 240ms;
+        }
+        .zn4-buy[data-busy="true"] { opacity: 0.55; }
+        .spin { animation: zn4-spin 1.1s linear infinite; }
+        @keyframes zn4-spin { to { transform: rotate(360deg); } }
+
+        /* The connected domain, walking the product's own status ladder. */
+        .zn4-domrow {
+          display: flex; align-items: center; justify-content: space-between;
+          gap: 12px; flex-wrap: wrap;
+          animation: zn-card-in 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn4-domrow .who { display: flex; align-items: center; gap: 10px; }
+        .zn4-domrow .disc {
+          width: 30px; height: 30px; flex: 0 0 auto;
+          display: inline-flex; align-items: center; justify-content: center;
+          border-radius: 8px;
+          background: rgba(250, 250, 250, 0.06); color: var(--ink2);
+          transition: background-color 520ms, color 520ms;
+        }
+        .zn4-domrow .disc .ic { width: 14px; height: 14px; }
+        .zn4-domrow .disc[data-tone="wait"] { background: var(--wait-soft); color: var(--wait); }
+        .zn4-domrow .disc[data-tone="work"] { background: var(--work-soft); color: var(--work); }
+        .zn4-domrow .disc[data-tone="live"] { background: var(--acc-soft); color: var(--acc-txt); }
+        .zn4-domrow .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .zn4-domrow code {
+          font-size: 13px; font-weight: 600; color: var(--ink);
+          font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        }
+        .zn4-domrow .bot { margin-top: 3px; font-size: 10.5px; color: var(--ink2); }
+        .zn4-domrow .bot strong { color: var(--ink); font-weight: 600; }
+        .zn4-domrow .acts { display: flex; gap: 6px; }
+        .zn4-ghost {
+          display: inline-flex; align-items: center; gap: 4px;
+          border-radius: 7px; padding: 4px 9px;
+          font-size: 10.5px; font-style: normal; color: var(--ink2);
+          background: var(--card-bg); box-shadow: var(--card-ring);
+        }
+        .zn4-ghost .ic { width: 10px; height: 10px; opacity: 0.75; }
+
+        /* ── The site card, from SiteCard.tsx ───────────────────────────── */
+        .zn4-site {
+          display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+          border-radius: 13px; overflow: hidden;
+          background: var(--card-bg); box-shadow: var(--card-ring);
+        }
+        .zn4-site .cover { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+        .zn4-site .cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+        .zn4-site .cover .stripe {
+          position: absolute; inset-inline: 0; top: 0; height: 3px; background: var(--acc);
+        }
+        .zn4-site .status {
+          position: absolute; inset-inline-end: 10px; top: 10px;
+          display: inline-flex; align-items: center; gap: 5px;
+          border-radius: 999px; padding: 3px 9px;
+          font-size: 9.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+          background: rgba(10, 20, 16, 0.72); color: rgba(250, 250, 250, 0.8);
+          transition: background-color 420ms, color 420ms;
+        }
+        .zn4-site .status[data-live="true"] {
+          background: rgba(21, 128, 61, 0.88); color: #ffffff;
+        }
+        .zn4-site .status .dot {
+          width: 5px; height: 5px; border-radius: 50%; background: #ffffff;
+          animation: zn4-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes zn4-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+        .zn4-site .body { padding: 14px 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+        .zn4-site .body h3 { font-size: 15px; font-weight: 700; color: var(--ink); }
+        .zn4-site .kind { font-size: 11px; color: var(--ink2); margin-top: -4px; }
+        .zn4-site .draft {
+          display: inline-block; border-radius: 7px; padding: 3px 8px;
+          background: var(--wait-soft); color: var(--wait);
+          font-size: 11px; font-weight: 500;
+        }
+        .zn4-site .host {
+          display: inline-flex; align-items: center; gap: 5px;
+          border-radius: 7px; padding: 3px 8px;
+          background: var(--acc-soft); color: var(--acc-txt);
+          font-size: 11px; font-weight: 500;
+          animation: zn-card-in 460ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        .zn4-site .host .ic { width: 11px; height: 11px; }
+        .zn4-site .acts { margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+        .zn4-site .acts .zn4-go { background: var(--acc); color: var(--acc-on); }
+
+        .zn4-note {
+          display: flex; align-items: center; gap: 7px;
+          font-size: 10.5px; color: var(--ink3);
+        }
+        .zn4-note .ic { width: 11px; height: 11px; }
+
+        /* ── The published site ──────────────────────────────────────────
+           The payoff, and the one thing this page has never shown: ابن fills
+           in a form for seventy seconds and never shows the website that
+           comes out. It is the real template's own content in the real
+           template's own preset — the onyx palette the wizard picks one
+           screen up and the same one ادر's booking form is painted in, so
+           the site the reader watched being built, run and published is one
+           site throughout.
+
+           The photograph is room-1, NOT the template's own hero: that file is
+           Unsplash stock with wine glasses across the foreground and bare
+           arms, and is wrong for this brand. */
+        .zn4-live {
+          background: var(--s-bg); color: var(--s-txt);
+          min-height: 100%;
+        }
+        .zn4-live header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 13px 22px;
+          box-shadow: inset 0 -1px 0 var(--s-line);
+        }
+        .zn4-live .mark {
+          font-size: 14px; font-weight: 600; letter-spacing: 0.04em; color: var(--s-txt);
+        }
+        .zn4-live nav { display: flex; align-items: center; gap: 16px; font-size: 11px; }
+        .zn4-live nav i { font-style: normal; color: var(--s-mut); }
+        .zn4-live nav b {
+          border-radius: 2px; padding: 5px 13px;
+          background: var(--s-acc); color: var(--s-bg);
+          font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
+        }
+        .zn4-live .hero { position: relative; aspect-ratio: 21 / 9; overflow: hidden; }
+        .zn4-live .hero img { width: 100%; height: 100%; object-fit: cover; }
+        .zn4-live .hero .over {
+          position: absolute; inset: 0;
+          display: flex; flex-direction: column; justify-content: center; align-items: center;
+          gap: 9px; text-align: center; padding: 0 8%;
+          background: linear-gradient(180deg, rgba(10, 10, 12, 0.28) 0%, rgba(10, 10, 12, 0.72) 100%);
+        }
+        .zn4-live .eyebrow {
+          font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--s-acc);
+        }
+        .zn4-live h1 {
+          font-family: "Playfair Display", "Times New Roman", serif;
+          font-size: clamp(22px, 3.4vw, 40px); line-height: 1.22; font-weight: 500;
+          white-space: pre-line; color: var(--s-txt);
+        }
+        .zn4-live .hero p {
+          max-width: 58ch; font-size: 11px; line-height: 1.7; color: rgba(250, 250, 250, 0.72);
+        }
+        .zn4-live .ctas { display: flex; gap: 9px; margin-top: 3px; }
+        .zn4-live .ctas b {
+          border-radius: 2px; padding: 7px 18px;
+          background: var(--s-acc); color: var(--s-bg);
+          font-size: 11px; font-weight: 600;
+        }
+        .zn4-live .ctas i {
+          border-radius: 2px; padding: 7px 18px;
+          box-shadow: inset 0 0 0 1px var(--s-line);
+          font-style: normal; font-size: 11px; color: var(--s-txt);
+        }
+        .zn4-live .dishes { padding: 22px 22px 26px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .zn4-live .dishes .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; }
+        .zn4-live .dish img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2px; }
+        .zn4-live .dish .cap { margin-top: 7px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .zn4-live .dish b { font-size: 11px; font-weight: 500; color: var(--s-txt); }
+        .zn4-live .dish u { text-decoration: none; font-size: 11px; color: var(--s-acc); }
+
+        /* ── Narrow ─────────────────────────────────────────────────────── */
+        @media (max-width: 1023px) {
+          .zn-publish { --appbasis: 100%; }
+          .zn-publish .zn-stagebox { width: 100%; }
+          .zn4-site { grid-template-columns: minmax(0, 1fr); }
+        }
+        @media (max-width: 767px) {
+          .zn-publish { padding-top: calc(var(--inset) + 6rem); }
+          .zn4-word { font-size: var(--word-size, min(150px, 34vw)); opacity: 0.28; }
+          .zn4-screen-in { padding: 14px 14px 16px; gap: 10px; }
+          .zn4-chrome { padding: 7px 10px; gap: 8px; }
+          .zn4-url { min-width: 0; font-size: 10px; padding: 3px 9px; }
+          .zn4-search { flex-wrap: wrap; }
+          .zn4-tr { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 6px; padding: 7px 9px; font-size: 10.5px; }
+          .zn4-tr > *:nth-child(3) { display: none; }
+          .zn4-live .dishes .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn4-live .dish:last-child { display: none; }
+          .zn4-domrow .acts { display: none; }
+        }
+
+        /* The composer inverts with the ground, exactly as it does on ادر: a
+           dashed near-black outline on a near-black screen is not a placement
+           tool, it is a guess. */
+        .zn-publish .zn-compose-box { outline-color: rgba(250, 250, 250, 0.5); }
+        .zn-publish .zn-compose-box[data-on="true"] { outline-color: #fafafa; }
+        .zn-publish .zn-compose-box .tag { background: #fafafa; color: #0c2a1e; }
+        .zn-publish .zn-compose-box .grip { background: #fafafa; }
+        .zn-publish .zn-compose-panel {
+          background: rgba(12, 42, 30, 0.92);
+          box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.14);
+        }
+        .zn-publish .zn-compose-panel .row { color: rgba(250, 250, 250, 0.6); }
+        .zn-publish .zn-compose-panel .row b { color: #fafafa; }
+        .zn-publish .zn-compose-panel .hint { color: rgba(250, 250, 250, 0.5); }
+        .zn-publish .zn-compose-panel .pick button,
+        .zn-publish .zn-compose-panel .acts button {
+          color: rgba(250, 250, 250, 0.75);
+          box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.2);
+        }
+        .zn-publish .zn-compose-panel .pick button[data-on="true"] {
+          background: rgba(250, 250, 250, 0.14); color: #fafafa;
+        }
+        .zn-publish .zn-compose-panel pre {
+          background: rgba(0, 0, 0, 0.3); color: rgba(250, 250, 250, 0.7);
+        }
+        .zn-publish .zn-compose-panel .save { background: #fafafa; color: #0c2a1e; }
+        .zn-publish .zn-compose-panel .save[data-state="done"] { background: #4ade80; color: #08240f; }
+        .zn-publish .zn-compose-panel .save[data-state="fail"] { background: #f08a8a; color: #2a0808; }
+
+
+
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
           .zn-card, .zn-dish, .zn-finish, .zn-service, .zn-shot img { animation: none; }
@@ -1778,12 +3642,19 @@ export default function Page() {
           .zn-preset, .zn-hour u, .zn-in { transition: none; }
           .zn-in[data-on="true"] em::after { animation: none; }
           .zn-words > span { animation: none; }
+          .zn3-chart .line, .zn3-chart .area, .zn3-chart .tip { animation: none; }
+          .zn3-chart .cross, .zn3-chart .dot, .zn3-chart .tip { transition: none; }
           .zn-w, .zn-slot { transition: none; }
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
           #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
           #zn-claim .line, #zn-claim .dot { transition: none; }
+          .zn4-win, .zn4-cursor, .zn4-cursor svg, .zn4-word > span,
+          .zn4-site .status, .zn4-domrow .disc, .zn4-switch button { transition: none; }
+          .zn4-screen, .zn4-tr, .zn4-domrow, .zn4-site .host { animation: none; }
+          .zn4-load[data-on], .zn4-site .status .dot, .spin { animation: none; }
+          .zn4-win[data-down] { transform: none; opacity: 1; }
         }
       ` }} />
 
@@ -1791,10 +3662,15 @@ export default function Page() {
           a hairline ring and no underline, so nothing divides the page.
           Fixed, so it costs the hero no vertical space and the words stay
           dead centre in the viewport. */}
+      {/* The header crosses every screen, so it takes the ground it is
+          standing on. On ادر it inverts with the panel and on the same clock
+          as the move, which is what makes arriving there read as one event
+          rather than a dark box sliding under a white pill. */}
       <header
         id="pill-header"
         ref={headerRef}
         dir="rtl"
+        data-dark={deck >= 2}
         className={`${ui.className} fixed inset-x-0 top-[var(--inset)] z-50 flex justify-center px-[var(--gut)]`}
       >
         <div className="w-full max-w-full md:w-auto">
@@ -2144,10 +4020,10 @@ export default function Page() {
           against the real viewport, so they are centred on the reader's
           screen at any zoom. Safe here because the page is one screen and the
           body already has overflow: hidden. */}
-      {/* The deck. Two screens on one track, a gesture apart. Fixed rather
+      {/* The deck. Four screens on one track, a gesture apart. Fixed rather
           than any height in viewport units, for the reason below; the track
-          is twice the deck and each panel is half the track, so a panel is
-          exactly one screen whatever zoom the root is writing. */}
+          is four times the deck and each panel a quarter of the track, so a
+          panel is exactly one screen whatever zoom the root is writing. */}
       <div id="zn-deck" data-moving={!settled} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
@@ -2257,6 +4133,42 @@ export default function Page() {
                slab, and Arabic at that scale wants stroke contrast rather than
                mass. The face rail is hero furniture and is hidden here anyway,
                so this word is not its to set. */
+            wordClass={display.className}
+            wordWeight={500}
+            wordLh={1.28}
+            edit={edit}
+          />
+        </div>
+
+        {/* Section three: ادر, the manage step — the three dashboard surfaces
+            the owner lives in once the site exists. The one panel on this
+            page that is not white paper: it is the inside of the product, so
+            it is obsidian, and it carries the page's single accent. */}
+        <div className="zn-panel zn3-panel" data-accent={accent} data-cards={cards} aria-hidden={deck !== 2}>
+          {/* The light for the seam. It hangs UPWARD past the top of this
+              panel onto the foot of ابن, exactly the way the hero's foot glow
+              hangs down onto the head of it — one light allowed to cross,
+              never two that have to be made to match. */}
+          <div className="zn3-glow" aria-hidden><i /></div>
+          <ManageSection
+            active={deck === 2 && settled}
+            uiClass={appUi.className}
+            wordClass={display.className}
+            wordWeight={500}
+            wordLh={1.28}
+            edit={edit}
+          />
+        </div>
+
+        {/* Section four: انشر, the publish step — the address being bought,
+            the site going live under it, and then the site itself. The one
+            panel with a colour of its own: still the inside of the product,
+            but a different room, and the hue is the one the product already
+            paints a live site in. */}
+        <div className="zn-panel zn4-panel" data-ground={ground} aria-hidden={deck !== 3}>
+          <PublishSection
+            active={deck === 3 && settled}
+            uiClass={appUi.className}
             wordClass={display.className}
             wordWeight={500}
             wordLh={1.28}

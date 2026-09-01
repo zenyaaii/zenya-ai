@@ -4,7 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
 import { themePreview, themePreviewFallback } from "@/lib/theme-previews"
 import { TEMPLATE_RUNS, type Ctx, type Form } from "./templates"
-import Composer, { EMPTY_LAYOUT, layoutVars, loadLayout, type Layout } from "./Composer"
+import Composer, { layoutVars, pick, type Layout, type Placement } from "./Composer"
+import placement from "./placement.json"
+import { HALT, KEY, THINK, makeRunner, useFit, type Cursor } from "./runner"
 
 /* ─────────────────────────────────────────────────────────────────────────
    Section two: ابن — the build step.
@@ -45,17 +47,9 @@ const TEMPLATES = [
 const WORDS = ["ابن", "تبني", "بناء", "تحسين"]
 const WORD_HOLD = 4600
 
-/* Timings. The cursor is slow enough to be followed and the typing slow
-   enough to read as a person rather than a machine. */
-const MOVE = 620
-const PRESS = 170
-const SETTLE = 260
-const KEY = 46
-const THINK = 900
-
-/* Thrown to unwind a run when the section goes off screen or unmounts.
-   Caught by the runner itself, and means nothing else. */
-const HALT = Symbol("halt")
+/* The cursor engine, the typing beat and the halt token all live in
+   ./runner, because section three drives its own surfaces with exactly the
+   same machinery. */
 
 export default function BuildSection({
   active,
@@ -107,30 +101,25 @@ export default function BuildSection({
   const [focus, setFocus] = useState<string | null>(null)
   /* The cursor is the one thing here that is decoration, so it stays out of
      the document until a run is actually driving one. */
-  const [cursor, setCursor] = useState<{ x: number; y: number; press: boolean } | null>(null)
+  const [cursor, setCursor] = useState<Cursor>(null)
   /* The wizard's closing bar, and whether its button has been pressed. */
   const [finish, setFinish] = useState<false | "ready" | "going">(false)
 
-  /* Placement, and where it comes from. An ordinary visitor has no composer
-     and no stored layout, so this stays EMPTY and every rule falls back to the
-     stylesheet's own numbers — the page renders exactly as it would without
-     any of this. */
+  /* Placement, and where it comes from: the file the composer saves into.
+     It is applied ALWAYS now, not only under ?edit=1 — a placement that only
+     existed while the tool was open was the old problem. An untouched cell in
+     that file is all zeroes and all nulls, which writes no variables at all,
+     so every rule falls back to the stylesheet's own numbers and the page
+     renders exactly as it would without any of this. */
   const [wide, setWide] = useState(true)
-  const [layout, setLayout] = useState<Layout>(EMPTY_LAYOUT)
+  const [layout, setLayout] = useState<Layout>(() => pick(placement as Placement, "build", true))
   useEffect(() => {
-    if (!edit) return
     const mq = window.matchMedia("(min-width: 1024px)")
-    const sync = () => { setWide(mq.matches); setLayout(loadLayout(mq.matches)) }
+    const sync = () => { setWide(mq.matches); setLayout(pick(placement as Placement, "build", mq.matches)) }
     sync()
     mq.addEventListener("change", sync)
     return () => mq.removeEventListener("change", sync)
-  }, [edit])
-
-  /* Kept as it is dragged, so a reload comes back to the same composition. */
-  const writeLayout = useCallback((l: Layout) => {
-    setLayout(l)
-    try { localStorage.setItem(`zn-compose-${wide ? "wide" : "narrow"}`, JSON.stringify(l)) } catch { /* private mode */ }
-  }, [wide])
+  }, [])
 
   /* The build word's own clock, on the hero's hold and the hero's roll. */
   const [word, setWord] = useState<{ cur: number; prev: number | null }>({ cur: 0, prev: null })
@@ -181,42 +170,10 @@ export default function BuildSection({
       body: JSON.stringify({ demo: true }),
     }).catch(() => { /* the card will ask again */ })
 
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 120) : ms))
-    const wait = async (ms: number) => { await sleep(ms); if (dead) throw HALT }
-
-    /* Where a target sits inside the frame. Rects come back in RENDERED
-       pixels, because the root ZoomLock writes CSS zoom, while the offset
-       written onto the cursor is in CSS pixels. The frame's own rect against
-       its offsetWidth is the ratio between the two, so the two are never
-       mixed — the same trap the hero's column measurement fell into. */
-    const at = (el: Element | null, ax = 0.5, ay = 0.55) => {
-      const frame = frameRef.current
-      if (!frame || !el) return null
-      const f = frame.getBoundingClientRect()
-      const t = el.getBoundingClientRect()
-      const scale = frame.offsetWidth ? f.width / frame.offsetWidth : 1
-      if (!scale) return null
-      return {
-        x: (t.left + t.width * ax - f.left) / scale,
-        y: (t.top + t.height * ay - f.top) / scale,
-      }
-    }
-
-    const find = (key: string) => frameRef.current?.querySelector(`[data-t="${key}"]`) ?? null
-
-    const moveEl = async (el: Element | null, ax?: number, ay?: number) => {
-      const p = at(el, ax, ay)
-      if (p) setCursor((c) => ({ x: p.x, y: p.y, press: c ? c.press : false }))
-      await wait(reduced ? 0 : MOVE)
-    }
-    const move = (key: string, ax?: number, ay?: number) => moveEl(find(key), ax, ay)
-
-    const click = async () => {
-      setCursor((c) => (c ? { ...c, press: true } : c))
-      await wait(PRESS)
-      setCursor((c) => (c ? { ...c, press: false } : c))
-      await wait(SETTLE)
-    }
+    /* The cursor, the clock and the halt, shared with section three. */
+    const { move, moveEl, click, beat, wait } = makeRunner({
+      frameRef, setCursor, setFocus, reduced, alive: () => !dead,
+    })
 
     /* A patch whose value is a function is applied to that key's previous
        value, so a script can append to a list without holding it. */
@@ -255,14 +212,6 @@ export default function BuildSection({
       await click()
       set(patch)
       await wait(260)
-    }
-
-    /* The beat between one card finishing and the next arriving. The cursor
-       STAYS — a person filling in a form does not vanish between fields. */
-    const beat = async (ms = THINK) => {
-      setFocus(null)
-      setCursor((c) => (c ? { ...c, press: false } : c))
-      await wait(ms)
     }
 
     const ctx: Ctx = {
@@ -315,20 +264,9 @@ export default function BuildSection({
      fields rather than the last one's. */
   useEffect(() => { setForm(tpl.empty) }, [tpl])
 
-  /* Nothing in this window is ever cut. The cards are wildly different sizes —
-     four fields, or a week of opening hours, or eight template tiles — and a
-     window sized for the largest is mostly empty for the rest, while a window
-     sized for the rest slices the largest in half. So the content is MEASURED
-     and scaled to the room it actually has, exactly the way the hero sizes its
-     three words: lay it out at its natural size, read that size, and write the
-     ratio that makes it fit.
-
-     It only ever scales DOWN. A four-field card is not blown up to fill the
-     frame; it just sits there at its own size, which is what it should do.
-
-     The observer watches the card's LAYOUT box, which a transform does not
-     touch — so scaling it cannot feed back into the measurement. That is what
-     keeps this from being a loop. */
+  /* Nothing in this window is ever cut: the fit pass measures the card and
+     scales it to the room the window actually has. Shared with section
+     three — see ./runner. */
   /* Swipe sideways on the window to change template. The deck owns the
      VERTICAL swipe — that is how a reader gets between the two screens — so
      this only claims a gesture that travelled further across than down, and
@@ -363,36 +301,7 @@ export default function BuildSection({
     }
   }, [tpl])
 
-  useEffect(() => {
-    const stage = stageRef.current
-    const fit = fitRef.current
-    if (!stage || !fit) return
-    const inner = fit.firstElementChild as HTMLElement | null
-    if (!inner) return
-
-    const measure = () => {
-      fit.style.setProperty("--fit", "1")
-      const h = inner.offsetHeight
-      const w = inner.offsetWidth
-      /* The stage's CONTENT box, not its padding box: clientHeight counts the
-         padding, and measuring against that lets the card bleed a few pixels
-         into it and get clipped at the window's edge. */
-      const cs = getComputedStyle(stage)
-      const availH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
-      const availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)
-      if (!h || !w || availH <= 0 || availW <= 0) return
-      const k = Math.min(1, availH / h, availW / w)
-      /* Rounded, so a stray sub-pixel does not rewrite the transform on every
-         keystroke and force a fresh composite for nothing. */
-      fit.style.setProperty("--fit", String(Math.floor(k * 1000) / 1000))
-    }
-
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(inner)
-    ro.observe(stage)
-    return () => ro.disconnect()
-  }, [tpl, view, card, finish])
+  useFit(stageRef, fitRef, [tpl, view, card, finish])
 
   const T = tpl.cards[Math.min(card, tpl.cards.length - 1)]
 
@@ -402,7 +311,7 @@ export default function BuildSection({
       dir="rtl"
       ref={buildRef}
       data-edit={edit || undefined}
-      style={edit ? layoutVars(layout) : undefined}
+      style={layoutVars(layout)}
     >
       {/* The build word: the ground the window stands on. Four forms of the
           one word this section is, on the hero's own roll — the old one
@@ -538,7 +447,7 @@ export default function BuildSection({
       </div>
 
       {edit && (
-        <Composer layout={layout} setLayout={writeLayout} scope={buildRef} wide={wide} />
+        <Composer layout={layout} setLayout={setLayout} scope={buildRef} wide={wide} section="build" />
       )}
     </div>
   )

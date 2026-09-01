@@ -1,0 +1,62 @@
+{
+  "build": {
+    "wide": {
+      "appX": 0,
+      "appY": 0,
+      "appW": null,
+      "appH": null,
+      "wordX": 0,
+      "wordY": 0,
+      "wordSize": null
+    },
+    "narrow": {
+      "appX": -11,
+      "appY": -1,
+      "appW": 474,
+      "appH": 540,
+      "wordX": 5,
+      "wordY": -29,
+      "wordSize": 107
+    }
+  },
+  "manage": {
+    "wide": {
+      "appX": 0,
+      "appY": 0,
+      "appW": null,
+      "appH": null,
+      "wordX": 0,
+      "wordY": 0,
+      "wordSize": null
+    },
+    "narrow": {
+      "appX": -13,
+      "appY": -13,
+      "appW": 502,
+      "appH": null,
+      "wordX": 6,
+      "wordY": -26,
+      "wordSize": 117
+    }
+  },
+  "publish": {
+    "wide": {
+      "appX": 0,
+      "appY": 0,
+      "appW": null,
+      "appH": null,
+      "wordX": 0,
+      "wordY": 0,
+      "wordSize": null
+    },
+    "narrow": {
+      "appX": 0,
+      "appY": 0,
+      "appW": null,
+      "appH": null,
+      "wordX": 0,
+      "wordY": 0,
+      "wordSize": null
+    }
+  }
+}

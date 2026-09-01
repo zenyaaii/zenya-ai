@@ -30,7 +30,10 @@ Rules that hold:
   exception is the 1px separator inside the header pill, between the nav and
   the account control.
 - **The page is achromatic.** Every pixel of colour belongs to the light at the
-  edges. Nothing else is tinted, ever.
+  edges. Nothing else is tinted, ever — with **one recorded exception**, the
+  ادر panel, which is obsidian with a single accent because it is the inside
+  of the product rather than the paper the product is drawn on. See "Section
+  three" below; do not take it as licence to tint anything else.
 
 ## The light
 
@@ -210,11 +213,17 @@ at all: the body has been `overflow: hidden` since the hero was one screen, and
 the deck moves by transform instead.
 
 **Percentages, never viewport units.** `#zn-deck` is `fixed; inset: 0`, the
-track inside it is `height: 200%`, and each panel is `height: 50%`. A panel is
-therefore exactly one screen at any zoom — which matters, because the root
+track inside it is `height: 300%`, and each panel is `height: 33.3333%`. A panel
+is therefore exactly one screen at any zoom — which matters, because the root
 ZoomLock writes CSS `zoom` and `vh` resolves *before* that scale is applied. At
 the 85% cap the travel measures `-1059px` on a 900px window; that is one screen
 in CSS pixels, and reading it as "59px too far" is the mistake to avoid.
+
+**Adding a screen is four numbers, and they all live together:** the track's
+height, the panel's height, the step in
+`transform: translateY(calc(var(--deck) * -33.3333%))`, and `PANELS` in the
+gesture handler. Nothing else counts panels. Going from two screens to three
+touched those four and nothing else.
 
 **The lock is the whole trick.** A gesture past the threshold moves the deck and
 then closes it for the length of the move; every event arriving while it is
@@ -460,16 +469,42 @@ nothing and sits out the whole timeout every time.
 A placement tool at `/demo/home?edit=1`, in `app/demo/home/Composer.tsx`. It
 exists so the composition can be found by moving it rather than by describing
 it: drag the window or the word, pull a corner to resize, nudge with the arrow
-keys, read the numbers, copy the CSS out and paste it into `page.tsx`.
+keys, read the numbers, save.
 
-**It is not part of the page.** It mounts only at `?edit=1`, and every value it
-touches is read through a CSS variable that falls back to the stylesheet's own
-number — so a page without it renders exactly as it did before it existed.
-Verified: no `?edit`, no `.zn-compose` in the DOM and no inline style on
-`.zn-build`. Nothing it produces should become load-bearing; the output is
-meant to be pasted in and the stored layout thrown away.
+**It works on both built sections.** One component, one set of behaviour; the
+section it is composing decides only which two selectors it measures
+(`.zn-app`/`.zn-word` for ابن, `.zn3-app`/`.zn3-word` for ادر) and which cell it
+saves into. On the obsidian panel the tool inverts with the ground — a dashed
+near-black outline on a near-black screen is not a placement tool, it is a
+guess.
 
-Three things it had to get right, and one it got wrong first:
+### Saving is direct, and that is the change
+
+The first version wrote to `localStorage` and printed CSS for a human to paste
+into `page.tsx` by hand. That is the saving problem: **nothing done in the tool
+ever reached the page**, and a browser that cleared its storage lost the work.
+
+Now the Save button (and ⌘S) POSTs to `/api/demo-layout`, which writes
+`app/demo/home/placement.json`. Both sections import that file and apply it
+**always**, not only under `?edit=1` — so a save changes the real page, survives
+a reload, is committed with the rest of the source, and ships. The button says
+which of the three things happened rather than going quiet: saving, saved, or
+refused with the reason.
+
+**The route is development-only and says so.** It writes to the filesystem, so a
+production build returns 404 as though it did not exist — which is the honest
+answer, because a read-only serverless filesystem could not do it anyway. Every
+field is validated against a range and clamped before it is written, and the
+only path it can write is one module constant. A malformed file on disk is
+repaired rather than merged into.
+
+**An untouched cell still changes nothing.** Every value travels as a CSS
+variable that the stylesheet already falls back away from, and a zeroed cell
+writes no variables at all — verified: a plain visitor has no `.zn-compose` in
+the DOM and no inline `style` attribute on either section. That property is what
+makes it safe for the tool's output to be load-bearing.
+
+### Four things it had to get right
 
 - **Read the base size ONCE, at pointer-down.** Reading it live each frame is a
   feedback loop — the thing grows, the next frame measures the grown thing and
@@ -482,12 +517,23 @@ Three things it had to get right, and one it got wrong first:
 - **The word lies behind the window**, so where they overlap its outline cannot
   be reached by a pointer. The panel carries an explicit pair of buttons, and
   the picked outline comes forward.
-- **Layouts are kept per width class**, wide and narrow, because the two are
-  laid out differently and a number that suits a laptop is wrong on a phone.
+- **The arrow keys are the DECK'S keys.** The first version grabbed them in the
+  capture phase, which took the page's navigation away and nudged the layout a
+  pixel on every press instead — measured, two presses to reach ادر left the
+  window sitting 2px low before anything had been dragged. With two sections
+  each mounting their own tool, both would have grabbed the same press as well.
+  So a composer is engaged only once something inside it has been touched, and
+  it lets go on a click elsewhere or on Escape. Until then the arrows belong to
+  the deck, exactly as they do without the tool.
+
+**Layouts are kept per width class**, wide and narrow, because the two are laid
+out differently and a number that suits a laptop is wrong on a phone.
 
 ## The placement
 
-Composed by hand at `?edit=1` and baked into `page.tsx`. The window is 1198px
+Composed by hand at `?edit=1`. The nudges below are baked into `page.tsx` as
+the DEFAULTS; anything saved in `placement.json` overrides them, because every
+rule reads the saved variable first and falls back to these. The window is 1198px
 wide and 719px tall, shifted 109px left and 69px down; the word is 308px,
 nudged 7px left and 72px down. On a phone the window drops 32px and moves 11px
 left and the word moves 2px left and 9px up; both keep their own size.
@@ -511,8 +557,9 @@ on.
 
 ## Where this stands, and what is next
 
-The hero and section two are built, at `app/demo/home/`, live at
-`zenyaai.co/demo/home`. It is NOT the homepage and must not be wired into `/`.
+The hero, section two (ابن) and section three (ادر) are built, at
+`app/demo/home/`, live at `zenyaai.co/demo/home`. It is NOT the homepage and
+must not be wired into `/`.
 
 **The Style card is the wizard's card.** Not a version of it — the presets are
 IMPORTED from `utils/restaurant/presets` and `utils/services/presets`, and the
@@ -528,59 +575,633 @@ Laid out RTL, every sentence put its full stop on the wrong end.
 **The picker tiles carry their real covers**, at full colour — settled, and the
 two missing screenshots have been shot. See the section above.
 
-## Next: section three, ادر
+## Section three: ادر
 
-The second of the three words: the manage step. Not built. This is the brief.
+The second of the three words: the manage step, at `app/demo/home/`
+(`ManageSection.tsx` is the stage, `surfaces.tsx` is what it drives). It is the
+third panel of the same deck, one more gesture down.
 
-**It is the third panel of the same deck.** One more `.zn-panel` in the track,
-one more gesture down. Everything section two needed already exists and is
-generic: the deck takes another panel, the fit pass scales whatever is put in
-the window, the cursor engine drives anything with a `data-t` on it, and the
-composer will place it. Do not build a second set of any of that.
+**No second set of machinery.** The cursor engine and the fit pass turned out
+to be generic, so they moved into `app/demo/home/runner.ts` and both sections
+import them. Section two was rewired onto the shared copy rather than left with
+its own — two copies of a thing this hard-won drift apart, and the whole point
+of the extraction is that they cannot.
 
-**Follow the product, the way ابن does.** ابن is worth watching because it is
-the real wizard, in its own order, with its own labels — a demo that invents a
-screen the product does not have is worth nothing. ادر has real surfaces and
-they are all built:
+### The style break
 
-- `app/(app)/dashboard/bookings` — the reservations inbox. `site_bookings`,
-  `POST /api/bookings`. A booking ARRIVING is the strongest single beat
-  available: the owner's site takes a reservation and it lands in their inbox
-  while they watch.
-- `components/editor/ThemeEditor.tsx` and its panel set — click-to-edit on a
-  live preview, undo/redo, autosave, inline AI rewrite (`AiRewrite.tsx`). The
-  cursor changing a headline on the real site is the other strong beat.
-- `app/(app)/dashboard/analytics` — the unified analytics, eight tabs.
-- `app/(app)/dashboard/seo` — live SERP preview.
-- `app/(app)/dashboard/domains`, `billing`, `settings`.
+**Section three is the one panel on this page that is not white paper, and the
+break is deliberate.** The hero and ابن are the outside — the paper the site is
+drawn on. ادر is where the owner works once the site exists, so it reads as
+being *inside* the product. Everywhere else in this document, "the page is
+achromatic" still holds; this is the exception, and here is why it is not an
+invented palette:
 
-**Pick ONE centrepiece and build the rest around it**, the way the Menu card
-carries ابن. The booking arriving and the editor rewrite are the two
-candidates; the editor is the more honest match for the word ادر, and the
-booking is the more surprising. Ask before choosing.
+- **The ground is obsidian, `#131316`**, with the window one step lighter at
+  `#1a1a1f` — the same lift the white window makes off paper, inverted.
+- **The accent is `#c8a96a`, brushed gold, and it was already on the page.**
+  Section two's restaurant run picks the **onyx** preset — `#0a0a0c` ground,
+  `#c8a96a` accent, `#f4ecd8` text — so the site the reader watches being built
+  one screen up *is* a black-and-gold site, and this is its dashboard. The same
+  value is what the real analytics dashboard already paints its bookings tile
+  with (`accent="#c8a96a"` on the التواصل tile), and it sits inside the رمل
+  palette's own hue band.
+- **One hue, on live data only**: the row as it arrives, the field being typed,
+  the active range and tab. Everything else is paper on obsidian.
+- **The accent is the dashboard's own `#5e6ad2`**, chosen by putting both on
+  the real page and looking. The fill takes the product's exact primary; text
+  and hairlines take a lifted stop of the same hue (`#97a0ee`), because
+  `#5e6ad2` as *type* on this ground falls under 4.5:1. `?accent=gold` still
+  reaches the brushed-gold alternative, which is worth keeping for as long as
+  the choice is worth revisiting.
 
-**What ابن learned, which ادر should not relearn:**
+**The card treatment is `lit`**, switchable at `?cards=ring|fill|well|lit`.
+Every surface in the section is one box, so they share one material: a
+hairline that is bright along the top edge and fades down, obeying the light
+this section already has coming from above. Costs no colour and no shadow.
 
-- Read the surface's own labels and order. Do not paraphrase them.
-- Never invent a number to fill a field. Ratings, counts, revenue, visitor
-  totals — analytics is full of boxes that want a figure, and putting one in is
-  fabricating data about a business that does not exist. Show the empty state
-  or leave the field alone. This is the rule most at risk on a dashboard.
-- One card, one animation, in sequence. The cursor never disappears between
-  them.
-- Every entrance rests in its finished state.
-- Measure on localhost after every change; never trust the reasoning.
+The **tile grid is the one exception**: six outlined boxes in a row read as a
+wireframe whatever the hairline is doing, so the tiles take a solid fill
+instead. That is the only per-element override in the set.
 
-**Two things worth doing before ادر**, both of which make it land harder:
+Dropping the boxes entirely is what this kind of section usually wants, and it
+is deliberately not offered. The product's own dashboard puts its content in
+bordered cards, and the section's whole discipline is following the real
+screen.
 
-1. **A scroll cue on the hero.** There is no affordance anywhere that a second
-   screen exists — the body is `overflow: hidden`, the wheel is hijacked, there
-   is no scrollbar. Every screen added after this one inherits that problem.
-2. **The finished site as the payoff for ابن.** The section shows the input for
-   seventy seconds and never the output; `/demo/restaurant` and
-   `/demo/services` are live and need no login.
+**Type is paper, and the contrast is measured, not judged:** `#fafafa` at
+16.5:1 against the window, `rgba(250,250,250,0.66)` at 7.7:1, and the quietest
+step at `0.50` for 5.2:1. `0.44` was tried first and measures 4.2:1, which is
+under AA — on a dark ground the tertiary step has to be lifted, not lowered.
+Tajawal, one weight lighter than the light sections use and with more leading.
 
-After ادر, انشر — publishing, the subdomain, the live site.
+**The word is the hero's SECOND column** — ادر / تدير / إدارة / إشراف — on the
+same roll and in the same face, paper at `opacity: 0.26`, and `0.30` and much
+larger on a phone. `0.12` was tried first on the theory that light ink on a
+dark ground carries further than dark ink on paper: the theory is true and it
+still came out invisible, because here the word competes with a lit window
+rather than with bare paper. Faded as a LAYER, never as alpha in `color`, for
+the reason section two already records.
+
+### The light across the seam
+
+The light hangs **upward** out of section three onto the foot of ابن — the
+mirror of the hero's foot glow hanging down onto its head. One light that is
+allowed to cross, never two that would have to be matched, and nothing clips
+it.
+
+**The first attempt went muddy exactly as feared, and the fix is chroma, not
+lightness.** Sampled at `x=60` down the seam, the pale رمل stops arrived at the
+top of the obsidian as `80,70,58` — a brown-grey with twenty points between its
+red and its blue. A light laid over a near-black ground at a third opacity
+keeps only a third of what it started with, so a pale stop arrives desaturated;
+what survives the mix is *saturation*. Rebuilt from غروب's warm stops in رمل's
+hue band, the same measurement reads `104,74,46` — fifty-eight points of
+separation, and a real amber. The same change improved the paper side too:
+`245,235,222` became `250,221,194`, so the bleed onto ابن now reads instead of
+being almost invisible.
+
+Blend modes are the wrong answer here and were rejected: `screen` fixes the
+dark side and erases the light entirely on the paper side, which would mean two
+lights again.
+
+### The header crosses over
+
+**The pill is on every screen, so it takes the ground it is standing on.** On
+ادر it inverts — dark glass, paper type, and the call to action flipped from
+obsidian-on-paper to paper-on-obsidian — and it runs on the deck's own 1020ms
+clock, so the header, the ground and the light all land together. Arriving
+reads as one event rather than a dark box sliding under a white pill.
+
+Everything in that rule is `!important`, because the pill's surface, the mark's
+colour and the call to action are inline styles on the elements themselves and
+a stylesheet cannot reach past an inline style any other way.
+
+Two things it got wrong first, both worth keeping:
+
+- **Never a descendant wildcard.** The first version transitioned
+  `background`, `box-shadow`, `color` and `fill` on `.zn-pill *` — every node
+  in the bar — and all of it ran on the frames the deck was travelling.
+  Measured, that took the move from 52 frames to 36 and its worst frame from
+  153ms to 436ms, and it was slowing the *hero→build* move too, which has
+  nothing to do with this section. Only four things actually change colour
+  here, so only those four carry a transition. Best of three afterwards:
+  hero→build 63 frames / worst 67ms, build→manage 67 / 33.
+- **Name the control, do not match its shape.** Inverting
+  `a.rounded-full` caught every nav link — they are `rounded-full` too — and
+  turned the bar into a row of white pills. The account control carries a
+  `data-cta` so the rule can name the one element it means.
+
+### The seam: the ground has to ramp, not start
+
+The glow was not enough. A solid fill begins exactly at the panel's edge, and
+an edge between paper and obsidian is a cut whatever is blurred over the top of
+it: sampled across the seam, **paper at `250,221,194` met obsidian at
+`104,74,46` in a single pixel.**
+
+So the panel is transparent at its own top and reaches full obsidian a tenth of
+the way down, and what shows through in between is the deck's paper — the
+screen the reader is arriving from. Measured again afterwards, panel two's last
+pixel is `249,220,189` and panel three's first is `248,218,188`: the two grounds
+now meet at the same value, and the largest step anywhere down the ramp is 30
+units across 26 pixels. There is nothing left to see.
+
+The ramp finishes **above the header**, at 10% of the panel rather than 23%. A
+longer one put a band of paper light under the pill, which made the inverted
+header read as a dark box on a bright sky — the opposite of arriving somewhere.
+
+Percentages of the panel, never `vh`, for the same reason the deck itself is
+built in percentages.
+
+### Size: the window came down, not the type alone
+
+**Filling the window is what made the section read as oversized.** The floor
+that stretched the short surface out to 500px was the wrong fix for the dead
+space around it — in ابن a card sits at its own size in a roomy frame and the
+frame is the composition. The floor is gone, the window came down from 719 to
+545 (and is capped at 1010px wide, because a dashboard stretched to 1198 is a
+wall of small print), and every type size in the section stepped down by the
+same 0.87 — applied mechanically across all 57 of them, so a scale stays a
+scale and nothing drifts.
+
+Measured after: content 481–502 against 483 of window, fit `0.89`–`1.0` on
+every laptop size, `0.795`–`0.87` on a phone. All of it above section two's own
+worst-case `0.763`.
+
+**On a phone the window cannot be the lever.** The surfaces stack there, so the
+content is ~750px tall, and shrinking the window just makes the fit pass scale
+it into type nobody can read — a 500px window measured `0.598`, which renders
+ten-pixel type at six. So on a phone the window keeps its height and the
+CONTENT comes down instead: furniture first, labels never. That is the only
+lever that makes the screen smaller without making it illegible.
+
+### The window is inert
+
+**Nothing inside it can be touched.** The booking form is the product's real
+component, with real inputs and a real submit, so on a phone a tap landed in it
+and the keyboard came up — a reader found themselves filling in a form that
+belongs to a demo. It is something to watch, not something to use.
+
+Three parts, because one is not enough:
+
+- `pointer-events: none` on the **screen**, not on the stage — a touch then
+  still reaches the frame underneath, so the sideways swipe that changes
+  surface keeps working. Verified: a tap on the name field leaves
+  `document.activeElement` as `BODY`, and the swipe still moves
+  bookings → analytics.
+- **No `focus()` call in the script.** The value setter never needed one, and
+  focusing a real input on a phone raises the on-screen keyboard by itself,
+  with no tap at all.
+- **`tabIndex = -1` on every control** in the subtree, re-applied whenever the
+  surface changes. `pointer-events` does not take an input out of the tab
+  order, so without this a keyboard could still reach it.
+
+None of it obstructs the script: the value setter and a programmatic `click()`
+are not user interaction, and `pointer-events` cannot block either.
+
+Section two is deliberately NOT treated this way. Its picker tiles are real
+links to real pages and a reader should be able to follow them.
+
+### The light stays below ابن
+
+The first version hung the glow 21vh up out of this panel, and because panel
+three comes after panel two in the DOM and each is its own stacking context,
+that overhang painted **over** the foot of the build screen — its window and
+its switcher sat in a warm wash belonging to the next screen. Measured, section
+two's last two hundred pixels read `249,236,223` instead of paper.
+
+The glow now starts inside its own panel. Section two's foot is `250,250,250`
+again down to y=800, with only the last forty pixels — below everything —
+carrying any warmth at all. The seam does not need the overhang: the ground
+ramp starts transparent at this panel's own top, so what a reader passes
+through is paper meeting paper and then darkening. **The colour belongs to ادر,
+and it starts where ادر starts.**
+
+### The pictures
+
+**`hero.webp` is not usable and is no longer referenced.** It is the restaurant
+template's own Unsplash hero, and it is wrong for this brand twice over: wine
+glasses across the whole foreground, and bare arms. The share preview and
+section two's Visuals hero slot both take `room-1.webp` — the dining room —
+which is also the better cover for a restaurant, since an interior says what
+the place is and a plate does not.
+
+**The same photograph is still the template's own hero**, in
+`utils/restaurant/mock-content.ts`, which means it is what a generated
+restaurant site shows when the owner uploads nothing, what `/demo/restaurant`
+shows, and what the picker's own screenshot
+(`public/theme-previews/restaurant.webp`) is a picture of. That is a product
+problem, not a demo-page one, and it is not fixed.
+
+### The cursor, and physical versus logical
+
+**`left: 0`, never `inset-inline-start: 0`.** The cursor's x is a distance from
+the frame's *physical* left edge, so its anchor has to be that same edge. The
+logical property resolves to `right` in an RTL container and threw the pointer
+clean off the window — measured at x=1468 on a frame ending at 1149, which is
+why there was no pointer in this section at all. Section two uses `left: 0` and
+this is the reason. **Logical properties are right for content and wrong for a
+coordinate system measured in physical pixels.**
+
+The word, the trays and the menus keep their logical properties; they are
+content and they should flip.
+
+### Two old traps that bit again
+
+- **A backtick inside the stylesheet ends the stylesheet.** The whole block is
+  one template literal. A backtick written into a *comment* closed it, and the
+  CSS after it became JavaScript — the page 500'd with "pill is not defined".
+  The existing comment in the deck section says this; it is worth saying twice.
+- **`.next` corrupts and the page stops hydrating.** Chunks come back 404 as
+  HTML, React never hydrates, and the section renders as static markup with no
+  animation and no cursor — which looks exactly like a bug in the section. Stop
+  the server, delete `.next`, restart, and re-check before believing anything
+  measured through it.
+
+### How ادر presents itself: the device
+
+The section does not float a rectangle in the middle of a panel. **A screen
+rises from below the fold and comes to rest as a COMPLETE device** — all four
+corners, nothing running off an edge. Cropping the body at the bottom was tried
+first and reads as a screenshot that did not finish loading rather than as a
+product shot.
+
+**Which device depends on the width**, because that is what the reader is
+holding, and each one is its real shape. The ASPECT is on the screen and the
+width is derived from the height, so the object has real proportions instead of
+whatever the container happened to be. The surfaces inside are the same real
+screens at every size.
+
+| | aspect | tell | shown | measured |
+| --- | --- | --- | --- | --- |
+| MacBook Pro | 16:10 | the notch | cut at the bottom | 864x673, 81% of it, 61% of the screen |
+| iPad | 4:3 | a camera dot | whole | 746x566, 57% |
+| Phone | 9:19.5 | the island | cut, and crossing the left corner | 429x909, 68% of it, 73% of the screen |
+
+**The phone is BIGGER than the page it is on.** Shown whole it had to be 292px
+wide to fit the height, which is a toy: the screen was narrower than its own
+content wanted. So the machine is half again as large, it runs off the bottom
+the way the laptop does, and it crosses the left corner. The word lives
+top-right, so the object belongs bottom-left.
+
+The clamp that stops a screen escaping its frame is lifted for the phone and
+nowhere else: everywhere else a device wider than its container is the bug from
+the section above; here it is the composition. The bias is `-4%` and not more,
+because at `-10%` the page edge was taking seventy pixels of screen and the end
+of every line with it. What the edge takes now is bezel and a margin.
+
+**On the phone the website is cut WITH the mockup.** The laptop keeps its
+content inside the visible part; the phone lets the screen fill the whole
+machine, past the cut, which is what a phone lying past the edge of a page
+actually looks like. What keeps that honest is where the scrolling aims: the
+cursor puts whatever it is working on a quarter of the way down the screen, not
+merely "in view", because a screen whose lower half is off the page has plenty
+of room that the reader cannot see.
+
+**The laptop is the one that is cut.** A MacBook shown whole has to be small
+enough to fit a screen, and small is the one thing an object this size must not
+be, so it runs off the bottom edge and the reader sees about sixty per cent of
+it. The two smaller devices are shown whole, because at their size they can be.
+A base was drawn under the lid while it was whole and is gone with the crop:
+drawing a thing below the fold is drawing something nobody sees.
+
+**The laptop holds a true 16:10 at any window height.** Its width is derived
+from its height, so a tall window used to push the derived width past the
+container and the escape-clamp then squashed the aspect to 1.361 — a fake
+16:10 at full size, which is worse than a real one at ninety per cent. The
+height is capped by what the WIDTH can afford instead. Two things that cap has
+to get right, both learned by measuring: the budget is for the WHOLE screen and
+not the visible part, because the screen fills the machine and is cut with it,
+so the overhang has to be subtracted; and the section gets a wider box than
+section two's 1198 (a wizard card wants that width, a 16:10 machine turns every
+pixel of it into height), which is what buys back the presence a true aspect
+costs rather than buying it by faking the shape. Measured after: 1.6 at every
+size, and the machine came out wider than it was.
+
+**No growth deltas.** The totals are sample figures and read as "this is what
+the screen looks like"; a rate of growth reads as a claim. "+31%" says the
+business is growing, which is a thing said about a business that does not
+exist. The one is a picture of a product, the other is a boast.
+
+**The screen can never paint outside its frame.** Its width is derived from its
+height through the aspect, so on a TALL viewport the derived width outgrows the
+container and the display paints straight over the bezel and out past the
+corners — measured, that is what a 1440x1200 window did. `max-width: 100%` on
+the screen makes the aspect give instead: a slightly tall screen is a rounding
+error, a screen hanging outside its own device is a broken picture.
+
+The phone takes nearly all the height left to it, because a phone's own shape
+is tall and narrow: any less and the screen gets too narrow for the content to
+be read at its natural size, which is the whole point of not scaling it.
+
+**The switcher moved above the device.** It used to sit under the window, and
+the device runs off the bottom on purpose, so there is no "under" any more.
+
+**The rise rests in its finished state.** The travelling state is what carries
+the attribute (`data-down`), and at rest there is nothing written at all, so a
+browser that never runs the transition still finds the screen where it belongs.
+It is `transform` only, and it starts once the deck has landed, so it never
+shares frames with the move.
+
+**The frame is darker than the screen it holds**, and darker than the room. The
+first version had it a step LIGHTER than its own display, which is backwards
+for an object and is why it read as a padded box rather than a device: a bezel
+is the darkest thing in the picture and the display is the only thing that is
+lit. It catches a hairline along its top edge, the screen is seated into it
+with one dark line, and a faint sheen runs off the top corner because a display
+is a sheet of glass under a light that comes from above. The sheen is 0.055
+paper at its strongest, which lifts the surface about nine values and costs the
+type nothing.
+
+**The cast is physics, not decoration.** A lit display throws light into the
+room in FRONT of it, which here is the strip the word lives in. The first one
+pooled underneath, where the device covers the whole bottom of the screen and
+none of it could ever be seen. `--dev-seen` is declared on the section rather
+than on the device so the light knows where the screen's top edge is.
+
+### It is a MacBook, and the screen is full
+
+Above 1024 the device is a **MacBook Pro display: 16:10, a thin frame, rounded
+display corners and the notch**. The aspect is on the SCREEN and the width is
+derived from it, so the object has real proportions rather than whatever the
+container happened to be. The notch sits IN the display, which is where it is
+on the real machine, so the top row of the screen clears it.
+
+**Nothing floats in the middle of the glass.** Section two scales a card down
+to the room it has and centres it; that is right for a card and wrong for a
+display, where the leftover reads as a half-loaded page rather than as air. The
+surfaces stretch to the screen instead, and the only space left is the padding
+between the frame and where the content starts.
+
+### Scrolling, not scaling
+
+**Section three has no fit pass.** Shrinking has a floor: past a point the type
+is simply too small to read, and a phone kept hitting it. Scrolling has no such
+floor, and it is also what a person does — you scroll to the field you are
+filling in. So a surface is allowed to be TALLER than the display showing it,
+and the cursor brings each target into view before it moves to it (`bring()` in
+`runner.ts`).
+
+The stage is `overflow: hidden` rather than `auto`: the reader is watching, not
+driving, so there is no scrollbar and no gesture to hijack. Programmatic
+scrolling still works, which is the only kind this screen does.
+
+**Finding the thing that scrolls is two tests, not one.** It has to overflow
+AND be a scroll container. Overflowing alone finds the stretched content box
+first, and `scrollBy` on an element whose overflow is `visible` does nothing at
+all — the scroll silently never happens, which is exactly how this failed the
+first time and measured `scrollTop: 0` on a screen with 290px of travel in it.
+
+**The share preview is back on phones.** It had been hidden to buy a fit ratio,
+and that trade no longer exists. Nothing is hidden on a phone now; it is just
+further down, which is where it is on the real screen too. The SEO run ends by
+moving to the Google result rather than to the save button, because the preview
+is the reason that screen exists — and on a phone that is the beat that scrolls
+down to it.
+
+### What the sizing learned
+
+`--dev-seen` is the device's height as a share of the box the section lays out
+in, and it is now the only number: the device is whole, so there is no crop to
+express. Two things got this wrong on the way here:
+
+- **A percentage margin resolves against the containing block's WIDTH, not its
+  height.** While the device was still cropped, `margin-bottom: -12%` took
+  122px off a desktop and 35px off a phone, because those are the widths, and
+  the device looked right on exactly one screen. Any overhang has to be a
+  length.
+- **A saved placement does not survive a change of shape.** `--app-h` was
+  composed against the old window and, once the device existed, it sized the
+  device instead: 520px, which showed a third of an iPad. The height was
+  cleared out of `placement.json` for this section; the width, the nudges and
+  the word size were composed against things that still exist and were kept.
+
+### The three surfaces
+
+The switcher, the sideways swipe and the auto-rotation are section two's, in
+this section's own values. Each surface is the real screen, in its own order,
+with its own labels.
+
+**الحجوزات — the centrepiece.** Two panes: the owner's inbox and the guest's
+side of the published site, and a reservation crossing between them while the
+reader watches. The form is the product's own `components/site/BookingForm` —
+the one every template ships — **mounted rather than reproduced**, and
+deliberately mounted *without* a `BookingProvider`. That is the path the editor
+and the preview already take: with no slug a submit is a no-op that still shows
+the component's real success state. So the reader sees the real form behave
+exactly as it does on a live site, **nothing is posted, no row is written, and
+`/api/bookings` is never called from this page.** The cursor types into it
+through the prototype's own value setter and a bubbling event — what React's
+`onChange` is built over — the same move section two makes to hand the analyzer
+its file. Then the row lands, the counts tick, and the owner sets it to مؤكّد
+through the status control the inbox actually has.
+
+Every value on that row is a value the reader just watched being typed. That is
+the line this section draws: a guest's name in a name field is sample content
+of the same class as the wizard's demo business; a visitor total is a statistic
+about a business that does not exist.
+
+**التحليلات — SAMPLE FIGURES, by the owner's decision.** This surface used to
+be the honest empty state and is no longer. The owner asked twice, explicitly,
+for a populated dashboard after the empty version was built and shown, and that
+is their call to make about their own marketing. What follows is the shape that
+decision took, and the guardrails that came with it:
+
+- **The numbers are not measured and are not anybody's traffic.** They are
+  sample data for a restaurant that does not exist, in a demo where the
+  business name, the guest and the phone number are already sample data.
+- **Everything derives from ONE series** in `surfaces.tsx`, so the six tiles
+  and the chart can never disagree: views come from the series, sessions and
+  visitors from views, the conversion rate is computed. Six figures picked
+  separately is how a demo ends up claiming more conversions than sessions.
+- **The dashboard's own line about "showing zeros instead of invented numbers"
+  is GONE from this surface.** Printing that sentence above invented numbers
+  would have been the one genuinely dishonest thing on the page.
+- **Putting it back is deleting one constant.** Remove `DAILY`/`HOURLY`, set
+  the tiles to zero, restore the note; nothing else on the surface depends on
+  it.
+
+**The range drives the data.** There are three of them and each has its own
+series: thirty days, the last seven of it, and that last day hour by hour. The
+hourly series sums to exactly the last daily figure, so the ranges agree with
+each other and a reader who switches and adds up is not caught out. Switching
+range changes all six tiles, the conversion rate and the axis at once — a
+dashboard showing month figures under a button marked "24 hours" is the tell
+that it is a picture rather than a screen.
+
+**The figures roll to their new values and the curve draws itself.** The tiles
+hold a NUMBER and a formatter rather than a finished string, because a string
+cannot be counted toward; the count runs 760ms on the page's own arriving
+curve, and collapses under reduced motion. The curve is keyed on the range so
+its draw-in replays, and rests fully drawn.
+
+**Trace the cursor before believing the path.** Sampling `.zn3-cursor` every
+140ms through a run and drawing the result over a screenshot is the only way
+to see what it actually does. It caught this: the tiles were visited far-left
+then far-right, which is an eight-hundred-pixel dash straight across all six
+with a climb back up to the pill after it. The tiles go in reading order now,
+right to left, and the path never doubles back over itself. Eight stops in
+twenty-four seconds, two of them clicks, the longest hold five seconds.
+
+**The path is 7 أيام, then البحث, then 24 ساعة, then الجلسات** — a control,
+then something to read, then a control, then something to read. That
+alternation is what stops it reading as a tour of the buttons.
+
+**البحث is a real tab with a real panel behind it**, showing what the product
+shows an account that has not connected Search Console, verbatim. It is worth
+having: it is the one screen in the section that still says "بيانات حقيقية من
+جوجل مباشرة" and means it. The tiles stay put across tabs exactly as they do on
+the real dashboard, which is why the second range change is visible from the
+search tab at all.
+
+**The chart is READ, not looked at.** The cursor runs along the curve right to
+left and the crosshair follows it — the line, the dot on the point, and the
+reading, exactly as `TrendChart` raises them on a real pointer. This turned the
+longest hold in the run, five seconds resting on the chart, from its only idle
+moment into the beat that shows what the chart is for: nobody stares at a
+chart, they run along it.
+
+The stops are invisible anchors at the real curve points, so the cursor travels
+to them through the same engine as every other target rather than through a
+second mechanism that would have to be kept in step with it. Two things the
+reading had to learn:
+
+- **It moves out of its own way.** Pinned to the top of the plot, a peak put
+  the tooltip exactly over the dot it belonged to. It goes to the foot when its
+  point is in the top of the plot.
+- **Clamp in MIXED units, not per cent.** The reading is centred on its point,
+  so what has to stay inside the plot is half its own width, which is a fixed
+  number of pixels. A percentage clamp that holds on a thousand-pixel chart
+  lets it hang out of a two-hundred-and-seventy-pixel one — measured, 15px
+  outside on a phone. `clamp(76px, X%, calc(100% - 76px))` takes both units and
+  one rule covers every width.
+
+**One control, and then time to look.** The run used to work seven of them in
+twenty-six seconds — ranges, the site select, the metric, the export menu — and
+a cursor hopping between buttons is not somebody using a dashboard, it is
+somebody demonstrating that the buttons exist. Nothing stayed on screen long
+enough to read. There is one change now, a week to a day, and the cursor moves
+OFF the control while the numbers roll and the curve redraws, because that is
+what the reader is meant to be watching.
+
+The rule itself still stands everywhere else on this page and in the product —
+ratings, review counts and the services wizard's empty rating field are all
+still left alone. This is a recorded exception on one marketing surface, not a
+change of policy.
+
+The paragraph below describes the version that was replaced, and is kept
+because it is the argument for going back:
+
+**التحليلات — the surface that cannot carry a figure, and says so.** There is
+no real number for a business that does not exist and `/api/analytics` is
+behind a session, so this shows the state a site published today is genuinely
+in: the real six tiles in the real order reading `0` and `—`, the dashboard's
+own Delta with no baseline ("— جديد", because "+100%" against nothing would be
+a lie), the chart's own empty line, and the dashboard's own sentence about
+showing zeros **بدل أرقام مُختلَقة**, verbatim. The refusal is the point rather
+than a shortfall: every competitor's marketing shot has an invented number on
+it. The beat is the owner working the real controls — ranges, the site select,
+the metric, the export menu and its seven real datasets — and then reading the
+line that explains the zeros.
+
+**SEO — its own centrepiece, and it invents nothing.** The Google result and
+the share preview are both written from the fields as they are typed, and the
+character counters are counting characters the reader is watching arrive
+(`38/60`, `100/160`, from `SEO_TITLE_MAX` / `SEO_DESC_MAX`). **The SERP card
+keeps its own colours** — white, `#1a0dab` — and is the single surface in the
+section that does: recoloured to the accent it would stop being a preview of
+anything, and the preview is the whole reason the screen exists.
+
+### The rule the three runs share
+
+**The cursor rests on the RESULT, never on the control that caused it.** Every
+one of the three broke this the same way before it was traced:
+
+- analytics parked on the range pill while the figures rolled elsewhere;
+- bookings sat on the submit it had just pressed while the reservation appeared
+  on the other half of the screen — the reader is looking at the wrong side —
+  and then ended with six seconds on a filter chip;
+- SEO already did it right, and is why the pattern was noticeable: it ends on
+  the Google preview rather than the save button.
+
+Traced afterwards: bookings went from 12 stops and 2628px of travel to 9 and
+2220, and its longest hold moved from a filter chip to the row itself.
+
+**Trace before believing.** Sampling `.zn3-cursor` every 140-200ms through a
+run and drawing the path over a screenshot is the only way to see what an
+animation does. Reading the code will not show it — all three of these runs
+were written by someone who thought they were fine.
+
+### What this section learned
+
+- **`className="ring"` is a Tailwind utility.** A bare semantic class name can
+  collide with the global stylesheet: `ring` paints
+  `box-shadow: 0 0 0 3px rgb(59 130 246 / .5)`, so the empty state's icon wore
+  a blue focus ring that no computed style of mine explained. Renamed to
+  `disc`. The bare utilities worth avoiding as class names are `ring`,
+  `border`, `shadow`, `blur`, `filter`, `transform`, `transition`, `outline`,
+  `block`, `flex`, `grid`, `table`, `container`, `truncate`, `visible`,
+  `hidden`, `static`, `fixed`, `absolute`, `relative`, `sticky`.
+
+- **A `min-height` floor turned into a cap, and the fit pass measured the
+  frame.** The short surface was given `min-height: 500px` so it would fill the
+  window instead of floating in it — and because the measured child is a grid
+  item, it then *stretched*: `offsetHeight` 610 while `scrollHeight` was 825,
+  so the ratio came back 1, nothing scaled, and the form was sliced off the
+  bottom of a phone. This is the trap section two already records ("the child
+  must size to its CONTENT, never stretch"), arriving through a different door.
+  Two fixes: `align-self: start` on the measured child, and the floor scoped to
+  `min-width: 1024px`, where there is actually room for it. **The invariant to
+  check is `offsetHeight === scrollHeight` on whatever `.zn-fit` measures.**
+
+- **Match the existing bar rather than inventing one.** Section two's own worst
+  fit ratio on a phone is `0.763` (the eight-tile picker). Section three came
+  back at `0.739 / 0.786 / 0.583`, so the phone rules trim until all three sit
+  at or above it — now `0.762 / 0.786 / 0.797`. What gives up its room is
+  furniture, never a label: the share preview is the third card on that column
+  and the one the real screen also puts last.
+
+- **Format at render, never at module load.** `(0).toLocaleString("ar")` as a
+  module constant is evaluated on the server too, and the Node build here ships
+  a small ICU that answers with a different digit than a browser with a full
+  one. The dashboard is a client component and formats in the browser, so this
+  does too — the demo then shows whatever the real screen would show on that
+  same browser, rather than a digit baked at the wrong end.
+
+- **Reconcile per-surface state during render, not in an effect.** An effect
+  runs after the paint, so for exactly one frame the new surface was handed the
+  previous one's fields — which crashed the SEO screen reading `.trim()` on a
+  key the bookings state does not have. The state is held *with* the id of the
+  surface it belongs to and reconciled in render instead.
+
+- **The measured numbers.** Verified at 1440×900, 1280×800, 1024×768 and
+  390×844, both accents: nothing stretched, nothing cut, no horizontal
+  overflow, no page errors, and the cursor inside the window on every surface.
+  Fit ratios `0.89`–`1.0` on a laptop and `0.795`–`0.87` on a phone. The deck
+  move into the new panel measures level with the existing one — best of three,
+  hero→build 63 frames / worst 67ms against build→manage 67 / 33 — so the third
+  screen costs the second one nothing. (Dev-build, headed-Playwright numbers,
+  not comparable to the 83 recorded above; only the two measured side by side
+  are, and that harness is noisy enough that a single reading means little.)
+
+### Open
+
+- ادر shows three surfaces; the editor (`ThemeEditor.tsx`, click-to-edit and
+  inline AI rewrite) is the strongest beat not built.
+
+### Still on the list
+
+Carried over, and none of it is done:
+
+1. **A scroll cue on the hero.** There is still no affordance anywhere that a
+   second screen exists — the body is `overflow: hidden`, the wheel is
+   hijacked, there is no scrollbar. Every screen added inherits that problem,
+   and there are three of them now.
+2. **The finished site as the payoff for ابن.** That section shows the input
+   for seventy seconds and never the output; `/demo/restaurant` and
+   `/demo/services` are live and need no login. ادر now shows the guest's side
+   of a published site, which makes the gap in ابن more obvious, not less.
+3. **انشر** — publishing, the subdomain, the live site. The third word, and the
+   fourth panel.
 
 ## Working notes
 
@@ -591,9 +1212,21 @@ After ادر, انشر — publishing, the subdomain, the live site.
   hook ships `vercel --prod` from the local tree, so fetch and merge origin
   first or the deploy reverts production.
 - **If the page renders as raw unstyled HTML**, the dev server's `.next` cache
-  has corrupted (`Cannot find module './NNNN.js'`), usually from a build
-  running while the dev server was live. Stop the server, delete `.next`,
+  has corrupted (`Cannot find module './NNNN.js'`, or `UNKNOWN: unknown error,
+  open .next\static\chunkspp\layout.js`). Stop the server, delete `.next`,
   restart.
+
+  **The cause was the deploy hook, and it is fixed.** `.vercelignore` did not
+  exclude `.next`, so every turn-end `vercel --prod` walked and uploaded the
+  dev cache at the moment the dev server was writing to it. On Windows that
+  fails with the UNKNOWN error above and leaves the cache broken, which is why
+  this kept happening right after a deploy and cost a six-minute rebuild each
+  time. Vercel builds from source on its own builders and never needs the
+  directory. `.next` is in `.vercelignore` now.
+
+- **Never run two dev servers.** The second one takes port 3001 and both then
+  write to the same `.next`, which corrupts it the same way. If a start says
+  "Port 3000 is in use, trying 3001", stop it: something is already serving.
 - **The dev server is what to check, not `next start`.** Port 3000 has been
   found serving a stale production build more than once; hashed chunk names in
   the HTML (`webpack-<hash>.js`) are the tell. Dev and start cannot share
