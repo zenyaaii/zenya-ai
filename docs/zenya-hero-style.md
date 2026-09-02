@@ -1245,13 +1245,99 @@ would have shown the deck through — and the deck is paper — putting a white
 band across the top of a panel sitting between two dark screens.
 
 Measured mid-move, sampling the column at `x=40` down the whole seam: obsidian
-`19,19,22` reaches the green with **a worst single-pixel step of 1 unit**.
-There is nothing to see. The ramp finishes at 8% of the panel, above the
-header, for the reason ادر's finishes at 10%.
+`19,19,22` reaches the green with **a worst single-pixel step of 3 units**.
+There is nothing to see.
 
-The header is now `data-dark={deck >= 2}` rather than `=== 2`, so the pill
-inverts once and stays inverted across both dark screens instead of flashing
-back to paper between them.
+**"Above the header" has to be measured, not assumed.** The ramp finished at 8%
+of the panel first, on the reasoning that ادر's finishes at 10% and shorter is
+safer. It is not: the pill sits at `--inset`, twenty-seven rendered pixels down
+with thirty-eight more of its own, so it spans roughly y=27 to y=65 on a 900px
+window — and a ramp settling near y=72 is **behind** the pill, not above it.
+Measured at rest, this panel's top pixel read `19,20,22`, full obsidian, and did
+not reach the green until y=70. The screen wore a dark bar across its head and
+the pill floated on it.
+
+ادر gets away with a long ramp because it has a light in exactly that band, so
+the gradient reads as sky. This panel has no glow at all, so the same ramp reads
+as dirt. **A ramp is invisible at rest only if it finishes before the header
+starts.**
+
+It is now `2.2%`, which settles by y=20. It can be that short because the step
+it hides is small: obsidian to evergreen is 34 units at its widest channel, and
+34 units over 20 pixels is under two per pixel. ادر needs ten times the distance
+because it is hiding 231.
+
+### The header takes the ground it is standing on
+
+`data-dark={deck >= 2}` was not enough. It is the right switch for the four
+things that invert the same way on any dark ground — the mark, the pages, the
+separator, the call to action — but it made both dark screens share one grey
+glass, and **a neutral pill over a coloured ground reads as a bar belonging to
+some other page, floating above this one.**
+
+So the header also carries `data-panel`, which names *which* dark screen it is
+on, and each one lifts its own ground by the same step: obsidian `19,19,22` to
+`rgba(32,32,38,.72)`, evergreen `15,53,39` to `rgba(28,66,55,.72)`, with the
+outer ring taking the ground itself so the pill reads as cut out of the screen
+rather than laid on it. Measured, the pill went from a neutral `51,51,67` on the
+green to `25,58,49` against an `18,46,36` ground.
+
+It is `data-panel` and not `data-ground` because `.zn4-panel` already spends that
+name on the choice of evergreen, and one attribute meaning two things in one
+file is how a stylesheet this size starts lying.
+
+### The window moves to its size, it does not snap to it
+
+The window is sized by the page inside it, and that page changes height four
+times a cycle. Measured: **+245px** when the results table lands, **+48** when
+the bought domain appears under it, **-272** on the change of surface, **+206**
+when the published site loads. Every one of them was a single frame wide, which
+is not a resize, it is a jolt — and it is the most visible motion defect the
+section had.
+
+`height: auto` cannot be transitioned, so the height is **measured off the
+content and written as a pixel value** the stylesheet then eases over 520ms on
+the page's own curve. The same move `--fit` and the hero's column matrix make,
+for the same reason. The fallback is `auto`, so with the script dead the window
+still fits its page and simply arrives instantly.
+
+**The loop it would have been.** `.zn4-screen` carried `min-height: 100%`, which
+is 100% of the stage, which is what is left of the window — so the content's
+height depended on the window's height, and the window was about to be sized
+from the content. That is exactly the feedback the fit pass in `runner.ts` is
+built to avoid. The `min-height` chain is gone; the content is content, the
+window is measured from it, and nothing reads back.
+
+The observer also has to watch an element that **survives a change of surface**.
+The screen used to be keyed on the surface id, so it remounted and took its
+observer with it; the key moved to a child (`.zn4-in`), which is also where the
+entrance animation now lives.
+
+### The switcher belongs to the window
+
+It was a sibling of the window in the stage's column, so it pinned to the top
+while the window centred in what was left — and on a short page the two pills
+sat **275px clear of the thing they switch**, reading as unrelated furniture. It
+is inside the window's box now, so the pair centres together and travels in as
+one arrival instead of two. Measured after: a consistent 37px gap at every size
+from 1728 down to 360.
+
+### Measure the deck HEADED, or do not measure it
+
+Headless Chromium reports roughly **a third of the frames** for the same move.
+The same harness, same build, same three moves:
+
+| | headless | headed |
+| --- | --- | --- |
+| hero → ابن | 14 frames / 133ms worst | 65 / 50 |
+| ابن → ادر | 17 / 100 | 67 / 33 |
+| ادر → انشر | 25 / 133 | 66 / 33 |
+
+The headed numbers match what this document already recorded for the first two
+moves, and they say the fourth screen costs the deck nothing. The headless ones
+say the whole deck runs at fifteen frames a second, which is false, and would
+have been filed as a regression in the new section. **Best of three, headed, and
+compare the moves against each other rather than against a number in a file.**
 
 ### The object is a BROWSER
 
