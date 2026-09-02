@@ -55,6 +55,7 @@ import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
 import BuildSection from "./BuildSection"
 import ManageSection from "./ManageSection"
 import PublishSection from "./PublishSection"
+import FooterSection from "./FooterSection"
 
 /* The default face for the three words, and the only one that is preloaded,
    because it is what the page renders before anybody picks anything. Both cuts
@@ -626,7 +627,7 @@ export default function Page() {
     return () => clearTimeout(id)
   }, [deck])
   useEffect(() => {
-    const PANELS = 4
+    const PANELS = 5
     const go = (dir: number) => {
       const now = Date.now()
       if (now < deckShut.current) {
@@ -1161,15 +1162,16 @@ export default function Page() {
            zoom and vh resolves BEFORE that scale is applied, so a "100dvh"
            panel in an 85%-zoomed window is short by a seventh and the two
            screens would never line up. The deck is a fixed box measured
-           against the real viewport; a panel at a quarter of a track at four
+           against the real viewport; a panel at a fifth of a track at five
            times the deck is exactly one screen at any zoom. Adding a screen
            means three numbers, all here — the track's height, the panel's,
            and the step the transform takes — plus PANELS in the gesture
-           handler, and nothing else on the page counts panels. */
+           handler, and nothing else on the page counts panels. (Four screens
+           read 400% / 25% / -25%; the footer made it five.) */
         #zn-deck { position: fixed; inset: 0; overflow: hidden; }
         #zn-track {
-          position: absolute; inset: 0; height: 400%;
-          transform: translateY(calc(var(--deck, 0) * -25%));
+          position: absolute; inset: 0; height: 500%;
+          transform: translateY(calc(var(--deck, 0) * -20%));
           transition: transform 1020ms cubic-bezier(0.22, 1, 0.36, 1);
           will-change: transform;
         }
@@ -1183,7 +1185,7 @@ export default function Page() {
            light has to be allowed to cross. (No backticks in here — this
            whole block is a template literal, and one would end it.) */
         .zn-panel {
-          position: relative; height: 25%;
+          position: relative; height: 20%;
           transform: translateZ(0);
           contain: layout;
         }
@@ -1794,9 +1796,15 @@ export default function Page() {
            size starts lying.
 
            ادر: obsidian #131316, lifted 13 values. This is what the rule above
-           always was; it is named now so its neighbour can differ. */
+           always was; it is named now so its neighbour can differ. The footer
+           stands on the same obsidian, so it takes the same lift — listed by
+           its own name rather than folded into "manage", because it is a
+           different panel and a name that means two panels is the same lie in
+           a smaller place. */
         #pill-header[data-panel="manage"] .zn-pill,
-        #pill-header[data-panel="manage"] .zn-phone-pill {
+        #pill-header[data-panel="manage"] .zn-phone-pill,
+        #pill-header[data-panel="close"] .zn-pill,
+        #pill-header[data-panel="close"] .zn-phone-pill {
           background-color: rgba(32, 32, 38, 0.72) !important;
           box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.12),
                       0 0 0 4px rgba(19, 19, 22, 0.5) !important;
@@ -3743,6 +3751,237 @@ export default function Page() {
         .zn-publish .zn-compose-panel .save[data-state="fail"] { background: #f08a8a; color: #2a0808; }
 
 
+        /* ── Section five: the close ──────────────────────────────────────
+           The fifth panel, and the only one that is not a step in the
+           argument. There is no fourth word behind it, no device and no
+           script: it is the mark, the one claim, the real pages and the real
+           company line, at rest.
+
+           THE GROUND IS ادر'S OBSIDIAN. The seam above it comes down from
+           انشر's evergreen, and evergreen to obsidian is 34 units at its
+           widest channel — the same step انشر itself hides, and short enough
+           that 2.2% of a panel settles it by y=20, clear of a pill that
+           begins at y=27. Going back to paper is a 231-unit step; ادر needs
+           ten times the ramp for exactly that reason, and gets away with it
+           only because it has a light sitting in the band the ramp lands in.
+           This screen has no light, so the same ramp would read as dirt
+           across its head. A ramp is invisible at rest ONLY if it finishes
+           before the header starts. */
+        .zn5-panel {
+          /* ادر's three measured steps of paper on a near-black ground:
+             16.5:1, 7.7:1 and 5.2:1. The ground here is the same value, so
+             the same numbers hold. */
+          --ink: #fafafa;
+          --ink2: rgba(250, 250, 250, 0.66);
+          --ink3: rgba(250, 250, 250, 0.52);
+          --hair: rgba(250, 250, 250, 0.11);
+          --g: #131316;
+          --prev: #0f3527;
+          /* Shorter than انشر's 2.2% even though the step is the same size,
+             and the reason is the direction rather than the distance: انشر's
+             band is a NEUTRAL at the top of a coloured screen, this one is a
+             SATURATED green at the top of a neutral one, and the eye reads
+             chroma against grey harder than grey against chroma. Measured on
+             both: 2.2% settles at y=16 with a worst single-pixel step of 3,
+             1.5% settles at y=12 with a step of 4, and 1% settles at 8 with a
+             step of 6 — which is the edge of what reads. 1.5% keeps the step
+             invisible and takes a quarter off the band. Still finishes fifteen
+             pixels above a pill that begins at y=27. */
+          background: linear-gradient(
+            to bottom,
+            var(--prev) 0%,
+            color-mix(in oklab, var(--prev), var(--g) 62%) 0.61%,
+            color-mix(in oklab, var(--prev), var(--g) 90%) 1.02%,
+            var(--g) 1.5%
+          );
+          color: var(--ink);
+        }
+
+        .zn-close {
+          position: absolute; inset: 0; z-index: 1;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr);
+          place-items: center;
+          padding: calc(var(--inset) + 3.4rem) var(--gut) calc(var(--inset) + 0.6rem);
+        }
+        /* Capped rather than fixed, so a narrow laptop shrinks the card
+           instead of pushing it through the gutter. */
+        .zn-closebox { width: min(100%, 1180px); height: 100%; display: grid; align-content: center; }
+        .zn-close .zn-fit { width: 100%; }
+
+        /* The measured child: the signature and the card as ONE object, so
+           the fit pass scales the composition rather than the card alone and
+           the two never drift apart on a small screen. */
+        .zn5-stack { display: grid; gap: 92px; align-self: start; }
+
+        /* The signature. The other three screens each stand a display word
+           behind their object; this one has no fourth word, so the name
+           stands behind it instead — quiet enough to be a signature and not a
+           headline. Faded as a LAYER, never as alpha in the colour: the mark
+           is 27 rectangles that meet at their edges, and a semi-transparent
+           fill composites every one of those seams twice. */
+        .zn5-sig { display: flex; justify-content: center; opacity: 0.11; }
+        .zn5-sig svg { width: min(74%, 660px); height: auto; color: #fafafa; }
+
+        /* The card. ادر's lit material at a larger radius: one hairline that
+           is bright along the top edge and fades down, obeying a light that
+           comes from above — no drop shadow, which this style refuses, and no
+           second card grammar, because the dark screens are one family. */
+        .zn5-card {
+          position: relative;
+          border-radius: 34px;
+          overflow: hidden;
+          background: rgba(250, 250, 250, 0.028);
+          box-shadow: inset 0 1px 0 rgba(250, 250, 250, 0.17),
+                      inset 0 0 0 1px rgba(250, 250, 250, 0.065);
+        }
+        /* The wash, on its own layer rather than in the background, so the
+           hairline above stays a hairline instead of being mixed into a
+           gradient. Strongest at the top and gone by the middle: a surface is
+           lit from one side, not tinted all over. */
+        .zn5-sheen {
+          position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(
+            to bottom,
+            rgba(250, 250, 250, 0.07) 0%,
+            rgba(250, 250, 250, 0.026) 34%,
+            rgba(250, 250, 250, 0) 62%
+          );
+        }
+        .zn5-body { position: relative; padding: 34px 36px 28px; }
+
+        .zn5-cols {
+          display: grid;
+          grid-template-columns: 1.55fr 1fr 1fr 1fr;
+          gap: 40px;
+          align-items: start;
+        }
+
+        .zn5-brand { display: flex; flex-direction: column; align-items: flex-start; }
+        .zn5-mark { display: block; color: var(--ink); }
+        .zn5-claim {
+          margin: 16px 0 0; max-width: 34ch;
+          font-size: 13px; line-height: 1.85; color: var(--ink2);
+        }
+        /* The one inversion this page already uses, taken the other way: on
+           paper the call to action is obsidian, on a dark ground it is paper.
+           Same control, same reading. */
+        .zn5-cta {
+          margin-top: 18px;
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 8px 15px; border-radius: 999px;
+          background: #fafafa; color: #131316;
+          font-size: 12.5px; line-height: 1; text-decoration: none;
+          transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                      transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn5-cta:hover { background: #ffffff; transform: translateX(-2px); }
+        .zn5-cta .ic { width: 14px; height: 14px; }
+        .zn5-mail {
+          margin-top: 14px;
+          font-size: 12px; color: var(--ink3); text-decoration: none;
+          transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn5-mail:hover { color: var(--ink2); }
+
+        /* No tracking on the headings. The reference letter-spaces its
+           uppercase labels; Arabic has no upper case and its letters connect,
+           so tracking here draws the joins apart. Same rule the display line
+           keeps, arriving at a twelve-pixel label. */
+        .zn5-col h3 {
+          margin: 0 0 14px; font-size: 12px; font-weight: 500;
+          line-height: 1; color: var(--ink3);
+        }
+        .zn5-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+        .zn5-col a {
+          font-size: 13px; line-height: 1.4; color: var(--ink2); text-decoration: none;
+          transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn5-col a:hover { color: var(--ink); }
+
+        /* The one rule on this page besides the separator inside the header
+           pill, and it is the same exception: a hairline INSIDE a surface,
+           never a line drawn across the page. */
+        .zn5-bottom {
+          margin-top: 30px; padding-top: 22px;
+          border-top: 1px solid var(--hair);
+          display: flex; align-items: center; justify-content: space-between;
+          gap: 16px; flex-wrap: wrap;
+        }
+        .zn5-social { display: flex; gap: 8px; }
+        .zn5-social a {
+          width: 32px; height: 32px; border-radius: 999px;
+          display: inline-flex; align-items: center; justify-content: center;
+          color: var(--ink3);
+          box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.1);
+          transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                      background 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn5-social a:hover {
+          color: var(--ink);
+          background: rgba(250, 250, 250, 0.05);
+          box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.2);
+        }
+        .zn5-social svg { width: 14px; height: 14px; }
+        .zn5-legal { margin: 0; font-size: 11.5px; line-height: 1.6; color: var(--ink3); }
+
+        /* The arrival. data-run carries it, so at REST there is no attribute
+           written at all and the finished state is the resting state — the
+           rule this page has broken twice and does not break again. */
+        @keyframes zn5-rise {
+          from { opacity: 0; transform: translateY(18px); }
+        }
+        @keyframes zn5-lift {
+          from { opacity: 0; transform: translateY(10px); }
+        }
+        .zn5-stack[data-run] .zn5-card {
+          animation: zn5-rise 640ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+          animation-delay: 90ms;
+        }
+        .zn5-stack[data-run] .zn5-sig,
+        .zn5-stack[data-run] .zn5-brand,
+        .zn5-stack[data-run] .zn5-col,
+        .zn5-stack[data-run] .zn5-bottom {
+          animation: zn5-lift 560ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+          animation-delay: calc(140ms + var(--d, 0) * 70ms);
+        }
+
+        /* Narrow. The brand takes the full width and the three lists pair up
+           beneath it, which is what the reference does at its own breakpoint;
+           three Arabic lists side by side on a phone wrap every label. */
+        /* Below 900 the three lists pair up and the stack gets tall, so the
+           signature and the gap come down with it. The bar is section two's
+           own worst fit ratio, 0.763: at 900x700 this composition first
+           measured 0.751, which is under it, and what gave way is furniture
+           — the signature and the gap — never a label. 0.767 after. */
+        @media (max-width: 900px) {
+          .zn5-stack { gap: 44px; }
+          .zn5-sig svg { width: min(72%, 360px); }
+          .zn5-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 24px; }
+          .zn5-brand { grid-column: 1 / -1; }
+          .zn5-claim { max-width: 46ch; }
+        }
+        /* A phone is the one place the composition has to give something up,
+           and what gives is furniture rather than a label: the signature comes
+           down and the gap with it, so the fit pass never has to scale the
+           links into type nobody can read. */
+        /* Three lists fit side by side down to about 640; below that the
+           longest label wraps every row, so they pair up and the odd one out
+           takes the second row. A phone footer looks like that everywhere; a
+           TABLET with a lone column and 170px of dead card beside it does
+           not, which is what two columns at 768 gave. */
+        @media (max-width: 640px) {
+          .zn5-stack { gap: 34px; }
+          .zn5-sig svg { width: min(66%, 300px); }
+          .zn5-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .zn5-card { border-radius: 26px; }
+          .zn5-body { padding: 26px 22px 22px; }
+          .zn5-cols { gap: 24px 18px; }
+          .zn5-bottom { margin-top: 24px; padding-top: 18px; }
+        }
+
 
         @media (prefers-reduced-motion: reduce) {
           #zn-track { transition: none; }
@@ -3766,6 +4005,12 @@ export default function Page() {
           .zn4-load[data-on], .zn4-site .status .dot, .spin { animation: none; }
           .zn4-win[data-down] { transform: none; opacity: 1; }
           .zn4-app { transition: none; }
+          .zn5-stack[data-run] .zn5-card,
+          .zn5-stack[data-run] .zn5-sig,
+          .zn5-stack[data-run] .zn5-brand,
+          .zn5-stack[data-run] .zn5-col,
+          .zn5-stack[data-run] .zn5-bottom { animation: none; }
+          .zn5-cta, .zn5-mail, .zn5-col a, .zn5-social a { transition: none; }
         }
       ` }} />
 
@@ -3782,7 +4027,13 @@ export default function Page() {
         ref={headerRef}
         dir="rtl"
         data-dark={deck >= 2}
-        data-panel={deck === 3 ? "publish" : deck === 2 ? "manage" : undefined}
+        /* Which dark screen, so the pill lifts THAT ground rather than
+           wearing one neutral glass across three different rooms. The footer
+           stands on ادر's obsidian, so it takes ادر's lift — a separate name
+           because it is a separate panel, not because the values differ. */
+        data-panel={
+          deck === 4 ? "close" : deck === 3 ? "publish" : deck === 2 ? "manage" : undefined
+        }
         className={`${ui.className} fixed inset-x-0 top-[var(--inset)] z-50 flex justify-center px-[var(--gut)]`}
       >
         <div className="w-full max-w-full md:w-auto">
@@ -4132,7 +4383,7 @@ export default function Page() {
           against the real viewport, so they are centred on the reader's
           screen at any zoom. Safe here because the page is one screen and the
           body already has overflow: hidden. */}
-      {/* The deck. Four screens on one track, a gesture apart. Fixed rather
+      {/* The deck. Five screens on one track, a gesture apart. Fixed rather
           than any height in viewport units, for the reason below; the track
           is four times the deck and each panel a quarter of the track, so a
           panel is exactly one screen whatever zoom the root is writing. */}
@@ -4286,6 +4537,21 @@ export default function Page() {
             wordLh={1.28}
             edit={edit}
           />
+        </div>
+
+        {/* Section five: the close. Not a fourth word — the hero cycles three
+            and there is no fourth — but the place the page comes to rest: the
+            mark, the one claim, the real pages and the real company line.
+            The deck has no free scrolling, so a footer here is either a whole
+            screen or it does not exist.
+
+            It stands on ادر's obsidian rather than going back to paper.
+            Evergreen to obsidian is 34 units, the same step انشر hides in a
+            ramp short enough to finish above the header pill; paper is 231,
+            and a ramp long enough for that lands a band of light under the
+            pill unless something in the band explains it. */}
+        <div className="zn-panel zn5-panel" aria-hidden={deck !== 4}>
+          <FooterSection active={deck === 4 && settled} uiClass={appUi.className} />
         </div>
         </div>
       </div>

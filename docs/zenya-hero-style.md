@@ -213,7 +213,7 @@ at all: the body has been `overflow: hidden` since the hero was one screen, and
 the deck moves by transform instead.
 
 **Percentages, never viewport units.** `#zn-deck` is `fixed; inset: 0`, the
-track inside it is `height: 400%`, and each panel is `height: 25%`. A panel
+track inside it is `height: 500%`, and each panel is `height: 20%`. A panel
 is therefore exactly one screen at any zoom — which matters, because the root
 ZoomLock writes CSS `zoom` and `vh` resolves *before* that scale is applied. At
 the 85% cap the travel measures `-1059px` on a 900px window; that is one screen
@@ -221,17 +221,19 @@ in CSS pixels, and reading it as "59px too far" is the mistake to avoid.
 
 **Adding a screen is four numbers, and they all live together:** the track's
 height, the panel's height, the step in
-`transform: translateY(calc(var(--deck) * -25%))`, and `PANELS` in the gesture
+`transform: translateY(calc(var(--deck) * -20%))`, and `PANELS` in the gesture
 handler. Nothing else counts panels. Going from two screens to three touched
 those four and nothing else; going from three to four touched the same four
 and one more — the header's `data-dark`, which was `deck === 2` and is now
 `deck >= 2`, because there are two dark screens and the pill must not flash
-back to paper between them.
+back to paper between them. Going from four to five touched the four again,
+and `data-panel` — which names *which* dark screen the pill is standing on,
+and there are three of them now.
 
-At four screens the track is `400%`, a panel is `25%`, and the step is `-25%`.
-Measured after: the four panels sit at exactly 0, 900, 1800 and 2700 on a
-900px window, down and back up again, with no horizontal overflow and no page
-errors on any of them.
+At five screens the track is `500%`, a panel is `20%`, and the step is `-20%`.
+Measured after: the five panels sit at exactly 0, 900, 1800, 2700 and 3600 on
+a 900px window, down and back up again, with no horizontal overflow and no
+page errors on any of them.
 
 **The lock is the whole trick.** A gesture past the threshold moves the deck and
 then closes it for the length of the move; every event arriving while it is
@@ -565,9 +567,9 @@ on.
 
 ## Where this stands, and what is next
 
-The hero, ابن, ادر and انشر are built, at `app/demo/home/`, live at
-`zenyaai.co/demo/home`. Four screens. It is NOT the homepage and must not be
-wired into `/`.
+The hero, ابن, ادر, انشر and the close are built, at `app/demo/home/`, live
+at `zenyaai.co/demo/home`. Five screens. It is NOT the homepage and must not
+be wired into `/`.
 
 **The Style card is the wizard's card.** Not a version of it — the presets are
 IMPORTED from `utils/restaurant/presets` and `utils/services/presets`, and the
@@ -1469,14 +1471,183 @@ stays on screen — a scroll to a dish had been cutting the headline in half.
 1. **A scroll cue on the hero. This is now the only thing standing between the
    page and a reader.** There is still no affordance anywhere that a second
    screen exists — the body is `overflow: hidden`, the wheel is hijacked, there
-   is no scrollbar — and there are **four** screens behind it now. Three of them
-   are the whole argument the page makes, and nothing on the hero says they are
-   there. It is the highest-value item left by a distance.
+   is no scrollbar — and there are **five** screens behind it now. Three of them
+   are the whole argument the page makes and the fifth is the footer, which a
+   reader has every reason to expect and no way to know is there. Nothing on
+   the hero says any of it exists. It is the highest-value item left by a
+   distance, and each screen added makes it worse.
 2. **The finished site as the payoff for ابن.** انشر now ends on the published
    site at its own address, so the page as a whole does show the output — but
    ابن itself still shows seventy seconds of input and never what comes out of
    it, and it is the section where the gap is felt. `/demo/restaurant` and
    `/demo/services` are live and need no login.
+
+## Section five: the close
+
+The footer, and the fifth panel of the same deck. It lives in
+`app/demo/home/FooterSection.tsx`; there is no second file, because there is
+no script — no cursor, no device, nothing from `runner.ts` but the fit pass.
+
+**A footer here is a whole screen or it does not exist.** The deck has no free
+scrolling at all: the body has been `overflow: hidden` since the hero was one
+screen and the wheel is hijacked, so there is no foot of a page for a footer
+to sit at. Either it is a panel or there is nowhere to put it.
+
+**It is NOT a fourth word.** The hero cycles three — ابن، ادر، انشر — and there
+is no fourth. This screen is where the page comes to rest rather than another
+step in the argument, so it carries no display word, no object rising from
+below the fold and nothing being demonstrated.
+
+### The ground is ادر's obsidian, and going back to paper was the alternative
+
+Returning to paper closes the loop and is the composition this screen wanted.
+It was rejected on the seam, and the arithmetic is the whole argument:
+
+- Evergreen `15,53,39` to obsidian `19,19,22` is **34 units** at its widest
+  channel — the same step انشر hides, in a ramp short enough to finish above
+  the header pill.
+- Evergreen to paper `250,250,250` is **231**, which is what ادر hides, and ادر
+  needs **ten times the ramp** to do it. A ramp that long lands a band of light
+  in the strip the pill floats in, and reads as sky only because ادر has a
+  light sitting in exactly that band. This screen has no glow, so the same ramp
+  would read as dirt across its head.
+
+Buying a paper ground would therefore have meant inventing a light for this
+panel — adding colour to the page for the sake of a transition, on the one
+screen whose whole job is to stop arguing. The obsidian is already on the page,
+the two dark sections are already declared one family, and the pill already
+knows how to stand on it.
+
+**The ramp is 1.5%, shorter than انشر's 2.2% even though the step is the same
+size, and the reason is direction rather than distance.** انشر's band is a
+NEUTRAL at the top of a coloured screen; this one is a SATURATED green at the
+top of a neutral one, and the eye reads chroma against grey harder than grey
+against chroma. Measured on both, a pixel at a time down a 900px panel:
+
+| ramp | settles at | worst single-pixel step |
+| --- | --- | --- |
+| 2.2% | y=16 | 3 |
+| 1.5% | y=12 | 4 |
+| 1.0% | y=8 | 6 |
+
+The pill begins at y=27. 1.5% keeps the step invisible, finishes fifteen pixels
+clear of it, and takes a quarter off the visible band. 1% is the edge of what
+reads as an edge and buys four pixels.
+
+### The header takes a third ground
+
+`data-panel` now names three screens, not two: `manage`, `publish`, `close`.
+The footer stands on ادر's obsidian and takes ادر's exact lift, and it is still
+listed under its own name rather than folded into `manage` — a panel name that
+means two panels is the same lie `data-ground` would have been, in a smaller
+place.
+
+### The card is the reference, translated rather than copied
+
+The composition came in as a Tailwind footer: a `rounded-[40px]` black card
+with a white rim, a top-down white wash, four columns, and a bottom bar over a
+hairline. Four things had to change to be this page:
+
+- **No drop shadow.** The reference stacks three. Elevation here is stacked
+  hairline rings, and the card takes ادر's `lit` material unchanged — bright
+  along the top edge, fading down, obeying a light that comes from above.
+- **The card is LIGHTER than its ground, not darker.** `bg-black/80` is a dark
+  card on a dark page; on this page a surface lifts off its ground the way
+  ادر's window lifts off obsidian, so it is `rgba(250,250,250,0.028)` over
+  `#131316`.
+- **The wash is a LAYER, not a background.** Painted into the background it
+  mixes with the hairline and the hairline stops being one. It is its own
+  absolutely-positioned span, strongest at the top and gone by 62%.
+- **No tracking on the headings.** The reference letter-spaces its uppercase
+  labels. Arabic has no upper case and its letters connect, so tracking a
+  heading pulls the joins apart — the hero's own rule, arriving at a
+  twelve-pixel label.
+
+The one rule drawn across a surface is the hairline above the bottom bar, and
+it is the same exception the header pill already carries: a line INSIDE a
+surface, never one across the page.
+
+### The signature
+
+Every other screen on this deck stands a display word behind its object. This
+one has none, so what stands behind it is the name — `ZenyaMark` at
+`min(74%, 660px)`, paper at `opacity: 0.11`.
+
+It is not decoration and it is not a second claim: it is the real footer's own
+device, where the mark is stretched across the foot of the page, and it says
+nothing. **Without it the card floats dead centre in an empty screen and reads
+as a card rather than as the end of something** — measured, 310px of card in a
+900px screen with 300 above it and 260 below.
+
+Faded as a LAYER, never as alpha in the colour, for the reason section two
+records: the mark is 27 rectangles that meet at their edges, and a
+semi-transparent fill composites every one of those seams twice.
+
+### The signature and the card are ONE measured object
+
+`.zn5-stack` is what `.zn-fit` measures — signature, gap and card together — so
+the fit pass scales the composition rather than the card alone and the two
+cannot drift apart on a small screen. The invariant the fit pass needs is
+`offsetHeight === scrollHeight` on whatever it measures, and it holds at every
+size.
+
+**The bar is section two's own worst ratio, 0.763.** At 900x700 this
+composition first measured **0.751**, under it. Two things were wrong with the
+narrow layout and only one of them was size: below 900px the signature and the
+gap came down (furniture, never a label), which reached 0.768 — and then the
+LISTS went from two columns to three, which is what actually fixed it. Three
+lists side by side fit down to about 640, and the stack came from 924 to 678 at
+that window. **Fit is now 1 at every size measured**, so nothing on this screen
+is scaled at all.
+
+**Two columns was a tablet bug, not only a height one.** At 768x1024 the three
+lists paired up, قانوني sat alone in the right cell, and 170px of card was dead
+beside it. A phone footer looks like that everywhere and a tablet must not, so
+the two-column rule moved down to 640 where a phone actually needs it.
+
+### Nothing on it is invented
+
+- Every `href` was checked against the app tree: thirteen links, all built.
+- The address is `support@zenyaai.co`, which is the one the product already
+  answers on.
+- The company line is the real footer's own — تُدار كمؤسسة فردية هولندية — and
+  the year is formatted at render rather than at module load, for the ICU
+  reason section three records.
+- The sentence in the brand column is **the page's single claim**, not a second
+  one written for the foot of it, followed by the real footer's own description
+  of what the product does.
+- The three social accounts are the three the real footer links.
+
+### Measured
+
+Verified at 1728x1080, 1440x900, 1280x800, 1024x900, 1024x768, 900x700,
+768x1024, 430x932, 390x844 and 360x780: nothing stretched, nothing cut, no
+horizontal overflow, everything inside every edge, and no page errors. Fit
+comes back `1` at every one of them (`0.999` on the tablet, which is the same
+thing rounded), so the fit pass is a guard here rather than a lever — it exists
+because the invariant has to hold, not because anything needs shrinking.
+
+**The move, headed, best of three** — and headed is the only way, for a reason
+worth adding to the one this document already records: the Browser pane freezes
+`requestAnimationFrame` while it is hidden, which stops CSS transitions AND
+**ResizeObserver callbacks**, so every fit ratio read through it comes back `1`
+whether it should or not. A composition that overflows its screen by a quarter
+measures as fitting perfectly.
+
+| | frames | worst |
+| --- | --- | --- |
+| hero to ابن | 58 | 217ms |
+| ابن to ادر | 56 | 166 |
+| ادر to انشر | 61 | 147 |
+| انشر to the close | **64** | **83** |
+
+The new move is the best of the four. The fifth screen costs the deck nothing.
+
+**The rest state was verified twice over:** a page that has never travelled to
+the fifth panel has no `data-run` written anywhere, and the card, the
+signature, the brand block and the bottom bar all read `opacity: 1` and
+`transform: none` — as does the same page under
+`prefers-reduced-motion: reduce`, before and after arriving.
 
 ## Working notes
 
