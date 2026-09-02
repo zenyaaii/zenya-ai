@@ -53,6 +53,7 @@ export default function PublishSection({
 }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
+  const screenRef = useRef<HTMLDivElement>(null)
 
   const [take, setTake] = useState(0)
   const sf = SURFACES[take % SURFACES.length]
@@ -194,6 +195,39 @@ export default function PublishSection({
     }
   }, [sf, form.site, form.live, form.rows?.length])
 
+  /* ── The window moves to its size, it does not snap to it ──────────────
+     The window is sized by the page inside it, and that page changes height
+     four times a cycle: the results table lands, the bought domain appears
+     under it, the surface changes, the published site loads. Each of those
+     was a single-frame jolt, because height: auto cannot be transitioned.
+
+     So the height is MEASURED and written as a pixel value, which the
+     stylesheet then eases — the same move --fit and the hero's column matrix
+     make, for the same reason.
+
+     It cannot loop. The observer watches the SCREEN, whose height is its
+     content's (align-self: start, and the min-height that used to tie it to
+     the window is gone), and writes onto the WINDOW. Content does not read
+     back from the window, so there is nothing to feed back. This is the trap
+     runner.ts's fit pass documents, avoided the same way. */
+  useEffect(() => {
+    const app = frameRef.current
+    const screen = screenRef.current
+    if (!app || !screen) return
+    const measure = () => {
+      const chrome = app.querySelector<HTMLElement>(".zn4-chrome")
+      const load = app.querySelector<HTMLElement>(".zn4-load")
+      const h = screen.offsetHeight
+      if (!h) return
+      const furniture = (chrome?.offsetHeight ?? 0) + (load?.offsetHeight ?? 0)
+      app.style.setProperty("--app-measured", (h + furniture) + "px")
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(screen)
+    return () => ro.disconnect()
+  }, [])
+
   /* The address the browser is showing. The surface owns it once it starts
      typing in it; until then it is the surface's own path. */
   const url = form.url || sf.host + sf.path
@@ -224,27 +258,33 @@ export default function PublishSection({
       </h2>
 
       <div className="zn-stagebox">
-        <div className="zn4-switch" role="tablist" aria-label="الشاشة المعروضة">
-          {SURFACES.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              role="tab"
-              aria-selected={s.id === sf.id}
-              data-on={s.id === sf.id}
-              onClick={() => choose(s.id)}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-
         {/* The browser. A complete window — all four corners — because what
             it is showing is an address, and an address bar cut off at an edge
             is not an address bar. data-down carries the arrival, so at rest
             nothing is written and a browser that never animates still finds
             the window where it belongs. */}
         <div className="zn4-win" data-down={!active || undefined}>
+          {/* INSIDE the window's box, not above it in the column. Left as a
+              sibling it pinned to the top of the stage while the window
+              centred in what was left, so on a short page the two pills sat
+              275px clear of the thing they switch and read as unrelated
+              furniture. They travel in together now, which is also one
+              arrival instead of two. */}
+          <div className="zn4-switch" role="tablist" aria-label="الشاشة المعروضة">
+            {SURFACES.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                role="tab"
+                aria-selected={s.id === sf.id}
+                data-on={s.id === sf.id}
+                onClick={() => choose(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
           <div className="zn4-app" ref={frameRef}>
             <div className="zn4-chrome">
               <span className="lights" aria-hidden><i /><i /><i /></span>
@@ -264,11 +304,17 @@ export default function PublishSection({
             <span className="zn4-load" data-on={form.loading ? true : undefined} aria-hidden />
 
             <div className="zn4-stage">
-              {/* Keyed on the surface AND on whether the site has arrived, so
-                  the swap into the published site replays the entrance the
-                  same way a change of surface does. */}
-              <div className="zn4-screen" key={sf.id + (form.site ? "-site" : "")}>
-                {sf.render({ f: form, focus })}
+              {/* The screen is NOT keyed and the entrance moved inside it. It
+                  has to survive every surface change, because it is what the
+                  window measures itself against — an element that remounts
+                  takes its observer with it. */}
+              <div className="zn4-screen" ref={screenRef}>
+                {/* Keyed on the surface AND on whether the site has arrived,
+                    so the swap into the published site replays the entrance
+                    the same way a change of surface does. */}
+                <div className="zn4-in" key={sf.id + (form.site ? "-site" : "")}>
+                  {sf.render({ f: form, focus })}
+                </div>
               </div>
             </div>
 

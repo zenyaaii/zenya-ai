@@ -1781,6 +1781,36 @@ export default function Page() {
           box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.12),
                       0 0 0 4px rgba(19, 19, 22, 0.5) !important;
         }
+        /* WHICH dark panel, not merely that it is dark. Both dark screens
+           shared one grey glass, which is right on obsidian and visibly wrong
+           on the green: a neutral pill over a coloured ground reads as a bar
+           belonging to some other page, floating above this one. So the pill
+           takes the ground it is standing on, and each value below is that
+           panel's own ground lifted by the same step.
+
+           The attribute is data-panel and not data-ground because .zn4-panel
+           already spends that name on the choice of evergreen, and one
+           attribute meaning two things in one file is how a stylesheet this
+           size starts lying.
+
+           ادر: obsidian #131316, lifted 13 values. This is what the rule above
+           always was; it is named now so its neighbour can differ. */
+        #pill-header[data-panel="manage"] .zn-pill,
+        #pill-header[data-panel="manage"] .zn-phone-pill {
+          background-color: rgba(32, 32, 38, 0.72) !important;
+          box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.12),
+                      0 0 0 4px rgba(19, 19, 22, 0.5) !important;
+        }
+        /* انشر: the evergreen #0f3527, lifted by the SAME step so the pill
+           sits off its ground exactly as far as it does on obsidian. The
+           outer ring takes the ground itself, which is what makes the pill
+           read as cut out of the screen rather than laid on top of it. */
+        #pill-header[data-panel="publish"] .zn-pill,
+        #pill-header[data-panel="publish"] .zn-phone-pill {
+          background-color: rgba(28, 66, 55, 0.72) !important;
+          box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.12),
+                      0 0 0 4px rgba(15, 53, 39, 0.5) !important;
+        }
         /* The mark fills with currentColor. Pure black is the rule on paper;
            on obsidian its counterpart is paper, not a grey. */
         #pill-header[data-dark="true"] svg { color: #fafafa !important; }
@@ -3110,15 +3140,30 @@ export default function Page() {
              would put a white band across the top of this panel, between two
              dark screens. ادر ramps from transparent because the screen above
              it really is paper. Here the screen above is obsidian, so that is
-             where the ramp starts. It finishes above the header, at 8% of the
-             panel, for the reason ادر's finishes at 10%: a longer one puts a
-             band of the old ground under the pill. */
+             where the ramp starts.
+
+             IT FINISHES ABOVE THE HEADER, and 8% was not above it. The pill
+             sits at --inset, which is 27 rendered pixels down with 38 more of
+             its own, so it spans roughly y=27 to y=65 on a 900px window; a
+             ramp settling around y=72 is BEHIND the pill, not above it.
+             Measured at rest, this panel's top pixel read 19,20,22 — full
+             obsidian — and did not reach the green until y=70, so the screen
+             wore a dark bar across its head and the pill floated on it. ادر
+             gets away with a long ramp because it has a light in exactly that
+             band and the gradient reads as sky; this panel has no glow at all,
+             so the same ramp reads as dirt.
+
+             2.2% settles by y=20, clear of the pill. It can be this short
+             because the step it hides is small: obsidian to evergreen is 34
+             units at its widest channel, and 34 units over 20 pixels is under
+             two per pixel, which is below what an eye reads as an edge. ادر
+             needs ten times the distance because it is hiding 231. */
           background: linear-gradient(
             to bottom,
             var(--prev) 0%,
-            color-mix(in oklab, var(--prev), var(--g) 55%) 3.5%,
-            color-mix(in oklab, var(--prev), var(--g) 88%) 6%,
-            var(--g) 8%
+            color-mix(in oklab, var(--prev), var(--g) 62%) 0.9%,
+            color-mix(in oklab, var(--prev), var(--g) 90%) 1.5%,
+            var(--g) 2.2%
           );
           color: var(--ink);
         }
@@ -3183,6 +3228,7 @@ export default function Page() {
         .zn4-word > span[data-state="in"] { opacity: 1; transform: none; }
 
         .zn4-switch { display: flex; gap: 6px; flex: 0 0 auto; margin-bottom: 16px; position: relative; z-index: 2; }
+        .zn4-win > .zn4-app { flex: 0 1 auto; }
         .zn4-switch button {
           border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 500;
           color: var(--ink3); background: transparent;
@@ -3222,8 +3268,8 @@ export default function Page() {
              the column and the window is centred in it. */
           flex: 1 1 auto; min-height: 0;
           width: 100%;
-          display: flex;
-          align-items: center;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
           /* The composed nudge belongs to the stagebox, which already applies
              it; repeating it here would move the window twice. What travels
              here is the arrival and nothing else. */
@@ -3235,8 +3281,24 @@ export default function Page() {
         .zn4-app {
           position: relative;
           width: 100%; max-width: 1200px;
-          flex: 1 1 auto;
-          min-height: 0; max-height: min(100%, var(--app-h, var(--appbasis)));
+          flex: 0 1 auto;
+          min-height: 0;
+          /* THE WINDOW MOVES TO ITS NEW SIZE, it does not snap to it.
+             Sized by its content, the window changed height four times a
+             cycle with nothing easing it: measured, +245px when the results
+             table lands, +48 when the bought domain appears under it, -272
+             on the change of surface and +206 when the published site loads.
+             Each one was one frame wide, which is not a resize, it is a jolt.
+
+             height: auto cannot be transitioned, so the height is MEASURED
+             off the content and written here as a pixel value — the same
+             move --fit and the hero's column matrix make, for the same
+             reason. The fallback is auto, so with the script dead the window
+             still fits its page; it just arrives there instantly, which is
+             exactly today's behaviour. */
+          height: var(--app-measured, auto);
+          max-height: min(100%, var(--app-h, var(--appbasis)));
+          transition: height 520ms cubic-bezier(0.22, 1, 0.36, 1);
           margin-inline: auto;
           border-radius: 16px;
           background: var(--lift);
@@ -3310,9 +3372,20 @@ export default function Page() {
            SCREEN and not on the stage, so a touch still reaches the frame
            underneath and the sideways swipe that changes surface keeps
            working. */
+        /* NO min-height HERE. It was 100%, which is 100% of the stage, which
+           is what is left of the window — so the content's height depended on
+           the window's height, and the window is about to be sized FROM the
+           content. That is a loop, and it is the same loop the fit pass in
+           runner.ts is carefully built to avoid. The content is content; the
+           window is measured from it. */
         .zn4-screen {
           pointer-events: none;
-          display: grid; align-self: start; min-height: 100%;
+          display: grid; align-self: start;
+        }
+        /* The entrance lives on the keyed child, so the measured element above
+           can stay put across a change of surface. */
+        .zn4-in {
+          display: grid;
           animation: zn-card-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
         }
         .zn4-screen-in {
@@ -3544,7 +3617,6 @@ export default function Page() {
            arms, and is wrong for this brand. */
         .zn4-live {
           background: var(--s-bg); color: var(--s-txt);
-          min-height: 100%;
         }
         .zn4-live header {
           display: flex; align-items: center; justify-content: space-between;
@@ -3690,9 +3762,10 @@ export default function Page() {
           #zn-claim .line, #zn-claim .dot { transition: none; }
           .zn4-win, .zn4-cursor, .zn4-cursor svg, .zn4-word > span,
           .zn4-site .status, .zn4-domrow .disc, .zn4-switch button { transition: none; }
-          .zn4-screen, .zn4-tr, .zn4-domrow, .zn4-site .host { animation: none; }
+          .zn4-in, .zn4-tr, .zn4-domrow, .zn4-site .host { animation: none; }
           .zn4-load[data-on], .zn4-site .status .dot, .spin { animation: none; }
           .zn4-win[data-down] { transform: none; opacity: 1; }
+          .zn4-app { transition: none; }
         }
       ` }} />
 
@@ -3709,6 +3782,7 @@ export default function Page() {
         ref={headerRef}
         dir="rtl"
         data-dark={deck >= 2}
+        data-panel={deck === 3 ? "publish" : deck === 2 ? "manage" : undefined}
         className={`${ui.className} fixed inset-x-0 top-[var(--inset)] z-50 flex justify-center px-[var(--gut)]`}
       >
         <div className="w-full max-w-full md:w-auto">
