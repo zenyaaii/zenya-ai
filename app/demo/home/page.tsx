@@ -4399,7 +4399,7 @@ export default function Page() {
       <div id="zn-deck" data-moving={!settled} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
-          {line !== "off" && <DeckLine panel={0} style={line} active={deck === 0} />}
+          {line !== "off" && <DeckLine panel={0} style={line} deck={deck} />}
       <main
         id="blank-home"
         dir="rtl"
@@ -4493,7 +4493,7 @@ export default function Page() {
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
         <div className="zn-panel" aria-hidden={deck !== 1}>
-          {line !== "off" && <DeckLine panel={1} style={line} active={deck === 1} />}
+          {line !== "off" && <DeckLine panel={1} style={line} deck={deck} />}
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is
@@ -4519,7 +4519,7 @@ export default function Page() {
             page that is not white paper: it is the inside of the product, so
             it is obsidian, and it carries the page's single accent. */}
         <div className="zn-panel zn3-panel" data-accent={accent} data-cards={cards} aria-hidden={deck !== 2}>
-          {line !== "off" && <DeckLine panel={2} style={line} active={deck === 2} />}
+          {line !== "off" && <DeckLine panel={2} style={line} deck={deck} />}
           {/* The light for the seam. It hangs UPWARD past the top of this
               panel onto the foot of ابن, exactly the way the hero's foot glow
               hangs down onto the head of it — one light allowed to cross,
@@ -4541,7 +4541,7 @@ export default function Page() {
             but a different room, and the hue is the one the product already
             paints a live site in. */}
         <div className="zn-panel zn4-panel" data-ground={ground} aria-hidden={deck !== 3}>
-          {line !== "off" && <DeckLine panel={3} style={line} active={deck === 3} />}
+          {line !== "off" && <DeckLine panel={3} style={line} deck={deck} />}
           <PublishSection
             active={deck === 3 && settled}
             uiClass={appUi.className}
@@ -4564,7 +4564,7 @@ export default function Page() {
             and a ramp long enough for that lands a band of light under the
             pill unless something in the band explains it. */}
         <div className="zn-panel zn5-panel" aria-hidden={deck !== 4}>
-          {line !== "off" && <DeckLine panel={4} style={line} active={deck === 4} />}
+          {line !== "off" && <DeckLine panel={4} style={line} deck={deck} />}
           <FooterSection active={deck === 4 && settled} uiClass={appUi.className} />
         </div>
         </div>
