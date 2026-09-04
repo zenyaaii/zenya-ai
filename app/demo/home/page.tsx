@@ -1,8 +1,13 @@
 "use client"
 
 /**
- * Candidate homepage — one page, one screen. A floating pill header over bare
- * paper, and three words in the middle. Nothing else, no dividers anywhere.
+ * Candidate homepage - a five panel deck. A floating pill header over bare
+ * paper, the three words, then one word per screen.
+ *
+ * The light running behind the panels is DeckLine, a single fixed canvas for
+ * the whole deck rather than one canvas per panel. See that file for why: a
+ * per-panel field cannot be made continuous, and the break between screens
+ * was the visible cost of trying.
  *
  * NOT the homepage. It ships as a standalone route at /demo/home so it can be
  * reviewed on the real domain; app/(main)/page.tsx remains the homepage and is
@@ -34,6 +39,7 @@ import Link from "next/link"
 import { Almarai, IBM_Plex_Sans_Arabic } from "next/font/google"
 import { Menu, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
+import DeckLine, { type DeckStop } from "@/components/marketing/DeckLine"
 import { createClient } from "@/utils/supabase/client"
 import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
 
@@ -67,6 +73,29 @@ const STONE = "#666666"
 
 /* The reference's elevation recipe: stacked hairline rings, never a shadow. */
 const RING = "0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55)"
+
+/* One accent per screen, and the ground each one stands on. DeckLine reads
+   these in document order and crossfades between neighbours as the deck
+   moves, so the colour arrives with the screen instead of snapping at its
+   edge. */
+const STOPS: DeckStop[] = [
+  { accent: [94, 106, 210], dark: 0 },
+  { accent: [113, 112, 255], dark: 0 },
+  { accent: [139, 134, 255], dark: 1 },
+  { accent: [74, 222, 128], dark: 1 },
+  { accent: [200, 169, 106], dark: 1 },
+]
+
+const GROUND = [PAPER, PAPER, "#131316", "#0f3527", "#0a0a0c"]
+
+/* The three verbs, one to a screen, in the order the product happens in. */
+const STEPS = [
+  { word: "ابن", line: "اختر قالبًا، واكتب نبذة عن نشاطك." },
+  { word: "ادر", line: "منتجاتك وطلباتك وعملاؤك في مكان واحد." },
+  { word: "انشر", line: "اشترِ عنوانك، وانشر موقعك في دقائق." },
+]
+
+const ON_DARK = "rgba(250,250,250,0.62)"
 
 export default function Page() {
   const [user, setUser] = useState<any>(null)
@@ -148,9 +177,16 @@ export default function Page() {
           root layout mounts on every route. Suppressed so the page reads as
           genuinely empty; it must be restored if this ever becomes a real
           route that ships. */}
-      <style>{`
-        body:has(#blank-home) [aria-labelledby="cookie-consent-title"] { display: none !important; }
-        body:has(#blank-home) { background: ${PAPER}; overflow: hidden; }
+      {/* Injected as raw html, not as a text child. React escapes quotes
+          inside a <style> child when it renders on the server, so the
+          attribute selector below came back as &quot; and every load
+          failed hydration and fell back to client rendering. */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        body:has(#zn-deck) [aria-labelledby="cookie-consent-title"] { display: none !important; }
+        /* The deck scrolls, so no overflow lock here. The ground under the
+           last panel matches it, so an overscroll bounce shows obsidian
+           rather than paper. */
+        body:has(#zn-deck) { background: ${GROUND[4]}; }
 
         /* Display scale. Two stops rather than one clamp: a single aggressive
            vw ratio that fills a desktop line leaves phones with a few pixels
@@ -167,7 +203,28 @@ export default function Page() {
           #hero-words { font-size: clamp(6rem, 14vw, 13rem); }
         }
 
-        body:has(#blank-home) ::selection { background: #171717; color: #fafafa; }
+        /* One word per screen, a step down from the hero so the deck reads as
+           the hero first and its chapters after. */
+        .zn-word {
+          font-size: clamp(3rem, 18vw, 7rem);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+        }
+        @media (min-width: 768px) {
+          .zn-word { font-size: clamp(5rem, 12vw, 11rem); }
+        }
+        .zn-say {
+          margin-top: 1.1rem;
+          max-width: 32ch;
+          font-size: 15px;
+          line-height: 1.7;
+        }
+        @media (min-width: 768px) {
+          .zn-say { font-size: 17px; }
+        }
+
+        body:has(#zn-deck) ::selection { background: #171717; color: #fafafa; }
 
         /* Entrances are CSS, not JS. The words are the only content on the
            page, so they must never depend on a rAF loop to become visible:
@@ -192,7 +249,7 @@ export default function Page() {
           #hero-words > span { animation: none; }
           .zn-drawer { transition: none; }
         }
-      `}</style>
+` }} />
 
       {/* ── Header ──────────────────────────────────────────────────────────
           A floating pill rather than a bar: it sits on the paper with a
@@ -304,38 +361,81 @@ export default function Page() {
         </div>
       </header>
 
-      {/* ── Hero ────────────────────────────────────────────────────────────
-          The whole page. Bare paper, no grid, no divider, no background
-          shift — the words are centred in the full viewport. */}
-      <main
-        id="blank-home"
-        dir="rtl"
-        className="flex h-[100dvh] w-full items-center justify-center"
-        style={{ background: PAPER }}
-      >
-        {/* Revealed in sequence: the order is the product — build, then
-            manage, then publish. Slow and short-travelled so it settles
-            rather than announces itself. */}
-        <h1
-          id="hero-words"
-          className={`${display.className} flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 px-5 text-center`}
-          style={{
-            color: OBSIDIAN,
-            fontWeight: 800,
-            lineHeight: 1.24,
-          }}
+      {/* Deck. Five screens, each on its own ground, with one field of
+          light running behind all of them. Panels carry data-panel so
+          DeckLine can measure a real panel instead of trusting innerHeight. */}
+      <div id="zn-deck" dir="rtl">
+        <DeckLine stops={STOPS} />
+
+        {/* Screen one: the hero. Bare paper, the three words centred, no
+            divider anywhere. Revealed in sequence, because the order is the
+            product: build, then manage, then publish. */}
+        <section
+          data-panel
+          className="relative flex h-[100svh] w-full items-center justify-center"
+          style={{ background: GROUND[0] }}
         >
-          {WORDS.map((word, i) => (
-            <span
-              key={word}
-              className="inline-block"
-              style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+          <h1
+            id="hero-words"
+            className={`${display.className} relative z-10 flex flex-wrap items-baseline justify-center gap-x-[0.3em] gap-y-1 px-5 text-center`}
+            style={{ color: OBSIDIAN, fontWeight: 800, lineHeight: 1.24 }}
+          >
+            {WORDS.map((word, i) => (
+              <span
+                key={word}
+                className="inline-block"
+                style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+              >
+                {word}
+              </span>
+            ))}
+          </h1>
+        </section>
+
+        {/* Screens two to four: one verb to a screen. */}
+        {STEPS.map((step, i) => {
+          const idx = i + 1
+          const onDark = STOPS[idx].dark === 1
+          return (
+            <section
+              key={step.word}
+              data-panel
+              className="relative flex h-[100svh] w-full items-center justify-center"
+              style={{ background: GROUND[idx] }}
             >
-              {word}
-            </span>
-          ))}
-        </h1>
-      </main>
+              <div className="relative z-10 flex flex-col items-center px-5 text-center">
+                <h2
+                  className={`${display.className} zn-word`}
+                  style={{ color: onDark ? PAPER : OBSIDIAN, fontWeight: 800, lineHeight: 1.24 }}
+                >
+                  {step.word}
+                </h2>
+                <p className={`${ui.className} zn-say`} style={{ color: onDark ? ON_DARK : STONE }}>
+                  {step.line}
+                </p>
+              </div>
+            </section>
+          )
+        })}
+
+        {/* Screen five: the close, standing on obsidian. */}
+        <section
+          data-panel
+          className="relative flex h-[100svh] w-full items-center justify-center"
+          style={{ background: GROUND[4] }}
+        >
+          <div className="relative z-10 flex flex-col items-center gap-8 px-5 text-center">
+            <ZenyaMark className="h-[26px] text-[#fafafa]" />
+            <Link
+              href="/theme/new"
+              className={`${ui.className} rounded-full px-5 py-2.5 text-[15px] leading-none transition-opacity duration-150 hover:opacity-85`}
+              style={{ background: PAPER, color: OBSIDIAN }}
+            >
+              ابدأ الإنشاء
+            </Link>
+          </div>
+        </section>
+      </div>
     </>
   )
 }
