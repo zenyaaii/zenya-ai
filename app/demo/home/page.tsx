@@ -205,9 +205,22 @@ const STYLES: TypeStyle[] = [
 const STORE_KEY = "zenya-demo-type"
 const STORE_GLOW = "zenya-demo-glow"
 
-/* What the page opens with. */
+/* What the page opens with. The light is OFF: the first thing a reader sees
+   is bare paper and the three words, and nothing else. */
 const DEFAULT_TYPE = "tajawal-900"
-const DEFAULT_GLOW = "aurora"
+const DEFAULT_GLOW = "none"
+
+/* ...and then, a beat later, the light arrives on its own — unless the reader
+   has already chosen one, in which case theirs is restored and this never
+   runs. The arrival is the whole affordance: the colour comes up and its
+   control changes in the same instant, so the connection between the two is
+   learned by watching it happen rather than by being labelled.
+
+   One constant to change which light it lands on. */
+const REVEAL_GLOW = "aurora"
+const REVEAL_WAIT = 2400
+/* How long the control wears the light's NAME before going back to "اللون". */
+const NAME_HOLD = 2600
 
 type Glow = {
   id: string
@@ -376,12 +389,34 @@ export default function Page() {
   const [pinned, setPinned] = useState(false)
   const [styleId, setStyleId] = useState(DEFAULT_TYPE)
   const [glowId, setGlowId] = useState(DEFAULT_GLOW)
+  /* Whether the light's control is wearing the palette's name, and whether it
+     is giving its one ring. Both are set by any change to the light, so the
+     auto-reveal and a deliberate pick behave identically — one rule, no
+     special case for either. */
+  const [glowNamed, setGlowNamed] = useState(false)
+  /* Set once a reader has chosen, or once the reveal has run. Either way the
+     page stops changing the light by itself. */
+  const glowSettled = useRef(false)
+  /* True for one beat at the arrival, and only then. The light's own control
+     announces itself every time it changes; this is what lets the FACE control
+     announce itself alongside it, once, so a reader reads the two bottom
+     corners as a pair of controls rather than two labels. The face itself is
+     never changed for them — the type is measured, and swapping it under a
+     reader would resize the line they are in the middle of reading. */
+  const [introRing, setIntroRing] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
   const typeRef = useRef<HTMLDivElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
 
   const type = STYLES.find((s) => s.id === styleId) ?? STYLES[0]
   const glow = GLOWS.find((g) => g.id === glowId) ?? GLOWS[0]
+  /* The last light that was actually a light. بلا has no gradient of its own,
+     so without this the paint would vanish on the frame the fade-out starts
+     and there would be nothing left to fade. */
+  const lastGrad = useRef(GLOWS[0].grad)
+  useEffect(() => { if (glow.grad !== "none") lastGrad.current = glow.grad }, [glow.grad])
+  const lit = glow.grad !== "none"
+  const paintGrad = lit ? glow.grad : lastGrad.current
 
   /* Portal URLs resolve to real subdomains in prod, relative on dev. Start
      relative to match SSR, then upgrade after mount to avoid a hydration
@@ -413,9 +448,39 @@ export default function Page() {
       const face = localStorage.getItem(STORE_KEY)
       if (face && STYLES.some((s) => s.id === face)) setStyleId(face)
       const light = localStorage.getItem(STORE_GLOW)
-      if (light && GLOWS.some((g) => g.id === light)) setGlowId(light)
+      if (light && GLOWS.some((g) => g.id === light)) {
+        setGlowId(light)
+        /* They have chosen before. Their light is theirs; do not perform. */
+        glowSettled.current = true
+      }
     } catch { /* private mode; the defaults are fine */ }
   }, [])
+
+  /* The arrival. Only ever for a reader who has not chosen — a stored choice,
+     including بلا, is a decision and the page does not overrule it. */
+  useEffect(() => {
+    if (glowSettled.current) return
+    const id = setTimeout(() => {
+      if (glowSettled.current) return
+      glowSettled.current = true
+      setGlowId(REVEAL_GLOW)
+      setIntroRing(true)
+      setTimeout(() => setIntroRing(false), 1500)
+    }, REVEAL_WAIT)
+    return () => clearTimeout(id)
+  }, [])
+
+  /* Whenever the light changes, its control says so: the swatch replays, a
+     single ring goes out from the button, and the label wears the palette's
+     name for a moment before going back to "اللون". This is what teaches the
+     control — not a tooltip, the thing itself moving at the moment the page
+     changes colour. It runs once per change and rests, like everything here. */
+  useEffect(() => {
+    if (glowId === DEFAULT_GLOW) return
+    setGlowNamed(true)
+    const id = setTimeout(() => setGlowNamed(false), NAME_HOLD)
+    return () => clearTimeout(id)
+  }, [glowId])
 
   /* One line, always. The type scale is measured rather than tuned: the line is
      laid out at its natural size, and --fit is set to the ratio that makes it
@@ -714,6 +779,8 @@ export default function Page() {
   }
 
   const pickGlow = (id: string) => {
+    /* Chosen. The page stops revealing anything from here on. */
+    glowSettled.current = true
     setGlowId(id)
     try { localStorage.setItem(STORE_GLOW, id) } catch { /* ignore */ }
   }
@@ -986,7 +1053,17 @@ export default function Page() {
            of section two and the two screens share one light — which is what
            they are: one light, not two that have to be matched. #zn-deck still
            clips everything at the viewport. */
-        #zn-glow { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+        /* The light ARRIVES. The page opens bare and this comes up a beat
+           later, over a second and a half, on the same ease-out everything
+           else here uses. The gradient stays painted through a fade-OUT too:
+           swapping it away at the instant بلا is chosen would make that a cut
+           rather than a fade, which is the one thing this page never does. */
+        #zn-glow {
+          position: absolute; inset: 0; overflow: visible; pointer-events: none;
+          opacity: 0;
+          transition: opacity 1500ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #zn-glow[data-on="true"] { opacity: 1; }
         #zn-glow > div { position: absolute; left: -8%; right: -8%; }
         #zn-glow .foot { bottom: -22vh; height: 34vh; filter: blur(9vh); opacity: 0.72; }
         #zn-glow .head { top: -24vh; height: 28vh; filter: blur(10vh); opacity: 0.3; }
@@ -1114,6 +1191,62 @@ export default function Page() {
            corner; width is animated on the same curve as the header pill so
            every surface on the page opens the same way. */
         .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1); }
+
+        /* The light's own control, and how a reader learns it is one.
+
+           Nothing here explains itself in words. At the moment the light
+           changes, the swatch replays from nothing, one ring goes out from it,
+           and the label stops saying "اللون" and says which light it is for a
+           couple of seconds. Three small things at the same instant as the
+           page changing colour, which is enough to join the two together
+           without a tooltip, a caption or an arrow.
+
+           The ring stays modest on purpose: the pill clips its own overflow,
+           so anything bigger than about two and a half times the swatch is cut
+           off at the pill's edge and reads as a bug rather than a beat. */
+        .zn-swatch {
+          position: relative;
+          height: 14px; width: 14px; flex: 0 0 auto; border-radius: 999px;
+          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+          animation: zn-swatch-in 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+        }
+        @keyframes zn-swatch-in {
+          from { transform: scale(0.3); opacity: 0; }
+          to   { transform: scale(1);   opacity: 1; }
+        }
+        /* Pure decoration, so its finished state really is gone — which is
+           what forwards leaves it as. Content on this page never does this. */
+        .zn-swatch i {
+          position: absolute; inset: 0; border-radius: 999px;
+          box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.42);
+          animation: zn-ring 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes zn-ring {
+          from { transform: scale(1);   opacity: 0.5; }
+          to   { transform: scale(2.4); opacity: 0; }
+        }
+        /* Both words share one cell, so the pill never changes width when the
+           label swaps — the corner control is a fixed 112px at rest and a
+           reflowing label would shove the swatch about. */
+        .zn-glowlabel { display: inline-grid; }
+        .zn-glowlabel > span {
+          grid-area: 1 / 1; justify-self: start; white-space: nowrap;
+          transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .zn-glowlabel > span[data-on="false"] { opacity: 0; }
+
+        /* The face control's half of the same beat. It gets the ring and
+           nothing else: the light can change under a reader harmlessly, but
+           the type is measured and swapping the face would resize the line
+           they are in the middle of reading. */
+        .zn-mark { position: relative; display: inline-flex; }
+        .zn-mark i {
+          position: absolute; left: 50%; top: 50%;
+          height: 14px; width: 14px; margin: -7px 0 0 -7px;
+          border-radius: 999px;
+          box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.42);
+          animation: zn-ring 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
 
         /* The phone header opens in two beats: out to the sides first, then
            down. Closing runs it backwards, the pages folding away before the
@@ -4013,6 +4146,9 @@ export default function Page() {
           .zn-w, .zn-slot { transition: none; }
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
+          #zn-glow { transition: none; }
+          .zn-swatch, .zn-swatch i, .zn-mark i { animation: none; }
+          .zn-glowlabel > span { transition: none; }
           #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
           #zn-claim .line, #zn-claim .dot { transition: none; }
@@ -4289,7 +4425,10 @@ export default function Page() {
               className="flex h-10 w-full items-center gap-1.5 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
               style={{ color: OBSIDIAN }}
             >
-              <Type size={14} strokeWidth={1.6} />
+              <span className="zn-mark" aria-hidden>
+                <Type size={14} strokeWidth={1.6} />
+                {introRing && <i />}
+              </span>
               الخط
             </button>
           }
@@ -4347,16 +4486,18 @@ export default function Page() {
               className="flex h-10 w-full items-center gap-2 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
               style={{ color: OBSIDIAN }}
             >
-              {/* The button wears the mix it is currently set to. */}
-              <span
-                className="h-3.5 w-3.5 shrink-0 rounded-full"
-                style={{
-                  background: glow.grad === "none" ? "transparent" : glow.grad,
-                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
-                }}
-                aria-hidden
-              />
-              اللون
+              {/* The button wears the mix it is currently set to, and says so
+                  when it changes. Keyed on the light, so React remounts it and
+                  the arrival replays — that replay, landing on the same frame
+                  as the page changing colour, is what tells a reader the two
+                  belong to each other. */}
+              <span key={glowId} className="zn-swatch" style={{ background: lit ? glow.grad : "transparent" }} aria-hidden>
+                {lit && <i />}
+              </span>
+              <span className="zn-glowlabel">
+                <span data-on={!glowNamed}>اللون</span>
+                <span data-on={glowNamed} aria-hidden={!glowNamed}>{glow.name}</span>
+              </span>
             </button>
           }
         >
@@ -4418,7 +4559,12 @@ export default function Page() {
             the hero does, rather than sitting under the whole site for ever.
             Promoted to its own layer, or the deck would have to re-rasterise
             a 9vh blur on every frame of the move. */}
-        <div id="zn-glow" aria-hidden style={{ "--glow": glow.grad } as React.CSSProperties}>
+        <div
+          id="zn-glow"
+          aria-hidden
+          data-on={lit}
+          style={{ "--glow": paintGrad } as React.CSSProperties}
+        >
           <div className="foot"><i /></div>
           <div className="head"><i /></div>
         </div>

@@ -118,6 +118,39 @@ Four traps, all of which shipped at least once:
   and any width written back are CSS pixels. Mixing them shrinks every column
   by the zoom factor.
 
+## How the light introduces itself
+
+The page opens with the light OFF. Bare paper, three words, nothing else. A
+beat later (`REVEAL_WAIT`, 2.4s) the light arrives on its own, fading up over a
+second and a half — and its control changes in the same instant.
+
+That simultaneity IS the affordance. Nothing on this page explains itself in
+words, so the control teaches itself by being watched: at the moment the paper
+takes colour, the swatch replays from nothing, one ring goes out from it, and
+the label stops saying اللون and says which light it is for a couple of
+seconds. The face control gives the same single ring at the same moment, so a
+reader reads the two bottom corners as a pair of controls rather than two
+labels.
+
+Four rules hold it together:
+
+- **A stored choice is never overruled.** If the reader has picked before —
+  including بلا — theirs is restored and the reveal never runs. The page
+  performs for someone who has not chosen, and only once.
+- **A pick settles it.** Choosing anything cancels the reveal for that visit.
+- **The gradient stays painted through a fade-OUT.** بلا has no gradient of its
+  own, so dropping the paint on the frame the fade begins would leave nothing
+  to fade and make it a cut — the one thing this page never does. The last real
+  gradient is held while the opacity goes down.
+- **The face is never changed for the reader**, only ringed. The light can swap
+  under someone harmlessly; the type is measured, and swapping the face would
+  resize the line they are in the middle of reading.
+
+The ring stays under about 2.4× the mark it grows from: the corner pill clips
+its own overflow, so anything larger is cut at the pill's edge and reads as a
+bug rather than a beat. It is pure decoration, so `forwards` leaving it gone is
+correct — content on this page never does that.
+
 ## The claim
 
 One sentence at the foot of the light, alternating Arabic and English, each
