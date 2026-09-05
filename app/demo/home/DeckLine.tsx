@@ -46,8 +46,11 @@ const STYLE_INDEX: Record<LineStyle, number> = {
   spectrum: 4,
 }
 
-/* Read off the panels themselves. Screens one and two sit on bare paper and own
-   no colour, so they take the brand primary and its brighter step. */
+/* Read off the panels themselves. Screens one and two are deliberately
+   achromatic - "every rule below is achromatic; the only colour on this page is
+   still the light" - so they do NOT get a hue of mine. They take the light the
+   reader chose, sampled in `accentFor` below; these two entries are only the
+   fallback for a browser that cannot parse oklch, or for بلا. */
 const ACCENT: Array<[number, number, number]> = [
   [0x5e, 0x6a, 0xd2],
   [0x71, 0x70, 0xff],
@@ -55,6 +58,58 @@ const ACCENT: Array<[number, number, number]> = [
   [0x4a, 0xde, 0x80],
   [0xc8, 0xa9, 0x6a],
 ]
+
+/* Let the browser do the colour maths, by rasterising rather than by reading a
+   string back.
+
+   The obvious version of this - set style.color, read getComputedStyle().color,
+   pull the numbers out - is wrong now. Browsers preserve oklch in computed
+   style instead of converting it, so that returns "oklch(0.74 0.13 252)" and a
+   numeric regex reads L, C and H as R, G and B: 252 becomes the blue channel
+   and every light comes out blue. Painting one pixel and reading it back gives
+   true sRGB bytes however the engine chooses to serialise. */
+function cssToRgb(css: string): [number, number, number] | null {
+  if (typeof document === "undefined") return null
+  const cv = document.createElement("canvas")
+  cv.width = 1
+  cv.height = 1
+  const ctx = cv.getContext("2d", { willReadFrequently: true })
+  if (!ctx) return null
+  /* A sentinel the light can never be: if assigning leaves fillStyle untouched
+     the engine could not parse the colour, and falling back beats shipping a
+     wrong hue. */
+  ctx.fillStyle = "#ff00ff"
+  const sentinel = ctx.fillStyle
+  ctx.fillStyle = css
+  if (ctx.fillStyle === sentinel) return null
+  ctx.fillRect(0, 0, 1, 1)
+  const d = ctx.getImageData(0, 0, 1, 1).data
+  return [d[0], d[1], d[2]]
+}
+
+/* The light's stops are pale by design - it is a glow, not ink - so a line
+   taken straight from one washes out on #fafafa. Pulled down enough to read
+   against paper while keeping the hue the reader picked. */
+const PAPER_PULL = 0.72
+
+/* The colour a screen hands the line.
+
+   Screens three to five own a colour outright. Screens one and two own none:
+   they sit on the hero's lit paper, and that light is a mix the reader chose
+   and that persists in their localStorage. So the line samples it - the hero
+   takes the first stop, ابن the third, so the two differ from each other while
+   both plainly belong to the same light. Choose رماد and they go grey, which is
+   the reader saying "no colour"; choose بلا and there are no stops at all and
+   the fallback applies. */
+function accentFor(i: number, light?: string): [number, number, number] {
+  const idx = Math.max(0, Math.min(ACCENT.length - 1, i))
+  if (idx > 1 || !light) return ACCENT[idx]
+  const stops = light.match(/oklch\([^)]*\)/g)
+  if (!stops || stops.length < 3) return ACCENT[idx]
+  const rgb = cssToRgb(idx === 0 ? stops[0] : stops[2])
+  if (!rgb) return ACCENT[idx]
+  return [rgb[0] * PAPER_PULL, rgb[1] * PAPER_PULL, rgb[2] * PAPER_PULL]
+}
 
 /* How dark the ground under each panel is. A line that reads on paper vanishes
    on obsidian, so it lifts. */
@@ -270,10 +325,30 @@ const FS = [
   "}",
 ].join("\n")
 
+function pushAccents(
+  a: { gl: WebGLRenderingContext; uAcc: WebGLUniformLocation | null; uAccP: WebGLUniformLocation | null; uAccN: WebGLUniformLocation | null },
+  panel: number,
+  light?: string,
+) {
+  const set = (loc: WebGLUniformLocation | null, c: [number, number, number]) =>
+    a.gl.uniform3f(loc, c[0] / 255, c[1] / 255, c[2] / 255)
+  set(a.uAcc, accentFor(panel, light))
+  set(a.uAccP, accentFor(panel - 1, light))
+  set(a.uAccN, accentFor(panel + 1, light))
+}
+
+type Accents = {
+  gl: WebGLRenderingContext
+  uAcc: WebGLUniformLocation | null
+  uAccP: WebGLUniformLocation | null
+  uAccN: WebGLUniformLocation | null
+}
+
 export default function DeckLine({
   panel,
   style,
   deck,
+  light,
 }: {
   panel: number
   style: LineStyle
@@ -281,10 +356,22 @@ export default function DeckLine({
      next to it, because during the move two panels are on screen at once and
      the seam between them is the whole thing being judged. */
   deck: number
+  /* The reader's chosen light, as its gradient string. Screens one and two
+     take their colour from it; the stops are parsed out rather than duplicated
+     so the two can never drift apart. */
+  light?: string
 }) {
   const ref = useRef<HTMLCanvasElement>(null)
   const deckRef = useRef(deck)
   deckRef.current = deck
+  /* Held so a change of light can re-push three uniforms instead of tearing
+     the context down. Nine lights across five panels would be forty-five
+     context creations, well past what a browser keeps alive. */
+  const accRef = useRef<Accents | null>(null)
+  /* Read through a ref in the setup effect so a change of light does not make
+     it a dependency and tear the context down; the effect below handles it. */
+  const lightRef = useRef(light)
+  lightRef.current = light
 
   useEffect(() => {
     const canvas = ref.current
@@ -344,16 +431,13 @@ export default function DeckLine({
     const uDarkP = u("uDarkP")
     const uDarkN = u("uDarkN")
 
-    const at = (i: number) => ACCENT[Math.max(0, Math.min(ACCENT.length - 1, i))]
     const dk = (i: number) => DARK[Math.max(0, Math.min(DARK.length - 1, i))]
-    const set3 = (loc: WebGLUniformLocation | null, c: [number, number, number]) =>
-      gl.uniform3f(loc, c[0] / 255, c[1] / 255, c[2] / 255)
+
+    accRef.current = { gl, uAcc, uAccP, uAccN }
+    pushAccents(accRef.current, panel, lightRef.current)
 
     /* The ends clamp to themselves, so the first and last screens simply hold
-       their own colour rather than blending toward nothing. */
-    set3(uAcc, at(panel))
-    set3(uAccP, at(panel - 1))
-    set3(uAccN, at(panel + 1))
+       their own value rather than blending toward nothing. */
     gl.uniform1f(uDark, dk(panel))
     gl.uniform1f(uDarkP, dk(panel - 1))
     gl.uniform1f(uDarkN, dk(panel + 1))
@@ -402,6 +486,7 @@ export default function DeckLine({
 
     return () => {
       cancelAnimationFrame(raf)
+      accRef.current = null
       ro.disconnect()
       gl.deleteProgram(prog)
       gl.deleteShader(vs)
@@ -409,6 +494,18 @@ export default function DeckLine({
       gl.deleteBuffer(buf)
     }
   }, [panel, style])
+
+  /* A change of light is three uniforms, not a new context. The frame loop is
+     already running and picks them up on its next tick; under reduced motion
+     nothing is running, so this repaints once. */
+  useEffect(() => {
+    const a = accRef.current
+    if (!a) return
+    pushAccents(a, panel, light)
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      a.gl.drawArrays(a.gl.TRIANGLES, 0, 3)
+    }
+  }, [panel, light])
 
   return (
     <canvas
