@@ -56,7 +56,6 @@ import BuildSection from "./BuildSection"
 import ManageSection from "./ManageSection"
 import PublishSection from "./PublishSection"
 import FooterSection from "./FooterSection"
-import DeckLine, { type LineStyle, LINE_STYLES } from "./DeckLine"
 
 /* The default face for the three words, and the only one that is preloaded,
    because it is what the page renders before anybody picks anything. Both cuts
@@ -604,12 +603,6 @@ export default function Page() {
      looking at them on the real page rather than in the abstract, which is
      how ادر's accent was settled; ?ground=pine|deep reaches the darker two. */
   const [ground, setGround] = useState<"emerald" | "pine" | "deep">("emerald")
-  /* The line that carries one colour per screen. Five treatments, settled the
-     way this page settles everything: by looking at them here rather than in
-     the abstract. ?line=band|thread|glow|spectrum|off; the edge is the default,
-     chosen by looking. It runs the length of the deck like the others, but
-     stays in the gutter and dissolves before the copy. */
-  const [line, setLine] = useState<LineStyle | "off">("edge")
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search)
@@ -619,9 +612,6 @@ export default function Page() {
       if (c === "fill" || c === "well" || c === "lit" || c === "ring") setCards(c)
       const g = q.get("ground")
       if (g === "deep" || g === "emerald" || g === "pine") setGround(g)
-      const ln = q.get("line")
-      if (ln === "off") setLine("off")
-      else if (ln && (LINE_STYLES as string[]).includes(ln)) setLine(ln as LineStyle)
     } catch { /* ignore */ }
   }, [])
 
@@ -4400,7 +4390,6 @@ export default function Page() {
       <div id="zn-deck" data-moving={!settled} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
-          {line !== "off" && <DeckLine panel={0} style={line} deck={deck} light={glow.grad} />}
       <main
         id="blank-home"
         dir="rtl"
@@ -4494,7 +4483,6 @@ export default function Page() {
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
         <div className="zn-panel" aria-hidden={deck !== 1}>
-          {line !== "off" && <DeckLine panel={1} style={line} deck={deck} light={glow.grad} />}
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is
@@ -4520,7 +4508,6 @@ export default function Page() {
             page that is not white paper: it is the inside of the product, so
             it is obsidian, and it carries the page's single accent. */}
         <div className="zn-panel zn3-panel" data-accent={accent} data-cards={cards} aria-hidden={deck !== 2}>
-          {line !== "off" && <DeckLine panel={2} style={line} deck={deck} light={glow.grad} />}
           {/* The light for the seam. It hangs UPWARD past the top of this
               panel onto the foot of ابن, exactly the way the hero's foot glow
               hangs down onto the head of it — one light allowed to cross,
@@ -4542,7 +4529,6 @@ export default function Page() {
             but a different room, and the hue is the one the product already
             paints a live site in. */}
         <div className="zn-panel zn4-panel" data-ground={ground} aria-hidden={deck !== 3}>
-          {line !== "off" && <DeckLine panel={3} style={line} deck={deck} light={glow.grad} />}
           <PublishSection
             active={deck === 3 && settled}
             uiClass={appUi.className}
@@ -4565,7 +4551,6 @@ export default function Page() {
             and a ramp long enough for that lands a band of light under the
             pill unless something in the band explains it. */}
         <div className="zn-panel zn5-panel" aria-hidden={deck !== 4}>
-          {line !== "off" && <DeckLine panel={4} style={line} deck={deck} light={glow.grad} />}
           <FooterSection active={deck === 4 && settled} uiClass={appUi.className} />
         </div>
         </div>
