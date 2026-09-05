@@ -151,31 +151,45 @@ its own overflow, so anything larger is cut at the pill's edge and reads as a
 bug rather than a beat. It is pure decoration, so `forwards` leaving it gone is
 correct — content on this page never does that.
 
-## Glass needs something to be glass about
+## The floating surfaces
 
-The header pill and both corner controls are glass — half-transparent, blurred,
-saturated, so they take on whatever is behind them. That works on a lit page
-and on the grounds of every screen below the hero. It does NOT work on bare
-paper: white at half opacity over `#fafafa` behind a five-per-cent hairline is
-invisible, and the controls stop reading as controls at all — they look like
-loose words lying on the page. Making the light's OFF state the page's opening
-state is what exposed this.
+The header pill, both corner controls and the ابن switcher. They are the only
+things on this page a reader can press, and they have to look it — on bare
+paper, on the light, and on the ground of every screen below.
 
-So the surfaces read their ground. `#zn-deck` carries `data-lit`, and the whole
-recipe — ground and ring, for the pill and the panes alike — hangs off it as
-four variables on the body:
+Six layers, and each is doing a job:
 
-- **Lit:** glass. `rgba(255,255,255,0.5)` behind a 5% hairline.
-- **Unlit:** a plain surface, BRIGHTER than the paper it sits on
-  (`rgba(255,255,255,0.96)`), behind a 13% hairline you can actually see.
+1. a **gradient** ground, not a flat one — real glass catches more light at its
+   top than its bottom, and a flat fill is the biggest tell that something is a
+   rectangle pretending
+2. **blur and saturate** behind it, so it takes the colour of what it is over
+   rather than sitting on top of it
+3. a bright inset **top rim** — the specular line. This is what the eye reads
+   as glass; without it the rest is a translucent box
+4. a dark inset **bottom rim**, so the far edge turns away
+5. a **hairline** all round, which is what carries it on bare paper where there
+   is no colour for the blur to pick up
+6. **three stacked drop shadows** — contact, near, far. One blurred shadow
+   reads as a blurred edge; three at different radii read as something floating
+   above the page. This is the layer that was missing.
 
-They cross over 900ms, so the light arriving softens them from buttons into
-glass rather than switching them — which is a second, quieter cue that
-something just changed.
+**This is the deliberate exception to the no-shadows rule**, and it is scoped to
+the controls. Content never does this. It was asked for twice: with hairlines
+alone the controls stopped reading as controls at all and looked like loose
+words lying on the page.
 
-`data-lit` is not "is the light on" but **"is there anything behind the
-floating surfaces"**: every screen below the hero has a ground of its own, so
-it stays true down there whatever the reader set the hero to.
+**Glass needs something to be glass about.** `#zn-deck` carries `data-lit` and
+the ground and edge hang off it as two variables on the body: lit, a
+half-transparent gradient behind an 11% hairline; unlit, near-opaque and
+brighter than the paper behind a 16% one. `data-lit` is not "is the light on"
+but **"is there anything behind the floating surfaces"** — every screen below
+the hero has a ground of its own, so it stays true down there.
+
+**Never paint over a dark screen's own pill.** The dark panels set
+`background-COLOR` and this recipe sets a background-IMAGE, and an image paints
+over a colour — so the white gradient sat on top of every dark pill and undid
+the per-panel work. They turn the variable off (`--pane-bg: none`) rather than
+fighting it with another `!important`.
 
 ## The claim
 

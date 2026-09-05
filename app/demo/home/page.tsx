@@ -914,39 +914,42 @@ export default function Page() {
            and the inset the header floats at. */
         body:has(#blank-home) { --gut: clamp(1.25rem, 4.5vw, 4rem); --inset: 2rem; }
 
-        /* What the floating surfaces are made of, and it depends on whether
-           there is anything behind them.
+        /* ── The floating surfaces ────────────────────────────────────
+           The header pill and both corner controls. They are the only things
+           on this page a reader can press, and they have to look it — on bare
+           paper, on the light, and on the ground of every screen below.
 
-           LIT — a light on screen one, or the ground of any screen below it —
-           and they are glass: half-transparent, blurred, saturated, so they
-           take on whatever is behind them instead of sitting on top of it.
+           Six layers, and every one of them is doing a job:
 
-           UNLIT — the light turned off and the reader on the bare paper — and
-           glass has nothing to be glass ABOUT. White at half opacity over
-           #fafafa with a five-per-cent hairline is invisible, and the header
-           and both corner controls stop reading as controls at all: they look
-           like loose words lying on the page. So off the light they stop
-           pretending, and become plain surfaces — brighter than the paper they
-           sit on, with a hairline you can actually see.
+             1. a GRADIENT ground, not a flat one — real glass catches more
+                light at its top edge than its bottom, and a flat fill is the
+                single biggest tell that something is a rectangle pretending
+             2. blur and saturate behind it, so it takes the colour of
+                whatever it is over instead of sitting on top of it
+             3. a bright inset TOP rim — the specular line. This is what the
+                eye actually reads as glass; without it the rest is just a
+                translucent box
+             4. a dark inset BOTTOM rim, so the far edge turns away
+             5. a hairline all round, which is what carries it on bare paper
+                where there is no colour for the blur to pick up
+             6. THREE stacked drop shadows — contact, near, far. One blurred
+                shadow reads as a blurred edge; three at different radii read
+                as something floating above the page, which is the thing that
+                was missing.
 
-           They cross between the two over most of a second, so the light
-           arriving softens them rather than switching them. */
+           The house rule elsewhere is hairline rings and no drop shadows. The
+           controls are the deliberate exception, and the owner asked for it
+           twice: with no depth at all they stopped reading as controls. */
         body:has(#blank-home) {
-          --pane-bg: rgba(255, 255, 255, 0.5);
-          --pane-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-                       0 0 0 1px rgba(0, 0, 0, 0.05),
-                       0 10px 34px rgba(17, 17, 17, 0.07);
-          --pill-bg: rgba(255, 255, 255, 0.72);
-          --pill-ring: ${RING};
+          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(255, 255, 255, 0.70) 100%);
+          --pane-edge: rgba(17, 17, 17, 0.14);
         }
+        /* Off the light, on bare paper, there is no colour behind the glass to
+           pick up — so it leans on being brighter than the paper and on a
+           firmer edge, and the shadows do the rest. */
         body:has(#zn-deck[data-lit="false"]) {
-          --pane-bg: rgba(255, 255, 255, 0.96);
-          --pane-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.9),
-                       0 0 0 1px rgba(0, 0, 0, 0.13),
-                       0 10px 28px rgba(17, 17, 17, 0.09);
-          --pill-bg: rgba(255, 255, 255, 0.96);
-          --pill-ring: 0 0 0 1px rgba(0, 0, 0, 0.13),
-                       0 10px 28px rgba(17, 17, 17, 0.09);
+          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.93) 100%);
+          --pane-edge: rgba(17, 17, 17, 0.16);
         }
 
         /* Display scale. Two stops rather than one clamp: a single aggressive
@@ -1310,19 +1313,34 @@ export default function Page() {
            these. saturate pulls the colour out of whatever the blur picked up,
            so the control in the bottom corner takes on the animation rather
            than sitting on top of it. */
-        .zn-glass {
+        .zn-glass, .zn-pill, .zn-phone-pill {
           background: var(--pane-bg);
-          -webkit-backdrop-filter: blur(22px) saturate(190%);
-          backdrop-filter: blur(22px) saturate(190%);
-          box-shadow: var(--pane-ring);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          backdrop-filter: blur(20px) saturate(180%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.95),
+            inset 0 -1px 0 rgba(17, 17, 17, 0.05),
+            0 0 0 1px var(--pane-edge),
+            0 2px 4px rgba(17, 17, 17, 0.09),
+            0 10px 24px rgba(17, 17, 17, 0.13),
+            0 28px 56px rgba(17, 17, 17, 0.13);
         }
         /* Backdrop filters are a stated accessibility preference for some
            readers, and unsupported in a few engines. Both land here. */
+        /* Backdrop filters are a stated accessibility preference for some
+           readers, and unsupported in a few engines. Both land here — and both
+           keep every layer except the blur, because the depth is what makes
+           these read as controls, not the transparency. */
         @media (prefers-reduced-transparency: reduce) {
-          .zn-glass { background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: none; backdrop-filter: none; }
+          .zn-glass, .zn-pill, .zn-phone-pill {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(255, 255, 255, 0.94) 100%);
+            -webkit-backdrop-filter: none; backdrop-filter: none;
+          }
         }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-          .zn-glass { background: rgba(255, 255, 255, 0.92); }
+          .zn-glass, .zn-pill, .zn-phone-pill {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+          }
         }
 
         .zn-list { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
@@ -1455,11 +1473,21 @@ export default function Page() {
            enough to belong on this page: a hairline pill, obsidian when it is
            the one being watched. */
         .zn-switch { display: flex; gap: 6px; flex: 0 0 auto; }
+        /* The same glass the header and the corner controls are made of, at
+           the smaller scale this one is: a flat pill next to a floating one
+           reads as a label, not a second control. Its chosen state stays flat
+           obsidian, because a pressed thing should not also be lifting. */
         .zn-switch button {
           padding: 7px 16px; border-radius: 999px;
           font-size: 11.5px; line-height: 1; color: ${STONE};
-          background: rgba(255, 255, 255, 0.6);
-          box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.76) 100%);
+          -webkit-backdrop-filter: blur(14px) saturate(170%);
+          backdrop-filter: blur(14px) saturate(170%);
+          box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.95),
+            0 0 0 1px rgba(17, 17, 17, 0.12),
+            0 1px 2px rgba(17, 17, 17, 0.07),
+            0 5px 14px rgba(17, 17, 17, 0.10);
           cursor: pointer;
           transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
                       color 260ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1467,7 +1495,8 @@ export default function Page() {
         }
         .zn-switch button:hover { color: ${OBSIDIAN}; }
         .zn-switch button[data-on="true"] {
-          background: ${OBSIDIAN}; color: ${PAPER}; box-shadow: none;
+          background: ${OBSIDIAN}; color: ${PAPER};
+          box-shadow: 0 1px 2px rgba(17, 17, 17, 0.16), 0 5px 14px rgba(17, 17, 17, 0.16);
         }
 
         /* The build word, in the hero's own face and cycling the same four
@@ -1965,6 +1994,14 @@ export default function Page() {
           transition-duration: 1020ms;
           transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
         }
+
+        /* The dark screens set background-COLOR and the glass recipe sets a
+           background-IMAGE, and an image paints over a colour — so without
+           this the white gradient sat on top of every dark pill and undid the
+           work below. The variable is turned off rather than the rule being
+           fought with another !important. */
+        #pill-header[data-dark="true"] .zn-pill,
+        #pill-header[data-dark="true"] .zn-phone-pill { --pane-bg: none; }
 
         #pill-header[data-dark="true"] .zn-pill,
         #pill-header[data-dark="true"] .zn-phone-pill {
@@ -4246,11 +4283,9 @@ export default function Page() {
               clipped the call to action into the mark, since that measurement
               changes with the account state and with the font. */}
           <div
-            className="zn-phone-pill mx-auto w-fit max-w-full overflow-hidden rounded-[22px] backdrop-blur-[12px] md:hidden"
+            className="zn-phone-pill mx-auto w-fit max-w-full overflow-hidden rounded-[22px] md:hidden"
             data-open={menuOpen}
             style={{
-              background: "var(--pill-bg)",
-              boxShadow: "var(--pill-ring)",
               minWidth: menuOpen ? "min(86vw, 268px)" : "184px",
             }}
           >
@@ -4311,10 +4346,8 @@ export default function Page() {
               gaps: opening pushes the mark and the account apart while the
               tray comes down. */}
           <div
-            className="zn-pill hidden overflow-hidden rounded-[24px] backdrop-blur-[12px] md:block"
+            className="zn-pill hidden overflow-hidden rounded-[24px] md:block"
             style={{
-              background: "var(--pill-bg)",
-              boxShadow: "var(--pill-ring)",
               width: panel === "themes" ? PILL_THEMES : panel === "account" ? PILL_ACCOUNT : PILL_REST,
             }}
             /* Leaving the surface closes a hover-opened tray. A tray the
