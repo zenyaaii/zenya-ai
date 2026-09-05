@@ -914,6 +914,41 @@ export default function Page() {
            and the inset the header floats at. */
         body:has(#blank-home) { --gut: clamp(1.25rem, 4.5vw, 4rem); --inset: 2rem; }
 
+        /* What the floating surfaces are made of, and it depends on whether
+           there is anything behind them.
+
+           LIT — a light on screen one, or the ground of any screen below it —
+           and they are glass: half-transparent, blurred, saturated, so they
+           take on whatever is behind them instead of sitting on top of it.
+
+           UNLIT — the light turned off and the reader on the bare paper — and
+           glass has nothing to be glass ABOUT. White at half opacity over
+           #fafafa with a five-per-cent hairline is invisible, and the header
+           and both corner controls stop reading as controls at all: they look
+           like loose words lying on the page. So off the light they stop
+           pretending, and become plain surfaces — brighter than the paper they
+           sit on, with a hairline you can actually see.
+
+           They cross between the two over most of a second, so the light
+           arriving softens them rather than switching them. */
+        body:has(#blank-home) {
+          --pane-bg: rgba(255, 255, 255, 0.5);
+          --pane-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+                       0 0 0 1px rgba(0, 0, 0, 0.05),
+                       0 10px 34px rgba(17, 17, 17, 0.07);
+          --pill-bg: rgba(255, 255, 255, 0.72);
+          --pill-ring: ${RING};
+        }
+        body:has(#zn-deck[data-lit="false"]) {
+          --pane-bg: rgba(255, 255, 255, 0.96);
+          --pane-ring: inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+                       0 0 0 1px rgba(0, 0, 0, 0.13),
+                       0 10px 28px rgba(17, 17, 17, 0.09);
+          --pill-bg: rgba(255, 255, 255, 0.96);
+          --pill-ring: 0 0 0 1px rgba(0, 0, 0, 0.13),
+                       0 10px 28px rgba(17, 17, 17, 0.09);
+        }
+
         /* Display scale. Two stops rather than one clamp: a single aggressive
            vw ratio that fills a desktop line leaves phones with a few pixels
            of clearance, and the words wrap the moment anything renders wide.
@@ -1162,7 +1197,9 @@ export default function Page() {
            with nothing below it in flow, and it is the only way the bar can
            open outward from its own centre. The curve is shared with the
            height so the two read as one movement. */
-        .zn-pill { transition: width 440ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .zn-pill { transition: width 440ms cubic-bezier(0.22, 1, 0.36, 1),
+                                background 900ms cubic-bezier(0.22, 1, 0.36, 1),
+                                box-shadow 900ms cubic-bezier(0.22, 1, 0.36, 1); }
 
         /* Animating a box's size is layout work, and these boxes also carry a
            backdrop filter, which is the expensive half. Containment stops the
@@ -1190,7 +1227,9 @@ export default function Page() {
            height added by the tray pushes the surface upward, out of the
            corner; width is animated on the same curve as the header pill so
            every surface on the page opens the same way. */
-        .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1); }
+        .zn-corner { transition: width 460ms cubic-bezier(0.22, 1, 0.36, 1),
+                                  background 900ms cubic-bezier(0.22, 1, 0.36, 1),
+                                  box-shadow 900ms cubic-bezier(0.22, 1, 0.36, 1); }
 
         /* The light's own control, and how a reader learns it is one.
 
@@ -1257,7 +1296,9 @@ export default function Page() {
 
            min-width rather than width, so the closed size is still whatever
            the contents measure and only the opening is a number. */
-        .zn-phone-pill { transition: min-width 380ms cubic-bezier(0.22, 1, 0.36, 1) 220ms; }
+        .zn-phone-pill { transition: min-width 380ms cubic-bezier(0.22, 1, 0.36, 1) 220ms,
+                                     background 900ms cubic-bezier(0.22, 1, 0.36, 1),
+                                     box-shadow 900ms cubic-bezier(0.22, 1, 0.36, 1); }
         .zn-phone-pill[data-open="true"] { transition-delay: 0s; }
         .zn-phone-drawer {
           transition: grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1270,12 +1311,10 @@ export default function Page() {
            so the control in the bottom corner takes on the animation rather
            than sitting on top of it. */
         .zn-glass {
-          background: rgba(255, 255, 255, 0.5);
+          background: var(--pane-bg);
           -webkit-backdrop-filter: blur(22px) saturate(190%);
           backdrop-filter: blur(22px) saturate(190%);
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-                      0 0 0 1px rgba(0, 0, 0, 0.05),
-                      0 10px 34px rgba(17, 17, 17, 0.07);
+          box-shadow: var(--pane-ring);
         }
         /* Backdrop filters are a stated accessibility preference for some
            readers, and unsupported in a few engines. Both land here. */
@@ -4210,8 +4249,8 @@ export default function Page() {
             className="zn-phone-pill mx-auto w-fit max-w-full overflow-hidden rounded-[22px] backdrop-blur-[12px] md:hidden"
             data-open={menuOpen}
             style={{
-              background: "rgba(255,255,255,0.72)",
-              boxShadow: RING,
+              background: "var(--pill-bg)",
+              boxShadow: "var(--pill-ring)",
               minWidth: menuOpen ? "min(86vw, 268px)" : "184px",
             }}
           >
@@ -4274,8 +4313,8 @@ export default function Page() {
           <div
             className="zn-pill hidden overflow-hidden rounded-[24px] backdrop-blur-[12px] md:block"
             style={{
-              background: "rgba(255,255,255,0.72)",
-              boxShadow: RING,
+              background: "var(--pill-bg)",
+              boxShadow: "var(--pill-ring)",
               width: panel === "themes" ? PILL_THEMES : panel === "account" ? PILL_ACCOUNT : PILL_REST,
             }}
             /* Leaving the surface closes a hover-opened tray. A tray the
@@ -4545,7 +4584,10 @@ export default function Page() {
           than any height in viewport units, for the reason below; the track
           is four times the deck and each panel a quarter of the track, so a
           panel is exactly one screen whatever zoom the root is writing. */}
-      <div id="zn-deck" data-moving={!settled} style={{ background: PAPER }}>
+      {/* data-lit is not "is the light on" but "is there anything behind the
+          floating surfaces" — every screen below the hero has a ground of its
+          own, so glass works down there whatever the reader set up here. */}
+      <div id="zn-deck" data-moving={!settled} data-lit={lit || deck !== 0} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
       <main

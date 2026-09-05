@@ -151,6 +151,32 @@ its own overflow, so anything larger is cut at the pill's edge and reads as a
 bug rather than a beat. It is pure decoration, so `forwards` leaving it gone is
 correct — content on this page never does that.
 
+## Glass needs something to be glass about
+
+The header pill and both corner controls are glass — half-transparent, blurred,
+saturated, so they take on whatever is behind them. That works on a lit page
+and on the grounds of every screen below the hero. It does NOT work on bare
+paper: white at half opacity over `#fafafa` behind a five-per-cent hairline is
+invisible, and the controls stop reading as controls at all — they look like
+loose words lying on the page. Making the light's OFF state the page's opening
+state is what exposed this.
+
+So the surfaces read their ground. `#zn-deck` carries `data-lit`, and the whole
+recipe — ground and ring, for the pill and the panes alike — hangs off it as
+four variables on the body:
+
+- **Lit:** glass. `rgba(255,255,255,0.5)` behind a 5% hairline.
+- **Unlit:** a plain surface, BRIGHTER than the paper it sits on
+  (`rgba(255,255,255,0.96)`), behind a 13% hairline you can actually see.
+
+They cross over 900ms, so the light arriving softens them from buttons into
+glass rather than switching them — which is a second, quieter cue that
+something just changed.
+
+`data-lit` is not "is the light on" but **"is there anything behind the
+floating surfaces"**: every screen below the hero has a ground of its own, so
+it stays true down there whatever the reader set the hero to.
+
 ## The claim
 
 One sentence at the foot of the light, alternating Arabic and English, each
