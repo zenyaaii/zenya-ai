@@ -118,38 +118,37 @@ Four traps, all of which shipped at least once:
   and any width written back are CSS pixels. Mixing them shrinks every column
   by the zoom factor.
 
-## How the light introduces itself
+## The light is off, and stays off
 
-The page opens with the light OFF. Bare paper, three words, nothing else. A
-beat later (`REVEAL_WAIT`, 2.4s) the light arrives on its own, fading up over a
-second and a half — and its control changes in the same instant.
+The page opens with the light OFF — bare paper, three words, nothing else —
+and it does not change on its own.
 
-That simultaneity IS the affordance. Nothing on this page explains itself in
-words, so the control teaches itself by being watched: at the moment the paper
-takes colour, the swatch replays from nothing, one ring goes out from it, and
-the label stops saying اللون and says which light it is for a couple of
-seconds. The face control gives the same single ring at the same moment, so a
-reader reads the two bottom corners as a pair of controls rather than two
-labels.
+**There was an auto-reveal here.** The light arrived by itself after 2.4s and
+its control changed in the same instant, on the theory that simultaneity is the
+affordance: nothing on this page explains itself in words, so let the control
+teach itself by being watched. It worked, and it is gone anyway. The owner
+asked for a hero with no colour in it, and a page that colours itself two
+seconds after you arrive is not that page, however well the trick lands.
 
-Four rules hold it together:
+What survives, because a deliberate pick still deserves an answer:
 
-- **A stored choice is never overruled.** If the reader has picked before —
-  including بلا — theirs is restored and the reveal never runs. The page
-  performs for someone who has not chosen, and only once.
-- **A pick settles it.** Choosing anything cancels the reveal for that visit.
+- **The control says what it did.** On any change the swatch replays from
+  nothing, one ring goes out from it, and the label stops saying اللون and
+  wears the palette's name for a couple of seconds.
 - **The gradient stays painted through a fade-OUT.** بلا has no gradient of its
   own, so dropping the paint on the frame the fade begins would leave nothing
   to fade and make it a cut — the one thing this page never does. The last real
   gradient is held while the opacity goes down.
-- **The face is never changed for the reader**, only ringed. The light can swap
-  under someone harmlessly; the type is measured, and swapping the face would
-  resize the line they are in the middle of reading.
+- **A stored choice is restored**, including بلا.
+- **The face is never changed for the reader.** The light can swap under
+  someone harmlessly; the type is measured, and swapping the face would resize
+  the line they are in the middle of reading. (The face control used to give a
+  ring alongside the light's, to pair the two bottom corners. That existed only
+  for the reveal and went with it.)
 
 The ring stays under about 2.4× the mark it grows from: the corner pill clips
 its own overflow, so anything larger is cut at the pill's edge and reads as a
-bug rather than a beat. It is pure decoration, so `forwards` leaving it gone is
-correct — content on this page never does that.
+bug rather than a beat.
 
 ## The floating surfaces
 
@@ -205,42 +204,37 @@ over a colour — so the white gradient sat on top of every dark pill and undid
 the per-panel work. They turn the variable off (`--pane-bg: none`) rather than
 fighting it with another `!important`.
 
-## The ground under ابن
+## The ground under ابن — removed
 
-`#bfcfe4` — a dusty cool blue. Opaque, committed, and nobody else's colour on
-this deck.
+ابن has no ground of its own. It is the hero's bare paper, and the wizard is
+the only thing on the screen.
 
-Chosen the way the last two grounds were: by rendering candidates on the screen
-itself and looking at them. Fourteen of them across two passes, and each pass
-taught something worth keeping.
+It had two grounds before this. A 9.5% indigo wash, then an opaque `#bfcfe4`
+picked out of fourteen candidates. Both are gone: **the owner asked for no
+colour in the second section**, the same call that turned the hero's light off.
 
-**Pass one measured the wrong thing.** It left the top quarter of the panel
-transparent, so the hero's aurora painted over the very thing being judged and
-every candidate came back the same pastel confetti. A comparison that cannot
-separate its candidates is not a comparison.
+Kept here because the reasoning is still true if the screen is ever coloured
+again, and both findings cost a full render pass to get:
 
-**Pass two, join band cut to 9%.** Warm grounds — clay, stone, sand — all fail
-the same way: the wizard's card is warm white, so on a warm ground it stops
-being an object and becomes a slightly brighter patch. **Sage** works, but
-spends انشر's green three screens early. The **indigos** work, and are the
-colour this screen had already been twice.
+- **Warm grounds lose the card.** The wizard's card is warm white, so on clay,
+  stone or sand it stops being an object and becomes a slightly brighter patch.
+  Cool grounds are the only ones it floats off.
+- **An opaque fill must not start at the panel's top edge.** That edge IS the
+  seam with the hero, and a fill starting there draws a step straight across
+  the page during the move. A transparent first 9% hides the seam; any wider
+  and the hero's light paints over the screen's own colour.
+- **Judge a candidate where its colour actually is.** The first comparison left
+  the top quarter transparent, the hero's aurora painted over everything, and
+  all six candidates came back the same pastel confetti.
 
-So: cool blue. It is the ground the white card floats highest off, and cool
-under the hero's warm light coming down is the best thing on the screen — the
-same meeting the old 9.5% tint was too faint to stage.
+**The class went with the rule.** No empty `.zn2-panel` selector, no dangling
+classname on the panel — a selector with no declarations reads as a placeholder
+someone forgot to fill in.
 
-**The first 9% is transparent, and that is not a preference.** That edge IS the
-seam with the hero, and an opaque fill starting there draws a step straight
-across the page during the move — measured, twice now. Nine percent hides the
-seam and lets the hero's light land, and nothing more; any wider and the aurora
-paints over the screen's own colour again. The bottom needs no band: ادر's glow
-hangs up over it and does that end's blending already.
-
-**A translucent wash is not a colour.** The two grounds before this one were 4.5%
-and 9.5% tints, chosen so the hero's light could hang down through them. What
-that actually bought was a screen with no colour of its own — what a reader saw
-on ابن was the hero, one screen later. A screen that carries its own name gets
-its own ground.
+**`data-lit` narrowed with it.** It was `lit || deck !== 0` when every screen
+below the hero had a ground; it is `lit || deck >= 2` now, because the first
+two screens are both bare paper and only ادر and انشر have anything behind the
+floating surfaces.
 
 ## The claim
 

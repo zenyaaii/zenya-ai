@@ -205,20 +205,13 @@ const STYLES: TypeStyle[] = [
 const STORE_KEY = "zenya-demo-type"
 const STORE_GLOW = "zenya-demo-glow"
 
-/* What the page opens with. The light is OFF: the first thing a reader sees
-   is bare paper and the three words, and nothing else. */
+/* What the page opens with, and what it stays as: the light is OFF. Bare
+   paper, the three words, and nothing else — and it does not change on its
+   own. There was an auto-reveal here that lit the page after 2.4s to teach the
+   control by demonstration; it is gone. The hero is uncoloured unless a reader
+   asks for colour. */
 const DEFAULT_TYPE = "tajawal-900"
 const DEFAULT_GLOW = "none"
-
-/* ...and then, a beat later, the light arrives on its own — unless the reader
-   has already chosen one, in which case theirs is restored and this never
-   runs. The arrival is the whole affordance: the colour comes up and its
-   control changes in the same instant, so the connection between the two is
-   learned by watching it happen rather than by being labelled.
-
-   One constant to change which light it lands on. */
-const REVEAL_GLOW = "aurora"
-const REVEAL_WAIT = 2400
 /* How long the control wears the light's NAME before going back to "اللون". */
 const NAME_HOLD = 2600
 
@@ -389,21 +382,9 @@ export default function Page() {
   const [pinned, setPinned] = useState(false)
   const [styleId, setStyleId] = useState(DEFAULT_TYPE)
   const [glowId, setGlowId] = useState(DEFAULT_GLOW)
-  /* Whether the light's control is wearing the palette's name, and whether it
-     is giving its one ring. Both are set by any change to the light, so the
-     auto-reveal and a deliberate pick behave identically — one rule, no
-     special case for either. */
+  /* Whether the light's control is wearing the palette's name. Set by any
+     change to the light, which now only ever means a deliberate pick. */
   const [glowNamed, setGlowNamed] = useState(false)
-  /* Set once a reader has chosen, or once the reveal has run. Either way the
-     page stops changing the light by itself. */
-  const glowSettled = useRef(false)
-  /* True for one beat at the arrival, and only then. The light's own control
-     announces itself every time it changes; this is what lets the FACE control
-     announce itself alongside it, once, so a reader reads the two bottom
-     corners as a pair of controls rather than two labels. The face itself is
-     never changed for them — the type is measured, and swapping it under a
-     reader would resize the line they are in the middle of reading. */
-  const [introRing, setIntroRing] = useState(false)
   const headerRef = useRef<HTMLElement>(null)
   const typeRef = useRef<HTMLDivElement>(null)
   const glowRef = useRef<HTMLDivElement>(null)
@@ -448,26 +429,8 @@ export default function Page() {
       const face = localStorage.getItem(STORE_KEY)
       if (face && STYLES.some((s) => s.id === face)) setStyleId(face)
       const light = localStorage.getItem(STORE_GLOW)
-      if (light && GLOWS.some((g) => g.id === light)) {
-        setGlowId(light)
-        /* They have chosen before. Their light is theirs; do not perform. */
-        glowSettled.current = true
-      }
+      if (light && GLOWS.some((g) => g.id === light)) setGlowId(light)
     } catch { /* private mode; the defaults are fine */ }
-  }, [])
-
-  /* The arrival. Only ever for a reader who has not chosen — a stored choice,
-     including بلا, is a decision and the page does not overrule it. */
-  useEffect(() => {
-    if (glowSettled.current) return
-    const id = setTimeout(() => {
-      if (glowSettled.current) return
-      glowSettled.current = true
-      setGlowId(REVEAL_GLOW)
-      setIntroRing(true)
-      setTimeout(() => setIntroRing(false), 1500)
-    }, REVEAL_WAIT)
-    return () => clearTimeout(id)
   }, [])
 
   /* Whenever the light changes, its control says so: the swatch replays, a
@@ -779,8 +742,6 @@ export default function Page() {
   }
 
   const pickGlow = (id: string) => {
-    /* Chosen. The page stops revealing anything from here on. */
-    glowSettled.current = true
     setGlowId(id)
     try { localStorage.setItem(STORE_GLOW, id) } catch { /* ignore */ }
   }
@@ -1281,19 +1242,6 @@ export default function Page() {
         }
         .zn-glowlabel > span[data-on="false"] { opacity: 0; }
 
-        /* The face control's half of the same beat. It gets the ring and
-           nothing else: the light can change under a reader harmlessly, but
-           the type is measured and swapping the face would resize the line
-           they are in the middle of reading. */
-        .zn-mark { position: relative; display: inline-flex; }
-        .zn-mark i {
-          position: absolute; left: 50%; top: 50%;
-          height: 14px; width: 14px; margin: -7px 0 0 -7px;
-          border-radius: 999px;
-          box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.42);
-          animation: zn-ring 1400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
         /* The phone header opens in two beats: out to the sides first, then
            down. Closing runs it backwards, the pages folding away before the
            pill narrows, so the two movements never fight over the same
@@ -1382,45 +1330,12 @@ export default function Page() {
           transform: translateZ(0);
           contain: layout;
         }
-        /* ── The ground under ابن ────────────────────────────────────
-           The hero is bare #fafafa and ابن was the same, so the two light
-           screens read as one page. This one is its own colour now: a dusty
-           cool blue, opaque, committed.
-
-           Chosen the same way as the last two: by rendering candidates on this
-           screen and looking at them. Fourteen of them over two passes. What
-           the passes taught, in order —
-
-             Pass one had a transparent top quarter and the hero's aurora
-             painted over the very thing being judged; every candidate came
-             back the same pastel confetti. A comparison that cannot separate
-             its candidates is measuring the wrong thing.
-
-             Pass two, with the join band cut to 9%: warm grounds (clay, stone,
-             sand) all fail the same way — the wizard's card is warm white, so
-             on a warm ground it stops being an object and becomes a slightly
-             brighter patch. Sage works but spends انشر's green three screens
-             early. The indigos work and are the colour this screen has already
-             been twice.
-
-           So: cool blue. It is the ground the white card floats highest off,
-           it is nobody else's colour on this deck, and cool under the hero's
-           warm light coming down is the best thing on the screen — the same
-           meeting the old tint was too faint to stage.
-
-           The first 9% is transparent and that part is not a preference. That
-           edge IS the seam with the hero, and an opaque fill starting there
-           draws a step straight across the page during the move — measured,
-           twice now. Nine percent hides the seam and lets the hero's light
-           land, and nothing more; any wider and the aurora paints over the
-           screen's own colour again. The bottom needs no band: ادر's glow
-           hangs up over it and does that end's blending already. */
-        .zn2-panel {
-          background: linear-gradient(180deg,
-            rgba(191, 207, 228, 0) 0%,
-            #bfcfe4 9%,
-            #bfcfe4 100%);
-        }
+        /* ابن has no ground of its own. It had one — a 9.5% indigo wash, then
+           an opaque #bfcfe4 — and the owner asked for both to go. The screen
+           is the hero's bare paper again, and the wizard is the only thing on
+           it. Nothing is left behind on purpose — not an empty rule and not
+           the .zn2-panel class that carried it. A selector with no declarations
+           reads as a placeholder someone forgot to fill in. */
         /* The light is the single most expensive thing on the page to paint,
            and it now travels. Rasterise it once and move the result. */
         #zn-glow { will-change: transform; transform: translateZ(0); }
@@ -4254,7 +4169,7 @@ export default function Page() {
           .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
           #zn-glow i { animation: none; }
           #zn-glow { transition: none; }
-          .zn-swatch, .zn-swatch i, .zn-mark i { animation: none; }
+          .zn-swatch, .zn-swatch i { animation: none; }
           .zn-glowlabel > span { transition: none; }
           #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
           #zn-claim .line > .caret { display: none; }
@@ -4528,10 +4443,7 @@ export default function Page() {
               className="flex h-10 w-full items-center gap-1.5 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
               style={{ color: OBSIDIAN }}
             >
-              <span className="zn-mark" aria-hidden>
-                <Type size={14} strokeWidth={1.6} />
-                {introRing && <i />}
-              </span>
+              <Type size={14} strokeWidth={1.6} aria-hidden />
               الخط
             </button>
           }
@@ -4649,9 +4561,11 @@ export default function Page() {
           is four times the deck and each panel a quarter of the track, so a
           panel is exactly one screen whatever zoom the root is writing. */}
       {/* data-lit is not "is the light on" but "is there anything behind the
-          floating surfaces" — every screen below the hero has a ground of its
-          own, so glass works down there whatever the reader set up here. */}
-      <div id="zn-deck" data-moving={!settled} data-lit={lit || deck !== 0} style={{ background: PAPER }}>
+          floating surfaces", which is what decides how hard the controls have
+          to work to read as controls. It counted every screen but the hero
+          while ابن had a ground; ابن is bare paper again, so the first two
+          screens are both unlit and only ادر and انشر count. */}
+      <div id="zn-deck" data-moving={!settled} data-lit={lit || deck >= 2} style={{ background: PAPER }}>
         <div id="zn-track" style={{ "--deck": deck } as React.CSSProperties}>
         <div className="zn-panel">
       <main
@@ -4751,7 +4665,7 @@ export default function Page() {
             argued for. It drives the product's own path — the eight
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
-        <div className="zn-panel zn2-panel" aria-hidden={deck !== 1}>
+        <div className="zn-panel" aria-hidden={deck !== 1}>
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is
