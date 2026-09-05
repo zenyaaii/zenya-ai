@@ -919,37 +919,41 @@ export default function Page() {
            on this page a reader can press, and they have to look it — on bare
            paper, on the light, and on the ground of every screen below.
 
-           Six layers, and every one of them is doing a job:
+           These were glass first: three stacked shadows at widening radii, a
+           soft edge, the whole thing hovering. It read as a cloud. A cloud is
+           a lovely object and a bad button, because nothing about it says
+           where the surface stops. So they are KEYS now — pressable things
+           with a definite edge, sitting ON the page rather than above it:
 
-             1. a GRADIENT ground, not a flat one — real glass catches more
-                light at its top edge than its bottom, and a flat fill is the
-                single biggest tell that something is a rectangle pretending
-             2. blur and saturate behind it, so it takes the colour of
-                whatever it is over instead of sitting on top of it
-             3. a bright inset TOP rim — the specular line. This is what the
-                eye actually reads as glass; without it the rest is just a
-                translucent box
-             4. a dark inset BOTTOM rim, so the far edge turns away
-             5. a hairline all round, which is what carries it on bare paper
-                where there is no colour for the blur to pick up
-             6. THREE stacked drop shadows — contact, near, far. One blurred
-                shadow reads as a blurred edge; three at different radii read
-                as something floating above the page, which is the thing that
-                was missing.
+             1. a GRADIENT ground, still: a lit face catches more light at its
+                top than its bottom, and a flat fill is the single biggest tell
+                that something is a rectangle pretending
+             2. blur and saturate behind it. Kept from the glass, and the one
+                thing worth keeping: it is why the control takes on the colour
+                of the animation instead of sitting on top of it
+             3. a bright inset TOP rim — the lit top face of the key
+             4. a dark inset BOTTOM rim, 3px, which is the key's front wall
+                seen from slightly above. This is the layer doing the work
+             5. a firm ring all round at 0.26, not a 0.14 hairline. It is the
+                edge of the key and it is meant to be seen
+             6. a hard 3px offset under it — no blur — which is the base the
+                key stands on, and then ONE short soft shadow for contact.
 
-           The house rule elsewhere is hairline rings and no drop shadows. The
-           controls are the deliberate exception, and the owner asked for it
-           twice: with no depth at all they stopped reading as controls. */
+           A blurred shadow says "floating, somewhere up there". A hard offset
+           says "this tall, right here", and that is the thing that was
+           missing. The house rule elsewhere is hairline rings and no drop
+           shadows; the controls are the deliberate exception, and the owner
+           has now asked for more of it three times. */
         body:has(#blank-home) {
-          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.90) 0%, rgba(255, 255, 255, 0.70) 100%);
-          --pane-edge: rgba(17, 17, 17, 0.14);
+          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
+          --pane-edge: rgba(17, 17, 17, 0.26);
         }
-        /* Off the light, on bare paper, there is no colour behind the glass to
-           pick up — so it leans on being brighter than the paper and on a
-           firmer edge, and the shadows do the rest. */
+        /* Off the light, on bare paper, there is no colour behind the key for
+           the blur to pick up — so it leans on being brighter than the paper
+           and on a firmer edge still, and the base does the rest. */
         body:has(#zn-deck[data-lit="false"]) {
-          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.93) 100%);
-          --pane-edge: rgba(17, 17, 17, 0.16);
+          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 245, 242, 0.96) 100%);
+          --pane-edge: rgba(17, 17, 17, 0.28);
         }
 
         /* Display scale. Two stops rather than one clamp: a single aggressive
@@ -1309,21 +1313,20 @@ export default function Page() {
         }
         .zn-phone-drawer[data-open="true"] { transition-delay: 200ms, 200ms; }
 
-        /* Glass, and it means it: the light behind the page is what tints
-           these. saturate pulls the colour out of whatever the blur picked up,
-           so the control in the bottom corner takes on the animation rather
-           than sitting on top of it. */
+        /* The key. saturate pulls the colour out of whatever the blur picked
+           up, so the control in the bottom corner still takes on the animation
+           rather than sitting on top of it — that part survived the move away
+           from glass. Everything below it is the key's own geometry. */
         .zn-glass, .zn-pill, .zn-phone-pill {
           background: var(--pane-bg);
-          -webkit-backdrop-filter: blur(20px) saturate(180%);
-          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(18px) saturate(180%);
+          backdrop-filter: blur(18px) saturate(180%);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.95),
-            inset 0 -1px 0 rgba(17, 17, 17, 0.05),
+            inset 0 1px 0 rgba(255, 255, 255, 1),
+            inset 0 -3px 0 rgba(17, 17, 17, 0.10),
             0 0 0 1px var(--pane-edge),
-            0 2px 4px rgba(17, 17, 17, 0.09),
-            0 10px 24px rgba(17, 17, 17, 0.13),
-            0 28px 56px rgba(17, 17, 17, 0.13);
+            0 3px 0 rgba(17, 17, 17, 0.12),
+            0 8px 16px rgba(17, 17, 17, 0.11);
         }
         /* Backdrop filters are a stated accessibility preference for some
            readers, and unsupported in a few engines. Both land here. */
@@ -1333,13 +1336,13 @@ export default function Page() {
            these read as controls, not the transparency. */
         @media (prefers-reduced-transparency: reduce) {
           .zn-glass, .zn-pill, .zn-phone-pill {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(255, 255, 255, 0.94) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(245, 244, 241, 0.97) 100%);
             -webkit-backdrop-filter: none; backdrop-filter: none;
           }
         }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
           .zn-glass, .zn-pill, .zn-phone-pill {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(245, 244, 241, 0.96) 100%);
           }
         }
 
@@ -1379,52 +1382,44 @@ export default function Page() {
           transform: translateZ(0);
           contain: layout;
         }
-        /* ابن's ground. The hero is bare #fafafa and ابن was the same, so the
-           two light screens read as one. This carries the hero's paper 4.5%
-           toward the dashboard's own primary, #5e6ad2, which is the colour the
-           very next screen is built on: ابن becomes the approach to ادر rather
-           than a second hero.
+        /* ── The ground under ابن ────────────────────────────────────
+           The hero is bare #fafafa and ابن was the same, so the two light
+           screens read as one page. This one is its own colour now: a dusty
+           cool blue, opaque, committed.
 
-           Stated plainly, this is a design choice, not a measurement. The build
-           flow's own values are all status colours - #15803d for valid, #b91c1c
-           for errors, #d97706 for warnings - and its one surface value, #fafaf7,
-           is three levels off the hero and invisible at screen size. There was
-           nothing to take, so this was chosen.
+           Chosen the same way as the last two: by rendering candidates on this
+           screen and looking at them. Fourteen of them over two passes. What
+           the passes taught, in order —
 
-           A translucent tint rather than a flat hex on purpose. The hero's light
-           hangs down past its own foot onto this screen and ادر's hangs up onto
-           it; an opaque ground would paint over both, and the light crossing is
-           the thing that makes these two screens feel like one surface. */
-        /* Chosen by rendering six candidates on this screen and looking at
-           them, not by reasoning: the brand indigo at 4.5% was so faint that
-           everything visible on ابن was really the hero's light hanging down,
-           and the screen had no colour of its own at all.
+             Pass one had a transparent top quarter and the hero's aurora
+             painted over the very thing being judged; every candidate came
+             back the same pastel confetti. A comparison that cannot separate
+             its candidates is measuring the wrong thing.
 
-           This is the same family, deepened and pushed a few degrees toward
-           ادر's violet — which is the point of the screen: ابن is the approach
-           to ادر, not a second hero. Rejected on the way: sand and rose, both
-           of which fell into the hero's own warmth and flattened the screen
-           into one note; teal, which is a genuinely different colour and reads
-           fresh on its own, but turns grey exactly where it meets the warm
-           light coming down, which is the best thing on this screen.
+             Pass two, with the join band cut to 9%: warm grounds (clay, stone,
+             sand) all fail the same way — the wizard's card is warm white, so
+             on a warm ground it stops being an object and becomes a slightly
+             brighter patch. Sage works but spends انشر's green three screens
+             early. The indigos work and are the colour this screen has already
+             been twice.
 
-           Still translucent, and that part is not a preference. The hero's
-           light hangs down past its own foot onto this screen and ادر's hangs
-           up onto it; an opaque ground paints over both, and the light
-           crossing is what makes the two screens read as one surface. */
-        /* A gradient down from nothing, not a flat wash. At the tint that
-           actually reads (twice the old one) a flat fill starts at the panel's
-           top edge and that edge IS the seam with the hero — measured, it drew
-           a visible step straight across the page exactly where the light was
-           supposed to be crossing. Transparent for the first third, which is
-           where the hero's light lands anyway, then full for the rest, which is
-           where this screen is its own. The bottom stays flat: ادر's glow hangs
-           up over it and does that end's blending already. */
+           So: cool blue. It is the ground the white card floats highest off,
+           it is nobody else's colour on this deck, and cool under the hero's
+           warm light coming down is the best thing on the screen — the same
+           meeting the old tint was too faint to stage.
+
+           The first 9% is transparent and that part is not a preference. That
+           edge IS the seam with the hero, and an opaque fill starting there
+           draws a step straight across the page during the move — measured,
+           twice now. Nine percent hides the seam and lets the hero's light
+           land, and nothing more; any wider and the aurora paints over the
+           screen's own colour again. The bottom needs no band: ادر's glow
+           hangs up over it and does that end's blending already. */
         .zn2-panel {
           background: linear-gradient(180deg,
-            rgba(70, 84, 200, 0) 0%,
-            rgba(70, 84, 200, 0.095) 32%,
-            rgba(70, 84, 200, 0.095) 100%);
+            rgba(191, 207, 228, 0) 0%,
+            #bfcfe4 9%,
+            #bfcfe4 100%);
         }
         /* The light is the single most expensive thing on the page to paint,
            and it now travels. Rasterise it once and move the result. */
@@ -1503,21 +1498,25 @@ export default function Page() {
            enough to belong on this page: a hairline pill, obsidian when it is
            the one being watched. */
         .zn-switch { display: flex; gap: 6px; flex: 0 0 auto; }
-        /* The same glass the header and the corner controls are made of, at
-           the smaller scale this one is: a flat pill next to a floating one
-           reads as a label, not a second control. Its chosen state stays flat
-           obsidian, because a pressed thing should not also be lifting. */
+        /* The same key the header and the corner controls are made of, at the
+           smaller scale this one is: a flat pill next to a standing one reads
+           as a label, not a second control. Its chosen state is genuinely
+           PRESSED — obsidian, its base gone, an inset shadow where the lit rim
+           was, and moved down by the 2px of base it just lost. A toggle whose
+           on-state is only a colour change is a colour swatch; one that sinks
+           is a switch. */
         .zn-switch button {
           padding: 7px 16px; border-radius: 999px;
           font-size: 11.5px; line-height: 1; color: ${STONE};
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.76) 100%);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
           -webkit-backdrop-filter: blur(14px) saturate(170%);
           backdrop-filter: blur(14px) saturate(170%);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.95),
-            0 0 0 1px rgba(17, 17, 17, 0.12),
-            0 1px 2px rgba(17, 17, 17, 0.07),
-            0 5px 14px rgba(17, 17, 17, 0.10);
+            inset 0 1px 0 rgba(255, 255, 255, 1),
+            inset 0 -2px 0 rgba(17, 17, 17, 0.09),
+            0 0 0 1px rgba(17, 17, 17, 0.24),
+            0 2px 0 rgba(17, 17, 17, 0.11),
+            0 5px 11px rgba(17, 17, 17, 0.09);
           cursor: pointer;
           transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
                       color 260ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -1526,7 +1525,9 @@ export default function Page() {
         .zn-switch button:hover { color: ${OBSIDIAN}; }
         .zn-switch button[data-on="true"] {
           background: ${OBSIDIAN}; color: ${PAPER};
-          box-shadow: 0 1px 2px rgba(17, 17, 17, 0.16), 0 5px 14px rgba(17, 17, 17, 0.16);
+          box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.4),
+                      0 1px 2px rgba(17, 17, 17, 0.18);
+          transform: translateY(2px);
         }
 
         /* The build word, in the hero's own face and cycling the same four

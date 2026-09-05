@@ -157,33 +157,47 @@ The header pill, both corner controls and the ابن switcher. They are the only
 things on this page a reader can press, and they have to look it — on bare
 paper, on the light, and on the ground of every screen below.
 
-Six layers, and each is doing a job:
+**They were glass, and glass was the wrong idea.** Three stacked drop shadows at
+widening radii, a 14% hairline, the whole thing hovering: it read as a *cloud*.
+A cloud is a lovely object and a bad button, because nothing about it says where
+the surface stops. Asked a third time for more presence, the answer was not more
+blur — it was to stop hovering.
 
-1. a **gradient** ground, not a flat one — real glass catches more light at its
+**They are keys now.** Pressable things with a definite edge, sitting *on* the
+page rather than above it. Six layers, and each is doing a job:
+
+1. a **gradient** ground, not a flat one — a lit face catches more light at its
    top than its bottom, and a flat fill is the biggest tell that something is a
    rectangle pretending
-2. **blur and saturate** behind it, so it takes the colour of what it is over
-   rather than sitting on top of it
-3. a bright inset **top rim** — the specular line. This is what the eye reads
-   as glass; without it the rest is a translucent box
-4. a dark inset **bottom rim**, so the far edge turns away
-5. a **hairline** all round, which is what carries it on bare paper where there
-   is no colour for the blur to pick up
-6. **three stacked drop shadows** — contact, near, far. One blurred shadow
-   reads as a blurred edge; three at different radii read as something floating
-   above the page. This is the layer that was missing.
+2. **blur and saturate** behind it. Kept from the glass, and the one thing worth
+   keeping: it is why the corner control takes on the colour of the animation
+   instead of sitting on top of it
+3. a bright inset **top rim** — the lit top face of the key
+4. a dark inset **bottom rim, 3px** — the key's front wall, seen from slightly
+   above. This is the layer doing the work
+5. a **firm ring** all round at 26%, not a 14% hairline. It is the edge of the
+   key and it is meant to be seen
+6. a **hard 3px offset** under it, no blur — the base the key stands on — and
+   then one short soft shadow for contact.
+
+**A blurred shadow says "floating, somewhere up there". A hard offset says
+"this tall, right here".** That was the thing that was missing, through two
+rounds of making the blur bigger.
 
 **This is the deliberate exception to the no-shadows rule**, and it is scoped to
-the controls. Content never does this. It was asked for twice: with hairlines
-alone the controls stopped reading as controls at all and looked like loose
-words lying on the page.
+the controls. Content never does this.
 
-**Glass needs something to be glass about.** `#zn-deck` carries `data-lit` and
-the ground and edge hang off it as two variables on the body: lit, a
-half-transparent gradient behind an 11% hairline; unlit, near-opaque and
-brighter than the paper behind a 16% one. `data-lit` is not "is the light on"
-but **"is there anything behind the floating surfaces"** — every screen below
-the hero has a ground of its own, so it stays true down there.
+**A toggle whose on-state is only a colour change is a colour swatch.** The ابن
+switcher's chosen state is genuinely pressed: obsidian, its base gone, an inset
+shadow where the lit rim was, and moved down by exactly the 2px of base it just
+lost. One that sinks is a switch.
+
+**The key still needs something to be lit by.** `#zn-deck` carries `data-lit`
+and the ground and edge hang off it as two variables on the body: lit, a
+near-opaque gradient behind a 26% ring; unlit, brighter still behind a 28% one.
+`data-lit` is not "is the light on" but **"is there anything behind the
+floating surfaces"** — every screen below the hero has a ground of its own, so
+it stays true down there.
 
 **Never paint over a dark screen's own pill.** The dark panels set
 `background-COLOR` and this recipe sets a background-IMAGE, and an image paints
@@ -193,30 +207,40 @@ fighting it with another `!important`.
 
 ## The ground under ابن
 
-`rgba(70, 84, 200, 0.095)` — the brand indigo, deepened and pushed a few
-degrees toward ادر's violet, because that is the point of the screen: ابن is
-the approach to ادر, not a second hero.
+`#bfcfe4` — a dusty cool blue. Opaque, committed, and nobody else's colour on
+this deck.
 
-Chosen by rendering six candidates on the screen itself and looking at them.
-The old value (the same indigo at 4.5%) was so faint that everything visible on
-ابن was really the hero's light hanging down — the screen had no colour of its
-own. Rejected: **sand** and **rose**, both of which fall into the hero's own
-warmth and flatten the screen to one note; **teal**, which is a genuinely
-different colour and reads fresh alone, but turns grey exactly where it meets
-the warm light coming down, which is the best thing on that screen.
+Chosen the way the last two grounds were: by rendering candidates on the screen
+itself and looking at them. Fourteen of them across two passes, and each pass
+taught something worth keeping.
 
-Two rules the value has to obey:
+**Pass one measured the wrong thing.** It left the top quarter of the panel
+transparent, so the hero's aurora painted over the very thing being judged and
+every candidate came back the same pastel confetti. A comparison that cannot
+separate its candidates is not a comparison.
 
-- **Translucent, never a flat hex.** The hero's light hangs down past its own
-  foot onto this screen and ادر's hangs up onto it. An opaque ground paints
-  over both, and the light crossing is what makes the screens read as one
-  surface.
-- **A gradient down from nothing, not a flat wash.** At a tint that actually
-  reads, a flat fill starts at the panel's top edge — and that edge IS the seam
-  with the hero. It drew a visible step straight across the page, exactly where
-  the light was supposed to be crossing. Transparent for the first third (where
-  the hero's light lands anyway), full for the rest. The bottom stays flat:
-  ادر's glow hangs up over it and does that end's blending already.
+**Pass two, join band cut to 9%.** Warm grounds — clay, stone, sand — all fail
+the same way: the wizard's card is warm white, so on a warm ground it stops
+being an object and becomes a slightly brighter patch. **Sage** works, but
+spends انشر's green three screens early. The **indigos** work, and are the
+colour this screen had already been twice.
+
+So: cool blue. It is the ground the white card floats highest off, and cool
+under the hero's warm light coming down is the best thing on the screen — the
+same meeting the old 9.5% tint was too faint to stage.
+
+**The first 9% is transparent, and that is not a preference.** That edge IS the
+seam with the hero, and an opaque fill starting there draws a step straight
+across the page during the move — measured, twice now. Nine percent hides the
+seam and lets the hero's light land, and nothing more; any wider and the aurora
+paints over the screen's own colour again. The bottom needs no band: ادر's glow
+hangs up over it and does that end's blending already.
+
+**A translucent wash is not a colour.** The two grounds before this one were 4.5%
+and 9.5% tints, chosen so the hero's light could hang down through them. What
+that actually bought was a screen with no colour of its own — what a reader saw
+on ابن was the hero, one screen later. A screen that carries its own name gets
+its own ground.
 
 ## The claim
 
