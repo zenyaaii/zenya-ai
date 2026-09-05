@@ -191,6 +191,33 @@ over a colour — so the white gradient sat on top of every dark pill and undid
 the per-panel work. They turn the variable off (`--pane-bg: none`) rather than
 fighting it with another `!important`.
 
+## The ground under ابن
+
+`rgba(70, 84, 200, 0.095)` — the brand indigo, deepened and pushed a few
+degrees toward ادر's violet, because that is the point of the screen: ابن is
+the approach to ادر, not a second hero.
+
+Chosen by rendering six candidates on the screen itself and looking at them.
+The old value (the same indigo at 4.5%) was so faint that everything visible on
+ابن was really the hero's light hanging down — the screen had no colour of its
+own. Rejected: **sand** and **rose**, both of which fall into the hero's own
+warmth and flatten the screen to one note; **teal**, which is a genuinely
+different colour and reads fresh alone, but turns grey exactly where it meets
+the warm light coming down, which is the best thing on that screen.
+
+Two rules the value has to obey:
+
+- **Translucent, never a flat hex.** The hero's light hangs down past its own
+  foot onto this screen and ادر's hangs up onto it. An opaque ground paints
+  over both, and the light crossing is what makes the screens read as one
+  surface.
+- **A gradient down from nothing, not a flat wash.** At a tint that actually
+  reads, a flat fill starts at the panel's top edge — and that edge IS the seam
+  with the hero. It drew a visible step straight across the page, exactly where
+  the light was supposed to be crossing. Transparent for the first third (where
+  the hero's light lands anyway), full for the rest. The bottom stays flat:
+  ادر's glow hangs up over it and does that end's blending already.
+
 ## The claim
 
 One sentence at the foot of the light, alternating Arabic and English, each

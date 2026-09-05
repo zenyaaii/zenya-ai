@@ -1395,7 +1395,37 @@ export default function Page() {
            hangs down past its own foot onto this screen and ادر's hangs up onto
            it; an opaque ground would paint over both, and the light crossing is
            the thing that makes these two screens feel like one surface. */
-        .zn2-panel { background: rgba(94, 106, 210, 0.045); }
+        /* Chosen by rendering six candidates on this screen and looking at
+           them, not by reasoning: the brand indigo at 4.5% was so faint that
+           everything visible on ابن was really the hero's light hanging down,
+           and the screen had no colour of its own at all.
+
+           This is the same family, deepened and pushed a few degrees toward
+           ادر's violet — which is the point of the screen: ابن is the approach
+           to ادر, not a second hero. Rejected on the way: sand and rose, both
+           of which fell into the hero's own warmth and flattened the screen
+           into one note; teal, which is a genuinely different colour and reads
+           fresh on its own, but turns grey exactly where it meets the warm
+           light coming down, which is the best thing on this screen.
+
+           Still translucent, and that part is not a preference. The hero's
+           light hangs down past its own foot onto this screen and ادر's hangs
+           up onto it; an opaque ground paints over both, and the light
+           crossing is what makes the two screens read as one surface. */
+        /* A gradient down from nothing, not a flat wash. At the tint that
+           actually reads (twice the old one) a flat fill starts at the panel's
+           top edge and that edge IS the seam with the hero — measured, it drew
+           a visible step straight across the page exactly where the light was
+           supposed to be crossing. Transparent for the first third, which is
+           where the hero's light lands anyway, then full for the rest, which is
+           where this screen is its own. The bottom stays flat: ادر's glow hangs
+           up over it and does that end's blending already. */
+        .zn2-panel {
+          background: linear-gradient(180deg,
+            rgba(70, 84, 200, 0) 0%,
+            rgba(70, 84, 200, 0.095) 32%,
+            rgba(70, 84, 200, 0.095) 100%);
+        }
         /* The light is the single most expensive thing on the page to paint,
            and it now travels. Rasterise it once and move the result. */
         #zn-glow { will-change: transform; transform: translateZ(0); }
