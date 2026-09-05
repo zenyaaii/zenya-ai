@@ -118,36 +118,91 @@ const FS = [
      mix(above, mine, 0.5) at its foot: the same value, so the join is
      seamless while each screen still owns its colour through its middle. */
   "  float f = -p.y;",
-  "  vec3  A = f < 0.0 ? mix(uAcc,  uAccP,  -f) : mix(uAcc,  uAccN,  f);",
-  "  float D = f < 0.0 ? mix(uDark, uDarkP, -f) : mix(uDark, uDarkN, f);",
+  /* Blending linearly across the whole half meant a screen only ever hit its
+     true colour at its exact centre, which washed the gold out of الختام. The
+     weight is held at zero through the middle 40% and only opens up near the
+     seam, still reaching exactly 0.5 at the edge so both sides meet. */
+  "  float w = smoothstep(0.20, 0.5, abs(f)) * 0.5;",
+  "  vec3  A = f < 0.0 ? mix(uAcc,  uAccP,  w) : mix(uAcc,  uAccN,  w);",
+  "  float D = f < 0.0 ? mix(uDark, uDarkP, w) : mix(uDark, uDarkN, w);",
 
-  /* 0 - the edge: the corner fan, in the panel's colour. */
+  /* 0 - the edge. A fan of soft bands hugging the gutter and running the whole
+     length of the deck.
+
+     The first version worked off p alone and never looked at uDeck, so it
+     stamped the identical corner ornament on all five screens: five
+     decorations, not one line. It now runs along the deck axis like the others,
+     so the fan is a single thing you travel down, and it dissolves before it
+     reaches the copy rather than passing behind it. */
   "  if (S < 0.5) {",
-  "    vec2 q = rot(p, -0.40);",
-  "    float fan = 0.34 + 0.95 * smoothstep(-1.15, 0.95, q.x);",
+  "    float ar = uRes.x / uRes.y;",
+  "    float Y = (uDeck - 2.0) - p.y;",
+  /* Distance out from the gutter. The deck sets copy RTL, so the free side is
+     the left and the fan hugs it. */
+  "    float e = p.x + ar * 0.5;",
+  "    vec2 q = vec2(Y, e);",
+  /* The fan opens as it descends: strands spread and thicken toward the foot
+     of the deck. */
+  "    float fan = 0.60 + 0.55 * smoothstep(-2.6, 2.6, Y);",
   "    vec3 a = vec3(0.0); float al = 0.0;",
-  "    band(a, al, q, fan, -0.40, 0.070, 1.10, 0.150, 0.0, 0.150, 0.05, A, t);",
-  "    band(a, al, q, fan, -0.20, 0.085, 0.95, 0.185, 1.1, 0.170, 0.30, A, t);",
-  "    band(a, al, q, fan,  0.00, 0.075, 1.25, 0.135, 2.3, 0.160, 0.55, A, t);",
-  "    band(a, al, q, fan,  0.20, 0.090, 1.05, 0.205, 3.4, 0.175, 0.75, A, t);",
-  "    band(a, al, q, fan,  0.42, 0.095, 0.90, 0.125, 5.7, 0.185, 0.95, A, t);",
+  "    band(a, al, q, fan, 0.10, 0.10, 0.70, 0.11, 0.0, 0.085, 0.10, A, t);",
+  "    band(a, al, q, fan, 0.28, 0.12, 0.58, 0.14, 1.6, 0.100, 0.40, A, t);",
+  "    band(a, al, q, fan, 0.48, 0.11, 0.76, 0.09, 3.1, 0.095, 0.70, A, t);",
+  "    band(a, al, q, fan, 0.70, 0.13, 0.52, 0.12, 4.7, 0.110, 0.95, A, t);",
   "    col = a / max(al, 0.0001);",
-  "    col = mix(col, vec3(1.0), smoothstep(1.2, 2.6, al) * 0.40);",
-  "    alpha = clamp(al, 0.0, 1.0) * smoothstep(-1.45, -0.35, q.x);",
+  "    col = mix(col, vec3(1.0), smoothstep(1.15, 2.5, al) * 0.38);",
+  /* Gone well before the text column, so the copy never sits on it. */
+  "    alpha = clamp(al, 0.0, 1.0) * (1.0 - smoothstep(ar * 0.40, ar * 0.78, e)) * 0.95;",
   "  }",
 
-  /* 1 - the band: a hard-edged diagonal, its crossing point walking down the
-     deck so each screen is cut at a different height. */
+  /* 1 - the band. A hard-edged ribbon running the whole length of the deck.
+     Three things were wrong with the first version and all three are fixed
+     here: its centre was a function of uDeck alone, so it was five separate
+     cuts at five heights rather than one band; step() gave a raw aliased edge,
+     which on a diagonal is visible stair-stepping; and the interior was a flat
+     linear ramp, which is a painted stripe rather than a window onto something
+     moving. */
   "  else if (S < 1.5) {",
-  "    vec2 q = rot(p, -0.26);",
-  "    float centre = 0.40 - (uDeck / 4.0) * 0.86;",
-  "    float d = q.y - centre;",
-  "    float half_ = 0.11;",
-  "    float inside = step(abs(d), half_);",
-  "    float g = clamp((d + half_) / (2.0 * half_), 0.0, 1.0);",
-  "    col = shade(A, g);",
-  "    col = mix(col, vec3(1.0), smoothstep(0.45, 1.0, g) * 0.22);",
-  "    alpha = inside * 0.92;",
+  /* Same deck axis as the spectrum, so the two edges of the cut run straight
+     across every seam: panel n covers [n-2.5, n-1.5] and n+1 continues it. */
+  "    float Y = (uDeck - 2.0) - p.y;",
+  "    float X = p.x;",
+
+  /* The centre drifts as it descends. The linear term is the diagonal you read
+     on any one screen; the slow sines make it wander over the five so it is a
+     lazy S down the whole deck rather than a straight rule. */
+  /* The linear term was 0.30, which walked the centre 0.75 across the deck and
+     pushed the band clean off the first and last screens: the hero had 7% of
+     it. Most of the travel now comes from the sine, which returns, so the band
+     is on every screen while still crossing each one on a slant. */
+  "    float c = 0.12 * Y",
+  "            + 0.34 * sin(Y * 0.95 + t * 0.17)",
+  "            + 0.09 * sin(Y * 0.44 - t * 0.10);",
+  "    float halfw = 0.30 + 0.05 * sin(Y * 0.33 + t * 0.15);",
+  "    float d = (X - c) / halfw;",
+
+  /* Antialiased cut. One pixel is 1/uRes.y in p units; dividing by halfw puts
+     that in the same units as d, so the edge stays exactly one pixel soft at
+     any size or DPR without needing the derivatives extension. */
+  "    float px = (1.0 / uRes.y) / halfw;",
+  "    float inside = 1.0 - smoothstep(1.0 - px * 1.5, 1.0 + px * 1.5, abs(d));",
+
+  /* What fills the cut. Two crossed low-frequency waves in deck space give a
+     slow mesh that flows along the band, so the hard edge frames something
+     alive instead of a gradient. */
+  "    float m1 = sin(Y * 0.72 + X * 1.30 + t * 0.40);",
+  "    float m2 = sin(Y * 0.45 - X * 0.85 + t * 0.29 + 2.1);",
+  "    float mesh = clamp(0.5 + 0.26 * m1 + 0.24 * m2, 0.0, 1.0);",
+  "    float across = clamp(0.5 + 0.5 * d, 0.0, 1.0);",
+  "    float k = clamp(0.34 * across + 0.66 * mesh, 0.0, 1.0);",
+
+  "    col = shade(A, k);",
+  "    col = mix(col, vec3(1.0), smoothstep(0.60, 1.0, mesh) * 0.32);",
+
+  /* Translucent, not a slab: the screen copy sits above this and has to stay
+     readable where the band crosses it. Measured at 0.68 this peaked at 59-75
+     of 255, which is barely there. */
+  "    alpha = inside * 0.95;",
   "  }",
 
   /* 2 - the thread: one fine luminous line down the gutter. The quietest. */

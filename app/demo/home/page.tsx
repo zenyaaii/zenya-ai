@@ -606,9 +606,10 @@ export default function Page() {
   const [ground, setGround] = useState<"emerald" | "pine" | "deep">("emerald")
   /* The line that carries one colour per screen. Five treatments, settled the
      way this page settles everything: by looking at them here rather than in
-     the abstract. ?line=edge|band|thread|glow|off; the spectrum is the default
-     because it is the only one that is a single object across all five. */
-  const [line, setLine] = useState<LineStyle | "off">("spectrum")
+     the abstract. ?line=band|thread|glow|spectrum|off; the edge is the default,
+     chosen by looking. It runs the length of the deck like the others, but
+     stays in the gutter and dissolves before the copy. */
+  const [line, setLine] = useState<LineStyle | "off">("edge")
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search)
