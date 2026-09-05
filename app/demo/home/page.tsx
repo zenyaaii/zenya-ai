@@ -1189,6 +1189,23 @@ export default function Page() {
           transform: translateZ(0);
           contain: layout;
         }
+        /* ابن's ground. The hero is bare #fafafa and ابن was the same, so the
+           two light screens read as one. This carries the hero's paper 4.5%
+           toward the dashboard's own primary, #5e6ad2, which is the colour the
+           very next screen is built on: ابن becomes the approach to ادر rather
+           than a second hero.
+
+           Stated plainly, this is a design choice, not a measurement. The build
+           flow's own values are all status colours - #15803d for valid, #b91c1c
+           for errors, #d97706 for warnings - and its one surface value, #fafaf7,
+           is three levels off the hero and invisible at screen size. There was
+           nothing to take, so this was chosen.
+
+           A translucent tint rather than a flat hex on purpose. The hero's light
+           hangs down past its own foot onto this screen and ادر's hangs up onto
+           it; an opaque ground would paint over both, and the light crossing is
+           the thing that makes these two screens feel like one surface. */
+        .zn2-panel { background: rgba(94, 106, 210, 0.045); }
         /* The light is the single most expensive thing on the page to paint,
            and it now travels. Rasterise it once and move the result. */
         #zn-glow { will-change: transform; transform: translateZ(0); }
@@ -4482,7 +4499,7 @@ export default function Page() {
             argued for. It drives the product's own path — the eight
             templates, the wizard behind the one that is picked, and that
             wizard's own form filling itself in, one card at a time. */}
-        <div className="zn-panel" aria-hidden={deck !== 1}>
+        <div className="zn-panel zn2-panel" aria-hidden={deck !== 1}>
           {/* Held until the deck has actually landed. Starting the script on
               the gesture put a cursor animation, a network prefetch and eight
               cards' worth of React on the same frames as the move, which is
