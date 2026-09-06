@@ -22,6 +22,7 @@ import {
 import AuroraBackground from '@/components/marketing/AuroraBackground'
 import { cn } from '@/lib/utils'
 import { useNotify } from '@/components/ui/Notify'
+import { REVIEW_REWARD_AR_SHORT } from '@/lib/review-reward'
 
 type Topic = 'support' | 'request' | 'sales' | 'review' | 'other'
 
@@ -381,7 +382,7 @@ function ContactPageInner() {
                           <Gift className="h-4 w-4" strokeWidth={2} />
                         </span>
                         <p className="text-[13.5px] font-bold text-foreground">
-                          هذا كودك — 30% على أول شهر
+                          هذا كودك — {REVIEW_REWARD_AR_SHORT}
                         </p>
                       </div>
                       <button

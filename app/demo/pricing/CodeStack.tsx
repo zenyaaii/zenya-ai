@@ -23,8 +23,8 @@
  *      because that is what this page already means by "yours".
  *
  * WHAT IS ON THE CARDS IS THE HARD PART, and it is not a design question.
- * Zenya hands out exactly ONE code a person can type: SHUKRAN30, 30% off the
- * first month, in the allowlist at app/api/promo-codes/route.ts. The other two
+ * Zenya hands out exactly ONE code a person can type: the review code in
+ * lib/review-reward.ts, allowlisted at app/api/promo-codes/route.ts. The other two
  * discounts are real but are NOT codes: lib/domain-entitlement.ts applies them
  * server-side at checkout and says in as many words that they are "never
  * exposed as public promotion codes". So the cards are labelled by kind, and
@@ -43,11 +43,12 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
 import SlideButton from "@/components/ui/SlideButton"
+import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT } from "@/lib/review-reward"
 
 /* The same key ReviewOffer writes, so a reader who unlocked the code anywhere
    else on the site arrives here already holding it. */
 const UNLOCK_KEY = "zenya:review-code-unlocked"
-const REVIEW_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || "SHUKRAN30"
+const REVIEW_CODE = REVIEW_REWARD_CODE
 const REVIEW_URL = "/contact?topic=review"
 
 type Card = {
@@ -67,7 +68,7 @@ const CARDS: Card[] = [
     id: "review",
     kind: "code",
     chip: "كود تُدخِله بنفسك",
-    figure: "30%",
+    figure: REVIEW_REWARD_PCT + "%",
     figureSub: "على أول شهر",
     body: "شاركنا رأيك الصادق عن زينيا. الكود لك مهما كان رأيك، ودقيقة واحدة تكفي.",
     cta: { label: "قيّمنا واحصل عليه", href: REVIEW_URL },

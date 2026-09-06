@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react'
+import { REVIEW_REWARD_AR } from '@/lib/review-reward'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
@@ -518,7 +519,7 @@ export default function AccountSettings() {
           ) : codes.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[#e8e5de] bg-[#faf8f3] p-5 text-center">
               <p className="text-[13px] leading-relaxed text-muted">
-                لا أكواد بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على كود خصم 30% على أول شهر —
+                لا أكواد بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على كود {REVIEW_REWARD_AR} —
                 وسيظهر هنا تلقائيًا.
               </p>
             </div>

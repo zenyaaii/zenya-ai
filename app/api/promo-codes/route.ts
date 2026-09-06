@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { REVIEW_REWARD_CODE, REVIEW_REWARD_META } from '@/lib/review-reward'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -14,19 +15,14 @@ export const dynamic = 'force-dynamic'
  * can only save a code Zenya actually hands out, never an arbitrary string.
  */
 
-const REVIEW_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
+const REVIEW_CODE = REVIEW_REWARD_CODE
 
 /** Codes a user may save to their own list, with display metadata. */
 const KNOWN_CODES: Record<
   string,
   { label: string; description: string; kind: string; source: string }
 > = {
-  [REVIEW_CODE]: {
-    label: '30% خصم على أول شهر',
-    description: 'أدخِله في خانة «Promotion code» عند الاشتراك. صالح لأول شهر وللعملاء الجدد.',
-    kind: 'subscription',
-    source: 'review',
-  },
+  [REVIEW_CODE]: { ...REVIEW_REWARD_META },
 }
 
 function admin() {

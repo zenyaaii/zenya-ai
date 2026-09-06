@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+import { REVIEW_REWARD_CODE } from '@/lib/review-reward'
 
 const schema = z.object({
   name: z.string().max(120).optional(),
@@ -12,7 +13,7 @@ const schema = z.object({
 })
 
 /** The one code we hand out to reviewers. Matches ReviewOffer.tsx. */
-const REVIEW_PROMO_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
+const REVIEW_PROMO_CODE = REVIEW_REWARD_CODE
 
 /**
  * Contact-form intake.

@@ -12,6 +12,7 @@ import { affiliateClickHref } from '@/lib/affiliate'
 import { createClient } from '@/utils/supabase/client'
 // Shared with layout.tsx so the FAQPage JSON-LD always matches what renders.
 import { FAQS } from './faqs'
+import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT, REVIEW_REWARD_AR } from '@/lib/review-reward'
 
 type ViewerProfile = {
   plan?: string | null
@@ -20,7 +21,7 @@ type ViewerProfile = {
 }
 
 const REVIEW_UNLOCK_KEY = 'zenya:review-code-unlocked'
-const REVIEW_PROMO_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
+const REVIEW_PROMO_CODE = REVIEW_REWARD_CODE
 const REVIEW_URL = '/contact?topic=review'
 
 
@@ -241,7 +242,7 @@ export default function PricingPage() {
             >
               <Gift className="h-3.5 w-3.5 flex-shrink-0 text-primary" strokeWidth={2} />
               <span className="text-[12.5px] font-medium text-primary">
-                خصم 20% على أول شهر — احصل على الكود بعد المعاينة
+                {REVIEW_REWARD_AR} — احصل على الكود بعد المعاينة
               </span>
             </div>
 
@@ -311,7 +312,7 @@ export default function PricingPage() {
             {/* Review pitch — only for Starter users clicking upgrade→Pro who
                 haven't left a review yet. Marketing-shaped, but the reward is
                 the same one Pro already includes (free cheap-TLD domain +
-                30% off first month via SHUKRAN30) — nothing fake. */}
+                the review code) — nothing fake. */}
             {showReviewPitch && (
               <ReviewPitchCard onShared={onReviewShared} />
             )}
@@ -340,7 +341,7 @@ export default function PricingPage() {
         {/* Discount hacks — honest ways to earn a discount (review → code) */}
         <DiscountHacks />
 
-        {/* Discount-code hint — where to use a promo code (e.g. SHUKRAN30) */}
+        {/* Discount-code hint — where to use a promo code */}
         <div className="mx-auto mb-14 flex justify-center px-6">
           <span className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-token bg-white px-4 py-2 text-center text-[13px] text-muted shadow-soft-sm">
             <Gift className="h-4 w-4 flex-shrink-0 text-primary" strokeWidth={2} />
@@ -605,13 +606,13 @@ function CostCalculator() {
 /**
  * DiscountHacks — honest, actionable ways to earn a discount. Each "hack" is a
  * simple do-X → get-Y%-off card. For now there's one: leave an honest review
- * and get 30% off your first month (the same SHUKRAN30 code Pro/Starter honor
+ * and get a first-month discount (the same review code Pro/Starter honor
  * at checkout). Built as a list so more hacks can be added later without
  * touching layout. Nothing here is fake — the reward is a real, working code.
  */
 const DISCOUNT_HACKS = [
   {
-    pct: 30,
+    pct: REVIEW_REWARD_PCT,
     code: REVIEW_PROMO_CODE,
     title: 'قيّم تجربتك معنا',
     desc: 'شاركنا رأيك الصادق عن زينيا — دقيقة واحدة تكفي — واحصل على خصم على أول شهر.',
@@ -829,9 +830,9 @@ function PlanCTA({
  * clicks upgrade→Pro AND hasn't already left a review. Two beats:
  *
  *   1. Pitch: "before you upgrade, share your honest feedback and here's
- *      a 30%-off first-month code as a thank-you (on top of the free
+ *      the first-month code as a thank-you (on top of the free
  *      domain year Pro already includes)."
- *   2. After click: reveal SHUKRAN30 with copy-to-clipboard, plus a
+ *   2. After click: reveal the code with copy-to-clipboard, plus a
  *      "متابعة الترقية" reminder.
  *
  * The review link opens in a new tab so the user's Pro upgrade flow is
@@ -896,7 +897,7 @@ function ReviewPitchCard({ onShared }: { onShared: () => void }) {
             زينيا مشروع صغير يعمل بجدّ. رأيك الصادق يساعدنا فعلًا على التحسّن.
             <br />
             <span className="font-semibold">شاركنا تجربتك،</span> ونشكرك بـ
-            <span className="font-semibold gradient-text"> 30% خصم على أول شهر Pro </span>
+            <span className="font-semibold gradient-text"> {REVIEW_REWARD_PCT}% خصم على أول شهر Pro </span>
             على نطاقك المجاني للسنة الأولى.
           </p>
           <button

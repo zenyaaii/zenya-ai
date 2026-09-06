@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Gift, Copy, Check, ArrowLeft } from 'lucide-react'
+import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT, REVIEW_REWARD_AR_SHORT } from '@/lib/review-reward'
 
 /**
  * ReviewOffer — shown on the generation waiting screen: while the AI builds the
  * site, invite the user to share feedback and, as a thank-you, reveal a promo
- * code for 30% off their first month.
+ * code for a discount on their first month. The size of it lives in
+ * lib/review-reward.ts, never in this file.
  *
  * IMPORTANT (honest by design): the reward is for SHARING FEEDBACK, never
  * conditional on a positive or public review — so it stays compliant with
@@ -17,7 +19,7 @@ import { Gift, Copy, Check, ArrowLeft } from 'lucide-react'
  * first-time customers, so it only ever discounts a genuine first month.
  */
 
-const PROMO_CODE = process.env.NEXT_PUBLIC_REVIEW_PROMO_CODE || 'SHUKRAN30'
+const PROMO_CODE = REVIEW_REWARD_CODE
 const UNLOCK_KEY = 'zenya:review-code-unlocked'
 const REVIEW_URL = '/contact?topic=review'
 
@@ -77,7 +79,7 @@ export default function ReviewOffer() {
         {!unlocked ? (
           <motion.div key="pitch" exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             <h3 className="text-[15.5px] font-bold text-foreground">
-              شاركنا رأيك، واحصل على خصم <span className="gradient-text">30% على أول شهر.</span>
+              شاركنا رأيك، واحصل على خصم <span className="gradient-text">{REVIEW_REWARD_AR_SHORT}.</span>
             </h3>
             <p className="mx-auto mt-2 max-w-xs text-[13px] leading-[1.8] text-muted">
               بينما نجهّز موقعك، أخبرنا بتجربتك بصراحة — رأيك يساعدنا على التحسّن. نشكرك بكود خصم فورًا،
@@ -112,7 +114,7 @@ export default function ReviewOffer() {
               )}
             </button>
             <p className="mx-auto mt-3 max-w-xs text-[12.5px] leading-[1.7] text-muted">
-              أدخِله عند الدفع لتحصل على 30% خصم على أول شهر من اشتراكك.
+              أدخِله عند الدفع لتحصل على {REVIEW_REWARD_PCT}% خصم على أول شهر من اشتراكك.
             </p>
           </motion.div>
         )}
