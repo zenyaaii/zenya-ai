@@ -383,7 +383,7 @@ export default function PricingView() {
             hear it as one. The Zenya column is one standing surface through the
             whole thing rather than a hairline drawn under every row. */}
         <div className="zp-table-wrap">
-          <table className="zp-table">
+          <table className="zp-table" role="table">
             <caption className="sr-only">
               مقارنة زينيا بمنشئات الذكاء الاصطناعي العامة وبالوكالات
             </caption>
@@ -397,11 +397,13 @@ export default function PricingView() {
             </thead>
             <tbody>
               {COMPARE.map((row, i) => (
-                <tr key={row.feature} style={{ ["--i" as string]: String(i) }} data-reveal>
-                  <th scope="row" className="zp-td zp-td-feature">{row.feature}</th>
-                  <td className="zp-td zp-td-zenya">{row.zenya}</td>
-                  <td className="zp-td">{row.other}</td>
-                  <td className="zp-td">{row.agency}</td>
+                <tr key={row.feature} role="row" style={{ ["--i" as string]: String(i) }} data-reveal>
+                  <th scope="row" role="rowheader" className="zp-td zp-td-feature">{row.feature}</th>
+                  {/* data-label is what the stacked layout prints in place of
+                      the header row it has to hide on a phone. */}
+                  <td role="cell" className="zp-td zp-td-zenya" data-label="زينيا">{row.zenya}</td>
+                  <td role="cell" className="zp-td" data-label="ذكاء اصطناعي آخر">{row.other}</td>
+                  <td role="cell" className="zp-td" data-label="وكالة">{row.agency}</td>
                 </tr>
               ))}
             </tbody>
@@ -674,17 +676,25 @@ const CSS = `
   from { transform: scale(var(--settle-from, 1.14)); }
   to { transform: scale(1); }
 }
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .zp-compare {
-      transform-origin: 50% 50%;
-      animation: zp-settle linear both;
-      animation-timeline: view();
-      /* From the moment its top edge appears to the moment it is fully in
-         view. The panel is shorter than the viewport at every width it is
-         laid out at, so this range always completes. */
-      animation-range: entry 0% entry 100%;
-      will-change: transform;
+/* WIDE SCREENS ONLY, and that is a correction. The entry range ends when the
+   panel's BOTTOM edge enters the viewport, so it only behaves when the panel
+   is shorter than the viewport. It was, at every width, until the table began
+   stacking on phones: measured after that change, 1267px of panel against an
+   844px viewport. The shrink then stretches across the whole read and the
+   table sits visibly oversized the entire time someone is trying to compare
+   rows in it. Below 701px the panel simply rests at its size, which is also
+   where the effect was worth least: at that width the panel is nearly the
+   full screen already, so scaling it up mostly pushes it under the clip. */
+@media (min-width: 701px) {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .zp-compare {
+        transform-origin: 50% 50%;
+        animation: zp-settle linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+        will-change: transform;
+      }
     }
   }
 }
@@ -767,6 +777,48 @@ const CSS = `
      plan being recommended, not the cheapest by accident of source order. */
   .zp-card[data-plan="starter"] { order: -1; }
 }
+/* THE TABLE STOPS BEING A TABLE ON A PHONE. At 390px the matrix is 640px
+   wide, so two of its four columns sit off-screen behind a horizontal scroll
+   with nothing to say they are there: measured, a reader sees الميزة, زينيا
+   and a 5px sliver of the third. A comparison nobody can see both sides of is
+   not a comparison. Each row becomes its own block instead, with the column
+   names printed per value from data-label. The roles are declared explicitly
+   in the markup because display:block strips a table's implicit ones. */
+@media (max-width: 700px) {
+  .zp-table, .zp-table tbody, .zp-table tr, .zp-table th, .zp-table td { display: block; }
+  .zp-table { min-width: 0; }
+  .zp-table thead { display: none; }
+  .zp-table-wrap { overflow-x: visible; }
+
+  .zp-table tbody tr {
+    padding: 0.875rem 0;
+    box-shadow: none;
+  }
+  .zp-table tbody tr + tr { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+
+  .zp-td { padding: 0; text-align: start; }
+  .zp-td-feature { font-size: 15px; margin-bottom: 0.625rem; }
+
+  /* The three values sit in a row of their own, Zenya first and lit. */
+  .zp-table tbody tr { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 0.5rem; align-items: stretch; }
+  .zp-td-feature { grid-column: 1 / -1; }
+  .zp-table tbody tr .zp-td:not(.zp-td-feature) {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 12.5px; text-align: start;
+  }
+  .zp-table tbody tr .zp-td-zenya { background: rgba(94, 106, 210, 0.18); border-radius: 8px; }
+  .zp-table tbody tr:last-child .zp-td-zenya { border-radius: 8px; }
+  .zp-td:not(.zp-td-feature)::before {
+    content: attr(data-label);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #8a8a94;
+  }
+  .zp-td-zenya::before { color: var(--violet-lift); }
+}
+
 @media (max-width: 560px) {
   .zp-root { --r-panel: 20px; }
   .zp-head { padding-top: 1.25rem; }

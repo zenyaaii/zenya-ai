@@ -42,6 +42,7 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
+import SlideButton from "@/components/ui/SlideButton"
 
 /* The same key ReviewOffer writes, so a reader who unlocked the code anywhere
    else on the site arrives here already holding it. */
@@ -202,9 +203,11 @@ export default function CodeStack() {
           <p className="cs-figure-sub">{card.figureSub}</p>
           <p className="cs-body">{card.body}</p>
           {card.cta && !earned ? (
-            <Link href={card.cta.href} className="cs-cta" tabIndex={live ? undefined : -1}>
-              {card.cta.label}
-            </Link>
+            <span className="cs-cta-slot" data-live={live ? "true" : undefined}>
+              <SlideButton href={card.cta.href} variant="violet" slide="دقيقة واحدة">
+                {card.cta.label}
+              </SlideButton>
+            </span>
           ) : null}
           {isCode && earned ? <p className="cs-earned-hint">هذا الكود لك بالفعل</p> : null}
         </div>
@@ -242,6 +245,7 @@ export default function CodeStack() {
             خصم واحد تُدخِله بنفسك، واثنان يُطبَّقان عند الدفع دون أن تفعل شيئًا.
           </p>
         </div>
+        <div className="cs-panel cs-panel-flow">
         <div className="cs-column">
           {CARDS.map((card) => (
             <article
@@ -253,6 +257,7 @@ export default function CodeStack() {
               {face(card)}
             </article>
           ))}
+        </div>
         </div>
       </section>
     )
@@ -269,6 +274,7 @@ export default function CodeStack() {
         </p>
       </div>
 
+      <div className="cs-panel">
       <div className="cs-stage" ref={stageRef} data-open={open ? "true" : undefined}>
         {/* The hit layer. It takes the click while the stack is closed, and
             stops taking it the moment the cards are live, so the link and the
@@ -319,14 +325,17 @@ export default function CodeStack() {
         </div>
       </div>
 
-      <div className="cs-foot">
-        {!open ? (
-          <p className="cs-hint">اضغط البطاقات لفردها</p>
-        ) : (
-          <button type="button" className="cs-collapse" onClick={() => setOpen(false)}>
-            اطوِ البطاقات
-          </button>
-        )}
+        <div className="cs-foot">
+          {!open ? (
+            <p className="cs-hint">اضغط البطاقات لفردها</p>
+          ) : (
+            <span className="cs-collapse">
+              <SlideButton onClick={() => setOpen(false)} variant="quiet" slide="أعِدها كما كانت">
+                اطوِ البطاقات
+              </SlideButton>
+            </span>
+          )}
+        </div>
       </div>
     </section>
   )
@@ -341,6 +350,46 @@ const CSS = `
 .cs-head { text-align: center; margin-bottom: clamp(1.75rem, 4vw, 2.5rem); }
 .cs-h2 { margin: 0; font-size: clamp(24px, 3.4vw, 36px); font-weight: 900; line-height: 1.36; letter-spacing: 0; color: var(--obsidian); }
 .cs-sub { margin: 0.75rem auto 0; max-width: 34rem; font-size: 15px; font-weight: 500; line-height: 1.85; color: var(--stone); }
+
+/* ---- the panel, and how it arrives --------------------------------------
+   A square of its own, like the comparison has, but a HALF STEP off the
+   ground rather than an inversion: two obsidian panels in a row would make
+   the page bottom-heavy and would stop the dark meaning anything.
+
+   Its arrival is deliberately NOT the comparison's. That one scales down.
+   This one rises and unrotates, which is a card being set down rather than a
+   surface being framed, and it is the motion this section is about. Same
+   discipline as the other: a scroll-driven timeline, transform only, and a
+   base rule already at the finished state so a browser without view() support
+   reads a settled page.
+--------------------------------------------------------------------------- */
+.cs-panel {
+  position: relative;
+  border-radius: var(--r-panel);
+  background: #f1f0ec;
+  padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2rem);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+.cs-panel-flow { padding-block: 1.25rem; }
+
+@keyframes cs-place {
+  from { transform: translateY(42px) rotate(-0.7deg); }
+  to { transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cs-panel {
+      animation: cs-place linear both;
+      animation-timeline: view();
+      /* Ends at 60% of the entry rather than 90%, so the move completes early
+         even where the panel is taller than the window: the column layout on
+         a phone is about 950px of cards, and a range tied to the bottom edge
+         would leave it drifting for most of the scroll. */
+      animation-range: entry 0% entry 60%;
+      will-change: transform;
+    }
+  }
+}
 
 .cs-stage {
   position: relative;
@@ -410,19 +459,11 @@ const CSS = `
 .cs-card[data-earned] .cs-front .cs-body { color: #a8a8b2; }
 .cs-back .cs-body { color: #a8a8b2; }
 
-.cs-cta {
-  margin-top: auto; align-self: stretch; text-align: center;
-  padding: 0.625rem 0.875rem; border-radius: var(--r-control);
-  font-size: 13px; font-weight: 700; text-decoration: none;
-  background: linear-gradient(180deg, #6b76d8 0%, #5460c9 100%); color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -3px 0 rgba(26, 30, 72, 0.34),
-    0 0 0 1px rgba(52, 60, 150, 0.55),
-    0 3px 0 rgba(52, 60, 150, 0.30);
-  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-.cs-cta:active { transform: translateY(3px); }
+/* The CTA is the shared SlideButton. The slot only owns its placement: the
+   button owns everything about how it looks and how it moves, so this page
+   cannot drift away from the rest of the site's buttons. */
+.cs-cta-slot { margin-top: auto; align-self: stretch; width: 100%; }
+.cs-cta-slot:not([data-live]) .sb { pointer-events: none; }
 .cs-earned-hint { margin: auto 0 0; font-size: 12px; font-weight: 700; color: var(--violet-lift); }
 
 .cs-code {
@@ -439,13 +480,9 @@ const CSS = `
 
 .cs-foot { display: flex; justify-content: center; margin-top: 0.5rem; min-height: 2.5rem; }
 .cs-hint { margin: 0; font-size: 12.5px; font-weight: 500; color: #8a8a94; }
-.cs-collapse {
-  border: 0; cursor: pointer; background: transparent;
-  font: inherit; font-size: 12.5px; font-weight: 700; color: var(--stone);
-  padding: 0.375rem 0.75rem; border-radius: 999px;
-}
-.cs-collapse:hover { color: var(--obsidian); background: rgba(0, 0, 0, 0.04); }
-
+.cs-collapse { display: inline-block; width: auto; }
+.cs-collapse .sb { width: auto; padding-inline: 1rem; font-size: 12.5px; }
+.cs-collapse .sb { --sb-win: 2.2em; }
 /* Closed, the cards behind the top one are decoration and must not be read or
    tabbed into. Open, they are all live. */
 .cs-stage:not([data-open]) .cs-card:not(:first-child) { pointer-events: none; }
