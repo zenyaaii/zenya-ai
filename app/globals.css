@@ -768,3 +768,75 @@ html.lenis body {
   .sb:active .sb-face:last-child { opacity: 0; }
   .sb:active { transform: none; }
 }
+
+/* ==========================================================================
+   SwipeStack — components/ui/SwipeStack.tsx
+   ==========================================================================
+   A deck of cards on a phone. Geometry is written by the script (it has to be,
+   because it is fractional while a finger is down); this file owns only the
+   box, the hint and the furniture.
+
+   touch-action: pan-y is load-bearing. It tells the browser before the first
+   move that vertical belongs to the page and horizontal belongs to the deck.
+   Without it the browser holds events back while it works out which is which,
+   and the card visibly trails the thumb at the start of every drag.
+   ========================================================================== */
+
+/* Clipped, and the stage narrowed to leave the neighbours room to peek. A
+   full-width stage put the cards behind it 23px past the page's gutter, which
+   showed up as a 1px horizontal overflow on the document. clip and not hidden,
+   so this never becomes a scroll container competing with the deck's own
+   gesture. */
+.ss { width: 100%; overflow-x: clip; }
+.ss-stage {
+  position: relative;
+  width: 100%;
+  max-width: 19.5rem;
+  margin-inline: auto;
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+.ss-stage:focus-visible { outline: 2px solid #5e6ad2; outline-offset: 8px; border-radius: 20px; }
+
+/* Every card in the same grid cell, so the stage stands as tall as the
+   TALLEST of them and they still overlap. Letting the first card hold the
+   height and absolutely positioning the rest was the first attempt, and the
+   plans are not the same height: Pro carries an extra note and two more
+   feature rows, so in front it ran out of the stage and its button landed on
+   the paragraph below. A grid cell costs nothing and cannot be outgrown. */
+.ss-stage { display: grid; }
+.ss-card {
+  grid-area: 1 / 1;
+  transform-origin: 50% 92%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+.ss-card > * { height: 100%; }
+
+/* The hint is NOT here. It runs through the component's own paint(), because
+   a CSS animation with fill "both" outranks an inline style: as a keyframe it
+   held the front card at its last frame and the deck's layout transform
+   stopped applying to it. One writer per transform, and it is the script. */
+
+.ss-dots { display: flex; justify-content: center; gap: 0.4375rem; margin-top: 1.125rem; }
+.ss-dot {
+  width: 7px; height: 7px; padding: 0; border: 0; cursor: pointer;
+  border-radius: 999px;
+  background: rgba(23, 23, 23, 0.18);
+  transition: background-color 220ms cubic-bezier(0.22, 1, 0.36, 1), width 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ss-dot[data-on] { width: 20px; background: #5e6ad2; }
+.ss-dot:focus-visible { outline: 2px solid #5e6ad2; outline-offset: 3px; }
+
+.ss-tip {
+  margin: 0.75rem 0 0; text-align: center;
+  font-size: 12px; font-weight: 500; color: #8a8a94;
+  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.ss-tip[data-hide] { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-dot, .ss-tip { transition: none; }
+}

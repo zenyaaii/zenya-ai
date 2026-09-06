@@ -43,6 +43,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
 import SlideButton from "@/components/ui/SlideButton"
+import SwipeStack from "@/components/ui/SwipeStack"
 import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT } from "@/lib/review-reward"
 
 /* The same key ReviewOffer writes, so a reader who unlocked the code anywhere
@@ -237,6 +238,12 @@ export default function CodeStack() {
   }
 
   if (narrow) {
+    /* The code card sits in the MIDDLE of the deck, not at its head: the one
+       a reader can act on should have a neighbour on each side, so the two
+       automatic discounts read as the company it keeps rather than as a queue
+       behind it. Source order stays as it is, because the wide fan stacks by
+       index and the code card belongs on top there. */
+    const order = [CARDS[1], CARDS[0], CARDS[2]]
     return (
       <section className="cs" aria-labelledby="cs-h" ref={stageRef}>
         <style dangerouslySetInnerHTML={{ __html: CSS }} />
@@ -247,18 +254,22 @@ export default function CodeStack() {
           </p>
         </div>
         <div className="cs-panel cs-panel-flow">
-        <div className="cs-column">
-          {CARDS.map((card) => (
-            <article
-              key={card.id}
-              className="cs-card cs-card-flow"
-              data-kind={card.kind}
-              data-earned={card.kind === "code" && earned ? "true" : undefined}
-            >
-              {face(card)}
-            </article>
-          ))}
-        </div>
+          <SwipeStack
+            label="الخصومات"
+            initialIndex={1}
+            itemLabels={order.map((c) => c.figure + " " + c.figureSub)}
+          >
+            {order.map((card) => (
+              <article
+                key={card.id}
+                className="cs-card cs-card-flow"
+                data-kind={card.kind}
+                data-earned={card.kind === "code" && earned ? "true" : undefined}
+              >
+                {face(card)}
+              </article>
+            ))}
+          </SwipeStack>
         </div>
       </section>
     )
@@ -493,10 +504,10 @@ const CSS = `
   .cs-cta:active { transform: none; }
 }
 
-/* Below 720px the fan becomes a column, because a 472px spread does not go
-   into a 390px window and squeezing it would make three unreadable cards
-   instead of one honest list. */
-.cs-column { display: grid; gap: 1rem; max-width: 26rem; margin: 0 auto; }
+/* Below 900px the fan becomes a swipeable deck, because a 710px spread does
+   not go into a 390px window and squeezing it would make three unreadable
+   cards. A column was tried first and read as three unrelated blocks: the
+   point of this section is that the three are alternatives to each other. */
 .cs-card-flow {
   position: static;
   width: auto;

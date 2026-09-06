@@ -53,6 +53,7 @@ import ZenyaMark from "@/components/ZenyaMark"
 import SlideButton from "@/components/ui/SlideButton"
 import CodeStack from "./CodeStack"
 import PricingFooter from "./PricingFooter"
+import SwipeStack from "@/components/ui/SwipeStack"
 
 /* Display and content are the same family at different weights. Arabic reads
    as one voice that way, and the page stops looking like two fonts arguing. */
@@ -188,7 +189,138 @@ function Tick({ className }: { className?: string }) {
 export default function PricingView() {
   const [trayOpen, setTrayOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  /* Which layout the plans take. Read from matchMedia rather than duplicated
+     as a breakpoint in the stylesheet, so the markup and the CSS cannot
+     disagree about where the row becomes a deck. Starts false so the server
+     and the first client render agree, then corrects on mount. */
+  const [narrow, setNarrow] = useState(false)
   const rootRef = useRef<HTMLElement | null>(null)
+  const headRef = useRef<HTMLElement | null>(null)
+  /* Whether a dark panel is currently behind the header. */
+  const [onDark, setOnDark] = useState(false)
+
+  /* THE HEADER TAKES THE GROUND IT IS STANDING ON, which is what the deck
+     does and what was missing here. Two things had to be true before the
+     blur could show anything at all: the header had to be sticky, so that
+     content passes behind it rather than scrolling away with it, and its own
+     ground had to stop being opaque. A backdrop-filter under a solid white
+     fill is work the compositor does for nothing.
+
+     Over the dark panels it inverts to the deck's own values rather than
+     staying a white bar floating over obsidian.
+
+     The band this watches is the strip the header actually occupies, in CSS
+     pixels. The root ZoomLock writes CSS zoom, so a bounding rect comes back
+     in rendered pixels while rootMargin is read as CSS pixels; dividing by the
+     zoom is what keeps the two from being mixed. */
+  useEffect(() => {
+    const head = headRef.current
+    const root = rootRef.current
+    if (!head || !root) return
+    let io: IntersectionObserver | null = null
+
+    /* A rootMargin band the height of the header, and threshold 0, so each
+       dark panel reports exactly as its edge crosses the header rather than
+       at intervals along the way.
+
+       A threshold ladder was tried first and is not accurate enough: it fires
+       when a share of the TARGET becomes visible, so the last report during a
+       scroll lands wherever the final threshold happened to fall. Measured, it
+       last saw the panel at 71px while the panel settled at 60px, four pixels
+       past the header, and the header stayed light with obsidian behind it.
+
+       And a note worth keeping, because it cost the first attempt: rects and
+       rootMargin are in the SAME space here. The root ZoomLock writes CSS
+       zoom, which tempts a division; the first version divided and the band
+       never matched. Verified by planting this exact observer: false at the
+       top, true on the comparison, true on the footer, false back at the top.
+
+       The set is what makes two panels safe. Leaving one and arriving at the
+       next are separate reports, and taking the last one alone would blink
+       the header light between them. */
+    const live = new Set<Element>()
+
+    const build = () => {
+      io?.disconnect()
+      live.clear()
+      /* The visible pill, not the first one in the DOM: the phone pill and the
+         wide bar both exist at every width and one of them is display:none
+         with a zero-height rect. */
+      const pill = Array.from(head.querySelectorAll<HTMLElement>(".zp-pill, .zp-phone-pill"))
+        .find((el) => el.getBoundingClientRect().height > 0)
+      if (!pill) return
+      const r = pill.getBoundingClientRect()
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) live.add(e.target)
+            else live.delete(e.target)
+          })
+          setOnDark(live.size > 0)
+        },
+        {
+          rootMargin: -r.top + "px 0px " + -(window.innerHeight - r.bottom) + "px 0px",
+          threshold: 0,
+        }
+      )
+      darks.forEach((el) => io!.observe(el))
+    }
+
+    const darks = Array.from(root.querySelectorAll<HTMLElement>(".zp-compare, .zf-inner"))
+    build()
+    window.addEventListener("resize", build)
+    return () => { io?.disconnect(); window.removeEventListener("resize", build) }
+    /* Rebuilt when the layout swaps, because the two pills are different
+       heights and the band is measured from whichever one is showing. */
+  }, [narrow])
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)")
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener("change", sync)
+    return () => mq.removeEventListener("change", sync)
+  }, [])
+
+  /* THE TABLE SAYS THAT IT SCROLLS BY SCROLLING. A matrix wider than the
+     screen with no affordance reads as a matrix with three columns, and the
+     reader never learns the other two are there. When it arrives it slides a
+     little and comes back, once.
+
+     The direction is measured, not assumed: RTL browsers disagree about the
+     sign of scrollLeft, so this tries one way, checks whether the box actually
+     moved, and takes the other way if it did not. */
+  useEffect(() => {
+    const wrap = rootRef.current?.querySelector<HTMLElement>(".zp-table-wrap")
+    if (!wrap) return
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return
+        io.disconnect()
+        const max = wrap.scrollWidth - wrap.clientWidth
+        if (max < 24) return
+        /* Probe the direction with smooth scrolling OFF. With it on, the
+           assignment starts an animation and reading scrollLeft back on the
+           same tick returns the old value, so the check always said "did not
+           move" and immediately undid itself. Measured: the box went through
+           exactly one position. */
+        const prev = wrap.style.scrollBehavior
+        wrap.style.scrollBehavior = "auto"
+        const home = wrap.scrollLeft
+        wrap.scrollLeft = home - 64
+        const delta = wrap.scrollLeft !== home ? -64 : 64
+        wrap.scrollLeft = home
+        wrap.style.scrollBehavior = prev
+        window.setTimeout(() => {
+          wrap.scrollLeft = home + delta
+          window.setTimeout(() => { wrap.scrollLeft = home }, 640)
+        }, 280)
+      })
+    }, { threshold: 0.35 })
+    io.observe(wrap)
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     const root = rootRef.current
@@ -212,13 +344,85 @@ export default function PricingView() {
     )
     targets.forEach((el) => io.observe(el))
     return () => io.disconnect()
-  }, [])
+    /* Re-run when the layout swaps. The observer collects its targets once,
+       and the plans are a different set of elements in the row and in the
+       deck: mounting collected the row's cards, the media query then replaced
+       them with the deck's, and nothing was left observing the new ones. They
+       kept the hidden half of the reveal for ever. Measured: on a phone the
+       whole plan deck rendered at opacity 0 with only its dots showing. */
+  }, [narrow])
+
+  /* The card itself, so the deck and the row cannot drift apart. */
+  const planCard = (plan: (typeof PLANS)[number], i: number) => {
+    const marked = plan.id === "starter"
+    return (
+            <article
+              key={plan.id}
+              className="zp-card"
+              data-plan={plan.id}
+              data-mark={marked ? "true" : undefined}
+              data-reveal
+              style={{ ["--i" as string]: String(i) }}
+            >
+              <header className="zp-card-head">
+                {/* Always rendered, ghosted where there is no badge: showing it
+                    only on Starter pushed that card's name and price below its
+                    neighbours', and the top alignment of the three prices is
+                    the most important scan line on the page. */}
+                <b
+                  className="zp-badge"
+                  data-ghost={"badge" in plan && plan.badge ? undefined : "true"}
+                  aria-hidden={"badge" in plan && plan.badge ? undefined : true}
+                >
+                  {"badge" in plan && plan.badge ? plan.badge : NBSP}
+                </b>
+                <p className="zp-name">{plan.name}</p>
+                <div className="zp-price">
+                  <span className="zp-amount" dir="ltr">{plan.amount}</span>
+                  <span className="zp-per">{plan.per}</span>
+                </div>
+                <p className="zp-sub">{plan.sub}</p>
+              </header>
+
+              {"note" in plan && plan.note ? (
+                <div className="zp-note">
+                  <span className="zp-note-title">{plan.note.title}</span>
+                  <span className="zp-note-body">{plan.note.body}</span>
+                </div>
+              ) : null}
+
+              <ul className="zp-features">
+                {plan.features.map((feature) => (
+                  <li key={feature}>
+                    <Tick className="zp-tick" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <SlideButton
+                href={plan.href}
+                slide={plan.ctaSlide}
+                variant={marked ? "violet" : "key"}
+              >
+                {plan.cta}
+              </SlideButton>
+
+              <p className="zp-foot">{plan.foot}</p>
+            </article>
+    )
+  }
 
   return (
     <main className={"zp-root " + tajawal.className} dir="rtl" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <header className={"zp-head " + plex.className} onMouseLeave={() => setTrayOpen(false)}>
+      <header
+        ref={headRef}
+        className={"zp-head " + plex.className}
+        data-dark={onDark ? "true" : undefined}
+        onMouseLeave={() => setTrayOpen(false)}
+      >
         {/* Phone: a small pill, not the laptop bar squeezed onto a phone.
             Measured before this existed: the wide bar was rendering at 380px
             on a 390px screen while the deck's own phone pill is 184px closed.
@@ -361,67 +565,26 @@ export default function PricingView() {
       </div>
 
       {/* The plans stand on the ground. They are the page, not an item on it. */}
-      <section className="zp-row" aria-label="الخطط">
-        {PLANS.map((plan, i) => {
-          const marked = plan.id === "starter"
-          return (
-            <article
-              key={plan.id}
-              className="zp-card"
-              data-plan={plan.id}
-              data-mark={marked ? "true" : undefined}
-              data-reveal
-              style={{ ["--i" as string]: String(i) }}
-            >
-              <header className="zp-card-head">
-                {/* Always rendered, ghosted where there is no badge: showing it
-                    only on Starter pushed that card's name and price below its
-                    neighbours', and the top alignment of the three prices is
-                    the most important scan line on the page. */}
-                <b
-                  className="zp-badge"
-                  data-ghost={"badge" in plan && plan.badge ? undefined : "true"}
-                  aria-hidden={"badge" in plan && plan.badge ? undefined : true}
-                >
-                  {"badge" in plan && plan.badge ? plan.badge : NBSP}
-                </b>
-                <p className="zp-name">{plan.name}</p>
-                <div className="zp-price">
-                  <span className="zp-amount" dir="ltr">{plan.amount}</span>
-                  <span className="zp-per">{plan.per}</span>
-                </div>
-                <p className="zp-sub">{plan.sub}</p>
-              </header>
-
-              {"note" in plan && plan.note ? (
-                <div className="zp-note">
-                  <span className="zp-note-title">{plan.note.title}</span>
-                  <span className="zp-note-body">{plan.note.body}</span>
-                </div>
-              ) : null}
-
-              <ul className="zp-features">
-                {plan.features.map((feature) => (
-                  <li key={feature}>
-                    <Tick className="zp-tick" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <SlideButton
-                href={plan.href}
-                slide={plan.ctaSlide}
-                variant={marked ? "violet" : "key"}
-              >
-                {plan.cta}
-              </SlideButton>
-
-              <p className="zp-foot">{plan.foot}</p>
-            </article>
-          )
-        })}
-      </section>
+      {/* ONE CARD, TWO LAYOUTS. Wide, the three stand side by side and the
+          prices share a scan line. On a phone they were a column, which meant
+          a reader met the recommendation and then scrolled past two more of
+          the same shape without ever seeing them together. They are a deck
+          now: the recommendation in front, its neighbours visibly behind it,
+          and a finger between them. */}
+      {narrow ? (
+        <SwipeStack
+          className="zp-swipe"
+          label="الخطط"
+          initialIndex={PLANS.findIndex((p) => p.id === "starter")}
+          itemLabels={PLANS.map((p) => p.name)}
+        >
+          {PLANS.map((plan, i) => planCard(plan, i))}
+        </SwipeStack>
+      ) : (
+        <section className="zp-row" aria-label="الخطط">
+          {PLANS.map((plan, i) => planCard(plan, i))}
+        </section>
+      )}
 
       <p className="zp-tail" data-reveal>
         عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
@@ -536,7 +699,19 @@ const CSS = `
 
 /* ---- the header, on the deck's own mechanic ----------------------------- */
 
-.zp-head { display: flex; justify-content: center; padding: 2rem 0 clamp(2.5rem, 6vw, 4rem); }
+/* Sticky, so there is something behind it to reflect. The strip is
+   pointer-transparent and only the pills take clicks, or a full-width bar
+   would swallow taps on whatever is passing underneath. */
+.zp-head {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0 0;
+  pointer-events: none;
+}
+.zp-pill, .zp-phone-pill { pointer-events: auto; }
 
 /* The header splits at md (768px), the same place the deck splits it: tablets
    get the laptop bar, phones get the compact pill. */
@@ -545,9 +720,12 @@ const CSS = `
   margin-inline: auto;
   overflow: hidden;
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 245, 242, 0.96) 100%);
+  /* Translucent on purpose. The deck's lit values: solid white here would
+     make the backdrop-filter below a no-op that still costs a layer. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
+  transition: background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out), color 520ms var(--ease-out);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
     inset 0 -3px 0 rgba(17, 17, 17, 0.10),
@@ -583,9 +761,12 @@ const CSS = `
 .zp-pill {
   border-radius: 24px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 245, 242, 0.96) 100%);
+  /* Translucent on purpose. The deck's lit values: solid white here would
+     make the backdrop-filter below a no-op that still costs a layer. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
+  transition: background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out), color 520ms var(--ease-out);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 1),
     inset 0 -3px 0 rgba(17, 17, 17, 0.10),
@@ -621,6 +802,37 @@ const CSS = `
 .zp-side-end { justify-content: flex-end; }
 .zp-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
 .zp-mark-svg { height: 17px; color: #000; }
+
+/* ---- the header standing on a dark panel --------------------------------
+   The deck's values, not a new set: rgba(32,32,38,0.72) behind a 12% paper
+   ring and a 4px ring of the ground itself, which is what makes the pill read
+   as cut out of the screen rather than laid on top of it. The alpha is the
+   point. At 0.72 the blur underneath is doing visible work.
+------------------------------------------------------------------------- */
+.zp-head[data-dark] .zp-pill,
+.zp-head[data-dark] .zp-phone-pill {
+  background: rgba(32, 32, 38, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(250, 250, 250, 0.12),
+    0 0 0 4px rgba(19, 19, 22, 0.5);
+}
+/* The mark fills with currentColor. Pure black is the rule on paper; on
+   obsidian its counterpart is paper, not a grey. */
+.zp-head[data-dark] .zp-mark-svg,
+.zp-head[data-dark] .zp-mark-svg-sm { color: #fafafa; }
+.zp-head[data-dark] .zp-nav-item,
+.zp-head[data-dark] .zp-tray-row,
+.zp-head[data-dark] .zp-round { color: rgba(250, 250, 250, 0.66); }
+.zp-head[data-dark] .zp-nav-item:hover,
+.zp-head[data-dark] .zp-nav-item[data-current="true"],
+.zp-head[data-dark] .zp-tray-row:hover { color: #fafafa; }
+.zp-head[data-dark] .zp-tray-row:hover,
+.zp-head[data-dark] .zp-round:hover { background: rgba(250, 250, 250, 0.08); }
+.zp-head[data-dark] .zp-sep { background: rgba(250, 250, 250, 0.16); }
+/* The account control inverts with the pill: obsidian on paper becomes paper
+   on obsidian, so it stays the one solid thing in the bar. */
+.zp-head[data-dark] .zp-account { background: #fafafa; color: #171717; }
+.zp-head[data-dark] .zp-account:hover { background: #fff; }
 .zp-nav { display: flex; align-items: center; gap: 0.125rem; }
 .zp-nav-item {
   border-radius: 999px;
@@ -633,6 +845,10 @@ const CSS = `
   transition: color 150ms var(--ease-out);
 }
 .zp-nav-item:hover, .zp-nav-item[data-current="true"] { color: var(--obsidian); }
+.zp-nav-item, .zp-tray-row, .zp-round, .zp-sep, .zp-account,
+.zp-mark-svg, .zp-mark-svg-sm {
+  transition: color 520ms var(--ease-out), background-color 520ms var(--ease-out);
+}
 /* The one separator the style allows: inside the header pill, before the
    account control. Nothing else on this page draws a line across anything. */
 .zp-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0, 0, 0, 0.07); }
@@ -674,7 +890,7 @@ const CSS = `
 
 /* ---- the lede ----------------------------------------------------------- */
 
-.zp-lede { text-align: center; margin: 0 auto clamp(2.5rem, 6vw, 3.75rem); max-width: 46rem; }
+.zp-lede { text-align: center; margin: clamp(2.5rem, 6vw, 4rem) auto clamp(2.5rem, 6vw, 3.75rem); max-width: 46rem; }
 .zp-h1 {
   margin: 0;
   font-size: clamp(30px, 5vw, 52px);
@@ -836,7 +1052,6 @@ const CSS = `
 }
 .zp-h2-sub { margin: 0.75rem 0 0; font-size: 15px; font-weight: 500; line-height: 1.85; color: #a8a8b2; }
 
-.zp-table-wrap { overflow-x: auto; }
 .zp-table { width: 100%; min-width: 640px; border-collapse: separate; border-spacing: 0; text-align: start; }
 .zp-th {
   padding: 0 1rem 0.9375rem;
@@ -896,47 +1111,23 @@ const CSS = `
      plan being recommended, not the cheapest by accident of source order. */
   .zp-card[data-plan="starter"] { order: -1; }
 }
-/* THE TABLE STOPS BEING A TABLE ON A PHONE. At 390px the matrix is 640px
-   wide, so two of its four columns sit off-screen behind a horizontal scroll
-   with nothing to say they are there: measured, a reader sees الميزة, زينيا
-   and a 5px sliver of the third. A comparison nobody can see both sides of is
-   not a comparison. Each row becomes its own block instead, with the column
-   names printed per value from data-label. The roles are declared explicitly
-   in the markup because display:block strips a table's implicit ones. */
-@media (max-width: 700px) {
-  .zp-table, .zp-table tbody, .zp-table tr, .zp-table th, .zp-table td { display: block; }
-  .zp-table { min-width: 0; }
-  .zp-table thead { display: none; }
-  .zp-table-wrap { overflow-x: visible; }
+/* THE TABLE STAYS A TABLE ON A PHONE. It was restacked into blocks for a
+   while, and that was the wrong trade: a comparison is read across, and
+   stacking it turned one matrix into seven little ones. It keeps its columns
+   and scrolls sideways inside its own box, and the page tells the reader that
+   by moving it a little when it arrives. See nudgeTable().
 
-  .zp-table tbody tr {
-    padding: 0.875rem 0;
-    box-shadow: none;
-  }
-  .zp-table tbody tr + tr { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08); }
-
-  .zp-td { padding: 0; text-align: start; }
-  .zp-td-feature { font-size: 15px; margin-bottom: 0.625rem; }
-
-  /* The three values sit in a row of their own, Zenya first and lit. */
-  .zp-table tbody tr { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 0.5rem; align-items: stretch; }
-  .zp-td-feature { grid-column: 1 / -1; }
-  .zp-table tbody tr .zp-td:not(.zp-td-feature) {
-    display: flex; flex-direction: column; gap: 0.25rem;
-    padding: 0.5rem 0.625rem;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    font-size: 12.5px; text-align: start;
-  }
-  .zp-table tbody tr .zp-td-zenya { background: rgba(94, 106, 210, 0.18); border-radius: 8px; }
-  .zp-table tbody tr:last-child .zp-td-zenya { border-radius: 8px; }
-  .zp-td:not(.zp-td-feature)::before {
-    content: attr(data-label);
-    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; color: #8a8a94;
-  }
-  .zp-td-zenya::before { color: var(--violet-lift); }
+   The wrapper is the only thing on this page that scrolls horizontally, and it
+   is overscroll-contained so flicking to the end of the table does not start
+   dragging the page behind it. */
+.zp-table-wrap {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
 }
+.zp-table-wrap::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { .zp-table-wrap { scroll-behavior: auto; } }
 
 @media (max-width: 560px) {
   .zp-root { --r-panel: 20px; }
