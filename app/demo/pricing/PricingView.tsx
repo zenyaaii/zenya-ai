@@ -586,10 +586,6 @@ export default function PricingView() {
         </section>
       )}
 
-      <p className="zp-tail" data-reveal>
-        عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
-      </p>
-
       {/* What comes off the price first, then the argument for the price.
           The comparison moved below the stack: it is the longest block on the
           page and the least urgent, so it was standing between the plans and
@@ -678,7 +674,10 @@ const CSS = `
   min-height: 100%;
   background: var(--ground);
   color: var(--obsidian);
-  padding: 0 var(--gut) clamp(3rem, 7vw, 6rem);
+  /* No bottom padding: the footer is the last thing and it is flush with the
+     end of the document, so a gap under it would show the ground below a cap
+     that is meant to BE the bottom. */
+  padding: 0 var(--gut) 0;
   /* Arabic never takes negative tracking: the letterforms connect. */
   letter-spacing: 0;
 }
@@ -996,10 +995,6 @@ const CSS = `
 }
 .zp-card[data-mark] .zp-foot { color: #a8a8b2; }
 
-.zp-tail {
-  margin: clamp(2rem, 4vw, 3rem) auto 0; text-align: center;
-  font-size: 13.5px; font-weight: 500; line-height: 1.8; color: var(--stone);
-}
 
 /* ---- the comparison, on its own ground ---------------------------------- */
 

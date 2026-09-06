@@ -102,7 +102,14 @@ const CARD_W = 300
 const OVERLAP = 56
 
 export default function CodeStack() {
-  const [open, setOpen] = useState(false)
+  /* THE FAN IS OPEN. It used to start closed and spread on a click, which is
+     the Kokonut original's idea and the wrong one for this content: measured,
+     the closed stack filled 31% of its panel, so the section read as one small
+     card adrift in a large empty box, and the reader had to guess there was
+     anything to press. Three discounts are three things to read, not a
+     surprise to unwrap. The phone still stacks them, because there the deck is
+     a way of fitting three cards into one screen rather than a reveal. */
+  const [open] = useState(true)
   const [earned, setEarned] = useState(false)
   const [flipped, setFlipped] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -288,20 +295,6 @@ export default function CodeStack() {
 
       <div className="cs-panel">
       <div className="cs-stage" ref={stageRef} data-open={open ? "true" : undefined}>
-        {/* The hit layer. It takes the click while the stack is closed, and
-            stops taking it the moment the cards are live, so the link and the
-            copy button inside them are reachable. */}
-        <button
-          type="button"
-          className="cs-hit"
-          aria-expanded={open}
-          aria-controls="cs-cards"
-          onClick={() => setOpen(true)}
-          hidden={open}
-        >
-          <span className="sr-only">افرد بطاقات الخصم</span>
-        </button>
-
         <div className="cs-cards" id="cs-cards">
           {CARDS.map((card, i) => {
             const centre = (total - 1) * 5
@@ -337,17 +330,11 @@ export default function CodeStack() {
         </div>
       </div>
 
-        <div className="cs-foot">
-          {!open ? (
-            <p className="cs-hint">اضغط البطاقات لفردها</p>
-          ) : (
-            <span className="cs-collapse">
-              <SlideButton onClick={() => setOpen(false)} variant="quiet" slide="أعِدها كما كانت">
-                اطوِ البطاقات
-              </SlideButton>
-            </span>
-          )}
-        </div>
+        {/* The line about where a code goes belongs beside the code, not
+            orphaned between two sections as it was. */}
+        <p className="cs-foot">
+          عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
+        </p>
       </div>
     </section>
   )
@@ -377,6 +364,11 @@ const CSS = `
 --------------------------------------------------------------------------- */
 .cs-panel {
   position: relative;
+  /* Sized to the open fan (710px of cards) rather than to the page. At the
+     page's 1080 the fan filled 66% of it and the closed stack filled 31%,
+     which is what made this section read as mostly nothing. */
+  max-width: 860px;
+  margin-inline: auto;
   border-radius: var(--r-panel);
   background: #f1f0ec;
   padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2rem);
@@ -410,12 +402,6 @@ const CSS = `
   align-items: center;
   justify-content: center;
 }
-.cs-hit {
-  position: absolute; inset: 0; z-index: 40;
-  appearance: none; border: 0; background: transparent; padding: 0;
-  cursor: pointer; border-radius: var(--r-card);
-}
-.cs-hit:focus-visible { outline: 2px solid var(--violet); outline-offset: 4px; }
 .cs-cards { position: absolute; inset: 0; }
 
 .cs-card {
@@ -490,14 +476,10 @@ const CSS = `
 .cs-code-hint { font-size: 11.5px; font-weight: 700; color: var(--violet-lift); }
 .cs-code:focus-visible { outline: 2px solid var(--violet-lift); outline-offset: 3px; }
 
-.cs-foot { display: flex; justify-content: center; margin-top: 0.5rem; min-height: 2.5rem; }
-.cs-hint { margin: 0; font-size: 12.5px; font-weight: 500; color: #8a8a94; }
-.cs-collapse { display: inline-block; width: auto; }
-.cs-collapse .sb { width: auto; padding-inline: 1rem; font-size: 12.5px; }
-.cs-collapse .sb { --sb-win: 2.2em; }
-/* Closed, the cards behind the top one are decoration and must not be read or
-   tabbed into. Open, they are all live. */
-.cs-stage:not([data-open]) .cs-card:not(:first-child) { pointer-events: none; }
+.cs-foot {
+  margin: 1.25rem 0 0; text-align: center;
+  font-size: 13px; font-weight: 500; line-height: 1.8; color: var(--stone);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .cs-flip { transition: none; }

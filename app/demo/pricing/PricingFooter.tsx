@@ -64,6 +64,12 @@ export default function PricingFooter() {
   return (
     <footer className="zf" data-reveal>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      {/* The mark over the footer, as the deck does it: large, at a whisper of
+          opacity, so it reads as a watermark the panel rises in front of
+          rather than a second logo competing with the one inside. */}
+      <div className="zf-sig" aria-hidden>
+        <ZenyaMark />
+      </div>
       <div className="zf-inner">
         <div className="zf-cols">
           <div className="zf-brand">
@@ -112,11 +118,34 @@ export default function PricingFooter() {
 
 /* No backticks inside this literal: one would end it. */
 const CSS = `
-.zf { max-width: 1080px; margin: clamp(3.5rem, 8vw, 6rem) auto 0; }
+/* FULL BLEED, AND IT ENDS THE PAGE. The footer was a floating rounded card of
+   the same obsidian, the same radius and nearly the same width as the
+   comparison panel directly above it, so the page finished on two almost
+   identical dark rectangles. It is a different KIND of object now: it runs
+   edge to edge, its top corners are round and its bottom corners are square,
+   and it sits flush against the bottom of the document. A cap, not another
+   card.
+
+   The negative inline margin is how it escapes the page's own gutter, which
+   .zp-root applies as padding. calc on the same variable, so the two can
+   never drift. */
+.zf {
+  position: relative;
+  margin: clamp(3.5rem, 8vw, 6rem) calc(var(--gut) * -1) 0;
+}
+.zf-sig {
+  display: flex;
+  justify-content: center;
+  opacity: 0.06;
+  margin-bottom: -2.25rem;
+  pointer-events: none;
+}
+.zf-sig svg { width: min(52%, 420px); height: auto; color: #171717; }
 .zf-inner {
-  border-radius: var(--r-panel);
+  position: relative;
+  border-radius: var(--r-panel) var(--r-panel) 0 0;
   background: var(--onyx);
-  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.75rem) clamp(1.5rem, 3vw, 2rem);
+  padding: clamp(2.5rem, 4vw, 3.25rem) clamp(1.5rem, 4vw, 3.5rem) clamp(1.75rem, 3vw, 2.25rem);
 }
 .zf-cols {
   display: grid;
