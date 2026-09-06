@@ -64,13 +64,20 @@ export default function PricingFooter() {
   return (
     <footer className="zf" data-reveal>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      {/* The mark over the footer, as the deck does it: large, at a whisper of
-          opacity, so it reads as a watermark the panel rises in front of
-          rather than a second logo competing with the one inside. */}
+      {/* The mark lives INSIDE the cap, as the deck does it: large, paper
+          coloured, at a whisper of opacity, so the card below rises in front
+          of it rather than a second logo competing with the one inside. */}
       <div className="zf-sig" aria-hidden>
         <ZenyaMark />
       </div>
-      <div className="zf-inner">
+
+      <div className="zf-card">
+        {/* The wash on its own layer rather than in the background, so the
+            hairline stays a hairline instead of being mixed into a gradient.
+            Strongest at the top and gone by the middle: a surface is lit from
+            one side, not tinted all over. */}
+        <span className="zf-sheen" aria-hidden />
+        <div className="zf-body">
         <div className="zf-cols">
           <div className="zf-brand">
             <Link href="/demo/home" aria-label="زينيا" className="zf-mark">
@@ -111,6 +118,7 @@ export default function PricingFooter() {
             © {year} زينيا. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
           </p>
         </div>
+        </div>
       </div>
     </footer>
   )
@@ -129,23 +137,62 @@ const CSS = `
    The negative inline margin is how it escapes the page's own gutter, which
    .zp-root applies as padding. calc on the same variable, so the two can
    never drift. */
+/* THE CAP IS A GROUND, NOT THE FOOTER. It runs edge to edge, its top corners
+   are round and its bottom corners square, and it is flush with the end of the
+   document: a cap, not another floating card of the same obsidian the
+   comparison panel already is. What stands ON it is the footer.
+
+   The negative inline margin is how it escapes the page's own gutter, which
+   .zp-root applies as padding. calc on the same variable, so the two can never
+   drift. */
 .zf {
   position: relative;
   margin: clamp(3.5rem, 8vw, 6rem) calc(var(--gut) * -1) 0;
-}
-.zf-sig {
-  display: flex;
-  justify-content: center;
-  opacity: 0.06;
-  margin-bottom: -2.25rem;
-  pointer-events: none;
-}
-.zf-sig svg { width: min(52%, 420px); height: auto; color: #171717; }
-.zf-inner {
-  position: relative;
+  padding: clamp(2.75rem, 5vw, 4rem) var(--gut) clamp(1.5rem, 3vw, 2.25rem);
   border-radius: var(--r-panel) var(--r-panel) 0 0;
   background: var(--onyx);
-  padding: clamp(2.5rem, 4vw, 3.25rem) clamp(1.5rem, 4vw, 3.5rem) clamp(1.75rem, 3vw, 2.25rem);
+  overflow: hidden;
+}
+/* Inside the cap and behind the card, in paper rather than ink, because on
+   obsidian the counterpart of black is paper and not a grey. */
+.zf-sig {
+  position: absolute;
+  inset-inline: 0;
+  top: clamp(0.75rem, 2vw, 1.5rem);
+  display: flex;
+  justify-content: center;
+  opacity: 0.07;
+  pointer-events: none;
+}
+.zf-sig svg { width: min(62%, 520px); height: auto; color: #fafafa; }
+
+/* ادر's lit material, which is what the deck's own footer card is made of:
+   one hairline bright along the top edge and fading down, obeying a light
+   that comes from above. No drop shadow, which this style refuses, and no
+   second card grammar, because the dark surfaces are one family. */
+.zf-card {
+  position: relative;
+  max-width: 1080px;
+  margin-inline: auto;
+  border-radius: 26px;
+  overflow: hidden;
+  background: rgba(250, 250, 250, 0.028);
+  box-shadow:
+    inset 0 1px 0 rgba(250, 250, 250, 0.17),
+    inset 0 0 0 1px rgba(250, 250, 250, 0.065);
+}
+.zf-sheen {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(250, 250, 250, 0.07) 0%,
+    rgba(250, 250, 250, 0.026) 34%,
+    rgba(250, 250, 250, 0) 62%
+  );
+}
+.zf-body {
+  position: relative;
+  padding: clamp(2rem, 3.5vw, 2.75rem) clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 2.5vw, 1.875rem);
 }
 .zf-cols {
   display: grid;
