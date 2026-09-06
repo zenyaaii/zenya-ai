@@ -19,6 +19,7 @@
  */
 
 import Link from "next/link"
+import SlideButton from "@/components/ui/SlideButton"
 import ZenyaMark from "@/components/ZenyaMark"
 import { TikTokIcon, InstagramIcon, XIcon } from "../home/FooterSection"
 
@@ -87,6 +88,13 @@ export default function PricingFooter() {
               أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي. اكتب نبذة عن
               نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
             </p>
+            {/* The deck's footer carries this and it belongs here too: the
+                last thing on a pricing page should be a way to start. */}
+            <span className="zf-cta">
+              <SlideButton href="/theme/new" variant="violet" slide="ابدأ الآن">
+                ابدأ الإنشاء
+              </SlideButton>
+            </span>
             <a className="zf-mail" href="mailto:support@zenyaai.co" dir="ltr">
               support@zenyaai.co
             </a>
@@ -148,23 +156,25 @@ const CSS = `
 .zf {
   position: relative;
   margin: clamp(3.5rem, 8vw, 6rem) calc(var(--gut) * -1) 0;
-  padding: clamp(2.75rem, 5vw, 4rem) var(--gut) clamp(1.5rem, 3vw, 2.25rem);
+  padding: clamp(3rem, 6vw, 5rem) var(--gut) clamp(1.75rem, 3vw, 2.5rem);
   border-radius: var(--r-panel) var(--r-panel) 0 0;
   background: var(--onyx);
   overflow: hidden;
 }
-/* Inside the cap and behind the card, in paper rather than ink, because on
-   obsidian the counterpart of black is paper and not a grey. */
+/* THE MARK IS IN FLOW, NOT BEHIND THE CARD. It was absolutely positioned and
+   overlapping, which is what made this read as cramped: the logo sat ON the
+   footer instead of above it and there was no air anywhere. The deck's own
+   footer gives it a whole band of its own, and these are its numbers, taken
+   by measuring that screen rather than guessed: 660px wide, 11% opacity, and
+   92px of clear space between it and the card below. */
 .zf-sig {
-  position: absolute;
-  inset-inline: 0;
-  top: clamp(0.75rem, 2vw, 1.5rem);
   display: flex;
   justify-content: center;
-  opacity: 0.07;
+  margin-bottom: clamp(2.5rem, 6vw, 5.75rem);
+  opacity: 0.11;
   pointer-events: none;
 }
-.zf-sig svg { width: min(62%, 520px); height: auto; color: #fafafa; }
+.zf-sig svg { width: min(74%, 660px); height: auto; color: #fafafa; }
 
 /* ادر's lit material, which is what the deck's own footer card is made of:
    one hairline bright along the top edge and fading down, obeying a light
@@ -172,9 +182,11 @@ const CSS = `
    second card grammar, because the dark surfaces are one family. */
 .zf-card {
   position: relative;
-  max-width: 1080px;
+  max-width: 1180px;
   margin-inline: auto;
-  border-radius: 26px;
+  /* The deck's radius. A footer card is a large surface and 26 read tight
+     against a 28 cap. */
+  border-radius: 34px;
   overflow: hidden;
   background: rgba(250, 250, 250, 0.028);
   box-shadow:
@@ -192,16 +204,20 @@ const CSS = `
 }
 .zf-body {
   position: relative;
-  padding: clamp(2rem, 3.5vw, 2.75rem) clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 2.5vw, 1.875rem);
+  /* 34px 36px 28px on the deck. */
+  padding: clamp(1.75rem, 3vw, 2.125rem) clamp(1.25rem, 3vw, 2.25rem) clamp(1.5rem, 2.5vw, 1.75rem);
 }
 .zf-cols {
   display: grid;
-  grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr));
+  /* The deck's own track sizes and gap. */
+  grid-template-columns: 1.55fr repeat(3, minmax(0, 1fr));
   gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: start;
 }
 .zf-mark { display: inline-flex; }
 .zf-mark-svg { height: 22px; color: #fafafa; }
 .zf-claim { margin: 1rem 0 0; max-width: 30ch; font-size: 13.5px; font-weight: 500; line-height: 1.9; color: #a8a8b2; }
+.zf-cta { display: block; margin-top: 1.25rem; max-width: 13rem; }
 .zf-mail {
   display: inline-block; margin-top: 1rem;
   font-size: 13px; font-weight: 500; color: var(--violet-lift); text-decoration: none;
