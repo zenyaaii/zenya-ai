@@ -50,6 +50,7 @@ import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
 import SlideButton from "@/components/ui/SlideButton"
+import CodeStack from "./CodeStack"
 
 /* Display and content are the same family at different weights. Arabic reads
    as one voice that way, and the page stops looking like two fonts arguing. */
@@ -408,6 +409,9 @@ export default function PricingView() {
         </div>
       </section>
       </div>
+
+      {/* What comes off the price, after the argument for the price. */}
+      <CodeStack />
     </main>
   )
 }
