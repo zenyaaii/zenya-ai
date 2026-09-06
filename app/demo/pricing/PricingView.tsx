@@ -720,20 +720,23 @@ const CSS = `
   margin-inline: auto;
   overflow: hidden;
   border-radius: 22px;
-  /* Translucent on purpose. The deck's lit values: solid white here would
-     make the backdrop-filter below a no-op that still costs a layer. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
+  /* Glass, not a key. The dark state's two layers with the values inverted:
+     one flat translucent face, one hairline, over a ring of the ground. The
+     five-layer key this replaces (lit rim, front wall, hard base, contact
+     shadow) said "an object sitting ON the page"; this says "a pane over it".
+     See app/demo/home/page.tsx for why the light face is greyer and MORE
+     transparent than the dark one. */
+  background: rgba(238, 238, 243, 0.60);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
-  transition: background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out), color 520ms var(--ease-out);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -3px 0 rgba(17, 17, 17, 0.10),
-    0 0 0 1px rgba(17, 17, 17, 0.28),
-    0 3px 0 rgba(17, 17, 17, 0.12),
-    0 8px 16px rgba(17, 17, 17, 0.11);
+    0 0 0 1px rgba(17, 17, 17, 0.18),
+    0 0 0 4px rgba(250, 250, 250, 0.5);
   /* Sideways first, then down, so the two do not fight for the same frames. */
-  transition: min-width 380ms var(--ease-out) 220ms;
+  transition:
+    min-width 380ms var(--ease-out) 220ms,
+    background-color 520ms var(--ease-out),
+    box-shadow 520ms var(--ease-out);
 }
 .zp-phone-pill[data-open] { transition-delay: 0s; }
 @media (prefers-reduced-motion: reduce) { .zp-phone-pill { transition: none; } }
@@ -761,26 +764,37 @@ const CSS = `
 .zp-pill {
   border-radius: 24px;
   overflow: hidden;
-  /* Translucent on purpose. The deck's lit values: solid white here would
-     make the backdrop-filter below a no-op that still costs a layer. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
+  /* Glass, not a key. The dark state's two layers with the values inverted:
+     one flat translucent face, one hairline, over a ring of the ground. The
+     five-layer key this replaces (lit rim, front wall, hard base, contact
+     shadow) said "an object sitting ON the page"; this says "a pane over it".
+     See app/demo/home/page.tsx for why the light face is greyer and MORE
+     transparent than the dark one. */
+  background: rgba(238, 238, 243, 0.60);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
-  transition: background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out), color 520ms var(--ease-out);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -3px 0 rgba(17, 17, 17, 0.10),
-    0 0 0 1px rgba(17, 17, 17, 0.28),
-    0 3px 0 rgba(17, 17, 17, 0.12),
-    0 8px 16px rgba(17, 17, 17, 0.11);
-  transition: width 440ms var(--ease-out);
+    0 0 0 1px rgba(17, 17, 17, 0.18),
+    0 0 0 4px rgba(250, 250, 250, 0.5);
+  transition:
+    width 440ms var(--ease-out),
+    background-color 520ms var(--ease-out),
+    box-shadow 520ms var(--ease-out);
   /* Resizing a box that also carries a backdrop filter is the expensive half;
      containment stops the work at the pill's own border. */
   contain: layout paint;
   will-change: width;
 }
+/* Without a blur behind it a 60% face is not glass, it is a washed-out
+   rectangle, so both fallbacks go opaque and let the hairline carry the edge. */
 @media (prefers-reduced-transparency: reduce) {
-  .zp-pill { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .zp-pill, .zp-phone-pill {
+    background: #f2f2f5;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .zp-pill, .zp-phone-pill { background: #f2f2f5; }
 }
 @media (prefers-reduced-motion: reduce) { .zp-pill { transition: none; } }
 

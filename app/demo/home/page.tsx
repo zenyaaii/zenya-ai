@@ -911,15 +911,15 @@ export default function Page() {
            shadows; the controls are the deliberate exception, and the owner
            has now asked for more of it three times. */
         body:has(#blank-home) {
-          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
-          --pane-edge: rgba(17, 17, 17, 0.26);
+          --pane-bg: rgba(238, 238, 243, 0.60);
+          --pane-edge: rgba(17, 17, 17, 0.18);
         }
         /* Off the light, on bare paper, there is no colour behind the key for
            the blur to pick up — so it leans on being brighter than the paper
            and on a firmer edge still, and the base does the rest. */
         body:has(#zn-deck[data-lit="false"]) {
-          --pane-bg: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 245, 242, 0.96) 100%);
-          --pane-edge: rgba(17, 17, 17, 0.28);
+          --pane-bg: rgba(238, 238, 243, 0.60);
+          --pane-edge: rgba(17, 17, 17, 0.18);
         }
 
         /* Display scale. Two stops rather than one clamp: a single aggressive
@@ -1266,37 +1266,46 @@ export default function Page() {
         }
         .zn-phone-drawer[data-open="true"] { transition-delay: 200ms, 200ms; }
 
-        /* The key. saturate pulls the colour out of whatever the blur picked
-           up, so the control in the bottom corner still takes on the animation
-           rather than sitting on top of it — that part survived the move away
-           from glass. Everything below it is the key's own geometry. */
+        /* GLASS, IN BOTH ROOMS. saturate pulls the colour out of whatever the
+           blur picked up, so the corner control takes on the animation rather
+           than sitting on top of it.
+
+           These were keys: a near-opaque face, a lit top rim, a 3px front
+           wall, a hard base and a contact shadow. Six layers that said "a
+           pressable object sitting ON the page". The owner compared them with
+           the header standing on the dark panels, which was always real glass,
+           and asked for that construction everywhere. So the light state is
+           now the dark state's two layers with the values inverted: one flat
+           translucent face and one hairline, plus a ring of the ground.
+
+           The face is greyer and MORE transparent than the dark one (0.60
+           against 0.72), and that is not an inconsistency. Dark glass has
+           obsidian behind it to be seen against; light glass on #fafafa paper
+           has almost nothing, so white at the dark's alpha simply disappears
+           on a bare screen. Rendered on bare paper before choosing: the white
+           candidates dissolved, the grey ones held. The edge comes from the
+           hairline here, not from the fill. */
         .zn-glass, .zn-pill, .zn-phone-pill {
           background: var(--pane-bg);
           -webkit-backdrop-filter: blur(18px) saturate(180%);
           backdrop-filter: blur(18px) saturate(180%);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 1),
-            inset 0 -3px 0 rgba(17, 17, 17, 0.10),
             0 0 0 1px var(--pane-edge),
-            0 3px 0 rgba(17, 17, 17, 0.12),
-            0 8px 16px rgba(17, 17, 17, 0.11);
+            0 0 0 4px rgba(250, 250, 250, 0.5);
         }
         /* Backdrop filters are a stated accessibility preference for some
-           readers, and unsupported in a few engines. Both land here. */
-        /* Backdrop filters are a stated accessibility preference for some
-           readers, and unsupported in a few engines. Both land here — and both
-           keep every layer except the blur, because the depth is what makes
-           these read as controls, not the transparency. */
+           readers, and unsupported in a few engines. Both land here, and both
+           go OPAQUE rather than translucent: without a blur behind it, a 60%
+           face over paper is not glass, it is a washed-out rectangle. The
+           hairline and the ground ring still give it its edge. */
         @media (prefers-reduced-transparency: reduce) {
           .zn-glass, .zn-pill, .zn-phone-pill {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(245, 244, 241, 0.97) 100%);
+            background: #f2f2f5;
             -webkit-backdrop-filter: none; backdrop-filter: none;
           }
         }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-          .zn-glass, .zn-pill, .zn-phone-pill {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(245, 244, 241, 0.96) 100%);
-          }
+          .zn-glass, .zn-pill, .zn-phone-pill { background: #f2f2f5; }
         }
 
         .zn-list { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.18) transparent; }
@@ -1428,15 +1437,17 @@ export default function Page() {
         .zn-switch button {
           padding: 7px 16px; border-radius: 999px;
           font-size: 11.5px; line-height: 1; color: ${STONE};
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 244, 241, 0.88) 100%);
+          /* The same glass as every other surface on the page, so this does
+             not sit next to the corner controls as the last white key. The
+             sink survives: it now comes from the chosen state's obsidian fill
+             and its inset, which is a bigger change from flat glass than it
+             ever was from a raised key. */
+          background: rgba(238, 238, 243, 0.60);
           -webkit-backdrop-filter: blur(14px) saturate(170%);
           backdrop-filter: blur(14px) saturate(170%);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 1),
-            inset 0 -2px 0 rgba(17, 17, 17, 0.09),
-            0 0 0 1px rgba(17, 17, 17, 0.24),
-            0 2px 0 rgba(17, 17, 17, 0.11),
-            0 5px 11px rgba(17, 17, 17, 0.09);
+            0 0 0 1px rgba(17, 17, 17, 0.18),
+            0 0 0 4px rgba(250, 250, 250, 0.5);
           cursor: pointer;
           transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
                       color 260ms cubic-bezier(0.22, 1, 0.36, 1),

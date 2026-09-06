@@ -156,6 +156,36 @@ The header pill, both corner controls and the ابن switcher. They are the only
 things on this page a reader can press, and they have to look it — on bare
 paper, on the light, and on the ground of every screen below.
 
+**SUPERSEDED, 2026-09-06: they are glass again, and this time it is real.**
+Keep everything below, because the reasoning was sound and the failure was
+specific: the *first* glass was three stacked drop shadows at widening radii
+behind a 14% hairline, which is a cloud, and a cloud is a bad button. The keys
+that replaced it fixed that by adding weight.
+
+What settled it was the header standing on the dark panels, which was never a
+key: `rgba(32, 32, 38, 0.72)` behind a 12% paper hairline and a 4px ring of the
+ground, over `blur(18px) saturate(180%)`. Two layers, genuinely see-through,
+and the owner compared the two rooms and asked for that construction on paper
+as well. So the light surfaces are now the dark one's two layers with the
+values inverted, and the six-layer key is gone from the header and from both
+corner controls.
+
+The light face is `rgba(238, 238, 243, 0.60)` behind an 18% hairline: greyer
+and MORE transparent than the dark one, which is not an inconsistency. Dark
+glass has obsidian behind it to be seen against; light glass on `#fafafa` has
+almost nothing, so white at the dark's alpha simply disappears on a bare
+screen. Rendered on bare paper before choosing, the white candidates dissolved
+and the grey ones held. On light, the edge comes from the hairline, not the
+fill.
+
+Both no-blur fallbacks go OPAQUE (`#f2f2f5`) rather than translucent: without
+a blur behind it, a 60% face is not glass, it is a washed-out rectangle.
+
+**The keys did not die, they narrowed.** `components/ui/SlideButton.tsx` keeps
+the six layers for calls to action, and that is the distinction worth holding:
+a CTA is a thing you press, so it should look pressable; a header and a picker
+are panes you look through. What follows is still the recipe for the former.
+
 **They were glass, and glass was the wrong idea.** Three stacked drop shadows at
 widening radii, a 14% hairline, the whole thing hovering: it read as a *cloud*.
 A cloud is a lovely object and a bad button, because nothing about it says where
