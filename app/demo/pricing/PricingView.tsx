@@ -362,8 +362,17 @@ export default function PricingView() {
         عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
       </p>
 
-      {/* The argument, on its own ground. */}
-      <section className="zp-compare" aria-labelledby="zp-compare-h" data-reveal>
+      {/* The argument, on its own ground.
+
+          The stage exists to clip: the panel is scaled UP while it is below
+          the fold, and a scaled box paints outside its layout width even
+          though it does not take up more of it. Without a clip that overhang
+          becomes a horizontal scrollbar on any window narrower than about
+          1250px. overflow-x: clip and not hidden, because hidden would make
+          this a scroll container and steal the panel's own sticky behaviour
+          if it ever gets any. */}
+      <div className="zp-compare-stage">
+      <section className="zp-compare" aria-labelledby="zp-compare-h">
         <div className="zp-compare-head">
           <h2 id="zp-compare-h" className="zp-h2">لماذا زينيا</h2>
           <p className="zp-h2-sub">نفس الموقع، وثلاث طرق لدفع ثمنه.</p>
@@ -398,6 +407,7 @@ export default function PricingView() {
           </table>
         </div>
       </section>
+      </div>
     </main>
   )
 }
@@ -638,7 +648,48 @@ const CSS = `
 
 /* ---- the comparison, on its own ground ---------------------------------- */
 
+/* ---- the panel arrives by shrinking -------------------------------------
+   It sits scaled up while it is below the fold, so the first thing a reader
+   meets at the bottom of the screen is a big dark shape, and it settles to
+   its resting size as it scrolls into view.
+
+   Driven by a CSS scroll-driven timeline, for three reasons that all matter:
+   a scroll listener is banned here and would run on every frame; a transform
+   on a scroll timeline is composited off the main thread, which a JS-driven
+   one is not; and the resting state stays the finished state, because a
+   browser without view() support simply never runs it and the panel is
+   already at scale 1 in its base rule. That is the house rule this page has
+   broken twice before, and it is why the effect is not written in JS.
+
+   Uniform scale rather than an animated width: width is layout work on every
+   frame, and this style animates transform and opacity only.
+--------------------------------------------------------------------------- */
+.zp-compare-stage { overflow-x: clip; }
+
+@keyframes zp-settle {
+  from { transform: scale(var(--settle-from, 1.14)); }
+  to { transform: scale(1); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .zp-compare {
+      transform-origin: 50% 50%;
+      animation: zp-settle linear both;
+      animation-timeline: view();
+      /* From the moment its top edge appears to the moment it is fully in
+         view. The panel is shorter than the viewport at every width it is
+         laid out at, so this range always completes. */
+      animation-range: entry 0% entry 100%;
+      will-change: transform;
+    }
+  }
+}
+
 .zp-compare {
+  /* How big it starts. One number, and the only one worth touching to make
+     the arrival stronger or quieter. Above about 1.22 the panel's own text
+     is visibly soft while it is scaled, which is the ceiling on this. */
+  --settle-from: 1.14;
   max-width: 1080px;
   margin: clamp(3.5rem, 8vw, 6rem) auto 0;
   padding: clamp(2.25rem, 5vw, 3.5rem) clamp(1.25rem, 3.5vw, 3rem) clamp(2rem, 4vw, 3rem);
