@@ -271,7 +271,12 @@ const CLAIM_GAP = 280
    hovering them closes whatever is open rather than opening an empty tray. */
 const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
   { href: "/themes", label: "القوالب", panel: "themes" },
-  { href: "/pricing", label: "الأسعار" },
+  /* The demo's own pricing screen, not the live one. Both exist: /pricing is
+     the page that takes money today and is untouched; /demo/pricing is the
+     candidate in this deck's style, reviewable on the real domain without
+     changing what a customer pays. Point this back at /pricing if the
+     candidate is ever promoted. */
+  { href: "/demo/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
