@@ -46,11 +46,13 @@
  */
 
 import { useEffect, useRef, useState } from "react"
+import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
 import SlideButton from "@/components/ui/SlideButton"
 import CodeStack from "./CodeStack"
+import PricingFooter from "./PricingFooter"
 
 /* Display and content are the same family at different weights. Arabic reads
    as one voice that way, and the page stops looking like two fonts arguing. */
@@ -185,6 +187,7 @@ function Tick({ className }: { className?: string }) {
 
 export default function PricingView() {
   const [trayOpen, setTrayOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -216,6 +219,67 @@ export default function PricingView() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <header className={"zp-head " + plex.className} onMouseLeave={() => setTrayOpen(false)}>
+        {/* Phone: a small pill, not the laptop bar squeezed onto a phone.
+            Measured before this existed: the wide bar was rendering at 380px
+            on a 390px screen while the deck's own phone pill is 184px closed.
+            Closed it is the menu, the mark and the account; opening widens the
+            same surface from the middle and takes the pages down underneath,
+            which is the deck's arrangement exactly. */}
+        <div
+          className="zp-phone-pill"
+          data-open={menuOpen ? "true" : undefined}
+          style={{ minWidth: menuOpen ? "min(86vw, 268px)" : "184px" }}
+        >
+          <div className="zp-phone-bar">
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-expanded={menuOpen}
+              aria-controls="zp-phone-menu"
+              aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"}
+              className="zp-round"
+            >
+              {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
+            </button>
+            <Link href="/demo/home" aria-label="زينيا" className="zp-phone-mark">
+              {/* Pure black is permitted here: the style reserves #000 for
+                  logo marks and graphic glyphs, nowhere else. */}
+              <ZenyaMark className="zp-mark-svg-sm" />
+            </Link>
+            {/* The deck's own signed-out control, verbatim: an obsidian pill
+                reading ابدأ, not an icon. It is what makes the closed pill
+                measure what the deck's measures. */}
+            <Link href="/login?mode=signup" className="zp-account zp-account-phone">
+              ابدأ
+            </Link>
+          </div>
+          <div
+            className="zp-drawer"
+            data-open={menuOpen ? "true" : undefined}
+            style={{
+              gridTemplateRows: menuOpen ? "1fr" : "0fr",
+              visibility: menuOpen ? "visible" : "hidden",
+            }}
+          >
+            <div className="zp-drawer-clip">
+              <nav id="zp-phone-menu" className="zp-phone-menu">
+                {NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="zp-tray-row"
+                    data-current={item.current ? "true" : undefined}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </div>
+
+        {/* Tablet and up: the deck's bar, at the deck's measurements. */}
         <div className="zp-pill" style={{ width: trayOpen ? PILL_THEMES : PILL_REST }}>
           {/* 1fr auto 1fr. The nav is the auto track, so it cannot move; the
               two 1fr tracks take the new width equally and the surface opens
@@ -252,8 +316,8 @@ export default function PricingView() {
 
             <span className="zp-side zp-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zp-sep" aria-hidden />
-              <Link href="/dashboard" className="zp-account">
-                حسابي
+              <Link href="/login?mode=signup" className="zp-account">
+                ابدأ
               </Link>
             </span>
           </div>
@@ -363,6 +427,12 @@ export default function PricingView() {
         عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
       </p>
 
+      {/* What comes off the price first, then the argument for the price.
+          The comparison moved below the stack: it is the longest block on the
+          page and the least urgent, so it was standing between the plans and
+          the thing that makes them cheaper. */}
+      <CodeStack />
+
       {/* The argument, on its own ground.
 
           The stage exists to clip: the panel is scaled UP while it is below
@@ -412,8 +482,7 @@ export default function PricingView() {
       </section>
       </div>
 
-      {/* What comes off the price, after the argument for the price. */}
-      <CodeStack />
+      <PricingFooter />
     </main>
   )
 }
@@ -468,6 +537,49 @@ const CSS = `
 /* ---- the header, on the deck's own mechanic ----------------------------- */
 
 .zp-head { display: flex; justify-content: center; padding: 2rem 0 clamp(2.5rem, 6vw, 4rem); }
+
+/* The header splits at md (768px), the same place the deck splits it: tablets
+   get the laptop bar, phones get the compact pill. */
+.zp-phone-pill {
+  width: fit-content; max-width: 100%;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(246, 245, 242, 0.96) 100%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -3px 0 rgba(17, 17, 17, 0.10),
+    0 0 0 1px rgba(17, 17, 17, 0.28),
+    0 3px 0 rgba(17, 17, 17, 0.12),
+    0 8px 16px rgba(17, 17, 17, 0.11);
+  /* Sideways first, then down, so the two do not fight for the same frames. */
+  transition: min-width 380ms var(--ease-out) 220ms;
+}
+.zp-phone-pill[data-open] { transition-delay: 0s; }
+@media (prefers-reduced-motion: reduce) { .zp-phone-pill { transition: none; } }
+.zp-phone-bar {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: 0.375rem;
+  height: 44px; padding-inline: 0.375rem;
+}
+.zp-phone-mark { display: flex; align-items: center; justify-self: center; padding-inline: 0.375rem; }
+.zp-mark-svg-sm { height: 16px; color: #000; }
+.zp-round {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+  border: 0; background: transparent; cursor: pointer;
+  border-radius: 999px; color: var(--obsidian); text-decoration: none;
+  transition: background-color 150ms var(--ease-out);
+}
+.zp-round:hover { background: rgba(0, 0, 0, 0.05); }
+.zp-account-phone { justify-self: end; }
+.zp-phone-menu { display: grid; padding: 0.125rem 0.375rem 0.375rem; }
+.zp-tray-row[data-current="true"] { color: var(--obsidian); }
+
+@media (min-width: 768px) { .zp-phone-pill { display: none; } }
+@media (max-width: 767px) { .zp-pill { display: none; } }
 .zp-pill {
   border-radius: 24px;
   overflow: hidden;
@@ -492,11 +604,17 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) { .zp-pill { transition: none; } }
 
 /* The words hold the middle and the surface opens around them. */
+/* The deck's own measurements, taken from app/demo/home/page.tsx rather than
+   guessed: h-12 (48px), pe-1.5 ps-3, and nav items at 10px 12px. Measured
+   before this: the pill here stood 43.3px against the deck's 48px, because
+   the bar was sized by its contents instead of being given the height. */
 .zp-bar {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  padding: 0.3125rem 0.5rem;
+  height: 48px;
+  padding-inline-start: 0.75rem;
+  padding-inline-end: 0.375rem;
 }
 .zp-side { display: flex; align-items: center; min-width: 0; }
 .zp-side-start { justify-content: flex-start; }
@@ -506,7 +624,7 @@ const CSS = `
 .zp-nav { display: flex; align-items: center; gap: 0.125rem; }
 .zp-nav-item {
   border-radius: 999px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
   font-size: 14px;
   line-height: 1.24;
   white-space: nowrap;
@@ -518,12 +636,13 @@ const CSS = `
 /* The one separator the style allows: inside the header pill, before the
    account control. Nothing else on this page draws a line across anything. */
 .zp-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0, 0, 0, 0.07); }
+/* The deck's control: rounded-full, px-4 py-2, 14px, obsidian. */
 .zp-account {
   border-radius: 999px;
-  padding: 0.5rem 0.875rem;
+  padding: 0.5rem 1rem;
   font-size: 14px;
   line-height: 1.24;
-  font-weight: 500;
+  font-weight: 400;
   white-space: nowrap;
   text-decoration: none;
   background: var(--obsidian);
@@ -821,7 +940,6 @@ const CSS = `
 
 @media (max-width: 560px) {
   .zp-root { --r-panel: 20px; }
-  .zp-head { padding-top: 1.25rem; }
   .zp-card { padding: 1.5rem 1.25rem 1.375rem; }
   .zp-amount { font-size: 40px; }
   .zp-compare { padding-inline: 1rem; }
