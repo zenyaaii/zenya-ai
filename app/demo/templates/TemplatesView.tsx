@@ -126,6 +126,14 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * Deriving the href from the id would have sent the first tile somewhere that
  * does not exist.
  *
+ * `candidate` IS THE IN-SET DESTINATION, and it is a separate field on
+ * purpose. `build` stays the real route this template's builder lives at, so
+ * that field cannot quietly become a lie; `candidate` says "there is a
+ * reviewable version of that inside the candidate set, send the reader there
+ * instead". Only restaurant has one. The rule it serves is the one already
+ * recorded twice on this page: links inside the candidate set point inside the
+ * candidate set, never out to the live site mid-review.
+ *
  * `soon` MIRRORS WHAT THE LIVE CATALOGUE ACTUALLY SHOWS THE PUBLIC. The
  * one-product builder is being rebuilt: app/(main)/themes/page.tsx gates it on
  * "theme.id === 'one_product' && isAdmin !== true" and renders قريبًا for
@@ -136,7 +144,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  */
 const TEMPLATES = [
   { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            build: "/build",                  shopify: true, soon: true },
-  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant" },
+  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant", candidate: "/demo/build" },
   { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas",      build: "/theme/new/atlas" },
   { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook",   build: "/theme/new/lookbook" },
   { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective", build: "/theme/new/collective" },
@@ -367,7 +375,7 @@ export default function TemplatesView() {
                  names in one list, so the template rides along hidden: the
                  visible face still reads ابنِ, the name reads ابنِ بقالب مطعم.
                  Same shape as the live catalogue's aria-label. */
-              <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-build">
+              <SlideButton href={"candidate" in t ? t.candidate : t.build} variant="violet" slide="هيا بنا" className="zt-build">
                 ابنِ<span className="sr-only">{" بقالب " + t.label}</span>
               </SlideButton>
             )}
@@ -991,6 +999,48 @@ const CSS = `
   -webkit-backdrop-filter: blur(18px) saturate(180%);
   backdrop-filter: blur(18px) saturate(180%);
   box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.16);
+}
+
+/* ---- the corner mark ----------------------------------------------------
+   A violet bracket on two opposite corners of every tile, drawn on the card's
+   own radius so it reads as part of the corner rather than a sticker on one,
+   and opening on hover. Two corners rather than four, because a full frame is
+   a border and the ring token is already the border.
+
+   It is the one piece of chrome on this page that carries colour at rest, and
+   that is a real cost against the page's design read — the eight screenshots
+   were meant to be the only colour in the room. It is here because it was
+   asked for, and it is kept to a hairline on two corners so it marks the card
+   without competing with what is inside it.
+------------------------------------------------------------------------- */
+.zt-tile::before, .zt-tile::after {
+  content: "";
+  position: absolute;
+  width: 24px; height: 24px;
+  pointer-events: none;
+  z-index: 2;
+  border-color: var(--violet);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.5;
+  transition: opacity 320ms var(--ease-out), width 320ms var(--ease-out), height 320ms var(--ease-out);
+}
+.zt-tile::before {
+  inset-block-start: -1px; inset-inline-start: -1px;
+  border-block-start-width: 2px; border-inline-start-width: 2px;
+  border-start-start-radius: var(--r-card);
+}
+.zt-tile::after {
+  inset-block-end: -1px; inset-inline-end: -1px;
+  border-block-end-width: 2px; border-inline-end-width: 2px;
+  border-end-end-radius: var(--r-card);
+}
+@media (hover: hover) {
+  .zt-tile:hover::before, .zt-tile:hover::after { opacity: 1; width: 32px; height: 32px; }
+}
+.zt-tile:focus-within::before, .zt-tile:focus-within::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .zt-tile::before, .zt-tile::after { transition: none; }
 }
 
 /* Three tight lines, not four stacked bands with a button under them. */

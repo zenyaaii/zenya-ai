@@ -38,11 +38,12 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { ArrowLeft, ArrowRight, Check, Menu, Plus, Trash2, X } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Menu, Plus, SkipForward, Trash2, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
 import SlideButton from "@/components/ui/SlideButton"
+import MenuImageAnalyzer, { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
 import PricingFooter from "../pricing/PricingFooter"
 import { ALL_FIELDS, DEFAULT_HOURS, PLACE_KINDS, PRESETS, STEPS, UPLOADS, type FieldSpec } from "./spec"
 
@@ -78,6 +79,10 @@ export default function BuildFormView() {
      once they have been in and out of it — a form that shouts before you have
      typed anything reads as broken rather than as helpful. */
   const [touched, setTouched] = useState<Set<string>>(new Set())
+  /* Steps the reader chose to pass over. Kept apart from "visited" so the rail
+     can say skipped rather than done — a step nobody filled is not a step
+     that is finished, and a tick on it would be the form lying again. */
+  const [skipped, setSkipped] = useState<Set<number>>(new Set())
   const [values, setValues] = useState<Values>({})
   const [kind, setKind] = useState("")
   const [preset, setPreset] = useState("")
@@ -94,6 +99,26 @@ export default function BuildFormView() {
   const spec = STEPS[step]
 
   const set = useCallback((k: string, v: string) => setValues((p) => ({ ...p, [k]: v })), [])
+
+  /**
+   * The analyzer's read, mapped into this form's own menu state. Same shape
+   * the deck's applyMenu uses, and the same contract the component expects:
+   * return how much was applied so it can report it.
+   */
+  const applyMenu = useCallback((extracted: ExtractedCategory[]) => {
+    const mapped = extracted
+      .map((c) => ({
+        id: uid(),
+        name: (c.name || "").trim().slice(0, 40),
+        items: (Array.isArray(c.items) ? c.items : [])
+          .map((it) => ({ id: uid(), name: (it.name || "").trim().slice(0, 80), price: (it.price || "").trim().slice(0, 30) }))
+          .filter((it) => it.name.length >= 1),
+      }))
+      .filter((c) => c.name.length >= 2 && c.items.length > 0)
+    if (mapped.length) setCats(mapped)
+    return { categories: mapped.length, items: mapped.reduce((n, c) => n + c.items.length, 0) }
+  }, [])
+
 
   /* ---- progress -------------------------------------------------------
      Counted over the REQUIRED fields only. Counting every optional field
@@ -317,6 +342,24 @@ export default function BuildFormView() {
 
   const menu = (
     <div className="zb-block">
+      {/* THE WIZARD'S OWN ANALYZER, not a copy of it. Same component, same
+          client-side preparation, same /api/analyze-menu request. The demo
+          flag is the one the component documents for exactly this case: a
+          public page with nobody signed in, which the route answers from a
+          memoised read instead of returning 401. */}
+      <div className="zb-analyzer">
+        <MenuImageAnalyzer cuisine={values.cuisine} demo onExtract={applyMenu} />
+        {/* The one thing the reader cannot see and would otherwise get wrong.
+            In demo mode the route reads its BUNDLED SAMPLE menu rather than
+            the picture that was posted — deliberately, so a flag anyone can
+            send cannot buy vision calls. It is a real model read of a real
+            menu photograph; it is just not yours. */}
+        <p className="zb-note">
+          على هذه الصفحة العامة يقرأ التحليل قائمة نموذجية جاهزة، لا الصورة التي ترفعها.
+          داخل المنشئ الحقيقي يُقرأ ملفك أنت.
+        </p>
+      </div>
+
       {cats.map((c, ci) => (
         <div key={c.id} className="zb-cat">
           <div className="zb-cat-head">
@@ -428,6 +471,7 @@ export default function BuildFormView() {
         <div className="zb-sum-row"><dt>أصناف القائمة</dt><dd>{menuItems}</dd></div>
         <div className="zb-sum-row"><dt>أيام مفتوحة</dt><dd>{hours.filter((h) => !h.closed).length} من 7</dd></div>
         <div className="zb-sum-row"><dt>الصور</dt><dd>{(shots.gallery?.length ?? 0) + (shots.dishes?.length ?? 0)}</dd></div>
+        <div className="zb-sum-row"><dt>خطوات متخطّاة</dt><dd>{skipped.size}</dd></div>
       </div>
 
       {filled.length ? (
@@ -539,7 +583,8 @@ export default function BuildFormView() {
 
           <ol className="zb-steps">
             {STEPS.map((s, i) => {
-              const done = i !== step && visited.has(i) && stepStatus(i).complete
+              const wasSkipped = skipped.has(i) && i !== step
+              const done = i !== step && !wasSkipped && visited.has(i) && stepStatus(i).complete
               return (
                 <li key={s.id}>
                   <button
@@ -547,11 +592,12 @@ export default function BuildFormView() {
                     className="zb-step"
                     data-on={i === step ? "true" : undefined}
                     data-done={done ? "true" : undefined}
+                    data-skipped={wasSkipped ? "true" : undefined}
                     aria-current={i === step ? "step" : undefined}
                     onClick={() => go(i)}
                   >
                     <span className="zb-step-n" aria-hidden>
-                      {done ? <Check size={12} strokeWidth={3} /> : i + 1}
+                      {done ? <Check size={12} strokeWidth={3} /> : wasSkipped ? <SkipForward size={11} strokeWidth={2.5} /> : i + 1}
                     </span>
                     <span className="zb-step-t">{s.title}</span>
                   </button>
@@ -600,6 +646,24 @@ export default function BuildFormView() {
             <p className="zb-nav-note" data-warn={stepStatus(step).complete ? undefined : "true"}>
               {stepStatus(step).note}
             </p>
+
+            {/* SKIP, and only where skipping is honest. It shows on the steps
+                the wizard itself calls optional — الحجوزات، الصور، الصحافة —
+                and the images step's own subtitle is where the word comes
+                from: "ارفع صورك الخاصة. أو تخطَّ — نحن نتكفّل بذلك." It is
+                deliberately a real control rather than a quiet link: a reader
+                who does not want a section should not have to guess that
+                leaving it empty and pressing next is allowed. */}
+            {spec.optional && !last ? (
+              <button
+                type="button"
+                className="zb-skip"
+                onClick={() => { setSkipped((p) => new Set(p).add(step)); go(step + 1) }}
+              >
+                <SkipForward size={15} strokeWidth={1.75} aria-hidden />
+                تخطَّ هذه الخطوة
+              </button>
+            ) : null}
 
             {last ? (
               <span className="zb-go">
@@ -948,6 +1012,100 @@ textarea.zb-in { resize: vertical; min-height: 84px; }
 }
 .zb-go { flex: 0 0 auto; width: 12.5rem; }
 
+/* ---- the skip control ---------------------------------------------------
+   Sized and coloured to be FOUND, not to be discovered. It sits between the
+   two navigation buttons where the eye already goes, carries the accent as an
+   outline rather than a fill so it does not outrank التالي, and says which
+   step it is skipping rather than just "skip".
+------------------------------------------------------------------------- */
+.zb-skip {
+  display: inline-flex; align-items: center; gap: 0.4375rem;
+  border: 0; cursor: pointer; font: inherit;
+  border-radius: var(--r-control); padding: 0.5625rem 1rem;
+  font-size: 13.5px; font-weight: 700; line-height: 1.4;
+  color: var(--violet); background: rgba(94, 106, 210, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(94, 106, 210, 0.30);
+  transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.zb-skip:hover { background: rgba(94, 106, 210, 0.16); box-shadow: inset 0 0 0 1px rgba(94, 106, 210, 0.50); }
+.zb-skip:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+
+/* A skipped step is not a finished step, so it never gets the tick. */
+.zb-step[data-skipped] .zb-step-n { background: rgba(17, 17, 17, 0.06); color: #9a9aa2; }
+.zb-step[data-skipped] .zb-step-t { color: #9a9aa2; }
+
+/* ---- the analyzer -------------------------------------------------------
+   The wizard's own component, given a ground of its own so it reads as one
+   block rather than as loose controls above the categories.
+------------------------------------------------------------------------- */
+.zb-analyzer { margin-bottom: 1rem; }
+
+/* THE ANALYZER ARRIVES AMBER, AND THIS PAGE HAS NO AMBER IN IT.
+   The component paints its panel with INLINE styles —
+   background: rgba(217,119,6,0.06), borderColor: rgba(217,119,6,0.28) — so
+   the cascade cannot reach them and !important is the only lever. The
+   component is shared with the real wizard, so it is not edited: the override
+   lives here and applies only inside this page.
+
+   The selector matches the inline VALUE rather than a position in the tree
+   (no :first-child, no nth-child), so re-arranging the component's markup
+   cannot silently detach it. What can detach it is the component changing its
+   amber to some other colour — at which point the panel simply goes back to
+   its own styling, which is a visible miss rather than a broken layout. */
+.zb-analyzer [style*="217, 119, 6"] {
+  background: rgba(94, 106, 210, 0.07) !important;
+  border-color: rgba(94, 106, 210, 0.28) !important;
+}
+.zb-note {
+  margin: 0.875rem 0 0;
+  border-radius: var(--r-control);
+  padding: 0.625rem 0.75rem;
+  font-size: 12px; font-weight: 500; line-height: 1.75;
+  color: var(--violet);
+  background: rgba(94, 106, 210, 0.08);
+}
+
+/* ---- the corner mark ----------------------------------------------------
+   A violet bracket on two opposite corners of every card. It is drawn on
+   pseudo-elements over the card's own radius, so it reads as part of the
+   corner rather than as a sticker on top of one, and it opens on hover.
+   Two corners rather than four: a full frame is a border, and a border is the
+   thing the ring token already does.
+------------------------------------------------------------------------- */
+.zb-card, .zb-meter { position: relative; }
+.zb-card::before, .zb-card::after,
+.zb-meter::before, .zb-meter::after {
+  content: "";
+  position: absolute;
+  width: 26px; height: 26px;
+  pointer-events: none;
+  border-color: var(--violet);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.5;
+  transition: opacity 320ms var(--ease-out), width 320ms var(--ease-out), height 320ms var(--ease-out);
+}
+.zb-card::before, .zb-meter::before {
+  inset-block-start: -1px; inset-inline-start: -1px;
+  border-block-start-width: 2px; border-inline-start-width: 2px;
+  border-start-start-radius: var(--r-panel);
+}
+.zb-card::after, .zb-meter::after {
+  inset-block-end: -1px; inset-inline-end: -1px;
+  border-block-end-width: 2px; border-inline-end-width: 2px;
+  border-end-end-radius: var(--r-panel);
+}
+.zb-meter::before, .zb-meter::after { width: 18px; height: 18px; }
+.zb-meter::before { border-start-start-radius: var(--r-card); }
+.zb-meter::after { border-end-end-radius: var(--r-card); }
+@media (hover: hover) {
+  .zb-card:hover::before, .zb-card:hover::after { opacity: 1; width: 34px; height: 34px; }
+}
+.zb-card:focus-within::before, .zb-card:focus-within::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .zb-card::before, .zb-card::after, .zb-meter::before, .zb-meter::after { transition: none; }
+}
+
 /* ---- arrival ------------------------------------------------------------
    Under .zb-js only, so a browser that never runs the script reads a
    finished form. A card that rests invisible has shipped on this codebase
@@ -972,6 +1130,7 @@ textarea.zb-in { resize: vertical; min-height: 84px; }
   .zb-step-t { max-width: 9rem; }
 }
 @media (max-width: 680px) {
+  .zb-skip { order: 4; flex-basis: 100%; justify-content: center; }
   .zb-grid { grid-template-columns: minmax(0, 1fr); }
   .zb-presets { grid-template-columns: minmax(0, 1fr); }
   .zb-sum { grid-template-columns: repeat(2, minmax(0,1fr)); }
