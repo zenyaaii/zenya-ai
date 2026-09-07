@@ -166,7 +166,11 @@ const COMPARE = [
 ]
 
 const NAV: Array<{ href: string; label: string; tray?: boolean; current?: boolean }> = [
-  { href: "/themes", label: "القوالب", tray: true },
+  // The candidate catalogue, not the live one. This pointed at /themes because
+  // /demo/templates did not exist when this page was built; now that it does,
+  // the deck's own header should keep a reader inside the candidate set rather
+  // than dropping them onto the production site mid-review.
+  { href: "/demo/templates", label: "القوالب", tray: true },
   { href: "/demo/pricing", label: "الأسعار", current: true },
   { href: "/contact", label: "تواصل" },
 ]

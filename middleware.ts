@@ -265,13 +265,20 @@ export async function middleware(request: NextRequest) {
   //
   // ADDING A PAGE IS ONE LINE: put its segment in DEMO_SUBDOMAIN_PAGES.
   //
-  // Anything not on that list 404s, and the allowlist is the point rather than
-  // tidiness. Falling through instead would let the real marketing site leak
-  // onto this host — /themes, /pricing and /contact all exist at the root, so
-  // demo.zenyaai.co/themes would quietly serve the live catalogue.
+  // Anything not on that list is SENT TO THE APEX, and both halves of that
+  // matter. It must not be served here: /themes, /pricing and /contact all
+  // exist at the root, so falling through would quietly put the live marketing
+  // site on this host. And it must not dead-end either — these pages link out
+  // constantly (the header's تواصل, the tray's eight theme demos, every column
+  // in the footer), and 404ing all of it made the host a trap. Redirecting
+  // hands the reader the real page at its real address.
   //
-  // Rewrite, not redirect, so the address stays on the subdomain. Every page
-  // here is noindex, so a second host does not put a duplicate in the index.
+  // 307, not 308: the allowlist grows as candidate pages ship, and a permanent
+  // redirect would sit in browser caches contradicting it the day /login moves
+  // onto this host.
+  //
+  // Allowlisted paths are REWRITTEN, so the address stays on the subdomain.
+  // Every page here is noindex, so a second host adds no duplicate to the index.
   if (host === 'demo.zenyaai.co') {
     if (
       pathname.startsWith('/_next/') ||
@@ -282,13 +289,14 @@ export async function middleware(request: NextRequest) {
     }
 
     const segment = pathname === '/' ? 'home' : pathname.replace(/^\//, '').replace(/\/$/, '')
-    const url = request.nextUrl.clone()
-    url.pathname = DEMO_SUBDOMAIN_PAGES.has(segment)
-      ? `/demo/${segment}`
-      : // A path with no route under /demo, so Next renders its own 404 rather
-        // than this host exposing a page that does not belong to it.
-        '/demo/_not-a-demo-page'
-    return NextResponse.rewrite(url)
+    if (DEMO_SUBDOMAIN_PAGES.has(segment)) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/demo/${segment}`
+      return NextResponse.rewrite(url)
+    }
+    return NextResponse.redirect(
+      new URL(pathname + request.nextUrl.search, 'https://zenyaai.co'),
+    )
   }
 
   // ---- dashboard.zenyaai.co → dashboard portal (like Shopify admin) ---------
