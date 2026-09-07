@@ -6,6 +6,7 @@ const OWN_HOSTS = new Set([
   'www.zenyaai.co',
   'dashboard.zenyaai.co',
   'accounts.zenyaai.co',
+  'demo.zenyaai.co',
   'localhost',
   'localhost:3000',
 ])
@@ -15,6 +16,14 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
   'dashboard',
   'accounts',
+  // Reserved so the candidate pages get their own address. Without this entry
+  // the wildcard below claims it: demo.zenyaai.co rewrites to /s/demo, a
+  // customer site that does not exist, and the host 404s. Verified before this
+  // change — demo.zenyaai.co already resolved to Vercel through the
+  // *.zenyaai.co wildcard and returned exactly the same 404 as any random
+  // subdomain. Reserving the name is what makes the host ours; no DNS record
+  // needs to change.
+  'demo',
 ])
 
 /**
@@ -219,6 +228,38 @@ export async function middleware(request: NextRequest) {
     const h = new Headers(request.headers)
     h.set('x-zenya-site', '1')
     return NextResponse.rewrite(url, { request: { headers: h } })
+  }
+
+  // ---- demo.zenyaai.co → the candidate pages, at their own address ---------
+  // A straight prefix map onto the existing /demo/* routes, the same mechanic
+  // dashboard.zenyaai.co uses: the URL bar shows demo.zenyaai.co/templates and
+  // never demo.zenyaai.co/demo/templates.
+  //
+  //   demo.zenyaai.co/            → /demo            (the storefront demo)
+  //   demo.zenyaai.co/templates   → /demo/templates
+  //   demo.zenyaai.co/pricing     → /demo/pricing
+  //   demo.zenyaai.co/home        → /demo/home
+  //   demo.zenyaai.co/restaurant  → /demo/restaurant  (and the other templates)
+  //
+  // Rewrite, not redirect, so the address stays on the subdomain. These pages
+  // are all noindex, so giving them a host of their own does not put a second
+  // copy of the marketing site into the index.
+  if (host === 'demo.zenyaai.co') {
+    if (
+      pathname.startsWith('/_next/') ||
+      pathname.startsWith('/api/') ||
+      pathname.startsWith('/s/')
+    ) {
+      return NextResponse.next()
+    }
+    // Already under /demo (an internal link that kept the prefix) — leave it,
+    // or the rewrite would stack into /demo/demo/...
+    if (pathname === '/demo' || pathname.startsWith('/demo/')) {
+      return await updateSession(request)
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = pathname === '/' ? '/demo' : `/demo${pathname}`
+    return NextResponse.rewrite(url)
   }
 
   // ---- dashboard.zenyaai.co → dashboard portal (like Shopify admin) ---------
