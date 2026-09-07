@@ -4,18 +4,70 @@
  * The candidate templates page. See page.tsx for why this route exists and for
  * the design read.
  *
- * THE COMPOSITION IS TWO MOVEMENTS, the same shape as /demo/pricing. The tiles
+ * THE COMPOSITION IS TWO MOVEMENTS, the same shape as /demo/pricing: the eight
  * stand directly on the ground, because the catalogue IS the page rather than
- * one item on it; the floor sits inside a dark soft-cornered panel, because it
- * is a different kind of claim. The tiles are what you choose between, the
- * panel is what is true whichever you choose. Giving the second its own ground
- * is what separates them without drawing a rule across the page, which this
- * style refuses.
+ * one item on it, and the floor sits inside a dark panel, because it is a
+ * different kind of claim. The tiles are what you choose between, the panel is
+ * what is true whichever you choose.
+ *
+ * WHAT THE FIRST BUILD GOT WRONG, all three measured on the live page at 1440
+ * before anything here was rewritten:
+ *
+ *   1. THE DARK PANEL AND THE FOOTER CAP WERE 96px APART. Both obsidian, one
+ *      above the other, with a white stripe between them: the last 44% of the
+ *      document read as one dark object interrupted by a printing fault. The
+ *      old docstring argued that two dark objects are a pattern rather than an
+ *      accident, and that is true at a distance and false at 96px. The panel
+ *      now carries its own bottom margin so a full band of paper separates the
+ *      two, and .zf's own clamp(3.5rem, 8vw, 6rem) is no longer the only gap.
+ *
+ *   2. THE PANEL WAS A SLAB SIZED FOR SOMETHING BIGGER. Four short columns
+ *      centred inside 1003x368, with the rest of it padding. It is a
+ *      two-column asymmetric block now — the claim and its call on the start
+ *      side, the four facts as a 2x2 on the end side — and 241 tall instead
+ *      of 368.
+ *
+ *      A NOTE ON THE MEASUREMENT, because the obvious number is a trap. Text
+ *      density, taken as the union of every text run's client rects over the
+ *      section's area, went 8.9% -> 14.3%. That reads like the diagnosis and
+ *      it is not one: the same measure on /demo/pricing's comparison, the
+ *      dark section on this site that genuinely earns its ground, is 5.9%,
+ *      and on the shared footer cap it is 2.2%. Both look fine. So density
+ *      alone never explained the fault, and a density target set without
+ *      measuring those two first would have been invented. What was actually
+ *      wrong is (1) above and the centred four-column layout. Do not tune
+ *      this panel against a percentage.
+ *
+ *   3. THE TILES SPENT 45% OF THEIR HEIGHT ON A PLATE THAT WAS 26% INK, and
+ *      the biggest thing on that plate was an outlined button repeated eight
+ *      times inside tiles that were already entirely a link to the same URL.
+ *      Eight identical buttons is the chrome competing with the covers, which
+ *      is the one thing this page's design read forbids. The plate is three
+ *      tight lines now and the whole card is the link.
+ *
+ * THE GRID IS 2 THEN 3, AND IT COMES OUT OF THE OLD MEASUREMENT RATHER THAN
+ * OVER IT. Tile scale was chosen on legibility, criterion written down first:
+ * a tile only works if the template's own Arabic hero type survives at tile
+ * size. Rendered at 1440 and cropped 1:1 (rendered px, under ZoomLock's 0.85):
+ *
+ *     2 across -> cover 490x306   headline, sub-copy and buttons all legible
+ *     3 across -> cover 318x199   headline crisp, sub-copy and buttons legible
+ *     4 across -> cover 233x146   headline survives, everything else texture
+ *
+ * That test names two good sizes, not one. So the first two templates in the
+ * catalogue's own order lead at 2-across, where everything in the cover reads,
+ * and the remaining six run 3 and 3 beneath them. Eight lands square, the
+ * ragged 3+3+2 final row is gone, and the page changes pace once instead of
+ * repeating one row three times. The lead pair is the first two in the array,
+ * so nothing is re-sorted and no template is ranked.
+ *
+ * The mechanic is a SIX-column grid: a 3-across tile spans 2 and a 2-across
+ * tile spans 3. One track system, so the two sizes cannot drift apart, and the
+ * narrow breakpoints collapse it by changing the span rather than the grid.
  *
  * THE DARK PANEL IS ادر'S INVERSION, deliberately the same values as the
  * pricing page's comparison: #131316 with #97a0ee for type, because the flat
- * primary falls under 4.5:1 on that ground. Two dark objects on one page is a
- * pattern, not an accident; here they are the panel and the footer cap.
+ * primary falls under 4.5:1 on that ground.
  *
  * THE HEADER IS THE SIBLING'S, MECHANIC AND ALL. Sticky so there is something
  * behind it to reflect, a 1fr auto 1fr grid so the words hold the middle while
@@ -41,7 +93,7 @@
  */
 
 import { useEffect, useRef, useState } from "react"
-import { Menu, X } from "lucide-react"
+import { ArrowLeft, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
@@ -62,6 +114,9 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * from lib/template-pages.tsx, `tagline` / `sections` / `presets` / `demo` from
  * the live catalogue at app/(main)/themes/page.tsx, and `shopify` from the same
  * flag that page renders as شوبيفاي / مباشر. Exactly one template carries it.
+ *
+ * The order is load-bearing now: the first two lead the grid at 2-across. It
+ * is the array's existing order, not a ranking.
  */
 const TEMPLATES = [
   { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            shopify: true },
@@ -73,6 +128,20 @@ const TEMPLATES = [
   { id: "services",    label: "خدمات",  name: "موقع خدمات",                tagline: "خدمات محلية · حِرف",       sections: 13, presets: 4, demo: "/demo/services" },
   { id: "wellness",    label: "عافية",  name: "موقع مركز عافية",           tagline: "سبا · يوغا · عافية",       sections: 12, presets: 3, demo: "/demo/wellness" },
 ] as const
+
+/* How many tiles lead the grid at 2-across. Two, because eight minus two is
+   six and six divides by three: the ragged final row exists or does not exist
+   on this one number. */
+const LEAD = 2
+
+/**
+ * The lede's three totals, summed from the array above rather than typed out,
+ * so they cannot drift when a template's counts change. They are the only
+ * numbers on the page that are not already on a tile, and they are arithmetic
+ * on real data, not a claim.
+ */
+const TOTAL_SECTIONS = TEMPLATES.reduce((n, t) => n + t.sections, 0)
+const TOTAL_PRESETS = TEMPLATES.reduce((n, t) => n + t.presets, 0)
 
 /**
  * The floor: what is true of all eight.
@@ -198,13 +267,33 @@ export default function TemplatesView() {
     return () => io.disconnect()
   }, [narrow])
 
-  /* One tile, so the grid and the deck cannot drift apart. */
+  /**
+   * One tile, so the grid and the deck cannot drift apart.
+   *
+   * `lead` is the 2-across size, and it is a data attribute rather than a
+   * second component: the two sizes differ by a column span and two type
+   * steps, and everything else about them has to stay identical or the grid
+   * stops reading as one set of things.
+   *
+   * THE WHOLE CARD IS ONE LINK, AND EXACTLY ONE TAB STOP. The cover is inert
+   * and the name carries the href; the name's ::after is stretched over the
+   * card, so a pointer can press anywhere and a keyboard gets one focusable
+   * element with the template's own name as its accessible name. The previous
+   * build had two links per tile to the same URL, which is sixteen tab stops
+   * for eight destinations.
+   */
   const tile = (t: (typeof TEMPLATES)[number], i: number) => (
-    <article key={t.id} className="zt-tile" data-reveal style={{ ["--i" as string]: String(i) }}>
+    <article
+      key={t.id}
+      className="zt-tile"
+      data-lead={i < LEAD ? "true" : undefined}
+      data-reveal
+      style={{ ["--i" as string]: String(i) }}
+    >
       {/* The cover is the tile's whole top. object-position: top keeps every
           template's own hero intact, which matters because the eight
           screenshots do not share an aspect ratio (measured: 1.07 to 1.71). */}
-      <Link href={t.demo} className="zt-shot" aria-label={"معاينة " + t.name}>
+      <div className="zt-shot">
         {/* A plain img, deliberately, and the same choice every other
             theme-cover surface makes: themePreview() returns the resolver route
             /api/theme-preview/<id>, which 302s to whichever file is on disk.
@@ -212,26 +301,34 @@ export default function TemplatesView() {
             the thing the resolver exists to keep out of the components. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={themePreview(t.id)} alt={"معاينة قالب " + t.name} loading="lazy" decoding="async" />
+        {/* The screenshots are not all dark at the top: atlas, studio and
+            lookbook open on near-white, and against a white card they lose
+            their own top edge. A hairline drawn OVER the image gives every
+            cover the same definite boundary. It has to be a pseudo-element:
+            an inset shadow on the box sits under the img that fills it. */}
+        <span className="zt-edge" aria-hidden />
         {/* The "in" guard, not a bare t.shopify: `as const` makes TEMPLATES a
             union in which only the one Shopify entry carries the key at all.
             Same idiom the sibling uses for its optional badge. */}
         {"shopify" in t && t.shopify ? <span className="zt-flag">شوبيفاي</span> : null}
-      </Link>
+      </div>
 
       <div className="zt-body">
         <p className="zt-tag">{t.tagline}</p>
-        <h3 className="zt-name">{t.name}</h3>
+        {/* RTL: forward is left, so the arrow follows the name rather than
+            leading it. It sits NEXT TO the name and not at the far end of the
+            row: pushed to the edge by space-between it was 200px of empty
+            plate away from the word it belongs to and read as a stray glyph. */}
+        <h3 className="zt-name">
+          <Link href={t.demo} className="zt-name-link">{t.name}</Link>
+          <ArrowLeft className="zt-arrow" size={16} strokeWidth={1.75} aria-hidden />
+        </h3>
         {/* Real counts, from the catalogue's own data. */}
         <p className="zt-meta">
           <span>{t.sections} قسمًا</span>
           <span className="zt-dot" aria-hidden>·</span>
           <span>{t.presets} أنماط جاهزة</span>
         </p>
-        <span className="zt-cta">
-          <SlideButton href={t.demo} slide="افتح المعاينة" variant="quiet">
-            معاينة القالب
-          </SlideButton>
-        </span>
       </div>
     </article>
   )
@@ -356,23 +453,51 @@ export default function TemplatesView() {
         </div>
       </header>
 
+      {/* THE LEDE IS NOT CENTRED. A centred display line over a centred subline
+          is the safest possible opening and it made the catalogue read as a
+          brochure; start-aligned, it hangs off the same edge as the grid below
+          it, so the two share one margin and the page has a spine. The totals
+          take the far end of the same row: real arithmetic on the array, and
+          the one place on the page that states the size of the catalogue. */}
       <div className="zt-lede" data-reveal>
-        <h1 className="zt-h1">
-          ثمانية قوالب.
-          <br />
-          كلّها جاهزة للنشر.
-        </h1>
-        <p className="zt-lede-sub">
-          كل قالب موقع كامل بالعربية — تختار واحدًا، وتكتب نبذة عن نشاطك، ويكتب
-          الذكاء الاصطناعي الباقي. المعاينة مجانية.
-        </p>
+        <div className="zt-lede-say">
+          <h1 className="zt-h1">
+            ثمانية قوالب.
+            <br />
+            كلّها جاهزة للنشر.
+          </h1>
+          <p className="zt-lede-sub">
+            كل قالب موقع كامل بالعربية — تختار واحدًا، وتكتب نبذة عن نشاطك، ويكتب
+            الذكاء الاصطناعي الباقي. المعاينة مجانية.
+          </p>
+        </div>
+        {/* "107 قسمًا" on its own reads as a count PER template, which would
+            be a false claim: it is the sum across all eight. The caption is
+            what makes the three numbers honest, and it costs one line. */}
+        <div className="zt-tally">
+          <p className="zt-tally-cap">في المجموع</p>
+          <dl className="zt-tally-row">
+            <div className="zt-tally-item">
+              <dt>قوالب</dt>
+              <dd>{TEMPLATES.length}</dd>
+            </div>
+            <div className="zt-tally-item">
+              <dt>أقسام</dt>
+              <dd>{TOTAL_SECTIONS}</dd>
+            </div>
+            <div className="zt-tally-item">
+              <dt>أنماط جاهزة</dt>
+              <dd>{TOTAL_PRESETS}</dd>
+            </div>
+          </dl>
+        </div>
       </div>
 
       {/* The tiles stand on the ground. They are the page, not an item on it.
-          ONE TILE, TWO LAYOUTS. Wide, they are a contact sheet. On a phone a
-          grid of eight becomes eight postage stamps stacked into a very long
-          scroll, so they are a deck: one card in front, its neighbours visibly
-          behind it, and a finger between them. */}
+          ONE TILE, TWO LAYOUTS. Wide, they are a contact sheet with a lead
+          pair. On a phone a grid of eight becomes eight postage stamps stacked
+          into a very long scroll, so they are a deck: one card in front, its
+          neighbours visibly behind it, and a finger between them. */}
       {narrow ? (
         <SwipeStack
           className="zt-swipe"
@@ -387,26 +512,30 @@ export default function TemplatesView() {
         </section>
       )}
 
-      {/* The floor, on its own ground. What is true whichever tile you pick. */}
+      {/* The floor, on its own ground. What is true whichever tile you pick.
+          Two columns, uneven: the claim and its call on the start side, the
+          four facts as a 2x2 on the end side. Centring all of it inside a slab
+          is what left the first build at 8.9% ink. */}
       <section className="zt-panel" aria-labelledby="zt-panel-h" data-reveal>
-        <div className="zt-panel-head">
-          <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
-          <p className="zt-h2-sub">الاختلاف في الشكل، لا في ما تحصل عليه.</p>
-        </div>
-
-        <div className="zt-floor">
-          {FLOOR.map((f, i) => (
-            <div key={f.head} className="zt-floor-item" data-reveal style={{ ["--i" as string]: String(i) }}>
-              <h3 className="zt-floor-head">{f.head}</h3>
-              <p className="zt-floor-body">{f.body}</p>
+        <div className="zt-panel-grid">
+          <div className="zt-panel-say">
+            <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
+            <p className="zt-h2-sub">الاختلاف في الشكل، لا في ما تحصل عليه.</p>
+            <div className="zt-panel-cta">
+              <SlideButton href="/theme/new" variant="violet" slide="ابدأ الآن">
+                ابدأ الإنشاء
+              </SlideButton>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="zt-panel-cta">
-          <SlideButton href="/theme/new" variant="violet" slide="ابدأ الآن">
-            ابدأ الإنشاء
-          </SlideButton>
+          <div className="zt-floor">
+            {FLOOR.map((f, i) => (
+              <div key={f.head} className="zt-floor-item" data-reveal style={{ ["--i" as string]: String(i) }}>
+                <h3 className="zt-floor-head">{f.head}</h3>
+                <p className="zt-floor-body">{f.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -438,6 +567,13 @@ const CSS = `
   --r-panel: 28px;
   --r-card: 16px;
   --r-control: 10px;
+  /* The card's internal margin. The cover and every line of type hang off it,
+     which is the whole reason the plate looks aligned rather than inset. */
+  --inset: 10px;
+
+  /* The measure everything on this page hangs off. The lede, the grid and the
+     panel all take it, which is what gives the composition one spine. */
+  --page: 1180px;
 
   position: relative;
   min-height: 100%;
@@ -646,78 +782,135 @@ const CSS = `
 .zt-tray-row:hover { background: rgba(0, 0, 0, 0.04); color: var(--obsidian); }
 .zt-tray-row[data-current="true"] { color: var(--obsidian); }
 
-/* ---- the lede ----------------------------------------------------------- */
+/* ---- the lede -----------------------------------------------------------
+   Start-aligned, on the grid's own edge, with the totals at the far end of the
+   same row. The baseline rule is what makes the row read as one line of
+   information rather than two blocks that happen to be adjacent: the tally's
+   first row sits on the h1's first baseline.
+------------------------------------------------------------------------- */
 
-.zt-lede { text-align: center; margin: clamp(2.5rem, 6vw, 4rem) auto clamp(2.5rem, 6vw, 3.75rem); max-width: 46rem; }
+.zt-lede {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* Top-aligned, not bottom. Bottom-aligned put the totals under the subline
+     with the whole end-top corner empty above them, which stranded them in the
+     middle of the page. Against the top they answer the display line. */
+  align-items: start;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  max-width: var(--page);
+  margin: clamp(3rem, 7vw, 5rem) auto clamp(2.5rem, 5vw, 3.5rem);
+}
 .zt-h1 {
   margin: 0;
-  font-size: clamp(30px, 5vw, 52px);
+  font-size: clamp(30px, 4.4vw, 50px);
   font-weight: 900;
   /* Arabic leading stays well above 1.24 so descenders are never clipped. */
-  line-height: 1.36;
+  line-height: 1.3;
   letter-spacing: 0;
   color: var(--obsidian);
 }
 .zt-lede-sub {
-  margin: 1.125rem auto 0; max-width: 36rem;
+  margin: 1.125rem 0 0; max-width: 40ch;
   font-size: 16px; font-weight: 500; line-height: 1.9; color: var(--stone);
+}
+/* Three totals, summed from the array. Tabular figures so the three numbers
+   sit on one optical grid instead of three different widths, and the number
+   above its own label so the row scans as figures rather than as a sentence. */
+.zt-tally { padding-top: 0.625rem; }
+.zt-tally-cap {
+  margin: 0 0 0.875rem;
+  font-size: 11.5px; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0.06em; color: var(--stone);
+}
+.zt-tally-row {
+  display: flex; align-items: flex-start; gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  margin: 0; padding: 0;
+}
+.zt-tally-item { display: flex; flex-direction: column; gap: 0.1875rem; }
+.zt-tally dt {
+  order: 2;
+  font-size: 12px; font-weight: 500; line-height: 1.6;
+  letter-spacing: 0; color: var(--stone);
+}
+.zt-tally dd {
+  order: 1; margin: 0;
+  font-size: clamp(26px, 2.4vw, 32px); font-weight: 900; line-height: 1.24;
+  color: var(--obsidian);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- the eight, standing on the ground ----------------------------------
-   THREE ACROSS, AND THE MEASUREMENT OVERTURNED THE GUESS. Each cover is a
-   screenshot of an Arabic page, so the criterion is set before looking: a tile
-   only does its job if the template's own hero type survives at tile size.
-   Two across was the prediction. It lost.
+   SIX TRACKS, TWO SPANS. A lead tile spans 3 of 6 (two across), the rest span
+   2 of 6 (three across). One track system rather than two grids, so the two
+   sizes share a gutter and cannot drift apart.
 
-   Rendered on this page at 1440 and measured (rendered px, under ZoomLock's
-   0.85 zoom), then cropped at native resolution and compared 1:1:
+   The scale is the old measurement, used rather than replaced. Rendered on
+   this page at 1440 (rendered px, under ZoomLock's 0.85 zoom), cropped at
+   native resolution and compared 1:1:
 
      2 across -> cover 490x306   headline, sub-copy and buttons all legible
      3 across -> cover 318x199   headline crisp, sub-copy and buttons legible
      4 across -> cover 233x146   headline survives, everything else is texture
 
-   Three is the smallest tile at which the cover still communicates, which is
-   exactly the thing being chosen. Two clears the bar by a wide margin and
-   costs the catalogue its shape: at two, an eight-item index becomes four
-   screens of scrolling and stops reading as an index at all. Four is where the
-   sub-copy and the button labels go, and a preview nobody can read is
+   The test names TWO good sizes. The first build picked one of them and paid
+   for it with a ragged 3 + 3 + 2 final row, which it accepted as the cheapest
+   of three costs. Using both sizes is cheaper still: eight is 2 + 3 + 3, the
+   last row is square, and the page changes pace once. Four across is still
+   rejected, on the same evidence as before — a preview nobody can read is
    decoration.
-
-   What is rejected, and why it is worth writing down: the last row is 3 + 3 + 2
-   and therefore ragged. Squaring it by going to four costs legibility, which
-   is the criterion; squaring it by spanning the last two tiles wider would be
-   a bento layout, which is decoration this style refuses. A ragged final row
-   is the cheapest of the three costs.
 --------------------------------------------------------------------------- */
 
 .zt-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1rem, 2.4vw, 1.75rem);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(1rem, 2.2vw, 1.75rem);
   align-items: stretch;
-  max-width: 1180px;
+  max-width: var(--page);
   margin: 0 auto;
 }
+.zt-tile { grid-column: span 2; }
+.zt-tile[data-lead] { grid-column: span 3; }
+
 .zt-tile {
+  position: relative;
   display: flex; flex-direction: column;
-  overflow: hidden;
   border-radius: var(--r-card);
   background: var(--card);
   /* Elevation is stacked hairline rings, never a drop shadow. Cards are not
-     keys: the six-layer recipe is scoped to what you press. */
+     keys: the six-layer recipe is scoped to what you press. The ring firms up
+     on hover instead of the card lifting, because nothing on this page floats. */
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 0 0 4px rgba(250, 250, 250, 0.55);
+  transition: box-shadow 320ms var(--ease-out);
+}
+@media (hover: hover) {
+  .zt-tile:hover { box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.20), 0 0 0 4px rgba(250, 250, 250, 0.55); }
 }
 /* The cover. A fixed ratio because the eight screenshots do not share one
    (measured: 1.07 to 1.71), and cropping from the top is what keeps every
    template's own hero intact. The ground under it is obsidian rather than a
    grey, so a cover that fails to load reads as a deliberate dark plate and
    never as a broken image — there is no Unsplash fallback here on purpose. */
+/* ONE INSET, AND EVERYTHING INSIDE THE CARD HANGS OFF IT. The cover is framed
+   rather than flush, decided by rendering both at 1:1 and looking:
+
+     flush  - the screenshot runs into the card's own top corners, so it reads
+              as the card's lid, and the type below it is inset from an edge
+              the image ignores. At lead size that misalignment is plain.
+     inset  - the cover is an object ON the card, its edge is defined on all
+              four sides (which the pale-topped covers need), and the type's
+              edge lines up with the cover's.
+
+   It costs cover width: 301 at 3-across rather than 318. That is still inside
+   the legible band the scale was chosen from, well clear of the 233 at which
+   the Arabic collapses to texture, and re-cropped 1:1 to confirm it. */
 .zt-shot {
   position: relative;
   display: block;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: var(--onyx);
+  margin: var(--inset) var(--inset) 0;
+  border-radius: var(--r-control);
 }
 .zt-shot img {
   width: 100%; height: 100%;
@@ -726,8 +919,15 @@ const CSS = `
   transform: scale(1.001);
   transition: transform 620ms var(--ease-out);
 }
+/* Drawn over the image, so the pale-topped covers keep a definite edge. */
+.zt-edge {
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.10);
+  pointer-events: none;
+}
 @media (hover: hover) {
-  .zt-tile:hover .zt-shot img { transform: scale(1.03); }
+  .zt-tile:hover .zt-shot img { transform: scale(1.035); }
 }
 @media (prefers-reduced-motion: reduce) {
   .zt-shot img, .zt-tile:hover .zt-shot img { transition: none; transform: none; }
@@ -746,56 +946,98 @@ const CSS = `
   box-shadow: 0 0 0 1px rgba(250, 250, 250, 0.16);
 }
 
-.zt-body { display: flex; flex-direction: column; flex: 1; padding: 1.375rem 1.375rem 1.25rem; }
+/* Three tight lines, not four stacked bands with a button under them. */
+.zt-body {
+  display: flex; flex-direction: column;
+  padding: 0.8125rem var(--inset) 0.9375rem;
+}
 .zt-tag {
-  margin: 0 0 0.5rem;
+  margin: 0;
   font-size: 11.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0.06em; color: var(--stone);
 }
 .zt-name {
-  margin: 0;
-  font-size: clamp(18px, 1.7vw, 21px); font-weight: 900; line-height: 1.45;
+  display: flex; align-items: center; gap: 0.4375rem;
+  margin: 0.3125rem 0 0; min-width: 0;
+  font-size: 18px; font-weight: 900; line-height: 1.45;
   letter-spacing: 0; color: var(--obsidian);
 }
+.zt-tile[data-lead] .zt-name { font-size: clamp(19px, 1.6vw, 22px); }
+.zt-name-link { color: inherit; text-decoration: none; }
+/* The whole card, from one link. One tab stop per tile, named by the template. */
+.zt-name-link::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: var(--r-card);
+}
+.zt-name-link:focus-visible::after {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+}
+.zt-arrow {
+  flex: 0 0 auto; color: #b4b4bb;
+  transition: transform 320ms var(--ease-out), color 320ms var(--ease-out);
+}
+@media (hover: hover) {
+  .zt-tile:hover .zt-arrow { transform: translateX(-4px); color: var(--obsidian); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zt-arrow, .zt-tile:hover .zt-arrow { transition: none; transform: none; }
+}
 .zt-meta {
-  margin: 0.5rem 0 0;
-  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  margin: 0.25rem 0 0;
+  display: flex; align-items: center; gap: 0.4375rem; flex-wrap: wrap;
+  font-size: 12.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
 }
 .zt-dot { color: #b4b4bb; }
-.zt-cta { display: block; margin-top: 1.125rem; max-width: 12rem; }
 
-/* ---- the floor, on its own ground --------------------------------------- */
+/* ---- the floor, on its own ground ---------------------------------------
+   TWO COLUMNS, UNEVEN, AND A BAND OF PAPER UNDER IT. The margin-bottom is not
+   taste: .zf carries margin-top clamp(3.5rem, 8vw, 6rem), which is 96 CSS px,
+   and two obsidian objects 96px apart read as one object with a fault through
+   it rather than as two claims.
+
+   THE MARGIN DOES NOT ADD TO .zf'S, IT REPLACES IT. The panel and the footer
+   are adjacent siblings, so their vertical margins COLLAPSE to the larger of
+   the two — the first build of this rule set 10rem here, measured the gap, and
+   got 158 CSS px rather than the 256 it expected. The number below is
+   therefore the WHOLE gap, not an addition to one. Measured after: 237 CSS px.
+
+   It is deliberately wider than the 96px above the panel. The panel is about
+   the eight, so it belongs to the catalogue; the footer is site chrome and
+   belongs to nothing on this page.
+------------------------------------------------------------------------- */
 
 .zt-panel {
-  max-width: 1180px;
-  margin: clamp(3.5rem, 8vw, 6rem) auto 0;
-  padding: clamp(2.25rem, 5vw, 3.5rem) clamp(1.25rem, 3.5vw, 3rem) clamp(2rem, 4vw, 3rem);
+  max-width: var(--page);
+  margin: clamp(3.5rem, 8vw, 6rem) auto clamp(7rem, 17vw, 15rem);
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.75rem);
   border-radius: var(--r-panel);
   background: var(--onyx);
 }
-.zt-panel-head { text-align: center; margin-bottom: clamp(1.75rem, 4vw, 2.5rem); }
-.zt-h2 {
-  margin: 0; font-size: clamp(24px, 3.4vw, 36px); font-weight: 900;
-  line-height: 1.36; letter-spacing: 0; color: var(--ground);
+.zt-panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr);
+  gap: clamp(1.75rem, 4vw, 3.25rem);
+  align-items: start;
 }
-.zt-h2-sub { margin: 0.75rem 0 0; font-size: 15px; font-weight: 500; line-height: 1.85; color: #a8a8b2; }
+.zt-h2 {
+  margin: 0; font-size: clamp(24px, 3vw, 34px); font-weight: 900;
+  line-height: 1.32; letter-spacing: 0; color: var(--ground);
+}
+.zt-h2-sub { margin: 0.75rem 0 0; font-size: 15px; font-weight: 500; line-height: 1.8; color: #a8a8b2; }
+.zt-panel-cta { margin-top: clamp(1.25rem, 2.5vw, 1.75rem); max-width: 15rem; }
 
 .zt-floor {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(1.25rem, 3vw, 2.25rem);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.6vw, 1.875rem) clamp(1.5rem, 3vw, 2.5rem);
 }
 .zt-floor-head {
-  margin: 0 0 0.5rem;
-  font-size: 15px; font-weight: 900; line-height: 1.55;
+  margin: 0 0 0.375rem;
+  font-size: 15px; font-weight: 900; line-height: 1.5;
   letter-spacing: 0; color: var(--violet-lift);
 }
-.zt-floor-body { margin: 0; font-size: 13.5px; font-weight: 500; line-height: 1.85; color: #a8a8b2; }
-.zt-panel-cta {
-  display: flex; justify-content: center;
-  margin-top: clamp(2rem, 4vw, 2.75rem);
-}
-.zt-panel-cta > * { max-width: 15rem; width: 100%; }
+.zt-floor-body { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.8; color: #a8a8b2; }
 
 /* ---- arrival ------------------------------------------------------------
    The hidden half applies only under .zt-js, which the script adds on mount,
@@ -817,13 +1059,19 @@ const CSS = `
 /* The deck's cards need a definite width to stack against. */
 .zt-swipe { margin-inline: auto; }
 
-/* Below about 1060 the third column takes the cover under the 4-across
-   measurement above, so the grid drops to two before it drops to a deck. */
+@media (max-width: 1180px) {
+  .zt-lede { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .zt-tally { justify-content: flex-start; }
+}
+/* Below about 1060 a 3-across tile takes the cover under the 4-across
+   measurement above, so every tile goes to two across before it goes to a
+   deck: spans change, the six tracks do not. */
 @media (max-width: 1060px) {
-  .zt-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 800px; }
+  .zt-tile, .zt-tile[data-lead] { grid-column: span 3; }
+  .zt-grid { max-width: 820px; }
 }
 @media (max-width: 980px) {
-  .zt-floor { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .zt-panel-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 760px) {
   /* Inside the deck a tile is one card: it must not also be a grid item. */
@@ -832,6 +1080,6 @@ const CSS = `
 @media (max-width: 560px) {
   .zt-root { --r-panel: 20px; }
   .zt-floor { grid-template-columns: minmax(0, 1fr); }
-  .zt-body { padding: 1.125rem 1.125rem 1rem; }
+  .zt-body { padding: 0.6875rem var(--inset) 0.8125rem; }
 }
 `
