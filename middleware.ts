@@ -43,6 +43,7 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'pricing',
   'templates',
   'build',
+  'access',
 ])
 
 /**
