@@ -24,6 +24,36 @@ export async function updateSession(request: NextRequest, forwardedHeaders?: Hea
     },
   })
 
+  // Allow Shopify embedding and self-embedding for previews. Applied on every
+  // exit path, including the unconfigured one below, so a deployment without
+  // Supabase still serves the same frame policy.
+  const withFrameHeaders = (res: typeof response) => {
+    res.headers.delete('X-Frame-Options')
+    res.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;")
+    return res
+  }
+
+  /**
+   * NO SUPABASE CONFIGURED — SKIP THE REFRESH, DO NOT THROW.
+   *
+   * createServerClient throws "Your project's URL and Key are required to
+   * create a Supabase client!" when these are unset, and this middleware runs
+   * on very nearly every path. So a deployment missing the two public Supabase
+   * values does not degrade — EVERY route 500s, including pages that never
+   * touch auth. Measured on a fresh Vercel project: one error group, 2 users,
+   * route /middleware, and /demo/templates unreachable because of it.
+   *
+   * Skipping is the safe direction, not a bypass. All this function does is
+   * refresh the session cookie via getUser(); it never authorises anything. The
+   * gating lives in middleware.ts, which reads the session — with none present
+   * it sees an anonymous visitor and redirects protected routes to login. So
+   * an unconfigured deployment fails CLOSED: public pages render, private ones
+   * bounce. Where the env is set, nothing here changes.
+   */
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return withFrameHeaders(response)
+  }
+
   // Scope auth cookies to .zenyaai.co so the session is shared across the
   // accounts / dashboard / apex subdomains (host-only on localhost/preview).
   const cookieDomain = cookieDomainForHost(request.headers.get('host'))
@@ -105,9 +135,5 @@ export async function updateSession(request: NextRequest, forwardedHeaders?: Hea
     /* stale refresh token — leave the request untouched, don't crash */
   }
 
-  // Allow Shopify embedding and self-embedding for previews
-  response.headers.delete('X-Frame-Options')
-  response.headers.set('Content-Security-Policy', "frame-ancestors 'self' https://admin.shopify.com https://*.myshopify.com https://*.spin.dev;")
-
-  return response
+  return withFrameHeaders(response)
 }
