@@ -8,6 +8,11 @@ node_modules/
 .next/
 out/
 build/
+# ...but 'build/' above is unrooted, so it also swallows any app directory
+# called build. .gitignore anchors the same rule as '/build'; this re-includes
+# the candidate route so it is actually linted. Without it the page passes
+# eslint by never being read.
+!app/demo/build/
 public/
 shopify-theme/
 shopify-theme-v2/
