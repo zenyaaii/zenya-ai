@@ -74,15 +74,18 @@
  * the pill grows, the compact 184px pill on phones, and the deck's inverted
  * glass over dark grounds.
  *
- * ONE CORRECTION TO THAT COPY, and it is why the observer below reads .zf and
- * not .zf-inner: /demo/pricing watches ".zp-compare, .zf-inner", and .zf-inner
- * exists nowhere in the codebase — the footer's element is .zf, renamed when
- * the cap became a ground. Measured on /demo/pricing at 1440x620, scrolled to
- * the true bottom: the footer sits behind the header, data-dark is unset, and
- * the pill stays rgba(238,238,243,0.60) light glass on the obsidian cap. It
- * does not reproduce at 1440x900 because ZoomLock caps real scroll there before
- * the footer ever reaches the header, which is why it survived review. This
- * page watches the class that exists.
+ * WHY THE OBSERVER BELOW READS .zf. The footer's element is .zf; .zf-inner was
+ * never anything. /demo/pricing asked for the latter and therefore never
+ * observed its own footer, so its pill stayed light glass standing on the
+ * obsidian cap. Reproduced at the true bottom before the fix, at 1440x620 and
+ * at 390x844: footer behind the pill, data-dark unset, pill still
+ * rgba(238,238,243,0.60). It does not reproduce at 1440x900, because ZoomLock
+ * caps real scroll there before the footer ever reaches the header — which is
+ * why it survived review, and why the dark pill visible at that size comes
+ * from .zp-compare rather than from the footer.
+ *
+ * FIXED on the sibling in the same change as this rewrite. Both pages now
+ * watch the class the markup actually carries.
  *
  * MOTION IS ON ARRIVAL ONLY, and every resting state is the finished state. The
  * hidden half of each reveal is applied by a class the script adds on mount, so

@@ -270,7 +270,20 @@ export default function PricingView() {
       darks.forEach((el) => io!.observe(el))
     }
 
-    const darks = Array.from(root.querySelectorAll<HTMLElement>(".zp-compare, .zf-inner"))
+    /* .zf IS THE FOOTER CAP'S CLASS, and .zf-inner was never anything.
+       This selector asked for an element that exists nowhere in the codebase,
+       so the footer was silently not observed and the pill stayed light glass
+       standing on the obsidian cap. Reproduced at the true bottom before the
+       fix: 1440x620 and 390x844 both had the footer behind the pill with
+       data-dark unset. It survives at 1440x900 only because the root ZoomLock
+       caps real scroll there before the footer ever reaches the header, which
+       is why it passed review — and why the dark pill seen at that size comes
+       from .zp-compare rather than from the footer.
+
+       A querySelectorAll that matches nothing throws nothing. It is worth one
+       thought per selector whether the class is the one the markup actually
+       carries. */
+    const darks = Array.from(root.querySelectorAll<HTMLElement>(".zp-compare, .zf"))
     build()
     window.addEventListener("resize", build)
     return () => { io?.disconnect(); window.removeEventListener("resize", build) }
