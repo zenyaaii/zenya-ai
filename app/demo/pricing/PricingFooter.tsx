@@ -27,7 +27,7 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
   {
     head: "المنتج",
     links: [
-      { href: "/themes", label: "تصفّح القوالب" },
+      { href: "/demo/templates", label: "تصفّح القوالب" },
       { href: "/features", label: "الميزات" },
       { href: "/websites", label: "أنواع المواقع" },
       { href: "/pricing", label: "الأسعار" },

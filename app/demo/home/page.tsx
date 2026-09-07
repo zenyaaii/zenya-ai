@@ -270,7 +270,13 @@ const CLAIM_GAP = 280
 /* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
 const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
-  { href: "/themes", label: "القوالب", panel: "themes" },
+  /* The candidate catalogue, not the live one — the same reasoning as الأسعار
+     below. /themes is the page that ships today and is untouched;
+     /demo/templates is the candidate in this deck's style. Pointing the deck's
+     own header at the live catalogue dropped a reviewer out of the candidate
+     set mid-read. Point this back at /themes if the candidate is ever
+     promoted. */
+  { href: "/demo/templates", label: "القوالب", panel: "themes" },
   /* The demo's own pricing screen, not the live one. Both exist: /pricing is
      the page that takes money today and is untouched; /demo/pricing is the
      candidate in this deck's style, reviewable on the real domain without
@@ -4413,8 +4419,10 @@ export default function Page() {
                         </Link>
                       ))}
                     </div>
+                    {/* The candidate catalogue, matching the nav item this
+                        tray hangs off. */}
                     <Link
-                      href="/themes"
+                      href="/demo/templates"
                       onClick={() => setPanel(null)}
                       className={`${ROW} mt-1.5 pt-2.5`}
                       style={{ color: OBSIDIAN, borderTop: "1px solid rgba(0,0,0,0.07)" }}
