@@ -27,6 +27,24 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
 ])
 
 /**
+ * What demo.zenyaai.co serves: the house-style CANDIDATE pages, by segment.
+ *
+ * Each maps to app/demo/<segment>/page.tsx, so demo.zenyaai.co/pricing renders
+ * /demo/pricing with the address bar left alone. Ship a new candidate page and
+ * add its folder name here — that is the whole registration step.
+ *
+ * The theme demos (restaurant, atlas, lookbook, collective, studio, services,
+ * wellness, and the storefront at /demo) are NOT in this set on purpose. They
+ * preview what the product generates for a customer; they are not candidates
+ * for Zenya's own site. They keep their addresses under zenyaai.co/demo/*.
+ */
+const DEMO_SUBDOMAIN_PAGES = new Set([
+  'home',
+  'pricing',
+  'templates',
+])
+
+/**
  * Cheap "is this visitor logged in?" check for routing decisions — looks for
  * the presence of a Supabase auth-token cookie (sb-<ref>-auth-token, possibly
  * chunked). We don't validate it here; middleware just needs a signal to
@@ -230,20 +248,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url, { request: { headers: h } })
   }
 
-  // ---- demo.zenyaai.co → the candidate pages, at their own address ---------
-  // A straight prefix map onto the existing /demo/* routes, the same mechanic
-  // dashboard.zenyaai.co uses: the URL bar shows demo.zenyaai.co/templates and
-  // never demo.zenyaai.co/demo/templates.
+  // ---- demo.zenyaai.co → the CANDIDATE PAGES ONLY --------------------------
+  // This host is for the house-style candidates — the pages being designed and
+  // reviewed — and nothing else:
   //
-  //   demo.zenyaai.co/            → /demo            (the storefront demo)
-  //   demo.zenyaai.co/templates   → /demo/templates
-  //   demo.zenyaai.co/pricing     → /demo/pricing
+  //   demo.zenyaai.co/            → /demo/home
   //   demo.zenyaai.co/home        → /demo/home
-  //   demo.zenyaai.co/restaurant  → /demo/restaurant  (and the other templates)
+  //   demo.zenyaai.co/pricing     → /demo/pricing
+  //   demo.zenyaai.co/templates   → /demo/templates
   //
-  // Rewrite, not redirect, so the address stays on the subdomain. These pages
-  // are all noindex, so giving them a host of their own does not put a second
-  // copy of the marketing site into the index.
+  // The THEME demos are deliberately NOT here. /demo/restaurant, /demo/atlas,
+  // the storefront at /demo and the rest are previews of what the product
+  // generates, not candidates for Zenya's own site, and they keep their
+  // existing addresses under zenyaai.co/demo/*. Nothing was deleted; this host
+  // simply does not serve them.
+  //
+  // ADDING A PAGE IS ONE LINE: put its segment in DEMO_SUBDOMAIN_PAGES.
+  //
+  // Anything not on that list 404s, and the allowlist is the point rather than
+  // tidiness. Falling through instead would let the real marketing site leak
+  // onto this host — /themes, /pricing and /contact all exist at the root, so
+  // demo.zenyaai.co/themes would quietly serve the live catalogue.
+  //
+  // Rewrite, not redirect, so the address stays on the subdomain. Every page
+  // here is noindex, so a second host does not put a duplicate in the index.
   if (host === 'demo.zenyaai.co') {
     if (
       pathname.startsWith('/_next/') ||
@@ -252,13 +280,14 @@ export async function middleware(request: NextRequest) {
     ) {
       return NextResponse.next()
     }
-    // Already under /demo (an internal link that kept the prefix) — leave it,
-    // or the rewrite would stack into /demo/demo/...
-    if (pathname === '/demo' || pathname.startsWith('/demo/')) {
-      return await updateSession(request)
-    }
+
+    const segment = pathname === '/' ? 'home' : pathname.replace(/^\//, '').replace(/\/$/, '')
     const url = request.nextUrl.clone()
-    url.pathname = pathname === '/' ? '/demo' : `/demo${pathname}`
+    url.pathname = DEMO_SUBDOMAIN_PAGES.has(segment)
+      ? `/demo/${segment}`
+      : // A path with no route under /demo, so Next renders its own 404 rather
+        // than this host exposing a page that does not belong to it.
+        '/demo/_not-a-demo-page'
     return NextResponse.rewrite(url)
   }
 
