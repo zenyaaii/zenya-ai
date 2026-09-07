@@ -296,6 +296,28 @@ export async function middleware(request: NextRequest) {
       url.pathname = `/demo/${segment}`
       return NextResponse.rewrite(url)
     }
+
+    // THE SAME PAGE AT ITS APEX ADDRESS STAYS ON THIS HOST.
+    //
+    // The candidate pages link to each other as /demo/templates, /demo/build
+    // and so on, because that is the one href that works on zenyaai.co AND
+    // resolves to the right file. Falling through to the redirect below sent
+    // every one of those clicks off to the apex, so on this host the header
+    // nav walked the reader out of the demo on the first click — measured:
+    // demo.zenyaai.co/demo/templates answered 307 to zenyaai.co.
+    //
+    // Redirected to the clean address rather than rewritten, so a page has
+    // ONE url on this host and the reader sees demo.zenyaai.co/templates,
+    // which is the whole point of the subdomain.
+    if (segment.startsWith('demo/')) {
+      const inner = segment.slice('demo/'.length)
+      if (DEMO_SUBDOMAIN_PAGES.has(inner)) {
+        const url = request.nextUrl.clone()
+        url.pathname = `/${inner}`
+        return NextResponse.redirect(url)
+      }
+    }
+
     return NextResponse.redirect(
       new URL(pathname + request.nextUrl.search, 'https://zenyaai.co'),
     )

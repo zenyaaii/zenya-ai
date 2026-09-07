@@ -169,9 +169,23 @@ const HAND: Record<Mode, string> = {
   forgot: "أعد التعيين في زينيا",
 }
 
-export default function AccessView() {
+/**
+ * ?mode= DRIVES THE PAGE, exactly as it drives app/(main)/login, because that
+ * is how every "ابدأ" on the site links to the auth surface. It arrives as a
+ * PROP resolved on the server rather than through useSearchParams, which is
+ * what app/accounts/{login,signup} already do with initialMode.
+ *
+ * That is not a style preference. useSearchParams has to sit inside a
+ * Suspense boundary, and a client-side navigation into a suspended subtree
+ * that also carries this page's inline <style> is a shape React can fail to
+ * reconcile — the first build of this did, blanking the whole page on the
+ * very click the header CTA makes. Resolved on the server there is no
+ * boundary, no hook, and no client-side transition to get wrong.
+ */
+export default function AccessView({ initialMode = "signin" }: { initialMode?: Mode }) {
+  const initial = initialMode
   const [menuOpen, setMenuOpen] = useState(false)
-  const [mode, setMode] = useState<Mode>("signin")
+  const [mode, setMode] = useState<Mode>(initial)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
@@ -182,7 +196,7 @@ export default function AccessView() {
   const [handed, setHanded] = useState<Mode | null>(null)
   const [accounts, setAccounts] = useState<SavedAccount[]>([])
   /** The reader has asked to type credentials, so the chooser stands aside. */
-  const [typing, setTyping] = useState(false)
+  const [typing, setTyping] = useState(initial !== "signin")
   const [onDark, setOnDark] = useState(false)
 
   const rootRef = useRef<HTMLElement | null>(null)
@@ -330,7 +344,7 @@ export default function AccessView() {
             <Link href="/demo/home" aria-label="زينيا" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
             {/* The set's own end control, unchanged. On this page it doubles as
                 the exit to the real thing, which is where it already pointed. */}
-            <Link href="/login?mode=signup" className="za-account za-account-phone">ابدأ</Link>
+            <Link href="/demo/access?mode=signup" className="za-account za-account-phone">ابدأ</Link>
           </div>
           <div className="za-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -356,7 +370,7 @@ export default function AccessView() {
             </nav>
             <span className="za-side za-side-end">
               <span className="za-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="za-account">ابدأ</Link>
+              <Link href="/demo/access?mode=signup" className="za-account">ابدأ</Link>
             </span>
           </div>
         </div>

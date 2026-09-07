@@ -524,7 +524,7 @@ export default function BuildFormView() {
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
             <Link href="/demo/home" aria-label="زينيا" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
-            <Link href="/login?mode=signup" className="zb-account zb-account-phone">ابدأ</Link>
+            <Link href="/demo/access?mode=signup" className="zb-account zb-account-phone">ابدأ</Link>
           </div>
           <div className="zb-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -550,7 +550,7 @@ export default function BuildFormView() {
             </nav>
             <span className="zb-side zb-side-end">
               <span className="zb-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zb-account">ابدأ</Link>
+              <Link href="/demo/access?mode=signup" className="zb-account">ابدأ</Link>
             </span>
           </div>
         </div>

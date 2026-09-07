@@ -417,7 +417,7 @@ export default function TemplatesView() {
                   marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zt-mark-svg-sm" />
             </Link>
-            <Link href="/login?mode=signup" className="zt-account zt-account-phone">
+            <Link href="/demo/access?mode=signup" className="zt-account zt-account-phone">
               ابدأ
             </Link>
           </div>
@@ -479,7 +479,7 @@ export default function TemplatesView() {
 
             <span className="zt-side zt-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zt-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zt-account">ابدأ</Link>
+              <Link href="/demo/access?mode=signup" className="zt-account">ابدأ</Link>
             </span>
           </div>
 
@@ -574,7 +574,7 @@ export default function TemplatesView() {
             <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
             <p className="zt-h2-sub">الاختلاف في الشكل، لا في ما تحصل عليه.</p>
             <div className="zt-panel-cta">
-              <SlideButton href="/theme/new" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="/demo/build" variant="violet" slide="ابدأ الآن">
                 ابدأ الإنشاء
               </SlideButton>
             </div>

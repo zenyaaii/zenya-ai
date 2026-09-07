@@ -60,6 +60,26 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function DemoAccessPage() {
-  return <AccessView />
+type Mode = "signin" | "signup" | "forgot"
+
+/**
+ * ?mode= is read HERE, on the server, and handed down as a prop — the shape
+ * app/accounts/{login,signup} already use with initialMode, rather than the
+ * useSearchParams + Suspense shape app/(main)/login uses.
+ *
+ * Both work on a first load. Only one survives a client-side navigation into
+ * this route: a suspended subtree carrying the page's inline <style> blanked
+ * the entire page on the click the header CTA makes, which is the one click
+ * that reaches this page from anywhere else in the candidate set. No hook and
+ * no boundary means nothing to reconcile.
+ */
+export default function DemoAccessPage({
+  searchParams,
+}: {
+  searchParams?: { mode?: string }
+}) {
+  const asked = searchParams?.mode
+  const initialMode: Mode =
+    asked === "signup" || asked === "forgot" || asked === "signin" ? asked : "signin"
+  return <AccessView initialMode={initialMode} />
 }
