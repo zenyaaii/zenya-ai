@@ -120,16 +120,29 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  *
  * The order is load-bearing now: the first two lead the grid at 2-across. It
  * is the array's existing order, not a ranking.
+ *
+ * `build` IS READ PER TEMPLATE, NEVER CONSTRUCTED. Seven of the eight are
+ * /theme/new/<id>, and one_product is /build — a different route entirely.
+ * Deriving the href from the id would have sent the first tile somewhere that
+ * does not exist.
+ *
+ * `soon` MIRRORS WHAT THE LIVE CATALOGUE ACTUALLY SHOWS THE PUBLIC. The
+ * one-product builder is being rebuilt: app/(main)/themes/page.tsx gates it on
+ * "theme.id === 'one_product' && isAdmin !== true" and renders قريبًا for
+ * everyone else, with /build reachable by admins only. This page has no auth
+ * and is public, so that tile gets the قريبًا state and no build link. A violet
+ * button onto a builder the reader cannot use would be the same class of lie
+ * as an Unsplash cover standing in for a template.
  */
 const TEMPLATES = [
-  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            shopify: true },
-  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant" },
-  { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas" },
-  { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook" },
-  { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective" },
-  { id: "studio",      label: "ستوديو", name: "موقع علامة تجارية وقصة",    tagline: "قصة علامة · تحرير",        sections: 12, presets: 4, demo: "/demo/studio" },
-  { id: "services",    label: "خدمات",  name: "موقع خدمات",                tagline: "خدمات محلية · حِرف",       sections: 13, presets: 4, demo: "/demo/services" },
-  { id: "wellness",    label: "عافية",  name: "موقع مركز عافية",           tagline: "سبا · يوغا · عافية",       sections: 12, presets: 3, demo: "/demo/wellness" },
+  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            build: "/build",                  shopify: true, soon: true },
+  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant" },
+  { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas",      build: "/theme/new/atlas" },
+  { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook",   build: "/theme/new/lookbook" },
+  { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective", build: "/theme/new/collective" },
+  { id: "studio",      label: "ستوديو", name: "موقع علامة تجارية وقصة",    tagline: "قصة علامة · تحرير",        sections: 12, presets: 4, demo: "/demo/studio",     build: "/theme/new/studio" },
+  { id: "services",    label: "خدمات",  name: "موقع خدمات",                tagline: "خدمات محلية · حِرف",       sections: 13, presets: 4, demo: "/demo/services",   build: "/theme/new/services" },
+  { id: "wellness",    label: "عافية",  name: "موقع مركز عافية",           tagline: "سبا · يوغا · عافية",       sections: 12, presets: 3, demo: "/demo/wellness",   build: "/theme/new/wellness" },
 ] as const
 
 /* How many tiles lead the grid at 2-across. Two, because eight minus two is
@@ -326,12 +339,40 @@ export default function TemplatesView() {
           <Link href={t.demo} className="zt-name-link">{t.name}</Link>
           <ArrowLeft className="zt-arrow" size={16} strokeWidth={1.75} aria-hidden />
         </h3>
-        {/* Real counts, from the catalogue's own data. */}
-        <p className="zt-meta">
-          <span>{t.sections} قسمًا</span>
-          <span className="zt-dot" aria-hidden>·</span>
-          <span>{t.presets} أنماط جاهزة</span>
-        </p>
+        {/* Real counts on the start, the build control on the end. One row, so
+            the action costs the plate a line of height rather than a band. */}
+        <div className="zt-foot">
+          <p className="zt-meta">
+            <span>{t.sections} قسمًا</span>
+            <span className="zt-dot" aria-hidden>·</span>
+            <span>{t.presets} أنماط جاهزة</span>
+          </p>
+
+          {/* THE BUILD CONTROL MUST BE RAISED ABOVE THE STRETCHED LINK.
+              .zt-name-link::after covers the whole card so the tile is
+              clickable anywhere; without a stacking context of its own this
+              button sits UNDER that overlay and every press opens the preview
+              instead. .zt-act carries position/z-index for exactly that. */}
+          <span className="zt-act">
+            {"soon" in t && t.soon ? (
+              /* What the live catalogue shows the public for this one. Not a
+                 button: there is nothing behind it to press. */
+              <span className="zt-soon" title="نعمل على نسخة جديدة كليًا — قريبًا">
+                قريبًا
+              </span>
+            ) : (
+              /* SlideButton takes no aria-label — it builds the accessible
+                 name from children, into its own visually-hidden .sb-a11y
+                 copy. Left as bare "ابنِ" that is eight links with identical
+                 names in one list, so the template rides along hidden: the
+                 visible face still reads ابنِ, the name reads ابنِ بقالب مطعم.
+                 Same shape as the live catalogue's aria-label. */
+              <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-build">
+                ابنِ<span className="sr-only">{" بقالب " + t.label}</span>
+              </SlideButton>
+            )}
+          </span>
+        </div>
       </div>
     </article>
   )
@@ -886,8 +927,11 @@ const CSS = `
   transition: box-shadow 320ms var(--ease-out);
 }
 @media (hover: hover) {
-  .zt-tile:hover { box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.20), 0 0 0 4px rgba(250, 250, 250, 0.55); }
+  /* The violet arrives on the ring only while the card is pointed at, so the
+     resting page keeps its colour budget on the covers. */
+  .zt-tile:hover { box-shadow: 0 0 0 1px rgba(94, 106, 210, 0.42), 0 0 0 4px rgba(250, 250, 250, 0.55); }
 }
+.zt-tile:focus-within { box-shadow: 0 0 0 1px rgba(94, 106, 210, 0.42), 0 0 0 4px rgba(250, 250, 250, 0.55); }
 /* The cover. A fixed ratio because the eight screenshots do not share one
    (measured: 1.07 to 1.71), and cropping from the top is what keeps every
    template's own hero intact. The ground under it is obsidian rather than a
@@ -987,12 +1031,64 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .zt-arrow, .zt-tile:hover .zt-arrow { transition: none; transform: none; }
 }
+/* Counts on the start, the build control on the end, on one baseline. */
+.zt-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.625rem; margin-top: 0.4375rem;
+}
 .zt-meta {
-  margin: 0.25rem 0 0;
+  margin: 0; min-width: 0;
   display: flex; align-items: center; gap: 0.4375rem; flex-wrap: wrap;
   font-size: 12.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
 }
 .zt-dot { color: #b4b4bb; }
+
+/* ---- the build control -------------------------------------------------
+   THE ONE PIECE OF COLOUR THE CHROME IS ALLOWED. The page's design read is
+   that the eight screenshots are the only colour in the room, and eight
+   violet controls are a real cost against it — they are here because the
+   owner asked for them. So the accent is spent on the ACTION and nowhere
+   else: no violet text, no violet borders on the cards at rest, no tinted
+   eyebrows. The card picks up a violet ring only while it is being pointed
+   at, which is a state, not a decoration.
+
+   RAISED ABOVE THE STRETCHED LINK. .zt-name-link::after covers the card, so
+   without this the button is under the overlay and every press opens the
+   preview instead of the builder. Verified by clicking rather than by
+   reading: elementFromPoint at the button's centre returns .sb-face, a real
+   press lands on /theme/new/atlas, and a press anywhere else on the plate or
+   the cover still lands on /demo/atlas.
+
+   WHAT IT COSTS, measured at 1440: the cover's share of a 3-across tile goes
+   66.5% -> 63.6% and the tile grows 283 -> 296. The plate is still the
+   smaller half, but this is the second-largest thing on it after the name,
+   and on a page whose whole argument is that the screenshots do the talking
+   that is a real trade rather than a free addition.
+------------------------------------------------------------------------- */
+.zt-act { position: relative; z-index: 1; flex: 0 0 auto; }
+
+/* A local scale-down of the shared button. The component is width:100% at
+   14px with a 2.75em window, which is a page-level CTA; in a tile it has to
+   sit on the same line as a 12.5px count without becoming the loudest thing
+   on the card. Nothing about SlideButton itself changes. */
+.zt-build.sb {
+  --sb-win: 2.1em;
+  width: auto;
+  padding: 0.1875rem 0.875rem;
+  font-size: 13px;
+}
+.zt-tile[data-lead] .zt-build.sb { font-size: 13.5px; padding: 0.25rem 1rem; }
+
+/* The one that has no builder to open. Quiet, not violet: nothing to press. */
+.zt-soon {
+  display: inline-flex; align-items: center;
+  border-radius: var(--r-control);
+  padding: 0.4375rem 0.75rem;
+  font-size: 12.5px; font-weight: 700; line-height: 1.35;
+  color: var(--stone);
+  background: rgba(17, 17, 17, 0.04);
+  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.07);
+}
 
 /* ---- the floor, on its own ground ---------------------------------------
    TWO COLUMNS, UNEVEN, AND A BAND OF PAPER UNDER IT. The margin-bottom is not
@@ -1084,5 +1180,7 @@ const CSS = `
   .zt-root { --r-panel: 20px; }
   .zt-floor { grid-template-columns: minmax(0, 1fr); }
   .zt-body { padding: 0.6875rem var(--inset) 0.8125rem; }
+  /* Under ~560 the count and the button stop fitting one line together. */
+  .zt-foot { flex-wrap: wrap; gap: 0.5rem 0.625rem; }
 }
 `
