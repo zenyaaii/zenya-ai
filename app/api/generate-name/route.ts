@@ -2,7 +2,23 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+/**
+ * Constructed on first request, not at module scope.
+ *
+ * `new OpenAI()` throws when OPENAI_API_KEY is unset, and at module scope that
+ * throw happens while Next is COLLECTING PAGE DATA — so a deployment with no
+ * OpenAI key set fails the whole build on this one route, rather than failing
+ * this one route when somebody calls it. Measured on Vercel: "Failed to collect
+ * page data for /api/generate-name".
+ *
+ * Deferring it changes nothing where the key is configured; where it is not,
+ * the build succeeds and only this endpoint errors, which is the correct blast
+ * radius.
+ */
+let openaiClient: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  return (openaiClient ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }));
+}
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +28,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'invalid_input', message: 'context (string) required' }, { status: 400 });
     }
 
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
