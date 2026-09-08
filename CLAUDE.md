@@ -27,3 +27,35 @@ cinematic-motion presets there; that UI is intentionally dense and utilitarian.
 If a design task is ambiguous, follow the skill's rule: state the design read and
 proceed; ask at most one clarifying question only when the direction genuinely
 diverges.
+
+## Candidate demo pages: ALWAYS register the route on the demo subdomain
+
+Every candidate page built under `app/demo/**` must be reachable at
+`demo.zenyaai.co/<segment>`. **This is not an optional last step — it ships in
+the same commit as the page.** A candidate that is not on the allowlist 307s to
+the apex, so from the owner's side the page simply does not exist.
+
+Registering it is one line in `middleware.ts`:
+
+```ts
+const DEMO_SUBDOMAIN_PAGES = new Set([
+  'home', 'pricing', 'templates', 'build', 'access',
+  // ← add the new segment here
+])
+```
+
+The segment is the directory name under `app/demo/`, so `app/demo/access`
+→ `'access'` → `demo.zenyaai.co/access`.
+
+Before finishing any task that adds a page under `app/demo/`, check that its
+segment is in that Set. If it is not, add it.
+
+**The one exception, already recorded in `middleware.ts`:** the generated-site
+theme previews — restaurant, atlas, lookbook, wellness, studio, services,
+storefront, collective, sufra, thread, ribbon — are deliberately NOT on the
+allowlist. They are previews of what the product *generates*, not candidates
+for Zenya's own site, and they keep their addresses under `zenyaai.co/demo/*`.
+The rule above is for the candidate set (home / pricing / templates / build /
+access and whatever follows them). If a theme preview should go on the
+subdomain too, that is a decision for the owner to make, not an oversight to
+fix silently.

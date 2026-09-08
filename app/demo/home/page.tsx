@@ -51,7 +51,7 @@ import { Almarai, IBM_Plex_Sans_Arabic, Alexandria, Alkalami, Amiri, Amiri_Quran
 import { Menu, Type, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
 import { createClient } from "@/utils/supabase/client"
-import { dashboardUrl, accountsUrl } from "@/lib/portal-urls"
+import { dashboardUrl } from "@/lib/portal-urls"
 import BuildSection from "./BuildSection"
 import ManageSection from "./ManageSection"
 import PublishSection from "./PublishSection"
@@ -410,12 +410,23 @@ export default function Page() {
   const lit = glow.grad !== "none"
   const paintGrad = lit ? glow.grad : lastGrad.current
 
-  /* Portal URLs resolve to real subdomains in prod, relative on dev. Start
-     relative to match SSR, then upgrade after mount to avoid a hydration
-     mismatch, the same approach the shared Navbar uses. */
-  const [portal, setPortal] = useState({ login: "/login", signup: "/login?mode=signup", dash: "/dashboard" })
+  /* THE DEMO'S SIGN-IN IS THE DEMO'S OWN.
+     login and signup used to resolve to accounts.zenyaai.co after mount,
+     which walked the reader straight out of the candidate set on the header's
+     one call to action — and on demo.zenyaai.co it landed them on the real
+     product. Now that the set has an auth page they point at it, and because
+     they are constants there is nothing to upgrade after mount and nothing to
+     mismatch on hydration.
+
+     dash still resolves for real: it only ever shows for someone who IS
+     signed in, and there is no demo dashboard to send them to. */
+  const [portal, setPortal] = useState({
+    login: "/demo/access",
+    signup: "/demo/access?mode=signup",
+    dash: "/dashboard",
+  })
   useEffect(() => {
-    setPortal({ login: accountsUrl("/login"), signup: accountsUrl("/signup"), dash: dashboardUrl() })
+    setPortal((p) => ({ ...p, dash: dashboardUrl() }))
   }, [])
 
   useEffect(() => {

@@ -163,7 +163,7 @@ export default function FooterSection({
                     نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
                   </p>
 
-                  <Link href="/theme/new" className="zn5-cta">
+                  <Link href="/demo/build" className="zn5-cta">
                     <span>ابدأ الإنشاء</span>
                     <ArrowLeft className="ic" strokeWidth={1.6} aria-hidden />
                   </Link>

@@ -91,7 +91,7 @@ export default function PricingFooter() {
             {/* The deck's footer carries this and it belongs here too: the
                 last thing on a pricing page should be a way to start. */}
             <span className="zf-cta">
-              <SlideButton href="/theme/new" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="/demo/build" variant="violet" slide="ابدأ الآن">
                 ابدأ الإنشاء
               </SlideButton>
             </span>

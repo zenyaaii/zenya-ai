@@ -470,7 +470,7 @@ export default function PricingView() {
             {/* The deck's own signed-out control, verbatim: an obsidian pill
                 reading ابدأ, not an icon. It is what makes the closed pill
                 measure what the deck's measures. */}
-            <Link href="/login?mode=signup" className="zp-account zp-account-phone">
+            <Link href="/demo/access?mode=signup" className="zp-account zp-account-phone">
               ابدأ
             </Link>
           </div>
@@ -537,7 +537,7 @@ export default function PricingView() {
 
             <span className="zp-side zp-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zp-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zp-account">
+              <Link href="/demo/access?mode=signup" className="zp-account">
                 ابدأ
               </Link>
             </span>
