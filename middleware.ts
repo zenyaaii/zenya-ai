@@ -47,6 +47,8 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'review',
   'dashboard',
   'contact',
+  'about',
+  'faq',
   // THE LEGAL SET IS FIVE ADDRESSES, NOT ONE. The live site keeps /privacy,
   // /terms, /cookies, /refund and /subprocessors as five separate indexed
   // URLs and has to keep them, so the candidate is five routes over one
