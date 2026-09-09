@@ -388,6 +388,13 @@ export const DASHBOARD_CSS = `
   letter-spacing: 0;
   color: var(--obsidian);
 }
+/* The heading inside a card, above a preview or a field group. */
+.zy-h3 {
+  margin: 0;
+  font-size: 13px; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--obsidian);
+}
 /* The small uppercase label above a number. Positive tracking is right here
    and only here: these are set in Latin caps, which genuinely need it. */
 .zy-eyebrow {
@@ -525,6 +532,291 @@ export const DASHBOARD_CSS = `
    views keeps a grey stub so the axis stays legible. */
 .zy-spark-b { width: 100%; border-radius: 2px 2px 0 0; background: rgba(94,106,210,0.55); }
 .zy-spark-b[data-zero] { background: rgba(17,17,17,0.07); }
+
+/* ---- the segmented control ------------------------------------------
+   The range picker, the metric picker, the tab bar. Everywhere the reader
+   chooses one of a few options, it is THE SAME OBJECT.
+
+   THE INDICATOR MOVES, IT IS NOT REDRAWN. That is the whole difference
+   between a switch and a row of buttons that change colour: the eye
+   follows one object across the row and understands that the options are
+   alternatives. Redrawing a fill on the new button and clearing it on the
+   old is two events the reader has to connect.
+
+   THE TRANSFORM IS COMPUTED IN PHYSICAL PIXELS, NEVER A PERCENTAGE. A
+   transform percentage is physical and does not follow dir, so
+   translateX(100%) sends the indicator off the wrong edge in RTL. The
+   component measures offsetLeft/offsetWidth - also physical - so the two
+   agree in both directions.
+
+   Width is transitioned as well as transform. It normally would not be
+   (layout properties are not free), but this element is absolutely
+   positioned, so its width cannot reflow anything beside it, and the
+   labels here are Arabic words of genuinely different lengths - a
+   fixed-width indicator would either overhang the short ones or clip
+   the long ones. */
+.zy-seg {
+  position: relative;
+  display: inline-flex; align-items: center;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--field);
+  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+  font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
+  /* The row scrolls rather than wrapping when the viewport cannot hold it.
+     A wrapped segmented control reads as two controls, and the indicator
+     would have to jump a line. */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.zy-seg::-webkit-scrollbar { display: none; }
+.zy-seg-ind {
+  position: absolute;
+  z-index: 0;
+  inset-block: 3px;
+  left: 0;
+  border-radius: 999px;
+  background: var(--violet);
+  box-shadow: 0 0 0 3px rgba(94,106,210,0.14);
+  transition: transform 400ms var(--ease-out), width 400ms var(--ease-out);
+  will-change: transform, width;
+}
+/* Before the first measurement the indicator has no place to be, so it is
+   not painted at all - a 0-width pill parked at the start edge would flash
+   across the row on hydration. */
+.zy-seg-ind[data-idle] { opacity: 0; transition: none; }
+.zy-seg-b {
+  position: relative; z-index: 1;
+  flex: 0 0 auto;
+  border: 0; background: transparent; cursor: pointer; font: inherit;
+  border-radius: 999px;
+  padding: 0.375rem 0.8125rem;
+  font-size: 12px; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: var(--stone);
+  transition: color 260ms var(--ease-out);
+}
+.zy-seg-b:hover { color: var(--obsidian); }
+.zy-seg-b[data-on] { color: #ffffff; }
+.zy-seg-b:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+/* ---- the underline tab bar ------------------------------------------
+   Used where there are too many options for a pill row (the analytics
+   dashboard has eight). Same mechanic: one indicator that MOVES. */
+.zy-tabs {
+  position: relative;
+  display: flex; align-items: center; gap: 0.125rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
+  box-shadow: inset 0 -1px 0 rgba(17,17,17,0.08);
+}
+.zy-tabs::-webkit-scrollbar { display: none; }
+.zy-tab {
+  flex: 0 0 auto;
+  border: 0; background: transparent; cursor: pointer; font: inherit;
+  padding: 0.5rem 0.75rem 0.625rem;
+  font-size: 12.5px; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: var(--stone);
+  transition: color 220ms var(--ease-out);
+}
+.zy-tab:hover { color: var(--obsidian); }
+.zy-tab[data-on] { color: var(--violet); }
+.zy-tab:focus-visible { outline: 2px solid var(--violet); outline-offset: -2px; border-radius: 6px; }
+.zy-tab-ind {
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--violet);
+  transition: transform 400ms var(--ease-out), width 400ms var(--ease-out);
+  will-change: transform, width;
+}
+.zy-tab-ind[data-idle] { opacity: 0; transition: none; }
+
+/* ---- the chart ------------------------------------------------------
+   Marks follow the house data-viz specs: a 2px line, an ~8px marker with a
+   2px surface ring so it stays legible where it crosses the line, an area
+   wash rather than a saturated block, and hairline SOLID gridlines one step
+   off the surface. Nothing here is dashed except the comparison series,
+   where dashing is the convention for "the period before this one".
+
+   AXIS TEXT WEARS TEXT TOKENS, NEVER THE SERIES COLOUR. The violet belongs
+   to the marks; a violet tick label would make the chrome look like data.
+------------------------------------------------------------------------- */
+/* THE PLOT IS LTR AND THE CARD AROUND IT IS NOT. The dashboard is RTL and
+   the SVG inherited it, which flips what text-anchor: end means - every axis
+   label was anchored on the wrong side and hung outside the plot box.
+   Measured on the real page at 1440 before the fix: two y ticks 9.4px past
+   the right edge, one x tick 6.9px past it and another 12.3px past the left.
+   The geometry here runs left to right on purpose (time does), so the
+   drawing surface says so and the anchors mean what they say. */
+.zy-chart { direction: ltr; outline: none; }
+.zy-chart:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 8px; }
+.zy-chart-tick {
+  fill: var(--stone-2);
+  font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  /* Ticks are a column of numbers that must line up, which is the one place
+     tabular figures are right. The big standalone values on the stat tiles
+     deliberately do NOT use them. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* THE REVEAL. transform-box: fill-box makes the scale origin the rect's own
+   left edge rather than the SVG origin, which is what lets one keyframe work
+   at any chart width. It is a transform, so it composites - no layout, no
+   repaint of the paths underneath. */
+.zy-chart-wipe {
+  fill: #fff;
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: zy-wipe 820ms var(--ease-out) both;
+}
+@keyframes zy-wipe { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* The crosshair glides between days. transform only. */
+.zy-chart-cursor { transition: transform 220ms var(--ease-out); }
+
+/* ---- the chart tooltip ----------------------------------------------
+   Values lead, labels follow: the reader already knows which series they
+   are on and wants the number. The series is keyed with a short stroke
+   rather than a filled box - at this density a box is data-weight ink
+   doing a label's job. */
+.zy-chart-tip {
+  position: absolute; top: 2px; z-index: 10;
+  pointer-events: none;
+  min-width: 132px;
+  border-radius: var(--r-control);
+  padding: 0.5rem 0.625rem;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.10), 0 0 0 4px rgba(250,250,250,0.60);
+  font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
+}
+.zy-chart-tip-d { font-size: 11px; font-weight: 500; line-height: 1.5; color: var(--stone-2); }
+.zy-chart-tip-v { margin-top: 0.1875rem; display: flex; align-items: baseline; gap: 0.375rem; }
+/* Tabular here on purpose: the number is re-rendered on every pointer move,
+   and proportional figures make it jitter sideways as the digits change. */
+.zy-chart-tip-n { font-size: 16px; font-weight: 900; line-height: 1.4; color: var(--obsidian); font-variant-numeric: tabular-nums; }
+.zy-chart-tip-l { display: inline-flex; align-items: center; gap: 0.3125rem; font-size: 11px; font-weight: 500; color: var(--stone); }
+.zy-chart-tip-p { margin-top: 0.125rem; display: flex; align-items: center; gap: 0.3125rem; font-size: 11px; font-weight: 500; line-height: 1.6; color: var(--stone); font-variant-numeric: tabular-nums; }
+.zy-chart-key { display: inline-block; width: 10px; height: 2px; border-radius: 2px; background: var(--violet); }
+.zy-chart-key[data-prev] { background: rgba(17,17,17,0.34); }
+
+/* ---- the two-state toggle -------------------------------------------
+   "Compare", "no bots". Not a segmented control: there is no row of
+   alternatives to slide an indicator across, just one thing that is on or
+   off. It reports the state it is IN, which is why the label changes with
+   it rather than describing the action. */
+.zy-toggle {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  border: 0; cursor: pointer; font: inherit;
+  border-radius: var(--r-control);
+  padding: 0.4375rem 0.6875rem;
+  font-size: 12px; font-weight: 700; line-height: 1.5;
+  letter-spacing: 0;
+  white-space: nowrap;
+  color: var(--stone);
+  background: var(--field);
+  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+  font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
+  transition: color 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
+}
+.zy-toggle:hover { color: var(--obsidian); box-shadow: 0 0 0 1px rgba(17,17,17,0.18); }
+.zy-toggle[data-on] {
+  color: var(--violet);
+  background: var(--violet-fill);
+  box-shadow: 0 0 0 1px rgba(94,106,210,0.35);
+}
+.zy-toggle:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+/* ---- the stat tile --------------------------------------------------
+   A number with a label. Where the tile is also a CONTROL - the analytics
+   KPI row picks what the chart plots - being selected is what colours it,
+   and the ring is what shows it, because the card has no border to tint.
+
+   IT IS .zy-stat AND NOT .zy-tile, AND THAT NAME COST A DEBUGGING PASS.
+   .zy-tile was already taken, further up this file, by the 34x34 icon square
+   beside a row title - complete with a fixed width and height. Reusing the
+   name meant the analytics stat tile inherited height: 34px, so a flex column
+   with four rows of content had no room for any of it: the children shrank
+   (flex-shrink is 1 by default in a column, which is what turned a 20px
+   sparkline into a 0px one), the labels broke to one glyph per line, and the
+   whole KPI row collapsed to 36px and overlapped the control bar above it.
+   Two components, two names. */
+.zy-stat {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  /* THE LAYOUT IS DECLARED, NOT INHERITED. A <button> is not a plain block:
+     the UA lays its content out in an anonymous centred box, so dropping the
+     old w-full/p-4 utilities for this class left the four rows running
+     ACROSS the tile as flex items - each about 36px wide, with the Arabic
+     labels breaking to one glyph per line and the whole row collapsing to
+     36px tall. Measured, not guessed: the tile came back
+     display=flex flexDirection=row height=35.99 with children 36px wide.
+     A column with stretched items is what the content always assumed. */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 0; cursor: pointer; font: inherit;
+  text-align: start;
+  border-radius: var(--r-card);
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: var(--ring-1), var(--ring-2);
+  transition: box-shadow 220ms var(--ease-out);
+}
+@media (min-width: 640px) { .zy-stat { padding: 1.125rem 1.25rem; } }
+.zy-stat[data-static] { cursor: default; }
+.zy-stat:not([data-static]):hover { box-shadow: 0 0 0 1px rgba(94,106,210,0.40), 0 0 0 4px rgba(94,106,210,0.10); }
+.zy-stat[data-on] { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
+.zy-stat:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+.zy-stat-chip {
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: var(--r-control);
+  color: var(--stone-2);
+  background: rgba(17,17,17,0.05);
+  transition: color 220ms var(--ease-out), background-color 220ms var(--ease-out);
+}
+.zy-stat[data-on] .zy-stat-chip { color: var(--violet); background: var(--violet-fill); }
+.zy-stat:not([data-static]):hover .zy-stat-chip { color: var(--violet); }
+.zy-stat-v {
+  font-size: 22px; font-weight: 900; line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--obsidian);
+}
+@media (min-width: 640px) { .zy-stat-v { font-size: 24px; } }
+.zy-stat-sub { margin-top: 0.375rem; font-size: 12px; font-weight: 500; line-height: 1.7; color: var(--stone); }
+
+/* ---- the screen-reader-only block -----------------------------------
+   The chart ships a table of its own numbers so the tooltip enhances rather
+   than gates. Tailwind's sr-only did NOT hold it: measured on the real page,
+   the table rendered at its natural 807x687 and hung 687px out of the bottom
+   of the chart card. Owning the recipe here removes the dependency on a
+   utility being generated and on nothing else in this scope outranking it.
+
+   clip-path AND the legacy clip: the old one is what actually applies in
+   several engines, and the pair is the long-standing accessible recipe.
+   Never display:none or visibility:hidden - both take the content out of the
+   accessibility tree, which is the one thing this element exists to be in. */
+.zy-app .zy-sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* ---- the status pill ------------------------------------------------
    One shape for every state the dashboard reports. The hue comes from the
@@ -720,5 +1012,10 @@ export const DASHBOARD_CSS = `
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  /* The wipe is a "both" animation, so squashing its duration still lands it
+     on the TO frame - the chart is drawn, just instantly. Stated explicitly
+     because the failure mode of getting this wrong is a permanently blank
+     chart for exactly the readers who cannot afford one. */
+  .zy-chart-wipe { animation: none !important; transform: scaleX(1) !important; }
 }
 `

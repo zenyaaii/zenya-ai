@@ -166,10 +166,10 @@ export default function SearchPanel({
     <>
       <Section title="أداء البحث" action={siteSelector}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Tile label="مرات الظهور" value={(t?.impressions ?? 0).toLocaleString('ar')} icon={Eye} accent="#5e6ad2" sub="آخر 28 يومًا" />
-          <Tile label="النقرات" value={(t?.clicks ?? 0).toLocaleString('ar')} icon={MousePointerClick} accent="#15803d" sub="من نتائج البحث" />
-          <Tile label="نسبة النقر" value={t ? `${(t.ctr * 100).toFixed(1)}%` : '—'} icon={Percent} accent="#9b6f00" sub="نقرات ÷ ظهور" />
-          <Tile label="متوسط الترتيب" value={t && t.position ? t.position.toFixed(1) : '—'} icon={ArrowUpDown} accent="#c8a96a" sub="كلما قلّ كان أفضل" />
+          <Tile label="مرات الظهور" value={(t?.impressions ?? 0).toLocaleString('ar')} icon={Eye} sub="آخر 28 يومًا" />
+          <Tile label="النقرات" value={(t?.clicks ?? 0).toLocaleString('ar')} icon={MousePointerClick} sub="من نتائج البحث" />
+          <Tile label="نسبة النقر" value={t ? `${(t.ctr * 100).toFixed(1)}%` : '—'} icon={Percent} sub="نقرات ÷ ظهور" />
+          <Tile label="متوسط الترتيب" value={t && t.position ? t.position.toFixed(1) : '—'} icon={ArrowUpDown} sub="كلما قلّ كان أفضل" />
         </div>
         {noData && (
           <Note>

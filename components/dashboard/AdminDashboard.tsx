@@ -124,22 +124,22 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
         <Tile
           label="الإيرادات (الإجمالي)" value={usd(d.revenue.gross_all_time_cents)}
           sub={`${d.revenue.paying_users} مشترك مدفوع · ${usd(d.revenue.gross_30d_cents)} خلال 30 يومًا`}
-          icon={DollarSign} accent="#15803d"
+          icon={DollarSign}
         />
         <Tile
           label="الإيراد الشهري المتكرر" value={usd(d.revenue.mrr_cents)}
           sub={`${d.revenue.hosting_active} نشط · ${d.revenue.churned_30d} ملغى خلال 30 يومًا`}
-          icon={Repeat} accent="#5e6ad2"
+          icon={Repeat}
         />
         <Tile
           label="إنفاق الذكاء الاصطناعي" value={`$${d.ai_usage.cost_total_usd.toFixed(2)}`}
           sub={`$${d.ai_usage.cost_30d_usd.toFixed(2)} آخر 30 يومًا`}
-          icon={Cpu} accent="#9b6f00"
+          icon={Cpu}
         />
         <Tile
           label="المستخدمون" value={d.totals.users.toLocaleString('ar')}
           sub={`${d.engagement.active_30d} نشط خلال 30 يومًا · ${d.engagement.signups_30d} جديد`}
-          icon={Users} accent="#c8a96a"
+          icon={Users}
         />
       </section>
 
