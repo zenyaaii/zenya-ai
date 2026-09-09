@@ -15,6 +15,7 @@ import {
   AudiencePanel, ContentPanel, ConversionsPanel, InsightsPanel, OverviewPanel, SourcesPanel,
 } from './panels'
 import { Panel, SkeletonBlock, SkeletonTile, Tile, rise } from './primitives'
+import { Segmented, TabBar } from '@/components/app/Segmented'
 import type { AnalyticsPayload, TabKey } from './types'
 
 const TABS: Array<{ key: TabKey; label: string }> = [
@@ -160,11 +161,12 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       {/* ---- header ---- */}
       <motion.header
         {...rise}
-        className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
+        className="flex flex-wrap items-end justify-between gap-3 pb-5"
+        style={{ boxShadow: 'inset 0 -1px 0 rgba(17,17,17,0.08)' }}
       >
         <div className="min-w-0">
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground sm:text-[24px]">التحليلات</h1>
-          <p className="mt-1 text-[13px] leading-relaxed text-muted">
+          <h1 className="zy-h1">التحليلات</h1>
+          <p className="mt-1.5 text-[13px] font-medium leading-[1.8] text-[#56565a]">
             كل ما يحدث على مواقعك المنشورة — الزوّار، ومن أين أتوا، وماذا فعلوا.
           </p>
         </div>
@@ -172,7 +174,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
           {isAdmin && (
             <Link
               href="/dashboard/admin"
-              className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+              className="zy-btn-q"
             >
               <ShieldCheck className="h-3 w-3" /> لوحة الإدارة
             </Link>
@@ -180,7 +182,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
+            className="zy-btn-q disabled:opacity-60"
           >
             <RefreshCw className={'h-3 w-3 ' + (refreshing ? 'animate-spin' : '')} />
             <span className="hidden sm:inline">{refreshing ? 'جارٍ التحديث…' : 'تحديث'}</span>
@@ -199,71 +201,78 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       />
 
       {/* ---- KPI tiles (persist across tabs) ---- */}
+      {/* KPI tiles (persist across tabs).
+
+          THE SIX ACCENT COLOURS ARE GONE. Each tile used to pass its own hue
+          - #5e6ad2, #4f5ab8, #15803d, #b45309, #9b6f00, #c8a96a - so the row
+          read as six categories when it is one: six measures of the same
+          traffic. Worse, three of those were the status triad used as
+          identity, which is the one thing status colour must never do; a page
+          view is not "good" the way a passing check is.
+
+          What carries colour now is the SELECTION: the tile whose metric the
+          chart is plotting wears the accent, and the rest are grey. That is
+          the accent doing its job on a product surface - saying which one you
+          are looking at - instead of decorating six boxes. The delta keeps the
+          triad, because up-versus-down genuinely is good-versus-bad. */}
       <section className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
         <Tile
-          label="الزوّار" value={t.visitors.toLocaleString('ar')} icon={Users} accent="#5e6ad2"
+          label="الزوّار" value={t.visitors.toLocaleString('ar')} icon={Users}
           delta={compare ? dl.visitors : undefined} spark={sparks}
           sub="أشخاص مختلفون"
+          active={metric === 'visitors'} onClick={() => setMetric('visitors')}
         />
         <Tile
-          label="الجلسات" value={t.sessions.toLocaleString('ar')} icon={LogOut} accent="#4f5ab8"
+          label="الجلسات" value={t.sessions.toLocaleString('ar')} icon={LogOut}
           delta={compare ? dl.sessions : undefined}
           sub="زيارات منفصلة"
+          active={metric === 'sessions'} onClick={() => setMetric('sessions')}
         />
         <Tile
-          label="المشاهدات" value={t.views.toLocaleString('ar')} icon={Eye} accent="#15803d"
+          label="المشاهدات" value={t.views.toLocaleString('ar')} icon={Eye}
           delta={compare ? dl.views : undefined}
           sub="صفحات مفتوحة"
+          active={metric === 'views'} onClick={() => setMetric('views')}
         />
         <Tile
-          label="معدل المغادرة" value={t.sessions ? `${t.bounce_rate}%` : '—'} icon={LogOut} accent="#b45309"
+          label="معدل المغادرة" value={t.sessions ? `${t.bounce_rate}%` : '—'} icon={LogOut}
           delta={compare ? dl.bounce_rate : undefined} invertDelta
           sub="غادروا بعد صفحة"
         />
         <Tile
-          label="متوسط المدة" value={formatDuration(t.avg_duration_ms)} icon={Timer} accent="#9b6f00"
+          label="متوسط المدة" value={formatDuration(t.avg_duration_ms)} icon={Timer}
           delta={compare ? dl.avg_duration_ms : undefined}
           sub="وقت فعلي على الصفحة"
         />
         <Tile
-          label="التواصل" value={t.events.toLocaleString('ar')} icon={MousePointerClick} accent="#c8a96a"
+          label="التواصل" value={t.events.toLocaleString('ar')} icon={MousePointerClick}
           delta={compare ? dl.events : undefined}
           sub={t.sessions ? `${t.conversion_rate}% من الجلسات` : 'واتساب · هاتف · حجز'}
+          active={metric === 'events'} onClick={() => setMetric('events')}
         />
       </section>
 
       {data.sessions_since === null && t.views > 0 && (
-        <p className="mt-3 rounded-lg border border-token bg-[#fafaf7] px-3 py-2 text-[11.5px] leading-relaxed text-muted">
+        <p className="mt-3 rounded-[10px] bg-[#f4f4f6] px-3 py-2.5 text-[11.5px] font-medium leading-[1.8] text-[#56565a]" style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.08)' }}>
           الزوّار والجلسات ومعدل المغادرة والمدة تُقاس منذ تفعيل القياس الجديد فقط. المشاهدات
           الأقدم من ذلك مسجّلة، لكن بلا تفاصيل الجلسة — لذلك تظهر أصفارًا هنا بدل أرقام مُختلَقة.
         </p>
       )}
 
-      {/* ---- tabs ---- */}
-      <div className="mt-7 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-        <div className="flex min-w-max gap-1 border-b border-token" role="tablist" aria-label="أقسام التحليلات">
-          {TABS.map((x) => (
-            <button
-              key={x.key}
-              role="tab"
-              aria-selected={tab === x.key}
-              onClick={() => setTab(x.key)}
-              className={
-                'relative whitespace-nowrap px-3 py-2.5 text-[13px] font-medium transition ' +
-                (tab === x.key ? 'text-foreground' : 'text-muted hover:text-foreground')
-              }
-            >
-              {x.label}
-              {tab === x.key && (
-                <motion.span
-                  layoutId="zy-tab-underline"
-                  className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-primary"
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* ---- tabs ----
+           The shared TabBar: one indicator that MOVES between tabs, measured
+           from the laid-out button rather than computed from an index, so it
+           lands correctly under Arabic labels of different widths and in both
+           directions. The row scrolls sideways rather than wrapping - eight
+           wrapped tabs read as two rows of controls and the indicator would
+           have to jump a line. */}
+      <TabBar
+        items={TABS}
+        value={tab}
+        onChange={setTab}
+        label="أقسام التحليلات"
+        className="mt-7"
+      />
 
       {/* ---- tab content ---- */}
       {tab === 'overview' && (
@@ -288,7 +297,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       {tab === 'realtime' && <RealtimePanel site={site} includeBots={includeBots} />}
       {tab === 'insights' && <InsightsPanel d={data} />}
 
-      <p className="mt-10 text-center text-[11.5px] leading-relaxed text-muted">
+      <p className="mt-10 text-center text-[11.5px] font-medium leading-[1.8] text-[#66666e]">
         آخر تحديث {new Date(data.generated_at).toLocaleString('ar')} · التوقيت {data.tz}
         {!data.include_bots && ' · زيارات الروبوتات مستبعدة'}
       </p>
@@ -331,23 +340,15 @@ function ControlBar({
 
   return (
     <div className="mt-5 flex flex-wrap items-center gap-2">
-      {/* range */}
-      <div className="flex flex-wrap items-center gap-0.5 rounded-full border border-token bg-surface/60 p-0.5">
-        {RANGES.map((r) => (
-          <button
-            key={r}
-            type="button"
-            onClick={() => setRange(r)}
-            aria-pressed={range === r}
-            className={
-              'rounded-full px-2.5 py-1 text-[12px] font-medium transition sm:px-3 ' +
-              (range === r ? 'bg-foreground text-white shadow-sm' : 'text-muted hover:text-foreground')
-            }
-          >
-            {SHORT_RANGE[r] ?? RANGE_LABEL_AR[r]}
-          </button>
-        ))}
-      </div>
+      {/* range - the filter every reader reaches for, so it comes first in
+          the row. Same sliding indicator as the metric switcher inside the
+          chart, because they are the same kind of choice. */}
+      <Segmented
+        items={RANGES.map((r) => ({ key: r, label: SHORT_RANGE[r] ?? RANGE_LABEL_AR[r] }))}
+        value={range}
+        onChange={setRange}
+        label="اختر المدة"
+      />
 
       {/* site */}
       {data.sites.length > 0 && (
@@ -355,7 +356,7 @@ function ControlBar({
           value={site}
           onChange={(e) => setSite(e.target.value)}
           aria-label="اختر الموقع"
-          className="max-w-[190px] rounded-md zy-card px-2.5 py-1.5 text-[12.5px] text-foreground outline-none transition focus:border-primary"
+          className="max-w-[190px] px-2.5 py-[7px] text-[12.5px] font-medium"
         >
           <option value="">كل المواقع ({data.sites.length})</option>
           {data.sites.map((s) => (
@@ -386,7 +387,7 @@ function ControlBar({
           onClick={() => setExportOpen((v) => !v)}
           aria-expanded={exportOpen}
           aria-haspopup="menu"
-          className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+          className="zy-btn-q"
         >
           <Download className="h-3 w-3" />
           <span className="hidden sm:inline">تصدير</span>
@@ -394,7 +395,7 @@ function ControlBar({
         {exportOpen && (
           <div
             role="menu"
-            className="absolute end-0 z-20 mt-1 w-52 overflow-hidden rounded-lg zy-card py-1 shadow-lg"
+            className="zy-menu absolute end-0 z-20 mt-1.5 w-52"
           >
             {EXPORTS.map((x) => (
               <a
@@ -402,12 +403,12 @@ function ControlBar({
                 role="menuitem"
                 href={`/api/analytics/export?dataset=${x.key}&${params}`}
                 onClick={() => setExportOpen(false)}
-                className="block px-3 py-2 text-[12.5px] text-foreground transition hover:bg-black/[0.04]"
+                className="zy-menu-row"
               >
                 {x.label}
               </a>
             ))}
-            <p className="border-t border-token px-3 py-2 text-[11px] leading-relaxed text-muted">
+            <p className="mt-1 border-t border-[rgba(17,17,17,0.07)] px-2.5 pb-1 pt-2 text-[11px] font-medium leading-[1.7] text-[#66666e]">
               ملف CSV يفتح مباشرة في Excel بالعربية.
             </p>
           </div>
@@ -439,12 +440,11 @@ function Toggle({
       onClick={onClick}
       title={title}
       aria-pressed={active}
-      className={
-        'inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[12px] font-medium transition ' +
-        (active
-          ? 'border-primary/40 bg-[rgba(94,106,210,0.08)] text-primary'
-          : 'border-token bg-white text-muted hover:bg-black/5')
-      }
+      /* A two-state switch, so it says which state it is IN rather than what
+         pressing it would do. On is the accent: it is a filter the reader
+         chose, and a chosen option is exactly what the accent marks here. */
+      className="zy-toggle"
+      data-on={active ? '' : undefined}
     >
       {children}
     </button>

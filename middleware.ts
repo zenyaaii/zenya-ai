@@ -45,6 +45,7 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'build',
   'access',
   'review',
+  'dashboard',
 ])
 
 /**

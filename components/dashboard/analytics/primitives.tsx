@@ -23,10 +23,10 @@ export function Section({
   className?: string
 }) {
   return (
-    <section className={'mt-8 ' + className}>
-      <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h2>
-        {action ?? (hint && <span className="text-[11.5px] text-muted">{hint}</span>)}
+    <section className={'mt-7 ' + className}>
+      <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="zy-h2">{title}</h2>
+        {action ?? (hint && <span className="text-[11.5px] font-medium text-[#66666e]">{hint}</span>)}
       </div>
       {children}
     </section>
@@ -89,13 +89,12 @@ export function Delta({
 /* ─── stat tile ───────────────────────────────────────────────────────────── */
 
 export function Tile({
-  label, value, sub, icon: Icon, accent, delta, invertDelta, spark, active, onClick,
+  label, value, sub, icon: Icon, delta, invertDelta, spark, active, onClick,
 }: {
   label: string
   value: string
   sub?: string
   icon: LucideIcon
-  accent: string
   delta?: number | null
   invertDelta?: boolean
   spark?: number[]
@@ -110,36 +109,43 @@ export function Tile({
       onClick={onClick}
       disabled={!interactive}
       aria-pressed={interactive ? !!active : undefined}
-      className={
-        // The selected and hover states move from the border to the ring,
-        // because the card no longer has a border to colour.
-        'group w-full rounded-2xl zy-card p-4 text-start transition sm:p-5 ' +
-        (active ? 'shadow-[0_0_0_1px_var(--primary)] ' : '') +
-        (interactive ? 'cursor-pointer hover:shadow-[0_0_0_1px_var(--border-glow)] ' : 'cursor-default ')
-      }
+      className="zy-stat"
+      data-on={active ? '' : undefined}
+      data-static={interactive ? undefined : ''}
     >
       <div className="flex items-start justify-between gap-2">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
-        <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
-          style={{ background: `${accent}1a` }}
-        >
-          <Icon className="h-3.5 w-3.5" strokeWidth={2} style={{ color: accent }} />
+        <div className="zy-eyebrow">{label}</div>
+        {/* The chip is grey until this is the metric on the chart, and then it
+            is the accent. It used to take a per-tile hue prop; see the note
+            over the tile row in AnalyticsDashboard for why six hues on six
+            measures of the same traffic was wrong. */}
+        <div className="zy-stat-chip">
+          <Icon className="h-3.5 w-3.5" strokeWidth={2} />
         </div>
       </div>
       <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span className="text-[22px] font-bold tracking-tight tabular-nums text-foreground sm:text-[24px]">
-          {value}
-        </span>
+        {/* Proportional figures, deliberately. tabular-nums gives every digit
+            the width of a zero, which makes a standalone value like 121 look
+            gappy at display size. Tabular belongs in columns that align -
+            the axis ticks and the table rows - not here. */}
+        <span className="zy-stat-v">{value}</span>
         {delta !== undefined && <Delta value={delta} invert={invertDelta} />}
       </div>
-      {spark && spark.length > 1 && <Sparkline values={spark} accent={accent} />}
-      {sub && <div className="mt-1 text-[12px] text-muted">{sub}</div>}
+      {spark && spark.length > 1 && <Sparkline values={spark} />}
+      {sub && <div className="zy-stat-sub">{sub}</div>}
     </motion.button>
   )
 }
 
-export function Sparkline({ values, accent }: { values: number[]; accent: string }) {
+/**
+ * The 12-point trend under a stat tile. One flat accent at low strength: it is
+ * an annotation on the number above it, not a chart of its own, and at 20px
+ * tall it cannot carry an axis to be read against anyway.
+ *
+ * vectorEffect keeps the stroke 1.5px after preserveAspectRatio="none" has
+ * stretched the box; without it the line thins out as the tile widens.
+ */
+export function Sparkline({ values }: { values: number[] }) {
   const max = Math.max(1, ...values)
   const W = 100
   const H = 22
@@ -148,9 +154,9 @@ export function Sparkline({ values, accent }: { values: number[]; accent: string
     .map((v, i) => `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(2)},${(H - (v / max) * (H - 2) - 1).toFixed(2)}`)
     .join(' ')
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="mt-2 block h-5 w-full" aria-hidden>
-      <path d={d} fill="none" stroke={accent} strokeWidth="1.5" strokeLinecap="round"
-        strokeLinejoin="round" vectorEffect="non-scaling-stroke" opacity={0.75} />
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="mt-2.5 block h-5 w-full" aria-hidden>
+      <path d={d} fill="none" stroke="#5e6ad2" strokeWidth="1.5" strokeLinecap="round"
+        strokeLinejoin="round" vectorEffect="non-scaling-stroke" opacity={0.55} />
     </svg>
   )
 }

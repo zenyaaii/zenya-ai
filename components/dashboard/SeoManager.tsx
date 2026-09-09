@@ -83,7 +83,7 @@ export default function SeoManager({ sites: initialSites }: { sites: SeoSite[] }
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 border-b border-token pb-5">
-        <h1 className="text-[24px] font-bold tracking-tight text-foreground">السيو</h1>
+        <h1 className="zy-h1">السيو</h1>
         <p className="mt-1 text-[13px] text-muted">
           تحكّم كامل في شكل موقعك داخل جوجل — العنوان، الوصف، معاينة النتيجة الحيّة، خريطة الموقع، والتحقّق من Search Console.
         </p>
@@ -209,7 +209,7 @@ function SiteEditor({
         <div className="rounded-2xl zy-card p-5">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" strokeWidth={2} />
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">بيانات البحث</h2>
+            <h2 className="zy-h2">بيانات البحث</h2>
           </div>
           <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">
             زينيا يكتب هذه الحقول تلقائيًا من محتوى موقعك. اترك الحقل فارغًا لاستخدام النص التلقائي، أو اكتب نصك للتحكّم الكامل.
@@ -343,7 +343,12 @@ function Field({
   const len = value.trim().length
   const over = max ? len > max : false
   const near = max ? len > max * 0.9 : false
-  const counterColor = over ? '#b91c1c' : near ? '#b45309' : '#9a9a9a'
+  /* The resting counter was #9a9a9a, which measures 2.81:1 on white and fails
+     WCAG AA at any size - the exact grey the house style has already thrown
+     out twice. --stone-2 (#66666e, 5.69:1) is the token for text that should
+     recede and still be readable. Over and near-limit stay on the status
+     triad, because there the colour is reporting a state. */
+  const counterColor = over ? '#b91c1c' : near ? '#b45309' : '#66666e'
 
   return (
     <div>
@@ -408,7 +413,7 @@ function SerpPreview({
     <div className="rounded-2xl zy-card p-5">
       <div className="mb-3 flex items-center gap-2">
         <Search className="h-4 w-4 text-primary" strokeWidth={2} />
-        <h3 className="text-[13px] font-semibold text-foreground">معاينة نتيجة جوجل</h3>
+        <h3 className="zy-h3">معاينة نتيجة جوجل</h3>
         <span className="ms-auto text-[10.5px] text-muted">حاسوب</span>
       </div>
 
@@ -461,7 +466,7 @@ function SocialPreview({
     <div className="mt-5 rounded-2xl zy-card p-5">
       <div className="mb-3 flex items-center gap-2">
         <ExternalLink className="h-4 w-4 text-primary" strokeWidth={2} />
-        <h3 className="text-[13px] font-semibold text-foreground">معاينة المشاركة (واتساب · تويتر)</h3>
+        <h3 className="zy-h3">معاينة المشاركة (واتساب · تويتر)</h3>
       </div>
       <div className="overflow-hidden rounded-xl border border-token">
         {image ? (
@@ -489,7 +494,7 @@ function SitemapCard({ site }: { site: SeoSite }) {
     <div className="rounded-2xl zy-card p-5">
       <div className="flex items-center gap-2">
         <Map className="h-4 w-4 text-primary" strokeWidth={2} />
-        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">خريطة الموقع (Sitemap)</h2>
+        <h2 className="zy-h2">خريطة الموقع (Sitemap)</h2>
       </div>
       {site.isPublished && site.sitemapUrl ? (
         <>
@@ -592,7 +597,7 @@ function SearchConsoleCard({
     <div className="rounded-2xl zy-card p-5">
       <div className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-primary" strokeWidth={2} />
-        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Google Search Console</h2>
+        <h2 className="zy-h2">Google Search Console</h2>
         {connected && (
           <span className="ms-auto inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold text-[#15803d]">
             <Check className="h-3 w-3" /> مربوط
@@ -1018,7 +1023,7 @@ function EmptyState() {
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(94,106,210,0.10)]">
         <Globe className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
-      <h2 className="mt-4 text-[16px] font-semibold text-foreground">لا توجد مواقع بعد</h2>
+      <h2 className="zy-h2 mt-4">لا توجد مواقع بعد</h2>
       <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-[1.6] text-muted">
         أدوات السيو تعمل مع أي موقع منشور على زينيا (على عنوان اسمك.zenyaai.co) أو أي قالب عرض قيد الإعداد. أنشئ موقعًا أو انشر أحد قوالبك لتبدأ.
       </p>

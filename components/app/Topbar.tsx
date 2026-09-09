@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { useT } from '@/components/i18n/LocaleProvider'
+import { chromeFont } from './chrome-font'
 import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 import type { Messages } from '@/lib/i18n/messages'
 
@@ -73,30 +74,27 @@ export default function Topbar({
   // this the bar scrolls away and the menu becomes unreachable. On lg+ the shell
   // is fixed-height so it stays put anyway.
   return (
-    <header
-      className="sticky top-0 z-30 flex h-14 flex-shrink-0 items-center justify-between border-b border-token bg-white px-4 lg:static"
-      style={{ boxShadow: '0 1px 0 #f0ede6' }}
-    >
+    <header className="zy-top sticky top-0 z-30 lg:static">
       <div className="flex items-center gap-3">
         {/* Mobile hamburger */}
         <button
           type="button"
           onClick={onMobileMenuOpen}
-          className="rounded-md p-1.5 text-muted hover:bg-black/5 lg:hidden"
+          className="zy-icon-btn inline-flex lg:hidden"
           aria-label={t.nav.openMenu}
         >
           <Menu className="h-4 w-4" />
         </button>
-        <h1 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h1>
+        <h1 className="zy-top-title">{title}</h1>
       </div>
 
       <div className="flex items-center gap-2">
         {/* Quick action — New site */}
         <Link
           href="/theme/new"
-          className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-1.5 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
+          className="zy-top-cta"
         >
-          <Plus className="h-3 w-3" strokeWidth={2.5} />
+          <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
           <span className="hidden sm:inline">{t.nav.newSite}</span>
         </Link>
 
@@ -107,7 +105,7 @@ export default function Topbar({
         {/* Notifications — placeholder, no inbox yet */}
         <button
           type="button"
-          className="relative hidden rounded-md p-1.5 text-muted hover:bg-black/5 sm:block"
+          className="zy-icon-btn relative hidden sm:inline-flex"
           aria-label={t.nav.notifications}
           title={t.nav.noNotifications}
         >
@@ -118,19 +116,14 @@ export default function Topbar({
         <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>
           <DropdownMenu.Trigger asChild>
             <button
-              className="flex items-center gap-2 rounded-md border border-token bg-white px-2 py-1.5 transition-colors hover:bg-black/[0.04]"
+              className="zy-top-acct"
               aria-label={t.nav.accountMenu}
             >
-              <div
-                className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold text-white"
-                style={{ background: '#5e6ad2' }}
-              >
-                {initial}
-              </div>
-              <span className="hidden text-[12.5px] font-medium text-foreground sm:block">
+              <div className="zy-top-av">{initial}</div>
+              <span className="zy-top-name hidden sm:block">
                 {firstName || t.nav.account}
               </span>
-              <ChevronDown className="hidden h-3 w-3 text-muted sm:block" strokeWidth={2.5} />
+              <ChevronDown className="hidden h-3 w-3 text-[#66666e] sm:block" strokeWidth={2.25} />
             </button>
           </DropdownMenu.Trigger>
 
@@ -149,21 +142,23 @@ export default function Topbar({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 6, scale: 0.97 }}
                     transition={{ duration: 0.15, ease: DROPDOWN_EASE }}
-                    className="w-56 overflow-hidden rounded-xl border border-token bg-white p-1.5"
-                    style={{ boxShadow: '0 8px 24px rgba(28,28,28,0.10), 0 0 0 1px #e5e2d9' }}
+                    /* The portal lands OUTSIDE the shell, so the menu carries the
+                       token scope and the chrome face itself. Without zy-tokens
+                       here every var() below it resolves to nothing. */
+                    className={`zy-tokens zy-menu ${chromeFont.variable} w-56 overflow-hidden`}
                   >
-                    <div className="mb-1 px-2.5 py-2" style={{ borderBottom: '1px solid #f0ede6' }}>
-                      <p className="text-[13px] font-semibold text-foreground">
+                    <div className="zy-menu-head">
+                      <p className="text-[13px] font-bold leading-[1.5] text-[#171717]">
                         {fullName || t.nav.yourAccount}
                       </p>
-                      <p className="truncate text-[12px] text-muted">{email}</p>
+                      <p className="truncate text-[12px] leading-[1.6] text-[#66666e]">{email}</p>
                     </div>
 
                     <DropdownMenu.Item asChild>
                       <Link
                         href="/dashboard"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-muted outline-none transition-colors data-[highlighted]:bg-[rgba(28,28,28,0.05)] data-[highlighted]:text-foreground"
+                        className="zy-menu-row"
                       >
                         <LayoutDashboard className="h-3.5 w-3.5" strokeWidth={2} />
                         {t.nav.home}
@@ -174,18 +169,19 @@ export default function Topbar({
                       <Link
                         href="/dashboard/settings"
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-muted outline-none transition-colors data-[highlighted]:bg-[rgba(28,28,28,0.05)] data-[highlighted]:text-foreground"
+                        className="zy-menu-row"
                       >
                         <Settings className="h-3.5 w-3.5" strokeWidth={2} />
                         {t.nav.settings}
                       </Link>
                     </DropdownMenu.Item>
 
-                    <div className="mt-1 border-t border-[#f0ede6] pt-1">
+                    <div className="mt-1 border-t border-[rgba(17,17,17,0.07)] pt-1">
                       <DropdownMenu.Item asChild>
                         <button
                           onClick={signOut}
-                          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] font-medium text-[#dc2626] outline-none transition-colors data-[highlighted]:bg-[rgba(220,38,38,0.06)]"
+                          className="zy-menu-row"
+                          data-tone="danger"
                         >
                           <LogOut className="h-3.5 w-3.5 rtl-flip" strokeWidth={2} />
                           {t.accounts.signOut}
