@@ -15,6 +15,14 @@
  * is bilingual and must not do this — it runs on lib/i18n and serves English —
  * but the candidate set is Arabic-only copy, and pinning the direction here
  * keeps it off the root layout's locale.
+ *
+ * THE STANDING NOTE POINTS AT dashboard.zenyaai.co, NOT zenyaai.co/dashboard.
+ * The product runs the logged-in surface on its own host, the way Shopify runs
+ * admin: middleware.ts rewrites dashboard.zenyaai.co/ to /dashboard and
+ * dashboard.zenyaai.co/sites to /dashboard/sites, so the path segment never
+ * appears in the URL a customer sees. Sidebar.tsx already records this on its
+ * own outbound link. The first version of this note sent readers to an address
+ * the product does not advertise.
  */
 
 import { useState } from 'react'
@@ -495,8 +503,8 @@ function StandingNote() {
       نسخة تجريبية من لوحة التحكم. الأرقام والمواقع والحجوزات هنا كلها بيانات
       تجريبية، ولا تسجّل هذه الصفحة دخول أحد ولا تقرأ حسابًا حقيقيًا. لوحة
       التحكم الفعلية على{' '}
-      <a href="https://zenyaai.co/dashboard" className="zy-link" style={{ display: 'inline' }}>
-        zenyaai.co/dashboard
+      <a href="https://dashboard.zenyaai.co" className="zy-link" style={{ display: 'inline' }}>
+        dashboard.zenyaai.co
       </a>{' '}
       وتحتاج تسجيل دخول.
     </p>
