@@ -102,6 +102,14 @@ export const MARKETING_CSS = `
 .zx-acts > * { flex: 0 0 auto; }
 .zx-acts > .sb { width: 100%; }
 @media (min-width: 520px) { .zx-acts > .sb { width: fit-content; } }
+.zx-act-1 {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  min-height: 44px; padding: 0 1.25rem; border-radius: var(--r-control);
+  background: var(--obsidian); color: var(--ground); text-decoration: none;
+  font-size: 15px; font-weight: 700; line-height: 1.5;
+  transition: opacity 200ms var(--ease-out);
+}
+.zx-act-1:hover { opacity: 0.88; }
 .zx-act-2 {
   display: inline-flex; align-items: center; gap: 0.5rem; min-height: 38px; padding: 0 1.125rem;
   border-radius: var(--r-control); background: var(--card); color: var(--obsidian);
@@ -109,7 +117,39 @@ export const MARKETING_CSS = `
   font-size: 15px; font-weight: 500; line-height: 1.5;
   transition: box-shadow 240ms var(--ease-out);
 }
+.zx-act-2 { min-height: 44px; justify-content: center; }
 .zx-act-2:hover { box-shadow: 0 0 0 1px rgba(0,0,0,0.22); }
+.zx-acts > .zx-act-1, .zx-acts > .zx-act-2 { width: 100%; }
+@media (min-width: 520px) { .zx-acts > .zx-act-1, .zx-acts > .zx-act-2 { width: auto; } }
+
+/* ---- .gradient-text, neutralised ---------------------------------------
+   Some of the copy this candidate imports carries its own markup: the
+   TEMPLATE_PAGES records store their headline as JSX with a
+   <span className="gradient-text"> inside it, and lib/comparisons does the
+   same through the pages that read it. The copy is not this restyle's to
+   rewrite, but the fill is not copy: .gradient-text computes to
+   linear-gradient(120deg, #4f5ab8 10%, #7170ff 100%) clipped to the text,
+   which is the one thing the house style names in "what this style refuses"
+   and the LILA RULE's AI-purple headline exactly.
+
+   So the class is overridden inside .zx-root rather than edited out of the
+   data: the marked word becomes the candidate set's marked word, obsidian
+   with a violet rule drawn under it. Specificity does the work (0,2,0 beats
+   0,1,0) and Tailwind v3 compiles @layer away, so there is no layer to lose
+   to.
+------------------------------------------------------------------------- */
+.zx-root .gradient-text {
+  position: relative; white-space: nowrap;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  -webkit-text-fill-color: currentColor; color: var(--obsidian);
+}
+.zx-root .gradient-text::after {
+  content: ""; position: absolute; inset-inline: -0.06em; bottom: 0.02em; height: 0.07em;
+  border-radius: 999px; background: var(--violet); transform-origin: right center;
+}
+.zx-js .gradient-text::after { transform: scaleX(0); }
+.zx-js [data-in] .gradient-text::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
+@media (prefers-reduced-motion: reduce) { .zx-js .gradient-text::after { transform: none; } }
 
 /* ---- shared section type ------------------------------------------------ */
 .zx-h2 {

@@ -49,6 +49,9 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'contact',
   'about',
   'faq',
+  'features',
+  'websites',
+  'compare',
   // THE LEGAL SET IS FIVE ADDRESSES, NOT ONE. The live site keeps /privacy,
   // /terms, /cookies, /refund and /subprocessors as five separate indexed
   // URLs and has to keep them, so the candidate is five routes over one
@@ -61,6 +64,23 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'legal/refund',
   'legal/subprocessors',
 ])
+
+/**
+ * CANDIDATES THAT HAVE MANY ADDRESSES BY NATURE.
+ *
+ * A [slug] candidate is not one page: /demo/websites has eight detail pages
+ * and /demo/compare has seven, and every one of them is linked from the hub
+ * and from its own siblings. Listing fifteen segments by hand would go stale
+ * the day a template or a competitor is added to lib/template-pages or
+ * lib/comparisons, and a stale list here does not fail loudly, it 307s the
+ * link to the apex and the page silently stops existing.
+ *
+ * So these two prefixes are allowlisted rather than their members. An unknown
+ * slug under them still does not resolve: it rewrites to /demo/<path>, where
+ * the route's own notFound() answers it, which is the right answer for a
+ * mistyped address and a better one than bouncing it to the apex.
+ */
+const DEMO_SUBDOMAIN_PREFIXES = ['websites/', 'compare/']
 
 /**
  * Cheap "is this visitor logged in?" check for routing decisions — looks for
@@ -307,7 +327,10 @@ export async function middleware(request: NextRequest) {
     }
 
     const segment = pathname === '/' ? 'home' : pathname.replace(/^\//, '').replace(/\/$/, '')
-    if (DEMO_SUBDOMAIN_PAGES.has(segment)) {
+    if (
+      DEMO_SUBDOMAIN_PAGES.has(segment) ||
+      DEMO_SUBDOMAIN_PREFIXES.some((p) => segment.startsWith(p))
+    ) {
       const url = request.nextUrl.clone()
       url.pathname = `/demo/${segment}`
       return NextResponse.rewrite(url)
