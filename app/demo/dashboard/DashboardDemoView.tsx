@@ -16,13 +16,23 @@
  * but the candidate set is Arabic-only copy, and pinning the direction here
  * keeps it off the root layout's locale.
  *
- * THE STANDING NOTE POINTS AT dashboard.zenyaai.co, NOT zenyaai.co/dashboard.
- * The product runs the logged-in surface on its own host, the way Shopify runs
- * admin: middleware.ts rewrites dashboard.zenyaai.co/ to /dashboard and
- * dashboard.zenyaai.co/sites to /dashboard/sites, so the path segment never
- * appears in the URL a customer sees. Sidebar.tsx already records this on its
- * own outbound link. The first version of this note sent readers to an address
- * the product does not advertise.
+ * NOTHING HERE IS A DOOR INTO THE PRODUCT. There is no link to the real
+ * dashboard, no link to a sign-in, and no control that navigates anywhere a
+ * session would be asked for: the header's "موقع جديد" and the account chip
+ * are spans with role="presentation", not links, and the rail's rows switch
+ * the view in place.
+ *
+ * That is deliberate and it is the second version of this page. The first
+ * carried a link to dashboard.zenyaai.co in the standing note, on the theory
+ * that a preview should say where the real thing lives. It should say so - it
+ * still does, in words - but it should not hand anyone a way in. A candidate
+ * page's job is to be looked at; the moment it offers a sign-in it stops being
+ * a preview and starts being an entrance, and an entrance on a host that
+ * serves noindex mock-ups is the wrong place for one.
+ *
+ * The one outbound link left is the rail's "العودة إلى الموقع التسويقي" to the
+ * marketing apex, which every candidate in the set carries and which is not a
+ * sign-in.
  */
 
 import { useState } from 'react'
@@ -502,11 +512,7 @@ function StandingNote() {
     <p className="mx-auto max-w-7xl px-6 pb-10 pt-2 text-center text-[11.5px] font-medium leading-[1.9] text-[#66666e]">
       نسخة تجريبية من لوحة التحكم. الأرقام والمواقع والحجوزات هنا كلها بيانات
       تجريبية، ولا تسجّل هذه الصفحة دخول أحد ولا تقرأ حسابًا حقيقيًا. لوحة
-      التحكم الفعلية على{' '}
-      <a href="https://dashboard.zenyaai.co" className="zy-link" style={{ display: 'inline' }}>
-        dashboard.zenyaai.co
-      </a>{' '}
-      وتحتاج تسجيل دخول.
+      التحكم الفعلية سطح خاص يحتاج تسجيل دخول، وليس جزءًا من هذه المعاينة.
     </p>
   )
 }
