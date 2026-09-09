@@ -154,6 +154,7 @@ export function FaqList({ title, faqs }: { title: string; faqs: QA[] }) {
  * rule; one instance per page is not.
  */
 export function CtaBand({
+  eyebrow,
   title = "جرّب زينيا مجانًا الآن",
   subtitle = "اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.",
   primaryLabel = "ابدأ الإنشاء مجانًا",
@@ -161,6 +162,10 @@ export function CtaBand({
   secondaryHref = "/demo/pricing",
   children,
 }: {
+  /** Some closing bands carry their own label. The live /why band prints
+   *  "جاهز خلال دقائق" above its heading, and dropping it would delete a run
+   *  of the product's copy along with the pill it was printed in. */
+  eyebrow?: string
   title?: string
   subtitle?: string
   primaryLabel?: string
@@ -170,6 +175,12 @@ export function CtaBand({
 }) {
   return (
     <section className="zx-band" data-reveal>
+      {eyebrow ? (
+        <p className="zx-eyebrow">
+          <span className="zx-eyebrow-dot" aria-hidden />
+          {eyebrow}
+        </p>
+      ) : null}
       <h2 className="zx-band-h">{title}</h2>
       <p className="zx-band-p">{subtitle}</p>
       {children}

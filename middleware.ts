@@ -80,7 +80,7 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
  * the route's own notFound() answers it, which is the right answer for a
  * mistyped address and a better one than bouncing it to the apex.
  */
-const DEMO_SUBDOMAIN_PREFIXES = ['websites/', 'compare/']
+const DEMO_SUBDOMAIN_PREFIXES = ['websites/', 'compare/', 'why/']
 
 /**
  * Cheap "is this visitor logged in?" check for routing decisions — looks for
