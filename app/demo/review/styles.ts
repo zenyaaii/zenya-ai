@@ -284,28 +284,113 @@ export const CSS = `
 .zr-go .sb { flex: 1 1 220px; }
 .zr-go-note { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 11.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
 
-/* ---- the door ----------------------------------------------------------
-   Where the real channel would POST. Nothing here submits anything, so the
-   panel says what the real page prints instead of pretending to have printed
-   it. Same precedent as /demo/access and /demo/build.
+/* ---- the thank-you -----------------------------------------------------
+   THE MOMENT THE REVIEW IS SENT, which is the one screen the reader is
+   guaranteed to read to the end — and the one the live channel styles least.
+
+   What it replaces: a 48px green disc at #27a644 (about 2.9:1 on white), a
+   heading with -0.6px tracking on Arabic, and a reward card built as a
+   violet-to-amber GRADIENT behind a DASHED violet border. That is four house
+   rules broken in one panel: a gradient on something that is not the light, a
+   second accent hue with no meaning, a green outside the status triad, and
+   negative letter-spacing on letterforms that connect.
+
+   Here: the ground stays flat, the ring stays a hairline, the success hue is
+   the triad's #15803d and it colours ONLY the mark that reports the state,
+   and the accent stays on the thing the accent is for — the rating, and the
+   code the rating earned.
 ------------------------------------------------------------------------- */
-.zr-door { display: flex; flex-direction: column; }
-.zr-door-pass { display: inline-flex; align-items: center; gap: 0.4375rem; margin: 0; font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--violet); }
-.zr-door-stars { display: flex; align-items: center; gap: 0.1875rem; margin-top: 0.875rem; color: var(--violet); }
-.zr-door-star { width: 15px; height: 15px; }
-.zr-door-star[data-off] { color: rgba(17,17,17,0.16); }
-.zr-spec { margin-top: 0.875rem; border-radius: var(--r-card); padding: 0.875rem 1rem; background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08); }
-.zr-spec-l { margin: 0 0 0.375rem; font-size: 11.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2); }
-.zr-spec-q { margin: 0; font-size: 13.5px; font-weight: 700; line-height: 1.85; color: var(--obsidian); }
-.zr-door-b { margin: 0.875rem 0 0; font-size: 13px; font-weight: 500; line-height: 1.9; color: var(--stone); }
-.zr-door-go { display: flex; flex-direction: column; align-items: start; gap: 0.75rem; margin-top: 1.25rem; }
-.zr-door-go .sb { width: 100%; }
-.zr-quiet {
-  border: 0; background: transparent; padding: 0; font: inherit; cursor: pointer;
-  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
-  transition: color 160ms var(--ease-out);
+.zr-thanks { display: flex; flex-direction: column; align-items: flex-start; }
+.zr-tick {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 999px; flex: 0 0 auto;
+  background: rgba(21,128,61,0.08); color: #15803d;
+  box-shadow: 0 0 0 1px rgba(21,128,61,0.18);
 }
-.zr-quiet:hover { color: var(--obsidian); }
+.zr-tick svg { width: 19px; height: 19px; }
+/* The check DRAWS. A mark that fades in is a picture of a confirmation; one
+   that is drawn is the confirmation happening. 26 is the path's own length,
+   measured rather than guessed. */
+.zr-js .zr-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zr-draw 460ms var(--ease-out) 120ms forwards; }
+@keyframes zr-draw { to { stroke-dashoffset: 0; } }
+.zr-thanks-h {
+  margin: 0.875rem 0 0; font-size: clamp(20px, 2.6vw, 25px); font-weight: 900;
+  line-height: 1.4; color: var(--obsidian); letter-spacing: 0;
+}
+/* The rating, read back. The reader set it three fields ago and the panel
+   that thanks them for it should show what they actually said. */
+.zr-thanks-stars { display: flex; align-items: center; gap: 0.25rem; margin: 0.75rem 0 0; color: var(--violet); }
+.zr-thanks-star { width: 17px; height: 17px; }
+.zr-thanks-star[data-off] { color: rgba(17,17,17,0.16); }
+.zr-thanks-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+
+/* ---- the reward --------------------------------------------------------
+   A flat panel on the field fill behind one hairline: the same object as
+   every other panel on the page, which is the point. The code is the only
+   Latin run in the card, so it gets the tracking and the accent and nothing
+   else does.
+------------------------------------------------------------------------- */
+.zr-code { width: 100%; margin-top: 1.25rem; border-radius: var(--r-card); padding: clamp(0.875rem, 2.5vw, 1.125rem); background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08); }
+.zr-code-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 12.5px; font-weight: 900; line-height: 1.6; color: var(--obsidian); }
+.zr-code-head svg { color: var(--violet); flex: 0 0 auto; }
+.zr-code-row {
+  display: inline-flex; align-items: center; gap: 0.875rem; max-width: 100%;
+  border: 0; cursor: pointer; font: inherit; text-align: start;
+  border-radius: var(--r-control); padding: 0.5625rem 0.875rem;
+  background: var(--card); box-shadow: 0 0 0 1px rgba(94,106,210,0.28);
+  transition: box-shadow 220ms var(--ease-out);
+}
+.zr-code-row:hover { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px rgba(94,106,210,0.12); }
+.zr-code-row:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px rgba(94,106,210,0.20); }
+.zr-code-row[data-copied] { box-shadow: 0 0 0 1px #15803d, 0 0 0 4px rgba(21,128,61,0.12); }
+.zr-code-str { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 16px; font-weight: 900; line-height: 1.5; letter-spacing: 0.14em; color: var(--violet); }
+.zr-code-ico { flex: 0 0 auto; display: flex; color: var(--stone-2); transition: color 200ms var(--ease-out); }
+.zr-code-row[data-copied] .zr-code-ico { color: #15803d; }
+.zr-code-note { margin: 0.75rem 0 0; font-size: 11.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
+
+/* ---- what happens next, and the honest edge ----------------------------- */
+.zr-next { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.25rem 0 0; font-size: 13px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zr-next svg { flex: 0 0 auto; margin-top: 0.3125rem; color: var(--violet); }
+/* THE STANDING NOTE IS NOT A STATUS, so it is not tinted like one. It was
+   built as an amber panel — amber fill, amber hairline, amber bold text — and
+   that breaks the rule this house keeps about the status triad: a status hue
+   may colour the pill or the icon that REPORTS a state, never a card fill and
+   never body text. Nothing here is reporting a state; the page is telling the
+   reader what it is. So the panel is the same field fill and hairline as every
+   other panel on the page, the text is the same grey as every other note, and
+   the one amber thing on it is the 14px mark that flags it. */
+.zr-demo {
+  display: flex; align-items: flex-start; gap: 0.5625rem;
+  width: 100%; margin-top: 1.25rem; border-radius: var(--r-card);
+  padding: 0.8125rem 1rem; background: var(--field);
+  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+}
+.zr-demo svg { flex: 0 0 auto; margin-top: 0.25rem; color: #b45309; }
+.zr-demo p { margin: 0; font-size: 12px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zr-thanks-go { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem; margin-top: 1.25rem; width: 100%; }
+.zr-thanks-go .sb { flex: 1 1 220px; }
+/* The hit box is padded and the padding is pulled straight back out, so the
+   target clears the 24px floor (32 under a coarse pointer) without the label
+   moving a pixel off the baseline it shares with the action beside it.
+   Measured at 390: it was 15px tall rendered before this. */
+.zr-quiet {
+  border: 0; background: transparent; font: inherit; cursor: pointer;
+  padding: 0.5rem 0.375rem; margin: -0.5rem -0.375rem;
+  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  border-radius: 8px;
+  transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+.zr-quiet:hover { color: var(--obsidian); background: rgba(17,17,17,0.04); }
+.zr-quiet:focus-visible { outline: 2px solid var(--violet); outline-offset: 1px; }
+@media (pointer: coarse) {
+  .zr-quiet { padding-block: 0.6875rem; margin-block: -0.6875rem; }
+}
+
+/* The panel arrives in sequence rather than as a block: mark, then heading,
+   then rating, then message, then reward. It reads in the order it is meant
+   to be read. Under .zr-js only, and off entirely for reduced motion. */
+.zr-js .zr-thanks > * { animation: zr-rise 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 90ms); }
+@keyframes zr-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ---- the aside ---------------------------------------------------------- */
 .zr-aside { display: flex; flex-direction: column; gap: clamp(1rem, 2.5vw, 1.5rem); min-width: 0; }
@@ -422,12 +507,36 @@ export const CSS = `
   .zr-js [data-reveal] { opacity: 1; transform: none; transition: none; }
   .zr-js .zr-h1-mark::after { transform: none; }
   .zr-star, .zr-star-in, .zr-star-out, .zr-verdict-face, .zr-in, .zr-slot-grow { transition: none; }
+  /* The confirmation still has to BE there, so the mark rests drawn and the
+     panel rests visible rather than animating into place. */
+  .zr-js .zr-thanks > * { animation: none; }
+  .zr-js .zr-tick-p { stroke-dashoffset: 0; animation: none; }
 }
 
-/* ---- the growing slot for the door -------------------------------------- */
-.zr-slot-grow { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 440ms var(--ease-out), opacity 320ms var(--ease-out); opacity: 0; }
-.zr-slot-grow[data-on] { grid-template-rows: 1fr; opacity: 1; }
-.zr-slot-grow-clip { min-height: 0; overflow: hidden; }
+/* ---- the remodel -------------------------------------------------------
+   THE CARD IS ONE OBJECT THAT CHANGES STATE, not two cards that swap. Asking
+   for the review and thanking for it are the same surface at two moments, so
+   the instrument and the form collapse on grid-template-rows while the
+   thank-you grows in the same motion — the mechanic /demo/access uses for the
+   same reason, and the one way to transition to an auto height without
+   hard-coding a pixel the contents will outgrow.
+
+   VISIBILITY, NOT JUST OPACITY: a collapsed form has to leave the tab order
+   as well as the page, and a hidden-but-focusable control is the standard way
+   that goes wrong.
+
+   AND THE CLIP IS ONLY ON WHILE IT MOVES. The focus halo is 4px OUTSIDE the
+   input, so a slot that stayed clipped would slice the ring off every field
+   in it and take away the one signal that says where the reader is. This bug
+   is recorded on /demo/access; it does not get to ship again here.
+------------------------------------------------------------------------- */
+.zr-slot-grow {
+  display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden;
+  transition: grid-template-rows 440ms var(--ease-out), opacity 320ms var(--ease-out), visibility 0s linear 440ms;
+}
+.zr-slot-grow[data-on] { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition-delay: 0s, 0s, 0s; }
+.zr-slot-grow-clip { min-height: 0; }
+.zr-slot-grow[data-moving] > .zr-slot-grow-clip, .zr-slot-grow:not([data-on]) > .zr-slot-grow-clip { overflow: hidden; }
 
 /* ---- narrow ------------------------------------------------------------- */
 @media (max-width: 480px) {

@@ -36,14 +36,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Check, Gift, Menu, ShieldCheck, X } from "lucide-react"
+import { Check, Copy, Gift, Info, Menu, ShieldCheck, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
 import SlideButton from "@/components/ui/SlideButton"
 import PricingFooter from "../pricing/PricingFooter"
-import { REVIEW_REWARD_AR_SHORT, REVIEW_REWARD_PCT } from "@/lib/review-reward"
+import { REVIEW_REWARD_CODE, REVIEW_REWARD_AR_SHORT, REVIEW_REWARD_PCT } from "@/lib/review-reward"
 import { CSS } from "./styles"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
@@ -96,9 +96,22 @@ const MAX_NAME = 120
 
 const validateEmail = (v: string) => z.string().email().safeParse(v).success
 
-/** The string the real channel prints on success, quoted rather than faked. */
+/** The paragraph the real channel prints on success, verbatim from
+ *  TOPIC_SUCCESS.review in app/(main)/contact/page.tsx. Not rewritten: the
+ *  words are the product's, and this page is restyling the moment, not
+ *  rewording it. */
 const REAL_SUCCESS =
   "شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة بزينيا."
+
+/**
+ * The heading, and it is the ONE string on this screen the demo changed.
+ *
+ * The live panel prints "تمّ استلام رسالتك." because that card is shared by
+ * all five contact topics and cannot know which one it just sent. This page
+ * is the review channel and nothing else, so it can name what arrived. The
+ * paragraph under it stays the product's, word for word.
+ */
+const THANKS_H = "تمّ استلام مراجعتك."
 
 /** The pipeline a review actually travels, from the route's own docstring. */
 const STEPS: Array<{ h: string; b: string }> = [
@@ -120,9 +133,9 @@ const STEPS: Array<{ h: string; b: string }> = [
 const STAR_D =
   "M12 2.4l2.95 5.98 6.6.96-4.77 4.65 1.12 6.57L12 17.45l-5.9 3.11 1.13-6.57L2.45 9.34l6.6-.96z"
 
-function Star({ className, filled }: { className?: string; filled?: boolean }) {
+function Star({ className, filled, off }: { className?: string; filled?: boolean; off?: boolean }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden focusable="false">
+    <svg className={className} viewBox="0 0 24 24" aria-hidden focusable="false" data-off={off ? "true" : undefined}>
       <path
         d={STAR_D}
         fill={filled ? "currentColor" : "none"}
@@ -329,143 +342,142 @@ export default function ReviewView() {
         <div className="zr-well">
           {/* ---- the instrument -------------------------------------------- */}
           <section className="zr-card" aria-labelledby="zr-inst-q" data-reveal style={{ ["--i" as string]: "1" }}>
-            <div className="zr-inst">
-              <p className="zr-inst-q" id="zr-inst-q">كيف كانت تجربتك مع زينيا؟</p>
+            <Grow on={!handed}>
+              <div className="zr-inst">
+                <p className="zr-inst-q" id="zr-inst-q">كيف كانت تجربتك مع زينيا؟</p>
 
-              {/* A radiogroup, because that is what five mutually exclusive
-                  values are. The arrows move it, so the whole instrument is
-                  reachable without a pointer — and in RTL the physical left
-                  key is the NEXT star, which is why the two are swapped
-                  against their Latin meaning here.
+                {/* A radiogroup, because that is what five mutually exclusive
+                    values are. The arrows move it, so the whole instrument is
+                    reachable without a pointer — and in RTL the physical left
+                    key is the NEXT star, which is why the two are swapped
+                    against their Latin meaning here.
 
-                  POINTING AT THE ROW REPLACES WHAT IS SHOWN, it does not add
-                  to it. Painting the hover over the set value put four solid
-                  stars under a verdict reading "تجربة سيّئة" the moment a
-                  reader who had chosen four ran the cursor back to one. So a
-                  hover shows the hovered value alone, at a third of the
-                  weight, and leaving the row restores the set one. Focus
-                  never previews: the arrows SET, so a preview there would
-                  wash out the value the reader just chose. */}
-              <div
-                ref={starsRef}
-                className="zr-stars"
-                role="radiogroup"
-                aria-label="تقييمك بالنجوم"
-                onMouseLeave={() => setHover(0)}
-                onKeyDown={(e) => {
-                  let next = 0
-                  if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = Math.min(5, (rating || 0) + 1)
-                  else if (e.key === "ArrowRight" || e.key === "ArrowDown") next = Math.max(1, (rating || 1) - 1)
-                  else if (e.key === "Home") next = 1
-                  else if (e.key === "End") next = 5
-                  if (!next) return
-                  e.preventDefault()
-                  setStars(next)
-                  /* Selection and focus travel together, which is what a
-                     radiogroup does: the roving tabindex has just moved to
-                     the new star, and leaving the focus ring on the old one
-                     would point at a value that is no longer set. */
-                  const btns = starsRef.current?.querySelectorAll<HTMLButtonElement>(".zr-star")
-                  btns?.[next - 1]?.focus()
-                }}
-              >
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    role="radio"
-                    aria-checked={rating === n}
-                    aria-label={n + " من 5"}
-                    tabIndex={rating === n || (rating === 0 && n === 1) ? 0 : -1}
-                    className="zr-star"
-                    style={{ ["--i" as string]: String(n - 1) }}
-                    data-on={!previewing && rating >= n ? "true" : undefined}
-                    data-hover={previewing && hover >= n ? "true" : undefined}
-                    data-pop={popped === n ? "true" : undefined}
-                    onMouseEnter={() => setHover(n)}
-                    onClick={() => setStars(n)}
-                  >
-                    <svg className="zr-star-svg" viewBox="0 0 24 24" aria-hidden focusable="false">
-                      <path className="zr-star-out" d={STAR_D} />
-                      <path className="zr-star-in" d={STAR_D} />
-                    </svg>
-                  </button>
-                ))}
+                    POINTING AT THE ROW REPLACES WHAT IS SHOWN, it does not add
+                    to it. Painting the hover over the set value put four solid
+                    stars under a verdict reading "تجربة سيّئة" the moment a
+                    reader who had chosen four ran the cursor back to one. So a
+                    hover shows the hovered value alone, at a third of the
+                    weight, and leaving the row restores the set one. Focus
+                    never previews: the arrows SET, so a preview there would
+                    wash out the value the reader just chose. */}
+                <div
+                  ref={starsRef}
+                  className="zr-stars"
+                  role="radiogroup"
+                  aria-label="تقييمك بالنجوم"
+                  onMouseLeave={() => setHover(0)}
+                  onKeyDown={(e) => {
+                    let next = 0
+                    if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = Math.min(5, (rating || 0) + 1)
+                    else if (e.key === "ArrowRight" || e.key === "ArrowDown") next = Math.max(1, (rating || 1) - 1)
+                    else if (e.key === "Home") next = 1
+                    else if (e.key === "End") next = 5
+                    if (!next) return
+                    e.preventDefault()
+                    setStars(next)
+                    /* Selection and focus travel together, which is what a
+                       radiogroup does: the roving tabindex has just moved to
+                       the new star, and leaving the focus ring on the old one
+                       would point at a value that is no longer set. */
+                    const btns = starsRef.current?.querySelectorAll<HTMLButtonElement>(".zr-star")
+                    btns?.[next - 1]?.focus()
+                  }}
+                >
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      role="radio"
+                      aria-checked={rating === n}
+                      aria-label={n + " من 5"}
+                      tabIndex={rating === n || (rating === 0 && n === 1) ? 0 : -1}
+                      className="zr-star"
+                      style={{ ["--i" as string]: String(n - 1) }}
+                      data-on={!previewing && rating >= n ? "true" : undefined}
+                      data-hover={previewing && hover >= n ? "true" : undefined}
+                      data-pop={popped === n ? "true" : undefined}
+                      onMouseEnter={() => setHover(n)}
+                      onClick={() => setStars(n)}
+                    >
+                      <svg className="zr-star-svg" viewBox="0 0 24 24" aria-hidden focusable="false">
+                        <path className="zr-star-out" d={STAR_D} />
+                        <path className="zr-star-in" d={STAR_D} />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+
+                {/* The verdict rolls: faces stacked in one grid cell, so the
+                    window is as tall as the tallest and the card cannot resize
+                    under the reader when a longer word arrives. */}
+                <p className="zr-verdict" aria-live="polite">
+                  {VERDICTS.map((v, i) => (
+                    <span
+                      key={i}
+                      className="zr-verdict-face"
+                      data-empty={i === 0 ? "true" : undefined}
+                      data-side={i === shown ? undefined : i < shown ? "up" : "down"}
+                      aria-hidden={i !== shown}
+                    >
+                      {v}
+                    </span>
+                  ))}
+                </p>
+                <p className="zr-inst-hint">
+                  {rating > 0 ? "يمكنك تغيير تقييمك في أي وقت قبل الإرسال." : "اضغط على نجمة، أو استخدم الأسهم."}
+                </p>
               </div>
 
-              {/* The verdict rolls: faces stacked in one grid cell, so the
-                  window is as tall as the tallest and the card cannot resize
-                  under the reader when a longer word arrives. */}
-              <p className="zr-verdict" aria-live="polite">
-                {VERDICTS.map((v, i) => (
-                  <span
-                    key={i}
-                    className="zr-verdict-face"
-                    data-empty={i === 0 ? "true" : undefined}
-                    data-side={i === shown ? undefined : i < shown ? "up" : "down"}
-                    aria-hidden={i !== shown}
-                  >
-                    {v}
-                  </span>
-                ))}
-              </p>
-              <p className="zr-inst-hint">
-                {rating > 0 ? "يمكنك تغيير تقييمك في أي وقت قبل الإرسال." : "اضغط على نجمة، أو استخدم الأسهم."}
-              </p>
-            </div>
+              <div className="zr-rule" aria-hidden />
 
-            <div className="zr-rule" aria-hidden />
+                <form className="zr-form" onSubmit={submit} noValidate>
+                  <div className="zr-pair">
+                    <Field id="zr-name" label="الاسم" required>
+                      <input id="zr-name" className="zr-in" type="text" value={name} autoComplete="name"
+                        maxLength={MAX_NAME} placeholder="كما تريده أن يظهر"
+                        onChange={(e) => setName(e.target.value)} />
+                    </Field>
+                    <Field id="zr-email" label="البريد الإلكتروني" required>
+                      <input id="zr-email" className="zr-in zr-ltr" type="email" value={email} autoComplete="email"
+                        dir="ltr" placeholder="name@company.com"
+                        onChange={(e) => setEmail(e.target.value)} />
+                    </Field>
+                  </div>
 
-            <div className="zr-slot-grow" data-on={handed ? "true" : undefined}>
-              <div className="zr-slot-grow-clip">
-                {handed ? <Door rating={rating} onBack={() => setHanded(false)} /> : null}
-              </div>
-            </div>
-
-            {handed ? null : (
-              <form className="zr-form" onSubmit={submit} noValidate>
-                <div className="zr-pair">
-                  <Field id="zr-name" label="الاسم" required>
-                    <input id="zr-name" className="zr-in" type="text" value={name} autoComplete="name"
-                      maxLength={MAX_NAME} placeholder="كما تريده أن يظهر"
-                      onChange={(e) => setName(e.target.value)} />
+                  <Field id="zr-site" label="موقعك في زينيا" hint="اختياري">
+                    <input id="zr-site" className="zr-in zr-ltr" type="text" value={site} dir="ltr"
+                      placeholder="myshop.zenyaai.co" onChange={(e) => setSite(e.target.value)} />
                   </Field>
-                  <Field id="zr-email" label="البريد الإلكتروني" required>
-                    <input id="zr-email" className="zr-in zr-ltr" type="email" value={email} autoComplete="email"
-                      dir="ltr" placeholder="name@company.com"
-                      onChange={(e) => setEmail(e.target.value)} />
+
+                  <Field id="zr-body" label="مراجعتك" required>
+                    <textarea id="zr-body" className="zr-in zr-area" value={body} maxLength={MAX_BODY}
+                      placeholder="ما الذي بنيته؟ وما الذي كان جيّدًا أو ناقصًا فيه؟"
+                      onChange={(e) => setBody(e.target.value)} />
+                    <p className="zr-count" data-met={met ? "true" : undefined} data-near={near ? "true" : undefined}>
+                      <span>تُنشر كما كتبتها، دون تحرير.</span>
+                      <span className="zr-count-n" dir="ltr">{count} / {MAX_BODY}</span>
+                    </p>
                   </Field>
-                </div>
 
-                <Field id="zr-site" label="موقعك في زينيا" hint="اختياري">
-                  <input id="zr-site" className="zr-in zr-ltr" type="text" value={site} dir="ltr"
-                    placeholder="myshop.zenyaai.co" onChange={(e) => setSite(e.target.value)} />
-                </Field>
+                  <div className="zr-status" role="status" aria-live="polite">
+                    {error ? <p className="zr-err">{error}</p> : null}
+                  </div>
 
-                <Field id="zr-body" label="مراجعتك" required>
-                  <textarea id="zr-body" className="zr-in zr-area" value={body} maxLength={MAX_BODY}
-                    placeholder="ما الذي بنيته؟ وما الذي كان جيّدًا أو ناقصًا فيه؟"
-                    onChange={(e) => setBody(e.target.value)} />
-                  <p className="zr-count" data-met={met ? "true" : undefined} data-near={near ? "true" : undefined}>
-                    <span>تُنشر كما كتبتها، دون تحرير.</span>
-                    <span className="zr-count-n" dir="ltr">{count} / {MAX_BODY}</span>
-                  </p>
-                </Field>
+                  <div className="zr-go">
+                    <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال">
+                      أرسل مراجعتي
+                    </SlideButton>
+                    <p className="zr-go-note">
+                      لا يُنشر بريدك ولا عنوان موقعك. الاسم والنجوم والنصّ فقط هي ما يظهر على الجدار.
+                    </p>
+                  </div>
+                </form>
+            
+            </Grow>
 
-                <div className="zr-status" role="status" aria-live="polite">
-                  {error ? <p className="zr-err">{error}</p> : null}
-                </div>
-
-                <div className="zr-go">
-                  <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال">
-                    أرسل مراجعتي
-                  </SlideButton>
-                  <p className="zr-go-note">
-                    لا يُنشر بريدك ولا عنوان موقعك. الاسم والنجوم والنصّ فقط هي ما يظهر على الجدار.
-                  </p>
-                </div>
-              </form>
-            )}
+            <Grow on={handed}>
+              {handed ? <Thanks rating={rating} onBack={() => setHanded(false)} /> : null}
+            </Grow>
           </section>
 
           {/* ---- the column that explains it ------------------------------- */}
@@ -493,7 +505,12 @@ export default function ReviewView() {
               </p>
               <ol className="zr-steps">
                 {STEPS.map((s, i) => (
-                  <li key={s.h} className="zr-step" data-live={i === 0 && rating > 0 ? "true" : undefined}>
+                  /* The spine reports where the review actually is: the first
+                     beat lights as soon as there is a rating to send, and it
+                     hands over to the second the moment the review is sent.
+                     The panel beside it says the same thing in words; this is
+                     the page keeping one state, not two. */
+                  <li key={s.h} className="zr-step" data-live={(handed ? i === 1 : i === 0 && rating > 0) ? "true" : undefined}>
                     <span className="zr-step-n" aria-hidden>{i + 1}</span>
                     <div className="zr-step-t">
                       <h3 className="zr-step-h">{s.h}</h3>
@@ -557,6 +574,33 @@ export default function ReviewView() {
   )
 }
 
+/* -------------------------------------------------------------------------
+   A slot that grows, and the timer that un-clips it.
+
+   A TIMER, NOT transitionend. transitionend is not guaranteed to arrive, and
+   the case that matters is not an edge one: under prefers-reduced-motion the
+   transition is none, so the event never fires at all and the clip would stay
+   on for ever — slicing the focus halo off every field inside it for exactly
+   the readers least able to afford a missing focus ring. It also bubbles, so
+   a nested transition finishing would clear the flag early. One timer,
+   slightly longer than the 440ms transition, has none of those problems.
+------------------------------------------------------------------------- */
+function Grow({ on, children }: { on: boolean; children: React.ReactNode }) {
+  const [moving, setMoving] = useState(false)
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    setMoving(true)
+    const t = window.setTimeout(() => setMoving(false), 520)
+    return () => window.clearTimeout(t)
+  }, [on])
+  return (
+    <div className="zr-slot-grow" data-on={on ? "true" : undefined} data-moving={moving ? "true" : undefined}>
+      <div className="zr-slot-grow-clip">{children}</div>
+    </div>
+  )
+}
+
 /** Label ABOVE the input: the placeholder is a hint, never the field's name. */
 function Field({
   id, label, required, hint, children,
@@ -574,40 +618,101 @@ function Field({
 }
 
 /* -------------------------------------------------------------------------
-   THE DOOR.
+   THE THANK-YOU, and it is the screen this page exists to get right.
 
-   Everything typed passed the product's real rules, and this is where the
-   real flow would POST to /api/reviews and /api/contact. Printing the
-   thank-you here would be a lie — no row was written, no mail was sent, no
-   code was issued — so the real string is QUOTED as the specimen it is, the
-   panel says plainly what did and did not happen, and the reader is handed to
-   the real channel.
+   It is the one panel a reviewer is guaranteed to read to the end, and on the
+   live channel it is the least designed thing in the flow. Everything here is
+   the real moment, restyled: the product's own paragraph, the product's own
+   reward, the rating read back, and the state the review is now in.
+
+   WHAT IT DOES NOT DO is claim any of it happened. No row was written, no
+   mail was sent, and the strip at the foot says so in place rather than in a
+   footnote three sections down — because a thank-you screen that reads as
+   real IS the thing that would mislead, and it is exactly the screen being
+   designed here. That is the tension, and the answer is to build the screen
+   honestly and label it, not to build a worse screen.
+
+   THE CODE IS SHOWN, and that is a reversal from this page's first commit,
+   for a reason found by reading the site rather than by changing my mind:
+   SHUKRAN20 is not a secret. components/ReviewOffer.tsx reveals the same
+   string to anyone who clicks it on the marketing site, the pricing page
+   carries it, and Stripe restricts it to first-time customers on a first
+   month. Withholding it here protected nothing and left the panel that most
+   needed designing as a grey rectangle. What the copy DOES change is the
+   claim attached to it: the live panel says "هذا كودك" because you earned it
+   by submitting; this one says where the code came from.
 ------------------------------------------------------------------------- */
-function Door({ rating, onBack }: { rating: number; onBack: () => void }) {
-  return (
-    <div className="zr-door">
-      <p className="zr-door-pass">
-        <Check size={14} strokeWidth={3} aria-hidden />
-        اجتازت مراجعتك كل قواعد التحقق.
-      </p>
+function Thanks({ rating, onBack }: { rating: number; onBack: () => void }) {
+  const [copied, setCopied] = useState(false)
 
-      <p className="zr-door-stars" aria-label={"تقييمك: " + rating + " من 5"}>
+  useEffect(() => {
+    if (!copied) return
+    const t = window.setTimeout(() => setCopied(false), 1800)
+    return () => window.clearTimeout(t)
+  }, [copied])
+
+  /* The live page's copyCode, including its silent catch: a clipboard write
+     is refused in plenty of ordinary situations (no permission, an insecure
+     origin), and an error toast for a failed copy of a string the reader can
+     see and select is noise. */
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(REVIEW_REWARD_CODE)
+      setCopied(true)
+    } catch {}
+  }
+
+  return (
+    <div className="zr-thanks">
+      <span className="zr-tick" style={{ ["--i" as string]: "0" }} aria-hidden>
+        <svg viewBox="0 0 24 24" fill="none" focusable="false">
+          <path className="zr-tick-p" d="M5 12.6l4.6 4.6L19 7.8" stroke="currentColor" strokeWidth={2.4}
+            strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+
+      <h2 className="zr-thanks-h" style={{ ["--i" as string]: "1" }}>{THANKS_H}</h2>
+
+      <p className="zr-thanks-stars" style={{ ["--i" as string]: "2" }} aria-label={"تقييمك: " + rating + " من 5"}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <Star key={n} className="zr-door-star" filled={n <= rating} />
+          <Star key={n} className="zr-thanks-star" filled={n <= rating} off={n > rating} />
         ))}
       </p>
 
-      <div className="zr-spec">
-        <p className="zr-spec-l">في القناة الحقيقية ستقرأ هنا:</p>
-        <p className="zr-spec-q">{REAL_SUCCESS}</p>
+      <p className="zr-thanks-b" style={{ ["--i" as string]: "3" }}>{REAL_SUCCESS}</p>
+
+      <div className="zr-code" style={{ ["--i" as string]: "4" }}>
+        <p className="zr-code-head">
+          <Gift size={14} strokeWidth={2} aria-hidden />
+          رمز الشكر — {REVIEW_REWARD_AR_SHORT}
+        </p>
+        <button type="button" className="zr-code-row" data-copied={copied ? "true" : undefined}
+          onClick={copy} aria-label={copied ? "تم نسخ رمز الخصم" : "نسخ رمز الخصم"}>
+          <span className="zr-code-str" dir="ltr">{REVIEW_REWARD_CODE}</span>
+          <span className="zr-code-ico" aria-hidden>
+            {copied ? <Check size={15} strokeWidth={2.5} /> : <Copy size={15} strokeWidth={2} />}
+          </span>
+        </button>
+        <p className="zr-code-note">
+          أدخِله في خانة «Promotion code» عند الاشتراك. صالح للعملاء الجدد على أول شهر. هذا هو الرمز
+          نفسه المعروض في صفحة الأسعار، لا رمزًا صادرًا عن هذه الصفحة.
+        </p>
       </div>
 
-      <p className="zr-door-b">
-        أمّا هنا فلم يحدث أيٌّ من ذلك: هذه صفحة تصميم مُقترحة، لا تتصل بأي خادم، ولم تُحفظ مراجعتك
-        ولم يُرسل بريد ولم يصدر رمز خصم.
+      <p className="zr-next" style={{ ["--i" as string]: "5" }}>
+        <ShieldCheck size={14} strokeWidth={2.25} aria-hidden />
+        مراجعتك الآن في الخطوة الثانية: نقرأها قبل نشرها، ولا تظهر على الجدار حتى يعتمدها أحد المؤسّسين.
       </p>
 
-      <div className="zr-door-go">
+      <div className="zr-demo" style={{ ["--i" as string]: "6" }}>
+        <Info size={14} strokeWidth={2.25} aria-hidden />
+        <p>
+          ما سبق هو شكل الرسالة الحقيقية. أمّا هنا فلم تُحفظ مراجعتك ولم يُرسل بريد — هذه صفحة تصميم
+          مُقترحة لا تتصل بأي خادم.
+        </p>
+      </div>
+
+      <div className="zr-thanks-go" style={{ ["--i" as string]: "7" }}>
         <SlideButton href={REAL} variant="violet" slide="إلى القناة الحقيقية">
           شارك تجربتك في زينيا
         </SlideButton>
