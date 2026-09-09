@@ -47,6 +47,17 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'review',
   'dashboard',
   'contact',
+  // THE LEGAL SET IS FIVE ADDRESSES, NOT ONE. The live site keeps /privacy,
+  // /terms, /cookies, /refund and /subprocessors as five separate indexed
+  // URLs and has to keep them, so the candidate is five routes over one
+  // shell rather than one tabbed page. `segment` above is the whole path,
+  // not just its first part, so a nested candidate is allowlisted by its
+  // full path and rewrites to /demo/<that path>.
+  'legal/privacy',
+  'legal/terms',
+  'legal/cookies',
+  'legal/refund',
+  'legal/subprocessors',
 ])
 
 /**
