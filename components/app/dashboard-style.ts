@@ -262,7 +262,15 @@ export const DASHBOARD_CSS = `
   font-size: 11.5px; font-weight: 500; line-height: 1.7;
   color: var(--stone-2);
 }
-.zy-rail-foot a { color: inherit; transition: color 180ms var(--ease-out); }
+/* Same reason as .zy-link: this measured 15px. It is the only link in the
+   rail and it sits at the very bottom edge, which is the hardest place on a
+   phone to hit accurately. */
+.zy-rail-foot a {
+  display: inline-flex; align-items: center;
+  min-height: 32px;
+  color: inherit;
+  transition: color 180ms var(--ease-out);
+}
 .zy-rail-foot a:hover { color: var(--violet); }
 
 /* ---- the topbar ---------------------------------------------------- */
@@ -480,6 +488,19 @@ export const DASHBOARD_CSS = `
   text-underline-offset: 3px;
 }
 .zy-link:hover { text-decoration: underline; }
+/* A LINK IS A TAP TARGET, NOT JUST TEXT. As bare inline text this measured
+   17px tall, which is under half a fingertip. The padding is pulled back out
+   of the layout with a negative margin so adding it does not move the thing
+   the link sits beside - the row keeps its baseline, the finger gets its
+   target. */
+.zy-link {
+  min-height: 24px;
+  padding-block: 0.3125rem;
+  margin-block: -0.3125rem;
+}
+@media (pointer: coarse) {
+  .zy-link { min-height: 32px; padding-block: 0.5rem; margin-block: -0.5rem; }
+}
 
 /* ---- the meter ------------------------------------------------------
    Violet as PROGRESS, which is the accent doing work rather than
@@ -817,6 +838,99 @@ export const DASHBOARD_CSS = `
   white-space: nowrap;
   border: 0;
 }
+
+/* ---- the mobile drawer ----------------------------------------------
+   THE RAIL IS lg:flex, SO BELOW 1024px THERE IS NO NAV AT ALL UNLESS
+   SOMETHING ELSE CARRIES IT. On the product that something is Sidebar's own
+   drawer; a surface that renders the rail itself has to bring one too, or a
+   phone reader is locked on whatever view loaded first. Measured on the
+   candidate before this existed: zero reachable nav rows at 390px.
+
+   The panel slides from the INLINE-START edge, which is the right in Arabic
+   and the left in English. translateX is physical and does not follow dir,
+   so the closed position is set per-direction rather than with one
+   percentage - the trap the house style records.
+------------------------------------------------------------------------- */
+.zy-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(17,17,17,0.42);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 260ms var(--ease-out);
+}
+.zy-scrim[data-open] { opacity: 1; }
+.zy-drawer {
+  position: fixed; z-index: 61;
+  inset-block: 0; inset-inline-start: 0;
+  width: min(282px, 86vw);
+  display: flex; flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(17,17,17,0.10);
+  transition: transform 320ms var(--ease-out);
+  /* Closed: pushed off the START edge. LTR start is the left, so it goes
+     negative; RTL start is the right, so it goes positive. */
+  transform: translateX(-100%);
+}
+[dir="rtl"] .zy-drawer { transform: translateX(100%); }
+.zy-drawer[data-open] { transform: translateX(0); }
+[dir="rtl"] .zy-drawer[data-open] { transform: translateX(0); }
+.zy-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding-inline: 1.125rem 0.625rem;
+  flex-shrink: 0;
+  box-shadow: inset 0 -1px 0 rgba(17,17,17,0.07);
+}
+@media (min-width: 1024px) { .zy-scrim, .zy-drawer { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .zy-scrim, .zy-drawer { transition: none; }
+}
+
+/* ---- mobile chrome --------------------------------------------------
+   The bar is the only chrome a phone gets, so it has to hold the page
+   title, the way back to the nav, and the primary action without any of
+   them shrinking to an unlabelled circle. 44px is the hit-target floor;
+   at 390px the CTA keeps its icon and drops its label, which is the one
+   place a bare glyph is acceptable because the icon is a plus. */
+@media (max-width: 1023px) {
+  .zy-top { padding-inline: 0.75rem; gap: 0.5rem; }
+  .zy-top-title { font-size: 15px; }
+  .zy-icon-btn { width: 38px; height: 38px; }
+  .zy-top-cta { padding: 0.5rem 0.75rem; min-height: 38px; }
+  .zy-top-acct { padding-inline: 0.25rem 0.5rem; min-height: 38px; }
+}
+@media (max-width: 400px) {
+  .zy-top { padding-inline: 0.625rem; }
+  .zy-top-cta { padding: 0.5rem 0.625rem; }
+}
+
+/* ---- the switch -----------------------------------------------------
+   A binary preference. The knob MOVES between the two ends rather than the
+   track being redrawn, for the same reason the segmented indicator does.
+   Sized 40x24 with a 20px knob: the whole control clears the 24px minimum
+   for a touch target on its short axis and is comfortably over it on the
+   long one. */
+.zy-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; height: 24px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(17,17,17,0.14);
+  transition: background-color 240ms var(--ease-out);
+}
+.zy-switch[data-on] { background: var(--violet); }
+.zy-switch-knob {
+  position: absolute;
+  top: 2px; inset-inline-start: 2px;
+  width: 20px; height: 20px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(17,17,17,0.20);
+  transition: transform 240ms var(--ease-out);
+}
+/* Physical transform, so the two directions get their own sign. */
+.zy-switch[data-on] .zy-switch-knob { transform: translateX(16px); }
+[dir="rtl"] .zy-switch[data-on] .zy-switch-knob { transform: translateX(-16px); }
 
 /* ---- the status pill ------------------------------------------------
    One shape for every state the dashboard reports. The hue comes from the
