@@ -67,6 +67,9 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   // checkout is ONE segment and belongs in this exact-match Set rather than
   // in DEMO_SUBDOMAIN_PREFIXES below.
   'checkout',
+  // Same shape as checkout: the theme rides in as ?type=, so the editor is
+  // ONE segment and belongs in this Set rather than in the prefixes.
+  'editor',
 ])
 
 /**

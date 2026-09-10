@@ -68,20 +68,43 @@ export type PreviewProps = {
   onViewChange?: (v: string) => void
 }
 
+/**
+ * Where the editor reads and writes the theme's wrapper content
+ * (theme.content, holding content[config.contentKey] plus the style keys).
+ *
+ * The live routes pass nothing and get the default: the signed-in user and
+ * GET/PATCH /api/themes/[id], exactly as before. A store is only for a
+ * surface that must never touch the database — the /demo/editor candidate
+ * keeps its edits in memory through one of these, so it runs every real
+ * mechanic (autosave, undo, the save indicator) without a session or a row.
+ */
+export type EditorStore = {
+  load: () => Promise<any>
+  /** Throw to report a failed save; the editor shows it like a PATCH error. */
+  save: (nextContent: any) => Promise<void>
+}
+
 export default function ThemeEditor({
   themeId,
   config,
   Preview,
   backHref,
+  exitHref = '/dashboard/sites',
+  store,
 }: {
   themeId: string
   config: EditorConfig
   Preview: ComponentType<PreviewProps>
   backHref: string
+  /** The top bar's way out. The live routes keep /dashboard/sites. */
+  exitHref?: string
+  store?: EditorStore
 }) {
   const t = useT()
   const router = useRouter()
-  const supabase = createClient()
+  // No store means the live path, which needs the browser client. With a
+  // store there is no session to read, so no client is created at all.
+  const supabase = useMemo(() => (store ? null : createClient()), [store])
   const isMobile = useIsMobile()
 
   // ── State ────────────────────────────────────────────────────────────
@@ -126,20 +149,26 @@ export default function ThemeEditor({
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (cancelled) return
-      if (!user) {
-        router.push(`/login?next=${backHref}/edit`)
-        return
+      let c: any
+      if (store) {
+        c = await store.load()
+        if (cancelled) return
+      } else {
+        const { data: { user } } = await supabase!.auth.getUser()
+        if (cancelled) return
+        if (!user) {
+          router.push(`/login?next=${backHref}/edit`)
+          return
+        }
+        const r = await fetch(`/api/themes/${themeId}`)
+        if (!r.ok) {
+          setError(r.status === 404 ? t.editor.themeNotFound : t.editor.noAccess)
+          setLoading(false)
+          return
+        }
+        const j = await r.json()
+        c = j?.theme?.content
       }
-      const r = await fetch(`/api/themes/${themeId}`)
-      if (!r.ok) {
-        setError(r.status === 404 ? t.editor.themeNotFound : t.editor.noAccess)
-        setLoading(false)
-        return
-      }
-      const j = await r.json()
-      const c = j?.theme?.content
       const inner = c?.[config.contentKey]
       if (!inner) {
         setError(t.editor.notThisTemplate.replace('{name}', config.themeName))
@@ -172,7 +201,7 @@ export default function ThemeEditor({
     }
     load()
     return () => { cancelled = true }
-  }, [themeId, supabase, router, config, backHref])
+  }, [themeId, supabase, router, config, backHref, store])
 
   // ── Dirty detection ──────────────────────────────────────────────────
   const dirty = useMemo(() => {
@@ -192,9 +221,14 @@ export default function ThemeEditor({
     if (!content) return
     setStatus('saving'); setError(null)
     try {
-      const getRes = await fetch(`/api/themes/${themeId}`)
-      const getJson = await getRes.json()
-      const fullContent = (getJson?.theme?.content as any) || {}
+      let fullContent: any
+      if (store) {
+        fullContent = (await store.load()) || {}
+      } else {
+        const getRes = await fetch(`/api/themes/${themeId}`)
+        const getJson = await getRes.json()
+        fullContent = (getJson?.theme?.content as any) || {}
+      }
       const cleanSections = pruneSectionStyles(sectionStyles)
       const nextContent = {
         ...fullContent,
@@ -204,14 +238,18 @@ export default function ThemeEditor({
         color_overrides: Object.keys(colorOverrides).length ? colorOverrides : undefined,
         section_styles: Object.keys(cleanSections).length ? cleanSections : undefined,
       }
-      const r = await fetch(`/api/themes/${themeId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: nextContent }),
-      })
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}))
-        throw new Error(j?.message || j?.error || t.editor.saveFailedStatus.replace('{status}', String(r.status)))
+      if (store) {
+        await store.save(nextContent)
+      } else {
+        const r = await fetch(`/api/themes/${themeId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: nextContent }),
+        })
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}))
+          throw new Error(j?.message || j?.error || t.editor.saveFailedStatus.replace('{status}', String(r.status)))
+        }
       }
       setOriginal(snapshot(content, presetId, typographyPreset, colorOverrides, sectionStyles))
       setLastSavedAt(Date.now())
@@ -221,7 +259,7 @@ export default function ThemeEditor({
       setStatus('error')
       setError(e?.message || t.editor.saveFailedDot)
     }
-  }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey])
+  }, [content, presetId, typographyPreset, colorOverrides, sectionStyles, themeId, config.contentKey, store])
 
   // Autosave — fires ~1.4s after edits settle.
   useEffect(() => {
@@ -377,7 +415,7 @@ export default function ThemeEditor({
     return (
       <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 py-24 text-center">
         <p className="text-foreground">{error}</p>
-        <Link href="/dashboard/sites" className="mt-4 inline-block text-sm text-primary hover:underline">
+        <Link href={exitHref} className="mt-4 inline-block text-sm text-primary hover:underline">
           {t.editor.backToSites}
         </Link>
       </main>
@@ -451,7 +489,7 @@ export default function ThemeEditor({
       >
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <Link
-            href="/dashboard/sites"
+            href={exitHref}
             className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2.5 py-1.5 text-[12.5px] font-medium text-muted hover:bg-black/5"
           >
             <ArrowLeft className="h-3 w-3 rtl-flip" strokeWidth={2.25} />
