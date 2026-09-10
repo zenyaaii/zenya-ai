@@ -63,6 +63,10 @@ const DEMO_SUBDOMAIN_PAGES = new Set([
   'legal/cookies',
   'legal/refund',
   'legal/subprocessors',
+  // The plan rides in as ?plan=, which is a query and not a path, so the
+  // checkout is ONE segment and belongs in this exact-match Set rather than
+  // in DEMO_SUBDOMAIN_PREFIXES below.
+  'checkout',
 ])
 
 /**
