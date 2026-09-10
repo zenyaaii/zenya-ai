@@ -3,7 +3,7 @@
 /* ────────────────────────────────────────────────────────────────────── *
  * Inline AI copywriter for the theme editor.                              *
  *                                                                         *
- * Every text / textarea field gets a small ✦ trigger. Clicking it opens  *
+ * Every text / textarea field gets a small AI trigger. Clicking it opens *
  * an inline panel with rewrite modes (Improve, Shorter, Punchier, …) and  *
  * a free-form instruction box. We hand the API the brand identity + a     *
  * sample of the site's existing copy so the rewrite matches the theme's   *
@@ -12,12 +12,18 @@
  * Theme context flows through <AiCopyProvider>. The provider value is     *
  * stable (getters read a live ref) so wiring it in doesn't re-render      *
  * every field on each keystroke.                                          *
+ *                                                                         *
+ * OFFLINE (the /demo/editor candidate, see ./env): the trigger and the    *
+ * panel still render, so the design can be judged, but nothing can call   *
+ * /api/ai/rewrite. The panel says so where the instruction box would be,  *
+ * and run() returns before it could fetch.                                *
  * ────────────────────────────────────────────────────────────────────── */
 
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
-import { Sparkles, Loader2, RotateCcw, X } from 'lucide-react'
+import { Sparkles, RotateCcw, X } from 'lucide-react'
+import { useEditorEnv } from './env'
 
 export type AiBrand = { name?: string; tagline?: string; category?: string }
 
@@ -55,7 +61,7 @@ function buildModes(t: Messages): Array<{ id: Mode; label: string }> {
 }
 
 /**
- * Hook used by FieldText / FieldTextArea. Returns a `trigger` (the ✦ button
+ * Hook used by FieldText / FieldTextArea. Returns a `trigger` (the AI button
  * for the label row) and a `panel` (the expandable UI rendered under the
  * input). Both are null when there's no Ai context — so the field components
  * stay usable outside the editor.
@@ -69,6 +75,7 @@ export function useAiRewrite(opts: {
 }): { available: boolean; trigger: ReactNode; panel: ReactNode } {
   const t = useT()
   const ctx = useAiCopy()
+  const { offline } = useEditorEnv()
   const [open, setOpen] = useState(false)
 
   if (!ctx) return { available: false, trigger: null, panel: null }
@@ -78,22 +85,19 @@ export function useAiRewrite(opts: {
       type="button"
       onClick={() => setOpen((o) => !o)}
       title={t.editor.aiRewriteTitle}
-      aria-label={t.editor.aiRewriteTitle}
-      className={
-        'inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider transition ' +
-        (open
-          ? 'border-primary bg-[rgba(94,106,210,0.10)] text-primary'
-          : 'border-token bg-white text-muted hover:border-primary/50 hover:text-primary')
-      }
+      aria-label={`${t.editor.aiRewriteTitle}: ${opts.fieldLabel}`}
+      aria-expanded={open}
+      className="ze-ai"
     >
-      <Sparkles className="h-3 w-3" strokeWidth={2.25} />
-      AI
+      <Sparkles strokeWidth={2} aria-hidden />
+      <bdi dir="ltr">AI</bdi>
     </button>
   )
 
   const panel = open ? (
     <AiRewritePanel
       ctx={ctx}
+      offline={offline}
       fieldLabel={opts.fieldLabel}
       panelLabel={opts.panelLabel}
       multiline={opts.multiline}
@@ -107,9 +111,10 @@ export function useAiRewrite(opts: {
 }
 
 function AiRewritePanel({
-  ctx, fieldLabel, panelLabel, multiline, current, onChange, onClose,
+  ctx, offline, fieldLabel, panelLabel, multiline, current, onChange, onClose,
 }: {
   ctx: AiCopyContextValue
+  offline: boolean
   fieldLabel: string
   panelLabel?: string
   multiline: boolean
@@ -124,7 +129,7 @@ function AiRewritePanel({
   const [instruction, setInstruction] = useState('')
 
   async function run(mode: Mode | 'custom') {
-    if (loading) return
+    if (offline || loading) return
     if (mode === 'custom' && !instruction.trim()) {
       setErr(t.editor.writeFirst)
       return
@@ -162,79 +167,62 @@ function AiRewritePanel({
   }
 
   return (
-    <div className="mt-1.5 rounded-lg border border-primary/30 bg-[rgba(94,106,210,0.05)] p-2.5">
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3 w-3" strokeWidth={2.25} /> {t.editor.aiRewriteHeading}
+    <div className="ze-aipanel">
+      <div className="ze-aipanel-h">
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
+          <Sparkles strokeWidth={2} aria-hidden style={{ width: 15, height: 15 }} /> {t.editor.aiRewriteHeading}
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-0.5 text-muted hover:text-foreground"
-          aria-label={t.editor.closeAiRewrite}
-        >
-          <X className="h-3 w-3" />
+        <button type="button" onClick={onClose} className="ze-icon" aria-label={t.editor.closeAiRewrite}>
+          <X strokeWidth={2} aria-hidden />
         </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap gap-1">
+      <div className="ze-chips">
         {buildModes(t).map((m) => (
           <button
             key={m.id}
             type="button"
-            disabled={loading}
+            disabled={loading || offline}
             onClick={() => run(m.id)}
-            className="rounded-full border border-token bg-white px-2 py-0.5 text-[11px] font-medium text-foreground transition hover:border-primary/50 hover:text-primary disabled:opacity-50"
+            className="ze-chip"
           >
             {m.label}
           </button>
         ))}
       </div>
 
-      <div className="mt-2 flex items-center gap-1.5">
-        <input
-          value={instruction}
-          onChange={(e) => setInstruction(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); run('custom') } }}
-          placeholder={t.editor.tellAiPlaceholder}
-          disabled={loading}
-          className="flex-1 rounded-md border border-token bg-white px-2 py-1 text-[12px] outline-none focus:border-primary disabled:opacity-50"
-        />
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() => run('custom')}
-          className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : t.editor.run}
-        </button>
-      </div>
-
-      {err && (
-        <p className="mt-2 rounded-md border border-[rgba(220,38,38,0.25)] bg-[rgba(220,38,38,0.06)] px-2 py-1.5 text-[11.5px] text-[#b91c1c]">
-          {err}
-        </p>
+      {offline ? (
+        <p className="ze-note" data-tone="door">{t.editor.aiOffline}</p>
+      ) : (
+        <div className="ze-row2">
+          <input
+            value={instruction}
+            onChange={(e) => setInstruction(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); run('custom') } }}
+            placeholder={t.editor.tellAiPlaceholder}
+            aria-label={t.editor.tellAiPlaceholder}
+            disabled={loading}
+            dir="auto"
+            className="ze-input"
+          />
+          <button type="button" disabled={loading} onClick={() => run('custom')} className="ze-btn" data-tone="accent" aria-busy={loading}>
+            {loading ? <span className="ze-spin" aria-hidden /> : t.editor.run}
+          </button>
+        </div>
       )}
 
+      {err && <p className="ze-err">{err}</p>}
+
       {loading && variants.length === 0 && (
-        <p className="mt-2 flex items-center gap-1.5 text-[11.5px] text-muted">
-          <Loader2 className="h-3 w-3 animate-spin" /> {t.editor.writingInStyle}
-        </p>
+        <p className="ze-hint" role="status">{t.editor.writingInStyle}</p>
       )}
 
       {variants.length > 0 && (
-        <div className="mt-2 space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-              {t.editor.clickOneToUse}
-            </span>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => run('improve')}
-              className="inline-flex items-center gap-1 text-[10.5px] font-medium text-muted hover:text-primary disabled:opacity-50"
-            >
-              <RotateCcw className="h-3 w-3" /> {t.editor.regenerate}
+        <div className="ze-items">
+          <div className="ze-card-h">
+            <span className="ze-hint">{t.editor.clickOneToUse}</span>
+            <button type="button" disabled={loading} onClick={() => run('improve')} className="ze-link">
+              <RotateCcw aria-hidden /> {t.editor.regenerate}
             </button>
           </div>
           {variants.map((v, i) => (
@@ -242,9 +230,10 @@ function AiRewritePanel({
               key={i}
               type="button"
               onClick={() => { onChange(v); onClose() }}
-              className="block w-full rounded-md border border-token bg-white px-2.5 py-2 text-left text-[12.5px] leading-snug text-foreground transition hover:border-primary hover:bg-[rgba(94,106,210,0.04)]"
+              className="ze-variant"
+              dir="auto"
             >
-              <span className="block whitespace-pre-line break-words">{v.replace(/\\n/g, '\n')}</span>
+              {v.replace(/\\n/g, '\n')}
             </button>
           ))}
         </div>

@@ -1,9 +1,9 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import {
-  ChevronDown, ChevronRight, ImageIcon, Plus, RotateCcw, Trash2,
+  ChevronRight, ImageIcon, RotateCcw, Trash2,
   Upload,
 } from 'lucide-react'
 import GalleryPicker from './GalleryPicker'
@@ -13,24 +13,32 @@ import { useAiRewrite } from './AiRewrite'
  * Shared editor field components — used by every theme's editor.        *
  * All inputs are uncontrolled-friendly: value/onChange pair, fast    *
  * rerenders, no internal state besides UI affordances.                  *
+ *                                                                        *
+ * Styled by editor-style.ts. The label sits ABOVE its field and is tied *
+ * to it with htmlFor, so tapping a label focuses the field. Labels are  *
+ * 14.5px sentence case with no tracking: they are Arabic, and uppercase *
+ * tracking on Arabic pulls the joins apart. The input carries Tajawal,  *
+ * the content face; everything around it carries the chrome face.      *
  * ────────────────────────────────────────────────────────────────────── */
 
 export function FieldText({
   label, value, onChange, placeholder, panelLabel,
 }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; panelLabel?: string }) {
+  const id = useId()
   const ai = useAiRewrite({ fieldLabel: label, panelLabel, multiline: false, current: value, onChange })
   return (
-    <div className="block">
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="ze-field">
+      <div className="ze-label-row">
+        <label className="ze-label" htmlFor={id}>{label}</label>
         {ai.trigger}
       </div>
       <input
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         dir="auto"
-        className="w-full rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
+        className="ze-input"
       />
       {ai.panel}
     </div>
@@ -40,22 +48,23 @@ export function FieldText({
 export function FieldTextArea({
   label, value, onChange, placeholder, rows = 3, panelLabel,
 }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; rows?: number; panelLabel?: string }) {
+  const id = useId()
   const ai = useAiRewrite({ fieldLabel: label, panelLabel, multiline: true, current: value, onChange })
   return (
-    <div className="block">
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="ze-field">
+      <div className="ze-label-row">
+        <label className="ze-label" htmlFor={id}>{label}</label>
         {ai.trigger}
       </div>
       <textarea
+        id={id}
         rows={rows}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         dir="auto"
         wrap="soft"
-        className="block w-full resize-y break-words rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground placeholder:text-muted/60 outline-none transition-shadow duration-150 focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]"
-        style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+        className="ze-textarea"
       />
       {ai.panel}
     </div>
@@ -65,36 +74,30 @@ export function FieldTextArea({
 export function FieldNumber({
   label, value, onChange, min, max, step,
 }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number }) {
+  const id = useId()
   return (
-    <label className="block">
-      <span className="mb-1 block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="ze-field">
+      <label className="ze-label" htmlFor={id}>{label}</label>
       <input
+        id={id}
         type="number"
         value={value}
         onChange={(e) => onChange(Number(e.target.value) || 0)}
         min={min}
         max={max}
         step={step}
-        className="w-full rounded-md border border-token bg-white px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-primary"
+        className="ze-input"
       />
-    </label>
-  )
-}
-
-export function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="pt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-      {children}
     </div>
   )
 }
 
+export function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <div className="ze-card-t">{children}</div>
+}
+
 export function SmallNote({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="rounded-md bg-[rgba(94,106,210,0.06)] px-2.5 py-2 text-[11.5px] leading-[1.55] text-muted">
-      {children}
-    </p>
-  )
+  return <p className="ze-note">{children}</p>
 }
 
 export function Collapsible({
@@ -103,44 +106,39 @@ export function Collapsible({
   const t = useT()
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="rounded-lg border border-token bg-white">
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5">
+    <div className="ze-item">
+      <div className="ze-item-h">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex flex-1 items-center gap-2 text-left"
+          aria-expanded={open}
+          className="ze-item-toggle"
         >
-          {open ? <ChevronDown className="h-3.5 w-3.5 text-muted" /> : <ChevronRight className="h-3.5 w-3.5 text-muted" />}
-          <span className="truncate text-[13px] font-medium text-foreground">{title}</span>
+          <ChevronRight strokeWidth={2.25} aria-hidden />
+          <span className="ze-row-t">{title}</span>
         </button>
         {onRemove && (
           <button
             type="button"
             onClick={onRemove}
             title={t.editor.remove}
-            className="rounded border border-token bg-white p-1 text-muted hover:bg-[rgba(220,38,38,0.06)] hover:text-[#b91c1c]"
+            aria-label={`${t.editor.remove}: ${title}`}
+            className="ze-icon"
+            data-tone="bad"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 strokeWidth={2} aria-hidden />
           </button>
         )}
       </div>
-      {open && (
-        <div className="space-y-2 border-t border-token px-2.5 py-2.5">
-          {children}
-        </div>
-      )}
+      {open && <div className="ze-item-body">{children}</div>}
     </div>
   )
 }
 
 export function AddRowButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center justify-center gap-1 rounded-md border border-dashed border-token bg-white py-2 text-[12.5px] font-medium text-primary hover:bg-[rgba(94,106,210,0.04)]"
-    >
-      <Plus className="h-3 w-3" /> {label}
+    <button type="button" onClick={onClick} className="ze-add">
+      {label}
     </button>
   )
 }
@@ -155,51 +153,36 @@ export function FieldImage({
   const t = useT()
   const [pickerOpen, setPickerOpen] = useState(false)
   return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between">
-        <span className="block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</span>
+    <div className="ze-field">
+      <div className="ze-label-row">
+        <span className="ze-label">{label}</span>
         {value && (
-          <button type="button" onClick={() => onChange('')} className="text-[10.5px] text-[#b91c1c] hover:underline">
+          <button type="button" onClick={() => onChange('')} className="ze-link" data-tone="bad">
             {t.editor.clear}
           </button>
         )}
       </div>
-      {value ? (
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          className="group mb-1.5 block w-full overflow-hidden rounded-md border border-token transition hover:border-primary"
-          title={t.editor.clickToChange}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt={label} className="block h-32 w-full object-cover" />
-          <span className="block bg-black/60 px-2 py-1 text-center text-[10.5px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            {t.editor.clickToChange}
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        className="ze-img"
+        aria-label={`${value ? t.editor.changeImage : t.editor.chooseImage}: ${label}`}
+      >
+        {value ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={value} alt="" />
+        ) : (
+          <span className="ze-img-empty">
+            <Upload strokeWidth={2} aria-hidden />
+            {t.editor.chooseImage}
           </span>
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          className="mb-1.5 grid h-24 w-full place-items-center rounded-md border border-dashed border-token bg-surface text-muted transition hover:border-primary hover:text-primary"
-        >
-          <div className="flex flex-col items-center gap-1">
-            <Upload className="h-4 w-4" strokeWidth={2} />
-            <span className="text-[11.5px] font-medium">{t.editor.chooseImage}</span>
-          </div>
-        </button>
-      )}
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={() => setPickerOpen(true)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
-        >
-          <ImageIcon className="h-3 w-3" strokeWidth={2.25} />
-          {value ? t.editor.changeImage : t.editor.openGallery}
-        </button>
-      </div>
-      {hint && <p className="mt-1 text-[11px] text-muted">{hint}</p>}
+        )}
+      </button>
+      <button type="button" onClick={() => setPickerOpen(true)} className="ze-btn" data-tone="quiet">
+        <ImageIcon strokeWidth={2} aria-hidden />
+        {value ? t.editor.changeImage : t.editor.openGallery}
+      </button>
+      {hint && <p className="ze-hint">{hint}</p>}
       <GalleryPicker
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
@@ -216,33 +199,29 @@ export function InlineImage({
   const t = useT()
   const [pickerOpen, setPickerOpen] = useState(false)
   return (
-    <div className="flex items-center gap-2">
+    <div className="ze-row2">
       <button
         type="button"
         onClick={() => setPickerOpen(true)}
-        className="group relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border border-token bg-white transition hover:border-primary"
+        className="ze-swatch"
+        style={{ background: 'var(--field)' }}
         title={value ? t.editor.clickToChange : t.editor.chooseImage}
+        aria-label={value ? t.editor.changeImage : t.editor.chooseImage}
       >
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt={label} className="h-full w-full object-cover" />
+          <img src={value} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <span className="grid h-full w-full place-items-center text-muted">
-            <ImageIcon className="h-3.5 w-3.5" />
-          </span>
+          <ImageIcon strokeWidth={2} aria-hidden style={{ width: 16, height: 16, margin: 'auto' }} />
         )}
       </button>
-      <button
-        type="button"
-        onClick={() => setPickerOpen(true)}
-        className="inline-flex min-w-0 flex-1 items-center justify-between gap-1.5 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
-      >
-        <span className="truncate text-left text-muted">{value ? truncateUrl(value) : label}</span>
-        <Upload className="h-3 w-3 flex-shrink-0 text-muted" strokeWidth={2.25} />
+      <button type="button" onClick={() => setPickerOpen(true)} className="ze-btn" data-tone="quiet" style={{ flex: '1 1 auto', minWidth: 0, justifyContent: 'space-between' }}>
+        <span className="ze-row-t" style={{ textAlign: 'start' }}>{value ? truncateUrl(value) : label}</span>
+        <Upload strokeWidth={2} aria-hidden />
       </button>
       {value && (
-        <button type="button" onClick={() => onChange('')} className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5" title={t.editor.clear}>
-          <Trash2 className="h-3 w-3" />
+        <button type="button" onClick={() => onChange('')} className="ze-icon" data-tone="bad" title={t.editor.clear} aria-label={t.editor.clear}>
+          <Trash2 strokeWidth={2} aria-hidden />
         </button>
       )}
       <GalleryPicker
@@ -270,16 +249,8 @@ export function UploadButton({
   const buttonLabel = label ?? t.editor.upload
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={
-          small
-            ? 'inline-flex items-center gap-1 rounded-md border border-token bg-white px-2 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5'
-            : 'inline-flex items-center gap-1.5 rounded-md border border-token bg-white px-3 py-1.5 text-[12.5px] font-medium text-foreground hover:bg-black/5'
-        }
-      >
-        <Upload className={small ? 'h-3 w-3' : 'h-3.5 w-3.5'} strokeWidth={2.25} />
+      <button type="button" onClick={() => setOpen(true)} className="ze-btn" data-tone="quiet" data-small={small ? '' : undefined}>
+        <Upload strokeWidth={2} aria-hidden />
         {buttonLabel}
       </button>
       <GalleryPicker open={open} onClose={() => setOpen(false)} onPick={(url) => onUploaded(url)} />
@@ -309,19 +280,21 @@ export function StringList({
     onChange(value.filter((_, idx) => idx !== i))
   }
   return (
-    <div>
+    <div className="ze-field">
       {label && <SectionLabel>{label}</SectionLabel>}
-      <div className="mt-1 space-y-1">
+      <div className="ze-items">
         {value.map((s, i) => (
-          <div key={i} className="flex items-center gap-1.5">
+          <div key={i} className="ze-row2">
             <input
               value={s}
               onChange={(e) => update(i, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 rounded-md border border-token bg-white px-2 py-1 text-[12.5px] outline-none focus:border-primary"
+              aria-label={label ? `${label} ${i + 1}` : undefined}
+              dir="auto"
+              className="ze-input"
             />
-            <button type="button" onClick={() => remove(i)} className="rounded border border-token bg-white p-1 text-muted hover:bg-[rgba(220,38,38,0.06)] hover:text-[#b91c1c]">
-              <Trash2 className="h-3 w-3" />
+            <button type="button" onClick={() => remove(i)} className="ze-icon" data-tone="bad" title={t.editor.remove} aria-label={t.editor.remove}>
+              <Trash2 strokeWidth={2} aria-hidden />
             </button>
           </div>
         ))}
@@ -347,46 +320,42 @@ export function ColorRow({
   const t = useT()
   const isHex = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(value)
   return (
-    <div className="flex items-center gap-2 rounded-md border border-token bg-white px-2 py-1.5">
-      <span
-        className="h-6 w-6 flex-shrink-0 rounded border border-token"
-        style={{ background: value }}
-        aria-hidden
-      />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-semibold text-foreground">{label}</span>
-          {overridden && (
-            <span className="rounded bg-primary/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wider text-primary">
-              {t.editor.custom}
-            </span>
-          )}
-        </div>
-        <div className="mt-0.5 flex items-center gap-1">
-          {isHex && (
-            <input
-              type="color"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className="h-5 w-5 cursor-pointer rounded border border-token bg-white"
-              aria-label={`${label} color`}
-            />
-          )}
+    <div className="ze-color">
+      {/* The swatch IS the colour picker when the value is a hex, so the
+          control a finger aims at is the size of the colour it shows. */}
+      <span className="ze-swatch" style={{ background: value }}>
+        {isHex && (
           <input
-            value={value}
+            type="color"
+            value={value.length === 4 ? '#' + value.slice(1).split('').map((c) => c + c).join('') : value}
             onChange={(e) => onChange(e.target.value)}
-            className="flex-1 rounded border border-token bg-white px-1.5 py-0.5 font-mono text-[11px] outline-none focus:border-primary"
+            aria-label={label}
           />
-        </div>
+        )}
+      </span>
+      <div className="ze-color-m">
+        <span className="ze-color-l">
+          {label}
+          {overridden && <span className="ze-tag">{t.editor.custom}</span>}
+        </span>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-label={label}
+          spellCheck={false}
+          data-mono
+          className="ze-input"
+        />
       </div>
       {overridden && (
         <button
           type="button"
           onClick={onReset}
           title={t.editor.backToPreset}
-          className="rounded border border-token bg-white p-1 text-muted hover:bg-black/5"
+          aria-label={t.editor.backToPreset}
+          className="ze-icon"
         >
-          <RotateCcw className="h-3 w-3" />
+          <RotateCcw strokeWidth={2} aria-hidden />
         </button>
       )}
     </div>
@@ -397,14 +366,7 @@ export function MoodChip({
   active, onClick, children,
 }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        'rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider transition ' +
-        (active ? 'bg-foreground text-white' : 'bg-[rgba(28,28,28,0.06)] text-muted hover:text-foreground')
-      }
-    >
+    <button type="button" onClick={onClick} aria-pressed={active} className="ze-chip">
       {children}
     </button>
   )

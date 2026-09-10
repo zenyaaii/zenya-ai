@@ -206,6 +206,30 @@ const ar = {
     deleteImageWarning: 'إن كانت مستخدمة في أي موقع، سيُظهر الموقع صورة معطوبة.',
     deleteFailed: 'فشل الحذف',
     delete: 'حذف',
+    /** The Save button's tooltip; ⌘S is the shortcut. */
+    saveTitle: 'حفظ (⌘S)',
+    /** Alignment names, substituted into alignTo. */
+    alignLeft: 'يسار',
+    alignCenter: 'وسط',
+    alignRight: 'يمين',
+    /** The AI rewrite panel when the editor runs without a service (the demo). */
+    aiOffline: 'إعادة الصياغة بالذكاء الاصطناعي تعمل في المحرّر الحقيقي فقط. هذه النسخة التجريبية لا تتصل بأي خدمة.',
+    /** The gallery when the editor runs without a service (the demo). */
+    galleryOffline: 'المعرض يقرأ صورك من حسابك في المحرّر الحقيقي. هذه النسخة التجريبية لا تقرأ صورًا ولا ترفعها ولا تحذفها، ويمكنك لصق رابط صورة لتجربته هنا.',
+    demoNoticeLead: 'نسخة تجريبية.',
+    demoNotice: 'تعديلاتك تبقى في هذه الصفحة فقط ولا تُحفظ في أي مكان، وتختفي عند إعادة التحميل.',
+    /** The same notice, one line, for a phone. */
+    demoNoticeShort: 'تعديلاتك لا تُحفظ في أي مكان.',
+    /** Shown only when scripts are off: the editor cannot load without them. */
+    needsJs: 'المحرّر يحتاج إلى تفعيل JavaScript في المتصفح.',
+    demoTemplate: 'القالب',
+    /** The six template names, as lib/template-pages.tsx names them. */
+    demoTypeRestaurant: 'موقع مطعم',
+    demoTypeAtlas: 'صفحة هبوط لتطبيق',
+    demoTypeLookbook: 'موقع أزياء ولوك بوك',
+    demoTypeServices: 'موقع خدمات',
+    demoTypeStudio: 'موقع علامة تجارية وقصة',
+    demoTypeWellness: 'موقع مركز عافية',
   },
   common: {
     language: 'اللغة',
@@ -344,7 +368,7 @@ const en: Messages = {
     sectionStyle: 'Section style',
     size: 'Size',
     alignment: 'Alignment',
-    appliesToSection: 'Applies to this section',
+    appliesToSection: 'Applies to the section',
     textSize: 'Text size {label}',
     alignTo: 'Align {id}',
     paletteHelp:
@@ -396,6 +420,23 @@ const en: Messages = {
     deleteImageWarning: 'If a site uses it, that site will show a broken image.',
     deleteFailed: 'Delete failed',
     delete: 'Delete',
+    saveTitle: 'Save (⌘S)',
+    alignLeft: 'left',
+    alignCenter: 'centre',
+    alignRight: 'right',
+    aiOffline: 'AI rewrite runs in the real editor only. This demo does not call any service.',
+    galleryOffline: 'The gallery reads your images from your account in the real editor. This demo does not read, upload or delete any image; you can paste an image link to try it here.',
+    demoNoticeLead: 'Demo.',
+    demoNotice: 'Your edits stay on this page only, are not stored anywhere, and are gone when you reload.',
+    demoNoticeShort: 'Your edits are not stored anywhere.',
+    needsJs: 'The editor needs JavaScript turned on in your browser.',
+    demoTemplate: 'Template',
+    demoTypeRestaurant: 'Restaurant website',
+    demoTypeAtlas: 'App landing page',
+    demoTypeLookbook: 'Fashion lookbook website',
+    demoTypeServices: 'Services website',
+    demoTypeStudio: 'Brand story website',
+    demoTypeWellness: 'Wellness center website',
   },
   common: {
     language: 'Language',

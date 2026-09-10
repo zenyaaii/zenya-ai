@@ -13,10 +13,20 @@
  * WHAT IS NOT. The store. It keeps the wrapper content in a closure and
  * resolves a save after a short wait, so the status runs its real
  * saving -> saved -> idle cycle. There is no fetch, no Supabase client and no
- * row: reload the page and every edit is gone, and the page says so.
+ * row: reload the page and every edit is gone, and the page says so in the
+ * notice, which the editor places under its bar on a desktop and at the top
+ * of the section list on a tablet or phone.
+ *
+ * AND THE TWO THINGS THAT CALL A SERVICE ON THEIR OWN STOP AT A DOOR. With a
+ * store, ThemeEditor marks the editor offline (components/editor/env.ts): the
+ * AI rewrite panel opens but says it runs only in the real editor, and the
+ * gallery opens but reads, uploads and deletes nothing. No commercial fact is
+ * claimed about either — no credits, no limits, no plan.
  */
 
 import { useMemo, type ComponentType } from 'react'
+import Link from 'next/link'
+import { useT } from '@/components/i18n/LocaleProvider'
 import ThemeEditor, { type EditorStore, type PreviewProps } from '@/components/editor/ThemeEditor'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import AtlasPreview from '@/components/theme/atlas/AtlasPreview'
@@ -37,7 +47,7 @@ import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
 import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
 import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
-import type { DemoType } from './types'
+import { DEMO_TYPES, type DemoType } from './types'
 
 type Theme = { config: EditorConfig; Preview: ComponentType<PreviewProps>; content: unknown }
 
@@ -66,6 +76,38 @@ function memoryStore(contentKey: string, content: unknown): EditorStore {
   }
 }
 
+function DemoNotice({ type }: { type: DemoType }) {
+  const t = useT()
+  const names: Record<DemoType, string> = {
+    restaurant: t.editor.demoTypeRestaurant,
+    atlas: t.editor.demoTypeAtlas,
+    lookbook: t.editor.demoTypeLookbook,
+    services: t.editor.demoTypeServices,
+    studio: t.editor.demoTypeStudio,
+    wellness: t.editor.demoTypeWellness,
+  }
+  return (
+    <div className="ze-demo" role="note">
+      {/* Always on screen, in every layout, under the bar: a reader must not
+          have to open anything to learn that nothing is kept. A phone gets
+          the one-line version so the preview keeps its height. */}
+      <span className="ze-demo-t">
+        <strong>{t.editor.demoNoticeLead}</strong>{' '}
+        <span className="ze-demo-long">{t.editor.demoNotice}</span>
+        <span className="ze-demo-short">{t.editor.demoNoticeShort}</span>
+      </span>
+      <nav className="ze-demo-types" aria-label={t.editor.demoTemplate}>
+        <span>{t.editor.demoTemplate}</span>
+        {DEMO_TYPES.map((k) => (
+          <Link key={k} href={'/demo/editor?type=' + k} aria-current={k === type ? 'page' : undefined}>
+            {names[k]}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  )
+}
+
 export default function EditorDemoView({ type }: { type: DemoType }) {
   const theme = THEMES[type]
   const store = useMemo(() => memoryStore(theme.config.contentKey, theme.content), [theme])
@@ -78,6 +120,7 @@ export default function EditorDemoView({ type }: { type: DemoType }) {
       backHref="/demo/templates"
       exitHref="/demo/templates"
       store={store}
+      notice={<DemoNotice type={type} />}
     />
   )
 }

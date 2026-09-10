@@ -1,39 +1,54 @@
 'use client'
 
 /* ─────────────────────────────────────────────────────────────────────── *
- * MobileEditor — the phone layout for the theme editor.                    *
+ * MobileEditor — the compact layouts for the theme editor.                 *
  *                                                                          *
- * Desktop uses three panes (sections rail · preview · fields rail). None    *
- * of that fits a phone, so here we render:                                  *
+ * Desktop uses three panes (sections rail · preview · fields). Below       *
+ * 1280px they do not fit, so ThemeEditor renders this tree instead, in    *
+ * one of two forms:                                                        *
  *                                                                          *
+ *   PHONE (below 768px)                                                    *
  *   • a full-bleed live preview (the phone IS the device); tap any section  *
- *     to edit it (TapToEditOverlay), and                                    *
+ *     to edit it (SectionOverlay), and                                      *
  *   • a draggable bottom sheet that snaps between peek → ~60% → full and     *
  *     holds the SAME fields/colors/typography panels the desktop rail uses   *
  *     (imported from ./panels — zero fork).                                  *
+ *                                                                          *
+ *   DOCKED (768–1279px: an iPad either way up, a small laptop)             *
+ *   • the preview on a stage with the device toggle, and the same panels in *
+ *     a docked inspector beside it. An iPad in portrait used to get the     *
+ *     phone sheet stretched to 834px — a 92%-tall sheet over a preview it   *
+ *     could not see — and in landscape the three desktop panes, with 730px  *
+ *     left for "desktop". Neither was designed for it.                      *
  *                                                                          *
  * All editing STATE lives in ThemeEditor; this component is pure            *
  * presentation and receives it via props. That's why save/undo/autosave/AI  *
  * "just work" here without being re-implemented.                            *
  *                                                                          *
- * Two things break this pattern if unhandled, so we handle both:            *
+ * Two things break the sheet if unhandled, so we handle both:              *
  *   • the on-screen keyboard covering the fields → we track visualViewport   *
  *     and keep the sheet's scrollable body sized above the keyboard;         *
  *   • sheet-drag fighting inner scroll → the sheet only starts dragging when  *
  *     its body is scrolled to the top (guarded in the drag handlers).        *
+ * And one more, found while restyling: the cookie banner (229px on a       *
+ * phone) sat over the sheet's head, the one place the save lives. While it *
+ * is on screen the sheet stands on top of it instead.                      *
  * ─────────────────────────────────────────────────────────────────────── */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import Link from 'next/link'
 import { motion, useMotionValue, animate, type PanInfo } from 'framer-motion'
 import {
-  ArrowLeft, Save, Palette, Type as TypeIcon, Settings, ChevronRight,
-  LayoutGrid, X, type LucideIcon,
+  ArrowLeft, Save, Palette, Type as TypeIcon, Settings, ChevronLeft,
+  ChevronUp, ChevronDown, X,
 } from 'lucide-react'
+import { chromeFont } from '@/components/app/chrome-font'
 import type { PreviewProps } from './ThemeEditor'
-import PreviewFrame from './PreviewFrame'
-import TapToEditOverlay from './TapToEditOverlay'
+import { EditorStyle, RailRow, DeviceToggle } from './chrome'
+import PreviewFrame, { type PreviewDevice } from './PreviewFrame'
+import SectionOverlay from './SectionOverlay'
+import { useMediaQuery } from './useIsMobile'
 import {
   FieldsRenderer, ColorsPanel, TypographyPanel, SectionStyleHeader,
   UndoRedo, StatusPill, type Status,
@@ -88,6 +103,44 @@ export type MobileEditorProps = {
   clearSectionStyle: (panelId: string) => void
 
   error: string | null
+  /** A strip under the bar (the candidate says there that nothing is kept). */
+  notice?: ReactNode
+  /** Docked-inspector form (768px and up). ThemeEditor passes it already
+   *  settled; mounted on its own, the component reads it itself. */
+  docked?: boolean
+}
+
+/**
+ * How much of the bottom of the screen the cookie banner holds, in CSS px.
+ * CookieConsent is shared chrome and exposes no state, but it announces a
+ * choice with `zenya:consent-change` and a reopen with `zenya:open-consent`,
+ * so this measures on mount and on those two events only.
+ */
+function useConsentInset(): number {
+  const [inset, setInset] = useState(0)
+  useEffect(() => {
+    const measure = () => {
+      const el = document.querySelector('[aria-labelledby="cookie-consent-title"]') as HTMLElement | null
+      if (!el) { setInset(0); return }
+      // The rect is in rendered pixels; the sheet's `bottom` is in CSS pixels
+      // and is zoomed again by ZoomLock, so divide the root zoom back out.
+      const zoom = parseFloat(getComputedStyle(document.documentElement).zoom || '1') || 1
+      const r = el.getBoundingClientRect()
+      setInset(Math.max(0, Math.round((window.innerHeight - r.top) / zoom)))
+    }
+    const later = () => window.setTimeout(measure, 60)
+    const first = window.setTimeout(measure, 120)
+    window.addEventListener('zenya:consent-change', later)
+    window.addEventListener('zenya:open-consent', later)
+    window.addEventListener('resize', later)
+    return () => {
+      window.clearTimeout(first)
+      window.removeEventListener('zenya:consent-change', later)
+      window.removeEventListener('zenya:open-consent', later)
+      window.removeEventListener('resize', later)
+    }
+  }, [])
+  return inset
 }
 
 export default function MobileEditor(props: MobileEditorProps) {
@@ -98,15 +151,20 @@ export default function MobileEditor(props: MobileEditorProps) {
     selected, setSelected, view, setView,
     status, dirty, lastSavedAt, save, undo, redo, canUndo, canRedo,
     patchPath, setPresetId, setOverride, resetOverrides, setTypographyPreset,
-    patchSectionStyle, clearSectionStyle, error,
+    patchSectionStyle, clearSectionStyle, error, notice,
   } = props
 
-  // Iframe handles for the tap overlay.
+  const dockedMq = useMediaQuery('(min-width: 768px)')
+  const docked = props.docked ?? dockedMq
+  const [device, setDevice] = useState<PreviewDevice>('tablet')
+
+  // The iframe document for the selection overlay.
   const [iframeDoc, setIframeDoc] = useState<Document | null>(null)
-  const [iframeEl, setIframeEl] = useState<HTMLIFrameElement | null>(null)
 
   // Sheet: 'picker' shows the section list, 'fields' edits the selected one.
   const [sheetMode, setSheetMode] = useState<'picker' | 'fields'>('picker')
+
+  const bottomInset = useConsentInset()
 
   // ── Sheet geometry (detent offsets in px, measured from the top of the
   //    fully-expanded sheet). Recomputed against the *visual* viewport so the
@@ -124,14 +182,25 @@ export default function MobileEditor(props: MobileEditorProps) {
     }
   }, [])
 
-  const PEEK_PX = 68
-  const sheetHeight = Math.max(240, Math.round(vh * 0.92))
+  // The visual viewport is in screen pixels; the sheet is laid out in CSS
+  // pixels, which ZoomLock's root zoom scales down. Divide it back out, or
+  // the sheet is sized for a screen 15% shorter than the one it is on.
+  const [zoom, setZoom] = useState(1)
+  useEffect(() => {
+    setZoom(parseFloat(getComputedStyle(document.documentElement).zoom || '1') || 1)
+  }, [vh])
+
+  // The head of the sheet at rest: the handle, the title, the save state and
+  // the save itself — everything a thumb needs without opening anything.
+  const PEEK_PX = 84
+  const avail = Math.max(0, vh / zoom - bottomInset)
+  const sheetHeight = Math.max(240, Math.round(avail * 0.92))
   const detents = useMemo(() => ({
     // y = translateY of the sheet; 0 = fully expanded.
     peek: Math.max(0, sheetHeight - PEEK_PX),
-    mid: Math.max(0, Math.round(sheetHeight - vh * 0.6)),
+    mid: Math.max(0, Math.round(sheetHeight - avail * 0.6)),
     full: 0,
-  }), [sheetHeight, vh])
+  }), [sheetHeight, avail])
 
   const [detent, setDetent] = useState<Detent>('peek')
   const y = useMotionValue(0)
@@ -141,12 +210,12 @@ export default function MobileEditor(props: MobileEditorProps) {
   // user is mid-drag.
   const draggingRef = useRef(false)
   useEffect(() => {
-    if (draggingRef.current) return
+    if (draggingRef.current || docked) return
     const controls = animate(y, detents[detent], {
       type: 'spring', stiffness: 520, damping: 44, mass: 0.9,
     })
     return controls.stop
-  }, [detent, detents, y])
+  }, [detent, detents, y, docked])
 
   const openTo = useCallback((d: Detent) => setDetent(d), [])
 
@@ -240,193 +309,235 @@ export default function MobileEditor(props: MobileEditorProps) {
     () => (Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''),
     [sectionStyles],
   )
-  const onPreviewReady = useCallback((d: Document, el: HTMLIFrameElement) => {
-    setIframeDoc(d); setIframeEl(el)
-  }, [])
+  const onPreviewReady = useCallback((d: Document) => { setIframeDoc(d) }, [])
+
+  // What of the preview the sheet covers, so a picked section is scrolled into
+  // the part that is still visible. Read from the TARGET detent, which changes
+  // in the same render as the selection, not from the animated position.
+  const obscured = docked ? 0 : (sheetHeight - detents[detent]) + bottomInset
+
+  const saveButton = (
+    <button
+      type="button"
+      onClick={save}
+      disabled={!dirty || status === 'saving'}
+      title={t.editor.saveTitle}
+      className="ze-save"
+    >
+      <Save strokeWidth={2.25} aria-hidden />
+      {t.editor.save}
+    </button>
+  )
+
+  // The panel for the selected section — identical in the sheet and the dock.
+  const body = sheetMode === 'picker' ? (
+    <Picker
+      config={config}
+      view={view}
+      setView={setView}
+      selected={selected}
+      onPick={pickSection}
+    />
+  ) : selected === STYLE_ID ? (
+    <div className="ze-insp-body" style={{ padding: 0 }}>
+      <ColorsPanel
+        presetId={presetId}
+        setPresetId={setPresetId}
+        colorOverrides={colorOverrides}
+        setOverride={setOverride}
+        resetOverrides={resetOverrides}
+        config={config}
+      />
+    </div>
+  ) : selected === TYPO_ID ? (
+    <div className="ze-insp-body" style={{ padding: 0 }}>
+      <TypographyPanel value={typographyPreset} onChange={setTypographyPreset} />
+    </div>
+  ) : activePanel ? (
+    <div className="ze-insp-body" style={{ padding: 0 }}>
+      <SectionStyleHeader
+        panelId={activePanel.id}
+        panelLabel={activePanel.label}
+        value={sectionStyles[activePanel.id]}
+        onPatch={(p) => patchSectionStyle(activePanel.id, p)}
+        onClear={() => clearSectionStyle(activePanel.id)}
+      />
+      <FieldsRenderer
+        fields={activePanel.fields}
+        content={content}
+        patchPath={patchPath}
+        panelLabel={activePanel.label}
+      />
+    </div>
+  ) : (
+    <SmallNote>{t.editor.pickSectionToEdit}</SmallNote>
+  )
+
+  const backToList = (
+    <button
+      type="button"
+      onClick={() => { setSheetMode('picker'); if (!docked) openTo('mid') }}
+      className="ze-icon"
+      aria-label={t.editor.sections}
+      title={t.editor.sections}
+    >
+      <ChevronLeft className="rtl-flip" strokeWidth={2.25} aria-hidden />
+    </button>
+  )
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0a0a0c]">
-      {/* Top bar */}
-      <header className="flex h-12 flex-shrink-0 items-center justify-between gap-2 border-b border-token bg-white px-3">
-        <Link
-          href={backHref}
-          className="inline-flex flex-shrink-0 items-center gap-1 rounded-md border border-token bg-white px-2 py-1.5 text-[12px] font-medium text-muted active:bg-black/5"
-          aria-label={t.editor.back}
-        >
-          <ArrowLeft className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.25} />
-        </Link>
+    <div className={'ze-root ' + chromeFont.variable}>
+      <EditorStyle />
 
-        <div className="flex min-w-0 flex-1 items-center justify-center">
-          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} />
+      {/* ── The bar ── */}
+      <header className="ze-bar">
+        <div className="ze-bar-start">
+          <Link href={backHref} className="ze-icon" aria-label={t.editor.back} data-label={docked ? '' : undefined}>
+            <ArrowLeft className="rtl-flip" strokeWidth={2} aria-hidden />
+            {docked && <span>{t.editor.back}</span>}
+          </Link>
+          <h1 className="ze-title">
+            {docked && <span className="ze-title-q">{t.editor.edit} </span>}{brandName}
+          </h1>
         </div>
-
-        <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
-        <button
-          onClick={save}
-          disabled={!dirty || status === 'saving'}
-          className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm transition active:scale-95 disabled:opacity-50"
-        >
-          <Save className="h-3 w-3" strokeWidth={2.5} />
-          {t.editor.save}
-        </button>
-      </header>
-
-      {/* Live preview — full-bleed. Sits under the sheet. */}
-      <div className="relative flex-1 overflow-hidden">
-        <PreviewFrame
-          device="mobile"
-          fullBleed
-          sectionStylesCss={sectionStylesCss}
-          onReady={onPreviewReady}
-          preview={previewNode}
-        />
-        <TapToEditOverlay
-          doc={iframeDoc}
-          iframe={iframeEl}
-          selectedPanelId={sheetMode === 'fields' ? selected : undefined}
-          onPick={pickSection}
-          panelToViews={panelToViews}
-          currentView={view}
-          onViewChange={setView}
-        />
-        {/* Hint bubble above the peek bar */}
-        {detent === 'peek' && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-[76px] flex justify-center">
-            <span className="rounded-full bg-black/70 px-3 py-1 text-[11px] font-medium text-white backdrop-blur">
-              {t.editor.tapAnySection}
-            </span>
+        {docked && (
+          <div className="ze-bar-mid">
+            <DeviceToggle device={device} onChange={setDevice} />
           </div>
         )}
-      </div>
-
-      {/* Scrim when the sheet is expanded */}
-      {detent !== 'peek' && (
-        <button
-          aria-hidden
-          tabIndex={-1}
-          onClick={() => openTo('peek')}
-          className="fixed inset-0 z-30 bg-black/30"
-          style={{ backdropFilter: 'blur(1px)' }}
-        />
-      )}
-
-      {/* Draggable bottom sheet */}
-      <motion.div
-        className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl bg-white shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.4)]"
-        style={{ height: sheetHeight, y }}
-        drag="y"
-        dragConstraints={{ top: 0, bottom: detents.peek }}
-        dragElastic={0.02}
-        onDragStart={onDragStart}
-        onDrag={onDrag}
-        onDragEnd={onDragEnd}
-      >
-        {/* Grab handle + header — the whole header is the drag surface */}
-        <div className="flex-shrink-0 cursor-grab select-none px-4 pt-2 active:cursor-grabbing">
-          <div className="mx-auto h-1 w-10 rounded-full bg-black/15" />
-          <div className="mt-2 flex items-center justify-between gap-2 pb-2">
-            {sheetMode === 'fields' ? (
-              <button
-                type="button"
-                onClick={() => { setSheetMode('picker'); openTo('mid') }}
-                className="inline-flex items-center gap-1 text-[13px] font-semibold text-foreground"
-              >
-                <ChevronRight className="h-4 w-4 text-muted" strokeWidth={2.25} />
-                {activeLabel}
-              </button>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
-                <LayoutGrid className="h-4 w-4 text-muted" strokeWidth={2} />
-                {t.editor.editBrand.replace('{name}', brandName)}
-              </span>
-            )}
-            <div className="flex items-center gap-1">
-              {detent !== 'full' ? (
-                <button
-                  type="button"
-                  onClick={() => openTo('full')}
-                  className="rounded-md px-2 py-1 text-[11.5px] font-medium text-muted active:bg-black/5"
-                >
-                  {t.editor.expand}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openTo('mid')}
-                  className="rounded-md px-2 py-1 text-[11.5px] font-medium text-muted active:bg-black/5"
-                >
-                  {t.editor.shrink}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => openTo('peek')}
-                aria-label={t.editor.close}
-                className="rounded-md p-1 text-muted active:bg-black/5"
-              >
-                <X className="h-4 w-4" strokeWidth={2.25} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Body — scrolls independently of the sheet drag */}
-        <div
-          ref={bodyRef}
-          onFocusCapture={onSheetFocus}
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-t border-token px-4 pb-24 pt-3"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-        >
-          {sheetMode === 'picker' ? (
-            <Picker
-              config={config}
-              view={view}
-              setView={setView}
-              selected={selected}
-              onPick={pickSection}
-            />
-          ) : selected === STYLE_ID ? (
-            <ColorsPanel
-              presetId={presetId}
-              setPresetId={setPresetId}
-              colorOverrides={colorOverrides}
-              setOverride={setOverride}
-              resetOverrides={resetOverrides}
-              config={config}
-            />
-          ) : selected === TYPO_ID ? (
-            <TypographyPanel value={typographyPreset} onChange={setTypographyPreset} />
-          ) : activePanel ? (
-            <div className="space-y-4">
-              <SectionStyleHeader
-                panelId={activePanel.id}
-                value={sectionStyles[activePanel.id]}
-                onPatch={(p) => patchSectionStyle(activePanel.id, p)}
-                onClear={() => clearSectionStyle(activePanel.id)}
-              />
-              <FieldsRenderer
-                fields={activePanel.fields}
-                content={content}
-                patchPath={patchPath}
-                panelLabel={activePanel.label}
-              />
-            </div>
-          ) : (
-            <SmallNote>{t.editor.pickSectionToEdit}</SmallNote>
+        <div className="ze-bar-end" style={docked ? undefined : { flex: '0 0 auto' }}>
+          <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
+          {docked && (
+            <>
+              <span className="ze-sep" aria-hidden />
+              <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} />
+              {saveButton}
+            </>
           )}
         </div>
-      </motion.div>
+      </header>
 
-      {error && content && (
-        <div className="fixed bottom-2 left-1/2 z-50 -translate-x-1/2 rounded-md border border-[#fca5a5] bg-[#fee2e2] px-3 py-2 text-[12.5px] font-medium text-[#b91c1c] shadow-lg">
-          {error}
+      {notice}
+
+      {docked ? (
+        /* ── DOCKED: stage + inspector ── */
+        <div className="ze-body">
+          <main className="ze-stage">
+            <PreviewFrame
+              device={device}
+              sectionStylesCss={sectionStylesCss}
+              onReady={onPreviewReady}
+              preview={previewNode}
+            />
+            <SectionOverlay
+              doc={iframeDoc}
+              selectedPanelId={selected}
+              onPick={pickSection}
+              panelToViews={panelToViews}
+              currentView={view}
+              onViewChange={setView}
+            />
+          </main>
+          <aside className="ze-pane ze-dock" aria-label={t.editor.editing}>
+            <div className="ze-insp-head">
+              {sheetMode === 'fields' && backToList}
+              <div style={{ minWidth: 0 }}>
+                <span className="ze-insp-kick">{sheetMode === 'fields' ? t.editor.editing : t.editor.sections}</span>
+                <h2 className="ze-insp-t">{sheetMode === 'fields' ? activeLabel : brandName}</h2>
+              </div>
+            </div>
+            <div className="ze-scroll">
+              <div style={{ padding: '1rem' }}>{body}</div>
+            </div>
+          </aside>
         </div>
+      ) : (
+        /* ── PHONE: full-bleed preview + sheet ── */
+        <>
+          <main className="ze-stage" data-bleed>
+            <PreviewFrame
+              device="mobile"
+              fullBleed
+              sectionStylesCss={sectionStylesCss}
+              onReady={onPreviewReady}
+              preview={previewNode}
+            />
+            <SectionOverlay
+              doc={iframeDoc}
+              selectedPanelId={selected}
+              onPick={pickSection}
+              panelToViews={panelToViews}
+              currentView={view}
+              onViewChange={setView}
+              obscuredBottom={obscured}
+            />
+          </main>
+
+          {/* At mid the site above the sheet stays live and tappable — that is
+              where the reader watches their edit land. Only a full sheet dims
+              what little of the site is left, and a tap there lowers it. */}
+          {detent === 'full' && (
+            <button
+              aria-hidden
+              tabIndex={-1}
+              onClick={() => openTo('mid')}
+              className="ze-sheet-scrim"
+            />
+          )}
+
+          <motion.div
+            className="ze-sheet"
+            style={{ height: sheetHeight, y, bottom: bottomInset }}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: detents.peek }}
+            dragElastic={0.02}
+            onDragStart={onDragStart}
+            onDrag={onDrag}
+            onDragEnd={onDragEnd}
+          >
+            {/* Grab handle + head — the whole head is the drag surface */}
+            <div className="ze-sheet-grab">
+              <div className="ze-handle" aria-hidden />
+              <div className="ze-sheet-head">
+                {sheetMode === 'fields' && backToList}
+                <div className="ze-sheet-titles">
+                  <span className="ze-sheet-t">
+                    <span>{sheetMode === 'fields' ? activeLabel : t.editor.editBrand.replace('{name}', brandName)}</span>
+                  </span>
+                  <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} compact />
+                </div>
+                {detent !== 'full' ? (
+                  <button type="button" onClick={() => openTo('full')} className="ze-icon" aria-label={t.editor.expand} title={t.editor.expand}>
+                    <ChevronUp strokeWidth={2.25} aria-hidden />
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => openTo('mid')} className="ze-icon" aria-label={t.editor.shrink} title={t.editor.shrink}>
+                    <ChevronDown strokeWidth={2.25} aria-hidden />
+                  </button>
+                )}
+                {detent !== 'peek' && (
+                  <button type="button" onClick={() => openTo('peek')} className="ze-icon" aria-label={t.editor.close} title={t.editor.close}>
+                    <X strokeWidth={2.25} aria-hidden />
+                  </button>
+                )}
+                {saveButton}
+              </div>
+            </div>
+
+            {/* Body — scrolls independently of the sheet drag */}
+            <div ref={bodyRef} onFocusCapture={onSheetFocus} className="ze-sheet-body">
+              {body}
+            </div>
+          </motion.div>
+        </>
       )}
+
+      {error && content && <div className="ze-toast" role="alert">{error}</div>}
     </div>
   )
 }
 
-/* ── Section picker — the list shown in the sheet ────────────────────────── */
+/* ── Section picker — the list in the sheet and the dock ───────────────── */
 
 function Picker({
   config, view, setView, selected, onPick,
@@ -440,24 +551,24 @@ function Picker({
   const t = useT()
   const pagePanels = config.panels.filter((p) => panelInView(p, view))
   return (
-    <div className="space-y-4">
-      {/* Page chips */}
+    <div className="ze-pick">
+      {/* The hint lives in the list now. As a bubble floating over the
+          preview it sat on top of the site's own buttons. */}
+      <p className="ze-note">{t.editor.tapAnySection}</p>
+
       {config.pages && config.pages.length > 0 && (
-        <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+        <div className="ze-pages" role="group">
           {config.pages.map((p) => {
             const Icon = p.icon
-            const active = view === p.id
             return (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setView(p.id)}
-                className={
-                  'inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] font-medium transition ' +
-                  (active ? 'bg-foreground text-white' : 'border border-token text-muted active:bg-black/5')
-                }
+                aria-pressed={view === p.id}
+                className="ze-chip"
               >
-                <Icon className="h-3 w-3" strokeWidth={2.25} />
+                <Icon strokeWidth={2} aria-hidden style={{ width: 15, height: 15 }} />
                 {p.label}
               </button>
             )
@@ -465,73 +576,27 @@ function Picker({
         </div>
       )}
 
-      {/* Sections on this page */}
       <div>
-        <PickerLabel>{t.editor.sections}</PickerLabel>
-        <div className="grid grid-cols-1 gap-1.5">
+        <div className="ze-pick-h">{t.editor.sections}</div>
+        <div className="ze-rows">
           {pagePanels.map((p) => (
-            <PickerRow
-              key={p.id}
-              icon={p.icon || Settings}
-              label={p.label}
-              active={selected === p.id}
-              onClick={() => onPick(p.id)}
-            />
+            <RailRow key={p.id} icon={p.icon || Settings} label={p.label}
+              active={selected === p.id} onClick={() => onPick(p.id)} go />
           ))}
         </div>
       </div>
 
-      {/* Global + style */}
       <div>
-        <PickerLabel>{t.editor.globalAllPages}</PickerLabel>
-        <div className="grid grid-cols-1 gap-1.5">
-          <PickerRow icon={Palette} label={t.editor.colorsPalette} active={selected === STYLE_ID} onClick={() => onPick(STYLE_ID)} />
-          <PickerRow icon={TypeIcon} label={t.editor.typography} active={selected === TYPO_ID} onClick={() => onPick(TYPO_ID)} />
+        <div className="ze-pick-h">{t.editor.globalAllPages}</div>
+        <div className="ze-rows">
+          <RailRow icon={Palette} label={t.editor.colorsPalette} active={selected === STYLE_ID} onClick={() => onPick(STYLE_ID)} go />
+          <RailRow icon={TypeIcon} label={t.editor.typography} active={selected === TYPO_ID} onClick={() => onPick(TYPO_ID)} go />
           {config.globalPanels.map((p) => (
-            <PickerRow
-              key={p.id}
-              icon={p.icon || Settings}
-              label={p.label}
-              active={selected === p.id}
-              onClick={() => onPick(p.id)}
-            />
+            <RailRow key={p.id} icon={p.icon || Settings} label={p.label}
+              active={selected === p.id} onClick={() => onPick(p.id)} go />
           ))}
         </div>
       </div>
     </div>
-  )
-}
-
-function PickerLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-0.5 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
-      {children}
-    </div>
-  )
-}
-
-function PickerRow({
-  icon: Icon, label, active, onClick,
-}: {
-  icon: LucideIcon
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        'flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-3 text-start transition ' +
-        (active ? 'border-foreground bg-[rgba(28,28,28,0.04)]' : 'border-token active:bg-black/[0.03]')
-      }
-    >
-      <span className="flex items-center gap-2.5">
-        <Icon className="h-4 w-4 flex-shrink-0 text-muted" strokeWidth={2} />
-        <span className="text-[14px] text-foreground">{label}</span>
-      </span>
-      <ChevronRight className="h-4 w-4 flex-shrink-0 rotate-180 text-muted/50" strokeWidth={2.25} />
-    </button>
   )
 }

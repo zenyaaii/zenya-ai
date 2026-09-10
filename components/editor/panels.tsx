@@ -4,10 +4,14 @@
  * Shared editor panels + field renderers.
  *
  * These presentational pieces are used by BOTH the desktop shell
- * (ThemeEditor.tsx) and the mobile shell (MobileEditor.tsx). They were
+ * (ThemeEditor.tsx) and the compact shell (MobileEditor.tsx). They were
  * extracted out of ThemeEditor so the two layouts render identical fields
- * from the same code — the mobile editor is a different *frame* around the
+ * from the same code — the compact editor is a different *frame* around the
  * exact same panels, not a fork.
+ *
+ * Styled by editor-style.ts (.ze-). A pressed or chosen control on this
+ * surface is filled or ringed in OBSIDIAN; the violet ring belongs to the
+ * section being edited and never appears on a control.
  */
 
 import { useEffect, useState } from 'react'
@@ -124,9 +128,9 @@ function RenderField({
       patchPath(f.path, [...arr, f.makeItem()])
     }
     return (
-      <div>
+      <div className="ze-field">
         <SectionLabel>{f.label}</SectionLabel>
-        <div className="mt-1.5 space-y-2">
+        <div className="ze-items">
           {arr.map((item, i) => {
             const title =
               (f.itemTitle ? getPath(item, f.itemTitle) : '') || `${f.itemLabel} ${i + 1}`
@@ -178,10 +182,12 @@ export function ColorsPanel({
   const merged: Record<string, string> = { ...basePreset.colors, ...colorOverrides }
   return (
     <>
-      <SmallNote>
-        {t.editor.paletteHelp}
-      </SmallNote>
-      <div className="grid grid-cols-2 gap-2">
+      <SmallNote>{t.editor.paletteHelp}</SmallNote>
+      {/* Each card is painted in its own preset, so the card IS the sample.
+          Name and vibe are both set in the preset's text colour on its own
+          background: the accent is shown as a dot, never as small type on a
+          ground it was not chosen to be read against. */}
+      <div className="ze-presets">
         {config.colorPresets.map((p) => {
           const selected = presetId === p.id
           const cols = p.colors as any
@@ -190,26 +196,22 @@ export function ColorsPanel({
               key={p.id}
               type="button"
               onClick={() => setPresetId(p.id)}
-              className={
-                'group relative overflow-hidden rounded-lg border-2 p-3 text-start transition ' +
-                (selected ? 'border-foreground' : 'border-token hover:border-foreground/40')
-              }
+              aria-pressed={selected}
+              data-preset={p.id}
+              className="ze-preset"
               style={{ background: cols.background || '#fff', color: cols.text || '#000' }}
             >
-              <div className="mb-2 flex gap-1">
-                <span className="h-4 w-4 rounded-full" style={{ background: cols.primary }} />
-                <span className="h-4 w-4 rounded-full" style={{ background: cols.accent }} />
-                <span className="h-4 w-4 rounded-full border" style={{ background: cols.surface, borderColor: cols.border }} />
-              </div>
-              <div className="text-[10px] uppercase tracking-[0.16em]" style={{ color: cols.accent }}>
-                {p.vibe}
-              </div>
-              <div className="mt-0.5 text-[14px] leading-tight" style={{ fontFamily: p.heading_font, color: cols.text }}>
-                {p.name}
-              </div>
+              <span className="ze-preset-dots" aria-hidden>
+                <span style={{ background: cols.primary }} />
+                <span style={{ background: cols.accent }} />
+                <span style={{ background: cols.surface }} />
+              </span>
+              <span className="ze-preset-n" style={{ fontFamily: p.heading_font }}>{p.name}</span>
+              <span className="ze-preset-v">{p.vibe}</span>
               {selected && (
-                <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  {t.editor.active}
+                <span className="ze-check">
+                  <Check strokeWidth={3} aria-hidden />
+                  <span className="ze-a11y">{t.editor.active}</span>
                 </span>
               )}
             </button>
@@ -217,29 +219,28 @@ export function ColorsPanel({
         })}
       </div>
 
-      <SectionLabel>{t.editor.customColors}</SectionLabel>
-      <div className="space-y-1.5">
-        {config.colorTokens.map((tok) => (
-          <ColorRow
-            key={tok.key}
-            label={tok.label}
-            value={merged[tok.key] || ''}
-            overridden={colorOverrides[tok.key] != null}
-            onChange={(v) => setOverride(tok.key, v)}
-            onReset={() => setOverride(tok.key, undefined)}
-          />
-        ))}
+      <div className="ze-field">
+        <SectionLabel>{t.editor.customColors}</SectionLabel>
+        <div className="ze-colors">
+          {config.colorTokens.map((tok) => (
+            <ColorRow
+              key={tok.key}
+              label={tok.label}
+              value={merged[tok.key] || ''}
+              overridden={colorOverrides[tok.key] != null}
+              onChange={(v) => setOverride(tok.key, v)}
+              onReset={() => setOverride(tok.key, undefined)}
+            />
+          ))}
+        </div>
+        {Object.keys(colorOverrides).length > 0 && (
+          <div>
+            <button type="button" onClick={resetOverrides} className="ze-link">
+              <RotateCcw aria-hidden /> {t.editor.resetAllColors}
+            </button>
+          </div>
+        )}
       </div>
-
-      {Object.keys(colorOverrides).length > 0 && (
-        <button
-          type="button"
-          onClick={resetOverrides}
-          className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground"
-        >
-          <RotateCcw className="h-3 w-3" /> {t.editor.resetAllColors}
-        </button>
-      )}
     </>
   )
 }
@@ -253,13 +254,13 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
   return (
     <>
       <SmallNote>{t.editor.fontsHelp}</SmallNote>
-      <div className="flex flex-wrap gap-1">
+      <div className="ze-chips" role="group">
         <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>{t.editor.all}</MoodChip>
         {TYPOGRAPHY_MOODS.map((m) => (
           <MoodChip key={m} active={mood === m} onClick={() => setMood(m)}>{m}</MoodChip>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-1.5">
+      <div className="ze-types">
         {presets.map((p) => {
           const selected = value === p.id
           return (
@@ -267,32 +268,21 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
               key={p.id}
               type="button"
               onClick={() => onChange(p.id)}
-              className={
-                'relative w-full rounded-lg border-2 px-3 py-2.5 text-start transition ' +
-                (selected ? 'border-foreground bg-[rgba(28,28,28,0.03)]' : 'border-token bg-white hover:border-foreground/40')
-              }
+              aria-pressed={selected}
+              className="ze-type"
             >
-              <div className="flex items-baseline justify-between gap-2">
-                <span
-                  className="text-[18px] leading-tight text-foreground"
-                  style={{
-                    fontFamily: p.heading_font,
-                    fontWeight: p.heading_weight ?? 600,
-                    letterSpacing: p.heading_tracking ?? '-0.02em',
-                  }}
-                >
-                  {p.name}
-                </span>
-                <span className="rounded bg-[rgba(28,28,28,0.04)] px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider text-muted">
-                  {p.mood}
-                </span>
-              </div>
-              <div className="mt-1 text-[11.5px] text-muted" style={{ fontFamily: p.body_font }}>
-                {p.vibe}
-              </div>
+              {/* The sample is the pair's face and weight. Its tracking is
+                  left at zero: the house never tracks type in or out, and a
+                  sample that did would teach the reader otherwise. */}
+              <span className="ze-type-n">
+                <span style={{ fontFamily: p.heading_font, fontWeight: p.heading_weight ?? 600 }}>{p.name}</span>
+                <span className="ze-type-m">{p.mood}</span>
+              </span>
+              <span className="ze-type-v" style={{ fontFamily: p.body_font }}>{p.vibe}</span>
               {selected && (
-                <span className="absolute right-2 top-2 rounded-full bg-foreground px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-wider text-white">
-                  {t.editor.active}
+                <span className="ze-check">
+                  <Check strokeWidth={3} aria-hidden />
+                  <span className="ze-a11y">{t.editor.active}</span>
                 </span>
               )}
             </button>
@@ -300,9 +290,11 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
         })}
       </div>
       {value && (
-        <button type="button" onClick={() => onChange('')} className="mt-2 inline-flex items-center gap-1 text-[11.5px] font-medium text-muted hover:text-foreground">
-          <RotateCcw className="h-3 w-3" /> {t.editor.usePresetFonts}
-        </button>
+        <div>
+          <button type="button" onClick={() => onChange('')} className="ze-link">
+            <RotateCcw aria-hidden /> {t.editor.usePresetFonts}
+          </button>
+        </div>
       )}
     </>
   )
@@ -313,33 +305,20 @@ export function UndoRedo({
   canUndo, canRedo, onUndo, onRedo,
 }: { canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void }) {
   const t = useT()
+  // Undo points back along the reading direction, so the pair flips in RTL.
   return (
-    <div className="flex flex-shrink-0 items-center gap-0.5">
-      <button
-        type="button"
-        onClick={onUndo}
-        disabled={!canUndo}
-        title={t.editor.undoTitle}
-        aria-label={t.editor.undo}
-        className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Undo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
+    <>
+      <button type="button" onClick={onUndo} disabled={!canUndo} title={t.editor.undoTitle} aria-label={t.editor.undo} className="ze-icon">
+        <Undo2 className="rtl-flip" strokeWidth={2} aria-hidden />
       </button>
-      <button
-        type="button"
-        onClick={onRedo}
-        disabled={!canRedo}
-        title={t.editor.redoTitle}
-        aria-label={t.editor.redo}
-        className="inline-flex items-center justify-center rounded-md border border-token bg-white p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        <Redo2 className="h-3.5 w-3.5" strokeWidth={2.25} />
+      <button type="button" onClick={onRedo} disabled={!canRedo} title={t.editor.redoTitle} aria-label={t.editor.redo} className="ze-icon">
+        <Redo2 className="rtl-flip" strokeWidth={2} aria-hidden />
       </button>
-    </div>
+    </>
   )
 }
 
-/* ── Save status pill ─────────────────────────────────────────────────── */
+/* ── Save status ──────────────────────────────────────────────────────── */
 
 /**
  * "Saved 2 minutes ago" keeps itself current. The clock lives HERE, in the one
@@ -357,24 +336,29 @@ function SavedAgo({ at }: { at: number }) {
   return <>{t.editor.savedAgo.replace('{time}', relativeTime(at, now, t))}</>
 }
 
+/**
+ * The save state. It lives in a fixed-width slot (.ze-status), so a change of
+ * state swaps the words in place and moves nothing beside it. The dot carries
+ * the state as well as the words, and role=status announces it.
+ */
 export function StatusPill({
-  status, dirty, lastSavedAt,
-}: { status: Status; dirty: boolean; lastSavedAt: number | null }) {
+  status, dirty, lastSavedAt, compact = false,
+}: { status: Status; dirty: boolean; lastSavedAt: number | null; compact?: boolean }) {
   const t = useT()
-  if (status === 'saving') return <span className="text-[12px] font-medium text-muted">{t.editor.saving}</span>
-  if (status === 'saved') {
-    return (
-      <span className="inline-flex items-center gap-1 text-[12px] font-medium text-[#15803d]">
-        <Check className="h-3 w-3" strokeWidth={2.5} /> {t.editor.saved}
-      </span>
-    )
-  }
-  if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">{t.editor.saveFailed}</span>
-  if (dirty) return <span className="text-[12px] font-medium text-muted">{t.editor.unsaved}</span>
-  if (lastSavedAt) {
-    return <span className="text-[12px] font-medium text-muted"><SavedAgo at={lastSavedAt} /></span>
-  }
-  return <span className="text-[12px] font-medium text-muted">{t.editor.allSaved}</span>
+  let s: string
+  let text: React.ReactNode
+  if (status === 'saving') { s = 'saving'; text = t.editor.saving }
+  else if (status === 'saved') { s = 'saved'; text = t.editor.saved }
+  else if (status === 'error') { s = 'error'; text = t.editor.saveFailed }
+  else if (dirty) { s = 'dirty'; text = t.editor.unsaved }
+  else if (lastSavedAt) { s = 'idle'; text = <SavedAgo at={lastSavedAt} /> }
+  else { s = 'idle'; text = t.editor.allSaved }
+  return (
+    <span className="ze-status" data-s={s} data-compact={compact ? '' : undefined} role="status" aria-live="polite">
+      <span className="ze-status-dot" aria-hidden />
+      <span className="ze-status-t">{text}</span>
+    </span>
+  )
 }
 
 export function relativeTime(from: number, now: number, t: Messages): string {
@@ -390,9 +374,11 @@ export function relativeTime(from: number, now: number, t: Messages): string {
 /* ── Per-section text size + alignment header ─────────────────────────── */
 
 export function SectionStyleHeader({
-  panelId, value, onPatch, onClear,
+  panelId, panelLabel, value, onPatch, onClear,
 }: {
   panelId: string
+  /** The section's name as the rails show it; the id is only a fallback. */
+  panelLabel?: string
   value?: SectionStyle
   onPatch: (p: Partial<SectionStyle>) => void
   onClear: () => void
@@ -403,28 +389,24 @@ export function SectionStyleHeader({
   // own default, which is start/right in RTL). Each button sets its literal value.
   const activeAlign: SectionTextAlign | undefined = value?.text_align
   const hasOverride = (value && (value.text_scale != null || value.text_align != null)) || false
+  const alignName: Record<SectionTextAlign, string> = {
+    left: t.editor.alignLeft, center: t.editor.alignCenter, right: t.editor.alignRight,
+  }
 
   return (
-    <div className="rounded-lg border border-token bg-[rgba(94,106,210,0.04)] p-2.5">
-      <div className="flex items-baseline justify-between">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-          {t.editor.sectionStyle}
-        </span>
+    <div className="ze-card">
+      <div className="ze-card-h">
+        <span className="ze-card-t">{t.editor.sectionStyle}</span>
         {hasOverride && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="text-[10.5px] font-medium text-muted hover:text-foreground"
-            title={t.editor.resetThisSection}
-          >
+          <button type="button" onClick={onClear} className="ze-link" title={t.editor.resetThisSection}>
             {t.editor.reset}
           </button>
         )}
       </div>
 
-      <div className="mt-2 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">{t.editor.size}</span>
-        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+      <div className="ze-kv">
+        <span>{t.editor.size}</span>
+        <div className="ze-seg" data-fill role="group" aria-label={t.editor.size}>
           {SECTION_TEXT_SCALES.map((s) => {
             const selected = Math.abs(activeScale - s.value) < 0.01
             return (
@@ -432,11 +414,8 @@ export function SectionStyleHeader({
                 key={s.id}
                 type="button"
                 onClick={() => onPatch({ text_scale: s.value === 1 ? undefined : s.value })}
-                className={
-                  'flex-1 rounded text-[11px] font-semibold transition ' +
-                  (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
-                }
-                style={{ padding: '3px 0' }}
+                aria-pressed={selected}
+                className="ze-seg-b"
                 title={t.editor.textSize.replace('{label}', s.label)}
               >
                 {s.label}
@@ -446,9 +425,11 @@ export function SectionStyleHeader({
         </div>
       </div>
 
-      <div className="mt-1.5 flex items-center gap-1.5">
-        <span className="text-[10.5px] text-muted">{t.editor.alignment}</span>
-        <div className="flex flex-1 rounded-md border border-token bg-white p-0.5">
+      <div className="ze-kv">
+        <span>{t.editor.alignment}</span>
+        {/* Physical left/centre/right on purpose: these are the literal CSS
+            values the section receives, so the icons must not flip in RTL. */}
+        <div className="ze-seg" data-fill role="group" aria-label={t.editor.alignment} dir="ltr">
           {(
             [
               { id: 'left' as const,   Icon: AlignLeft   },
@@ -457,27 +438,27 @@ export function SectionStyleHeader({
             ]
           ).map(({ id, Icon }) => {
             const selected = activeAlign === id
+            const label = t.editor.alignTo.replace('{id}', alignName[id])
             return (
               <button
                 key={id}
                 type="button"
                 onClick={() => onPatch({ text_align: activeAlign === id ? undefined : id })}
-                className={
-                  'flex flex-1 items-center justify-center rounded transition ' +
-                  (selected ? 'bg-foreground text-white' : 'text-muted hover:bg-black/[0.04]')
-                }
-                style={{ padding: '4px 0' }}
-                title={t.editor.alignTo.replace('{id}', id)}
+                aria-pressed={selected}
+                aria-label={label}
+                title={label}
+                className="ze-seg-b"
+                data-icon
               >
-                <Icon className="h-3 w-3" strokeWidth={2.25} />
+                <Icon strokeWidth={2} aria-hidden />
               </button>
             )
           })}
         </div>
       </div>
 
-      <p className="mt-2 text-[10.5px] leading-snug text-muted/80">
-        {t.editor.appliesToSection} <strong className="font-semibold text-foreground">{panelId}</strong>.
+      <p className="ze-hint">
+        {t.editor.appliesToSection} <strong>{panelLabel || panelId}</strong>
       </p>
     </div>
   )
