@@ -270,13 +270,21 @@ export const EDITOR_CSS = `
 .ze-rail { width: 248px; }
 .ze-insp { width: 340px; }
 .ze-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+/* THE STAGE IS ROUNDED BUT DOES NOT CLIP. Measured on the production build,
+   40 keystrokes into the hero headline at 1440: with the stage clipping its
+   rounded corners and the device frame clipping its own, key-to-paint was
+   p50 56ms / p95 104ms. Two nested rounded clips around a live iframe push
+   Chrome off its fast rounded-corner path, so every keystroke's repaint of
+   the site went through a mask. With neither clip it was 40/56ms; with this
+   rule and the square frame below, 48/64ms — the same p95 as before the
+   restyle. Nothing needs the stage to clip: the frame clips the scaled
+   iframe itself, with a plain rectangle. */
 .ze-stage {
   position: relative;
   flex: 1 1 auto; min-width: 0; min-height: 0;
   border-radius: var(--r-panel);
   background: var(--stage);
   box-shadow: inset 0 0 0 1px var(--hair-2);
-  overflow: hidden;
 }
 
 /* ---- the rail ----------------------------------------------------------- */
@@ -521,9 +529,11 @@ export const EDITOR_CSS = `
 /* ---- the preview stage -------------------------------------------------- */
 .ze-frame-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding: 12px; }
 .ze-frame-wrap[data-bleed] { padding: 0; }
-/* The device is an object on the stage: white, the card radius, a hairline
-   and a white halo — the house ring, not a drop shadow. */
-.ze-frame { position: relative; flex: 0 0 auto; overflow: hidden; background: #ffffff; border-radius: var(--r-card); box-shadow: 0 0 0 1px rgba(17,17,17,0.16), 0 0 0 5px rgba(255,255,255,0.65); }
+/* The device is an object on the stage: white, a hairline and a white halo —
+   the house ring, not a drop shadow. SQUARE ON PURPOSE: it must clip the
+   scaled iframe, and a rectangular clip is free where a rounded one costs a
+   mask on every repaint of the site (see .ze-stage above). */
+.ze-frame { position: relative; flex: 0 0 auto; overflow: hidden; background: #ffffff; border-radius: 0; box-shadow: 0 0 0 1px rgba(17,17,17,0.16), 0 0 0 5px rgba(255,255,255,0.65); }
 .ze-frame-wrap[data-bleed] .ze-frame { border-radius: 0; box-shadow: none; }
 .ze-frame iframe { position: absolute; top: 0; left: 0; display: block; border: 0; background: #ffffff; transform-origin: 0 0; }
 
