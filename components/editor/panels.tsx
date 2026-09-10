@@ -10,7 +10,7 @@
  * exact same panels, not a fork.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
 import {
@@ -341,9 +341,25 @@ export function UndoRedo({
 
 /* ── Save status pill ─────────────────────────────────────────────────── */
 
+/**
+ * "Saved 2 minutes ago" keeps itself current. The clock lives HERE, in the one
+ * leaf that prints it, and only while it is on screen — it used to be a
+ * setInterval in ThemeEditor that re-rendered the whole editor (and, through
+ * the preview, the customer's whole site) every 15 seconds, forever.
+ */
+function SavedAgo({ at }: { at: number }) {
+  const t = useT()
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15000)
+    return () => clearInterval(id)
+  }, [])
+  return <>{t.editor.savedAgo.replace('{time}', relativeTime(at, now, t))}</>
+}
+
 export function StatusPill({
-  status, dirty, lastSavedAt, now,
-}: { status: Status; dirty: boolean; lastSavedAt: number | null; now: number }) {
+  status, dirty, lastSavedAt,
+}: { status: Status; dirty: boolean; lastSavedAt: number | null }) {
   const t = useT()
   if (status === 'saving') return <span className="text-[12px] font-medium text-muted">{t.editor.saving}</span>
   if (status === 'saved') {
@@ -356,7 +372,7 @@ export function StatusPill({
   if (status === 'error') return <span className="text-[12px] font-medium text-[#b91c1c]">{t.editor.saveFailed}</span>
   if (dirty) return <span className="text-[12px] font-medium text-muted">{t.editor.unsaved}</span>
   if (lastSavedAt) {
-    return <span className="text-[12px] font-medium text-muted">{t.editor.savedAgo.replace('{time}', relativeTime(lastSavedAt, now, t))}</span>
+    return <span className="text-[12px] font-medium text-muted"><SavedAgo at={lastSavedAt} /></span>
   }
   return <span className="text-[12px] font-medium text-muted">{t.editor.allSaved}</span>
 }

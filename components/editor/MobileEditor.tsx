@@ -72,7 +72,6 @@ export type MobileEditorProps = {
   status: Status
   dirty: boolean
   lastSavedAt: number | null
-  now: number
   save: () => void
   undo: () => void
   redo: () => void
@@ -97,7 +96,7 @@ export default function MobileEditor(props: MobileEditorProps) {
     themeName, backHref, config, Preview,
     content, presetId, colorOverrides, typographyPreset, sectionStyles,
     selected, setSelected, view, setView,
-    status, dirty, lastSavedAt, now, save, undo, redo, canUndo, canRedo,
+    status, dirty, lastSavedAt, save, undo, redo, canUndo, canRedo,
     patchPath, setPresetId, setOverride, resetOverrides, setTypographyPreset,
     patchSectionStyle, clearSectionStyle, error,
   } = props
@@ -222,6 +221,29 @@ export default function MobileEditor(props: MobileEditorProps) {
     ? (getPath(content, config.brandNamePath) || themeName)
     : themeName
 
+  // The same memo ThemeEditor builds, for the same reason: the iframe root
+  // re-renders only when what the preview reads changes. MobileEditor is also
+  // mounted on its own by app/mobile-editor-demo, so it builds its own.
+  const previewNode = useMemo(() => (
+    <Preview
+      content={content}
+      presetId={presetId}
+      colorOverrides={colorOverrides}
+      typographyPreset={typographyPreset || undefined}
+      sectionStyles={sectionStyles}
+      view={view}
+      onViewChange={setView}
+    />
+  ), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view, setView])
+
+  const sectionStylesCss = useMemo(
+    () => (Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''),
+    [sectionStyles],
+  )
+  const onPreviewReady = useCallback((d: Document, el: HTMLIFrameElement) => {
+    setIframeDoc(d); setIframeEl(el)
+  }, [])
+
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden bg-[#0a0a0c]">
       {/* Top bar */}
@@ -235,7 +257,7 @@ export default function MobileEditor(props: MobileEditorProps) {
         </Link>
 
         <div className="flex min-w-0 flex-1 items-center justify-center">
-          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} now={now} />
+          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} />
         </div>
 
         <UndoRedo canUndo={canUndo} canRedo={canRedo} onUndo={undo} onRedo={redo} />
@@ -254,19 +276,9 @@ export default function MobileEditor(props: MobileEditorProps) {
         <PreviewFrame
           device="mobile"
           fullBleed
-          sectionStylesCss={Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''}
-          onReady={(d, el) => { setIframeDoc(d); setIframeEl(el) }}
-          render={() => (
-            <Preview
-              content={content}
-              presetId={presetId}
-              colorOverrides={colorOverrides}
-              typographyPreset={typographyPreset || undefined}
-              sectionStyles={sectionStyles}
-              view={view}
-              onViewChange={setView}
-            />
-          )}
+          sectionStylesCss={sectionStylesCss}
+          onReady={onPreviewReady}
+          preview={previewNode}
         />
         <TapToEditOverlay
           doc={iframeDoc}

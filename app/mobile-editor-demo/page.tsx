@@ -186,7 +186,6 @@ export default function MobileEditorDemoPage() {
       status={status}
       dirty={true}
       lastSavedAt={lastSavedAt}
-      now={Date.now()}
       save={() => { setStatus('saving'); setTimeout(() => { setStatus('saved'); setLastSavedAt(Date.now()); setTimeout(() => setStatus('idle'), 1400) }, 500) }}
       undo={() => {}}
       redo={() => {}}

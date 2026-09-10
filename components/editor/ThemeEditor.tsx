@@ -122,7 +122,6 @@ export default function ThemeEditor({
 
   const [original, setOriginal] = useState<string>('')
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null)
-  const [nowTs, setNowTs] = useState<number>(() => Date.now())
 
   // Responsive preview device + the iframe handles for click-to-edit.
   const [device, setDevice] = useState<PreviewDevice>('desktop')
@@ -268,11 +267,8 @@ export default function ThemeEditor({
     return () => clearTimeout(t)
   }, [dirty, status, save])
 
-  // Tick the "saved Xs ago" label.
-  useEffect(() => {
-    const id = setInterval(() => setNowTs(Date.now()), 15000)
-    return () => clearInterval(id)
-  }, [])
+  // "Saved Xs ago" keeps its own clock — see SavedAgo in ./panels. A ticker
+  // here re-rendered the whole editor, and the site, every 15 seconds.
 
   // ── Undo / redo ──────────────────────────────────────────────────────
   function applyDoc(d: Doc) {
@@ -364,6 +360,41 @@ export default function ThemeEditor({
     getVoiceSample: () => extractVoiceSample(liveContentRef.current),
   }), [config])
 
+  // ── The preview, memoised on exactly the state it reads. ───────────────
+  // PreviewFrame re-renders the iframe root when this element changes
+  // identity and at no other time, so a status change, an undo-history
+  // tick or a rail click re-renders the editor chrome and never the site.
+  // setView is a state setter, so it is stable; an inline (v) => setView(v)
+  // would hand the preview a new prop every render and defeat the memo.
+  const previewNode = useMemo(() => (content ? (
+    <Preview
+      content={content}
+      presetId={presetId}
+      colorOverrides={colorOverrides}
+      typographyPreset={typographyPreset || undefined}
+      sectionStyles={sectionStyles}
+      view={view}
+      onViewChange={setView}
+    />
+  ) : null), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view])
+
+  const sectionStylesCss = useMemo(
+    () => (Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''),
+    [sectionStyles],
+  )
+
+  // Stable so the overlay's listeners are bound once per iframe document, not
+  // re-bound on every keystroke (it was built inline, a new object each render).
+  const panelToViews = useMemo(() => Object.fromEntries(
+    config.panels
+      .map((p) => [p.id, panelViews(p)] as const)
+      .filter(([, v]) => v !== null) as Array<[string, string[]]>
+  ), [config.panels])
+
+  const onPreviewReady = useCallback((d: Document, el: HTMLIFrameElement) => {
+    setIframeDoc(d); setIframeEl(el)
+  }, [])
+
   // ── Helpers ──────────────────────────────────────────────────────────
   function patchPath(path: string, value: any) {
     setContent((c: any) => setPath(c, path, value))
@@ -452,7 +483,6 @@ export default function ThemeEditor({
           status={status}
           dirty={dirty}
           lastSavedAt={lastSavedAt}
-          now={nowTs}
           save={save}
           undo={undo}
           redo={redo}
@@ -511,7 +541,7 @@ export default function ThemeEditor({
         </div>
 
         <div className="hidden min-w-0 flex-1 items-center justify-end gap-3 lg:flex">
-          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} now={nowTs} />
+          <StatusPill status={status} dirty={dirty} lastSavedAt={lastSavedAt} />
           <span className="hidden text-[11px] text-muted/70 sm:inline">
             <kbd className="rounded border border-token bg-surface px-1 py-px text-[10px]">⌘S</kbd> to save
           </span>
@@ -617,31 +647,17 @@ export default function ThemeEditor({
         >
           <PreviewFrame
             device={device}
-            sectionStylesCss={Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''}
-            onReady={(d, el) => { setIframeDoc(d); setIframeEl(el) }}
-            render={() => (
-              <Preview
-                content={content}
-                presetId={presetId}
-                colorOverrides={colorOverrides}
-                typographyPreset={typographyPreset || undefined}
-                sectionStyles={sectionStyles}
-                view={view}
-                onViewChange={(v) => setView(v)}
-              />
-            )}
+            sectionStylesCss={sectionStylesCss}
+            onReady={onPreviewReady}
+            preview={previewNode}
           />
           <ClickToEditOverlay
             doc={iframeDoc}
             iframe={iframeEl}
             currentView={view}
             onPick={setSelected}
-            panelToViews={Object.fromEntries(
-              config.panels
-                .map((p) => [p.id, panelViews(p)] as const)
-                .filter(([, v]) => v !== null) as Array<[string, string[]]>
-            )}
-            onViewChange={(v) => setView(v)}
+            panelToViews={panelToViews}
+            onViewChange={setView}
           />
         </main>
 

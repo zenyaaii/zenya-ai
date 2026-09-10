@@ -30,7 +30,7 @@
  * Fonts + colors travel with the theme's own React tree.                   *
  * ────────────────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { startTransition, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import { createRoot, type Root } from 'react-dom/client'
 
@@ -61,14 +61,24 @@ function syncHeadStyles(src: Document, dest: Document) {
 export default function PreviewFrame({
   device,
   sectionStylesCss,
-  render,
+  preview,
   onReady,
   fullBleed = false,
 }: {
   device: PreviewDevice
   sectionStylesCss?: string
-  /** Renders the theme tree into the iframe's own React root. */
-  render: (doc: Document) => ReactNode
+  /**
+   * The theme element, rendered into the iframe's own React root.
+   *
+   * PASS A MEMOISED ELEMENT. The iframe root re-renders when — and only
+   * when — this changes identity. It used to be a render callback invoked
+   * from an effect with no dependency array, so the customer's ENTIRE site
+   * re-rendered on every parent render: every keystroke, every autosave
+   * status change, and a "saved Xs ago" ticker every 15 seconds while the
+   * editor sat idle. The callers now build this with useMemo over exactly
+   * the state the preview reads.
+   */
+  preview: ReactNode
   /** Fires once the iframe document + element are ready (for the overlay). */
   onReady?: (doc: Document, iframe: HTMLIFrameElement) => void
   /** On phones the device IS the device — drop the simulated frame/padding and
@@ -79,8 +89,8 @@ export default function PreviewFrame({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const rootRef = useRef<Root | null>(null)
   const [doc, setDoc] = useState<Document | null>(null)
-  const renderRef = useRef(render)
-  renderRef.current = render
+  const previewRef = useRef(preview)
+  previewRef.current = preview
   const onReadyRef = useRef(onReady)
   onReadyRef.current = onReady
 
@@ -154,7 +164,7 @@ export default function PreviewFrame({
     d.body.appendChild(mountEl)
     const root = createRoot(mountEl)
     rootRef.current = root
-    root.render(renderRef.current(d))
+    root.render(previewRef.current)
 
     setDoc(d)
     onReadyRef.current?.(d, iframe)
@@ -168,11 +178,22 @@ export default function PreviewFrame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Re-render the iframe root whenever the parent re-renders (content edits,
-  // preset/typography/color changes, view switches) so the preview stays live.
+  // Re-render the iframe root when the preview element changes — content
+  // edits, preset/typography/colour changes, view switches — and at no other
+  // time.
+  //
+  // AS A TRANSITION, NOT A SYNC UPDATE. A keystroke is a discrete event, and
+  // React 18 flushes the passive effects of a discrete update synchronously,
+  // so a plain root.render() here inherited the keystroke's sync priority and
+  // rendered the whole theme inside the same task as the keypress. Marked as
+  // a transition, the theme renders after the field has painted, can yield,
+  // and a newer keystroke's render supersedes an unfinished older one instead
+  // of queueing behind it. The field never waits for the site.
   useEffect(() => {
-    if (doc && rootRef.current) rootRef.current.render(render(doc))
-  })
+    const root = rootRef.current
+    if (!doc || !root) return
+    startTransition(() => { root.render(preview) })
+  }, [doc, preview])
 
   // Keep per-section style overrides in sync.
   useEffect(() => {
