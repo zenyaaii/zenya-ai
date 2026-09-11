@@ -1,5 +1,6 @@
 'use client'
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -127,11 +128,17 @@ export default function SiteCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      /* NO INLINE boxShadow. It used to carry
+         '0 1px 0 #f0ede6, 0 8px 24px -16px rgba(28,28,28,0.10)' - the old warm
+         line plus a drop shadow - and an inline style beats every stylesheet,
+         so this card was the one place on the surface the ring token could not
+         reach. Elevation is .zy-card's stacked hairlines now, like everything
+         else. The lift on hover stays: it is the card responding, not
+         elevation. */
       className={
         'group relative isolate flex flex-col rounded-2xl zy-card transition-all duration-200 hover:-translate-y-0.5 ' +
         (menuOpen ? 'z-30' : '')
       }
-      style={{ boxShadow: '0 1px 0 #f0ede6, 0 8px 24px -16px rgba(28,28,28,0.10)' }}
     >
       {/* Top — visual + status overlay. Themes with a captured preview
           show the screenshot; everything else falls back to the icon-
@@ -149,7 +156,18 @@ export default function SiteCard({
             }}
           />
           {/* Accent stripe at top for brand cue */}
-          <div className="absolute left-0 top-0 h-1 w-full" style={{ background: tint.fg }} />
+          {/* THE TEMPLATE COLOUR BAR IS GONE. It drew a 4px rule of the
+              template's own hue across the top of every card, which broke two
+              house rules at once: nothing draws a line across a surface, and
+              the page is achromatic apart from the accent and the status
+              triad. It also wrote left-0, a PHYSICAL edge, on a card that
+              renders in RTL - harmless only because it was w-full.
+
+              Nothing is lost: the template already names itself in words
+              directly under the title (مطعم / تطبيق / أزياء), which is
+              legible to a screen reader and to someone who cannot separate
+              #be123c from #c2410c. The medallion keeps its tint - see the
+              note there. */}
           {/* Subtle bottom fade so the title chip below reads clean */}
           <div
             aria-hidden
@@ -186,10 +204,21 @@ export default function SiteCard({
           {/* Icon medallion */}
           <div
             className="relative flex h-14 w-14 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+            /* Was a coloured drop shadow. The house style has no drop shadows
+               at all - elevation is stacked hairlines - so this is the same
+               tint expressed as a ring. */
+            /* THE MEDALLION KEEPS ITS TINT, DELIBERATELY, and it is the one
+               thing on this surface still outside the triad. It is a single
+               large object on a card that has no thumbnail, standing in for
+               the missing picture, so it is closer to artwork than to chrome.
+               Collapsing the nine template hues to one accent would make every
+               placeholder identical, and that is a product decision about the
+               template identity system rather than a restyle - it is flagged
+               rather than taken. */
             style={{
               background: 'white',
               color: tint.fg,
-              boxShadow: `0 8px 24px -8px ${tint.ring}, 0 0 0 1px ${tint.ring} inset`,
+              boxShadow: `0 0 0 1px ${tint.ring}, 0 0 0 4px rgba(250,250,250,0.55)`,
             }}
           >
             <Icon className="h-6 w-6" strokeWidth={1.75} />
@@ -265,8 +294,8 @@ export default function SiteCard({
           const isOnetime = plan === 'pro_onetime'
           const title = isOnetime ? 'أضف الاستضافة لنشر الموقع' : 'خطة Pro تفتح النشر'
           const cta = isOnetime
-            ? 'أضف استضافة زينيا · 24.99$ شهريًا ←'
-            : 'الترقية إلى Pro · 24.99$ شهريًا ←'
+            ? `أضف استضافة زينيا · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
+            : `الترقية إلى Pro · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
           return (
             <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[12.5px]">
               <div className="flex items-start gap-2">
@@ -286,7 +315,7 @@ export default function SiteCard({
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-2">
           <Link
             href={editUrlFor(theme.id, businessType)}
-            className="rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+            className="zy-btn-q"
             title="تعديل المحتوى"
           >
             <Edit3 className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
@@ -300,7 +329,7 @@ export default function SiteCard({
               href={publishedHere ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
               target="_blank"
               rel="noreferrer"
-              className="rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+              className="zy-btn-q"
             >
               <Eye className="me-1 inline-block h-3 w-3" strokeWidth={2.25} />
               معاينة
@@ -380,8 +409,7 @@ export default function SiteCard({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.98 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute bottom-full end-0 z-40 mb-2 w-64 overflow-hidden rounded-lg zy-card shadow-lg"
-                    style={{ boxShadow: '0 12px 32px rgba(28,28,28,0.16), 0 0 0 1px #e5e2d9' }}
+                    className="zy-menu absolute bottom-full end-0 z-40 mb-2 w-64 overflow-hidden"
                   >
                     {/* Screenshot thumbnail — what the user expects to see when
                         they open the "more" menu. Clicking it opens the site
@@ -471,7 +499,15 @@ function editUrlFor(id: string, businessType: string): string {
   return `/preview/${id}`
 }
 
-/* -------------------------- StatusPill ---------------------------------- */
+/* -------------------------- StatusPill ----------------------------------
+   Three hand-rolled pills became one .zy-pill with a tone. They were the
+   same shape three times over with their own fill, border and foreground
+   inlined - and an inline style is unreachable from a stylesheet, so this
+   was one of the places the status triad could not land by re-pointing a
+   token. The tones are the documented ones: live is success, a draft is
+   warning (it is unfinished, not broken) and a Shopify export is accent,
+   because it names a destination rather than a state.
+------------------------------------------------------------------------- */
 
 function StatusPill({
   isPublished,
@@ -484,46 +520,19 @@ function StatusPill({
 }) {
   if (isPublished) {
     return (
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
-        style={{
-          background: 'rgba(21,128,61,0.10)',
-          color: '#15803d',
-          border: '1px solid rgba(21,128,61,0.20)',
-        }}
-      >
+      <span className="zy-pill" data-tone="ok">
+        {/* The dot pulses to say "serving right now". Under
+            prefers-reduced-motion the stylesheet stops it. */}
         <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#15803d]" />
         مباشر
       </span>
     )
   }
   if (isEcom) {
-    return (
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
-        style={{
-          background: 'rgba(94,106,210,0.10)',
-          color: '#5e6ad2',
-          border: '1px solid rgba(94,106,210,0.20)',
-        }}
-      >
-        شوبيفاي
-      </span>
-    )
+    return <span className="zy-pill" data-tone="accent">شوبيفاي</span>
   }
   if (isDraft) {
-    return (
-      <span
-        className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
-        style={{
-          background: 'rgba(217,119,6,0.10)',
-          color: '#b45309',
-          border: '1px solid rgba(217,119,6,0.20)',
-        }}
-      >
-        مسودّة
-      </span>
-    )
+    return <span className="zy-pill" data-tone="warn">مسوّدة · غير مباشر بعد</span>
   }
   return null
 }

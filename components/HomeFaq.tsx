@@ -5,7 +5,7 @@ import * as Accordion from '@radix-ui/react-accordion'
 import { ChevronDown, ArrowLeft } from 'lucide-react'
 import { Reveal } from '@/components/marketing/Reveal'
 import { cn } from '@/lib/utils'
-import { AR_FAQS } from '@/app/(main)/faq/faq-data'
+import { AR_FAQS } from '@/lib/faq-data'
 
 /** Homepage FAQ teaser — shows the top questions and links to the full /faq
  *  page. Shares the same source data as /faq so answers never drift. */

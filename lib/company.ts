@@ -55,6 +55,18 @@ export const COMPANY = {
 
   // Pricing — monthly subscriptions since 2026-07-02. One-time purchases made
   // before that date are grandfathered and keep what they paid for.
+  //
+  // THE NUMBER IS HERE ONCE AND FORMATTED EVERYWHERE ELSE. The two figures
+  // below used to be retyped in nineteen places across the Arabic site, the
+  // English site, the dashboard and the terms, in four different shapes:
+  // "14.99$", "$14.99", "14.99 دولارًا" and a bare 14.99. Nothing kept them in
+  // step, and a price that disagrees with itself is a price someone gets
+  // charged and did not agree to. Read STARTER_PRICE_USD, or one of the
+  // formatted constants built from it; do not type the digits.
+  STARTER_PRICE_USD: 14.99,
+  PRO_PRICE_USD: 24.99,
+  /** The one-time Entry unlock: two AI generations. */
+  ENTRY_PRICE_USD: 0.5,
   STARTER_PRICE_DISPLAY: '14.99 دولارًا شهريًا',
   PRO_PRICE_DISPLAY: '24.99 دولارًا شهريًا',
   PRICE_DISPLAY: 'اشتراك شهري — 14.99 دولارًا لخطة Starter أو 24.99 دولارًا لخطة Pro',
@@ -80,3 +92,27 @@ export const formatAddress = () => {
   )
   return parts.join(', ')
 }
+
+/**
+ * The prices, in the shapes the site actually prints.
+ *
+ * usd() is deliberately not a currency Intl format: the site writes prices as
+ * a bare "$14.99" in Latin script inside otherwise Arabic sentences, with the
+ * dollar sign leading, and Intl's ar locale would render them in Arabic-Indic
+ * digits with the symbol trailing. Two different shapes for one price on one
+ * page is what this module exists to prevent.
+ */
+export function usd(amount: number): string {
+  return '$' + amount.toFixed(2)
+}
+
+/** "14.99$" — the trailing-sign shape the Arabic surfaces use inline. */
+export function usdTrailing(amount: number): string {
+  return amount.toFixed(2) + '$'
+}
+
+export const PRICES = {
+  starter: COMPANY.STARTER_PRICE_USD,
+  pro: COMPANY.PRO_PRICE_USD,
+  entry: COMPANY.ENTRY_PRICE_USD,
+} as const

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import {
   CalendarCheck, Phone, Mail, Users, Clock, MapPin, Sparkles, Lock, ArrowUpRight,
 } from 'lucide-react'
+import { Segmented } from '@/components/app/Segmented'
 import { useNotify } from '@/components/ui/Notify'
 import type { BookingAccess } from '@/lib/booking-entitlement'
 
@@ -37,18 +38,26 @@ const TYPE_AR: Record<BookingRow['booking_type'], string> = {
   contact: 'طلب تواصل',
 }
 
+/**
+ * A booking status maps onto the dashboard's ONE status triad rather than
+ * carrying its own four-colour table. "new" is the accent because it is the
+ * thing asking for the owner's attention, not a good-or-bad state; "done" is
+ * quiet for the same reason - it is finished, so it should stop shouting.
+ * The old table wrote #4954c9 and #57534e, two greys and violets that appear
+ * nowhere else in the product.
+ */
+const STATUS_TONE: Record<StatusKey, 'accent' | 'ok' | 'bad' | 'quiet'> = {
+  new: 'accent',
+  confirmed: 'ok',
+  cancelled: 'bad',
+  done: 'quiet',
+}
+
 const STATUS_AR: Record<StatusKey, string> = {
   new: 'جديد',
   confirmed: 'مؤكّد',
   cancelled: 'ملغى',
   done: 'منجز',
-}
-
-const STATUS_STYLE: Record<StatusKey, { bg: string; fg: string }> = {
-  new:       { bg: 'rgba(94,106,210,0.12)', fg: '#4954c9' },
-  confirmed: { bg: 'rgba(39,166,68,0.12)',  fg: '#15803d' },
-  cancelled: { bg: 'rgba(220,38,38,0.10)',  fg: '#b91c1c' },
-  done:      { bg: 'rgba(28,28,28,0.07)',   fg: '#57534e' },
 }
 
 const STATUS_ORDER: StatusKey[] = ['new', 'confirmed', 'done', 'cancelled']
@@ -118,20 +127,25 @@ export default function BookingsInbox({
   }
 
   return (
-    <div dir="rtl" className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    /* NO dir="rtl" HERE. This surface is bilingual: it runs on lib/i18n and
+       serves English as well as Arabic, so pinning the direction on the
+       container forces an English session to read right to left. The document
+       already carries the right dir; every layout below uses logical
+       properties, so it follows either one. */
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-bold text-foreground">
-            <CalendarCheck className="h-5 w-5 text-primary" />
+          <h1 className="zy-h1 flex items-center gap-2.5">
+            <CalendarCheck className="h-[22px] w-[22px] shrink-0 text-[#5e6ad2]" strokeWidth={2} />
             الحجوزات
           </h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1.5 text-[13px] font-medium leading-[1.8] text-[#56565a]">
             كل طلبات الحجز والمواعيد التي يرسلها زوّار مواقعك تصلك هنا.
           </p>
         </div>
         {access.status === 'pro' && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-[rgba(94,106,210,0.10)] px-2.5 py-1 text-[11px] font-semibold text-primary">
+          <span className="zy-pill" data-tone="accent">
             <Sparkles className="h-3 w-3" /> مفعّلة
           </span>
         )}
@@ -142,24 +156,21 @@ export default function BookingsInbox({
       {/* Locked with no trial started: show the feature pitch, nothing else. */}
       {access.status === 'locked' ? null : (
         <>
-          {/* Filter chips */}
-          <div className="mb-4 flex flex-wrap gap-2">
-            {(['all', ...STATUS_ORDER] as const).map((k) => (
-              <button
-                key={k}
-                onClick={() => setFilter(k)}
-                className={
-                  'rounded-full px-3 py-1.5 text-[12.5px] font-medium transition-colors ' +
-                  (filter === k
-                    ? 'bg-[rgba(94,106,210,0.12)] text-primary'
-                    : 'text-muted hover:bg-[rgba(28,28,28,0.04)]')
-                }
-              >
-                {k === 'all' ? 'الكل' : STATUS_AR[k]}
-                <span className="ms-1.5 opacity-60">{counts[k] || 0}</span>
-              </button>
-            ))}
-          </div>
+          {/* The status filter. The same sliding control as the analytics
+              range picker, because it is the same kind of choice: one of a
+              few alternatives, with the indicator moving between them. The
+              count rides in the label rather than in a second element, so
+              the indicator has one box to measure. */}
+          <Segmented
+            className="mb-4"
+            label="تصفية حسب الحالة"
+            value={filter}
+            onChange={setFilter}
+            items={(['all', ...STATUS_ORDER] as const).map((k) => ({
+              key: k,
+              label: `${k === 'all' ? 'الكل' : STATUS_AR[k]} ${counts[k] || 0}`,
+            }))}
+          />
 
           {visible.length === 0 ? (
             <EmptyState hasAny={bookings.length > 0} hasSites={hasSites} />
@@ -250,7 +261,6 @@ function BookingCard({
   saving: boolean
   onStatus: (s: StatusKey) => void
 }) {
-  const st = STATUS_STYLE[b.status]
   const created = new Date(b.created_at)
   const createdLabel = isNaN(created.getTime())
     ? ''
@@ -259,23 +269,20 @@ function BookingCard({
       created.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <li className="rounded-xl zy-card p-4 sm:p-5">
+    <li className="rounded-2xl zy-card p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[15px] font-bold text-foreground">{b.name}</span>
-            <span className="rounded-full bg-[rgba(28,28,28,0.05)] px-2 py-0.5 text-[11px] font-medium text-muted">
+            <span className="text-[15px] font-black leading-[1.5] text-[#171717]">{b.name}</span>
+            <span className="zy-pill" data-tone="quiet">
               {TYPE_AR[b.booking_type]}
             </span>
           </div>
-          <p className="mt-0.5 text-[11.5px] text-muted">
+          <p className="mt-1 text-[11.5px] font-medium leading-[1.7] text-[#66666e]">
             {siteName}{createdLabel ? ` · ${createdLabel}` : ''}
           </p>
         </div>
-        <span
-          className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold"
-          style={{ background: st.bg, color: st.fg }}
-        >
+        <span className="zy-pill shrink-0" data-tone={STATUS_TONE[b.status]}>
           {STATUS_AR[b.status]}
         </span>
       </div>

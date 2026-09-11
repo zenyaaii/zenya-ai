@@ -1,6 +1,6 @@
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
-import { AR_FAQS, EN_FAQS } from '@/app/(main)/faq/faq-data'
+import { AR_FAQS, EN_FAQS } from '@/lib/faq-data'
 
 /**
  * /llms.txt — a plain-text brief written for AI assistants (ChatGPT, Gemini,

@@ -1,5 +1,6 @@
 'use client'
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import { useEffect, useRef, useState } from 'react'
 import { suggestSlugFrom, validateSlug, slugErrorMessage, normalizeSlug } from '@/lib/slug'
 
@@ -192,7 +193,7 @@ export default function PublishSiteModal({
             }}
           >
             احصل على موقعك المباشر على <strong>اسمك.zenyaai.co</strong> مع{' '}
-            <strong>خطة Starter (14.99$ شهريًا)</strong>.{' '}
+            <strong>خطة Starter ({usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا)</strong>.{' '}
             <a href="/pricing?upgrade=starter" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
               ابدأ الآن ←
             </a>

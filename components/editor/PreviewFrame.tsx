@@ -10,15 +10,24 @@
  * squished desktop layout, not the mobile one. An iframe has its own       *
  * viewport, so the breakpoints fire correctly at the device width.         *
  *                                                                          *
+ * EVERY DEVICE RENDERS AT ITS TRUE WIDTH, AND SCALES TO FIT. The frame     *
+ * used to be `width: <device>; max-width: 100%`, which silently squeezed    *
+ * it: on an iPad in landscape the stage is ~730px, so "desktop" showed the  *
+ * theme's tablet layout and "tablet" (834) was squashed below 834. Now the  *
+ * iframe's own viewport is always the device's width — desktop is the      *
+ * stage width but never narrower than DESKTOP_MIN — and when that is wider  *
+ * than the stage the iframe is scaled down with a transform. Breakpoints    *
+ * fire at the real width; only the picture is smaller.                      *
+ *                                                                          *
  * Design notes:                                                            *
  *  - A SEPARATE React root is mounted inside the iframe (createRoot). React *
  *    attaches its event system to that root's document, so onClick /       *
  *    accordions / view switches inside the theme keep working. A           *
  *    cross-document portal would silently swallow those events.            *
- *  - The iframe has a FIXED height (fills the pane) and scrolls INTERNALLY.   *
- *    Themes use viewport heights (`h-screen`, `min-h-[90vh]`); auto-growing   *
- *    the iframe to its content would make those grow the iframe, which grows  *
- *    them again — a grow-forever loop. A fixed viewport keeps `100vh` stable. *
+ *  - The iframe has a FIXED height (fills the stage) and scrolls           *
+ *    INTERNALLY. Themes use viewport heights (`h-screen`, `min-h-[90vh]`);  *
+ *    auto-growing the iframe to its content would make those grow the       *
+ *    iframe, which grows them again — a grow-forever loop.                 *
  *  - framer-motion's `whileInView` can't fire across the iframe boundary, so  *
  *    we force reduced-motion (below) — every reveal renders in its final,     *
  *    visible state regardless of scroll, which is what an editor wants.       *
@@ -27,20 +36,36 @@
  *                                                                          *
  * Tailwind/global CSS lives in the parent document, so we clone the head   *
  * <style>/<link> tags into the iframe (and keep them in sync through HMR). *
- * Fonts + colors travel with the theme's own React tree.                   *
  * ────────────────────────────────────────────────────────────────────── */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { startTransition, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useT } from '@/components/i18n/LocaleProvider'
 import { createRoot, type Root } from 'react-dom/client'
 
 export type PreviewDevice = 'desktop' | 'tablet' | 'mobile'
 
 export const DEVICE_WIDTH: Record<PreviewDevice, number | null> = {
-  desktop: null, // fill the pane
+  desktop: null, // the stage width, never below DESKTOP_MIN
   tablet: 834,
   mobile: 390,
 }
+
+/** A framed phone or tablet is never TALLER than the screen it stands for.
+ *  Scaled down to fit a narrow stage, a frame whose viewport ran the stage's
+ *  whole height made every 100vh hero grow past the device it claimed to be:
+ *  at 834x1112 the "tablet" was 1500px tall. Desktop has no fixed height. */
+export const DEVICE_HEIGHT: Record<PreviewDevice, number | null> = {
+  desktop: null,
+  tablet: 1112,
+  mobile: 844,
+}
+
+/** The narrowest a "desktop" preview renders. Tailwind's `lg` — below it a
+ *  theme is in its tablet layout, which is not what the desktop button says. */
+export const DESKTOP_MIN = 1024
+
+/** The stage's inner margin around a framed device, in CSS px. */
+const PAD = 12
 
 function syncHeadStyles(src: Document, dest: Document) {
   // Re-clone the parent's stylesheets into the iframe head. Head <style>/<link>
@@ -58,31 +83,71 @@ function syncHeadStyles(src: Document, dest: Document) {
   else dest.head.appendChild(frag)
 }
 
+/**
+ * Device pixels per CSS pixel: the display's own ratio times the root zoom
+ * ZoomLock writes. Snapping against this is what makes a rounded length
+ * whole where it is actually rasterised rather than where it is declared.
+ * One on the server, where there is no window and nothing to rasterise.
+ */
+function pxGrid(): number {
+  if (typeof window === 'undefined') return 1
+  const dpr = window.devicePixelRatio || 1
+  const zoom = parseFloat(getComputedStyle(document.documentElement).zoom || '1') || 1
+  return Math.max(1, dpr * zoom)
+}
+
 export default function PreviewFrame({
   device,
   sectionStylesCss,
-  render,
+  preview,
   onReady,
   fullBleed = false,
 }: {
   device: PreviewDevice
   sectionStylesCss?: string
-  /** Renders the theme tree into the iframe's own React root. */
-  render: (doc: Document) => ReactNode
+  /**
+   * The theme element, rendered into the iframe's own React root.
+   *
+   * PASS A MEMOISED ELEMENT. The iframe root re-renders when — and only
+   * when — this changes identity. It used to be a render callback invoked
+   * from an effect with no dependency array, so the customer's ENTIRE site
+   * re-rendered on every parent render: every keystroke, every autosave
+   * status change, and a "saved Xs ago" ticker every 15 seconds while the
+   * editor sat idle. The callers now build this with useMemo over exactly
+   * the state the preview reads.
+   */
+  preview: ReactNode
   /** Fires once the iframe document + element are ready (for the overlay). */
   onReady?: (doc: Document, iframe: HTMLIFrameElement) => void
-  /** On phones the device IS the device — drop the simulated frame/padding and
-   *  let the iframe fill its container edge-to-edge, ignoring the device width. */
+  /** On phones the device IS the device — drop the simulated frame and let
+   *  the iframe fill its container edge-to-edge, ignoring the device width. */
   fullBleed?: boolean
 }) {
   const t = useT()
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<Root | null>(null)
   const [doc, setDoc] = useState<Document | null>(null)
-  const renderRef = useRef(render)
-  renderRef.current = render
+  const previewRef = useRef(preview)
+  previewRef.current = preview
   const onReadyRef = useRef(onReady)
   onReadyRef.current = onReady
+
+  // The stage's size in CSS px. clientWidth is layout size, unaffected by the
+  // root zoom and by transforms, which is the unit the frame is sized in.
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null)
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const read = () => setBox((b) => {
+      const w = el.clientWidth, h = el.clientHeight
+      return b && b.w === w && b.h === h ? b : { w, h }
+    })
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   // Set up the iframe document + its own React root. Each effect run owns and
   // tears down its own root/observers, so React 18 Strict Mode's double-invoke
@@ -93,9 +158,7 @@ export default function PreviewFrame({
     if (!iframe || !d || !d.body) return
 
     // Mirror the parent document's direction + language into the iframe so the
-    // preview renders exactly like the published (Arabic-first, RTL) site. The
-    // iframe starts life as a blank LTR document; without this the whole theme
-    // would lay out left-to-right inside the editor even though it's RTL live.
+    // preview renders exactly like the published (Arabic-first, RTL) site.
     const rootDir = document.documentElement.getAttribute('dir') || 'rtl'
     const rootLang = document.documentElement.getAttribute('lang') || 'ar'
     d.documentElement.setAttribute('dir', rootDir)
@@ -154,7 +217,7 @@ export default function PreviewFrame({
     d.body.appendChild(mountEl)
     const root = createRoot(mountEl)
     rootRef.current = root
-    root.render(renderRef.current(d))
+    root.render(previewRef.current)
 
     setDoc(d)
     onReadyRef.current?.(d, iframe)
@@ -168,11 +231,22 @@ export default function PreviewFrame({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Re-render the iframe root whenever the parent re-renders (content edits,
-  // preset/typography/color changes, view switches) so the preview stays live.
+  // Re-render the iframe root when the preview element changes — content
+  // edits, preset/typography/colour changes, view switches — and at no other
+  // time.
+  //
+  // AS A TRANSITION, NOT A SYNC UPDATE. A keystroke is a discrete event, and
+  // React 18 flushes the passive effects of a discrete update synchronously,
+  // so a plain root.render() here inherited the keystroke's sync priority and
+  // rendered the whole theme inside the same task as the keypress. Marked as
+  // a transition, the theme renders after the field has painted, can yield,
+  // and a newer keystroke's render supersedes an unfinished older one instead
+  // of queueing behind it. The field never waits for the site.
   useEffect(() => {
-    if (doc && rootRef.current) rootRef.current.render(render(doc))
-  })
+    const root = rootRef.current
+    if (!doc || !root) return
+    startTransition(() => { root.render(preview) })
+  }, [doc, preview])
 
   // Keep per-section style overrides in sync.
   useEffect(() => {
@@ -181,38 +255,57 @@ export default function PreviewFrame({
     if (s) s.textContent = sectionStylesCss || ''
   }, [doc, sectionStylesCss])
 
-  const width = fullBleed ? null : DEVICE_WIDTH[device]
-  const framed = width != null
+  // ── Geometry. Nothing here animates: switching device is instant, because
+  //    tweening the width of a live site re-lays it out on every frame. ────
+  const availW = box ? Math.max(0, box.w - (fullBleed ? 0 : PAD * 2)) : 0
+  const availH = box ? Math.max(0, box.h - (fullBleed ? 0 : PAD * 2)) : 0
+  // Until the stage has been measured there is nothing to fit, and a scale of
+  // 0/0 would size the iframe NaN; it stays at scale 1, unseen, for the one
+  // frame that takes.
+  const measured = availW > 0 && availH > 0
+  const fixed = DEVICE_WIDTH[device]
+  const devW = fullBleed ? availW : (fixed ?? Math.max(availW, DESKTOP_MIN))
+  /**
+   * THE SCALE IS DERIVED FROM A WHOLE-DEVICE-PIXEL FRAME, not the other way
+   * round, and that ordering is the whole point.
+   *
+   * Before, the scale was the raw ratio and the frame was Math.floor of it.
+   * So the container was a whole CSS pixel wide while the iframe inside it
+   * was scaled by the unfloored ratio: the two disagreed by up to a pixel,
+   * which showed as a soft seam down the edge of the preview, and the
+   * customer's whole site was resampled at an arbitrary fraction.
+   *
+   * Snapping the frame in DEVICE space and deriving the scale from it makes
+   * the container and the scaled iframe agree exactly, and puts the
+   * preview's edges on the pixel grid. Device space, not CSS space, because
+   * ZoomLock renders the document at 0.85 and a whole CSS pixel is not a
+   * whole device pixel under it.
+   */
+  const rawScale = fullBleed || !measured ? 1 : Math.min(1, availW / devW)
+  const grid = pxGrid()
+  const snapW = (v: number) => Math.max(1, Math.floor(v * grid) / grid)
+  const frameW = fullBleed ? 0 : snapW(devW * rawScale)
+  const scale = fullBleed || !measured ? 1 : frameW / devW
+  const capH = fullBleed ? null : DEVICE_HEIGHT[device]
+  const iframeH = Math.min(scale < 1 ? availH / scale : availH, capH ?? Infinity)
+  const frameH = fullBleed ? 0 : snapW(iframeH * scale)
 
   return (
-    <div
-      className="flex h-full w-full justify-center"
-      style={{ padding: framed ? '24px 16px' : 0, alignItems: 'stretch' }}
-    >
+    <div ref={wrapRef} className="ze-frame-wrap" data-bleed={fullBleed ? '' : undefined}>
       <div
-        style={{
-          width: framed ? width : '100%',
-          maxWidth: '100%',
-          height: '100%',
-          // Explicit flex-basis in px: with `auto`, the iframe's intrinsic size
-          // leaks into the basis calc and the frame won't honor the device width.
-          flex: framed ? `0 0 ${width}px` : '1 1 auto',
-          borderRadius: framed ? 20 : 0,
-          overflow: 'hidden',
-          background: '#fff',
-          boxShadow: framed
-            ? '0 24px 70px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)'
-            : 'none',
-          transition: 'width 0.25s ease',
-        }}
+        className="ze-frame"
+        data-device={fullBleed ? 'bleed' : device}
+        data-scale={scale.toFixed(3)}
+        style={fullBleed
+          ? { width: '100%', height: '100%' }
+          : { width: frameW, height: frameH, visibility: measured ? undefined : 'hidden' }}
       >
-        {/* Fixed-height iframe that scrolls internally: the iframe's viewport
-            height stays stable, so theme `100vh`/`min-h-screen` heroes resolve
-            to one device viewport instead of feeding a grow-forever loop. */}
         <iframe
           ref={iframeRef}
           title={t.editor.previewTitle}
-          className="block h-full w-full border-0 bg-white"
+          style={fullBleed
+            ? { width: '100%', height: '100%' }
+            : { width: devW, height: iframeH, transform: scale < 1 ? `scale(${scale})` : undefined }}
         />
       </div>
     </div>

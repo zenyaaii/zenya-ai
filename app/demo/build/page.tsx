@@ -1,51 +1,38 @@
 /**
- * Candidate build form — the house style applied to the wizard.
+ * A restyle proposal for the RESTAURANT WIZARD, not for /build.
  *
- * NOT the wizard. It ships as a standalone route at /demo/build so it can be
- * reviewed on the real domain; app/(main)/theme/new/** remains the live
- * builder and is untouched. It is noindex, because a second form in the index
- * would compete with the real one for the same query.
+ * IT IS FILED UNDER THE WRONG NAME AND THE NAME IS KEPT ON PURPOSE, because
+ * the confusion it caused is worth recording. The candidate set shipped this
+ * as "build", and the promotion nearly put it at /build — which is a
+ * different surface entirely. /build is the Shopify one-product builder:
+ * paste a product URL, pick images, choose colours, generate a theme. What
+ * this page restyles is app/(main)/theme/new/restaurant, the eight-step
+ * restaurant brief. Every string in components/zenya/build/spec.ts is copied
+ * out of that wizard, and the presets are imported from its own
+ * utils/restaurant/presets so a palette cannot drift between the two.
  *
- * Design read: a RAIL AND A STAGE. The catalogue at /demo/templates is a page
- * you look at; this is a page you work through, so the composition answers one
- * question at a time — where am I, and what is left. Eight steps on the start
- * side, one step on the stage, a bar underneath that never moves.
+ * SO IT STAYS A PROPOSAL, while the rest of the candidate set went live. The
+ * wizard it proposes for sits behind an account and runs the generator; this
+ * route is public and noindex, and a public page cannot reach that generator.
+ * The last step is therefore a review, and its call to action hands the
+ * reader to the real builder. A page that pretended to POST to a generator it
+ * cannot reach would be the same class of lie as a stock photo standing in
+ * for a template preview.
  *
- * WHERE THE VIOLET GOES, and why it is different here. On the catalogue the
- * accent had to compete with eight full-colour screenshots, so it was spent
- * only on the action. There are no screenshots on this page, so violet gets to
- * carry meaning instead of decoration: the progress fill, the current step,
- * the ring on the field you are in, a chosen chip or preset, and the primary
- * button. Type stays obsidian, the ground stays one flat #fafafa, and nothing
- * else is tinted.
+ * WHAT IT IS WORTH LOOKING AT FOR: the rail-and-stage composition, the
+ * eight-step progress model, and the rule that the accent is spent on
+ * progress and on the action and nowhere else. Those transfer to the wizard
+ * whether or not this exact form does.
  *
- * NOTHING HERE IS INVENTED. Every section title, subtitle, field label,
- * placeholder and required star in spec.ts is copied from
- * app/(main)/theme/new/restaurant/page.tsx, and the style presets are imported
- * from utils/restaurant/presets so a palette cannot drift between the demo and
- * the real form. This is the same rule app/demo/home/templates.tsx states for
- * the deck: a demo that invents a form the product does not have is worth
- * nothing.
- *
- * AND IT DOES NOT GENERATE. The generator sits behind the real wizard and
- * needs an account; this route is public. So the last step is a review and its
- * call to action hands the reader to /theme/new/restaurant, and the page says
- * so in place rather than implying a POST it cannot make. An honest edge beats
- * a convincing dead end.
- *
- * ONE TEMPLATE, AND THE SHAPE IS THE CONTRACT. The seven buildable wizards run
- * to 4,586 lines between them, each with its own repeaters, hour grids, menu
- * builders and upload rails. Restaurant is the richest at eight sections and
- * the one already mirrored in app/demo/home/templates.tsx, so it exercises the
- * design hardest and can be checked against an existing mirror. Adding another
- * is another SPEC object; nothing in the view knows the word "restaurant".
+ * REGISTERED ON THE SUBDOMAIN in the same commit, per CLAUDE.md: "build" is
+ * in DEMO_SUBDOMAIN_PAGES, so this renders at demo.zenyaai.co/build.
  */
 
 import type { Metadata } from "next"
-import BuildFormView from "./BuildFormView"
+import BuildFormView from "@/components/zenya/build/BuildFormView"
 
 export const metadata: Metadata = {
-  title: "ابنِ موقعك — نسخة تجريبية",
+  title: "ابنِ موقعك — مقترح تصميم",
   robots: { index: false, follow: false },
 }
 

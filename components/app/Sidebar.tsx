@@ -6,7 +6,6 @@ import {
   Home, Folder, BarChart3, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, CalendarCheck, type LucideIcon,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import ZenyaMark from '@/components/ZenyaMark'
 import { useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
@@ -82,21 +81,15 @@ export default function Sidebar({
   const body = (
     <>
       {/* Logo */}
-      <Link
-        href="/dashboard"
-        className="flex h-14 items-center border-b border-token px-4"
-        onClick={onMobileClose}
-      >
-        <ZenyaMark className="h-5 text-[#16171b]" />
+      <Link href="/dashboard" className="zy-rail-mark" onClick={onMobileClose}>
+        <ZenyaMark className="h-[18px] text-[#171717]" />
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 overflow-y-auto py-3">
         {NAV.map((group, gi) => (
-          <div key={group.label} className={gi > 0 ? 'mt-6' : ''}>
-            <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
-              {group.label}
-            </div>
+          <div key={group.label} className={gi > 0 ? 'zy-rail-group mt-5' : 'zy-rail-group'}>
+            <div className="zy-rail-label">{group.label}</div>
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon
@@ -107,20 +100,17 @@ export default function Sidebar({
                     href={item.href}
                     onClick={onMobileClose}
                     data-tour={item.tour}
-                    className={cn(
-                      'group flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] font-medium transition-colors duration-150',
-                      active
-                        ? 'bg-[rgba(94,106,210,0.10)] text-primary'
-                        : 'text-muted hover:bg-[rgba(28,28,28,0.04)] hover:text-foreground'
-                    )}
+                    className="zy-rail-row"
+                    data-on={active ? '' : undefined}
+                    aria-current={active ? 'page' : undefined}
                   >
                     <Icon
-                      className="h-3.5 w-3.5 flex-shrink-0"
-                      strokeWidth={active ? 2.5 : 2}
+                      className="h-[15px] w-[15px] flex-shrink-0"
+                      strokeWidth={active ? 2.25 : 1.9}
                     />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.pill && (
-                      <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-muted">
+                      <span className="zy-pill" data-tone="quiet">
                         {item.pill}
                       </span>
                     )}
@@ -133,11 +123,11 @@ export default function Sidebar({
       </nav>
 
       {/* Foot — small marketing link out */}
-      <div className="border-t border-token p-3 text-[11.5px] text-muted">
+      <div className="zy-rail-foot">
         {/* Dashboard runs on dashboard.zenyaai.co, so this must be the absolute
             apex URL. ?home=1 tells the apex NOT to bounce a logged-in user back
             to accounts/dashboard — they explicitly want to see the marketing site. */}
-        <a href="https://zenyaai.co/?home=1" className="hover:text-foreground" onClick={onMobileClose}>
+        <a href="https://zenyaai.co/?home=1" onClick={onMobileClose}>
           → العودة إلى الموقع التسويقي
         </a>
       </div>
@@ -147,10 +137,7 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop sidebar — always visible at lg+ */}
-      <aside
-        className="hidden w-60 flex-shrink-0 flex-col border-e border-token bg-white lg:flex"
-        style={{ boxShadow: '1px 0 0 #f0ede6' }}
-      >
+      <aside className="zy-pane hidden w-[236px] flex-shrink-0 flex-col lg:flex">
         {body}
       </aside>
 
@@ -163,13 +150,13 @@ export default function Sidebar({
             aria-hidden
           />
           <aside
-            className="absolute start-0 top-0 flex h-full w-60 flex-col border-e border-token bg-white"
-            style={{ boxShadow: '4px 0 24px rgba(0,0,0,0.10)' }}
+            className="absolute start-0 top-0 flex h-full w-[236px] flex-col bg-white"
+            style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.10)' }}
           >
             <button
               type="button"
               onClick={onMobileClose}
-              className="absolute end-2 top-2 z-10 rounded-md p-1.5 text-muted hover:bg-black/5"
+              className="zy-icon-btn absolute end-2 top-2 z-10 inline-flex"
               aria-label={t.nav.closeMenu}
             >
               <X className="h-4 w-4" />

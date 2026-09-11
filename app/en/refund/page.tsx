@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { COMPANY } from '@/lib/company'
+import { COMPANY, usd } from '@/lib/company'
 
 const SITE = 'https://zenyaai.co'
 
@@ -26,8 +26,8 @@ export default function EnRefundPolicy() {
       <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        Zenya AI is sold as a <strong>monthly subscription</strong>: Starter at $14.99 per month and Pro at
-        $24.99 per month. The subscription renews automatically each month until you cancel it. There is also
+        Zenya AI is sold as a <strong>monthly subscription</strong>: Starter at {usd(COMPANY.STARTER_PRICE_USD)} per month and Pro at{' '}
+        {usd(COMPANY.PRO_PRICE_USD)} per month. The subscription renews automatically each month until you cancel it. There is also
         a free plan giving you <strong>{COMPANY.FREE_GENERATIONS} generations</strong> to try, with no card
         required.
       </p>

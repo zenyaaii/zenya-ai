@@ -1,7 +1,8 @@
+import { COMPANY, usd } from '@/lib/company'
 import type { Metadata } from 'next'
 import { Sparkles, Languages, LayoutTemplate, Server, Globe, CreditCard, PencilRuler, BarChart3, Search, Gauge } from 'lucide-react'
 import { Breadcrumbs, CompareHero, FaqList, CtaBand } from '@/components/marketing/CompareParts'
-import type { QA } from '@/app/(main)/faq/faq-data'
+import type { QA } from '@/lib/faq-data'
 
 const SITE = 'https://zenyaai.co'
 
@@ -42,7 +43,7 @@ const FEATURE_FAQS: QA[] = [
   { q: 'Does Zenya host my site?', a: 'Yes, on the Pro plan. Zenya hosts your site inside the European Union with automatic SSL and GDPR compliance, with no technical setup from you.' },
   { q: 'Can I connect my own domain?', a: 'Yes on Pro, with SSL and no Zenya badge. We also include a free custom domain for a full year (standard domain), and 30% off any other domain.' },
   { q: 'Can my site accept payments?', a: 'For stores, the commerce template exports to Shopify, which handles the cart and secure checkout. Brochure sites (restaurants, services, wellness) are hosted by Zenya.' },
-  { q: 'How much does Zenya cost?', a: 'Free to try (two generations), then Starter at $14.99/month, and Pro at $24.99/month adding full hosting and a custom domain.' },
+  { q: 'How much does Zenya cost?', a: `Free to try (two generations), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month, and Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding full hosting and a custom domain.` },
 ]
 
 export default function FeaturesPageEn() {

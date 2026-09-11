@@ -71,6 +71,10 @@ type ButtonProps = CommonProps & {
   href?: never
   onClick?: () => void
   type?: "button" | "submit"
+  /** Only a button can be disabled. A disabled link is a link that lies, so
+   *  the link half of this union deliberately has no such prop: a CTA that
+   *  should not be followed is not rendered as a link at all. */
+  disabled?: boolean
 }
 
 export default function SlideButton(props: LinkProps | ButtonProps) {
@@ -102,6 +106,8 @@ export default function SlideButton(props: LinkProps | ButtonProps) {
           onClick={props.onClick}
           className={cls}
           data-variant={variant}
+          disabled={props.disabled}
+          aria-busy={props.disabled || undefined}
         >
           {label}
           {inner}

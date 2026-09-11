@@ -1,3 +1,4 @@
+import { COMPANY, usd } from '@/lib/company'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
@@ -96,7 +97,7 @@ export default function CompareHubEn() {
             <li><span className="font-semibold text-foreground">The AI writes for you:</span> from a short brief to a full site with copy and design.</li>
             <li><span className="font-semibold text-foreground">Ready in minutes:</span> no weeks of waiting and no maintenance.</li>
             <li><span className="font-semibold text-foreground">Fully managed:</span> EU hosting + SSL + GDPR, and a custom domain on Pro.</li>
-            <li><span className="font-semibold text-foreground">Affordable:</span> free to try, then $14.99–$24.99/month.</li>
+            <li><span className="font-semibold text-foreground">Affordable:</span> free to try, then {usd(COMPANY.STARTER_PRICE_USD)}–{usd(COMPANY.PRO_PRICE_USD)}/month.</li>
           </ul>
         </section>
 

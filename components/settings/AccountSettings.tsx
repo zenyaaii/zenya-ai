@@ -17,6 +17,7 @@
  * Brand chrome: cream #faf8f3 fields, indigo #5e6ad2 accent, rounded cards.
  */
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import { useEffect, useState, type ReactNode } from 'react'
 import { REVIEW_REWARD_AR } from '@/lib/review-reward'
 import { useRouter } from 'next/navigation'
@@ -478,7 +479,7 @@ export default function AccountSettings() {
           icon={CreditCard}
           accent="#d97706"
           title="الخطة والفوترة"
-          subtitle="اشتراك شهري — Starter 14.99$ أو Pro 24.99$. ألغِ في أي وقت."
+          subtitle={`اشتراك شهري — Starter ${usdTrailing(COMPANY.STARTER_PRICE_USD)} أو Pro ${usdTrailing(COMPANY.PRO_PRICE_USD)}. ألغِ في أي وقت.`}
           action={
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef0fb] px-3 py-1 text-[12px] font-bold text-[#5e6ad2]">
               {isPro && <Sparkles className="h-3 w-3" />}

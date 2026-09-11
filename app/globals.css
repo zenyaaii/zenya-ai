@@ -88,8 +88,16 @@
 
   html {
     scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* NOT `antialiased`. Forcing greyscale antialiasing is a Latin-display
+       habit: it thins every stem by roughly half a pixel, which flatters a
+       36px English headline and wrecks Arabic. This interface is Arabic at
+       14.5px, which the root ZoomLock renders at 12.32px, and at that size
+       the i'jam dots, the hamza and the joins between letters are one or two
+       pixels of ink each. Greyscale AA greys them out and the text reads
+       thin and soft. `auto` lets the platform use subpixel rendering where
+       it has it, which puts the ink back. */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
   body {
@@ -637,7 +645,7 @@ html.lenis body {
   padding: 0.375rem 1rem;
   border-radius: 10px;
   font: inherit;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   letter-spacing: 0;
   text-align: center;
@@ -649,6 +657,8 @@ html.lenis body {
 
 /* The accessible name. One plain label that is never cloned or clipped, so
    the duplicated visible copy can be aria-hidden. */
+/* 14px was 11.9 rendered under ZoomLock's 0.85, under the 12px floor, on the
+   primary call to action of every page on the site. 14.5 lands on 12.33. */
 .sb-a11y {
   position: absolute;
   width: 1px; height: 1px;
@@ -701,8 +711,12 @@ html.lenis body {
     0 3px 0 rgba(17, 17, 17, 0.12),
     0 8px 16px rgba(17, 17, 17, 0.11);
 }
+/* The top stop used to be #6b76d8, which measured 4.03:1 against the white
+   label - under the 4.5 floor, on the primary call to action of every page on
+   the site. The lit face still reads as lit; it is just no longer the lightest
+   thing a white glyph has to sit on. #5a66cf is 4.96:1. */
 .sb[data-variant="violet"] {
-  background: linear-gradient(180deg, #6b76d8 0%, #5460c9 100%);
+  background: linear-gradient(180deg, #5a66cf 0%, #4e5ac0 100%);
   color: #fff;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.45),
@@ -733,6 +747,19 @@ html.lenis body {
 }
 
 /* Pressed, a key loses its base and drops by exactly the base it lost. */
+/* In flight. The button keeps its colour, because a CTA that goes grey while
+   it works reads as broken rather than busy; what changes is that it stops
+   responding to the pointer and stops sliding. The label the component swaps
+   in says what is happening. */
+.sb:disabled {
+  cursor: default;
+  opacity: 0.62;
+  transform: none;
+}
+.sb:disabled .sb-track { transform: none; }
+.sb:disabled .sb-face:first-child { opacity: 1; }
+.sb:disabled .sb-face:last-child { opacity: 0; }
+
 .sb:active { transform: translateY(3px); }
 .sb[data-variant="key"]:active {
   box-shadow:
@@ -820,23 +847,37 @@ html.lenis body {
    held the front card at its last frame and the deck's layout transform
    stopped applying to it. One writer per transform, and it is the script. */
 
-.ss-dots { display: flex; justify-content: center; gap: 0.4375rem; margin-top: 1.125rem; }
+.ss-dots { display: flex; justify-content: center; gap: 0; margin-top: 0.5rem; }
+/* THE DOT IS THE PAINT, THE BUTTON IS THE TARGET.
+   The button used to BE the 7px dot, which measured 5.9 rendered against a
+   32px floor - a control a finger cannot reliably hit, on a carousel where
+   the dots are the only way back to a card you have passed. So the button is
+   38px square (32.3 rendered), transparent, and the dot is drawn inside it by
+   ::before. Nothing about the look changes; the gap moves from between the
+   dots to inside the targets. */
 .ss-dot {
-  width: 7px; height: 7px; padding: 0; border: 0; cursor: pointer;
-  border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; padding: 0; border: 0; cursor: pointer;
+  background: transparent;
+}
+.ss-dot::before {
+  content: ''; display: block;
+  width: 7px; height: 7px; border-radius: 999px;
   background: rgba(23, 23, 23, 0.18);
   transition: background-color 220ms cubic-bezier(0.22, 1, 0.36, 1), width 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.ss-dot[data-on] { width: 20px; background: #5e6ad2; }
+.ss-dot[data-on]::before { width: 20px; background: #5e6ad2; }
 .ss-dot:focus-visible { outline: 2px solid #5e6ad2; outline-offset: 3px; }
 
 .ss-tip {
   margin: 0.75rem 0 0; text-align: center;
-  font-size: 12px; font-weight: 500; color: #8a8a94;
+  /* 12px is 10.2 rendered, under the floor; and #8a8a94 measured 3.27:1 on
+     paper and 3.00:1 on the warm card ground, against 4.5. */
+  font-size: 14.5px; font-weight: 500; color: #6a6a75;
   transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .ss-tip[data-hide] { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ss-dot, .ss-tip { transition: none; }
+  .ss-dot::before, .ss-tip { transition: none; }
 }

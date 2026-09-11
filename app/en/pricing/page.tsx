@@ -1,7 +1,8 @@
+import { COMPANY, usd } from '@/lib/company'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Check, Globe, Info } from 'lucide-react'
-import { EN_FAQS } from '@/app/(main)/faq/faq-data'
+import { EN_FAQS } from '@/lib/faq-data'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
 const SITE = 'https://zenyaai.co'
@@ -9,7 +10,7 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    'Zenya pricing in plain terms. Preview free, unlock two AI generations for a one-time $0.50 (Entry), then Starter at $14.99/month for unlimited generation, a custom domain, bookings and analytics, or Pro at $24.99/month adding a free domain for a year and no Zenya badge.',
+    `Zenya pricing in plain terms. Preview free, unlock two AI generations for a one-time ${usd(COMPANY.ENTRY_PRICE_USD)} (Entry), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation, a custom domain, bookings and analytics, or Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding a free domain for a year and no Zenya badge.`,
   keywords: ['Zenya pricing', 'AI website builder pricing', 'Arabic website builder cost'],
   alternates: {
     canonical: `${SITE}/en/pricing`,
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Zenya pricing',
     description:
-      'Start free, then $14.99/month for unlimited generation or $24.99/month with full hosting and a custom domain.',
+      `Start free, then ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation or ${usd(COMPANY.PRO_PRICE_USD)}/month with full hosting and a custom domain.`,
     url: `${SITE}/en/pricing`,
     type: 'website',
     locale: 'en_US',
@@ -56,7 +57,7 @@ const PLANS: Plan[] = [
   },
   {
     name: 'Starter',
-    price: '$14.99',
+    price: usd(COMPANY.STARTER_PRICE_USD),
     cadence: '/month',
     tagline: 'Build, manage, and publish — no limits, on your own domain.',
     features: [
@@ -75,7 +76,7 @@ const PLANS: Plan[] = [
   },
   {
     name: 'Pro',
-    price: '$24.99',
+    price: usd(COMPANY.PRO_PRICE_USD),
     cadence: '/month',
     tagline: 'Build, manage, and publish — everything included, domain on us.',
     features: [
@@ -113,7 +114,7 @@ export default function EnPricing() {
     name: 'Zenya pricing',
     url: `${SITE}/en/pricing`,
     description:
-      'Zenya plans: free to try, Starter at $14.99 per month, Pro at $24.99 per month with hosting and a custom domain.',
+      `Zenya plans: free to try, Starter at ${usd(COMPANY.STARTER_PRICE_USD)} per month, Pro at ${usd(COMPANY.PRO_PRICE_USD)} per month with hosting and a custom domain.`,
   }
 
   return (

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { COMPANY, formatAddress } from '@/lib/company'
+import { COMPANY, formatAddress, usd } from '@/lib/company'
 
 const SITE = 'https://zenyaai.co'
 
@@ -82,7 +82,7 @@ export default function EnTermsOfService() {
       <h2>6. Pricing and billing</h2>
       <ul>
         <li><strong>Free plan:</strong> up to {COMPANY.FREE_GENERATIONS} trial generations per account, no credit card.</li>
-        <li><strong>Starter:</strong> $14.99/month — unlimited AI generation and export. <strong>Pro:</strong> $24.99/month — adds full Zenya hosting, a custom domain, SSL, and analytics.</li>
+        <li><strong>Starter:</strong> {usd(COMPANY.STARTER_PRICE_USD)}/month — unlimited AI generation and export. <strong>Pro:</strong> {usd(COMPANY.PRO_PRICE_USD)}/month — adds full Zenya hosting, a custom domain, SSL, and analytics.</li>
         <li>Both plans are a <strong>monthly subscription that renews automatically</strong> at the end of each billing cycle until you cancel. You can cancel at any time from your dashboard, and your subscription stays active until the end of the current paid cycle.</li>
         <li>Existing customers on the previous one-time plan ($9.99) or the hosting plan ($19.99/month) keep their plan and price unchanged.</li>
         <li>Currency is set by your country: US dollars outside the EEA and the UK, euros within them.</li>

@@ -64,14 +64,26 @@ const PLAN_LABEL: Record<Plan, string> = {
   admin:       'مشرف',
 }
 
-const PLAN_TINT: Record<Plan, { bg: string; ring: string; fg: string }> = {
-  free:        { bg: 'rgba(28,28,28,0.06)',   ring: 'rgba(28,28,28,0.18)',   fg: '#6b6b6b' },
-  entry:       { bg: 'rgba(13,148,136,0.10)', ring: 'rgba(13,148,136,0.30)', fg: '#0d9488' },
-  pro_onetime: { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
-  pro_hosting: { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
-  starter:     { bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)', fg: '#5e6ad2' },
-  pro:         { bg: 'rgba(21,128,61,0.10)',  ring: 'rgba(21,128,61,0.30)',  fg: '#15803d' },
-  admin:       { bg: 'rgba(200,169,106,0.16)', ring: 'rgba(200,169,106,0.45)', fg: '#9b6f00' },
+/**
+ * A plan is a state, so it reports through the status pill like every other
+ * state on this surface. It used to carry its own seven-entry tint table -
+ * five fills, five rings and five foregrounds, including #0d9488, #9b6f00
+ * and a #c8a96a gold that appeared nowhere else in the product.
+ *
+ * The tones are the documented triad plus the accent and a quiet grey:
+ *   ok      the plan is paid and current
+ *   accent  the plan is paid but has something left to add
+ *   quiet   the free tier, which is a state and not an achievement
+ */
+type Tone = 'ok' | 'accent' | 'quiet'
+const PLAN_TONE: Record<Plan, Tone> = {
+  free:        'quiet',
+  entry:       'accent',
+  pro_onetime: 'accent',
+  pro_hosting: 'ok',
+  starter:     'accent',
+  pro:         'ok',
+  admin:       'ok',
 }
 
 export default function DashboardHomePage() {
@@ -138,12 +150,12 @@ export default function DashboardHomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
-        <h1 className="text-[28px] font-bold tracking-tight text-foreground">
+        <h1 className="zy-h1">
           {loading ? 'مرحبًا…' : `مرحبًا بعودتك، ${firstName}`}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
           <PlanBadge plan={plan} />
-          <span className="text-[12.5px] text-muted">· {profile?.email || ''}</span>
+          <span className="zy-sub">{profile?.email || ''}</span>
         </div>
       </motion.div>
 
@@ -183,8 +195,8 @@ export default function DashboardHomePage() {
         {/* Recent sites */}
         <section className="lg:col-span-2">
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">أحدث المواقع</h2>
-            <Link href="/dashboard/sites" className="text-[12.5px] font-medium text-primary hover:underline">
+            <h2 className="zy-h2">أحدث المواقع</h2>
+            <Link href="/dashboard/sites" className="zy-link">
               عرض الكل ←
             </Link>
           </div>
@@ -201,7 +213,8 @@ export default function DashboardHomePage() {
               {themes.length > 3 && (
                 <Link
                   href="/dashboard/sites"
-                  className="block rounded-2xl border border-dashed border-token px-4 py-3 text-center text-[12.5px] font-medium text-muted hover:bg-black/[0.02]"
+                  className="block rounded-2xl px-4 py-3 text-center text-[12.5px] font-bold text-[#56565a] transition-colors hover:text-[#5e6ad2]"
+                  style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.10)' }}
                 >
                   + {themes.length - 3} أخرى · افتح المواقع
                 </Link>
@@ -227,12 +240,8 @@ export default function DashboardHomePage() {
  * ─────────────────────────────────────────────────────────────────────── */
 
 function PlanBadge({ plan }: { plan: Plan }) {
-  const tint = PLAN_TINT[plan]
   return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold uppercase tracking-[0.08em]"
-      style={{ background: tint.bg, color: tint.fg, border: `1px solid ${tint.ring}` }}
-    >
+    <span className="zy-pill" data-tone={PLAN_TONE[plan]}>
       {plan !== 'free' && <Sparkles className="h-3 w-3" strokeWidth={2.5} />}
       {PLAN_LABEL[plan]}
     </span>
@@ -250,11 +259,11 @@ function StatTile({
   return (
     <div className="rounded-2xl zy-card p-5">
       <div className="flex items-start justify-between">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</div>
-        <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.75} />
+        <div className="zy-eyebrow">{label}</div>
+        <Icon className="h-3.5 w-3.5 text-[#66666e]" strokeWidth={1.75} />
       </div>
-      <div className="mt-2 text-[24px] font-bold tracking-tight text-foreground">{value}</div>
-      {sub && <div className="mt-1 text-[12px] text-muted">{sub}</div>}
+      <div className="zy-num mt-2">{value}</div>
+      {sub && <div className="zy-sub mt-1">{sub}</div>}
     </div>
   )
 }
@@ -282,20 +291,17 @@ function HostingExpiryBanner({
   const endStr = end.toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
 
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(180,83,9,0.28)] bg-[rgba(180,83,9,0.06)] px-4 py-3.5">
-      <AlertTriangle className="h-5 w-5 shrink-0 text-[#b45309]" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold text-[#8a3c1f]">
+    <div className="zy-banner mt-6" data-tone="warn">
+      <AlertTriangle className="zy-banner-ico h-5 w-5" />
+      <div className="zy-banner-b">
+        <p className="zy-banner-t">
           تنتهي استضافتك {dayWord} ({endStr})
         </p>
-        <p className="mt-0.5 text-[12.5px] leading-[1.55] text-[#a05a3a]">
+        <p className="zy-banner-p">
           عند انتهائها ستتوقف مواقعك المستضافة عن الظهور. جدّد اشتراكك لإبقائها مباشرة — محتواك يبقى محفوظًا.
         </p>
       </div>
-      <Link
-        href="/dashboard/billing"
-        className="shrink-0 rounded-full bg-[#b45309] px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-[#95440a]"
-      >
+      <Link href="/dashboard/billing" className="zy-btn">
         جدّد الاستضافة
       </Link>
     </div>
@@ -305,24 +311,34 @@ function HostingExpiryBanner({
 /** Shown to a free user who has spent every free generation. */
 function TrialSpentBanner() {
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[rgba(94,106,210,0.28)] bg-[rgba(94,106,210,0.06)] px-4 py-3.5">
-      <Sparkles className="h-5 w-5 shrink-0 text-primary" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] font-semibold text-foreground">استنفدت تجربتك المجانية</p>
-        <p className="mt-0.5 text-[12.5px] leading-[1.55] text-muted">
+    <div className="zy-banner mt-6">
+      <Sparkles className="zy-banner-ico h-5 w-5" />
+      <div className="zy-banner-b">
+        <p className="zy-banner-t">استنفدت تجربتك المجانية</p>
+        <p className="zy-banner-p">
           اشترك لتوليد مواقع بلا حدود، مع تصدير شوبيفاي وملفات المشاريع. مواقعك الحالية تبقى محفوظة.
         </p>
       </div>
-      <Link
-        href="/pricing"
-        className="shrink-0 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:opacity-90"
-      >
+      <Link href="/pricing" className="zy-btn">
         طالع الخطط
       </Link>
     </div>
   )
 }
 
+/**
+ * The fourth tile in the stat row: what the reader is paying for.
+ *
+ * It was six near-identical blocks, each with its own eyebrow colour
+ * (#15803d, #5e6ad2, #9b6f00, #b8860b) and its own hand-written meter. The
+ * shapes are now one, and the only thing a plan chooses is its tone, its
+ * lines and whether it has somewhere to upgrade to.
+ *
+ * THE EYEBROW IS NO LONGER TINTED. A plan name printed in green is the
+ * status hue colouring a label rather than reporting a state, which is the
+ * rule this restyle is holding: the tone belongs to the pill and the icon.
+ * Here it is the small check or spark beside the eyebrow that carries it.
+ */
 function PlanCard({
   plan, trialRemaining, trialLimit, hostingEnd,
 }: {
@@ -331,130 +347,67 @@ function PlanCard({
   trialLimit: number
   hostingEnd: string | null | undefined
 }) {
-  if (plan === 'pro_hosting') {
-    const renews = hostingEnd ? new Date(hostingEnd) : null
-    const formatted = renews ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
-          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
-          الاستضافة نشطة
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">19.99$ / شهريًا</div>
-        <div className="mt-1 text-[12px] text-muted">يتجدّد {formatted}</div>
-      </div>
-    )
-  }
-  if (plan === 'pro_onetime') {
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          برو مدى الحياة
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
-        <Link href="/pricing?upgrade=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-          أضف الاستضافة · 19.99$ شهريًا
-          <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-        </Link>
-      </div>
-    )
-  }
-  if (plan === 'starter') {
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-primary">
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          Starter نشط
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">توليد غير محدود</div>
-        <Link href="/pricing?upgrade=pro" className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-          الترقية إلى Pro · 24.99$ شهريًا
-          <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-        </Link>
-      </div>
-    )
-  }
-  if (plan === 'pro') {
-    const renews = hostingEnd ? new Date(hostingEnd) : null
-    const formatted = renews ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#15803d]">
-          <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
-          Pro نشط · استضافة مشمولة
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">24.99$ / شهريًا</div>
-        <div className="mt-1 text-[12px] text-muted">يتجدّد {formatted}</div>
-      </div>
-    )
-  }
-  if (plan === 'admin') {
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#9b6f00]">
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          مشرف
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">كل المزايا مفتوحة</div>
-        <div className="mt-1 text-[12px] text-muted">الاستضافة + مدى الحياة مشمولان</div>
-      </div>
-    )
-  }
-  if (plan === 'entry') {
-    const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
-    return (
-      <div className="rounded-2xl zy-card p-5">
-        <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#b8860b' }}>
-          <Sparkles className="h-3 w-3" strokeWidth={2.5} />
-          خطة Entry
-        </div>
-        <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-          {trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'استخدمت قالبيك'}
-        </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
-          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#b8860b' }} />
-        </div>
-        <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-          توليد بلا حدود · Starter 14.99$
-          <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
-        </Link>
-      </div>
-    )
-  }
-  // free
+  const renews = hostingEnd ? new Date(hostingEnd) : null
+  const formatted =
+    renews && !isNaN(renews.getTime())
+      ? renews.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      : '—'
+
+  // A plan that meters generations shows the meter; the rest show a renewal.
+  const metered = plan === 'entry' || plan === 'free'
   const pct = trialLimit > 0 ? Math.round((trialRemaining / trialLimit) * 100) : 0
+
+  const spec: Record<Plan, { eyebrow: string; head: string; note?: string; cta?: { href: string; label: string } }> = {
+    pro_hosting: { eyebrow: 'الاستضافة نشطة', head: '19.99$ / شهريًا', note: `يتجدّد ${formatted}` },
+    pro:         { eyebrow: 'Pro نشط · استضافة مشمولة', head: '24.99$ / شهريًا', note: `يتجدّد ${formatted}` },
+    admin:       { eyebrow: 'مشرف', head: 'كل المزايا مفتوحة', note: 'الاستضافة + مدى الحياة مشمولان' },
+    pro_onetime: { eyebrow: 'برو مدى الحياة', head: 'توليد غير محدود', cta: { href: '/pricing?upgrade=pro', label: 'أضف الاستضافة · 19.99$ شهريًا' } },
+    starter:     { eyebrow: 'Starter نشط', head: 'توليد غير محدود', cta: { href: '/pricing?upgrade=pro', label: 'الترقية إلى Pro · 24.99$ شهريًا' } },
+    entry:       { eyebrow: 'خطة Entry', head: trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'استخدمت قالبيك', cta: { href: '/pricing?upgrade=starter', label: 'توليد بلا حدود · Starter 14.99$' } },
+    free:        { eyebrow: 'الباقة المجانية', head: trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'انتهت التجربة', cta: { href: '/pricing?upgrade=starter', label: 'اشترك في Starter · 14.99$ شهريًا' } },
+  }
+  const it = spec[plan]
+  const tone = PLAN_TONE[plan]
+
   return (
     <div className="rounded-2xl zy-card p-5">
-      <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الباقة المجانية</div>
-      <div className="mt-1.5 text-[18px] font-semibold tracking-tight text-foreground">
-        {trialRemaining > 0 ? `بقي ${trialRemaining} من ${trialLimit}` : 'انتهت التجربة'}
+      <div className="flex items-center gap-1.5">
+        {tone === 'ok' ? (
+          <CheckCircle2 className="h-3 w-3 shrink-0 text-[#15803d]" strokeWidth={2.5} />
+        ) : tone === 'accent' ? (
+          <Sparkles className="h-3 w-3 shrink-0 text-[#5e6ad2]" strokeWidth={2.5} />
+        ) : null}
+        <span className="zy-eyebrow truncate">{it.eyebrow}</span>
       </div>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
-        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: pct === 0 ? '#dc2626' : '#5e6ad2' }} />
-      </div>
-      <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline">
-        اشترك في Starter · 14.99$ شهريًا
-        <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
-      </Link>
+      <div className="mt-1.5 text-[17px] font-black leading-[1.4] text-[#171717]">{it.head}</div>
+      {metered && (
+        <div className="zy-meter mt-2.5" data-spent={pct === 0 ? '' : undefined}>
+          <div className="zy-meter-fill" style={{ width: `${pct}%` }} />
+        </div>
+      )}
+      {it.note && <div className="zy-sub mt-1">{it.note}</div>}
+      {it.cta && (
+        <Link href={it.cta.href} className="zy-link mt-2.5">
+          {it.cta.label}
+          <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
+        </Link>
+      )}
     </div>
   )
 }
+
 
 function RecentRow({ theme }: { theme: Theme }) {
   const live = theme.is_published && theme.slug
   return (
     <div className="flex items-center justify-between rounded-2xl zy-card px-4 py-3">
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-lg"
-          style={{ background: live ? 'rgba(21,128,61,0.10)' : 'rgba(217,119,6,0.10)' }}
-        >
-          {live ? <Globe className="h-4 w-4 text-[#15803d]" strokeWidth={2} /> : <Folder className="h-4 w-4 text-[#b45309]" strokeWidth={2} />}
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="zy-tile" data-tone={live ? 'ok' : 'warn'}>
+          {live ? <Globe className="h-4 w-4" strokeWidth={2} /> : <Folder className="h-4 w-4" strokeWidth={2} />}
         </div>
-        <div>
-          <div className="text-[13.5px] font-semibold text-foreground">{theme.product_name}</div>
-          <div className="text-[11.5px] text-muted">
+        <div className="min-w-0">
+          <div className="text-[13.5px] font-bold leading-[1.5] text-[#171717]">{theme.product_name}</div>
+          <div className="text-[11.5px] font-medium leading-[1.7] text-[#56565a]">
             {live ? (
               <a href={publicSiteUrl(theme.slug!)} target="_blank" rel="noreferrer" className="hover:text-primary">
                 {publicSiteHost(theme.slug!)} <ExternalLink className="inline-block h-2.5 w-2.5 opacity-70" />
@@ -469,7 +422,7 @@ function RecentRow({ theme }: { theme: Theme }) {
         href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-black/5"
+        className="zy-btn-q"
       >
         فتح
         <ExternalLink className="h-3 w-3 opacity-70" strokeWidth={2.25} />
@@ -483,10 +436,10 @@ function RecentSkeleton() {
     <div className="space-y-2">
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex animate-pulse items-center gap-3 rounded-2xl zy-card px-4 py-3">
-          <div className="h-9 w-9 rounded-lg bg-[rgba(28,28,28,0.06)]" />
+          <div className="h-[34px] w-[34px] rounded-lg bg-[rgba(17,17,17,0.06)]" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-2/3 rounded bg-[rgba(28,28,28,0.06)]" />
-            <div className="h-2.5 w-1/3 rounded bg-[rgba(28,28,28,0.04)]" />
+            <div className="h-3 w-2/3 rounded bg-[rgba(17,17,17,0.06)]" />
+            <div className="h-2.5 w-1/3 rounded bg-[rgba(17,17,17,0.04)]" />
           </div>
         </div>
       ))}
@@ -496,30 +449,21 @@ function RecentSkeleton() {
 
 function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boolean }) {
   return (
-    <div
-      className="relative overflow-hidden rounded-2xl zy-card-dashed p-8 text-center"
-      style={{ background: 'radial-gradient(80% 60% at 50% 0%, rgba(94,106,210,0.08), transparent 70%)' }}
-    >
-      <div
-        className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl"
-        style={{ background: 'white', boxShadow: '0 8px 24px -8px rgba(94,106,210,0.40), 0 0 0 1px rgba(94,106,210,0.20) inset' }}
-      >
-        <Sparkles className="h-6 w-6 text-primary" strokeWidth={1.75} />
+    <div className="zy-empty">
+      <div className="zy-empty-ico">
+        <Sparkles className="h-5 w-5" strokeWidth={1.75} />
       </div>
-      <h3 className="text-[18px] font-bold tracking-tight text-foreground">أنشئ موقعك الأول</h3>
-      <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
+      <h3 className="zy-h2">أنشئ موقعك الأول</h3>
+      <p className="mx-auto mt-2 max-w-md text-[13px] font-medium leading-[1.8] text-[#56565a]">
         اختر قالبًا، واكتب نبذة سريعة، وتكتب زينيا المحتوى وتصمّم الصفحة.
         جاهز خلال أقل من دقيقة.
       </p>
-      <Link
-        href="/theme/new"
-        className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
-      >
-        <Plus className="h-4 w-4" strokeWidth={2.5} />
-        أنشئ موقعًا جديدًا
-      </Link>
-      <div className="mt-3">
-        <Link href="/themes" className="text-[12px] text-muted hover:text-foreground">
+      <div className="mt-5 flex flex-col items-center gap-3">
+        <Link href="/theme/new" className="zy-btn">
+          <Plus className="h-4 w-4" strokeWidth={2.5} />
+          أنشئ موقعًا جديدًا
+        </Link>
+        <Link href="/themes" className="text-[12px] font-medium text-[#56565a] hover:text-[#171717]">
           أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
@@ -530,35 +474,35 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
 function QuickActions({ hasHosting, plan }: { hasHosting: boolean; plan: Plan }) {
   return (
     <div className="rounded-2xl zy-card p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">إجراءات سريعة</div>
+      <div className="zy-eyebrow">إجراءات سريعة</div>
       <div className="mt-3 space-y-2">
-        <Link href="/theme/new" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
+        <Link href="/theme/new" className="zy-rail-row justify-between">
           <span className="inline-flex items-center gap-2">
-            <Plus className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+            <Plus className="h-3.5 w-3.5" strokeWidth={2.25} />
             موقع جديد
           </span>
-          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
+          <ArrowRight className="h-3 w-3 rtl-flip opacity-50" />
         </Link>
-        <Link href="/dashboard/domains" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
+        <Link href="/dashboard/domains" className="zy-rail-row justify-between">
           <span className="inline-flex items-center gap-2">
-            <Globe className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+            <Globe className="h-3.5 w-3.5" strokeWidth={2.25} />
             إدارة النطاقات
           </span>
-          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
+          <ArrowRight className="h-3 w-3 rtl-flip opacity-50" />
         </Link>
-        <Link href="/dashboard/gallery" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
+        <Link href="/dashboard/gallery" className="zy-rail-row justify-between">
           <span className="inline-flex items-center gap-2">
-            <ImageIcon className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+            <ImageIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
             افتح معرضي
           </span>
-          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
+          <ArrowRight className="h-3 w-3 rtl-flip opacity-50" />
         </Link>
-        <Link href="/dashboard/analytics" className="flex items-center justify-between rounded-md px-2 py-2 text-[13px] font-medium text-foreground hover:bg-black/[0.04]">
+        <Link href="/dashboard/analytics" className="zy-rail-row justify-between">
           <span className="inline-flex items-center gap-2">
-            <BarChart3 className="h-3.5 w-3.5 text-primary" strokeWidth={2.25} />
+            <BarChart3 className="h-3.5 w-3.5" strokeWidth={2.25} />
             عرض التحليلات
           </span>
-          <ArrowRight className="h-3 w-3 text-muted rtl-flip" />
+          <ArrowRight className="h-3 w-3 rtl-flip opacity-50" />
         </Link>
       </div>
     </div>
@@ -575,16 +519,16 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   return (
     <div className="rounded-2xl zy-card p-5">
       <div className="flex items-baseline justify-between">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">مشاهدات · آخر 30 يومًا</div>
-        <Link href="/dashboard/analytics" className="text-[11.5px] font-medium text-primary hover:underline">
+        <div className="zy-eyebrow">مشاهدات · آخر 30 يومًا</div>
+        <Link href="/dashboard/analytics" className="zy-link">
           افتح التحليلات ←
         </Link>
       </div>
       <div className="mt-2 flex items-end gap-3">
-        <div className="text-[28px] font-bold tracking-tight text-foreground tabular-nums">
+        <div className="zy-num">
           {loading ? '—' : views30.toLocaleString()}
         </div>
-        <div className="pb-1.5 text-[11.5px] text-muted">
+        <div className="zy-sub pb-1.5">
           {views7 > 0 ? `${views7.toLocaleString()} هذا الأسبوع` : 'لا مشاهدات هذا الأسبوع'}
         </div>
       </div>
@@ -598,11 +542,9 @@ function TrafficCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
           return (
             <div key={i} className="flex h-full items-end justify-center">
               <div
-                className="w-full rounded-t-[2px]"
-                style={{
-                  height: `${Math.max(2, h)}px`,
-                  background: s.views === 0 ? 'rgba(28,28,28,0.06)' : '#5e6ad2',
-                }}
+                className="zy-spark-b"
+                data-zero={s.views === 0 ? '' : undefined}
+                style={{ height: `${Math.max(2, h)}px` }}
               />
             </div>
           )
@@ -618,17 +560,17 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
   return (
     <div className="rounded-2xl zy-card p-5">
       <div className="flex items-baseline justify-between">
-        <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">أفضل المواقع أداءً</div>
-        <span className="text-[11.5px] text-muted">{liveDomains > 0 ? `${liveDomains} نطاق مخصّص` : 'آخر 30 يومًا'}</span>
+        <div className="zy-eyebrow">أفضل المواقع أداءً</div>
+        <span className="zy-sub">{liveDomains > 0 ? `${liveDomains} نطاق مخصّص` : 'آخر 30 يومًا'}</span>
       </div>
       {loading ? (
         <div className="mt-3 space-y-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-9 animate-pulse rounded-md bg-[rgba(28,28,28,0.04)]" />
+            <div key={i} className="h-9 animate-pulse rounded-md bg-[rgba(17,17,17,0.04)]" />
           ))}
         </div>
       ) : top.length === 0 ? (
-        <div className="mt-4 py-2 text-[12.5px] text-muted">
+        <div className="zy-sub mt-4 py-2">
           لا مشاهدات بعد. انشر موقعًا لتبدأ جمع الزيارات.
         </div>
       ) : (
@@ -640,14 +582,14 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
             return (
               <li key={s.id} className="rounded-md px-1 py-1">
                 <div className="flex items-baseline justify-between text-[12.5px]">
-                  <span className="truncate font-medium text-foreground">
-                    <span className="me-1.5 inline-block w-4 text-end text-muted tabular-nums">{i + 1}.</span>
+                  <span className="truncate font-bold text-[#171717]">
+                    <span className="me-1.5 inline-block w-4 text-end font-medium tabular-nums text-[#66666e]">{i + 1}.</span>
                     {s.product_name}
                   </span>
-                  <span className="tabular-nums text-muted">{v.toLocaleString()}</span>
+                  <span className="font-medium tabular-nums text-[#56565a]">{v.toLocaleString()}</span>
                 </div>
-                <div className="mt-1 h-1 overflow-hidden rounded-full bg-[rgba(28,28,28,0.06)]">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                <div className="zy-meter mt-1.5" style={{ height: 4 }}>
+                  <div className="zy-meter-fill" style={{ width: `${pct}%` }} />
                 </div>
               </li>
             )
@@ -664,12 +606,12 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
   if (plan === 'entry') return null
   if (plan === 'pro_onetime') {
     return (
-      <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">أضف الاستضافة</div>
-        <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
+      <div className="rounded-2xl zy-card p-5">
+        <div className="zy-eyebrow">أضف الاستضافة</div>
+        <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 19.99$ شهريًا، ألغِ في أي وقت.
         </p>
-        <Link href="/pricing?upgrade=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+        <Link href="/pricing?upgrade=pro" className="zy-btn mt-3.5">
           ابدأ الاستضافة
           <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
         </Link>
@@ -678,12 +620,12 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
   }
   if (plan === 'starter') {
     return (
-      <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">الترقية إلى Pro</div>
-        <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
+      <div className="rounded-2xl zy-card p-5">
+        <div className="zy-eyebrow">الترقية إلى Pro</div>
+        <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 24.99$ شهريًا، ألغِ في أي وقت.
         </p>
-        <Link href="/pricing?upgrade=pro" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+        <Link href="/pricing?upgrade=pro" className="zy-btn mt-3.5">
           الترقية إلى Pro
           <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
         </Link>
@@ -692,16 +634,16 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
   }
   // free
   return (
-    <div className="rounded-2xl border border-token bg-[rgba(94,106,210,0.04)] p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+    <div className="rounded-2xl zy-card p-5">
+      <div className="zy-eyebrow">
         {trialRemaining === 0 ? 'انتهت التجربة' : 'الترقية إلى Starter'}
       </div>
-      <p className="mt-2 text-[13px] leading-[1.55] text-foreground">
+      <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
         {trialRemaining === 0
           ? 'استخدمت توليدَيك المجانيين. اشترك في Starter لتوليد غير محدود.'
           : 'اشترك شهريًا، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع.'}
       </p>
-      <Link href="/pricing?upgrade=starter" className="mt-3 inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white">
+      <Link href="/pricing?upgrade=starter" className="zy-btn mt-3.5">
         اشترك في Starter · 14.99$
         <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
       </Link>
