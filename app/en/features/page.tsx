@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Sparkles, Languages, LayoutTemplate, Server, Globe, CreditCard, PencilRuler, BarChart3, Search, Gauge } from 'lucide-react'
 import { Breadcrumbs, CompareHero, FaqList, CtaBand } from '@/components/marketing/CompareParts'
-import type { QA } from '@/app/(main)/faq/faq-data'
+import type { QA } from '@/lib/faq-data'
 
 const SITE = 'https://zenyaai.co'
 

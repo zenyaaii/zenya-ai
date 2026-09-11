@@ -7,7 +7,7 @@
  * better pick. Facts match the live product.
  */
 
-import type { QA } from '@/app/(main)/faq/faq-data'
+import type { QA } from '@/lib/faq-data'
 
 export type CompareRowEn = { label: string; zenya: string; them: string; zenyaWins?: boolean }
 

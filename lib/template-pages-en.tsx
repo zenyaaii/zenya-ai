@@ -5,7 +5,7 @@
  */
 
 import type { ReactNode } from 'react'
-import type { QA } from '@/app/(main)/faq/faq-data'
+import type { QA } from '@/lib/faq-data'
 
 export type TemplatePageEn = {
   key: string

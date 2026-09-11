@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Check, Globe, Info } from 'lucide-react'
-import { EN_FAQS } from '@/app/(main)/faq/faq-data'
+import { EN_FAQS } from '@/lib/faq-data'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
 const SITE = 'https://zenyaai.co'

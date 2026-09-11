@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Sparkles, Check } from 'lucide-react'
-import { EN_FAQS } from '@/app/(main)/faq/faq-data'
+import { EN_FAQS } from '@/lib/faq-data'
 import { TEMPLATE_PAGES_EN } from '@/lib/template-pages-en'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 

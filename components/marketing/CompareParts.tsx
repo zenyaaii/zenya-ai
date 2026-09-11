@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import type { CompareRow } from '@/lib/comparisons'
-import type { QA } from '@/app/(main)/faq/faq-data'
+import type { QA } from '@/lib/faq-data'
 
 /**
  * Server-rendered building blocks for the SEO comparison + feature pages.
