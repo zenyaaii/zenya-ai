@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { getT } from '@/lib/i18n/server'
 import { CHROME_CSS } from '@/components/zenya/chrome/tokens'
 import { ACCOUNTS_CSS } from './styles'
+import AccountsHeader from '@/components/accounts/AccountsHeader'
 
 /** Title follows the viewer's locale; the portal is noindex either way. */
 export function generateMetadata() {
@@ -26,12 +27,19 @@ export function generateMetadata() {
  * chooser all read the same definitions. .zx-root is the scope
  * components/zenya/chrome/tokens.ts declares them on, so the ground carries
  * both classes.
+ *
+ * THE HEADER IS MOUNTED HERE TOO, so it is the same object on all four
+ * screens and does not have to be remembered per page. It draws its links
+ * against the apex rather than relatively — on this host middleware rewrites
+ * every unrouted path under /accounts, so a relative /pricing would 404. See
+ * components/accounts/AccountsHeader.
  */
 export default function AccountsLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="zx-root zn-ground" dir="rtl">
+    <div className="zx-root zn-ground" dir="rtl">
       <style dangerouslySetInnerHTML={{ __html: CHROME_CSS + ACCOUNTS_CSS }} />
-      {children}
-    </main>
+      <AccountsHeader />
+      <main className="zn-body">{children}</main>
+    </div>
   )
 }

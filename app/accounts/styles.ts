@@ -39,11 +39,100 @@ export const ACCOUNTS_CSS = `
 .zn-ground {
   min-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem var(--gut, clamp(1rem, 4vw, 3rem));
+  flex-direction: column;
   background: var(--ground);
   color: var(--obsidian);
+}
+
+/* The card sits in what is left under the pill, centred in it. */
+.zn-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem var(--gut, clamp(1rem, 4vw, 3rem)) 4rem;
+}
+
+/* ── the header ──────────────────────────────────────────────────────── */
+.zn-head { display: flex; justify-content: center; padding: 2rem var(--gut, 1rem) 0; }
+.zn-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.375rem 0.375rem 0.375rem 0.75rem;
+  background: var(--card);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.07);
+}
+.zn-head-mark {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  color: var(--obsidian);
+}
+.zn-head-svg { height: 1rem; width: auto; }
+
+.zn-nav { display: flex; align-items: center; }
+.zn-nav-item {
+  display: inline-flex;
+  align-items: center;
+  /* 38px CSS clears the 32px coarse-pointer floor under ZoomLock's 0.85, and
+     14.2px clears the 12px type floor. Both were measured in RENDERED pixels
+     rather than CSS pixels, which is the trap documented in
+     components/zenya/chrome/tokens.ts. */
+  min-height: 2.375rem;
+  padding: 0 0.6875rem;
+  font-size: 0.8875rem;
+  color: var(--stone);
+  text-decoration: none;
+  border-radius: 999px;
+  transition: color 140ms var(--ease-out);
+}
+.zn-nav-item:hover { color: var(--obsidian); }
+.zn-nav-item:focus-visible { outline: 2px solid var(--violet); outline-offset: -2px; }
+
+.zn-head-end { display: inline-flex; align-items: center; gap: 0.5rem; }
+.zn-sep { width: 1px; height: 1.125rem; background: rgba(23, 23, 23, 0.10); }
+
+.zn-head-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.375rem;
+  padding: 0 0.9375rem;
+  font-size: 0.8875rem;
+  font-weight: 500;
+  color: #fafafa;
+  background: var(--obsidian);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: opacity 140ms var(--ease-out);
+}
+.zn-head-cta:hover { opacity: 0.88; }
+.zn-head-cta:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+/* Signed in, the pill ends in the account's first letter, and it is the way
+   to the dashboard. */
+.zn-head-disc {
+  display: grid;
+  place-items: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fafafa;
+  background: var(--obsidian);
+  text-decoration: none;
+  transition: opacity 140ms var(--ease-out);
+}
+.zn-head-disc:hover { opacity: 0.88; }
+.zn-head-disc:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+@media (max-width: 420px) {
+  .zn-nav-item { padding: 0 0.5rem; font-size: 0.8375rem; }
+  .zn-pill { gap: 0.25rem; padding-left: 0.5rem; }
 }
 
 .zn-card {

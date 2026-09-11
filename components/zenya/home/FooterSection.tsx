@@ -34,10 +34,12 @@ import { useFit } from "./runner"
    the page's single claim rather than a second one written for the footer.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* The three marks the real footer carries, redrawn here rather than imported:
-   components/Footer.tsx is a client module that also pulls in the consent
-   dialog, the language switcher and the aurora palette, none of which this
-   page has any use for. */
+/* The three marks the footer carries, drawn here. They were redrawn rather
+   than imported because components/Footer.tsx was a client module that also
+   pulled in the consent dialog, the language switcher and the aurora palette,
+   none of which this page had any use for. That file is now deleted — the
+   restyle left it importing nothing and imported by nothing — so this is
+   where the marks live. */
 export function TikTokIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>

@@ -16,58 +16,40 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
   'dashboard',
   'accounts',
-  // Reserved so the candidate pages get their own address. Without this entry
-  // the wildcard below claims it: demo.zenyaai.co rewrites to /s/demo, a
-  // customer site that does not exist, and the host 404s. Verified before this
-  // change — demo.zenyaai.co already resolved to Vercel through the
-  // *.zenyaai.co wildcard and returned exactly the same 404 as any random
-  // subdomain. Reserving the name is what makes the host ours; no DNS record
-  // needs to change.
+  // Still reserved even though the host is retired. Without the entry the
+  // wildcard below claims the name and demo.zenyaai.co rewrites to /s/demo —
+  // a customer site that does not exist — so an old link would 404 instead of
+  // reaching the hand-off that sends it to the apex.
   'demo',
 ])
 
 /**
- * What demo.zenyaai.co serves, now that the candidates have been promoted.
+ * THE THREE PRETTY ADDRESSES demo.zenyaai.co used to have.
  *
- * It used to serve the whole candidate set. That set IS the site now: the
- * house style ships from app/(site), so /pricing, /themes, /about and the
- * rest answer at the apex and there is nothing left here to propose. Every
- * promoted segment was removed from this list in the same commit that
- * promoted it, which is what makes demo.zenyaai.co/pricing send the reader
- * to the real page instead of rewriting to a route that no longer exists.
+ * The subdomain is retired. It existed to hold the candidate set while the
+ * restyle was under review, and that set is the site now — /pricing, /themes,
+ * /about and the rest answer at the apex, so there was nothing left to
+ * propose and no reason to keep a second host correct for three pages.
  *
- * Two entries remain, and they are the two surfaces that are NOT pages of
- * the public site: the dashboard and the editor. app/demo/dashboard and
- * app/demo/editor render them with fixture data at an address that needs no
- * account, which is the only way to look at either one without signing in.
+ * The three pages themselves are NOT retired. They are the surfaces that are
+ * not pages of the public site:
  *
- * The theme demos are still deliberately absent — /demo/restaurant,
- * /demo/atlas, the storefront at /demo and the rest preview what the product
- * generates for a customer, and they keep their addresses under
- * zenyaai.co/demo/*.
+ *   demo/dashboard  the dashboard against fixture data, so it can be looked
+ *                   at without an account
+ *   demo/editor     the theme editor, likewise
+ *   demo/build      the restyle proposal for the restaurant wizard at
+ *                   /theme/new/restaurant, which is a public route and
+ *                   therefore cannot reach the generator it proposes for
+ *
+ * They live at zenyaai.co/demo/dashboard, /demo/editor and /demo/build, which
+ * is where they always lived — the subdomain was an alias, not a home.
+ *
+ * This set is only what the retired host needs in order to send an old link
+ * to the right place: demo.zenyaai.co/dashboard was the alias for
+ * /demo/dashboard, so the bare segment has to be mapped back rather than
+ * handed to the apex as /dashboard, which is the real logged-in dashboard.
  */
-const DEMO_SUBDOMAIN_PAGES = new Set([
-  'dashboard',
-  'editor',
-  // The one candidate that did NOT go live, because it was filed under the
-  // wrong name. It restyles the restaurant wizard at /theme/new/restaurant,
-  // not the Shopify builder at /build, and the wizard it proposes for sits
-  // behind an account and runs a generator this public route cannot reach.
-  // See app/demo/build/page.tsx.
-  'build',
-])
-
-/**
- * Emptied by the promotion, kept as the hook it was.
- *
- * These were the candidates that are many addresses by nature — the eight
- * template detail pages under /websites, the seven competitor pages under
- * /compare, and /why. All of them are live routes now, so nothing needs
- * prefix-matching on this host. The mechanism stays because the next surface
- * that gets proposed here may well be another slug family, and re-deriving
- * it from the comment history is worse than leaving an empty array.
- */
-const DEMO_SUBDOMAIN_PREFIXES: string[] = []
+const RETIRED_DEMO_SEGMENTS = new Set(['dashboard', 'editor', 'build'])
 
 /**
  * Cheap "is this visitor logged in?" check for routing decisions — looks for
@@ -273,33 +255,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url, { request: { headers: h } })
   }
 
-  // ---- demo.zenyaai.co → the two surfaces that are not pages ---------------
-  // This host served the whole candidate set while the restyle was being
-  // reviewed. The candidates are the site now, so what is left here is the
-  // dashboard and the editor:
+  // ---- demo.zenyaai.co → retired -------------------------------------------
+  // The subdomain existed to hold the candidate set while the restyle was
+  // under review. The candidates are the site, and the three pages that were
+  // still here — the dashboard and editor previews and the wizard proposal —
+  // are reachable on the main domain at zenyaai.co/demo/dashboard,
+  // /demo/editor and /demo/build, which is where every link to them now
+  // points. A second host for three pages is a second host to keep correct.
   //
-  //   demo.zenyaai.co/           → /demo/dashboard
-  //   demo.zenyaai.co/dashboard  → /demo/dashboard
-  //   demo.zenyaai.co/editor     → /demo/editor
+  // So every path on it hands off to the same path on the apex, and the
+  // allowlist is gone: there is nothing left to allow.
   //
-  // Both are real product surfaces behind an account, rendered here against
-  // fixture data so they can be looked at without signing in.
-  //
-  // The THEME demos are deliberately NOT here. /demo/restaurant, /demo/atlas,
-  // the storefront at /demo and the rest preview what the product generates,
-  // and they keep their addresses under zenyaai.co/demo/*.
-  //
-  // Anything not on the list is SENT TO THE APEX, and after the promotion
-  // that is the point rather than a fallback: /pricing, /themes, /about and
-  // every other former candidate is a real page at the root now, so a reader
-  // arriving on an old demo link lands on the page it became.
-  //
-  // 307, not 308: the allowlist still moves — a permanent redirect would sit
-  // in browser caches contradicting it the day another surface is proposed
-  // on this host.
-  //
-  // Allowlisted paths are REWRITTEN, so the address stays on the subdomain.
-  // Both remaining pages are noindex, so this host adds no duplicate.
+  // STILL 307 AND NOT 308. A permanent redirect would be cached by browsers
+  // that have ever visited, which makes the decision irreversible from the
+  // owner's side without asking readers to clear their cache. The host is
+  // being retired, not deleted, and keeping this reversible costs one
+  // uncached round trip on a host that no link points at any more.
   if (host === 'demo.zenyaai.co') {
     if (
       pathname.startsWith('/_next/') ||
@@ -309,37 +280,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
-    const segment = pathname === '/' ? 'dashboard' : pathname.replace(/^\//, '').replace(/\/$/, '')
-    if (
-      DEMO_SUBDOMAIN_PAGES.has(segment) ||
-      DEMO_SUBDOMAIN_PREFIXES.some((p) => segment.startsWith(p))
-    ) {
-      const url = request.nextUrl.clone()
-      url.pathname = `/demo/${segment}`
-      return NextResponse.rewrite(url)
-    }
-
-    // THE SAME PAGE AT ITS /demo/ ADDRESS STAYS ON THIS HOST.
-    //
-    // Both remaining pages are reached as /demo/dashboard and /demo/editor on
-    // the apex, so those hrefs turn up on this host too. Falling through to
-    // the redirect below would walk the reader out of the subdomain on the
-    // first click.
-    //
-    // Redirected to the clean address rather than rewritten, so a page has
-    // ONE url on this host and the reader sees demo.zenyaai.co/dashboard,
-    // which is the whole point of the subdomain.
-    if (segment.startsWith('demo/')) {
-      const inner = segment.slice('demo/'.length)
-      if (DEMO_SUBDOMAIN_PAGES.has(inner)) {
-        const url = request.nextUrl.clone()
-        url.pathname = `/${inner}`
-        return NextResponse.redirect(url)
-      }
-    }
+    // demo.zenyaai.co/dashboard was the pretty address for /demo/dashboard,
+    // so the bare segments are mapped back rather than 404ing on the apex.
+    const segment = pathname === '/' ? 'demo/dashboard' : pathname.replace(/^\//, '').replace(/\/$/, '')
+    const target = RETIRED_DEMO_SEGMENTS.has(segment) ? `/demo/${segment}` : `/${segment}`
 
     return NextResponse.redirect(
-      new URL(pathname + request.nextUrl.search, 'https://zenyaai.co'),
+      new URL(target + request.nextUrl.search, 'https://zenyaai.co'),
     )
   }
 
