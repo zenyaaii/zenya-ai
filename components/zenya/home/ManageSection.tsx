@@ -302,7 +302,7 @@ export default function ManageSection({
               <div className="zn-fit" ref={fitRef}>
                 {/* Keyed on the surface, so an entrance replays and the
                     product's own form comes back empty on the way round. */}
-                <div className="zn3-screen" key={sf.id}>
+                <div className="zn3-screen" data-simulated key={sf.id}>
                   {sf.render({ f: form, focus, siteRef })}
                 </div>
               </div>

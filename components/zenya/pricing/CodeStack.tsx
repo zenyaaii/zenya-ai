@@ -444,14 +444,14 @@ const CSS = `
 .cs-chip {
   display: inline-block; margin-bottom: 1.125rem;
   padding: 0.25rem 0.6875rem; border-radius: 999px;
-  font-size: 11px; font-weight: 700; line-height: 1.5; white-space: nowrap;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; white-space: nowrap;
 }
 .cs-chip[data-kind="code"] { background: var(--violet); color: #fff; }
 .cs-chip[data-kind="auto"] { background: rgba(0, 0, 0, 0.05); color: var(--stone); }
 
 .cs-figure { margin: 0; font-size: 38px; font-weight: 900; line-height: 1.28; letter-spacing: 0; color: var(--obsidian); }
 .cs-figure-sub { margin: 0.125rem 0 0; font-size: 16px; font-weight: 700; line-height: 1.5; color: var(--stone); }
-.cs-body { margin: 0.875rem 0 0; font-size: 13px; font-weight: 500; line-height: 1.8; color: var(--stone); }
+.cs-body { margin: 0.875rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone); }
 .cs-card[data-earned] .cs-front .cs-figure { color: var(--ground); }
 .cs-card[data-earned] .cs-front .cs-figure-sub,
 .cs-card[data-earned] .cs-front .cs-body { color: #a8a8b2; }
@@ -462,7 +462,7 @@ const CSS = `
    cannot drift away from the rest of the site's buttons. */
 .cs-cta-slot { margin-top: auto; align-self: stretch; width: 100%; }
 .cs-cta-slot:not([data-live]) .sb { pointer-events: none; }
-.cs-earned-hint { margin: auto 0 0; font-size: 12px; font-weight: 700; color: var(--violet-lift); }
+.cs-earned-hint { margin: auto 0 0; font-size: 14.5px; font-weight: 700; color: var(--violet-lift); }
 
 .cs-code {
   margin-top: 0.25rem; align-self: stretch;
@@ -473,12 +473,12 @@ const CSS = `
   box-shadow: inset 0 0 0 1px rgba(151, 160, 238, 0.45);
 }
 .cs-code-text { font-size: 19px; font-weight: 900; letter-spacing: 0.08em; color: #fff; }
-.cs-code-hint { font-size: 11.5px; font-weight: 700; color: var(--violet-lift); }
+.cs-code-hint { font-size: 14.5px; font-weight: 700; color: var(--violet-lift); }
 .cs-code:focus-visible { outline: 2px solid var(--violet-lift); outline-offset: 3px; }
 
 .cs-foot {
   margin: 1.25rem 0 0; text-align: center;
-  font-size: 13px; font-weight: 500; line-height: 1.8; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone);
 }
 
 @media (prefers-reduced-motion: reduce) {

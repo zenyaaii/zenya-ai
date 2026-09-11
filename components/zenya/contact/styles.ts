@@ -115,16 +115,16 @@ export const CSS = `
 .zc-head[data-dark] .zc-sep { background: rgba(250,250,250,0.16); }
 .zc-head[data-dark] .zc-account { background: #fafafa; color: #171717; }
 .zc-nav { display: flex; align-items: center; gap: 0.125rem; }
-.zc-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
+.zc-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
 .zc-nav-item:hover { color: var(--obsidian); }
 .zc-nav-item[aria-current] { color: var(--obsidian); font-weight: 700; }
 .zc-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); transition: background-color 520ms var(--ease-out); }
-.zc-account { border-radius: 999px; padding: 0.6875rem 1rem; font-size: 14px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
+.zc-account { border-radius: 999px; padding: 0.6875rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
 .zc-account:hover { opacity: 0.86; }
 .zc-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zc-drawer[data-open] { transition-delay: 0s, 0s; }
 .zc-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
-.zc-tray-row { display: block; border-radius: 8px; padding: 0.6875rem 0.75rem; font-size: 14px; line-height: 1.24; text-decoration: none; color: #666; }
+.zc-tray-row { display: block; border-radius: 8px; padding: 0.6875rem 0.75rem; font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666; }
 .zc-tray-row:hover { background: rgba(0,0,0,0.04); color: var(--obsidian); }
 
 /* ---- the measure -------------------------------------------------------
@@ -137,7 +137,7 @@ export const CSS = `
 .zc-open { padding-top: clamp(3rem, 8vw, 6.5rem); padding-bottom: clamp(1.5rem, 3.5vw, 2.25rem); }
 .zc-eyebrow {
   display: inline-flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem;
-  font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
 }
 .zc-eyebrow-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--violet); }
 .zc-h1 {
@@ -162,7 +162,7 @@ export const CSS = `
   display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.25rem;
   border-radius: 999px; padding: 0.5rem 0.875rem;
   background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.07);
-  font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--stone);
+  font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--stone);
 }
 .zc-promise svg { color: var(--violet); flex: 0 0 auto; }
 
@@ -197,7 +197,7 @@ export const CSS = `
   box-shadow: 0 0 0 1px rgba(17,17,17,0.06);
 }
 .zc-ch-t { min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
-.zc-ch-l { font-size: 12.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2); }
+.zc-ch-l { font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2); }
 .zc-ch-v {
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--obsidian);
@@ -209,7 +209,7 @@ export const CSS = `
 .zc-ch-go { margin-inline-start: auto; flex: 0 0 auto; display: flex; color: var(--stone-2); transition: color 200ms var(--ease-out), transform 260ms var(--ease-out); }
 .zc-ch-row:hover .zc-ch-go { color: var(--violet); transform: translate(-2px, -2px); }
 @media (prefers-reduced-motion: reduce) { .zc-ch-go { transition: none; } .zc-ch-row:hover .zc-ch-go { transform: none; } }
-.zc-ch-note { margin: 0.75rem 0 0; font-size: 12.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
+.zc-ch-note { margin: 0.75rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
 
 /* ---- the well ----------------------------------------------------------
    1.55fr / 1fr rather than two halves, the split /demo/review settled on: the
@@ -251,13 +251,13 @@ export const CSS = `
    a selection, not a subject. It also keeps the chosen state legible at
    4.5:1 instead of the live page's violet-on-violet-wash at 3.89:1.
 ------------------------------------------------------------------------- */
-.zc-topic-l { margin: 0 0 0.625rem; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.zc-topic-l { margin: 0 0 0.625rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
 .zc-chips { display: flex; flex-wrap: wrap; gap: 0.4375rem; }
 .zc-chip {
   display: inline-flex; align-items: center; gap: 0.4375rem;
   min-height: 38px; padding: 0.4375rem 0.875rem;
   border: 0; border-radius: 999px; cursor: pointer; font: inherit;
-  font-size: 13.5px; font-weight: 700; line-height: 1.5; letter-spacing: 0;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; letter-spacing: 0;
   color: var(--stone); background: var(--field);
   box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
   transition: color 200ms var(--ease-out), background-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
@@ -277,13 +277,13 @@ export const CSS = `
 .zc-f { display: flex; flex-direction: column; min-width: 0; }
 .zc-form > .zc-f, .zc-form > .zc-pair { margin-top: 0.875rem; }
 .zc-form > .zc-pair:first-child, .zc-form > .zc-f:first-child { margin-top: 0; }
-.zc-lab { display: flex; align-items: baseline; gap: 0.375rem; margin-bottom: 0.4375rem; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.zc-lab { display: flex; align-items: baseline; gap: 0.375rem; margin-bottom: 0.4375rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
 /* margin-INLINE-start. The live page writes ml-1 on this asterisk, which in
    an RTL document puts the gap on the far side of the mark instead of
    between the mark and the label it belongs to. Measured there: 4px left,
    0px right. */
 .zc-req { margin-inline-start: 0; color: var(--violet); font-weight: 700; }
-.zc-opt { font-size: 12px; font-weight: 500; color: var(--stone-2); }
+.zc-opt { font-size: 14.5px; font-weight: 500; color: var(--stone-2); }
 .zc-in {
   width: 100%; border: 0; border-radius: var(--r-control);
   padding: 0.6875rem 0.875rem;
@@ -299,7 +299,7 @@ export const CSS = `
 .zc-area { resize: vertical; min-height: 132px; line-height: 1.9; }
 .zc-count {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
-  margin-top: 0.4375rem; font-size: 12px; font-weight: 700; line-height: 1.6; color: var(--stone-2);
+  margin-top: 0.4375rem; font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--stone-2);
 }
 .zc-count-n { font-variant-numeric: tabular-nums; flex: 0 0 auto; }
 .zc-count[data-met] .zc-count-n { color: var(--violet); }
@@ -318,18 +318,18 @@ export const CSS = `
   box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
 }
 .zc-hand svg { flex: 0 0 auto; margin-top: 0.25rem; color: var(--violet); }
-.zc-hand p { margin: 0; font-size: 12.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zc-hand p { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 
 /* ---- status + action ---------------------------------------------------- */
 .zc-status { display: block; margin-top: 0.875rem; }
 .zc-err {
   margin: 0; border-radius: var(--r-control); padding: 0.625rem 0.75rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.7; color: #b45309;
+  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: #b45309;
   background: rgba(180,83,9,0.07); box-shadow: 0 0 0 1px rgba(180,83,9,0.20);
 }
 .zc-go { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem; margin-top: 1.25rem; }
 .zc-go .sb { flex: 1 1 220px; }
-.zc-go-note { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 12px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
+.zc-go-note { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
 
 /* ---- the receipt -------------------------------------------------------
    The screen a sender is guaranteed to read, and the live one is a 48px
@@ -352,13 +352,13 @@ export const CSS = `
 .zc-js .zc-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zc-draw 460ms var(--ease-out) 120ms forwards; }
 @keyframes zc-draw { to { stroke-dashoffset: 0; } }
 .zc-done-h { margin: 0.875rem 0 0; font-size: clamp(20px, 2.6vw, 25px); font-weight: 900; line-height: 1.4; color: var(--obsidian); letter-spacing: 0; }
-.zc-done-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+.zc-done-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
 /* What the reader actually typed, read back. A receipt that does not show
    the message it received is a picture of a receipt. */
 .zc-slip { width: 100%; margin-top: 1.25rem; border-radius: var(--r-card); padding: clamp(0.875rem, 2.5vw, 1.125rem); background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08); }
 .zc-slip dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.5rem 0.75rem; }
-.zc-slip dt { margin: 0; font-size: 12px; font-weight: 700; line-height: 1.7; color: var(--stone-2); white-space: nowrap; }
-.zc-slip dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
+.zc-slip dt { margin: 0; font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--stone-2); white-space: nowrap; }
+.zc-slip dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
 .zc-slip-msg { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500 !important; }
 .zc-demo {
   display: flex; align-items: flex-start; gap: 0.5625rem;
@@ -370,7 +370,7 @@ export const CSS = `
    is the same field fill as every other panel and the one amber thing on it
    is the 14px mark that flags it. The rule /demo/review records. */
 .zc-demo svg { flex: 0 0 auto; margin-top: 0.25rem; color: #b45309; }
-.zc-demo p { margin: 0; font-size: 12px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zc-demo p { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 .zc-done-go { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem; margin-top: 1.25rem; width: 100%; }
 .zc-done-go .sb { flex: 1 1 220px; }
 /* The hit box is padded and the padding is pulled straight back out, so the
@@ -379,7 +379,7 @@ export const CSS = `
 .zc-quiet {
   border: 0; background: transparent; font: inherit; cursor: pointer;
   padding: 0.5rem 0.375rem; margin: -0.5rem -0.375rem;
-  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   border-radius: 8px;
   transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
 }
@@ -400,9 +400,9 @@ export const CSS = `
   padding: clamp(1.25rem, 3.5vw, 1.625rem);
   box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55);
 }
-.zc-note-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 13.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
+.zc-note-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 14.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
 .zc-note-head svg { color: var(--violet); flex: 0 0 auto; }
-.zc-note-b { margin: 0; font-size: 13px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+.zc-note-b { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
 .zc-note-b strong { font-weight: 900; color: var(--obsidian); }
 
 /* ---- the register ------------------------------------------------------
@@ -415,11 +415,11 @@ export const CSS = `
 .zc-reg-row { display: contents; }
 .zc-reg dt {
   margin: 0; padding-top: 0.75rem;
-  font-size: 12.5px; font-weight: 500; line-height: 1.7; color: var(--stone-2);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone-2);
 }
 .zc-reg dd {
   margin: 0 0 0.75rem; min-width: 0; overflow-wrap: anywhere;
-  font-size: 14px; font-weight: 700; line-height: 1.7; color: var(--obsidian);
+  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian);
   font-variant-numeric: tabular-nums;
 }
 .zc-reg > dt:first-of-type { padding-top: 0; }
@@ -446,7 +446,7 @@ export const CSS = `
 .zc-owner-n { display: flex; align-items: center; gap: 0.375rem; font-size: 14.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
 .zc-owner-n svg { flex: 0 0 auto; color: var(--stone-2); transition: color 200ms var(--ease-out); }
 .zc-owner:hover .zc-owner-n svg { color: var(--violet); }
-.zc-owner-r { margin: 0; font-size: 12.5px; font-weight: 500; line-height: 1.6; color: var(--stone-2); }
+.zc-owner-r { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.6; color: var(--stone-2); }
 .zc-owner:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; border-radius: 4px; }
 
 /* ---- the social row ----------------------------------------------------- */
@@ -465,7 +465,7 @@ export const CSS = `
 /* ---- the standing note -------------------------------------------------- */
 .zc-foot-note {
   width: min(100%, 640px); margin: clamp(2rem, 5vw, 3.25rem) 0 clamp(2rem, 5vw, 3rem);
-  font-size: 12.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
 }
 .zc-link { color: var(--violet-ink); font-weight: 700; text-underline-offset: 3px; }
 .zc-link:hover { text-decoration: underline; }
@@ -519,5 +519,37 @@ export const CSS = `
 /* ---- narrow ------------------------------------------------------------- */
 @media (max-width: 480px) {
   .zc-open { padding-top: clamp(2rem, 8vw, 3rem); }
+}
+
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control on this page has to measure at least 32 RENDERED pixels on
+   both axes. components/ZoomLock.tsx writes zoom: 0.85 on the document
+   element always, so a length authored in CSS reaches the screen at 85% of
+   itself: the CSS floor is 38, not 32. Measured before this block, at 360 to
+   1440: .zc-mark 82.4x25.5, .zc-nav-item 53.6x31.8, .zc-account 41.8x28.3, .zc-chip 59x27.5.
+
+   Inline links inside a sentence are deliberately not here. WCAG 2.5.8
+   exempts them, and it has to - an inline link inherits the line box of the
+   prose around it, so giving one a 32px target means giving every paragraph
+   that contains a link a 32px line height.
+--------------------------------------------------------------------------- */
+.zc-round {
+  min-width: 38px;
+  min-height: 38px;
+}
+.zc-phone-mark,
+.zc-mark,
+.zc-account,
+.zc-account-phone,
+.zc-nav-item,
+.zc-tray-row,
+.zc-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
 }
 `

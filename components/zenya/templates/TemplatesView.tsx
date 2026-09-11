@@ -784,7 +784,7 @@ const CSS = `
 .zt-nav-item {
   border-radius: 999px;
   padding: 0.625rem 0.75rem;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.24;
   white-space: nowrap;
   color: #666666;
@@ -802,7 +802,7 @@ const CSS = `
 .zt-account {
   border-radius: 999px;
   padding: 0.5rem 1rem;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.24;
   font-weight: 400;
   white-space: nowrap;
@@ -828,7 +828,7 @@ const CSS = `
 }
 .zt-tray-row {
   display: block; border-radius: 6px; padding: 0.5rem 0.75rem;
-  font-size: 13.5px; line-height: 1.24; text-decoration: none; color: #666666;
+  font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666666;
   transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
 }
 .zt-tray-row:hover { background: rgba(0, 0, 0, 0.04); color: var(--obsidian); }
@@ -871,8 +871,10 @@ const CSS = `
 .zt-tally { padding-top: 0.625rem; }
 .zt-tally-cap {
   margin: 0 0 0.875rem;
-  font-size: 11.5px; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0.06em; color: var(--stone);
+  /* Arabic: no tracking (it measured 0.69px and Arabic letterforms join), and
+     11.5px is 9.78 rendered against a 12 floor. */
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
+  color: var(--stone, #666666);
 }
 .zt-tally-row {
   display: flex; align-items: flex-start; gap: clamp(1.25rem, 2.6vw, 2.25rem);
@@ -881,7 +883,7 @@ const CSS = `
 .zt-tally-item { display: flex; flex-direction: column; gap: 0.1875rem; }
 .zt-tally dt {
   order: 2;
-  font-size: 12px; font-weight: 500; line-height: 1.6;
+  font-size: 14.5px; font-weight: 500; line-height: 1.6;
   letter-spacing: 0; color: var(--stone);
 }
 .zt-tally dd {
@@ -993,7 +995,7 @@ const CSS = `
 .zt-flag {
   position: absolute; inset-block-start: 0.75rem; inset-inline-start: 0.75rem;
   border-radius: 999px; padding: 0.3125rem 0.6875rem;
-  font-size: 11px; font-weight: 700; line-height: 1.4; letter-spacing: 0;
+  font-size: 14.5px; font-weight: 700; line-height: 1.4; letter-spacing: 0;
   color: #fafafa;
   background: rgba(32, 32, 38, 0.72);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -1050,8 +1052,9 @@ const CSS = `
 }
 .zt-tag {
   margin: 0;
-  font-size: 11.5px; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0.06em; color: var(--stone);
+  /* Same as .zt-tally-cap: Arabic takes no tracking, and the floor is 14.2. */
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
+  color: var(--stone, #666666);
 }
 .zt-name {
   display: flex; align-items: center; gap: 0.4375rem;
@@ -1089,9 +1092,10 @@ const CSS = `
 .zt-meta {
   margin: 0; min-width: 0;
   display: flex; align-items: center; gap: 0.4375rem; flex-wrap: wrap;
-  font-size: 12.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
 }
-.zt-dot { color: #b4b4bb; }
+/* A separator between two labels is still text. #b4b4bb measured 2.06:1. */
+.zt-dot { color: #6e6e78; }
 
 /* ---- the build control -------------------------------------------------
    THE ONE PIECE OF COLOUR THE CHROME IS ALLOWED. The page's design read is
@@ -1124,17 +1128,22 @@ const CSS = `
 .zt-build.sb {
   --sb-win: 2.1em;
   width: auto;
+  /* The tile's button was shrunk to sit on one line with a small count, which
+     took it to 28.3 rendered against a 32 floor and its label to 11.05
+     against a 12 one. It keeps the tighter side padding and gets the height
+     back. */
+  min-height: 38px;
   padding: 0.1875rem 0.875rem;
-  font-size: 13px;
+  font-size: 14.5px;
 }
-.zt-tile[data-lead] .zt-build.sb { font-size: 13.5px; padding: 0.25rem 1rem; }
+.zt-tile[data-lead] .zt-build.sb { font-size: 14.5px; padding: 0.25rem 1rem; }
 
 /* The one that has no builder to open. Quiet, not violet: nothing to press. */
 .zt-soon {
   display: inline-flex; align-items: center;
   border-radius: var(--r-control);
   padding: 0.4375rem 0.75rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.35;
+  font-size: 14.5px; font-weight: 700; line-height: 1.35;
   color: var(--stone);
   background: rgba(17, 17, 17, 0.04);
   box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.07);
@@ -1186,7 +1195,7 @@ const CSS = `
   font-size: 15px; font-weight: 900; line-height: 1.5;
   letter-spacing: 0; color: var(--violet-lift);
 }
-.zt-floor-body { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.8; color: #a8a8b2; }
+.zt-floor-body { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: #a8a8b2; }
 
 /* ---- arrival ------------------------------------------------------------
    The hidden half applies only under .zt-js, which the script adds on mount,
@@ -1233,4 +1242,35 @@ const CSS = `
   /* Under ~560 the count and the button stop fitting one line together. */
   .zt-foot { flex-wrap: wrap; gap: 0.5rem 0.625rem; }
 }
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control here has to measure at least 32 RENDERED pixels on both axes.
+   components/ZoomLock.tsx writes zoom: 0.85 on the document element always,
+   so a length authored in CSS reaches the screen at 85 per cent of itself:
+   the CSS floor is 38, not 32. Measured before this block, at 360 to 1440:
+   .zt-phone-mark 88.2x16, .zt-mark 93x17, .zt-name-link 103.6x26.1.
+
+   Inline links inside a sentence are deliberately not here - WCAG 2.5.8
+   exempts them, and enforcing a target on one would mean setting a 32px line
+   height on every paragraph that contains a link.
+--------------------------------------------------------------------------- */
+.zt-round {
+  min-width: 38px;
+  min-height: 38px;
+}
+.zt-phone-mark,
+.zt-mark,
+.zt-account,
+.zt-account-phone,
+.zt-nav-item,
+.zt-tray-row,
+.zt-name-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+}
+
 `

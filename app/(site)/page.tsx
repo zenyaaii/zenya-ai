@@ -836,7 +836,7 @@ export default function Page() {
     <Link
       href={portal.signup}
       data-cta="1"
-      className="rounded-full px-4 py-2 text-[14px] leading-none text-white transition-opacity duration-150 hover:opacity-85"
+      className="inline-flex min-h-[38px] items-center justify-center rounded-full px-4 py-2 text-[14.5px] leading-none text-white transition-opacity duration-150 hover:opacity-85"
       style={{ background: OBSIDIAN }}
     >
       ابدأ
@@ -1446,8 +1446,13 @@ export default function Page() {
            on-state is only a colour change is a colour swatch; one that sinks
            is a switch. */
         .zn-switch button {
+          /* 7px of padding on 11.5px type measured 20.4 rendered against a
+             32 floor, and the type itself was 9.78 against a 12 floor. The
+             pill keeps its shape; it is the height a finger needs now. */
+          display: inline-flex; align-items: center; justify-content: center;
+          min-height: 38px;
           padding: 7px 16px; border-radius: 999px;
-          font-size: 11.5px; line-height: 1; color: ${STONE};
+          font-size: 14.5px; line-height: 1; color: ${STONE};
           /* The same glass as every other surface on the page, so this does
              not sit next to the corner controls as the last white key. The
              sink survives: it now comes from the chosen state's obsidian fill
@@ -2288,7 +2293,16 @@ export default function Page() {
            still reaches the frame underneath and the sideways swipe that
            changes surface keeps working. The script drives the form through
            the value setter and a programmatic click, neither of which
-           pointer-events can block. */
+           pointer-events can block.
+
+           THE SCREEN ALSO CARRIES data-simulated, and that is for the audit
+           rather than the browser. scripts/theme-check.cjs skips these
+           subtrees: the controls inside them are a PICTURE of the product,
+           deliberately drawn small, and holding them to the tap-target and
+           type floors would mean drawing the product at a size that no longer
+           looks like the product. Without the marker they were the single
+           largest source of findings in every run, and real ones sat under
+           them. */
         .zn3-screen {
           pointer-events: none;
           display: grid;
@@ -3086,8 +3100,13 @@ export default function Page() {
         /* The switcher, in this section's own values. */
         .zn3-switch { display: flex; gap: 6px; flex: 0 0 auto; }
         .zn3-switch button {
+          /* These pick which screen the laptop shows, so they are controls
+             the reader presses - not part of the picture inside it. Measured
+             20.4 rendered against a 32 floor, at 8.5px of type. */
+          display: inline-flex; align-items: center; justify-content: center;
+          min-height: 38px;
           padding: 7px 16px; border-radius: 999px;
-          font-size: 10px; line-height: 1; color: var(--ink2);
+          font-size: 14.5px; line-height: 1; color: var(--ink2);
           box-shadow: inset 0 0 0 1px var(--hair);
           cursor: pointer;
           transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -3437,7 +3456,11 @@ export default function Page() {
         .zn4-switch { display: flex; gap: 6px; flex: 0 0 auto; margin-bottom: 16px; position: relative; z-index: 2; }
         .zn4-win > .zn4-app { flex: 0 1 auto; }
         .zn4-switch button {
-          border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 500;
+          /* Same as .zn3-switch: a real control outside the simulated screen,
+             measured 23.2 rendered at 9.78px of type. */
+          display: inline-flex; align-items: center; justify-content: center;
+          min-height: 38px;
+          border-radius: 999px; padding: 5px 13px; font-size: 14.5px; font-weight: 500;
           color: var(--ink3); background: transparent;
           box-shadow: inset 0 0 0 1px var(--hair);
           transition: color 240ms, background-color 240ms, box-shadow 240ms;
@@ -4058,10 +4081,20 @@ export default function Page() {
         }
 
         .zn5-brand { display: flex; flex-direction: column; align-items: flex-start; }
-        .zn5-mark { display: block; color: var(--ink); }
+        .zn5-mark {
+          /* 42, not 38. THIS WHOLE SECTION IS TRANSFORM-SCALED to fit one
+             screen - useFit measures it and shrinks it, about 21% at 360 -
+             and a transform scales the hit box with the picture. So the CSS
+             floor here is the 38 the rest of the site uses, divided by that
+             fit: 38 / 0.79 rounds to 48, and 42 is what clears 32 rendered at
+             the scales actually measured. Every control in this footer is
+             sized from the same reasoning. */
+          display: inline-flex; align-items: center; min-height: 44px;
+          color: var(--ink);
+        }
         .zn5-claim {
           margin: 16px 0 0; max-width: 34ch;
-          font-size: 13px; line-height: 1.85; color: var(--ink2);
+          font-size: 14.5px; line-height: 1.85; color: var(--ink2);
         }
         /* The one inversion this page already uses, taken the other way: on
            paper the call to action is obsidian, on a dark ground it is paper.
@@ -4069,17 +4102,18 @@ export default function Page() {
         .zn5-cta {
           margin-top: 18px;
           display: inline-flex; align-items: center; gap: 7px;
-          padding: 8px 15px; border-radius: 999px;
+          padding: 8px 15px; border-radius: 999px; min-height: 44px;
           background: #fafafa; color: #131316;
-          font-size: 12.5px; line-height: 1; text-decoration: none;
+          font-size: 14.5px; line-height: 1; text-decoration: none;
           transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1),
                       transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .zn5-cta:hover { background: #ffffff; transform: translateX(-2px); }
         .zn5-cta .ic { width: 14px; height: 14px; }
         .zn5-mail {
-          margin-top: 14px;
-          font-size: 12px; color: var(--ink3); text-decoration: none;
+          margin-top: 8px;
+          display: inline-flex; align-items: center; min-height: 44px;
+          font-size: 14.5px; color: var(--ink3); text-decoration: none;
           transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .zn5-mail:hover { color: var(--ink2); }
@@ -4092,9 +4126,10 @@ export default function Page() {
           margin: 0 0 14px; font-size: 12px; font-weight: 500;
           line-height: 1; color: var(--ink3);
         }
-        .zn5-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; }
+        .zn5-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
         .zn5-col a {
-          font-size: 13px; line-height: 1.4; color: var(--ink2); text-decoration: none;
+          display: inline-flex; align-items: center; min-height: 44px;
+          font-size: 14.5px; line-height: 1.4; color: var(--ink2); text-decoration: none;
           transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1);
         }
         .zn5-col a:hover { color: var(--ink); }
@@ -4110,7 +4145,7 @@ export default function Page() {
         }
         .zn5-social { display: flex; gap: 8px; }
         .zn5-social a {
-          width: 32px; height: 32px; border-radius: 999px;
+          width: 44px; height: 44px; border-radius: 999px;
           display: inline-flex; align-items: center; justify-content: center;
           color: var(--ink3);
           box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.1);
@@ -4124,7 +4159,8 @@ export default function Page() {
           box-shadow: inset 0 0 0 1px rgba(250, 250, 250, 0.2);
         }
         .zn5-social svg { width: 14px; height: 14px; }
-        .zn5-legal { margin: 0; font-size: 11.5px; line-height: 1.6; color: var(--ink3); }
+        /* 11.5px is 9.78 rendered. */
+        .zn5-legal { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ink3); }
 
         /* The arrival. data-run carries it, so at REST there is no attribute
            written at all and the finished state is the resting state — the
@@ -4269,13 +4305,13 @@ export default function Page() {
                 aria-expanded={menuOpen}
                 aria-controls="pill-menu"
                 aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
+                className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/[0.05]"
                 style={{ color: OBSIDIAN }}
               >
                 {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
               </button>
 
-              <Link href="/?home=1" aria-label="زينيا" className="flex shrink-0 items-center justify-self-center px-1.5">
+              <Link href="/?home=1" aria-label="زينيا" className="flex min-h-[38px] shrink-0 items-center justify-self-center px-1.5">
                 {/* Pure black is permitted here: the reference reserves #000 for
                     logo marks and graphic glyphs, nowhere else. */}
                 <ZenyaMark className="h-[16px] text-black" />
@@ -4332,7 +4368,7 @@ export default function Page() {
               <Link
                 href="/?home=1"
                 aria-label="زينيا"
-                className="flex shrink-0 items-center px-1"
+                className="flex min-h-[38px] shrink-0 items-center px-1"
                 onMouseEnter={() => setPanel(null)}
               >
                 <ZenyaMark className="h-[17px] text-black" />
@@ -4347,7 +4383,7 @@ export default function Page() {
                     onFocus={() => setPanel(item.panel ?? null)}
                     aria-expanded={item.panel ? panel === item.panel : undefined}
                     aria-controls={item.panel ? "pill-tray" : undefined}
-                    className="rounded-full px-3 py-2 text-[14px] leading-none transition-colors duration-150 hover:text-[#171717]"
+                    className="inline-flex min-h-[38px] items-center justify-center rounded-full px-3 py-2 text-[14.5px] leading-none transition-colors duration-150 hover:text-[#171717]"
                     style={{ color: panel === item.panel ? OBSIDIAN : STONE }}
                   >
                     {item.label}
@@ -4469,7 +4505,7 @@ export default function Page() {
               onClick={() => toggleCorner("type")}
               aria-expanded={corner === "type"}
               aria-controls="type-tray"
-              className="flex h-10 w-full items-center gap-1.5 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
+              className="flex h-10 w-full items-center gap-1.5 whitespace-nowrap px-3.5 text-[14.5px] leading-none"
               style={{ color: OBSIDIAN }}
             >
               <Type size={14} strokeWidth={1.6} aria-hidden />
@@ -4527,7 +4563,7 @@ export default function Page() {
               onClick={() => toggleCorner("glow")}
               aria-expanded={corner === "glow"}
               aria-controls="glow-tray"
-              className="flex h-10 w-full items-center gap-2 whitespace-nowrap px-3.5 text-[12.5px] leading-none"
+              className="flex h-10 w-full items-center gap-2 whitespace-nowrap px-3.5 text-[14.5px] leading-none"
               style={{ color: OBSIDIAN }}
             >
               {/* The button wears the mix it is currently set to, and says so
@@ -4667,7 +4703,7 @@ export default function Page() {
         <p
           id="zn-claim"
           dir="ltr"
-          className={`${ui.className} text-[12px] md:text-[13px]`}
+          className={`${ui.className} text-[14.5px]`}
           style={{ color: STONE }}
         >
           {/* Only the sentence being read is on the page, so the box is its

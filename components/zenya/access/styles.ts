@@ -94,15 +94,15 @@ export const CSS = `
 .za-head[data-dark] .za-sep { background: rgba(250,250,250,0.16); }
 .za-head[data-dark] .za-account { background: #fafafa; color: #171717; }
 .za-nav { display: flex; align-items: center; gap: 0.125rem; }
-.za-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
+.za-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
 .za-nav-item:hover { color: var(--obsidian); }
 .za-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); transition: background-color 520ms var(--ease-out); }
-.za-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
+.za-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
 .za-account:hover { opacity: 0.86; }
 .za-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .za-drawer[data-open] { transition-delay: 0s, 0s; }
 .za-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
-.za-tray-row { display: block; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 13.5px; line-height: 1.24; text-decoration: none; color: #666; }
+.za-tray-row { display: block; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666; }
 .za-tray-row:hover { background: rgba(0,0,0,0.04); color: var(--obsidian); }
 
 /* ---- the stage: one object on bare paper -------------------------------
@@ -180,7 +180,7 @@ export const CSS = `
 .za-tab {
   position: relative; z-index: 1; border: 0; background: transparent; cursor: pointer; font: inherit;
   border-radius: 999px; padding: 0.5rem 0.5rem;
-  font-size: 13.5px; font-weight: 700; line-height: 1.5; color: var(--stone);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone);
   transition: color 300ms var(--ease-out);
 }
 .za-tab[data-on] { color: #fff; }
@@ -210,12 +210,12 @@ export const CSS = `
 .za-roll-face[data-side="up"] { transform: translateY(-122%); opacity: 0; transition-timing-function: var(--ease-in); }
 .za-roll-face[data-side="down"] { transform: translateY(122%); opacity: 0; transition-timing-function: var(--ease-in); }
 .za-roll-h { margin: 0; font-size: clamp(22px, 2.6vw, 27px); font-weight: 900; line-height: 1.36; color: var(--obsidian); }
-.za-roll-s { margin-top: 0.5rem; font-size: 14px; font-weight: 500; line-height: 1.8; color: var(--stone); }
+.za-roll-s { margin-top: 0.5rem; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone); }
 
 /* ---- the form ----------------------------------------------------------- */
 .za-form { display: flex; flex-direction: column; }
 .za-f { display: flex; flex-direction: column; }
-.za-lab { display: block; margin-bottom: 0.4375rem; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.za-lab { display: block; margin-bottom: 0.4375rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
 .za-req { color: var(--violet); font-weight: 700; }
 .za-in {
   width: 100%; border: 0; border-radius: var(--r-control);
@@ -307,13 +307,13 @@ export const CSS = `
   display: block; height: 100%; border-radius: 999px; background: var(--violet);
   transform-origin: right center; transition: transform 480ms var(--ease-out), background-color 300ms var(--ease-out);
 }
-.za-meter-l { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 11.5px; font-weight: 700; line-height: 1.5; color: var(--stone); white-space: nowrap; }
+.za-meter-l { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone); white-space: nowrap; }
 .za-meter[data-met] .za-meter-l { color: var(--violet); }
 
 /* ---- consent ------------------------------------------------------------ */
 .za-consent {
   display: flex; align-items: start; gap: 0.625rem; cursor: pointer;
-  font-size: 12px; font-weight: 500; line-height: 1.8; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone);
 }
 .za-check { flex: 0 0 auto; margin-top: 0.3125rem; width: 15px; height: 15px; accent-color: #5e6ad2; cursor: pointer; }
 .za-link {
@@ -329,7 +329,7 @@ export const CSS = `
 .za-status { display: block; }
 .za-err {
   margin: 0; border-radius: var(--r-control); padding: 0.625rem 0.75rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.7; color: #c2410c;
+  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: #c2410c;
   background: rgba(194,65,12,0.07); box-shadow: 0 0 0 1px rgba(194,65,12,0.20);
 }
 
@@ -338,10 +338,10 @@ export const CSS = `
 
 /* ---- the switchers under the form --------------------------------------- */
 .za-alt { display: flex; flex-direction: column; align-items: start; gap: 0.5rem; }
-.za-alt-line { margin: 0; font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone); }
+.za-alt-line { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone); }
 .za-alt-quiet {
   border: 0; background: transparent; padding: 0; font: inherit; cursor: pointer;
-  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   transition: color 160ms var(--ease-out);
 }
 .za-alt-quiet:hover { color: var(--obsidian); }
@@ -349,7 +349,7 @@ export const CSS = `
   display: inline-flex; align-items: center; gap: 0.375rem;
   border: 0; background: transparent; padding: 0; font: inherit; cursor: pointer;
   margin-bottom: 0.875rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.5; color: var(--stone);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone);
   transition: color 160ms var(--ease-out);
 }
 .za-back:hover { color: var(--obsidian); }
@@ -377,15 +377,15 @@ export const CSS = `
   flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; border-radius: 999px;
   background: rgba(94,106,210,0.12); color: var(--violet);
-  font-size: 14px; font-weight: 900; line-height: 1;
+  font-size: 14.5px; font-weight: 900; line-height: 1;
 }
 .za-acc-id { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; }
 /* The e-mail carries dir="ltr" so its characters order correctly, which also
    moves its "start" edge to the LEFT — left-aligned, it floated away from the
    name stacked above it. For an ltr run, "end" IS the right edge, which is
    where this card's start side is. */
-.za-acc-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
-.za-acc-mail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: end; font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--stone); }
+.za-acc-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.za-acc-mail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: end; font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--stone); }
 .za-acc-go { flex: 0 0 auto; color: var(--stone); transition: color 200ms var(--ease-out), transform 260ms var(--ease-out); }
 .za-acc:hover .za-acc-go { color: var(--violet); }
 @media (prefers-reduced-motion: no-preference) {
@@ -404,12 +404,12 @@ export const CSS = `
   display: inline-flex; align-items: center; justify-content: center; gap: 0.4375rem;
   margin-top: 0.125rem; border: 0; cursor: pointer; font: inherit;
   border-radius: var(--r-control); padding: 0.6875rem 0.875rem;
-  font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--stone);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone);
   background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
   transition: color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
 }
 .za-acc-add:hover { color: var(--violet); box-shadow: 0 0 0 1px rgba(94,106,210,0.45); }
-.za-acc-note { margin: 0.375rem 0 0; font-size: 11.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
+.za-acc-note { margin: 0.375rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
 
 /* ---- the door -----------------------------------------------------------
    Where the real page would call supabase. See the component's docstring for
@@ -418,22 +418,22 @@ export const CSS = `
 .za-hand { display: flex; flex-direction: column; }
 .za-hand-pass {
   display: inline-flex; align-items: center; gap: 0.4375rem; margin: 0;
-  font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--violet);
+  font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--violet);
 }
 .za-spec {
   margin-top: 0.875rem; border-radius: var(--r-card); padding: 0.875rem 1rem;
   background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
 }
-.za-spec-l { margin: 0 0 0.375rem; font-size: 11.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2); }
-.za-spec-q { margin: 0; font-size: 13.5px; font-weight: 700; line-height: 1.75; color: var(--obsidian); }
-.za-hand-b { margin: 0.875rem 0 0; font-size: 13px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.za-spec-l { margin: 0 0 0.375rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2); }
+.za-spec-q { margin: 0; font-size: 14.5px; font-weight: 700; line-height: 1.75; color: var(--obsidian); }
+.za-hand-b { margin: 0.875rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 .za-hand-go { display: flex; flex-direction: column; align-items: start; gap: 0.75rem; margin-top: 1.25rem; }
 .za-hand-go .sb { width: 100%; }
 
 /* ---- the standing note under the card ----------------------------------- */
 .za-foot-note {
   width: min(100%, 452px); margin: 1.125rem 0 0;
-  font-size: 12.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
 }
 
 /* ---- the corner mark ----------------------------------------------------
@@ -490,6 +490,44 @@ export const CSS = `
 /* ---- narrow ------------------------------------------------------------- */
 @media (max-width: 480px) {
   .za-stage { padding-top: clamp(2rem, 8vw, 3rem); }
-  .za-roll-s { font-size: 13.5px; }
+  .za-roll-s { font-size: 14.5px; }
+}
+
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control on this page has to measure at least 32 RENDERED pixels on
+   both axes. components/ZoomLock.tsx writes zoom: 0.85 on the document
+   element always, so a length authored in CSS reaches the screen at 85% of
+   itself: the CSS floor is 38, not 32. Measured before this block, at 360 to
+   1440: .za-round 27.2x27.2, .za-phone-mark 75x13.6, .za-mark 79x14.4, .za-card-mark 72.9x15.3, .za-eye 25.5x25.5.
+
+   Inline links inside a sentence are deliberately not here. WCAG 2.5.8
+   exempts them, and it has to - an inline link inherits the line box of the
+   prose around it, so giving one a 32px target means giving every paragraph
+   that contains a link a 32px line height.
+--------------------------------------------------------------------------- */
+.za-round,
+.za-eye {
+  min-width: 38px;
+  min-height: 38px;
+}
+.za-phone-mark,
+.za-mark,
+.za-card-mark,
+.za-account,
+.za-account-phone,
+.za-nav-item,
+.za-tray-row,
+/* button.za-link is a control - it switches the form's mode. a.za-link is
+   prose, in the consent sentence under the card, and stays out of here. */
+button.za-link,
+.za-tab,
+.za-alt-quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
 }
 `

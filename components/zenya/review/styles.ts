@@ -94,15 +94,15 @@ export const CSS = `
 .zr-head[data-dark] .zr-sep { background: rgba(250,250,250,0.16); }
 .zr-head[data-dark] .zr-account { background: #fafafa; color: #171717; }
 .zr-nav { display: flex; align-items: center; gap: 0.125rem; }
-.zr-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
+.zr-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
 .zr-nav-item:hover { color: var(--obsidian); }
 .zr-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); transition: background-color 520ms var(--ease-out); }
-.zr-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
+.zr-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
 .zr-account:hover { opacity: 0.86; }
 .zr-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zr-drawer[data-open] { transition-delay: 0s, 0s; }
 .zr-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
-.zr-tray-row { display: block; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 13.5px; line-height: 1.24; text-decoration: none; color: #666; }
+.zr-tray-row { display: block; border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666; }
 .zr-tray-row:hover { background: rgba(0,0,0,0.04); color: var(--obsidian); }
 
 /* ---- the measure -------------------------------------------------------
@@ -116,7 +116,7 @@ export const CSS = `
 .zr-open { padding-top: clamp(3rem, 8vw, 6.5rem); padding-bottom: clamp(1.75rem, 4vw, 2.75rem); }
 .zr-eyebrow {
   display: inline-flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem;
-  font-size: 11.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
 }
 .zr-eyebrow-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--violet); }
 .zr-h1 {
@@ -141,7 +141,7 @@ export const CSS = `
   display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.25rem;
   border-radius: 999px; padding: 0.4375rem 0.875rem;
   background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.07);
-  font-size: 12.5px; font-weight: 700; line-height: 1.6; color: var(--stone);
+  font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--stone);
 }
 .zr-refuse svg { color: var(--violet); flex: 0 0 auto; }
 
@@ -239,7 +239,7 @@ export const CSS = `
 .zr-verdict-face[data-side="up"] { transform: translateY(-124%); opacity: 0; transition-timing-function: var(--ease-in); }
 .zr-verdict-face[data-side="down"] { transform: translateY(124%); opacity: 0; transition-timing-function: var(--ease-in); }
 .zr-verdict-face[data-empty] { color: var(--stone-2); font-weight: 700; }
-.zr-inst-hint { margin: 0.375rem 0 0; font-size: 12.5px; font-weight: 500; line-height: 1.7; color: var(--stone-2); }
+.zr-inst-hint { margin: 0.375rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone-2); }
 
 /* ---- the fields --------------------------------------------------------- */
 .zr-rule { height: 1px; background: rgba(17,17,17,0.07); margin-bottom: clamp(1.25rem, 3vw, 1.5rem); }
@@ -249,9 +249,9 @@ export const CSS = `
 .zr-f { display: flex; flex-direction: column; min-width: 0; }
 .zr-form > .zr-f, .zr-form > .zr-pair { margin-top: 0.875rem; }
 .zr-form > .zr-pair:first-child, .zr-form > .zr-f:first-child { margin-top: 0; }
-.zr-lab { display: flex; align-items: baseline; gap: 0.375rem; margin-bottom: 0.4375rem; font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.zr-lab { display: flex; align-items: baseline; gap: 0.375rem; margin-bottom: 0.4375rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
 .zr-req { color: var(--violet); font-weight: 700; }
-.zr-opt { font-size: 11.5px; font-weight: 500; color: var(--stone-2); }
+.zr-opt { font-size: 14.5px; font-weight: 500; color: var(--stone-2); }
 .zr-in {
   width: 100%; border: 0; border-radius: var(--r-control);
   padding: 0.6875rem 0.875rem;
@@ -267,7 +267,7 @@ export const CSS = `
 .zr-area { resize: vertical; min-height: 132px; line-height: 1.9; }
 .zr-count {
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
-  margin-top: 0.4375rem; font-size: 11.5px; font-weight: 700; line-height: 1.6; color: var(--stone-2);
+  margin-top: 0.4375rem; font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--stone-2);
 }
 .zr-count-n { font-variant-numeric: tabular-nums; }
 .zr-count[data-met] .zr-count-n { color: var(--violet); }
@@ -277,12 +277,12 @@ export const CSS = `
 .zr-status { display: block; margin-top: 0.875rem; }
 .zr-err {
   margin: 0; border-radius: var(--r-control); padding: 0.625rem 0.75rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.7; color: #b45309;
+  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: #b45309;
   background: rgba(180,83,9,0.07); box-shadow: 0 0 0 1px rgba(180,83,9,0.20);
 }
 .zr-go { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem; margin-top: 1.25rem; }
 .zr-go .sb { flex: 1 1 220px; }
-.zr-go-note { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 11.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
+.zr-go-note { flex: 1 1 200px; min-width: 0; margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone-2); }
 
 /* ---- the thank-you -----------------------------------------------------
    THE MOMENT THE REVIEW IS SENT, which is the one screen the reader is
@@ -322,7 +322,7 @@ export const CSS = `
 .zr-thanks-stars { display: flex; align-items: center; gap: 0.25rem; margin: 0.75rem 0 0; color: var(--violet); }
 .zr-thanks-star { width: 17px; height: 17px; }
 .zr-thanks-star[data-off] { color: rgba(17,17,17,0.16); }
-.zr-thanks-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+.zr-thanks-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
 
 /* ---- the reward --------------------------------------------------------
    A flat panel on the field fill behind one hairline: the same object as
@@ -331,7 +331,7 @@ export const CSS = `
    else does.
 ------------------------------------------------------------------------- */
 .zr-code { width: 100%; margin-top: 1.25rem; border-radius: var(--r-card); padding: clamp(0.875rem, 2.5vw, 1.125rem); background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08); }
-.zr-code-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 12.5px; font-weight: 900; line-height: 1.6; color: var(--obsidian); }
+.zr-code-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 14.5px; font-weight: 900; line-height: 1.6; color: var(--obsidian); }
 .zr-code-head svg { color: var(--violet); flex: 0 0 auto; }
 .zr-code-row {
   display: inline-flex; align-items: center; gap: 0.875rem; max-width: 100%;
@@ -346,10 +346,10 @@ export const CSS = `
 .zr-code-str { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 16px; font-weight: 900; line-height: 1.5; letter-spacing: 0.14em; color: var(--violet); }
 .zr-code-ico { flex: 0 0 auto; display: flex; color: var(--stone-2); transition: color 200ms var(--ease-out); }
 .zr-code-row[data-copied] .zr-code-ico { color: #15803d; }
-.zr-code-note { margin: 0.75rem 0 0; font-size: 11.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
+.zr-code-note { margin: 0.75rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
 
 /* ---- what happens next, and the honest edge ----------------------------- */
-.zr-next { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.25rem 0 0; font-size: 13px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zr-next { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.25rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 .zr-next svg { flex: 0 0 auto; margin-top: 0.3125rem; color: var(--violet); }
 /* THE STANDING NOTE IS NOT A STATUS, so it is not tinted like one. It was
    built as an amber panel — amber fill, amber hairline, amber bold text — and
@@ -366,7 +366,7 @@ export const CSS = `
   box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
 }
 .zr-demo svg { flex: 0 0 auto; margin-top: 0.25rem; color: #b45309; }
-.zr-demo p { margin: 0; font-size: 12px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zr-demo p { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 .zr-thanks-go { display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem; margin-top: 1.25rem; width: 100%; }
 .zr-thanks-go .sb { flex: 1 1 220px; }
 /* The hit box is padded and the padding is pulled straight back out, so the
@@ -376,7 +376,7 @@ export const CSS = `
 .zr-quiet {
   border: 0; background: transparent; font: inherit; cursor: pointer;
   padding: 0.5rem 0.375rem; margin: -0.5rem -0.375rem;
-  font-size: 13px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   border-radius: 8px;
   transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
 }
@@ -399,15 +399,15 @@ export const CSS = `
   padding: clamp(1.25rem, 3.5vw, 1.625rem);
   box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55);
 }
-.zr-note-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 13.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
+.zr-note-head { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem; font-size: 14.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
 .zr-note-head svg { color: var(--violet); flex: 0 0 auto; }
-.zr-note-b { margin: 0; font-size: 13px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+.zr-note-b { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
 .zr-reward {
   display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap;
   margin-bottom: 0.625rem;
 }
 .zr-reward-n { font-size: clamp(26px, 3.4vw, 34px); font-weight: 900; line-height: 1.24; color: var(--violet); font-variant-numeric: tabular-nums; }
-.zr-reward-l { font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--obsidian); }
+.zr-reward-l { font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--obsidian); }
 
 /* ---- the pipeline ------------------------------------------------------
    Three beats on one spine, not three cards. A card each would say they are
@@ -428,13 +428,13 @@ export const CSS = `
   display: flex; align-items: center; justify-content: center;
   width: 25px; height: 25px; border-radius: 999px;
   background: var(--field); box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
-  font-size: 11.5px; font-weight: 900; line-height: 1; color: var(--stone);
+  font-size: 14.5px; font-weight: 900; line-height: 1; color: var(--stone);
   font-variant-numeric: tabular-nums;
 }
 .zr-step[data-live] .zr-step-n { background: var(--violet); color: #fff; box-shadow: 0 0 0 4px rgba(94,106,210,0.15); }
 .zr-step-t { min-width: 0; }
-.zr-step-h { margin: 0.1875rem 0 0.25rem; font-size: 13px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
-.zr-step-b { margin: 0; font-size: 12.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
+.zr-step-h { margin: 0.1875rem 0 0.25rem; font-size: 14.5px; font-weight: 900; line-height: 1.5; color: var(--obsidian); }
+.zr-step-b { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 
 /* ---- the wall ----------------------------------------------------------
    Where approved reviews will stand. It holds PLACEHOLDERS, clearly labelled
@@ -445,7 +445,7 @@ export const CSS = `
 .zr-wall { padding-top: clamp(3rem, 7vw, 5.5rem); padding-bottom: clamp(1rem, 3vw, 2rem); }
 .zr-wall-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: clamp(1rem, 2.5vw, 1.5rem); }
 .zr-h2 { margin: 0; font-size: clamp(22px, 3.2vw, 32px); font-weight: 900; line-height: 1.36; color: var(--obsidian); }
-.zr-wall-count { margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.6; color: var(--stone-2); }
+.zr-wall-count { margin: 0; font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--stone-2); }
 .zr-slots { display: grid; grid-template-columns: 1fr; gap: clamp(0.75rem, 2vw, 1rem); }
 @media (min-width: 720px) { .zr-slots { grid-template-columns: repeat(3, 1fr); } }
 .zr-slot {
@@ -462,7 +462,7 @@ export const CSS = `
 .zr-slot-av { width: 24px; height: 24px; border-radius: 999px; background: rgba(17,17,17,0.06); flex: 0 0 auto; }
 .zr-slot-tag {
   position: absolute; inset-inline-end: clamp(1rem, 2.5vw, 1.25rem); inset-block-start: clamp(1rem, 2.5vw, 1.25rem);
-  font-size: 10.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
+  font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone-2);
 }
 .zr-slot[data-first] { background: var(--card); box-shadow: 0 0 0 1px rgba(94,106,210,0.30), 0 0 0 4px rgba(94,106,210,0.08); }
 .zr-slot[data-first] .zr-slot-tag { color: var(--violet); }
@@ -481,12 +481,12 @@ export const CSS = `
   0% { transform: translateX(-100%); }
   55%, 100% { transform: translateX(100%); }
 }
-.zr-wall-b { margin: clamp(1rem, 2.5vw, 1.5rem) 0 0; max-width: 62ch; font-size: 13.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
+.zr-wall-b { margin: clamp(1rem, 2.5vw, 1.5rem) 0 0; max-width: 62ch; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
 
 /* ---- the standing note -------------------------------------------------- */
 .zr-foot-note {
   width: min(100%, 640px); margin: clamp(2rem, 5vw, 3.25rem) 0 clamp(2rem, 5vw, 3rem);
-  font-size: 12.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
+  font-size: 14.5px; font-weight: 500; line-height: 1.9; color: var(--stone);
 }
 .zr-link { color: var(--violet); font-weight: 700; text-underline-offset: 3px; }
 .zr-link:hover { text-decoration: underline; }
@@ -547,5 +547,37 @@ export const CSS = `
    control the whole page turns on. */
 @media (pointer: coarse) {
   .zr-star { width: calc(var(--star) + 0.75rem); height: calc(var(--star) + 0.75rem); }
+}
+
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control on this page has to measure at least 32 RENDERED pixels on
+   both axes. components/ZoomLock.tsx writes zoom: 0.85 on the document
+   element always, so a length authored in CSS reaches the screen at 85% of
+   itself: the CSS floor is 38, not 32. Measured before this block, at 360 to
+   1440: .zr-round 27.2x27.2, .zr-phone-mark 75x13.6, .zr-mark 79x14.4, .zr-account 41.8x28.3.
+
+   Inline links inside a sentence are deliberately not here. WCAG 2.5.8
+   exempts them, and it has to - an inline link inherits the line box of the
+   prose around it, so giving one a 32px target means giving every paragraph
+   that contains a link a 32px line height.
+--------------------------------------------------------------------------- */
+.zr-round {
+  min-width: 38px;
+  min-height: 38px;
+}
+.zr-phone-mark,
+.zr-mark,
+.zr-account,
+.zr-account-phone,
+.zr-nav-item,
+.zr-tray-row,
+.zr-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
 }
 `

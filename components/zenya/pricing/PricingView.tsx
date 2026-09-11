@@ -874,7 +874,7 @@ const CSS = `
 .zp-nav-item {
   border-radius: 999px;
   padding: 0.625rem 0.75rem;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.24;
   white-space: nowrap;
   color: #666666;
@@ -893,7 +893,7 @@ const CSS = `
 .zp-account {
   border-radius: 999px;
   padding: 0.5rem 1rem;
-  font-size: 14px;
+  font-size: 14.5px;
   line-height: 1.24;
   font-weight: 400;
   white-space: nowrap;
@@ -920,7 +920,7 @@ const CSS = `
 }
 .zp-tray-row {
   display: block; border-radius: 6px; padding: 0.5rem 0.75rem;
-  font-size: 13.5px; line-height: 1.24; text-decoration: none; color: #666666;
+  font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666666;
   transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
 }
 .zp-tray-row:hover { background: rgba(0, 0, 0, 0.04); color: var(--obsidian); }
@@ -966,7 +966,7 @@ const CSS = `
   display: inline-block; align-self: flex-start;
   margin-bottom: 0.75rem; padding: 0.1875rem 0.6875rem;
   border-radius: 999px; background: var(--violet); color: #fff;
-  font-size: 11px; font-weight: 700; line-height: 1.5;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0; white-space: nowrap;
 }
 /* visibility, not display: the box still lays out and still measures exactly
@@ -975,16 +975,16 @@ const CSS = `
 .zp-card-head { display: flex; flex-direction: column; align-items: flex-start; }
 .zp-name {
   margin: 0 0 0.875rem;
-  font-size: 11.5px; font-weight: 700; line-height: 1.4;
+  font-size: 14.5px; font-weight: 700; line-height: 1.4;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone);
 }
 .zp-card[data-mark] .zp-name { color: var(--violet-lift); }
 .zp-price { display: flex; align-items: baseline; gap: 0.375rem; margin-bottom: 0.5625rem; }
 .zp-amount { font-size: 46px; font-weight: 900; line-height: 1.24; letter-spacing: 0; }
 .zp-card[data-mark] .zp-amount { color: var(--ground); }
-.zp-per { font-size: 14px; font-weight: 500; line-height: 1.6; color: var(--stone); }
+.zp-per { font-size: 14.5px; font-weight: 500; line-height: 1.6; color: var(--stone); }
 .zp-card[data-mark] .zp-per { color: #a8a8b2; }
-.zp-sub { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.75; color: var(--stone); }
+.zp-sub { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.75; color: var(--stone); }
 .zp-card[data-mark] .zp-sub { color: #a8a8b2; }
 
 /* Pro's entitlement note: a hairline-ringed box in the page's one accent, not
@@ -995,8 +995,8 @@ const CSS = `
   border-radius: var(--r-control);
   box-shadow: inset 0 0 0 1px rgba(94, 106, 210, 0.28);
 }
-.zp-note-title { font-size: 12.5px; font-weight: 700; line-height: 1.6; color: var(--violet); }
-.zp-note-body { font-size: 12px; font-weight: 500; line-height: 1.75; color: #4b4b73; }
+.zp-note-title { font-size: 14.5px; font-weight: 700; line-height: 1.6; color: var(--violet); }
+.zp-note-body { font-size: 14.5px; font-weight: 500; line-height: 1.75; color: #4b4b73; }
 
 .zp-features {
   list-style: none; margin: 1.375rem 0 1.625rem; padding: 0; flex: 1;
@@ -1004,7 +1004,7 @@ const CSS = `
 }
 .zp-features li {
   display: flex; align-items: flex-start; gap: 0.5625rem;
-  font-size: 13.5px; font-weight: 500; line-height: 1.7; color: var(--ink-soft);
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--ink-soft);
 }
 .zp-card[data-mark] .zp-features li { color: #eaeaef; }
 .zp-tick { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 4px; color: #7c7c86; }
@@ -1015,7 +1015,9 @@ const CSS = `
    neighbours' stay put. */
 .zp-foot {
   margin: 0.625rem 0 0; min-height: 2.45rem; text-align: center;
-  font-size: 12px; font-weight: 500; line-height: 1.7; color: #7c7c86;
+  /* 12px is 10.2 rendered, under the 12 floor; and #7c7c86 measured 4.13:1
+     on the card's white, under 4.5. #6e6e78 is 5.04:1. */
+  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: #6e6e78;
 }
 .zp-card[data-mark] .zp-foot { color: #a8a8b2; }
 
@@ -1088,9 +1090,15 @@ const CSS = `
 .zp-table { width: 100%; min-width: 640px; border-collapse: separate; border-spacing: 0; text-align: start; }
 .zp-th {
   padding: 0 1rem 0.9375rem;
-  font-size: 11.5px; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: #9a9aa4; text-align: center;
+  /* NO TRACKING AND NO UPPERCASE: these four headers are Arabic. Arabic
+     letterforms join, so 0.1em pulled the joins apart - measured at 1.15px -
+     and Arabic has no case, so the transform only ever fired on a Latin
+     string that wandered in. 11.5px was also 9.78 rendered, and #9a9aa4 was
+     2.79:1 on white. */
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
+  /* THIS TABLE IS ON THE ONYX PANEL, not on the card's white. A grey chosen
+     for white reads 3.68:1 here; #9a9aa6 is 6.30:1 on #19191c. */
+  color: #9a9aa6; text-align: center;
 }
 .zp-th-feature { text-align: start; }
 /* The Zenya column is one surface running the height of the table, which is
@@ -1103,7 +1111,7 @@ const CSS = `
   padding-top: 0.9375rem;
 }
 .zp-td {
-  padding: 1rem; font-size: 14px; font-weight: 500; line-height: 1.75;
+  padding: 1rem; font-size: 14.5px; font-weight: 500; line-height: 1.75;
   text-align: center; color: #a8a8b2;
 }
 .zp-td-feature { text-align: start; font-weight: 700; color: #e4e4ea; }
@@ -1168,4 +1176,34 @@ const CSS = `
   .zp-amount { font-size: 40px; }
   .zp-compare { padding-inline: 1rem; }
 }
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control here has to measure at least 32 RENDERED pixels on both axes.
+   components/ZoomLock.tsx writes zoom: 0.85 on the document element always,
+   so a length authored in CSS reaches the screen at 85 per cent of itself:
+   the CSS floor is 38, not 32. Measured before this block, at 360 to 1440:
+   .zp-round 27.2x27.2, .zp-phone-mark 75x13.6, .zp-mark 79x14.4, .zp-account 41.8x28.3.
+
+   Inline links inside a sentence are deliberately not here - WCAG 2.5.8
+   exempts them, and enforcing a target on one would mean setting a 32px line
+   height on every paragraph that contains a link.
+--------------------------------------------------------------------------- */
+.zp-round {
+  min-width: 38px;
+  min-height: 38px;
+}
+.zp-phone-mark,
+.zp-mark,
+.zp-account,
+.zp-account-phone,
+.zp-nav-item,
+.zp-tray-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+}
+
 `

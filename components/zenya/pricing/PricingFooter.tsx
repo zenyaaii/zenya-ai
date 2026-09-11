@@ -134,6 +134,20 @@ export default function PricingFooter() {
 }
 
 /* No backticks inside this literal: one would end it. */
+/* ---------------------------------------------------------------------------
+   EVERY var() HERE CARRIES ITS FALLBACK, AND IT HAS TO.
+
+   This footer is mounted by two kinds of page. The ones that wrap their
+   content in chrome/Shell get CHROME_CSS, which declares --onyx,
+   --violet-lift, --r-panel, --gut and --ease-out on .zx-root. The ones that
+   draw their own root - pricing, themes, login, review, contact - do not.
+
+   On those, a bare var(--violet-lift) is an INVALID declaration, so the
+   property is not set and the value inherits instead. Measured on /login: the
+   mail link came out #171717 on the #131316 cap, 1.02:1, which is a support
+   address nobody can read. It failed silently because an invalid custom
+   property is not an error, it is just nothing.
+--------------------------------------------------------------------------- */
 const CSS = `
 /* FULL BLEED, AND IT ENDS THE PAGE. The footer was a floating rounded card of
    the same obsidian, the same radius and nearly the same width as the
@@ -156,10 +170,10 @@ const CSS = `
    drift. */
 .zf {
   position: relative;
-  margin: clamp(3.5rem, 8vw, 6rem) calc(var(--gut) * -1) 0;
-  padding: clamp(3rem, 6vw, 5rem) var(--gut) clamp(1.75rem, 3vw, 2.5rem);
-  border-radius: var(--r-panel) var(--r-panel) 0 0;
-  background: var(--onyx);
+  margin: clamp(3.5rem, 8vw, 6rem) calc(var(--gut, clamp(1rem, 4vw, 3rem)) * -1) 0;
+  padding: clamp(3rem, 6vw, 5rem) var(--gut, clamp(1rem, 4vw, 3rem)) clamp(1.75rem, 3vw, 2.5rem);
+  border-radius: var(--r-panel, 28px) var(--r-panel, 28px) 0 0;
+  background: var(--onyx, #131316);
   overflow: hidden;
 }
 /* THE MARK IS IN FLOW, NOT BEHIND THE CARD. It was absolutely positioned and
@@ -215,9 +229,13 @@ const CSS = `
   gap: clamp(1.5rem, 3vw, 2.5rem);
   align-items: start;
 }
-.zf-mark { display: inline-flex; }
+/* The wordmark is a link home, so it is a target: 22px of SVG measured
+   18.7 rendered. align-items keeps the mark where it was; the extra height is
+   padding the reader can hit, not space the logo grew into. */
+.zf-mark { display: inline-flex; align-items: center; min-height: 38px; }
 .zf-mark-svg { height: 22px; color: #fafafa; }
-.zf-claim { margin: 1rem 0 0; max-width: 30ch; font-size: 13.5px; font-weight: 500; line-height: 1.9; color: #a8a8b2; }
+/* 13.5px is 11.47 rendered, under the 12 floor. */
+.zf-claim { margin: 1rem 0 0; max-width: 34ch; font-size: 14.5px; font-weight: 500; line-height: 1.9; color: #a8a8b2; }
 .zf-cta { display: block; margin-top: 1.25rem; max-width: 13rem; }
 .zf-mail {
   /* min-height, not padding: the target has to clear 32 RENDERED pixels and
@@ -225,18 +243,26 @@ const CSS = `
      Measured before this: 95 x 16.6 rendered. */
   display: inline-flex; align-items: center; min-height: 38px;
   margin-top: 0.5rem;
-  font-size: 13px; font-weight: 500; color: var(--violet-lift); text-decoration: none;
+  /* 13px is 11.05 rendered. */
+  font-size: 14.5px; font-weight: 500; color: var(--violet-lift, #97a0ee); text-decoration: none;
 }
 .zf-mail:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .zf-head {
   margin: 0 0 0.5rem;
+  /* NO TRACKING AND NO UPPERCASE ON ARABIC. These four words are Arabic and
+     the rule that used to sit here applied 0.1em of letter-spacing and
+     text-transform: uppercase to them. Arabic letterforms JOIN, so tracking
+     pulls the joins apart, and Arabic has no case, so the transform is a
+     no-op that only ever fires on a Latin string that wanders in. Measured at
+     1.16px of separation on eighteen routes. */
+  letter-spacing: normal;
   /* 11px CSS is 9.35 rendered under zoom 0.85, which is below the 12px floor
      whatever its colour. 14.5px clears it at 12.33. */
-  font-size: 14.5px; font-weight: 700; letter-spacing: 0.08em;
+  font-size: 14.5px; font-weight: 700;
   /* #7c7c88 measured 4.26:1 on this ground, under the 4.5 floor for text this
      size. #9a9aa6 is 6.30:1. */
-  text-transform: uppercase; color: #9a9aa6;
+  color: #9a9aa6;
 }
 /* The gap comes off the list and goes inside the rows, so the targets grow
    without the column growing with them. Measured before this: 89 x 18.7
@@ -244,9 +270,10 @@ const CSS = `
 .zf-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
 .zf-col a {
   display: inline-flex; align-items: center; min-height: 38px;
-  font-size: 13.5px; font-weight: 500; line-height: 1.6;
+  /* 13.5px is 11.47 rendered. */
+  font-size: 14.5px; font-weight: 500; line-height: 1.6;
   color: #d2d2da; text-decoration: none;
-  transition: color 150ms var(--ease-out);
+  transition: color 150ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .zf-col a:hover { color: #fff; }
 
@@ -266,7 +293,7 @@ const CSS = `
   /* 34px is 28.9 rendered, under the floor. 38 lands on 32.3. */
   width: 38px; height: 38px; border-radius: 999px;
   color: #a8a8b2;
-  transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+  transition: color 150ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)), background-color 150ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .zf-social a:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
 .zf-social svg { width: 16px; height: 16px; }

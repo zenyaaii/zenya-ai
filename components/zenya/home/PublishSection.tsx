@@ -308,7 +308,7 @@ export default function PublishSection({
                   has to survive every surface change, because it is what the
                   window measures itself against — an element that remounts
                   takes its observer with it. */}
-              <div className="zn4-screen" ref={screenRef}>
+              <div className="zn4-screen" data-simulated ref={screenRef}>
                 {/* Keyed on the surface AND on whether the site has arrived,
                     so the swap into the published site replays the entrance
                     the same way a change of surface does. */}

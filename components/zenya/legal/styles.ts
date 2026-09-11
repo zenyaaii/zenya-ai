@@ -447,4 +447,41 @@ export const CSS = `
 .zl-root :where(a, button, summary):focus-visible {
   outline: 2px solid var(--violet-ink); outline-offset: 3px; border-radius: 6px;
 }
+
+
+/* ---------------------------------------------------------------------------
+   TARGET FLOOR.
+
+   Every control on this page has to measure at least 32 RENDERED pixels on
+   both axes. components/ZoomLock.tsx writes zoom: 0.85 on the document
+   element always, so a length authored in CSS reaches the screen at 85% of
+   itself: the CSS floor is 38, not 32. Measured before this block, at 360 to
+   1440: .zl-doc-link 81.8x27.5, .zl-spine-sum 282.9x27.5.
+
+   Inline links inside a sentence are deliberately not here. WCAG 2.5.8
+   exempts them, and it has to - an inline link inherits the line box of the
+   prose around it, so giving one a 32px target means giving every paragraph
+   that contains a link a 32px line height.
+--------------------------------------------------------------------------- */
+.zl-round {
+  min-width: 38px;
+  min-height: 38px;
+}
+/* The subprocessor table's policy links are the word "رابط" in a cell: a
+   control, not prose, and they measured 23.5x12. The word is narrow, so they
+   need the width floor as well as the height one. */
+.zl-doc td a { min-width: 38px; justify-content: center; }
+.zl-doc td a,
+.zl-phone-mark,
+.zl-mark,
+.zl-account,
+.zl-account-phone,
+.zl-nav-item,
+.zl-tray-row,
+.zl-doc-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+}
 `

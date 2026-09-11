@@ -332,7 +332,14 @@ export default function BuildSection({
       </h2>
 
       <div className="zn-stagebox">
-      <div className="zn-app" ref={frameRef}>
+      {/* data-simulated: everything inside this frame is a PICTURE of the
+          wizard, drawn at the size it is inside a laptop and driven by the
+          script rather than by the reader. scripts/theme-check.cjs skips it
+          for the same reason it skips .zn3-screen and .zn4-screen - the fit
+          transform here is 0.613, so holding the tiles to the type floor
+          would mean drawing the wizard at a size that stops looking like a
+          laptop screen. */}
+      <div className="zn-app" data-simulated ref={frameRef}>
         {/* Where this is. The path changes on the click, which is the point of
             the first beat: the picker really does open the wizard. */}
         <div className="zn-path" dir="ltr">

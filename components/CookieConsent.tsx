@@ -95,7 +95,7 @@ export default function CookieConsent() {
           </h2>
           <p
             id="cookie-consent-desc"
-            className="mt-1.5 text-[13.5px] leading-[1.6] text-muted"
+            className="mt-1.5 text-[14.5px] leading-[1.6] text-muted"
           >
             نستخدم ملفات تعريف ارتباط ضرورية تمامًا لإبقائك مسجَّل الدخول. وبموافقتك
             نودّ أيضًا استخدام ملفات وظيفية وتحليلية لتحسين المنتج. اقرأ المزيد في{' '}
@@ -143,27 +143,27 @@ export default function CookieConsent() {
         <div className="flex flex-shrink-0 flex-col gap-2 sm:w-44">
           <button
             onClick={acceptAll}
-            className="rounded-md bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90"
+            className="inline-flex min-h-[38px] items-center justify-center rounded-md bg-primary px-4 py-2.5 text-[14.5px] font-semibold text-white transition-opacity hover:opacity-90"
           >
             قبول الكل
           </button>
           <button
             onClick={rejectAll}
-            className="rounded-md border border-token bg-background px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors hover:bg-black/5"
+            className="inline-flex min-h-[38px] items-center justify-center rounded-md border border-token bg-background px-4 py-2.5 text-[14.5px] font-medium text-foreground transition-colors hover:bg-black/5"
           >
             رفض غير الأساسي
           </button>
           {showDetails ? (
             <button
               onClick={saveChoices}
-              className="rounded-md border border-token bg-background px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors hover:bg-black/5"
+              className="inline-flex min-h-[38px] items-center justify-center rounded-md border border-token bg-background px-4 py-2.5 text-[14.5px] font-medium text-foreground transition-colors hover:bg-black/5"
             >
               حفظ اختياراتي
             </button>
           ) : (
             <button
               onClick={() => setShowDetails(true)}
-              className="text-[12.5px] text-muted underline hover:text-foreground"
+              className="inline-flex min-h-[38px] items-center text-[14.5px] text-muted underline hover:text-foreground"
             >
               إدارة التفضيلات
             </button>
