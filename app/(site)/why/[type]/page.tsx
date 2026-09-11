@@ -1,5 +1,5 @@
 /**
- * Candidate long-read — the house style applied to the eight /why articles.
+ * The long-read — the house style applied to the eight /why articles.
  *
  * BUILT AGAINST restaurant, AND IT IS THE RIGHT ARTICLE TO BUILD AGAINST: it
  * is the first record in ARTICLES, it is the one whose sections use four of
@@ -7,11 +7,6 @@
  * the eight, so every contrast problem the tint causes shows at its worst
  * here. A shell that holds this one holds the other seven;
  * generateStaticParams builds all eight.
- *
- * NOT the live page. app/(main)/why/[type]/page.tsx is untouched. noindex,
- * which is the one place this candidate differs in kind from its live twin:
- * the live article is deliberately indexed and orphaned, and a second copy of
- * it in the index would compete with it for the same query.
  *
  * DESIGN READ: a redesign of a long editorial argument for a business owner
  * deciding whether a website is worth it, in the house language: flat
@@ -96,7 +91,7 @@ export function generateMetadata({ params }: { params: { type: string } }): Meta
   }
 }
 
-export default function DemoWhyPage({ params }: { params: { type: string } }) {
+export default function WhyPage({ params }: { params: { type: string } }) {
   const article = ARTICLES[params.type as Article["key"]]
   if (!article) notFound()
   const twin = TEMPLATE_PAGES.find((t) => t.key === article.key)

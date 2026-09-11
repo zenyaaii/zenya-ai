@@ -1,10 +1,5 @@
 /**
- * Candidate templates page — the house style applied to the catalogue.
- *
- * NOT the templates page. It ships as a standalone route at /demo/templates so
- * it can be reviewed on the real domain; app/(main)/themes/page.tsx remains the
- * live catalogue and is untouched. It is noindex, because a second catalogue in
- * the index would compete with the real one for the same query.
+ * The templates page — the house style applied to the catalogue.
  *
  * Design read: a CONTACT SHEET. The style doc records that the page is
  * achromatic and that every pixel of colour belongs to the light at the edges.
@@ -50,6 +45,6 @@
 
 import TemplatesView from "@/components/zenya/templates/TemplatesView"
 
-export default function DemoTemplatesPage() {
+export default function ThemesPage() {
   return <TemplatesView />
 }

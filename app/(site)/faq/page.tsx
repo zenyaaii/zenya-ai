@@ -1,10 +1,5 @@
 /**
- * Candidate FAQ page — the house style applied to the eleven questions.
- *
- * NOT the live page. It ships at /demo/faq so it can be read at a real
- * address; app/(main)/faq/page.tsx is untouched, and this route imports the
- * same faq-data module rather than copying its entries. No API, no schema, no
- * live route. It is noindex.
+ * The FAQ page — the house style applied to the eleven questions.
  *
  * DESIGN READ: a redesign of a reference page for someone with one specific
  * question, in the house language: flat #fafafa, near-black Arabic at display
@@ -12,7 +7,7 @@
  * question that is open.
  * Dials: DESIGN_VARIANCE 7, MOTION_INTENSITY 4, VISUAL_DENSITY 4.
  *
- * WHAT THE LIVE SURFACE MEASURES, in the browser at 360/390/430/768/1440:
+ * WHAT THE PAGE THIS REPLACED MEASURED, in the browser at 360/390/430/768/1440:
  *   · The same three aurora orbs as /about: rgba(94,106,210,0.06),
  *     rgba(217,119,6,0.07) and rgba(113,112,255,0.03), each blur(64px) at
  *     opacity 0.7, over #f7f4ed rather than the flat #fafafa.
@@ -33,11 +28,10 @@
  * under floor, the eyebrow budget is 2 against a ceiling of 2, and there is
  * no invented proof on the page.
  *
- * REGISTERED ON THE SUBDOMAIN in the same commit, per CLAUDE.md.
  */
 
 import FaqView from "@/components/zenya/faq/FaqView"
 
-export default function DemoFaqPage() {
+export default function FaqPage() {
   return <FaqView />
 }

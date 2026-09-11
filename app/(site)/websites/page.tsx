@@ -1,8 +1,6 @@
 /**
- * Candidate websites hub — the house style applied to the catalogue of what
+ * The websites hub — the house style applied to the catalogue of what
  * the product builds.
- *
- * NOT the live page. app/(main)/websites/page.tsx is untouched. noindex.
  *
  * DESIGN READ: a redesign of a catalogue for someone looking for their own
  * business type, in the house language: flat #fafafa, hairline rings instead
@@ -12,7 +10,7 @@
  * a step below the other marketing candidates on purpose: a catalogue's job
  * is comparison, and comparison wants a regular grid.
  *
- * MEASURED ON THE LIVE PAGE at 360/390/430/768/1440:
+ * MEASURED ON THE PAGE THIS REPLACED at 360/390/430/768/1440:
  *   · Five of the eight label chips fail contrast, white on the template's
  *     own accent: 2.15:1 on #f59e0b, 2.25:1 on #c8a96a, 2.49:1 on #14b8a6,
  *     2.54:1 on #10b981, 4.47:1 on #6366f1. All at 11px, 9.35px rendered.
@@ -75,7 +73,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function DemoWebsitesHub() {
+export default function WebsitesHubPage() {
   return (
     <Shell css={CSS}>
       <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "أنواع المواقع" }]} />

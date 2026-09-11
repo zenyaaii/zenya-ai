@@ -1,11 +1,6 @@
 /**
- * Candidate pricing page — the house style applied to the one surface that
+ * The pricing page — the house style applied to the one surface that
  * takes money.
- *
- * NOT the pricing page. It ships as a standalone route at /demo/pricing so it
- * can be reviewed on the real domain; app/(main)/pricing/page.tsx remains the
- * live page and is untouched. It is noindex, because a second pricing page in
- * the index would compete with the real one for the same query.
  *
  * Design read: a price list is a receipt, not a pitch. Three keys laid on one
  * flat ground, and the only colour in the room is on the one you are meant to
@@ -64,6 +59,6 @@
 
 import PricingView from "@/components/zenya/pricing/PricingView"
 
-export default function DemoPricingPage() {
+export default function PricingPage() {
   return <PricingView />
 }

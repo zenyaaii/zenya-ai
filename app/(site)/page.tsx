@@ -1,14 +1,13 @@
 "use client"
 
 /**
- * Candidate homepage - one page, one screen. A floating pill header over bare
+ * The homepage - one page, one screen. A floating pill header over bare
  * paper, and three words in the middle.
  *
- * NOT the homepage. It ships as a standalone route at /demo/home so it can be
- * reviewed on the real domain; app/(main)/page.tsx remains the homepage and is
- * untouched. Do not wire this into `/`. If it is ever promoted, move the file
- * to app/(main)/page.tsx and restore the nav/footer/consent hiding that the
- * (main) layout needs.
+ * IT IS WIRED INTO / AND IT DRAWS ITS OWN CHROME. app/(site)/layout.tsx
+ * renders nothing precisely so this page can: the floating pill is the whole
+ * header and the obsidian cap is the whole footer. Mounting the old Navbar
+ * and Footer around it would stack a second set on top.
  *
  * Visual language: the Vercel design system per the reference, "typeset
  * terminal on white paper". Light canvas (#fafafa), near-black type (#171717,
@@ -270,18 +269,7 @@ const CLAIM_GAP = 280
 /* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
 const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
-  /* The candidate catalogue, not the live one — the same reasoning as الأسعار
-     below. /themes is the page that ships today and is untouched;
-     /demo/templates is the candidate in this deck's style. Pointing the deck's
-     own header at the live catalogue dropped a reviewer out of the candidate
-     set mid-read. Point this back at /themes if the candidate is ever
-     promoted. */
   { href: "/themes", label: "القوالب", panel: "themes" },
-  /* The demo's own pricing screen, not the live one. Both exist: /pricing is
-     the page that takes money today and is untouched; /demo/pricing is the
-     candidate in this deck's style, reviewable on the real domain without
-     changing what a customer pays. Point this back at /pricing if the
-     candidate is ever promoted. */
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
@@ -289,8 +277,10 @@ const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
 type PanelId = "themes" | "account"
 
 /* The eight templates, labelled as they are on /themes and pointing at the
-   same no-auth live previews. Kept local rather than imported so this demo
-   route stays self-contained; the labels track lib/aurora-tints. */
+   same no-auth previews. These are the one set of /demo addresses that stayed
+   where they were: they preview what the product GENERATES for a customer,
+   which is not a page of this site and was never a candidate for one. The
+   labels track lib/aurora-tints. */
 const TEMPLATES = [
   { href: "/demo", label: "متجر" },
   { href: "/demo/restaurant", label: "مطعم" },
@@ -877,11 +867,16 @@ export default function Page() {
 
   return (
     <>
-      {/* /demo/* sits outside the (main) group, so there is no Navbar, Footer
-          or review button to hide here, only the consent dialog, which the
-          root layout mounts on every route. Suppressed so the page reads as
-          genuinely empty; it must be restored if this ever becomes a real
-          route that ships. */}
+      {/* app/(site) renders no Navbar, Footer or review button, so there is
+          nothing of the old chrome to hide here.
+      
+          THE CONSENT DIALOG IS NOT HIDDEN, and the rule that hid it is gone.
+          While this was a proposal at /demo/home it was suppressed so the page
+          would read as genuinely empty, with a note saying it had to come back
+          before the page shipped. This is the page now, it is the first thing
+          a first-time visitor sees, and the dialog is how the site asks for
+          consent before anything non-essential runs. An empty composition is
+          not worth a consent banner nobody was shown. */}
       {/* dangerouslySetInnerHTML, not a text child: React escapes " and ' when
           it serialises text, so an inline <style> ships to the browser with
           &quot; inside its selectors. That both breaks those rules until
@@ -889,7 +884,6 @@ export default function Page() {
           throwing away the server document and re-rendering the whole page on
           every load. */}
       <style dangerouslySetInnerHTML={{ __html: `
-        body:has(#blank-home) [aria-labelledby="cookie-consent-title"] { display: none !important; }
         body:has(#blank-home) { background: ${PAPER}; overflow: hidden; }
 
         /* Two measurements, held on the body so the header, the rail and the

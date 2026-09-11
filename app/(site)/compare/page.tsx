@@ -1,8 +1,6 @@
 /**
- * Candidate comparisons hub — the house style applied to the positioning
+ * The comparisons hub — the house style applied to the positioning
  * argument.
- *
- * NOT the live page. app/(main)/compare/page.tsx is untouched. noindex.
  *
  * DESIGN READ: a redesign of a decision page for someone weighing Zenya
  * against a tool they already know, in the house language: flat #fafafa,
@@ -10,7 +8,7 @@
  * reads as honest rather than as an advertisement.
  * Dials: DESIGN_VARIANCE 7, MOTION_INTENSITY 3, VISUAL_DENSITY 5.
  *
- * MEASURED ON THE LIVE PAGE at 360/390/430/768/1440:
+ * MEASURED ON THE PAGE THIS REPLACED at 360/390/430/768/1440:
  *   · .kicker at 4.28:1, 9.35px rendered, +1.76px tracking and uppercase on
  *     Arabic, above a linear-gradient hairline. .gradient-text on the
  *     headline.
@@ -70,7 +68,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function DemoCompareHub() {
+export default function CompareHubPage() {
   return (
     <Shell css={CSS}>
       <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "المقارنات" }]} />

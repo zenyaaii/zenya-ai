@@ -1,11 +1,6 @@
 /**
- * Candidate about page — the house style applied to the story Zenya tells
+ * The about page — the house style applied to the story Zenya tells
  * about itself.
- *
- * NOT the live page. It ships at /demo/about so it can be read at a real
- * address; app/(main)/about/page.tsx is untouched. No API, no schema, no live
- * route. It is noindex, because a second about page in the index would
- * compete with the real one.
  *
  * DESIGN READ: a redesign of a trust page for someone deciding whether a new
  * Arabic product is real, in the house language: flat #fafafa, near-black
@@ -13,7 +8,7 @@
  * only where it reports something.
  * Dials: DESIGN_VARIANCE 7, MOTION_INTENSITY 4, VISUAL_DENSITY 4.
  *
- * WHAT THE LIVE SURFACE MEASURES, and why the restyle is worth doing. Taken
+ * WHAT THE PAGE THIS REPLACED MEASURED, and why the restyle is worth doing. Taken
  * in the browser at 360/390/430/768/1440:
  *   · Three aurora orbs, rgba(94,106,210,0.06), rgba(217,119,6,0.07) and
  *     rgba(113,112,255,0.03), each blur(64px) at opacity 0.7, over a #f7f4ed
@@ -37,12 +32,10 @@
  * a ceiling of 3, and there is no invented proof anywhere on the page: no
  * testimonial, no logo wall, no counts, no ratings.
  *
- * REGISTERED ON THE SUBDOMAIN in the same commit, per CLAUDE.md: "about" is
- * in DEMO_SUBDOMAIN_PAGES, so this renders at demo.zenyaai.co/about.
  */
 
 import AboutView from "@/components/zenya/about/AboutView"
 
-export default function DemoAboutPage() {
+export default function AboutPage() {
   return <AboutView />
 }

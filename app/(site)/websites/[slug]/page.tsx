@@ -1,5 +1,5 @@
 /**
- * Candidate website-type detail page.
+ * The website-type detail page.
  *
  * BUILT AGAINST restaurant, AND IT IS THE RIGHT SLUG TO BUILD AGAINST: it is
  * the first record in TEMPLATE_PAGES, the one with the fullest data (six
@@ -7,9 +7,6 @@
  * key match, so a shell that renders it correctly is exercising every field
  * the type declares. The other seven render through the same component with
  * no second design pass; generateStaticParams below builds all of them.
- *
- * NOT the live page. app/(main)/websites/[slug]/page.tsx is untouched.
- * noindex.
  *
  * MEASURED ON THE LIVE /websites/restaurant:
  *   · The headline is stored in the data as JSX containing a
@@ -71,7 +68,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 }
 
-export default function DemoWebsiteType({ params }: { params: { slug: string } }) {
+export default function WebsiteTypePage({ params }: { params: { slug: string } }) {
   const t = TEMPLATE_PAGES.find((x) => x.slug === params.slug)
   if (!t) notFound()
   const others = TEMPLATE_PAGES.filter((x) => x.slug !== t.slug)

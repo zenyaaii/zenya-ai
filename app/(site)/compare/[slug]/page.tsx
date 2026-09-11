@@ -1,5 +1,5 @@
 /**
- * Candidate comparison detail page.
+ * The comparison detail page.
  *
  * BUILT AGAINST wix, AND IT IS THE RIGHT SLUG TO BUILD AGAINST: it is the
  * first record in COMPARISONS, it has the longest rows array (nine), and it
@@ -7,9 +7,6 @@
  * renders it is exercising the widest table this data can produce. The other
  * six render through the same component with no second design pass;
  * generateStaticParams below builds all of them.
- *
- * NOT the live page. app/(main)/compare/[slug]/page.tsx is untouched.
- * noindex.
  *
  * MEASURED ON THE LIVE /compare/wix:
  *   · The measure is 100.5 Arabic characters a line at 1440, the widest in
@@ -80,7 +77,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 }
 
-export default function DemoComparePage({ params }: { params: { slug: string } }) {
+export default function ComparisonPage({ params }: { params: { slug: string } }) {
   const c = COMPARISONS.find((x) => x.slug === params.slug)
   if (!c) notFound()
   const others = COMPARISONS.filter((x) => x.slug !== c.slug)

@@ -1,8 +1,5 @@
 /**
- * Candidate features page — the house style applied to what the product does.
- *
- * NOT the live page. It ships at /demo/features; app/(main)/features/page.tsx
- * is untouched. No API, no schema, no live route. noindex.
+ * The features page — the house style applied to what the product does.
  *
  * DESIGN READ: a redesign of a capability page for someone deciding whether
  * the product covers their case, in the house language: flat #fafafa,
@@ -10,7 +7,7 @@
  * and the accent only on the mark.
  * Dials: DESIGN_VARIANCE 7, MOTION_INTENSITY 4, VISUAL_DENSITY 5.
  *
- * MEASURED ON THE LIVE PAGE at 360/390/430/768/1440:
+ * MEASURED ON THE PAGE THIS REPLACED at 360/390/430/768/1440:
  *   · .gradient-text fills the headline.
  *   · .kicker prints "كل ما تحتاجه" at 11px (9.35px rendered), tracked
  *     +1.76px and uppercased on Arabic, at 4.28:1 against a 4.5 floor, above
@@ -103,7 +100,7 @@ const FEATURE_FAQS: QA[] = [
   { q: 'كم تكلفة زينيا؟', a: `تبدأ التجربة مجانًا (عمليتا توليد)، ثم خطة Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وخطة Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا تضيف الاستضافة الكاملة والنطاق المخصّص.` },
 ]
 
-export default function DemoFeaturesPage() {
+export default function FeaturesPage() {
   return (
     <Shell css={CSS}>
       <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "الميزات" }]} />
