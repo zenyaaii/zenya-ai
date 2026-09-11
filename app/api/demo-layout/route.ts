@@ -10,9 +10,15 @@ import path from "path"
    reader did in the tool ever reached the page, and a browser that cleared
    its storage lost the composition.
 
-   This writes the placement to app/demo/home/placement.json, which the page
-   imports — so a save changes the real page, survives a reload, is committed
-   with the rest of the source, and ships.
+   This writes the placement to components/zenya/home/placement.json, which
+   the three home sections import — so a save changes the real page, survives
+   a reload, is committed with the rest of the source, and ships.
+
+   IT USED TO WRITE app/demo/home/placement.json. That directory is gone: the
+   candidate homepage was promoted out of app/demo and into app/(site), and
+   the placement file moved to components/zenya/home/ beside the sections that
+   read it. The route kept pointing at the old path, so Save wrote nothing a
+   page would ever read.
 
    THIS ROUTE IS DEVELOPMENT ONLY. It writes to the filesystem, so it must
    never answer in production: a deployed build returns 404 as though it did
@@ -22,7 +28,7 @@ import path from "path"
    constant below.
    ───────────────────────────────────────────────────────────────────────── */
 
-const FILE = path.join(process.cwd(), "app", "demo", "home", "placement.json")
+const FILE = path.join(process.cwd(), "components", "zenya", "home", "placement.json")
 
 const SECTIONS = ["build", "manage", "publish"] as const
 const WIDTHS = ["wide", "narrow"] as const
