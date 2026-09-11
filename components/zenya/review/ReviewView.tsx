@@ -56,8 +56,16 @@ const NAV: Array<{ href: string; label: string }> = [
   { href: "/contact", label: "تواصل" },
 ]
 
-/* The real channel, and the real page this one is a proposal for. */
-const REAL = "/contact?topic=review"
+/* Where a review goes. Three calls, in this order, because the order is what
+   keeps the promise honest: the row is written first, the intake that issues
+   the thank-you runs second, and saving the code against a signed-in account
+   is best-effort and must never be able to fail the submission. */
+const REVIEWS_ENDPOINT = "/api/reviews"
+const CONTACT_ENDPOINT = "/api/contact"
+const PROMO_ENDPOINT = "/api/promo-codes"
+
+/** The one thing worth telling a reader whose review did not reach us. */
+const SEND_FAILED = "تعذّر حفظ مراجعتك — يُرجى المحاولة مجددًا."
 
 /**
  * The verdicts, one per star, plus the resting face at index 0.
@@ -161,6 +169,8 @@ export default function ReviewView() {
   const [body, setBody] = useState("")
   const [error, setError] = useState<string | null>(null)
   /** The door: set when every real rule passes. Nothing else changes. */
+  /** In flight. Blocks a second submit and dims the action. */
+  const [sending, setSending] = useState(false)
   const [handed, setHanded] = useState(false)
 
   const rootRef = useRef<HTMLElement | null>(null)
@@ -243,16 +253,22 @@ export default function ReviewView() {
   }, [])
 
   /**
-   * THE DOOR.
+   * SEND IT.
    *
-   * The real flow validates, POSTs to /api/reviews, POSTs to /api/contact and
-   * prints a reward code. This one runs the same checks in the same order,
-   * throwing the same strings, and then stops. No row is written, no mail is
-   * sent, no code is issued — and no code is shown, because a discount the
-   * reader has not earned is the same class of lie as a fake success message.
+   * The four rules run first, in the order the product enforces them, so a
+   * review with no stars or a three-character body never becomes a row.
+   *
+   * Then three calls. /api/reviews writes the row as pending, and a failure
+   * there stops everything — a reader told "thank you" whose words were never
+   * stored is the one outcome this page must not produce. /api/contact runs
+   * second and is what returns the thank-you code. /api/promo-codes is
+   * best-effort: it saves the code against a signed-in account so it turns up
+   * under the discount codes in settings, and it 401s for a guest, which is
+   * fine and is why its failure is swallowed rather than surfaced.
    */
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (sending) return
     setError(null)
     try {
       if (!name.trim()) throw new Error(NO_NAME)
@@ -263,7 +279,43 @@ export default function ReviewView() {
       setError(err instanceof Error ? err.message : "حدث خطأ ما.")
       return
     }
-    setHanded(true)
+
+    setSending(true)
+    try {
+      const rev = await fetch(REVIEWS_ENDPOINT, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email, rating, body }),
+      })
+      if (!rev.ok) {
+        const j = await rev.json().catch(() => ({}))
+        throw new Error(typeof j?.message === "string" ? j.message : SEND_FAILED)
+      }
+
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email, topic: "review", message: body }),
+      })
+      const data = res.ok ? await res.json().catch(() => ({})) : {}
+
+      if (typeof data?.rewardCode === "string") {
+        try {
+          void fetch(PROMO_ENDPOINT, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ code: data.rewardCode }),
+            keepalive: true,
+          }).catch(() => {})
+        } catch {}
+      }
+
+      setHanded(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : SEND_FAILED)
+    } finally {
+      setSending(false)
+    }
   }
 
   const shown = hover || rating
@@ -464,7 +516,8 @@ export default function ReviewView() {
                   </div>
 
                   <div className="zr-go">
-                    <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال">
+                    <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال"
+                      disabled={sending}>
                       أرسل مراجعتي
                     </SlideButton>
                     <p className="zr-go-note">
@@ -563,9 +616,8 @@ export default function ReviewView() {
         </section>
 
         <p className="zr-foot-note">
-          صفحة تصميم مُقترحة. النموذج يتحقق من مدخلاتك بالقواعد الحقيقية، لكنه لا يحفظ مراجعتك ولا
-          يرسل رمز خصم —{" "}
-          <Link href={REAL} className="zr-link">شارك تجربتك فعليًا من هنا</Link>.
+          تُحفظ مراجعتك باسمك وبريدك، ولا يُنشر البريد أبدًا. إن أردت سحبها بعد إرسالها، راسِلنا من{" "}
+          <Link href="/contact" className="zr-link">صفحة التواصل</Link> ونحذفها.
         </p>
       </div>
 
@@ -707,16 +759,16 @@ function Thanks({ rating, onBack }: { rating: number; onBack: () => void }) {
       <div className="zr-demo" style={{ ["--i" as string]: "6" }}>
         <Info size={14} strokeWidth={2.25} aria-hidden />
         <p>
-          ما سبق هو شكل الرسالة الحقيقية. أمّا هنا فلم تُحفظ مراجعتك ولم يُرسل بريد — هذه صفحة تصميم
-          مُقترحة لا تتصل بأي خادم.
+          إن كنت داخل حسابك، فالرمز محفوظ أيضًا ضمن أكواد الخصم في الإعدادات. وإن لم تكن، فانسخه
+          الآن — لا نرسله في بريد لاحق.
         </p>
       </div>
 
       <div className="zr-thanks-go" style={{ ["--i" as string]: "7" }}>
-        <SlideButton href={REAL} variant="violet" slide="إلى القناة الحقيقية">
-          شارك تجربتك في زينيا
+        <SlideButton href="/pricing" variant="violet" slide="استخدم الرمز هناك">
+          إلى صفحة الأسعار
         </SlideButton>
-        <button type="button" className="zr-quiet" onClick={onBack}>العودة إلى النموذج</button>
+        <button type="button" className="zr-quiet" onClick={onBack}>اكتب مراجعة أخرى</button>
       </div>
     </div>
   )

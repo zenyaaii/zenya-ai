@@ -1,65 +1,49 @@
 /**
- * Candidate review page — the house style applied to the channel where a
- * customer rates Zenya.
+ * The review channel.
  *
- * NOT the review channel. It ships as a standalone route at /demo/review so
- * it can be read on the real domain; the live surfaces are untouched:
- * app/(main)/contact with ?topic=review is still the form that submits,
- * app/api/reviews/route.ts is still the only thing that writes a row, and
- * components/Testimonials.tsx is still what the marketing site renders. This
- * page changes the STYLE of that channel and nothing else — no schema, no
- * route, no API. It is noindex, because a second review form in the index
- * would compete with the real one for the same query.
+ * It used to be one topic inside the five-topic contact form, which is why
+ * the stars sat as a small row under the message box and why a review with no
+ * rating was something the intake had to refuse. Rating is a single gesture,
+ * so it gets a page: the five stars are the largest object on it and
+ * everything else is the sentence around them.
  *
- * DESIGN READ: ONE INSTRUMENT ON BARE PAPER. Rating is a single gesture, so
- * the five stars are the largest object on the page and every other element
- * is the sentence around them — the invitation above, the note beside, the
- * empty wall below. Flat #fafafa, hairline rings for elevation, no wash and
- * no gradient anywhere on the page.
+ * WHAT HAPPENS WHEN IT IS SENT. Three calls, in order. /api/reviews writes
+ * the row as pending — a founder reads it before it can appear anywhere.
+ * /api/contact runs second and returns the thank-you code. /api/promo-codes
+ * saves that code against a signed-in account and is best-effort; it 401s for
+ * a guest, which is why the reader is told to copy the code rather than wait
+ * for an e-mail.
  *
- * WHAT THE LIVE SURFACE LOOKS LIKE, and why this is a restyle worth doing.
- * The review channel today is one topic inside a five-topic contact form,
- * standing on an aurora background, with the stars as a small row under the
- * message box; the marketing site's Testimonials block adds a radial violet
- * wash, a gradient-text heading, a drop-shadowed card and an amber chip. That
- * is four house-style violations in two screens: a page that is not
- * achromatic, gradients on something that is not the light, a drop shadow
- * doing the elevation, and a second accent hue with no meaning attached. All
- * of it is gone here. The ground is one flat #fafafa, elevation is the
- * stacked hairline ring token, and #5e6ad2 appears only where it carries
- * meaning: the stars the reader has set, the counter once the rule is met,
- * the live step of the pipeline, and the primary action.
+ * DESIGN READ: one instrument on bare paper. Flat #fafafa, hairline rings for
+ * elevation, no wash and no gradient anywhere on the page.
+ * Dials: DESIGN_VARIANCE 6, MOTION_INTENSITY 4, VISUAL_DENSITY 3.
  *
  * NO GOLD FOR THE STARS. A star is data — the value being set — so it takes
  * the accent, which is what the house style already allows data to do. An
  * invented gold would be a second hue on an achromatic page, and it would be
  * the only colour on it that means nothing.
  *
- * AND NOTHING IS SUBMITTED. There is no fetch in this tree. The form runs the
- * product's real rules — the zod bounds in app/api/reviews/route.ts and the
- * two checks app/(main)/contact/page.tsx runs before it posts — and then
- * stops at the door, quotes the real thank-you rather than printing it, and
- * hands the reader to /contact?topic=review. That matters more here than on
- * /demo/access: a POST from a design page would put a pending row in the
- * production reviews table that no customer ever wrote.
- *
- * THE WALL IS EMPTY ON PURPOSE. Testimonials.tsx refuses to ship invented
- * testimonials while Zenya is early. Filling this page with three plausible
- * founders would break that refusal in a nicer typeface, so the wall holds
- * labelled placeholders and says what they are waiting for.
- *
- * REGISTERED ON THE SUBDOMAIN in the same commit, per CLAUDE.md: "review" is
- * in DEMO_SUBDOMAIN_PAGES, so this renders at demo.zenyaai.co/review.
+ * THE WALL IS EMPTY ON PURPOSE. Zenya is early and has refused to ship
+ * invented testimonials from the beginning. The wall holds labelled
+ * placeholders and says plainly what they are waiting for. Filling it with
+ * three plausible founders would break that refusal in a nicer typeface.
  */
 
-import type { Metadata } from "next"
-import ReviewView from "@/components/zenya/review/ReviewView"
+import type { Metadata } from 'next'
+import ReviewView from '@/components/zenya/review/ReviewView'
+import { REVIEW_REWARD_AR } from '@/lib/review-reward'
 
 export const metadata: Metadata = {
-  title: "قيّم تجربتك مع زينيا — نسخة تجريبية",
-  robots: { index: false, follow: false },
+  title: 'قيّم تجربتك مع زينيا',
+  description: `شارك تجربتك الصادقة مع زينيا — في صالحنا أو لم تكن — واحصل على ${REVIEW_REWARD_AR} كشكرٍ على وقتك. نقرأ كل مراجعة قبل نشرها.`,
+  alternates: { canonical: '/review' },
+  openGraph: {
+    title: 'قيّم تجربتك مع زينيا',
+    description: 'شارك تجربتك الصادقة. نقرأ كل مراجعة قبل نشرها، ولا نعرض شهادات مُختلَقة.',
+    url: 'https://zenyaai.co/review',
+  },
 }
 
-export default function DemoReviewPage() {
+export default function ReviewPage() {
   return <ReviewView />
 }

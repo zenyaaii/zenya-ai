@@ -741,6 +741,19 @@ html.lenis body {
 }
 
 /* Pressed, a key loses its base and drops by exactly the base it lost. */
+/* In flight. The button keeps its colour, because a CTA that goes grey while
+   it works reads as broken rather than busy; what changes is that it stops
+   responding to the pointer and stops sliding. The label the component swaps
+   in says what is happening. */
+.sb:disabled {
+  cursor: default;
+  opacity: 0.62;
+  transform: none;
+}
+.sb:disabled .sb-track { transform: none; }
+.sb:disabled .sb-face:first-child { opacity: 1; }
+.sb:disabled .sb-face:last-child { opacity: 0; }
+
 .sb:active { transform: translateY(3px); }
 .sb[data-variant="key"]:active {
   box-shadow:

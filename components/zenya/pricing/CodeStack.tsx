@@ -50,7 +50,7 @@ import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT } from "@/lib/review-reward"
    else on the site arrives here already holding it. */
 const UNLOCK_KEY = "zenya:review-code-unlocked"
 const REVIEW_CODE = REVIEW_REWARD_CODE
-const REVIEW_URL = "/contact?topic=review"
+const REVIEW_URL = "/review"
 
 type Card = {
   id: string

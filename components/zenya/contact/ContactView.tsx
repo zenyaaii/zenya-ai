@@ -76,8 +76,17 @@ const NAV: Array<{ href: string; label: string; here?: boolean }> = [
   { href: "/contact", label: "تواصل", here: true },
 ]
 
-/** The real channel this page is a proposal for. */
-const REAL = "/contact"
+/** This page's own address, for the links that point a reader back at it. */
+const SELF = "/contact"
+
+/** Where the message goes. The same route the previous contact page posted
+ *  to; nothing about the intake changed, only the screen around it. */
+const CONTACT_ENDPOINT = "/api/contact"
+
+/** What the reader is told when the network, rather than their input, is
+ *  what failed. The address is the one the support channel actually reads. */
+const SEND_FAILED =
+  "تعذّر الإرسال — يُرجى مراسلتنا مباشرةً على " + COMPANY.SUPPORT_EMAIL + "."
 
 /* ---------------------------------------------------------------------------
    THE FACTS.
@@ -158,16 +167,24 @@ const SOCIALS = [
   { label: "X", href: "https://x.com/zenyaaico", Icon: XIcon },
 ]
 
-export default function ContactView() {
+export default function ContactView({
+  initialTopic = "support",
+}: {
+  /** Read from ?topic= on the server. See the route for why it is a prop and
+   *  not a useSearchParams call. */
+  initialTopic?: Topic
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [onDark, setOnDark] = useState(false)
 
-  const [topic, setTopic] = useState<Topic>("support")
+  const [topic, setTopic] = useState<Topic>(initialTopic)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
   const [error, setError] = useState<string | null>(null)
-  /** The door: set when every real rule passes. Nothing else changes. */
+  /** In flight. Blocks a second submit and dims the action. */
+  const [sending, setSending] = useState(false)
+  /** Set once the intake has accepted the message and the receipt is real. */
   const [handed, setHanded] = useState(false)
   /** The topic the receipt is for, frozen when the door opened, so changing
    *  the chips behind a finished receipt cannot rewrite what it says. */
@@ -243,32 +260,50 @@ export default function ContactView() {
   }, [])
 
   /**
-   * THE DOOR.
+   * SEND IT.
    *
-   * The real flow validates, POSTs to /api/contact, and for a review also
-   * POSTs to /api/reviews and /api/promo-codes. This one runs the same checks
-   * in the same order, throws the same strings, and then stops. No row is
-   * written, no mail is sent, and no reward code is shown, because a discount
-   * the reader has not earned is the same class of lie as a fake success
-   * message.
+   * The rules run first, in the order the intake route enforces them, so a
+   * bad address or a two-word message never becomes a request. Then the
+   * message goes to /api/contact — the same endpoint, the same body shape,
+   * and the same treatment of a non-200 as the one thing worth telling the
+   * reader about.
+   *
+   * A REVIEW IS NOT SENT FROM HERE, and the check below is the belt to the
+   * action row's brace. The intake refuses a review with no stars, this form
+   * has no stars to give it, and /review is the page that does. A keyboard
+   * submit must not slip past that.
    */
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (sending) return
     setError(null)
     try {
       if (!validateEmail(email)) throw new Error(BAD_EMAIL)
       if (message.trim().length < MIN_MESSAGE) throw new Error(SHORT_MESSAGE)
-      /* The live page refuses a review with no rating, and this form has no
-         rating to give it. The action row has already turned into a link to
-         the channel that does; this is the belt to that brace, so a keyboard
-         submit cannot slip past it. */
       if (topic === "review") throw new Error(NO_STARS)
     } catch (err) {
       setError(err instanceof Error ? err.message : "حدث خطأ ما.")
       return
     }
-    setSentTopic(topic)
-    setHanded(true)
+
+    setSending(true)
+    try {
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, email, topic, message }),
+      })
+      if (!res.ok) throw new Error(SEND_FAILED)
+      setSentTopic(topic)
+      setHanded(true)
+    } catch {
+      /* Deliberately one string for every failure mode. A reader who cannot
+         reach the intake needs the address that still works, not a status
+         code. */
+      setError(SEND_FAILED)
+    } finally {
+      setSending(false)
+    }
   }
 
   const count = message.length
@@ -474,8 +509,9 @@ export default function ContactView() {
                         إلى قناة التقييم
                       </SlideButton>
                     ) : (
-                      <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال">
-                        أرسل الرسالة
+                      <SlideButton type="submit" variant="violet" slide="راجِع قبل الإرسال"
+                        disabled={sending}>
+                        {sending ? "جارٍ الإرسال…" : "أرسل الرسالة"}
                       </SlideButton>
                     )}
                     <p className="zc-go-note">
@@ -558,10 +594,8 @@ export default function ContactView() {
         </div>
 
         <p className="zc-foot-note">
-          صفحة تصميم مُقترحة. النموذج يتحقق من مدخلاتك بالقواعد الحقيقية، لكنه لا يرسل رسالتك ولا
-          يحفظها في أي مكان.{" "}
-          <Link href={REAL} className="zc-link">راسِلنا فعليًا من هنا</Link>، أو استخدم البريد
-          والهاتف في الأعلى.
+          تصلنا رسالتك على {COMPANY.SUPPORT_EMAIL} ونردّ من العنوان نفسه. إن كان الأمر عاجلًا،
+          فالبريد والهاتف في الأعلى يصلان إلينا مباشرةً.
         </p>
       </div>
 
@@ -661,16 +695,13 @@ function Receipt({
       <div className="zc-demo" style={{ ["--i" as string]: "4" }}>
         <Info size={14} strokeWidth={2.25} aria-hidden />
         <p>
-          ما سبق هو شكل الرسالة الحقيقية. أمّا هنا فلم تُرسَل رسالتك ولم تُحفظ، فهذه صفحة تصميم
-          مُقترحة لا تتصل بأي خادم.
+          احتفظنا بنسخة من رسالتك كما كتبتها. إن أردت إضافة شيء، أرسِل رسالة أخرى ولا تُعِد كتابة
+          ما سبق — سنقرأ الاثنتين معًا.
         </p>
       </div>
 
       <div className="zc-done-go" style={{ ["--i" as string]: "5" }}>
-        <SlideButton href={REAL} variant="violet" slide="إلى القناة الحقيقية">
-          أرسِلها فعليًا
-        </SlideButton>
-        <button type="button" className="zc-quiet" onClick={onBack}>العودة إلى النموذج</button>
+        <button type="button" className="zc-quiet" onClick={onBack}>أرسِل رسالة أخرى</button>
       </div>
     </div>
   )
