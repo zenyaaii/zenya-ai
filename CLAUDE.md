@@ -8,8 +8,8 @@ without being asked — whenever the work touches visual design.**
 
 **Always load and follow it for** any styling/layout/UI work on the design-facing
 surfaces:
-- the marketing site (`app/(main)/**`, `components/marketing/**`, `components/Hero.tsx`, landing sections)
-- the 8 generated site templates (`components/theme/**`, restaurant/atlas/lookbook/wellness/studio/services/storefront, and their previews)
+- the public site (`app/(site)/**`, `components/zenya/**`)
+- the generated site templates (`components/theme/**`, restaurant/atlas/lookbook/wellness/studio/services/storefront, and their previews)
 - any new landing page, portfolio, hero, or redesign
 
 How: at the start of such a task, read the SKILL.md and apply it — state the
@@ -28,34 +28,72 @@ If a design task is ambiguous, follow the skill's rule: state the design read an
 proceed; ask at most one clarifying question only when the direction genuinely
 diverges.
 
-## Candidate demo pages: ALWAYS register the route on the demo subdomain
+## Where the public site lives
 
-Every candidate page built under `app/demo/**` must be reachable at
-`demo.zenyaai.co/<segment>`. **This is not an optional last step — it ships in
-the same commit as the page.** A candidate that is not on the allowlist 307s to
-the apex, so from the owner's side the page simply does not exist.
+The house style recorded in `docs/zenya-hero-style.md` is the live site. It is
+laid out in two halves and the split is load-bearing:
 
-Registering it is one line in `middleware.ts`:
+- **`app/(site)/**`** — every public page. The group's layout renders nothing.
+  Each page draws its own chrome by wrapping its content in
+  `components/zenya/chrome/Shell`, which supplies the header pill, the token
+  block and the obsidian footer cap. **Do not mount a Navbar or a Footer in
+  `app/(site)/layout.tsx`** — it would stack a second set on top of the one
+  every page already draws.
+- **`components/zenya/**`** — the views those pages render, one directory per
+  surface, plus `chrome/` for the shared header, tokens, marketing CSS and
+  parts. Note that `components/site/` is something else entirely: the runtime
+  for the sites Zenya *generates* for customers. Keep them apart.
+
+`app/(main)/**` is what has not been restyled yet: the account and settings
+stubs, the auth callbacks, and the generated-theme previews under `/theme/new`.
+It still mounts the old `components/Navbar` and `components/Footer`. A page
+moved out of `(main)` and into `(site)` loses that chrome and must gain
+`Shell`; a page that keeps the old chrome must stay in `(main)`.
+
+**Metadata lives in the route, not the view.** Every promoted page kept its
+original `layout.tsx` — title, description, canonical, hreflang and JSON-LD —
+and those files are the reason the restyle did not cost the site its search
+presence. When you edit a page under `app/(site)`, leave its `layout.tsx`
+alone unless the change is specifically about metadata.
+
+**Data modules do not live inside route folders.** `lib/faq-data.ts`,
+`lib/pricing-faqs.ts` and `lib/why-copy.ts` were once
+`app/(main)/faq/faq-data.ts` and friends, and every importer broke the moment
+their route group moved. New shared content goes in `lib/`.
+
+## What `demo.zenyaai.co` is for now
+
+It served the candidate set while the restyle was under review. That set is
+the site, so the subdomain is down to two entries in `DEMO_SUBDOMAIN_PAGES` in
+`middleware.ts`:
 
 ```ts
 const DEMO_SUBDOMAIN_PAGES = new Set([
-  'home', 'pricing', 'templates', 'build', 'access',
-  // ← add the new segment here
+  'dashboard', 'editor',
 ])
 ```
 
-The segment is the directory name under `app/demo/`, so `app/demo/access`
-→ `'access'` → `demo.zenyaai.co/access`.
+Both are product surfaces that normally sit behind an account;
+`app/demo/dashboard` and `app/demo/editor` render them against fixture data so
+they can be looked at without signing in. Everything else on that host 307s to
+the apex, which is now the right answer rather than a fallback — a former
+candidate address lands on the page it became.
 
-Before finishing any task that adds a page under `app/demo/`, check that its
-segment is in that Set. If it is not, add it.
+**If you add a page under `app/demo/`, register its segment in that Set in the
+same commit.** An unregistered segment 307s to the apex, so from the owner's
+side the page simply does not exist. The segment is the directory name under
+`app/demo/`.
 
-**The one exception, already recorded in `middleware.ts`:** the generated-site
-theme previews — restaurant, atlas, lookbook, wellness, studio, services,
-storefront, collective, sufra, thread, ribbon — are deliberately NOT on the
-allowlist. They are previews of what the product *generates*, not candidates
-for Zenya's own site, and they keep their addresses under `zenyaai.co/demo/*`.
-The rule above is for the candidate set (home / pricing / templates / build /
-access and whatever follows them). If a theme preview should go on the
-subdomain too, that is a decision for the owner to make, not an oversight to
-fix silently.
+**The standing exception:** the generated-site theme previews — restaurant,
+atlas, lookbook, wellness, studio, services, collective, sufra, thread, ribbon,
+and the storefront at `/demo` itself — are deliberately NOT on the allowlist.
+They preview what the product *generates*, not Zenya's own site, and they keep
+their addresses under `zenyaai.co/demo/*`.
+
+## Two documents to read before large work here
+
+- `docs/zenya-candidate-programme.md` — what was built, the tokens, the
+  rendering traps (ZoomLock's `zoom: 0.85` means every floor is held in
+  *rendered* pixels), and the honesty rules.
+- `docs/zenya-theme-check.md` — the twelve-gate pre-flight audit, and which
+  gates block a merge.
