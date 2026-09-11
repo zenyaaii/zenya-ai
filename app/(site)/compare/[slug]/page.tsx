@@ -37,20 +37,47 @@
 
 import type { Metadata } from "next"
 import Link from "next/link"
+import { hreflangAlternates } from "@/lib/i18n/config"
 import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
-import { COMPARISONS } from "@/lib/comparisons"
+import { COMPARISONS, getComparison } from "@/lib/comparisons"
 import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, Hero, CompareTable, ChooseBlocks, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
+
+const SITE = 'https://zenyaai.co'
 
 export function generateStaticParams() {
   return COMPARISONS.map((c) => ({ slug: c.slug }))
 }
 
-export const metadata: Metadata = {
-  title: "مقارنة (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+  const c = getComparison(params.slug)
+  if (!c) return {}
+  const url = `${SITE}/compare/${c.slug}`
+  return {
+    title: c.title,
+    description: c.metaDescription,
+    keywords: [
+      `زينيا مقابل ${c.them}`,
+      `Zenya vs ${c.themLatin}`,
+      `${c.them} بديل`,
+      `أفضل من ${c.them}`,
+      'منشئ مواقع بالذكاء الاصطناعي',
+      'منشئ مواقع عربي',
+    ],
+    alternates: {
+      canonical: url,
+      languages: hreflangAlternates(url, `${SITE}/en/compare/${c.slug}`),
+    },
+    openGraph: {
+      title: c.title,
+      description: c.metaDescription,
+      url,
+      type: 'article',
+    },
+    twitter: { card: 'summary_large_image', title: c.title, description: c.metaDescription },
+  }
 }
 
 export default function DemoComparePage({ params }: { params: { slug: string } }) {
@@ -62,8 +89,8 @@ export default function DemoComparePage({ params }: { params: { slug: string } }
     <Shell css={CSS}>
       <Breadcrumbs
         trail={[
-          { label: "الرئيسية", href: "/demo/home" },
-          { label: "المقارنات", href: "/demo/compare" },
+          { label: "الرئيسية", href: "/" },
+          { label: "المقارنات", href: "/compare" },
           { label: `زينيا مقابل ${c.them}` },
         ]}
       />
@@ -73,7 +100,7 @@ export default function DemoComparePage({ params }: { params: { slug: string } }
         title={<>زينيا مقابل</>}
         mark={c.them}
         intro={c.intro}
-        actions={<Link href="/demo/access?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
+        actions={<Link href="/login?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
       />
 
       <section className="zx-wide" data-reveal>
@@ -87,7 +114,7 @@ export default function DemoComparePage({ params }: { params: { slug: string } }
         <h2 className="zx-h2">مقارنات أخرى</h2>
         <div className="zx-pills">
           {others.map((o) => (
-            <Link key={o.slug} href={`/demo/compare/${o.slug}`} className="zx-pill-link">
+            <Link key={o.slug} href={`/compare/${o.slug}`} className="zx-pill-link">
               {`زينيا مقابل ${o.them}`}
               <ArrowLeft size={15} strokeWidth={2.25} aria-hidden />
             </Link>

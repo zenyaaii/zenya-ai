@@ -33,21 +33,42 @@
 
 import type { Metadata } from "next"
 import Link from "next/link"
+import { hreflangAlternates } from "@/lib/i18n/config"
 import { notFound } from "next/navigation"
 import { ArrowLeft, Eye } from "lucide-react"
-import { TEMPLATE_PAGES } from "@/lib/template-pages"
+import { TEMPLATE_PAGES, getTemplatePage } from "@/lib/template-pages"
 import { themePreview } from "@/lib/theme-previews"
 import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/websites/styles"
 
+const SITE = 'https://zenyaai.co'
+
 export function generateStaticParams() {
   return TEMPLATE_PAGES.map((t) => ({ slug: t.slug }))
 }
 
-export const metadata: Metadata = {
-  title: "نوع موقع (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+  const t = getTemplatePage(params.slug)
+  if (!t) return {}
+  const url = `${SITE}/websites/${t.slug}`
+  return {
+    title: t.title,
+    description: t.metaDescription,
+    keywords: t.keywords,
+    alternates: {
+      canonical: url,
+      languages: hreflangAlternates(url, `${SITE}/en/websites/${t.slug}`),
+    },
+    openGraph: {
+      title: t.title,
+      description: t.metaDescription,
+      url,
+      type: 'website',
+      images: [{ url: themePreview(t.key), width: 1200, height: 630, alt: t.name }],
+    },
+    twitter: { card: 'summary_large_image', title: t.title, description: t.metaDescription },
+  }
 }
 
 export default function DemoWebsiteType({ params }: { params: { slug: string } }) {
@@ -59,8 +80,8 @@ export default function DemoWebsiteType({ params }: { params: { slug: string } }
     <Shell css={CSS}>
       <Breadcrumbs
         trail={[
-          { label: "الرئيسية", href: "/demo/home" },
-          { label: "أنواع المواقع", href: "/demo/websites" },
+          { label: "الرئيسية", href: "/" },
+          { label: "أنواع المواقع", href: "/websites" },
           { label: t.name },
         ]}
       />
@@ -76,7 +97,7 @@ export default function DemoWebsiteType({ params }: { params: { slug: string } }
             <p className="zx-lede" key={i}>{p}</p>
           ))}
           <div className="zx-acts">
-            <Link href="/demo/access?mode=signup" className="zx-act-1">{`أنشئ ${t.name} مجانًا`}</Link>
+            <Link href="/login?mode=signup" className="zx-act-1">{`أنشئ ${t.name} مجانًا`}</Link>
             <Link href={t.demoHref} className="zx-act-2">
               <Eye size={16} strokeWidth={2} aria-hidden />
               شاهد نموذجًا حيًّا
@@ -109,7 +130,7 @@ export default function DemoWebsiteType({ params }: { params: { slug: string } }
         {/* The editorial cross-link the live page added so each /why article
             has a parent that a crawler can actually reach. Kept, because
             removing it would quietly undo that. */}
-        <Link href={`/demo/why/${t.key}`} className="zx-read">
+        <Link href={`/why/${t.key}`} className="zx-read">
           <span>
             <span className="zx-read-k">مقال مطوّل</span>
             <span className="zx-read-h">{`لماذا يحتاج نشاطك إلى ${t.name}؟`}</span>
@@ -127,7 +148,7 @@ export default function DemoWebsiteType({ params }: { params: { slug: string } }
         <h2 className="zx-h2">أنواع مواقع أخرى</h2>
         <div className="zx-pills">
           {others.map((o) => (
-            <Link key={o.slug} href={`/demo/websites/${o.slug}`} className="zx-pill-link">
+            <Link key={o.slug} href={`/websites/${o.slug}`} className="zx-pill-link">
               {o.name}
               <ArrowLeft size={15} strokeWidth={2.25} aria-hidden />
             </Link>

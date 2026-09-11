@@ -250,8 +250,8 @@ export default function CheckoutView({ initialPlan }: { initialPlan: PlanId }) {
         <p className="zx-foot-note">
           هذه صفحة <strong>تصميم مقترح</strong> لواجهة الدفع، وليست الدفع نفسه. صفحة الدفع
           الحقيقية هي <Link className="zx-link" href="/checkout">/checkout</Link>، والأسعار
-          الكاملة على <Link className="zx-link" href="/demo/pricing">صفحة الأسعار</Link>، وشروط
-          الإلغاء والاسترداد في <Link className="zx-link" href="/demo/legal/refund">سياسة الاسترداد</Link>.
+          الكاملة على <Link className="zx-link" href="/pricing">صفحة الأسعار</Link>، وشروط
+          الإلغاء والاسترداد في <Link className="zx-link" href="/refund">سياسة الاسترداد</Link>.
         </p>
       </section>
     </Shell>
@@ -295,7 +295,7 @@ function Summary({
           <Row icon={<CircleAlert className="zk-row-ic" strokeWidth={2} />}>
             <strong>لا يحمل <bdi dir="ltr">lib/company.ts</bdi> سعرًا معروضًا لهذه الخطة</strong>، ولن
             تُكتب هنا قيمة من خارجه. السعر المعتمد على{" "}
-            <Link className="zx-link" href="/demo/pricing">صفحة الأسعار</Link>.
+            <Link className="zx-link" href="/pricing">صفحة الأسعار</Link>.
           </Row>
         ) : null}
 
@@ -415,7 +415,7 @@ function Door({ plan, doorRef }: {
         <Link href={"/checkout?plan=" + plan.id} className="zx-act-1">
           إتمام الدفع على الصفحة الحقيقية
         </Link>
-        <Link href="/demo/pricing" className="zx-act-2">
+        <Link href="/pricing" className="zx-act-2">
           <ArrowLeft size={15} strokeWidth={2} aria-hidden />
           العودة إلى الأسعار
         </Link>

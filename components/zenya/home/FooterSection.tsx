@@ -66,7 +66,7 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
   {
     head: "المنتج",
     links: [
-      { href: "/demo/templates", label: "تصفّح القوالب" },
+      { href: "/themes", label: "تصفّح القوالب" },
       { href: "/features", label: "الميزات" },
       { href: "/websites", label: "أنواع المواقع" },
       { href: "/pricing", label: "الأسعار" },
@@ -163,7 +163,7 @@ export default function FooterSection({
                     نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
                   </p>
 
-                  <Link href="/demo/build" className="zn5-cta">
+                  <Link href="/build" className="zn5-cta">
                     <span>ابدأ الإنشاء</span>
                     <ArrowLeft className="ic" strokeWidth={1.6} aria-hidden />
                   </Link>

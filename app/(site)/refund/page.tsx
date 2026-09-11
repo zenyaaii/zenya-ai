@@ -21,9 +21,12 @@ import type { Metadata } from "next"
 import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/refund"
 
+import { COMPANY } from '@/lib/company'
+
 export const metadata: Metadata = {
-  title: "سياسة الإلغاء والاسترداد (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: `سياسة الاسترداد — ${COMPANY.BRAND_NAME}`,
+  description: `متى وكيف يمكنك إلغاء اشتراكك في ${COMPANY.PRODUCT_NAME} أو طلب استرداد المبلغ.`,
+  alternates: { canonical: '/refund' },
 }
 
 export default function Page() {

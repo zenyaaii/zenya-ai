@@ -25,9 +25,9 @@ export type NavItem = { href: string; label: string; here?: boolean }
 
 /** The candidate set links inside the candidate set, in the set's own order. */
 export const NAV: NavItem[] = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
-  { href: "/demo/contact", label: "تواصل" },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
+  { href: "/contact", label: "تواصل" },
 ]
 
 /**
@@ -94,8 +94,8 @@ export default function Header({
             aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
-          <Link href="/demo/home" aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
-          <Link href="/demo/access?mode=signup" className="zx-account zx-account-phone">ابدأ</Link>
+          <Link href="/" aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
+          <Link href="/login?mode=signup" className="zx-account zx-account-phone">ابدأ</Link>
         </div>
         <div className="zx-drawer" data-open={menuOpen ? "true" : undefined}
           style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -115,7 +115,7 @@ export default function Header({
       <div className="zx-pill">
         <div className="zx-bar">
           <span className="zx-side zx-side-start">
-            <Link href="/demo/home" className="zx-mark" aria-label="زينيا"><ZenyaMark className="zx-mark-svg" /></Link>
+            <Link href="/" className="zx-mark" aria-label="زينيا"><ZenyaMark className="zx-mark-svg" /></Link>
           </span>
           <nav className="zx-nav">
             {nav.map((i) => (
@@ -126,7 +126,7 @@ export default function Header({
           </nav>
           <span className="zx-side zx-side-end">
             <span className="zx-sep" aria-hidden />
-            <Link href="/demo/access?mode=signup" className="zx-account">ابدأ</Link>
+            <Link href="/login?mode=signup" className="zx-account">ابدأ</Link>
           </span>
         </div>
       </div>

@@ -276,13 +276,13 @@ const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
      own header at the live catalogue dropped a reviewer out of the candidate
      set mid-read. Point this back at /themes if the candidate is ever
      promoted. */
-  { href: "/demo/templates", label: "القوالب", panel: "themes" },
+  { href: "/themes", label: "القوالب", panel: "themes" },
   /* The demo's own pricing screen, not the live one. Both exist: /pricing is
      the page that takes money today and is untouched; /demo/pricing is the
      candidate in this deck's style, reviewable on the real domain without
      changing what a customer pays. Point this back at /pricing if the
      candidate is ever promoted. */
-  { href: "/demo/pricing", label: "الأسعار" },
+  { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -421,8 +421,8 @@ export default function Page() {
      dash still resolves for real: it only ever shows for someone who IS
      signed in, and there is no demo dashboard to send them to. */
   const [portal, setPortal] = useState({
-    login: "/demo/access",
-    signup: "/demo/access?mode=signup",
+    login: "/login",
+    signup: "/login?mode=signup",
     dash: "/dashboard",
   })
   useEffect(() => {
@@ -4433,7 +4433,7 @@ export default function Page() {
                     {/* The candidate catalogue, matching the nav item this
                         tray hangs off. */}
                     <Link
-                      href="/demo/templates"
+                      href="/themes"
                       onClick={() => setPanel(null)}
                       className={`${ROW} mt-1.5 pt-2.5`}
                       style={{ color: OBSIDIAN, borderTop: "1px solid rgba(0,0,0,0.07)" }}

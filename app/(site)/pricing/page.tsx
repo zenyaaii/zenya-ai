@@ -62,13 +62,7 @@
  * nobody has checked is not a design decision.
  */
 
-import type { Metadata } from "next"
 import PricingView from "@/components/zenya/pricing/PricingView"
-
-export const metadata: Metadata = {
-  title: "الأسعار — نسخة تجريبية",
-  robots: { index: false, follow: false },
-}
 
 export default function DemoPricingPage() {
   return <PricingView />

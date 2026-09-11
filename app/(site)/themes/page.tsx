@@ -48,13 +48,7 @@
  * lie.
  */
 
-import type { Metadata } from "next"
 import TemplatesView from "@/components/zenya/templates/TemplatesView"
-
-export const metadata: Metadata = {
-  title: "القوالب — نسخة تجريبية",
-  robots: { index: false, follow: false },
-}
 
 export default function DemoTemplatesPage() {
   return <TemplatesView />

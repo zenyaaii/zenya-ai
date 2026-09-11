@@ -46,9 +46,9 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 
 /* The candidate set links inside the candidate set, in the set's own order. */
 const NAV: Array<{ href: string; label: string }> = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
-  { href: "/demo/contact", label: "تواصل" },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
+  { href: "/contact", label: "تواصل" },
 ]
 
 /**
@@ -199,8 +199,8 @@ export default function LegalShell({
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
-            <Link href="/demo/access?mode=signup" className="zl-account zl-account-phone">ابدأ</Link>
+            <Link href="/" aria-label="زينيا" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
+            <Link href="/login?mode=signup" className="zl-account zl-account-phone">ابدأ</Link>
           </div>
           <div className="zl-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -219,7 +219,7 @@ export default function LegalShell({
         <div className="zl-pill">
           <div className="zl-bar">
             <span className="zl-side zl-side-start">
-              <Link href="/demo/home" className="zl-mark" aria-label="زينيا"><ZenyaMark className="zl-mark-svg" /></Link>
+              <Link href="/" className="zl-mark" aria-label="زينيا"><ZenyaMark className="zl-mark-svg" /></Link>
             </span>
             <nav className="zl-nav">
               {NAV.map((i) => (
@@ -228,7 +228,7 @@ export default function LegalShell({
             </nav>
             <span className="zl-side zl-side-end">
               <span className="zl-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zl-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="zl-account">ابدأ</Link>
             </span>
           </div>
         </div>
@@ -254,7 +254,7 @@ export default function LegalShell({
         <nav className="zl-switch" aria-label="المستندات القانونية" data-reveal>
           <div className="zl-switch-rail">
             {DOCS.map((d) => (
-              <Link key={d.slug} href={"/demo/legal/" + d.slug} className="zl-doc-link"
+              <Link key={d.slug} href={"/" + d.slug} className="zl-doc-link"
                 aria-current={d.slug === slug ? "page" : undefined}>
                 {d.title}
               </Link>

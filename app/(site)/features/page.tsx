@@ -50,9 +50,34 @@ import { Breadcrumbs, Hero, FaqList, CtaBand } from "@/components/zenya/chrome/P
 import type { QA } from "@/lib/faq-data"
 import { CSS } from "@/components/zenya/features/styles"
 
+import { hreflangAlternates } from '@/lib/i18n/config'
+
+const SITE = 'https://zenyaai.co'
+
 export const metadata: Metadata = {
-  title: "المزايا (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: 'المزايا: محتوى بالذكاء الاصطناعي، استضافة ونطاق',
+  description:
+    'كل ما تقدّمه زينيا: محتوى عربي يكتبه الذكاء الاصطناعي، 8 قوالب لكل نشاط، استضافة داخل الاتحاد الأوروبي مع SSL وGDPR، نطاق مخصّص مجاني على Pro، تصدير إلى شوبيفاي مع دفع آمن، محرّر مباشر، تحليلات، وجاهزية كاملة لمحرّكات البحث.',
+  keywords: [
+    'ميزات زينيا',
+    'استضافة مواقع عربية',
+    'ربط نطاق مخصّص',
+    'قبول المدفوعات موقع',
+    'محرّر مواقع بالذكاء الاصطناعي',
+    'استضافة GDPR أوروبا',
+    'تصدير شوبيفاي',
+  ],
+  alternates: {
+    canonical: `${SITE}/features`,
+    languages: hreflangAlternates(`${SITE}/features`, `${SITE}/en/features`),
+  },
+  openGraph: {
+    title: 'ميزات زينيا — محتوى بالذكاء الاصطناعي، استضافة، نطاق، ودفع',
+    description:
+      'محتوى عربي بالذكاء الاصطناعي، 8 قوالب، استضافة أوروبية + SSL + GDPR، نطاق مخصّص، تصدير شوبيفاي مع دفع آمن، محرّر مباشر، وتحليلات.',
+    url: `${SITE}/features`,
+    type: 'website',
+  },
 }
 
 /** The live page's ten features, titles and bodies unchanged. */
@@ -80,7 +105,7 @@ const FEATURE_FAQS: QA[] = [
 export default function DemoFeaturesPage() {
   return (
     <Shell css={CSS}>
-      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/demo/home" }, { label: "الميزات" }]} />
+      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "الميزات" }]} />
 
       {/* THE HEADLINE IS THE LIVE HEADLINE, em-dash and all: "كل شيء لإطلاق
           موقعك — مكتوبًا ومستضافًا لك." An earlier draft of this file swapped
@@ -100,7 +125,7 @@ export default function DemoFeaturesPage() {
         intro={[
           "زينيا ليست مجرّد قوالب. من المحتوى الذي يكتبه الذكاء الاصطناعي، إلى الاستضافة الأوروبية والنطاق المخصّص والدفع الآمن — كل ما يحتاجه نشاطك ليظهر باحترافية في مكان واحد.",
         ]}
-        actions={<Link href="/demo/access?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
+        actions={<Link href="/login?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
       />
 
       <section className="zx-feats zx-wide" data-reveal>

@@ -67,9 +67,33 @@ export function generateStaticParams() {
   return Object.keys(ARTICLES).map((type) => ({ type }))
 }
 
-export const metadata: Metadata = {
-  title: "دليل زينيا (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+const SITE = 'https://zenyaai.co'
+
+export function generateMetadata({ params }: { params: { type: string } }): Metadata {
+  const article = ARTICLES[params.type as Article['key']]
+  if (!article) return { title: 'زينيا' }
+  return {
+    // `absolute` on purpose: every meta.title already ends in the wordmark, and
+    // the root layout's template appends it a second time. The live pages were
+    // shipping it twice, which Google truncates and readers read as a bug.
+    // absolute suppresses the template and the copy keeps its own wordmark.
+    title: { absolute: article.meta.title },
+    description: article.meta.description,
+    keywords: article.meta.keywords,
+    alternates: { canonical: `${SITE}/why/${article.key}` },
+    openGraph: {
+      title: article.meta.title,
+      description: article.meta.description,
+      url: `${SITE}/why/${article.key}`,
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.meta.title,
+      description: article.meta.description,
+    },
+    robots: { index: true, follow: true },
+  }
 }
 
 export default function DemoWhyPage({ params }: { params: { type: string } }) {
@@ -82,8 +106,8 @@ export default function DemoWhyPage({ params }: { params: { type: string } }) {
     <Shell css={CSS}>
       <Breadcrumbs
         trail={[
-          { label: "الرئيسية", href: "/demo/home" },
-          { label: "القوالب", href: "/demo/templates" },
+          { label: "الرئيسية", href: "/" },
+          { label: "القوالب", href: "/themes" },
           { label: article.templateName },
         ]}
       />
@@ -156,7 +180,7 @@ export default function DemoWhyPage({ params }: { params: { type: string } }) {
             same vertical, then the seven siblings. Kept, because removing it
             would put these eight articles back to being dead ends. */}
         {twin ? (
-          <Link href={`/demo/websites/${twin.slug}`} className="zx-twin" data-reveal>
+          <Link href={`/websites/${twin.slug}`} className="zx-twin" data-reveal>
             <span>
               <span className="zx-twin-k">القالب نفسه</span>
               <span className="zx-twin-h">{`${twin.name} من زينيا`}</span>
@@ -172,7 +196,7 @@ export default function DemoWhyPage({ params }: { params: { type: string } }) {
           <h2 className="zx-h2">اقرأ أيضًا</h2>
           <div className="zx-pills">
             {siblings.map((s) => (
-              <Link key={s.key} href={`/demo/why/${s.key}`} className="zx-pill-link">
+              <Link key={s.key} href={`/why/${s.key}`} className="zx-pill-link">
                 {s.templateName}
                 <ArrowLeft size={15} strokeWidth={2.25} aria-hidden />
               </Link>

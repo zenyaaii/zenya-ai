@@ -21,9 +21,12 @@ import type { Metadata } from "next"
 import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/subprocessors"
 
+import { COMPANY } from '@/lib/company'
+
 export const metadata: Metadata = {
-  title: "المعالجون الفرعيون (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: `المعالجون الفرعيون — ${COMPANY.BRAND_NAME}`,
+  description: `مزوّدو الخدمات الخارجيون الذين يعالجون البيانات نيابةً عن ${COMPANY.PRODUCT_NAME}.`,
+  alternates: { canonical: '/subprocessors' },
 }
 
 export default function Page() {

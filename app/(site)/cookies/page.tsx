@@ -21,9 +21,12 @@ import type { Metadata } from "next"
 import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/cookies"
 
+import { COMPANY } from '@/lib/company'
+
 export const metadata: Metadata = {
-  title: "سياسة ملفات تعريف الارتباط (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: `سياسة ملفات تعريف الارتباط — ${COMPANY.BRAND_NAME}`,
+  description: `كيف ولماذا يستخدم ${COMPANY.PRODUCT_NAME} ملفات تعريف الارتباط والتقنيات المشابهة.`,
+  alternates: { canonical: '/cookies' },
 }
 
 export default function Page() {

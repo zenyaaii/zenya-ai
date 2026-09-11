@@ -4,7 +4,7 @@
  * Seven candidate pages each carry their own copy of this block, which is how
  * a floor fixed on one page stays broken on the other six: the 14px header
  * type that renders 11.9px, and the 31.8px nav item against a 32px coarse
- * floor, were fixed in app/demo/legal/styles.ts and nowhere else. This module
+ * floor, were fixed in components/zenya/legal/styles.ts and nowhere else. This module
  * is that corrected version, lifted verbatim, so the pages built from here on
  * share one definition instead of eight.
  *

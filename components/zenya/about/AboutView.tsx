@@ -133,8 +133,8 @@ export default function AboutView() {
             ثقة العملاء، دون أن يدفع آلاف الدولارات لوكالة أو ينتظر أسابيع.
           </p>
           <div className="zx-acts">
-            <SlideButton href="/demo/access?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
-            <Link href="/demo/templates" className="zx-act-2">شاهد القوالب الثمانية</Link>
+            <SlideButton href="/login?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
+            <Link href="/themes" className="zx-act-2">شاهد القوالب الثمانية</Link>
           </div>
         </section>
 
@@ -235,8 +235,8 @@ export default function AboutView() {
                 the skill's one-label-per-intent rule rather than a second
                 intent. */}
             <div className="zx-acts zx-acts-en">
-              <SlideButton href="/demo/access?mode=signup">Start building free</SlideButton>
-              <Link href="/demo/pricing" className="zx-act-2">See pricing</Link>
+              <SlideButton href="/login?mode=signup">Start building free</SlideButton>
+              <Link href="/pricing" className="zx-act-2">See pricing</Link>
             </div>
         </section>
 

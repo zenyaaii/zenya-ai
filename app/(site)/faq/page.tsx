@@ -36,13 +36,7 @@
  * REGISTERED ON THE SUBDOMAIN in the same commit, per CLAUDE.md.
  */
 
-import type { Metadata } from "next"
 import FaqView from "@/components/zenya/faq/FaqView"
-
-export const metadata: Metadata = {
-  title: "الأسئلة الشائعة (نسخة تجريبية)",
-  robots: { index: false, follow: false },
-}
 
 export default function DemoFaqPage() {
   return <FaqView />

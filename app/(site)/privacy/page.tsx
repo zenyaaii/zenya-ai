@@ -21,9 +21,12 @@ import type { Metadata } from "next"
 import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/privacy"
 
+import { COMPANY } from '@/lib/company'
+
 export const metadata: Metadata = {
-  title: "سياسة الخصوصية (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: `سياسة الخصوصية — ${COMPANY.BRAND_NAME}`,
+  description: `كيف يجمع ${COMPANY.PRODUCT_NAME} بياناتك الشخصية ويستخدمها ويحميها. متوافق مع اللائحة العامة لحماية البيانات (GDPR).`,
+  alternates: { canonical: '/privacy' },
 }
 
 export default function Page() {

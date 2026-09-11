@@ -41,13 +41,7 @@
  * in DEMO_SUBDOMAIN_PAGES, so this renders at demo.zenyaai.co/about.
  */
 
-import type { Metadata } from "next"
 import AboutView from "@/components/zenya/about/AboutView"
-
-export const metadata: Metadata = {
-  title: "من نحن (نسخة تجريبية)",
-  robots: { index: false, follow: false },
-}
 
 export default function DemoAboutPage() {
   return <AboutView />

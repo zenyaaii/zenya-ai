@@ -159,7 +159,7 @@ export function CtaBand({
   subtitle = "اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.",
   primaryLabel = "ابدأ الإنشاء مجانًا",
   secondaryLabel = "شاهد الأسعار",
-  secondaryHref = "/demo/pricing",
+  secondaryHref = "/pricing",
   children,
 }: {
   /** Some closing bands carry their own label. The live /why band prints
@@ -185,7 +185,7 @@ export function CtaBand({
       <p className="zx-band-p">{subtitle}</p>
       {children}
       <div className="zx-acts">
-        <Link href="/demo/access?mode=signup" className="zx-act-1">{primaryLabel}</Link>
+        <Link href="/login?mode=signup" className="zx-act-1">{primaryLabel}</Link>
         <Link href={secondaryHref} className="zx-act-2">{secondaryLabel}</Link>
       </div>
     </section>

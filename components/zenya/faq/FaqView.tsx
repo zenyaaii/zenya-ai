@@ -97,10 +97,10 @@ export default function FaqView() {
           </h1>
           <p className="zx-lede">
             كل ما تحتاج معرفته عن زينيا. لم تجد سؤالك؟{" "}
-            <Link href="/demo/contact">تواصل معنا</Link>.
+            <Link href="/contact">تواصل معنا</Link>.
           </p>
           <div className="zx-acts">
-            <SlideButton href="/demo/access?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
+            <SlideButton href="/login?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
           </div>
         </section>
 
@@ -138,7 +138,7 @@ export default function FaqView() {
           <h2 className="zx-h2">جاهز لتجربة زينيا؟</h2>
           <p className="zx-p">ابدأ مجانًا — بلا بطاقة ائتمان.</p>
           <div className="zx-acts">
-            <SlideButton href="/demo/access?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
+            <SlideButton href="/login?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
           </div>
         </section>
 

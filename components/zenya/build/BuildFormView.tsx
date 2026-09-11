@@ -53,8 +53,8 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 /* The candidate set links inside the candidate set. Reported twice on the
    other pages; it does not get to regress here. */
 const NAV: Array<{ href: string; label: string; current?: boolean }> = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -523,8 +523,8 @@ export default function BuildFormView() {
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
-            <Link href="/demo/access?mode=signup" className="zb-account zb-account-phone">ابدأ</Link>
+            <Link href="/" aria-label="زينيا" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
+            <Link href="/login?mode=signup" className="zb-account zb-account-phone">ابدأ</Link>
           </div>
           <div className="zb-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -541,7 +541,7 @@ export default function BuildFormView() {
         <div className="zb-pill">
           <div className="zb-bar">
             <span className="zb-side zb-side-start">
-              <Link href="/demo/home" className="zb-mark" aria-label="زينيا"><ZenyaMark className="zb-mark-svg" /></Link>
+              <Link href="/" className="zb-mark" aria-label="زينيا"><ZenyaMark className="zb-mark-svg" /></Link>
             </span>
             <nav className="zb-nav">
               {NAV.map((i) => (
@@ -550,7 +550,7 @@ export default function BuildFormView() {
             </nav>
             <span className="zb-side zb-side-end">
               <span className="zb-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zb-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="zb-account">ابدأ</Link>
             </span>
           </div>
         </div>

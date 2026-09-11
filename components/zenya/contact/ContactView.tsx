@@ -71,9 +71,9 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 /* The candidate set links inside the candidate set, in the set's own order.
    تواصل points at this page, which is why it carries aria-current. */
 const NAV: Array<{ href: string; label: string; here?: boolean }> = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
-  { href: "/demo/contact", label: "تواصل", here: true },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
+  { href: "/contact", label: "تواصل", here: true },
 ]
 
 /** The real channel this page is a proposal for. */
@@ -287,8 +287,8 @@ export default function ContactView() {
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zc-phone-mark"><ZenyaMark className="zc-mark-svg-sm" /></Link>
-            <Link href="/demo/access?mode=signup" className="zc-account zc-account-phone">ابدأ</Link>
+            <Link href="/" aria-label="زينيا" className="zc-phone-mark"><ZenyaMark className="zc-mark-svg-sm" /></Link>
+            <Link href="/login?mode=signup" className="zc-account zc-account-phone">ابدأ</Link>
           </div>
           <div className="zc-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -308,7 +308,7 @@ export default function ContactView() {
         <div className="zc-pill">
           <div className="zc-bar">
             <span className="zc-side zc-side-start">
-              <Link href="/demo/home" className="zc-mark" aria-label="زينيا"><ZenyaMark className="zc-mark-svg" /></Link>
+              <Link href="/" className="zc-mark" aria-label="زينيا"><ZenyaMark className="zc-mark-svg" /></Link>
             </span>
             <nav className="zc-nav">
               {NAV.map((i) => (
@@ -319,7 +319,7 @@ export default function ContactView() {
             </nav>
             <span className="zc-side zc-side-end">
               <span className="zc-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zc-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="zc-account">ابدأ</Link>
             </span>
           </div>
         </div>
@@ -427,7 +427,7 @@ export default function ContactView() {
                     <p>
                       القناة الحقيقية ترفض مراجعة بلا نجوم، وتقول ذلك بهذه الكلمات:
                       «{NO_STARS}» لذلك تُكتب المراجعة حيث تُختار النجوم أولًا، في{" "}
-                      <Link href="/demo/review" className="zc-link">قناة التقييم</Link>.
+                      <Link href="/review" className="zc-link">قناة التقييم</Link>.
                     </p>
                   </div>
                 </Grow>
@@ -470,7 +470,7 @@ export default function ContactView() {
 
                   <div className="zc-go">
                     {isReview ? (
-                      <SlideButton href="/demo/review" variant="violet" slide="اختر نجومك هناك">
+                      <SlideButton href="/review" variant="violet" slide="اختر نجومك هناك">
                         إلى قناة التقييم
                       </SlideButton>
                     ) : (

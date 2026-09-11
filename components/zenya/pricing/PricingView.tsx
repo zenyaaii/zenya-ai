@@ -170,8 +170,8 @@ const NAV: Array<{ href: string; label: string; tray?: boolean; current?: boolea
   // /demo/templates did not exist when this page was built; now that it does,
   // the deck's own header should keep a reader inside the candidate set rather
   // than dropping them onto the production site mid-review.
-  { href: "/demo/templates", label: "القوالب", tray: true },
-  { href: "/demo/pricing", label: "الأسعار", current: true },
+  { href: "/themes", label: "القوالب", tray: true },
+  { href: "/pricing", label: "الأسعار", current: true },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -462,7 +462,7 @@ export default function PricingView() {
             >
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zp-phone-mark">
+            <Link href="/" aria-label="زينيا" className="zp-phone-mark">
               {/* Pure black is permitted here: the style reserves #000 for
                   logo marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zp-mark-svg-sm" />
@@ -470,7 +470,7 @@ export default function PricingView() {
             {/* The deck's own signed-out control, verbatim: an obsidian pill
                 reading ابدأ, not an icon. It is what makes the closed pill
                 measure what the deck's measures. */}
-            <Link href="/demo/access?mode=signup" className="zp-account zp-account-phone">
+            <Link href="/login?mode=signup" className="zp-account zp-account-phone">
               ابدأ
             </Link>
           </div>
@@ -508,7 +508,7 @@ export default function PricingView() {
           <div className="zp-bar">
             <span className="zp-side zp-side-start">
               <Link
-                href="/demo/home"
+                href="/"
                 className="zp-mark"
                 aria-label="زينيا"
                 onMouseEnter={() => setTrayOpen(false)}
@@ -537,7 +537,7 @@ export default function PricingView() {
 
             <span className="zp-side zp-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zp-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zp-account">
+              <Link href="/login?mode=signup" className="zp-account">
                 ابدأ
               </Link>
             </span>

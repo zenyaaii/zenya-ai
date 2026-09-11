@@ -51,8 +51,8 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 
 /* The candidate set links inside the candidate set, in the set's own order. */
 const NAV: Array<{ href: string; label: string }> = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -287,8 +287,8 @@ export default function ReviewView() {
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
-            <Link href="/demo/access?mode=signup" className="zr-account zr-account-phone">ابدأ</Link>
+            <Link href="/" aria-label="زينيا" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
+            <Link href="/login?mode=signup" className="zr-account zr-account-phone">ابدأ</Link>
           </div>
           <div className="zr-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -305,7 +305,7 @@ export default function ReviewView() {
         <div className="zr-pill">
           <div className="zr-bar">
             <span className="zr-side zr-side-start">
-              <Link href="/demo/home" className="zr-mark" aria-label="زينيا"><ZenyaMark className="zr-mark-svg" /></Link>
+              <Link href="/" className="zr-mark" aria-label="زينيا"><ZenyaMark className="zr-mark-svg" /></Link>
             </span>
             <nav className="zr-nav">
               {NAV.map((i) => (
@@ -314,7 +314,7 @@ export default function ReviewView() {
             </nav>
             <span className="zr-side zr-side-end">
               <span className="zr-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zr-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="zr-account">ابدأ</Link>
             </span>
           </div>
         </div>

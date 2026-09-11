@@ -66,8 +66,8 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
    items in the set's own order. Reported three times on the other pages; it
    does not get to regress on the fifth. */
 const NAV: Array<{ href: string; label: string }> = [
-  { href: "/demo/templates", label: "القوالب" },
-  { href: "/demo/pricing", label: "الأسعار" },
+  { href: "/themes", label: "القوالب" },
+  { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -341,10 +341,10 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
+            <Link href="/" aria-label="زينيا" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
             {/* The set's own end control, unchanged. On this page it doubles as
                 the exit to the real thing, which is where it already pointed. */}
-            <Link href="/demo/access?mode=signup" className="za-account za-account-phone">ابدأ</Link>
+            <Link href="/login?mode=signup" className="za-account za-account-phone">ابدأ</Link>
           </div>
           <div className="za-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -361,7 +361,7 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
         <div className="za-pill">
           <div className="za-bar">
             <span className="za-side za-side-start">
-              <Link href="/demo/home" className="za-mark" aria-label="زينيا"><ZenyaMark className="za-mark-svg" /></Link>
+              <Link href="/" className="za-mark" aria-label="زينيا"><ZenyaMark className="za-mark-svg" /></Link>
             </span>
             <nav className="za-nav">
               {NAV.map((i) => (
@@ -370,7 +370,7 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
             </nav>
             <span className="za-side za-side-end">
               <span className="za-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="za-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="za-account">ابدأ</Link>
             </span>
           </div>
         </div>
@@ -392,7 +392,7 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
         <div className="za-well">
           <span className="za-sig" aria-hidden><ZenyaMark className="za-sig-svg" /></span>
         <section className="za-card" aria-labelledby="za-h1">
-          <Link href="/demo/home" className="za-card-mark" aria-label="زينيا">
+          <Link href="/" className="za-card-mark" aria-label="زينيا">
             <ZenyaMark className="za-card-mark-svg" />
           </Link>
 

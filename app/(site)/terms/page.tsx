@@ -21,9 +21,12 @@ import type { Metadata } from "next"
 import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/terms"
 
+import { COMPANY } from '@/lib/company'
+
 export const metadata: Metadata = {
-  title: "شروط الخدمة (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: `شروط الخدمة — ${COMPANY.BRAND_NAME}`,
+  description: `الشروط التي تحكم استخدامك لـ ${COMPANY.PRODUCT_NAME}.`,
+  alternates: { canonical: '/terms' },
 }
 
 export default function Page() {

@@ -144,7 +144,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  */
 const TEMPLATES = [
   { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            build: "/build",                  shopify: true, soon: true },
-  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant", candidate: "/demo/build" },
+  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant", candidate: "/build" },
   { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas",      build: "/theme/new/atlas" },
   { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook",   build: "/theme/new/lookbook" },
   { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective", build: "/theme/new/collective" },
@@ -184,8 +184,8 @@ const FLOOR = [
 ] as const
 
 const NAV: Array<{ href: string; label: string; tray?: boolean; current?: boolean }> = [
-  { href: "/demo/templates", label: "القوالب", tray: true, current: true },
-  { href: "/demo/pricing", label: "الأسعار" },
+  { href: "/themes", label: "القوالب", tray: true, current: true },
+  { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
@@ -412,12 +412,12 @@ export default function TemplatesView() {
             >
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/demo/home" aria-label="زينيا" className="zt-phone-mark">
+            <Link href="/" aria-label="زينيا" className="zt-phone-mark">
               {/* Pure black is permitted here: the style reserves #000 for logo
                   marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zt-mark-svg-sm" />
             </Link>
-            <Link href="/demo/access?mode=signup" className="zt-account zt-account-phone">
+            <Link href="/login?mode=signup" className="zt-account zt-account-phone">
               ابدأ
             </Link>
           </div>
@@ -454,7 +454,7 @@ export default function TemplatesView() {
               the words rather than dragging them along. */}
           <div className="zt-bar">
             <span className="zt-side zt-side-start">
-              <Link href="/demo/home" className="zt-mark" aria-label="زينيا" onMouseEnter={() => setTrayOpen(false)}>
+              <Link href="/" className="zt-mark" aria-label="زينيا" onMouseEnter={() => setTrayOpen(false)}>
                 <ZenyaMark className="zt-mark-svg" />
               </Link>
             </span>
@@ -479,7 +479,7 @@ export default function TemplatesView() {
 
             <span className="zt-side zt-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zt-sep" aria-hidden />
-              <Link href="/demo/access?mode=signup" className="zt-account">ابدأ</Link>
+              <Link href="/login?mode=signup" className="zt-account">ابدأ</Link>
             </span>
           </div>
 
@@ -574,7 +574,7 @@ export default function TemplatesView() {
             <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
             <p className="zt-h2-sub">الاختلاف في الشكل، لا في ما تحصل عليه.</p>
             <div className="zt-panel-cta">
-              <SlideButton href="/demo/build" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="/build" variant="violet" slide="ابدأ الآن">
                 ابدأ الإنشاء
               </SlideButton>
             </div>

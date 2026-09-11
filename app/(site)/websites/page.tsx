@@ -45,15 +45,40 @@ import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, Hero, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/websites/styles"
 
+import { hreflangAlternates } from '@/lib/i18n/config'
+
+const SITE = 'https://zenyaai.co'
+
 export const metadata: Metadata = {
-  title: "أنواع المواقع (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: 'أنواع المواقع: مطعم، تطبيق، متجر، خدمات، عافية',
+  description:
+    'أيًّا كان نشاطك، لزينيا قالب له: موقع مطعم، صفحة هبوط لتطبيق، متجر إلكتروني، موقع أزياء، موقع خدمات، مركز عافية، قصة علامة، أو متجر بمنتج واحد. اختر نوعك وأطلق موقعك بالذكاء الاصطناعي خلال دقائق.',
+  keywords: [
+    'أنواع المواقع',
+    'إنشاء موقع مطعم',
+    'صفحة هبوط تطبيق',
+    'إنشاء متجر إلكتروني',
+    'موقع خدمات',
+    'موقع مركز عافية',
+    'منشئ مواقع بالذكاء الاصطناعي',
+  ],
+  alternates: {
+    canonical: `${SITE}/websites`,
+    languages: hreflangAlternates(`${SITE}/websites`, `${SITE}/en/websites`),
+  },
+  openGraph: {
+    title: 'أنواع المواقع التي تبنيها زينيا',
+    description:
+      'قالب لكل نشاط: مطعم، تطبيق، متجر، أزياء، خدمات، عافية، علامة تجارية، ومنتج واحد — بالذكاء الاصطناعي وبالعربية.',
+    url: `${SITE}/websites`,
+    type: 'website',
+  },
 }
 
 export default function DemoWebsitesHub() {
   return (
     <Shell css={CSS}>
-      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/demo/home" }, { label: "أنواع المواقع" }]} />
+      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "أنواع المواقع" }]} />
 
       <Hero
         eyebrow="قالب لكل نشاط"
@@ -62,14 +87,14 @@ export default function DemoWebsitesHub() {
         intro={[
           "ثمانية قوالب احترافية، واحد لكل نوع نشاط — يكتب الذكاء الاصطناعي محتواها بالعربية ويجهّزها للنشر خلال دقائق. اختر نوع موقعك لتعرف ما يتضمّنه ولتشاهد نموذجًا حيًّا.",
         ]}
-        actions={<Link href="/demo/access?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
+        actions={<Link href="/login?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
       />
 
       <section className="zx-cat zx-wide" data-reveal>
         <ul className="zx-grid">
           {TEMPLATE_PAGES.map((t) => (
             <li key={t.slug} style={{ display: "flex", minWidth: 0 }}>
-              <Link href={`/demo/websites/${t.slug}`} className="zx-card" style={{ flex: 1 }}>
+              <Link href={`/websites/${t.slug}`} className="zx-card" style={{ flex: 1 }}>
                 <span className="zx-shot">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={themePreview(t.key)} alt={`نموذج ${t.name}`} loading="lazy" />

@@ -27,7 +27,7 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
   {
     head: "المنتج",
     links: [
-      { href: "/demo/templates", label: "تصفّح القوالب" },
+      { href: "/themes", label: "تصفّح القوالب" },
       { href: "/features", label: "الميزات" },
       { href: "/websites", label: "أنواع المواقع" },
       { href: "/pricing", label: "الأسعار" },
@@ -81,7 +81,7 @@ export default function PricingFooter() {
         <div className="zf-body">
         <div className="zf-cols">
           <div className="zf-brand">
-            <Link href="/demo/home" aria-label="زينيا" className="zf-mark">
+            <Link href="/" aria-label="زينيا" className="zf-mark">
               <ZenyaMark className="zf-mark-svg" />
             </Link>
             <p className="zf-claim">
@@ -91,7 +91,7 @@ export default function PricingFooter() {
             {/* The deck's footer carries this and it belongs here too: the
                 last thing on a pricing page should be a way to start. */}
             <span className="zf-cta">
-              <SlideButton href="/demo/build" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="/build" variant="violet" slide="ابدأ الآن">
                 ابدأ الإنشاء
               </SlideButton>
             </span>

@@ -39,15 +39,40 @@ import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, Hero, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
 
+import { hreflangAlternates } from '@/lib/i18n/config'
+
+const SITE = 'https://zenyaai.co'
+
 export const metadata: Metadata = {
-  title: "المقارنات (نسخة تجريبية)",
-  robots: { index: false, follow: false },
+  title: 'مقارنة مع ويكس وشوبيفاي وووردبريس وسكوير سبيس',
+  description:
+    'كيف تقارن زينيا بأشهر منشئات المواقع والبدائل؟ مقارنات صريحة مع ويكس (Wix)، شوبيفاي، ووردبريس، سكوير سبيس، والوكالات — في اللغة العربية وRTL، كتابة المحتوى بالذكاء الاصطناعي، السعر، ووقت الإطلاق.',
+  keywords: [
+    'أفضل منشئ مواقع بالذكاء الاصطناعي',
+    'أفضل منشئ مواقع عربي',
+    'بديل ويكس',
+    'بديل شوبيفاي',
+    'بديل ووردبريس',
+    'زينيا مقابل ويكس',
+    'مقارنة منشئات المواقع',
+  ],
+  alternates: {
+    canonical: `${SITE}/compare`,
+    languages: hreflangAlternates(`${SITE}/compare`, `${SITE}/en/compare`),
+  },
+  openGraph: {
+    title: 'زينيا مقابل المنافسين — مقارنات صريحة',
+    description:
+      'مقارنات صريحة بين زينيا وويكس وشوبيفاي وووردبريس وسكوير سبيس والوكالات: اللغة العربية، الذكاء الاصطناعي، السعر، والاستضافة.',
+    url: `${SITE}/compare`,
+    type: 'website',
+  },
 }
 
 export default function DemoCompareHub() {
   return (
     <Shell css={CSS}>
-      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/demo/home" }, { label: "المقارنات" }]} />
+      <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "المقارنات" }]} />
 
       <Hero
         eyebrow="زينيا مقابل غيرها"
@@ -57,14 +82,14 @@ export default function DemoCompareHub() {
           "معظم منشئات المواقع عالمية وإنجليزية أولًا: تمنحك أدوات، لكنك تصمّم وتكتب كل شيء بنفسك. زينيا عربية أولًا، والذكاء الاصطناعي يكتب موقعك ويرتّب أقسامه من نبذة قصيرة — فتنطلق خلال دقائق.",
           "قارنّا زينيا بصدق مع أشهر البدائل. لكل مقارنة صفحة تشرح الفروق بالتفصيل، وتقول بوضوح متى يكون المنافس هو الخيار الأنسب لك.",
         ]}
-        actions={<Link href="/demo/access?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
+        actions={<Link href="/login?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
       />
 
       <section className="zx-cmps zx-wide" data-reveal>
         <ul className="zx-cmplist">
           {COMPARISONS.map((c) => (
             <li key={c.slug} style={{ display: "contents" }}>
-              <Link href={`/demo/compare/${c.slug}`} className="zx-cmp">
+              <Link href={`/compare/${c.slug}`} className="zx-cmp">
                 <h2 className="zx-cmp-h">
                   {`زينيا مقابل ${c.them}`}
                   <bdi dir="ltr" className="zx-cmp-latin">{c.themLatin}</bdi>
