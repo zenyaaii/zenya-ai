@@ -31,6 +31,7 @@
  * THE COPY IS THE LIVE COPY, read from lib/comparisons rather than copied.
  */
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -111,7 +112,7 @@ export default function DemoCompareHub() {
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>الذكاء الاصطناعي يكتب لك:</b> من نبذة قصيرة إلى موقع كامل بالنصوص والتصميم.</span></li>
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>جاهز خلال دقائق:</b> لا أسابيع انتظار ولا صيانة.</span></li>
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>مُدار بالكامل:</b> استضافة أوروبية + SSL + GDPR، ونطاق مخصّص على Pro.</span></li>
-          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>بسعر معقول:</b> مجانًا للتجربة، ثم 14.99$–24.99$ شهريًا.</span></li>
+          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>بسعر معقول:</b> مجانًا للتجربة، ثم {usdTrailing(COMPANY.STARTER_PRICE_USD)}–{usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا.</span></li>
         </ul>
       </section>
 

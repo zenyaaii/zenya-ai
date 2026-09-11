@@ -1,3 +1,4 @@
+import { COMPANY, usd } from '@/lib/company'
 import { ImageResponse } from 'next/og'
 
 // Dynamic 1200x630 OG image — used by Twitter/LinkedIn/Facebook previews.
@@ -78,7 +79,7 @@ export default async function OpenGraphImage() {
             zenyaai.co
           </div>
           <div>·</div>
-          <div>$14.99/mo Starter · $24.99/mo Pro</div>
+          <div>{`${usd(COMPANY.STARTER_PRICE_USD)}/mo Starter · ${usd(COMPANY.PRO_PRICE_USD)}/mo Pro`}</div>
         </div>
       </div>
     ),

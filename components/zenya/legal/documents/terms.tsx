@@ -1,4 +1,4 @@
-import { COMPANY, formatAddress } from '@/lib/company'
+import { COMPANY, formatAddress, usdTrailing } from '@/lib/company'
 
 /**
  * terms: the live document's clauses, moved without a word changed.
@@ -173,7 +173,7 @@ export default function Doc() {
       <h2 id="s-6">٦. التسعير والفوترة</h2>
       <ul>
         <li><strong>الباقة المجانية:</strong> حتى عمليتَي توليد تجريبيتين لكل حساب، دون بطاقة ائتمان.</li>
-        <li><strong>Starter:</strong> 14.99$ شهريًا — توليد وتصدير غير محدودين بالذكاء الاصطناعي. <strong>Pro:</strong> 24.99$ شهريًا — يضيف استضافة زينيا الكاملة، والنطاق المخصّص، وشهادة SSL، والتحليلات.</li>
+        <li><strong>Starter:</strong> {usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا — توليد وتصدير غير محدودين بالذكاء الاصطناعي. <strong>Pro:</strong> {usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا — يضيف استضافة زينيا الكاملة، والنطاق المخصّص، وشهادة SSL، والتحليلات.</li>
         <li>كلتا الخطتين <strong>اشتراك شهري يتجدّد تلقائيًا</strong> في نهاية كل دورة فوترة حتى تُلغيه. يمكنك الإلغاء في أي وقت من لوحة التحكم، ويبقى اشتراكك فعّالًا حتى نهاية الدورة المدفوعة الحالية.</li>
         <li>العملاء الحاليون على الخطة السابقة لمرة واحدة (9.99$) أو خطة الاستضافة (19.99$ شهريًا) يحتفظون بخطّتهم وسعرها دون تغيير.</li>
         <li>تُحدَّد العملة حسب بلدك: الدولار الأمريكي خارج المنطقة الاقتصادية الأوروبية/المملكة المتحدة، واليورو داخلهما.</li>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { hreflangAlternates } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
 import { FAQS } from '@/lib/pricing-faqs'
+import { COMPANY, usdTrailing } from '@/lib/company'
 
 /**
  * This route is the ARABIC pricing page — /en/pricing is the English twin.
@@ -14,9 +15,9 @@ import { FAQS } from '@/lib/pricing-faqs'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: 'الأسعار — Entry بـ 0.50$ مرّة واحدة، Starter بـ 14.99$ شهريًا، Pro بـ 24.99$',
+  title: `الأسعار — Entry بـ ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} مرّة واحدة، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
   description:
-    'ابدأ بخطة Entry: 0.50$ لمرة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على اسمك.zenyaai.co. Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاقك الخاص والحجوزات والتحليلات وتصدير شوبيفاي. Pro بـ 24.99$ شهريًا يضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. الإلغاء متاح في أي وقت.',
+    `ابدأ بخطة Entry: ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على اسمك.zenyaai.co. Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا لتوليد غير محدود ونطاقك الخاص والحجوزات والتحليلات وتصدير شوبيفاي. Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا يضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. الإلغاء متاح في أي وقت.`,
   keywords: [
     'أسعار منشئ المواقع',
     'كم تكلفة إنشاء موقع',
@@ -32,14 +33,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    title: 'أسعار زينيا — من 0.50$ لمرة واحدة إلى 24.99$ شهريًا مع الاستضافة',
+    title: `أسعار زينيا — من ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description:
       'ثلاث خطط واضحة: Entry لمرة واحدة، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
     url: `${SITE}/pricing`,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'أسعار زينيا — من 0.50$ لمرة واحدة إلى 24.99$ شهريًا مع الاستضافة',
+    title: `أسعار زينيا — من ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description: 'ثلاث خطط واضحة، بلا عقود، والإلغاء في أي وقت.',
   },
 }
@@ -71,7 +72,7 @@ const PRICING_OFFER_SCHEMA = {
     {
       '@type': 'Offer',
       name: 'Entry',
-      price: '0.50',
+      price: COMPANY.ENTRY_PRICE_USD.toFixed(2),
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
@@ -80,7 +81,7 @@ const PRICING_OFFER_SCHEMA = {
     {
       '@type': 'Offer',
       name: 'Starter',
-      price: '14.99',
+      price: String(COMPANY.STARTER_PRICE_USD),
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
@@ -89,7 +90,7 @@ const PRICING_OFFER_SCHEMA = {
     {
       '@type': 'Offer',
       name: 'Pro',
-      price: '24.99',
+      price: String(COMPANY.PRO_PRICE_USD),
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',

@@ -45,6 +45,7 @@
  * app/(main)/pricing/page.tsx, verbatim.
  */
 
+import { COMPANY, usd, usdTrailing } from '@/lib/company'
 import { useEffect, useRef, useState } from "react"
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
@@ -107,7 +108,7 @@ const PLANS = [
   {
     id: "starter",
     name: "Starter",
-    amount: "$14.99",
+    amount: usd(COMPANY.STARTER_PRICE_USD),
     per: "/شهريًا",
     sub: "ابنِ، أدِر، وانشر — بلا حدود، على نطاقك الخاص.",
     cta: "اشترك في Starter",
@@ -129,7 +130,7 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro",
-    amount: "$24.99",
+    amount: usd(COMPANY.PRO_PRICE_USD),
     per: "/شهريًا",
     sub: "ابنِ، أدِر، وانشر — كل شيء مشمول، بنطاق مجاني.",
     cta: "اشترك في Pro",
@@ -156,7 +157,13 @@ const PLANS = [
    edit is "1-2" for "1–2", because an en dash as a range separator is banned
    by the project's design skill. */
 const COMPARE = [
-  { feature: "السعر", zenya: "0.50$ / 14.99$ / 24.99$", other: "+29$ شهريًا", agency: "+2,000$" },
+  {
+    feature: "السعر",
+    zenya: [COMPANY.ENTRY_PRICE_USD, COMPANY.STARTER_PRICE_USD, COMPANY.PRO_PRICE_USD]
+      .map(usdTrailing).join(" / "),
+    other: "+29$ شهريًا",
+    agency: "+2,000$",
+  },
   { feature: "وقت الإعداد", zenya: "أقل من 60 ثانية", other: "دقائق", agency: "أسابيع" },
   { feature: "القوالب", zenya: "8 قوالب", other: "1-2", agency: "مخصّص" },
   { feature: "النشر مشمول", zenya: "من خطة Entry", other: "في معظمها", agency: "تتولّاها بنفسك" },

@@ -21,6 +21,7 @@
 import Link from "next/link"
 import SlideButton from "@/components/ui/SlideButton"
 import ZenyaMark from "@/components/ZenyaMark"
+import { COMPANY } from "@/lib/company"
 import { TikTokIcon, InstagramIcon, XIcon } from "../home/FooterSection"
 
 const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string }> }> = [
@@ -95,8 +96,8 @@ export default function PricingFooter() {
                 ابدأ الإنشاء
               </SlideButton>
             </span>
-            <a className="zf-mail" href="mailto:support@zenyaai.co" dir="ltr">
-              support@zenyaai.co
+            <a className="zf-mail" href={"mailto:" + COMPANY.SUPPORT_EMAIL} dir="ltr">
+              {COMPANY.SUPPORT_EMAIL}
             </a>
           </div>
 
@@ -219,18 +220,30 @@ const CSS = `
 .zf-claim { margin: 1rem 0 0; max-width: 30ch; font-size: 13.5px; font-weight: 500; line-height: 1.9; color: #a8a8b2; }
 .zf-cta { display: block; margin-top: 1.25rem; max-width: 13rem; }
 .zf-mail {
-  display: inline-block; margin-top: 1rem;
+  /* min-height, not padding: the target has to clear 32 RENDERED pixels and
+     ZoomLock puts every length through zoom 0.85, so the CSS floor is 38.
+     Measured before this: 95 x 16.6 rendered. */
+  display: inline-flex; align-items: center; min-height: 38px;
+  margin-top: 0.5rem;
   font-size: 13px; font-weight: 500; color: var(--violet-lift); text-decoration: none;
 }
 .zf-mail:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .zf-head {
-  margin: 0 0 0.875rem;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #7c7c88;
+  margin: 0 0 0.5rem;
+  /* 11px CSS is 9.35 rendered under zoom 0.85, which is below the 12px floor
+     whatever its colour. 14.5px clears it at 12.33. */
+  font-size: 14.5px; font-weight: 700; letter-spacing: 0.08em;
+  /* #7c7c88 measured 4.26:1 on this ground, under the 4.5 floor for text this
+     size. #9a9aa6 is 6.30:1. */
+  text-transform: uppercase; color: #9a9aa6;
 }
-.zf-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.625rem; }
+/* The gap comes off the list and goes inside the rows, so the targets grow
+   without the column growing with them. Measured before this: 89 x 18.7
+   rendered, against a floor of 32. */
+.zf-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
 .zf-col a {
+  display: inline-flex; align-items: center; min-height: 38px;
   font-size: 13.5px; font-weight: 500; line-height: 1.6;
   color: #d2d2da; text-decoration: none;
   transition: color 150ms var(--ease-out);
@@ -250,13 +263,16 @@ const CSS = `
 .zf-social { display: flex; align-items: center; gap: 0.375rem; }
 .zf-social a {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 999px;
+  /* 34px is 28.9 rendered, under the floor. 38 lands on 32.3. */
+  width: 38px; height: 38px; border-radius: 999px;
   color: #a8a8b2;
   transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
 .zf-social a:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
 .zf-social svg { width: 16px; height: 16px; }
-.zf-legal { margin: 0; font-size: 12px; font-weight: 500; line-height: 1.7; color: #7c7c88; }
+/* 12px CSS is 10.2 rendered; 14.5 lands on 12.33. And #7c7c88 measured
+   4.26:1 on this ground. */
+.zf-legal { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.7; color: #9a9aa6; }
 
 @media (max-width: 860px) {
   .zf-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }

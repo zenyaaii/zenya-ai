@@ -75,7 +75,15 @@ export default function CookieConsent() {
       role="dialog"
       aria-labelledby="cookie-consent-title"
       aria-describedby="cookie-consent-desc"
-      className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white/95 p-5 shadow-2xl backdrop-blur-md sm:bottom-6 sm:inset-x-6"
+      /* NO backdrop-blur, and no bg-white/95 behind it.
+         A backdrop-filter puts this panel on its own compositor layer, and
+         text on a composited layer loses subpixel antialiasing - which on
+         Arabic thins the stems by about half a pixel and takes the i'jam dots
+         with it. This banner is the first Arabic a first-time visitor reads,
+         so it is the last place that should happen. An opaque ground costs
+         nothing here: the panel is 5rem tall over whatever it covers, and
+         nobody is reading the page through it. */
+      className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-2xl sm:bottom-6 sm:inset-x-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex-1">

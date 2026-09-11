@@ -1,5 +1,6 @@
 'use client'
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import { useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -293,8 +294,8 @@ export default function SiteCard({
           const isOnetime = plan === 'pro_onetime'
           const title = isOnetime ? 'أضف الاستضافة لنشر الموقع' : 'خطة Pro تفتح النشر'
           const cta = isOnetime
-            ? 'أضف استضافة زينيا · 24.99$ شهريًا ←'
-            : 'الترقية إلى Pro · 24.99$ شهريًا ←'
+            ? `أضف استضافة زينيا · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
+            : `الترقية إلى Pro · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
           return (
             <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[12.5px]">
               <div className="flex items-start gap-2">

@@ -1,5 +1,6 @@
 'use client'
 
+import { COMPANY, usd } from '@/lib/company'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Check } from 'lucide-react'
@@ -81,8 +82,8 @@ export default function Hero() {
             {...fade(0.16)}
             className="mt-3 text-[13.5px] text-subtle"
           >
-            <span className="font-latin" dir="ltr">‎$14.99</span> شهريًا · Starter · أو{' '}
-            <span className="font-latin" dir="ltr">$24.99</span> شهريًا · Pro مع استضافة كاملة
+            <span className="font-latin" dir="ltr">{"\u200E" + usd(COMPANY.STARTER_PRICE_USD)}</span> شهريًا · Starter · أو{' '}
+            <span className="font-latin" dir="ltr">{usd(COMPANY.PRO_PRICE_USD)}</span> شهريًا · Pro مع استضافة كاملة
           </motion.p>
 
           {/* CTAs */}

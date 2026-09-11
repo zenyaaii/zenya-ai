@@ -1,3 +1,4 @@
+import { COMPANY, usd } from '@/lib/company'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Sparkles, Check } from 'lucide-react'
@@ -61,7 +62,7 @@ export default function EnHome() {
             and lays out the sections — a professional, publish-ready website in minutes. Arabic and right-to-left are
             built in, not bolted on.
           </p>
-          <p className="mt-3 text-[14px] text-subtle">Free to try · then $14.99/mo (Starter) or $24.99/mo with full hosting (Pro).</p>
+          <p className="mt-3 text-[14px] text-subtle">{`Free to try · then ${usd(COMPANY.STARTER_PRICE_USD)}/mo (Starter) or ${usd(COMPANY.PRO_PRICE_USD)}/mo with full hosting (Pro).`}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/en/websites" className="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white btn-shadow-primary transition-all duration-200 hover:-translate-y-0.5">
               Start building free

@@ -1,4 +1,5 @@
 'use client'
+import { COMPANY } from '@/lib/company'
 import { useState } from 'react'
 
 export default function Upsell({ 
@@ -18,7 +19,7 @@ export default function Upsell({
 
   const upsellProduct = product || {
     name: "حافظة حماية مميزة",
-    price: 14.99,
+    price: COMPANY.STARTER_PRICE_USD,
     originalPrice: 29.99,
     image: "https://images.unsplash.com/photo-1541140532154-b024d705b909?q=80&w=400&auto=format&fit=crop"
   }

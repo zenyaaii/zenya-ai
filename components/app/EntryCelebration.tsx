@@ -11,6 +11,7 @@
  * moment — thanks on payment, encouragement on start, barakah on the work.
  * ───────────────────────────────────────────────────────────────────────── */
 
+import { COMPANY, usdTrailing } from '@/lib/company'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
@@ -274,7 +275,7 @@ export function EntrySpentBanner() {
         className="shrink-0 rounded-full px-4 py-2 text-[12.5px] font-semibold text-white transition hover:opacity-90"
         style={{ background: 'var(--primary, #5e6ad2)' }}
       >
-        الترقية إلى Starter · 14.99$
+        {`الترقية إلى Starter · ${usdTrailing(COMPANY.STARTER_PRICE_USD)}`}
       </Link>
     </div>
   )

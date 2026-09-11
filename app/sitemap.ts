@@ -33,6 +33,10 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
   { path: '/demo/studio',     priority: 0.6, freq: 'weekly' },
   { path: '/demo/services',   priority: 0.6, freq: 'weekly' },
   { path: '/demo/wellness',   priority: 0.6, freq: 'weekly' },
+  // The review channel. Arabic only: it writes into the reviews table through
+  // app/api/reviews, which has no English counterpart, so there is nothing to
+  // pair it with and an hreflang alternate would 404.
+  { path: '/review',          priority: 0.5, freq: 'monthly' },
   // All legal pages are bilingual and live in PAIRED_STATIC below.
 ]
 
