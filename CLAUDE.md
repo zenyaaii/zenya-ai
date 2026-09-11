@@ -44,8 +44,9 @@ laid out in two halves and the split is load-bearing:
   parts. Note that `components/site/` is something else entirely: the runtime
   for the sites Zenya *generates* for customers. Keep them apart.
 
-`app/(main)/**` is what has not been restyled yet: the account and settings
-stubs, the auth callbacks, and the generated-theme previews under `/theme/new`.
+`app/(main)/**` is what has not been restyled yet: the `/settings` and
+`/account` redirects, the auth callbacks, the Shopify one-product builder at
+`/build`, and the generated-theme previews under `/theme/new`.
 It still mounts the old `components/Navbar` and `components/Footer`. A page
 moved out of `(main)` and into `(site)` loses that chrome and must gain
 `Shell`; a page that keeps the old chrome must stay in `(main)`.
@@ -64,20 +65,23 @@ their route group moved. New shared content goes in `lib/`.
 ## What `demo.zenyaai.co` is for now
 
 It served the candidate set while the restyle was under review. That set is
-the site, so the subdomain is down to two entries in `DEMO_SUBDOMAIN_PAGES` in
-`middleware.ts`:
+the site, so the subdomain is down to three entries in `DEMO_SUBDOMAIN_PAGES`
+in `middleware.ts`:
 
 ```ts
 const DEMO_SUBDOMAIN_PAGES = new Set([
-  'dashboard', 'editor',
+  'dashboard', 'editor', 'build',
 ])
 ```
 
-Both are product surfaces that normally sit behind an account;
-`app/demo/dashboard` and `app/demo/editor` render them against fixture data so
-they can be looked at without signing in. Everything else on that host 307s to
-the apex, which is now the right answer rather than a fallback — a former
-candidate address lands on the page it became.
+`dashboard` and `editor` are product surfaces that normally sit behind an
+account, rendered against fixture data so they can be looked at without
+signing in. `build` is the one candidate that did **not** go live: it restyles
+the restaurant wizard at `/theme/new/restaurant`, not the Shopify builder at
+`/build`, and the wizard it proposes for runs a generator a public route
+cannot reach. Everything else on that host 307s to the apex, which is now the
+right answer rather than a fallback — a former candidate address lands on the
+page it became.
 
 **If you add a page under `app/demo/`, register its segment in that Set in the
 same commit.** An unregistered segment 307s to the apex, so from the owner's
@@ -92,8 +96,9 @@ their addresses under `zenyaai.co/demo/*`.
 
 ## Two documents to read before large work here
 
-- `docs/zenya-candidate-programme.md` — what was built, the tokens, the
+- `docs/zenya-site.md` — what was built, the tokens, what the forms call, the
   rendering traps (ZoomLock's `zoom: 0.85` means every floor is held in
   *rendered* pixels), and the honesty rules.
-- `docs/zenya-theme-check.md` — the twelve-gate pre-flight audit, and which
-  gates block a merge.
+- `docs/zenya-theme-check.md` — the audit, what each gate measures, and the
+  measurement traps that make a harness lie. The harness itself is
+  `scripts/theme-check.cjs`; run it against a dev server.
