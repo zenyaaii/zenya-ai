@@ -49,9 +49,11 @@
  * obsidian.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Menu, UserPlus, X } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/utils/supabase/client"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
@@ -78,17 +80,21 @@ type Mode = "signin" | "signup" | "forgot"
 type SavedAccount = { email: string; name?: string }
 
 /**
- * The demo's OWN store, under its own key.
+ * THE PORTAL'S STORE, shared on purpose.
  *
- * The portal remembers accounts under "zenya_accounts" and reads a live
- * Supabase session to offer a one-click continue. This page has no session
- * and must not touch the portal's key — writing a demo account into the list
- * the real portal reads would put a name on the real sign-in screen that the
- * reader never typed there. So it keeps its own key, it is filled only by
- * what you yourself do on this page, and the card says so in place.
+ * components/accounts/AccountsAuthForm remembers accounts under this key and
+ * this page writes the same shape into it, so someone who signs in here finds
+ * their account waiting at accounts.zenyaai.co and the other way round. While
+ * this page was a proposal it kept a separate key, because writing into the
+ * real list would have put a name on the real sign-in screen that nobody had
+ * typed there. It is the real sign-in screen now.
+ *
+ * The cap is the portal's four, not the demo's three, for the same reason:
+ * two lists with different lengths would drop an account on whichever screen
+ * you happened to use second.
  */
-const STORE = "zenya_demo_access_accounts"
-const MAX_SAVED = 3
+const STORE = "zenya_accounts"
+const MAX_SAVED = 4
 
 function loadAccounts(): SavedAccount[] {
   try {
@@ -142,32 +148,30 @@ const ACTION: Record<Mode, string> = {
   forgot: "إرسال رابط التعيين",
 }
 
-/* The real success strings, quoted rather than asserted — see handOff. The
-   sign-in mode has none, because the real page does not print one: it routes
-   to the dashboard. So it gets no quote, and the panel says what actually
-   happens there instead of inventing a message to fill the slot. */
+/* What the reader is told once the call comes back. Sign-in has no string
+   because it does not stop here: the session opens and the router leaves for
+   ?next=. The other two end on this page and have to say what is now in the
+   reader's inbox. */
 const SUCCESS: Record<Mode, string | null> = {
   signin: null,
   signup: "تم إنشاء الحساب! يرجى التحقق من بريدك لتأكيده.",
   forgot: "تم إرسال رابط إعادة تعيين كلمة المرور! تحقق من بريدك.",
 }
 
-/** Where each mode hands off, in the mode the reader was already in. */
-const REAL: Record<Mode, string> = {
-  signin: "/login",
-  signup: "/login?mode=signup",
-  forgot: "/login?mode=forgot",
+/* The line under it: what to do while waiting, since both are waits. */
+const SUCCESS_NOTE: Record<Mode, string | null> = {
+  signin: null,
+  signup: "الرابط صالح لمدة محدودة. إن لم يصلك خلال دقائق، تحقّق من مجلد البريد العشوائي.",
+  forgot: "إن لم يصلك بريد، فالغالب أن هذا العنوان ليس مسجّلًا لدينا — أنشئ حسابًا بدلًا من ذلك.",
 }
 
-/* The door's own labels, and they are NOT ACTION[mode].
-   Reading "إنشاء حساب" directly under "لم تُنشئ حسابًا" makes the door look
-   like a form that failed and wants pressing again. A control that leaves the
-   page has to name where it goes, so each one names zenya. */
-const HAND: Record<Mode, string> = {
-  signin: "سجّل دخولك في زينيا",
-  signup: "أنشئ حسابك في زينيا",
-  forgot: "أعد التعيين في زينيا",
-}
+/** The string Supabase does not throw, and the one this page has to notice.
+ *  With "Confirm email" on, a duplicate signup returns a user with an empty
+ *  identities array and sends no mail, so that it cannot be used to discover
+ *  which addresses exist. Left alone, the reader waits for a message that is
+ *  never coming. */
+const ALREADY_REGISTERED =
+  "هذا البريد مسجّل بالفعل. سجّل الدخول، أو أعد تعيين كلمة المرور إن نسيتها."
 
 /**
  * ?mode= DRIVES THE PAGE, exactly as it drives app/(main)/login, because that
@@ -182,8 +186,17 @@ const HAND: Record<Mode, string> = {
  * very click the header CTA makes. Resolved on the server there is no
  * boundary, no hook, and no client-side transition to get wrong.
  */
-export default function AccessView({ initialMode = "signin" }: { initialMode?: Mode }) {
+export default function AccessView({
+  initialMode = "signin",
+  next = "/dashboard",
+}: {
+  initialMode?: Mode
+  /** Where a completed sign-in goes. Read from ?next= on the server. */
+  next?: string
+}) {
   const initial = initialMode
+  const router = useRouter()
+  const supabase = useMemo(() => createClient(), [])
   const [menuOpen, setMenuOpen] = useState(false)
   const [mode, setMode] = useState<Mode>(initial)
   const [email, setEmail] = useState("")
@@ -192,8 +205,12 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
   const [showPassword, setShowPassword] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  /** The door. Set when validation passes; nothing else changes. */
+  /** Set when a call came back and the page has something to report: an
+   *  account awaiting confirmation, or a reset link on its way. Signing in
+   *  never sets it, because signing in leaves. */
   const [handed, setHanded] = useState<Mode | null>(null)
+  /** A call is in flight. Blocks a second submit and dims the action. */
+  const [busy, setBusy] = useState(false)
   const [accounts, setAccounts] = useState<SavedAccount[]>([])
   /** The reader has asked to type credentials, so the chooser stands aside. */
   const [typing, setTyping] = useState(initial !== "signin")
@@ -258,20 +275,48 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
   }, [])
 
   /**
-   * THE DOOR, and the whole reason this page can be public.
+   * Remember the address, so the chooser is there next time.
    *
-   * The real handlers run the checks below and then call supabase — signUp,
-   * signInWithPassword, resetPasswordForEmail. This one runs the same checks,
-   * in the same order, throwing the same strings, and then stops. It does not
-   * create an account, send mail, set a cookie or route anywhere.
-   *
-   * What it does do is remember the e-mail in the demo's own store, because
-   * that is what makes the account chooser above a real control rather than a
-   * mock-up: fill the form once and the chooser is there next time, holding
-   * your data and nobody else's.
+   * Signing in carries no name in the form, so a name this address is already
+   * remembered under is KEPT rather than overwritten by the empty string —
+   * otherwise signing up and then signing in turns a chooser row from a
+   * person's name back into a bare e-mail. When Supabase hands back a display
+   * name of its own it wins, which is what the portal does too.
    */
-  function submit(e: React.FormEvent) {
+  const remember = useCallback(
+    (addr: string, name?: string) => {
+      const known = accounts.find((a) => a.email.toLowerCase() === addr.toLowerCase())
+      const label = (name || "").trim() || known?.name
+      const list = [
+        { email: addr, name: label || undefined },
+        ...accounts.filter((a) => a.email.toLowerCase() !== addr.toLowerCase()),
+      ].slice(0, MAX_SAVED)
+      setAccounts(list)
+      saveAccounts(list)
+      try {
+        localStorage.setItem("zenya_last_email", addr)
+      } catch {}
+    },
+    [accounts],
+  )
+
+  /**
+   * SIGN IN, SIGN UP, OR SEND THE RESET LINK.
+   *
+   * The checks run first, in the order the product enforces them and throwing
+   * the product's own strings, so a six-character rule or a missing consent
+   * box is caught before any network call. Then the mode decides which of the
+   * three Supabase calls runs.
+   *
+   * THE DUPLICATE-SIGNUP CASE IS THE ONE THAT NEEDS CODE. With "Confirm
+   * email" on, signing up with an address that already exists does not error
+   * — that would let anyone enumerate the user table — it returns a user with
+   * an empty identities array and sends nothing. Without the check below the
+   * reader sits waiting for a confirmation mail that was never sent.
+   */
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (busy) return
     setError(null)
     try {
       if (mode === "forgot") {
@@ -288,22 +333,66 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
       setError(err instanceof Error ? err.message : "حدث خطأ ما.")
       return
     }
-    if (mode !== "forgot") {
-      /* Signing in carries no name — the real portal reads one off the user
-         Supabase hands back, and there is no Supabase here — so a name this
-         address is already remembered under is KEPT rather than overwritten.
-         Without this, signing up and then signing in turns the chooser row
-         from "ليلى الخوري" back into a bare e-mail. */
-      const known = accounts.find((a) => a.email.toLowerCase() === email.toLowerCase())
-      const name = (mode === "signup" ? fullName.trim() : "") || known?.name
-      const next = [
-        { email, name: name || undefined },
-        ...accounts.filter((a) => a.email.toLowerCase() !== email.toLowerCase()),
-      ].slice(0, MAX_SAVED)
-      setAccounts(next)
-      saveAccounts(next)
+
+    setBusy(true)
+    try {
+      if (mode === "forgot") {
+        const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
+        })
+        if (err) throw err
+        setHanded("forgot")
+        return
+      }
+
+      if (mode === "signin") {
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+        if (err) throw err
+        remember(email, (data.user?.user_metadata?.full_name as string) || undefined)
+        try {
+          localStorage.setItem("zenya_email", email)
+        } catch {}
+        router.push(next)
+        router.refresh()
+        return
+      }
+
+      const { data, error: err } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+          data: {
+            full_name: fullName.trim(),
+            consent_terms_v: "1",
+            consent_terms_at: new Date().toISOString(),
+          },
+        },
+      })
+      if (err) throw err
+
+      const alreadyRegistered =
+        !!data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0
+      if (alreadyRegistered) {
+        setError(ALREADY_REGISTERED)
+        return
+      }
+
+      remember(email, fullName)
+      if (data.session) {
+        try {
+          localStorage.setItem("zenya_email", email)
+        } catch {}
+        router.push(next)
+        router.refresh()
+        return
+      }
+      setHanded("signup")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "حدث خطأ ما.")
+    } finally {
+      setBusy(false)
     }
-    setHanded(mode)
   }
 
   /** The portal's own pickAccount: prefill, clear the password, focus it. */
@@ -421,7 +510,7 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
           </div>
 
           {handed ? (
-            <HandOff mode={handed} onBack={() => setHanded(null)} />
+            <HandOff mode={handed} email={email} onBack={() => setHanded(null)} />
           ) : chooser ? (
             <div className="za-accs">
               {accounts.map((a) => (
@@ -445,7 +534,7 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
                 تسجيل الدخول بحساب آخر
               </button>
               <p className="za-acc-note">
-                هذه الحسابات محفوظة في متصفحك أنت وحدك، من نموذج هذه الصفحة — لا تُرسل إلى أي خادم، ولا تفتح أي جلسة.
+                هذه الأسماء محفوظة في متصفحك أنت وحدك لتسهيل الدخول — لا كلمات مرور ولا جلسات، والحذف يمحوها من هنا فقط.
               </p>
             </div>
           ) : (
@@ -528,7 +617,9 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
               </div>
 
               <div className="za-go">
-                <SlideButton type="submit" variant="violet" slide={ACTION[mode]}>{ACTION[mode]}</SlideButton>
+                <SlideButton type="submit" variant="violet" slide={ACTION[mode]} disabled={busy}>
+                  {busy ? "لحظة…" : ACTION[mode]}
+                </SlideButton>
               </div>
 
               {/* The real pages' own switchers, kept because they are where a
@@ -560,12 +651,14 @@ export default function AccessView({ initialMode = "signin" }: { initialMode?: M
         </section>
         </div>
 
-        {/* The honest edge, standing under the card so it is read BEFORE the
-            form is filled and not only after. The panel inside the card says
-            it again at the moment it matters. */}
+        {/* The consent line, standing under the card so it is read BEFORE the
+            form is filled. Sign-up also has its own checkbox, because consent
+            recorded in user metadata has to be an act rather than a notice. */}
         <p className="za-foot-note">
-          صفحة تصميم مُقترحة. النموذج يتحقق من مدخلاتك فعليًا، لكنه لا يُنشئ حسابًا ولا يسجّل دخولك —
-          {" "}<Link href="/login" className="za-link">الدخول الحقيقي من هنا</Link>.
+          بالمتابعة أنت توافق على{" "}
+          <Link href="/terms" className="za-link">شروط الخدمة</Link> و
+          <Link href="/privacy" className="za-link">سياسة الخصوصية</Link>. تعذّر الدخول؟{" "}
+          <Link href="/contact" className="za-link">راسِلنا</Link>.
         </p>
       </div>
 
@@ -670,36 +763,27 @@ function Field({
    dashboard. Inventing a message to fill that slot would be the same lie in a
    smaller font.
 ------------------------------------------------------------------------- */
-function HandOff({ mode, onBack }: { mode: Mode; onBack: () => void }) {
-  const quote = SUCCESS[mode]
+function HandOff({ mode, email, onBack }: { mode: Mode; email: string; onBack: () => void }) {
+  const done = SUCCESS[mode]
+  const note = SUCCESS_NOTE[mode]
+  /* Sign-in never reaches this panel: it routes away. The guard is here so a
+     future fourth mode cannot render an empty card. */
+  if (!done) return null
   return (
     <div className="za-hand">
       <p className="za-hand-pass">
         <Check size={14} strokeWidth={3} aria-hidden />
-        اجتازت مدخلاتك كل قواعد التحقق.
+        {done}
       </p>
 
-      {quote ? (
-        <div className="za-spec">
-          <p className="za-spec-l">في الصفحة الحقيقية ستقرأ هنا:</p>
-          <p className="za-spec-q">{quote}</p>
-        </div>
-      ) : (
-        <div className="za-spec">
-          <p className="za-spec-l">في الصفحة الحقيقية:</p>
-          <p className="za-spec-q">تُفتح جلستك وتنتقل مباشرةً إلى لوحة التحكم.</p>
-        </div>
-      )}
+      <div className="za-spec">
+        <p className="za-spec-l">أُرسل إلى:</p>
+        <p className="za-spec-q"><bdi dir="ltr">{email}</bdi></p>
+      </div>
 
-      <p className="za-hand-b">
-        أمّا هنا فلم يحدث أيٌّ من ذلك: هذه صفحة تصميم مُقترحة، ولا تتصل بأي خادم مصادقة، ولم تُنشئ حسابًا ولم
-        تُرسل بريدًا ولم تفتح جلسة.
-      </p>
+      {note ? <p className="za-hand-b">{note}</p> : null}
 
       <div className="za-hand-go">
-        <SlideButton href={REAL[mode]} variant="violet" slide="إلى الصفحة الحقيقية">
-          {HAND[mode]}
-        </SlideButton>
         <button type="button" className="za-alt-quiet" onClick={onBack}>العودة إلى النموذج</button>
       </div>
     </div>
