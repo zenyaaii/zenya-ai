@@ -88,8 +88,16 @@
 
   html {
     scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    /* NOT `antialiased`. Forcing greyscale antialiasing is a Latin-display
+       habit: it thins every stem by roughly half a pixel, which flatters a
+       36px English headline and wrecks Arabic. This interface is Arabic at
+       14.5px, which the root ZoomLock renders at 12.32px, and at that size
+       the i'jam dots, the hamza and the joins between letters are one or two
+       pixels of ink each. Greyscale AA greys them out and the text reads
+       thin and soft. `auto` lets the platform use subpixel rendering where
+       it has it, which puts the ink back. */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
   body {

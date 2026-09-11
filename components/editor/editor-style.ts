@@ -49,6 +49,14 @@
  */
 
 export const EDITOR_CSS = `
+/* THE FLOOR IS 15.5px, NOT 14.5px, AND THE REASON IS THE ROOT ZOOM.
+   ZoomLock renders the whole app at 0.85, so the 14.5px this panel used to
+   be set in arrived on screen as 12.32px. That clears a 12px floor by a
+   third of a pixel, which is a floor and not a size: Arabic at 12px puts
+   the i'jam dots and the joins between letters on one or two pixels of ink
+   each, and it reads thin however well it is rasterised. 15.5px arrives as
+   13.18px, which is a reading size. The larger steps are unchanged, so the
+   hierarchy between them is the hierarchy that was designed. */
 .ze-root, .ze-tokens {
   --ground: #fafafa;
   --card: #ffffff;
@@ -81,7 +89,7 @@ export const EDITOR_CSS = `
   /* One control height, raised for a finger below. */
   --h-ctl: 34px;
   font-family: var(--chrome);
-  font-size: 14.5px;
+  font-size: 15.5px;
   line-height: 1.7;
   letter-spacing: 0;
   color: var(--obsidian);
@@ -102,7 +110,7 @@ export const EDITOR_CSS = `
   background: var(--ground);
   color: var(--obsidian);
   font-family: var(--chrome);
-  font-size: 14.5px;
+  font-size: 15.5px;
   line-height: 1.7;
   letter-spacing: 0;
   overflow: hidden;
@@ -149,7 +157,7 @@ export const EDITOR_CSS = `
 .ze-icon:hover { color: var(--obsidian); background: rgba(17,17,17,0.055); }
 .ze-icon:active { background: rgba(17,17,17,0.09); }
 .ze-icon:disabled { cursor: default; color: rgba(17,17,17,0.28); background: transparent; }
-.ze-icon[data-label] { padding-inline: 0.625rem 0.75rem; font-size: 14.5px; font-weight: 500; }
+.ze-icon[data-label] { padding-inline: 0.625rem 0.75rem; font-size: 15.5px; font-weight: 500; }
 .ze-icon svg { width: 17px; height: 17px; flex: 0 0 auto; }
 .ze-sep { width: 1px; height: 20px; background: var(--hair); flex: 0 0 auto; margin-inline: 0.25rem; }
 
@@ -160,7 +168,7 @@ export const EDITOR_CSS = `
 .ze-status {
   display: inline-flex; align-items: center; justify-content: flex-end; gap: 0.4375rem;
   width: 12rem; min-width: 0; flex: 0 1 auto;
-  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   white-space: nowrap;
 }
 .ze-status-t { overflow: hidden; text-overflow: ellipsis; }
@@ -180,7 +188,7 @@ export const EDITOR_CSS = `
   flex: 0 0 auto;
   height: var(--h-ctl); padding-inline: 1rem;
   border: 0; border-radius: 999px; cursor: pointer;
-  font-size: 14.5px; font-weight: 700; line-height: 1.7;
+  font-size: 15.5px; font-weight: 700; line-height: 1.7;
   color: #ffffff; background: var(--violet);
   box-shadow: 0 0 0 1px rgba(94,106,210,0.6), 0 0 0 4px rgba(94,106,210,0);
   transition: box-shadow 200ms var(--ease-out), background-color 160ms var(--ease-out), color 160ms var(--ease-out);
@@ -211,7 +219,7 @@ export const EDITOR_CSS = `
   height: calc(var(--h-ctl) - 6px); min-width: calc(var(--h-ctl) - 6px);
   padding-inline: 0.6875rem;
   border: 0; border-radius: 999px; background: transparent; cursor: pointer;
-  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   white-space: nowrap;
   transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
@@ -229,7 +237,7 @@ export const EDITOR_CSS = `
   padding: 0.3125rem 0.875rem;
   background: #ffffff;
   box-shadow: 0 1px 0 var(--hair-2);
-  font-size: 14.5px; line-height: 1.7; color: var(--stone);
+  font-size: 15.5px; line-height: 1.7; color: var(--stone);
   position: relative; z-index: 19;
 }
 .ze-demo strong { color: var(--obsidian); font-weight: 700; }
@@ -290,7 +298,7 @@ export const EDITOR_CSS = `
 /* ---- the rail ----------------------------------------------------------- */
 .ze-group { padding: 0.875rem 0.625rem 0.25rem; }
 .ze-group + .ze-group { box-shadow: inset 0 1px 0 var(--hair-2); margin-top: 0.5rem; }
-.ze-group-h { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; padding: 0 0.625rem 0.375rem; font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
+.ze-group-h { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; padding: 0 0.625rem 0.375rem; font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
 .ze-group-h span + span { font-weight: 500; color: var(--stone-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ze-rows { display: grid; gap: 2px; }
 
@@ -303,7 +311,7 @@ export const EDITOR_CSS = `
   width: 100%; min-height: var(--h-ctl);
   padding: 0 0.75rem;
   border: 0; border-radius: var(--r-control); background: transparent; cursor: pointer;
-  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
+  font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--stone);
   text-align: start;
   transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
@@ -325,19 +333,19 @@ export const EDITOR_CSS = `
   min-height: 60px; padding: 0.5rem 1rem;
   box-shadow: 0 1px 0 var(--hair-2);
 }
-.ze-insp-kick { display: block; font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone); }
+.ze-insp-kick { display: block; font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--stone); }
 .ze-insp-t { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.7; color: var(--obsidian); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ze-insp-body { display: grid; gap: 1.125rem; padding: 1rem; }
 
 /* ---- notes -------------------------------------------------------------- */
-.ze-note { margin: 0; padding: 0.625rem 0.75rem; border-radius: var(--r-control); background: var(--field); font-size: 14.5px; line-height: 1.7; color: var(--stone); }
+.ze-note { margin: 0; padding: 0.625rem 0.75rem; border-radius: var(--r-control); background: var(--field); font-size: 15.5px; line-height: 1.7; color: var(--stone); }
 .ze-note[data-tone="door"] { background: var(--violet-fill); color: var(--obsidian); box-shadow: 0 0 0 1px rgba(94,106,210,0.20); }
 
 /* ---- fields ------------------------------------------------------------- */
 .ze-field { display: grid; gap: 0.375rem; min-width: 0; }
 .ze-label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 26px; }
-.ze-label { font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--stone); }
-.ze-hint { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--stone-2); }
+.ze-label { font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--stone); }
+.ze-hint { margin: 0; font-size: 15.5px; line-height: 1.7; color: var(--stone-2); }
 .ze-input, .ze-textarea {
   display: block; width: 100%; min-width: 0;
   min-height: var(--h-ctl);
@@ -353,14 +361,14 @@ export const EDITOR_CSS = `
 .ze-input::placeholder, .ze-textarea::placeholder { color: var(--ghost); }
 .ze-input:hover, .ze-textarea:hover { box-shadow: 0 0 0 1px rgba(17,17,17,0.18); }
 .ze-input:focus, .ze-textarea:focus { background: #ffffff; box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
-.ze-input[data-mono] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14.5px; direction: ltr; text-align: left; }
+.ze-input[data-mono] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 15.5px; direction: ltr; text-align: left; }
 
 /* A text action: clear, reset, reset all. */
 .ze-link {
   display: inline-flex; align-items: center; gap: 0.3125rem;
   min-height: 28px; padding: 0 0.25rem;
   border: 0; background: transparent; cursor: pointer;
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--violet-ink);
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--violet-ink);
   border-radius: 6px;
 }
 /* A short word ("clear") is narrower than a fingertip: the target holds its
@@ -378,7 +386,7 @@ export const EDITOR_CSS = `
   height: 28px; padding-inline: 0.5rem;
   border: 0; border-radius: 999px; cursor: pointer;
   background: transparent; box-shadow: 0 0 0 1px var(--hair);
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--stone);
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--stone);
   transition: color 150ms var(--ease-out), box-shadow 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
 @media (pointer: coarse) { .ze-ai { height: 38px; padding-inline: 0.75rem; } }
@@ -386,14 +394,14 @@ export const EDITOR_CSS = `
 .ze-ai[aria-expanded="true"] { color: var(--violet-ink); background: var(--violet-fill); box-shadow: 0 0 0 1px rgba(94,106,210,0.35); }
 .ze-ai svg { width: 14px; height: 14px; }
 .ze-aipanel { display: grid; gap: 0.625rem; padding: 0.75rem; border-radius: var(--r-card); background: #ffffff; box-shadow: 0 0 0 1px rgba(94,106,210,0.28), 0 0 0 4px rgba(94,106,210,0.06); }
-.ze-aipanel-h { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 14.5px; font-weight: 700; color: var(--violet-ink); }
+.ze-aipanel-h { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 15.5px; font-weight: 700; color: var(--violet-ink); }
 .ze-chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
 .ze-chip {
   display: inline-flex; align-items: center; gap: 0.3125rem;
   min-height: 30px; padding-inline: 0.75rem;
   border: 0; border-radius: 999px; cursor: pointer;
   background: #ffffff; box-shadow: 0 0 0 1px var(--hair);
-  font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--obsidian);
+  font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--obsidian);
   white-space: nowrap;
   transition: color 150ms var(--ease-out), box-shadow 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
@@ -408,7 +416,7 @@ export const EDITOR_CSS = `
   flex: 0 0 auto;
   min-height: var(--h-ctl); padding-inline: 0.875rem;
   border: 0; border-radius: var(--r-control); cursor: pointer;
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: #ffffff; background: var(--obsidian);
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: #ffffff; background: var(--obsidian);
   text-decoration: none;
   transition: opacity 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
@@ -429,7 +437,7 @@ export const EDITOR_CSS = `
   transition: box-shadow 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
 .ze-variant:hover { background: #ffffff; box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
-.ze-err { margin: 0; padding: 0.5rem 0.75rem; border-radius: var(--r-control); background: var(--error-fill); box-shadow: inset 3px 0 0 var(--error); font-size: 14.5px; line-height: 1.7; color: var(--error); }
+.ze-err { margin: 0; padding: 0.5rem 0.75rem; border-radius: var(--r-control); background: var(--error-fill); box-shadow: inset 3px 0 0 var(--error); font-size: 15.5px; line-height: 1.7; color: var(--error); }
 [dir="rtl"] .ze-err { box-shadow: inset -3px 0 0 var(--error); }
 .ze-spin { width: 14px; height: 14px; border-radius: 999px; border: 2px solid currentColor; border-inline-end-color: transparent; animation: ze-spin 700ms linear infinite; }
 @keyframes ze-spin { to { transform: rotate(360deg); } }
@@ -437,9 +445,9 @@ export const EDITOR_CSS = `
 /* ---- the section style card -------------------------------------------- */
 .ze-card { display: grid; gap: 0.625rem; padding: 0.75rem; border-radius: var(--r-card); background: #ffffff; box-shadow: 0 0 0 1px var(--hair); }
 .ze-card-h { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
-.ze-card-t { font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
+.ze-card-t { font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
 .ze-kv { display: grid; grid-template-columns: 5.25rem minmax(0, 1fr); align-items: center; gap: 0.5rem; }
-.ze-kv > span { font-size: 14.5px; color: var(--stone); }
+.ze-kv > span { font-size: 15.5px; color: var(--stone); }
 
 /* ---- repeating items ---------------------------------------------------- */
 .ze-items { display: grid; gap: 0.5rem; }
@@ -449,7 +457,7 @@ export const EDITOR_CSS = `
   display: flex; align-items: center; gap: 0.5rem; flex: 1 1 auto; min-width: 0;
   min-height: var(--h-ctl); padding: 0 0.5rem;
   border: 0; border-radius: var(--r-control); background: transparent; cursor: pointer;
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); text-align: start;
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); text-align: start;
 }
 .ze-item-toggle:hover { background: rgba(17,17,17,0.04); }
 .ze-item-toggle svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--stone); transition: transform 180ms var(--ease-out); }
@@ -462,7 +470,7 @@ export const EDITOR_CSS = `
   width: 100%; min-height: var(--h-ctl);
   border: 1px dashed rgba(17,17,17,0.24); border-radius: var(--r-control);
   background: transparent; cursor: pointer;
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--violet-ink);
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--violet-ink);
   transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out);
 }
 .ze-add:hover { background: var(--violet-fill); border-color: rgba(94,106,210,0.45); }
@@ -477,7 +485,7 @@ export const EDITOR_CSS = `
 }
 .ze-img:hover { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
 .ze-img img { display: block; width: 100%; height: 8rem; object-fit: cover; }
-.ze-img-empty { display: grid; place-items: center; gap: 0.25rem; height: 6rem; color: var(--stone); font-size: 14.5px; font-weight: 700; }
+.ze-img-empty { display: grid; place-items: center; gap: 0.25rem; height: 6rem; color: var(--stone); font-size: 15.5px; font-weight: 700; }
 .ze-img-empty svg { width: 18px; height: 18px; }
 
 /* ---- colours ------------------------------------------------------------ */
@@ -497,7 +505,7 @@ export const EDITOR_CSS = `
 .ze-preset-dots { display: flex; gap: 4px; }
 .ze-preset-dots span { width: 14px; height: 14px; border-radius: 999px; box-shadow: 0 0 0 1px rgba(127,127,127,0.35); }
 .ze-preset-n { font-size: 15px; font-weight: 700; line-height: 1.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ze-preset-v { font-size: 14.5px; line-height: 1.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ze-preset-v { font-size: 15.5px; line-height: 1.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ze-check { position: absolute; inset-block-start: 8px; inset-inline-end: 8px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; background: var(--obsidian); color: #ffffff; box-shadow: 0 0 0 2px #ffffff; }
 .ze-check svg { width: 13px; height: 13px; }
 .ze-colors { display: grid; gap: 0.375rem; }
@@ -505,8 +513,8 @@ export const EDITOR_CSS = `
 .ze-swatch { position: relative; flex: 0 0 auto; width: var(--h-ctl); height: var(--h-ctl); border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(17,17,17,0.14); overflow: hidden; }
 .ze-swatch input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
 .ze-color-m { display: grid; gap: 0.125rem; flex: 1 1 auto; min-width: 0; }
-.ze-color-l { display: flex; align-items: center; gap: 0.375rem; font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
-.ze-tag { display: inline-flex; align-items: center; padding: 0 0.4375rem; border-radius: 999px; font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--violet-ink); background: var(--violet-fill); }
+.ze-color-l { display: flex; align-items: center; gap: 0.375rem; font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
+.ze-tag { display: inline-flex; align-items: center; padding: 0 0.4375rem; border-radius: 999px; font-size: 15.5px; font-weight: 500; line-height: 1.7; color: var(--violet-ink); background: var(--violet-fill); }
 .ze-color .ze-input { min-height: 30px; padding-block: 0.125rem; }
 @media (pointer: coarse) { .ze-color .ze-input { min-height: 38px; } }
 
@@ -522,8 +530,8 @@ export const EDITOR_CSS = `
 .ze-type:hover { box-shadow: 0 0 0 1px rgba(17,17,17,0.26); }
 .ze-type[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--obsidian), 0 0 0 5px rgba(23,23,23,0.08); }
 .ze-type-n { display: flex; align-items: baseline; gap: 0.5rem; font-size: 19px; line-height: 1.7; color: var(--obsidian); }
-.ze-type-m { font-family: var(--chrome); font-size: 14.5px; font-weight: 500; color: var(--stone); }
-.ze-type-v { font-size: 14.5px; line-height: 1.7; color: var(--stone); }
+.ze-type-m { font-family: var(--chrome); font-size: 15.5px; font-weight: 500; color: var(--stone); }
+.ze-type-v { font-size: 15.5px; line-height: 1.7; color: var(--stone); }
 .ze-type .ze-check { inset-block-start: 50%; margin-top: -11px; }
 
 /* ---- the preview stage -------------------------------------------------- */
@@ -538,12 +546,26 @@ export const EDITOR_CSS = `
 .ze-frame iframe { position: absolute; top: 0; left: 0; display: block; border: 0; background: #ffffff; transform-origin: 0 0; }
 
 /* ---- the phone sheet ---------------------------------------------------- */
+/* THE SHEET IS PROMOTED WHILE IT MOVES AND NOT A MOMENT LONGER.
+   will-change is set inline from the component's moving flag rather than
+   here, because here it could only be permanent, and a permanent compositor
+   layer costs subpixel antialiasing on every glyph inside it. The offsets
+   the component animates to are snapped to whole DEVICE pixels, which under
+   the root zoom of 0.85 is not the same thing as whole CSS pixels. */
 .ze-sheet {
   position: fixed; inset-inline: 0; z-index: 40;
   display: flex; flex-direction: column;
   background: #ffffff;
   border-radius: var(--r-panel) var(--r-panel) 0 0;
   box-shadow: 0 0 0 1px rgba(17,17,17,0.14), 0 -1px 0 4px rgba(250,250,250,0.35);
+}
+/* While the sheet is in flight the body is not being read, so it need not be
+   re-laid-out either: containment keeps a drag frame to a composite of an
+   already-painted layer instead of a layout pass over every field in the
+   panel. Off at rest, so nothing about reading it changes. */
+.ze-sheet[data-moving] .ze-sheet-body { contain: layout paint; }
+@media (prefers-reduced-motion: reduce) {
+  .ze-sheet { transition: none; }
 }
 /* On a phone the device IS the device: the stage is the whole screen under
    the bar, with no margin, radius or frame. */
@@ -567,7 +589,7 @@ export const EDITOR_CSS = `
 .ze-pick .ze-row { min-height: 46px; padding-inline: 0.875rem; background: var(--field); }
 .ze-pick .ze-row:hover { background: #ececef; }
 .ze-pick .ze-row[aria-current] { background: var(--violet-fill); }
-.ze-pick-h { padding: 0 0.25rem 0.375rem; font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
+.ze-pick-h { padding: 0 0.25rem 0.375rem; font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--obsidian); }
 .ze-pages { display: flex; gap: 0.375rem; overflow-x: auto; scrollbar-width: none; padding: 2px; margin: -2px; }
 .ze-pages::-webkit-scrollbar { display: none; }
 
@@ -577,7 +599,7 @@ export const EDITOR_CSS = `
 /* ---- loading and errors ------------------------------------------------- */
 .ze-skel { flex: 1 1 auto; display: flex; gap: 8px; padding: 8px; min-height: 0; }
 .ze-skel > div { border-radius: var(--r-panel); background: #ffffff; box-shadow: var(--ring-1), var(--ring-2); }
-.ze-skel-mid { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem; text-align: center; background: var(--stage) !important; box-shadow: inset 0 0 0 1px var(--hair-2) !important; color: var(--stone); font-size: 14.5px; }
+.ze-skel-mid { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 1rem; text-align: center; background: var(--stage) !important; box-shadow: inset 0 0 0 1px var(--hair-2) !important; color: var(--stone); font-size: 15.5px; }
 .ze-empty { margin: auto; display: grid; justify-items: center; gap: 0.75rem; max-width: 26rem; padding: 2rem 1.5rem; text-align: center; border-radius: var(--r-card); background: #ffffff; box-shadow: var(--ring-1), var(--ring-2); }
 .ze-empty p { margin: 0; font-size: 15px; line-height: 1.7; color: var(--obsidian); }
 .ze-toast {
@@ -586,7 +608,7 @@ export const EDITOR_CSS = `
   padding: 0.625rem 0.875rem;
   border-radius: var(--r-control); background: #ffffff;
   box-shadow: 0 0 0 1px rgba(185,28,28,0.28), 0 0 0 4px rgba(250,250,250,0.7);
-  font-size: 14.5px; font-weight: 700; line-height: 1.7; color: var(--error);
+  font-size: 15.5px; font-weight: 700; line-height: 1.7; color: var(--error);
 }
 
 /* ---- the gallery -------------------------------------------------------- */
@@ -597,7 +619,7 @@ export const EDITOR_CSS = `
   width: 100%; max-width: 64rem; height: min(80vh, 44rem);
   overflow: hidden; border-radius: var(--r-panel); background: #ffffff;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.10), 0 0 0 6px rgba(250,250,250,0.35);
-  font-family: var(--chrome); font-size: 14.5px; line-height: 1.7; color: var(--obsidian);
+  font-family: var(--chrome); font-size: 15.5px; line-height: 1.7; color: var(--obsidian);
 }
 .ze-modal-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.75rem 1rem; box-shadow: 0 1px 0 var(--hair-2); }
 .ze-modal-t { margin: 0; font-size: 16px; font-weight: 700; }

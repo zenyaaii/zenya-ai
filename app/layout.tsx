@@ -316,7 +316,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           />
         )}
       </head>
-      <body className="min-h-dvh bg-background text-foreground antialiased">
+      {/* NO `antialiased` HERE. Tailwind's utility sets
+          -webkit-font-smoothing: antialiased, which forces greyscale
+          antialiasing and thins every stem by roughly half a pixel. That
+          flatters a large Latin headline and wrecks Arabic: this interface
+          is Arabic at 14.5px, which the root ZoomLock renders at 12.32px,
+          and at that size the i'jam dots and the joins between letters are
+          one or two pixels of ink each. Greyscale AA greys them out and the
+          text reads thin and soft. The html rule in globals.css sets `auto`
+          so the platform can use subpixel rendering where it has it; this
+          class was overriding that rule from a more specific selector. */}
+      <body className="min-h-dvh bg-background text-foreground">
         {/* Caps the base UI at ~85% on touch devices and holds it there under
             Safari page-zoom, so the site magnifies (pinch) instead of reflowing
             — Apple-style. Zenya's own surfaces only; a customer's published site

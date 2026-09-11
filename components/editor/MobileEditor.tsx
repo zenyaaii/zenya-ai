@@ -195,12 +195,32 @@ export default function MobileEditor(props: MobileEditorProps) {
   const PEEK_PX = 84
   const avail = Math.max(0, vh / zoom - bottomInset)
   const sheetHeight = Math.max(240, Math.round(avail * 0.92))
+
+  /**
+   * SNAP A CSS OFFSET SO IT LANDS ON A WHOLE DEVICE PIXEL.
+   *
+   * This is the difference between crisp Arabic and mushy Arabic, and it is
+   * not obvious. ZoomLock writes `zoom: 0.85` on the document element, so a
+   * translate of a round 571 CSS pixels puts the sheet at 485.35 real ones.
+   * Every glyph inside it then straddles a pixel row, the rasteriser
+   * resamples, and 12px Arabic turns to grey mush: measured before this
+   * change, the sheet sat at top 533.756 and its first label at 609.241.
+   *
+   * Rounding in DEVICE space and dividing back gives an offset that is whole
+   * where it counts. Rounding the CSS value instead, which is the obvious
+   * thing to do, is exactly what produced the fractional result.
+   */
+  const snap = useCallback(
+    (v: number) => (zoom ? Math.round(v * zoom) / zoom : Math.round(v)),
+    [zoom],
+  )
+
   const detents = useMemo(() => ({
     // y = translateY of the sheet; 0 = fully expanded.
-    peek: Math.max(0, sheetHeight - PEEK_PX),
-    mid: Math.max(0, Math.round(sheetHeight - avail * 0.6)),
+    peek: snap(Math.max(0, sheetHeight - PEEK_PX)),
+    mid: snap(Math.max(0, sheetHeight - avail * 0.6)),
     full: 0,
-  }), [sheetHeight, avail])
+  }), [sheetHeight, avail, snap])
 
   const [detent, setDetent] = useState<Detent>('peek')
   const y = useMotionValue(0)
@@ -209,13 +229,57 @@ export default function MobileEditor(props: MobileEditorProps) {
   // Animate to a detent whenever it (or the geometry) changes — unless the
   // user is mid-drag.
   const draggingRef = useRef(false)
+
+  /**
+   * IS THE SHEET MOVING RIGHT NOW?
+   *
+   * It drives `will-change`, and the point is that it goes back off. A sheet
+   * that carries `will-change: transform` for ever keeps its own compositor
+   * layer for ever, and text on a composited layer loses subpixel
+   * antialiasing permanently: smooth to drag, soft to read, which is the
+   * worst of both. Promoting only for the length of the gesture buys the
+   * cheap frames while they are needed and hands the text back to the main
+   * layer the moment it stops.
+   */
+  const [moving, setMoving] = useState(false)
+
+  /**
+   * NUDGE THE RESTING SHEET ONTO A WHOLE DEVICE PIXEL.
+   *
+   * Snapping the translate is necessary but not sufficient. The sheet is
+   * anchored with `bottom`, so its resting top is
+   * viewportHeight - inset - height + y, and the viewport height in CSS
+   * pixels is itself fractional once the root zoom divides it: measured
+   * 992.94, not 993. A perfectly snapped translate therefore still lands the
+   * box, and every glyph in it, a third of a pixel off the grid. Deriving the
+   * correction algebraically means re-deriving it every time the layout
+   * changes; measuring it does not.
+   *
+   * So once the sheet is at rest, read where it actually is, and take the
+   * remainder back out. One read and one write, only when it has stopped.
+   */
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const settle = useCallback(() => {
+    const el = sheetRef.current
+    if (!el || !zoom) return
+    const top = el.getBoundingClientRect().top
+    const frac = top - Math.round(top)
+    if (Math.abs(frac) > 0.001) y.set(y.get() - frac / zoom)
+  }, [y, zoom])
+
   useEffect(() => {
     if (draggingRef.current || docked) return
+    setMoving(true)
     const controls = animate(y, detents[detent], {
       type: 'spring', stiffness: 520, damping: 44, mass: 0.9,
+      // Land exactly on the detent rather than within a spring epsilon of
+      // it: the snapped value is whole in device space and a resting offset
+      // a third of a pixel away from it is not.
+      restDelta: 0.001,
+      onComplete: () => { y.set(detents[detent]); setMoving(false); settle() },
     })
-    return controls.stop
-  }, [detent, detents, y, docked])
+    return () => { controls.stop(); setMoving(false) }
+  }, [detent, detents, y, docked, settle])
 
   const openTo = useCallback((d: Detent) => setDetent(d), [])
 
@@ -241,6 +305,7 @@ export default function MobileEditor(props: MobileEditorProps) {
   const canDragRef = useRef(true)
   const onDragStart = useCallback(() => {
     draggingRef.current = true
+    setMoving(true)
   }, [])
   const onDrag = useCallback((_: unknown, info: PanInfo) => {
     // If dragging up but body isn't at the top, cancel by snapping y back.
@@ -270,7 +335,10 @@ export default function MobileEditor(props: MobileEditorProps) {
     }
     setDetent(target)
     canDragRef.current = true
-  }, [y, detents])
+    // If the drag ended on the detent the sheet is already at, the effect
+    // above will not re-run, so nothing would put it back on the grid.
+    if (Math.abs(detents[target] - cur) < 0.5) { y.set(detents[target]); settle() }
+  }, [y, detents, settle])
 
   // ── Resolve the active panel for the fields view. ────────────────────────
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
@@ -486,8 +554,10 @@ export default function MobileEditor(props: MobileEditorProps) {
           )}
 
           <motion.div
+            ref={sheetRef}
             className="ze-sheet"
-            style={{ height: sheetHeight, y, bottom: bottomInset }}
+            data-moving={moving ? 'true' : undefined}
+            style={{ height: sheetHeight, y, bottom: bottomInset, willChange: moving ? 'transform' : 'auto' }}
             drag="y"
             dragConstraints={{ top: 0, bottom: detents.peek }}
             dragElastic={0.02}
