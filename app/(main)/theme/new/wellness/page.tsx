@@ -349,7 +349,7 @@ export default function WellnessWizardPage() {
       <main className="relative z-10 mx-auto max-w-5xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-teal-700">قالب استوديو العافية</p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
             ابنِ موقع استوديو عافية فاخرًا.
           </h1>
           <p className="mt-3 max-w-3xl text-muted">
@@ -603,7 +603,7 @@ export default function WellnessWizardPage() {
               type="button"
               disabled={loading}
               onClick={startGenerate}
-              className="whitespace-nowrap rounded-full px-8 py-3.5 text-sm font-bold transition hover:scale-[1.02] disabled:opacity-60"
+              className="whitespace-nowrap rounded-xl px-8 py-3.5 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
               style={{ background: selectedPreset.colors.accent, color: selectedPreset.id === 'noir' ? '#0e0e0e' : selectedPreset.colors.text }}
             >
               {loading ? 'جارٍ توليد موقعك...' : 'ولّد قالب العافية ←'}
@@ -632,7 +632,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
   return (
     <motion.section {...sectionMotion} className="mb-8 rounded-[32px] border border-token bg-surface/65 p-6 shadow-soft-md backdrop-blur-xl sm:p-8">
       <div className="mb-5">
-        <h2 className="text-xl font-extrabold tracking-tight text-foreground">{title}</h2>
+        <h2 className="text-xl font-extrabold text-foreground">{title}</h2>
         {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
       </div>
       {children}

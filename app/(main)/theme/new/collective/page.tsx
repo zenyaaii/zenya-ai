@@ -247,7 +247,7 @@ export default function CollectiveWizardPage() {
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-emerald-600">نُخبة · قالب الكتالوج</p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
             ابنِ متجرًا منتقى متعدد العلامات.
           </h1>
           <ShopifyAffiliateCallout
@@ -500,7 +500,7 @@ export default function CollectiveWizardPage() {
               type="button"
               onClick={startGenerate}
               disabled={loading}
-              className="flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 px-12 py-4 text-base font-black text-white shadow-xl shadow-emerald-500/25 transition hover:scale-105 hover:shadow-emerald-500/40 disabled:opacity-60 disabled:hover:scale-100"
+              className="flex items-center gap-3 rounded-xl bg-[#171717] px-12 py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد متجرك...</>

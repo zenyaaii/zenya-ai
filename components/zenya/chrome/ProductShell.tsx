@@ -36,6 +36,7 @@ import { useRef } from "react"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import Header, { useOnDark, type NavItem } from "./Header"
 import { CHROME_CSS } from "./tokens"
+import { PRODUCT_TOKENS_CSS } from "@/components/app/tokens"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
 const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
@@ -55,7 +56,7 @@ export default function ProductShell({
 
   return (
     <div className={"zx-root " + tajawal.className} dir="rtl" ref={rootRef}>
-      <style dangerouslySetInnerHTML={{ __html: CHROME_CSS + css }} />
+      <style dangerouslySetInnerHTML={{ __html: PRODUCT_TOKENS_CSS + CHROME_CSS + css }} />
       <Header headRef={headRef} onDark={onDark} uiClass={plex.className} nav={nav} />
       {children}
     </div>
