@@ -193,6 +193,15 @@ export default function MobileEditor(props: MobileEditorProps) {
   // The head of the sheet at rest: the handle, the title, the save state and
   // the save itself — everything a thumb needs without opening anything.
   const PEEK_PX = 84
+  /* Pixels per second. Below SOFT a gesture is a nudge and the sheet stays
+     where it is; above HARD it is a throw and the sheet goes the whole way.
+     Between them it is a swipe and moves exactly one detent. */
+  const FLICK_SOFT = 320
+  const FLICK_HARD = 1200
+  /* A drag this long is deliberate whatever its speed. */
+  const DRAG_STEP_PX = 44
+  /* And a drag across this much of the sheet's whole travel is a throw. */
+  const THROW_FRACTION = 0.45
   const avail = Math.max(0, vh / zoom - bottomInset)
   const sheetHeight = Math.max(240, Math.round(avail * 0.92))
 
@@ -267,19 +276,32 @@ export default function MobileEditor(props: MobileEditorProps) {
     if (Math.abs(frac) > 0.001) y.set(y.get() - frac / zoom)
   }, [y, zoom])
 
-  useEffect(() => {
-    if (draggingRef.current || docked) return
+  /* One spring, and both the detent effect and the end of a drag go through
+     it. They have to: if a gesture resolves to the detent the sheet is
+     already on, setDetent changes nothing, the effect below does not re-run,
+     and without this the sheet stays stranded wherever the finger left it
+     instead of settling back. That was a real bug, and it is why this is a
+     function rather than an effect body. */
+  const springTo = useCallback((target: Detent) => {
     setMoving(true)
-    const controls = animate(y, detents[detent], {
+    return animate(y, detents[target], {
       type: 'spring', stiffness: 520, damping: 44, mass: 0.9,
       // Land exactly on the detent rather than within a spring epsilon of
       // it: the snapped value is whole in device space and a resting offset
       // a third of a pixel away from it is not.
       restDelta: 0.001,
-      onComplete: () => { y.set(detents[detent]); setMoving(false); settle() },
+      onComplete: () => { y.set(detents[target]); setMoving(false); settle() },
     })
+  }, [y, detents, settle])
+
+  const detentRef = useRef(detent)
+  detentRef.current = detent
+
+  useEffect(() => {
+    if (draggingRef.current || docked) return
+    const controls = springTo(detent)
     return () => { controls.stop(); setMoving(false) }
-  }, [detent, detents, y, docked, settle])
+  }, [detent, detents, docked, springTo])
 
   const openTo = useCallback((d: Detent) => setDetent(d), [])
 
@@ -287,7 +309,7 @@ export default function MobileEditor(props: MobileEditorProps) {
   const pickSection = useCallback((id: string) => {
     setSelected(id)
     setSheetMode('fields')
-    setDetent((cur) => (cur === 'peek' ? 'mid' : cur))
+    setDetent('full')
   }, [setSelected])
 
   // When a field gains focus and the keyboard opens, make sure the sheet is
@@ -303,11 +325,22 @@ export default function MobileEditor(props: MobileEditorProps) {
   // ── Drag: only let the sheet drag when its body is scrolled to the top,
   //    otherwise the gesture belongs to the inner scroll. ──────────────────
   const canDragRef = useRef(true)
+  /* A tap and a drag arrive through the same handlers, so the only way to
+     tell them apart is whether the finger travelled. Anything under four
+     pixels is a tap. */
+  const movedRef = useRef(false)
+  /* Which detent the gesture set off from. Stepping one stop is measured
+     from here rather than from wherever the finger happened to let go, so a
+     swipe moves exactly one stop however far it slid. */
+  const fromRef = useRef<Detent>('peek')
   const onDragStart = useCallback(() => {
     draggingRef.current = true
+    movedRef.current = false
+    fromRef.current = detentRef.current
     setMoving(true)
   }, [])
   const onDrag = useCallback((_: unknown, info: PanInfo) => {
+    if (Math.abs(info.offset.y) > 4) movedRef.current = true
     // If dragging up but body isn't at the top, cancel by snapping y back.
     if (bodyRef.current && bodyRef.current.scrollTop > 2 && info.delta.y < 0) {
       canDragRef.current = false
@@ -315,30 +348,59 @@ export default function MobileEditor(props: MobileEditorProps) {
   }, [])
   const onDragEnd = useCallback((_: unknown, info: PanInfo) => {
     draggingRef.current = false
-    const cur = y.get()
+    // (the release position is no longer needed: stepping is measured from
+    // the detent the gesture started at, not from where the finger let go)
     const v = info.velocity.y
-    // Order detents by y position (full=0 < mid < peek).
-    const ordered: Array<[Detent, number]> = [
-      ['full', detents.full], ['mid', detents.mid], ['peek', detents.peek],
-    ]
+    /**
+     * TWO SPEEDS, NOT ONE.
+     *
+     * A sheet with a single velocity threshold can only answer one question:
+     * was that a flick or not. So a nudge and a throw did the same thing and
+     * the sheet always stopped in the middle. These are the three gestures a
+     * thumb actually makes, and they get three answers:
+     *
+     *   nudge     under FLICK_SOFT and under DRAG_STEP_PX   stay
+     *   swipe     over either one                           one stop along
+     *   throw     over FLICK_HARD                           all the way
+     *
+     * DISTANCE COUNTS AS WELL AS SPEED, and that is not belt and braces. A
+     * slow, long drag is unmistakably deliberate and reports almost no
+     * velocity, so on velocity alone it would be read as a nudge and snap
+     * back under the finger that just dragged it half the screen.
+     *
+     * Stepping is measured from the detent the gesture STARTED at, so one
+     * swipe is always exactly one stop.
+     */
+    const openness: Detent[] = ['peek', 'mid', 'full']
+    const from = openness.indexOf(fromRef.current)
+    const step = (by: number) => openness[Math.min(openness.length - 1, Math.max(0, from + by))]
+
+    const dy = info.offset.y                 // positive downward
+    const up = (Math.abs(v) > 40 ? v : dy) < 0
+    const span = Math.max(1, detents.peek - detents.full)
+
+    /* EACH TIER IS READ FROM SPEED **OR** DISTANCE, and that is not
+       redundancy. Velocity is the better signal when the hardware reports it
+       honestly and a useless one when it does not: driven through synthetic
+       touch events, a 300px throw here reports 53px/s while a 70px swipe
+       reports 257, which is backwards. A gesture that crosses nearly half
+       the sheet is a throw whatever the clock says it was, and a gesture
+       that crosses a couple of finger-widths is a swipe. */
+    const threw = Math.abs(v) >= FLICK_HARD || Math.abs(dy) >= span * THROW_FRACTION
+    const swiped = Math.abs(v) >= FLICK_SOFT || Math.abs(dy) >= DRAG_STEP_PX
+
     let target: Detent
-    if (v > 600) {
-      // Fast flick down → next lower detent.
-      target = cur < detents.mid - 1 ? 'mid' : 'peek'
-    } else if (v < -600) {
-      // Fast flick up → next higher detent.
-      target = cur > detents.mid + 1 ? 'mid' : 'full'
-    } else {
-      // Nearest by position.
-      target = ordered.reduce((best, [name, val]) =>
-        Math.abs(val - cur) < Math.abs(detents[best] - cur) ? name : best, 'peek' as Detent)
-    }
-    setDetent(target)
+    if (threw) target = up ? 'full' : 'peek'
+    else if (swiped) target = step(up ? 1 : -1)
+    else target = fromRef.current
+
     canDragRef.current = true
-    // If the drag ended on the detent the sheet is already at, the effect
-    // above will not re-run, so nothing would put it back on the grid.
-    if (Math.abs(detents[target] - cur) < 0.5) { y.set(detents[target]); settle() }
-  }, [y, detents, settle])
+    // Always drive the spring from here. Where the target IS the current
+    // detent, setDetent is a no-op and the effect never fires, which is what
+    // used to leave the sheet stranded mid-screen after a nudge.
+    if (target === detentRef.current) springTo(target)
+    else setDetent(target)
+  }, [y, detents, springTo])
 
   // ── Resolve the active panel for the fields view. ────────────────────────
   const allPanels: EditorPanel[] = [...config.panels, ...config.globalPanels]
@@ -444,7 +506,7 @@ export default function MobileEditor(props: MobileEditorProps) {
   const backToList = (
     <button
       type="button"
-      onClick={() => { setSheetMode('picker'); if (!docked) openTo('mid') }}
+      onClick={() => { setSheetMode('picker'); if (!docked) openTo('full') }}
       className="ze-icon"
       aria-label={t.editor.sections}
       title={t.editor.sections}
@@ -565,8 +627,20 @@ export default function MobileEditor(props: MobileEditorProps) {
             onDrag={onDrag}
             onDragEnd={onDragEnd}
           >
-            {/* Grab handle + head — the whole head is the drag surface */}
-            <div className="ze-sheet-grab">
+            {/* Grab handle + head — the whole head is the drag surface, and
+                also the tap target. A TAP OPENS ALL THE WAY: a finger that
+                lands and lifts without travelling is not asking for one stop,
+                it is asking to see the panel. Buttons inside the head are
+                excluded, or the save and the close would both expand the
+                sheet on their way to doing their own job. */}
+            <div
+              className="ze-sheet-grab"
+              onClick={(e) => {
+                if (movedRef.current) return
+                if ((e.target as HTMLElement).closest('button')) return
+                openTo('full')
+              }}
+            >
               <div className="ze-handle" aria-hidden />
               <div className="ze-sheet-head">
                 {sheetMode === 'fields' && backToList}

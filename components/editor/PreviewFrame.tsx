@@ -83,6 +83,19 @@ function syncHeadStyles(src: Document, dest: Document) {
   else dest.head.appendChild(frag)
 }
 
+/**
+ * Device pixels per CSS pixel: the display's own ratio times the root zoom
+ * ZoomLock writes. Snapping against this is what makes a rounded length
+ * whole where it is actually rasterised rather than where it is declared.
+ * One on the server, where there is no window and nothing to rasterise.
+ */
+function pxGrid(): number {
+  if (typeof window === 'undefined') return 1
+  const dpr = window.devicePixelRatio || 1
+  const zoom = parseFloat(getComputedStyle(document.documentElement).zoom || '1') || 1
+  return Math.max(1, dpr * zoom)
+}
+
 export default function PreviewFrame({
   device,
   sectionStylesCss,
@@ -252,11 +265,30 @@ export default function PreviewFrame({
   const measured = availW > 0 && availH > 0
   const fixed = DEVICE_WIDTH[device]
   const devW = fullBleed ? availW : (fixed ?? Math.max(availW, DESKTOP_MIN))
-  const scale = fullBleed || !measured ? 1 : Math.min(1, availW / devW)
-  const frameW = Math.floor(devW * scale)
+  /**
+   * THE SCALE IS DERIVED FROM A WHOLE-DEVICE-PIXEL FRAME, not the other way
+   * round, and that ordering is the whole point.
+   *
+   * Before, the scale was the raw ratio and the frame was Math.floor of it.
+   * So the container was a whole CSS pixel wide while the iframe inside it
+   * was scaled by the unfloored ratio: the two disagreed by up to a pixel,
+   * which showed as a soft seam down the edge of the preview, and the
+   * customer's whole site was resampled at an arbitrary fraction.
+   *
+   * Snapping the frame in DEVICE space and deriving the scale from it makes
+   * the container and the scaled iframe agree exactly, and puts the
+   * preview's edges on the pixel grid. Device space, not CSS space, because
+   * ZoomLock renders the document at 0.85 and a whole CSS pixel is not a
+   * whole device pixel under it.
+   */
+  const rawScale = fullBleed || !measured ? 1 : Math.min(1, availW / devW)
+  const grid = pxGrid()
+  const snapW = (v: number) => Math.max(1, Math.floor(v * grid) / grid)
+  const frameW = fullBleed ? 0 : snapW(devW * rawScale)
+  const scale = fullBleed || !measured ? 1 : frameW / devW
   const capH = fullBleed ? null : DEVICE_HEIGHT[device]
   const iframeH = Math.min(scale < 1 ? availH / scale : availH, capH ?? Infinity)
-  const frameH = Math.floor(iframeH * scale)
+  const frameH = fullBleed ? 0 : snapW(iframeH * scale)
 
   return (
     <div ref={wrapRef} className="ze-frame-wrap" data-bleed={fullBleed ? '' : undefined}>
