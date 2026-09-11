@@ -49,6 +49,12 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
 const DEMO_SUBDOMAIN_PAGES = new Set([
   'dashboard',
   'editor',
+  // The one candidate that did NOT go live, because it was filed under the
+  // wrong name. It restyles the restaurant wizard at /theme/new/restaurant,
+  // not the Shopify builder at /build, and the wizard it proposes for sits
+  // behind an account and runs a generator this public route cannot reach.
+  // See app/demo/build/page.tsx.
+  'build',
 ])
 
 /**
