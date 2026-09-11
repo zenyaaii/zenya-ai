@@ -146,7 +146,16 @@ const STEPS = [
 ]
 const CURRENT = 3
 
-export default function CheckoutView({ initialPlan }: { initialPlan: PlanId }) {
+export default function CheckoutView({
+  initialPlan,
+  start,
+}: {
+  initialPlan: PlanId
+  /** The server action that creates the Stripe session. It is passed in
+   *  rather than imported so this view stays a plain component: the page is
+   *  what knows it is a route, and the action is what knows about Stripe. */
+  start: (plan: PlanId) => Promise<{ url: string } | { error: string }>
+}) {
   const [plan, setPlan] = useState<PlanId>(initialPlan)
   /* The figure and the list are swapped out and back on a plan change, so the
      card reports a change the reader caused instead of cutting to it. */
@@ -173,16 +182,34 @@ export default function CheckoutView({ initialPlan }: { initialPlan: PlanId }) {
     window.setTimeout(() => { setPlan(next); setOut(false) }, 180)
   }
 
-  /* THE DOOR. The live route would decide here; this one waits the length of
-     a decision so the button reports that it did something, then stops. It
-     does not call Stripe, and there is nothing in this function that could. */
+  /* THE HANDOFF.
+     On success this function does not return — the browser leaves for Stripe.
+     The door below is therefore an ERROR surface: it only ever renders when
+     the session could not be created, which is why it is not shown until
+     something has gone wrong. */
   const doorRef = useRef<HTMLDivElement | null>(null)
+  const [failure, setFailure] = useState<string | null>(null)
 
-  function knock() {
+  async function knock() {
     if (busy) return
-    if (atDoor) { doorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" }); return }
     setBusy(true)
-    window.setTimeout(() => { setBusy(false); setAtDoor(true) }, 520)
+    setFailure(null)
+    try {
+      const result = await start(plan)
+      if ("url" in result) {
+        /* A full navigation, not router.push: the destination is Stripe's
+           origin and the client router cannot own it. */
+        window.location.href = result.url
+        return
+      }
+      setFailure(result.error)
+      setAtDoor(true)
+    } catch {
+      setFailure("تعذّر الاتصال. تحقّق من شبكتك ثم حاوِل مرة أخرى.")
+      setAtDoor(true)
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -241,17 +268,17 @@ export default function CheckoutView({ initialPlan }: { initialPlan: PlanId }) {
         </div>
 
         <Summary plan={current} out={out} renews={renews} busy={busy}
-                 atDoor={atDoor} onGo={knock} doorRef={doorRef} />
+                 atDoor={atDoor} failure={failure} onGo={knock} doorRef={doorRef} />
       </section>
 
       <StateGallery />
 
       <section className="zk-tail" data-reveal>
         <p className="zx-foot-note">
-          هذه صفحة <strong>تصميم مقترح</strong> لواجهة الدفع، وليست الدفع نفسه. صفحة الدفع
-          الحقيقية هي <Link className="zx-link" href="/checkout">/checkout</Link>، والأسعار
-          الكاملة على <Link className="zx-link" href="/pricing">صفحة الأسعار</Link>، وشروط
-          الإلغاء والاسترداد في <Link className="zx-link" href="/refund">سياسة الاسترداد</Link>.
+          الأسعار الكاملة على <Link className="zx-link" href="/pricing">صفحة الأسعار</Link>،
+          وشروط الإلغاء والاسترداد في{" "}
+          <Link className="zx-link" href="/refund">سياسة الاسترداد</Link>. أي سؤال قبل الدفع؟{" "}
+          <Link className="zx-link" href="/contact">راسِلنا أولًا</Link>.
         </p>
       </section>
     </Shell>
@@ -262,10 +289,13 @@ export default function CheckoutView({ initialPlan }: { initialPlan: PlanId }) {
    THE ORDER SUMMARY. The centre of the page, not a sidebar afterthought.
 ------------------------------------------------------------------------- */
 function Summary({
-  plan, out, renews, busy, atDoor, onGo, doorRef,
+  plan, out, renews, busy, atDoor, failure, onGo, doorRef,
 }: {
   plan: Plan; out: boolean; renews: string | null
-  busy: boolean; atDoor: boolean; onGo: () => void
+  busy: boolean; atDoor: boolean
+  /** Set only when the session could not be created. See Door. */
+  failure: string | null
+  onGo: () => void
   doorRef: React.MutableRefObject<HTMLDivElement | null>
 }) {
   return (
@@ -362,19 +392,17 @@ function Summary({
               <span>جارٍ التحضير…</span>
             </>
           ) : (
-            <span>{atDoor ? "اذهب إلى التفاصيل" : "المتابعة إلى الدفع"}</span>
+            <span>{atDoor ? "حاوِل مرة أخرى" : "المتابعة إلى الدفع"}</span>
           )}
         </button>
         <p className="zk-fine">
-          هذه واجهة مقترحة ولا تُنفّذ أي عملية دفع. للدفع فعليًا:{" "}
-          <Link href={"/checkout?plan=" + plan.id}>
-            <bdi dir="ltr">/checkout?plan={plan.id}</bdi>
-          </Link>
+          تُدخَل بيانات البطاقة في صفحة <bdi dir="ltr">Stripe</bdi> وحدها. لا يمرّ منها شيء عبر
+          خوادم زينيا، ولا نحتفظ برقم بطاقتك.
         </p>
       </div>
 
       <Grow on={atDoor}>
-        <Door plan={plan} doorRef={doorRef} />
+        {failure ? <Door plan={plan} message={failure} doorRef={doorRef} /> : null}
       </Grow>
     </div>
   )
@@ -392,28 +420,33 @@ function Row({ icon, children }: { icon: React.ReactNode; children: React.ReactN
 /* -------------------------------------------------------------------------
    THE DOOR. Where the demo stops and says so.
 ------------------------------------------------------------------------- */
-function Door({ plan, doorRef }: {
-  plan: Plan; doorRef: React.MutableRefObject<HTMLDivElement | null>
+/**
+ * What the reader sees when the session could not be created.
+ *
+ * It never renders on the happy path — that path leaves for Stripe and never
+ * comes back to this component — so everything here is written for someone
+ * whose payment did NOT start, and the first thing it says is that nothing
+ * was charged.
+ */
+function Door({ plan, message, doorRef }: {
+  plan: Plan
+  message: string
+  doorRef: React.MutableRefObject<HTMLDivElement | null>
 }) {
   return (
-    <div className="zk-door" data-in="true" ref={doorRef}>
-      <span className="zk-tick" aria-hidden>
+    <div className="zk-door" data-in="true" ref={doorRef} role="alert">
+      <span className="zk-tick zk-tick-bad" aria-hidden>
         <svg viewBox="0 0 24 24" fill="none" focusable="false" width="100%" height="100%">
-          <path className="zk-tick-p" d="M5 12.6l4.6 4.6L19 7.8" stroke="currentColor"
+          <path className="zk-tick-p" d="M12 7.5v6M12 17h.01" stroke="currentColor"
                 strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-      <h3 className="zk-door-h">هنا يقف العرض</h3>
-      <p className="zk-door-p">
-        على الصفحة الحقيقية، هذه هي اللحظة التي تنتقل فيها إلى{" "}
-        <bdi dir="ltr">Stripe</bdi> لإتمام الدفع. وهذه صفحة تصميم، فهي{" "}
-        <strong>لا تفتح صفحة دفع ولا تُنشئ عملية شراء ولا تتصل بـ <bdi dir="ltr">Stripe</bdi> إطلاقًا</strong>.
-      </p>
-      <p className="zk-dua">بارك الله لك فيما اخترت.</p>
+      <h3 className="zk-door-h">تعذّر بدء الدفع</h3>
+      <p className="zk-door-p">{message}</p>
 
       <div className="zk-door-acts">
         <Link href={"/checkout?plan=" + plan.id} className="zx-act-1">
-          إتمام الدفع على الصفحة الحقيقية
+          حاوِل مرة أخرى
         </Link>
         <Link href="/pricing" className="zx-act-2">
           <ArrowLeft size={15} strokeWidth={2} aria-hidden />
@@ -423,13 +456,11 @@ function Door({ plan, doorRef }: {
 
       <div className="zk-strip">
         <p>
-          <strong>لم يُخصم منك شيء ولم يُنشأ أي اشتراك.</strong> لا يوجد في هذه الصفحة حقل بطاقة
-          ولا طلب واحد إلى <bdi dir="ltr">Stripe</bdi>. وأي مشكلة تواجهك في الدفع الحقيقي،
-          راسلنا على{" "}
+          <strong>لم يُخصم منك شيء ولم يُنشأ أي اشتراك.</strong> إن تكرّر هذا، راسلنا على{" "}
           <a href={"mailto:" + COMPANY.SUPPORT_EMAIL}>
             <bdi dir="ltr">{COMPANY.SUPPORT_EMAIL}</bdi>
           </a>{" "}
-          — أعانك الله، ونحن في خدمتك.
+          ونتكفّل به.
         </p>
       </div>
     </div>

@@ -159,6 +159,10 @@ export const CSS = `
 ------------------------------------------------------------------------- */
 .zk-door { margin: 1rem 0 0; border-radius: var(--r-panel); background: var(--card); box-shadow: 0 0 0 1px rgba(0,0,0,0.09); padding: clamp(1.25rem, 4vw, 1.875rem); }
 .zk-tick { display: block; width: 34px; height: 34px; color: #15803d; }
+/* The door only ever opens on a failure, so its mark is a warning rather than
+   a tick. Amber, not the status red: nothing was charged and nothing is
+   broken, the session simply did not start. */
+.zk-tick-bad { color: #b45309; }
 .zk-tick-p { stroke-dasharray: 26; stroke-dashoffset: 0; }
 .zx-js .zk-door[data-in] .zk-tick-p { animation: zk-draw 620ms var(--ease-out) both; }
 @keyframes zk-draw { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
