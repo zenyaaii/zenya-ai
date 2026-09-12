@@ -690,6 +690,13 @@ export default function BuildFormView() {
    No backticks inside this literal: one would end it.
 --------------------------------------------------------------------------- */
 const CSS = `
+/* THE TWO FLOORS, IN RENDERED PIXELS. ZoomLock writes zoom: 0.85 from the
+   root layout, so 14.5px CSS reaches the eye at 12.33 and 38px CSS reaches
+   the finger at 32.3 — the 12px type floor and the 32px coarse-pointer floor.
+   Measured by scripts/theme-check.cjs, which reported this page at 195 type
+   and 99 tap failures across five widths before these numbers were applied:
+   the chips were 26.8px tall with 10.63px labels and the step rail 31.4px.
+   Nothing here goes below either number. */
 .zb-root {
   --ground: #fafafa;
   --card: #ffffff;
@@ -725,9 +732,9 @@ const CSS = `
   transition: min-width 380ms var(--ease-out) 220ms, background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out);
 }
 .zb-phone-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.375rem; height: 44px; padding-inline: 0.375rem; }
-.zb-phone-mark { display: flex; align-items: center; justify-self: center; padding-inline: 0.375rem; }
+.zb-phone-mark { display: flex; align-items: center; justify-self: center; min-height: 38px; padding-inline: 0.375rem; }
 .zb-mark-svg-sm { height: 16px; color: #000; }
-.zb-round { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex-shrink: 0; border: 0; background: transparent; cursor: pointer; border-radius: 999px; color: var(--obsidian); }
+.zb-round { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex-shrink: 0; border: 0; background: transparent; cursor: pointer; border-radius: 999px; color: var(--obsidian); }
 .zb-round:hover { background: rgba(0,0,0,0.05); }
 .zb-account-phone { justify-self: end; }
 .zb-phone-menu { display: grid; padding: 0.125rem 0.375rem 0.375rem; }
@@ -747,7 +754,7 @@ const CSS = `
 .zb-side { display: flex; align-items: center; min-width: 0; }
 .zb-side-start { justify-content: flex-start; }
 .zb-side-end { justify-content: flex-end; }
-.zb-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
+.zb-mark { display: flex; align-items: center; min-height: 38px; padding: 0 0.375rem; flex-shrink: 0; }
 .zb-mark-svg { height: 17px; color: #000; }
 .zb-head[data-dark] .zb-pill, .zb-head[data-dark] .zb-phone-pill {
   background: rgba(32,32,38,0.72);
@@ -759,10 +766,10 @@ const CSS = `
 .zb-head[data-dark] .zb-sep { background: rgba(250,250,250,0.16); }
 .zb-head[data-dark] .zb-account { background: #fafafa; color: #171717; }
 .zb-nav { display: flex; align-items: center; gap: 0.125rem; }
-.zb-nav-item { border-radius: 999px; padding: 0.625rem 0.75rem; font-size: 14px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
+.zb-nav-item { border-radius: 999px; padding: 0.6875rem 0.75rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
 .zb-nav-item:hover, .zb-nav-item[data-current] { color: var(--obsidian); }
 .zb-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); transition: background-color 520ms var(--ease-out); }
-.zb-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
+.zb-account { border-radius: 999px; padding: 0.6875rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
 .zb-account:hover { opacity: 0.86; }
 .zb-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zb-drawer[data-open] { transition-delay: 0s, 0s; }
@@ -772,7 +779,7 @@ const CSS = `
 
 /* ---- lede ---------------------------------------------------------------- */
 .zb-lede { max-width: var(--page); margin: clamp(2.5rem, 6vw, 4rem) auto clamp(2rem, 4vw, 3rem); }
-.zb-eyebrow { margin: 0 0 0.75rem; font-size: 11.5px; font-weight: 700; line-height: 1.5; letter-spacing: 0.06em; color: var(--violet); }
+.zb-eyebrow { margin: 0 0 0.75rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--violet); }
 .zb-h1 { margin: 0; font-size: clamp(28px, 4vw, 46px); font-weight: 900; line-height: 1.3; color: var(--obsidian); }
 .zb-sub { margin: 1.125rem 0 0; max-width: 44ch; font-size: 15.5px; font-weight: 500; line-height: 1.9; color: var(--stone); }
 
@@ -795,7 +802,7 @@ const CSS = `
 .zb-meter-top { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.75rem; }
 .zb-meter-n { font-size: 28px; font-weight: 900; line-height: 1.24; color: var(--obsidian); font-variant-numeric: tabular-nums; }
 .zb-meter-n i { font-style: normal; font-size: 15px; margin-inline-start: 1px; color: var(--stone); }
-.zb-meter-l { font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--stone); }
+.zb-meter-l { font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--stone); }
 .zb-track { height: 5px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; }
 .zb-fill {
   display: block; height: 100%; border-radius: 999px; background: var(--violet);
@@ -809,15 +816,16 @@ const CSS = `
   width: 100%; display: flex; align-items: center; gap: 0.625rem;
   border: 0; background: transparent; cursor: pointer; text-align: start;
   border-radius: var(--r-control); padding: 0.5rem 0.625rem;
-  font: inherit; font-size: 13.5px; font-weight: 500; line-height: 1.5; color: var(--stone);
+  min-height: 38px;
+  font: inherit; font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--stone);
   transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
 }
 .zb-step:hover { background: rgba(17,17,17,0.04); color: var(--obsidian); }
 .zb-step[data-on] { background: rgba(94,106,210,0.09); color: var(--obsidian); font-weight: 700; }
 .zb-step-n {
   flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
-  width: 21px; height: 21px; border-radius: 999px;
-  font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+  width: 24px; height: 24px; border-radius: 999px;
+  font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums;
   background: rgba(17,17,17,0.06); color: var(--stone);
   transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
 }
@@ -832,7 +840,7 @@ const CSS = `
   box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55);
 }
 .zb-card-head { margin-bottom: clamp(1.5rem, 3vw, 2rem); }
-.zb-count { margin: 0 0 0.5rem; font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; color: var(--violet); }
+.zb-count { margin: 0 0 0.5rem; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--violet); }
 .zb-h2 { margin: 0; font-size: clamp(21px, 2.4vw, 27px); font-weight: 900; line-height: 1.36; color: var(--obsidian); }
 .zb-h2-sub { margin: 0.625rem 0 0; max-width: 56ch; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone); }
 .zb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.125rem; }
@@ -842,7 +850,7 @@ const CSS = `
 
 /* ---- fields -------------------------------------------------------------- */
 .zb-f { display: flex; flex-direction: column; gap: 0.4375rem; }
-.zb-lab { font-size: 13px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
+.zb-lab { font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--obsidian); }
 .zb-req { color: var(--violet); font-weight: 700; }
 .zb-in {
   width: 100%; border: 0; border-radius: var(--r-control);
@@ -867,15 +875,16 @@ textarea.zb-in { resize: vertical; min-height: 84px; }
 
 /* ---- blocks -------------------------------------------------------------- */
 .zb-block { display: flex; flex-direction: column; gap: 0.75rem; }
-.zb-block-h { margin: 0; font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; color: var(--stone); }
-.zb-opt { color: #9a9aa2; font-weight: 500; letter-spacing: 0; }
-.zb-hint { margin: 0; font-size: 12.5px; font-weight: 500; line-height: 1.75; color: var(--stone); }
+.zb-block-h { margin: 0; font-size: 14.5px; font-weight: 700; line-height: 1.5; color: var(--stone); }
+.zb-opt { color: var(--stone-2); font-weight: 500; letter-spacing: 0; }
+.zb-hint { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.75; color: var(--stone); }
 
 .zb-chips { display: flex; flex-wrap: wrap; gap: 0.4375rem; }
 .zb-chip {
   border: 0; cursor: pointer; font: inherit;
-  border-radius: 999px; padding: 0.4375rem 0.875rem;
-  font-size: 12.5px; font-weight: 500; line-height: 1.4; color: var(--obsidian);
+  border-radius: 999px; padding: 0 0.875rem;
+  min-height: 38px; display: inline-flex; align-items: center;
+  font-size: 14.5px; font-weight: 500; line-height: 1.4; color: var(--obsidian);
   background: #f4f4f6; box-shadow: 0 0 0 1px rgba(17,17,17,0.10);
   transition: background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), color 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
@@ -986,13 +995,14 @@ textarea.zb-in { resize: vertical; min-height: 84px; }
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   margin-top: 1.125rem;
 }
-.zb-nav-note { margin: 0; flex: 1 1 auto; text-align: center; font-size: 12.5px; font-weight: 500; line-height: 1.6; color: var(--stone); transition: color 200ms var(--ease-out); }
+.zb-nav-note { margin: 0; flex: 1 1 auto; text-align: center; font-size: 14.5px; font-weight: 500; line-height: 1.6; color: var(--stone); transition: color 200ms var(--ease-out); }
 .zb-nav-note[data-warn] { color: var(--violet); font-weight: 700; }
 .zb-back, .zb-next {
   display: inline-flex; align-items: center; gap: 0.4375rem;
   border: 0; cursor: pointer; font: inherit;
   border-radius: var(--r-control); padding: 0.625rem 1.125rem;
-  font-size: 14px; font-weight: 700; line-height: 1.4;
+  min-height: 38px;
+  font-size: 14.5px; font-weight: 700; line-height: 1.4;
   transition: background-color 180ms var(--ease-out), opacity 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
 }
 .zb-back { background: #f0f0f3; color: var(--obsidian); box-shadow: 0 0 0 1px rgba(17,17,17,0.10); }

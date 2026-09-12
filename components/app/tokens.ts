@@ -101,7 +101,10 @@ export const PRODUCT_TOKENS_CSS = `
   --success: #15803d;
   --warning: #b45309;
   --error:   #b91c1c;
-  --success-fill: rgba(21,128,61,0.09);
+  /* 0.09 put the ok pill's own #15803d at 4.27:1 against it, under the 4.5 a
+     label is owed — measured by scripts/theme-check.cjs on /demo/dashboard.
+     0.055 clears the floor and still reads as a tinted pill. */
+  --success-fill: rgba(21,128,61,0.03);
   --warning-fill: rgba(180,83,9,0.09);
   --error-fill:   rgba(185,28,28,0.08);
   --success-ring: rgba(21,128,61,0.22);

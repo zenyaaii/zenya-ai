@@ -180,7 +180,7 @@ export default function DashboardDemoView() {
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <span className="zy-top-cta" role="presentation">
               <Plus className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
-              <span className="hidden sm:inline">موقع جديد</span>
+              <span className="hidden text-[14.5px] sm:inline">موقع جديد</span>
             </span>
             <span className="zy-icon-btn relative hidden sm:inline-flex" aria-hidden>
               <Bell className="h-4 w-4" />
@@ -206,7 +206,7 @@ export default function DashboardDemoView() {
           {view === 'billing' && <BillingView />}
           {view === 'settings' && <SettingsView />}
 
-          <p className="mx-auto max-w-7xl px-4 pb-10 pt-2 text-center text-[11.5px] font-medium leading-[1.9] text-[#66666e] sm:px-6">
+          <p className="mx-auto max-w-7xl px-4 pb-10 pt-2 text-center text-[14.5px] font-medium leading-[1.9] text-[#66666e] sm:px-6">
             نسخة تجريبية من لوحة التحكم. الأرقام والمواقع والحجوزات هنا كلها بيانات
             تجريبية، ولا تسجّل هذه الصفحة دخول أحد ولا تقرأ حسابًا حقيقيًا. لوحة
             التحكم الفعلية سطح خاص يحتاج تسجيل دخول، وليس جزءًا من هذه المعاينة.

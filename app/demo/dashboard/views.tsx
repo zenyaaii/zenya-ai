@@ -64,7 +64,7 @@ export function PageHead({
           {Icon && <Icon className="h-[22px] w-[22px] shrink-0 text-[#5e6ad2]" strokeWidth={2} />}
           <span className="min-w-0">{title}</span>
         </h2>
-        <p className="mt-1.5 text-[13px] font-medium leading-[1.8] text-[#56565a]">{sub}</p>
+        <p className="mt-1.5 text-[14.5px] font-medium leading-[1.8] text-[#56565a]">{sub}</p>
       </div>
       {aside && <div className="flex shrink-0 flex-wrap items-center gap-2">{aside}</div>}
     </header>
@@ -137,8 +137,8 @@ export function HomeView({ go }: { go: (v: string) => void }) {
                     {s.live ? <Globe className="h-4 w-4" strokeWidth={2} /> : <Folder className="h-4 w-4" strokeWidth={2} />}
                   </div>
                   <div className="min-w-0">
-                    <div className="truncate text-[13.5px] font-bold leading-[1.5] text-[#171717]">{s.name}</div>
-                    <div className="truncate text-[11.5px] font-medium leading-[1.7] text-[#56565a]">
+                    <div className="truncate text-[14.5px] font-bold leading-[1.5] text-[#171717]">{s.name}</div>
+                    <div className="truncate text-[14.5px] font-medium leading-[1.7] text-[#56565a]">
                       {s.live ? s.host : 'مسوّدة · غير منشورة بعد'}
                     </div>
                   </div>
@@ -176,7 +176,7 @@ export function HomeView({ go }: { go: (v: string) => void }) {
             <div className="zy-eyebrow">خطة الإطلاق</div>
             <ul className="mt-3 space-y-2.5">
               {[['أنشئ موقعك', true], ['خصّص محتواك', true], ['انشُر موقعك', true], ['اربط نطاقك', false]].map(([label, done]) => (
-                <li key={String(label)} className="flex items-center gap-2.5 text-[13px] font-medium text-[#171717]">
+                <li key={String(label)} className="flex items-center gap-2.5 text-[14.5px] font-medium text-[#171717]">
                   <CheckCircle2
                     className={'h-4 w-4 shrink-0 ' + (done ? 'text-[#15803d]' : 'text-[rgba(17,17,17,0.18)]')}
                     strokeWidth={2.25}
@@ -240,9 +240,9 @@ export function SitesView({ filter, setFilter }: { filter: string; setFilter: (f
             </div>
             <div className="flex min-w-0 flex-1 flex-col p-4">
               <h3 className="truncate text-[14.5px] font-black leading-[1.5] text-[#171717]">{s.name}</h3>
-              <p className="mt-0.5 text-[11.5px] font-medium leading-[1.7] text-[#66666e]">{s.kind} · {s.updated}</p>
+              <p className="mt-0.5 text-[14.5px] font-medium leading-[1.7] text-[#66666e]">{s.kind} · {s.updated}</p>
               {s.host && (
-                <p className="mt-2 truncate text-[12px] font-medium text-[#5e6ad2]" dir="ltr">{s.host}</p>
+                <p className="mt-2 truncate text-[14.5px] font-medium text-[#5e6ad2]" dir="ltr">{s.host}</p>
               )}
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <span className="zy-btn-q">تعديل</span>
@@ -281,10 +281,10 @@ export function GalleryView() {
           <figure key={a.id} className="group overflow-hidden rounded-2xl zy-card">
             <div className="aspect-square w-full" style={{ background: a.tint }} aria-hidden />
             <figcaption className="min-w-0 p-2.5">
-              <div className="truncate text-[12px] font-bold leading-[1.5] text-[#171717]">{a.name}</div>
+              <div className="truncate text-[14.5px] font-bold leading-[1.5] text-[#171717]">{a.name}</div>
               <div className="mt-0.5 flex items-center justify-between gap-2">
-                <span className="truncate text-[10.5px] font-medium text-[#66666e]">{a.site}</span>
-                <span className="shrink-0 text-[10.5px] font-medium tabular-nums text-[#66666e]">{a.size}</span>
+                <span className="truncate text-[14.5px] font-medium text-[#66666e]">{a.site}</span>
+                <span className="shrink-0 text-[14.5px] font-medium tabular-nums text-[#66666e]">{a.size}</span>
               </div>
             </figcaption>
           </figure>
@@ -351,14 +351,14 @@ export function AnalyticsView({
         <div className="min-w-0 overflow-hidden rounded-2xl zy-card">
           <div className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
             <h3 className="zy-h3">من أين يأتون</h3>
-            <span className="shrink-0 text-[11.5px] font-medium text-[#66666e]">آخر 30 يومًا</span>
+            <span className="shrink-0 text-[14.5px] font-medium text-[#66666e]">آخر 30 يومًا</span>
           </div>
           <BarList rows={CHANNELS} />
         </div>
         <div className="min-w-0 overflow-hidden rounded-2xl zy-card">
           <div className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
             <h3 className="zy-h3">أهم الصفحات</h3>
-            <span className="shrink-0 text-[11.5px] font-medium text-[#66666e]">5 صفحات</span>
+            <span className="shrink-0 text-[14.5px] font-medium text-[#66666e]">5 صفحات</span>
           </div>
           <BarList rows={PAGES} />
         </div>
@@ -412,19 +412,19 @@ export function BookingsView({
                   <span className="text-[14.5px] font-black leading-[1.5] text-[#171717]">{b.name}</span>
                   <span className="zy-pill" data-tone="quiet">{b.kind}</span>
                 </div>
-                <p className="mt-1 truncate text-[11.5px] font-medium leading-[1.7] text-[#66666e]">{b.site}</p>
+                <p className="mt-1 truncate text-[14.5px] font-medium leading-[1.7] text-[#66666e]">{b.site}</p>
               </div>
               <span className="zy-pill shrink-0" data-tone={b.tone}>{b.status}</span>
             </div>
             {/* Wraps rather than scrolls: three facts, each of which must stay
                 whole, on a screen that can only hold two of them per line. */}
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] font-medium text-[#171717]">
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-medium text-[#171717]">
               <span dir="ltr" className="tabular-nums">{b.phone}</span>
               <span>{b.party}</span>
               <span>{b.when}</span>
             </div>
             {b.note && (
-              <p className="mt-3 rounded-[10px] bg-[#f4f4f6] px-3 py-2.5 text-[12.5px] font-medium leading-[1.8] text-[#56565a]">
+              <p className="mt-3 rounded-[10px] bg-[#f4f4f6] px-3 py-2.5 text-[14.5px] font-medium leading-[1.8] text-[#56565a]">
                 {b.note}
               </p>
             )}
@@ -465,14 +465,14 @@ export function SeoView() {
             <h3 className="zy-h3 mb-3">معاينة نتيجة جوجل</h3>
             <div className="rounded-[10px] bg-[#f4f4f6] p-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-black text-[#5e6ad2]">م</span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[14.5px] font-black text-[#5e6ad2]">م</span>
                 <div className="min-w-0">
-                  <div className="truncate text-[11.5px] font-bold text-[#171717]">{SEO_SITE.name}</div>
-                  <div className="truncate text-[10.5px] text-[#56565a]" dir="ltr">{SEO_SITE.host}</div>
+                  <div className="truncate text-[14.5px] font-bold text-[#171717]">{SEO_SITE.name}</div>
+                  <div className="truncate text-[14.5px] text-[#56565a]" dir="ltr">{SEO_SITE.host}</div>
                 </div>
               </div>
               <p className="mt-2 text-[15px] font-medium leading-[1.5] text-[#1a0dab]">{SEO_SITE.title}</p>
-              <p className="mt-1 text-[12px] font-medium leading-[1.7] text-[#56565a]">{SEO_SITE.description}</p>
+              <p className="mt-1 text-[14.5px] font-medium leading-[1.7] text-[#56565a]">{SEO_SITE.description}</p>
             </div>
             <p className="zy-sub mt-3">هكذا يظهر موقعك عند البحث عنه.</p>
           </div>
@@ -509,13 +509,13 @@ function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <label className="text-[12.5px] font-bold text-[#171717]">{label}</label>
-        {counter && <span className="shrink-0 text-[11px] font-medium tabular-nums text-[#66666e]">{counter}</span>}
+        <label className="text-[14.5px] font-bold text-[#171717]">{label}</label>
+        {counter && <span className="shrink-0 text-[14.5px] font-medium tabular-nums text-[#66666e]">{counter}</span>}
       </div>
       {area
-        ? <textarea readOnly rows={3} defaultValue={value} className="w-full px-3 py-2.5 text-[13px] font-medium leading-[1.7]" />
-        : <input readOnly defaultValue={value} className="w-full px-3 py-2.5 text-[13px] font-medium" />}
-      <p className="mt-1.5 text-[11.5px] font-medium leading-[1.7] text-[#66666e]">{hint}</p>
+        ? <textarea readOnly rows={3} defaultValue={value} className="w-full px-3 py-2.5 text-[14.5px] font-medium leading-[1.7]" />
+        : <input readOnly defaultValue={value} className="w-full px-3 py-2.5 text-[14.5px] font-medium" />}
+      <p className="mt-1.5 text-[14.5px] font-medium leading-[1.7] text-[#66666e]">{hint}</p>
     </div>
   )
 }
@@ -537,10 +537,10 @@ export function DomainsView() {
             <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="truncate text-[14px] font-black text-[#171717]" dir="ltr">{d.domain}</span>
+                  <span className="truncate text-[14.5px] font-black text-[#171717]" dir="ltr">{d.domain}</span>
                   <span className="zy-pill shrink-0" data-tone={d.tone}>{d.status}</span>
                 </div>
-                <p className="mt-1 truncate text-[11.5px] font-medium leading-[1.7] text-[#66666e]">
+                <p className="mt-1 truncate text-[14.5px] font-medium leading-[1.7] text-[#66666e]">
                   {d.site} · يتجدّد {d.renews}
                 </p>
               </div>
@@ -560,8 +560,8 @@ export function DomainsView() {
         <div className="zy-eyebrow">كيف يعمل الربط</div>
         <ol className="mt-3 space-y-2.5">
           {['أضف النطاق هنا', 'انسخ سجلّي DNS إلى مزوّد النطاق', 'انتظر حتى 24 ساعة للتفعيل'].map((t, i) => (
-            <li key={t} className="flex items-start gap-2.5 text-[13px] font-medium leading-[1.8] text-[#171717]">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(94,106,210,0.10)] text-[11px] font-black text-[#5e6ad2]">
+            <li key={t} className="flex items-start gap-2.5 text-[14.5px] font-medium leading-[1.8] text-[#171717]">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(94,106,210,0.10)] text-[14.5px] font-black text-[#5e6ad2]">
                 {i + 1}
               </span>
               <span className="min-w-0">{t}</span>
@@ -598,7 +598,7 @@ export function BillingView() {
           </div>
           <div className="mt-5 grid gap-x-6 gap-y-2 sm:grid-cols-2">
             {PLAN_INCLUDES.map((t) => (
-              <div key={t} className="flex items-start gap-2 text-[12.5px] font-medium leading-[1.7] text-[#171717]">
+              <div key={t} className="flex items-start gap-2 text-[14.5px] font-medium leading-[1.7] text-[#171717]">
                 <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#15803d]" strokeWidth={2.25} />
                 <span className="min-w-0">{t}</span>
               </div>
@@ -611,7 +611,7 @@ export function BillingView() {
           <div className="mt-3 flex items-center gap-3">
             <div className="zy-tile"><CreditCard className="h-4 w-4" strokeWidth={2} /></div>
             <div className="min-w-0">
-              <div className="text-[13.5px] font-bold text-[#171717]" dir="ltr">•••• 4242</div>
+              <div className="text-[14.5px] font-bold text-[#171717]" dir="ltr">•••• 4242</div>
               <div className="zy-sub">تنتهي 08/29</div>
             </div>
           </div>
@@ -630,7 +630,7 @@ export function BillingView() {
             <thead>
               <tr>
                 {['الفاتورة', 'التاريخ', 'المبلغ', 'الحالة', ''].map((h) => (
-                  <th key={h} scope="col" className="whitespace-nowrap px-4 py-2.5 text-start text-[11px] font-bold uppercase tracking-[0.1em] text-[#66666e]" style={{ boxShadow: 'inset 0 -1px 0 rgba(17,17,17,0.07)' }}>
+                  <th key={h} scope="col" className="whitespace-nowrap px-4 py-2.5 text-start text-[14.5px] font-bold uppercase tracking-[0.1em] text-[#66666e]" style={{ boxShadow: 'inset 0 -1px 0 rgba(17,17,17,0.07)' }}>
                     {h}
                   </th>
                 ))}
@@ -639,9 +639,9 @@ export function BillingView() {
             <tbody>
               {INVOICES.map((inv) => (
                 <tr key={inv.id}>
-                  <td className="whitespace-nowrap px-4 py-3 text-[12.5px] font-bold text-[#171717]" dir="ltr">{inv.id}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[12.5px] font-medium text-[#56565a]">{inv.date}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[12.5px] font-medium tabular-nums text-[#171717]">{inv.amount}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[14.5px] font-bold text-[#171717]" dir="ltr">{inv.id}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[14.5px] font-medium text-[#56565a]">{inv.date}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[14.5px] font-medium tabular-nums text-[#171717]">{inv.amount}</td>
                   <td className="whitespace-nowrap px-4 py-3"><span className="zy-pill" data-tone={inv.tone}>{inv.status}</span></td>
                   <td className="whitespace-nowrap px-4 py-3 text-end">
                     <span className="zy-link"><Download className="h-3 w-3" strokeWidth={2.25} />تحميل</span>
@@ -692,7 +692,7 @@ export function SettingsView() {
             <ul className="mt-3 space-y-3">
               {[['حجز جديد', true], ['تقرير أسبوعي', true], ['تحديثات المنتج', false], ['عروض وتخفيضات', false]].map(([label, on]) => (
                 <li key={String(label)} className="flex items-center justify-between gap-3">
-                  <span className="min-w-0 truncate text-[13px] font-medium text-[#171717]">{label}</span>
+                  <span className="min-w-0 truncate text-[14.5px] font-medium text-[#171717]">{label}</span>
                   <span className="zy-switch shrink-0" data-on={on ? '' : undefined} aria-hidden>
                     <span className="zy-switch-knob" />
                   </span>
