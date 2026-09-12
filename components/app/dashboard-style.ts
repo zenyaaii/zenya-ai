@@ -108,10 +108,23 @@ ${PRODUCT_TOKENS_CSS}
 /* ---- the rail ------------------------------------------------------ */
 .zy-rail-mark { display: flex; align-items: center; height: 56px; padding-inline: 1.125rem; }
 .zy-rail-group { padding-inline: 0.625rem; }
+/* ── THE TWO FLOORS, IN RENDERED PIXELS ──────────────────────────────────
+   ZoomLock writes zoom: 0.85 from the root layout, so 14.5px CSS reaches the
+   eye at 12.33 and 38px CSS reaches the finger at 32.3 — the 12px type floor
+   and the 32px coarse-pointer floor this project holds.
+
+   scripts/theme-check.cjs measured this surface at 224 type failures and 20
+   tap failures across five widths: the stat eyebrow was 10.5px CSS, which is
+   8.92px on the glass, and the rail's rows stood 30.2px. Dense is a spacing
+   decision, not a licence to print text nobody can read, so the sizes below
+   sit on the floor and the density is kept by the padding instead.
+
+   The uppercase + letter-spacing on the two label styles also went. The
+   labels are Arabic: text-transform: uppercase is a dead declaration on the
+   script, and 0.12-0.14em pulls connected letterforms apart. */
 .zy-rail-label {
   padding: 0 0.625rem 0.5rem;
-  font-size: 10.5px; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0.12em; text-transform: uppercase;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   color: var(--stone-2);
 }
 /* A nav row is a control, so it takes the control radius and the field's
@@ -122,15 +135,22 @@ ${PRODUCT_TOKENS_CSS}
   position: relative;
   display: flex; align-items: center; gap: 0.625rem;
   border-radius: var(--r-control);
-  padding: 0.5rem 0.625rem;
-  font-size: 13px; font-weight: 500; line-height: 1.5;
+  min-height: 38px;
+  padding: 0.4375rem 0.625rem;
+  font-size: 14.5px; font-weight: 500; line-height: 1.5;
   letter-spacing: 0;
   color: var(--stone);
   transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out);
 }
 .zy-rail-row:hover { color: var(--obsidian); background: rgba(17,17,17,0.045); }
+/* --violet on the row's own tint measured 3.98:1, under the 4.5 a label is
+   owed. --violet-ink is the accent's text weight and clears it; the tint and
+   the rule at the edge still carry "you are here". */
 .zy-rail-row[data-on] {
-  color: var(--violet);
+  /* --primary-600, not --violet-ink: the ink token is declared by CHROME_CSS
+     on .zx-root and would resolve to nothing here. --primary-600 is the same
+     #4f5ab8 and is in the product token layer this surface reads. */
+  color: var(--primary-600);
   font-weight: 700;
   background: var(--violet-fill);
 }
@@ -151,7 +171,7 @@ ${PRODUCT_TOKENS_CSS}
 }
 .zy-rail-foot {
   padding: 0.875rem 1.125rem;
-  font-size: 11.5px; font-weight: 500; line-height: 1.7;
+  font-size: 14.5px; font-weight: 500; line-height: 1.7;
   color: var(--stone-2);
 }
 /* Same reason as .zy-link: this measured 15px. It is the only link in the
@@ -159,7 +179,9 @@ ${PRODUCT_TOKENS_CSS}
    phone to hit accurately. */
 .zy-rail-foot a {
   display: inline-flex; align-items: center;
-  min-height: 32px;
+  /* 32px CSS renders 27.2 — under the floor it was written for. 38 renders
+     32.3, which is the number the rest of this stylesheet uses. */
+  min-height: 38px;
   color: inherit;
   transition: color 180ms var(--ease-out);
 }
@@ -223,11 +245,11 @@ ${PRODUCT_TOKENS_CSS}
 .zy-top-acct[data-state="open"] { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
 .zy-top-av {
   display: flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border-radius: 999px;
+  width: 30px; height: 30px; border-radius: 999px;
   background: var(--violet); color: #fff;
-  font-size: 11.5px; font-weight: 700; line-height: 1;
+  font-size: 14.5px; font-weight: 700; line-height: 1;
 }
-.zy-top-name { font-size: 12.5px; font-weight: 500; line-height: 1.5; color: var(--obsidian); }
+.zy-top-name { font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--obsidian); }
 
 /* The one filled action in the chrome. */
 .zy-top-cta {
@@ -298,8 +320,7 @@ ${PRODUCT_TOKENS_CSS}
 /* The small uppercase label above a number. Positive tracking is right here
    and only here: these are set in Latin caps, which genuinely need it. */
 .zy-eyebrow {
-  font-size: 10.5px; font-weight: 700; line-height: 1.6;
-  letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 14.5px; font-weight: 700; line-height: 1.6;
   color: var(--stone-2);
 }
 .zy-num {
@@ -308,7 +329,7 @@ ${PRODUCT_TOKENS_CSS}
   color: var(--obsidian);
   font-variant-numeric: tabular-nums;
 }
-.zy-sub { font-size: 12px; font-weight: 500; line-height: 1.7; color: var(--stone); }
+.zy-sub { font-size: 14.5px; font-weight: 500; line-height: 1.7; color: var(--stone); }
 
 /* ---- the banner -----------------------------------------------------
    One shape for every "something needs your attention" row: hosting about
@@ -362,8 +383,9 @@ ${PRODUCT_TOKENS_CSS}
   display: inline-flex; align-items: center; gap: 0.375rem;
   border: 0; cursor: pointer; font: inherit;
   border-radius: var(--r-control);
-  padding: 0.4375rem 0.75rem;
-  font-size: 12px; font-weight: 700; line-height: 1.5;
+  min-height: 38px;
+  padding: 0 0.75rem;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
   color: var(--obsidian); background: var(--field);
   text-decoration: none;
@@ -374,7 +396,8 @@ ${PRODUCT_TOKENS_CSS}
 /* A text link that is an action rather than prose. */
 .zy-link {
   display: inline-flex; align-items: center; gap: 0.25rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.6;
+  min-height: 38px;
+  font-size: 14.5px; font-weight: 700; line-height: 1.6;
   letter-spacing: 0;
   color: var(--violet); text-decoration: none;
   text-underline-offset: 3px;
@@ -830,8 +853,8 @@ ${PRODUCT_TOKENS_CSS}
 .zy-pill {
   display: inline-flex; align-items: center; gap: 0.3125rem;
   border-radius: 999px;
-  padding: 0.1875rem 0.5625rem;
-  font-size: 11.5px; font-weight: 700; line-height: 1.6;
+  padding: 0.25rem 0.5625rem;
+  font-size: 14.5px; font-weight: 700; line-height: 1.6;
   letter-spacing: 0;
   white-space: nowrap;
 }

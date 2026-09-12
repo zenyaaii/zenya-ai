@@ -54,6 +54,7 @@ import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, Menu, UserPlus, X } from "lu
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
+import { authErrorMessage } from "@/lib/auth-errors"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
@@ -323,6 +324,10 @@ export default function AccessView({
         if (!validateEmail(email)) throw new Error("يرجى إدخال بريد إلكتروني صالح.")
       } else if (mode === "signin") {
         if (!email || !password) throw new Error("يرجى تعبئة جميع الحقول.")
+        /* Checked HERE rather than left to the server. A mistyped address
+           comes back from Supabase as "invalid credentials", which sends a
+           person hunting for a password problem they do not have. */
+        if (!validateEmail(email)) throw new Error("صيغة البريد الإلكتروني غير صحيحة. تحقّق منها.")
       } else {
         if (!fullName) throw new Error("يرجى إدخال اسمك الكامل.")
         if (!validateEmail(email)) throw new Error("يرجى إدخال بريد إلكتروني صالح.")
@@ -330,7 +335,7 @@ export default function AccessView({
         if (!acceptTerms) throw new Error("يرجى الموافقة على شروط الخدمة وسياسة الخصوصية للمتابعة.")
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حدث خطأ ما.")
+      setError(authErrorMessage(err, mode))
       return
     }
 
@@ -389,7 +394,14 @@ export default function AccessView({
       }
       setHanded("signup")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "حدث خطأ ما.")
+      /* knownAccount: this browser has already signed this address in, so the
+         account certainly exists and the message can say the password is the
+         problem. Nothing is asked of the server to learn that. */
+      setError(
+        authErrorMessage(err, mode, {
+          knownAccount: accounts.some((a) => a.email.toLowerCase() === email.trim().toLowerCase()),
+        }),
+      )
     } finally {
       setBusy(false)
     }

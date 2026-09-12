@@ -16,6 +16,7 @@
     "seo:ping": "node scripts/indexnow.mjs",
     "shopify": "shopify",
     "dev:shopify": "concurrently \"npm run dev\" \"shopify app dev\"",
+    "check:auth-errors": "node scripts/auth-errors-check.cjs",
     "test:e2e": "playwright test",
     "test:e2e:public": "playwright test --project=public",
     "test:e2e:authed": "playwright test --project=authed",

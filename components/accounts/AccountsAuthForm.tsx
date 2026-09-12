@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { authErrorMessage } from '@/lib/auth-errors'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, ArrowLeft, LogOut, UserPlus, X } from 'lucide-react'
@@ -172,6 +173,10 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
         setStatus({ type: 'success', message: 'تم إرسال رابط إعادة تعيين كلمة المرور! تحقق من بريدك.' })
       } else if (mode === 'signin') {
         if (!email || !password) throw new Error('يرجى تعبئة جميع الحقول.')
+        /* Checked here rather than left to the server: a mistyped address
+           comes back as "invalid credentials" and sends a person hunting for
+           a password problem they do not have. */
+        if (!validateEmail(email)) throw new Error('صيغة البريد الإلكتروني غير صحيحة. تحقّق منها.')
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         const nm = (data.user?.user_metadata?.full_name as string) || undefined
@@ -215,8 +220,20 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           setStatus({ type: 'success', message: 'تم إنشاء الحساب! يرجى التحقق من بريدك لتأكيده.' })
         }
       }
-    } catch (err: any) {
-      setStatus({ type: 'error', message: err.message || 'حدث خطأ ما.' })
+    } catch (err) {
+      /* One mapping, shared with the door on the apex, so the two cannot say
+         different things about the same failure. knownAccount is read from
+         this browser's remembered list — if the address has signed in here
+         before, the account exists and the message can name the password
+         directly without asking the server anything. */
+      setStatus({
+        type: 'error',
+        message: authErrorMessage(err, mode, {
+          knownAccount: savedAccounts.some(
+            (a) => a.email.toLowerCase() === email.trim().toLowerCase(),
+          ),
+        }),
+      })
     } finally {
       setLoading(false)
     }
