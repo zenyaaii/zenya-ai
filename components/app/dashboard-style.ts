@@ -255,8 +255,9 @@ ${PRODUCT_TOKENS_CSS}
 .zy-top-cta {
   display: inline-flex; align-items: center; gap: 0.375rem;
   border-radius: 999px;
-  padding: 0.4375rem 0.875rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.5;
+  min-height: 38px;
+  padding: 0 0.875rem;
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
   color: #fff; background: var(--violet);
   box-shadow: 0 0 0 1px rgba(94,106,210,0.60), 0 0 0 4px rgba(94,106,210,0);
@@ -313,7 +314,9 @@ ${PRODUCT_TOKENS_CSS}
 /* The heading inside a card, above a preview or a field group. */
 .zy-h3 {
   margin: 0;
-  font-size: 13px; font-weight: 700; line-height: 1.5;
+  /* 13px renders 11.05 under the root zoom. Every card heading on every
+     dashboard screen is this class. */
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
   color: var(--obsidian);
 }
@@ -368,8 +371,10 @@ ${PRODUCT_TOKENS_CSS}
   flex-shrink: 0;
   border: 0; cursor: pointer; font: inherit;
   border-radius: 999px;
-  padding: 0.5rem 0.9375rem;
-  font-size: 12.5px; font-weight: 700; line-height: 1.5;
+  min-height: 38px;
+  padding: 0 0.9375rem;
+  /* 12.5px renders 10.63. This is the primary action on the whole surface. */
+  font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
   color: #ffffff; background: var(--violet);
   text-decoration: none;
