@@ -303,7 +303,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
                 type="button"
                 onClick={switchAccount}
                 disabled={continuing}
-                className="flex w-full items-center justify-center gap-1.5 text-[12.5px] text-muted transition-colors hover:text-foreground disabled:opacity-60"
+                className="zn-switch mx-auto gap-1.5 font-normal !text-[color:var(--stone)] no-underline"
               >
                 <LogOut className="h-3 w-3" strokeWidth={2} />
                 ليس أنت؟ تسجيل الخروج
@@ -372,7 +372,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           <button
             type="button"
             onClick={() => { setShowForm(false); setStatus(null) }}
-            className="flex items-center gap-1.5 text-[12.5px] font-medium text-muted transition-colors hover:text-foreground"
+            className="zn-switch gap-1.5 font-medium !text-[color:var(--stone)] no-underline"
           >
             <ArrowRight className="h-3.5 w-3.5 rtl-flip" strokeWidth={2.25} />
             العودة إلى الحسابات المحفوظة
@@ -449,13 +449,25 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="flex cursor-pointer items-start gap-2.5 overflow-hidden pt-1 text-[12.5px] leading-relaxed text-muted"
+              className="flex cursor-pointer items-start gap-2.5 overflow-hidden pt-1 text-[14.5px] leading-relaxed text-muted"
             >
               <input
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 flex-shrink-0"
+                /* 15px and #5e6ad2, matching .za-check in
+                   components/zenya/access/styles.ts — this is the same
+                   consent row as the shipped door on the apex and the two
+                   should not disagree by a pixel.
+
+                   scripts/theme-check.cjs reports this input as under the
+                   32px coarse floor, and that reading is a limitation of the
+                   gate rather than a defect: the input is wrapped by the
+                   <label> below, so the tappable object is the whole consent
+                   row, which is several lines tall. Growing the box to 32px
+                   would put a checkbox the size of a button next to 14.5px
+                   text to satisfy a measurement of the wrong element. */
+                className="mt-0.5 h-[15px] w-[15px] flex-shrink-0"
                 style={{ accentColor: '#5e6ad2' }}
               />
               <span>
@@ -504,7 +516,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           {mode === 'signin' && (
             <>
               <div>
-                <button type="button" onClick={() => toggle('forgot')} className="text-muted transition-colors hover:text-foreground">
+                <button type="button" onClick={() => toggle('forgot')} className="zn-switch font-normal !text-[color:var(--stone)] no-underline">
                   نسيت كلمة المرور؟
                 </button>
               </div>

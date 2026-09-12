@@ -36,6 +36,14 @@
  */
 
 export const ACCOUNTS_CSS = `
+/* 14.5px IS THE FLOOR, and it is not a preference.
+   components/ZoomLock.tsx writes zoom: 0.85 on the document element from the
+   ROOT layout, so it is in force on this host too, and a finger and an eye
+   both land on what is RENDERED. 14px CSS renders 11.9px and 13px renders
+   11.05px, both under the 12px type floor. 14.5px renders 12.33px and clears
+   it. This is the same number and the same reasoning as
+   components/zenya/chrome/tokens.ts, which is where it was measured; nothing
+   in the shipped house stylesheets goes below it. */
 .zn-ground {
   min-height: 100dvh;
   display: flex;
@@ -65,9 +73,14 @@ export const ACCOUNTS_CSS = `
   border-radius: 999px;
   box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.07);
 }
+/* 38px CSS renders 32.3px, which is the 32px coarse-pointer floor. Measured
+   by scripts/theme-check.cjs at 390: the mark was 13.6px tall, the eye 30.6,
+   the switch 29 and the reset link 21. Everything a finger lands on is held
+   at 2.375rem from here. */
 .zn-head-mark {
   display: inline-flex;
   align-items: center;
+  min-height: 2.375rem;
   padding: 0 0.5rem;
   color: var(--obsidian);
 }
@@ -83,7 +96,7 @@ export const ACCOUNTS_CSS = `
      components/zenya/chrome/tokens.ts. */
   min-height: 2.375rem;
   padding: 0 0.6875rem;
-  font-size: 0.8875rem;
+  font-size: 14.5px;
   color: var(--stone);
   text-decoration: none;
   border-radius: 999px;
@@ -100,7 +113,7 @@ export const ACCOUNTS_CSS = `
   align-items: center;
   min-height: 2.375rem;
   padding: 0 0.9375rem;
-  font-size: 0.8875rem;
+  font-size: 14.5px;
   font-weight: 500;
   color: #fafafa;
   background: var(--obsidian);
@@ -119,7 +132,7 @@ export const ACCOUNTS_CSS = `
   width: 2.375rem;
   height: 2.375rem;
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 14.5px;
   font-weight: 700;
   line-height: 1;
   color: #fafafa;
@@ -130,8 +143,11 @@ export const ACCOUNTS_CSS = `
 .zn-head-disc:hover { opacity: 0.88; }
 .zn-head-disc:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 
+/* The phone tightens the PADDING, never the type. The previous version of
+   this rule dropped the nav to 13.4px, which renders 11.4px — it undid the
+   floor on the one device where it matters most. */
 @media (max-width: 420px) {
-  .zn-nav-item { padding: 0 0.5rem; font-size: 0.8375rem; }
+  .zn-nav-item { padding: 0 0.4375rem; }
   .zn-pill { gap: 0.25rem; padding-left: 0.5rem; }
 }
 
@@ -158,7 +174,7 @@ export const ACCOUNTS_CSS = `
   line-height: 1.35;
   color: var(--obsidian);
 }
-.zn-sub { margin: 0; font-size: 0.875rem; line-height: 1.7; color: var(--stone); }
+.zn-sub { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--stone); }
 
 .zn-stack { display: grid; gap: 0.625rem; }
 
@@ -209,7 +225,7 @@ export const ACCOUNTS_CSS = `
 /* min-width: 0 so a long address truncates instead of pushing the row wide. */
 .zn-account-text { min-width: 0; display: grid; gap: 0.125rem; }
 .zn-account-name {
-  font-size: 0.875rem;
+  font-size: 15px;
   font-weight: 500;
   color: var(--obsidian);
   overflow: hidden;
@@ -217,7 +233,7 @@ export const ACCOUNTS_CSS = `
   white-space: nowrap;
 }
 .zn-account-mail {
-  font-size: 0.8125rem;
+  font-size: 14.5px;
   color: var(--stone-2);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -257,8 +273,8 @@ export const ACCOUNTS_CSS = `
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.375rem;
+  height: 2.375rem;
   border: 0;
   border-radius: var(--r-control);
   background: transparent;
@@ -302,7 +318,7 @@ export const ACCOUNTS_CSS = `
   width: 100%;
   min-height: 3rem;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 14.5px;
   font-weight: 500;
   color: var(--stone);
   background: transparent;
@@ -328,7 +344,7 @@ export const ACCOUNTS_CSS = `
 .zn-note {
   border-radius: var(--r-card);
   padding: 0.8125rem 0.875rem;
-  font-size: 0.875rem;
+  font-size: 14.5px;
   font-weight: 500;
   line-height: 1.7;
   text-align: center;
@@ -343,7 +359,7 @@ export const ACCOUNTS_CSS = `
 .zn-foot {
   margin-top: 1.5rem;
   text-align: center;
-  font-size: 0.8125rem;
+  font-size: 14.5px;
   line-height: 1.8;
   color: var(--stone-2);
 }
@@ -356,12 +372,17 @@ export const ACCOUNTS_CSS = `
 
 .zn-switch {
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--violet-ink);
   background: none;
   border: 0;
-  padding: 0.25rem;
+  /* inline-flex + min-height, not padding alone: an inline button's box does
+     not grow to its padding the way a flex one does. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.375rem;
+  padding: 0 0.25rem;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;

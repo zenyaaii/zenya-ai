@@ -1,10 +1,29 @@
 const { chromium } = require('playwright')
 
 const ROUTES = [
+  // The public site.
   '/', '/about', '/faq', '/features', '/pricing', '/themes',
   '/websites', '/websites/restaurant', '/compare', '/compare/wix',
   '/why/restaurant', '/privacy', '/terms', '/cookies', '/refund',
-  '/subprocessors', '/contact', '/login', '/review',
+  '/subprocessors', '/contact', '/login', '/review', '/checkout',
+
+  /* The PRODUCT surfaces, added when app/(main) and the accounts portal
+     moved onto the house style. They were outside this list while they were
+     on the old visual language, which is precisely why their defects — an
+     aurora still running in seven wizards, and type under the floor on a
+     portal this audit never looked at — survived three passes of it.
+
+     The accounts portal is served here at /accounts/*; on its own host
+     middleware rewrites /login and /signup to these same routes, so auditing
+     the path form audits the host form. */
+  '/accounts', '/accounts/login', '/accounts/signup',
+  '/auth/reset-password', '/auth/auth-code-error',
+
+  /* The three public product previews. The real dashboard, editor and
+     wizards sit behind an account and this harness has no session, so these
+     fixture-backed routes are the only way the audit can see that surface
+     at all. */
+  '/demo/dashboard', '/demo/build',
 ]
 const WIDTHS = [360, 390, 430, 768, 1440]
 const BASE = 'http://localhost:3000'
@@ -215,6 +234,23 @@ const PROBE = () => {
         if (around.length > own.length + 2) return
       }
     }
+    /* A CONTROL WRAPPED BY ITS OWN LABEL IS MEASURED AT THE LABEL, for the
+       same reason the exemption above exists: clicking anywhere in a
+       <label> toggles the input inside it, so the tappable object is the
+       whole row and the input's own box is not what a finger has to find.
+
+       Without this the gate reports every consent checkbox in the project -
+       they are 15px by house convention, matching .za-check in
+       components/zenya/access/styles.ts - and the only way to satisfy it
+       would be a 32px checkbox sitting next to 14.5px text, which is
+       satisfying a measurement of the wrong element at the cost of the
+       design. The LABEL still has to clear the floor, and is checked. */
+    if ((el.tagName === 'INPUT' || el.tagName === 'SELECT') && el.closest('label')) {
+      const lab = el.closest('label').getBoundingClientRect()
+      const f = matchMedia('(pointer: coarse)').matches ? 32 : 24
+      if (lab.width >= f && lab.height >= f) return
+    }
+
     const r = el.getBoundingClientRect()
     if (r.width === 0 || r.height === 0) return
     /* r is already rendered. See the note above.
