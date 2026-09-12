@@ -14,7 +14,9 @@
  *   • Danger   — permanent account deletion
  *   • Appearance — light / dark toggle (this device)
  *
- * Brand chrome: cream #faf8f3 fields, indigo #5e6ad2 accent, rounded cards.
+ * Chrome: the house dashboard language — .zy-card, .zy-btn, .zy-h3 and the
+ * product tokens. It carried its own cream fields and a nine-colour icon set
+ * until the port; nothing here declares a palette of its own now.
  */
 
 import { COMPANY, usdTrailing } from '@/lib/company'
@@ -43,8 +45,7 @@ import {
   Sparkles,
   Gift,
   Copy,
-  Check as CheckIcon,
-} from 'lucide-react'
+  Check as CheckIcon, Settings as SettingsIcon,} from 'lucide-react'
 
 /* ── Status helper ───────────────────────────────────────────────── */
 
@@ -95,31 +96,29 @@ function Section({
 }) {
   const danger = tone === 'danger'
   return (
-    <motion.section
-      variants={sectionV}
-      whileHover={{ y: -2 }}
-      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
-      className={`group overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-[0_18px_40px_-22px_rgba(28,28,28,0.30)] ${
-        danger ? 'border-red-200' : 'border-[#e8e5de]'
-      }`}
-    >
-      <div className={`flex items-center gap-4 border-b p-5 ${danger ? 'border-red-100' : 'border-[#f0ede6]'}`}>
+    <motion.section variants={sectionV} className="zy-card rounded-2xl p-4 sm:p-5">
+      <div className="flex items-center gap-3">
+        {/* ONE ACCENT, NOT NINE. Each card used to carry its own hue — violet,
+            sky, green, purple, teal, blue — which is the same confetti the
+            dashboard restyle reduced to a documented triad everywhere else.
+            The icon chip is the field fill; the only colour that survives is
+            the one that reports danger. */}
         <div
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
           style={{
-            background: danger ? 'rgba(220,38,38,0.08)' : `${accent}16`,
-            color: danger ? '#ef4444' : accent,
+            background: danger ? 'rgba(185,28,28,0.07)' : 'var(--field)',
+            color: danger ? '#b91c1c' : 'var(--stone)',
           }}
         >
-          <Icon className="h-5 w-5" strokeWidth={1.8} />
+          <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className={`text-[15px] font-semibold ${danger ? 'text-red-600' : 'text-foreground'}`}>{title}</h2>
-          {subtitle && <p className="mt-0.5 text-[12.5px] leading-snug text-muted">{subtitle}</p>}
+          <h2 className="zy-h3" style={danger ? { color: '#b91c1c' } : undefined}>{title}</h2>
         </div>
         {action}
       </div>
-      <div className="p-5">{children}</div>
+      {subtitle && <p className="zy-sub mt-1.5">{subtitle}</p>}
+      <div className="mt-4">{children}</div>
     </motion.section>
   )
 }
@@ -127,7 +126,10 @@ function Section({
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-[12px] font-semibold uppercase tracking-[0.05em] text-muted">{label}</label>
+      {/* Was 12px uppercase with 0.05em tracking. 12px renders 10.2px under
+          the root zoom; uppercase is a dead declaration on Arabic and the
+          tracking pulls its connected letterforms apart. */}
+      <label className="block text-[14.5px] font-bold text-[#171717]">{label}</label>
       {children}
     </div>
   )
@@ -137,7 +139,10 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full rounded-xl border border-[#e8e5de] bg-[#faf8f3] px-4 py-2.5 text-[14px] text-foreground placeholder:text-muted/60 transition focus:border-[#5e6ad2] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5e6ad2]/15 disabled:opacity-50 ${props.className ?? ''}`}
+      /* No colours here any more: .zy-app already styles every input on this
+         surface, so a field in settings and a field in the editor cannot
+         disagree. What is left is the size and the box. */
+      className={`w-full px-3 py-2.5 text-[14.5px] font-medium disabled:opacity-50 ${props.className ?? ''}`}
     />
   )
 }
@@ -158,7 +163,7 @@ function PrimaryButton({
     <button
       {...rest}
       disabled={status === 'loading' || status === 'success' || rest.disabled}
-      className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-[#4f5ab8] disabled:opacity-60"
+      className="zy-btn"
     >
       {status === 'loading' && <Loader2 className="h-4 w-4 animate-spin" />}
       {status === 'success' && <Check className="h-4 w-4" />}
@@ -174,7 +179,7 @@ function GhostButton({
   return (
     <button
       {...rest}
-      className="inline-flex items-center gap-2 rounded-xl border border-[#e8e5de] bg-[#faf8f3] px-5 py-2.5 text-[13.5px] font-semibold text-foreground transition hover:bg-[#f0ede6] disabled:opacity-60"
+      className="zy-btn-q"
     >
       {children}
     </button>
@@ -183,8 +188,18 @@ function GhostButton({
 
 function Note({ status, msg }: { status: Status; msg: string }) {
   if (status === 'idle' || !msg) return null
+  /* text-[#b91c1c] is #dc2626 at 4.0:1 and text-[#15803d] is #059669 at
+     3.4:1 — both under the 4.5 a label is owed. The triad's own values are
+     6.47 and 5.02. role=status so the result of pressing Save reaches a
+     screen reader, which it did not before. */
   return (
-    <span className={`text-[12.5px] ${status === 'error' ? 'text-red-600' : 'text-emerald-600'}`}>{msg}</span>
+    <span
+      role="status"
+      className="text-[14.5px] font-medium"
+      style={{ color: status === 'error' ? '#b91c1c' : '#15803d' }}
+    >
+      {msg}
+    </span>
   )
 }
 
@@ -354,51 +369,51 @@ export default function AccountSettings() {
   const initial = newName?.trim()?.[0] || email?.[0] || '؟'
 
   return (
-    <div className="mx-auto max-w-2xl" dir="rtl">
-      {/* Header — premium brand banner */}
+    /* The demo's page width, not max-w-2xl. Nine cards in one 672px column
+       is a very long scroll on a screen that has room for two; every other
+       screen in app/demo/dashboard lays out at max-w-7xl. */
+    <div className="mx-auto w-full max-w-7xl" dir="rtl">
+      {/* THE PAGE HEAD, flat.
+
+          What this replaces: a rounded-3xl banner carrying a 50px drop
+          shadow, TWO radial gradient washes, and an avatar filled with a
+          violet-to-periwinkle gradient under its own coloured shadow. That
+          is the aurora, on the settings screen, after it had been taken out
+          of the marketing site, the dashboard chrome, the accounts portal
+          and the seven wizards in turn.
+
+          The composition is the one /demo/dashboard uses for every screen:
+          an icon chip, a title, a sentence saying what the screen is for.
+          The plan pill stays because it reports something real. */}
       <motion.div
-        initial={reduce ? false : { opacity: 0, y: -12 }}
+        initial={reduce ? false : { opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="relative mb-8 overflow-hidden rounded-3xl border border-[#e8e5de] bg-white p-6 shadow-[0_18px_50px_-30px_rgba(28,28,28,0.4)]"
+        transition={{ duration: 0.4, ease: EASE }}
+        className="mb-6 flex items-start gap-3"
       >
-        {/* soft brand wash */}
         <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(120% 140% at 100% 0%, rgba(94,106,210,0.14), transparent 55%), radial-gradient(90% 120% at 0% 100%, rgba(139,148,232,0.10), transparent 60%)',
-          }}
-        />
-        <div className="relative flex items-center gap-4">
-          <div
-            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-[20px] font-bold text-white"
-            style={{
-              background: 'linear-gradient(135deg, #5e6ad2 0%, #8b94e8 100%)',
-              boxShadow: '0 12px 28px -10px rgba(94,106,210,0.55)',
-            }}
-          >
-            {initial.toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-[26px] font-bold tracking-tight text-foreground">
-              الإعدادات
-            </h1>
-            <p className="mt-0.5 truncate text-[13.5px] text-muted">
-              مُسجَّل الدخول باسم{' '}
-              <span dir="ltr" className="font-medium text-foreground">{email || '…'}</span>
-            </p>
-          </div>
-          <span className="hidden flex-shrink-0 items-center gap-1.5 self-start rounded-full bg-[#eef0fb] px-3 py-1 text-[12px] font-bold text-[#5e6ad2] sm:inline-flex">
-            {isPro && <Sparkles className="h-3 w-3" />}
-            {planLabel}
-          </span>
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+          style={{ background: 'var(--field)', color: 'var(--stone)' }}
+        >
+          <SettingsIcon className="h-5 w-5" strokeWidth={1.8} />
         </div>
+        <div className="min-w-0 flex-1">
+          <h1 className="zy-h1">الإعدادات</h1>
+          <p className="zy-sub mt-1">
+            مُسجَّل الدخول باسم{' '}
+            <span dir="ltr" className="font-medium text-[#171717]">{email || '…'}</span>
+          </p>
+        </div>
+        <span className="zy-pill shrink-0" data-tone="accent">
+          {isPro && <Sparkles className="h-3 w-3" />}
+          {planLabel}
+        </span>
       </motion.div>
 
+      {/* Two columns from lg, one below it, items-start so a short card does
+          not stretch to the height of a tall neighbour. */}
       <motion.div
-        className="space-y-5"
+        className="grid items-start gap-4 lg:grid-cols-2"
         variants={containerV}
         initial={reduce ? false : 'hidden'}
         animate="show"
@@ -481,7 +496,7 @@ export default function AccountSettings() {
           title="الخطة والفوترة"
           subtitle={`اشتراك شهري — Starter ${usdTrailing(COMPANY.STARTER_PRICE_USD)} أو Pro ${usdTrailing(COMPANY.PRO_PRICE_USD)}. ألغِ في أي وقت.`}
           action={
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef0fb] px-3 py-1 text-[12px] font-bold text-[#5e6ad2]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--violet-fill)] px-3 py-1 text-[14.5px] font-bold text-[#5e6ad2]">
               {isPro && <Sparkles className="h-3 w-3" />}
               {planLabel}
             </span>
@@ -490,13 +505,13 @@ export default function AccountSettings() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/dashboard/billing"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#5e6ad2] px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-[#4f5ab8]"
+              className="zy-btn"
             >
               تفاصيل الخطة والفواتير
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </div>
-          <p className="mt-3 text-[12.5px] leading-relaxed text-muted">
+          <p className="mt-3 text-[14.5px] leading-relaxed text-muted">
             تريد استردادًا؟ راجع{' '}
             <Link href="/refund" className="text-[#5e6ad2] hover:underline">سياسة الاسترداد</Link>{' '}
             ثم <Link href="/contact" className="text-[#5e6ad2] hover:underline">تواصل معنا</Link> وسنعالج طلبك.
@@ -518,8 +533,8 @@ export default function AccountSettings() {
               ))}
             </div>
           ) : codes.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#e8e5de] bg-[#faf8f3] p-5 text-center">
-              <p className="text-[13px] leading-relaxed text-muted">
+            <div className="rounded-xl border border-dashed border-[color:var(--border)] bg-[color:var(--field)] p-5 text-center">
+              <p className="text-[14.5px] leading-relaxed text-muted">
                 لا أكواد بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على كود {REVIEW_REWARD_AR} —
                 وسيظهر هنا تلقائيًا.
               </p>
@@ -529,31 +544,31 @@ export default function AccountSettings() {
               {codes.map((c) => (
                 <li
                   key={c.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-[#e8e5de] bg-[#faf8f3] p-3.5"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--field)] p-3.5"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <code
                         dir="ltr"
-                        className="rounded-md border border-dashed border-[#5e6ad2]/50 bg-white px-2.5 py-1 text-[14px] font-extrabold tracking-[0.1em] text-[#5e6ad2]"
+                        className="rounded-md border border-dashed border-[#5e6ad2]/50 bg-white px-2.5 py-1 text-[14.5px] font-extrabold tracking-[0.1em] text-[#5e6ad2]"
                       >
                         {c.code}
                       </code>
-                      {c.label && <span className="truncate text-[13px] font-semibold text-foreground">{c.label}</span>}
+                      {c.label && <span className="truncate text-[14.5px] font-semibold text-foreground">{c.label}</span>}
                     </div>
                     {c.description && (
-                      <p className="mt-1.5 text-[12px] leading-relaxed text-muted">{c.description}</p>
+                      <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">{c.description}</p>
                     )}
                   </div>
                   <button
                     type="button"
                     onClick={() => copyCode(c.code)}
                     aria-label={`نسخ ${c.code}`}
-                    className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[#e8e5de] bg-white px-3 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-[#f0ede6]"
+                    className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[color:var(--border)] bg-white px-3 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-[#f0ede6]"
                   >
                     {copiedCode === c.code ? (
                       <>
-                        <CheckIcon className="h-3.5 w-3.5 text-emerald-600" /> تم النسخ
+                        <CheckIcon className="h-3.5 w-3.5 text-[#15803d]" /> تم النسخ
                       </>
                     ) : (
                       <>
@@ -572,9 +587,9 @@ export default function AccountSettings() {
           <button
             type="button"
             onClick={toggleDark}
-            className="flex w-full items-center justify-between rounded-xl border border-[#e8e5de] bg-[#faf8f3] px-4 py-3 text-right"
+            className="flex w-full items-center justify-between rounded-xl border border-[color:var(--border)] bg-[color:var(--field)] px-4 py-3 text-right"
           >
-            <span className="text-[14px] font-medium text-foreground">الوضع الداكن</span>
+            <span className="text-[14.5px] font-medium text-foreground">الوضع الداكن</span>
             <span className={`relative h-6 w-11 rounded-full transition-colors ${dark ? 'bg-[#5e6ad2]' : 'bg-[#d4d1ca]'}`}>
               <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${dark ? '-translate-x-5' : '-translate-x-0.5'}`} />
             </span>
@@ -583,9 +598,9 @@ export default function AccountSettings() {
 
         {/* Privacy */}
         <Section icon={Shield} accent="#0d9488" title="الخصوصية والأمان">
-          <ul className="-my-1 divide-y divide-[#f0ede6]">
+          <ul className="-my-1 divide-y divide-[color:var(--border)]">
             <li>
-              <button onClick={openConsent} className="flex w-full items-center justify-between py-3 text-[13.5px] font-medium text-foreground transition hover:text-[#5e6ad2]">
+              <button onClick={openConsent} className="flex w-full items-center justify-between py-3 text-[14.5px] font-medium text-foreground transition hover:text-[#5e6ad2]">
                 إدارة ملفات تعريف الارتباط
                 <ChevronLeft className="h-4 w-4 text-muted" />
               </button>
@@ -595,7 +610,7 @@ export default function AccountSettings() {
               { href: '/terms', label: 'شروط الخدمة' },
             ].map(({ href, label }) => (
               <li key={href}>
-                <Link href={href} className="flex items-center justify-between py-3 text-[13.5px] font-medium text-foreground transition hover:text-[#5e6ad2]">
+                <Link href={href} className="flex items-center justify-between py-3 text-[14.5px] font-medium text-foreground transition hover:text-[#5e6ad2]">
                   {label}
                   <ChevronLeft className="h-4 w-4 text-muted" />
                 </Link>
@@ -606,7 +621,7 @@ export default function AccountSettings() {
 
         {/* Data */}
         <Section icon={Database} accent="#2563eb" title="بياناتك" subtitle="نزّل نسخة كاملة — وفق المادتين ١٥ و٢٠ من GDPR">
-          <p className="mb-4 text-[13px] leading-relaxed text-muted">
+          <p className="mb-4 text-[14.5px] leading-relaxed text-muted">
             يشمل التصدير ملفك الشخصي وقوالبك وسجلّ الاستخلاص ومشترياتك.
           </p>
           <GhostButton onClick={exportData} disabled={exporting}>
@@ -617,7 +632,7 @@ export default function AccountSettings() {
 
         {/* Danger zone */}
         <Section icon={AlertTriangle} title="منطقة الخطر" tone="danger">
-          <p className="mb-4 text-[13px] leading-relaxed text-muted">
+          <p className="mb-4 text-[14.5px] leading-relaxed text-muted">
             احذف نهائيًا حسابك وقوالبك وسجلّ الاستخلاص. تُلغى فوترة Stripe تلقائيًا، ويُحتفظ
             بسجلّات الفواتير المطلوبة ضريبيًا (٧ سنوات وفق القانون الهولندي).{' '}
             <strong className="text-red-700">لا يمكن التراجع.</strong> سنرسل لك بريد تأكيد بالحذف.
@@ -625,25 +640,25 @@ export default function AccountSettings() {
           {!showDelete ? (
             <button
               onClick={() => setShowDelete(true)}
-              className="rounded-xl border border-red-300 bg-white px-5 py-2.5 text-[13.5px] font-semibold text-red-600 transition hover:bg-red-50"
+              className="rounded-xl border border-red-300 bg-white px-5 py-2.5 text-[14.5px] font-semibold text-[#b91c1c] transition hover:bg-red-50"
             >
               حذف حسابي…
             </button>
           ) : (
             <div className="space-y-3 rounded-xl border border-red-200 bg-red-50 p-4">
-              <p className="text-[13px] text-red-800">اكتب <strong>حذف</strong> للتأكيد.</p>
+              <p className="text-[14.5px] text-red-800">اكتب <strong>حذف</strong> للتأكيد.</p>
               <Input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="حذف" className="bg-white" />
               <div className="flex gap-2">
                 <button
                   onClick={deleteAccount}
                   disabled={confirmText !== 'حذف' || deleting}
-                  className="rounded-xl bg-red-600 px-5 py-2.5 text-[13.5px] font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                  className="rounded-xl bg-red-600 px-5 py-2.5 text-[14.5px] font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
                 >
                   {deleting ? 'جارٍ الحذف…' : 'حذف الحساب نهائيًا'}
                 </button>
                 <button
                   onClick={() => { setShowDelete(false); setConfirmText('') }}
-                  className="rounded-xl border border-[#e8e5de] bg-white px-4 py-2.5 text-[13.5px] font-medium text-foreground transition hover:bg-[#f0ede6]"
+                  className="rounded-xl border border-[color:var(--border)] bg-white px-4 py-2.5 text-[14.5px] font-medium text-foreground transition hover:bg-[#f0ede6]"
                 >
                   إلغاء
                 </button>
