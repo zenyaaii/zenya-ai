@@ -550,6 +550,11 @@ export default function TemplatesView() {
           pair. On a phone a grid of eight becomes eight postage stamps stacked
           into a very long scroll, so they are a deck: one card in front, its
           neighbours visibly behind it, and a finger between them. */}
+      {/* The anchor the panel's call returns to. It sits OUTSIDE the ternary
+          because the tiles render as a swipe deck on a phone and a grid on a
+          wide screen, and the address has to exist at both widths. */}
+      <span id="zt-picker" aria-hidden />
+
       {narrow ? (
         <SwipeStack
           className="zt-swipe"
@@ -573,8 +578,18 @@ export default function TemplatesView() {
           <div className="zt-panel-say">
             <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
             <p className="zt-h2-sub">الاختلاف في الشكل، لا في ما تحصل عليه.</p>
+            {/* THIS SENT EVERY READER TO /build, THE SHOPIFY ONE-PRODUCT
+                BUILDER. On a page showing eight templates, under a heading
+                that says the difference is only in the shape, a generic
+                "start creating" that drops you into one specific flow is
+                simply the wrong door — somebody reading about the restaurant
+                template pressed it and landed in the Shopify wizard.
+
+                The panel's whole claim is "whichever tile you pick", so its
+                call belongs on the tiles. It returns to the picker above
+                rather than choosing on the reader's behalf. */}
             <div className="zt-panel-cta">
-              <SlideButton href="/build" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="#zt-picker" variant="violet" slide="اختر قالبك">
                 ابدأ الإنشاء
               </SlideButton>
             </div>
