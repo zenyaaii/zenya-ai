@@ -25,6 +25,14 @@
  */
 
 export const AUTH_CSS = `
+/* 14.5px IS THE FLOOR, and it is not a preference.
+   components/ZoomLock.tsx writes zoom: 0.85 on the document element from the
+   ROOT layout, so it is in force on this host too, and a finger and an eye
+   both land on what is RENDERED. 14px CSS renders 11.9px and 13px renders
+   11.05px, both under the 12px type floor. 14.5px renders 12.33px and clears
+   it. This is the same number and the same reasoning as
+   components/zenya/chrome/tokens.ts, which is where it was measured; nothing
+   in the shipped house stylesheets goes below it. */
 .zs-wrap {
   display: flex;
   align-items: center;
@@ -47,7 +55,11 @@ export const AUTH_CSS = `
 }
 
 .zs-top { text-align: center; margin-bottom: 1.75rem; }
-.zs-mark { display: inline-flex; margin-bottom: 1.5rem; color: var(--obsidian); }
+/* 38px CSS renders 32.3px, which is the 32px coarse-pointer floor. Measured
+   by scripts/theme-check.cjs at 390: the mark was 13.6px tall, the eye 30.6,
+   the switch 29 and the reset link 21. Everything a finger lands on is held
+   at 2.375rem from here. */
+.zs-mark { display: inline-flex; align-items: center; min-height: 2.375rem; margin-bottom: 1.5rem; color: var(--obsidian); }
 .zs-h1 {
   margin: 0 0 0.375rem;
   font-size: clamp(1.375rem, 1.1rem + 1.1vw, 1.625rem);
@@ -55,7 +67,7 @@ export const AUTH_CSS = `
   line-height: 1.35;
   color: var(--obsidian);
 }
-.zs-sub { margin: 0; font-size: 0.875rem; line-height: 1.7; color: var(--stone); }
+.zs-sub { margin: 0; font-size: 14.5px; line-height: 1.7; color: var(--stone); }
 
 .zs-skeleton {
   height: 8rem;
@@ -100,8 +112,8 @@ export const AUTH_CSS = `
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.375rem;
+  height: 2.375rem;
   border: 0;
   border-radius: var(--r-control);
   background: transparent;
@@ -149,7 +161,7 @@ export const AUTH_CSS = `
   border-radius: var(--r-card);
   padding: 0.875rem;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 14.5px;
   font-weight: 500;
   line-height: 1.7;
 }
@@ -160,7 +172,9 @@ export const AUTH_CSS = `
 .zs-note[data-tone="error"] { background: rgba(185, 28, 28, 0.07); color: #b91c1c; }
 
 .zs-note-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.375rem;
   margin-top: 0.75rem;
   font-weight: 600;
   color: var(--violet-ink);

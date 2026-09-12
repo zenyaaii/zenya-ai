@@ -646,19 +646,21 @@ export default function RestaurantWizardPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-surface">
+    <div className="relative min-h-screen w-full overflow-hidden bg-background">
       {/* gradient bg */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 left-1/4 h-[560px] w-[560px] rounded-full bg-amber-300/25 blur-3xl" />
-        <div className="absolute top-1/3 right-0 h-[520px] w-[520px] translate-x-1/4 rounded-full bg-fuchsia-400/20 blur-3xl" />
-      </div>
-      <div className="absolute inset-0 z-0 bg-white/50 backdrop-blur-2xl" />
+      {/* The ground is flat, and that is the whole house style. This carried
+          two or three blurred colour orbs plus a full-viewport
+          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          the dashboard and the accounts portal each dropped in turn. The
+          scrim was the expensive half: a backdrop-filter across the viewport
+          composites every glyph on the page, which on Arabic costs the
+          subpixel antialiasing that keeps the stems from thinning. */}
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={fillExample} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.3em] text-amber-700">قالب المطاعم · دار</p>
+          <p className="text-[14.5px] font-semibold text-primary-600">قالب المطاعم · دار</p>
           <h1 className="mt-2 text-4xl font-extrabold text-foreground sm:text-5xl">
             أخبرنا عن مطعمك.
           </h1>

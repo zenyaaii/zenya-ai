@@ -233,20 +233,20 @@ export default function CollectiveWizardPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-surface">
-      {/* Ambient */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 left-1/3 h-[600px] w-[600px] rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="absolute top-1/2 right-0 h-[500px] w-[500px] translate-x-1/3 rounded-full bg-amber-300/10 blur-3xl" />
-        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] -translate-x-1/4 rounded-full bg-violet-300/8 blur-3xl" />
-      </div>
-      <div className="absolute inset-0 z-0 bg-white/55 backdrop-blur-2xl" />
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* The ground is flat, and that is the whole house style. This carried
+          two or three blurred colour orbs plus a full-viewport
+          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          the dashboard and the accounts portal each dropped in turn. The
+          scrim was the expensive half: a backdrop-filter across the viewport
+          composites every glyph on the page, which on Arabic costs the
+          subpixel antialiasing that keeps the stems from thinning. */}
 
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sectionMotion} className="mb-12">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-600">نُخبة · قالب الكتالوج</p>
+          <p className="text-[14.5px] font-semibold text-primary-600">نُخبة · قالب الكتالوج</p>
           <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
             ابنِ متجرًا منتقى متعدد العلامات.
           </h1>
