@@ -67,6 +67,21 @@ const NAV: Array<{ key: ViewKey; label: string; icon: LucideIcon; group: 'work' 
 
 const TITLE = Object.fromEntries(NAV.map((n) => [n.key, n.label])) as Record<ViewKey, string>
 
+/** The nine screens are one page with a rail, so without this the eight that
+ *  are not 'home' had no address at all — they could be reached by clicking
+ *  and by no other means, which makes them impossible to link to, to send to
+ *  somebody, or to reopen. ?view= gives each one a URL.
+ *
+ *  It is read once on mount and written with replaceState rather than through
+ *  the router: switching views is not a navigation (no data is fetched and
+ *  the page does not change), so it should not push a history entry the back
+ *  button then has to walk through. */
+function viewFromLocation(): ViewKey {
+  if (typeof window === 'undefined') return 'home'
+  const v = new URLSearchParams(window.location.search).get('view')
+  return NAV.some((n) => n.key === v) ? (v as ViewKey) : 'home'
+}
+
 export default function DashboardDemoView() {
   const [view, setView] = useState<ViewKey>('home')
   const [drawer, setDrawer] = useState(false)
@@ -75,9 +90,23 @@ export default function DashboardDemoView() {
   const [bookingFilter, setBookingFilter] = useState('all')
   const [siteFilter, setSiteFilter] = useState('all')
 
+  /* Read the address on mount. Deliberately in an effect rather than in the
+     useState initialiser: the initialiser also runs on the server, where
+     there is no location, and the two renders would disagree. */
+  useEffect(() => {
+    const v = viewFromLocation()
+    if (v !== 'home') setView(v)
+  }, [])
+
   const go = useCallback((v: string) => {
     setView(v as ViewKey)
     setDrawer(false)
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      if (v === 'home') url.searchParams.delete('view')
+      else url.searchParams.set('view', v)
+      window.history.replaceState(null, '', url)
+    }
     // A view change is a page change to the reader, so it starts at the top.
     // The scroller is <main> on desktop and the document on a phone, so both
     // are reset rather than guessing which one is live at this width.
