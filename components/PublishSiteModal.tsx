@@ -1,5 +1,18 @@
 'use client'
 
+/**
+ * PUBLISH A SITE — take a generated site from private draft to live.
+ *
+ * It confirms the address the site will answer on (slug.zenyaai.co, or the
+ * custom domain if one is connected), and it is the last screen before
+ * something the customer made becomes something the public can open. Opened
+ * from the dashboard's Sites page.
+ *
+ * The restyle is the palette and the elevation only. What it publishes, and
+ * the checks before it does, are untouched.
+ */
+
+
 import { COMPANY, usdTrailing } from '@/lib/company'
 import { useEffect, useRef, useState } from 'react'
 import { suggestSlugFrom, validateSlug, slugErrorMessage, normalizeSlug } from '@/lib/slug'
@@ -113,8 +126,12 @@ export default function PublishSiteModal({
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 60,
-        background: 'rgba(15,15,18,0.55)',
-        backdropFilter: 'blur(6px)',
+        /* The scrim stays; the 6px blur goes. A backdrop-filter across the
+           whole viewport is the most expensive paint on the page, and it
+           puts the dialog's own text on a composited layer, which costs
+           subpixel antialiasing on Arabic. A 55% scrim already separates the
+           dialog from the page. */
+        background: 'rgba(19,19,22,0.55)',
         display: 'grid', placeItems: 'center', padding: 16,
       }}
     >
@@ -151,7 +168,7 @@ export default function PublishSiteModal({
               width: '100%',
               padding: '11px 13px',
               fontSize: 14,
-              border: '1px solid #e5e2d9',
+              border: '1px solid rgba(17,17,17,0.10)',
               borderRadius: 8,
               outline: 'none',
               fontFamily: 'inherit',
@@ -214,7 +231,7 @@ export default function PublishSiteModal({
             style={{
               padding: '9px 14px', fontSize: 13.5, fontWeight: 500,
               background: 'transparent', color: '#6b6b6b',
-              border: '1px solid #e5e2d9', borderRadius: 8,
+              border: '1px solid rgba(17,17,17,0.10)', borderRadius: 10,
               cursor: 'pointer',
             }}
           >

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { PRODUCT_TOKENS_CSS } from '@/components/app/tokens'
 
 const STORAGE_KEY = 'zenya_consent'
 const STORAGE_VERSION = '1'
@@ -71,6 +72,12 @@ export default function CookieConsent() {
   }
 
   return (
+    <>
+      {/* The declarations the class above needs. On the dashboard AppShell
+          already injects them; on every other page nothing does, so the
+          banner carries its own copy rather than depending on a shell it is
+          not inside. */}
+      <style dangerouslySetInnerHTML={{ __html: PRODUCT_TOKENS_CSS }} />
     <div
       role="dialog"
       aria-labelledby="cookie-consent-title"
@@ -83,7 +90,20 @@ export default function CookieConsent() {
          so it is the last place that should happen. An opaque ground costs
          nothing here: the panel is 5rem tall over whatever it covers, and
          nobody is reading the page through it. */
-      className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-2xl sm:bottom-6 sm:inset-x-6"
+      /* zy-tokens, because this banner is mounted in the ROOT layout and so
+         sits outside .zx-root and .zy-app both. Every colour in it comes
+         through border-token, bg-background and text-foreground, and outside
+         a scope those resolved to the :root definitions — the old marketing
+         cream and the #e5e2d9 border. The banner is on every page of the
+         site, so it was the one object still painting the retired palette
+         over a restyled page. .zy-tokens exists for exactly this: the
+         declarations with none of the shell's layout.
+
+         shadow-2xl also goes. The house rule is elevation by hairline ring,
+         and a 25-blur drop shadow under a panel that is already separated
+         from the page by being fixed to the bottom of it was never doing
+         work. */
+      className="zy-tokens fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:bottom-6 sm:inset-x-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex-1">
@@ -171,6 +191,7 @@ export default function CookieConsent() {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

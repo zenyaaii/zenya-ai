@@ -257,7 +257,7 @@ export default function LookbookWizardPage() {
       <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
         <motion.div {...sm} className="mb-12">
           <p className="text-xs uppercase tracking-[0.35em] text-stone-500">لوك بوك · قالب الأزياء المحتشمة</p>
-          <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
             ابنِ موقع أزياء فاخرًا.
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
@@ -434,7 +434,7 @@ export default function LookbookWizardPage() {
           {/* ── Generate ───────────────────────────────────────── */}
           <motion.div {...sm} className="flex flex-col items-center gap-4 pt-4">
             <button type="button" onClick={startGenerate} disabled={loading}
-              className="flex items-center gap-3 rounded-full bg-stone-900 px-12 py-4 text-base font-black text-white shadow-xl shadow-stone-900/20 transition hover:scale-105 hover:bg-stone-800 disabled:opacity-60 disabled:hover:scale-100"
+              className="flex items-center gap-3 rounded-xl bg-[#171717] px-12 py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد موقعك...</>

@@ -1,5 +1,21 @@
 'use client'
 
+/**
+ * ADD A CUSTOM DOMAIN to a site the customer has already generated.
+ *
+ * WHAT IT DOES, in two steps. Step one takes the domain they own — the one
+ * bought at GoDaddy or Namecheap or Porkbun. Step two prints the exact DNS
+ * records that domain needs (an A record, a CNAME, sometimes a TXT to verify)
+ * and, through lib/registrars, links straight to the DNS page of the
+ * registrar it detected, because "add an A record" is the sentence that loses
+ * people. Opened from the dashboard's Sites and Domains pages.
+ *
+ * The restyle is the palette and the elevation only. The DNS table, the copy
+ * buttons and the registrar detection are untouched: they are the part that
+ * makes the modal worth opening.
+ */
+
+
 import { useState } from 'react'
 import { getRegistrar } from '@/lib/registrars'
 
@@ -63,17 +79,21 @@ export default function AddDomainModal({
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 60,
-        background: 'rgba(15,15,18,0.55)',
-        backdropFilter: 'blur(6px)',
+        /* The scrim stays; the 6px blur goes. A backdrop-filter across the
+           whole viewport is the most expensive paint on the page, and it
+           puts the dialog's own text on a composited layer, which costs
+           subpixel antialiasing on Arabic. A 55% scrim already separates the
+           dialog from the page. */
+        background: 'rgba(19,19,22,0.55)',
         display: 'grid', placeItems: 'center', padding: 16,
       }}
     >
       <div
         style={{
           width: '100%', maxWidth: 560,
-          background: 'white', borderRadius: 16,
+          background: '#ffffff', borderRadius: 28,
           padding: 28, maxHeight: '90vh', overflowY: 'auto',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.30)',
+          boxShadow: '0 0 0 1px rgba(23,23,23,0.08)',
         }}
       >
         {step === 'enter' ? (
@@ -131,7 +151,7 @@ function EnterStep({
           width: '100%',
           padding: '11px 13px',
           fontSize: 14,
-          border: '1px solid #e5e2d9',
+          border: '1px solid rgba(17,17,17,0.10)',
           borderRadius: 8,
           outline: 'none',
           fontFamily: 'inherit',
@@ -170,7 +190,7 @@ function EnterStep({
           style={{
             padding: '9px 14px', fontSize: 13.5, fontWeight: 500,
             background: 'transparent', color: '#6b6b6b',
-            border: '1px solid #e5e2d9', borderRadius: 8,
+            border: '1px solid rgba(17,17,17,0.10)', borderRadius: 10,
             cursor: 'pointer',
           }}
         >
@@ -236,8 +256,8 @@ function DnsStep({
         ))}
       </ol>
 
-      <div style={{ marginTop: 16, border: '1px solid #e5e2d9', borderRadius: 10, overflow: 'hidden' }}>
-        <div style={{ background: '#f7f4ed', padding: '8px 12px', fontSize: 11, fontWeight: 700, color: '#6b6b6b', letterSpacing: 0.4, textTransform: 'uppercase' }}>
+      <div style={{ marginTop: 16, border: '1px solid rgba(17,17,17,0.10)', borderRadius: 16, overflow: 'hidden' }}>
+        <div style={{ background: '#f4f4f6', padding: '8px 12px', fontSize: 11, fontWeight: 700, color: '#56565a', letterSpacing: 0.4, textTransform: 'uppercase' }}>
           سجلات DNS لإضافتها للنطاق {domain}
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>

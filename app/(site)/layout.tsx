@@ -9,11 +9,12 @@ import type { ReactNode } from 'react'
  * Navbar and a Footer mounted here would be a second header and a second
  * footer stacked on top of the ones the page already draws.
  *
- * The old marketing chrome (components/Navbar, components/Footer,
- * components/ReviewFloatingButton) still serves app/(main), which now holds
- * only the surfaces that have not been restyled: the account and settings
- * stubs, the auth callbacks, and the generated-theme previews under
- * /theme/new.
+ * The old marketing chrome — components/Navbar, components/Footer and
+ * components/ReviewFloatingButton — is DELETED. It served app/(main) until
+ * that group moved onto components/zenya/chrome/ProductShell, and then it
+ * served nothing. (main) now holds the product: the account and settings
+ * redirects, the auth callbacks, the Shopify builder and the seven generator
+ * wizards under /theme/new.
  *
  * The floating review launcher is deliberately not mounted here. It existed
  * to make one honest review channel reachable from anywhere while that

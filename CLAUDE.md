@@ -44,12 +44,29 @@ laid out in two halves and the split is load-bearing:
   parts. Note that `components/site/` is something else entirely: the runtime
   for the sites Zenya *generates* for customers. Keep them apart.
 
-`app/(main)/**` is what has not been restyled yet: the `/settings` and
+`app/(main)/**` is the **product**, not the marketing site: the `/settings` and
 `/account` redirects, the auth callbacks, the Shopify one-product builder at
-`/build`, and the generated-theme previews under `/theme/new`.
-It still mounts the old `components/Navbar` and `components/Footer`. A page
-moved out of `(main)` and into `(site)` loses that chrome and must gain
-`Shell`; a page that keeps the old chrome must stay in `(main)`.
+`/build`, and the seven generator wizards under `/theme/new`.
+
+It is on the house style too now. Its layout mounts
+`components/zenya/chrome/ProductShell`, which is the tokens and the header pill
+and deliberately **no** marketing footer — a generator flow is a form with
+somewhere to go next, not a page read to the bottom. `ProductShell` roots a
+`<div>`, not a `<main>`, because every page under `(main)` renders its own.
+
+The old `components/Navbar` and `components/Footer` are **gone**; nothing
+imports them. A page moving between the groups swaps `ProductShell` for `Shell`
+or the reverse — `Shell` adds the obsidian footer cap and the reveal observer,
+which is what separates a public page from a product one.
+
+**One token layer feeds all of it.** `components/app/tokens.ts` exports
+`PRODUCT_TOKENS_CSS`, scoped to `.zy-app, .zy-tokens, .zx-root`, and it is what
+`--background`, `--surface`, `--card`, `--muted`, `--border`, the status triad
+and the elevation rings resolve to on every product surface. The dashboard
+stylesheet composes it; so does `ProductShell`; so does the cookie banner, which
+is mounted in the root layout and is inside no shell at all. If a surface is
+painting the old cream, it is outside those three selectors — add `.zy-tokens`,
+do not write a fourth copy of the palette.
 
 **Metadata lives in the route, not the view.** Every promoted page kept its
 original `layout.tsx` — title, description, canonical, hreflang and JSON-LD —
@@ -62,37 +79,35 @@ alone unless the change is specifically about metadata.
 `app/(main)/faq/faq-data.ts` and friends, and every importer broke the moment
 their route group moved. New shared content goes in `lib/`.
 
-## What `demo.zenyaai.co` is for now
+## `demo.zenyaai.co` is retired
 
-It served the candidate set while the restyle was under review. That set is
-the site, so the subdomain is down to three entries in `DEMO_SUBDOMAIN_PAGES`
-in `middleware.ts`:
+The subdomain held the candidate set while the restyle was under review. That
+set is the site, so a second host was being kept correct for three pages. It is
+gone: **every path on `demo.zenyaai.co` now 307s to the same path on the apex**,
+and `DEMO_SUBDOMAIN_PAGES` no longer exists. There is no registration step when
+you add a page under `app/demo/` any more — it is reachable at
+`zenyaai.co/demo/<segment>` the moment the route exists.
 
-```ts
-const DEMO_SUBDOMAIN_PAGES = new Set([
-  'dashboard', 'editor', 'build',
-])
-```
+The three pages themselves are **not** retired. They are the surfaces that are
+not pages of the public site, and they keep the addresses they always had:
 
-`dashboard` and `editor` are product surfaces that normally sit behind an
-account, rendered against fixture data so they can be looked at without
-signing in. `build` is the one candidate that did **not** go live: it restyles
-the restaurant wizard at `/theme/new/restaurant`, not the Shopify builder at
-`/build`, and the wizard it proposes for runs a generator a public route
-cannot reach. Everything else on that host 307s to the apex, which is now the
-right answer rather than a fallback — a former candidate address lands on the
-page it became.
+- `zenyaai.co/demo/dashboard` — the dashboard against fixture data, so it can
+  be looked at without an account
+- `zenyaai.co/demo/editor` — the theme editor, likewise
+- `zenyaai.co/demo/build` — the restyle proposal for the restaurant wizard at
+  `/theme/new/restaurant`. It is a public route, so it cannot reach the
+  generator it proposes for; its last step is a review that hands the reader to
+  the real builder
 
-**If you add a page under `app/demo/`, register its segment in that Set in the
-same commit.** An unregistered segment 307s to the apex, so from the owner's
-side the page simply does not exist. The segment is the directory name under
-`app/demo/`.
+`RETIRED_DEMO_SEGMENTS` in `middleware.ts` is the only trace left, and it exists
+for one reason: `demo.zenyaai.co/dashboard` was an alias for `/demo/dashboard`,
+so an old link has to be mapped back rather than handed to the apex as
+`/dashboard`, which is the real logged-in dashboard.
 
-**The standing exception:** the generated-site theme previews — restaurant,
-atlas, lookbook, wellness, studio, services, collective, sufra, thread, ribbon,
-and the storefront at `/demo` itself — are deliberately NOT on the allowlist.
-They preview what the product *generates*, not Zenya's own site, and they keep
-their addresses under `zenyaai.co/demo/*`.
+The generated-site theme previews — restaurant, atlas, lookbook, wellness,
+studio, services, collective, sufra, thread, ribbon, and the storefront at
+`/demo` — are unaffected. They preview what the product *generates*, not
+Zenya's own site, and they were never on the subdomain.
 
 ## Two documents to read before large work here
 

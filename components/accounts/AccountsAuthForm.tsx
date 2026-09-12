@@ -224,35 +224,17 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
 
   const toggle = (m: Mode) => { setMode(m); setStatus(null) }
 
-  const inputClass =
-    'w-full rounded-xl border border-token bg-white/80 px-4 py-3 text-[14px] text-foreground placeholder:text-muted ' +
-    'outline-none backdrop-blur-sm transition-shadow duration-150 ' +
-    'focus:border-primary focus:shadow-[0_0_0_3px_rgba(94,106,210,0.15)]'
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full max-w-md rounded-3xl p-8 sm:p-10"
-      style={{
-        background: 'rgba(255,255,255,0.72)',
-        backdropFilter: 'blur(18px)',
-        WebkitBackdropFilter: 'blur(18px)',
-        border: '1px solid rgba(255,255,255,0.7)',
-        boxShadow:
-          '0 1px 0 rgba(255,255,255,0.8) inset, 0 24px 70px -20px rgba(28,28,28,0.28), 0 0 0 1px rgba(94,106,210,0.06)',
-      }}
-    >
+    <div className="zn-card">
       {/* Logo + heading */}
-      <div className="mb-7 text-center">
+      <div className="zn-top">
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6 inline-flex"
+          className="zn-mark"
         >
-          <ZenyaMark className="h-6 text-[#16171b]" />
+          <ZenyaMark className="h-6" />
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -263,10 +245,10 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
           >
-            <h1 className="mb-1.5 text-[26px] font-semibold tracking-tight text-foreground" style={{ letterSpacing: '-0.02em' }}>
+            <h1 className="zn-h1">
               {mode === 'signin' ? 'أهلًا بعودتك' : mode === 'signup' ? 'أنشئ حسابك' : 'إعادة تعيين كلمة المرور'}
             </h1>
-            <p className="text-[13.5px] text-muted">
+            <p className="zn-sub">
               {mode === 'signin'
                 ? showChooser
                   ? 'اختر حسابًا للمتابعة إلى لوحة التحكم.'
@@ -282,12 +264,12 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
       {!ready && mode === 'signin' ? (
         /* Brief skeleton while we check for an existing session — avoids a
            flash of the empty form before the account chooser appears. */
-        <div className="space-y-2.5" aria-hidden>
-          <div className="h-[54px] animate-pulse rounded-xl bg-black/[0.04]" />
-          <div className="h-[54px] animate-pulse rounded-xl bg-black/[0.04]" />
+        <div className="zn-stack" aria-hidden>
+          <div className="zn-skeleton" />
+          <div className="zn-skeleton" />
         </div>
       ) : showChooser ? (
-        <div className="space-y-2.5">
+        <div className="zn-stack">
           {/* Live session → one-click continue */}
           {sessionAccount && (
             <>
@@ -295,29 +277,26 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
                 type="button"
                 onClick={continueToDashboard}
                 disabled={continuing}
-                className="group flex w-full items-center gap-3 rounded-2xl border border-token bg-white/80 p-3 text-start transition-all duration-150 hover:border-primary hover:shadow-[0_0_0_3px_rgba(94,106,210,0.10)] disabled:opacity-60"
+                className="zn-account"
               >
-                <span
-                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-[16px] font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #6b78e0 0%, #5e6ad2 55%, #4954c9 100%)' }}
-                >
+                <span className="zn-avatar">
                   {initialsFor(sessionAccount)}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[14px] font-semibold text-foreground">
+                <span className="zn-account-text">
+                  <span className="zn-account-name">
                     {sessionAccount.name || sessionAccount.email}
                   </span>
-                  <span className="block truncate text-[12.5px] text-muted" dir="ltr">
+                  <span className="zn-account-mail" dir="ltr">
                     {sessionAccount.email}
                   </span>
                 </span>
                 {continuing ? (
-                  <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                  <svg className="zn-spin zn-account-go" width="16" height="16" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
                 ) : (
-                  <ArrowLeft className="h-4 w-4 flex-shrink-0 text-muted transition-colors group-hover:text-primary rtl-flip" strokeWidth={2.5} />
+                  <ArrowLeft className="zn-account-go rtl-flip" size={16} strokeWidth={2} />
                 )}
               </button>
               <button
@@ -347,21 +326,21 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
                 .map((a) => (
                   <div
                     key={a.email}
-                    className="group flex items-center gap-3 rounded-2xl border border-token bg-white/70 p-3 transition-all duration-150 hover:border-primary hover:shadow-[0_0_0_3px_rgba(94,106,210,0.10)]"
+                    className="zn-account group"
                   >
                     <button
                       type="button"
                       onClick={() => pickAccount(a)}
                       className="flex min-w-0 flex-1 items-center gap-3 text-start"
                     >
-                      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(94,106,210,0.12)] text-[15px] font-bold text-primary">
+                      <span className="zn-avatar">
                         {initialsFor(a)}
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[13.5px] font-semibold text-foreground">
+                      <span className="zn-account-text">
+                        <span className="zn-account-name">
                           {a.name || a.email}
                         </span>
-                        <span className="block truncate text-[12px] text-muted" dir="ltr">{a.email}</span>
+                        <span className="zn-account-mail" dir="ltr">{a.email}</span>
                       </span>
                     </button>
                     <button
@@ -380,7 +359,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           <button
             type="button"
             onClick={() => { setShowForm(true); setEmail(''); setPassword(''); setStatus(null) }}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-token bg-white/40 px-4 py-3 text-[13px] font-medium text-muted transition-colors hover:border-primary hover:text-primary"
+            className="zn-quiet"
           >
             <UserPlus className="h-3.5 w-3.5" strokeWidth={2} />
             تسجيل الدخول بحساب آخر
@@ -414,7 +393,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="الاسم الكامل"
-                className={inputClass}
+                className="zn-input"
               />
             </motion.div>
           )}
@@ -430,7 +409,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
             placeholder="name@company.com"
             autoComplete="email"
             dir="ltr"
-            className={inputClass + ' text-start'}
+            className="zn-input text-start"
           />
         </div>
 
@@ -450,12 +429,12 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="كلمة المرور"
                 autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                className={inputClass + ' pe-12'}
+                className="zn-input zn-input-eye"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute end-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:bg-[rgba(28,28,28,0.05)] hover:text-foreground"
+                className="zn-eye"
                 aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" strokeWidth={2} /> : <Eye className="h-4 w-4" strokeWidth={2} />}
@@ -481,9 +460,9 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
               />
               <span>
                 أوافق على{' '}
-                <Link href="/terms" target="_blank" className="font-medium text-primary underline-offset-2 hover:underline">شروط الخدمة</Link>{' '}
+                <Link href="/terms" target="_blank" className="zn-switch">شروط الخدمة</Link>{' '}
                 و{' '}
-                <Link href="/privacy" target="_blank" className="font-medium text-primary underline-offset-2 hover:underline">سياسة الخصوصية</Link>
+                <Link href="/privacy" target="_blank" className="zn-switch">سياسة الخصوصية</Link>
                 ، وأوافق على الوصول الفوري للخدمة.
               </span>
             </motion.label>
@@ -493,11 +472,11 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
         <button
           type="submit"
           disabled={loading || (mode === 'signup' && !acceptTerms)}
-          className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-[14px] font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 btn-shadow-primary"
+          className="zn-primary"
         >
           {loading ? (
             <span className="inline-flex items-center justify-center gap-2">
-              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="zn-spin" width="16" height="16" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -511,25 +490,17 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           )}
         </button>
 
-        <AnimatePresence>
+        {/* Announced, not only painted: a rejected sign-in was a message a
+            screen-reader user never received. */}
+        <div role="status" aria-live="polite">
           {status && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-xl p-3 text-center text-[13px] font-medium"
-              style={{
-                background: status.type === 'success' ? 'rgba(34,197,94,0.08)' : 'rgba(220,38,38,0.06)',
-                border: `1px solid ${status.type === 'success' ? 'rgba(34,197,94,0.25)' : 'rgba(220,38,38,0.20)'}`,
-                color: status.type === 'success' ? '#15803d' : '#b91c1c',
-              }}
-            >
-              {status.message}
-            </motion.div>
+            <div className="zn-note" data-tone={status.type}>
+              <p>{status.message}</p>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
 
-        <div className="space-y-2 pt-2 text-center text-[13px]">
+        <div className="zn-foot">
           {mode === 'signin' && (
             <>
               <div>
@@ -539,7 +510,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
               </div>
               <div className="text-muted">
                 ليس لديك حساب؟{' '}
-                <button type="button" onClick={() => toggle('signup')} className="font-medium text-primary underline-offset-2 hover:underline">
+                <button type="button" onClick={() => toggle('signup')} className="zn-switch">
                   أنشئ حسابًا مجانًا
                 </button>
               </div>
@@ -548,7 +519,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           {mode === 'signup' && (
             <div className="text-muted">
               لديك حساب بالفعل؟{' '}
-              <button type="button" onClick={() => toggle('signin')} className="font-medium text-primary underline-offset-2 hover:underline">
+              <button type="button" onClick={() => toggle('signin')} className="zn-switch">
                 تسجيل الدخول
               </button>
             </div>
@@ -556,7 +527,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           {mode === 'forgot' && (
             <div className="text-muted">
               تذكّرتها؟{' '}
-              <button type="button" onClick={() => toggle('signin')} className="font-medium text-primary underline-offset-2 hover:underline">
+              <button type="button" onClick={() => toggle('signin')} className="zn-switch">
                 العودة لتسجيل الدخول
               </button>
             </div>
@@ -564,6 +535,6 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
         </div>
       </form>
       )}
-    </motion.div>
+    </div>
   )
 }

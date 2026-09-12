@@ -660,7 +660,7 @@ function UrlStep({
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
           <Link2 className="h-5 w-5 text-primary" strokeWidth={2.2} />
         </div>
-        <h1 className="mt-5 text-[26px] font-bold tracking-tight text-foreground">
+        <h1 className="mt-5 text-[26px] font-bold text-foreground">
           ابدأ برابط منتج
         </h1>
         <p className="mt-2 text-[14px] text-muted">
@@ -773,7 +773,7 @@ function ProductStep(props: {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
+        <h1 className="text-[22px] font-bold text-foreground">
           خصّصه
         </h1>
         <p className="mt-1 text-[13px] text-muted">
@@ -1012,7 +1012,7 @@ function ColorStep({
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
+        <h1 className="text-[22px] font-bold text-foreground">
           اختر مظهر متجرك
         </h1>
         <p className="mt-1 text-[13px] text-muted">
@@ -1163,7 +1163,7 @@ function PaletteTile({
 
       {/* Display name */}
       <div
-        className="mt-1 text-[22px] font-bold tracking-tight"
+        className="mt-1 text-[22px] font-bold"
         style={{ color: p.fg, fontFamily: 'ui-serif, Georgia, "Times New Roman", serif', letterSpacing: '-0.01em', lineHeight: 1.1 }}
       >
         {p.name}
@@ -1210,7 +1210,7 @@ function GenerateStep({
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-[22px] font-bold tracking-tight text-foreground">
+        <h1 className="text-[22px] font-bold text-foreground">
           {downloaded ? 'قالبك جاهز' : 'أنت جاهز للتوليد'}
         </h1>
         <p className="mt-1 text-[13px] text-muted">

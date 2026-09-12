@@ -19,6 +19,19 @@ export function accountsUrl(path = ''): string {
 }
 
 /**
+ * The public marketing site, for links drawn on a portal host.
+ *
+ * accounts.zenyaai.co rewrites every unrouted path under /accounts (see
+ * middleware.ts), so a relative <Link href="/pricing"> in the portal's header
+ * resolves to /accounts/pricing and 404s. The header therefore needs the apex
+ * spelled out. On localhost and preview deployments there are no subdomains
+ * and the same app serves everything, so the relative path is correct there.
+ */
+export function siteUrl(path = ''): string {
+  return isZenyaHost() ? `https://zenyaai.co${path || '/'}` : path || '/'
+}
+
+/**
  * The public address of a published customer site: slug.zenyaai.co.
  * This is the real live URL (a Vercel wildcard subdomain) regardless of which
  * host the dashboard is being viewed on — never the internal /s/<slug> path.
