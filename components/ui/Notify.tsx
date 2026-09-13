@@ -168,7 +168,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.96 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                    className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-token bg-white/95 px-4 py-3 backdrop-blur-md"
+                    className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-token bg-white/95 px-4 py-3"
                     style={{ boxShadow: '0 12px 32px -12px rgba(28,28,28,0.28), 0 0 0 1px rgba(28,28,28,0.04)' }}
                     dir="rtl"
                   >
@@ -179,9 +179,9 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                       <Icon className="h-3.5 w-3.5" strokeWidth={2.25} />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-semibold leading-snug text-foreground">{t.message}</p>
+                      <p className="text-[14.5px] font-semibold leading-snug text-foreground">{t.message}</p>
                       {t.description && (
-                        <p className="mt-0.5 text-[12px] leading-snug text-muted">{t.description}</p>
+                        <p className="mt-0.5 text-[14.5px] leading-snug text-muted">{t.description}</p>
                       )}
                     </div>
                     <button
@@ -243,7 +243,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                         {confirmState.title}
                       </h2>
                       {confirmState.message && (
-                        <div className="mt-1.5 text-[13.5px] leading-[1.7] text-muted">
+                        <div className="mt-1.5 text-[14.5px] leading-[1.7] text-muted">
                           {confirmState.message}
                         </div>
                       )}
@@ -251,7 +251,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                   </div>
 
                   {confirmState.checkbox && (
-                    <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl border border-token bg-surface px-3.5 py-3 text-[13px] leading-snug text-foreground transition-colors hover:bg-black/[0.02]">
+                    <label className="mt-4 flex cursor-pointer items-start gap-2.5 rounded-xl border border-token bg-surface px-3.5 py-3 text-[14.5px] leading-snug text-foreground transition-colors hover:bg-black/[0.02]">
                       <input
                         type="checkbox"
                         checked={checked}
@@ -267,7 +267,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                     <button
                       type="button"
                       onClick={() => settle(false)}
-                      className="rounded-lg border border-token bg-white px-4 py-2 text-[13px] font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground"
+                      className="rounded-lg border border-token bg-white px-4 py-2 text-[14.5px] font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground"
                     >
                       {confirmState.cancelText || 'إلغاء'}
                     </button>
@@ -275,7 +275,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                       type="button"
                       autoFocus
                       onClick={() => settle(true)}
-                      className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                      className="rounded-lg px-4 py-2 text-[14.5px] font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                       style={
                         confirmState.tone === 'danger'
                           ? { background: '#dc2626', boxShadow: '0 8px 20px -8px rgba(220,38,38,0.55)' }

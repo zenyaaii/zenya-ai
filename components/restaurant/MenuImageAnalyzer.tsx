@@ -296,7 +296,7 @@ export default function MenuImageAnalyzer({
 
   return (
     <div
-      className="mb-6 rounded-2xl border p-5 backdrop-blur-md"
+      className="mb-6 rounded-2xl border p-5"
       style={{ background: 'rgba(217,119,6,0.06)', borderColor: 'rgba(217,119,6,0.28)' }}
     >
       <div className="flex items-start gap-3">
@@ -307,14 +307,14 @@ export default function MenuImageAnalyzer({
           📸
         </div>
         <div className="flex-1">
-          <p className="text-[13.5px] font-semibold text-foreground">
+          <p className="text-[14.5px] font-semibold text-foreground">
             عندك قائمة كبيرة؟ ارفع صورتها ودعنا نكتبها لك.
           </p>
-          <p className="mt-0.5 text-[12px] leading-[1.55] text-muted">
+          <p className="mt-0.5 text-[14.5px] leading-[1.55] text-muted">
             صوّر قائمة مطعمك (حتى {MAX_SHOTS} صور — وجه وظهر أو صفحات) وسنستخرج الفئات والأصناف
             والأسعار تلقائيًا. تراجعها وتعدّلها قبل التوليد. لا نضيف أي صور — نقرأ النص فقط.
           </p>
-          <p className="mt-1 text-[11px] leading-[1.5] text-muted/80">
+          <p className="mt-1 text-[14.5px] leading-[1.5] text-muted/80">
             نصيحة: كلما كانت الصورة أوضح وأقرب، كانت القراءة أدقّ. القوائم العريضة نقسمها تلقائيًا
             لنقرأ كل عمود بدقّة.
           </p>
@@ -357,7 +357,7 @@ export default function MenuImageAnalyzer({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full border border-token bg-surface px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-elevated disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full border border-token bg-surface px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-elevated disabled:opacity-60"
           >
             {preparing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
             {shots.length === 0 ? 'ارفع صورة القائمة' : 'أضف صفحة أخرى'}
@@ -369,7 +369,7 @@ export default function MenuImageAnalyzer({
             type="button"
             onClick={analyze}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-[14.5px] font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
           >
             {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {analyzing
@@ -382,13 +382,13 @@ export default function MenuImageAnalyzer({
       </div>
 
       {error && (
-        <p className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-medium text-[#b45309]">
+        <p className="mt-3 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-[#b45309]">
           <X className="h-3.5 w-3.5" /> {error}
         </p>
       )}
 
       {result && (
-        <p className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-medium text-[#15803d]">
+        <p className="mt-3 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-[#15803d]">
           <CheckCircle2 className="h-3.5 w-3.5" />
           أضفنا {result.categories} فئة و{result.items} صنفًا من صورتك. راجعها وعدّلها بالأسفل.
         </p>

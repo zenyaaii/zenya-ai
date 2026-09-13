@@ -235,8 +235,7 @@ export default function CollectiveWizardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport
-          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
           the dashboard and the accounts portal each dropped in turn. The
           scrim was the expensive half: a backdrop-filter across the viewport
           composites every glyph on the page, which on Arabic costs the
@@ -262,7 +261,7 @@ export default function CollectiveWizardPage() {
         </motion.div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm text-red-800">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
             {error}
           </motion.div>
         )}
@@ -270,44 +269,44 @@ export default function CollectiveWizardPage() {
         <div className="space-y-8">
 
           {/* ── Brand ──────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">1. متجرك</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">اسم المتجر *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم المتجر *</label>
                 <input
                   value={form.brand_name}
                   onChange={(e) => update('brand_name', e.target.value)}
                   placeholder="مثلاً: نُخبة، المختارات، دار الشمال"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
                 <input
                   value={form.brand_tagline}
                   onChange={(e) => update('brand_tagline', e.target.value)}
                   placeholder="مثلاً: منتقاة لحياة تُعاش بإتقان."
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">وصف المتجر *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">وصف المتجر *</label>
                 <textarea
                   value={form.brand_description}
                   onChange={(e) => update('brand_description', e.target.value)}
                   placeholder="مثلاً: سوق منتقى متعدد العلامات للمنزل والخزانة والعافية — 400 منتج، كلٌّ منها مُختبَر."
                   rows={2}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">فئات المنتجات *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">فئات المنتجات *</label>
                 <input
                   value={form.categories}
                   onChange={(e) => update('categories', e.target.value)}
                   placeholder="المنزل والمعيشة، الأزياء، الجمال، العافية، المطبخ... (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {CATEGORY_SUGGESTIONS.map((cat) => (
@@ -318,7 +317,7 @@ export default function CollectiveWizardPage() {
                         const current = form.categories ? form.categories.split(',').map(s => s.trim()) : []
                         if (!current.includes(cat)) update('categories', [...current, cat].join(', '))
                       }}
-                      className="rounded-full border border-token bg-surface px-3 py-1 text-[11px] text-muted transition hover:border-emerald-400 hover:text-emerald-600"
+                      className="rounded-full border border-token bg-[color:var(--card)] px-3 py-1 text-[14.5px] text-muted transition hover:border-emerald-400 hover:text-emerald-600"
                     >
                       + {cat}
                     </button>
@@ -326,25 +325,25 @@ export default function CollectiveWizardPage() {
                 </div>
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">قصة الانتقاء</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة الانتقاء</label>
                 <textarea
                   value={form.curation_story}
                   onChange={(e) => update('curation_story', e.target.value)}
                   placeholder="كيف تقرّر ما تعرضه؟ مثلاً: نشتري كل شيء بأنفسنا ولا نعرض إلا ما نشتريه ثانيةً فعلًا."
                   rows={2}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
             </div>
           </motion.section>
 
           {/* ── Collections ────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-xl font-black text-foreground">2. التشكيلات</h2>
-              <span className="text-sm text-muted">{form.collections.filter(c => c.name.trim()).length}/6</span>
+              <span className="text-[14.5px] text-muted">{form.collections.filter(c => c.name.trim()).length}/6</span>
             </div>
-            <p className="mb-5 text-sm text-muted">حتى تشكيلة واحدة تكفي — أضف حتى 6. كلما أضفت أكثر، بدت واجهة المتجر أغنى. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات تلقائيًا.</p>
+            <p className="mb-5 text-[14.5px] text-muted">حتى تشكيلة واحدة تكفي — أضف حتى 6. كلما أضفت أكثر، بدت واجهة المتجر أغنى. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات تلقائيًا.</p>
             <div className="space-y-3">
               {form.collections.map((col, i) => (
                 <div key={col.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
@@ -352,19 +351,19 @@ export default function CollectiveWizardPage() {
                     value={col.name}
                     onChange={(e) => updateCollection(col.id, { name: e.target.value })}
                     placeholder={`التشكيلة ${i + 1}`}
-                    className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                   />
                   <input
                     value={col.tagline}
                     onChange={(e) => updateCollection(col.id, { tagline: e.target.value })}
                     placeholder="شعار التشكيلة (اختياري)"
-                    className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                   />
                   <button
                     type="button"
                     onClick={() => removeCollection(col.id)}
                     disabled={form.collections.length <= 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
                   >
                     ×
                   </button>
@@ -372,50 +371,50 @@ export default function CollectiveWizardPage() {
               ))}
             </div>
             {form.collections.length < 6 && (
-              <button type="button" onClick={addCollection} className="mt-4 flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:underline">
+              <button type="button" onClick={addCollection} className="mt-4 flex items-center gap-2 text-[14.5px] font-semibold text-emerald-600 hover:underline">
                 + أضف تشكيلة
               </button>
             )}
           </motion.section>
 
           {/* ── Pricing & Perks ────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">3. التسعير والمزايا</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">نطاق السعر (الأدنى)</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نطاق السعر (الأدنى)</label>
                 <input
                   value={form.price_min}
                   onChange={(e) => update('price_min', e.target.value)}
                   placeholder="مثلاً: 45$"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">نطاق السعر (الأعلى)</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نطاق السعر (الأعلى)</label>
                 <input
                   value={form.price_max}
                   onChange={(e) => update('price_max', e.target.value)}
                   placeholder="مثلاً: 495$"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الشحن</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشحن</label>
                 <input
                   value={form.shipping_perks}
                   onChange={(e) => update('shipping_perks', e.target.value)}
                   placeholder="مثلاً: مجاني فوق 150$، خلال 3 إلى 5 أيام"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">سياسة الإرجاع</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">سياسة الإرجاع</label>
                 <input
                   value={form.returns_policy}
                   onChange={(e) => update('returns_policy', e.target.value)}
                   placeholder="مثلاً: إرجاع مجاني خلال 14 يومًا"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -426,49 +425,49 @@ export default function CollectiveWizardPage() {
                     onChange={(e) => update('sustainability', e.target.checked)}
                     className="h-4 w-4 rounded text-emerald-600"
                   />
-                  <span className="text-sm font-semibold text-foreground">منتجات مُدقَّقة للاستدامة</span>
+                  <span className="text-[14.5px] font-semibold text-foreground">منتجات مُدقَّقة للاستدامة</span>
                 </label>
               </div>
             </div>
           </motion.section>
 
           {/* ── Social proof ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-2 text-xl font-black text-foreground">4. الدليل الاجتماعي</h2>
-            <p className="mb-6 text-sm text-muted">اختياري — يضيف تقييمات وأعداد عملاء إلى التصميم.</p>
+            <p className="mb-6 text-[14.5px] text-muted">اختياري — يضيف تقييمات وأعداد عملاء إلى التصميم.</p>
             <div className="grid gap-5 sm:grid-cols-3">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">عدد العملاء</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد العملاء</label>
                 <input
                   value={form.customer_count}
                   onChange={(e) => update('customer_count', e.target.value)}
                   placeholder="مثلاً: +28,000"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">عدد التقييمات</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد التقييمات</label>
                 <input
                   value={form.review_count}
                   onChange={(e) => update('review_count', e.target.value)}
                   placeholder="مثلاً: +6,800 تقييم"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
                 <input
                   value={form.review_rating}
                   onChange={(e) => update('review_rating', e.target.value)}
                   placeholder="4.9"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
                 />
               </div>
             </div>
           </motion.section>
 
           {/* ── Style preset ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {COLLECTIVE_PRESETS.map((preset) => {
@@ -479,13 +478,13 @@ export default function CollectiveWizardPage() {
                     type="button"
                     onClick={() => update('style_preset', preset.id)}
                     className={`rounded-2xl border p-4 text-left transition-all ${
-                      selected ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-500/5' : 'border-token bg-surface hover:border-emerald-300'
+                      selected ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-500/5' : 'border-token bg-[color:var(--card)] hover:border-emerald-300'
                     }`}
                   >
                     <div className="mb-3 h-10 w-full overflow-hidden rounded-xl ring-1 ring-black/5" style={{ background: preset.colors.gradient }} />
-                    <p className={`text-xs font-black ${selected ? 'text-emerald-600' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[11px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.primary : '#94a3b8' }}>
+                    <p className={`text-[14.5px] font-black ${selected ? 'text-emerald-600' : 'text-foreground'}`}>{preset.name}</p>
+                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
+                    <p className="mt-2 text-[14.5px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.primary : '#94a3b8' }}>
                       {preset.vibe}
                     </p>
                   </button>
@@ -509,7 +508,7 @@ export default function CollectiveWizardPage() {
               )}
             </button>
             {loading && (
-              <p className="text-sm text-muted">يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات ويُنسّق كتالوجك — نحو 15 إلى 20 ثانية.</p>
+              <p className="text-[14.5px] text-muted">يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات ويُنسّق كتالوجك — نحو 15 إلى 20 ثانية.</p>
             )}
           </motion.div>
         </div>

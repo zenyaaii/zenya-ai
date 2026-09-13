@@ -46,7 +46,7 @@ export default function ComingSoon({
         />
 
         <div className="relative">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(94,106,210,0.25)] bg-[rgba(94,106,210,0.06)] px-3.5 py-1.5 text-[12px] font-bold text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(94,106,210,0.25)] bg-[rgba(94,106,210,0.06)] px-3.5 py-1.5 text-[14.5px] font-bold text-primary">
             <Clock className="h-3.5 w-3.5" strokeWidth={2.4} />
             قريبًا · نسخة جديدة كليًا
           </div>
@@ -78,7 +78,7 @@ export default function ComingSoon({
                     <Icon className="h-5 w-5" strokeWidth={2.1} />
                   </div>
                   <div className="mt-3.5 text-[14.5px] font-bold text-foreground">{f.title}</div>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{f.body}</p>
+                  <p className="mt-1 text-[14.5px] leading-relaxed text-muted">{f.body}</p>
                 </motion.div>
               )
             })}
@@ -90,7 +90,7 @@ export default function ComingSoon({
               href={browseHref}
               target={browseTarget}
               rel={browseTarget === '_blank' ? 'noreferrer' : undefined}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[14px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-[14.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02]"
             >
               <Sparkles className="h-4 w-4" strokeWidth={2.2} />
               {browseLabel}
@@ -99,14 +99,14 @@ export default function ComingSoon({
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-5 py-3 text-[14px] font-semibold text-foreground transition hover:bg-black/5"
+                className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-5 py-3 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
               >
                 <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
               </button>
             )}
           </div>
 
-          <div className="mt-7 flex items-center gap-2 border-t border-token pt-6 text-[12.5px] text-muted">
+          <div className="mt-7 flex items-center gap-2 border-t border-token pt-6 text-[14.5px] text-muted">
             <Check className="h-4 w-4 flex-shrink-0 text-[#15803d]" />
             بينما ننهيه، يمكنك بناء أي من قوالب زينيا الثمانية الأخرى الآن — مطاعم، أزياء، خدمات، برمجيات وغيرها.
           </div>

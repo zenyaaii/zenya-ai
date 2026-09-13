@@ -23,7 +23,7 @@ export default function DevFillButton({
       onClick={onFill}
       aria-label={label}
       title="Fill this form with realistic sample data so you can generate quickly."
-      className="fixed bottom-6 left-6 z-30 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 to-violet-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-xl shadow-fuchsia-500/30 ring-2 ring-white/70 transition hover:scale-[1.03]"
+      className="fixed bottom-6 left-6 z-30 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-fuchsia-600 to-violet-600 px-4 py-2.5 text-[14.5px] font-bold uppercase tracking-wider text-white shadow-xl shadow-fuchsia-500/30 ring-2 ring-white/70 transition hover:scale-[1.03]"
     >
       <span aria-hidden>⚡</span>
       {label}
