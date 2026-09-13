@@ -644,6 +644,77 @@ export function welcomeEmail(args: {
   return { subject, text, html }
 }
 
+/** Visitor-typed text goes into the HTML body, so it is escaped first. */
+function esc(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+/**
+ * Sent to a site owner the moment a visitor submits a booking on one of their
+ * sites (app/api/bookings), unless they switched "حجز جديد" off in dashboard
+ * settings. Reply-To is the visitor when they left an email, so answering the
+ * mail answers the customer.
+ */
+export function bookingReceivedEmail(args: {
+  firstName?: string | null
+  siteName: string
+  kind: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  when?: string | null
+  party?: number | null
+  message?: string | null
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://dashboard.zenyaai.co/bookings'
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+  const subject = `${args.kind} جديد من ${args.name} — ${args.siteName}`
+
+  const facts: Array<[string, string]> = [
+    ['الاسم', args.name],
+    ...(args.phone ? [['الهاتف', args.phone] as [string, string]] : []),
+    ...(args.email ? [['البريد', args.email] as [string, string]] : []),
+    ...(args.when ? [['الموعد', args.when] as [string, string]] : []),
+    ...(args.party ? [['عدد الأشخاص', String(args.party)] as [string, string]] : []),
+  ]
+
+  const text = [
+    greeting,
+    '',
+    `وصلك ${args.kind} جديد على موقعك «${args.siteName}».`,
+    '',
+    ...facts.map(([k, v]) => `${k}: ${v}`),
+    ...(args.message ? ['', args.message] : []),
+    '',
+    `كل حجوزاتك: ${manageUrl}`,
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
+      وصلك <strong style="color:#16171b;">${esc(args.kind)}</strong> جديد على موقعك «${esc(args.siteName)}».
+    </p>
+    <table role="presentation" style="width:100%; border-collapse:collapse; margin:0 0 18px;">
+      ${facts.map(([k, v]) => `<tr><td style="padding:6px 0; font-size:15px; color:#8a8a83; white-space:nowrap;">${k}</td><td style="padding:6px 12px 6px 0; font-size:15px; color:#16171b; font-weight:700;">${esc(v)}</td></tr>`).join('')}
+    </table>
+    ${args.message ? `<p style="margin:0 0 22px; padding:12px 14px; background:#f4f4f6; border-radius:10px; font-size:15px; line-height:1.8; color:#5f5f5d;">${esc(args.message)}</p>` : ''}`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'حجز جديد',
+    heading: `${args.kind} من ${esc(args.name)}`,
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'افتح الحجوزات',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن إشعار «حجز جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
 /**
  * Sent once, mid-trial (~day 7), to a free user who still has free
  * generations left but hasn't converted. A gentle "you've still got room —

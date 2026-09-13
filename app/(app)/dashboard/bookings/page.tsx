@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { bookingAccess } from '@/lib/booking-entitlement'
-import BookingsInbox, { type BookingRow, type SiteMap } from '@/components/dashboard/BookingsInbox'
+import BookingsClient, { type BookingRow, type SiteMap } from './BookingsClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,12 +50,5 @@ export default async function BookingsPage() {
 
   const bookings = (bookingsRaw || []) as BookingRow[]
 
-  return (
-    <BookingsInbox
-      access={access}
-      bookings={bookings}
-      sites={sites}
-      hasSites={(themes || []).length > 0}
-    />
-  )
+  return <BookingsClient access={access} bookings={bookings} sites={sites} />
 }

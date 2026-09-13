@@ -24,6 +24,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail, announcementEmail, paymentReceiptEmail } from '../lib/email'
+import { readPrefs, type NotificationPrefs } from '../lib/notification-prefs'
 
 // ── tiny .env.local loader (no dotenv dependency required) ───────────────
 function loadEnv() {
@@ -62,7 +63,7 @@ function admin() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }
 
-type AuthUser = { id: string; email: string; confirmed: boolean; firstName: string | null }
+type AuthUser = { id: string; email: string; confirmed: boolean; firstName: string | null; prefs: NotificationPrefs }
 
 async function listAllUsers(sb: ReturnType<typeof admin>): Promise<AuthUser[]> {
   const out: AuthUser[] = []
@@ -78,6 +79,7 @@ async function listAllUsers(sb: ReturnType<typeof admin>): Promise<AuthUser[]> {
         email: u.email,
         confirmed: !!u.email_confirmed_at,
         firstName: meta.first_name || meta.name || meta.full_name?.split?.(' ')?.[0] || null,
+        prefs: readPrefs(meta.notification_prefs),
       })
     }
     if (data.users.length < 200) break
@@ -101,7 +103,8 @@ async function run() {
   let recipients: { email: string; tmpl: { subject: string; text: string; html: string }; tag: string }[] = []
 
   if (KIND === 'announcement') {
-    recipients = users.map((u) => ({
+    // Product news honours the "تحديثات المنتج" switch in dashboard settings.
+    recipients = users.filter((u) => u.prefs.product).map((u) => ({
       email: u.email,
       tmpl: announcementEmail({ firstName: u.firstName }),
       tag: 'announcement',
