@@ -337,8 +337,7 @@ export default function WellnessWizardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport
-          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
           the dashboard and the accounts portal each dropped in turn. The
           scrim was the expensive half: a backdrop-filter across the viewport
           composites every glyph on the page, which on Arabic costs the
@@ -358,7 +357,7 @@ export default function WellnessWizardPage() {
         </motion.div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm text-red-800">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
             {error}
           </motion.div>
         )}
@@ -404,16 +403,16 @@ export default function WellnessWizardPage() {
             </Field>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
-            <p className="mb-1 text-xs uppercase tracking-[0.22em] text-muted">ساعات العمل</p>
-            <p className="mb-4 text-xs text-muted/80">حدّد أوقات الفتح / الإغلاق لكل يوم. أشِّر على «مغلق» للأيام التي تكون فيها مغلقًا.</p>
+          <div className="mt-6 rounded-2xl border border-token bg-[color:var(--card)] p-5">
+            <p className="mb-1 text-[14.5px] uppercase tracking-[0.22em] text-muted">ساعات العمل</p>
+            <p className="mb-4 text-[14.5px] text-muted/80">حدّد أوقات الفتح / الإغلاق لكل يوم. أشِّر على «مغلق» للأيام التي تكون فيها مغلقًا.</p>
             <div className="divide-y divide-token">
               {form.hours.map((h, idx) => (
                 <div key={h.day} className="flex flex-col gap-2 py-3 sm:grid sm:grid-cols-[110px_1fr_1fr_80px] sm:items-center sm:gap-3">
                   {/* Day + closed toggle: same row on mobile, separate grid cells on sm+ */}
                   <div className="flex items-center justify-between sm:contents">
-                    <span className="text-sm font-medium text-foreground">{h.label}</span>
-                    <label className="flex items-center gap-2 text-xs text-muted sm:order-last sm:justify-end">
+                    <span className="text-[14.5px] font-medium text-foreground">{h.label}</span>
+                    <label className="flex items-center gap-2 text-[14.5px] text-muted sm:order-last sm:justify-end">
                       <input
                         type="checkbox"
                         checked={!!h.closed}
@@ -449,11 +448,11 @@ export default function WellnessWizardPage() {
         <Section title="الجلسات والخدمات" subtitle="حتى جلسة واحدة تكفي. أضف المدّة والسعر حيثما أمكن.">
           <div className="space-y-5">
             {form.treatments.map((t, index) => (
-              <div key={t.id} className="rounded-3xl border border-token bg-elevated/60 p-5">
+              <div key={t.id} className="rounded-2xl border border-token bg-[color:var(--card)] p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted">الجلسة {String(index + 1).padStart(2, '0')}</p>
+                  <p className="text-[14.5px] font-bold uppercase tracking-[0.22em] text-muted">الجلسة {String(index + 1).padStart(2, '0')}</p>
                   {form.treatments.length > 1 && (
-                    <button type="button" onClick={() => removeTreatment(t.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-500">
+                    <button type="button" onClick={() => removeTreatment(t.id)} className="rounded-full border border-token px-3 py-1 text-[14.5px] font-semibold text-muted transition hover:text-[#b91c1c]">
                       إزالة
                     </button>
                   )}
@@ -470,7 +469,7 @@ export default function WellnessWizardPage() {
                 </div>
               </div>
             ))}
-            <button type="button" onClick={addTreatment} className="w-full rounded-2xl border-2 border-dashed border-token py-4 text-sm font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground">
+            <button type="button" onClick={addTreatment} className="w-full rounded-2xl border-2 border-dashed border-token py-4 text-[14.5px] font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground">
               + أضف جلسة أخرى
             </button>
           </div>
@@ -494,14 +493,14 @@ export default function WellnessWizardPage() {
         {/* Team */}
         <Section title="أعضاء الفريق" subtitle="اختياري. أضف أبرز مختصّيك — سيكتب الذكاء الاصطناعي سيرهم إن أعطيتنا تفاصيلهم.">
           {form.team.length === 0 && (
-            <p className="mb-4 text-sm text-muted">لم تُضف أعضاء فريق بعد. تخطَّ هذا وسينشئ الذكاء الاصطناعي سيرًا مبدئية، أو أضف فريقك الحقيقي أدناه.</p>
+            <p className="mb-4 text-[14.5px] text-muted">لم تُضف أعضاء فريق بعد. تخطَّ هذا وسينشئ الذكاء الاصطناعي سيرًا مبدئية، أو أضف فريقك الحقيقي أدناه.</p>
           )}
           <div className="space-y-5">
             {form.team.map((m, index) => (
-              <div key={m.id} className="rounded-3xl border border-token bg-elevated/60 p-5">
+              <div key={m.id} className="rounded-2xl border border-token bg-[color:var(--card)] p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted">المختصّ {String(index + 1).padStart(2, '0')}</p>
-                  <button type="button" onClick={() => removeTeamMember(m.id)} className="rounded-full border border-token px-3 py-1 text-xs font-semibold text-muted transition hover:text-red-500">
+                  <p className="text-[14.5px] font-bold uppercase tracking-[0.22em] text-muted">المختصّ {String(index + 1).padStart(2, '0')}</p>
+                  <button type="button" onClick={() => removeTeamMember(m.id)} className="rounded-full border border-token px-3 py-1 text-[14.5px] font-semibold text-muted transition hover:text-[#b91c1c]">
                     إزالة
                   </button>
                 </div>
@@ -514,7 +513,7 @@ export default function WellnessWizardPage() {
                 </div>
               </div>
             ))}
-            <button type="button" onClick={addTeamMember} className="w-full rounded-2xl border-2 border-dashed border-token py-4 text-sm font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground">
+            <button type="button" onClick={addTeamMember} className="w-full rounded-2xl border-2 border-dashed border-token py-4 text-[14.5px] font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground">
               + أضف عضو فريق
             </button>
           </div>
@@ -546,7 +545,7 @@ export default function WellnessWizardPage() {
               helper="الصورة الكبيرة أعلى صفحتك."
             />
             <div>
-              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+              <label className="mb-2 block text-[14.5px] font-medium text-foreground">
                 صور الاستوديو / المكان (حتى 8)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
@@ -573,7 +572,7 @@ export default function WellnessWizardPage() {
                   key={preset.id}
                   type="button"
                   onClick={() => update('style_preset', preset.id)}
-                  className={`rounded-3xl border-2 p-5 text-left transition ${selected ? 'border-foreground shadow-soft-lg scale-[1.02]' : 'border-token hover:border-foreground/40'}`}
+                  className={`rounded-2xl border-2 p-5 text-left transition ${selected ? 'border-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] scale-[1.02]' : 'border-token hover:border-foreground/40'}`}
                   style={{ background: preset.colors.background, color: preset.colors.text }}
                 >
                   <div className="mb-4 flex gap-2">
@@ -581,9 +580,9 @@ export default function WellnessWizardPage() {
                     <span className="h-5 w-5 rounded-full shadow-sm" style={{ background: preset.colors.accent }} />
                     <span className="h-5 w-5 rounded-full border shadow-sm" style={{ background: preset.colors.surface, borderColor: preset.colors.border }} />
                   </div>
-                  <p className="text-[0.6rem] uppercase tracking-[0.28em]" style={{ color: preset.colors.accent }}>{preset.vibe}</p>
+                  <p className="text-[14.5px] uppercase tracking-[0.28em]" style={{ color: preset.colors.accent }}>{preset.vibe}</p>
                   <p className="mt-2 text-xl font-extrabold" style={{ fontFamily: preset.heading_font }}>{preset.name}</p>
-                  <p className="mt-2 text-xs opacity-75">{preset.description}</p>
+                  <p className="mt-2 text-[14.5px] opacity-75">{preset.description}</p>
                 </button>
               )
             })}
@@ -591,19 +590,19 @@ export default function WellnessWizardPage() {
         </Section>
 
         {/* Sticky CTA */}
-        <div className="sticky bottom-6 z-20 mt-12 overflow-hidden rounded-[28px] border border-token shadow-soft-lg"
+        <div className="sticky bottom-6 z-20 mt-12 overflow-hidden rounded-[28px] border border-token shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]"
           style={{ background: selectedPreset.colors.primary }}
         >
           <div className="flex flex-col items-center justify-between gap-4 p-5 sm:flex-row">
             <div style={{ color: selectedPreset.colors.surface }}>
-              <p className="text-sm font-semibold">جاهز لتوليد موقع العافية الخاص بك.</p>
-              <p className="text-xs opacity-70">سنبني الموقع الفاخر كاملًا وننقلك إلى المعاينة الحيّة.</p>
+              <p className="text-[14.5px] font-semibold">جاهز لتوليد موقع العافية الخاص بك.</p>
+              <p className="text-[14.5px] opacity-70">سنبني الموقع الفاخر كاملًا وننقلك إلى المعاينة الحيّة.</p>
             </div>
             <button
               type="button"
               disabled={loading}
               onClick={startGenerate}
-              className="whitespace-nowrap rounded-xl px-8 py-3.5 text-sm font-bold transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
+              className="whitespace-nowrap rounded-xl px-8 py-3.5 text-[14.5px] font-bold transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
               style={{ background: selectedPreset.colors.accent, color: selectedPreset.id === 'noir' ? '#0e0e0e' : selectedPreset.colors.text }}
             >
               {loading ? 'جارٍ توليد موقعك...' : 'ولّد قالب العافية ←'}
@@ -626,14 +625,14 @@ export default function WellnessWizardPage() {
 }
 
 const inputCls =
-  'w-full rounded-2xl border border-token bg-surface/85 px-4 py-3 text-sm text-foreground placeholder:text-muted/60 focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15'
+  'w-full rounded-2xl border border-token bg-[color:var(--card)]/85 px-4 py-3 text-[14.5px] text-foreground placeholder:text-muted/60 focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15'
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <motion.section {...sectionMotion} className="mb-8 rounded-[32px] border border-token bg-surface/65 p-6 shadow-soft-md backdrop-blur-xl sm:p-8">
+    <motion.section {...sectionMotion} className="mb-8 rounded-[32px] border border-token bg-[color:var(--card)]/65 p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:p-8">
       <div className="mb-5">
         <h2 className="text-xl font-extrabold text-foreground">{title}</h2>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[14.5px] text-muted">{subtitle}</p>}
       </div>
       {children}
     </motion.section>
@@ -643,8 +642,8 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 function Field({ label, required, children, className = '' }: { label: string; required?: boolean; children: React.ReactNode; className?: string }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-        {label}{required && <span className="ms-1 text-red-500">*</span>}
+      <span className="mb-1.5 block text-[14.5px] font-semibold uppercase tracking-[0.18em] text-muted">
+        {label}{required && <span className="ms-1 text-[#b91c1c]">*</span>}
       </span>
       {children}
     </label>

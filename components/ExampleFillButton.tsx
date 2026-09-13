@@ -22,7 +22,7 @@ export default function ExampleFillButton({
         type="button"
         onClick={() => setOpen(true)}
         title="ملء النموذج بمثال جاهز يمكنك تعديله."
-        className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-3 text-sm font-bold text-black shadow-xl shadow-amber-500/30 ring-2 ring-white/70 transition hover:scale-[1.03]"
+        className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-[14.5px] font-bold text-[#171717] shadow-xl shadow-amber-500/30 ring-2 ring-white/70 transition hover:scale-[1.03]"
       >
         <span aria-hidden>✨</span>
         {label}
@@ -34,24 +34,24 @@ export default function ExampleFillButton({
           onClick={() => setOpen(false)}
         >
           <div
-            className="mx-4 w-full max-w-sm rounded-2xl border border-amber-200 bg-white p-6 shadow-2xl"
+            className="mx-4 w-full max-w-sm rounded-2xl border border-[rgba(23,23,23,0.10)] bg-white p-6 shadow-[0_0_0_1px_rgba(23,23,23,0.08)]"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-[15px] font-semibold text-foreground">ملاحظة: سيُحسب من حصتك</p>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-muted">
+            <p className="mt-2 text-[14.5px] leading-relaxed text-muted">
               توليد هذا المثال يستهلك طلبًا واحدًا من حصتك. يمكنك تعديل التفاصيل قبل التوليد
               أو بعده.
             </p>
             <div className="mt-5 flex gap-2">
               <button
                 onClick={handleConfirm}
-                className="flex-1 rounded-full bg-amber-400 py-2.5 text-[13.5px] font-bold text-black transition hover:bg-amber-500"
+                className="flex-1 rounded-full bg-[#171717] py-2.5 text-[14.5px] font-bold text-white transition hover:opacity-90"
               >
                 فهمت — استمر ✨
               </button>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-token bg-background px-4 py-2.5 text-[13.5px] font-medium text-foreground transition hover:bg-black/5"
+                className="rounded-full border border-token bg-background px-4 py-2.5 text-[14.5px] font-medium text-foreground transition hover:bg-black/5"
               >
                 إلغاء
               </button>

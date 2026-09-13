@@ -261,8 +261,7 @@ export default function StudioWizardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport
-          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
           the dashboard and the accounts portal each dropped in turn. The
           scrim was the expensive half: a backdrop-filter across the viewport
           composites every glyph on the page, which on Arabic costs the
@@ -282,7 +281,7 @@ export default function StudioWizardPage() {
         </motion.div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm text-red-800">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
             {error}
           </motion.div>
         )}
@@ -290,77 +289,77 @@ export default function StudioWizardPage() {
         <div className="space-y-8">
 
           {/* ── Brand ──────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">اسم العلامة *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم العلامة *</label>
                 <input
                   value={form.brand_name}
                   onChange={(e) => update('brand_name', e.target.value)}
                   placeholder="مثلاً: صَنعة، أصالة، دار الحِرَف"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
                 <input
                   value={form.brand_tagline}
                   onChange={(e) => update('brand_tagline', e.target.value)}
                   placeholder="مثلاً: صُنع باليد. خُلق ليدوم."
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الفئة *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الفئة *</label>
                 <select
                   value={form.brand_category}
                   onChange={(e) => update('brand_category', e.target.value)}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 >
                   <option value="">اختر الفئة...</option>
                   {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">سنة التأسيس</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">سنة التأسيس</label>
                 <input
                   value={form.brand_founded}
                   onChange={(e) => update('brand_founded', e.target.value)}
                   placeholder="مثلاً: 2017"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">بيان الرسالة *</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">بيان الرسالة *</label>
                 <textarea
                   value={form.mission}
                   onChange={(e) => update('mission', e.target.value)}
                   placeholder="مثلاً: نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى."
                   rows={3}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">قصة المؤسّس</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة المؤسّس</label>
                 <textarea
                   value={form.founder_story}
                   onChange={(e) => update('founder_story', e.target.value)}
                   placeholder="كيف بدأت العلامة؟ ما المشكلة التي كنت تحلّها؟ سيكتب الذكاء الاصطناعي رسالةً مؤثّرة من هذا."
                   rows={3}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
             </div>
           </motion.section>
 
           {/* ── Values ─────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-xl font-black text-foreground">2. القيم الجوهرية</h2>
-              <span className="text-sm text-muted">{form.values.filter(v => v.title.trim()).length}/5</span>
+              <span className="text-[14.5px] text-muted">{form.values.filter(v => v.title.trim()).length}/5</span>
             </div>
-            <p className="mb-5 text-sm text-muted">ما الذي ترفض علامتك المساومة عليه؟ من 1 إلى 5 قيم.</p>
+            <p className="mb-5 text-[14.5px] text-muted">ما الذي ترفض علامتك المساومة عليه؟ من 1 إلى 5 قيم.</p>
             <div className="space-y-3">
               {form.values.map((val, i) => (
                 <div key={val.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
@@ -368,19 +367,19 @@ export default function StudioWizardPage() {
                     value={val.title}
                     onChange={(e) => updateValue(val.id, { title: e.target.value })}
                     placeholder={`القيمة ${i + 1}`}
-                    className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                   />
                   <input
                     value={val.description}
                     onChange={(e) => updateValue(val.id, { description: e.target.value })}
                     placeholder="وصف موجز (اختياري)"
-                    className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                   />
                   <button
                     type="button"
                     onClick={() => removeValue(val.id)}
                     disabled={form.values.length <= 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
                   >
                     ×
                   </button>
@@ -388,37 +387,37 @@ export default function StudioWizardPage() {
               ))}
             </div>
             {form.values.length < 5 && (
-              <button type="button" onClick={addValue} className="mt-4 flex items-center gap-2 text-sm font-semibold text-stone-600 hover:underline">
+              <button type="button" onClick={addValue} className="mt-4 flex items-center gap-2 text-[14.5px] font-semibold text-stone-600 hover:underline">
                 + أضف قيمة
               </button>
             )}
           </motion.section>
 
           {/* ── Process & Timeline ─────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">3. أسلوب العمل والمحطّات</h2>
             <div className="grid gap-5">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">كيف تصنع أشياءك</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">كيف تصنع أشياءك</label>
                 <textarea
                   value={form.process_description}
                   onChange={(e) => update('process_description', e.target.value)}
                   placeholder="مثلاً: كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا."
                   rows={2}
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">خطوات العمل</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">خطوات العمل</label>
                 <input
                   value={form.process_steps}
                   onChange={(e) => update('process_steps', e.target.value)}
                   placeholder="التوريد، التصميم، الصنع, الفحص، الشحن (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-4 block text-sm font-bold text-foreground">المحطّات البارزة (السنة + الحدث)</label>
+                <label className="mb-4 block text-[14.5px] font-bold text-foreground">المحطّات البارزة (السنة + الحدث)</label>
                 <div className="space-y-3">
                   {form.milestones.map((m, i) => (
                     <div key={m.id} className="grid gap-3 sm:grid-cols-[120px_1fr_auto]">
@@ -426,19 +425,19 @@ export default function StudioWizardPage() {
                         value={m.year}
                         onChange={(e) => updateMilestone(m.id, { year: e.target.value })}
                         placeholder="السنة"
-                        className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                        className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                       />
                       <input
                         value={m.event}
                         onChange={(e) => updateMilestone(m.id, { event: e.target.value })}
                         placeholder={`مثلاً: افتتحنا أول ستوديو لنا`}
-                        className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                        className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                       />
                       <button
                         type="button"
                         onClick={() => removeMilestone(m.id)}
                         disabled={form.milestones.length <= 1}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30"
+                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
                       >
                         ×
                       </button>
@@ -446,7 +445,7 @@ export default function StudioWizardPage() {
                   ))}
                 </div>
                 {form.milestones.length < 6 && (
-                  <button type="button" onClick={addMilestone} className="mt-3 flex items-center gap-2 text-sm font-semibold text-stone-600 hover:underline">
+                  <button type="button" onClick={addMilestone} className="mt-3 flex items-center gap-2 text-[14.5px] font-semibold text-stone-600 hover:underline">
                     + أضف محطّة
                   </button>
                 )}
@@ -455,60 +454,60 @@ export default function StudioWizardPage() {
           </motion.section>
 
           {/* ── Credibility ────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-2 text-xl font-black text-foreground">4. المصداقية</h2>
-            <p className="mb-6 text-sm text-muted">الظهور الصحفي وحجم الفريق وأدلّة العملاء تبني الثقة.</p>
+            <p className="mb-6 text-[14.5px] text-muted">الظهور الصحفي وحجم الفريق وأدلّة العملاء تبني الثقة.</p>
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">ظهور في الصحافة</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">ظهور في الصحافة</label>
                 <input
                   value={form.press_features}
                   onChange={(e) => update('press_features', e.target.value)}
                   placeholder="The New York Times, Wallpaper*, Monocle, Vogue Living... (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">حجم الفريق</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">حجم الفريق</label>
                 <input
                   value={form.team_size}
                   onChange={(e) => update('team_size', e.target.value)}
                   placeholder="مثلاً: 9 أشخاص"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">القطع / المنتجات المباعة</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">القطع / المنتجات المباعة</label>
                 <input
                   value={form.customer_count}
                   onChange={(e) => update('customer_count', e.target.value)}
                   placeholder="مثلاً: +42,000 قطعة في البيوت"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">نسبة العملاء المتكرّرين</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نسبة العملاء المتكرّرين</label>
                 <input
                   value={form.repeat_rate}
                   onChange={(e) => update('repeat_rate', e.target.value)}
                   placeholder="مثلاً: 82%"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
                 <input
                   value={form.avg_rating}
                   onChange={(e) => update('avg_rating', e.target.value)}
                   placeholder="مثلاً: 4.97★"
-                  className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
+                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
                 />
               </div>
             </div>
           </motion.section>
 
           {/* ── Style preset ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {STUDIO_PRESETS.map((preset) => {
@@ -519,13 +518,13 @@ export default function StudioWizardPage() {
                     type="button"
                     onClick={() => update('style_preset', preset.id)}
                     className={`rounded-2xl border p-4 text-left transition-all ${
-                      selected ? 'border-stone-500 ring-1 ring-stone-500 bg-stone-500/5' : 'border-token bg-surface hover:border-stone-300'
+                      selected ? 'border-stone-500 ring-1 ring-stone-500 bg-stone-500/5' : 'border-token bg-[color:var(--card)] hover:border-stone-300'
                     }`}
                   >
                     <div className="mb-3 h-10 w-full overflow-hidden rounded-xl ring-1 ring-black/5" style={{ background: preset.colors.gradient }} />
-                    <p className={`text-xs font-black ${selected ? 'text-stone-700' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[11px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[10px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.accent : '#94a3b8' }}>
+                    <p className={`text-[14.5px] font-black ${selected ? 'text-stone-700' : 'text-foreground'}`}>{preset.name}</p>
+                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
+                    <p className="mt-2 text-[14.5px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.accent : '#94a3b8' }}>
                       {preset.vibe}
                     </p>
                   </button>
@@ -549,7 +548,7 @@ export default function StudioWizardPage() {
               )}
             </button>
             {loading && (
-              <p className="text-sm text-muted">يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك واقتباساتك الصحفية — نحو 15 إلى 20 ثانية.</p>
+              <p className="text-[14.5px] text-muted">يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك واقتباساتك الصحفية — نحو 15 إلى 20 ثانية.</p>
             )}
           </motion.div>
         </div>

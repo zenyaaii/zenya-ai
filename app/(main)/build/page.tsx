@@ -348,7 +348,7 @@ export default function BuildPage() {
     return (
       <div className="min-h-screen bg-[var(--background)]">
         <header className="border-b border-token bg-white">
-          <div className="mx-auto flex max-w-6xl items-center gap-2 px-6 py-4 text-[14px] font-semibold text-foreground">
+          <div className="mx-auto flex max-w-6xl items-center gap-2 px-6 py-4 text-[14.5px] font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             متجر المنتج الواحد
           </div>
@@ -364,11 +364,11 @@ export default function BuildPage() {
     <div className="min-h-screen bg-[var(--background)]">
       <header className="border-b border-token bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
+          <div className="flex items-center gap-2 text-[14.5px] font-semibold text-foreground">
             <Sparkles className="h-4 w-4 text-primary" />
             أنشئ متجر منتج واحد
           </div>
-          <div className="text-[12.5px] text-muted">
+          <div className="text-[14.5px] text-muted">
             الخطوة {step} من 4 · {STEP_LABELS[step].name}
           </div>
         </div>
@@ -380,7 +380,7 @@ export default function BuildPage() {
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         {shopifyError && (
-          <div className="mb-6 flex items-start gap-2 rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-4 py-3 text-[12.5px] text-[#b91c1c]">
+          <div className="mb-6 flex items-start gap-2 rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-4 py-3 text-[14.5px] text-[#b91c1c]">
             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>
               تعذّر إكمال الربط مع Shopify. أغلِق نافذة Shopify وحاول الضغط على «اتصال» مرة أخرى.
@@ -389,7 +389,7 @@ export default function BuildPage() {
             <button
               type="button"
               onClick={() => setShopifyError(null)}
-              className="ms-auto flex-shrink-0 text-[11px] font-semibold text-[#b91c1c] underline-offset-2 hover:underline"
+              className="ms-auto flex-shrink-0 text-[14.5px] font-semibold text-[#b91c1c] underline-offset-2 hover:underline"
             >
               إخفاء
             </button>
@@ -523,7 +523,7 @@ function StepNav({ step, onJump }: { step: Step; onJump: (s: Step) => void }) {
                 onClick={() => done && onJump(s)}
                 disabled={!done}
                 className={
-                  'flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ' +
+                  'flex items-center gap-2 rounded-full px-3 py-1.5 text-[14.5px] font-semibold transition ' +
                   (active
                     ? 'bg-primary text-white shadow-sm'
                     : done
@@ -533,7 +533,7 @@ function StepNav({ step, onJump }: { step: Step; onJump: (s: Step) => void }) {
               >
                 <span
                   className={
-                    'flex h-5 w-5 items-center justify-center rounded-full text-[10.5px] font-bold ' +
+                    'flex h-5 w-5 items-center justify-center rounded-full text-[14.5px] font-bold ' +
                     (active
                       ? 'bg-white/20 text-white'
                       : done
@@ -577,14 +577,14 @@ function UrlStep({
   return (
     <div className="mx-auto max-w-2xl">
       {/* Store question — sets expectations before the wizard begins */}
-      <div className="mb-5 rounded-3xl border border-token bg-white p-6 shadow-sm">
+      <div className="mb-5 rounded-2xl border border-token bg-white p-6 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
             <Store className="h-5 w-5 text-primary" strokeWidth={2.1} />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-[16px] font-bold text-foreground">هل لديك متجر Shopify؟</h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-muted">
+            <p className="mt-1 text-[14.5px] leading-relaxed text-muted">
               إن كان لديك متجر، فأسهل طريقة أن تربط زينيا به — سنثبّت القالب وننشئ المنتج
               تلقائيًا بنقرة واحدة في نهاية الخطوات، دون أي رفع يدوي.
             </p>
@@ -594,14 +594,14 @@ function UrlStep({
                 <button
                   type="button"
                   onClick={() => setHasStore('yes')}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
                 >
                   <Store className="h-4 w-4" /> نعم، لديّ متجر
                 </button>
                 <button
                   type="button"
                   onClick={() => setHasStore('no')}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
                 >
                   لا، سأكمل هنا
                 </button>
@@ -609,7 +609,7 @@ function UrlStep({
             )}
 
             {hasStore === 'yes' && (
-              <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-3.5 text-[12.5px]">
+              <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-3.5 text-[14.5px]">
                 <div className="flex items-center gap-1.5 font-semibold text-foreground">
                   <Upload className="h-4 w-4 text-[#15803d]" /> رائع — سنربط متجرك في الخطوة الأخيرة
                 </div>
@@ -620,7 +620,7 @@ function UrlStep({
                 <button
                   type="button"
                   onClick={() => setHasStore(null)}
-                  className="mt-1.5 text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+                  className="mt-1.5 text-[14.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
                 >
                   → تغيير الإجابة
                 </button>
@@ -628,7 +628,7 @@ function UrlStep({
             )}
 
             {hasStore === 'no' && (
-              <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3.5 text-[12.5px]">
+              <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3.5 text-[14.5px]">
                 <p className="leading-relaxed text-muted">
                   لا مشكلة — أكمل هنا وسنولّد لك قالبًا كاملاً تنزّله كملف ‎.zip‎ جاهز لـ Shopify.
                   تحتاج متجرًا لاحقًا؟ ابدأ تجربة Shopify مجانية وعُد لرفعه بنقرة.
@@ -638,14 +638,14 @@ function UrlStep({
                     href={shopifyAffiliate}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[12.5px] font-semibold text-white transition hover:scale-[1.02]"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
                   >
                     ابدأ تجربة Shopify المجانية <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                   <button
                     type="button"
                     onClick={() => setHasStore(null)}
-                    className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+                    className="text-[14.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
                   >
                     → تغيير الإجابة
                   </button>
@@ -656,14 +656,14 @@ function UrlStep({
         </div>
       </div>
 
-      <div className="rounded-3xl border border-token bg-white p-10 shadow-sm">
+      <div className="rounded-2xl border border-token bg-white p-10 shadow-sm">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
           <Link2 className="h-5 w-5 text-primary" strokeWidth={2.2} />
         </div>
         <h1 className="mt-5 text-[26px] font-bold text-foreground">
           ابدأ برابط منتج
         </h1>
-        <p className="mt-2 text-[14px] text-muted">
+        <p className="mt-2 text-[14.5px] text-muted">
           الصق أي رابط منتج — Shopify أو AliExpress أو Amazon أو متجر مستقل، من أي مكان. نستخرج الاسم
           والصور والوصف والسعر حتى لا تضطر لإعادة كتابة أي شيء.
         </p>
@@ -680,13 +680,13 @@ function UrlStep({
               value={url}
               onChange={(e) => onUrl(e.target.value)}
               placeholder="https://example.com/products/cool-thing"
-              className="w-full rounded-full border border-token bg-surface py-3 pl-10 pr-4 text-[14px] text-foreground outline-none transition focus:border-primary"
+              className="w-full rounded-full border border-token bg-[color:var(--card)] py-3 pl-10 pr-4 text-[14.5px] text-foreground outline-none transition focus:border-primary"
             />
           </div>
           <button
             type="submit"
             disabled={analyzing || !url.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-[14px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-[14.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             {analyzing ? (
               <>
@@ -703,14 +703,14 @@ function UrlStep({
         </form>
 
         {error && (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+          <div className="mt-4 flex items-start gap-2 rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[14.5px] text-[#b91c1c]">
             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {analyzing && !error && (
-          <div className="mt-6 space-y-2 text-[12.5px] text-muted">
+          <div className="mt-6 space-y-2 text-[14.5px] text-muted">
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
               جارٍ جلب صفحة المنتج…
@@ -726,7 +726,7 @@ function UrlStep({
           </div>
         )}
 
-        <div className="mt-8 rounded-xl border border-token bg-[#fafaf7] p-4 text-[12.5px] text-muted">
+        <div className="mt-8 rounded-xl border border-token bg-[#fafaf7] p-4 text-[14.5px] text-muted">
           <strong className="text-foreground">نصيحة:</strong> صفحات منتجات Shopify تمنحنا أفضل
           البيانات. ونتعامل أيضًا مع AliExpress وAmazon وأي واجهة متجر تنشر بيانات منتج بصيغة
           Open Graph أو JSON-LD.
@@ -776,7 +776,7 @@ function ProductStep(props: {
         <h1 className="text-[22px] font-bold text-foreground">
           خصّصه
         </h1>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[14.5px] text-muted">
           اختر {MIN_IMAGES} صور على الأقل، وحسّن اسم المنتج، وأضف تفاصيل متجرك.
         </p>
       </header>
@@ -787,11 +787,11 @@ function ProductStep(props: {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-primary" />
-              <h2 className="text-[14px] font-semibold text-foreground">اختر صورك</h2>
+              <h2 className="text-[14.5px] font-semibold text-foreground">اختر صورك</h2>
             </div>
             <div
               className={
-                'rounded-full px-2.5 py-1 text-[11px] font-semibold ' +
+                'rounded-full px-2.5 py-1 text-[14.5px] font-semibold ' +
                 (minOk
                   ? 'bg-[rgba(21,128,61,0.10)] text-[#15803d]'
                   : 'bg-[rgba(94,106,210,0.10)] text-primary')
@@ -800,12 +800,12 @@ function ProductStep(props: {
               {selectedCount} من {MIN_IMAGES} كحد أدنى{minOk ? ' ✓' : ''}
             </div>
           </div>
-          <p className="mt-1 text-[12px] text-muted">
+          <p className="mt-1 text-[14.5px] text-muted">
             أول صورة تختارها تصبح الصورة الرئيسية. انقر للتبديل.
           </p>
 
           {scraped.images.length === 0 ? (
-            <div className="mt-4 rounded-xl border border-dashed border-token bg-[#fafaf7] p-6 text-center text-[12.5px] text-muted">
+            <div className="mt-4 rounded-xl border border-dashed border-token bg-[#fafaf7] p-6 text-center text-[14.5px] text-muted">
               لم نجد صورًا في تلك الصفحة. جرّب رابط منتج آخر.
             </div>
           ) : (
@@ -828,7 +828,7 @@ function ProductStep(props: {
                     <Image src={src} alt="" fill sizes="160px" className="object-cover" unoptimized />
                     {isSelected && (
                       <div className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md">
-                        <span className="text-[11px] font-bold">{sel + 1}</span>
+                        <span className="text-[14.5px] font-bold">{sel + 1}</span>
                       </div>
                     )}
                   </button>
@@ -842,7 +842,7 @@ function ProductStep(props: {
         <section className="lg:col-span-2 space-y-4">
           {/* Product name + AI gen */}
           <div className="rounded-2xl border border-token bg-white p-5">
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <label className="block text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
               اسم المنتج
             </label>
             <div className="mt-2 flex items-stretch gap-2">
@@ -850,14 +850,14 @@ function ProductStep(props: {
                 value={productName}
                 onChange={(e) => onProductName(e.target.value)}
                 placeholder="اسم منتجك"
-                className="flex-1 rounded-lg border border-token bg-surface px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary"
+                className="flex-1 rounded-lg border border-token bg-[color:var(--card)] px-3 py-2.5 text-[14.5px] text-foreground outline-none transition focus:border-primary"
               />
               <button
                 type="button"
                 onClick={onSuggestNames}
                 disabled={aiNaming}
                 title="اقترح أسماء بالذكاء الاصطناعي"
-                className="inline-flex items-center gap-1 rounded-lg border border-token bg-white px-3 py-2.5 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
+                className="inline-flex items-center gap-1 rounded-lg border border-token bg-white px-3 py-2.5 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
               >
                 {aiNaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4 text-primary" />}
                 {aiNaming ? 'يفكّر…' : 'تسمية تلقائية'}
@@ -865,17 +865,17 @@ function ProductStep(props: {
             </div>
 
             {aiNameError && (
-              <div className="mt-2 text-[11.5px] text-[#b91c1c]">{aiNameError}</div>
+              <div className="mt-2 text-[14.5px] text-[#b91c1c]">{aiNameError}</div>
             )}
 
             {aiNames && aiNames.length > 0 && (
               <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3">
-                <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                <div className="flex items-center justify-between text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <span>اقتراحات الذكاء الاصطناعي · انقر للاستخدام</span>
                   <button
                     type="button"
                     onClick={onCloseAiPanel}
-                    className="rounded text-[10px] text-muted hover:text-foreground"
+                    className="rounded text-[14.5px] text-muted hover:text-foreground"
                   >
                     ✕
                   </button>
@@ -886,7 +886,7 @@ function ProductStep(props: {
                       key={n}
                       type="button"
                       onClick={() => onPickName(n)}
-                      className="rounded-full border border-token bg-white px-3 py-1 text-[12px] font-medium text-foreground transition hover:border-primary hover:text-primary"
+                      className="rounded-full border border-token bg-white px-3 py-1 text-[14.5px] font-medium text-foreground transition hover:border-primary hover:text-primary"
                     >
                       {n}
                     </button>
@@ -895,7 +895,7 @@ function ProductStep(props: {
                     type="button"
                     onClick={onSuggestNames}
                     disabled={aiNaming}
-                    className="rounded-full px-3 py-1 text-[11.5px] font-medium text-muted hover:text-foreground"
+                    className="rounded-full px-3 py-1 text-[14.5px] font-medium text-muted hover:text-foreground"
                   >
                     <RefreshCw className="me-1 inline h-3 w-3" />
                     المزيد
@@ -907,57 +907,57 @@ function ProductStep(props: {
 
           {/* Store name */}
           <div className="rounded-2xl border border-token bg-white p-5">
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <label className="block text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
               <Store className="me-1 inline h-3 w-3" /> اسم المتجر
             </label>
             <input
               value={storeName}
               onChange={(e) => onStoreName(e.target.value)}
               placeholder="مثلاً: متجر نور"
-              className="mt-2 w-full rounded-lg border border-token bg-surface px-3 py-2.5 text-[14px] text-foreground outline-none transition focus:border-primary"
+              className="mt-2 w-full rounded-lg border border-token bg-[color:var(--card)] px-3 py-2.5 text-[14.5px] text-foreground outline-none transition focus:border-primary"
             />
-            <p className="mt-1.5 text-[11.5px] text-muted">
+            <p className="mt-1.5 text-[14.5px] text-muted">
               يظهر في الترويسة والسلّة والتذييل.
             </p>
           </div>
 
           {/* Pricing */}
           <div className="rounded-2xl border border-token bg-white p-5">
-            <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <label className="block text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
               <Tag className="me-1 inline h-3 w-3" /> التسعير
             </label>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <div>
-                <div className="mb-1 text-[10.5px] font-medium text-muted">السعر الأصلي</div>
+                <div className="mb-1 text-[14.5px] font-medium text-muted">السعر الأصلي</div>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-muted">$</span>
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14.5px] text-muted">$</span>
                   <input
                     dir="ltr"
                     value={originalPrice}
                     onChange={(e) => onOriginalPrice(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder="99.99"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-token bg-surface py-2.5 pl-7 pr-3 text-[14px] text-foreground outline-none transition focus:border-primary"
+                    className="w-full rounded-lg border border-token bg-[color:var(--card)] py-2.5 pl-7 pr-3 text-[14.5px] text-foreground outline-none transition focus:border-primary"
                   />
                 </div>
               </div>
               <div>
-                <div className="mb-1 text-[10.5px] font-medium text-muted">سعر العرض</div>
+                <div className="mb-1 text-[14.5px] font-medium text-muted">سعر العرض</div>
                 <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-muted">$</span>
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14.5px] text-muted">$</span>
                   <input
                     dir="ltr"
                     value={salePrice}
                     onChange={(e) => onSalePrice(e.target.value.replace(/[^0-9.]/g, ''))}
                     placeholder="49.99"
                     inputMode="decimal"
-                    className="w-full rounded-lg border border-token bg-surface py-2.5 pl-7 pr-3 text-[14px] text-foreground outline-none transition focus:border-primary"
+                    className="w-full rounded-lg border border-token bg-[color:var(--card)] py-2.5 pl-7 pr-3 text-[14.5px] text-foreground outline-none transition focus:border-primary"
                   />
                 </div>
               </div>
             </div>
             {priceDiscount > 0 && (
-              <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[11px] font-semibold text-[#15803d]">
+              <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[14.5px] font-semibold text-[#15803d]">
                 خصم {priceDiscount}٪ يظهر للمتسوّقين
               </div>
             )}
@@ -970,18 +970,18 @@ function ProductStep(props: {
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
         >
           <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
         </button>
-        <div className="text-[12px] text-muted">
+        <div className="text-[14.5px] text-muted">
           {canNext ? 'جاهز لاختيار الألوان' : `تحتاج ${Math.max(0, MIN_IMAGES - selectedCount)} صورة إضافية + الاسم والمتجر وسعر العرض.`}
         </div>
         <button
           type="button"
           onClick={onNext}
           disabled={!canNext}
-          className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+          className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[14.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
         >
           اختر الألوان <ArrowRight className="h-4 w-4 rtl-flip" />
         </button>
@@ -1015,7 +1015,7 @@ function ColorStep({
         <h1 className="text-[22px] font-bold text-foreground">
           اختر مظهر متجرك
         </h1>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[14.5px] text-muted">
           انقر لوحة ألوان — تتحدّث معاينة الهاتف فورًا.
         </p>
       </header>
@@ -1023,7 +1023,7 @@ function ColorStep({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         {/* Sticky phone preview */}
         <div className="lg:col-span-2 lg:sticky lg:top-6 lg:self-start">
-          <div className="rounded-3xl border border-token bg-white p-6 flex flex-col items-center">
+          <div className="rounded-2xl border border-token bg-white p-6 flex flex-col items-center">
             <PhoneMockup
               palette={palette}
               productName={productName}
@@ -1033,11 +1033,11 @@ function ColorStep({
               heroImage={heroImage}
             />
             <div className="mt-4 text-center">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+              <div className="text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                 {VIBE_LABELS[palette.vibe].name}
               </div>
               <div className="mt-0.5 text-[15px] font-bold text-foreground">{palette.name}</div>
-              <div className="mt-1 text-[12px] text-muted">{palette.blurb}</div>
+              <div className="mt-1 text-[14.5px] text-muted">{palette.blurb}</div>
             </div>
           </div>
         </div>
@@ -1047,10 +1047,10 @@ function ColorStep({
           {groups.map((vibe) => (
             <section key={vibe}>
               <div className="mb-3 flex items-baseline justify-between">
-                <h2 className="text-[14px] font-semibold text-foreground">
+                <h2 className="text-[14.5px] font-semibold text-foreground">
                   {VIBE_LABELS[vibe].name}
                 </h2>
-                <span className="text-[11.5px] text-muted">{VIBE_LABELS[vibe].blurb}</span>
+                <span className="text-[14.5px] text-muted">{VIBE_LABELS[vibe].blurb}</span>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {PALETTES.filter((p) => p.vibe === vibe).map((p) => {
@@ -1075,15 +1075,15 @@ function ColorStep({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
         >
           <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
         </button>
-        <div className="text-[12px] text-muted">{palette.name} محدّدة</div>
+        <div className="text-[14.5px] text-muted">{palette.name} محدّدة</div>
         <button
           type="button"
           onClick={onNext}
-          className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[13px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
+          className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-[14.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02]"
         >
           توليد <ArrowRight className="h-4 w-4 rtl-flip" />
         </button>
@@ -1143,7 +1143,7 @@ function PaletteTile({
       {/* SELECTED chip */}
       {active && (
         <div
-          className="absolute end-4 top-4 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
+          className="absolute end-4 top-4 rounded-full px-2 py-0.5 text-[14.5px] font-bold uppercase tracking-[0.14em]"
           style={{
             background: p.primary,
             color: p.primaryFg,
@@ -1155,7 +1155,7 @@ function PaletteTile({
 
       {/* Vibe label */}
       <div
-        className="mt-5 text-[10px] font-bold uppercase tracking-[0.18em]"
+        className="mt-5 text-[14.5px] font-bold uppercase tracking-[0.18em]"
         style={{ color: p.accent }}
       >
         {VIBE_LABELS[p.vibe].name}
@@ -1171,7 +1171,7 @@ function PaletteTile({
 
       {/* Blurb */}
       <div
-        className="mt-2 text-[12.5px] leading-[1.45]"
+        className="mt-2 text-[14.5px] leading-[1.45]"
         style={{ color: p.muted }}
       >
         {p.blurb}
@@ -1213,7 +1213,7 @@ function GenerateStep({
         <h1 className="text-[22px] font-bold text-foreground">
           {downloaded ? 'قالبك جاهز' : 'أنت جاهز للتوليد'}
         </h1>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[14.5px] text-muted">
           {downloaded
             ? 'عاينه أدناه، ثم ادفعه إلى Shopify أو نزّل ملف ‎.zip‎.'
             : 'راجع التصميم، ثم سننشئ قالب Shopify الكامل.'}
@@ -1234,13 +1234,13 @@ function GenerateStep({
           ) : (
             <>
               <div className="rounded-2xl border border-token bg-white p-5">
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                <div className="flex items-center gap-2 text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <ShoppingBag className="h-3 w-3" /> المنتج
                 </div>
                 <div className="mt-2 text-[18px] font-bold text-foreground">{productName || 'منتج بلا اسم'}</div>
-                <div className="mt-1 text-[13px] text-muted">في <strong className="text-foreground">{storeName || 'متجرك'}</strong></div>
+                <div className="mt-1 text-[14.5px] text-muted">في <strong className="text-foreground">{storeName || 'متجرك'}</strong></div>
                 {realReviewCount >= 3 && (
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[14.5px] font-semibold text-[#15803d]">
                     <Check className="h-3 w-3" />
                     {realReviewCount} تقييم حقيقي مستورد{realPhotoCount > 0 ? ` · ${realPhotoCount} صورة من العملاء` : ''}
                     {reviewStats ? ` · ${reviewStats.average.toFixed(1)}★ من ${reviewStats.count.toLocaleString()} تقييم` : ''}
@@ -1250,8 +1250,8 @@ function GenerateStep({
                   <div className="text-[22px] font-bold" style={{ color: palette.primary }}>${price.toFixed(2)}</div>
                   {originalPrice > price && (
                     <>
-                      <div className="text-[13px] text-muted line-through">${originalPrice.toFixed(2)}</div>
-                      <div className="rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[11px] font-semibold text-[#15803d]">
+                      <div className="text-[14.5px] text-muted line-through">${originalPrice.toFixed(2)}</div>
+                      <div className="rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[14.5px] font-semibold text-[#15803d]">
                         وفّر ${(originalPrice - price).toFixed(2)}
                       </div>
                     </>
@@ -1260,12 +1260,12 @@ function GenerateStep({
               </div>
 
               <div className="rounded-2xl border border-token bg-white p-5">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                <div className="text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                   {images.length} صورة محدّدة
                 </div>
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {images.slice(0, 10).map((src) => (
-                    <div key={src} className="relative aspect-square overflow-hidden rounded-lg border border-token bg-surface">
+                    <div key={src} className="relative aspect-square overflow-hidden rounded-lg border border-token bg-[color:var(--card)]">
                       <Image src={src} alt="" fill sizes="80px" className="object-cover" unoptimized />
                     </div>
                   ))}
@@ -1273,7 +1273,7 @@ function GenerateStep({
               </div>
 
               <div className="rounded-2xl border border-token bg-white p-5">
-                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Palette</div>
+                <div className="text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">Palette</div>
                 <div className="mt-2 flex items-center gap-3">
                   <div className="flex">
                     {[palette.bg, palette.surface, palette.primary, palette.accent, palette.fg].map((c, i) => (
@@ -1281,8 +1281,8 @@ function GenerateStep({
                     ))}
                   </div>
                   <div>
-                    <div className="text-[14px] font-bold text-foreground">{palette.name}</div>
-                    <div className="text-[12px] text-muted">{VIBE_LABELS[palette.vibe].name}</div>
+                    <div className="text-[14.5px] font-bold text-foreground">{palette.name}</div>
+                    <div className="text-[14.5px] text-muted">{VIBE_LABELS[palette.vibe].name}</div>
                   </div>
                 </div>
               </div>
@@ -1291,9 +1291,9 @@ function GenerateStep({
         </div>
 
         {/* Preview — always visible so the user can see what they got */}
-        <div className="lg:col-span-2 flex flex-col items-center rounded-3xl border border-token bg-white p-6">
+        <div className="lg:col-span-2 flex flex-col items-center rounded-2xl border border-token bg-white p-6">
           {downloaded && (
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[11px] font-semibold text-[#15803d]">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[rgba(21,128,61,0.10)] px-2.5 py-1 text-[14.5px] font-semibold text-[#15803d]">
               <Check className="h-3 w-3" /> تم التوليد
             </div>
           )}
@@ -1306,11 +1306,11 @@ function GenerateStep({
             heroImage={heroImage}
           />
           <div className="mt-4 text-center">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+            <div className="text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
               {VIBE_LABELS[palette.vibe].name}
             </div>
-            <div className="text-[14px] font-bold text-foreground">{palette.name}</div>
-            <div className="mt-1 text-[11.5px] text-muted">صفحة المنتج · معاينة حيّة</div>
+            <div className="text-[14.5px] font-bold text-foreground">{palette.name}</div>
+            <div className="mt-1 text-[14.5px] text-muted">صفحة المنتج · معاينة حيّة</div>
           </div>
         </div>
       </div>
@@ -1321,7 +1321,7 @@ function GenerateStep({
 
       {/* Generate CTA (pre-download only) */}
       {!downloaded && (
-        <div className="rounded-3xl border border-token bg-white p-8">
+        <div className="rounded-2xl border border-token bg-white p-8">
           <div className="text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <Sparkles className="h-6 w-6 text-primary" />
@@ -1329,7 +1329,7 @@ function GenerateStep({
             <h2 className="mt-4 text-[20px] font-bold text-foreground">
               أنشئ قالب Shopify الكامل
             </h2>
-            <p className="mx-auto mt-2 max-w-md text-[13px] text-muted">
+            <p className="mx-auto mt-2 max-w-md text-[14.5px] text-muted">
               سنولّد كل صفحة وقسم — الواجهة الرئيسية والحزم والعروض الإضافية والتقييمات والأسئلة الشائعة
               وزر الإضافة للسلّة الثابت، وكل شيء — ونسلّمك قالبًا جاهزًا لـ Shopify.
             </p>
@@ -1337,7 +1337,7 @@ function GenerateStep({
               type="button"
               onClick={onGenerate}
               disabled={generating}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-[14px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-[14.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {generating ? (
                 <>
@@ -1352,7 +1352,7 @@ function GenerateStep({
               )}
             </button>
             {generateMsg && generateMsg.startsWith('error:') && (
-              <div className="mx-auto mt-4 max-w-md rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+              <div className="mx-auto mt-4 max-w-md rounded-xl border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[14.5px] text-[#b91c1c]">
                 {generateMsg.slice(6)}
               </div>
             )}
@@ -1365,7 +1365,7 @@ function GenerateStep({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+          className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
         >
           <ArrowLeft className="h-4 w-4 rtl-flip" /> العودة للألوان
         </button>
@@ -1373,7 +1373,7 @@ function GenerateStep({
           <button
             type="button"
             onClick={onGoDashboard}
-            className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+            className="inline-flex items-center gap-1 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
           >
             لوحة التحكم <ArrowRight className="h-4 w-4 rtl-flip" />
           </button>
@@ -1409,7 +1409,7 @@ function HonestyGateModal({
       aria-modal="true"
       aria-label="إشعار بمحتوى مولَّد بالذكاء الاصطناعي"
     >
-      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="border-b border-token bg-[rgba(217,119,6,0.05)] px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(217,119,6,0.12)]">
@@ -1417,7 +1417,7 @@ function HonestyGateModal({
             </div>
             <div>
               <h2 className="text-[16px] font-bold text-foreground">تنبيه — أجزاء من هذا القالب من اختراع الذكاء الاصطناعي</h2>
-              <p className="mt-0.5 text-[12.5px] text-muted">
+              <p className="mt-0.5 text-[14.5px] text-muted">
                 {high.length} يجب إصلاحها · {medium.length} للتحقق منها. أنت وحدك من يجعلها حقيقية قبل الإطلاق.
               </p>
             </div>
@@ -1435,9 +1435,9 @@ function HonestyGateModal({
                     }`}
                   />
                   <div className="min-w-0">
-                    <div className="text-[11.5px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
-                    <div className="mt-0.5 text-[13px] font-semibold text-foreground">{cl.claim}</div>
-                    <div className="mt-1 text-[12px] leading-relaxed text-muted">{cl.why}</div>
+                    <div className="text-[14.5px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
+                    <div className="mt-0.5 text-[14.5px] font-semibold text-foreground">{cl.claim}</div>
+                    <div className="mt-1 text-[14.5px] leading-relaxed text-muted">{cl.why}</div>
                   </div>
                 </div>
               </li>
@@ -1446,7 +1446,7 @@ function HonestyGateModal({
         </div>
 
         <div className="border-t border-token bg-white px-6 py-4">
-          <p className="mb-3 text-[12px] leading-relaxed text-muted">
+          <p className="mb-3 text-[14.5px] leading-relaxed text-muted">
             بالمتابعة، تُقرّ بأن أعداد المخزون وإشعارات المشترين واقتباسات الصحافة ونماذج التقييمات
             وما شابهها في القالب المولَّد هي أمثلة مولَّدة بالذكاء الاصطناعي — وليست معلومات حقيقية —
             وأن مسؤوليتك استبدالها أو التحقق منها قبل النشر.
@@ -1455,7 +1455,7 @@ function HonestyGateModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+              className="rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
             >
               رجوع
             </button>
@@ -1463,7 +1463,7 @@ function HonestyGateModal({
               type="button"
               disabled={sending}
               onClick={() => onAcknowledge(claims.map((c) => c.id))}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-[14.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               فهمت — أكمل
@@ -1507,16 +1507,16 @@ function ClaimsPanel({
             <AlertCircle className="h-4.5 w-4.5 text-[#d97706]" />
           </div>
           <div>
-            <div className="text-[14px] font-bold text-foreground">
+            <div className="text-[14.5px] font-bold text-foreground">
               فحص المصداقية — ما اخترعه الذكاء الاصطناعي
             </div>
-            <div className="mt-0.5 text-[12px] text-muted">
+            <div className="mt-0.5 text-[14.5px] text-muted">
               {high.length} يجب إصلاحها · {medium.length} للتحقق منها قبل الإطلاق. أعداد المخزون وأسماء المشترين
               واقتباسات الصحافة — أمور أنت وحدك من يجعلها حقيقية.
             </div>
           </div>
         </div>
-        <span className="flex-shrink-0 rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-foreground">
+        <span className="flex-shrink-0 rounded-full border border-token bg-white px-3 py-1.5 text-[14.5px] font-semibold text-foreground">
           {open ? 'إخفاء' : 'مراجعة'}
         </span>
       </button>
@@ -1533,15 +1533,15 @@ function ClaimsPanel({
                   aria-label={cl.severity === 'high' ? 'يجب إصلاحها' : 'تحقّق'}
                 />
                 <div className="min-w-0">
-                  <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
-                  <div className="mt-0.5 text-[13px] font-semibold text-foreground">{cl.claim}</div>
-                  <div className="mt-1 text-[12.5px] leading-relaxed text-muted">{cl.why}</div>
-                  <div className="mt-1.5 text-[12.5px] font-medium text-foreground">← {cl.fix}</div>
+                  <div className="text-[14.5px] font-semibold uppercase tracking-[0.08em] text-muted">{cl.location}</div>
+                  <div className="mt-0.5 text-[14.5px] font-semibold text-foreground">{cl.claim}</div>
+                  <div className="mt-1 text-[14.5px] leading-relaxed text-muted">{cl.why}</div>
+                  <div className="mt-1.5 text-[14.5px] font-medium text-foreground">← {cl.fix}</div>
                 </div>
               </div>
             </li>
           ))}
-          <li className="px-1 pt-1 text-[11.5px] text-muted">
+          <li className="px-1 pt-1 text-[14.5px] text-muted">
             تُرفَق هذه القائمة أيضًا داخل القالب كقائمة تحقّق في ملف README.md.
           </li>
         </ul>
@@ -1642,7 +1642,7 @@ function PublishPanel({
             <div className="text-[15px] font-bold text-foreground">
               قالب {productName || 'منتجك'} جاهز
             </div>
-            <p className="mt-0.5 text-[12.5px] text-muted">
+            <p className="mt-0.5 text-[14.5px] text-muted">
               وصل ملف ‎.zip‎ للتو إلى مجلّد التنزيلات. ادفعه إلى Shopify بنقرتين أدناه.
             </p>
           </div>
@@ -1653,8 +1653,8 @@ function PublishPanel({
       <div className="rounded-2xl border border-token bg-white p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-[14px] font-bold text-foreground">ملف القالب ‎.zip‎</div>
-            <div className="mt-0.5 text-[11.5px] text-muted">
+            <div className="text-[14.5px] font-bold text-foreground">ملف القالب ‎.zip‎</div>
+            <div className="mt-0.5 text-[14.5px] text-muted">
               جاهز لـ Shopify · ارفعه من <em>المتجر الإلكتروني ← القوالب ← إضافة قالب</em>.
             </div>
           </div>
@@ -1662,7 +1662,7 @@ function PublishPanel({
             type="button"
             onClick={onGenerate}
             disabled={generating}
-            className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
           >
             {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             إعادة التنزيل
@@ -1673,20 +1673,20 @@ function PublishPanel({
       {/* Path picker */}
       {hasShopify === null && (
         <div className="rounded-2xl border border-token bg-white p-5">
-          <div className="text-[14px] font-bold text-foreground">هل تملك متجر Shopify بعد؟</div>
-          <div className="mt-0.5 text-[12px] text-muted">سنعرض لك الخطوة التالية المناسبة.</div>
+          <div className="text-[14.5px] font-bold text-foreground">هل تملك متجر Shopify بعد؟</div>
+          <div className="mt-0.5 text-[14.5px] text-muted">سنعرض لك الخطوة التالية المناسبة.</div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setHasShopify('yes')}
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
             >
               <Store className="h-4 w-4" /> نعم — لنرفعه
             </button>
             <button
               type="button"
               onClick={() => setHasShopify('no')}
-              className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
             >
               ليس بعد — أرني كيف أبدأ
             </button>
@@ -1697,10 +1697,10 @@ function PublishPanel({
       {/* Has a Shopify store → connect once, then one-click publish */}
       {hasShopify === 'yes' && (
         <div className="rounded-2xl border border-token bg-white p-5">
-          <div className="flex items-center gap-2 text-[14px] font-bold text-foreground">
+          <div className="flex items-center gap-2 text-[14.5px] font-bold text-foreground">
             <Upload className="h-4 w-4 text-primary" /> انشر مباشرةً إلى متجر Shopify الخاص بك
           </div>
-          <div className="mt-1 text-[12px] text-muted">
+          <div className="mt-1 text-[14.5px] text-muted">
             اربط مرة واحدة وتُثبّت زينيا القالب <strong>وتنشئ المنتج</strong> من بيانات
             AliExpress المستخرجة — وتُربط أزرار الشراء به تلقائيًا.
           </div>
@@ -1712,9 +1712,9 @@ function PublishPanel({
                 value={shop}
                 onChange={(e) => { setShop(e.target.value); setConnState('idle'); setPublishResult(null) }}
                 placeholder={storeName ? storeName.toLowerCase().replace(/[^a-z0-9-]+/g, '-') : 'my-store'}
-                className="w-full rounded-lg border border-token bg-surface px-3 py-2.5 pr-32 text-[14px] text-foreground outline-none transition focus:border-primary"
+                className="w-full rounded-lg border border-token bg-[color:var(--card)] px-3 py-2.5 pr-32 text-[14.5px] text-foreground outline-none transition focus:border-primary"
               />
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-muted">
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[14.5px] text-muted">
                 .myshopify.com
               </span>
             </div>
@@ -1724,7 +1724,7 @@ function PublishPanel({
                 disabled={!handle || connState === 'checking' || connState === 'waiting'}
                 onClick={connect}
                 className={
-                  'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold shadow-sm transition ' +
+                  'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14.5px] font-semibold shadow-sm transition ' +
                   (handle ? 'bg-primary text-white hover:scale-[1.02] disabled:opacity-60' : 'cursor-not-allowed bg-primary/40 text-white')
                 }
               >
@@ -1737,22 +1737,22 @@ function PublishPanel({
           </div>
 
           {connState === 'waiting' && (
-            <div className="mt-2 text-[12px] text-muted">
+            <div className="mt-2 text-[14.5px] text-muted">
               وافِق على تطبيق زينيا في التبويب الذي فُتح للتو — تلتقط هذه الشاشة الاتصال تلقائيًا.
             </div>
           )}
           {connError && (
-            <div className="mt-2 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12px] text-[#b91c1c]">
+            <div className="mt-2 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[14.5px] text-[#b91c1c]">
               {connError}
             </div>
           )}
 
           {connState === 'connected' && !publishResult?.ok && (
             <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
-              <div className="flex items-center gap-2 text-[13px] font-semibold text-foreground">
+              <div className="flex items-center gap-2 text-[14.5px] font-semibold text-foreground">
                 <Check className="h-4 w-4 text-[#15803d]" /> تم الاتصال بـ {shopDomain}
               </div>
-              <p className="mt-1 text-[12px] text-muted">
+              <p className="mt-1 text-[14.5px] text-muted">
                 نقرة واحدة تُثبّت القالب (غير منشور، آمن للمعاينة) وتنشئ
                 «{productName || 'منتجك'}» بالصور والأسعار المستخرجة.
               </p>
@@ -1760,7 +1760,7 @@ function PublishPanel({
                 type="button"
                 disabled={publishing}
                 onClick={publish}
-                className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:opacity-60"
+                className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[14.5px] font-semibold text-white shadow-lg shadow-primary/20 transition hover:scale-[1.02] disabled:opacity-60"
               >
                 {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {publishing ? 'جارٍ نشر القالب + المنتج…' : 'انشر القالب + المنتج'}
@@ -1769,17 +1769,17 @@ function PublishPanel({
           )}
 
           {publishResult && !publishResult.ok && (
-            <div className="mt-3 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+            <div className="mt-3 rounded-lg border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[14.5px] text-[#b91c1c]">
               {publishResult.message || 'فشل النشر — حاول مجددًا.'}
             </div>
           )}
 
           {publishResult?.ok && publishResult.theme && (
             <div className="mt-3 rounded-xl border border-[rgba(21,128,61,0.25)] bg-[rgba(21,128,61,0.05)] p-4">
-              <div className="flex items-center gap-2 text-[13.5px] font-bold text-foreground">
+              <div className="flex items-center gap-2 text-[14.5px] font-bold text-foreground">
                 <Check className="h-4 w-4 text-[#15803d]" /> منشور على {shopDomain}
               </div>
-              <p className="mt-1 text-[12px] text-muted">
+              <p className="mt-1 text-[14.5px] text-muted">
                 القالب <strong>{publishResult.theme.name}</strong> مُثبَّت (غير منشور)
                 {publishResult.product ? ' وأُنشئ المنتج' : ''}.
                 {publishResult.theme.processing ? ' يُنهي Shopify المعالجة — امنحه ~30 ثانية.' : ''}
@@ -1787,22 +1787,22 @@ function PublishPanel({
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href={publishResult.theme.previewUrl} target="_blank" rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:scale-[1.02]">
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]">
                   معاينة المتجر <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 <a href={publishResult.theme.editorUrl} target="_blank" rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                  className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5">
                   تخصيص القالب <ExternalLink className="h-3.5 w-3.5" />
                 </a>
                 {publishResult.product && (
                   <a href={publishResult.product.adminUrl} target="_blank" rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5">
                     عرض المنتج <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 )}
                 {publishResult.theme.themesUrl && (
                   <a href={publishResult.theme.themesUrl} target="_blank" rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[12.5px] font-semibold text-foreground transition hover:bg-black/5">
+                    className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5">
                     انشره مباشرةً <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 )}
@@ -1814,23 +1814,23 @@ function PublishPanel({
             <button
               type="button"
               onClick={() => setHasShopify(null)}
-              className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+              className="text-[14.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
             >
               → تغيير الإجابة
             </button>
             <button
               type="button"
               onClick={() => setShowManual((v) => !v)}
-              className="text-[11.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
+              className="text-[14.5px] font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
             >
               {showManual ? 'إخفاء الرفع اليدوي' : 'تفضّل رفع ملف zip يدويًا؟'}
             </button>
           </div>
 
           {showManual && (
-            <ol className="mt-3 space-y-2 border-t border-token pt-3 text-[12.5px] text-foreground">
+            <ol className="mt-3 space-y-2 border-t border-token pt-3 text-[14.5px] text-foreground">
               <li className="flex gap-2">
-                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">1</span>
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[14.5px] font-bold text-white">1</span>
                 <span>
                   افتح{' '}
                   <a className="font-semibold underline" href={adminHref || 'https://admin.shopify.com'} target="_blank" rel="noreferrer">
@@ -1840,7 +1840,7 @@ function PublishPanel({
                 </span>
               </li>
               <li className="flex gap-2">
-                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">2</span>
+                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[14.5px] font-bold text-white">2</span>
                 <span>انقر <strong>تخصيص</strong> — كل قسم قابل للتعديل من هناك.</span>
               </li>
             </ol>
@@ -1851,8 +1851,8 @@ function PublishPanel({
       {/* No Shopify store → affiliate signup */}
       {hasShopify === 'no' && (
         <div className="rounded-2xl border border-token bg-white p-5">
-          <div className="text-[14px] font-bold text-foreground">ابدأ متجرك مجانًا لمدة 3 أيام</div>
-          <div className="mt-1 text-[12.5px] text-muted">
+          <div className="text-[14.5px] font-bold text-foreground">ابدأ متجرك مجانًا لمدة 3 أيام</div>
+          <div className="mt-1 text-[14.5px] text-muted">
             تمنحك تجربة Shopify المجانية متجرًا يعمل. وما إن يجهز، عُد والصق معرّف متجرك، وسننقلك مباشرةً إلى شاشة الرفع.
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -1860,14 +1860,14 @@ function PublishPanel({
               href={shopifyAffiliate}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-5 py-2 text-[13px] font-semibold text-white transition hover:scale-[1.02]"
+              className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-5 py-2 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
             >
               ابدأ تجربة Shopify المجانية <ExternalLink className="h-3.5 w-3.5" />
             </a>
             <button
               type="button"
               onClick={() => setHasShopify('yes')}
-              className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground transition hover:bg-black/5"
+              className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
             >
               في الواقع أملك واحدًا — دعني ألصق معرّف متجري
             </button>

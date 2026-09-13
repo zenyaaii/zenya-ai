@@ -318,7 +318,7 @@ export default function GenerationOverlay({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.4 }}
-                  className="text-sm text-muted"
+                  className="text-[14.5px] text-muted"
                 >
                   {reduce ? 'جارٍ بناء موقعك، لحظات…' : messages[msgIndex]}
                 </motion.p>

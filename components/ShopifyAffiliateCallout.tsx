@@ -33,7 +33,7 @@ export default function ShopifyAffiliateCallout({
         >
           ابدأ تجربة Shopify مجانية
         </a>{' '}
-        <span className="text-xs text-muted">(رابط تابع — نتقاضى عمولة بسيطة)</span>
+        <span className="text-[14.5px] text-muted">(رابط تابع — نتقاضى عمولة بسيطة)</span>
       </span>
     )
   }
@@ -43,17 +43,17 @@ export default function ShopifyAffiliateCallout({
       <div
         className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border border-token bg-white px-4 py-3 ${className}`}
       >
-        <div className="text-sm text-foreground">
+        <div className="text-[14.5px] text-foreground">
           <strong>ألا تملك متجر Shopify بعد؟</strong>{' '}
           <span className="text-muted">أنشئ واحدًا مجانًا، ثم ارفع قالب زينيا.</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-[11px] text-muted sm:inline">رابط تابع · يدعم زينيا</span>
+          <span className="hidden text-[14.5px] text-muted sm:inline">رابط تابع · يدعم زينيا</span>
           <a
             href={href}
             target="_blank"
             rel="sponsored noopener noreferrer"
-            className="rounded-md bg-[#008060] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
+            className="rounded-md bg-[#008060] px-3 py-1.5 text-[14.5px] font-semibold text-white hover:opacity-90"
           >
             ابدأ تجربة مجانية ←
           </a>
@@ -88,10 +88,10 @@ export default function ShopifyAffiliateCallout({
           </svg>
         </div>
         <div>
-          <h3 className="text-sm font-bold text-foreground">
+          <h3 className="text-[14.5px] font-bold text-foreground">
             ألا تملك متجر Shopify بعد؟
           </h3>
-          <p className="mt-1 text-xs text-muted leading-relaxed">
+          <p className="mt-1 text-[14.5px] text-muted leading-relaxed">
             أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب زينيا
             من{' '}
             <strong>المتجر الإلكتروني ← القوالب ← إضافة ← رفع</strong>. يتولّى Shopify
@@ -100,14 +100,14 @@ export default function ShopifyAffiliateCallout({
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
-        <p className="text-[11px] text-muted">
+        <p className="text-[14.5px] text-muted">
           رابط تابع — تتقاضى زينيا عمولة بسيطة، دون أي تكلفة إضافية عليك.
         </p>
         <a
           href={href}
           target="_blank"
           rel="sponsored noopener noreferrer"
-          className="rounded-md bg-[#008060] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+          className="rounded-md bg-[#008060] px-4 py-2 text-[14.5px] font-semibold text-white shadow-sm hover:opacity-90"
         >
           ابدأ تجربة Shopify مجانية ←
         </a>

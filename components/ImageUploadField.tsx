@@ -64,7 +64,7 @@ export default function ImageUploadField({
   return (
     <div className={className}>
       {label && (
-        <label className="mb-1.5 block text-[12.5px] font-medium text-foreground">
+        <label className="mb-1.5 block text-[14.5px] font-medium text-foreground">
           {label}
         </label>
       )}
@@ -90,14 +90,14 @@ export default function ImageUploadField({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="rounded-md bg-white/95 px-2 py-1 text-[11px] font-semibold text-foreground hover:bg-white"
+              className="rounded-md bg-white/95 px-2 py-1 text-[14.5px] font-semibold text-foreground hover:bg-white"
             >
               Replace
             </button>
             <button
               type="button"
               onClick={() => onChange('')}
-              className="rounded-md bg-white/95 px-2 py-1 text-[11px] font-semibold text-[#b91c1c] hover:bg-white"
+              className="rounded-md bg-white/95 px-2 py-1 text-[14.5px] font-semibold text-[#b91c1c] hover:bg-white"
             >
               Remove
             </button>
@@ -118,7 +118,7 @@ export default function ImageUploadField({
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
                 <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
               </svg>
-              <span className="text-[11.5px] font-medium">Uploading…</span>
+              <span className="text-[14.5px] font-medium">Uploading…</span>
             </>
           ) : (
             <>
@@ -127,7 +127,7 @@ export default function ImageUploadField({
               ) : (
                 <Upload className="h-4 w-4" strokeWidth={1.75} />
               )}
-              <span className="text-[11.5px] font-medium">
+              <span className="text-[14.5px] font-medium">
                 {aspect === 'thumb' ? 'Image' : 'Upload image'}
               </span>
             </>
@@ -136,10 +136,10 @@ export default function ImageUploadField({
       )}
 
       {helper && !error && (
-        <p className="mt-1 text-[11.5px] text-muted">{helper}</p>
+        <p className="mt-1 text-[14.5px] text-muted">{helper}</p>
       )}
       {error && (
-        <p className="mt-1 inline-flex items-center gap-1 text-[11.5px] font-medium text-[#b91c1c]">
+        <p className="mt-1 inline-flex items-center gap-1 text-[14.5px] font-medium text-[#b91c1c]">
           <X className="h-3 w-3" /> {error}
         </p>
       )}

@@ -649,8 +649,7 @@ export default function RestaurantWizardPage() {
     <div className="relative min-h-screen w-full overflow-hidden bg-background">
       {/* gradient bg */}
       {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport
-          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
           the dashboard and the accounts portal each dropped in turn. The
           scrim was the expensive half: a backdrop-filter across the viewport
           composites every glyph on the page, which on Arabic costs the
@@ -670,7 +669,7 @@ export default function RestaurantWizardPage() {
         </div>
 
         {restoredDraft && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-[rgba(94,106,210,0.06)] p-4 text-sm text-foreground backdrop-blur">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-token bg-[rgba(94,106,210,0.06)] p-4 text-[14.5px] text-foreground backdrop-blur">
             <div>
               <strong>حفظنا مسوّدتك.</strong>{' '}
               <span className="text-muted">نُكمل من حيث توقّفت.</span>
@@ -678,7 +677,7 @@ export default function RestaurantWizardPage() {
             <button
               type="button"
               onClick={startFresh}
-              className="rounded-full border border-token bg-white px-3 py-1.5 text-[12px] font-semibold text-muted hover:bg-black/5"
+              className="rounded-full border border-token bg-white px-3 py-1.5 text-[14.5px] font-semibold text-muted hover:bg-black/5"
             >
               ابدأ من جديد
             </button>
@@ -686,7 +685,7 @@ export default function RestaurantWizardPage() {
         )}
 
         {error && (
-          <div className="mb-8 rounded-2xl border border-red-300 bg-red-50/80 p-4 text-sm text-red-800 backdrop-blur">
+          <div className="mb-8 rounded-2xl border border-[#b91c1c]/30 bg-[#b91c1c]/[0.07] p-4 text-[14.5px] text-[#b91c1c] backdrop-blur">
             {error}
           </div>
         )}
@@ -712,7 +711,7 @@ export default function RestaurantWizardPage() {
               lighter, morning-energy copy; fine dining is precise and
               quiet; a food truck is direct and punchy. */}
           <div className="mt-6">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+            <p className="mb-2 text-[14.5px] font-semibold uppercase tracking-[0.18em] text-muted">
               ما نوع المكان؟ <span className="text-muted/60">· اختياري</span>
             </p>
             <div className="flex flex-wrap gap-2">
@@ -723,10 +722,10 @@ export default function RestaurantWizardPage() {
                     key={t.id}
                     type="button"
                     onClick={() => update('restaurant_type', selected ? '' : t.id)}
-                    className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12.5px] font-medium transition ${
+                    className={`group inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[14.5px] font-medium transition ${
                       selected
                         ? 'border-foreground bg-foreground text-white shadow-sm'
-                        : 'border-token bg-surface text-foreground hover:border-foreground/40'
+                        : 'border-token bg-[color:var(--card)] text-foreground hover:border-foreground/40'
                     }`}
                   >
                     <Icon name={t.icon} size={16} animation="pop" hover={false} />
@@ -735,7 +734,7 @@ export default function RestaurantWizardPage() {
                 )
               })}
             </div>
-            <p className="mt-2 text-[11.5px] text-muted">
+            <p className="mt-2 text-[14.5px] text-muted">
               يساعد الذكاء الاصطناعي على كتابة نصوص تناسب أجواء مكانك. تخطَّ إن لم يناسبك شيء.
             </p>
           </div>
@@ -752,7 +751,7 @@ export default function RestaurantWizardPage() {
                   key={p.id}
                   onClick={() => update('style_preset', p.id)}
                   className={`group relative overflow-hidden rounded-2xl border-2 p-5 text-left transition ${
-                    selected ? 'border-foreground shadow-soft-lg' : 'border-token hover:border-foreground/40'
+                    selected ? 'border-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]' : 'border-token hover:border-foreground/40'
                   }`}
                   style={{ background: p.colors.background, color: p.colors.text }}
                 >
@@ -761,17 +760,17 @@ export default function RestaurantWizardPage() {
                     <span className="h-6 w-6 rounded-full" style={{ background: p.colors.accent }} />
                     <span className="h-6 w-6 rounded-full border" style={{ background: p.colors.surface, borderColor: p.colors.border }} />
                   </div>
-                  <p className="text-xs uppercase tracking-[0.2em]" style={{ color: p.colors.accent, fontFamily: p.heading_font }}>
+                  <p className="text-[14.5px] uppercase tracking-[0.2em]" style={{ color: p.colors.accent, fontFamily: p.heading_font }}>
                     {p.vibe}
                   </p>
                   <p className="mt-1 text-xl" style={{ fontFamily: p.heading_font, color: p.colors.text }}>
                     {p.name}
                   </p>
-                  <p className="mt-2 text-xs opacity-80" style={{ color: p.colors.muted }}>
+                  <p className="mt-2 text-[14.5px] opacity-80" style={{ color: p.colors.muted }}>
                     {p.description}
                   </p>
                   {selected && (
-                    <span className="absolute end-3 top-3 rounded-full bg-foreground px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
+                    <span className="absolute end-3 top-3 rounded-full bg-foreground px-2 py-0.5 text-[14.5px] font-bold uppercase tracking-wider text-white">
                       محدّد
                     </span>
                   )}
@@ -798,15 +797,15 @@ export default function RestaurantWizardPage() {
             </Field>
           </div>
 
-          <div className="mt-6 rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
-            <p className="mb-4 text-xs uppercase tracking-[0.22em] text-muted">ساعات العمل</p>
+          <div className="mt-6 rounded-2xl border border-token bg-[color:var(--card)] p-5">
+            <p className="mb-4 text-[14.5px] uppercase tracking-[0.22em] text-muted">ساعات العمل</p>
             <div className="divide-y divide-token">
               {form.hours.map((h, idx) => (
                 <div key={h.day} className="flex flex-col gap-2 py-3 sm:grid sm:grid-cols-[110px_1fr_1fr_80px] sm:items-center sm:gap-3">
                   {/* Day + closed toggle: same row on mobile, separate grid cells on sm+ */}
                   <div className="flex items-center justify-between sm:contents">
-                    <span className="text-sm font-medium text-foreground">{h.label}</span>
-                    <label className="flex items-center gap-2 text-xs text-muted sm:order-last sm:justify-end">
+                    <span className="text-[14.5px] font-medium text-foreground">{h.label}</span>
+                    <label className="flex items-center gap-2 text-[14.5px] text-muted sm:order-last sm:justify-end">
                       <input
                         type="checkbox"
                         checked={!!h.closed}
@@ -843,7 +842,7 @@ export default function RestaurantWizardPage() {
           <MenuImageAnalyzer cuisine={form.cuisine} onExtract={applyExtractedMenu} />
           <div className="space-y-5">
             {form.categories.map((cat) => (
-              <div key={cat.id} className="rounded-2xl border border-token bg-elevated/60 p-5 backdrop-blur-md">
+              <div key={cat.id} className="rounded-2xl border border-token bg-[color:var(--card)] p-5">
                 <div className="mb-4 flex items-center gap-3">
                   <input
                     className={inputCls + ' flex-1 font-semibold'}
@@ -855,14 +854,14 @@ export default function RestaurantWizardPage() {
                     <button
                       type="button"
                       onClick={() => removeCategory(cat.id)}
-                      className="rounded-full border border-token bg-surface px-3 py-1.5 text-xs font-semibold text-muted transition hover:border-red-300 hover:text-red-600"
+                      className="rounded-full border border-token bg-[color:var(--card)] px-3 py-1.5 text-[14.5px] font-semibold text-muted transition hover:border-[#b91c1c]/30 hover:text-[#b91c1c]"
                     >
                       إزالة
                     </button>
                   )}
                 </div>
                 <input
-                  className={inputCls + ' mb-4 text-sm'}
+                  className={inputCls + ' mb-4 text-[14.5px]'}
                   value={cat.description}
                   onChange={(e) => updateCategory(cat.id, { description: e.target.value })}
                   placeholder="ملاحظة اختيارية للفئة (مثلاً: «لنبدأ على مهل».)"
@@ -875,7 +874,7 @@ export default function RestaurantWizardPage() {
                     return (
                       <div
                         key={item.id}
-                        className="grid grid-cols-1 gap-3 rounded-xl border bg-surface/40 p-4 sm:grid-cols-[100px_1fr]"
+                        className="grid grid-cols-1 gap-3 rounded-xl border bg-[color:var(--card)]/40 p-4 sm:grid-cols-[100px_1fr]"
                         style={{
                           borderColor: itemValid
                             ? 'rgba(21,128,61,0.25)'
@@ -890,14 +889,14 @@ export default function RestaurantWizardPage() {
                         />
                         <div className="space-y-2">
                           <div className="grid gap-2 sm:grid-cols-[1.5fr_90px_90px_auto]">
-                            <input className={inputCls + ' py-2 text-sm'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="اسم الصنف (مطلوب)" />
-                            <input className={inputCls + ' py-2 text-sm'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24 (مطلوب)" />
-                            <input className={inputCls + ' py-2 text-sm'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="شارة" />
+                            <input className={inputCls + ' py-2 text-[14.5px]'} value={item.name} onChange={(e) => updateItem(cat.id, item.id, { name: e.target.value })} placeholder="اسم الصنف (مطلوب)" />
+                            <input className={inputCls + ' py-2 text-[14.5px]'} value={item.price} onChange={(e) => updateItem(cat.id, item.id, { price: e.target.value })} placeholder="$24 (مطلوب)" />
+                            <input className={inputCls + ' py-2 text-[14.5px]'} value={item.badge} onChange={(e) => updateItem(cat.id, item.id, { badge: e.target.value })} placeholder="شارة" />
                             {cat.items.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => removeItem(cat.id, item.id)}
-                                className="rounded-lg border border-token bg-surface px-2 py-1 text-xs text-muted hover:border-red-300 hover:text-red-600"
+                                className="rounded-lg border border-token bg-[color:var(--card)] px-2 py-1 text-[14.5px] text-muted hover:border-[#b91c1c]/30 hover:text-[#b91c1c]"
                                 aria-label="إزالة الصنف"
                               >
                                 <Icon name="close" size={14} animation="none" hover={false} />
@@ -905,13 +904,13 @@ export default function RestaurantWizardPage() {
                             )}
                           </div>
                           <input
-                            className={inputCls + ' py-2 text-sm'}
+                            className={inputCls + ' py-2 text-[14.5px]'}
                             value={item.description}
                             onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })}
                             placeholder="وصف موجز (اختياري — سيصقله الذكاء الاصطناعي)"
                           />
                           {/* Status — explicit so users see why an item may not save */}
-                          <div className="flex items-center gap-1.5 text-[11px] font-medium">
+                          <div className="flex items-center gap-1.5 text-[14.5px] font-medium">
                             {itemValid ? (
                               <span className="inline-flex items-center gap-1 text-[#15803d]">
                                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#15803d]" />
@@ -947,7 +946,7 @@ export default function RestaurantWizardPage() {
                               [cat.id]: Math.min(shown + ITEMS_BATCH, cat.items.length),
                             }))
                           }
-                          className="inline-flex items-center gap-1.5 rounded-full border border-token bg-elevated px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-surface"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-token bg-[color:var(--card)] px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-[color:var(--card)]"
                         >
                           عرض {Math.min(ITEMS_BATCH, hidden)} صنفًا آخر
                           <span className="text-muted">({hidden} مخفية)</span>
@@ -959,7 +958,7 @@ export default function RestaurantWizardPage() {
                           onClick={() =>
                             setVisibleByCat((v) => ({ ...v, [cat.id]: ITEMS_COLLAPSED }))
                           }
-                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-muted transition hover:text-foreground"
+                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[14.5px] font-semibold text-muted transition hover:text-foreground"
                         >
                           طيّ
                         </button>
@@ -971,7 +970,7 @@ export default function RestaurantWizardPage() {
                 <button
                   type="button"
                   onClick={() => addItem(cat.id)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-token bg-surface px-4 py-2 text-xs font-semibold text-foreground transition hover:bg-elevated"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-token bg-[color:var(--card)] px-4 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-[color:var(--card)]"
                 >
                   + أضف صنفًا
                 </button>
@@ -980,7 +979,7 @@ export default function RestaurantWizardPage() {
             <button
               type="button"
               onClick={addCategory}
-              className="w-full rounded-2xl border-2 border-dashed border-token bg-transparent py-4 text-sm font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground"
+              className="w-full rounded-2xl border-2 border-dashed border-token bg-transparent py-4 text-[14.5px] font-semibold text-muted transition hover:border-foreground/40 hover:text-foreground"
             >
               + أضف فئة للقائمة
             </button>
@@ -1043,7 +1042,7 @@ export default function RestaurantWizardPage() {
         <Section title="الصور" subtitle="ارفع صورك الخاصة. أو تخطَّ — نحن نتكفّل بذلك.">
           {/* Reassurance banner — explicit: no photos? not a problem. */}
           <div
-            className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-elevated/60 p-4 backdrop-blur-md"
+            className="mb-6 flex items-start gap-3 rounded-2xl border border-token bg-[color:var(--card)] p-4"
             style={{ background: 'rgba(94,106,210,0.06)', borderColor: 'rgba(94,106,210,0.25)' }}
           >
             <div
@@ -1052,7 +1051,7 @@ export default function RestaurantWizardPage() {
             >
               <Icon name="sparkles" size={18} animation="none" hover={false} />
             </div>
-            <div className="text-[13px] leading-[1.55] text-foreground">
+            <div className="text-[14.5px] leading-[1.55] text-foreground">
               <strong>لا صور؟ لا تقلق.</strong>{' '}
               <span className="text-muted">
                 اترك أي خانة صورة فارغة وسنملؤها بصور جميلة خالية من الحقوق تناسب{' '}
@@ -1087,7 +1086,7 @@ export default function RestaurantWizardPage() {
             />
 
             <div className="sm:col-span-2">
-              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+              <label className="mb-2 block text-[14.5px] font-medium text-foreground">
                 المعرض (حتى 8)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
@@ -1103,7 +1102,7 @@ export default function RestaurantWizardPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="mb-2 block text-[12.5px] font-medium text-foreground">
+              <label className="mb-2 block text-[14.5px] font-medium text-foreground">
                 صور الأطباق المميّزة (حتى 4)
               </label>
               <div className="grid gap-3 sm:grid-cols-4">
@@ -1131,17 +1130,17 @@ export default function RestaurantWizardPage() {
         </Section>
 
         {/* Submit */}
-        <div className="sticky bottom-6 z-20 mt-12 rounded-3xl border border-token bg-foreground p-5 shadow-soft-lg backdrop-blur-xl">
+        <div className="sticky bottom-6 z-20 mt-12 rounded-2xl border border-token bg-foreground p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="text-white">
-              <p className="text-sm font-semibold">جاهزون متى كنت مستعدًّا.</p>
-              <p className="text-xs opacity-70">يستغرق نحو 20 إلى 40 ثانية. سننقلك إلى معاينتك الحيّة.</p>
+              <p className="text-[14.5px] font-semibold">جاهزون متى كنت مستعدًّا.</p>
+              <p className="text-[14.5px] opacity-70">يستغرق نحو 20 إلى 40 ثانية. سننقلك إلى معاينتك الحيّة.</p>
             </div>
             <button
               type="button"
               disabled={loading}
               onClick={startGenerate}
-              className="rounded-xl bg-[#171717] px-8 py-3.5 text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
+              className="rounded-xl bg-[#171717] px-8 py-3.5 text-[14.5px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
             >
               {loading ? 'جارٍ توليد موقعك…' : 'ولّد موقعي'}
             </button>
@@ -1160,14 +1159,14 @@ export default function RestaurantWizardPage() {
 }
 
 const inputCls =
-  'w-full rounded-xl border border-token bg-surface/80 px-4 py-3 text-sm text-foreground placeholder:text-muted/60 backdrop-blur-md focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15'
+  'w-full rounded-xl border border-token bg-[color:var(--card)] px-4 py-3 text-[14.5px] text-foreground placeholder:text-muted/60 focus:border-foreground focus:outline-none focus:ring-2 focus:ring-foreground/15'
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section className="mb-8 rounded-3xl border border-token bg-surface/60 p-6 shadow-soft-md backdrop-blur-xl sm:p-8">
+    <section className="mb-8 rounded-2xl border border-token bg-[color:var(--card)] p-6 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:p-8">
       <div className="mb-5">
         <h2 className="text-xl font-extrabold text-foreground">{title}</h2>
-        {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+        {subtitle && <p className="mt-1 text-[14.5px] text-muted">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -1177,9 +1176,9 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 function Field({ label, required, children, className = '' }: { label: string; required?: boolean; children: React.ReactNode; className?: string }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+      <span className="mb-1.5 block text-[14.5px] font-semibold uppercase tracking-[0.18em] text-muted">
         {label}
-        {required && <span className="ms-1 text-red-500">*</span>}
+        {required && <span className="ms-1 text-[#b91c1c]">*</span>}
       </span>
       {children}
     </label>

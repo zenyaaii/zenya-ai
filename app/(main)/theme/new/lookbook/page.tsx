@@ -246,8 +246,7 @@ export default function LookbookWizardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport
-          backdrop-blur-2xl scrim over them — the aurora the marketing site,
+          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
           the dashboard and the accounts portal each dropped in turn. The
           scrim was the expensive half: a backdrop-filter across the viewport
           composites every glyph on the page, which on Arabic costs the
@@ -267,7 +266,7 @@ export default function LookbookWizardPage() {
         </motion.div>
 
         {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-3xl border border-red-200 bg-red-50/90 p-4 text-sm text-red-800">
+          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
             {error}
           </motion.div>
         )}
@@ -275,50 +274,50 @@ export default function LookbookWizardPage() {
         <div className="space-y-8">
 
           {/* ── Brand ──────────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">اسم العلامة *</label>
-                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: وَقار، نُهى، صفاء" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم العلامة *</label>
+                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: وَقار، نُهى، صفاء" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الشعار *</label>
-                <input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: ارتدي ما يليق بك." className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
+                <input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: ارتدي ما يليق بك." className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">فئة العلامة *</label>
-                <select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">فئة العلامة *</label>
+                <select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
                   <option value="">اختر الفئة...</option>
                   {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">العميل المستهدف *</label>
-                <input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="مثلاً: نساء محترفات بين 28 و45 يقدّرن الجودة على الكمية" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">العميل المستهدف *</label>
+                <input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="مثلاً: نساء محترفات بين 28 و45 يقدّرن الجودة على الكمية" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">التوجّه التصميمي *</label>
-                <textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية. لوحة ألوان محايدة دافئة وعاجية وأخضر غابي." rows={3} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">التوجّه التصميمي *</label>
+                <textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية. لوحة ألوان محايدة دافئة وعاجية وأخضر غابي." rows={3} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">قصة العلامة</label>
-                <textarea value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="أخبرنا قصة البداية أو القيم التأسيسية أو ما يميّز العلامة. سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا»." rows={4} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة العلامة</label>
+                <textarea value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="أخبرنا قصة البداية أو القيم التأسيسية أو ما يميّز العلامة. سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا»." rows={4} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
             </div>
           </motion.section>
 
           {/* ── Collection ─────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">2. التشكيلة</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">اسم التشكيلة</label>
-                <input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="مثلاً: تشكيلة الوقار" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم التشكيلة</label>
+                <input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="مثلاً: تشكيلة الوقار" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">الموسم</label>
-                <select value={form.collection_season} onChange={(e) => update('collection_season', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الموسم</label>
+                <select value={form.collection_season} onChange={(e) => update('collection_season', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
                   {['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'ريزورت 2025', 'أعياد 2025'].map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
@@ -326,35 +325,35 @@ export default function LookbookWizardPage() {
           </motion.section>
 
           {/* ── Products ───────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-black text-foreground">3. المنتجات</h2>
-              <span className="text-sm text-muted">{form.products.filter((p) => p.name.trim()).length}/8</span>
+              <span className="text-[14.5px] text-muted">{form.products.filter((p) => p.name.trim()).length}/8</span>
             </div>
-            <p className="mb-5 text-sm text-muted">حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.</p>
+            <p className="mb-5 text-[14.5px] text-muted">حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.</p>
             <div className="space-y-3">
               {form.products.map((product, i) => (
                 <div key={product.id} className="grid gap-3 sm:grid-cols-[2fr_1fr_1.2fr_auto]">
-                  <input value={product.name} onChange={(e) => updateProduct(product.id, { name: e.target.value })} placeholder={`اسم المنتج ${i + 1}`} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                  <input value={product.price} onChange={(e) => updateProduct(product.id, { price: e.target.value })} placeholder="السعر (مثلاً: 245$)" className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                  <select value={product.category} onChange={(e) => updateProduct(product.id, { category: e.target.value })} className="rounded-xl border border-token bg-surface px-4 py-2.5 text-sm text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
+                  <input value={product.name} onChange={(e) => updateProduct(product.id, { name: e.target.value })} placeholder={`اسم المنتج ${i + 1}`} className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                  <input value={product.price} onChange={(e) => updateProduct(product.id, { price: e.target.value })} placeholder="السعر (مثلاً: 245$)" className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                  <select value={product.category} onChange={(e) => updateProduct(product.id, { category: e.target.value })} className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
                     {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <button type="button" onClick={() => removeProduct(product.id)} disabled={form.products.length <= 1} className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-red-50 hover:text-red-500 disabled:opacity-30">×</button>
+                  <button type="button" onClick={() => removeProduct(product.id)} disabled={form.products.length <= 1} className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30">×</button>
                 </div>
               ))}
             </div>
             {form.products.length < 8 && (
-              <button type="button" onClick={addProduct} className="mt-4 text-sm font-semibold text-stone-600 hover:underline">
+              <button type="button" onClick={addProduct} className="mt-4 text-[14.5px] font-semibold text-stone-600 hover:underline">
                 + أضف منتجًا آخر
               </button>
             )}
           </motion.section>
 
           {/* ── Visual assets ──────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-2 text-xl font-black text-foreground">4. الأصول البصرية</h2>
-            <p className="mb-5 text-sm text-muted">ارفع صورك التحريرية وصور المنتجات — ستظهر في اللوك بوك وتُحفَظ أيضًا في معرضك لإعادة استخدامها لاحقًا. تخطَّ أي خانة وسنملؤها بصورة بديلة منتقاة.</p>
+            <p className="mb-5 text-[14.5px] text-muted">ارفع صورك التحريرية وصور المنتجات — ستظهر في اللوك بوك وتُحفَظ أيضًا في معرضك لإعادة استخدامها لاحقًا. تخطَّ أي خانة وسنملؤها بصورة بديلة منتقاة.</p>
             <div className="grid gap-5">
               <ImageUploadField
                 label="الصورة الرئيسية"
@@ -364,7 +363,7 @@ export default function LookbookWizardPage() {
                 helper="الصورة الكبيرة أعلى الصفحة."
               />
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">معرض اللوك بوك (حتى 8)</label>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">معرض اللوك بوك (حتى 8)</label>
                 <div className="grid gap-3 sm:grid-cols-4">
                   {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                     <ImageUploadField
@@ -380,42 +379,42 @@ export default function LookbookWizardPage() {
           </motion.section>
 
           {/* ── Social proof & Press ───────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">5. المصداقية</h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">عدد التقييمات</label>
-                <input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد التقييمات</label>
+                <input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">متوسط التقييم</label>
-                <select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
+                <select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
                   {['5.0', '4.9', '4.8', '4.7'].map((r) => <option key={r} value={r}>{r} ★</option>)}
                 </select>
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-sm font-bold text-foreground">ظهور في الصحافة</label>
-                <input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي، الجميلة" className="w-full rounded-xl border border-token bg-surface px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                <p className="mt-1 text-xs text-muted">مفصولة بفواصل. اتركها فارغة وسيستخدم الذكاء الاصطناعي قيمًا افتراضية ملائمة للأزياء.</p>
+                <label className="mb-2 block text-[14.5px] font-bold text-foreground">ظهور في الصحافة</label>
+                <input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي، الجميلة" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
+                <p className="mt-1 text-[14.5px] text-muted">مفصولة بفواصل. اتركها فارغة وسيستخدم الذكاء الاصطناعي قيمًا افتراضية ملائمة للأزياء.</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="flex cursor-pointer items-center gap-3">
                   <input type="checkbox" checked={form.sustainability_focus} onChange={(e) => update('sustainability_focus', e.target.checked)} className="h-4 w-4 rounded text-stone-600" />
-                  <span className="text-sm font-semibold text-foreground">أبرِز الاستدامة / الإنتاج الأخلاقي في قصة العلامة</span>
+                  <span className="text-[14.5px] font-semibold text-foreground">أبرِز الاستدامة / الإنتاج الأخلاقي في قصة العلامة</span>
                 </label>
               </div>
             </div>
           </motion.section>
 
           {/* ── Style preset ───────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-3xl border border-token bg-elevated/70 p-8 shadow-soft-md backdrop-blur-md">
+          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
             <h2 className="mb-6 text-xl font-black text-foreground">6. النمط البصري</h2>
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               {LOOKBOOK_PRESETS.map((preset) => {
                 const selected = form.style_preset === preset.id
                 return (
                   <button key={preset.id} type="button" onClick={() => update('style_preset', preset.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${selected ? 'border-stone-800 ring-1 ring-stone-800 bg-stone-50' : 'border-token bg-surface hover:border-stone-400'}`}
+                    className={`rounded-2xl border p-4 text-left transition-all ${selected ? 'border-stone-800 ring-1 ring-stone-800 bg-stone-50' : 'border-token bg-[color:var(--card)] hover:border-stone-400'}`}
                   >
                     <div className="mb-3 h-12 w-full overflow-hidden rounded-xl" style={{ background: preset.colors.background, border: `2px solid ${preset.colors.border}` }}>
                       <div className="flex h-full">
@@ -423,9 +422,9 @@ export default function LookbookWizardPage() {
                         <div className="h-full w-1/3" style={{ background: preset.colors.primary }} />
                       </div>
                     </div>
-                    <p className={`text-xs font-black ${selected ? 'text-stone-900' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[11px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-stone-400">{preset.vibe}</p>
+                    <p className={`text-[14.5px] font-black ${selected ? 'text-stone-900' : 'text-foreground'}`}>{preset.name}</p>
+                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
+                    <p className="mt-2 text-[14.5px] font-semibold uppercase tracking-wider text-stone-400">{preset.vibe}</p>
                   </button>
                 )
               })}
@@ -443,7 +442,7 @@ export default function LookbookWizardPage() {
                 <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد موقع اللوك بوك</>
               )}
             </button>
-            {loading && <p className="text-sm text-muted">يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية.</p>}
+            {loading && <p className="text-[14.5px] text-muted">يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية.</p>}
           </motion.div>
         </div>
       </main>
