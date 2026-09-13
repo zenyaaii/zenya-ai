@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 
 export type NavItem = { href: string; label: string; here?: boolean }
 
@@ -95,7 +96,7 @@ export default function Header({
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
           <Link href="/" aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
-          <Link href="/login?mode=signup" className="zx-account zx-account-phone">ابدأ</Link>
+          <AccountControl className="zx-account zx-account-phone" />
         </div>
         <div className="zx-drawer" data-open={menuOpen ? "true" : undefined}
           style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -126,7 +127,7 @@ export default function Header({
           </nav>
           <span className="zx-side zx-side-end">
             <span className="zx-sep" aria-hidden />
-            <Link href="/login?mode=signup" className="zx-account">ابدأ</Link>
+            <AccountControl className="zx-account" />
           </span>
         </div>
       </div>

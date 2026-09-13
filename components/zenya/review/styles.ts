@@ -78,11 +78,11 @@ export const CSS = `
 }
 @media (prefers-reduced-transparency: reduce) { .zr-pill, .zr-phone-pill { background: #f2f2f5; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .zr-pill, .zr-phone-pill { background: #f2f2f5; } }
-.zr-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
-.zr-side { display: flex; align-items: center; min-width: 0; }
+.zr-bar { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
+.zr-side { display: flex; align-items: center; flex-shrink: 0; }
 .zr-side-start { justify-content: flex-start; }
 .zr-side-end { justify-content: flex-end; }
-.zr-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
+.zr-mark { display: flex; align-items: center; padding: 0 0.25rem; flex-shrink: 0; }
 .zr-mark-svg { height: 17px; color: #000; }
 .zr-head[data-dark] .zr-pill, .zr-head[data-dark] .zr-phone-pill {
   background: rgba(32,32,38,0.72);

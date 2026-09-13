@@ -58,6 +58,7 @@ import { authErrorMessage } from "@/lib/auth-errors"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import PricingFooter from "../pricing/PricingFooter"
 import { CSS } from "./styles"
@@ -445,7 +446,7 @@ export default function AccessView({
             <Link href="/" aria-label="زينيا" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
             {/* The set's own end control, unchanged. On this page it doubles as
                 the exit to the real thing, which is where it already pointed. */}
-            <Link href="/login?mode=signup" className="za-account za-account-phone">ابدأ</Link>
+            <AccountControl className="za-account za-account-phone" />
           </div>
           <div className="za-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -471,7 +472,7 @@ export default function AccessView({
             </nav>
             <span className="za-side za-side-end">
               <span className="za-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="za-account">ابدأ</Link>
+              <AccountControl className="za-account" />
             </span>
           </div>
         </div>

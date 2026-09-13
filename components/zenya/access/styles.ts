@@ -78,11 +78,11 @@ export const CSS = `
 }
 @media (prefers-reduced-transparency: reduce) { .za-pill, .za-phone-pill { background: #f2f2f5; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .za-pill, .za-phone-pill { background: #f2f2f5; } }
-.za-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
-.za-side { display: flex; align-items: center; min-width: 0; }
+.za-bar { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
+.za-side { display: flex; align-items: center; flex-shrink: 0; }
 .za-side-start { justify-content: flex-start; }
 .za-side-end { justify-content: flex-end; }
-.za-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
+.za-mark { display: flex; align-items: center; padding: 0 0.25rem; flex-shrink: 0; }
 .za-mark-svg { height: 17px; color: #000; }
 .za-head[data-dark] .za-pill, .za-head[data-dark] .za-phone-pill {
   background: rgba(32,32,38,0.72);

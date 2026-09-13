@@ -28,6 +28,7 @@ import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { ArrowLeft, ArrowRight, Check, Menu, Plus, SkipForward, Trash2, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import PricingFooter from "@/components/zenya/pricing/PricingFooter"
 
@@ -287,7 +288,7 @@ function DemoHeader({ rootRef }: { rootRef: React.MutableRefObject<HTMLElement |
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
           <Link href="/" aria-label="زينيا" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
-          <Link href="/login?mode=signup" className="zb-account zb-account-phone">ابدأ</Link>
+          <AccountControl className="zb-account zb-account-phone" />
         </div>
         <div className="zb-drawer" data-open={menuOpen ? "true" : undefined}
           style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -313,7 +314,7 @@ function DemoHeader({ rootRef }: { rootRef: React.MutableRefObject<HTMLElement |
           </nav>
           <span className="zb-side zb-side-end">
             <span className="zb-sep" aria-hidden />
-            <Link href="/login?mode=signup" className="zb-account">ابدأ</Link>
+            <AccountControl className="zb-account" />
           </span>
         </div>
       </div>
@@ -646,11 +647,11 @@ const CSS = `
   contain: layout paint;
 }
 @media (prefers-reduced-transparency: reduce) { .zb-pill, .zb-phone-pill { background: #f2f2f5; -webkit-backdrop-filter: none; backdrop-filter: none; } }
-.zb-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
-.zb-side { display: flex; align-items: center; min-width: 0; }
+.zb-bar { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
+.zb-side { display: flex; align-items: center; flex-shrink: 0; }
 .zb-side-start { justify-content: flex-start; }
 .zb-side-end { justify-content: flex-end; }
-.zb-mark { display: flex; align-items: center; min-height: 38px; padding: 0 0.375rem; flex-shrink: 0; }
+.zb-mark { display: flex; align-items: center; min-height: 38px; padding: 0 0.25rem; flex-shrink: 0; }
 .zb-mark-svg { height: 17px; color: #000; }
 .zb-head[data-dark] .zb-pill, .zb-head[data-dark] .zb-phone-pill { background: rgba(32,32,38,0.72); box-shadow: 0 0 0 1px rgba(250,250,250,0.12), 0 0 0 4px rgba(19,19,22,0.5); }
 .zb-head[data-dark] .zb-mark-svg, .zb-head[data-dark] .zb-mark-svg-sm { color: #fafafa; }

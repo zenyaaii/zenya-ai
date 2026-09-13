@@ -100,6 +100,7 @@ import { ArrowLeft, Menu, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import SwipeStack from "@/components/ui/SwipeStack"
 import { themePreview } from "@/lib/theme-previews"
@@ -415,9 +416,7 @@ export default function TemplatesView() {
                   marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zt-mark-svg-sm" />
             </Link>
-            <Link href="/login?mode=signup" className="zt-account zt-account-phone">
-              ابدأ
-            </Link>
+            <AccountControl className="zt-account zt-account-phone" />
           </div>
           <div
             className="zt-drawer"
@@ -477,7 +476,7 @@ export default function TemplatesView() {
 
             <span className="zt-side zt-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zt-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zt-account">ابدأ</Link>
+              <AccountControl className="zt-account" />
             </span>
           </div>
 
@@ -752,17 +751,18 @@ const CSS = `
 
 /* The deck's own measurements: 48px tall, pe-1.5 ps-3, nav items 10px 12px. */
 .zt-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
   align-items: center;
   height: 48px;
   padding-inline-start: 0.75rem;
   padding-inline-end: 0.375rem;
 }
-.zt-side { display: flex; align-items: center; min-width: 0; }
+.zt-side { display: flex; align-items: center; flex-shrink: 0; }
 .zt-side-start { justify-content: flex-start; }
 .zt-side-end { justify-content: flex-end; }
-.zt-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
+.zt-mark { display: flex; align-items: center; padding: 0 0.25rem; flex-shrink: 0; }
 .zt-mark-svg { height: 17px; color: #000; }
 
 /* ---- the header standing on a dark panel --------------------------------

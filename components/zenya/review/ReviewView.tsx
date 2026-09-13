@@ -41,6 +41,7 @@ import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import PricingFooter from "../pricing/PricingFooter"
 import { REVIEW_REWARD_CODE, REVIEW_REWARD_AR_SHORT, REVIEW_REWARD_PCT } from "@/lib/review-reward"
@@ -340,7 +341,7 @@ export default function ReviewView() {
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
             <Link href="/" aria-label="زينيا" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
-            <Link href="/login?mode=signup" className="zr-account zr-account-phone">ابدأ</Link>
+            <AccountControl className="zr-account zr-account-phone" />
           </div>
           <div className="zr-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -366,7 +367,7 @@ export default function ReviewView() {
             </nav>
             <span className="zr-side zr-side-end">
               <span className="zr-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zr-account">ابدأ</Link>
+              <AccountControl className="zr-account" />
             </span>
           </div>
         </div>
