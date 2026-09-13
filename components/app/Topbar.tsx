@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import {
@@ -14,6 +14,7 @@ import { useT } from '@/components/i18n/LocaleProvider'
 import { chromeFont } from './chrome-font'
 import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 import type { Messages } from '@/lib/i18n/messages'
+import { useDashboardPath } from './useDashboardPath'
 
 /** Map known dashboard routes to a page title, in the active locale. */
 function titlesFor(t: Messages): Record<string, string> {
@@ -48,7 +49,7 @@ export default function Topbar({
   onMobileMenuOpen: () => void
 }) {
   const router = useRouter()
-  const pathname = usePathname()
+  const { pathname, linkTo } = useDashboardPath()
   const supabase = createClient()
   const [menuOpen, setMenuOpen] = useState(false)
   const t = useT()
@@ -156,7 +157,7 @@ export default function Topbar({
 
                     <DropdownMenu.Item asChild>
                       <Link
-                        href="/dashboard"
+                        href={linkTo('/dashboard')}
                         onClick={() => setMenuOpen(false)}
                         className="zy-menu-row"
                       >
@@ -167,7 +168,7 @@ export default function Topbar({
 
                     <DropdownMenu.Item asChild>
                       <Link
-                        href="/dashboard/settings"
+                        href={linkTo('/dashboard/settings')}
                         onClick={() => setMenuOpen(false)}
                         className="zy-menu-row"
                       >

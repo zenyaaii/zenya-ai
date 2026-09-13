@@ -74,8 +74,9 @@ export default function SeoManager({ sites: initialSites }: { sites: SeoSite[] }
             : 'حاول مرة أخرى.'
       notify.toast({ type: 'error', message: 'تعذّر ربط Search Console', description: detail })
     }
-    // clean the URL
-    if (typeof window !== 'undefined') window.history.replaceState({}, '', '/dashboard/seo')
+    // clean the URL — drop the query, keep the path as the host spells it
+    // (/seo on dashboard.zenyaai.co, /dashboard/seo on localhost)
+    if (typeof window !== 'undefined') window.history.replaceState({}, '', window.location.pathname)
     if (flag === 'connected') refreshGsc()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])

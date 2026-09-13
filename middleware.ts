@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
+import { DASHBOARD_HOST, dashboardPortalPath, hasDashboardPrefix } from '@/lib/portal-urls'
 
 const OWN_HOSTS = new Set([
   'zenyaai.co',
@@ -302,6 +303,19 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next({ request: { headers: forwardedHeaders } })
     }
 
+    // The doubled address. Links in the code are written /dashboard/<page>
+    // (the route, and the address on localhost); on this host that prefix is
+    // the rewrite's job, so a link, bookmark or server redirect that spells it
+    // lands on dashboard.zenyaai.co/dashboard/sites. Send it to /sites, which
+    // the rewrite below serves. 308: this is the page's address for good, and
+    // a cached hop can never loop — /sites rewrites, it never redirects back.
+    if (hasDashboardPrefix(pathname)) {
+      return NextResponse.redirect(
+        new URL(dashboardPortalPath(pathname) + request.nextUrl.search, `https://${DASHBOARD_HOST}`),
+        308,
+      )
+    }
+
     // Refresh auth cookies so Supabase session stays alive
     const sessionRes = await updateSession(request)
 
@@ -340,8 +354,8 @@ export async function middleware(request: NextRequest) {
       '/about',
       '/faq',
     ]
+    // /dashboard/* never reaches here — it was redirected to its clean form above.
     const alreadyRouted =
-      pathname.startsWith('/dashboard') ||
       PORTAL_PASSTHROUGH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
     if (!alreadyRouted) {

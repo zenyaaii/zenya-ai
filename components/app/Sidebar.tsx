@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Search, Globe, Image as ImageIcon,
   CreditCard, Settings, X, CalendarCheck, type LucideIcon,
@@ -9,6 +9,7 @@ import {
 import ZenyaMark from '@/components/ZenyaMark'
 import { useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
+import { useDashboardPath } from './useDashboardPath'
 
 type NavItem = {
   href: string
@@ -56,7 +57,8 @@ export default function Sidebar({
   mobileOpen: boolean
   onMobileClose: () => void
 }) {
-  const pathname = usePathname()
+  // Route form (/dashboard/sites) on either host; linkTo gives the address.
+  const { pathname, linkTo } = useDashboardPath()
   const searchParams = useSearchParams()
   const t = useT()
   const NAV = buildNav(t)
@@ -81,7 +83,7 @@ export default function Sidebar({
   const body = (
     <>
       {/* Logo */}
-      <Link href="/dashboard" className="zy-rail-mark" onClick={onMobileClose}>
+      <Link href={linkTo('/dashboard')} className="zy-rail-mark" onClick={onMobileClose}>
         <ZenyaMark className="h-[18px] text-[#171717]" />
       </Link>
 
@@ -97,7 +99,7 @@ export default function Sidebar({
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={linkTo(item.href)}
                     onClick={onMobileClose}
                     data-tour={item.tour}
                     className="zy-rail-row"
