@@ -318,8 +318,13 @@ export async function middleware(request: NextRequest) {
       '/login',
       '/auth',
       '/sign',
-      '/theme',    // /theme/new + per-template wizards (also covers /themes)
-      '/themes',   // template browser (explicit for clarity)
+      '/theme',    // /theme/new + per-template wizards
+      // The public gallery. It is /templates now, and this entry has to move
+      // with it: next.config.js redirects /themes BEFORE middleware runs, so
+      // a '/themes' entry here can never match anything again, and without
+      // '/templates' the portal rewrites it to /dashboard/templates — which
+      // does not exist. That is a 404 on dashboard.zenyaai.co/templates.
+      '/templates',
       '/demo',      // template demos (/demo, /demo/restaurant, …)
       '/demo-full', // full storefront demo
       '/preview',  // live preview + in-app editor (/preview/[id], /preview/[type]/[id]/edit)

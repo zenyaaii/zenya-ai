@@ -17,7 +17,7 @@ const { chromium } = require('playwright')
     }
     return { sel: '${sel}', fontSize: getComputedStyle(el).fontSize, chain }
   })()`
-  for (const [route, sels] of [['/pricing', ['.zp-name', '.cs-chip']], ['/themes', ['.zt-tag', '.zt-dot']], ['/', ['.tag', '.name']]]) {
+  for (const [route, sels] of [['/pricing', ['.zp-name', '.cs-chip']], ['/templates', ['.zt-tag', '.zt-dot']], ['/', ['.tag', '.name']]]) {
     await p.goto('http://localhost:3000' + route, { waitUntil: 'domcontentloaded' })
     await p.waitForTimeout(2500)
     for (const s of sels) console.log(route, JSON.stringify(await p.evaluate(probe(s))))
