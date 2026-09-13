@@ -67,7 +67,7 @@ export default function RealtimePanel({
   if (error && !data) {
     return (
       <Section title="مباشر">
-        <Panel className="p-8 text-center text-[13px] text-muted">{error}</Panel>
+        <Panel className="p-8 text-center text-[14.5px] text-muted">{error}</Panel>
       </Section>
     )
   }
@@ -81,7 +81,7 @@ export default function RealtimePanel({
         <div className="grid gap-5 lg:grid-cols-3">
           <Panel className="p-5">
             <div className="flex items-start justify-between">
-              <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
+              <div className="text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                 زوّار نشطون
               </div>
               <span className="relative flex h-2.5 w-2.5" aria-hidden>
@@ -96,10 +96,10 @@ export default function RealtimePanel({
                 />
               </span>
             </div>
-            <div className="mt-2 text-[28px] font-bold tabular-nums tracking-tight text-foreground">
+            <div className="mt-2 text-[28px] font-bold tabular-nums text-foreground">
               {data.active.toLocaleString('ar')}
             </div>
-            <div className="mt-1 text-[12px] text-muted">
+            <div className="mt-1 text-[14.5px] text-muted">
               خلال آخر {data.active_window_min} دقائق
             </div>
           </Panel>
@@ -143,7 +143,7 @@ export default function RealtimePanel({
                   <Td className="whitespace-nowrap text-muted tabular-nums">{timeAgo(v.at)}</Td>
                   <Td>
                     <div className="truncate font-medium text-foreground">{v.site_name}</div>
-                    <div className="truncate text-[11px] text-muted">{v.template}</div>
+                    <div className="truncate text-[14.5px] text-muted">{v.template}</div>
                   </Td>
                   <Td className="text-foreground">{v.path === '/' ? 'الرئيسية' : v.path}</Td>
                   <Td className="text-foreground">
@@ -160,7 +160,7 @@ export default function RealtimePanel({
                       <DeviceIcon device={v.device} />
                       {deviceLabelAr(v.device)}
                       {v.is_bot && (
-                        <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[10px] text-muted">
+                        <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[14.5px] text-muted">
                           روبوت
                         </span>
                       )}

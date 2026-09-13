@@ -200,8 +200,8 @@ export default function SitesPage() {
         className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
       >
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-foreground">مواقعك</h1>
-          <p className="mt-1 text-[13px] text-muted">
+          <h1 className="text-[24px] font-bold text-foreground">مواقعك</h1>
+          <p className="mt-1 text-[14.5px] text-muted">
             {loading
               ? 'جارٍ التحميل…'
               : counts.all === 0
@@ -212,13 +212,13 @@ export default function SitesPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/themes"
-            className="hidden items-center gap-1.5 rounded-full zy-card px-3 py-2 text-[12.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full zy-card px-3 py-2 text-[14.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
           >
             تصفّح القوالب
           </Link>
           <Link
             href="/theme/new"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
+            className="inline-flex items-center gap-1.5 zy-btn"
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
             موقع جديد
@@ -235,7 +235,7 @@ export default function SitesPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="ابحث في المواقع"
-              className="w-full rounded-full zy-card py-1.5 ps-9 pe-3 text-[13px] text-foreground outline-none transition focus:border-primary"
+              className="w-full rounded-full zy-card py-1.5 ps-9 pe-3 text-[14.5px] text-foreground outline-none transition focus:border-primary"
             />
           </div>
 
@@ -353,7 +353,7 @@ function FilterPill({
     <button
       onClick={() => onClick(v)}
       className={
-        'flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors ' +
+        'flex items-center gap-1 rounded-full px-3 py-1 text-[14.5px] font-semibold transition-colors ' +
         (active ? 'bg-foreground text-white' : 'text-muted hover:text-foreground')
       }
     >
@@ -389,7 +389,7 @@ function ViewBtn({
 
 function Pill({ n }: { n: number }) {
   return (
-    <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[10px] font-bold text-muted">
+    <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[14.5px] font-bold text-muted">
       {n}
     </span>
   )
@@ -461,22 +461,22 @@ function EmptyState() {
       >
         <Sparkles className="h-7 w-7 text-primary" strokeWidth={1.75} />
       </div>
-      <h3 className="text-[20px] font-bold tracking-tight text-foreground">
+      <h3 className="text-[20px] font-bold text-foreground">
         أنشئ موقعك الأول
       </h3>
-      <p className="mx-auto mt-2 max-w-md text-[13.5px] text-muted">
+      <p className="mx-auto mt-2 max-w-md text-[14.5px] text-muted">
         اختر قالبًا، واكتب نبذة سريعة، وتكتب زينيا المحتوى وتصمّم الصفحة.
         جاهز خلال أقل من دقيقة.
       </p>
       <Link
         href="/theme/new"
-        className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
+        className="mt-6 inline-flex items-center gap-1.5 zy-btn"
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} />
         أنشئ موقعًا جديدًا
       </Link>
       <div className="mt-4">
-        <Link href="/themes" className="text-[12.5px] text-muted hover:text-foreground">
+        <Link href="/themes" className="text-[14.5px] text-muted hover:text-foreground">
           أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
@@ -495,12 +495,12 @@ function FilteredEmpty({
   }
   return (
     <div className="rounded-2xl border border-dashed border-token p-10 text-center">
-      <p className="text-[14px] text-muted">
+      <p className="text-[14.5px] text-muted">
         لا توجد {labels[filter]} تطابق{query ? ` «${query}»` : ' الفلتر الحالي'}.
       </p>
       <button
         onClick={onReset}
-        className="mt-3 text-[13px] font-medium text-primary hover:underline"
+        className="mt-3 text-[14.5px] font-medium text-primary hover:underline"
       >
         مسح الفلاتر
       </button>
@@ -536,17 +536,17 @@ function SiteRow({
     <div className={'flex flex-wrap items-center justify-between gap-3 px-5 py-3 ' + (isFirst ? '' : 'border-t border-token')}>
       <div className="flex min-w-0 items-center gap-3">
         <div
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[11px] font-bold uppercase"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[14.5px] font-bold uppercase"
           style={{ background: live ? 'rgba(21,128,61,0.10)' : isEcom ? 'rgba(94,106,210,0.10)' : 'rgba(217,119,6,0.10)', color: live ? '#15803d' : isEcom ? '#5e6ad2' : '#b45309' }}
         >
           {(theme.product_name || '?').slice(0, 1)}
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="truncate text-[13.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</span>
+            <span className="truncate text-[14.5px] font-semibold text-foreground">{theme.product_name || 'Untitled'}</span>
             {live && trialHosting && <TrialBadge />}
           </div>
-          <div className="truncate text-[11.5px] text-muted">
+          <div className="truncate text-[14.5px] text-muted">
             {live ? `${theme.slug}.zenyaai.co` : bt + (isEcom ? ' · Shopify' : ' · draft')}
           </div>
         </div>
@@ -554,7 +554,7 @@ function SiteRow({
       <div className="flex items-center gap-1.5">
         <Link
           href={editUrlFor(theme.id, bt)}
-          className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+          className="rounded-md zy-card px-2.5 py-1 text-[14.5px] font-medium text-foreground hover:bg-black/5"
         >
           Edit
         </Link>
@@ -566,25 +566,25 @@ function SiteRow({
             href={live ? publicSiteUrl(theme.slug!) : `/preview/${theme.id}`}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-foreground hover:bg-black/5"
+            className="rounded-md zy-card px-2.5 py-1 text-[14.5px] font-medium text-foreground hover:bg-black/5"
           >
             {live ? 'زيارة' : 'معاينة'}
           </a>
         )}
         {isHostable && canPublish && !live && (
-          <button onClick={onPublish} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
+          <button onClick={onPublish} className="zy-btn">
             Publish
           </button>
         )}
         {isHostable && live && hasHosting && (
-          <button onClick={onAddDomain} className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white">
+          <button onClick={onAddDomain} className="zy-btn">
             Add domain
           </button>
         )}
         {isEcom && isPro && (
           <a
             href={`/api/themes/${theme.id}/export-shopify`}
-            className="rounded-md bg-primary px-2.5 py-1 text-[11.5px] font-semibold text-white"
+            className="zy-btn"
           >
             Shopify ZIP
           </a>
@@ -592,14 +592,14 @@ function SiteRow({
         {live && (
           <button
             onClick={onUnpublish}
-            className="rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-muted hover:bg-black/5"
+            className="rounded-md zy-card px-2.5 py-1 text-[14.5px] font-medium text-muted hover:bg-black/5"
           >
             Unpublish
           </button>
         )}
         <button
           onClick={onDelete}
-          className="rounded-md border border-[rgba(220,38,38,0.20)] bg-white px-2.5 py-1 text-[11.5px] font-medium text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+          className="rounded-md border border-[rgba(220,38,38,0.20)] bg-white px-2.5 py-1 text-[14.5px] font-medium text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
           title="حذف الموقع نهائيًا"
         >
           حذف

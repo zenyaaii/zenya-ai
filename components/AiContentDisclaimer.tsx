@@ -49,18 +49,18 @@ export default function AiContentDisclaimer({
           <h2 className="text-base font-bold text-foreground">
             تنبيه — بعض محتوى القالب من إنشاء الذكاء الاصطناعي
           </h2>
-          <p className="mt-1 text-[12.5px] text-muted">
+          <p className="mt-1 text-[14.5px] text-muted">
             نملأ الفراغات بأمثلة واقعية حتى يكتمل تصميم موقعك — لكنها ليست معلومات حقيقية.
           </p>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4">
-          <p className="text-[13px] text-muted">قد يشمل المحتوى المولَّد:</p>
+          <p className="text-[14.5px] text-muted">قد يشمل المحتوى المولَّد:</p>
           <ul className="mt-3 space-y-2">
             {items.map((t) => (
               <li
                 key={t}
-                className="flex items-start gap-2.5 rounded-xl border border-token bg-surface/60 p-3 text-[13px] text-foreground"
+                className="flex items-start gap-2.5 rounded-xl border border-token bg-surface/60 p-3 text-[14.5px] text-foreground"
               >
                 <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
                 {t}
@@ -70,7 +70,7 @@ export default function AiContentDisclaimer({
         </div>
 
         <div className="border-t border-token px-6 py-4">
-          <p className="mb-3 text-[12px] leading-relaxed text-muted">
+          <p className="mb-3 text-[14.5px] leading-relaxed text-muted">
             بالمتابعة، تُقرّ بأن هذه التفاصيل وآراء العملاء أمثلة مولَّدة لإكمال تصميم الموقع
             فقط، وأن مسؤوليتك مراجعتها واستبدالها بمحتواك وتقييماتك الحقيقية قبل النشر. زينيا
             غير مسؤولة — أمام الله ولا أمام أي عميل يشتري منك — عن أي ضرر ينتج عن نشر معلومات
@@ -80,14 +80,14 @@ export default function AiContentDisclaimer({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full border border-token bg-white px-4 py-2 text-[13px] font-semibold text-foreground hover:bg-black/5"
+              className="rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
             >
               رجوع
             </button>
             <button
               type="button"
               onClick={onConfirm}
-              className="rounded-full bg-foreground px-6 py-2.5 text-[13.5px] font-semibold text-white transition hover:scale-[1.02]"
+              className="rounded-full bg-foreground px-6 py-2.5 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
             >
               فهمت — أكمل التوليد
             </button>

@@ -71,7 +71,7 @@ const TEMPLATE_TINT: Record<string, { bg: string; ring: string; fg: string }> = 
   one_product: { bg: 'rgba(94,106,210,0.10)',  ring: 'rgba(94,106,210,0.30)',  fg: '#5e6ad2' },
   storefront:  { bg: 'rgba(94,106,210,0.10)',  ring: 'rgba(94,106,210,0.30)',  fg: '#5e6ad2' },
   collective:  { bg: 'rgba(5,150,105,0.10)',   ring: 'rgba(5,150,105,0.30)',   fg: '#059669' },
-  restaurant:  { bg: 'rgba(200,169,106,0.14)', ring: 'rgba(200,169,106,0.35)', fg: '#9b6f00' },
+  restaurant:  { bg: 'rgba(200,169,106,0.14)', ring: 'rgba(200,169,106,0.35)', fg: '#b45309' },
   atlas:       { bg: 'rgba(67,56,202,0.10)',   ring: 'rgba(67,56,202,0.28)',   fg: '#4338ca' },
   lookbook:    { bg: 'rgba(190,18,60,0.10)',   ring: 'rgba(190,18,60,0.28)',   fg: '#be123c' },
   studio:      { bg: 'rgba(28,28,28,0.06)',    ring: 'rgba(28,28,28,0.20)',    fg: '#1c1c1c' },
@@ -238,10 +238,10 @@ export default function SiteCard({
       {/* Body */}
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3">
-          <h3 className="line-clamp-1 text-[16px] font-semibold tracking-tight text-foreground">
+          <h3 className="line-clamp-1 text-[16px] font-semibold text-foreground">
             {theme.product_name || 'موقع بلا عنوان'}
           </h3>
-          <p className="mt-0.5 text-[11.5px] font-medium uppercase tracking-[0.14em] text-muted">
+          <p className="mt-0.5 text-[14.5px] font-medium uppercase tracking-[0.14em] text-muted">
             {label}
           </p>
         </div>
@@ -253,7 +253,7 @@ export default function SiteCard({
             target="_blank"
             rel="noreferrer"
             dir="ltr"
-            className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[#15803d]/[0.06] px-2 py-1 text-[12px] font-medium text-[#15803d] transition hover:bg-[#15803d]/[0.10]"
+            className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[#15803d]/[0.06] px-2 py-1 text-[14.5px] font-medium text-[#15803d] transition hover:bg-[#15803d]/[0.10]"
           >
             <Globe className="h-3 w-3" strokeWidth={2.5} />
             {publicSiteHost(theme.slug!)}
@@ -261,14 +261,14 @@ export default function SiteCard({
           </a>
         )}
         {!publishedHere && isHostable && (
-          <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(217,119,6,0.08)] px-2 py-1 text-[12px] font-medium text-[#b45309]">
+          <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(217,119,6,0.08)] px-2 py-1 text-[14.5px] font-medium text-[#b45309]">
             مسودّة · غير مباشر بعد
           </div>
         )}
         {/* Free-trial hosting badge — this site is live only for the first month. */}
         {publishedHere && trialHosting && (
           <div
-            className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-[12px] font-medium"
+            className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-[14.5px] font-medium"
             style={{ background: 'rgba(217,119,6,0.10)', color: '#b45309', border: '1px solid rgba(217,119,6,0.20)' }}
             title="موقعك مباشر مجانًا خلال الشهر الأول. بعده تحتاج خطة Starter للإبقاء عليه."
           >
@@ -276,7 +276,7 @@ export default function SiteCard({
           </div>
         )}
         {isEcom && (
-          <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(94,106,210,0.08)] px-2 py-1 text-[12px] font-medium text-primary">
+          <div className="mb-3 inline-flex items-center gap-1.5 self-start rounded-md bg-[rgba(94,106,210,0.08)] px-2 py-1 text-[14.5px] font-medium text-primary">
             يُصدَّر إلى شوبيفاي
           </div>
         )}
@@ -297,7 +297,7 @@ export default function SiteCard({
             ? `أضف استضافة زينيا · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
             : `الترقية إلى Pro · ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا ←`
           return (
-            <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[12.5px]">
+            <div className="mb-3 rounded-lg border border-token bg-surface px-3 py-2.5 text-[14.5px]">
               <div className="flex items-start gap-2">
                 <Lock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" strokeWidth={2} />
                 <div>
@@ -343,7 +343,7 @@ export default function SiteCard({
               hasHosting ? (
                 <button
                   onClick={onAddDomain}
-                  className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
+                  className="inline-flex items-center gap-1 zy-btn"
                 >
                   <Globe className="h-3 w-3" strokeWidth={2.5} />
                   أضف نطاقًا
@@ -353,14 +353,14 @@ export default function SiteCard({
               canPublish ? (
                 <button
                   onClick={onPublish}
-                  className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
+                  className="zy-btn"
                 >
                   انشر على زينيا
                 </button>
               ) : (
                 <Link
                   href="/pricing?upgrade=pro"
-                  className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
+                  className="zy-btn"
                 >
                   رقِّ للنشر
                 </Link>
@@ -372,7 +372,7 @@ export default function SiteCard({
           {isEcom && isPro && (
             <a
               href={`/api/themes/${theme.id}/export-shopify`}
-              className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
+              className="inline-flex items-center gap-1 zy-btn"
             >
               <Download className="h-3 w-3" strokeWidth={2.5} />
               نزّل ملف شوبيفاي
@@ -381,7 +381,7 @@ export default function SiteCard({
           {isEcom && !isPro && (
             <Link
               href="/pricing?upgrade=starter"
-              className="rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:opacity-90"
+              className="zy-btn"
             >
               اشترك في Starter للتصدير
             </Link>
@@ -445,7 +445,7 @@ export default function SiteCard({
                           <Icon className="h-6 w-6" strokeWidth={1.75} style={{ color: tint.fg }} />
                         </div>
                       )}
-                      <div className="flex items-center justify-between border-t border-token bg-white px-3 py-2 text-[11.5px] font-medium text-primary">
+                      <div className="flex items-center justify-between border-t border-token bg-white px-3 py-2 text-[14.5px] font-medium text-primary">
                         <span className="inline-flex items-center gap-1.5">
                           <Eye className="h-3 w-3" strokeWidth={2.25} />
                           افتح المعاينة الكاملة
@@ -460,7 +460,7 @@ export default function SiteCard({
                         <>
                           <button
                             onClick={() => { setMenuOpen(false); onUnpublish() }}
-                            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-muted hover:bg-black/5 hover:text-foreground"
+                            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[14.5px] text-muted hover:bg-black/5 hover:text-foreground"
                           >
                             <Trash2 className="h-3 w-3" strokeWidth={2.25} />
                             إلغاء النشر
@@ -470,7 +470,7 @@ export default function SiteCard({
                       )}
                       <button
                         onClick={() => { setMenuOpen(false); onDelete() }}
-                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
+                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-start text-[14.5px] text-[#b91c1c] hover:bg-[rgba(220,38,38,0.06)]"
                       >
                         <Trash2 className="h-3 w-3" strokeWidth={2.25} />
                         حذف الموقع نهائيًا

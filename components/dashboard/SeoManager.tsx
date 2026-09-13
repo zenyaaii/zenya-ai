@@ -84,7 +84,7 @@ export default function SeoManager({ sites: initialSites }: { sites: SeoSite[] }
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <header className="mb-6 border-b border-token pb-5">
         <h1 className="zy-h1">السيو</h1>
-        <p className="mt-1 text-[13px] text-muted">
+        <p className="mt-1 text-[14.5px] text-muted">
           تحكّم كامل في شكل موقعك داخل جوجل — العنوان، الوصف، معاينة النتيجة الحيّة، خريطة الموقع، والتحقّق من Search Console.
         </p>
       </header>
@@ -126,7 +126,7 @@ function SiteSwitcher({
             type="button"
             onClick={() => onSelect(s.id)}
             className={[
-              'flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors',
+              'flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[14.5px] font-medium transition-colors',
               active
                 ? 'border-primary/30 bg-[rgba(94,106,210,0.10)] text-primary'
                 : 'border-token bg-white text-muted hover:text-foreground',
@@ -211,7 +211,7 @@ function SiteEditor({
             <Sparkles className="h-4 w-4 text-primary" strokeWidth={2} />
             <h2 className="zy-h2">بيانات البحث</h2>
           </div>
-          <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             زينيا يكتب هذه الحقول تلقائيًا من محتوى موقعك. اترك الحقل فارغًا لاستخدام النص التلقائي، أو اكتب نصك للتحكّم الكامل.
           </p>
 
@@ -263,25 +263,25 @@ function SiteEditor({
               className="mt-0.5 h-4 w-4 accent-[#b91c1c]"
             />
             <div className="flex-1">
-              <div className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+              <div className="flex items-center gap-1.5 text-[14.5px] font-medium text-foreground">
                 {noindex ? <EyeOff className="h-3.5 w-3.5 text-[#b91c1c]" /> : <Eye className="h-3.5 w-3.5 text-[#15803d]" />}
                 إخفاء الموقع من محرّكات البحث
               </div>
-              <div className="mt-0.5 text-[11.5px] leading-[1.5] text-muted">
+              <div className="mt-0.5 text-[14.5px] leading-[1.5] text-muted">
                 فعّلها إذا كان الموقع قيد الإعداد ولا تريد ظهوره في جوجل بعد. الوضع الافتراضي: مرئي.
               </div>
             </div>
           </label>
 
           <div className="mt-5 flex items-center justify-between">
-            <div className="text-[11.5px] text-muted">
+            <div className="text-[14.5px] text-muted">
               {dirty ? 'لديك تغييرات غير محفوظة' : 'كل شيء محفوظ'}
             </div>
             <button
               type="button"
               disabled={!dirty || saving}
               onClick={save}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-40"
+              className="inline-flex items-center gap-2 zy-btn"
             >
               {saving ? 'جارٍ الحفظ…' : 'حفظ'}
               {!saving && <Check className="h-4 w-4" />}
@@ -353,19 +353,19 @@ function Field({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <label className="text-[12.5px] font-semibold text-foreground">{label}</label>
+        <label className="text-[14.5px] font-semibold text-foreground">{label}</label>
         <div className="flex items-center gap-2">
           {onReset && (
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1 text-[10.5px] font-medium text-primary hover:underline"
+              className="inline-flex items-center gap-1 text-[14.5px] font-medium text-primary hover:underline"
             >
               <RotateCcw className="h-3 w-3" /> تلقائي
             </button>
           )}
           {max != null && (
-            <span className="tabular-nums text-[10.5px] font-medium" style={{ color: counterColor }}>
+            <span className="tabular-nums text-[14.5px] font-medium" style={{ color: counterColor }}>
               {len}/{max}
             </span>
           )}
@@ -377,7 +377,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={3}
-          className="w-full resize-none rounded-lg zy-card px-3 py-2 text-[13px] leading-[1.6] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
+          className="w-full resize-none rounded-lg zy-card px-3 py-2 text-[14.5px] leading-[1.6] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
         />
       ) : (
         <input
@@ -387,12 +387,12 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={
-            'w-full rounded-lg zy-card px-3 py-2 text-[13px] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)] ' +
+            'w-full rounded-lg zy-card px-3 py-2 text-[14.5px] text-foreground outline-none placeholder:text-muted/60 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)] ' +
             (ltr ? 'text-left' : '')
           }
         />
       )}
-      <p className="mt-1 text-[11px] leading-[1.5] text-muted">{hint}</p>
+      <p className="mt-1 text-[14.5px] leading-[1.5] text-muted">{hint}</p>
     </div>
   )
 }
@@ -414,21 +414,21 @@ function SerpPreview({
       <div className="mb-3 flex items-center gap-2">
         <Search className="h-4 w-4 text-primary" strokeWidth={2} />
         <h3 className="zy-h3">معاينة نتيجة جوجل</h3>
-        <span className="ms-auto text-[10.5px] text-muted">حاسوب</span>
+        <span className="ms-auto text-[14.5px] text-muted">حاسوب</span>
       </div>
 
       {/* the SERP snippet — LTR like a real Google result */}
       <div dir="ltr" className="rounded-xl zy-card p-4" style={{ fontFamily: 'Arial, sans-serif' }}>
         <div className="flex items-center gap-2.5">
           <div
-            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[14.5px] font-bold text-white"
             style={{ background: '#5e6ad2' }}
           >
             {name.trim().charAt(0).toUpperCase() || 'Z'}
           </div>
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-[12px] text-[#202124]">{name}</div>
-            <div className="truncate text-[12px] text-[#4d5156]">{host || 'yourname.zenyaai.co'}</div>
+            <div className="truncate text-[14.5px] text-[#202124]">{name}</div>
+            <div className="truncate text-[14.5px] text-[#4d5156]">{host || 'yourname.zenyaai.co'}</div>
           </div>
         </div>
         <div
@@ -438,13 +438,13 @@ function SerpPreview({
         >
           {title}
         </div>
-        <div className="mt-1 text-[13px] leading-[1.45] text-[#4d5156]" dir="auto"
+        <div className="mt-1 text-[14.5px] leading-[1.45] text-[#4d5156]" dir="auto"
           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {description}
         </div>
       </div>
 
-      <div className="mt-3 text-[11px] leading-[1.5] text-muted">
+      <div className="mt-3 text-[14.5px] leading-[1.5] text-muted">
         {noindex ? (
           <span className="text-[#b91c1c]">الموقع مخفي حاليًا عن جوجل (noindex).</span>
         ) : published ? (
@@ -473,14 +473,14 @@ function SocialPreview({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt="" className="h-40 w-full object-cover" />
         ) : (
-          <div className="flex h-40 w-full items-center justify-center bg-surface text-[11.5px] text-muted">
+          <div className="flex h-40 w-full items-center justify-center bg-surface text-[14.5px] text-muted">
             لا توجد صورة واجهة — أضف صورة بارزة لتظهر عند المشاركة
           </div>
         )}
         <div className="bg-white p-3">
-          <div className="truncate text-[11px] uppercase tracking-wide text-muted" dir="ltr">{host || 'yourname.zenyaai.co'}</div>
-          <div className="mt-0.5 truncate text-[13px] font-semibold text-foreground" dir="auto">{title}</div>
-          <div className="mt-0.5 line-clamp-1 text-[12px] text-muted" dir="auto">{description}</div>
+          <div className="truncate text-[14.5px] uppercase tracking-wide text-muted" dir="ltr">{host || 'yourname.zenyaai.co'}</div>
+          <div className="mt-0.5 truncate text-[14.5px] font-semibold text-foreground" dir="auto">{title}</div>
+          <div className="mt-0.5 line-clamp-1 text-[14.5px] text-muted" dir="auto">{description}</div>
         </div>
       </div>
     </div>
@@ -498,13 +498,13 @@ function SitemapCard({ site }: { site: SeoSite }) {
       </div>
       {site.isPublished && site.sitemapUrl ? (
         <>
-          <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             زينيا يُنشئ خريطة موقع وملفّ robots.txt تلقائيًا لموقعك. أرسل هذا الرابط إلى Google Search Console ليكتشف جوجل صفحاتك أسرع.
           </p>
           <CopyRow value={site.sitemapUrl} />
         </>
       ) : (
-        <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">
+        <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
           انشر موقعك أولًا ليحصل على عنوان مباشر وخريطة موقع.{' '}
           <Link href="/dashboard/sites" className="text-primary hover:underline">اذهب إلى المواقع ←</Link>
         </p>
@@ -599,12 +599,12 @@ function SearchConsoleCard({
         <ShieldCheck className="h-4 w-4 text-primary" strokeWidth={2} />
         <h2 className="zy-h2">Google Search Console</h2>
         {connected && (
-          <span className="ms-auto inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold text-[#15803d]">
+          <span className="ms-auto inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[14.5px] font-semibold text-[#15803d]">
             <Check className="h-3 w-3" /> مربوط
           </span>
         )}
       </div>
-      <p className="mt-1 text-[12.5px] leading-[1.55] text-muted">
+      <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
         اربط حسابك في جوجل لترى بيانات البحث الحيّة لموقعك — مرّات الظهور، النقرات، متوسط الترتيب، والكلمات التي يجدك بها الناس.
       </p>
 
@@ -613,14 +613,14 @@ function SearchConsoleCard({
         <div className="mt-4">
           <div className="flex items-center justify-between rounded-xl border border-token bg-surface/40 px-3.5 py-2.5">
             <div className="min-w-0">
-              <div className="text-[12px] font-medium text-foreground">مربوط بحساب جوجل</div>
-              {connection?.email && <div dir="ltr" className="truncate text-[11.5px] text-muted">{connection.email}</div>}
+              <div className="text-[14.5px] font-medium text-foreground">مربوط بحساب جوجل</div>
+              {connection?.email && <div dir="ltr" className="truncate text-[14.5px] text-muted">{connection.email}</div>}
             </div>
             <button
               type="button"
               onClick={disconnect}
               disabled={disconnecting}
-              className="inline-flex items-center gap-1.5 rounded-md zy-card px-2.5 py-1 text-[11.5px] font-medium text-muted hover:text-foreground disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-md zy-card px-2.5 py-1 text-[14.5px] font-medium text-muted hover:text-foreground disabled:opacity-50"
             >
               <Unlink className="h-3 w-3" /> فصل
             </button>
@@ -632,12 +632,12 @@ function SearchConsoleCard({
           {configured ? (
             <a
               href="/api/gsc/connect"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-[13px] font-semibold text-white hover:opacity-90"
+              className="inline-flex w-full items-center justify-center gap-2 zy-btn"
             >
               <Link2 className="h-4 w-4" /> اربط Google Search Console
             </a>
           ) : (
-            <div className="flex items-start gap-2 rounded-xl bg-[rgba(217,119,6,0.08)] p-3 text-[11.5px] leading-[1.5] text-[#b45309]">
+            <div className="flex items-start gap-2 rounded-xl bg-[rgba(217,119,6,0.08)] p-3 text-[14.5px] leading-[1.5] text-[#b45309]">
               <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
               <span>الربط المباشر قيد التفعيل. حتى ذلك الحين، استخدم التحقّق اليدوي بالأسفل لإرسال موقعك إلى Search Console.</span>
             </div>
@@ -645,7 +645,7 @@ function SearchConsoleCard({
           <button
             type="button"
             onClick={() => setShowManual((v) => !v)}
-            className="mt-3 text-[11.5px] font-medium text-primary hover:underline"
+            className="mt-3 text-[14.5px] font-medium text-primary hover:underline"
           >
             {showManual ? 'إخفاء' : 'أو أثبت الملكية يدويًا (علامة HTML أو ملف) ←'}
           </button>
@@ -658,7 +658,7 @@ function SearchConsoleCard({
         {/* Step 1 — add the property (exact URL, copyable) */}
         <div>
           <StepHead n={1} title="أضف موقعك في Search Console" />
-          <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             افتح{' '}
             <Link
               href={site.url
@@ -675,12 +675,12 @@ function SearchConsoleCard({
         {/* Step 2 — paste EITHER the meta tag OR the HTML file name; we detect + host it */}
         <div>
           <StepHead n={2} title="الصق ما أعطاك جوجل — وسم أو ملف" />
-          <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             في Search Console، اختر <b>«علامة HTML»</b> وانسخ الوسم كاملًا، <b>أو</b> اختر <b>«ملف HTML»</b> وانسخ اسم الملف
-            (<code dir="ltr" className="rounded bg-surface px-1 text-[10.5px]">googleXXXX.html</code>). الصقه هنا — زينيا يكتشف الطريقة ويضيفها لموقعك تلقائيًا. <b>لا تحتاج لرفع أي ملف بنفسك.</b>
+            (<code dir="ltr" className="rounded bg-surface px-1 text-[14.5px]">googleXXXX.html</code>). الصقه هنا — زينيا يكتشف الطريقة ويضيفها لموقعك تلقائيًا. <b>لا تحتاج لرفع أي ملف بنفسك.</b>
           </p>
           {isVerifiedSet && (
-            <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[rgba(21,128,61,0.08)] px-3 py-2 text-[11px] text-[#15803d]">
+            <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[rgba(21,128,61,0.08)] px-3 py-2 text-[14.5px] text-[#15803d]">
               <Check className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="min-w-0 truncate">
                 {savedFile
@@ -695,10 +695,10 @@ function SearchConsoleCard({
             value={verifyInput}
             onChange={(e) => setVerifyInput(e.target.value)}
             placeholder={'<meta name="google-site-verification" content="…" />   أو   googleXXXX.html'}
-            className="mt-2 w-full resize-none rounded-lg zy-card px-3 py-2 text-left font-mono text-[11.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted/50 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
+            className="mt-2 w-full resize-none rounded-lg zy-card px-3 py-2 text-left font-mono text-[14.5px] leading-[1.5] text-foreground outline-none placeholder:text-muted/50 focus:border-primary/40 focus:ring-2 focus:ring-[rgba(94,106,210,0.12)]"
           />
           <div className="mt-1.5 flex items-center justify-between gap-2">
-            <div className="min-w-0 text-[11px]">
+            <div className="min-w-0 text-[14.5px]">
               {verifyInput.trim() === '' ? (
                 <span className="text-muted">الصق الوسم كاملًا أو اسم الملف.</span>
               ) : detected ? (
@@ -714,7 +714,7 @@ function SearchConsoleCard({
               type="button"
               onClick={saveVerify}
               disabled={savingVerify || !detected}
-              className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-[11.5px] font-semibold text-white disabled:opacity-40"
+              className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-[14.5px] font-semibold text-white disabled:opacity-40"
             >
               {savingVerify ? 'جارٍ الحفظ…' : 'احفظ وأضِف للموقع'}
             </button>
@@ -724,7 +724,7 @@ function SearchConsoleCard({
         {/* Step 3 — verify */}
         <div>
           <StepHead n={3} title="اضغط «تحقّق» في Search Console" />
-          <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             بعد الحفظ هنا{isVerifiedSet ? ' ✓' : ''}، ارجع إلى تبويب Search Console واضغط زر <b>«تحقّق» (Verify)</b>. سيجد جوجل التحقّق في موقعك.
             {!site.isPublished && <span className="text-[#b45309]"> — لكن انشر موقعك أولًا حتى يكون الوسم مباشرًا.</span>}
           </p>
@@ -733,7 +733,7 @@ function SearchConsoleCard({
         {/* Step 4 — submit sitemap */}
         <div>
           <StepHead n={4} title="أرسل خريطة الموقع" />
-          <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+          <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
             في Search Console → «خرائط المواقع» (Sitemaps)، الصق هذا الرابط واضغط «إرسال»:
           </p>
           <CopyRow value={site.sitemapUrl || 'انشر الموقع أولًا'} />
@@ -746,8 +746,8 @@ function SearchConsoleCard({
 function StepHead({ n, title }: { n: number; title: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-foreground text-[10px] font-bold text-white">{n}</span>
-      <span className="text-[12.5px] font-semibold text-foreground">{title}</span>
+      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-foreground text-[14.5px] font-bold text-white">{n}</span>
+      <span className="text-[14.5px] font-semibold text-foreground">{title}</span>
     </div>
   )
 }
@@ -783,14 +783,14 @@ function PerformancePanel({ site }: { site: SeoSite }) {
 
   if (loading) {
     return (
-      <div className="mt-4 flex items-center gap-2 rounded-xl border border-token bg-surface/40 p-4 text-[12px] text-muted">
+      <div className="mt-4 flex items-center gap-2 rounded-xl border border-token bg-surface/40 p-4 text-[14.5px] text-muted">
         <RefreshCw className="h-3.5 w-3.5 animate-spin" /> جارٍ جلب بيانات البحث…
       </div>
     )
   }
   if (!data) {
     return (
-      <div className="mt-4 rounded-xl border border-token bg-surface/40 p-4 text-[12px] text-muted">
+      <div className="mt-4 rounded-xl border border-token bg-surface/40 p-4 text-[14.5px] text-muted">
         تعذّر جلب البيانات. <button onClick={load} className="text-primary hover:underline">أعد المحاولة</button>
       </div>
     )
@@ -810,7 +810,7 @@ function PerformancePanel({ site }: { site: SeoSite }) {
   const t = data.totals!
   return (
     <div className="mt-4">
-      <div className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-muted">
+      <div className="mb-2 flex items-center gap-1.5 text-[14.5px] font-medium text-muted">
         <BarChart3 className="h-3.5 w-3.5" /> آخر 28 يومًا · بيانات مباشرة من جوجل
         <button onClick={load} className="ms-auto inline-flex items-center gap-1 text-primary hover:underline">
           <RefreshCw className="h-3 w-3" /> تحديث
@@ -825,12 +825,12 @@ function PerformancePanel({ site }: { site: SeoSite }) {
 
       {data.queries && data.queries.length > 0 && (
         <div className="mt-3 overflow-hidden rounded-xl border border-token">
-          <div className="border-b border-token bg-surface/50 px-3 py-2 text-[11px] font-semibold text-foreground">
+          <div className="border-b border-token bg-surface/50 px-3 py-2 text-[14.5px] font-semibold text-foreground">
             أكثر الكلمات التي يجدك بها الناس
           </div>
           <div className="divide-y divide-token">
             {data.queries.slice(0, 8).map((q, i) => (
-              <div key={i} className="flex items-center justify-between gap-2 px-3 py-1.5 text-[11.5px]">
+              <div key={i} className="flex items-center justify-between gap-2 px-3 py-1.5 text-[14.5px]">
                 <span className="min-w-0 truncate text-foreground" dir="auto">{q.query}</span>
                 <span className="flex flex-shrink-0 items-center gap-3 tabular-nums text-muted">
                   <span title="نقرات">{fmtInt(q.clicks)} نقرة</span>
@@ -906,19 +906,19 @@ function AutoSetupCard({
 
   return (
     <div className="mt-4 rounded-xl border border-token bg-surface/40 p-4">
-      <div className="text-[12.5px] font-semibold text-foreground">اربط الموقع بـ Search Console تلقائيًا</div>
-      <p className="mt-1 text-[11.5px] leading-[1.55] text-muted">
+      <div className="text-[14.5px] font-semibold text-foreground">اربط الموقع بـ Search Console تلقائيًا</div>
+      <p className="mt-1 text-[14.5px] leading-[1.55] text-muted">
         حسابك مربوط. اضغط الزر وستتكفّل زينيا بكل شيء: إضافة الموقع كخاصية، إثبات الملكية، وإرسال خريطة الموقع — دون أي خطوة يدوية.
       </p>
 
       {status === 'reconnect' ? (
         <div className="mt-3">
-          <p className="text-[11.5px] leading-[1.55] text-[#b45309]">
+          <p className="text-[14.5px] leading-[1.55] text-[#b45309]">
             الإعداد التلقائي يحتاج صلاحيات إضافية من جوجل. أعِد الربط مرة واحدة للسماح بالإضافة والتحقّق تلقائيًا.
           </p>
           <a
             href="/api/gsc/connect"
-            className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90"
+            className="mt-2 inline-flex items-center gap-1.5 zy-btn"
           >
             <Link2 className="h-3.5 w-3.5" /> أعِد ربط جوجل لتفعيل الإعداد التلقائي
           </a>
@@ -929,14 +929,14 @@ function AutoSetupCard({
             type="button"
             onClick={run}
             disabled={running}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90 disabled:opacity-60"
+            className="mt-3 inline-flex items-center gap-1.5 zy-btn"
           >
             {running ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
             {running ? 'جارٍ الإعداد…' : status === 'pending' ? 'أعد المحاولة' : 'اربط تلقائيًا الآن'}
           </button>
 
           {status === 'pending' && (
-            <p className="mt-2 text-[11px] leading-[1.55] text-muted">
+            <p className="mt-2 text-[14.5px] leading-[1.55] text-muted">
               خُزِّن رمز التحقّق على موقعك، لكن جوجل لم يلتقطه بعد (قد يستغرق دقيقة بعد النشر). أعد المحاولة بعد لحظات.
               {detail ? <span className="block opacity-70">({detail})</span> : null}
             </p>
@@ -945,7 +945,7 @@ function AutoSetupCard({
       )}
 
       {/* Manual fallback — pre-filled Add-property deep link + copyable URL. */}
-      <details className="mt-3 text-[11px] text-muted">
+      <details className="mt-3 text-[14.5px] text-muted">
         <summary className="cursor-pointer hover:text-foreground">أو أضِفه يدويًا</summary>
         <div className="mt-2">
           <a href={manualUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
@@ -960,7 +960,7 @@ function AutoSetupCard({
 
 function PerfNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-4 flex items-start gap-2 rounded-xl bg-[rgba(94,106,210,0.06)] p-3 text-[11.5px] leading-[1.5] text-muted">
+    <div className="mt-4 flex items-start gap-2 rounded-xl bg-[rgba(94,106,210,0.06)] p-3 text-[14.5px] leading-[1.5] text-muted">
       <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" />
       <span>{children}</span>
     </div>
@@ -970,8 +970,8 @@ function PerfNote({ children }: { children: React.ReactNode }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-token bg-surface/40 px-3 py-2.5">
-      <div className="text-[10.5px] font-medium text-muted">{label}</div>
-      <div className="mt-0.5 text-[18px] font-bold tabular-nums tracking-tight text-foreground" dir="ltr">{value}</div>
+      <div className="text-[14.5px] font-medium text-muted">{label}</div>
+      <div className="mt-0.5 text-[18px] font-bold tabular-nums text-foreground" dir="ltr">{value}</div>
     </div>
   )
 }
@@ -993,7 +993,7 @@ function CopyRow({ value }: { value: string }) {
   }
   return (
     <div className="mt-3 flex items-center gap-2 rounded-lg border border-token bg-surface/50 p-2">
-      <code dir="ltr" className="min-w-0 flex-1 truncate px-2 text-[12px] text-foreground">{value}</code>
+      <code dir="ltr" className="min-w-0 flex-1 truncate px-2 text-[14.5px] text-foreground">{value}</code>
       <a
         href={value}
         target="_blank"
@@ -1006,7 +1006,7 @@ function CopyRow({ value }: { value: string }) {
       <button
         type="button"
         onClick={copy}
-        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[12px] font-medium text-white"
+        className="inline-flex h-8 items-center gap-1.5 rounded-md bg-foreground px-3 text-[14.5px] font-medium text-white"
       >
         {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
         {copied ? 'نُسخ' : 'نسخ'}
@@ -1024,12 +1024,12 @@ function EmptyState() {
         <Globe className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
       <h2 className="zy-h2 mt-4">لا توجد مواقع بعد</h2>
-      <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-[1.6] text-muted">
+      <p className="mx-auto mt-1.5 max-w-md text-[14.5px] leading-[1.6] text-muted">
         أدوات السيو تعمل مع أي موقع منشور على زينيا (على عنوان اسمك.zenyaai.co) أو أي قالب عرض قيد الإعداد. أنشئ موقعًا أو انشر أحد قوالبك لتبدأ.
       </p>
       <Link
         href="/theme/new"
-        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 zy-btn"
       >
         أنشئ موقعًا <ArrowRight className="h-4 w-4 rotate-180" />
       </Link>

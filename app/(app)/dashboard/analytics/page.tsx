@@ -72,7 +72,7 @@ function AnalyticsLocked() {
         </p>
         <Link
           href="/checkout?plan=starter"
-          className="mt-6 inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-[14px] font-semibold text-white btn-shadow-primary transition hover:-translate-y-0.5"
+          className="mt-6 inline-flex items-center justify-center zy-btn"
         >
           الترقية إلى Starter
         </Link>

@@ -170,7 +170,7 @@ export default function TrendChart({
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
         <Segmented items={METRICS} value={metric} onChange={onMetricChange} label="اختر المقياس" />
         {showPrev && (
-          <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-[#56565a]">
+          <span className="flex items-center gap-1.5 text-[14.5px] font-medium text-[#56565a]">
             <svg width="18" height="6" aria-hidden className="shrink-0">
               <line x1="0" y1="3" x2="18" y2="3" stroke="rgba(17,17,17,0.34)" strokeWidth="1.5" strokeDasharray="4 3" />
             </svg>
@@ -317,7 +317,7 @@ export default function TrendChart({
 
         {!hasData && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
-            <p className="max-w-xs rounded-[10px] bg-white/85 px-3 py-2 text-center text-[12.5px] font-medium text-[#56565a] backdrop-blur-sm">
+            <p className="max-w-xs rounded-[10px] bg-white/85 px-3 py-2 text-center text-[14.5px] font-medium text-[#56565a] backdrop-blur-sm">
               لا مشاهدات في هذه المدة. جرّب مدة أطول، أو شارك رابط موقعك لتبدأ الزيارات.
             </p>
           </div>

@@ -39,7 +39,7 @@ export function OverviewPanel({ d }: { d: AnalyticsPayload }) {
           <Section title="أهم الصفحات" hint="أين يقضي الزوّار وقتهم">
             <PanelWithTitle title="الصفحات" hint={`${d.pages.length} صفحة`}>
               {d.pages.length === 0 ? (
-                <div className="px-4 py-8 text-center text-[12.5px] text-muted">لا بيانات بعد</div>
+                <div className="px-4 py-8 text-center text-[14.5px] text-muted">لا بيانات بعد</div>
               ) : (
                 <BarList
                   rows={d.pages.map((p) => ({
@@ -76,7 +76,7 @@ function SitesTable({ d }: { d: AnalyticsPayload }) {
     <Section
       title="تفصيل حسب الموقع"
       action={
-        <Link href="/dashboard/sites" className="text-[12px] font-medium text-primary hover:underline">
+        <Link href="/dashboard/sites" className="text-[14.5px] font-medium text-primary hover:underline">
           إدارة المواقع ←
         </Link>
       }
@@ -101,7 +101,7 @@ function SitesTable({ d }: { d: AnalyticsPayload }) {
                   </div>
                   <div className="min-w-0">
                     <div className="truncate font-medium text-foreground">{s.product_name}</div>
-                    <div className="truncate text-[11.5px] text-muted">
+                    <div className="truncate text-[14.5px] text-muted">
                       {s.is_published && s.slug ? publicSiteHost(s.slug) : `${s.template} · مسودة`}
                     </div>
                   </div>
@@ -116,12 +116,12 @@ function SitesTable({ d }: { d: AnalyticsPayload }) {
                     href={publicSiteUrl(s.slug)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[10.5px] font-semibold text-[#15803d]"
+                    className="inline-flex items-center gap-1 rounded-full bg-[rgba(21,128,61,0.10)] px-2 py-0.5 text-[14.5px] font-semibold text-[#15803d]"
                   >
                     منشور <ExternalLink className="h-2.5 w-2.5" />
                   </a>
                 ) : (
-                  <span className="inline-flex rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[10.5px] font-semibold text-[#b45309]">
+                  <span className="inline-flex rounded-full bg-[rgba(217,119,6,0.10)] px-2 py-0.5 text-[14.5px] font-semibold text-[#b45309]">
                     مسودة
                   </span>
                 )}
@@ -357,18 +357,18 @@ export function ConversionsPanel({ d }: { d: AnalyticsPayload }) {
         <div className="grid gap-5 lg:grid-cols-2">
           <Panel className="overflow-hidden">
             <div className="border-b border-token px-4 py-2.5">
-              <h3 className="text-[13px] font-semibold text-foreground">حسب نوع الإجراء</h3>
+              <h3 className="text-[14.5px] font-semibold text-foreground">حسب نوع الإجراء</h3>
             </div>
             <ul className="divide-y divide-[color:var(--border)]">
               {c.by_type.map((r) => (
                 <li key={r.event_type} className="px-4 py-3">
                   <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-[12.5px] font-medium text-foreground">
+                    <span className="text-[14.5px] font-medium text-foreground">
                       {isEventType(r.event_type) ? EVENT_LABEL_AR[r.event_type] : r.event_type}
                     </span>
-                    <span className="shrink-0 text-[12.5px] tabular-nums text-foreground">
+                    <span className="shrink-0 text-[14.5px] tabular-nums text-foreground">
                       {r.events.toLocaleString('ar')}
-                      <span className="ms-1.5 text-[11px] text-muted">
+                      <span className="ms-1.5 text-[14.5px] text-muted">
                         {r.sessions.toLocaleString('ar')} جلسة
                       </span>
                     </span>
@@ -398,7 +398,7 @@ export function ConversionsPanel({ d }: { d: AnalyticsPayload }) {
 
       <Section title="ماذا يعني هذا">
         <Panel className="p-5">
-          <p className="text-[13px] leading-relaxed text-foreground">
+          <p className="text-[14.5px] leading-relaxed text-foreground">
             من كل <b>{d.totals.sessions.toLocaleString('ar')}</b> جلسة على موقعك، قام{' '}
             <b>{c.total.toLocaleString('ar')}</b> زائر بإجراء تواصل فعلي — أي{' '}
             <b>{c.rate}%</b>. هذا هو الرقم الذي يقيس ما إذا كان موقعك يجلب لك عملاء، لا مجرد زيارات.
@@ -439,8 +439,8 @@ export function InsightsPanel({ d }: { d: AnalyticsPayload }) {
                   <Icon className="h-3.5 w-3.5" strokeWidth={2} style={{ color }} />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[13.5px] font-semibold text-foreground">{ins.title}</h3>
-                  <p className="mt-1 text-[12.5px] leading-relaxed text-muted">{ins.body}</p>
+                  <h3 className="text-[14.5px] font-semibold text-foreground">{ins.title}</h3>
+                  <p className="mt-1 text-[14.5px] leading-relaxed text-muted">{ins.body}</p>
                 </div>
               </div>
             </Panel>
