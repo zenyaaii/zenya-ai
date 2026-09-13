@@ -88,7 +88,7 @@ export default function PublishSiteModal({
     setSubmitting(true)
     setError(null)
     try {
-      const r = await fetch(`/api/themes/${theme.id}/publish`, {
+      const r = await fetch(`/api/templates/${theme.id}/publish`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slug: slug.trim().toLowerCase() }),

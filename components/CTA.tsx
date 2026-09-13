@@ -108,7 +108,7 @@ export default function CTA() {
                 />
               </Link>
               <Link
-                href="/themes"
+                href="/templates"
                 className="inline-flex items-center rounded-md border border-white/20 px-6 py-3 text-[14px] font-medium transition-all duration-150 hover:bg-white/10 active:scale-[0.98]"
                 style={{ color: 'rgba(255,255,255,0.88)' }}
               >

@@ -13,7 +13,7 @@ import Lenis from 'lenis'
 const MARKETING_PATHS = new Set<string>([
   '/',
   '/pricing',
-  '/themes',
+  '/templates',
   '/contact',
   '/terms',
   '/privacy',

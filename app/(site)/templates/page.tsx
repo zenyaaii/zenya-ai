@@ -24,13 +24,13 @@
  *     the style doc says plainly that content never does this.
  *
  *   - SHOPIFY IS A BADGE ON ONE TILE, NOT A SECTION. Exactly one template
- *     carries shopify: true in lib/themes-en.ts and on the live catalogue, and
+ *     carries shopify: true in lib/templates-en.ts and on the live catalogue, and
  *     the live page renders that flag as شوبيفاي / مباشر. Giving the export its
  *     own block would overweight one of eight and re-assert the "Shopify theme
  *     generator" reading that Zenya is not. A badge is proportionate.
  *
  * NOTHING HERE IS INVENTED. Names, short labels and audiences are read from
- * lib/template-pages.tsx; section and preset counts from lib/themes-en.ts; the
+ * lib/template-pages.tsx; section and preset counts from lib/templates-en.ts; the
  * demo routes are the real ones. There are no ratings, no counts of users, no
  * "trusted by". The covers come from themePreview(), the same resolver the live
  * catalogue uses, and every one of the eight resolves to a real screenshot in

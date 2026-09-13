@@ -13,7 +13,7 @@ import {
  * templates that DO work today. No fake countdowns or fabricated numbers.
  */
 export default function ComingSoon({
-  browseHref = '/themes',
+  browseHref = '/templates',
   browseLabel = 'استكشف قوالبنا الأخرى',
   browseTarget,
   onBack,

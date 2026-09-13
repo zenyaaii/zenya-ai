@@ -4,10 +4,10 @@
  * The portal's header, on accounts.zenyaai.co.
  *
  * WHY THE PORTAL DRAWS ITS OWN RATHER THAN RENDERING components/zenya/chrome.
- * The house Header pill links /themes, /pricing and /contact as relative
+ * The house Header pill links /templates, /pricing and /contact as relative
  * paths, which is right everywhere except here: middleware rewrites every
  * unrouted path on this host under /accounts, so those three resolve to
- * /accounts/themes and 404. This header spells the apex out through
+ * /accounts/templates and 404. This header spells the apex out through
  * siteUrl(), which stays relative on localhost and preview deployments where
  * there are no subdomains and the same app serves everything.
  *
@@ -31,7 +31,7 @@ import ZenyaMark from '@/components/ZenyaMark'
 import { dashboardUrl, siteUrl } from '@/lib/portal-urls'
 
 const NAV = [
-  { path: '/themes', label: 'القوالب' },
+  { path: '/templates', label: 'القوالب' },
   { path: '/pricing', label: 'الأسعار' },
   { path: '/contact', label: 'تواصل' },
 ]

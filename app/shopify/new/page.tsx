@@ -212,7 +212,7 @@ function NewThemeContent() {
         <TitleBar title="قريبًا" />
         <div className="mx-auto max-w-5xl px-6 pt-8">
           <ComingSoon
-            browseHref="https://zenyaai.co/themes"
+            browseHref="https://zenyaai.co/templates"
             browseTarget="_blank"
             onBack={() => router.push(`/shopify${qs ? `?${qs}` : ''}`)}
           />

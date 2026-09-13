@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Eye } from 'lucide-react'
-import { THEMES_EN } from '@/lib/themes-en'
+import { THEMES_EN } from '@/lib/templates-en'
 import { auroraTints } from '@/lib/aurora-tints'
 import { themePreview } from '@/lib/theme-previews'
 import { CtaBand } from '@/components/marketing/CompareParts'
@@ -14,13 +14,13 @@ export const metadata: Metadata = {
     'All eight Zenya templates, one per business type: restaurant, app landing page, fashion lookbook, multi-brand catalogue, brand story, services, wellness, and a single-product Shopify storefront. Preview any of them live.',
   keywords: ['Zenya templates', 'AI website templates', 'Arabic website templates', 'restaurant website template'],
   alternates: {
-    canonical: `${SITE}/en/themes`,
-    languages: { en: `${SITE}/en/themes`, ar: `${SITE}/themes`, 'x-default': `${SITE}/themes` },
+    canonical: `${SITE}/en/templates`,
+    languages: { en: `${SITE}/en/templates`, ar: `${SITE}/templates`, 'x-default': `${SITE}/templates` },
   },
   openGraph: {
     title: 'Zenya templates',
     description: 'Eight templates, one per business type. Preview any of them live before you build.',
-    url: `${SITE}/en/themes`,
+    url: `${SITE}/en/templates`,
     type: 'website',
     locale: 'en_US',
   },
@@ -35,7 +35,7 @@ export default function EnThemes() {
     '@type': 'CollectionPage',
     inLanguage: 'en',
     name: 'Zenya templates',
-    url: `${SITE}/en/themes`,
+    url: `${SITE}/en/templates`,
     description: 'The eight Zenya website templates, one per business type.',
   }
 

@@ -62,7 +62,7 @@ export default function SitesPage() {
         .select('plan, is_pro, has_hosting, entry_unlocked, created_at')
         .eq('id', user.id)
         .maybeSingle(),
-      fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
+      fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })),
     ])
 
     setProfile((profileRow as unknown as Profile) || null)
@@ -85,7 +85,7 @@ export default function SitesPage() {
       tone: 'danger',
     })
     if (!confirmed) return
-    const r = await fetch(`/api/themes/${theme.id}/publish`, { method: 'DELETE' })
+    const r = await fetch(`/api/templates/${theme.id}/publish`, { method: 'DELETE' })
     if (r.ok) {
       refreshTheme(theme.id, { is_published: false })
       toast({ type: 'success', message: 'تم إلغاء نشر الموقع.' })
@@ -108,7 +108,7 @@ export default function SitesPage() {
     })
     if (!confirmed) return
     const r = await fetch(
-      `/api/themes/${theme.id}${checked ? '?deleteImages=1' : ''}`,
+      `/api/templates/${theme.id}${checked ? '?deleteImages=1' : ''}`,
       { method: 'DELETE' },
     )
     if (!r.ok) {
@@ -211,7 +211,7 @@ export default function SitesPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href="/themes"
+            href="/templates"
             className="hidden items-center gap-1.5 rounded-full zy-card px-3 py-2 text-[14.5px] font-medium text-muted hover:bg-black/5 sm:inline-flex"
           >
             تصفّح القوالب
@@ -476,7 +476,7 @@ function EmptyState() {
         أنشئ موقعًا جديدًا
       </Link>
       <div className="mt-4">
-        <Link href="/themes" className="text-[14.5px] text-muted hover:text-foreground">
+        <Link href="/templates" className="text-[14.5px] text-muted hover:text-foreground">
           أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
@@ -583,7 +583,7 @@ function SiteRow({
         )}
         {isEcom && isPro && (
           <a
-            href={`/api/themes/${theme.id}/export-shopify`}
+            href={`/api/templates/${theme.id}/export-shopify`}
             className="zy-btn"
           >
             Shopify ZIP

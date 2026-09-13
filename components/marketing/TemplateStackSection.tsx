@@ -33,9 +33,9 @@ type Template = {
   buildHref: string
 }
 
-// All fields below mirror the canonical /themes page (the single source of
+// All fields below mirror the canonical /templates page (the single source of
 // truth for template metadata in the marketing surface). If you rename a
-// template, change a demo URL, or swap a cover photo, update /themes first
+// template, change a demo URL, or swap a cover photo, update /templates first
 // and then mirror here — don't drift.
 const TEMPLATES: Template[] = [
   {
@@ -290,7 +290,7 @@ export default function TemplateStackSection() {
           أنشئ قالبك
         </Link>
         <Link
-          href="/themes"
+          href="/templates"
           className="inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-6 py-3 text-[14px] font-semibold text-foreground backdrop-blur transition hover:bg-white"
         >
           شاهد كل القوالب

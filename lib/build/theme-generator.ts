@@ -266,7 +266,7 @@ function fileSettingsSchema(c: BuildConfig): string {
         theme_name: 'Zenya Dropship',
         theme_version: '1.0.0',
         theme_author: 'Zenya AI',
-        theme_documentation_url: 'https://zenyaai.co/docs/themes',
+        theme_documentation_url: 'https://zenyaai.co/docs/templates',
         theme_support_url: 'https://zenyaai.co/support',
       },
       {

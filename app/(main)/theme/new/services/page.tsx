@@ -298,7 +298,7 @@ export default function ServicesWizardPage() {
       }
 
       const preset = SERVICE_PRESETS.find((item) => item.id === form.style_preset) || SERVICE_PRESETS[0]
-      const saveRes = await fetch('/api/themes', {
+      const saveRes = await fetch('/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

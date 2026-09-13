@@ -561,7 +561,7 @@ export default function RestaurantWizardPage() {
 
       const preset = RESTAURANT_PRESETS.find((p) => p.id === form.style_preset) || RESTAURANT_PRESETS[0]
 
-      const saveRes = await fetch('/api/themes', {
+      const saveRes = await fetch('/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

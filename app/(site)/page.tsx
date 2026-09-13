@@ -269,14 +269,14 @@ const CLAIM_GAP = 280
 /* Only القوالب carries a tray. الأسعار and تواصل are single destinations, so
    hovering them closes whatever is open rather than opening an empty tray. */
 const NAV: Array<{ href: string; label: string; panel?: PanelId }> = [
-  { href: "/themes", label: "القوالب", panel: "themes" },
+  { href: "/templates", label: "القوالب", panel: "themes" },
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
 
 type PanelId = "themes" | "account"
 
-/* The eight templates, labelled as they are on /themes and pointing at the
+/* The eight templates, labelled as they are on /templates and pointing at the
    same no-auth previews. These are the one set of /demo addresses that stayed
    where they were: they preview what the product GENERATES for a customer,
    which is not a page of this site and was never a candidate for one. The
@@ -4463,7 +4463,7 @@ export default function Page() {
                     {/* The candidate catalogue, matching the nav item this
                         tray hangs off. */}
                     <Link
-                      href="/themes"
+                      href="/templates"
                       onClick={() => setPanel(null)}
                       className={`${ROW} mt-1.5 pt-2.5`}
                       style={{ color: OBSIDIAN, borderTop: "1px solid rgba(0,0,0,0.07)" }}

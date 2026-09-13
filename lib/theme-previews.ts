@@ -1,7 +1,7 @@
 /**
  * Single source of truth for theme card cover images.
  *
- * Every surface that lists templates (the public /themes catalog, the
+ * Every surface that lists templates (the public /templates catalog, the
  * /theme/new wizard picker, the marketing TemplateStackSection on the
  * landing page, the dashboard SiteCard) reads from this map so swapping
  * a screenshot only requires touching one file.

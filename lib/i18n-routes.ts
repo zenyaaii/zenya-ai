@@ -25,7 +25,7 @@ export const BILINGUAL_ROUTES = [
   '/compare',
   '/pricing',
   '/faq',
-  '/themes',
+  '/templates',
   '/about',
   '/contact',
   '/privacy',

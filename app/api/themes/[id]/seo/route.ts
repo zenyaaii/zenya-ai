@@ -15,7 +15,7 @@ function admin() {
 }
 
 /**
- * GET /api/themes/[id]/seo
+ * GET /api/templates/[id]/seo
  * Returns the theme's current SEO overrides + the auto-derived resolved values
  * (so the editor can show placeholders and the live SERP preview).
  */
@@ -41,7 +41,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 /**
- * PATCH /api/themes/[id]/seo
+ * PATCH /api/templates/[id]/seo
  * Body: { title?, description?, keywords?, ogImage?, gscVerification?, noindex? }
  * Merges the given SEO overrides into themes.content.seo (leaving the rest of
  * the content untouched). Empty string clears an override.
@@ -115,7 +115,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .single()
 
   if (error) {
-    console.error('[/api/themes/[id]/seo] update failed', error)
+    console.error('[/api/templates/[id]/seo] update failed', error)
     return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
   }
 

@@ -73,6 +73,29 @@ const nextConfig = {
     // app in Admin, but the storefront app-proxy (apps/zenya -> /app) does not,
     // so this can't hijack proxy traffic.
     return [
+      // /themes IS NOW /templates. The page has always been the template
+      // gallery; "themes" was the internal word for what a customer calls a
+      // template, and the URL said the internal one.
+      //
+      // PERMANENT, unlike the two below it. This rename is not coming back,
+      // and a 301 is what moves the page's search ranking to the new address
+      // rather than splitting it across two. Every internal link was updated
+      // in the same commit, so this redirect exists for the outside world:
+      // links already shared, and anything Google has indexed.
+      //
+      // The :slug form is not needed — /themes never had children — but the
+      // bare source also catches /themes/ with the trailing slash.
+      {
+        source: '/themes',
+        destination: '/templates',
+        permanent: true,
+      },
+      // The English route moved with it, for the same reason.
+      {
+        source: '/en/themes',
+        destination: '/en/templates',
+        permanent: true,
+      },
       {
         source: '/app',
         has: [{ type: 'query', key: 'host' }],

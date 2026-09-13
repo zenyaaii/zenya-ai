@@ -12,7 +12,7 @@ import { HALT, KEY, THINK, makeRunner, useFit, type Cursor } from "./runner"
    Section two: ابن — the build step.
 
    The first of the hero's three words, shown rather than described. The
-   section drives the product's own path: the eight templates as /themes
+   section drives the product's own path: the eight templates as /templates
    lists them, the real wizard behind the one that is picked, and the real
    form filling itself in.
 
@@ -29,7 +29,7 @@ import { HALT, KEY, THINK, makeRunner, useFit, type Cursor } from "./runner"
 
 const OBSIDIAN = "#171717"
 
-/* The eight, in the order /themes lists them and with the same Arabic
+/* The eight, in the order /templates lists them and with the same Arabic
    labels (lib/aurora-tints), the same taglines and the same createHref. The
    template the cursor picks is the one a reader clicking here would land on. */
 const TEMPLATES = [
@@ -344,7 +344,7 @@ export default function BuildSection({
             the first beat: the picker really does open the wizard. */}
         <div className="zn-path" dir="ltr">
           <span>zenyaai.co</span>
-          <b>{view === "picker" ? "/themes" : tpl.path}</b>
+          <b>{view === "picker" ? "/templates" : tpl.path}</b>
         </div>
 
         <div className="zn-stage" ref={stageRef}>

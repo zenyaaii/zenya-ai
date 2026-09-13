@@ -1,9 +1,9 @@
 import type { auroraTints } from '@/lib/aurora-tints'
 
 /**
- * English copy for the eight templates, for /en/themes.
+ * English copy for the eight templates, for /en/templates.
  *
- * Mirrors the THEMES map in app/(main)/themes/page.tsx — the Arabic page keeps
+ * Mirrors the THEMES map in app/(main)/templates/page.tsx — the Arabic page keeps
  * its own copy, and this module carries the English equivalent, matching the
  * pattern already used by comparisons-en.ts and template-pages-en.tsx.
  *

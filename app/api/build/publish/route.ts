@@ -211,7 +211,7 @@ export async function POST(req: NextRequest) {
             }
           : null,
         productError,
-        themesUrl: `https://admin.shopify.com/store/${storeHandleForFallback}/themes`,
+        themesUrl: `https://admin.shopify.com/store/${storeHandleForFallback}/templates`,
       })
     }
 
@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
       processing: theme.processing,
       previewUrl: theme.previewUrl,
       editorUrl: theme.editorUrl,
-      themesUrl: `https://admin.shopify.com/store/${storeHandle}/themes`,
+      themesUrl: `https://admin.shopify.com/store/${storeHandle}/templates`,
     },
     product: product
       ? {

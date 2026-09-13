@@ -60,7 +60,7 @@ export default function EnWhyArticle({ params }: { params: { slug: string } }) {
         <Breadcrumbs
           trail={[
             { label: 'Home', href: '/en' },
-            { label: 'Templates', href: '/en/themes' },
+            { label: 'Templates', href: '/en/templates' },
             { label: a.templateName },
           ]}
         />

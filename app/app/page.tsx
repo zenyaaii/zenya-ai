@@ -59,7 +59,7 @@ export default function AppHome() {
             </Link>
 
             <Link 
-              href={`/dashboard/themes?${queryString}`}
+              href={`/dashboard/templates?${queryString}`}
               className="flex flex-col items-center p-8 border-2 border-slate-100 rounded-xl hover:border-purple-600 hover:bg-purple-50 hover:shadow-lg transition group bg-white"
             >
                <div className="bg-purple-100 p-4 rounded-full mb-4 group-hover:bg-purple-200 transition">

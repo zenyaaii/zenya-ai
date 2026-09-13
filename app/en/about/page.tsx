@@ -157,7 +157,7 @@ export default function EnAbout() {
           subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Start building free"
           secondaryLabel="Browse templates"
-          secondaryHref="/en/themes"
+          secondaryHref="/en/templates"
         />
       </div>
     </main>
