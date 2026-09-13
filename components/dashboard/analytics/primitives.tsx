@@ -26,7 +26,7 @@ export function Section({
     <section className={'mt-7 ' + className}>
       <div className="mb-2.5 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="zy-h2">{title}</h2>
-        {action ?? (hint && <span className="text-[11.5px] font-medium text-[#66666e]">{hint}</span>)}
+        {action ?? (hint && <span className="text-[14.5px] font-medium text-[#66666e]">{hint}</span>)}
       </div>
       {children}
     </section>
@@ -58,14 +58,14 @@ export function Delta({
 }) {
   if (value == null) {
     return (
-      <span className={'inline-flex items-center gap-0.5 text-[11.5px] text-muted/70 ' + className}>
+      <span className={'inline-flex items-center gap-0.5 text-[14.5px] text-muted/70 ' + className}>
         <Minus className="h-3 w-3" strokeWidth={2} /> جديد
       </span>
     )
   }
   if (value === 0) {
     return (
-      <span className={'inline-flex items-center gap-0.5 text-[11.5px] text-muted ' + className}>
+      <span className={'inline-flex items-center gap-0.5 text-[14.5px] text-muted ' + className}>
         <Minus className="h-3 w-3" strokeWidth={2} /> 0%
       </span>
     )
@@ -76,7 +76,7 @@ export function Delta({
   return (
     <span
       className={
-        'inline-flex items-center gap-0.5 text-[11.5px] font-medium tabular-nums ' +
+        'inline-flex items-center gap-0.5 text-[14.5px] font-medium tabular-nums ' +
         (good ? 'text-[#15803d] ' : 'text-[#b91c1c] ') + className
       }
     >
@@ -174,7 +174,7 @@ export function BarList({
 }) {
   const shown = rows.slice(0, maxRows)
   if (shown.length === 0) {
-    return <div className="px-4 py-8 text-center text-[12.5px] text-muted">{emptyLabel}</div>
+    return <div className="px-4 py-8 text-center text-[14.5px] text-muted">{emptyLabel}</div>
   }
   const total = shown.reduce((s, r) => s + r[metric], 0) || 1
   const max = Math.max(1, ...shown.map((r) => r[metric]))
@@ -192,12 +192,12 @@ export function BarList({
               aria-hidden
             />
             <div className="relative flex items-baseline justify-between gap-3">
-              <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-foreground">
+              <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium text-foreground">
                 {renderName ? renderName(r) : r.name}
               </span>
-              <span className="shrink-0 whitespace-nowrap text-[12.5px] tabular-nums text-foreground">
+              <span className="shrink-0 whitespace-nowrap text-[14.5px] tabular-nums text-foreground">
                 {v.toLocaleString('ar')}
-                <span className="ms-1.5 text-[11px] text-muted">
+                <span className="ms-1.5 text-[14.5px] text-muted">
                   {Math.round((v / total) * 100)}%
                 </span>
               </span>
@@ -220,8 +220,8 @@ export function PanelWithTitle({
   return (
     <Panel className="overflow-hidden">
       <div className="flex items-baseline justify-between gap-2 border-b border-token px-4 py-2.5">
-        <h3 className="text-[13px] font-semibold text-foreground">{title}</h3>
-        {hint && <span className="text-[10px] uppercase tracking-[0.14em] text-muted/70">{hint}</span>}
+        <h3 className="text-[14.5px] font-semibold text-foreground">{title}</h3>
+        {hint && <span className="text-[14.5px] uppercase tracking-[0.14em] text-muted/70">{hint}</span>}
       </div>
       {children}
       {footer}
@@ -235,7 +235,7 @@ export function Th({ children, align = 'start' }: { children: React.ReactNode; a
   return (
     <th
       className={
-        'whitespace-nowrap px-4 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted ' +
+        'whitespace-nowrap px-4 py-2.5 text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted ' +
         (align === 'end' ? 'text-end' : 'text-start')
       }
     >
@@ -263,7 +263,7 @@ export function TableWrap({ children }: { children: React.ReactNode }) {
   return (
     <Panel className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-start text-[13px]">{children}</table>
+        <table className="w-full min-w-[520px] text-start text-[14.5px]">{children}</table>
       </div>
     </Panel>
   )
@@ -285,11 +285,11 @@ export function EmptyState({
         <Icon className="h-5 w-5 text-primary" strokeWidth={1.75} />
       </div>
       <h3 className="mt-3 text-[15px] font-semibold text-foreground">{title}</h3>
-      <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">{body}</p>
+      <p className="mx-auto mt-1.5 max-w-md text-[14.5px] leading-relaxed text-muted">{body}</p>
       {cta && (
         <Link
           href={cta.href}
-          className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white transition hover:bg-[var(--primary-600)]"
+          className="mt-5 inline-flex items-center gap-1.5 zy-btn"
         >
           {cta.label}
           <ArrowUpRight className="h-3 w-3 rtl-flip" />
@@ -315,5 +315,5 @@ export function SkeletonBlock({ height = 'h-64' }: { height?: string }) {
 
 /** A short line that says where a number came from, so nothing looks magic. */
 export function Note({ children }: { children: React.ReactNode }) {
-  return <p className="mt-2 text-[11.5px] leading-relaxed text-muted">{children}</p>
+  return <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{children}</p>
 }

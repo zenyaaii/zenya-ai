@@ -138,10 +138,10 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
         <Panel className="p-8 text-center">
           <BarChart3 className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
           <h2 className="mt-3 text-[16px] font-semibold text-foreground">تعذّر تحميل التحليلات</h2>
-          <p className="mt-1 text-[13px] text-muted">{error}</p>
+          <p className="mt-1 text-[14.5px] text-muted">{error}</p>
           <button
             onClick={() => { setLoading(true); load() }}
-            className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[12.5px] font-semibold text-white"
+            className="mt-5 inline-flex items-center gap-1.5 zy-btn"
           >
             <RefreshCw className="h-3 w-3" /> حاول مجددًا
           </button>
@@ -166,7 +166,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       >
         <div className="min-w-0">
           <h1 className="zy-h1">التحليلات</h1>
-          <p className="mt-1.5 text-[13px] font-medium leading-[1.8] text-[#56565a]">
+          <p className="mt-1.5 text-[14.5px] font-medium leading-[1.8] text-[#56565a]">
             كل ما يحدث على مواقعك المنشورة — الزوّار، ومن أين أتوا، وماذا فعلوا.
           </p>
         </div>
@@ -204,7 +204,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       {/* KPI tiles (persist across tabs).
 
           THE SIX ACCENT COLOURS ARE GONE. Each tile used to pass its own hue
-          - #5e6ad2, #4f5ab8, #15803d, #b45309, #9b6f00, #c8a96a - so the row
+          - #5e6ad2, #4f5ab8, #15803d, #b45309, #b45309, #c8a96a - so the row
           read as six categories when it is one: six measures of the same
           traffic. Worse, three of those were the status triad used as
           identity, which is the one thing status colour must never do; a page
@@ -253,7 +253,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       </section>
 
       {data.sessions_since === null && t.views > 0 && (
-        <p className="mt-3 rounded-[10px] bg-[#f4f4f6] px-3 py-2.5 text-[11.5px] font-medium leading-[1.8] text-[#56565a]" style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.08)' }}>
+        <p className="mt-3 rounded-[10px] bg-[#f4f4f6] px-3 py-2.5 text-[14.5px] font-medium leading-[1.8] text-[#56565a]" style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.08)' }}>
           الزوّار والجلسات ومعدل المغادرة والمدة تُقاس منذ تفعيل القياس الجديد فقط. المشاهدات
           الأقدم من ذلك مسجّلة، لكن بلا تفاصيل الجلسة — لذلك تظهر أصفارًا هنا بدل أرقام مُختلَقة.
         </p>
@@ -297,7 +297,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
       {tab === 'realtime' && <RealtimePanel site={site} includeBots={includeBots} />}
       {tab === 'insights' && <InsightsPanel d={data} />}
 
-      <p className="mt-10 text-center text-[11.5px] font-medium leading-[1.8] text-[#66666e]">
+      <p className="mt-10 text-center text-[14.5px] font-medium leading-[1.8] text-[#66666e]">
         آخر تحديث {new Date(data.generated_at).toLocaleString('ar')} · التوقيت {data.tz}
         {!data.include_bots && ' · زيارات الروبوتات مستبعدة'}
       </p>
@@ -356,7 +356,7 @@ function ControlBar({
           value={site}
           onChange={(e) => setSite(e.target.value)}
           aria-label="اختر الموقع"
-          className="max-w-[190px] px-2.5 py-[7px] text-[12.5px] font-medium"
+          className="max-w-[190px] px-2.5 py-[7px] text-[14.5px] font-medium"
         >
           <option value="">كل المواقع ({data.sites.length})</option>
           {data.sites.map((s) => (
@@ -408,7 +408,7 @@ function ControlBar({
                 {x.label}
               </a>
             ))}
-            <p className="mt-1 border-t border-[rgba(17,17,17,0.07)] px-2.5 pb-1 pt-2 text-[11px] font-medium leading-[1.7] text-[#66666e]">
+            <p className="mt-1 border-t border-[rgba(17,17,17,0.07)] px-2.5 pb-1 pt-2 text-[14.5px] font-medium leading-[1.7] text-[#66666e]">
               ملف CSV يفتح مباشرة في Excel بالعربية.
             </p>
           </div>

@@ -140,7 +140,7 @@ export default function BookingsInbox({
             <CalendarCheck className="h-[22px] w-[22px] shrink-0 text-[#5e6ad2]" strokeWidth={2} />
             الحجوزات
           </h1>
-          <p className="mt-1.5 text-[13px] font-medium leading-[1.8] text-[#56565a]">
+          <p className="mt-1.5 text-[14.5px] font-medium leading-[1.8] text-[#56565a]">
             كل طلبات الحجز والمواعيد التي يرسلها زوّار مواقعك تصلك هنا.
           </p>
         </div>
@@ -209,7 +209,7 @@ function AccessBanner({
           <span className="font-semibold">تجربة مجانية</span> — تبقّى{' '}
           <span className="font-bold text-primary">{access.daysLeft}</span> يومًا. الحجوزات ميزة في باقة Starter.
         </p>
-        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
+        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 zy-btn">
           الترقية إلى Starter <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -223,7 +223,7 @@ function AccessBanner({
           <span className="font-semibold">انتهت تجربتك المجانية.</span>{' '}
           توقّف استقبال الحجوزات الجديدة على مواقعك — رقِّ إلى Starter لإعادة تفعيلها.
         </p>
-        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-[12.5px] font-semibold text-white hover:opacity-90">
+        <Link href="/checkout?plan=starter" className="inline-flex items-center gap-1 zy-btn">
           الترقية إلى Starter <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -244,7 +244,7 @@ function AccessBanner({
       <button
         onClick={onStart}
         disabled={starting}
-        className="mt-5 inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+        className="mt-5 inline-flex items-center gap-1.5 zy-btn"
       >
         <Sparkles className="h-4 w-4" />
         {starting ? 'جارٍ التفعيل…' : 'ابدأ الشهر المجاني'}
@@ -278,7 +278,7 @@ function BookingCard({
               {TYPE_AR[b.booking_type]}
             </span>
           </div>
-          <p className="mt-1 text-[11.5px] font-medium leading-[1.7] text-[#66666e]">
+          <p className="mt-1 text-[14.5px] font-medium leading-[1.7] text-[#66666e]">
             {siteName}{createdLabel ? ` · ${createdLabel}` : ''}
           </p>
         </div>
@@ -288,7 +288,7 @@ function BookingCard({
       </div>
 
       {/* Details */}
-      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-foreground">
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] text-foreground">
         {b.phone && (
           <a href={`tel:${b.phone}`} className="inline-flex items-center gap-1.5 hover:text-primary" dir="ltr">
             <Phone className="h-3.5 w-3.5 text-muted" /> {b.phone}
@@ -318,19 +318,19 @@ function BookingCard({
       </div>
 
       {b.message && (
-        <p className="mt-3 rounded-lg bg-[rgba(28,28,28,0.03)] px-3 py-2 text-[13px] leading-relaxed text-foreground">
+        <p className="mt-3 rounded-lg bg-[rgba(28,28,28,0.03)] px-3 py-2 text-[14.5px] leading-relaxed text-foreground">
           {b.message}
         </p>
       )}
 
       {/* Status control */}
       <div className="mt-3.5 flex items-center gap-2 border-t border-token pt-3">
-        <span className="text-[11.5px] text-muted">الحالة</span>
+        <span className="text-[14.5px] text-muted">الحالة</span>
         <select
           value={b.status}
           disabled={saving}
           onChange={(e) => onStatus(e.target.value as StatusKey)}
-          className="rounded-md zy-card px-2 py-1 text-[12.5px] text-foreground outline-none focus:border-primary disabled:opacity-60"
+          className="rounded-md zy-card px-2 py-1 text-[14.5px] text-foreground outline-none focus:border-primary disabled:opacity-60"
         >
           {STATUS_ORDER.map((s) => (
             <option key={s} value={s}>{STATUS_AR[s]}</option>
@@ -350,7 +350,7 @@ function EmptyState({ hasAny, hasSites }: { hasAny: boolean; hasSites: boolean }
       <p className="text-sm font-semibold text-foreground">
         {hasAny ? 'لا توجد حجوزات بهذه الحالة' : 'لا توجد حجوزات بعد'}
       </p>
-      <p className="mx-auto mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted">
+      <p className="mx-auto mt-1.5 max-w-sm text-[14.5px] leading-relaxed text-muted">
         {hasAny
           ? 'جرّب تبديل الفلتر بالأعلى لعرض حجوزات بحالة أخرى.'
           : hasSites

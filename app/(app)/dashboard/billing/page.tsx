@@ -62,12 +62,26 @@ export default function BillingPage() {
   const purchased = profile?.pro_purchased_at ? new Date(profile.pro_purchased_at) : null
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <header className="mb-6 border-b border-token pb-5">
-        <h1 className="text-[24px] font-bold tracking-tight text-foreground">الفوترة</h1>
-        <p className="mt-1 text-[13px] text-muted">
-          باقتك، وسجلّ الدفع، وبوابة عملاء Stripe — الفواتير وطرق الدفع المحفوظة.
-        </p>
+    <div className="mx-auto w-full max-w-7xl px-6 py-8">
+      {/* The head every screen in app/demo/dashboard uses: an icon chip, the
+          title, and one sentence saying what the screen is for. The rule
+          underneath it goes — a border-b under a heading is a second
+          separator on a surface whose cards already separate themselves. */}
+      <header className="mb-6 flex items-start gap-3">
+        <div
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+          style={{ background: 'var(--field)', color: 'var(--stone)' }}
+        >
+          <CreditCard className="h-5 w-5" strokeWidth={1.8} />
+        </div>
+        <div className="min-w-0">
+          {/* was negative tracking on Arabic, whose letterforms
+              connect. */}
+          <h1 className="zy-h1">الفوترة</h1>
+          <p className="zy-sub mt-1">
+            باقتك، وسجلّ الدفع، وبوابة عملاء Stripe — الفواتير وطرق الدفع المحفوظة.
+          </p>
+        </div>
       </header>
 
       {loading ? (
@@ -92,7 +106,7 @@ export default function BillingPage() {
                 {plan === 'admin' && <PlanHeader icon="★" tint="#9b6f00" label="مشرف · كل المزايا" />}
                 {plan === 'free' && <PlanHeader icon=" " tint="#6b6b6b" label="الباقة المجانية" />}
 
-                <div className="mt-2 text-[26px] font-bold tracking-tight text-foreground">
+                <div className="mt-2 text-[26px] font-bold text-foreground">
                   {plan === 'pro_hosting' && '19.99$ / شهريًا'}
                   {plan === 'pro_onetime' && '9.99$ دُفعت مرة واحدة'}
                   {plan === 'starter' && '14.99$ / شهريًا'}
@@ -101,7 +115,7 @@ export default function BillingPage() {
                   {plan === 'free' && '$0'}
                 </div>
 
-                <div className="mt-1 text-[13px] text-muted">
+                <div className="mt-1 text-[14.5px] text-muted">
                   {(plan === 'pro_hosting' || plan === 'starter' || plan === 'pro') && renews && <>يتجدّد {renews.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
                   {plan === 'pro_onetime' && purchased && <>وصول مدى الحياة · تم الشراء {purchased.toLocaleDateString(undefined, { dateStyle: 'medium' })}</>}
                   {plan === 'free' && 'توليدان مجانيان عند التسجيل. بلا اشتراك.'}
@@ -114,19 +128,19 @@ export default function BillingPage() {
                 {plan === 'free' && (
                   <>
                     <Link href="/pricing?upgrade=starter"
-                          className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
+                          className="zy-btn">
                       اشترك في Starter · 14.99$/شهريًا
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
                     <Link href="/pricing?upgrade=pro"
-                          className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                          className="zy-btn-q">
                       اشترك في Pro · 24.99$ شهريًا
                     </Link>
                   </>
                 )}
                 {plan === 'pro_onetime' && (
                   <Link href="/pricing?upgrade=pro"
-                        className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
+                        className="zy-btn">
                     أضف الاستضافة · 19.99$ شهريًا
                     <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                   </Link>
@@ -134,12 +148,12 @@ export default function BillingPage() {
                 {plan === 'starter' && (
                   <>
                     <Link href="/pricing?upgrade=pro"
-                          className="inline-flex items-center justify-center gap-1 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white">
+                          className="zy-btn">
                       الترقية إلى Pro · 24.99$ شهريًا
                       <ArrowRight className="h-3 w-3 rtl-flip" strokeWidth={2.5} />
                     </Link>
                     <button onClick={openPortal} disabled={portalBusy}
-                            className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                            className="zy-btn-q">
                       <CreditCard className="h-3 w-3" />
                       {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
                     </button>
@@ -147,7 +161,7 @@ export default function BillingPage() {
                 )}
                 {(plan === 'pro_hosting' || plan === 'pro') && (
                   <button onClick={openPortal} disabled={portalBusy}
-                          className="inline-flex items-center justify-center gap-1 rounded-full zy-card px-4 py-2 text-[12.5px] font-semibold text-foreground hover:bg-black/5">
+                          className="zy-btn-q">
                     <CreditCard className="h-3 w-3" />
                     {portalBusy ? 'جارٍ الفتح…' : 'إدارة الاشتراك'}
                   </button>
@@ -164,8 +178,8 @@ export default function BillingPage() {
 
           {/* What's included */}
           <section className="mt-4 rounded-2xl zy-card p-6">
-            <h2 className="text-[15px] font-semibold tracking-tight text-foreground">ما هو مشمول</h2>
-            <ul className="mt-3 space-y-2 text-[13px]">
+            <h2 className="zy-h3">ما هو مشمول</h2>
+            <ul className="mt-3 space-y-2 text-[14.5px]">
               <Included on={true}                  label="مجاني · موقعان بالذكاء الاصطناعي" />
               <Included on={plan !== 'free'}       label="برو · توليد غير محدود" />
               <Included on={plan !== 'free'}       label="برو · تصدير ثيم شوبيفاي جاهز" />
@@ -183,7 +197,7 @@ export default function BillingPage() {
 
 function PlanHeader({ icon, tint, label }: { icon: string; tint: string; label: string }) {
   return (
-    <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: tint }}>
+    <div className="flex items-center gap-1.5 text-[14.5px] font-semibold uppercase tracking-[0.14em]" style={{ color: tint }}>
       {icon !== ' ' && (icon === '✓' ? <CheckCircle2 className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />)}
       {label}
     </div>

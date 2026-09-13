@@ -109,7 +109,7 @@ export default function SearchPanel({
     <select
       value={active}
       onChange={(e) => onPickSite(e.target.value)}
-      className="rounded-md zy-card px-2.5 py-1.5 text-[12.5px] text-foreground outline-none focus:border-primary"
+      className="rounded-md zy-card px-2.5 py-1.5 text-[14.5px] text-foreground outline-none focus:border-primary"
       aria-label="اختر الموقع"
     >
       {published.map((s) => (
@@ -123,17 +123,17 @@ export default function SearchPanel({
       <Section title="أداء البحث" action={siteSelector}>
         <Panel className="p-6">
           <h3 className="text-[15px] font-semibold text-foreground">هذا الموقع غير مُضاف في Search Console</h3>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+          <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">
             حسابك مرتبط ({status.email})، لكن لم نجد هذا الموقع ضمن خصائصك. أضف العنوان التالي
             كخاصية جديدة في Search Console:
           </p>
-          <code className="mt-3 block rounded-lg bg-black/[0.04] px-3 py-2 text-[12.5px] text-foreground" dir="ltr">
+          <code className="mt-3 block rounded-lg bg-black/[0.04] px-3 py-2 text-[14.5px] text-foreground" dir="ltr">
             {perf.expectedProperty}
           </code>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link
               href="/dashboard/seo"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-[12.5px] font-semibold text-white hover:opacity-90"
+              className="inline-flex items-center gap-1.5 zy-btn"
             >
               الإعداد التلقائي بنقرة في صفحة السيو ←
             </Link>
@@ -141,7 +141,7 @@ export default function SearchPanel({
               href={`https://search.google.com/search-console/welcome?resource_id=${encodeURIComponent(perf.expectedProperty || '')}`}
               target="_blank"
               rel="noreferrer"
-              className="text-[12.5px] font-medium text-primary hover:underline"
+              className="text-[14.5px] font-medium text-primary hover:underline"
             >
               أو أضِفه يدويًا
             </a>

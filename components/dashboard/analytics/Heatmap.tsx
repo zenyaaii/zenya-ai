@@ -36,7 +36,7 @@ export default function Heatmap({
 
   if (total === 0) {
     return (
-      <div className="px-4 py-10 text-center text-[12.5px] text-muted">
+      <div className="px-4 py-10 text-center text-[14.5px] text-muted">
         لا توجد زيارات كافية بعد لرسم خريطة الأوقات.
       </div>
     )
@@ -59,7 +59,7 @@ export default function Heatmap({
 
           {grid.map((row, dow) => (
             <div key={dow} className="mt-1 flex items-center gap-1">
-              <div className="w-11 shrink-0 text-[11px] text-muted">{DOW_SHORT[dow]}</div>
+              <div className="w-11 shrink-0 text-[14.5px] text-muted">{DOW_SHORT[dow]}</div>
               {row.map((v, hour) => {
                 // sqrt scale: linear washes out everything but the single peak
                 const intensity = max === 0 ? 0 : Math.sqrt(v / max)
@@ -87,7 +87,7 @@ export default function Heatmap({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11.5px] text-muted">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[14.5px] text-muted">
         <span>
           {hover
             ? `${DOW_AR[hover.dow]} · ${hover.hour}:00 — ${hover.views.toLocaleString('ar')} مشاهدة`

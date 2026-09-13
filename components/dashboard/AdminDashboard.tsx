@@ -67,17 +67,17 @@ export default function AdminDashboard() {
         className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
       >
         <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground sm:text-[24px]">
+          <h1 className="text-[22px] font-bold text-foreground sm:text-[24px]">
             الإدارة · الأعمال
           </h1>
-          <p className="mt-1 text-[13px] text-muted">
+          <p className="mt-1 text-[14.5px] text-muted">
             مسار التحويل والإيرادات واقتصاديات الوحدة على مستوى المنصة · عرض المؤسس.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard/analytics"
-            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-muted transition hover:bg-black/5"
           >
             تحليلات مواقعي
             <ArrowRight className="h-3 w-3 rtl-flip" />
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => load(true)}
             disabled={refreshing}
-            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[12px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-muted transition hover:bg-black/5 disabled:opacity-60"
           >
             <RefreshCw className={'h-3 w-3 ' + (refreshing ? 'animate-spin' : '')} />
             {refreshing ? 'جارٍ التحديث…' : 'تحديث'}
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
           {[0, 1, 2, 3].map((i) => <SkeletonTile key={i} />)}
         </div>
       ) : err || !d ? (
-        <Panel className="mt-8 p-8 text-center text-[13px] text-muted">{err || 'لا بيانات'}</Panel>
+        <Panel className="mt-8 p-8 text-center text-[14.5px] text-muted">{err || 'لا بيانات'}</Panel>
       ) : (
         <AdminBody d={d} usd={usd} />
       )}
@@ -149,7 +149,7 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
             const conv = topUsers ? Math.round((f.users / topUsers) * 100) : 0
             return (
               <div key={f.step}>
-                <div className="flex items-baseline justify-between text-[12.5px]">
+                <div className="flex items-baseline justify-between text-[14.5px]">
                   <span className="font-medium text-foreground">{f.step}</span>
                   <span className="tabular-nums text-muted">{f.users.toLocaleString('ar')} · {conv}%</span>
                 </div>
@@ -165,7 +165,7 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
       <Section title="اقتصاديات الوحدة">
         <div className="grid gap-5 lg:grid-cols-2">
           <Panel className="p-5">
-            <div className="space-y-2 text-[12.5px]">
+            <div className="space-y-2 text-[14.5px]">
               <Row label="الإيرادات (الإجمالي)" value={usd(d.revenue.gross_all_time_cents)} />
               <Row label="إنفاق الذكاء الاصطناعي (الإجمالي)" value={`$${d.ai_usage.cost_total_usd.toFixed(2)}`} />
               <Row label="هامش الذكاء الاصطناعي من الإيراد" value={d.ai_usage.margin_vs_revenue_pct == null ? '—' : `${d.ai_usage.margin_vs_revenue_pct}%`} />
@@ -174,12 +174,12 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
             </div>
             {d.ai_usage.by_operation.length > 0 && (
               <div className="mt-3 border-t border-token pt-3">
-                <div className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">
+                <div className="mb-2 text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
                   الإنفاق حسب العملية
                 </div>
                 <ul className="space-y-2">
                   {d.ai_usage.by_operation.map((o) => (
-                    <li key={o.operation} className="text-[12.5px]">
+                    <li key={o.operation} className="text-[14.5px]">
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="truncate font-medium text-foreground">{o.operation}</span>
                         <span className="shrink-0 tabular-nums text-muted">${o.cost_usd.toFixed(2)} · {o.calls}×</span>
@@ -199,7 +199,7 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
               <BarList rows={planItems} />
             </PanelWithTitle>
             <Panel className="p-5">
-              <div className="space-y-2 text-[12.5px]">
+              <div className="space-y-2 text-[14.5px]">
                 <Row label="المشاهدات (30 يومًا)" value={d.pageviews_30d.toLocaleString('ar')} />
                 <Row label="النشطون (7 / 30 يومًا)" value={`${d.engagement.active_7d} / ${d.engagement.active_30d}`} />
                 <Row label="المبالغ المستردة (30 يومًا)" value={String(d.revenue.refunded_30d)} />
@@ -217,7 +217,7 @@ function AdminBody({ d, usd }: { d: AdminData; usd: (c: number) => string }) {
         </Section>
       )}
 
-      <p className="mt-10 text-center text-[11.5px] text-muted">
+      <p className="mt-10 text-center text-[14.5px] text-muted">
         تم التوليد {new Date(d.generated_at).toLocaleString('ar')} · تكلفة الذكاء الاصطناعي مقدّرة بسعر القائمة
       </p>
     </>

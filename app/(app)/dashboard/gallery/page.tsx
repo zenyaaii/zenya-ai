@@ -107,8 +107,8 @@ export default function GalleryPage() {
     <div className="mx-auto max-w-6xl px-6 py-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5">
         <div>
-          <h1 className="text-[24px] font-bold tracking-tight text-foreground">المعرض</h1>
-          <p className="mt-1 text-[13px] text-muted">
+          <h1 className="text-[24px] font-bold text-foreground">المعرض</h1>
+          <p className="mt-1 text-[14.5px] text-muted">
             كل صورة رفعتها تعيش هنا. أعِد استخدامها في أي موقع تبنيه.
           </p>
         </div>
@@ -119,14 +119,14 @@ export default function GalleryPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث في الصور"
-              className="w-56 rounded-full zy-card py-1.5 ps-7 pe-3 text-[12.5px] outline-none focus:border-primary"
+              className="w-56 rounded-full zy-card py-1.5 ps-7 pe-3 text-[14.5px] outline-none focus:border-primary"
             />
           </div>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12.5px] font-semibold text-white shadow-sm transition hover:scale-[1.02] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 zy-btn"
           >
             {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" strokeWidth={2.5} />}
             {uploading ? 'جارٍ الرفع…' : 'رفع صور'}
@@ -146,7 +146,7 @@ export default function GalleryPage() {
       </header>
 
       {err && (
-        <div className="mb-4 rounded-md border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[12.5px] text-[#b91c1c]">
+        <div className="mb-4 rounded-md border border-[rgba(220,38,38,0.20)] bg-[rgba(220,38,38,0.06)] px-3 py-2 text-[14.5px] text-[#b91c1c]">
           {err}
         </div>
       )}
@@ -177,7 +177,7 @@ export default function GalleryPage() {
                 loading="lazy"
               />
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2.5 py-2 opacity-0 transition group-hover:opacity-100">
-                <span className="truncate text-[10.5px] font-medium text-white" title={img.name || img.url}>
+                <span className="truncate text-[14.5px] font-medium text-white" title={img.name || img.url}>
                   {img.name || 'بلا عنوان'}
                 </span>
                 <div className="flex items-center gap-1">
@@ -218,7 +218,7 @@ function Empty({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: boolean
     return (
       <div className="rounded-2xl zy-card-dashed p-12 text-center">
         <ImageIcon className="mx-auto h-9 w-9 text-muted" strokeWidth={1.5} />
-        <p className="mt-3 text-[13px] text-muted">لا صور تطابق بحثك.</p>
+        <p className="mt-3 text-[14.5px] text-muted">لا صور تطابق بحثك.</p>
       </div>
     )
   }
@@ -228,12 +228,12 @@ function Empty({ onUpload, hasQuery }: { onUpload: () => void; hasQuery: boolean
         <ImageIcon className="h-6 w-6 text-primary" strokeWidth={1.75} />
       </div>
       <h3 className="mt-4 text-[16px] font-semibold text-foreground">معرضك فارغ</h3>
-      <p className="mx-auto mt-1.5 max-w-md text-[13px] text-muted">
+      <p className="mx-auto mt-1.5 max-w-md text-[14.5px] text-muted">
         ارفع صورتك الأولى — كل صورة تستخدمها في أي موقع ستتجمّع هنا لإعادة استخدامها فورًا.
       </p>
       <button
         onClick={onUpload}
-        className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[13px] font-semibold text-white shadow-lg shadow-primary/25"
+        className="mt-5 inline-flex items-center gap-1.5 zy-btn"
       >
         <Upload className="h-3.5 w-3.5" strokeWidth={2.5} />
         ارفع صورتك الأولى

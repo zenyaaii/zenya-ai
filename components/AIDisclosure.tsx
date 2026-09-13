@@ -16,7 +16,7 @@ export default function AIDisclosure({
   if (variant === 'banner') {
     return (
       <div
-        className={`flex items-start gap-2.5 rounded-lg border border-token bg-background px-3.5 py-2.5 text-[12.5px] leading-[1.5] text-muted ${className}`}
+        className={`flex items-start gap-2.5 rounded-lg border border-token bg-background px-3.5 py-2.5 text-[14.5px] leading-[1.5] text-muted ${className}`}
         role="note"
         aria-label="إشعار بمحتوى مولَّد بالذكاء الاصطناعي"
       >
@@ -35,7 +35,7 @@ export default function AIDisclosure({
   }
   return (
     <p
-      className={`inline-flex items-center gap-1.5 text-[11.5px] text-muted ${className}`}
+      className={`inline-flex items-center gap-1.5 text-[14.5px] text-muted ${className}`}
       role="note"
     >
       <Sparkles className="h-3 w-3 text-primary" strokeWidth={2} />

@@ -67,7 +67,7 @@ const PLAN_LABEL: Record<Plan, string> = {
 /**
  * A plan is a state, so it reports through the status pill like every other
  * state on this surface. It used to carry its own seven-entry tint table -
- * five fills, five rings and five foregrounds, including #0d9488, #9b6f00
+ * five fills, five rings and five foregrounds, including #0d9488, #b45309
  * and a #c8a96a gold that appeared nowhere else in the product.
  *
  * The tones are the documented triad plus the accent and a quiet grey:
@@ -213,7 +213,7 @@ export default function DashboardHomePage() {
               {themes.length > 3 && (
                 <Link
                   href="/dashboard/sites"
-                  className="block rounded-2xl px-4 py-3 text-center text-[12.5px] font-bold text-[#56565a] transition-colors hover:text-[#5e6ad2]"
+                  className="block rounded-2xl px-4 py-3 text-center text-[14.5px] font-bold text-[#56565a] transition-colors hover:text-[#5e6ad2]"
                   style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.10)' }}
                 >
                   + {themes.length - 3} أخرى · افتح المواقع
@@ -330,7 +330,7 @@ function TrialSpentBanner() {
  * The fourth tile in the stat row: what the reader is paying for.
  *
  * It was six near-identical blocks, each with its own eyebrow colour
- * (#15803d, #5e6ad2, #9b6f00, #b8860b) and its own hand-written meter. The
+ * (#15803d, #5e6ad2, #b45309, #b8860b) and its own hand-written meter. The
  * shapes are now one, and the only thing a plan chooses is its tone, its
  * lines and whether it has somewhere to upgrade to.
  *
@@ -406,8 +406,8 @@ function RecentRow({ theme }: { theme: Theme }) {
           {live ? <Globe className="h-4 w-4" strokeWidth={2} /> : <Folder className="h-4 w-4" strokeWidth={2} />}
         </div>
         <div className="min-w-0">
-          <div className="text-[13.5px] font-bold leading-[1.5] text-[#171717]">{theme.product_name}</div>
-          <div className="text-[11.5px] font-medium leading-[1.7] text-[#56565a]">
+          <div className="text-[14.5px] font-bold leading-[1.5] text-[#171717]">{theme.product_name}</div>
+          <div className="text-[14.5px] font-medium leading-[1.7] text-[#56565a]">
             {live ? (
               <a href={publicSiteUrl(theme.slug!)} target="_blank" rel="noreferrer" className="hover:text-primary">
                 {publicSiteHost(theme.slug!)} <ExternalLink className="inline-block h-2.5 w-2.5 opacity-70" />
@@ -454,7 +454,7 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
         <Sparkles className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <h3 className="zy-h2">أنشئ موقعك الأول</h3>
-      <p className="mx-auto mt-2 max-w-md text-[13px] font-medium leading-[1.8] text-[#56565a]">
+      <p className="mx-auto mt-2 max-w-md text-[14.5px] font-medium leading-[1.8] text-[#56565a]">
         اختر قالبًا، واكتب نبذة سريعة، وتكتب زينيا المحتوى وتصمّم الصفحة.
         جاهز خلال أقل من دقيقة.
       </p>
@@ -463,7 +463,7 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           أنشئ موقعًا جديدًا
         </Link>
-        <Link href="/themes" className="text-[12px] font-medium text-[#56565a] hover:text-[#171717]">
+        <Link href="/themes" className="text-[14.5px] font-medium text-[#56565a] hover:text-[#171717]">
           أو تصفّح القوالب الثمانية ←
         </Link>
       </div>
@@ -581,7 +581,7 @@ function TopSiteCard({ analytics, loading }: { analytics: AnalyticsSummary | nul
             const pct = Math.max(4, Math.round((v / max) * 100))
             return (
               <li key={s.id} className="rounded-md px-1 py-1">
-                <div className="flex items-baseline justify-between text-[12.5px]">
+                <div className="flex items-baseline justify-between text-[14.5px]">
                   <span className="truncate font-bold text-[#171717]">
                     <span className="me-1.5 inline-block w-4 text-end font-medium tabular-nums text-[#66666e]">{i + 1}.</span>
                     {s.product_name}
@@ -608,7 +608,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
     return (
       <div className="rounded-2xl zy-card p-5">
         <div className="zy-eyebrow">أضف الاستضافة</div>
-        <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
+        <p className="mt-2 text-[14.5px] font-medium leading-[1.8] text-[#171717]">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 19.99$ شهريًا، ألغِ في أي وقت.
         </p>
         <Link href="/pricing?upgrade=pro" className="zy-btn mt-3.5">
@@ -622,7 +622,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
     return (
       <div className="rounded-2xl zy-card p-5">
         <div className="zy-eyebrow">الترقية إلى Pro</div>
-        <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
+        <p className="mt-2 text-[14.5px] font-medium leading-[1.8] text-[#171717]">
           انشر قوالب العرض على زينيا بنطاق مخصّص. 24.99$ شهريًا، ألغِ في أي وقت.
         </p>
         <Link href="/pricing?upgrade=pro" className="zy-btn mt-3.5">
@@ -638,7 +638,7 @@ function UpgradeNudge({ plan, trialRemaining }: { plan: Plan; trialRemaining: nu
       <div className="zy-eyebrow">
         {trialRemaining === 0 ? 'انتهت التجربة' : 'الترقية إلى Starter'}
       </div>
-      <p className="mt-2 text-[13px] font-medium leading-[1.8] text-[#171717]">
+      <p className="mt-2 text-[14.5px] font-medium leading-[1.8] text-[#171717]">
         {trialRemaining === 0
           ? 'استخدمت توليدَيك المجانيين. اشترك في Starter لتوليد غير محدود.'
           : 'اشترك شهريًا، واحصل على توليد غير محدود + تصدير شوبيفاي + ملفات المشاريع.'}
