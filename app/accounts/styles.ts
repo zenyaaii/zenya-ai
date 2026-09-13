@@ -25,9 +25,9 @@
  *
  * WHY THE PORTAL KEEPS ITS OWN STYLESHEET rather than rendering
  * components/zenya/access/AccessView, which is this same door already built
- * in the house style: AccessView's header links /themes, /pricing and
+ * in the house style: AccessView's header links /templates, /pricing and
  * /contact. On this host middleware rewrites every unrouted path under
- * /accounts, so those three links resolve to /accounts/themes and friends and
+ * /accounts, so those three links resolve to /accounts/templates and friends and
  * 404. Only /terms, /privacy, /refund, /cookies and /subprocessors are
  * allowed through. Dropping AccessView in here would have restyled the portal
  * and broken three links in the header doing it.

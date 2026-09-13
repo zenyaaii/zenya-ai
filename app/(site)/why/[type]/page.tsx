@@ -102,7 +102,7 @@ export default function WhyPage({ params }: { params: { type: string } }) {
       <Breadcrumbs
         trail={[
           { label: "الرئيسية", href: "/" },
-          { label: "القوالب", href: "/themes" },
+          { label: "القوالب", href: "/templates" },
           { label: article.templateName },
         ]}
       />

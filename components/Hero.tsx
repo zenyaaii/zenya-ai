@@ -89,7 +89,7 @@ export default function Hero() {
           {/* CTAs */}
           <motion.div {...fade(0.22)} className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/themes"
+              href="/templates"
               className={cn(
                 'group relative inline-flex items-center gap-2 overflow-hidden rounded-lg bg-primary px-7 py-3.5 text-[14.5px] font-semibold text-white transition-all duration-200',
                 'btn-shadow-primary hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-10px_rgba(94,106,210,0.6)] active:translate-y-0'
@@ -100,7 +100,7 @@ export default function Hero() {
               <ArrowRight className="h-4 w-4 rtl-flip transition-transform duration-200 group-hover:-translate-x-1" strokeWidth={2.5} />
             </Link>
             <Link
-              href="/themes"
+              href="/templates"
               className={cn(
                 'inline-flex items-center gap-2 rounded-lg border border-token bg-white/55 px-7 py-3.5 text-[14.5px] font-medium text-muted backdrop-blur transition-all duration-200',
                 'hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.3)] hover:bg-white hover:text-foreground'

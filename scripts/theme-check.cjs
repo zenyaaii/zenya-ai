@@ -2,7 +2,7 @@ const { chromium } = require('playwright')
 
 const ROUTES = [
   // The public site.
-  '/', '/about', '/faq', '/features', '/pricing', '/themes',
+  '/', '/about', '/faq', '/features', '/pricing', '/templates',
   '/websites', '/websites/restaurant', '/compare', '/compare/wix',
   '/why/restaurant', '/privacy', '/terms', '/cookies', '/refund',
   '/subprocessors', '/contact', '/login', '/review', '/checkout',

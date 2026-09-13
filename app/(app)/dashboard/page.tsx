@@ -109,7 +109,7 @@ export default function DashboardHomePage() {
         .select('plan, is_pro, has_hosting, trial_themes_limit, trial_themes_used, hosting_status, hosting_current_period_end, hosting_canceled_at, full_name, email')
         .eq('id', user.id)
         .maybeSingle(),
-      fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
+      fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })),
       fetch('/api/analytics').then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ])
     setProfile((profileRow as unknown as Profile) || null)
@@ -463,7 +463,7 @@ function GettingStarted({ hasHosting, isPro }: { hasHosting: boolean; isPro: boo
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           أنشئ موقعًا جديدًا
         </Link>
-        <Link href="/themes" className="text-[14.5px] font-medium text-[#56565a] hover:text-[#171717]">
+        <Link href="/templates" className="text-[14.5px] font-medium text-[#56565a] hover:text-[#171717]">
           أو تصفّح القوالب الثمانية ←
         </Link>
       </div>

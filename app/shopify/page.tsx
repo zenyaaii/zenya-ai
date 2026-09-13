@@ -102,7 +102,7 @@ const TEMPLATES: Template[] = [
 ];
 
 /** Where "generate more templates" sends merchants — the full web catalog. */
-const WEBSITE_TEMPLATES_URL = 'https://zenyaai.co/themes';
+const WEBSITE_TEMPLATES_URL = 'https://zenyaai.co/templates';
 
 function DashboardContent() {
   const { toast } = useNotify();
@@ -161,7 +161,7 @@ function DashboardContent() {
   async function fetchThemes() {
     setLoading(true);
     try {
-      const r = await fetch('/api/themes');
+      const r = await fetch('/api/templates');
       if (r.ok) {
         const j = await r.json();
         setThemes(j.themes || []);

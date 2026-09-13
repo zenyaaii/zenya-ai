@@ -134,7 +134,7 @@ export default function AboutView() {
           </p>
           <div className="zx-acts">
             <SlideButton href="/login?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>
-            <Link href="/themes" className="zx-act-2">شاهد القوالب الثمانية</Link>
+            <Link href="/templates" className="zx-act-2">شاهد القوالب الثمانية</Link>
           </div>
         </section>
 

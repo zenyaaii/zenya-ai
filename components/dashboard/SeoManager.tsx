@@ -172,7 +172,7 @@ function SiteEditor({
   async function save() {
     setSaving(true)
     try {
-      const res = await fetch(`/api/themes/${site.id}/seo`, {
+      const res = await fetch(`/api/templates/${site.id}/seo`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -548,7 +548,7 @@ function SearchConsoleCard({
     }
     setSavingVerify(true)
     try {
-      const r = await fetch(`/api/themes/${site.id}/seo`, {
+      const r = await fetch(`/api/templates/${site.id}/seo`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ gscVerification: verifyInput }),

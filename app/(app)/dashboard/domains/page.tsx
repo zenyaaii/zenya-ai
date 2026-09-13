@@ -124,7 +124,7 @@ export default function DomainsPage() {
     const [profileRes, domainsRes, themesRes, purchasesRes] = await Promise.all([
       supabase.from('profiles').select('plan, has_hosting, is_pro, free_domain_claimed_at').eq('id', user.id).maybeSingle(),
       fetch('/api/domains').then((r) => (r.ok ? r.json() : { domains: [] })),
-      fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })),
+      fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })),
       fetch('/api/domains/purchase').then((r) => (r.ok ? r.json() : { purchases: [] })),
     ])
 

@@ -25,7 +25,7 @@ export type NavItem = { href: string; label: string; here?: boolean }
 
 /** The candidate set links inside the candidate set, in the set's own order. */
 export const NAV: NavItem[] = [
-  { href: "/themes", label: "القوالب" },
+  { href: "/templates", label: "القوالب" },
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]

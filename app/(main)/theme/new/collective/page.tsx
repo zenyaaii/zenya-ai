@@ -200,7 +200,7 @@ export default function CollectiveWizardPage() {
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = COLLECTIVE_PRESETS.find((p) => p.id === form.style_preset) || COLLECTIVE_PRESETS[0]
-      const saveRes = await fetch('/api/themes', {
+      const saveRes = await fetch('/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

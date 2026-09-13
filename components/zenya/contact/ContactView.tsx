@@ -71,7 +71,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 /* The candidate set links inside the candidate set, in the set's own order.
    تواصل points at this page, which is why it carries aria-current. */
 const NAV: Array<{ href: string; label: string; here?: boolean }> = [
-  { href: "/themes", label: "القوالب" },
+  { href: "/templates", label: "القوالب" },
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل", here: true },
 ]

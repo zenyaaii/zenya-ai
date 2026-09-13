@@ -53,7 +53,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
 /* The candidate set links inside the candidate set. Reported twice on the
    other pages; it does not get to regress here. */
 const NAV: Array<{ href: string; label: string; current?: boolean }> = [
-  { href: "/themes", label: "القوالب" },
+  { href: "/templates", label: "القوالب" },
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]

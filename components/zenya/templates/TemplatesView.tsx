@@ -115,7 +115,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  *
  * Every field is read from the codebase, not written here: `name` and `label`
  * from lib/template-pages.tsx, `tagline` / `sections` / `presets` / `demo` from
- * the live catalogue at app/(main)/themes/page.tsx, and `shopify` from the same
+ * the live catalogue at app/(main)/templates/page.tsx, and `shopify` from the same
  * flag that page renders as شوبيفاي / مباشر. Exactly one template carries it.
  *
  * The order is load-bearing now: the first two lead the grid at 2-across. It
@@ -135,7 +135,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * candidate set, never out to the live site mid-review.
  *
  * `soon` MIRRORS WHAT THE LIVE CATALOGUE ACTUALLY SHOWS THE PUBLIC. The
- * one-product builder is being rebuilt: app/(main)/themes/page.tsx gates it on
+ * one-product builder is being rebuilt: app/(main)/templates/page.tsx gates it on
  * "theme.id === 'one_product' && isAdmin !== true" and renders قريبًا for
  * everyone else, with /build reachable by admins only. This page has no auth
  * and is public, so that tile gets the قريبًا state and no build link. A violet
@@ -184,7 +184,7 @@ const FLOOR = [
 ] as const
 
 const NAV: Array<{ href: string; label: string; tray?: boolean; current?: boolean }> = [
-  { href: "/themes", label: "القوالب", tray: true, current: true },
+  { href: "/templates", label: "القوالب", tray: true, current: true },
   { href: "/pricing", label: "الأسعار" },
   { href: "/contact", label: "تواصل" },
 ]
@@ -1005,7 +1005,7 @@ const CSS = `
   .zt-shot img, .zt-tile:hover .zt-shot img { transition: none; transform: none; }
 }
 /* The one flag on the catalogue, on the one template that carries the flag in
-   lib/themes-en.ts. Glass over the shot rather than a filled chip, so it does
+   lib/templates-en.ts. Glass over the shot rather than a filled chip, so it does
    not add a colour to a page whose colour budget belongs to the covers. */
 .zt-flag {
   position: absolute; inset-block-start: 0.75rem; inset-inline-start: 0.75rem;

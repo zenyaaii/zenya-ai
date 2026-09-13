@@ -354,7 +354,7 @@ export default function BuildPage() {
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-6">
-          <ComingSoon onBack={() => router.push('/themes')} />
+          <ComingSoon onBack={() => router.push('/templates')} />
         </main>
       </div>
     )
@@ -1578,7 +1578,7 @@ function PublishPanel({
     .replace(/[^a-z0-9-]/g, '')
   const shopDomain = handle ? `${handle}.myshopify.com` : ''
 
-  const adminHref = handle ? `https://admin.shopify.com/store/${handle}/themes` : ''
+  const adminHref = handle ? `https://admin.shopify.com/store/${handle}/templates` : ''
   // Affiliate signup for users without a store.
   const shopifyAffiliate = 'https://www.shopify.com/free-trial?ref=zenya-ai'
 

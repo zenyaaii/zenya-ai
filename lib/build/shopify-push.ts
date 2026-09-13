@@ -129,6 +129,6 @@ export async function pushThemeToShop(params: {
     name: theme.name,
     processing,
     previewUrl: `https://${shop}/?preview_theme_id=${numericId}`,
-    editorUrl: `https://admin.shopify.com/store/${shop.replace('.myshopify.com', '')}/themes/${numericId}/editor`,
+    editorUrl: `https://admin.shopify.com/store/${shop.replace('.myshopify.com', '')}/templates/${numericId}/editor`,
   }
 }

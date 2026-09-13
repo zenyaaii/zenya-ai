@@ -203,7 +203,7 @@ export default function AtlasWizardPage() {
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = ATLAS_PRESETS.find((p) => p.id === form.style_preset) || ATLAS_PRESETS[0]
-      const saveRes = await fetch('/api/themes', {
+      const saveRes = await fetch('/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

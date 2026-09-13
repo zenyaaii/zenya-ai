@@ -4,14 +4,14 @@
  * `/theme/new` — thin redirector.
  *
  * This route used to render a second full template gallery (the
- * "BusinessTypePicker"), which duplicated the canonical /themes page. We
- * collapsed the two: /themes is now the single template picker, and every
+ * "BusinessTypePicker"), which duplicated the canonical /templates page. We
+ * collapsed the two: /templates is now the single template picker, and every
  * template card links straight to its own wizard (or /build for the Shopify
  * one-product flow).
  *
  * We keep this route only to honor legacy `?type=` deep links (older marketing
  * CTAs pointed here). Each known type maps to its dedicated wizard; anything
- * else falls through to the /themes gallery.
+ * else falls through to the /templates gallery.
  */
 
 import { useEffect } from 'react'
@@ -44,7 +44,7 @@ export default function NewThemeRedirect() {
 
   useEffect(() => {
     const type = new URLSearchParams(window.location.search).get('type') || ''
-    router.replace(TYPE_ROUTES[type] || '/themes')
+    router.replace(TYPE_ROUTES[type] || '/templates')
   }, [router])
 
   return (

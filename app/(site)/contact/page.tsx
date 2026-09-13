@@ -52,7 +52,7 @@ type Topic = 'support' | 'request' | 'sales' | 'review' | 'other'
  * header CTA on every other page is a client-side navigation. No hook and no
  * boundary means nothing to reconcile.
  *
- * The one link that still uses it is the template request from /themes.
+ * The one link that still uses it is the template request from /templates.
  * Anything unrecognised falls back to support, which is what the old page did
  * by never matching it against the topic list.
  */

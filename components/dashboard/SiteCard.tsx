@@ -371,7 +371,7 @@ export default function SiteCard({
           {/* E-com primary — ZIP download. Starter includes Shopify export. */}
           {isEcom && isPro && (
             <a
-              href={`/api/themes/${theme.id}/export-shopify`}
+              href={`/api/templates/${theme.id}/export-shopify`}
               className="inline-flex items-center gap-1 zy-btn"
             >
               <Download className="h-3 w-3" strokeWidth={2.5} />

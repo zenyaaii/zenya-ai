@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     const productHandle = (createdProduct as any)?.handle || null;
     const adminProductUrl = `https://${shop}/admin/products/${createdProduct.id}`;
-    const themeEditorUrl = `https://${shop}/admin/themes/current/editor?context=apps`;
+    const themeEditorUrl = `https://${shop}/admin/templates/current/editor?context=apps`;
     const storefrontUrl = productHandle ? `https://${shop}/products/${productHandle}` : null;
 
     return NextResponse.json({

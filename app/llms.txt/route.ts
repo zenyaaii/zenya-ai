@@ -90,7 +90,7 @@ Full comparison hub: ${SITE}/compare
 - Features (hosting, domains, payments, AI content): ${SITE}/features
 - Website types (restaurant, app, store, services, wellness…): ${SITE}/websites
 - Pricing: ${SITE}/pricing
-- Templates: ${SITE}/themes
+- Templates: ${SITE}/templates
 - Comparisons: ${SITE}/compare
 - FAQ: ${SITE}/faq
 - About: ${SITE}/about

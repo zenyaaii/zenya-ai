@@ -16,7 +16,7 @@ import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 
 /** Header stays lean enough to hold one line at desktop. */
 const NAV = [
-  { href: '/en/themes', label: 'Templates' },
+  { href: '/en/templates', label: 'Templates' },
   { href: '/en/features', label: 'Features' },
   { href: '/en/pricing', label: 'Pricing' },
   { href: '/en/compare', label: 'Compare' },
@@ -28,7 +28,7 @@ const FOOTER_GROUPS: { heading: string; links: { href: string; label: string }[]
   {
     heading: 'Product',
     links: [
-      { href: '/en/themes', label: 'Templates' },
+      { href: '/en/templates', label: 'Templates' },
       { href: '/en/websites', label: 'Website types' },
       { href: '/en/features', label: 'Features' },
       { href: '/en/pricing', label: 'Pricing' },
