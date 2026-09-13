@@ -165,7 +165,9 @@ export default function FooterSection({
                     نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
                   </p>
 
-                  <Link href="/build" className="zn5-cta">
+                  {/* /templates, not /build: /build is the admin-only Shopify
+                      builder, and starting means picking a template. */}
+                  <Link href="/templates" className="zn5-cta">
                     <span>ابدأ الإنشاء</span>
                     <ArrowLeft className="ic" strokeWidth={1.6} aria-hidden />
                   </Link>
