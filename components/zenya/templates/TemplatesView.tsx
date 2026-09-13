@@ -126,13 +126,11 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * Deriving the href from the id would have sent the first tile somewhere that
  * does not exist.
  *
- * `candidate` IS THE IN-SET DESTINATION, and it is a separate field on
- * purpose. `build` stays the real route this template's builder lives at, so
- * that field cannot quietly become a lie; `candidate` says "there is a
- * reviewable version of that inside the candidate set, send the reader there
- * instead". Only restaurant has one. The rule it serves is the one already
- * recorded twice on this page: links inside the candidate set point inside the
- * candidate set, never out to the live site mid-review.
+ * THERE IS NO `candidate` ANY MORE. Restaurant carried candidate: "/build",
+ * and the build button preferred it, so pressing ابنِ on the restaurant tile
+ * opened the Shopify one-product builder instead of the restaurant wizard.
+ * This page is the live catalogue, so every build button goes to its own
+ * template's real builder and nothing else.
  *
  * `soon` MIRRORS WHAT THE LIVE CATALOGUE ACTUALLY SHOWS THE PUBLIC. The
  * one-product builder is being rebuilt: app/(main)/templates/page.tsx gates it on
@@ -144,7 +142,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  */
 const TEMPLATES = [
   { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            build: "/build",                  shopify: true, soon: true },
-  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant", candidate: "/build" },
+  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant" },
   { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas",      build: "/theme/new/atlas" },
   { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook",   build: "/theme/new/lookbook" },
   { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective", build: "/theme/new/collective" },
@@ -375,7 +373,7 @@ export default function TemplatesView() {
                  names in one list, so the template rides along hidden: the
                  visible face still reads ابنِ, the name reads ابنِ بقالب مطعم.
                  Same shape as the live catalogue's aria-label. */
-              <SlideButton href={"candidate" in t ? t.candidate : t.build} variant="violet" slide="هيا بنا" className="zt-build">
+              <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-build">
                 ابنِ<span className="sr-only">{" بقالب " + t.label}</span>
               </SlideButton>
             )}

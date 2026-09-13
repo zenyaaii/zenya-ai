@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { STUDIO_PRESETS } from '@/utils/studio/presets'
 import type { StudioInput } from '@/utils/studio/input'
@@ -14,6 +12,10 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import WizardShell, {
+  AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Select, Textarea,
+  type WizardStep,
+} from '@/components/zenya/build/WizardShell'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -79,7 +81,7 @@ const INITIAL_FORM: Form = {
   values: [
     { id: uid(), title: '', description: '' },
     { id: uid(), title: '', description: '' },
-    { id: uid(), title: '', description: '' }
+    { id: uid(), title: '', description: '' },
   ],
   process_description: '',
   process_steps: '',
@@ -87,29 +89,22 @@ const INITIAL_FORM: Form = {
   press_features: '',
   milestones: [
     { id: uid(), year: '', event: '' },
-    { id: uid(), year: '', event: '' }
+    { id: uid(), year: '', event: '' },
   ],
   customer_count: '',
   repeat_rate: '',
   avg_rating: '4.9',
-  style_preset: 'ink'
+  style_preset: 'ink',
 }
 
 const CATEGORY_OPTIONS = [
   'مفروشات حرفية', 'الأزياء والملابس', 'الجمال والعناية بالبشرة', 'الأطعمة والمشروبات',
   'الفن والمطبوعات', 'المجوهرات', 'الكتب والنشر', 'الهواء الطلق والمغامرة',
-  'الأثاث والتصميم', 'الخزف والفخار', 'المنسوجات والكتّان', 'أخرى'
+  'الأثاث والتصميم', 'الخزف والفخار', 'المنسوجات والكتّان', 'أخرى',
 ]
-
-const sectionMotion = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: 'easeOut' as const }
-}
 
 export default function StudioWizardPage() {
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -118,25 +113,21 @@ export default function StudioWizardPage() {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorKey, setErrorKey] = useState(0)
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     let cancelled = false
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (cancelled) return
-      // Guests can browse and fill the wizard; the save/generate action gates on auth (401 handler below).
-      setAuthReady(true)
-    }
-    checkAuth()
+    // Guests can browse and fill the wizard; generation gates on auth (401 below).
+    createClient().auth.getUser().then(() => { if (!cancelled) setAuthReady(true) })
     return () => { cancelled = true }
-  }, [router, supabase])
+  }, [])
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
-
   function updateValue(id: string, patch: Partial<ValueItem>) {
-    setForm((prev) => ({ ...prev, values: prev.values.map((v) => v.id === id ? { ...v, ...patch } : v) }))
+    setForm((prev) => ({ ...prev, values: prev.values.map((v) => (v.id === id ? { ...v, ...patch } : v)) }))
   }
   function addValue() {
     if (form.values.length >= 5) return
@@ -146,9 +137,8 @@ export default function StudioWizardPage() {
     if (form.values.length <= 1) return
     setForm((prev) => ({ ...prev, values: prev.values.filter((v) => v.id !== id) }))
   }
-
   function updateMilestone(id: string, patch: Partial<Milestone>) {
-    setForm((prev) => ({ ...prev, milestones: prev.milestones.map((m) => m.id === id ? { ...m, ...patch } : m) }))
+    setForm((prev) => ({ ...prev, milestones: prev.milestones.map((m) => (m.id === id ? { ...m, ...patch } : m)) }))
   }
   function addMilestone() {
     if (form.milestones.length >= 6) return
@@ -159,12 +149,19 @@ export default function StudioWizardPage() {
     setForm((prev) => ({ ...prev, milestones: prev.milestones.filter((m) => m.id !== id) }))
   }
 
+  const validValues = form.values.filter((v) => v.title.trim().length >= 2)
+  const brandChecks = [
+    form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 5,
+    form.brand_category.trim().length >= 2, form.mission.trim().length >= 20,
+  ]
+  const required = [...brandChecks, validValues.length >= 1]
+  const pct = Math.round((required.filter(Boolean).length / required.length) * 100)
+
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'أدخل اسم علامتك التجارية.'
     if (form.brand_tagline.trim().length < 5) return 'أدخل شعار العلامة.'
     if (form.brand_category.trim().length < 2) return 'اختر فئة العلامة.'
     if (form.mission.trim().length < 20) return 'صِف رسالتك (20 حرفًا على الأقل).'
-    const validValues = form.values.filter((v) => v.title.trim().length >= 2)
     if (validValues.length < 1) return 'أضف قيمة جوهرية واحدة على الأقل.'
     return null
   }
@@ -175,37 +172,37 @@ export default function StudioWizardPage() {
         name: form.brand_name.trim(),
         tagline: form.brand_tagline.trim(),
         category: form.brand_category.trim(),
-        founded: form.brand_founded.trim() || undefined
+        founded: form.brand_founded.trim() || undefined,
       },
       mission: form.mission.trim(),
       founder_story: form.founder_story.trim() || undefined,
-      values: form.values
-        .filter((v) => v.title.trim().length >= 2)
-        .map((v) => ({ title: v.title.trim(), description: v.description.trim() || undefined })),
+      values: validValues.map((v) => ({ title: v.title.trim(), description: v.description.trim() || undefined })),
       process: {
         description: form.process_description.trim() || undefined,
-        steps: form.process_steps.trim()
-          ? form.process_steps.split(/[\n,]/).map((s) => s.trim()).filter(Boolean)
-          : undefined
+        steps: form.process_steps.trim() ? form.process_steps.split(/[\n,]/).map((s) => s.trim()).filter(Boolean) : undefined,
       },
       team_size: form.team_size.trim() || undefined,
       press_features: form.press_features.trim() || undefined,
-      milestones: form.milestones
-        .filter((m) => m.year.trim() && m.event.trim())
-        .map((m) => ({ year: m.year.trim(), event: m.event.trim() })),
+      milestones: form.milestones.filter((m) => m.year.trim() && m.event.trim()).map((m) => ({ year: m.year.trim(), event: m.event.trim() })),
       social_proof: {
         customer_count: form.customer_count.trim() || undefined,
         repeat_rate: form.repeat_rate.trim() || undefined,
-        avg_rating: form.avg_rating.trim() || undefined
+        avg_rating: form.avg_rating.trim() || undefined,
       },
-      style_preset: form.style_preset
+      style_preset: form.style_preset,
     }
   }
 
-  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function fail(msg: string) {
+    setError(msg)
+    setErrorKey((k) => k + 1)
+    const idx = steps.findIndex((s) => !s.optional && !s.complete)
+    if (idx >= 0) setStep(idx)
+  }
+
   function startGenerate() {
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     if (!acked) { setDisclaimerOpen(true); return }
     void handleGenerate()
   }
@@ -213,14 +210,14 @@ export default function StudioWizardPage() {
   async function handleGenerate() {
     setError(null)
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     setLoading(true)
     try {
       const payload = buildPayload()
       const genRes = await fetch('/api/generate-studio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
@@ -234,13 +231,8 @@ export default function StudioWizardPage() {
           images: [],
           primaryColor: preset.colors.primary,
           secondaryColor: preset.colors.accent,
-          content: {
-            business_type: 'studio',
-            style_preset: form.style_preset,
-            studio: genJson.content,
-            input: payload
-          }
-        })
+          content: { business_type: 'studio', style_preset: form.style_preset, studio: genJson.content, input: payload },
+        }),
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/studio'); return }
@@ -250,316 +242,195 @@ export default function StudioWizardPage() {
       router.push(`/preview/studio/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
+      setErrorKey((k) => k + 1)
       setLoading(false)
     }
   }
 
+  const steps: WizardStep[] = [
+    {
+      id: 'brand',
+      title: 'علامتك التجارية',
+      sub: 'الاسم والشعار والرسالة التي تقوم عليها العلامة.',
+      complete: brandChecks.every(Boolean),
+      note: 'أكمل الاسم والشعار والفئة وبيان الرسالة.',
+      body: (
+        <Grid>
+          <Field label="اسم العلامة" required>
+            <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: صَنعة، أصالة، دار الحِرَف" />
+          </Field>
+          <Field label="الشعار" required>
+            <Input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: صُنع باليد. خُلق ليدوم." />
+          </Field>
+          <Field label="الفئة" required>
+            <Select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)}>
+              <option value="">اختر الفئة...</option>
+              {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </Select>
+          </Field>
+          <Field label="سنة التأسيس">
+            <Input value={form.brand_founded} onChange={(e) => update('brand_founded', e.target.value)} placeholder="مثلاً: 2017" />
+          </Field>
+          <Field label="بيان الرسالة" required wide>
+            <Textarea value={form.mission} onChange={(e) => update('mission', e.target.value)} placeholder="مثلاً: نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى." />
+          </Field>
+          <Field label="قصة المؤسّس" wide hint="سيكتب الذكاء الاصطناعي رسالةً مؤثّرة من هذا.">
+            <Textarea rows={4} value={form.founder_story} onChange={(e) => update('founder_story', e.target.value)} placeholder="كيف بدأت العلامة؟ ما المشكلة التي كنت تحلّها؟" />
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'values',
+      title: 'القيم الجوهرية',
+      sub: 'ما الذي ترفض علامتك المساومة عليه؟ من 1 إلى 5 قيم.',
+      complete: validValues.length >= 1,
+      note: 'أضف قيمة جوهرية واحدة على الأقل.',
+      body: (
+        <Grid>
+          <Block>
+            <div className="zb-list">
+              {form.values.map((v, i) => (
+                <Card key={v.id} title={'القيمة ' + (i + 1)} onRemove={form.values.length > 1 ? () => removeValue(v.id) : undefined} removeLabel={'حذف القيمة ' + (i + 1)}>
+                  <Grid>
+                    <Field label="القيمة">
+                      <Input value={v.title} onChange={(e) => updateValue(v.id, { title: e.target.value })} placeholder="بطء عن قصد" />
+                    </Field>
+                    <Field label="وصف موجز (اختياري)">
+                      <Input value={v.description} onChange={(e) => updateValue(v.id, { description: e.target.value })} />
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              {form.values.length < 5 ? <AddButton onClick={addValue}>أضف قيمة</AddButton> : null}
+            </div>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'process',
+      title: 'أسلوب العمل والمحطّات',
+      sub: 'كيف تُصنع أشياؤك، وأبرز ما مرّت به العلامة.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="كيف تصنع أشياءك" wide>
+            <Textarea value={form.process_description} onChange={(e) => update('process_description', e.target.value)} placeholder="مثلاً: كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة." />
+          </Field>
+          <Field label="خطوات العمل" wide hint="مفصولة بفواصل.">
+            <Input value={form.process_steps} onChange={(e) => update('process_steps', e.target.value)} placeholder="التوريد، التصميم، الصنع، الفحص، الشحن" />
+          </Field>
+          <Block title="المحطّات البارزة">
+            <div className="zb-list">
+              {form.milestones.map((m, i) => (
+                <Card key={m.id} title={'المحطّة ' + (i + 1)} onRemove={form.milestones.length > 1 ? () => removeMilestone(m.id) : undefined} removeLabel={'حذف المحطّة ' + (i + 1)}>
+                  <Grid>
+                    <Field label="السنة">
+                      <Input value={m.year} onChange={(e) => updateMilestone(m.id, { year: e.target.value })} placeholder="2019" />
+                    </Field>
+                    <Field label="الحدث">
+                      <Input value={m.event} onChange={(e) => updateMilestone(m.id, { event: e.target.value })} placeholder="افتتحنا أول ستوديو لنا" />
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              {form.milestones.length < 6 ? <AddButton onClick={addMilestone}>أضف محطّة</AddButton> : null}
+            </div>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'credibility',
+      title: 'المصداقية',
+      sub: 'الظهور الصحفي وحجم الفريق وأدلّة العملاء تبني الثقة.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="ظهور في الصحافة" wide hint="مفصولة بفواصل.">
+            <Input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="The New York Times, Wallpaper*, Monocle" />
+          </Field>
+          <Field label="حجم الفريق">
+            <Input value={form.team_size} onChange={(e) => update('team_size', e.target.value)} placeholder="مثلاً: 9 أشخاص" />
+          </Field>
+          <Field label="القطع / المنتجات المباعة">
+            <Input value={form.customer_count} onChange={(e) => update('customer_count', e.target.value)} placeholder="مثلاً: +42,000 قطعة في البيوت" />
+          </Field>
+          <Field label="نسبة العملاء المتكرّرين">
+            <Input value={form.repeat_rate} onChange={(e) => update('repeat_rate', e.target.value)} placeholder="مثلاً: 82%" />
+          </Field>
+          <Field label="متوسط التقييم">
+            <Input value={form.avg_rating} onChange={(e) => update('avg_rating', e.target.value)} placeholder="مثلاً: 4.9★" />
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'style',
+      title: 'النمط البصري',
+      sub: 'اختر المظهر. يمكنك تغييره لاحقًا.',
+      complete: true,
+      body: <Presets presets={STUDIO_PRESETS} value={form.style_preset} onChange={(id) => update('style_preset', id as StudioStylePresetId)} />,
+    },
+    {
+      id: 'review',
+      title: 'المراجعة',
+      sub: 'كل ما ستبني عليه. راجعه قبل التوليد.',
+      complete: required.every(Boolean),
+      note: 'ينقص شيء مطلوب في خطوة سابقة.',
+      body: (
+        <Grid>
+          <Review
+            facts={[
+              { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
+              { label: 'القيم', value: validValues.length },
+              { label: 'النمط', value: STUDIO_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
+            ]}
+            recap={[
+              { label: 'اسم العلامة', value: form.brand_name },
+              { label: 'الشعار', value: form.brand_tagline },
+              { label: 'الفئة', value: form.brand_category },
+              { label: 'الرسالة', value: form.mission },
+              { label: 'قصة المؤسّس', value: form.founder_story },
+              { label: 'القيم', value: validValues.map((v) => v.title).join('، ') },
+            ]}
+          >
+            <Handoff title="جاهز لصياغة صفحة علامتك." body="يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+          </Review>
+        </Grid>
+      ),
+    },
+  ]
+
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
+    return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium text-[#56565a]">جارٍ التحميل…</div>
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
-          the dashboard and the accounts portal each dropped in turn. The
-          scrim was the expensive half: a backdrop-filter across the viewport
-          composites every glyph on the page, which on Arabic costs the
-          subpixel antialiasing that keeps the stems from thinning. */}
-
+    <>
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
-      <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
-        <motion.div {...sectionMotion} className="mb-12">
-          <p className="text-[14.5px] font-semibold text-primary-600">ستوديو · قالب قصة العلامة</p>
-          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
-            ابنِ صفحة قصة علامتك.
-          </h1>
-          <p className="mt-3 max-w-2xl text-muted">
-            أخبرنا قصتك وتصوغ زينيا صفحة علامة تحريرية فاخرة — واجهة بيان وغاية ورسالة المؤسّس وخط زمني وقيم وأسلوب عمل وفريق واقتباسات صحفية.
-          </p>
-        </motion.div>
-
-        {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
-            {error}
-          </motion.div>
-        )}
-
-        <div className="space-y-8">
-
-          {/* ── Brand ──────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم العلامة *</label>
-                <input
-                  value={form.brand_name}
-                  onChange={(e) => update('brand_name', e.target.value)}
-                  placeholder="مثلاً: صَنعة، أصالة، دار الحِرَف"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
-                <input
-                  value={form.brand_tagline}
-                  onChange={(e) => update('brand_tagline', e.target.value)}
-                  placeholder="مثلاً: صُنع باليد. خُلق ليدوم."
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الفئة *</label>
-                <select
-                  value={form.brand_category}
-                  onChange={(e) => update('brand_category', e.target.value)}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                >
-                  <option value="">اختر الفئة...</option>
-                  {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">سنة التأسيس</label>
-                <input
-                  value={form.brand_founded}
-                  onChange={(e) => update('brand_founded', e.target.value)}
-                  placeholder="مثلاً: 2017"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">بيان الرسالة *</label>
-                <textarea
-                  value={form.mission}
-                  onChange={(e) => update('mission', e.target.value)}
-                  placeholder="مثلاً: نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى."
-                  rows={3}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة المؤسّس</label>
-                <textarea
-                  value={form.founder_story}
-                  onChange={(e) => update('founder_story', e.target.value)}
-                  placeholder="كيف بدأت العلامة؟ ما المشكلة التي كنت تحلّها؟ سيكتب الذكاء الاصطناعي رسالةً مؤثّرة من هذا."
-                  rows={3}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Values ─────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">2. القيم الجوهرية</h2>
-              <span className="text-[14.5px] text-muted">{form.values.filter(v => v.title.trim()).length}/5</span>
-            </div>
-            <p className="mb-5 text-[14.5px] text-muted">ما الذي ترفض علامتك المساومة عليه؟ من 1 إلى 5 قيم.</p>
-            <div className="space-y-3">
-              {form.values.map((val, i) => (
-                <div key={val.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
-                  <input
-                    value={val.title}
-                    onChange={(e) => updateValue(val.id, { title: e.target.value })}
-                    placeholder={`القيمة ${i + 1}`}
-                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                  />
-                  <input
-                    value={val.description}
-                    onChange={(e) => updateValue(val.id, { description: e.target.value })}
-                    placeholder="وصف موجز (اختياري)"
-                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeValue(val.id)}
-                    disabled={form.values.length <= 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            {form.values.length < 5 && (
-              <button type="button" onClick={addValue} className="mt-4 flex items-center gap-2 text-[14.5px] font-semibold text-stone-600 hover:underline">
-                + أضف قيمة
-              </button>
-            )}
-          </motion.section>
-
-          {/* ── Process & Timeline ─────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">3. أسلوب العمل والمحطّات</h2>
-            <div className="grid gap-5">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">كيف تصنع أشياءك</label>
-                <textarea
-                  value={form.process_description}
-                  onChange={(e) => update('process_description', e.target.value)}
-                  placeholder="مثلاً: كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا."
-                  rows={2}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">خطوات العمل</label>
-                <input
-                  value={form.process_steps}
-                  onChange={(e) => update('process_steps', e.target.value)}
-                  placeholder="التوريد، التصميم، الصنع, الفحص، الشحن (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-4 block text-[14.5px] font-bold text-foreground">المحطّات البارزة (السنة + الحدث)</label>
-                <div className="space-y-3">
-                  {form.milestones.map((m, i) => (
-                    <div key={m.id} className="grid gap-3 sm:grid-cols-[120px_1fr_auto]">
-                      <input
-                        value={m.year}
-                        onChange={(e) => updateMilestone(m.id, { year: e.target.value })}
-                        placeholder="السنة"
-                        className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                      />
-                      <input
-                        value={m.event}
-                        onChange={(e) => updateMilestone(m.id, { event: e.target.value })}
-                        placeholder={`مثلاً: افتتحنا أول ستوديو لنا`}
-                        className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeMilestone(m.id)}
-                        disabled={form.milestones.length <= 1}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                {form.milestones.length < 6 && (
-                  <button type="button" onClick={addMilestone} className="mt-3 flex items-center gap-2 text-[14.5px] font-semibold text-stone-600 hover:underline">
-                    + أضف محطّة
-                  </button>
-                )}
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Credibility ────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. المصداقية</h2>
-            <p className="mb-6 text-[14.5px] text-muted">الظهور الصحفي وحجم الفريق وأدلّة العملاء تبني الثقة.</p>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">ظهور في الصحافة</label>
-                <input
-                  value={form.press_features}
-                  onChange={(e) => update('press_features', e.target.value)}
-                  placeholder="The New York Times, Wallpaper*, Monocle, Vogue Living... (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">حجم الفريق</label>
-                <input
-                  value={form.team_size}
-                  onChange={(e) => update('team_size', e.target.value)}
-                  placeholder="مثلاً: 9 أشخاص"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">القطع / المنتجات المباعة</label>
-                <input
-                  value={form.customer_count}
-                  onChange={(e) => update('customer_count', e.target.value)}
-                  placeholder="مثلاً: +42,000 قطعة في البيوت"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نسبة العملاء المتكرّرين</label>
-                <input
-                  value={form.repeat_rate}
-                  onChange={(e) => update('repeat_rate', e.target.value)}
-                  placeholder="مثلاً: 82%"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
-                <input
-                  value={form.avg_rating}
-                  onChange={(e) => update('avg_rating', e.target.value)}
-                  placeholder="مثلاً: 4.97★"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20"
-                />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Style preset ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-              {STUDIO_PRESETS.map((preset) => {
-                const selected = form.style_preset === preset.id
-                return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => update('style_preset', preset.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${
-                      selected ? 'border-stone-500 ring-1 ring-stone-500 bg-stone-500/5' : 'border-token bg-[color:var(--card)] hover:border-stone-300'
-                    }`}
-                  >
-                    <div className="mb-3 h-10 w-full overflow-hidden rounded-xl ring-1 ring-black/5" style={{ background: preset.colors.gradient }} />
-                    <p className={`text-[14.5px] font-black ${selected ? 'text-stone-700' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[14.5px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.accent : '#94a3b8' }}>
-                      {preset.vibe}
-                    </p>
-                  </button>
-                )
-              })}
-            </div>
-          </motion.section>
-
-          {/* ── Generate ───────────────────────────────────────────── */}
-          <motion.div {...sectionMotion} className="flex flex-col items-center gap-4 pt-4">
-            <button
-              type="button"
-              onClick={startGenerate}
-              disabled={loading}
-              className="flex items-center gap-3 rounded-xl bg-[#171717] px-12 py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ صياغة قصتك...</>
-              ) : (
-                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد صفحة علامة ستوديو</>
-              )}
-            </button>
-            {loading && (
-              <p className="text-[14.5px] text-muted">يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك واقتباساتك الصحفية — نحو 15 إلى 20 ثانية.</p>
-            )}
-          </motion.div>
-        </div>
-      </main>
-
+      <WizardShell
+        eyebrow="ستوديو · قالب قصة العلامة"
+        title="ابنِ صفحة قصة علامتك."
+        sub="أخبرنا قصتك وتصوغ زينيا صفحة علامة تحريرية — واجهة بيان ورسالة المؤسّس وخط زمني وقيم وأسلوب عمل."
+        steps={steps}
+        step={step}
+        onStep={setStep}
+        progress={{ pct }}
+        scrollKey={errorKey || undefined}
+        notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
+        final={{ label: loading ? 'جارٍ صياغة قصتك…' : 'ولّد صفحة علامة ستوديو', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
+      />
       <AiContentDisclaimer
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
       />
       <GenerationOverlay open={loading} />
-    </div>
+    </>
   )
 }

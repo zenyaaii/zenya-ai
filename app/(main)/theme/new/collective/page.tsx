@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { COLLECTIVE_PRESETS } from '@/utils/collective/presets'
 import type { CollectiveInput } from '@/utils/collective/input'
@@ -15,6 +13,10 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import WizardShell, {
+  AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle,
+  type WizardStep,
+} from '@/components/zenya/build/WizardShell'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -71,9 +73,7 @@ const INITIAL_FORM: Form = {
   brand_description: '',
   categories: '',
   curation_story: '',
-  collections: [
-    { id: uid(), name: '', tagline: '' }
-  ],
+  collections: [{ id: uid(), name: '', tagline: '' }],
   price_min: '',
   price_max: '',
   price_avg: '',
@@ -83,23 +83,16 @@ const INITIAL_FORM: Form = {
   customer_count: '',
   review_count: '',
   review_rating: '4.9',
-  style_preset: 'jade'
+  style_preset: 'jade',
 }
 
 const CATEGORY_SUGGESTIONS = [
   'المنزل والمعيشة', 'الأزياء والملابس', 'الجمال والعناية بالبشرة', 'العافية', 'المطبخ والطعام',
-  'الفن والمقتنيات', 'الإكسسوارات', 'الكتب والقرطاسية', 'الهواء الطلق والسفر', 'أساسيات التقنية'
+  'الفن والمقتنيات', 'الإكسسوارات', 'الكتب والقرطاسية', 'الهواء الطلق والسفر', 'أساسيات التقنية',
 ]
-
-const sectionMotion = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: 'easeOut' as const }
-}
 
 export default function CollectiveWizardPage() {
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -108,25 +101,21 @@ export default function CollectiveWizardPage() {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorKey, setErrorKey] = useState(0)
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     let cancelled = false
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (cancelled) return
-      // Guests can browse and fill the wizard; the save/generate action gates on auth (401 handler below).
-      setAuthReady(true)
-    }
-    checkAuth()
+    // Guests can browse and fill the wizard; generation gates on auth (401 below).
+    createClient().auth.getUser().then(() => { if (!cancelled) setAuthReady(true) })
     return () => { cancelled = true }
-  }, [router, supabase])
+  }, [])
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
-
   function updateCollection(id: string, patch: Partial<CollectionItem>) {
-    setForm((prev) => ({ ...prev, collections: prev.collections.map((c) => c.id === id ? { ...c, ...patch } : c) }))
+    setForm((prev) => ({ ...prev, collections: prev.collections.map((c) => (c.id === id ? { ...c, ...patch } : c)) }))
   }
   function addCollection() {
     if (form.collections.length >= 6) return
@@ -137,31 +126,38 @@ export default function CollectiveWizardPage() {
     setForm((prev) => ({ ...prev, collections: prev.collections.filter((c) => c.id !== id) }))
   }
 
+  const currentCategories = form.categories.split(/[،,]/).map((s) => s.trim()).filter(Boolean)
+  function toggleCategory(cat: string) {
+    const next = currentCategories.includes(cat) ? currentCategories.filter((c) => c !== cat) : [...currentCategories, cat]
+    update('categories', next.join('، '))
+  }
+
+  const validCollections = form.collections.filter((c) => c.name.trim().length >= 2)
+  const storeChecks = [
+    form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 5,
+    form.brand_description.trim().length >= 10, form.categories.trim().length >= 2,
+  ]
+  const required = [...storeChecks, validCollections.length >= 1]
+  const pct = Math.round((required.filter(Boolean).length / required.length) * 100)
+
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'أدخل اسم متجرك أو علامتك.'
     if (form.brand_tagline.trim().length < 5) return 'أدخل شعارًا لمتجرك.'
     if (form.brand_description.trim().length < 10) return 'صِف متجرك (10 أحرف على الأقل).'
     if (form.categories.trim().length < 2) return 'أدخل فئة منتجات واحدة على الأقل.'
-    const validCols = form.collections.filter((c) => c.name.trim().length >= 2)
-    if (validCols.length < 1) return 'أضف تشكيلة واحدة على الأقل لتوليد المتجر.'
+    if (validCollections.length < 1) return 'أضف تشكيلة واحدة على الأقل لتوليد المتجر.'
     return null
   }
 
   function buildPayload(): CollectiveInput {
     return {
-      brand: {
-        name: form.brand_name.trim(),
-        tagline: form.brand_tagline.trim(),
-        description: form.brand_description.trim()
-      },
-      categories: form.categories.split(/[\n,]/).map((s) => s.trim()).filter(Boolean),
-      collections: form.collections
-        .filter((c) => c.name.trim().length >= 2)
-        .map((c) => ({ name: c.name.trim(), tagline: c.tagline.trim() || undefined })),
+      brand: { name: form.brand_name.trim(), tagline: form.brand_tagline.trim(), description: form.brand_description.trim() },
+      categories: form.categories.split(/[\n,،]/).map((s) => s.trim()).filter(Boolean),
+      collections: validCollections.map((c) => ({ name: c.name.trim(), tagline: c.tagline.trim() || undefined })),
       price_range: {
         min: form.price_min.trim() || undefined,
         max: form.price_max.trim() || undefined,
-        average: form.price_avg.trim() || undefined
+        average: form.price_avg.trim() || undefined,
       },
       curation_story: form.curation_story.trim() || undefined,
       sustainability: form.sustainability,
@@ -170,16 +166,22 @@ export default function CollectiveWizardPage() {
       social_proof: {
         review_count: form.review_count.trim() || undefined,
         review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
-        customer_count: form.customer_count.trim() || undefined
+        customer_count: form.customer_count.trim() || undefined,
       },
-      style_preset: form.style_preset
+      style_preset: form.style_preset,
     }
   }
 
-  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function fail(msg: string) {
+    setError(msg)
+    setErrorKey((k) => k + 1)
+    const idx = steps.findIndex((s) => !s.optional && !s.complete)
+    if (idx >= 0) setStep(idx)
+  }
+
   function startGenerate() {
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     if (!acked) { setDisclaimerOpen(true); return }
     void handleGenerate()
   }
@@ -187,14 +189,14 @@ export default function CollectiveWizardPage() {
   async function handleGenerate() {
     setError(null)
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     setLoading(true)
     try {
       const payload = buildPayload()
       const genRes = await fetch('/api/generate-collective', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
@@ -208,13 +210,8 @@ export default function CollectiveWizardPage() {
           images: [],
           primaryColor: preset.colors.primary,
           secondaryColor: preset.colors.accent,
-          content: {
-            business_type: 'collective',
-            style_preset: form.style_preset,
-            collective: genJson.content,
-            input: payload
-          }
-        })
+          content: { business_type: 'collective', style_preset: form.style_preset, collective: genJson.content, input: payload },
+        }),
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/collective'); return }
@@ -224,302 +221,187 @@ export default function CollectiveWizardPage() {
       router.push(`/preview/collective/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
+      setErrorKey((k) => k + 1)
       setLoading(false)
     }
   }
 
-  if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
-  }
-
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
-          the dashboard and the accounts portal each dropped in turn. The
-          scrim was the expensive half: a backdrop-filter across the viewport
-          composites every glyph on the page, which on Arabic costs the
-          subpixel antialiasing that keeps the stems from thinning. */}
-
-      <DevFillButton onFill={() => setForm(buildSampleForm())} />
-      <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
-      <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
-        <motion.div {...sectionMotion} className="mb-12">
-          <p className="text-[14.5px] font-semibold text-primary-600">نُخبة · قالب الكتالوج</p>
-          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
-            ابنِ متجرًا منتقى متعدد العلامات.
-          </h1>
-          <ShopifyAffiliateCallout
-            placement="theme_new_ecom_picker"
-            variant="banner"
-            className="mt-6"
-          />
-
-          <p className="mt-3 max-w-2xl text-muted">
-            أخبرنا عن كتالوجك وتولّد زينيا واجهة متجر فاخرة متعددة العلامات — واجهة رئيسية وتشكيلات ووافد جديد والأكثر مبيعًا وقصة العلامة وشهادات ونشرة بريدية.
-          </p>
-        </motion.div>
-
-        {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
-            {error}
-          </motion.div>
-        )}
-
-        <div className="space-y-8">
-
-          {/* ── Brand ──────────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. متجرك</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم المتجر *</label>
-                <input
-                  value={form.brand_name}
-                  onChange={(e) => update('brand_name', e.target.value)}
-                  placeholder="مثلاً: نُخبة، المختارات، دار الشمال"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
-                <input
-                  value={form.brand_tagline}
-                  onChange={(e) => update('brand_tagline', e.target.value)}
-                  placeholder="مثلاً: منتقاة لحياة تُعاش بإتقان."
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">وصف المتجر *</label>
-                <textarea
-                  value={form.brand_description}
-                  onChange={(e) => update('brand_description', e.target.value)}
-                  placeholder="مثلاً: سوق منتقى متعدد العلامات للمنزل والخزانة والعافية — 400 منتج، كلٌّ منها مُختبَر."
-                  rows={2}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">فئات المنتجات *</label>
-                <input
-                  value={form.categories}
-                  onChange={(e) => update('categories', e.target.value)}
-                  placeholder="المنزل والمعيشة، الأزياء، الجمال، العافية، المطبخ... (مفصولة بفواصل)"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {CATEGORY_SUGGESTIONS.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        const current = form.categories ? form.categories.split(',').map(s => s.trim()) : []
-                        if (!current.includes(cat)) update('categories', [...current, cat].join(', '))
-                      }}
-                      className="rounded-full border border-token bg-[color:var(--card)] px-3 py-1 text-[14.5px] text-muted transition hover:border-emerald-400 hover:text-emerald-600"
-                    >
-                      + {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة الانتقاء</label>
-                <textarea
-                  value={form.curation_story}
-                  onChange={(e) => update('curation_story', e.target.value)}
-                  placeholder="كيف تقرّر ما تعرضه؟ مثلاً: نشتري كل شيء بأنفسنا ولا نعرض إلا ما نشتريه ثانيةً فعلًا."
-                  rows={2}
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Collections ────────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">2. التشكيلات</h2>
-              <span className="text-[14.5px] text-muted">{form.collections.filter(c => c.name.trim()).length}/6</span>
-            </div>
-            <p className="mb-5 text-[14.5px] text-muted">حتى تشكيلة واحدة تكفي — أضف حتى 6. كلما أضفت أكثر، بدت واجهة المتجر أغنى. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات تلقائيًا.</p>
-            <div className="space-y-3">
-              {form.collections.map((col, i) => (
-                <div key={col.id} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
-                  <input
-                    value={col.name}
-                    onChange={(e) => updateCollection(col.id, { name: e.target.value })}
-                    placeholder={`التشكيلة ${i + 1}`}
-                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                  />
-                  <input
-                    value={col.tagline}
-                    onChange={(e) => updateCollection(col.id, { tagline: e.target.value })}
-                    placeholder="شعار التشكيلة (اختياري)"
-                    className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeCollection(col.id)}
-                    disabled={form.collections.length <= 1}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            {form.collections.length < 6 && (
-              <button type="button" onClick={addCollection} className="mt-4 flex items-center gap-2 text-[14.5px] font-semibold text-emerald-600 hover:underline">
-                + أضف تشكيلة
-              </button>
-            )}
-          </motion.section>
-
-          {/* ── Pricing & Perks ────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">3. التسعير والمزايا</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نطاق السعر (الأدنى)</label>
-                <input
-                  value={form.price_min}
-                  onChange={(e) => update('price_min', e.target.value)}
-                  placeholder="مثلاً: 45$"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">نطاق السعر (الأعلى)</label>
-                <input
-                  value={form.price_max}
-                  onChange={(e) => update('price_max', e.target.value)}
-                  placeholder="مثلاً: 495$"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشحن</label>
-                <input
-                  value={form.shipping_perks}
-                  onChange={(e) => update('shipping_perks', e.target.value)}
-                  placeholder="مثلاً: مجاني فوق 150$، خلال 3 إلى 5 أيام"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">سياسة الإرجاع</label>
-                <input
-                  value={form.returns_policy}
-                  onChange={(e) => update('returns_policy', e.target.value)}
-                  placeholder="مثلاً: إرجاع مجاني خلال 14 يومًا"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={form.sustainability}
-                    onChange={(e) => update('sustainability', e.target.checked)}
-                    className="h-4 w-4 rounded text-emerald-600"
-                  />
-                  <span className="text-[14.5px] font-semibold text-foreground">منتجات مُدقَّقة للاستدامة</span>
-                </label>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Social proof ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. الدليل الاجتماعي</h2>
-            <p className="mb-6 text-[14.5px] text-muted">اختياري — يضيف تقييمات وأعداد عملاء إلى التصميم.</p>
-            <div className="grid gap-5 sm:grid-cols-3">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد العملاء</label>
-                <input
-                  value={form.customer_count}
-                  onChange={(e) => update('customer_count', e.target.value)}
-                  placeholder="مثلاً: +28,000"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد التقييمات</label>
-                <input
-                  value={form.review_count}
-                  onChange={(e) => update('review_count', e.target.value)}
-                  placeholder="مثلاً: +6,800 تقييم"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
-                <input
-                  value={form.review_rating}
-                  onChange={(e) => update('review_rating', e.target.value)}
-                  placeholder="4.9"
-                  className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/20"
-                />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Style preset ───────────────────────────────────────── */}
-          <motion.section {...sectionMotion} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. النمط البصري</h2>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-              {COLLECTIVE_PRESETS.map((preset) => {
-                const selected = form.style_preset === preset.id
+  const steps: WizardStep[] = [
+    {
+      id: 'store',
+      title: 'متجرك',
+      sub: 'الاسم والشعار وما يبيعه المتجر.',
+      complete: storeChecks.every(Boolean),
+      note: 'أكمل الاسم والشعار والوصف وفئة واحدة على الأقل.',
+      body: (
+        <Grid>
+          <Field label="اسم المتجر" required>
+            <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: نُخبة، المختارات، دار الشمال" />
+          </Field>
+          <Field label="الشعار" required>
+            <Input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: منتقاة لحياة تُعاش بإتقان." />
+          </Field>
+          <Field label="وصف المتجر" required wide>
+            <Textarea value={form.brand_description} onChange={(e) => update('brand_description', e.target.value)} placeholder="مثلاً: سوق منتقى متعدد العلامات للمنزل والخزانة والعافية — 400 منتج، كلٌّ منها مُختبَر." />
+          </Field>
+          <Field label="فئات المنتجات" required wide hint="مفصولة بفواصل، أو اختر من الاقتراحات أدناه.">
+            <Input value={form.categories} onChange={(e) => update('categories', e.target.value)} placeholder="المنزل والمعيشة، الأزياء، الجمال، العافية" />
+          </Field>
+          <Block title="اقتراحات">
+            <div className="zb-chips">
+              {CATEGORY_SUGGESTIONS.map((cat) => {
+                const on = currentCategories.includes(cat)
                 return (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    onClick={() => update('style_preset', preset.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${
-                      selected ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-500/5' : 'border-token bg-[color:var(--card)] hover:border-emerald-300'
-                    }`}
-                  >
-                    <div className="mb-3 h-10 w-full overflow-hidden rounded-xl ring-1 ring-black/5" style={{ background: preset.colors.gradient }} />
-                    <p className={`text-[14.5px] font-black ${selected ? 'text-emerald-600' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[14.5px] uppercase tracking-wider font-semibold" style={{ color: selected ? preset.colors.primary : '#94a3b8' }}>
-                      {preset.vibe}
-                    </p>
+                  <button key={cat} type="button" className="zb-chip" data-on={on ? 'true' : undefined} aria-pressed={on} onClick={() => toggleCategory(cat)}>
+                    {cat}
                   </button>
                 )
               })}
             </div>
-          </motion.section>
+          </Block>
+          <Field label="قصة الانتقاء" wide>
+            <Textarea value={form.curation_story} onChange={(e) => update('curation_story', e.target.value)} placeholder="كيف تقرّر ما تعرضه؟ مثلاً: نشتري كل شيء بأنفسنا ولا نعرض إلا ما نشتريه ثانيةً." />
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'collections',
+      title: 'التشكيلات',
+      sub: 'حتى تشكيلة واحدة تكفي — أضف حتى 6. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات.',
+      complete: validCollections.length >= 1,
+      note: 'أضف تشكيلة واحدة على الأقل.',
+      body: (
+        <Grid>
+          <Block>
+            <div className="zb-list">
+              {form.collections.map((c, i) => (
+                <Card key={c.id} title={'التشكيلة ' + (i + 1)} onRemove={form.collections.length > 1 ? () => removeCollection(c.id) : undefined} removeLabel={'حذف التشكيلة ' + (i + 1)}>
+                  <Grid>
+                    <Field label="اسم التشكيلة">
+                      <Input value={c.name} onChange={(e) => updateCollection(c.id, { name: e.target.value })} placeholder="غرفة المعيشة" />
+                    </Field>
+                    <Field label="شعار التشكيلة (اختياري)">
+                      <Input value={c.tagline} onChange={(e) => updateCollection(c.id, { tagline: e.target.value })} placeholder="أشياء تعيش حولها." />
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              {form.collections.length < 6 ? <AddButton onClick={addCollection}>أضف تشكيلة</AddButton> : null}
+            </div>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'pricing',
+      title: 'التسعير والمزايا',
+      sub: 'نطاق الأسعار والشحن والإرجاع.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="نطاق السعر (الأدنى)">
+            <Input value={form.price_min} onChange={(e) => update('price_min', e.target.value)} placeholder="مثلاً: 45$" />
+          </Field>
+          <Field label="نطاق السعر (الأعلى)">
+            <Input value={form.price_max} onChange={(e) => update('price_max', e.target.value)} placeholder="مثلاً: 495$" />
+          </Field>
+          <Field label="الشحن">
+            <Input value={form.shipping_perks} onChange={(e) => update('shipping_perks', e.target.value)} placeholder="مثلاً: مجاني فوق 150$، خلال 3 إلى 5 أيام" />
+          </Field>
+          <Field label="سياسة الإرجاع">
+            <Input value={form.returns_policy} onChange={(e) => update('returns_policy', e.target.value)} placeholder="مثلاً: إرجاع مجاني خلال 14 يومًا" />
+          </Field>
+          <Block>
+            <Toggle on={form.sustainability} onChange={(v) => update('sustainability', v)}>منتجات مُدقَّقة للاستدامة</Toggle>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'social',
+      title: 'الدليل الاجتماعي',
+      sub: 'يضيف تقييمات وأعداد عملاء إلى التصميم.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="عدد العملاء">
+            <Input value={form.customer_count} onChange={(e) => update('customer_count', e.target.value)} placeholder="مثلاً: +28,000" />
+          </Field>
+          <Field label="عدد التقييمات">
+            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +6,800 تقييم" />
+          </Field>
+          <Field label="متوسط التقييم">
+            <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.9" />
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'style',
+      title: 'النمط البصري',
+      sub: 'اختر المظهر. يمكنك تغييره لاحقًا.',
+      complete: true,
+      body: <Presets presets={COLLECTIVE_PRESETS} value={form.style_preset} onChange={(id) => update('style_preset', id as CollectiveStylePresetId)} />,
+    },
+    {
+      id: 'review',
+      title: 'المراجعة',
+      sub: 'كل ما ستبني عليه. راجعه قبل التوليد.',
+      complete: required.every(Boolean),
+      note: 'ينقص شيء مطلوب في خطوة سابقة.',
+      body: (
+        <Grid>
+          <Review
+            facts={[
+              { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
+              { label: 'التشكيلات', value: validCollections.length },
+              { label: 'النمط', value: COLLECTIVE_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
+            ]}
+            recap={[
+              { label: 'اسم المتجر', value: form.brand_name },
+              { label: 'الشعار', value: form.brand_tagline },
+              { label: 'الوصف', value: form.brand_description },
+              { label: 'الفئات', value: form.categories },
+              { label: 'التشكيلات', value: validCollections.map((c) => c.name).join('، ') },
+            ]}
+          >
+            <Handoff title="جاهز لتوليد متجرك." body="يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات وينسّق كتالوجك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+          </Review>
+        </Grid>
+      ),
+    },
+  ]
 
-          {/* ── Generate ───────────────────────────────────────────── */}
-          <motion.div {...sectionMotion} className="flex flex-col items-center gap-4 pt-4">
-            <button
-              type="button"
-              onClick={startGenerate}
-              disabled={loading}
-              className="flex items-center gap-3 rounded-xl bg-[#171717] px-12 py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد متجرك...</>
-              ) : (
-                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد متجر نُخبة</>
-              )}
-            </button>
-            {loading && (
-              <p className="text-[14.5px] text-muted">يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات ويُنسّق كتالوجك — نحو 15 إلى 20 ثانية.</p>
-            )}
-          </motion.div>
-        </div>
-      </main>
+  if (!authReady) {
+    return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium text-[#56565a]">جارٍ التحميل…</div>
+  }
 
+  return (
+    <>
+      <DevFillButton onFill={() => setForm(buildSampleForm())} />
+      <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
+      <WizardShell
+        eyebrow="نُخبة · قالب الكتالوج"
+        title="ابنِ متجرًا منتقى متعدد العلامات."
+        sub="أخبرنا عن كتالوجك وتولّد زينيا واجهة متجر متعددة العلامات — واجهة رئيسية وتشكيلات والأكثر مبيعًا وقصة العلامة."
+        ledeExtra={<div style={{ marginTop: '1.25rem' }}><ShopifyAffiliateCallout placement="theme_new_ecom_picker" variant="banner" /></div>}
+        steps={steps}
+        step={step}
+        onStep={setStep}
+        progress={{ pct }}
+        scrollKey={errorKey || undefined}
+        notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
+        final={{ label: loading ? 'جارٍ توليد متجرك…' : 'ولّد متجر نُخبة', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
+      />
       <AiContentDisclaimer
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
       />
       <GenerationOverlay open={loading} />
-    </div>
+    </>
   )
 }
