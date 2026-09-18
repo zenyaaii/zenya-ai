@@ -90,9 +90,15 @@ export default function PricingFooter() {
               نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
             </p>
             {/* The deck's footer carries this and it belongs here too: the
-                last thing on a pricing page should be a way to start. */}
+                last thing on a pricing page should be a way to start.
+
+                IT GOES TO /templates, NOT /build. /build is the Shopify
+                one-product builder, which is admin-only while its new version
+                is built: a signed-out reader was sent to sign up and then shown
+                a "coming soon" gate. Starting means picking a template, and
+                every template on /templates links to its own builder. */}
             <span className="zf-cta">
-              <SlideButton href="/build" variant="violet" slide="ابدأ الآن">
+              <SlideButton href="/templates" variant="violet" slide="ابدأ الآن">
                 ابدأ الإنشاء
               </SlideButton>
             </span>

@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Icon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { createClient } from '@/utils/supabase/client'
 import { LOOKBOOK_PRESETS } from '@/utils/lookbook/presets'
 import type { LookbookStylePresetId } from '@/utils/lookbook/types'
@@ -14,6 +12,10 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import WizardShell, {
+  AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Select, Textarea, Toggle, Uploads,
+  type WizardStep,
+} from '@/components/zenya/build/WizardShell'
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
 
@@ -41,10 +43,12 @@ type Form = {
 const CATEGORY_OPTIONS = [
   'نسائي عصري', 'رجالي عصري', 'للجنسين',
   'فاخر / كوتور', 'ستريت وير', 'ملابس رياضية', 'عبايات', 'أوشحة وحجاب',
-  'إكسسوارات', 'أحذية', 'ملابس أطفال', 'أزياء زفاف', 'دينيم', 'تريكو', 'أخرى'
+  'إكسسوارات', 'أحذية', 'ملابس أطفال', 'أزياء زفاف', 'دينيم', 'تريكو', 'أخرى',
 ]
 
 const PRODUCT_CATEGORIES = ['فساتين', 'قطع علوية', 'قطع سفلية', 'ملابس خارجية', 'تريكو', 'إكسسوارات', 'أحذية', 'حقائب', 'عبايات', 'ملابس رياضية', 'أخرى']
+
+const SEASONS = ['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'ريزورت 2025', 'أعياد 2025']
 
 function buildSampleForm(): Form {
   return {
@@ -80,9 +84,7 @@ const INITIAL_FORM: Form = {
   target_customer: '',
   collection_name: '',
   collection_season: 'ربيع/صيف 25',
-  products: [
-    { id: uid(), name: '', price: '', category: 'فساتين' }
-  ],
+  products: [{ id: uid(), name: '', price: '', category: 'فساتين' }],
   brand_story: '',
   sustainability_focus: false,
   press_features: '',
@@ -90,18 +92,11 @@ const INITIAL_FORM: Form = {
   review_count: '',
   hero_image_url: '',
   gallery_image_urls: [],
-  style_preset: 'noir'
-}
-
-const sm = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: 'easeOut' as const }
+  style_preset: 'noir',
 }
 
 export default function LookbookWizardPage() {
   const router = useRouter()
-  const supabase = createClient()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -110,24 +105,21 @@ export default function LookbookWizardPage() {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false)
   const [acked, setAcked] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorKey, setErrorKey] = useState(0)
+  const [step, setStep] = useState(0)
 
   useEffect(() => {
     let cancelled = false
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (cancelled) return
-      // Guests can browse and fill the wizard; the save/generate action gates on auth (401 handler below).
-      setAuthReady(true)
-    }
-    checkAuth()
+    // Guests can browse and fill the wizard; generation gates on auth (401 below).
+    createClient().auth.getUser().then(() => { if (!cancelled) setAuthReady(true) })
     return () => { cancelled = true }
-  }, [router, supabase])
+  }, [])
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((p) => ({ ...p, [key]: value }))
   }
   function updateProduct(id: string, patch: Partial<Product>) {
-    setForm((p) => ({ ...p, products: p.products.map((pr) => pr.id === id ? { ...pr, ...patch } : pr) }))
+    setForm((p) => ({ ...p, products: p.products.map((pr) => (pr.id === id ? { ...pr, ...patch } : pr)) }))
   }
   function addProduct() {
     if (form.products.length >= 8) return
@@ -146,21 +138,34 @@ export default function LookbookWizardPage() {
     })
   }
 
+  const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
+  const brandChecks = [
+    form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 3, form.brand_category.trim().length >= 2,
+    form.style_direction.trim().length >= 10, form.target_customer.trim().length >= 10,
+  ]
+  const required = [...brandChecks, validProducts.length >= 1]
+  const pct = Math.round((required.filter(Boolean).length / required.length) * 100)
+
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'يرجى إدخال اسم علامتك التجارية.'
     if (form.brand_tagline.trim().length < 3) return 'يرجى إدخال شعار.'
     if (form.brand_category.trim().length < 2) return 'يرجى اختيار فئة العلامة.'
     if (form.style_direction.trim().length < 10) return 'صِف توجّهك التصميمي (10 أحرف على الأقل).'
     if (form.target_customer.trim().length < 10) return 'صِف عميلك المستهدف (10 أحرف على الأقل).'
-    const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
     if (validProducts.length < 1) return 'أضف منتجًا واحدًا على الأقل لملء اللوك بوك.'
     return null
   }
 
-  // Entry from the CTA: validate, then pass the AI-content honesty gate once.
+  function fail(msg: string) {
+    setError(msg)
+    setErrorKey((k) => k + 1)
+    const idx = steps.findIndex((s) => !s.optional && !s.complete)
+    if (idx >= 0) setStep(idx)
+  }
+
   function startGenerate() {
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     if (!acked) { setDisclaimerOpen(true); return }
     void handleGenerate()
   }
@@ -168,44 +173,34 @@ export default function LookbookWizardPage() {
   async function handleGenerate() {
     setError(null)
     const err = validate()
-    if (err) { setError(err); window.scrollTo({ top: 0, behavior: 'smooth' }); return }
+    if (err) return fail(err)
     setLoading(true)
     try {
       const payload = {
-        brand: {
-          name: form.brand_name.trim(),
-          tagline: form.brand_tagline.trim(),
-          category: form.brand_category.trim()
-        },
+        brand: { name: form.brand_name.trim(), tagline: form.brand_tagline.trim(), category: form.brand_category.trim() },
         style_direction: form.style_direction.trim(),
         target_customer: form.target_customer.trim(),
         collection_name: form.collection_name.trim() || undefined,
         collection_season: form.collection_season.trim() || undefined,
-        products: form.products
-          .filter((p) => p.name.trim().length >= 2)
-          .map((p) => ({
-            name: p.name.trim(),
-            price: p.price.trim() || undefined,
-            category: p.category.trim() || undefined
-          })),
+        products: validProducts.map((p) => ({ name: p.name.trim(), price: p.price.trim() || undefined, category: p.category.trim() || undefined })),
         brand_story: form.brand_story.trim() || undefined,
         sustainability_focus: form.sustainability_focus,
         press_features: form.press_features.trim() || undefined,
         social_proof: {
           review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
-          review_count: form.review_count.trim() || undefined
+          review_count: form.review_count.trim() || undefined,
         },
         visuals: {
           hero_image_url: form.hero_image_url.trim() || undefined,
-          gallery_image_urls: form.gallery_image_urls.filter(Boolean).slice(0, 8)
+          gallery_image_urls: form.gallery_image_urls.filter(Boolean).slice(0, 8),
         },
-        style_preset: form.style_preset
+        style_preset: form.style_preset,
       }
 
       const genRes = await fetch('/api/generate-lookbook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
@@ -219,13 +214,8 @@ export default function LookbookWizardPage() {
           images: form.gallery_image_urls.filter(Boolean),
           primaryColor: preset.colors.primary,
           secondaryColor: preset.colors.accent,
-          content: {
-            business_type: 'lookbook',
-            style_preset: form.style_preset,
-            lookbook: genJson.content,
-            input: payload
-          }
-        })
+          content: { business_type: 'lookbook', style_preset: form.style_preset, lookbook: genJson.content, input: payload },
+        }),
       })
       const saveJson = await saveRes.json()
       if (saveRes.status === 401) { router.push('/login?mode=signup&next=/theme/new/lookbook'); return }
@@ -235,224 +225,209 @@ export default function LookbookWizardPage() {
       router.push(`/preview/lookbook/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما. يرجى المحاولة مجددًا.')
+      setErrorKey((k) => k + 1)
       setLoading(false)
     }
   }
 
+  const steps: WizardStep[] = [
+    {
+      id: 'brand',
+      title: 'علامتك التجارية',
+      sub: 'الاسم والشعار ولمن تصمّم.',
+      complete: brandChecks.every(Boolean),
+      note: 'أكمل الاسم والشعار والفئة والعميل والتوجّه التصميمي.',
+      body: (
+        <Grid>
+          <Field label="اسم العلامة" required>
+            <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: وَقار، نُهى، صفاء" />
+          </Field>
+          <Field label="الشعار" required>
+            <Input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: ارتدي ما يليق بك." />
+          </Field>
+          <Field label="فئة العلامة" required>
+            <Select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)}>
+              <option value="">اختر الفئة...</option>
+              {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </Select>
+          </Field>
+          <Field label="العميل المستهدف" required>
+            <Input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="مثلاً: نساء محترفات بين 28 و45" />
+          </Field>
+          <Field label="التوجّه التصميمي" required wide>
+            <Textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية." />
+          </Field>
+          <Field label="قصة العلامة" wide hint="سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا».">
+            <Textarea rows={4} value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="قصة البداية أو القيم التأسيسية أو ما يميّز العلامة." />
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'collection',
+      title: 'التشكيلة',
+      sub: 'اسم التشكيلة وموسمها.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="اسم التشكيلة">
+            <Input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="مثلاً: تشكيلة الوقار" />
+          </Field>
+          <Field label="الموسم">
+            <Select value={form.collection_season} onChange={(e) => update('collection_season', e.target.value)}>
+              {SEASONS.map((s) => <option key={s} value={s}>{s}</option>)}
+            </Select>
+          </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'products',
+      title: 'المنتجات',
+      sub: 'حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.',
+      complete: validProducts.length >= 1,
+      note: 'أضف منتجًا واحدًا على الأقل.',
+      body: (
+        <Grid>
+          <Block>
+            <div className="zb-list">
+              {form.products.map((p, i) => (
+                <Card key={p.id} title={'المنتج ' + (i + 1)} onRemove={form.products.length > 1 ? () => removeProduct(p.id) : undefined} removeLabel={'حذف المنتج ' + (i + 1)}>
+                  <Grid>
+                    <Field label="اسم المنتج" wide>
+                      <Input value={p.name} onChange={(e) => updateProduct(p.id, { name: e.target.value })} placeholder="عباية حريرية · عاجية" />
+                    </Field>
+                    <Field label="السعر">
+                      <Input value={p.price} onChange={(e) => updateProduct(p.id, { price: e.target.value })} placeholder="245$" />
+                    </Field>
+                    <Field label="الفئة">
+                      <Select value={p.category} onChange={(e) => updateProduct(p.id, { category: e.target.value })}>
+                        {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </Select>
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              {form.products.length < 8 ? <AddButton onClick={addProduct}>أضف منتجًا آخر</AddButton> : null}
+            </div>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'visuals',
+      title: 'الأصول البصرية',
+      sub: 'صورك التحريرية وصور المنتجات. تخطَّ أي خانة وسنملؤها بصورة بديلة منتقاة.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Block>
+            <p className="zb-note">كل ما ترفعه يُحفَظ أيضًا في معرضك لإعادة استخدامه لاحقًا.</p>
+            <ImageUploadField label="الصورة الرئيسية" value={form.hero_image_url} onChange={(url) => update('hero_image_url', url)} aspect="wide" helper="الصورة الكبيرة أعلى الصفحة." />
+          </Block>
+          <Block title="معرض اللوك بوك (حتى 8)">
+            <Uploads>
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <ImageUploadField key={'lg-' + i} value={form.gallery_image_urls[i] || ''} onChange={(url) => setGalleryAt(i, url)} aspect="square" />
+              ))}
+            </Uploads>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'credibility',
+      title: 'المصداقية',
+      sub: 'التقييمات والظهور الصحفي والاستدامة.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Field label="عدد التقييمات">
+            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" />
+          </Field>
+          <Field label="متوسط التقييم">
+            <Select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)}>
+              {['5.0', '4.9', '4.8', '4.7'].map((r) => <option key={r} value={r}>{r} ★</option>)}
+            </Select>
+          </Field>
+          <Field label="ظهور في الصحافة" wide hint="مفصولة بفواصل. اتركها فارغة إن لم يكن لديك ظهور تذكره.">
+            <Input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي" />
+          </Field>
+          <Block>
+            <Toggle on={form.sustainability_focus} onChange={(v) => update('sustainability_focus', v)}>
+              أبرِز الاستدامة / الإنتاج الأخلاقي في قصة العلامة
+            </Toggle>
+          </Block>
+        </Grid>
+      ),
+    },
+    {
+      id: 'style',
+      title: 'النمط البصري',
+      sub: 'اختر المظهر. يمكنك تغييره لاحقًا.',
+      complete: true,
+      body: <Presets presets={LOOKBOOK_PRESETS} value={form.style_preset} onChange={(id) => update('style_preset', id as LookbookStylePresetId)} />,
+    },
+    {
+      id: 'review',
+      title: 'المراجعة',
+      sub: 'كل ما ستبني عليه. راجعه قبل التوليد.',
+      complete: required.every(Boolean),
+      note: 'ينقص شيء مطلوب في خطوة سابقة.',
+      body: (
+        <Grid>
+          <Review
+            facts={[
+              { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
+              { label: 'المنتجات', value: validProducts.length },
+              { label: 'النمط', value: LOOKBOOK_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
+            ]}
+            recap={[
+              { label: 'اسم العلامة', value: form.brand_name },
+              { label: 'الشعار', value: form.brand_tagline },
+              { label: 'الفئة', value: form.brand_category },
+              { label: 'العميل المستهدف', value: form.target_customer },
+              { label: 'التوجّه التصميمي', value: form.style_direction },
+              { label: 'التشكيلة', value: [form.collection_name, form.collection_season].filter(Boolean).join(' · ') },
+              { label: 'المنتجات', value: validProducts.map((p) => p.name).join('، ') },
+            ]}
+          >
+            <Handoff title="جاهز لتوليد موقع اللوك بوك." body="يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+          </Review>
+        </Grid>
+      ),
+    },
+  ]
+
   if (!authReady) {
-    return <div className="flex min-h-screen items-center justify-center text-muted">جارٍ التحميل...</div>
+    return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium text-[#56565a]">جارٍ التحميل…</div>
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      {/* The ground is flat, and that is the whole house style. This carried
-          two or three blurred colour orbs plus a full-viewport scrim over them — the aurora the marketing site,
-          the dashboard and the accounts portal each dropped in turn. The
-          scrim was the expensive half: a backdrop-filter across the viewport
-          composites every glyph on the page, which on Arabic costs the
-          subpixel antialiasing that keeps the stems from thinning. */}
-
+    <>
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
-      <main className="relative z-10 mx-auto max-w-4xl px-6 py-14">
-        <motion.div {...sm} className="mb-12">
-          <p className="text-[14.5px] font-semibold text-primary-600">لوك بوك · قالب الأزياء المحتشمة</p>
-          <h1 className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl">
-            ابنِ موقع أزياء فاخرًا.
-          </h1>
-          <p className="mt-3 max-w-2xl text-muted">
-            أخبرنا عن علامتك وتشكيلتك. تولّد زينيا موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة وجدار صحافة وتقييمات ونشرة بريدية.
-          </p>
-        </motion.div>
-
-        {error && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-8 rounded-2xl border border-[#b91c1c]/20 bg-[#b91c1c]/[0.07]/90 p-4 text-[14.5px] text-[#b91c1c]">
-            {error}
-          </motion.div>
-        )}
-
-        <div className="space-y-8">
-
-          {/* ── Brand ──────────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">1. علامتك التجارية</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم العلامة *</label>
-                <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="مثلاً: وَقار، نُهى، صفاء" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الشعار *</label>
-                <input value={form.brand_tagline} onChange={(e) => update('brand_tagline', e.target.value)} placeholder="مثلاً: ارتدي ما يليق بك." className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">فئة العلامة *</label>
-                <select value={form.brand_category} onChange={(e) => update('brand_category', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
-                  <option value="">اختر الفئة...</option>
-                  {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">العميل المستهدف *</label>
-                <input value={form.target_customer} onChange={(e) => update('target_customer', e.target.value)} placeholder="مثلاً: نساء محترفات بين 28 و45 يقدّرن الجودة على الكمية" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">التوجّه التصميمي *</label>
-                <textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية. لوحة ألوان محايدة دافئة وعاجية وأخضر غابي." rows={3} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">قصة العلامة</label>
-                <textarea value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="أخبرنا قصة البداية أو القيم التأسيسية أو ما يميّز العلامة. سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا»." rows={4} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Collection ─────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">2. التشكيلة</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">اسم التشكيلة</label>
-                <input value={form.collection_name} onChange={(e) => update('collection_name', e.target.value)} placeholder="مثلاً: تشكيلة الوقار" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20" />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">الموسم</label>
-                <select value={form.collection_season} onChange={(e) => update('collection_season', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-400/20">
-                  {['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'ريزورت 2025', 'أعياد 2025'].map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Products ───────────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-black text-foreground">3. المنتجات</h2>
-              <span className="text-[14.5px] text-muted">{form.products.filter((p) => p.name.trim()).length}/8</span>
-            </div>
-            <p className="mb-5 text-[14.5px] text-muted">حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.</p>
-            <div className="space-y-3">
-              {form.products.map((product, i) => (
-                <div key={product.id} className="grid gap-3 sm:grid-cols-[2fr_1fr_1.2fr_auto]">
-                  <input value={product.name} onChange={(e) => updateProduct(product.id, { name: e.target.value })} placeholder={`اسم المنتج ${i + 1}`} className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                  <input value={product.price} onChange={(e) => updateProduct(product.id, { price: e.target.value })} placeholder="السعر (مثلاً: 245$)" className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                  <select value={product.category} onChange={(e) => updateProduct(product.id, { category: e.target.value })} className="rounded-xl border border-token bg-[color:var(--card)] px-4 py-2.5 text-[14.5px] text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
-                    {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <button type="button" onClick={() => removeProduct(product.id)} disabled={form.products.length <= 1} className="flex h-10 w-10 items-center justify-center rounded-xl border border-token text-muted transition hover:bg-[#b91c1c]/[0.07] hover:text-[#b91c1c] disabled:opacity-30">×</button>
-                </div>
-              ))}
-            </div>
-            {form.products.length < 8 && (
-              <button type="button" onClick={addProduct} className="mt-4 text-[14.5px] font-semibold text-stone-600 hover:underline">
-                + أضف منتجًا آخر
-              </button>
-            )}
-          </motion.section>
-
-          {/* ── Visual assets ──────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-2 text-xl font-black text-foreground">4. الأصول البصرية</h2>
-            <p className="mb-5 text-[14.5px] text-muted">ارفع صورك التحريرية وصور المنتجات — ستظهر في اللوك بوك وتُحفَظ أيضًا في معرضك لإعادة استخدامها لاحقًا. تخطَّ أي خانة وسنملؤها بصورة بديلة منتقاة.</p>
-            <div className="grid gap-5">
-              <ImageUploadField
-                label="الصورة الرئيسية"
-                value={form.hero_image_url}
-                onChange={(url) => update('hero_image_url', url)}
-                aspect="wide"
-                helper="الصورة الكبيرة أعلى الصفحة."
-              />
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">معرض اللوك بوك (حتى 8)</label>
-                <div className="grid gap-3 sm:grid-cols-4">
-                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                    <ImageUploadField
-                      key={`lg-${i}`}
-                      value={form.gallery_image_urls[i] || ''}
-                      onChange={(url) => setGalleryAt(i, url)}
-                      aspect="square"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Social proof & Press ───────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">5. المصداقية</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">عدد التقييمات</label>
-                <input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-              </div>
-              <div>
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">متوسط التقييم</label>
-                <select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none">
-                  {['5.0', '4.9', '4.8', '4.7'].map((r) => <option key={r} value={r}>{r} ★</option>)}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-2 block text-[14.5px] font-bold text-foreground">ظهور في الصحافة</label>
-                <input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي، الجميلة" className="w-full rounded-xl border border-token bg-[color:var(--card)] px-5 py-3 text-foreground shadow-sm focus:border-stone-400 focus:outline-none" />
-                <p className="mt-1 text-[14.5px] text-muted">مفصولة بفواصل. اتركها فارغة وسيستخدم الذكاء الاصطناعي قيمًا افتراضية ملائمة للأزياء.</p>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input type="checkbox" checked={form.sustainability_focus} onChange={(e) => update('sustainability_focus', e.target.checked)} className="h-4 w-4 rounded text-stone-600" />
-                  <span className="text-[14.5px] font-semibold text-foreground">أبرِز الاستدامة / الإنتاج الأخلاقي في قصة العلامة</span>
-                </label>
-              </div>
-            </div>
-          </motion.section>
-
-          {/* ── Style preset ───────────────────────────────────── */}
-          <motion.section {...sm} className="rounded-2xl border border-token bg-[color:var(--card)]/70 p-8 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)]">
-            <h2 className="mb-6 text-xl font-black text-foreground">6. النمط البصري</h2>
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-              {LOOKBOOK_PRESETS.map((preset) => {
-                const selected = form.style_preset === preset.id
-                return (
-                  <button key={preset.id} type="button" onClick={() => update('style_preset', preset.id)}
-                    className={`rounded-2xl border p-4 text-left transition-all ${selected ? 'border-stone-800 ring-1 ring-stone-800 bg-stone-50' : 'border-token bg-[color:var(--card)] hover:border-stone-400'}`}
-                  >
-                    <div className="mb-3 h-12 w-full overflow-hidden rounded-xl" style={{ background: preset.colors.background, border: `2px solid ${preset.colors.border}` }}>
-                      <div className="flex h-full">
-                        <div className="h-full w-2/3" style={{ background: preset.colors.background }} />
-                        <div className="h-full w-1/3" style={{ background: preset.colors.primary }} />
-                      </div>
-                    </div>
-                    <p className={`text-[14.5px] font-black ${selected ? 'text-stone-900' : 'text-foreground'}`}>{preset.name}</p>
-                    <p className="mt-1 text-[14.5px] text-muted">{preset.description}</p>
-                    <p className="mt-2 text-[14.5px] font-semibold uppercase tracking-wider text-stone-400">{preset.vibe}</p>
-                  </button>
-                )
-              })}
-            </div>
-          </motion.section>
-
-          {/* ── Generate ───────────────────────────────────────── */}
-          <motion.div {...sm} className="flex flex-col items-center gap-4 pt-4">
-            <button type="button" onClick={startGenerate} disabled={loading}
-              className="flex items-center gap-3 rounded-xl bg-[#171717] px-12 py-4 text-base font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-45 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <><Icon name="loading" size={16} animation="none" hover={false} className="animate-spin" /> جارٍ توليد موقعك...</>
-              ) : (
-                <><Icon name="sparkles" size={16} animation="none" hover={false} /> ولّد موقع اللوك بوك</>
-              )}
-            </button>
-            {loading && <p className="text-[14.5px] text-muted">يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية.</p>}
-          </motion.div>
-        </div>
-      </main>
-
+      <WizardShell
+        eyebrow="لوك بوك · قالب الأزياء المحتشمة"
+        title="ابنِ موقع أزياء فاخرًا."
+        sub="أخبرنا عن علامتك وتشكيلتك. تولّد زينيا موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة."
+        steps={steps}
+        step={step}
+        onStep={setStep}
+        progress={{ pct }}
+        scrollKey={errorKey || undefined}
+        notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
+        final={{ label: loading ? 'جارٍ توليد موقعك…' : 'ولّد موقع اللوك بوك', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
+      />
       <AiContentDisclaimer
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
       />
       <GenerationOverlay open={loading} />
-    </div>
+    </>
   )
 }

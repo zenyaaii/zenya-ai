@@ -85,8 +85,8 @@ export const CHROME_CSS = `
   box-shadow: 0 0 0 1px rgba(17,17,17,0.18), 0 0 0 4px rgba(250,250,250,0.5);
   transition: min-width 380ms var(--ease-out) 220ms, background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out);
 }
-.zx-phone-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.375rem; height: 48px; padding-inline: 0.375rem; }
-.zx-phone-mark { display: flex; align-items: center; justify-content: center; justify-self: center; min-height: 38px; padding-inline: 0.5rem; }
+.zx-phone-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.375rem; height: 44px; padding-inline: 0.375rem; }
+.zx-phone-mark { display: flex; align-items: center; justify-content: center; justify-self: center; min-height: 38px; padding-inline: 0.375rem; }
 .zx-mark-svg-sm { height: 16px; color: #000; }
 /* 38px, not 32: rendered under the root zoom that is 32.3px, which is the
    floor a coarse pointer is owed. */
@@ -97,7 +97,7 @@ export const CHROME_CSS = `
 @media (min-width: 768px) { .zx-phone-pill { display: none; } }
 @media (max-width: 767px) { .zx-pill { display: none; } }
 .zx-pill {
-  border-radius: 24px; overflow: hidden; width: 396px;
+  border-radius: 24px; overflow: hidden; width: 380px;
   background: rgba(238, 238, 243, 0.60);
   -webkit-backdrop-filter: blur(18px) saturate(180%); backdrop-filter: blur(18px) saturate(180%);
   box-shadow: 0 0 0 1px rgba(17,17,17,0.18), 0 0 0 4px rgba(250,250,250,0.5);
@@ -106,11 +106,11 @@ export const CHROME_CSS = `
 }
 @media (prefers-reduced-transparency: reduce) { .zx-pill, .zx-phone-pill { background: #f2f2f5; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .zx-pill, .zx-phone-pill { background: #f2f2f5; } }
-.zx-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
-.zx-side { display: flex; align-items: center; min-width: 0; }
+.zx-bar { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
+.zx-side { display: flex; align-items: center; flex-shrink: 0; }
 .zx-side-start { justify-content: flex-start; }
 .zx-side-end { justify-content: flex-end; }
-.zx-mark { display: flex; align-items: center; min-height: 38px; padding: 0 0.5rem; flex-shrink: 0; }
+.zx-mark { display: flex; align-items: center; min-height: 38px; padding: 0 0.25rem; flex-shrink: 0; }
 .zx-mark-svg { height: 17px; color: #000; }
 .zx-head[data-dark] .zx-pill, .zx-head[data-dark] .zx-phone-pill {
   background: rgba(32,32,38,0.72);

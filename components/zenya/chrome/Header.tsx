@@ -20,6 +20,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 
 export type NavItem = { href: string; label: string; here?: boolean }
 
@@ -102,9 +103,11 @@ export default function Header({
    */
   homeHref?: string
   /**
-   * What stands at the end of the pill. Default is the one call to action;
-   * a surface that knows who is signed in passes its own control — the
-   * portal passes the account's initial on a disc. It is rendered in BOTH
+   * What stands at the end of the pill, when AccountControl is not the right
+   * object. AccountControl is the default and is right everywhere on this
+   * host: signed out it is the call to action, signed in it is the account's
+   * initial. The portal on accounts.zenyaai.co passes its own, because both
+   * of those hrefs have to spell the apex out there. It is rendered in BOTH
    * pills, so a phone gets the same object a desktop does.
    */
   account?: React.ReactNode
@@ -134,7 +137,7 @@ export default function Header({
           <A href={homeHref} aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></A>
           {account
             ? <span className="zx-account-phone">{account}</span>
-            : <A href="/login?mode=signup" className="zx-account zx-account-phone">ابدأ</A>}
+            : <AccountControl className="zx-account zx-account-phone" />}
         </div>
         <div className="zx-drawer" data-open={menuOpen ? "true" : undefined}
           style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -165,7 +168,7 @@ export default function Header({
           </nav>
           <span className="zx-side zx-side-end">
             <span className="zx-sep" aria-hidden />
-            {account ?? <A href="/login?mode=signup" className="zx-account">ابدأ</A>}
+            {account ?? <AccountControl className="zx-account" />}
           </span>
         </div>
       </div>

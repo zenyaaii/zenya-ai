@@ -5,7 +5,6 @@ import { headers } from 'next/headers'
 import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import PresenceBeacon from '@/components/marketing/PresenceBeacon'
-import ZoomLock from '@/components/ZoomLock'
 import CookieConsent from '@/components/CookieConsent'
 import { NotifyProvider } from '@/components/ui/Notify'
 import { resolveLocale } from '@/lib/i18n/server'
@@ -320,18 +319,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           -webkit-font-smoothing: antialiased, which forces greyscale
           antialiasing and thins every stem by roughly half a pixel. That
           flatters a large Latin headline and wrecks Arabic: this interface
-          is Arabic at 14.5px, which the root ZoomLock renders at 12.32px,
-          and at that size the i'jam dots and the joins between letters are
-          one or two pixels of ink each. Greyscale AA greys them out and the
-          text reads thin and soft. The html rule in globals.css sets `auto`
-          so the platform can use subpixel rendering where it has it; this
-          class was overriding that rule from a more specific selector. */}
+          is Arabic at 14.5px, and at that size the i'jam dots and the joins
+          between letters are one or two pixels of ink each. Greyscale AA
+          greys them out and the text reads thin and soft. The html rule in
+          globals.css sets `auto` so the platform can use subpixel rendering
+          where it has it; this class was overriding that rule from a more
+          specific selector. */}
+      {/* NO ROOT ZOOM. A ZoomLock used to write `zoom: 0.85` (lower still
+          under browser zoom or a docked side panel) on <html>. A fractional
+          zoom resamples every glyph off the pixel grid, and Arabic, whose
+          dots and joins are a pixel or two of ink, came out jagged and grey.
+          The page renders at its real size and the browser's own zoom is
+          left to the reader. */}
       <body className="min-h-dvh bg-background text-foreground">
-        {/* Caps the base UI at ~85% on touch devices and holds it there under
-            Safari page-zoom, so the site magnifies (pinch) instead of reflowing
-            — Apple-style. Zenya's own surfaces only; a customer's published site
-            keeps its own untouched zoom behaviour. */}
-        {!isCustomerSite && <ZoomLock />}
         <SmoothScroll />
         {/* Presence heartbeat feeds the live-users globe — anyone on a Zenya
             surface counts. Customer sites report via /api/insight instead. */}

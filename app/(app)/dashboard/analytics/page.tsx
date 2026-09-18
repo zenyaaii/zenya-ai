@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/server'
 import { userIsAdmin } from '@/lib/is-admin'
-import AnalyticsDashboard from '@/components/dashboard/analytics/AnalyticsDashboard'
+import AnalyticsClient from './AnalyticsClient'
 import { analyticsAccess } from '@/lib/analytics-entitlement'
 
 export const dynamic = 'force-dynamic'
@@ -55,7 +55,7 @@ export default async function AnalyticsPage() {
     }
   }
 
-  return <AnalyticsDashboard isAdmin={isAdmin} />
+  return <AnalyticsClient />
 }
 
 /** Shown when a non-Starter account's analytics trial has ended. */

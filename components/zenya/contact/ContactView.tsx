@@ -59,6 +59,7 @@ import {
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import { COMPANY } from "@/lib/company"
 import PricingFooter from "../pricing/PricingFooter"
@@ -323,7 +324,7 @@ export default function ContactView({
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
             <Link href="/" aria-label="زينيا" className="zc-phone-mark"><ZenyaMark className="zc-mark-svg-sm" /></Link>
-            <Link href="/login?mode=signup" className="zc-account zc-account-phone">ابدأ</Link>
+            <AccountControl className="zc-account zc-account-phone" />
           </div>
           <div className="zc-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -354,7 +355,7 @@ export default function ContactView({
             </nav>
             <span className="zc-side zc-side-end">
               <span className="zc-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zc-account">ابدأ</Link>
+              <AccountControl className="zc-account" />
             </span>
           </div>
         </div>

@@ -76,10 +76,10 @@ export const CSS = `
   box-shadow: 0 0 0 1px rgba(17,17,17,0.18), 0 0 0 4px rgba(250,250,250,0.5);
   transition: min-width 380ms var(--ease-out) 220ms, background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out);
 }
-.zc-phone-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.375rem; height: 48px; padding-inline: 0.375rem; }
+.zc-phone-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 0.375rem; height: 44px; padding-inline: 0.375rem; }
 /* 38px of hit box around a 16px mark. The link was as tall as its own SVG,
    which measured 13.6px rendered: a logo is still a target. */
-.zc-phone-mark { display: flex; align-items: center; justify-content: center; justify-self: center; min-height: 38px; padding-inline: 0.5rem; }
+.zc-phone-mark { display: flex; align-items: center; justify-content: center; justify-self: center; min-height: 38px; padding-inline: 0.375rem; }
 .zc-mark-svg-sm { height: 16px; color: #000; }
 /* 38px, not 32: rendered under the root zoom that is 32.3px, which is the
    floor a coarse pointer is owed. */
@@ -99,11 +99,11 @@ export const CSS = `
 }
 @media (prefers-reduced-transparency: reduce) { .zc-pill, .zc-phone-pill { background: #f2f2f5; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .zc-pill, .zc-phone-pill { background: #f2f2f5; } }
-.zc-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
-.zc-side { display: flex; align-items: center; min-width: 0; }
+.zc-bar { display: flex; justify-content: space-between; gap: 0.5rem; align-items: center; height: 48px; padding-inline-start: 0.75rem; padding-inline-end: 0.375rem; }
+.zc-side { display: flex; align-items: center; flex-shrink: 0; }
 .zc-side-start { justify-content: flex-start; }
 .zc-side-end { justify-content: flex-end; }
-.zc-mark { display: flex; align-items: center; min-height: 30px; padding: 0 0.5rem; flex-shrink: 0; }
+.zc-mark { display: flex; align-items: center; min-height: 30px; padding: 0 0.25rem; flex-shrink: 0; }
 .zc-mark-svg { height: 17px; color: #000; }
 .zc-head[data-dark] .zc-pill, .zc-head[data-dark] .zc-phone-pill {
   background: rgba(32,32,38,0.72);

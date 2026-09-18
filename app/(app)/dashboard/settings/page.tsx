@@ -1,11 +1,7 @@
-import AccountSettings from '@/components/settings/AccountSettings'
+import SettingsClient from './SettingsClient'
 
 export const metadata = { title: 'الإعدادات' }
 
 export default function DashboardSettingsPage() {
-  return (
-    <div className="px-6 py-8">
-      <AccountSettings />
-    </div>
-  )
+  return <SettingsClient />
 }

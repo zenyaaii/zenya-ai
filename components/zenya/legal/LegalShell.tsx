@@ -37,6 +37,7 @@ import Link from "next/link"
 import { ChevronDown, Menu, X } from "lucide-react"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import { COMPANY } from "@/lib/company"
 import PricingFooter from "../pricing/PricingFooter"
 import { CSS } from "./styles"
@@ -200,7 +201,7 @@ export default function LegalShell({
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
             <Link href="/" aria-label="زينيا" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
-            <Link href="/login?mode=signup" className="zl-account zl-account-phone">ابدأ</Link>
+            <AccountControl className="zl-account zl-account-phone" />
           </div>
           <div className="zl-drawer" data-open={menuOpen ? "true" : undefined}
             style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
@@ -228,7 +229,7 @@ export default function LegalShell({
             </nav>
             <span className="zl-side zl-side-end">
               <span className="zl-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zl-account">ابدأ</Link>
+              <AccountControl className="zl-account" />
             </span>
           </div>
         </div>

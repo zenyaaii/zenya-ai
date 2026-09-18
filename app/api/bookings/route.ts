@@ -5,6 +5,16 @@ import {
 import { isBotUA, normalizePath } from '@/lib/analytics-core'
 import { bookingAccess } from '@/lib/booking-entitlement'
 
+import { bookingReceivedEmail, sendEmail } from '@/lib/email'
+import { readPrefs } from '@/lib/notification-prefs'
+
+const TYPE_AR: Record<string, string> = {
+  reservation: 'حجز طاولة',
+  appointment: 'حجز موعد',
+  quote: 'طلب عرض سعر',
+  contact: 'طلب تواصل',
+}
+
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +81,7 @@ export async function POST(req: NextRequest) {
     // ---- owner entitlement -------------------------------------------------
     const { data: t } = await a
       .from('themes')
-      .select('user_id')
+      .select('user_id, product_name')
       .eq('id', theme.id)
       .maybeSingle()
     if (!t?.user_id) return json({ ok: false, error: 'unavailable' }, 404)
@@ -125,6 +135,40 @@ export async function POST(req: NextRequest) {
     })
 
     if (insErr) return json({ ok: false, error: 'server_error' }, 500)
+
+    // ---- tell the owner ------------------------------------------------------
+    // Awaited rather than fired and forgotten: a serverless function can be
+    // frozen the moment it responds. A mail failure never fails the booking.
+    if (!bot) {
+      try {
+        const { data: owner } = await a.auth.admin.getUserById(t.user_id)
+        const u = owner?.user
+        if (u?.email && readPrefs(u.user_metadata?.notification_prefs).booking) {
+          const meta = (u.user_metadata || {}) as any
+          const tmpl = bookingReceivedEmail({
+            firstName: meta.full_name?.split?.(' ')?.[0] || meta.name || null,
+            siteName: (t as any).product_name || slug,
+            kind: TYPE_AR[type] || TYPE_AR.contact,
+            name,
+            phone,
+            email,
+            when: [preferredDate, preferredTime].filter(Boolean).join(' · ') || null,
+            party: partySize,
+            message,
+          })
+          await sendEmail({
+            to: u.email,
+            subject: tmpl.subject,
+            text: tmpl.text,
+            html: tmpl.html,
+            replyTo: email || undefined,
+            tags: [{ name: 'type', value: 'booking_received' }],
+          })
+        }
+      } catch {
+        // The booking is saved; the owner still sees it in the dashboard.
+      }
+    }
 
     return json({ ok: true }, 200)
   } catch {

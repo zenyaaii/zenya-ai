@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { resolveSeo, readSeoOverrides } from '@/lib/seo'
-import { publicSiteUrl, publicSiteHost } from '@/lib/portal-urls'
-import SeoManager, { type SeoSite } from '@/components/dashboard/SeoManager'
+import { publicSiteHost } from '@/lib/portal-urls'
+import SeoClient, { type SeoSite } from './SeoClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,12 +36,8 @@ export default async function SeoPage() {
       return {
         id: t.id,
         productName: t.product_name || slug || 'موقع بلا اسم',
-        slug: slug || null,
-        templateType: t.template_type,
         isPublished: !!t.is_published,
         host: slug ? publicSiteHost(slug) : null,
-        url: slug ? publicSiteUrl(slug) : null,
-        sitemapUrl: slug ? `${publicSiteUrl(slug)}/sitemap.xml` : null,
         overrides: readSeoOverrides(t),
         resolved: {
           title: resolved.title,
@@ -52,5 +48,5 @@ export default async function SeoPage() {
       }
     })
 
-  return <SeoManager sites={sites} />
+  return <SeoClient sites={sites} />
 }

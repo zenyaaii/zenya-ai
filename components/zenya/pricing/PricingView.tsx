@@ -51,6 +51,7 @@ import { Menu, X } from "lucide-react"
 import Link from "next/link"
 import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
+import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import CodeStack from "./CodeStack"
 import PricingFooter from "./PricingFooter"
@@ -477,9 +478,7 @@ export default function PricingView() {
             {/* The deck's own signed-out control, verbatim: an obsidian pill
                 reading ابدأ, not an icon. It is what makes the closed pill
                 measure what the deck's measures. */}
-            <Link href="/login?mode=signup" className="zp-account zp-account-phone">
-              ابدأ
-            </Link>
+            <AccountControl className="zp-account zp-account-phone" />
           </div>
           <div
             className="zp-drawer"
@@ -544,9 +543,7 @@ export default function PricingView() {
 
             <span className="zp-side zp-side-end" onMouseEnter={() => setTrayOpen(false)}>
               <span className="zp-sep" aria-hidden />
-              <Link href="/login?mode=signup" className="zp-account">
-                ابدأ
-              </Link>
+              <AccountControl className="zp-account" />
             </span>
           </div>
 
@@ -827,17 +824,18 @@ const CSS = `
    before this: the pill here stood 43.3px against the deck's 48px, because
    the bar was sized by its contents instead of being given the height. */
 .zp-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
   align-items: center;
   height: 48px;
   padding-inline-start: 0.75rem;
   padding-inline-end: 0.375rem;
 }
-.zp-side { display: flex; align-items: center; min-width: 0; }
+.zp-side { display: flex; align-items: center; flex-shrink: 0; }
 .zp-side-start { justify-content: flex-start; }
 .zp-side-end { justify-content: flex-end; }
-.zp-mark { display: flex; align-items: center; padding: 0 0.375rem; flex-shrink: 0; }
+.zp-mark { display: flex; align-items: center; padding: 0 0.25rem; flex-shrink: 0; }
 .zp-mark-svg { height: 17px; color: #000; }
 
 /* ---- the header standing on a dark panel --------------------------------
