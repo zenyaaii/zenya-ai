@@ -30,7 +30,11 @@
  * /accounts, so those three links resolve to /accounts/templates and friends and
  * 404. Only /terms, /privacy, /refund, /cookies and /subprocessors are
  * allowed through. Dropping AccessView in here would have restyled the portal
- * and broken three links in the header doing it.
+ * and broken three links in the header doing it. The HEADER, separately, is
+ * the house pill now — components/accounts/AccountsHeader renders
+ * components/zenya/chrome/Header with the apex spelled out in the hrefs,
+ * which is the part of that problem that turned out to be a prop rather than
+ * a fork. What is left here is the ground, the card and the chooser.
  *
  * NO BACKTICKS ANYWHERE IN THE LITERAL: one would end it.
  */
@@ -62,67 +66,15 @@ export const ACCOUNTS_CSS = `
 }
 
 /* ── the header ──────────────────────────────────────────────────────── */
-.zn-head { display: flex; justify-content: center; padding: 2rem var(--gut, 1rem) 0; }
-.zn-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  max-width: 100%;
-  padding: 0.375rem 0.375rem 0.375rem 0.75rem;
-  background: var(--card);
-  border-radius: 999px;
-  box-shadow: 0 0 0 1px rgba(23, 23, 23, 0.07);
-}
-/* 38px CSS renders 32.3px, which is the 32px coarse-pointer floor. Measured
-   by scripts/theme-check.cjs at 390: the mark was 13.6px tall, the eye 30.6,
-   the switch 29 and the reset link 21. Everything a finger lands on is held
-   at 2.375rem from here. */
-.zn-head-mark {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.375rem;
-  padding: 0 0.5rem;
-  color: var(--obsidian);
-}
-.zn-head-svg { height: 1rem; width: auto; }
-
-.zn-nav { display: flex; align-items: center; }
-.zn-nav-item {
-  display: inline-flex;
-  align-items: center;
-  /* 38px CSS clears the 32px coarse-pointer floor under ZoomLock's 0.85, and
-     14.2px clears the 12px type floor. Both were measured in RENDERED pixels
-     rather than CSS pixels, which is the trap documented in
-     components/zenya/chrome/tokens.ts. */
-  min-height: 2.375rem;
-  padding: 0 0.6875rem;
-  font-size: 14.5px;
-  color: var(--stone);
-  text-decoration: none;
-  border-radius: 999px;
-  transition: color 140ms var(--ease-out);
-}
-.zn-nav-item:hover { color: var(--obsidian); }
-.zn-nav-item:focus-visible { outline: 2px solid var(--violet); outline-offset: -2px; }
-
-.zn-head-end { display: inline-flex; align-items: center; gap: 0.5rem; }
-.zn-sep { width: 1px; height: 1.125rem; background: rgba(23, 23, 23, 0.10); }
-
-.zn-head-cta {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.375rem;
-  padding: 0 0.9375rem;
-  font-size: 14.5px;
-  font-weight: 500;
-  color: #fafafa;
-  background: var(--obsidian);
-  border-radius: 999px;
-  text-decoration: none;
-  transition: opacity 140ms var(--ease-out);
-}
-.zn-head-cta:hover { opacity: 0.88; }
-.zn-head-cta:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+/* THE PILL ITSELF IS components/zenya/chrome/tokens.ts, which this layout
+   already loads: .zx-head, .zx-pill and .zx-phone-pill, the same object the
+   marketing pages and the wizards draw, with the same 768 breakpoint and the
+   same drawer. This file used to carry a second one — .zn-head, .zn-pill,
+   .zn-nav-item, .zn-head-cta and a 420px rule that tightened their padding —
+   and it had no phone form at all, so at 375 the three Arabic nav words and
+   the call to action each wrapped onto two lines inside a 56px bar. Those
+   rules are gone. What is left is the one thing the house pill does not
+   describe, because only this host knows who is signed in. */
 
 /* Signed in, the pill ends in the account's first letter, and it is the way
    to the dashboard. */
@@ -143,13 +95,6 @@ export const ACCOUNTS_CSS = `
 .zn-head-disc:hover { opacity: 0.88; }
 .zn-head-disc:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 
-/* The phone tightens the PADDING, never the type. The previous version of
-   this rule dropped the nav to 13.4px, which renders 11.4px — it undid the
-   floor on the one device where it matters most. */
-@media (max-width: 420px) {
-  .zn-nav-item { padding: 0 0.4375rem; }
-  .zn-pill { gap: 0.25rem; padding-left: 0.5rem; }
-}
 
 .zn-card {
   width: 100%;

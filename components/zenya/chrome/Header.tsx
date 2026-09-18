@@ -72,19 +72,56 @@ export function useOnDark(rootRef: React.MutableRefObject<HTMLElement | null>) {
   return { headRef, onDark }
 }
 
+/**
+ * next/link's plain twin, for a pill whose links leave the host. Same props,
+ * so the markup below does not have to know which one it is drawing.
+ */
+function Anchor({ href, children, ...rest }: React.ComponentProps<typeof Link>) {
+  return <a href={typeof href === "string" ? href : "#"} {...rest}>{children}</a>
+}
+
 export default function Header({
   headRef,
   onDark,
   uiClass,
   nav = NAV,
+  homeHref = "/",
+  account,
+  plain = false,
 }: {
   headRef: React.RefObject<HTMLElement>
   onDark: boolean
   /** The UI face (IBM Plex Sans Arabic). The pill is chrome, not display. */
   uiClass: string
   nav?: NavItem[]
+  /**
+   * Where the mark goes. "/" everywhere on this host; the portal on
+   * accounts.zenyaai.co spells the apex out, because middleware there
+   * rewrites every unrouted path under /accounts and a relative "/" is
+   * the portal's own root rather than the site's.
+   */
+  homeHref?: string
+  /**
+   * What stands at the end of the pill. Default is the one call to action;
+   * a surface that knows who is signed in passes its own control — the
+   * portal passes the account's initial on a disc. It is rendered in BOTH
+   * pills, so a phone gets the same object a desktop does.
+   */
+  account?: React.ReactNode
+  /**
+   * Render the links as plain anchors rather than next/link. The portal
+   * links off its own host, and a cross-origin href is a document
+   * navigation, not a route change — there is nothing for the router to
+   * prefetch and nothing for it to push.
+   */
+  plain?: boolean
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+
+  /* One element, two spellings, PICKED rather than defined here: a component
+     declared inside the render is a new type on every render, and React
+     unmounts and remounts everything under it each time the menu opens. */
+  const A = (plain ? Anchor : Link) as typeof Link
 
   return (
     <header ref={headRef} className={"zx-head " + uiClass} data-dark={onDark ? "true" : undefined}>
@@ -94,18 +131,20 @@ export default function Header({
             aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
-          <Link href="/" aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
-          <Link href="/login?mode=signup" className="zx-account zx-account-phone">ابدأ</Link>
+          <A href={homeHref} aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></A>
+          {account
+            ? <span className="zx-account-phone">{account}</span>
+            : <A href="/login?mode=signup" className="zx-account zx-account-phone">ابدأ</A>}
         </div>
         <div className="zx-drawer" data-open={menuOpen ? "true" : undefined}
           style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
           <div className="zx-drawer-clip">
             <nav id="zx-phone-menu" className="zx-phone-menu">
               {nav.map((i) => (
-                <Link key={i.href} href={i.href} className="zx-tray-row"
+                <A key={i.href} href={i.href} className="zx-tray-row"
                   aria-current={i.here ? "page" : undefined} onClick={() => setMenuOpen(false)}>
                   {i.label}
-                </Link>
+                </A>
               ))}
             </nav>
           </div>
@@ -115,18 +154,18 @@ export default function Header({
       <div className="zx-pill">
         <div className="zx-bar">
           <span className="zx-side zx-side-start">
-            <Link href="/" className="zx-mark" aria-label="زينيا"><ZenyaMark className="zx-mark-svg" /></Link>
+            <A href={homeHref} className="zx-mark" aria-label="زينيا"><ZenyaMark className="zx-mark-svg" /></A>
           </span>
           <nav className="zx-nav">
             {nav.map((i) => (
-              <Link key={i.href} href={i.href} className="zx-nav-item" aria-current={i.here ? "page" : undefined}>
+              <A key={i.href} href={i.href} className="zx-nav-item" aria-current={i.here ? "page" : undefined}>
                 {i.label}
-              </Link>
+              </A>
             ))}
           </nav>
           <span className="zx-side zx-side-end">
             <span className="zx-sep" aria-hidden />
-            <Link href="/login?mode=signup" className="zx-account">ابدأ</Link>
+            {account ?? <A href="/login?mode=signup" className="zx-account">ابدأ</A>}
           </span>
         </div>
       </div>
