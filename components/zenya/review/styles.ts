@@ -66,6 +66,13 @@ export const CSS = `
 .zr-round:hover { background: rgba(0,0,0,0.05); }
 .zr-account-phone { justify-self: end; }
 .zr-phone-menu { display: grid; padding: 0.125rem 0.375rem 0.375rem; }
+/* THE DRAWER'S ROWS READ FROM THE START, like the home page's. The target-floor
+   block at the foot of this sheet makes every control inline-flex and centres
+   it, which is right for a nav item and wrong for a full-width row in a tray:
+   it pulled the three page names into the middle of the pill while the home
+   page had them against the edge. The DESKTOP tray is a centred grid and is
+   deliberately left alone — this is scoped to the phone menu. */
+.zr-phone-menu .zr-tray-row { justify-content: flex-start; }
 @media (min-width: 768px) { .zr-phone-pill { display: none; } }
 @media (max-width: 767px) { .zr-pill { display: none; } }
 .zr-pill {

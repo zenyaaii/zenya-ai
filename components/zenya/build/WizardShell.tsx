@@ -662,7 +662,11 @@ const CSS = `
 .zb-nav-item { border-radius: 999px; padding: 0.6875rem 0.75rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; color: #666; text-decoration: none; transition: color 520ms var(--ease-out); }
 .zb-nav-item:hover { color: var(--obsidian); }
 .zb-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); }
-.zb-account { border-radius: 999px; padding: 0.6875rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out); }
+/* THE HOME PAGE'S CONTROL, TO THE PIXEL: inline-flex, 38px tall, 8px by 16px
+   of padding, 14.5px type. It measured 40px here because the vertical
+   padding was 11px and nothing set a height, so the one object that is on
+   every page was two pixels taller on some of them than on the home page. */
+.zb-account { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; border-radius: 999px; padding: 0.5rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out); }
 .zb-account:hover { opacity: 0.86; }
 .zb-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zb-drawer[data-open] { transition-delay: 0s, 0s; }

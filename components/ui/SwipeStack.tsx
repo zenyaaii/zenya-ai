@@ -22,6 +22,20 @@
  * whether the first move is a scroll before delivering events, and the card
  * visibly lags the thumb for the first few frames of every drag.
  *
+ * ONE SWIPE TURNS A CARD, and getting there took two fixes that are easy to
+ * mistake for one. The first is POINTER CAPTURE: the stage is 312px wide and
+ * centred, so any real swipe leaves it, and without capture the browser stops
+ * delivering moves at the edge — the card froze mid-drag and the release was
+ * never seen, which read as lag and as having to hold the card the whole way.
+ * It is taken LAZILY, once the gesture passes the slop, because a captured
+ * pointer makes the browser fire the click at the capturing element: taking
+ * it on pointerdown delivers every tap to the stage and the plan's own call
+ * to action stops working. The second fix is VELOCITY: the commit test was
+ * distance alone, 22 per cent of the stage, so a flick — the gesture everyone
+ * actually makes — fell short and snapped back. A gesture now commits if it
+ * went far enough OR fast enough, and the flick takes its direction from the
+ * velocity.
+ *
  * THE HINT GOES THROUGH THE SAME WRITER AS THE DRAG. If the reader has not
  * touched the stack after a beat, the front card leans one way and then the
  * other and settles, so the cards behind it are seen to be cards. It runs
@@ -56,7 +70,21 @@ const OFFSET_X = 26
 const SCALE_STEP = 0.06
 const TILT = 2.2
 /** Past this fraction of the stage the drag counts as a decision. */
-const THRESHOLD = 0.22
+const THRESHOLD = 0.16
+/**
+ * ...OR past this speed, in pixels per millisecond, which is what makes a
+ * flick work. Distance alone meant the only gesture that turned a card was a
+ * slow drag held most of the way across the stage: a quick flick of 40px at
+ * 300px is 0.13 of the stage, under any sane distance threshold, so the deck
+ * snapped back and the reader had to go back and DRAG it. 0.45 px/ms is about
+ * a third of a comfortable flick and well above the speed a finger can reach
+ * while it is still deciding.
+ */
+const FLICK = 0.45
+/** A flick still has to be a movement, not a jittery tap. */
+const FLICK_MIN_PX = 8
+/** Past this the gesture was a drag, so the click it ends with is not a tap. */
+const SLOP = 6
 
 export default function SwipeStack({
   children,
@@ -71,7 +99,8 @@ export default function SwipeStack({
 
   const stageRef = useRef<HTMLDivElement | null>(null)
   const cardRefs = useRef<Array<HTMLDivElement | null>>([])
-  const drag = useRef({ active: false, startX: 0, dx: 0, pointer: -1, raf: 0 })
+  const drag = useRef({ active: false, startX: 0, dx: 0, pointer: -1, raf: 0,
+                       lastX: 0, lastT: 0, vx: 0, swallowUntil: 0, captured: false })
   const indexRef = useRef(index)
   indexRef.current = index
   const touchedRef = useRef(touched)
@@ -154,10 +183,16 @@ export default function SwipeStack({
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return
-    drag.current.active = true
-    drag.current.startX = e.clientX
-    drag.current.dx = 0
-    drag.current.pointer = e.pointerId
+    const d = drag.current
+    d.active = true
+    d.startX = e.clientX
+    d.dx = 0
+    d.pointer = e.pointerId
+    d.lastX = e.clientX
+    d.lastT = e.timeStamp
+    d.vx = 0
+    d.swallowUntil = 0
+    d.captured = false
     setTouched(true)
   }
 
@@ -165,6 +200,40 @@ export default function SwipeStack({
     const d = drag.current
     if (!d.active || e.pointerId !== d.pointer) return
     d.dx = e.clientX - d.startX
+    /* Speed, smoothed, so one stuttered frame near the release cannot decide
+       the gesture. Sampled per EVENT rather than per frame: coalesced moves
+       are where the speed actually is. */
+    const dt = e.timeStamp - d.lastT
+    if (dt > 0) {
+      const v = (e.clientX - d.lastX) / dt
+      d.vx = d.vx === 0 ? v : d.vx * 0.7 + v * 0.3
+      d.lastX = e.clientX
+      d.lastT = e.timeStamp
+    }
+    /* CAPTURE, AND IT IS THE HALF OF THIS THAT WAS MISSING — BUT NOT UNTIL THE
+       GESTURE IS A DRAG. The stage is 19.5rem wide and centred, so a swipe
+       that starts on the card and travels a real distance leaves that box
+       well before the finger lifts. Without capture the browser stops
+       delivering moves the moment it does: the card freezes wherever it was,
+       pointerup never arrives, and the deck sits mid-drag until something
+       else touches it. That is what "it lags, you have to hold it the whole
+       time" was.
+
+       Taking the capture on pointerdown instead of here looks tidier and is
+       wrong, which cost a round of this: while a pointer is captured the
+       browser fires the compatibility CLICK at the capturing element, so
+       every tap inside the deck was delivered to the stage and the plan's
+       own call to action stopped being clickable. Past the slop the gesture
+       is a drag and there is no tap left to break. */
+    if (!d.captured && Math.abs(d.dx) > SLOP) {
+      try {
+        e.currentTarget.setPointerCapture?.(e.pointerId)
+        d.captured = true
+      } catch {
+        /* Throws NotFoundError when the pointer is not a live one. The drag
+           still works without capture; it just ends at the stage's edge. */
+      }
+    }
     if (d.raf) return
     /* One write per frame, never one per event. */
     d.raf = requestAnimationFrame(() => {
@@ -178,18 +247,47 @@ export default function SwipeStack({
     if (!d.active || e.pointerId !== d.pointer) return
     d.active = false
     if (d.raf) { cancelAnimationFrame(d.raf); d.raf = 0 }
+    /* Guarded: pointerup releases the capture implicitly, and on
+       lostpointercapture it is already gone. Releasing a pointer that is
+       not captured throws NotFoundError. */
+    if (d.captured && e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    d.captured = false
     const stage = stageRef.current
     const width = stage?.clientWidth || 1
-    const moved = d.dx / width
+    const dx = d.dx
+    const moved = dx / width
+    const vx = d.vx
     d.dx = 0
-    if (Math.abs(moved) > THRESHOLD) {
+    d.vx = 0
+    /* A gesture that travelled past the slop is a drag, and the click the
+       browser synthesises from it must not reach the plan's button. It is a
+       WINDOW and not a flag: a drag that ends on empty card never produces a
+       click at all, and a flag left standing would then eat the next real tap
+       — or a keyboard Enter, which arrives as a click with no pointer at all. */
+    d.swallowUntil = Math.abs(dx) > SLOP ? e.timeStamp + 300 : 0
+
+    /* EITHER far enough OR fast enough. The flick reads its direction from
+       the velocity rather than the distance, because at the end of a fast
+       throw those can disagree by a pixel or two. */
+    const flicked = Math.abs(vx) > FLICK && Math.abs(dx) > FLICK_MIN_PX
+    if (flicked || Math.abs(moved) > THRESHOLD) {
       /* Dragging the front card to the right brings the card that sits to its
          right forward, in both writing directions: the gesture is about the
          deck, not about the language. */
-      go(indexRef.current - Math.sign(moved))
+      go(indexRef.current - Math.sign(flicked ? vx : moved))
     } else {
       paint(0, true)
     }
+  }
+
+  /* Capture phase, so it is decided before the card's own link sees it. */
+  const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.timeStamp > drag.current.swallowUntil) return
+    drag.current.swallowUntil = 0
+    e.preventDefault()
+    e.stopPropagation()
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -212,6 +310,10 @@ export default function SwipeStack({
         onPointerMove={onPointerMove}
         onPointerUp={end}
         onPointerCancel={end}
+        /* The browser takes the pointer when it decides the gesture is a
+           vertical scroll; without this the deck would stay mid-drag. */
+        onLostPointerCapture={end}
+        onClickCapture={onClickCapture}
       >
         {children.map((child, i) => (
           <div

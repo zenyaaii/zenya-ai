@@ -101,6 +101,13 @@ export const CSS = `
 .zl-round:hover { background: rgba(0,0,0,0.05); }
 .zl-account-phone { justify-self: end; }
 .zl-phone-menu { display: grid; padding: 0.125rem 0.375rem 0.375rem; }
+/* THE DRAWER'S ROWS READ FROM THE START, like the home page's. The target-floor
+   block at the foot of this sheet makes every control inline-flex and centres
+   it, which is right for a nav item and wrong for a full-width row in a tray:
+   it pulled the three page names into the middle of the pill while the home
+   page had them against the edge. The DESKTOP tray is a centred grid and is
+   deliberately left alone — this is scoped to the phone menu. */
+.zl-phone-menu .zl-tray-row { justify-content: flex-start; }
 @media (min-width: 768px) { .zl-phone-pill { display: none; } }
 @media (max-width: 767px) { .zl-pill { display: none; } }
 .zl-pill {
@@ -140,7 +147,11 @@ export const CSS = `
 .zl-nav-item:hover { color: var(--obsidian); }
 .zl-nav-item[aria-current] { color: var(--obsidian); font-weight: 700; }
 .zl-sep { width: 1px; height: 20px; margin-inline-end: 0.375rem; background: rgba(0,0,0,0.07); transition: background-color 520ms var(--ease-out); }
-.zl-account { border-radius: 999px; padding: 0.6875rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
+/* THE HOME PAGE'S CONTROL, TO THE PIXEL: inline-flex, 38px tall, 8px by 16px
+   of padding, 14.5px type. It measured 40px here because the vertical
+   padding was 11px and nothing set a height, so the one object that is on
+   every page was two pixels taller on some of them than on the home page. */
+.zl-account { border-radius: 999px; padding: 0.5rem 1rem; font-size: 14.5px; line-height: 1.24; white-space: nowrap; text-decoration: none; background: var(--obsidian); color: var(--ground); transition: opacity 150ms var(--ease-out), background-color 520ms var(--ease-out), color 520ms var(--ease-out); }
 .zl-account:hover { opacity: 0.86; }
 .zl-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zl-drawer[data-open] { transition-delay: 0s, 0s; }

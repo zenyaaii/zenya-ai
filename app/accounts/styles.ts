@@ -30,11 +30,9 @@
  * /accounts, so those three links resolve to /accounts/templates and friends and
  * 404. Only /terms, /privacy, /refund, /cookies and /subprocessors are
  * allowed through. Dropping AccessView in here would have restyled the portal
- * and broken three links in the header doing it. The HEADER, separately, is
- * the house pill now — components/accounts/AccountsHeader renders
- * components/zenya/chrome/Header with the apex spelled out in the hrefs,
- * which is the part of that problem that turned out to be a prop rather than
- * a fork. What is left here is the ground, the card and the chooser.
+ * and broken three links in the header doing it. That argument is moot now:
+ * the portal has NO header at all. What is left here is the ground, the card
+ * and the chooser.
  *
  * NO BACKTICKS ANYWHERE IN THE LITERAL: one would end it.
  */
@@ -56,7 +54,7 @@ export const ACCOUNTS_CSS = `
   color: var(--obsidian);
 }
 
-/* The card sits in what is left under the pill, centred in it. */
+/* The card is the only thing on the page, so it takes the middle of it. */
 .zn-body {
   flex: 1;
   display: flex;
@@ -65,36 +63,10 @@ export const ACCOUNTS_CSS = `
   padding: 2rem var(--gut, clamp(1rem, 4vw, 3rem)) 4rem;
 }
 
-/* ── the header ──────────────────────────────────────────────────────── */
-/* THE PILL ITSELF IS components/zenya/chrome/tokens.ts, which this layout
-   already loads: .zx-head, .zx-pill and .zx-phone-pill, the same object the
-   marketing pages and the wizards draw, with the same 768 breakpoint and the
-   same drawer. This file used to carry a second one — .zn-head, .zn-pill,
-   .zn-nav-item, .zn-head-cta and a 420px rule that tightened their padding —
-   and it had no phone form at all, so at 375 the three Arabic nav words and
-   the call to action each wrapped onto two lines inside a 56px bar. Those
-   rules are gone. What is left is the one thing the house pill does not
-   describe, because only this host knows who is signed in. */
-
-/* Signed in, the pill ends in the account's first letter, and it is the way
-   to the dashboard. */
-.zn-head-disc {
-  display: grid;
-  place-items: center;
-  width: 2.375rem;
-  height: 2.375rem;
-  border-radius: 999px;
-  font-size: 14.5px;
-  font-weight: 700;
-  line-height: 1;
-  color: #fafafa;
-  background: var(--obsidian);
-  text-decoration: none;
-  transition: opacity 140ms var(--ease-out);
-}
-.zn-head-disc:hover { opacity: 0.88; }
-.zn-head-disc:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
-
+/* NO HEADER. The portal draws none — see app/accounts/layout.tsx for why —
+   so the rules that used to be here are gone: .zn-head, .zn-pill, .zn-nav,
+   .zn-nav-item, .zn-head-mark, .zn-head-cta, .zn-head-disc and a 420px rule
+   that tightened their padding. Nothing on this host renders them. */
 
 .zn-card {
   width: 100%;
