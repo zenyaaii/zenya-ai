@@ -570,7 +570,22 @@ export default function TemplatesView() {
           Two columns, uneven: the claim and its call on the start side, the
           four facts as a 2x2 on the end side. Centring all of it inside a slab
           is what left the first build at 8.9% ink. */}
-      <section className="zt-panel" aria-labelledby="zt-panel-h" data-reveal>
+      {/* The stage exists to clip. The panel is scaled UP while it is below the
+          fold, and a scaled box paints outside its layout width even though it
+          does not take up more of it; without a clip that overhang becomes a
+          horizontal scrollbar on any window narrower than about 1290px. clip
+          and not hidden, because hidden would make this a scroll container.
+          Same wrapper, same reason, as .zp-compare-stage on the sibling.
+
+          THE PANEL NO LONGER CARRIES data-reveal. It used to, and the settle
+          below writes the same property the reveal's hidden half does: an
+          animation on transform beats an inline-class transform, so the
+          reveal's translateY was dead and the panel was shrinking while still
+          at opacity 0. The four facts inside keep their own reveal, which is
+          exactly the sibling's arrangement — the panel settles, the content
+          rises. */}
+      <div className="zt-panel-stage">
+      <section className="zt-panel" aria-labelledby="zt-panel-h">
         <div className="zt-panel-grid">
           <div className="zt-panel-say">
             <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
@@ -602,6 +617,7 @@ export default function TemplatesView() {
           </div>
         </div>
       </section>
+      </div>
 
       <PricingFooter />
     </main>
@@ -1186,7 +1202,55 @@ const CSS = `
    belongs to nothing on this page.
 ------------------------------------------------------------------------- */
 
+/* ---- the panel, and how it arrives --------------------------------------
+   The sibling's settle, at the sibling's values: the panel enters the window
+   at scale 1.14 and is at its own size by the moment its bottom edge is
+   inside it. Scroll-driven rather than timed, so it cannot run on a reader
+   who is not looking at it, and transform-only, so no frame does layout work.
+   The base rule is already scale 1, which is the house rule this page's
+   sibling broke twice: a browser without view() support simply never runs the
+   animation and reads a finished panel.
+
+   MEASURED ON BOTH LIVE PAGES AT 1440x900 BEFORE THIS WAS WRITTEN, because
+   the range behaves differently on a short panel: the comparison is 782px
+   tall and this panel is 313px, and "entry 0% -> entry 100%" is the span
+   between the panel's top edge entering the window and its bottom edge
+   entering it. So the same 1.14 resolves over 313px of scroll here against
+   782px there — identical values, a quicker arrival. That is a property of
+   the panel's height, not a value to compensate for: pushing the range past
+   entry 100% would keep the panel oversized after it is fully on screen,
+   which is the one thing this effect must not do.
+
+   THE 701px GATE IS THE SIBLING'S AND IT IS LOAD-BEARING. The range ends on
+   the bottom edge, so the effect only behaves while the panel is shorter than
+   the window. Below 701 the two columns become one and the panel is tall, so
+   it rests at its own size, which is also where the effect was worth least.
+------------------------------------------------------------------------- */
+.zt-panel-stage { overflow-x: clip; }
+
+@keyframes zt-settle {
+  from { transform: scale(var(--settle-from, 1.14)); }
+  to { transform: scale(1); }
+}
+@media (min-width: 701px) {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .zt-panel {
+        transform-origin: 50% 50%;
+        animation: zt-settle linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+        will-change: transform;
+      }
+    }
+  }
+}
+
 .zt-panel {
+  /* How big it starts. One number, and the only one worth touching to make
+     the arrival stronger or quieter. Above about 1.22 the panel's own text is
+     visibly soft while it is scaled, which is the ceiling on this. */
+  --settle-from: 1.14;
   max-width: var(--page);
   margin: clamp(3.5rem, 8vw, 6rem) auto clamp(7rem, 17vw, 15rem);
   padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.75rem);
