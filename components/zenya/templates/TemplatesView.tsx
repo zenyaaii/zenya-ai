@@ -1203,54 +1203,67 @@ const CSS = `
 ------------------------------------------------------------------------- */
 
 /* ---- the panel, and how it arrives --------------------------------------
-   The sibling's settle, at the sibling's values: the panel enters the window
-   at scale 1.14 and is at its own size by the moment its bottom edge is
-   inside it. Scroll-driven rather than timed, so it cannot run on a reader
-   who is not looking at it, and transform-only, so no frame does layout work.
-   The base rule is already scale 1, which is the house rule this page's
-   sibling broke twice: a browser without view() support simply never runs the
-   animation and reads a finished panel.
+   The sibling's settle: the panel enters the window larger than its own size
+   and shrinks into it as it comes up. Scroll-driven rather than timed, so it
+   cannot run for a reader who is not looking at it, and transform-only, so no
+   frame does layout work. The base rule is already scale 1, which is the
+   house rule this page's sibling broke twice: a browser without view()
+   support never runs the animation and reads a finished panel.
 
-   MEASURED ON BOTH LIVE PAGES AT 1440x900 BEFORE THIS WAS WRITTEN, because
-   the range behaves differently on a short panel: the comparison is 782px
-   tall and this panel is 313px, and "entry 0% -> entry 100%" is the span
-   between the panel's top edge entering the window and its bottom edge
-   entering it. So the same 1.14 resolves over 313px of scroll here against
-   782px there — identical values, a quicker arrival. That is a property of
-   the panel's height, not a value to compensate for: pushing the range past
-   entry 100% would keep the panel oversized after it is fully on screen,
-   which is the one thing this effect must not do.
+   IT RUNS AT EVERY WIDTH, AND THE GATE THAT USED TO STOP IT WAS INHERITED
+   RATHER THAN EARNED. The rule came over from .zp-compare, which is fenced
+   above 701px because the comparison TABLE becomes 1267px tall on a phone and
+   would sit visibly oversized for the whole read. Measured on this page's own
+   panel on the dev server, it is nothing like that:
 
-   THE 701px GATE IS THE SIBLING'S AND IT IS LOAD-BEARING. The range ends on
-   the bottom edge, so the effect only behaves while the panel is shorter than
-   the window. Below 701 the two columns become one and the panel is tall, so
-   it rests at its own size, which is also where the effect was worth least.
+       390x844 phone   panel 733px      768x1024 tablet  panel 477px
+       1024x768        panel 367px      1440x900         panel 357px
+
+   and the entry range clamps itself when the subject is taller than the
+   scrollport, so the panel reached exactly 1.000 at every size tried, down to
+   320x568. The gate was about feel, not correctness, so it is gone and this
+   effect is on the phone too.
+
+   THE RANGE IS A DISTANCE, NOT THE PANEL'S OWN HEIGHT, and that is the whole
+   reason it feels the same everywhere. "entry 0% -> entry 100%" spans the
+   panel's top edge entering the window to its bottom edge entering it, so a
+   733px panel on a phone would take twice the scroll of a 357px panel on a
+   laptop for the same 9%. Stating 340px instead fixes the settle to one
+   physical distance at every size — and since the desktop panel is 357px
+   tall, 340px is within a few pixels of what the laptop already did, so
+   nothing changes there.
+
+   Do not push the end past the panel's own height on a short layout: the
+   panel would still be oversized after it is fully on screen, which is the
+   one thing this effect must not do.
 ------------------------------------------------------------------------- */
 .zt-panel-stage { overflow-x: clip; }
 
 @keyframes zt-settle {
-  from { transform: scale(var(--settle-from, 1.14)); }
+  from { transform: scale(var(--settle-from, 1.09)); }
   to { transform: scale(1); }
 }
-@media (min-width: 701px) {
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .zt-panel {
-        transform-origin: 50% 50%;
-        animation: zt-settle linear both;
-        animation-timeline: view();
-        animation-range: entry 0% entry 100%;
-        will-change: transform;
-      }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .zt-panel {
+      transform-origin: 50% 50%;
+      animation: zt-settle linear both;
+      animation-timeline: view();
+      /* A distance, not a percentage. See the note above. */
+      animation-range: entry 0% entry 340px;
+      will-change: transform;
     }
   }
 }
 
 .zt-panel {
-  /* How big it starts. One number, and the only one worth touching to make
-     the arrival stronger or quieter. Above about 1.22 the panel's own text is
-     visibly soft while it is scaled, which is the ceiling on this. */
-  --settle-from: 1.14;
+  /* How big it starts, and the only number here worth touching. The sibling
+     uses 1.14, which is right for a 1080px-wide table on a laptop and too
+     much for this panel on a phone: at 358px wide, 14% hangs 25px past each
+     edge into the clip. 1.09 is 16px there and still reads as an arrival.
+     Above about 1.22 the panel's own text goes visibly soft while it is
+     scaled, which is the ceiling on this whatever the width. */
+  --settle-from: 1.09;
   max-width: var(--page);
   margin: clamp(3.5rem, 8vw, 6rem) auto clamp(7rem, 17vw, 15rem);
   padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.75rem);
