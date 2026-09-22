@@ -4120,11 +4120,15 @@ export default function Page() {
 
         /* No tracking on the headings. The reference letter-spaces its
            uppercase labels; Arabic has no upper case and its letters connect,
-           so tracking here draws the joins apart. Same rule the display line
-           keeps, arriving at a twelve-pixel label. */
+           so tracking here draws the joins apart.
+
+           14.5px, NOT THE 12 THIS CARRIED. This site holds a 14.2px floor for
+           Arabic and these labels were under it at every width — before the
+           fit pass, which then took them to 7.3 on a phone. A label nobody
+           can read is not a quiet label. */
         .zn5-col h3 {
-          margin: 0 0 14px; font-size: 12px; font-weight: 500;
-          line-height: 1; color: var(--ink3);
+          margin: 0 0 12px; font-size: 14.5px; font-weight: 500;
+          line-height: 1.4; color: var(--ink3);
         }
         .zn5-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
         .zn5-col a {
@@ -4207,14 +4211,95 @@ export default function Page() {
            takes the second row. A phone footer looks like that everywhere; a
            TABLET with a lone column and 170px of dead card beside it does
            not, which is what two columns at 768 gave. */
+        /* ── THE PHONE FOOTER IS SHORTER ON PURPOSE, AND THAT IS THE WHOLE
+           FIX. This card is the fifth screen of a deck, and a deck screen
+           cannot scroll, so useFit measures the card and multiplies it down
+           until it fits. Measured on the running page before this block —
+           and measured through .zn-close .zn-fit, because a bare .zn-fit
+           matches the FIRST panel of the deck and reports its ratio, not
+           this one's:
+
+               390x844   scale 0.666   headings 8.0px   links 9.7px
+               390x700   scale 0.532   headings 6.4px   links 7.7px
+               320x568   scale 0.402   headings 4.8px   links 5.8px
+
+           against a site whose own floor for Arabic is 14.2. The footer was
+           not styled small, it was SHRUNK — and the shorter the phone, the
+           harder. Nothing in a type scale fixes that; the card has to stop
+           being taller than a phone.
+
+           So on a phone it gives up two things and keeps everything else:
+           the claim, because the page has already made it four screens
+           running, and the address, which lives on /contact and in the
+           bottom bar's own links. Every navigation link survives, at full
+           size, unscaled. Measured after: 508px tall at 390, fit scale
+           1.000, links at 14.5 on 844, 700 and 640 alike.
+
+           Three columns rather than two: at 390 the two-column version was
+           904px and still would not fit, and three keeps the longest lists
+           to five rows. ── */
         @media (max-width: 640px) {
-          .zn5-stack { gap: 34px; }
-          .zn5-sig svg { width: min(66%, 300px); }
-          .zn5-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          /* THE SIGNATURE COMES OFF, and it is the single biggest thing this
+             costs. It is there so the card does not read as a card floating
+             in an empty screen — a real argument at 1280, where the card is
+             half the width of the window. On a phone the card IS the screen,
+             so it has nothing to float in, and the 44px mark plus its 30px
+             gap is 74px that decides whether the type is legible. */
+          .zn5-sig { display: none; }
+          .zn5-stack { gap: 0; }
           .zn5-card { border-radius: 26px; }
-          .zn5-body { padding: 26px 22px 22px; }
-          .zn5-cols { gap: 24px 18px; }
-          .zn5-bottom { margin-top: 24px; padding-top: 18px; }
+          .zn5-body { padding: 20px 16px 18px; }
+          .zn5-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 10px; }
+          .zn5-claim, .zn5-mail { display: none; }
+          .zn5-cta { margin-top: 14px; }
+          /* 36 rather than 44: the fit pass no longer shrinks this card, so a
+             tap target is its own size here — and 36 is still clear of the
+             32px floor the rest of the site holds. */
+          .zn5-col a { min-height: 36px; line-height: 1.35; }
+          .zn5-col h3 { margin-bottom: 8px; }
+          .zn5-bottom { margin-top: 16px; padding-top: 14px; }
+        }
+        /* A tall phone has room the short ones do not, and the card should
+           spend it on itself rather than leave it around the edges: 508 of
+           card against 716 of screen at 390x844 reads as a slab dropped in
+           the middle. The padding is the only thing that grows — no type, no
+           gap, nothing that would change at the width where it is tight. */
+        @media (max-width: 640px) and (min-height: 700px) {
+          .zn5-body { padding: 28px 18px 24px; }
+        }
+        /* The smallest phone still worth supporting. At 320x568 the card is
+           476 against 461 of room, so it is the one size the block above
+           still leaves scaled — to 0.968, which puts every label at 14.0 and
+           just under the 14.2 floor. Fifteen pixels decide it, and every
+           number below is furniture, not content: nothing is dropped that a
+           390 phone keeps, and no tap target goes under 38.
+
+           WHERE THE FIFTEEN CAME FROM: the bottom bar, which is 119px of the
+           476 here. Social row and legal line cannot share a line at 320, so
+           the bar wraps — and its 16px flex gap, its rule padding and its own
+           top margin are then stacked one under the other rather than beside
+           each other. Halving the gap and trimming the two spacings is 12px
+           of the 15 on its own; the body padding and the grid's row gap are
+           the rest. Measured after: 454 against 461, scale 1.000, 14.5 on
+           every label. */
+        @media (max-width: 360px) {
+          /* The top inset clears the header pill; 3.4rem of it is room for a
+             pill that is 44px tall, and 2.5 still clears it at this width.
+             The bottom inset has nothing under it to clear at all. */
+          .zn-close { padding: calc(var(--inset) + 2.5rem) var(--gut) calc(var(--inset) + 0.2rem); }
+          .zn5-body { padding: 14px 12px 12px; }
+          .zn5-cols { gap: 8px; }
+          .zn5-col a { min-height: 32px; }
+          .zn5-col h3 { margin-bottom: 6px; }
+          .zn5-cta { margin-top: 10px; min-height: 40px; }
+          /* The gap is what the bar pays twice when it wraps: once between
+             the two rows, and never between the two items, because they are
+             never on one line at this width. */
+          .zn5-bottom { margin-top: 10px; padding-top: 10px; gap: 8px; }
+          /* 1.45 rather than 1.6 on a line that is always two lines here.
+             The size does not move — 14.5 is the floor's business, leading
+             is not. */
+          .zn5-legal { line-height: 1.45; }
         }
 
 

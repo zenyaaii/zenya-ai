@@ -113,9 +113,18 @@ export default function FooterSection({
 
   /* The same fit pass the other three sections use: the card is laid out at
      its natural size, measured, and scaled by whatever ratio makes it sit
-     inside the screen. Four columns and a bottom bar is the tallest thing on
-     this deck on a phone, and nothing on this page is ever cut. */
-  useFit(stageRef, fitRef, [])
+     inside the screen.
+
+     IT RE-MEASURES WHEN THE PANEL BECOMES ACTIVE, and that is a fix rather
+     than a flourish. With an empty dependency list it measured once, on
+     mount, while this panel was still off-screen — and its ResizeObserver
+     only fires when a size actually changes, so a ratio taken against the
+     wrong stage height was never corrected. Measured on the running page
+     through `.zn-close .zn-fit`: at 390x844 the applied ratio was 0.666,
+     which is 9.7px links against a 14.2 floor, and the card did not need to
+     be scaled at all once the phone block below it stopped it being taller
+     than the screen. */
+  useFit(stageRef, fitRef, [active])
 
   /* Formatted at render rather than at module load: the Node build here ships
      a small ICU and answers with a different digit than a browser with a full
