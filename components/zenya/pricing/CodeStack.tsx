@@ -355,12 +355,36 @@ const CSS = `
    ground rather than an inversion: two obsidian panels in a row would make
    the page bottom-heavy and would stop the dark meaning anything.
 
-   Its arrival is deliberately NOT the comparison's. That one scales down.
-   This one rises and unrotates, which is a card being set down rather than a
-   surface being framed, and it is the motion this section is about. Same
-   discipline as the other: a scroll-driven timeline, transform only, and a
-   base rule already at the finished state so a browser without view() support
-   reads a settled page.
+   IT ARRIVES SHUT AND OPENS FROM ITS MIDDLE. A band the height of a closed
+   lid sits where the panel will be, and as the section comes up it opens
+   upward and downward at once until the panel is its own size — and because
+   the cards are inside the panel, the opening is what puts them on screen.
+   They are not animated separately and they do not need to be.
+
+   IT IS A CLIP, NOT A HEIGHT, AND THAT IS THE WHOLE TRICK. The panel holds
+   its full layout box from the first frame; only clip-path changes. Animating
+   height (or max-height) would relayout everything below this section on
+   every frame and walk the scrollbar while the reader is scrolling. A clip
+   moves nothing: the footnote under the panel does not shift a pixel while it
+   opens. And a clip applies to the box AND its subtree, which is why one
+   property reveals the fan, the flip and the code button together.
+
+   WHAT IT REPLACED. The panel used to rise 42px and unrotate -0.7deg —
+   "a card being set down". That was a fine motion for a panel nobody had
+   asked a question about, but the section is a box with three discounts in
+   it, and a box that opens says what the section is. The old keyframes are
+   gone rather than kept alongside: two arrival animations on one element
+   fight over the same frames.
+
+   THE RANGE IS THE ELEMENT'S OWN ENTRY, trimmed at both ends. It starts at
+   8% so the panel is not already opening while it is still a sliver at the
+   bottom edge of the window, and finishes at 92% so it is fully open a beat
+   before it is fully on screen — an opening that completes exactly as it
+   lands reads as if it were waiting to be looked at.
+
+   Same discipline as the comparison: a scroll-driven timeline rather than a
+   timed one, and a base rule already at the finished state, so a browser with
+   no view() support never runs it and reads an open panel.
 --------------------------------------------------------------------------- */
 .cs-panel {
   position: relative;
@@ -373,24 +397,28 @@ const CSS = `
   background: #f1f0ec;
   padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2rem);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  /* THE RESTING STATE IS OPEN. Stated explicitly rather than left off, so the
+     animation has a finished state to interpolate to and a browser that never
+     runs it still gets the panel's own corner radius. */
+  clip-path: inset(0 0 0 0 round var(--r-panel));
 }
 .cs-panel-flow { padding-block: 1.25rem; }
 
-@keyframes cs-place {
-  from { transform: translateY(42px) rotate(-0.7deg); }
-  to { transform: none; }
+/* The closed band is 52px tall and fully rounded, which reads as a lid rather
+   than as a panel that has been squashed. calc() against 50% resolves against
+   the panel's own height, so this is right at every width without a second
+   rule: 478px tall on a laptop, 425 on a phone. */
+@keyframes cs-open {
+  from { clip-path: inset(calc(50% - 26px) 0 calc(50% - 26px) 0 round 999px); }
+  to { clip-path: inset(0 0 0 0 round var(--r-panel)); }
 }
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     .cs-panel {
-      animation: cs-place linear both;
+      animation: cs-open linear both;
       animation-timeline: view();
-      /* Ends at 60% of the entry rather than 90%, so the move completes early
-         even where the panel is taller than the window: the column layout on
-         a phone is about 950px of cards, and a range tied to the bottom edge
-         would leave it drifting for most of the scroll. */
-      animation-range: entry 0% entry 60%;
-      will-change: transform;
+      animation-range: entry 8% entry 92%;
+      will-change: clip-path;
     }
   }
 }
