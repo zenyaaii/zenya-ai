@@ -45,7 +45,7 @@ export default function SeoClient({ sites: initial }: { sites: SeoSite[] }) {
       // Text left identical to the automatic text stays automatic, so it keeps
       // following the site's content instead of freezing today's wording.
       const auto = { title: site.resolved.title, description: site.resolved.description, keywords: site.resolved.keywords.join('، ') }
-      const res = await fetch(`/api/templates/${site.id}/seo`, {
+      const res = await fetch(`/api/themes/${site.id}/seo`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

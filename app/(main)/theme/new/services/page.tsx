@@ -278,7 +278,7 @@ export default function ServicesWizardPage() {
       if (!generateRes.ok || !generateJson?.content) throw new Error(generateJson?.error || 'فشل التوليد')
 
       const preset = SERVICE_PRESETS.find((p) => p.id === form.style_preset) || SERVICE_PRESETS[0]
-      const saveRes = await fetch('/api/templates', {
+      const saveRes = await fetch('/api/themes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -26,7 +26,7 @@ export default function DashboardHomePage() {
 
       const [{ data: profile }, themesRes, bookingsRes, domainsRes, onboarding] = await Promise.all([
         supabase.from('profiles').select('plan, full_name, email').eq('id', user.id).maybeSingle(),
-        fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
+        fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
         // RLS scopes site_bookings to the owner's own sites.
         supabase
           .from('site_bookings')

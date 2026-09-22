@@ -16,11 +16,11 @@ function admin() {
 }
 
 // Only the e-commerce templates ship to Shopify. Everything else is
-// Zenya-hosted; we want the user to use /api/templates/[id]/publish for those.
+// Zenya-hosted; we want the user to use /api/themes/[id]/publish for those.
 const SHOPIFY_EXPORTABLE = new Set(['one_product', 'storefront', 'collective'])
 
 /**
- * GET /api/templates/[id]/export-shopify
+ * GET /api/themes/[id]/export-shopify
  * Builds a Shopify OS 2.0 theme ZIP from the user's saved theme content
  * and streams it back as a download. Requires Pro (one-time or hosting).
  */

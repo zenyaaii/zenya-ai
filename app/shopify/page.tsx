@@ -161,7 +161,7 @@ function DashboardContent() {
   async function fetchThemes() {
     setLoading(true);
     try {
-      const r = await fetch('/api/templates');
+      const r = await fetch('/api/themes');
       if (r.ok) {
         const j = await r.json();
         setThemes(j.themes || []);

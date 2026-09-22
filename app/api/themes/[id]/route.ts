@@ -15,7 +15,7 @@ function admin() {
 }
 
 /**
- * GET /api/templates/[id] — fetch a single theme (owned by caller).
+ * GET /api/themes/[id] — fetch a single theme (owned by caller).
  */
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -58,7 +58,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 /**
- * PATCH /api/templates/[id]
+ * PATCH /api/themes/[id]
  * Body: { content?: object, product_name?: string }
  *
  * Updates the theme's content jsonb. Used by the editor — the client
@@ -105,7 +105,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .single()
 
   if (error) {
-    console.error('[/api/templates/[id]] update failed', error)
+    console.error('[/api/themes/[id]] update failed', error)
     return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
   }
 
@@ -121,7 +121,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 const GALLERY_BUCKET = 'theme-uploads'
 
 /**
- * DELETE /api/templates/[id] — permanently remove a theme.
+ * DELETE /api/themes/[id] — permanently remove a theme.
  *
  * Query: ?deleteImages=1  → also remove the images this theme used from the
  *        user's gallery (rows + storage objects), BUT only those not
@@ -174,7 +174,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         deletableUrls = theseUrls.filter((u) => !stillInUse.has(u))
       }
     } catch (e) {
-      console.error('[/api/templates/[id]] image cleanup planning failed', e)
+      console.error('[/api/themes/[id]] image cleanup planning failed', e)
     }
   }
 
@@ -184,7 +184,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     .eq('id', params.id)
 
   if (error) {
-    console.error('[/api/templates/[id]] delete failed', error)
+    console.error('[/api/themes/[id]] delete failed', error)
     return NextResponse.json({ error: 'db_error', message: error.message }, { status: 500 })
   }
 
@@ -210,10 +210,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
           .eq('user_id', user.id)
           .in('id', ids)
         if (!delErr) deletedImages = ids.length
-        else console.error('[/api/templates/[id]] gallery row delete failed', delErr)
+        else console.error('[/api/themes/[id]] gallery row delete failed', delErr)
       }
     } catch (e) {
-      console.error('[/api/templates/[id]] image cleanup failed', e)
+      console.error('[/api/themes/[id]] image cleanup failed', e)
     }
   }
 

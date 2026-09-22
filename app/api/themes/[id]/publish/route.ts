@@ -21,7 +21,7 @@ function admin() {
 }
 
 /**
- * POST /api/templates/[id]/publish
+ * POST /api/themes/[id]/publish
  * Body: { slug: string }
  *
  * Sets the theme's slug, flips is_published=true, stamps published_at.
@@ -154,7 +154,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 /**
- * DELETE /api/templates/[id]/publish
+ * DELETE /api/themes/[id]/publish
  * Unpublish — keeps the slug reserved on the theme so re-publish is free,
  * but flips is_published off so /s/[slug] 404s.
  */

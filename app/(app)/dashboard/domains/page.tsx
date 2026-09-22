@@ -42,7 +42,7 @@ export default function DomainsPage() {
     const [{ data: profile }, d, t, p] = await Promise.all([
       supabase.from('profiles').select('plan, has_hosting, is_pro').eq('id', user.id).maybeSingle(),
       fetch('/api/domains').then((r) => (r.ok ? r.json() : { domains: [] })).catch(() => ({ domains: [] })),
-      fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
+      fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
       fetch('/api/domains/purchase').then((r) => (r.ok ? r.json() : { purchases: [] })).catch(() => ({ purchases: [] })),
     ])
     setCanConnect(canConnectCustomDomain(profile as any))

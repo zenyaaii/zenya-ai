@@ -40,7 +40,7 @@ export default function SitesPage() {
     if (!user) { router.push('/login?next=/dashboard/sites'); return }
     const [{ data: p }, res] = await Promise.all([
       supabase.from('profiles').select('plan, is_pro, has_hosting, entry_unlocked, created_at').eq('id', user.id).maybeSingle(),
-      fetch('/api/templates').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
+      fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
     ])
     setProfile((p as Profile) || null)
     setThemes(res?.themes || [])
@@ -65,7 +65,7 @@ export default function SitesPage() {
     let primary: SiteCardData['primary']
     if (SHOPIFY_TYPES.has(bt)) {
       primary = isPro
-        ? { label: 'نزّل ملف شوبيفاي', action: { href: `/api/templates/${t.id}/export-shopify`, external: true } }
+        ? { label: 'نزّل ملف شوبيفاي', action: { href: `/api/themes/${t.id}/export-shopify`, external: true } }
         : { label: 'اشترك للتصدير', action: { href: '/pricing?upgrade=starter' } }
     } else if (live) {
       primary = hasHosting

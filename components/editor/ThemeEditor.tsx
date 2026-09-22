@@ -8,7 +8,7 @@
  *   - an editor config (sections + fields + color tokens + presets)
  *
  * We handle:
- *   - load + save the theme via /api/templates/[id] (PATCH)
+ *   - load + save the theme via /api/themes/[id] (PATCH)
  *   - autosave (debounced) + manual save, with a "saved Xs ago" indicator
  *   - undo / redo across every edit (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z / Ctrl+Y)
  *   - left rail: pages + section panels + global panels
@@ -78,7 +78,7 @@ export type PreviewProps = {
  * (theme.content, holding content[config.contentKey] plus the style keys).
  *
  * The live routes pass nothing and get the default: the signed-in user and
- * GET/PATCH /api/templates/[id], exactly as before. A store is only for a
+ * GET/PATCH /api/themes/[id], exactly as before. A store is only for a
  * surface that must never touch the database — the /demo/editor candidate
  * keeps its edits in memory through one of these, so it runs every real
  * mechanic (autosave, undo, the save indicator) without a session or a row.
@@ -171,7 +171,7 @@ export default function ThemeEditor({
           router.push(`/login?next=${backHref}/edit`)
           return
         }
-        const r = await fetch(`/api/templates/${themeId}`)
+        const r = await fetch(`/api/themes/${themeId}`)
         if (!r.ok) {
           setError(r.status === 404 ? t.editor.themeNotFound : t.editor.noAccess)
           setLoading(false)
@@ -236,7 +236,7 @@ export default function ThemeEditor({
       if (store) {
         fullContent = (await store.load()) || {}
       } else {
-        const getRes = await fetch(`/api/templates/${themeId}`)
+        const getRes = await fetch(`/api/themes/${themeId}`)
         const getJson = await getRes.json()
         fullContent = (getJson?.theme?.content as any) || {}
       }
@@ -252,7 +252,7 @@ export default function ThemeEditor({
       if (store) {
         await store.save(nextContent)
       } else {
-        const r = await fetch(`/api/templates/${themeId}`, {
+        const r = await fetch(`/api/themes/${themeId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: nextContent }),

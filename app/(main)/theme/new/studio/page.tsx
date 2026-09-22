@@ -223,7 +223,7 @@ export default function StudioWizardPage() {
       if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
 
       const preset = STUDIO_PRESETS.find((p) => p.id === form.style_preset) || STUDIO_PRESETS[0]
-      const saveRes = await fetch('/api/templates', {
+      const saveRes = await fetch('/api/themes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

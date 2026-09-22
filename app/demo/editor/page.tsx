@@ -4,7 +4,7 @@
  *
  * NOT THE EDITOR'S ROUTE. The six live edit routes stay at
  * app/preview/<type>/[id]/edit and still load and save through
- * GET/PATCH /api/templates/[id]. This page mounts the SAME ThemeEditor those
+ * GET/PATCH /api/themes/[id]. This page mounts the SAME ThemeEditor those
  * routes mount, with the same per-type config, the same Preview component and
  * the theme's own mock content, and hands it an in-memory store instead of
  * the database. Every mechanic is the real one; nothing is written anywhere.
