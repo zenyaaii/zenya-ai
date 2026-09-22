@@ -386,6 +386,20 @@ const CSS = `
    lives on .cs-stage, which carries no transform of its own. Verified while
    the animation runs: the three cards sit at x = 228 / 492 / 733.
 
+   THE RANGES ARE WHERE THE READER IS LOOKING, AND THE FIRST VERSION OF THIS
+   WAS NOT. Every range used to be a pixel count from entry 0% — the instant
+   the panel's top edge touches the BOTTOM of the window. The ground finished
+   after 220px and the last card after 320, so the whole thing played out in
+   the bottom strip of the screen, in the corner of the reader's eye, and was
+   over half a screen before the panel arrived where anyone looks. A motion
+   nobody sees is not a subtle motion, it is a wasted one.
+
+   So the ranges now end on "cover", which is measured against the panel
+   crossing the window rather than against its first few hundred pixels: the
+   ground completes at cover 42% and the last card at cover 48%, which is the
+   panel around the middle of the screen. Same motion, same curves — only
+   where it happens changed.
+
    EVERY RANGE IS MEASURED FROM ITS OWN ELEMENT, AND THAT IS A TRAP THIS CODE
    FELL INTO ONCE. view() builds each element its own timeline from its own
    box, so "entry 300px" on a card is 300px into THAT CARD's entry, not the
@@ -432,16 +446,30 @@ const CSS = `
 .cs-panel-flow { padding-block: 1.25rem; }
 
 /* Stage one is the lozenge widening; stage two is the lid opening. 45% is
-   where one becomes the other, and 30px is half the closed height. */
+   where one becomes the other, and 22px is half the closed height.
+
+   THE RADIUS NEVER CHANGES, and that is the fix for corners that looked
+   unfinished. An earlier build travelled from round 999px (a pill) to round
+   28px, so every frame in between was a shape that is neither — at 45% of the
+   way it is round 744px, a blob with the panel's proportions. Holding
+   var(--r-panel) throughout means the corner is always THIS panel's corner:
+   the UA clamps a radius to half the box, so the 44px-tall closed band draws
+   at 22px and grows to the full 28 on its own, continuously, with no
+   in-between shape to look at.
+
+   THE TRAVEL IS BIGGER THAN IT WAS. The closed band was 60px tall and 46% of
+   the width; it is 44px and 24% now. Half the reason the motion "looked like
+   no motion" was that it barely moved — the box started nearly the size it
+   ended. */
 @keyframes cs-open {
-  0% { clip-path: inset(calc(50% - 30px) 27% calc(50% - 30px) 27% round 60px); }
-  45% { clip-path: inset(calc(50% - 30px) 0 calc(50% - 30px) 0 round var(--r-panel)); }
+  0% { clip-path: inset(calc(50% - 22px) 38% calc(50% - 22px) 38% round var(--r-panel)); }
+  45% { clip-path: inset(calc(50% - 22px) 0 calc(50% - 22px) 0 round var(--r-panel)); }
   100% { clip-path: inset(0 0 0 0 round var(--r-panel)); }
 }
-/* Short, and with a touch of scale: the contents come OUT of the box rather
-   than sliding up from under it. */
+/* The contents come OUT of the box rather than sliding up from under it, and
+   from a little further down than before for the same reason as above. */
 @keyframes cs-lift {
-  from { transform: translateY(16px) scale(0.985); }
+  from { transform: translateY(22px) scale(0.975); }
   to { transform: none; }
 }
 @keyframes cs-card-in {
@@ -458,14 +486,15 @@ const CSS = `
     .cs-panel::before {
       animation: cs-open cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-timeline: view();
-      animation-range: entry 0% entry 220px;
+      /* See THE RANGES ARE WHERE THE READER IS LOOKING, above. */
+      animation-range: entry 35% cover 42%;
       will-change: clip-path;
     }
     .cs-stage,
     .cs-panel-flow > * {
       animation: cs-lift cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-timeline: view();
-      animation-range: entry 140px entry 330px;
+      animation-range: entry 55% cover 46%;
       will-change: transform;
     }
     /* 35px of scroll between one card and the next, and 100px each to
@@ -476,16 +505,16 @@ const CSS = `
       animation: cs-card-in linear both;
       animation-timeline: view();
     }
-    .cs-cards > .cs-card:nth-child(1) { animation-range: entry 150px entry 250px; }
-    .cs-cards > .cs-card:nth-child(2) { animation-range: entry 185px entry 285px; }
-    .cs-cards > .cs-card:nth-child(3) { animation-range: entry 220px entry 320px; }
+    .cs-cards > .cs-card:nth-child(1) { animation-range: entry 70% cover 42%; }
+    .cs-cards > .cs-card:nth-child(2) { animation-range: entry 80% cover 45%; }
+    .cs-cards > .cs-card:nth-child(3) { animation-range: entry 90% cover 48%; }
     /* The last beat. It is a sibling of the panel and sits below it, so its
        own entry begins well after everything above — which is exactly the
        beat wanted, and it needs no offset of its own to get it. */
     .cs-foot {
       animation: cs-foot-in cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-timeline: view();
-      animation-range: entry 0% entry 140px;
+      animation-range: entry 40% entry 100%;
     }
   }
 }

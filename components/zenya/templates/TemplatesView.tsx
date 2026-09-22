@@ -1333,18 +1333,25 @@ const CSS = `
    320x568. The gate was about feel, not correctness, so it is gone and this
    effect is on the phone too.
 
-   THE RANGE IS A DISTANCE, NOT THE PANEL'S OWN HEIGHT, and that is the whole
-   reason it feels the same everywhere. "entry 0% -> entry 100%" spans the
-   panel's top edge entering the window to its bottom edge entering it, so a
-   733px panel on a phone would take twice the scroll of a 357px panel on a
-   laptop for the same 9%. Stating 340px instead fixes the settle to one
-   physical distance at every size — and since the desktop panel is 357px
-   tall, 340px is within a few pixels of what the laptop already did, so
-   nothing changes there.
+   THE RANGE IS ABOUT WHERE ON THE SCREEN IT HAPPENS, NOT HOW LONG IT TAKES,
+   and getting that wrong is what made an earlier version invisible. Two
+   versions were wrong before this one:
 
-   Do not push the end past the panel's own height on a short layout: the
-   panel would still be oversized after it is fully on screen, which is the
-   one thing this effect must not do.
+     entry 0% -> entry 100%   the panel's own height sets the duration, so a
+                              733px panel on a phone took twice the scroll of
+                              a 357px one on a laptop for the same 9%.
+     entry 0% -> entry 340px  one distance everywhere, which fixed that — and
+                              put the entire settle in the BOTTOM STRIP of the
+                              window, finished half a screen before the panel
+                              reached anywhere the reader looks.
+
+   Ending on "cover" fixes both: cover is measured against the panel crossing
+   the window, so the settle completes with the panel around the middle of the
+   screen at every size. Same 1.09, same curve, different place.
+
+   Do not end it later than about cover 50%: past that the panel is on its way
+   out of the window and still visibly oversized, which is the one thing this
+   effect must not do.
 ------------------------------------------------------------------------- */
 .zt-panel-stage { overflow-x: clip; }
 
@@ -1358,8 +1365,11 @@ const CSS = `
       transform-origin: 50% 50%;
       animation: zt-settle linear both;
       animation-timeline: view();
-      /* A distance, not a percentage. See the note above. */
-      animation-range: entry 0% entry 340px;
+      /* WHERE, NOT HOW LONG. See the note above: this used to be a distance
+         from entry 0%, which put the whole settle in the bottom strip of the
+         window. It ends on cover now, so it finishes with the panel around
+         the middle of the screen. */
+      animation-range: entry 35% cover 45%;
       will-change: transform;
     }
   }
