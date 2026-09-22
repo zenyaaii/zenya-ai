@@ -355,13 +355,67 @@ const CSS = `
    ground rather than an inversion: two obsidian panels in a row would make
    the page bottom-heavy and would stop the dark meaning anything.
 
-   Its arrival is deliberately NOT the comparison's. That one scales down.
-   This one rises and unrotates, which is a card being set down rather than a
-   surface being framed, and it is the motion this section is about. Same
-   discipline as the other: a scroll-driven timeline, transform only, and a
-   base rule already at the finished state so a browser without view() support
-   reads a settled page.
---------------------------------------------------------------------------- */
+   IT ARRIVES SHUT AND OPENS IN TWO MOVES. A small lozenge sits at the centre
+   of where the panel will be; it widens to the panel's width first, then
+   opens upward and downward until it is the panel. Then the three cards
+   arrive in it, one after another, and the line about where a code goes lands
+   last. A box that opens says what this section is in a way a panel sliding
+   up does not.
+
+   THE GROUND IS ITS OWN LAYER, AND THAT IS THE CORRECTION THAT MATTERED. The
+   first build of this clipped .cs-panel itself, which also clips everything
+   inside it: a hard edge sawed each card in half on the way open, and a card
+   cut in half does not read as "inside a box", it reads as broken. The cream
+   now lives on ::before and only that layer is clipped. Nothing a reader
+   looks at is ever cut.
+
+   IT IS STILL A CLIP, NOT A HEIGHT. The panel holds its full layout box from
+   the first frame; animating height would relayout everything below it on
+   every frame and walk the scrollbar under a reader who is scrolling.
+   Measured at four scroll positions on both widths: the element after the
+   panel keeps the same document offset throughout.
+
+   TWO CURVES, BECAUSE THERE ARE TWO MATERIALS. The ground takes the site's
+   own cubic-bezier(0.22, 1, 0.36, 1) — what everything else in Zenya moves
+   on — and what comes out of it takes a softer one.
+
+   THE CARDS TAKE OPACITY AND NOTHING ELSE, and this is not a preference:
+   .cs-card carries the fan's x/y/rotate from framer-motion as an inline
+   style, and a CSS animation on transform overrides inline styles while it is
+   running — the fan would collapse into a stack the moment this ran. The lift
+   lives on .cs-stage, which carries no transform of its own. Verified while
+   the animation runs: the three cards sit at x = 228 / 492 / 733.
+
+   THE RANGES ARE WHERE THE READER IS LOOKING, AND THE FIRST VERSION OF THIS
+   WAS NOT. Every range used to be a pixel count from entry 0% — the instant
+   the panel's top edge touches the BOTTOM of the window. The ground finished
+   after 220px and the last card after 320, so the whole thing played out in
+   the bottom strip of the screen, in the corner of the reader's eye, and was
+   over half a screen before the panel arrived where anyone looks. A motion
+   nobody sees is not a subtle motion, it is a wasted one.
+
+   So the ranges now end on "cover", which is measured against the panel
+   crossing the window rather than against its first few hundred pixels: the
+   ground completes at cover 42% and the last card at cover 48%, which is the
+   panel around the middle of the screen. Same motion, same curves — only
+   where it happens changed.
+
+   EVERY RANGE IS MEASURED FROM ITS OWN ELEMENT, AND THAT IS A TRAP THIS CODE
+   FELL INTO ONCE. view() builds each element its own timeline from its own
+   box, so "entry 300px" on a card is 300px into THAT CARD's entry, not the
+   panel's. A card's top edge sits about 60px below the panel's, so the card's
+   entry begins 60px of scroll later — and the first tuning, which read like a
+   single shared clock, left the three cards at opacity 0.85 / 0.62 / 0.38 at
+   the moment the panel was fully on screen. An open box with three faint
+   cards in it.
+
+   So the numbers below are stated in each element's own entry and were
+   checked against the panel's: measured again after the fix, all three cards
+   are at 1.00 before the panel finishes entering.
+
+   Resting states are the finished states throughout, so a browser without
+   view() support reads an open panel with everything in it.
+------------------------------------------------------------------------- */
 .cs-panel {
   position: relative;
   /* Sized to the open fan (710px of cards) rather than to the page. At the
@@ -370,27 +424,97 @@ const CSS = `
   max-width: 860px;
   margin-inline: auto;
   border-radius: var(--r-panel);
-  background: #f1f0ec;
   padding: clamp(1.5rem, 3vw, 2.25rem) clamp(1rem, 2.5vw, 2rem);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  /* The cream and its hairline moved to ::before. The box itself paints
+     nothing, so clipping the ground never touches the cards. */
+  background: transparent;
 }
+.cs-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--r-panel);
+  background: #f1f0ec;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  clip-path: inset(0 0 0 0 round var(--r-panel));
+}
+/* Everything the reader looks at sits above the ground. */
+.cs-stage,
+.cs-cards,
+.cs-panel-flow > * { position: relative; z-index: 1; }
 .cs-panel-flow { padding-block: 1.25rem; }
 
-@keyframes cs-place {
-  from { transform: translateY(42px) rotate(-0.7deg); }
+/* Stage one is the lozenge widening; stage two is the lid opening. 45% is
+   where one becomes the other, and 22px is half the closed height.
+
+   THE RADIUS NEVER CHANGES, and that is the fix for corners that looked
+   unfinished. An earlier build travelled from round 999px (a pill) to round
+   28px, so every frame in between was a shape that is neither — at 45% of the
+   way it is round 744px, a blob with the panel's proportions. Holding
+   var(--r-panel) throughout means the corner is always THIS panel's corner:
+   the UA clamps a radius to half the box, so the 44px-tall closed band draws
+   at 22px and grows to the full 28 on its own, continuously, with no
+   in-between shape to look at.
+
+   THE TRAVEL IS BIGGER THAN IT WAS. The closed band was 60px tall and 46% of
+   the width; it is 44px and 24% now. Half the reason the motion "looked like
+   no motion" was that it barely moved — the box started nearly the size it
+   ended. */
+@keyframes cs-open {
+  0% { clip-path: inset(calc(50% - 22px) 38% calc(50% - 22px) 38% round var(--r-panel)); }
+  45% { clip-path: inset(calc(50% - 22px) 0 calc(50% - 22px) 0 round var(--r-panel)); }
+  100% { clip-path: inset(0 0 0 0 round var(--r-panel)); }
+}
+/* The contents come OUT of the box rather than sliding up from under it, and
+   from a little further down than before for the same reason as above. */
+@keyframes cs-lift {
+  from { transform: translateY(22px) scale(0.975); }
   to { transform: none; }
 }
+@keyframes cs-card-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cs-foot-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .cs-panel {
-      animation: cs-place linear both;
+    .cs-panel::before {
+      animation: cs-open cubic-bezier(0.22, 1, 0.36, 1) both;
       animation-timeline: view();
-      /* Ends at 60% of the entry rather than 90%, so the move completes early
-         even where the panel is taller than the window: the column layout on
-         a phone is about 950px of cards, and a range tied to the bottom edge
-         would leave it drifting for most of the scroll. */
-      animation-range: entry 0% entry 60%;
+      /* See THE RANGES ARE WHERE THE READER IS LOOKING, above. */
+      animation-range: entry 35% cover 42%;
+      will-change: clip-path;
+    }
+    .cs-stage,
+    .cs-panel-flow > * {
+      animation: cs-lift cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view();
+      animation-range: entry 55% cover 46%;
       will-change: transform;
+    }
+    /* 35px of scroll between one card and the next, and 100px each to
+       arrive. Linear on purpose: a
+       fade that eases sits at nearly-invisible for the first third, which
+       reads as a card that is late rather than one that is arriving. */
+    .cs-cards > .cs-card {
+      animation: cs-card-in linear both;
+      animation-timeline: view();
+    }
+    .cs-cards > .cs-card:nth-child(1) { animation-range: entry 70% cover 42%; }
+    .cs-cards > .cs-card:nth-child(2) { animation-range: entry 80% cover 45%; }
+    .cs-cards > .cs-card:nth-child(3) { animation-range: entry 90% cover 48%; }
+    /* The last beat. It is a sibling of the panel and sits below it, so its
+       own entry begins well after everything above — which is exactly the
+       beat wanted, and it needs no offset of its own to get it. */
+    .cs-foot {
+      animation: cs-foot-in cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-timeline: view();
+      animation-range: entry 40% entry 100%;
     }
   }
 }

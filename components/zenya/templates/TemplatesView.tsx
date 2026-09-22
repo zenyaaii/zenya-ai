@@ -102,7 +102,6 @@ import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import ZenyaMark from "@/components/ZenyaMark"
 import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
-import SwipeStack from "@/components/ui/SwipeStack"
 import { themePreview } from "@/lib/theme-previews"
 import PricingFooter from "../pricing/PricingFooter"
 
@@ -201,6 +200,12 @@ export default function TemplatesView() {
      about where the grid becomes a deck. Starts false so the server and the
      first client render agree, then corrects on mount. */
   const [narrow, setNarrow] = useState(false)
+  /* WHICH TEMPLATE THE PHONE IS SHOWING. It starts on index 1, not 0, and
+     that is deliberate: the array's first entry is the one-product builder,
+     which is قريبًا for everyone who is not an admin. Opening the page on the
+     one template nobody can build would make the first screen a dead end. */
+  const [picked, setPicked] = useState(1)
+  const keyRefs = useRef<Array<HTMLButtonElement | null>>([])
   const rootRef = useRef<HTMLElement | null>(null)
   const headRef = useRef<HTMLElement | null>(null)
   const [onDark, setOnDark] = useState(false)
@@ -289,6 +294,116 @@ export default function TemplatesView() {
     targets.forEach((el) => io.observe(el))
     return () => io.disconnect()
   }, [narrow])
+
+  /**
+   * THE PHONE'S PICKER: one cover at a size that reads, and the eight as keys.
+   *
+   * What it replaces was a swipe deck — one card in front, the rest behind it.
+   * The deck showed a template properly but hid the catalogue: the eighth was
+   * seven swipes away and nothing on screen said there were eight at all. A
+   * grid of eight on a 390px screen is the opposite trade, and a worse one:
+   * at 166x104 a cover is a coloured rectangle, and eight of them read as one
+   * texture rather than eight choices.
+   *
+   * So the cover stays big — 358x224, three times the area of any eight-up
+   * arrangement — and the catalogue is stated underneath as eight labelled
+   * keys. Everything is on one screen, nothing is swiped, and the reader can
+   * always see how many there are and which one they are looking at.
+   *
+   * IT IS A TABLIST, because that is exactly what it is: eight controls, each
+   * revealing one panel. Roving tabindex, so the eight keys are ONE tab stop
+   * and not eight. In RTL the row runs right to left, so ArrowLeft advances
+   * and ArrowRight goes back — the arrow follows the eye, not the array.
+   */
+  const onKeyNav = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const last = TEMPLATES.length - 1
+    let next = -1
+    if (e.key === "ArrowLeft") next = i === last ? 0 : i + 1
+    else if (e.key === "ArrowRight") next = i === 0 ? last : i - 1
+    else if (e.key === "Home") next = 0
+    else if (e.key === "End") next = last
+    if (next < 0) return
+    e.preventDefault()
+    setPicked(next)
+    keyRefs.current[next]?.focus()
+  }
+
+  const picker = () => {
+    const t = TEMPLATES[picked]
+    const soon = "soon" in t && t.soon
+    return (
+      <section className="zt-pick" aria-label="القوالب">
+        <article
+          className="zt-hero"
+          id="zt-hero-panel"
+          role="tabpanel"
+          aria-labelledby={"zt-key-" + t.id}
+          data-reveal
+        >
+          {/* The cover is NOT a link. On this layout the two actions under it
+              are the way out, and a third tap target covering the whole image
+              would mean a reader aiming at the picture gets the preview when
+              they wanted to look. */}
+          <div className="zt-shot zt-hero-shot">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={themePreview(t.id)} alt={"معاينة قالب " + t.name} decoding="async" />
+            <span className="zt-edge" aria-hidden />
+            {"shopify" in t && t.shopify ? <span className="zt-flag">شوبيفاي</span> : null}
+          </div>
+
+          <div className="zt-hero-body">
+            <p className="zt-tag">{t.tagline}</p>
+            <h2 className="zt-hero-name">{t.name}</h2>
+            <p className="zt-meta zt-hero-meta">
+              <span>{t.sections} قسمًا</span>
+              <span className="zt-dot" aria-hidden>·</span>
+              <span>{t.presets} أنماط جاهزة</span>
+            </p>
+
+            <div className="zt-hero-acts">
+              <Link href={t.demo} className="zt-hero-demo">معاينة</Link>
+              {soon ? (
+                <span className="zt-soon zt-hero-soon" title="نعمل على نسخة جديدة كليًا — قريبًا">
+                  قريبًا
+                </span>
+              ) : (
+                <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-hero-build">
+                  ابنِ بهذا القالب
+                </SlideButton>
+              )}
+            </div>
+          </div>
+        </article>
+
+        <div className="zt-keys" role="tablist" aria-label="القوالب الثمانية" data-reveal>
+          {TEMPLATES.map((k, i) => (
+            <button
+              key={k.id}
+              ref={(el) => { keyRefs.current[i] = el }}
+              type="button"
+              role="tab"
+              id={"zt-key-" + k.id}
+              className="zt-key"
+              aria-selected={i === picked}
+              aria-controls="zt-hero-panel"
+              tabIndex={i === picked ? 0 : -1}
+              onClick={() => setPicked(i)}
+              onKeyDown={(e) => onKeyNav(e, i)}
+            >
+              <span className="zt-key-shot">
+                {/* Decorative: the label beside it already names the template,
+                    so an alt here would have a screen reader say it twice. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={themePreview(k.id)} alt="" loading="lazy" decoding="async" />
+                <span className="zt-edge" aria-hidden />
+              </span>
+              <span className="zt-key-label">{k.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   /**
    * One tile, so the grid and the deck cannot drift apart.
@@ -553,13 +668,7 @@ export default function TemplatesView() {
       <span id="zt-picker" aria-hidden />
 
       {narrow ? (
-        <SwipeStack
-          className="zt-swipe"
-          label="القوالب"
-          itemLabels={TEMPLATES.map((t) => t.label)}
-        >
-          {TEMPLATES.map((t, i) => tile(t, i))}
-        </SwipeStack>
+        picker()
       ) : (
         <section className="zt-grid" aria-label="القوالب">
           {TEMPLATES.map((t, i) => tile(t, i))}
@@ -570,7 +679,22 @@ export default function TemplatesView() {
           Two columns, uneven: the claim and its call on the start side, the
           four facts as a 2x2 on the end side. Centring all of it inside a slab
           is what left the first build at 8.9% ink. */}
-      <section className="zt-panel" aria-labelledby="zt-panel-h" data-reveal>
+      {/* The stage exists to clip. The panel is scaled UP while it is below the
+          fold, and a scaled box paints outside its layout width even though it
+          does not take up more of it; without a clip that overhang becomes a
+          horizontal scrollbar on any window narrower than about 1290px. clip
+          and not hidden, because hidden would make this a scroll container.
+          Same wrapper, same reason, as .zp-compare-stage on the sibling.
+
+          THE PANEL NO LONGER CARRIES data-reveal. It used to, and the settle
+          below writes the same property the reveal's hidden half does: an
+          animation on transform beats an inline-class transform, so the
+          reveal's translateY was dead and the panel was shrinking while still
+          at opacity 0. The four facts inside keep their own reveal, which is
+          exactly the sibling's arrangement — the panel settles, the content
+          rises. */}
+      <div className="zt-panel-stage">
+      <section className="zt-panel" aria-labelledby="zt-panel-h">
         <div className="zt-panel-grid">
           <div className="zt-panel-say">
             <h2 id="zt-panel-h" className="zt-h2">في كل قالب</h2>
@@ -602,6 +726,7 @@ export default function TemplatesView() {
           </div>
         </div>
       </section>
+      </div>
 
       <PricingFooter />
     </main>
@@ -1186,7 +1311,78 @@ const CSS = `
    belongs to nothing on this page.
 ------------------------------------------------------------------------- */
 
+/* ---- the panel, and how it arrives --------------------------------------
+   The sibling's settle: the panel enters the window larger than its own size
+   and shrinks into it as it comes up. Scroll-driven rather than timed, so it
+   cannot run for a reader who is not looking at it, and transform-only, so no
+   frame does layout work. The base rule is already scale 1, which is the
+   house rule this page's sibling broke twice: a browser without view()
+   support never runs the animation and reads a finished panel.
+
+   IT RUNS AT EVERY WIDTH, AND THE GATE THAT USED TO STOP IT WAS INHERITED
+   RATHER THAN EARNED. The rule came over from .zp-compare, which is fenced
+   above 701px because the comparison TABLE becomes 1267px tall on a phone and
+   would sit visibly oversized for the whole read. Measured on this page's own
+   panel on the dev server, it is nothing like that:
+
+       390x844 phone   panel 733px      768x1024 tablet  panel 477px
+       1024x768        panel 367px      1440x900         panel 357px
+
+   and the entry range clamps itself when the subject is taller than the
+   scrollport, so the panel reached exactly 1.000 at every size tried, down to
+   320x568. The gate was about feel, not correctness, so it is gone and this
+   effect is on the phone too.
+
+   THE RANGE IS ABOUT WHERE ON THE SCREEN IT HAPPENS, NOT HOW LONG IT TAKES,
+   and getting that wrong is what made an earlier version invisible. Two
+   versions were wrong before this one:
+
+     entry 0% -> entry 100%   the panel's own height sets the duration, so a
+                              733px panel on a phone took twice the scroll of
+                              a 357px one on a laptop for the same 9%.
+     entry 0% -> entry 340px  one distance everywhere, which fixed that — and
+                              put the entire settle in the BOTTOM STRIP of the
+                              window, finished half a screen before the panel
+                              reached anywhere the reader looks.
+
+   Ending on "cover" fixes both: cover is measured against the panel crossing
+   the window, so the settle completes with the panel around the middle of the
+   screen at every size. Same 1.09, same curve, different place.
+
+   Do not end it later than about cover 50%: past that the panel is on its way
+   out of the window and still visibly oversized, which is the one thing this
+   effect must not do.
+------------------------------------------------------------------------- */
+.zt-panel-stage { overflow-x: clip; }
+
+@keyframes zt-settle {
+  from { transform: scale(var(--settle-from, 1.09)); }
+  to { transform: scale(1); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .zt-panel {
+      transform-origin: 50% 50%;
+      animation: zt-settle linear both;
+      animation-timeline: view();
+      /* WHERE, NOT HOW LONG. See the note above: this used to be a distance
+         from entry 0%, which put the whole settle in the bottom strip of the
+         window. It ends on cover now, so it finishes with the panel around
+         the middle of the screen. */
+      animation-range: entry 35% cover 45%;
+      will-change: transform;
+    }
+  }
+}
+
 .zt-panel {
+  /* How big it starts, and the only number here worth touching. The sibling
+     uses 1.14, which is right for a 1080px-wide table on a laptop and too
+     much for this panel on a phone: at 358px wide, 14% hangs 25px past each
+     edge into the clip. 1.09 is 16px there and still reads as an arrival.
+     Above about 1.22 the panel's own text goes visibly soft while it is
+     scaled, which is the ceiling on this whatever the width. */
+  --settle-from: 1.09;
   max-width: var(--page);
   margin: clamp(3.5rem, 8vw, 6rem) auto clamp(7rem, 17vw, 15rem);
   padding: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.75rem);
@@ -1232,10 +1428,108 @@ const CSS = `
   .zt-js [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
 
-/* ---- narrow ------------------------------------------------------------- */
+/* ---- the phone's picker -------------------------------------------------
+   One card and eight keys. The card is the tile's own material — the same
+   ring, the same 10px inset, the same cover treatment — at the size a phone
+   can actually give it, so nothing new was invented for this layout. The keys
+   are the only new object on the page, and they are deliberately NOT small
+   cards: no plate, no inset, no corner bracket. A key is a cropped square and
+   a word, because it has to read as a control and not as a ninth template.
+------------------------------------------------------------------------- */
+.zt-pick {
+  max-width: 34rem;
+  margin-inline: auto;
+  display: grid;
+  gap: 0.875rem;
+}
 
-/* The deck's cards need a definite width to stack against. */
-.zt-swipe { margin-inline: auto; }
+.zt-hero {
+  position: relative;
+  display: flex; flex-direction: column;
+  border-radius: var(--r-card);
+  background: var(--card);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 0 0 4px rgba(250, 250, 250, 0.55);
+}
+/* The cover carries .zt-shot and nothing else: the ratio, the inset, the
+   obsidian ground under a cover that fails to load, and the hairline edge all
+   come from the tile. 16/10 with no override — the one time this had its own
+   ratio it was 16/11, which is 21px TALLER than 16/10 rather than shorter,
+   and that was exactly the 21px the eighth key needed. */
+.zt-hero-body {
+  display: flex; flex-direction: column;
+  padding: 0.75rem var(--inset) 0.875rem;
+}
+.zt-hero-name {
+  margin: 0.25rem 0 0;
+  font-size: 21px; font-weight: 900; line-height: 1.4;
+  letter-spacing: 0; color: var(--obsidian);
+}
+.zt-hero-meta { margin-top: 0.375rem; }
+/* The two ways out of the card, on one row: the quiet one takes the space it
+   needs and the violet one takes the rest. Never two violet buttons. */
+.zt-hero-acts {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem; margin-top: 0.8125rem;
+}
+.zt-hero-demo {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding-inline: 1.125rem;
+  border-radius: var(--r-control);
+  background: var(--card); color: var(--obsidian);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+  font-size: 15px; font-weight: 700; line-height: 1; text-decoration: none;
+}
+.zt-hero-demo:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
+.zt-hero-build { width: 100%; }
+.zt-hero-soon {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; border-radius: var(--r-control);
+}
+
+.zt-keys {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem 0.4375rem;
+}
+.zt-key {
+  appearance: none; -webkit-appearance: none;
+  border: 0; padding: 0; margin: 0; background: none; cursor: pointer;
+  display: grid; gap: 0.3125rem; justify-items: center;
+  font: inherit; color: inherit;
+}
+.zt-key-shot {
+  position: relative; display: block; width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden; border-radius: var(--r-control);
+  background: var(--onyx);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.10);
+  transition: box-shadow 260ms var(--ease-out);
+}
+.zt-key-shot img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: top center; display: block;
+}
+/* The ring is the whole selected state, and it is the same violet the build
+   button uses. The unselected keys stay at a hairline rather than dimming:
+   greying seven covers to mark one is a lot of grey for one bit of state. */
+.zt-key[aria-selected="true"] .zt-key-shot {
+  box-shadow: 0 0 0 2px var(--violet), 0 0 0 5px rgba(250, 250, 250, 0.6);
+}
+.zt-key:focus-visible .zt-key-shot { outline: 2px solid var(--violet); outline-offset: 3px; }
+.zt-key-label {
+  font-size: 14.5px; font-weight: 500; line-height: 1.4;
+  color: var(--stone); text-align: center;
+  transition: color 260ms var(--ease-out);
+}
+.zt-key[aria-selected="true"] .zt-key-label { color: var(--violet); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) {
+  .zt-key-shot, .zt-key-label { transition: none; }
+}
+/* Under about 360 the four keys stop leaving room for a word under each. */
+@media (max-width: 359px) {
+  .zt-keys { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---- narrow ------------------------------------------------------------- */
 
 @media (max-width: 1180px) {
   .zt-lede { grid-template-columns: minmax(0, 1fr); align-items: start; }
@@ -1251,9 +1545,46 @@ const CSS = `
 @media (max-width: 980px) {
   .zt-panel-grid { grid-template-columns: minmax(0, 1fr); }
 }
+/* ---------------------------------------------------------------------------
+   THE PHONE'S BUDGET. The picker only earns its keep if the eight keys are on
+   the first screen: the whole point of replacing the swipe deck was that the
+   catalogue should be visible without a scroll or a swipe. At 390x844 the
+   first build ended at 1056px — 212 over — and the lede was 315px of it.
+
+   So the lede is compressed here and nowhere else. Nothing is cut: the
+   display line, the sub-line and all three totals are still on the page. The
+   totals stop being a three-column figure block and become one line, which is
+   what they are on a phone anyway.
+
+   Measured after this block at 390x844: the keys end at 831 of 844.
+------------------------------------------------------------------------- */
 @media (max-width: 760px) {
-  /* Inside the deck a tile is one card: it must not also be a grid item. */
-  .zt-tile { height: 100%; }
+  .zt-lede { margin: 1.25rem auto 1rem; }
+  .zt-h1 { font-size: 28px; }
+  .zt-lede-sub { margin-top: 0.5rem; font-size: 14.5px; line-height: 1.7; }
+
+  /* THE TOTALS COME OFF THE PHONE, and they are the only thing that does.
+     They are also the only element here that says something the screen
+     already says twice: the keys show eight, and the card shows its own
+     section and preset counts. 42px for a third statement of both is what
+     was standing between the reader and the eighth key. They are untouched
+     at every other width, where the lede has a column to itself. */
+  .zt-tally { display: none; }
+
+  .zt-pick { gap: 0.6875rem; }
+  /* The category line goes: the key the reader just pressed is labelled
+     مطعم / أزياء / خدمات, so the category is already on screen and under
+     their thumb. The name and the counts stay. */
+  .zt-hero .zt-tag { display: none; }
+  .zt-hero-name { margin-top: 0; font-size: 20px; }
+  .zt-hero-body { padding-block: 0.6875rem 0.75rem; }
+  .zt-hero-acts { margin-top: 0.6875rem; }
+
+  /* The keys crop 4:3 rather than square. A website preview is landscape, so
+     a square crop throws away the sides of the very thing the key is showing
+     — and the row is 21px shorter for it. */
+  .zt-key-shot { aspect-ratio: 4 / 3; }
+  .zt-keys { gap: 0.4375rem 0.375rem; }
 }
 @media (max-width: 560px) {
   .zt-root { --r-panel: 20px; }
@@ -1286,11 +1617,17 @@ const CSS = `
 .zt-account-phone,
 .zt-nav-item,
 .zt-tray-row,
+.zt-hero-demo,
 .zt-name-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 38px;
 }
+/* The key is NOT in the list above, and that is a bug this file already made
+   once: display:inline-flex there overrides the key's own grid, and the
+   square thumbnail collapses to a 40px strip. It is a two-row grid, so it
+   takes the floor as a floor and keeps its own display. */
+.zt-key { min-width: 38px; min-height: 38px; }
 
 `

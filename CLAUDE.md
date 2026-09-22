@@ -1,5 +1,29 @@
 # Zenya — project instructions for Claude
 
+## Show a sample before you edit — always, without being asked
+
+**Any visual or motion change on this project gets a working sample first.** Do
+not edit the component, do not commit, do not "just try it": publish an Artifact
+the owner can look at, and wait for them to choose. This is a standing
+instruction — they should never have to ask for it.
+
+What a sample has to be:
+
+- **Live, not a picture.** A scroll effect is scrolled, a picker is tapped. A
+  still frame of a motion proves nothing.
+- **The real thing, not a redrawing.** Run the dev server and screenshot or
+  record the actual component, or inject the candidate CSS over the running
+  page. Hand-rebuilding a section to demo it produces a sample of something
+  that does not exist — the discount fan was rebuilt as a plain three-column
+  row once, and the whole review was wasted on a section that is not on the
+  site.
+- **More than one option, with the trade named.** Two to four, each with what
+  it costs, not a single proposal to rubber-stamp.
+- **At the widths it will ship at** — phone (390x844) and laptop at least. The
+  phone is usually where the idea breaks.
+
+Then, and only then, implement the one they pick.
+
 ## Design & styling: always use the Taste skill (`design-taste-frontend`)
 
 An anti-slop frontend skill is installed at `.claude/skills/design-taste-frontend`
