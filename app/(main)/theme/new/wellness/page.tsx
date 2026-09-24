@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
+import { WELLNESS_NICHES, getWellnessNiche } from '@/utils/wellness/niches'
 import type { WellnessInput } from '@/utils/wellness/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
@@ -13,7 +14,7 @@ import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 import WizardShell, {
-  AddButton, Block, Card, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Select, Textarea, Uploads,
+  AddButton, Block, Card, Chips, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Select, Textarea, Uploads,
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
 
@@ -45,6 +46,7 @@ function formatHours(hours: StudioHour[]): string {
 }
 
 type Form = {
+  niche: string
   brand_name: string
   brand_type: string
   city: string
@@ -71,6 +73,7 @@ type Form = {
 
 function buildSampleForm(): Form {
   return {
+    niche: 'center',
     brand_name: 'سَكينة للعافية',
     brand_type: 'سبا شامل ويوغا',
     city: 'جدة',
@@ -105,6 +108,7 @@ function buildSampleForm(): Form {
 }
 
 const INITIAL_FORM: Form = {
+  niche: '',
   brand_name: '',
   brand_type: '',
   city: '',
@@ -154,6 +158,28 @@ export default function WellnessWizardPage() {
     return () => { cancelled = true }
   }, [])
 
+  // Picking a niche fills what the owner has not touched yet: the type line,
+  // the colour style and the starter sessions. Anything they typed stays.
+  function pickNiche(id: string) {
+    setForm((prev) => {
+      const before = getWellnessNiche(prev.niche)
+      const next = getWellnessNiche(id)
+      if (!next) return { ...prev, niche: '' }
+      const typeUntouched = !prev.brand_type.trim() || prev.brand_type === before?.type
+      const styleUntouched = prev.style_preset === (before?.preset ?? INITIAL_FORM.style_preset)
+      const sessionsUntouched = prev.treatments.every((t) => !t.name.trim())
+      return {
+        ...prev,
+        niche: next.id,
+        brand_type: typeUntouched ? next.type : prev.brand_type,
+        style_preset: styleUntouched ? next.preset : prev.style_preset,
+        treatments: sessionsUntouched
+          ? next.starters.map((t) => ({ id: uid(), name: t.name, category: t.category, duration: t.duration, price: '', description: t.description, badge: '' }))
+          : prev.treatments,
+      }
+    })
+  }
+
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
@@ -172,7 +198,7 @@ export default function WellnessWizardPage() {
     setForm((prev) => ({ ...prev, treatments: prev.treatments.map((t) => (t.id === id ? { ...t, ...patch } : t)) }))
   }
   function addTreatment() {
-    setForm((prev) => ({ ...prev, treatments: [...prev.treatments, { id: uid(), name: '', category: 'تدليك', duration: '60 دقيقة', price: '', description: '', badge: '' }] }))
+    setForm((prev) => ({ ...prev, treatments: [...prev.treatments, { id: uid(), name: '', category: getWellnessNiche(prev.niche)?.categories[0] ?? 'تدليك', duration: '60 دقيقة', price: '', description: '', badge: '' }] }))
   }
   function removeTreatment(id: string) {
     setForm((prev) => ({ ...prev, treatments: prev.treatments.filter((t) => t.id !== id) }))
@@ -187,6 +213,8 @@ export default function WellnessWizardPage() {
     setForm((prev) => ({ ...prev, team: prev.team.filter((m) => m.id !== id) }))
   }
 
+  const niche = getWellnessNiche(form.niche)
+  const categories = niche?.categories ?? TREATMENT_CATEGORIES
   const validTreatments = form.treatments.filter((t) => t.name.trim().length >= 2)
   const ok = {
     basics: form.brand_name.trim().length >= 2 && form.brand_type.trim().length >= 2 && form.city.trim().length >= 2,
@@ -213,6 +241,7 @@ export default function WellnessWizardPage() {
 
   function buildPayload(): WellnessInput {
     return {
+      niche: niche?.id,
       brand: {
         name: form.brand_name.trim(),
         type: form.brand_type.trim(),
@@ -324,6 +353,9 @@ export default function WellnessWizardPage() {
       note: 'أدخل اسم الاستوديو ونوعه والمدينة.',
       body: (
         <Grid>
+          <Block title="ما نوع نشاطك؟" hint={niche ? `${niche.label}: ${niche.hint}. سنختار الصور والأيقونات وطريقة الكتابة والألوان لهذا النشاط.` : 'اختر الأقرب لنشاطك. سنختار الصور والأيقونات وطريقة الكتابة والألوان لهذا النشاط.'}>
+            <Chips options={WELLNESS_NICHES.map((n) => ({ id: n.id, label: n.label }))} value={form.niche || ''} onChange={pickNiche} allowNone={false} />
+          </Block>
           <Field label="اسم الاستوديو" required>
             <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="سَكينة للعافية" />
           </Field>
@@ -389,7 +421,7 @@ export default function WellnessWizardPage() {
                     </Field>
                     <Field label="الفئة">
                       <Select value={t.category} onChange={(e) => updateTreatment(t.id, { category: e.target.value })}>
-                        {TREATMENT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {(categories.includes(t.category) ? categories : [t.category, ...categories]).map((c) => <option key={c} value={c}>{c}</option>)}
                       </Select>
                     </Field>
                     <Field label="المدّة">
@@ -537,6 +569,7 @@ export default function WellnessWizardPage() {
             ]}
             recap={[
               { label: 'اسم الاستوديو', value: form.brand_name },
+              { label: 'النشاط', value: niche?.label ?? 'لم يُحدَّد' },
               { label: 'النوع', value: form.brand_type },
               { label: 'المدينة', value: [form.city, form.region].filter(Boolean).join('، ') },
               { label: 'الهاتف', value: form.phone },
@@ -545,7 +578,7 @@ export default function WellnessWizardPage() {
               { label: 'الفلسفة', value: form.philosophy_brief },
             ]}
           >
-            <Handoff title="جاهز لتوليد موقع العافية الخاص بك." body="سنبني الموقع الفاخر كاملًا وننقلك إلى المعاينة الحيّة." />
+            <Handoff title="جاهز لتوليد موقع العافية الخاص بك." body="سنبني الموقع كاملًا وننقلك إلى المعاينة الحيّة." />
           </Review>
         </Grid>
       ),
@@ -562,8 +595,8 @@ export default function WellnessWizardPage() {
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
         eyebrow="قالب استوديو العافية"
-        title="ابنِ موقع استوديو عافية فاخرًا."
-        sub="أخبرنا عن استوديوك وجلساتك وفريقك. تولّد زينيا موقعًا متكاملًا — واجهة رئيسية وقائمة جلسات وملفات الفريق ومسار حجز."
+        title="ابنِ موقعًا لمركزك أو صالونك أو عيادتك."
+        sub="اختر نوع نشاطك، وأخبرنا عن جلساتك وفريقك. تولّد زينيا موقعًا كاملًا بصور وكلام يناسب نشاطك: واجهة رئيسية وقائمة جلسات والفريق والحجز."
         steps={steps}
         step={step}
         onStep={setStep}

@@ -18,6 +18,9 @@ const teamMemberSchema = z.object({
 })
 
 export const wellnessInputSchema = z.object({
+  // Which niche pack to use (utils/wellness/niches.ts). Optional: older drafts
+  // have none, and the route guesses it from brand.type.
+  niche: z.string().max(32).optional(),
   brand: z.object({
     name: z.string().min(2),
     type: z.string().min(2),
