@@ -26,7 +26,6 @@ type Form = {
   phone: string
   email: string
   address: string
-  booking_url: string
   emergency_service: boolean
   availability: string
   response_time: string
@@ -64,7 +63,6 @@ function buildSampleForm(): Form {
     phone: '+966 11 555 0187',
     email: 'hello@itqan.sa',
     address: 'طريق الملك فهد، حي العليا، الرياض',
-    booking_url: 'https://book.itqan.sa',
     emergency_service: true,
     availability: 'السبت–الخميس، 8 ص – 6 م',
     response_time: 'استجابة في نفس اليوم لمعظم مناطق الخدمة',
@@ -102,7 +100,6 @@ const INITIAL_FORM: Form = {
   phone: '',
   email: '',
   address: '',
-  booking_url: '',
   emergency_service: false,
   availability: 'السبت–الخميس، 8 ص – 6 م',
   response_time: 'استجابة في نفس اليوم لمعظم مناطق الخدمة',
@@ -211,7 +208,6 @@ export default function ServicesWizardPage() {
         phone: form.phone.trim(),
         email: form.email.trim(),
         address: form.address.trim() || undefined,
-        booking_url: form.booking_url.trim() || undefined,
         emergency_service: form.emergency_service,
         availability: form.availability.trim() || undefined,
         response_time: form.response_time.trim() || undefined,
@@ -351,9 +347,6 @@ export default function ServicesWizardPage() {
           </Field>
           <Field label="العنوان">
             <Input value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="طريق الملك فهد، حي العليا، الرياض" />
-          </Field>
-          <Field label="رابط الحجز / الجدولة">
-            <Input dir="ltr" value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://..." />
           </Field>
           <Field label="سطر التوفّر">
             <Input value={form.availability} onChange={(e) => update('availability', e.target.value)} placeholder="السبت–الخميس، 8 ص – 6 م" />

@@ -119,6 +119,12 @@ export default function WellnessPreview({
   const setView = (v: WellnessView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
+  // Every "book" button leads to Zenya's own booking form, which opens the
+  // contact page. Never to an outside booking site.
+  const goBook = () => {
+    setView('contact')
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+  }
 
   const cssVars = useMemo(() => ({
     '--wl-primary': colors.primary,
@@ -151,7 +157,7 @@ export default function WellnessPreview({
 
       {view === 'home' && (
         <>
-          <HeroSection content={content} isDark={isDark} />
+          <HeroSection content={content} isDark={isDark} onBook={goBook} />
           <TrustBar content={content} isDark={isDark} />
           <PhilosophySection content={content} isDark={isDark} />
           <TestimonialsSection content={content} isDark={isDark} />
@@ -182,7 +188,7 @@ export default function WellnessPreview({
         </>
       )}
 
-      <FooterSection content={content} isDark={isDark} />
+      <FooterSection content={content} isDark={isDark} onBook={goBook} />
     </div>
   )
 }
@@ -280,7 +286,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-function HeroSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+function HeroSection({ content, isDark, onBook }: { content: WellnessContent; isDark: boolean; onBook: () => void }) {
   const rm = useReducedMotion()
   return (
     <section data-section="hero" className="relative min-h-[90vh] overflow-hidden flex items-center">
@@ -347,15 +353,16 @@ function HeroSection({ content, isDark }: { content: WellnessContent; isDark: bo
             transition={{ duration: 0.55, delay: 0.42 }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <motion.a
+            <motion.button
+              type="button"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
-              href={content.footer.booking_url || '#'}
+              onClick={onBook}
               className="rounded-full px-8 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] shadow-xl"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
             >
               {content.hero.cta_primary}
-            </motion.a>
+            </motion.button>
             <motion.a
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
@@ -850,7 +857,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
-              href={content.footer.booking_url || `mailto:${content.footer.email}`}
+              href={contactHref(content)}
               className="inline-block rounded-full px-12 py-4 text-sm font-bold uppercase tracking-[0.14em] shadow-2xl"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
             >
@@ -864,6 +871,13 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
       </div>
     </section>
   )
+}
+
+// When the owner's plan has no booking form, the booking button calls or
+// emails them. It never sends the visitor to another booking site.
+function contactHref(content: WellnessContent): string {
+  const phone = (content.footer.phone || '').replace(/[^\d+]/g, '')
+  return phone ? `tel:${phone}` : `mailto:${content.footer.email}`
 }
 
 function wellnessPalette(isDark: boolean) {
@@ -926,7 +940,7 @@ function FaqItem({ item, index, open, onToggle, isDark }: { item: WellnessFaqIte
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function FooterSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+function FooterSection({ content, isDark, onBook }: { content: WellnessContent; isDark: boolean; onBook: () => void }) {
   return (
     <footer className="px-8 py-16" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-primary)', borderTop: '1px solid var(--wl-border)' }}>
       <div className="mx-auto max-w-5xl">
@@ -959,13 +973,11 @@ function FooterSection({ content, isDark }: { content: WellnessContent; isDark: 
             <p className="text-sm font-light leading-relaxed" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
               {content.footer.hours || 'تواصل معنا لمعرفة المواعيد'}
             </p>
-            {content.footer.booking_url && (
-              <a href={content.footer.booking_url}
-                className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em]"
-                style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
-                احجز الآن
-              </a>
-            )}
+            <button type="button" onClick={onBook}
+              className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em]"
+              style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
+              احجز الآن
+            </button>
           </div>
         </div>
         <div className="border-t pt-8 text-center text-xs" style={{ borderColor: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.15)', color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.4)' }}>

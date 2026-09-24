@@ -61,7 +61,6 @@ Review count: ${input.social_proof?.review_count || 'N/A'}
 Weekly classes: ${input.timetable?.length ? input.timetable.map((s) => `${s.day} ${s.time} ${s.name}`).join('; ') : 'N/A'}
 Certifications: ${input.social_proof?.certifications || 'N/A'}
 Hours: ${input.contact.hours || 'N/A'}
-Booking URL: ${input.contact.booking_url || 'N/A'}
 
 NICHE
 ${niche.voice}
@@ -306,7 +305,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
-      cta_primary: String(ai?.hero?.cta_primary || (input.contact.booking_url ? 'احجز جلسة' : 'تواصل معنا')),
+      cta_primary: String(ai?.hero?.cta_primary || 'احجز جلسة'),
       cta_secondary: String(ai?.hero?.cta_secondary || 'تصفّح الجلسات'),
       image: heroImage,
       badge: ai?.hero?.badge ? String(ai.hero.badge) : undefined
@@ -350,7 +349,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       eyebrow: String(ai?.booking_cta?.eyebrow || mock.booking_cta.eyebrow),
       heading: String(ai?.booking_cta?.heading || mock.booking_cta.heading),
       subheading: String(ai?.booking_cta?.subheading || mock.booking_cta.subheading),
-      cta_label: String(ai?.booking_cta?.cta_label || (input.contact.booking_url ? 'احجز جلستك' : 'تواصل معنا')),
+      cta_label: String(ai?.booking_cta?.cta_label || 'احجز جلستك'),
       note: String(ai?.booking_cta?.note || mock.booking_cta.note),
       image: bookingImage
     },
@@ -365,7 +364,6 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       email: input.contact.email,
       address: input.contact.address,
       hours: input.contact.hours,
-      booking_url: input.contact.booking_url
     },
     seo: {
       title: String(ai?.seo?.title || `${input.brand.name} · ${input.brand.type} · ${input.brand.city}`),

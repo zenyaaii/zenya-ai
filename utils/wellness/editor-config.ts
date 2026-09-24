@@ -237,7 +237,6 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
         { type: 'text', path: 'footer.email',       label: 'Email' },
         { type: 'text', path: 'footer.address',     label: 'Address' },
         { type: 'text', path: 'footer.hours',       label: 'Hours' },
-        { type: 'text', path: 'footer.booking_url', label: 'Booking URL' },
       ],
     },
   ],

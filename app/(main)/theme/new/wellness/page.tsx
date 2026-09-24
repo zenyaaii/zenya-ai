@@ -57,7 +57,6 @@ type Form = {
   phone: string
   email: string
   address: string
-  booking_url: string
   hours: StudioHour[]
   cancellation_policy: string
   whatsapp: string
@@ -89,7 +88,6 @@ function buildSampleForm(): Form {
     phone: '+966 12 555 0182',
     email: 'hello@sakeena.sa',
     address: 'طريق الكورنيش، حي الشاطئ، جدة',
-    booking_url: 'https://book.sakeena.sa',
     hours: DEFAULT_STUDIO_HOURS.map((h) => ({ ...h })),
     cancellation_policy: 'يلزم إشعار قبل 24 ساعة، وإلا تُطبَّق رسوم 50٪.',
     whatsapp: '+966 55 555 0182',
@@ -131,7 +129,6 @@ const INITIAL_FORM: Form = {
   phone: '',
   email: '',
   address: '',
-  booking_url: '',
   hours: DEFAULT_STUDIO_HOURS,
   cancellation_policy: 'يلزم إشعار قبل 24 ساعة',
   whatsapp: '',
@@ -297,7 +294,6 @@ export default function WellnessWizardPage() {
         phone: form.phone.trim(),
         email: form.email.trim(),
         address: form.address.trim() || undefined,
-        booking_url: form.booking_url.trim() || undefined,
         hours: formatHours(form.hours) || undefined,
         cancellation_policy: form.cancellation_policy.trim() || undefined,
         // Most owners here take bookings on their mobile, so the phone doubles as WhatsApp.
@@ -453,9 +449,6 @@ export default function WellnessWizardPage() {
           </Field>
           <Field label="رابط الموقع على خرائط Google (اختياري)" hint="إن تركته فارغًا نضع الخريطة من العنوان.">
             <Input dir="ltr" value={form.map_url || ''} onChange={(e) => update('map_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
-          </Field>
-          <Field label="رابط الحجز الإلكتروني (اختياري)">
-            <Input dir="ltr" value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://..." />
           </Field>
           <Field label="سياسة الإلغاء" wide>
             <Input value={form.cancellation_policy} onChange={(e) => update('cancellation_policy', e.target.value)} placeholder="يلزم إشعار قبل 24 ساعة" />
