@@ -43,6 +43,11 @@ export type WellnessNiche = {
   categories: string[]
   starters: WellnessStarterSession[]
   photos: { hero: string; booking: string; space: string[] }
+  /**
+   * Stand-in team for owners who add none: roles, not invented people, and
+   * photos that show no one's face in niches whose staff are mostly women.
+   */
+  team: { title: string; specialty: string; photo: string }[]
   /** Icon names the AI should choose from for this niche. */
   icons: string[]
   /** English brief for the copywriter: who the clients are and how to talk to them. */
@@ -76,6 +81,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1515377905703-c4788e51af15',
       space: ['1519823551278-64ac92734fb1', '1600334129128-685c5582fd35', '1596178060671-7a80dc8059ea', '1620733723572-11c53f73a416'],
     },
+    team: [
+      { title: 'معالج مساج علاجي', specialty: 'الرقبة والظهر · الأنسجة العميقة', photo: '1560250097-0b93528c311a' },
+      { title: 'معالج مساج رياضي', specialty: 'الإصابات · الاستشفاء بعد التمرين', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'معالج استرخاء', specialty: 'السويدي · الأحجار الساخنة', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['care', 'heartbeat', 'timer', 'leaf', 'water', 'users', 'calendar-check', 'secure'],
     voice:
       'A massage center. Clients are office workers, drivers, athletes and new mothers with real pain: stiff neck, lower back, tired legs. Talk about the pain and the relief in plain words. Mention pressure the client chooses, a short talk before the session, and privacy (separate rooms for women where relevant).',
@@ -100,6 +110,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1600334089648-b0d9d3028eb2',
       space: ['1507652313519-d4e9174996dd', '1620733723572-11c53f73a416', '1596178060671-7a80dc8059ea', '1600334129128-685c5582fd35'],
     },
+    team: [
+      { title: 'مسؤول الحمام المغربي', specialty: 'التقشير بالكيس · الصابون البلدي', photo: '1560250097-0b93528c311a' },
+      { title: 'معالج مساج', specialty: 'الزيوت العطرية · الاسترخاء', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'أخصائي عناية بالجسم', specialty: 'الماسكات · الترطيب', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['spa', 'water', 'flower', 'leaf', 'care', 'moon', 'sparkles', 'users'],
     voice:
       'A day spa with hammam. Clients come to be looked after for a few hours: before a wedding, after a hard month, as a gift. Describe what happens step by step (steam, scrub with kessa, black soap, rinse, tea after). Warm and generous, never vague.',
@@ -124,6 +139,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1512290923902-8a9f81dc236c',
       space: ['1552693673-1bf958298935', '1616394584738-fc6e612e71b9', '1629198688000-71f23e745b6e', '1598440947619-2c35fc9aa908'],
     },
+    team: [
+      { title: 'أخصائية بشرة', specialty: 'التنظيف العميق · الهيدرافيشيال', photo: '1598440947619-2c35fc9aa908' },
+      { title: 'أخصائية علاج حب الشباب', specialty: 'التقشير · العناية المنزلية', photo: '1629198688000-71f23e745b6e' },
+      { title: 'استشارية العناية', specialty: 'تحليل البشرة · الخطط الشهرية', photo: '1556228720-195a672e8a03' },
+    ],
     icons: ['cosmetics', 'water', 'vision', 'sun', 'verified', 'calendar-check', 'leaf', 'sparkles'],
     voice:
       'A skin care center. Clients have tried many products and are tired of guessing. Build trust: look at the skin first, say what it needs and what it does not, be honest about how many sessions and how long results take. Specific skin problems (acne, dark spots, dryness) in everyday words.',
@@ -148,6 +168,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1599901860904-17e6ed7083a0',
       space: ['1575052814086-f385e2e2ad1b', '1552196563-55cd4e45efb3', '1603988363607-e1e4a66962c6', '1506126613408-eca07ce68773'],
     },
+    team: [
+      { title: 'مدرّب يوغا', specialty: 'المبتدئون · فينياسا', photo: '1560250097-0b93528c311a' },
+      { title: 'مدرّب بيلاتس', specialty: 'تقوية الظهر · الماط', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'مدرّب تنفس واسترخاء', specialty: 'يين · التنفس', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['meditation', 'users', 'calendar-check', 'sun', 'leaf', 'heartbeat', 'timer', 'care'],
     voice:
       'A yoga and pilates studio. Many clients think they are not flexible or fit enough and quit gyms before. Make it feel easy to start: small classes, a teacher who corrects you by hand, beginner classes, a free first class if offered, a timetable that fits a working day. These are classes, not treatments.',
@@ -172,6 +197,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1506126613408-eca07ce68773',
       space: ['1593811167562-9cef47bfc4d7', '1591343395902-1adcb454c4e2', '1552196563-55cd4e45efb3', '1620733723572-11c53f73a416'],
     },
+    team: [
+      { title: 'مرشد تأمل', specialty: 'التأمل الموجّه · النوم', photo: '1560250097-0b93528c311a' },
+      { title: 'مدرّب تنفس', specialty: 'التوتر · التنفس الصندوقي', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'معالج حمام صوتي', specialty: 'الأوعية · الاسترخاء', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['mind', 'moon', 'leaf', 'waves', 'users', 'timer', 'calendar-check', 'care'],
     voice:
       'A meditation and breathwork center. Clients are stressed, sleep badly, or have busy heads. Speak about real results they notice (falling asleep faster, a calmer morning) without medical claims. Simple instructions, no spiritual jargon.',
@@ -196,6 +226,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1595476108010-b4d1f102b1b1',
       space: ['1600948836101-f9ffda59d250', '1560066984-138dadb4c035', '1522337360788-8b13dee7a37e', '1487412947147-5cebf100ffc2'],
     },
+    team: [
+      { title: 'خبيرة صبغة', specialty: 'الصبغة · الهايلايت', photo: '1522337360788-8b13dee7a37e' },
+      { title: 'مصففة شعر', specialty: 'القص · التسريحات', photo: '1560066984-138dadb4c035' },
+      { title: 'خبيرة مكياج', specialty: 'السهرات · العرائس', photo: '1600948836101-f9ffda59d250' },
+    ],
     icons: ['salon', 'cosmetics', 'sparkles', 'calendar-check', 'users', 'timer', 'secure', 'verified'],
     voice:
       'A women\'s beauty salon (hair, color, makeup, brides). Clients care about the result looking like the photo they showed, about hygiene, and about not waiting. Talk about consultation before color, brands used if given, bridal trials, and on-time appointments. Friendly and confident, like a stylist talking to a client.',
@@ -220,6 +255,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1610992015732-2449b76344bc',
       space: ['1519415510236-718bdfcd89c8', '1600948836101-f9ffda59d250', '1598440947619-2c35fc9aa908', '1631730359585-38a4935cbec4'],
     },
+    team: [
+      { title: 'فنية أظافر', specialty: 'الجل · الرسم على الأظافر', photo: '1604654894610-df63bc536371' },
+      { title: 'فنية مانيكير وباديكير', specialty: 'العناية · التنظيف', photo: '1610992015732-2449b76344bc' },
+      { title: 'فنية تركيب أظافر', specialty: 'الأكريليك · الإطالة', photo: '1519415510236-718bdfcd89c8' },
+    ],
     icons: ['sparkle', 'secure', 'timer', 'palette', 'calendar-check', 'verified', 'care', 'sparkles'],
     voice:
       'A nail salon. Clients want neat, long-lasting nails, clean tools and a design that matches their idea. Mention sterilized tools, how many weeks gel lasts, bringing a photo for nail art. Light and friendly, short sentences.',
@@ -244,6 +284,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1507652313519-d4e9174996dd',
       space: ['1540206395-68808572332f', '1620733723572-11c53f73a416', '1600334089648-b0d9d3028eb2', '1540555700478-4be289fbecef'],
     },
+    team: [
+      { title: 'مسؤول الساونا', specialty: 'الحرارة · أوقات الجلسات', photo: '1560250097-0b93528c311a' },
+      { title: 'مدرّب استشفاء', specialty: 'الغطس البارد · التنفس', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'معالج مساج', specialty: 'ما بعد الساونا', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['spa', 'water', 'snow', 'timer', 'heartbeat', 'users', 'secure', 'calendar-check'],
     voice:
       'A sauna, steam and cold-plunge place. Clients come after training or work to warm up, sweat and reset. Be practical: temperatures, how long to stay in, drinking water, towels provided, separate times for women and men if given. Short, direct, a little energetic.',
@@ -268,6 +313,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1600334089648-b0d9d3028eb2',
       space: ['1575052814086-f385e2e2ad1b', '1544161515-4ab6ce6db874', '1552693673-1bf958298935', '1583416750470-965b2707b355'],
     },
+    team: [
+      { title: 'معالج مساج', specialty: 'الاسترخاء · العلاجي', photo: '1560250097-0b93528c311a' },
+      { title: 'أخصائي عناية', specialty: 'الوجه · الجسم', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'مدرّب يوغا', specialty: 'المبتدئون · التنفس', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['spa', 'care', 'mind', 'leaf', 'users', 'calendar-check', 'water', 'sun'],
     voice:
       'A wellness center with several services under one roof. Help the client choose: say who each service is for, suggest combinations, mention packages. Calm and clear, never flowery.',
@@ -292,6 +342,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1584515933487-779824d29309',
       space: ['1519823551278-64ac92734fb1', '1519494026892-80bbd2d6fd0d', '1551076805-e1869033e561', '1518611012118-696072aa579a'],
     },
+    team: [
+      { title: 'أخصائي علاج طبيعي', specialty: 'الظهر والرقبة · التقييم', photo: '1560250097-0b93528c311a' },
+      { title: 'أخصائي تأهيل رياضي', specialty: 'الإصابات · العودة للتمرين', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'أخصائي علاج يدوي', specialty: 'المفاصل · الحركة', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['therapy', 'heartbeat', 'clinic', 'verified', 'calendar-check', 'timer', 'users', 'secure'],
     voice:
       'A physiotherapy clinic. Clients are in pain or recovering from an injury or surgery and want to move normally again. Be clear and professional: assessment first, a plan with a number of sessions, exercises for home. Licensed therapists only if the owner says so. No promises of cure.',
@@ -316,6 +371,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1512621776951-a57141f2eefd',
       space: ['1505576399279-565b52d4ac71', '1466637574441-749b8f19452f', '1473093295043-cdd812d0e601', '1576091160550-2173dba999ef'],
     },
+    team: [
+      { title: 'أخصائي تغذية', specialty: 'إنقاص الوزن · الخطط العملية', photo: '1560250097-0b93528c311a' },
+      { title: 'أخصائي تغذية رياضية', specialty: 'بناء العضل · الأداء', photo: '1472099645785-5658abf4ff4e' },
+      { title: 'مسؤول المتابعة', specialty: 'القياسات · المتابعة الأسبوعية', photo: '1568602471122-7832951cc4c5' },
+    ],
     icons: ['nutrition', 'greens', 'metrics', 'calendar-check', 'heartbeat', 'users', 'verified', 'timer'],
     voice:
       'A nutritionist or diet clinic. Clients have tried diets that failed and fear being hungry or giving up the food they love. Speak about food they actually eat at home, weekly follow-up, body measurements, eating at family gatherings. No miracle weight loss numbers.',
@@ -340,6 +400,11 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       booking: '1631730359585-38a4935cbec4',
       space: ['1551076805-e1869033e561', '1552693673-1bf958298935', '1519494026892-80bbd2d6fd0d', '1629198688000-71f23e745b6e'],
     },
+    team: [
+      { title: 'طبيبة تجميل', specialty: 'الاستشارة · الحقن', photo: '1631730359585-38a4935cbec4' },
+      { title: 'أخصائية ليزر', specialty: 'إزالة الشعر · البشرة', photo: '1551076805-e1869033e561' },
+      { title: 'أخصائية بشرة', specialty: 'النضارة · العناية بعد الجلسة', photo: '1629198688000-71f23e745b6e' },
+    ],
     icons: ['clinic', 'verified', 'secure', 'vision', 'calendar-check', 'cosmetics', 'users', 'timer'],
     voice:
       'A laser and cosmetic clinic. Clients worry about safety, pain, and looking unnatural. Lead with the doctor, a consultation first, the device used if given, natural results, and honest session counts. Calm and medical-professional, not salesy.',

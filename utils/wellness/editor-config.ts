@@ -1,6 +1,6 @@
 import {
   Sparkles, Leaf, Hand, Users, Star, HelpCircle, Mail, Phone, Image as ImageIcon,
-  Calendar, Home as HomeIcon, Info,
+  Calendar, Home as HomeIcon, Info, MessageCircle, CalendarDays,
 } from 'lucide-react'
 import { WELLNESS_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -154,12 +154,32 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'testimonials', label: 'Testimonials', icon: Star, page: 'home',
+      id: 'timetable', label: 'Class timetable', icon: CalendarDays, page: 'treatments',
       fields: [
+        { type: 'text',     path: 'timetable.heading',    label: 'Heading' },
+        { type: 'textarea', path: 'timetable.subheading', label: 'Subheading', rows: 2 },
+        {
+          type: 'array', path: 'timetable.slots',
+          label: 'Classes', itemLabel: 'class', itemTitle: 'name',
+          makeItem: () => ({ day: 'السبت', time: '6:30 ص', name: 'New class', teacher: '', level: '' }),
+          itemFields: [
+            { type: 'text', path: 'day',     label: 'Day (e.g. السبت)' },
+            { type: 'text', path: 'time',    label: 'Time' },
+            { type: 'text', path: 'name',    label: 'Class name' },
+            { type: 'text', path: 'teacher', label: 'Teacher (optional)' },
+            { type: 'text', path: 'level',   label: 'Level (optional)' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'testimonials', label: 'Reviews', icon: Star, page: 'home',
+      fields: [
+        { type: 'text',     path: 'links.reviews_url',           label: 'Reviews link (Google, Trustpilot, Facebook)' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'Subheading', rows: 2 },
         { type: 'number',   path: 'testimonials.average_rating', label: 'Average rating', min: 0, max: 5, step: 0.1 },
-        { type: 'text',     path: 'testimonials.review_count',   label: 'Review count text' },
+        { type: 'text',     path: 'testimonials.review_count',   label: 'Number of reviews' },
         {
           type: 'array', path: 'testimonials.items',
           label: 'Reviews', itemLabel: 'review', itemTitle: 'name',
@@ -201,6 +221,13 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
     },
   ],
   globalPanels: [
+    {
+      id: 'links', label: 'WhatsApp & map', icon: MessageCircle,
+      fields: [
+        { type: 'text', path: 'links.whatsapp', label: 'WhatsApp number or wa.me link' },
+        { type: 'text', path: 'links.map_url',  label: 'Google Maps link (optional)' },
+      ],
+    },
     {
       id: 'footer', label: 'Footer', icon: Phone,
       fields: [

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Icon } from '@/components/icons'
-import type { WellnessContent, WellnessTreatment, WellnessTeamMember, WellnessTestimonial, WellnessFaqItem } from '@/utils/wellness/types'
+import type { WellnessContent, WellnessTreatment, WellnessTeamMember, WellnessTestimonial, WellnessFaqItem, WellnessTimetableSlot } from '@/utils/wellness/types'
 import { getWellnessPreset } from '@/utils/wellness/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
@@ -156,10 +156,12 @@ export default function WellnessPreview({
           <PhilosophySection content={content} isDark={isDark} />
           <TestimonialsSection content={content} isDark={isDark} />
           <BookingCtaSection content={content} isDark={isDark} />
+          <LocationSection content={content} isDark={isDark} />
         </>
       )}
       {view === 'treatments' && (
         <>
+          <TimetableSection content={content} isDark={isDark} />
           <TreatmentsSection content={content} isDark={isDark} />
           <JourneySection content={content} isDark={isDark} />
         </>
@@ -175,6 +177,7 @@ export default function WellnessPreview({
       {view === 'contact' && (
         <>
           <BookingCtaSection content={content} isDark={isDark} />
+          <LocationSection content={content} isDark={isDark} />
           <FaqSection content={content} isDark={isDark} />
         </>
       )}
@@ -717,6 +720,12 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 function TestimonialsSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
+  const items = content.testimonials.items.filter((t) => t.text?.trim())
+  const reviewsUrl = content.links?.reviews_url
+  // Reviews are the owner's own. With none and no link to them, the section
+  // has nothing true to say, so it is not drawn.
+  if (!items.length && !reviewsUrl) return null
+  const platform = reviewPlatform(reviewsUrl)
   return (
     <section data-section="testimonials" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
@@ -735,17 +744,34 @@ function TestimonialsSection({ content, isDark }: { content: WellnessContent; is
           {/* Rating badge */}
           <motion.div {...revealAnim(rm,0.26)} className="mt-8 inline-flex items-center gap-3 rounded-full border px-6 py-3"
             style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}>
-            <Stars rating={5} color="var(--wl-accent)" />
-            <span className="text-sm font-semibold" style={{ color: 'var(--wl-text)' }}>{content.testimonials.average_rating.toFixed(1)}</span>
-            <span className="text-xs" style={{ color: 'var(--wl-muted)' }}>from {content.testimonials.review_count} sessions</span>
+            <Stars rating={Math.round(content.testimonials.average_rating || 5)} color="var(--wl-accent)" />
+            <span className="text-sm font-semibold" style={{ color: 'var(--wl-text)' }}>{(content.testimonials.average_rating || 5).toFixed(1)}</span>
+            {content.testimonials.review_count ? (
+              <span className="text-xs" style={{ color: 'var(--wl-muted)' }}>
+                من {content.testimonials.review_count} تقييم{platform ? ` على ${platform}` : ''}
+              </span>
+            ) : null}
           </motion.div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-3">
-          {content.testimonials.items.map((t, i) => (
-            <TestimonialCard key={i} testimonial={t} index={i} isDark={isDark} />
-          ))}
-        </div>
+        {items.length ? (
+          <div className={`grid gap-6 ${items.length >= 3 ? 'sm:grid-cols-3' : items.length === 2 ? 'sm:grid-cols-2' : 'mx-auto max-w-xl'}`}>
+            {items.map((t, i) => (
+              <TestimonialCard key={i} testimonial={t} index={i} isDark={isDark} />
+            ))}
+          </div>
+        ) : null}
+
+        {reviewsUrl ? (
+          <div className="mt-10 text-center">
+            <a href={reviewsUrl} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition hover:opacity-80"
+              style={{ borderColor: 'var(--wl-accent)', color: 'var(--wl-text)' }}>
+              اقرأ كل التقييمات{platform ? ` على ${platform}` : ''}
+              <span aria-hidden style={{ color: 'var(--wl-accent)' }}>←</span>
+            </a>
+          </div>
+        ) : null}
       </div>
     </section>
   )
@@ -806,6 +832,12 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
             }}
           >
             <BookingForm type="appointment" palette={wellnessPalette(isDark)} />
+            {whatsappHref(content.links?.whatsapp) ? (
+              <div className="mt-4 flex flex-col items-center gap-3">
+                <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#6b6b6b' }}>أو</span>
+                <WhatsAppBookButton content={content} />
+              </div>
+            ) : null}
             {content.booking_cta.note && (
               <p className="mt-4 text-center text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#6b6b6b' }}>
                 {content.booking_cta.note}
@@ -814,6 +846,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
           </motion.div>
         ) : (
           <motion.div {...revealAnim(rm,0.3)} className="mt-10 flex flex-col items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-3">
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
@@ -823,6 +856,8 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
             >
               {content.booking_cta.cta_label}
             </motion.a>
+            <WhatsAppBookButton content={content} onDark />
+            </div>
             <p className="text-xs text-white/50">{content.booking_cta.note}</p>
           </motion.div>
         )}
@@ -938,5 +973,190 @@ function FooterSection({ content, isDark }: { content: WellnessContent; isDark: 
         </div>
       </div>
     </footer>
+  )
+}
+
+
+// ─── Links helpers ────────────────────────────────────────────────────────────
+function reviewPlatform(url?: string): string {
+  if (!url) return ''
+  const u = url.toLowerCase()
+  if (/google\.|g\.page|goo\.gl|maps\.app/.test(u)) return 'Google'
+  if (u.includes('trustpilot')) return 'Trustpilot'
+  if (u.includes('facebook') || u.includes('fb.')) return 'Facebook'
+  if (u.includes('tripadvisor')) return 'Tripadvisor'
+  if (u.includes('instagram')) return 'Instagram'
+  return ''
+}
+
+/** A wa.me link from a full link or a bare number. Empty when there is no number. */
+function whatsappHref(v?: string): string {
+  const raw = (v || '').trim()
+  if (!raw) return ''
+  if (/^https?:\/\//i.test(raw)) return raw
+  const digits = raw.replace(/[^0-9]/g, '').replace(/^00/, '')
+  return digits.length >= 8 ? `https://wa.me/${digits}` : ''
+}
+
+function mapLinks(content: WellnessContent): { open: string; embed: string } | null {
+  const address = [content.footer.address, content.brand.city].filter(Boolean).join('، ')
+  const custom = content.links?.map_url?.trim()
+  if (!address && !custom) return null
+  const q = encodeURIComponent(address || content.brand.name)
+  return {
+    open: custom || `https://www.google.com/maps/search/?api=1&query=${q}`,
+    embed: `https://www.google.com/maps?q=${q}&output=embed`,
+  }
+}
+
+// ─── WhatsApp ─────────────────────────────────────────────────────────────────
+function WaGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
+      <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.6.13-.14.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.7.25-1.29.18-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.8h-.01a9.8 9.8 0 0 1-5-1.37l-.36-.21-3.72.97 1-3.62-.24-.37a9.78 9.78 0 0 1-1.5-5.22c0-5.41 4.4-9.81 9.83-9.81 2.62 0 5.09 1.02 6.94 2.88a9.75 9.75 0 0 1 2.87 6.94c0 5.41-4.4 9.81-9.81 9.81zm8.35-18.16A11.73 11.73 0 0 0 12.05.2C5.54.2.25 5.48.25 11.99c0 2.08.54 4.11 1.58 5.9L.15 24l6.26-1.64a11.8 11.8 0 0 0 5.64 1.44h.01c6.5 0 11.8-5.29 11.8-11.8 0-3.15-1.23-6.11-3.46-8.36z" />
+    </svg>
+  )
+}
+
+/** "Book on WhatsApp", sitting next to the booking action. Nothing when there is no number. */
+function WhatsAppBookButton({ content, onDark = false }: { content: WellnessContent; onDark?: boolean }) {
+  const href = whatsappHref(content.links?.whatsapp)
+  if (!href) return null
+  const text = encodeURIComponent(`مرحبًا ${content.brand.name}، أريد حجز موعد.`)
+  const link = href.includes('?') ? href : `${href}?text=${text}`
+  return (
+    <motion.a
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.97 }}
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-bold tracking-[0.06em]"
+      style={onDark
+        ? { borderColor: 'rgba(255,255,255,0.55)', color: '#fff', background: 'rgba(255,255,255,0.08)' }
+        : { borderColor: 'var(--wl-border)', color: 'var(--wl-text)', background: 'var(--wl-surface)' }}
+    >
+      <WaGlyph className="h-5 w-5" />
+      احجز على واتساب
+    </motion.a>
+  )
+}
+
+// ─── Location ─────────────────────────────────────────────────────────────────
+function LocationSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
+  const links = mapLinks(content)
+  if (!links) return null
+  const wa = whatsappHref(content.links?.whatsapp)
+  const details = (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--wl-accent)' }}>موقعنا</p>
+        <h2 className="text-3xl font-light sm:text-4xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
+          {content.brand.name}
+        </h2>
+      </div>
+      <dl className="grid gap-4 text-sm">
+        {content.footer.address ? (
+          <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>العنوان</dt><dd style={{ color: 'var(--wl-text)' }}>{content.footer.address}</dd></div>
+        ) : null}
+        {content.footer.hours ? (
+          <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>ساعات العمل</dt><dd style={{ color: 'var(--wl-text)' }}>{content.footer.hours}</dd></div>
+        ) : null}
+        {content.footer.phone ? (
+          <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>الهاتف</dt><dd dir="ltr" className="text-right" style={{ color: 'var(--wl-text)' }}>{content.footer.phone}</dd></div>
+        ) : null}
+      </dl>
+      <div className="flex flex-wrap gap-3">
+        <a href={links.open} target="_blank" rel="noopener noreferrer"
+          className="rounded-full px-6 py-3 text-sm font-bold"
+          style={{ background: 'var(--wl-accent)', color: isDark ? '#0e0e0e' : 'var(--wl-primary)' }}>
+          افتح في الخرائط
+        </a>
+        {wa ? (
+          <a href={wa} target="_blank" rel="noopener noreferrer"
+            className="rounded-full border px-6 py-3 text-sm font-semibold"
+            style={{ borderColor: 'var(--wl-border)', color: 'var(--wl-text)' }}>
+            اسأل عن الطريق
+          </a>
+        ) : null}
+      </div>
+    </div>
+  )
+  return (
+    <section data-section="location" className="px-6 py-20 sm:px-8" style={{ background: 'var(--wl-surface)' }}>
+      <motion.div {...revealAnim(rm)} className="mx-auto max-w-5xl">
+        <div className="grid items-stretch gap-8 lg:grid-cols-[1fr_1.4fr]">
+          {details}
+          <div className="overflow-hidden rounded-3xl border" style={{ borderColor: 'var(--wl-border)', minHeight: 300 }}>
+            <iframe title={`خريطة ${content.brand.name}`} src={links.embed} loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+              className="h-full min-h-[300px] w-full" style={{ border: 0, filter: isDark ? 'invert(0.9) hue-rotate(180deg)' : undefined }} />
+          </div>
+        </div>
+      </motion.div>
+    </section>
+  )
+}
+
+// ─── Timetable ────────────────────────────────────────────────────────────────
+const WEEK = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
+
+function TimetableSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
+  const rm = !!useReducedMotion()
+  const tt = content.timetable
+  const slots = (tt?.slots || []).filter((s) => s.name?.trim() && s.day)
+  const days = WEEK.filter((d) => slots.some((s) => s.day === d))
+  const [active, setActive] = useState(0)
+  if (!tt || !slots.length) return null
+  const byDay = (d: string) => slots.filter((s) => s.day === d).sort((a, b) => a.time.localeCompare(b.time))
+  const header = (
+    <div className="mb-10 text-center">
+      <motion.p {...fadeAnim(rm)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>جدول الحصص</motion.p>
+      <motion.h2 {...revealAnim(rm, 0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>{tt.heading || 'جدول الحصص'}</motion.h2>
+      {tt.subheading ? <p className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>{tt.subheading}</p> : null}
+    </div>
+  )
+  const slotCard = (s: WellnessTimetableSlot, i: number) => (
+    <div key={i} className="rounded-2xl border p-4" style={{ borderColor: 'var(--wl-border)', background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--wl-surface)' }}>
+      <p dir="ltr" className="text-right text-xs font-semibold tabular-nums" style={{ color: 'var(--wl-accent)' }}>{s.time}</p>
+      <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--wl-text)' }}>{s.name}</p>
+      {(s.teacher || s.level) ? (
+        <p className="mt-1 text-xs" style={{ color: 'var(--wl-muted)' }}>{[s.teacher, s.level].filter(Boolean).join(' · ')}</p>
+      ) : null}
+    </div>
+  )
+  return (
+    <section data-section="timetable" className="px-6 py-20 sm:px-8" style={{ background: 'var(--wl-bg)' }}>
+      <div className="mx-auto max-w-6xl">
+        {header}
+          <div className="mx-auto max-w-2xl">
+            <div role="tablist" aria-label="أيام الأسبوع" className="mb-6 flex gap-2 overflow-x-auto pb-1">
+              {days.map((d, i) => (
+                <button key={d} role="tab" aria-selected={active === i} onClick={() => setActive(i)}
+                  className="shrink-0 rounded-full border px-4 py-2 text-sm transition"
+                  style={{
+                    borderColor: active === i ? 'var(--wl-accent)' : 'var(--wl-border)',
+                    background: active === i ? 'var(--wl-accent)' : 'transparent',
+                    color: active === i ? (isDark ? '#0e0e0e' : 'var(--wl-primary)') : 'var(--wl-text)',
+                    fontWeight: active === i ? 700 : 400,
+                  }}>
+                  {d}
+                </button>
+              ))}
+            </div>
+            <div className="grid gap-3">
+              {byDay(days[Math.min(active, days.length - 1)]).map((s, i) => (
+                <div key={i} className="flex items-center gap-5 rounded-2xl border p-4" style={{ borderColor: 'var(--wl-border)', background: 'var(--wl-surface)' }}>
+                  <span dir="ltr" className="w-20 shrink-0 text-sm font-semibold tabular-nums" style={{ color: 'var(--wl-accent)' }}>{s.time}</span>
+                  <div className="min-w-0">
+                    <p className="font-semibold" style={{ color: 'var(--wl-text)' }}>{s.name}</p>
+                    {(s.teacher || s.level) ? <p className="text-xs" style={{ color: 'var(--wl-muted)' }}>{[s.teacher, s.level].filter(Boolean).join(' · ')}</p> : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+      </div>
+    </section>
   )
 }

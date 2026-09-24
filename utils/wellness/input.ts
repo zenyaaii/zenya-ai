@@ -9,6 +9,21 @@ const treatmentSchema = z.object({
   badge: z.string().optional()
 })
 
+const reviewSchema = z.object({
+  name: z.string().min(1).max(80),
+  text: z.string().min(2).max(600),
+  treatment: z.string().max(120).optional(),
+  rating: z.number().min(1).max(5).optional()
+})
+
+const timetableSlotSchema = z.object({
+  day: z.string().min(2).max(20),
+  time: z.string().min(1).max(20),
+  name: z.string().min(2).max(80),
+  teacher: z.string().max(60).optional(),
+  level: z.string().max(40).optional()
+})
+
 const teamMemberSchema = z.object({
   name: z.string().min(2),
   title: z.string().optional(),
@@ -34,7 +49,9 @@ export const wellnessInputSchema = z.object({
     address: z.string().optional(),
     booking_url: z.string().url().optional(),
     hours: z.string().optional(),
-    cancellation_policy: z.string().optional()
+    cancellation_policy: z.string().optional(),
+    whatsapp: z.string().max(60).optional(),
+    map_url: z.string().url().optional()
   }),
   treatments: z.array(treatmentSchema).min(1),
   team: z.array(teamMemberSchema).optional().default([]),
@@ -47,8 +64,12 @@ export const wellnessInputSchema = z.object({
   social_proof: z.object({
     review_rating: z.number().min(1).max(5).optional(),
     review_count: z.string().optional(),
-    certifications: z.string().optional()
+    certifications: z.string().optional(),
+    // The owner's own reviews. The generator never writes reviews itself.
+    reviews: z.array(reviewSchema).max(12).optional(),
+    reviews_url: z.string().url().optional()
   }).optional().default({}),
+  timetable: z.array(timetableSlotSchema).max(60).optional(),
   visuals: z.object({
     hero_image_url: z.string().url().optional(),
     space_image_urls: z.string().optional(),

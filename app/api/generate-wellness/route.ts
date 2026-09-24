@@ -57,7 +57,8 @@ ${teamText}
 
 Amenities: ${input.amenities || 'N/A'}
 Rating: ${input.social_proof?.review_rating || 5}/5
-Review count: ${input.social_proof?.review_count || '100+'}
+Review count: ${input.social_proof?.review_count || 'N/A'}
+Weekly classes: ${input.timetable?.length ? input.timetable.map((s) => `${s.day} ${s.time} ${s.name}`).join('; ') : 'N/A'}
 Certifications: ${input.social_proof?.certifications || 'N/A'}
 Hours: ${input.contact.hours || 'N/A'}
 Booking URL: ${input.contact.booking_url || 'N/A'}
@@ -137,13 +138,12 @@ Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
     "amenities": ["Short amenity item"]
   },
   "testimonials": {
-    "heading": "Section heading",
-    "subheading": "1 short sentence",
-    "average_rating": 5.0,
-    "review_count": "Keep provided count",
-    "items": [
-      { "name": "First name + initial", "text": "28–50 words", "treatment": "Treatment name", "rating": 5 }
-    ]
+    "heading": "Section heading for the owner's client reviews",
+    "subheading": "1 short sentence"
+  },
+  "timetable": {
+    "heading": "Heading for the weekly class timetable (only used if the brief lists classes)",
+    "subheading": "1 short sentence"
   },
   "booking_cta": {
     "eyebrow": "Short eyebrow",
@@ -171,7 +171,7 @@ Requirements:
 - journey.steps: exactly 3 steps
 - team.members: include all provided team members
 - space.amenities: 4–6 items (use provided amenities if any)
-- testimonials.items: exactly 3 items
+- Do not write reviews or testimonials. Only the owner's real reviews are shown.
 - faq: 5–7 items
 
 ${ICON_VOCAB_PROMPT}
@@ -229,11 +229,13 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
             name: m.name,
             title: m.title || String(aiM.title || ''),
             specialty: m.specialty || String(aiM.specialty || ''),
-            bio: String(aiM.bio || m.bio || mock.team.members[i % mock.team.members.length].bio),
-            image: m.image_url || mock.team.members[i % mock.team.members.length].image
+            bio: String(aiM.bio || m.bio || ''),
+            image: m.image_url || unsplash(niche.team[i % niche.team.length].photo, 600)
           }
         })
-      : mock.team.members
+      // No team given: stand-in roles for this niche, not invented people.
+      // The owner swaps in real names and photos from the editor.
+      : niche.team.map((m) => ({ name: m.title, title: '', specialty: m.specialty, bio: '', image: unsplash(m.photo, 600) }))
 
   const philosophyPillars =
     Array.isArray(ai?.philosophy?.pillars) && ai.philosophy.pillars.length >= 3
@@ -253,15 +255,14 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
         }))
       : mock.journey.steps
 
-  const testimonials =
-    Array.isArray(ai?.testimonials?.items) && ai.testimonials.items.length >= 3
-      ? ai.testimonials.items.slice(0, 3).map((t: any) => ({
-          name: String(t?.name || 'عميل موثّق'),
-          text: String(t?.text || ''),
-          treatment: t?.treatment ? String(t.treatment) : undefined,
-          rating: typeof t?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
-        }))
-      : mock.testimonials.items
+  // Reviews are only ever the owner's own. With none, the section shows the
+  // link to their public reviews, or is not drawn at all.
+  const testimonials = (input.social_proof?.reviews || []).map((t) => ({
+    name: t.name.trim(),
+    text: t.text.trim(),
+    treatment: t.treatment?.trim() || undefined,
+    rating: typeof t.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
+  }))
 
   const faqItems =
     Array.isArray(ai?.faq) && ai.faq.length >= 5
@@ -281,6 +282,19 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       : mock.trust_bar.items
 
   return {
+    niche: niche.id,
+    links: {
+      whatsapp: input.contact.whatsapp?.trim() || undefined,
+      map_url: input.contact.map_url || undefined,
+      reviews_url: input.social_proof?.reviews_url || undefined
+    },
+    timetable: input.timetable?.length
+      ? {
+          heading: String(ai?.timetable?.heading || 'جدول الحصص'),
+          subheading: String(ai?.timetable?.subheading || 'احجز مكانك قبل الحصة.'),
+          slots: input.timetable.map((s) => ({ day: s.day, time: s.time, name: s.name, teacher: s.teacher || undefined, level: s.level || undefined }))
+        }
+      : undefined,
     brand: {
       name: input.brand.name,
       type: input.brand.type,
@@ -328,11 +342,8 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     testimonials: {
       heading: String(ai?.testimonials?.heading || mock.testimonials.heading),
       subheading: String(ai?.testimonials?.subheading || mock.testimonials.subheading),
-      average_rating:
-        typeof ai?.testimonials?.average_rating === 'number'
-          ? Math.max(4, Math.min(5, ai.testimonials.average_rating))
-          : input.social_proof?.review_rating || mock.testimonials.average_rating,
-      review_count: String(ai?.testimonials?.review_count || input.social_proof?.review_count || mock.testimonials.review_count),
+      average_rating: input.social_proof?.review_rating || 5,
+      review_count: String(input.social_proof?.review_count || '').replace(/^\+?\s*$/, ''),
       items: testimonials
     },
     booking_cta: {
