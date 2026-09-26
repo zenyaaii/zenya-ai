@@ -39,18 +39,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   BarChart3, Bell, CalendarCheck, ChevronDown, CreditCard, Folder, Globe,
-  Home, Image as ImageIcon, Menu, Plus, Search, Settings, X, type LucideIcon,
+  Home, Image as ImageIcon, Menu, MessageSquareQuote, Plus, Search, Settings, X, type LucideIcon,
 } from 'lucide-react'
 import { DASHBOARD_CSS } from '@/components/app/dashboard-style'
 import { chromeFont } from '@/components/app/chrome-font'
 import ZenyaMark from '@/components/ZenyaMark'
 import {
   AnalyticsView, BillingView, BookingsView, DomainsView, GalleryView,
-  HomeView, SeoView, SettingsView, SitesView,
+  HomeView, ReviewsView, SeoView, SettingsView, SitesView,
 } from './views'
 
 type ViewKey =
-  | 'home' | 'sites' | 'gallery' | 'analytics' | 'bookings'
+  | 'home' | 'sites' | 'gallery' | 'analytics' | 'bookings' | 'reviews'
   | 'seo' | 'domains' | 'billing' | 'settings'
 
 const NAV: Array<{ key: ViewKey; label: string; icon: LucideIcon; group: 'work' | 'account' }> = [
@@ -59,6 +59,7 @@ const NAV: Array<{ key: ViewKey; label: string; icon: LucideIcon; group: 'work' 
   { key: 'gallery',   label: 'المعرض',    icon: ImageIcon,     group: 'work' },
   { key: 'analytics', label: 'التحليلات', icon: BarChart3,     group: 'work' },
   { key: 'bookings',  label: 'الحجوزات',  icon: CalendarCheck, group: 'work' },
+  { key: 'reviews',   label: 'التقييمات', icon: MessageSquareQuote, group: 'work' },
   { key: 'seo',       label: 'السيو',     icon: Search,        group: 'work' },
   { key: 'domains',   label: 'النطاقات',  icon: Globe,         group: 'work' },
   { key: 'billing',   label: 'الفوترة',   icon: CreditCard,    group: 'account' },
@@ -230,6 +231,7 @@ export default function DashboardDemoView() {
             <AnalyticsView metric={metric} setMetric={setMetric} range={range} setRange={setRange} />
           )}
           {view === 'bookings' && <BookingsView filter={bookingFilter} setFilter={setBookingFilter} />}
+          {view === 'reviews' && <ReviewsView />}
           {view === 'seo' && <SeoView />}
           {view === 'domains' && <DomainsView />}
           {view === 'billing' && <BillingView />}

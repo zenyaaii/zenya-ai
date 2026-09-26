@@ -185,7 +185,7 @@ const structuredData = [
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      email: 'support@zenyaai.co',
+      email: 'team@zenyaai.co',
       url: `${SITE_URL}/contact`,
       availableLanguage: ['Arabic', 'English'],
     },

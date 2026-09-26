@@ -33,6 +33,9 @@ export type WellnessTestimonial = {
   text: string
   treatment?: string
   rating: number
+  /** 'google' when it came from the owner's Google listing; its text stays as written. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type WellnessFaqItem = {
@@ -52,12 +55,38 @@ export type WellnessJourneyStep = {
   text: string
 }
 
+export type WellnessTimetableSlot = {
+  day: string
+  time: string
+  name: string
+  teacher?: string
+  level?: string
+}
+
+export type WellnessLinks = {
+  /** A phone number or a wa.me link. */
+  whatsapp?: string
+  /** A Google Maps (or any map) link. Falls back to a search on the address. */
+  map_url?: string
+  /** Where the business's public reviews live: Google, Trustpilot, Facebook... */
+  reviews_url?: string
+}
+
 export type WellnessGalleryImage = {
   url: string
   alt?: string
 }
 
 export type WellnessContent = {
+  /** Niche pack id (utils/wellness/niches.ts). Missing on sites built before packs. */
+  niche?: string
+  links?: WellnessLinks
+  /** Weekly class timetable; only studios that run classes (yoga, pilates) have one. */
+  timetable?: {
+    heading: string
+    subheading: string
+    slots: WellnessTimetableSlot[]
+  }
   brand: {
     name: string
     type: string

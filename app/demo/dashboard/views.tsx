@@ -20,6 +20,8 @@ import { GscConnect, GscNumbers } from '@/components/dashboard/screens/search-co
 import { DomainsScreen } from '@/components/dashboard/screens/domains'
 import { BillingScreen } from '@/components/dashboard/screens/billing'
 import { SettingsScreen } from '@/components/dashboard/screens/settings'
+import { ReviewsScreen, type ReviewRow, type ReviewSource } from '@/components/dashboard/screens/reviews'
+import { useState } from 'react'
 import {
   ASSETS, BOOKINGS, CHANNELS, DOMAINS, GSC_EMAIL, GSC_QUERIES, GSC_TOTALS, INVOICES, PAGES, PLAN_INCLUDES,
   PREV_SERIES, SERIES, SEO_SITE, SITES, TOTALS,
@@ -162,6 +164,42 @@ export function SettingsView() {
         { key: 'product', label: 'تحديثات المنتج', on: false },
         { key: 'offers', label: 'عروض وتخفيضات', on: false },
       ]}
+    />
+  )
+}
+
+/* Sample reviews: four pulled from Google with the link the owner gave in
+   the wizard, and two the owner typed. */
+const SAMPLE_REVIEWS: ReviewRow[] = [
+  { id: 'g1', name: 'Noura A.', rating: 5, origin: 'google', when: 'قبل أسبوع', shown: true, text: 'أفضل مركز جربته في الرياض. الأخصائية فاهمة شغلها وتسمع لك قبل ما تبدأ.' },
+  { id: 'g2', name: 'منى الشهري', rating: 5, origin: 'google', when: 'قبل شهر', shown: true, text: 'نظافة وراحة وأسعار معقولة. رجعت له ثلاث مرات.' },
+  { id: 'g3', name: 'Lama', rating: 3, origin: 'google', when: 'قبل شهرين', shown: false, text: 'الخدمة حلوة لكن انتظرت ٢٠ دقيقة بعد موعدي.' },
+  { id: 'g4', name: 'هيفاء', rating: 5, origin: 'google', when: 'قبل 3 أشهر', shown: true, text: 'جلسة الحجامة كانت مريحة جدًا والموظفات لطيفات.' },
+  { id: 'm1', name: 'سارة القحطاني', rating: 5, origin: 'manual', shown: true, text: 'جلسة المساج كانت ممتازة، والمكان هادئ ونظيف. أنصح فيه بقوة.' },
+  { id: 'm2', name: 'ريم', rating: 4, origin: 'manual', shown: false, text: 'التعامل راقي والمواعيد مضبوطة، بس المواقف قليلة.' },
+]
+
+export function ReviewsView() {
+  const [siteId, setSiteId] = useState('s3')
+  const [reviews, setReviews] = useState<ReviewRow[]>(SAMPLE_REVIEWS)
+  const [fetching, setFetching] = useState(false)
+  const source: ReviewSource = { link: 'https://maps.app.goo.gl/waha-riyadh', rating: 4.8, count: 212, fetched: 'قبل 3 دقائق' }
+  return (
+    <ReviewsScreen
+      sites={SITES.filter((s) => s.id !== 's5').map((s) => ({ id: s.id, name: s.name }))}
+      siteId={siteId}
+      setSiteId={setSiteId}
+      source={source}
+      draftLink=""
+      fetching={fetching}
+      onFetch={{ onClick: () => { setFetching(true); setTimeout(() => setFetching(false), 900) } }}
+      heading="ماذا يقول عملاؤنا"
+      reviews={reviews}
+      onToggle={(id) => setReviews((rs) => rs.map((r) => (r.id === id ? { ...r, shown: !r.shown } : r)))}
+      onSave={(id, v) => setReviews((rs) => id
+        ? rs.map((r) => (r.id === id ? { ...r, ...v } : r))
+        : [...rs, { id: 'm' + Date.now(), origin: 'manual', shown: true, ...v }])}
+      onDelete={(id) => setReviews((rs) => rs.filter((r) => r.id !== id))}
     />
   )
 }
