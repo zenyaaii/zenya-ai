@@ -159,3 +159,20 @@ export const SEO_SITE = {
   description: 'مطعم المدينة — مطبخ شامي معاصر. تصفّح القائمة، تواصل معنا، واحجز طاولتك مباشرة من الموقع.',
   keywords: 'مطعم شامي, حجز طاولة, مطعم المدينة',
 }
+
+/* ── Google Search Console ──────────────────────────────────────────────── */
+
+export const GSC_EMAIL = 'nadia.almadina@gmail.com'
+
+export const GSC_TOTALS = { impressions: 3184, clicks: 142, ctr: 0.0446, position: 12.7 }
+
+export const GSC_QUERIES = [
+  { query: 'مطعم شامي قريب مني', impressions: 912, clicks: 38, ctr: 0.042, position: 9.1 },
+  { query: 'مطعم المدينة', impressions: 604, clicks: 61, ctr: 0.101, position: 1.4 },
+  { query: 'حجز طاولة عشاء', impressions: 488, clicks: 11, ctr: 0.023, position: 17.8 },
+  { query: 'منيو مطعم المدينة', impressions: 371, clicks: 19, ctr: 0.051, position: 2.2 },
+  { query: 'أفضل شاورما في المدينة', impressions: 296, clicks: 6, ctr: 0.02, position: 21.4 },
+  { query: 'مطاعم عائلية', impressions: 214, clicks: 4, ctr: 0.019, position: 24.9 },
+  { query: 'فتوش وحمص', impressions: 163, clicks: 2, ctr: 0.012, position: 28.3 },
+  { query: 'مطعم مفتوح الآن', impressions: 135, clicks: 1, ctr: 0.007, position: 31.0 },
+]
