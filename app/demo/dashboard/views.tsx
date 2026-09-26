@@ -16,11 +16,12 @@ import { GalleryScreen } from '@/components/dashboard/screens/gallery'
 import { AnalyticsScreen, type MetricKey, type RangeKey } from '@/components/dashboard/screens/analytics'
 import { BookingsScreen, type BookingData } from '@/components/dashboard/screens/bookings'
 import { SeoScreen } from '@/components/dashboard/screens/seo'
+import { GscConnect, GscNumbers } from '@/components/dashboard/screens/search-console'
 import { DomainsScreen } from '@/components/dashboard/screens/domains'
 import { BillingScreen } from '@/components/dashboard/screens/billing'
 import { SettingsScreen } from '@/components/dashboard/screens/settings'
 import {
-  ASSETS, BOOKINGS, CHANNELS, DOMAINS, INVOICES, PAGES, PLAN_INCLUDES,
+  ASSETS, BOOKINGS, CHANNELS, DOMAINS, GSC_EMAIL, GSC_QUERIES, GSC_TOTALS, INVOICES, PAGES, PLAN_INCLUDES,
   PREV_SERIES, SERIES, SEO_SITE, SITES, TOTALS,
 } from './data'
 
@@ -83,6 +84,16 @@ export function AnalyticsView({
       series={SERIES} prevSeries={PREV_SERIES}
       channels={CHANNELS} pages={PAGES}
       avgDuration="1 د 36 ث" avgDurationDelta={8.1}
+      searchConsole={
+        <GscNumbers
+          status="ok"
+          sites={SITES.filter((s) => s.live).map((s) => ({ id: s.id, name: s.name }))}
+          selectedId="s1"
+          totals={GSC_TOTALS}
+          queries={GSC_QUERIES}
+          toSeo={{}}
+        />
+      }
     />
   )
 }
@@ -110,6 +121,15 @@ export function SeoView() {
       keywords={SEO_SITE.keywords}
       titleMax={60}
       descMax={160}
+      searchConsole={
+        <GscConnect
+          status="connected"
+          email={GSC_EMAIL}
+          siteName={SEO_SITE.name}
+          siteState="added"
+          connect={{}} setup={{}} disconnect={{}} seeNumbers={{}}
+        />
+      }
     />
   )
 }

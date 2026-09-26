@@ -22,8 +22,11 @@ function backToSeo(req: NextRequest, status: string, reason?: string) {
   const url = new URL('/dashboard/seo', base)
   url.searchParams.set('gsc', status)
   if (reason) url.searchParams.set('gsc_reason', reason.slice(0, 64))
+  const site = req.cookies.get('gsc_oauth_site')?.value
+  if (status === 'connected' && site) url.searchParams.set('site', site)
   const res = NextResponse.redirect(url)
   res.cookies.delete('gsc_oauth_state')
+  res.cookies.delete('gsc_oauth_site')
   return res
 }
 

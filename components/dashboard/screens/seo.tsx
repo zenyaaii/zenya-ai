@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { Act, EmptyHint, Page, PageHead, type Action } from './kit'
 
@@ -19,11 +20,14 @@ export type SeoScreenProps = {
   save?: Action
   saving?: boolean
   reset?: Action
+  /** The Search Console block (see ./search-console). */
+  searchConsole?: ReactNode
 }
 
 export function SeoScreen({
   sites, selectedId, onSelect, site, title, description, keywords, titleMax, descMax,
   onTitle, onDescription, onKeywords, save, saving = false, reset,
+  searchConsole,
 }: SeoScreenProps) {
   return (
     <Page>
@@ -58,6 +62,8 @@ export function SeoScreen({
               )
             })}
           </div>
+
+          {searchConsole}
 
           {/* The preview comes FIRST on a phone and second on a desktop: on a
               narrow screen the reader wants to see what the change looks like
