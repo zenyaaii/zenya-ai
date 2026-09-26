@@ -33,6 +33,9 @@ export type WellnessTestimonial = {
   text: string
   treatment?: string
   rating: number
+  /** 'google' when it came from the owner's Google listing; its text stays as written. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type WellnessFaqItem = {

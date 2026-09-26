@@ -13,7 +13,9 @@ const reviewSchema = z.object({
   name: z.string().min(1).max(80),
   text: z.string().min(2).max(600),
   treatment: z.string().max(120).optional(),
-  rating: z.number().min(1).max(5).optional()
+  rating: z.number().min(1).max(5).optional(),
+  origin: z.literal('google').optional(),
+  when: z.string().max(60).optional()
 })
 
 const timetableSlotSchema = z.object({

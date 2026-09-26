@@ -20,7 +20,7 @@ import WizardShell, {
 
 type Treatment = { id: string; name: string; category: string; duration: string; price: string; description: string; badge: string }
 type TeamMember = { id: string; name: string; title: string; specialty: string; bio: string; image_url: string }
-type OwnerReview = { id: string; name: string; text: string; treatment: string; rating: string }
+type OwnerReview = { id: string; name: string; text: string; treatment: string; rating: string; origin?: 'google'; when?: string }
 type ClassSlot = { id: string; day: string; time: string; name: string; teacher: string; level: string }
 type StudioHour = { day: string; label: string; open: string; close: string; closed?: boolean }
 
@@ -47,11 +47,10 @@ const GOOGLE_ERRORS: Record<string, string> = {
   too_many: 'حاولت كثيرًا. جرّب بعد ساعة.',
 }
 
-/** Looks the business up on Google and lets the owner pick which reviews go
- *  on the site. `mode` is the sample switch: 'fill' adds everything at once,
- *  'pick' shows the reviews first with a tick box on each. */
-function GoogleReviewsImport({ url, name, city, mode, onImport }: {
-  url: string; name: string; city: string; mode: 'fill' | 'pick'
+/** Looks the business up on Google and shows its reviews with a tick box on
+ *  each, so the owner picks which go on the site. */
+function GoogleReviewsImport({ url, name, city, onImport }: {
+  url: string; name: string; city: string
   onImport: (r: GoogleResult, chosen: GoogleFound[]) => void
 }) {
   const [busy, setBusy] = useState(false)
@@ -70,12 +69,7 @@ function GoogleReviewsImport({ url, name, city, mode, onImport }: {
       const json = await res.json().catch(() => ({}))
       if (!res.ok) { setError(GOOGLE_ERRORS[json.error] || 'لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.'); return }
       const r = json as GoogleResult
-      if (mode === 'fill') {
-        onImport(r, r.reviews)
-        setDone(r.reviews.length ? 'أضفنا ' + r.reviews.length + ' تقييمات من Google تحت. احذف ما لا تريده.' : 'أخذنا التقييم والعدد من Google. Google لم تعطنا نصوص تقييمات.')
-      } else {
-        setFound(r); setKeep(r.reviews.map(() => true))
-      }
+      setFound(r); setKeep(r.reviews.map(() => true))
     } catch {
       setError('لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.')
     } finally {
@@ -247,9 +241,6 @@ const EMAIL_RE = /^\S+@\S+\.\S+$/
 
 export default function WellnessWizardPage() {
   const router = useRouter()
-  // SAMPLE ONLY: ?reviews=fill shows the add-everything variant. Removed once one is picked.
-  const [importMode, setImportMode] = useState<'fill' | 'pick'>('pick')
-  useEffect(() => { if (new URLSearchParams(window.location.search).get('reviews') === 'fill') setImportMode('fill') }, [])
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -325,7 +316,7 @@ export default function WellnessWizardPage() {
       const have = new Set((prev.reviews || []).map((x) => x.name.trim() + '|' + x.text.trim()))
       const fresh = chosen
         .filter((c) => !have.has(c.name + '|' + c.text))
-        .map((c) => ({ id: uid(), name: c.name, text: c.text, treatment: '', rating: String(c.rating) }))
+        .map((c) => ({ id: uid(), name: c.name, text: c.text, treatment: '', rating: String(c.rating), origin: 'google' as const, when: c.when || undefined }))
       return {
         ...prev,
         reviews: [...(prev.reviews || []), ...fresh],
@@ -438,6 +429,8 @@ export default function WellnessWizardPage() {
           text: r.text.trim(),
           treatment: r.treatment.trim() || undefined,
           rating: Number(r.rating) || 5,
+          origin: r.origin,
+          when: r.when,
         })),
         reviews_url: /^https?:\/\//.test((form.reviews_url || '').trim()) ? form.reviews_url.trim() : undefined,
       },
@@ -719,7 +712,7 @@ export default function WellnessWizardPage() {
             <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => update('reviews_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Block>
-            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} mode={importMode} onImport={importGoogle} />
+            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onImport={importGoogle} />
           </Block>
           <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
             <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.8" />

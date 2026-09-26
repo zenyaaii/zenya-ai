@@ -260,7 +260,10 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     name: t.name.trim(),
     text: t.text.trim(),
     treatment: t.treatment?.trim() || undefined,
-    rating: typeof t.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
+    rating: typeof t.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5,
+    // Marks a review taken from Google, so the dashboard never lets its text be reworded.
+    origin: t.origin,
+    when: t.when
   }))
 
   const faqItems =

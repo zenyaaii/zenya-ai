@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Search, Globe, Image as ImageIcon,
-  CreditCard, Settings, X, CalendarCheck, type LucideIcon,
+  CreditCard, Settings, X, CalendarCheck, MessageSquareQuote, type LucideIcon,
 } from 'lucide-react'
 import ZenyaMark from '@/components/ZenyaMark'
 import { useT } from '@/components/i18n/LocaleProvider'
@@ -37,6 +37,7 @@ function buildNav(t: Messages): NavGroup[] {
         { href: '/dashboard/gallery',    label: t.nav.gallery,   icon: ImageIcon },
         { href: '/dashboard/analytics',  label: t.nav.analytics, icon: BarChart3,     tour: 'analytics' },
         { href: '/dashboard/bookings',   label: t.nav.bookings,  icon: CalendarCheck, tour: 'bookings' },
+        { href: '/dashboard/reviews',    label: t.nav.reviews,   icon: MessageSquareQuote },
         { href: '/dashboard/seo',        label: t.nav.seo,       icon: Search,        tour: 'seo' },
         { href: '/dashboard/domains',    label: t.nav.domains,   icon: Globe,         tour: 'domains' },
       ],
