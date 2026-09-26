@@ -172,8 +172,8 @@ export default function FooterSection({
                     <ArrowLeft className="ic" strokeWidth={1.6} aria-hidden />
                   </Link>
 
-                  <a className="zn5-mail" href="mailto:support@zenyaai.co" dir="ltr">
-                    support@zenyaai.co
+                  <a className="zn5-mail" href="mailto:team@zenyaai.co" dir="ltr">
+                    team@zenyaai.co
                   </a>
                 </div>
 

@@ -7,27 +7,12 @@ import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { wellnessInputSchema, type WellnessInput } from '@/utils/wellness/input'
 import type { WellnessContent } from '@/utils/wellness/types'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
+import { resolveWellnessNiche, unsplash } from '@/utils/wellness/niches'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 const TIMEOUT_MS = 45_000
-
-const FALLBACK_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=2400&q=85',
-  'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=2400&q=85',
-  'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=2400&q=85'
-]
-
-const FALLBACK_SPACE_IMAGES = [
-  'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80'
-]
-
-const FALLBACK_BOOKING_IMAGE =
-  'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=2000&q=80'
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -44,6 +29,7 @@ function parseJsonSafe(raw: string): any {
 }
 
 function buildPrompt(input: WellnessInput): string {
+  const niche = resolveWellnessNiche(input.niche, input.brand.type)
   const treatmentsText = input.treatments
     .map((t) => `- ${t.name}${t.category ? ` [${t.category}]` : ''}${t.duration ? `, ${t.duration}` : ''}${t.price ? `, ${t.price}` : ''}${t.badge ? ` (${t.badge})` : ''}${t.description ? `: ${t.description}` : ''}`)
     .join('\n')
@@ -55,6 +41,7 @@ function buildPrompt(input: WellnessInput): string {
   return `WELLNESS STUDIO BRIEF
 Studio name: ${input.brand.name}
 Type: ${input.brand.type}
+Niche: ${niche.label} (${niche.id})
 Location: ${input.brand.city}${input.brand.region ? `, ${input.brand.region}` : ''}
 Founded: ${input.brand.founded_year || 'N/A'}
 
@@ -70,22 +57,25 @@ ${teamText}
 
 Amenities: ${input.amenities || 'N/A'}
 Rating: ${input.social_proof?.review_rating || 5}/5
-Review count: ${input.social_proof?.review_count || '100+'}
+Review count: ${input.social_proof?.review_count || 'N/A'}
+Weekly classes: ${input.timetable?.length ? input.timetable.map((s) => `${s.day} ${s.time} ${s.name}`).join('; ') : 'N/A'}
 Certifications: ${input.social_proof?.certifications || 'N/A'}
 Hours: ${input.contact.hours || 'N/A'}
-Booking URL: ${input.contact.booking_url || 'N/A'}
+
+NICHE
+${niche.voice}
 
 WRITING DIRECTION
-You are writing premium copy for a luxury wellness studio website. The tone is calm, confident, poetic without being vague — it should feel like a $1000/session spa, not a yoga app or gym. Speak to clients who value intentional rest and expert care.
-
-Hard rules:
-- Headlines can be poetic and line-broken with \\n (4–12 words each line).
-- Subheadlines: 1–2 short sentences, grounded and warm.
-- Treatment descriptions: 12–22 words, sensory and precise.
-- Testimonials: 28–50 words, specific and believable, mention the treatment.
-- FAQ answers: 1–2 direct, warm sentences.
-- Avoid generic wellness buzzwords: "journey", "transformation", "life-changing", "empowering", "holistic journey".
-- Never invent credentials or make medical claims.
+Write like the owner of this exact business talking to a client across the counter, not like an agency. The reader should not be able to tell a machine wrote it.
+- Open with the client's real problem or wish in this niche, in their words. A headline states something concrete (a pain, a result, a promise you can check), line-broken with \\n, 2–3 short lines.
+- Use specific details from the brief: the city or neighbourhood, real session names, durations, prices, hours, what happens in the first visit. Specific beats pretty.
+- Short sentences. Everyday Arabic a client in ${input.brand.city} would use; a light local touch is welcome, no heavy slang.
+- Say what happens and what the client gets. No abstract nouns stacked together, no rhetorical questions, no em-dash asides.
+- Treatment descriptions: 12–22 words. Say who it is for and what it does.
+- Testimonials: 20–45 words, sound like a real review on Google: one concrete detail, the treatment name, plain words.
+- FAQ answers: 1–2 direct sentences answering what a first-time client in this niche actually asks.
+- Never use these words or their Arabic equivalents: ${[...niche.avoid, 'journey', 'transformation', 'life-changing', 'empowering', 'elevate', 'unlock', 'sanctuary', 'oasis'].join(', ')}.
+- Never invent credentials, licences, awards or numbers the brief does not give. Never make medical claims or promise results.
 
 OUTPUT
 Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
@@ -93,7 +83,7 @@ Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
 {
   "hero": {
     "eyebrow": "Short trust-led line",
-    "headline": "Poetic headline. Use \\n to break into 2–3 short lines.",
+    "headline": "Concrete headline in the client's words. Use \\n to break into 2–3 short lines.",
     "subheadline": "1–2 sentences",
     "cta_primary": "Book a session",
     "cta_secondary": "Explore treatments",
@@ -147,17 +137,16 @@ Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
     "amenities": ["Short amenity item"]
   },
   "testimonials": {
-    "heading": "Section heading",
-    "subheading": "1 short sentence",
-    "average_rating": 5.0,
-    "review_count": "Keep provided count",
-    "items": [
-      { "name": "First name + initial", "text": "28–50 words", "treatment": "Treatment name", "rating": 5 }
-    ]
+    "heading": "Section heading for the owner's client reviews",
+    "subheading": "1 short sentence"
+  },
+  "timetable": {
+    "heading": "Heading for the weekly class timetable (only used if the brief lists classes)",
+    "subheading": "1 short sentence"
   },
   "booking_cta": {
     "eyebrow": "Short eyebrow",
-    "heading": "Poetic heading",
+    "heading": "Short, concrete heading",
     "subheading": "1–2 sentences",
     "cta_label": "CTA label",
     "note": "Short reassurance line"
@@ -181,10 +170,11 @@ Requirements:
 - journey.steps: exactly 3 steps
 - team.members: include all provided team members
 - space.amenities: 4–6 items (use provided amenities if any)
-- testimonials.items: exactly 3 items
+- Do not write reviews or testimonials. Only the owner's real reviews are shown.
 - faq: 5–7 items
 
 ${ICON_VOCAB_PROMPT}
+For this niche, pick the pillar icons from this shortlist first: ${niche.icons.join(', ')}. Each pillar gets a different icon that matches its text.
 Every "icon" field (philosophy.pillars) MUST be one name from the list above — never an emoji.`
 }
 
@@ -194,16 +184,18 @@ function splitLines(value: string): string[] {
 
 function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   const mock = WELLNESS_MOCK_CONTENT
+  const niche = resolveWellnessNiche(input.niche, input.brand.type)
 
-  const heroImage = input.visuals?.hero_image_url || FALLBACK_HERO_IMAGES[0]
-  const bookingImage = input.visuals?.hero_image_url || FALLBACK_BOOKING_IMAGE
+  // Owner uploads win; anything missing comes from the niche's own photos.
+  const heroImage = input.visuals?.hero_image_url || unsplash(niche.photos.hero, 2400)
+  const bookingImage = input.visuals?.hero_image_url || unsplash(niche.photos.booking, 2000)
   const spaceUrls = splitLines(input.visuals?.space_image_urls || '').filter((u) => /^https?:\/\//.test(u))
   const spaceImages =
     spaceUrls.length >= 4
       ? spaceUrls.slice(0, 4).map((url) => ({ url }))
       : [
           ...spaceUrls.map((url) => ({ url })),
-          ...FALLBACK_SPACE_IMAGES.slice(0, 4 - spaceUrls.length).map((url) => ({ url }))
+          ...niche.photos.space.slice(0, 4 - spaceUrls.length).map((id) => ({ url: unsplash(id, 1200) }))
         ]
 
   const treatments =
@@ -236,16 +228,18 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
             name: m.name,
             title: m.title || String(aiM.title || ''),
             specialty: m.specialty || String(aiM.specialty || ''),
-            bio: String(aiM.bio || m.bio || mock.team.members[i % mock.team.members.length].bio),
-            image: m.image_url || mock.team.members[i % mock.team.members.length].image
+            bio: String(aiM.bio || m.bio || ''),
+            image: m.image_url || unsplash(niche.team[i % niche.team.length].photo, 600)
           }
         })
-      : mock.team.members
+      // No team given: stand-in roles for this niche, not invented people.
+      // The owner swaps in real names and photos from the editor.
+      : niche.team.map((m) => ({ name: m.title, title: '', specialty: m.specialty, bio: '', image: unsplash(m.photo, 600) }))
 
   const philosophyPillars =
     Array.isArray(ai?.philosophy?.pillars) && ai.philosophy.pillars.length >= 3
       ? ai.philosophy.pillars.slice(0, 3).map((p: any) => ({
-          icon: String(p?.icon || 'spa'),
+          icon: String(p?.icon || niche.icons[0]),
           title: String(p?.title || ''),
           text: String(p?.text || '')
         }))
@@ -260,15 +254,14 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
         }))
       : mock.journey.steps
 
-  const testimonials =
-    Array.isArray(ai?.testimonials?.items) && ai.testimonials.items.length >= 3
-      ? ai.testimonials.items.slice(0, 3).map((t: any) => ({
-          name: String(t?.name || 'عميل موثّق'),
-          text: String(t?.text || ''),
-          treatment: t?.treatment ? String(t.treatment) : undefined,
-          rating: typeof t?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
-        }))
-      : mock.testimonials.items
+  // Reviews are only ever the owner's own. With none, the section shows the
+  // link to their public reviews, or is not drawn at all.
+  const testimonials = (input.social_proof?.reviews || []).map((t) => ({
+    name: t.name.trim(),
+    text: t.text.trim(),
+    treatment: t.treatment?.trim() || undefined,
+    rating: typeof t.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
+  }))
 
   const faqItems =
     Array.isArray(ai?.faq) && ai.faq.length >= 5
@@ -288,6 +281,19 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       : mock.trust_bar.items
 
   return {
+    niche: niche.id,
+    links: {
+      whatsapp: input.contact.whatsapp?.trim() || undefined,
+      map_url: input.contact.map_url || undefined,
+      reviews_url: input.social_proof?.reviews_url || undefined
+    },
+    timetable: input.timetable?.length
+      ? {
+          heading: String(ai?.timetable?.heading || 'جدول الحصص'),
+          subheading: String(ai?.timetable?.subheading || 'احجز مكانك قبل الحصة.'),
+          slots: input.timetable.map((s) => ({ day: s.day, time: s.time, name: s.name, teacher: s.teacher || undefined, level: s.level || undefined }))
+        }
+      : undefined,
     brand: {
       name: input.brand.name,
       type: input.brand.type,
@@ -299,7 +305,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
-      cta_primary: String(ai?.hero?.cta_primary || (input.contact.booking_url ? 'احجز جلسة' : 'تواصل معنا')),
+      cta_primary: String(ai?.hero?.cta_primary || 'احجز جلسة'),
       cta_secondary: String(ai?.hero?.cta_secondary || 'تصفّح الجلسات'),
       image: heroImage,
       badge: ai?.hero?.badge ? String(ai.hero.badge) : undefined
@@ -335,18 +341,15 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     testimonials: {
       heading: String(ai?.testimonials?.heading || mock.testimonials.heading),
       subheading: String(ai?.testimonials?.subheading || mock.testimonials.subheading),
-      average_rating:
-        typeof ai?.testimonials?.average_rating === 'number'
-          ? Math.max(4, Math.min(5, ai.testimonials.average_rating))
-          : input.social_proof?.review_rating || mock.testimonials.average_rating,
-      review_count: String(ai?.testimonials?.review_count || input.social_proof?.review_count || mock.testimonials.review_count),
+      average_rating: input.social_proof?.review_rating || 5,
+      review_count: String(input.social_proof?.review_count || '').replace(/^\+?\s*$/, ''),
       items: testimonials
     },
     booking_cta: {
       eyebrow: String(ai?.booking_cta?.eyebrow || mock.booking_cta.eyebrow),
       heading: String(ai?.booking_cta?.heading || mock.booking_cta.heading),
       subheading: String(ai?.booking_cta?.subheading || mock.booking_cta.subheading),
-      cta_label: String(ai?.booking_cta?.cta_label || (input.contact.booking_url ? 'احجز جلستك' : 'تواصل معنا')),
+      cta_label: String(ai?.booking_cta?.cta_label || 'احجز جلستك'),
       note: String(ai?.booking_cta?.note || mock.booking_cta.note),
       image: bookingImage
     },
@@ -361,7 +364,6 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       email: input.contact.email,
       address: input.contact.address,
       hours: input.contact.hours,
-      booking_url: input.contact.booking_url
     },
     seo: {
       title: String(ai?.seo?.title || `${input.brand.name} · ${input.brand.type} · ${input.brand.city}`),
@@ -408,7 +410,7 @@ export async function POST(req: NextRequest) {
           {
             role: 'system',
             content:
-              'You are a senior copywriter for ultra-premium wellness and spa brands. You write calm, precise, sensory copy that feels like it belongs on a $1000/session luxury wellness website. Always return strict JSON only.\n\n' +
+              'You are a senior copywriter who writes websites for small wellness and beauty businesses in the Arab world: massage centers, salons, clinics, studios. Your copy sounds like a real person who knows the trade, specific and warm, never generic or flowery. Always return strict JSON only.\n\n' +
               ARABIC_OUTPUT_DIRECTIVE
           },
           { role: 'user', content: buildPrompt(input) }

@@ -6,7 +6,7 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: 'Contact',
   description:
-    'Get in touch with Zenya about support, sales, or requesting a new template. Email support@zenyaai.co or use the form, and we reply from the European Union.',
+    'Get in touch with Zenya about support, sales, or requesting a new template. Email team@zenyaai.co or use the form, and we reply from the European Union.',
   keywords: ['contact Zenya', 'Zenya support', 'Zenya sales'],
   alternates: {
     canonical: `${SITE}/en/contact`,

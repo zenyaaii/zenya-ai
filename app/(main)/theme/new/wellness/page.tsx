@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
+import { WELLNESS_NICHES, getWellnessNiche } from '@/utils/wellness/niches'
 import type { WellnessInput } from '@/utils/wellness/input'
 import ImageUploadField from '@/components/ImageUploadField'
 import DevFillButton from '@/components/DevFillButton'
@@ -13,12 +14,14 @@ import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
 import WizardShell, {
-  AddButton, Block, Card, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Select, Textarea, Uploads,
+  AddButton, Block, Card, Chips, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Select, Textarea, Uploads,
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
 
 type Treatment = { id: string; name: string; category: string; duration: string; price: string; description: string; badge: string }
 type TeamMember = { id: string; name: string; title: string; specialty: string; bio: string; image_url: string }
+type OwnerReview = { id: string; name: string; text: string; treatment: string; rating: string }
+type ClassSlot = { id: string; day: string; time: string; name: string; teacher: string; level: string }
 type StudioHour = { day: string; label: string; open: string; close: string; closed?: boolean }
 
 function uid() { return Math.random().toString(36).slice(2, 9) }
@@ -33,6 +36,98 @@ const DEFAULT_STUDIO_HOURS: StudioHour[] = [
   { day: 'friday', label: 'الجمعة', open: '2:00 م', close: '9:00 م' },
 ]
 
+type GoogleFound = { name: string; rating: number; text: string; when: string }
+type GoogleResult = { place: { name: string; rating: number | null; count: number | null; url: string }; reviews: GoogleFound[] }
+
+const GOOGLE_ERRORS: Record<string, string> = {
+  not_configured: 'جلب التقييمات من Google غير مفعّل بعد. أضف تقييماتك بيدك تحت.',
+  sign_in: 'سجّل دخولك أولًا حتى نجلب تقييماتك.',
+  not_google_link: 'هذا ليس رابطًا من Google. انسخ الرابط من خرائط Google.',
+  not_found: 'لم نجد نشاطك على Google. تأكد من الرابط.',
+  too_many: 'حاولت كثيرًا. جرّب بعد ساعة.',
+}
+
+/** Looks the business up on Google and lets the owner pick which reviews go
+ *  on the site. `mode` is the sample switch: 'fill' adds everything at once,
+ *  'pick' shows the reviews first with a tick box on each. */
+function GoogleReviewsImport({ url, name, city, mode, onImport }: {
+  url: string; name: string; city: string; mode: 'fill' | 'pick'
+  onImport: (r: GoogleResult, chosen: GoogleFound[]) => void
+}) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [found, setFound] = useState<GoogleResult | null>(null)
+  const [keep, setKeep] = useState<boolean[]>([])
+  const [done, setDone] = useState('')
+
+  async function run() {
+    setBusy(true); setError(''); setDone(''); setFound(null)
+    try {
+      const res = await fetch('/api/reviews/google', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, name, city }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) { setError(GOOGLE_ERRORS[json.error] || 'لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.'); return }
+      const r = json as GoogleResult
+      if (mode === 'fill') {
+        onImport(r, r.reviews)
+        setDone(r.reviews.length ? 'أضفنا ' + r.reviews.length + ' تقييمات من Google تحت. احذف ما لا تريده.' : 'أخذنا التقييم والعدد من Google. Google لم تعطنا نصوص تقييمات.')
+      } else {
+        setFound(r); setKeep(r.reviews.map(() => true))
+      }
+    } catch {
+      setError('لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function add() {
+    if (!found) return
+    const chosen = found.reviews.filter((_, i) => keep[i])
+    onImport(found, chosen)
+    setFound(null)
+    setDone(chosen.length ? 'أضفنا ' + chosen.length + ' تقييمات تحت. تقدر تعدّلها الآن أو من لوحة التحكم.' : 'أخذنا التقييم والعدد من Google.')
+  }
+
+  const count = keep.filter(Boolean).length
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+      <button type="button" className="zb-add" onClick={run} disabled={busy || (!url.trim() && !name.trim())}>
+        {busy ? 'نبحث على Google…' : 'اجلب تقييماتي من Google'}
+      </button>
+      {error ? <p className="zb-note" role="alert" style={{ margin: 0, color: '#b45309', background: 'rgba(217,119,6,0.08)' }}>{error}</p> : null}
+      {done ? <p className="zb-note" style={{ margin: 0 }}>{done}</p> : null}
+      {found ? (
+        <div className="zb-list" style={{ padding: '0.75rem', borderRadius: 12, boxShadow: '0 0 0 1px rgba(17,17,17,0.08)', background: '#fff' }}>
+          <p style={{ margin: 0, fontWeight: 700 }}>
+            {found.place.name || 'نشاطك'}
+            {found.place.rating != null ? ' · ' + found.place.rating.toFixed(1) + ' ★' : ''}
+            {found.place.count != null ? ' · ' + found.place.count + ' تقييم' : ''}
+          </p>
+          <p style={{ margin: 0, fontSize: 14, color: '#6b6b6b' }}>
+            {found.reviews.length ? 'Google تعطينا حتى 5 تقييمات. اختر ما تريد عرضه في موقعك.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
+          </p>
+          {found.reviews.map((r, i) => (
+            <label key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.625rem', alignItems: 'start', padding: '0.625rem', borderRadius: 10, background: keep[i] ? 'rgba(94,106,210,0.06)' : 'transparent', cursor: 'pointer' }}>
+              <input type="checkbox" checked={!!keep[i]} onChange={(e) => setKeep((k) => k.map((v, j) => (j === i ? e.target.checked : v)))} style={{ marginTop: 5, width: 18, height: 18, accentColor: '#5e6ad2' }} />
+              <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+                <span dir="auto" style={{ fontWeight: 700 }}>{r.name} <span style={{ color: '#b7791f', fontWeight: 400 }}>{'★'.repeat(r.rating)}</span>{r.when ? <span style={{ color: '#8a8a8a', fontWeight: 400, fontSize: 13 }}> · {r.when}</span> : null}</span>
+                <span dir="auto" style={{ fontSize: 14.5, lineHeight: 1.7, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.text}</span>
+              </span>
+            </label>
+          ))}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button type="button" className="zb-add" onClick={add}>{found.reviews.length ? 'أضف المختارة (' + count + ')' : 'خذ التقييم والعدد'}</button>
+            <button type="button" className="zb-quiet" onClick={() => setFound(null)}>إلغاء</button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function formatHours(hours: StudioHour[]): string {
   return hours
     .map((h) => {
@@ -45,6 +140,7 @@ function formatHours(hours: StudioHour[]): string {
 }
 
 type Form = {
+  niche: string
   brand_name: string
   brand_type: string
   city: string
@@ -53,9 +149,13 @@ type Form = {
   phone: string
   email: string
   address: string
-  booking_url: string
   hours: StudioHour[]
   cancellation_policy: string
+  whatsapp: string
+  map_url: string
+  reviews: OwnerReview[]
+  reviews_url: string
+  timetable: ClassSlot[]
   philosophy_brief: string
   philosophy_approach: string
   amenities: string
@@ -71,6 +171,7 @@ type Form = {
 
 function buildSampleForm(): Form {
   return {
+    niche: 'center',
     brand_name: 'سَكينة للعافية',
     brand_type: 'سبا شامل ويوغا',
     city: 'جدة',
@@ -79,9 +180,15 @@ function buildSampleForm(): Form {
     phone: '+966 12 555 0182',
     email: 'hello@sakeena.sa',
     address: 'طريق الكورنيش، حي الشاطئ، جدة',
-    booking_url: 'https://book.sakeena.sa',
     hours: DEFAULT_STUDIO_HOURS.map((h) => ({ ...h })),
     cancellation_policy: 'يلزم إشعار قبل 24 ساعة، وإلا تُطبَّق رسوم 50٪.',
+    whatsapp: '+966 55 555 0182',
+    map_url: '',
+    reviews: [
+      { id: uid(), name: 'نورة س.', text: 'أول مرة أجرب الأنسجة العميقة. المعالج سألني عن ظهري قبل ما يبدأ، وطلعت أخف بكثير.', treatment: 'تدليك الأنسجة العميقة', rating: '5' },
+    ],
+    reviews_url: '',
+    timetable: [],
     philosophy_brief: 'سَكينة ملاذ هادئ بُني حول فكرة واحدة: الراحة مهارة، لا ترف. نمزج ممارسات شرقية وغربية — علاجًا جسديًا وتنفّسًا وأعشابًا — بلا مبالغات. الجلسات على مهل، والموسيقى خافتة، وهناك دائمًا شاي.',
     philosophy_approach: 'تكاملي، مراعٍ للراحة النفسية، أقلّ تدخّلًا',
     amenities: 'ساونا بالأشعة تحت الحمراء\nغرف علاج خاصة\nصالة شاي\nكبسولة طفو\nحوض ماء بارد\nحديقة تأمّل',
@@ -105,6 +212,7 @@ function buildSampleForm(): Form {
 }
 
 const INITIAL_FORM: Form = {
+  niche: '',
   brand_name: '',
   brand_type: '',
   city: '',
@@ -113,14 +221,18 @@ const INITIAL_FORM: Form = {
   phone: '',
   email: '',
   address: '',
-  booking_url: '',
   hours: DEFAULT_STUDIO_HOURS,
   cancellation_policy: 'يلزم إشعار قبل 24 ساعة',
+  whatsapp: '',
+  map_url: '',
+  reviews: [],
+  reviews_url: '',
+  timetable: [],
   philosophy_brief: '',
   philosophy_approach: '',
   amenities: '',
-  review_rating: '5.0',
-  review_count: '+100',
+  review_rating: '',
+  review_count: '',
   certifications: '',
   hero_image_url: '',
   space_image_urls: [],
@@ -135,6 +247,9 @@ const EMAIL_RE = /^\S+@\S+\.\S+$/
 
 export default function WellnessWizardPage() {
   const router = useRouter()
+  // SAMPLE ONLY: ?reviews=fill shows the add-everything variant. Removed once one is picked.
+  const [importMode, setImportMode] = useState<'fill' | 'pick'>('pick')
+  useEffect(() => { if (new URLSearchParams(window.location.search).get('reviews') === 'fill') setImportMode('fill') }, [])
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
   const [form, setForm] = useState<Form>(INITIAL_FORM)
@@ -154,6 +269,28 @@ export default function WellnessWizardPage() {
     return () => { cancelled = true }
   }, [])
 
+  // Picking a niche fills what the owner has not touched yet: the type line,
+  // the colour style and the starter sessions. Anything they typed stays.
+  function pickNiche(id: string) {
+    setForm((prev) => {
+      const before = getWellnessNiche(prev.niche)
+      const next = getWellnessNiche(id)
+      if (!next) return { ...prev, niche: '' }
+      const typeUntouched = !prev.brand_type.trim() || prev.brand_type === before?.type
+      const styleUntouched = prev.style_preset === (before?.preset ?? INITIAL_FORM.style_preset)
+      const sessionsUntouched = prev.treatments.every((t) => !t.name.trim())
+      return {
+        ...prev,
+        niche: next.id,
+        brand_type: typeUntouched ? next.type : prev.brand_type,
+        style_preset: styleUntouched ? next.preset : prev.style_preset,
+        treatments: sessionsUntouched
+          ? next.starters.map((t) => ({ id: uid(), name: t.name, category: t.category, duration: t.duration, price: '', description: t.description, badge: '' }))
+          : prev.treatments,
+      }
+    })
+  }
+
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
@@ -172,10 +309,47 @@ export default function WellnessWizardPage() {
     setForm((prev) => ({ ...prev, treatments: prev.treatments.map((t) => (t.id === id ? { ...t, ...patch } : t)) }))
   }
   function addTreatment() {
-    setForm((prev) => ({ ...prev, treatments: [...prev.treatments, { id: uid(), name: '', category: 'تدليك', duration: '60 دقيقة', price: '', description: '', badge: '' }] }))
+    setForm((prev) => ({ ...prev, treatments: [...prev.treatments, { id: uid(), name: '', category: getWellnessNiche(prev.niche)?.categories[0] ?? 'تدليك', duration: '60 دقيقة', price: '', description: '', badge: '' }] }))
   }
   function removeTreatment(id: string) {
     setForm((prev) => ({ ...prev, treatments: prev.treatments.filter((t) => t.id !== id) }))
+  }
+  function updateReview(id: string, patch: Partial<OwnerReview>) {
+    setForm((prev) => ({ ...prev, reviews: (prev.reviews || []).map((r) => (r.id === id ? { ...r, ...patch } : r)) }))
+  }
+  function addReview() {
+    setForm((prev) => ({ ...prev, reviews: [...(prev.reviews || []), { id: uid(), name: '', text: '', treatment: '', rating: '5' }] }))
+  }
+  function importGoogle(r: GoogleResult, chosen: GoogleFound[]) {
+    setForm((prev) => {
+      const have = new Set((prev.reviews || []).map((x) => x.name.trim() + '|' + x.text.trim()))
+      const fresh = chosen
+        .filter((c) => !have.has(c.name + '|' + c.text))
+        .map((c) => ({ id: uid(), name: c.name, text: c.text, treatment: '', rating: String(c.rating) }))
+      return {
+        ...prev,
+        reviews: [...(prev.reviews || []), ...fresh],
+        reviews_url: prev.reviews_url?.trim() ? prev.reviews_url : r.place.url,
+        review_rating: r.place.rating != null ? r.place.rating.toFixed(1) : prev.review_rating,
+        review_count: r.place.count != null ? String(r.place.count) : prev.review_count,
+      }
+    })
+  }
+  function removeReview(id: string) {
+    setForm((prev) => ({ ...prev, reviews: (prev.reviews || []).filter((r) => r.id !== id) }))
+  }
+  function updateSlot(id: string, patch: Partial<ClassSlot>) {
+    setForm((prev) => ({ ...prev, timetable: (prev.timetable || []).map((c) => (c.id === id ? { ...c, ...patch } : c)) }))
+  }
+  function addSlot() {
+    setForm((prev) => {
+      const list = prev.timetable || []
+      const last = list[list.length - 1]
+      return { ...prev, timetable: [...(prev.timetable || []), { id: uid(), day: last?.day || 'السبت', time: '', name: '', teacher: last?.teacher || '', level: '' }] }
+    })
+  }
+  function removeSlot(id: string) {
+    setForm((prev) => ({ ...prev, timetable: (prev.timetable || []).filter((c) => c.id !== id) }))
   }
   function updateTeam(id: string, patch: Partial<TeamMember>) {
     setForm((prev) => ({ ...prev, team: prev.team.map((m) => (m.id === id ? { ...m, ...patch } : m)) }))
@@ -187,6 +361,11 @@ export default function WellnessWizardPage() {
     setForm((prev) => ({ ...prev, team: prev.team.filter((m) => m.id !== id) }))
   }
 
+  const niche = getWellnessNiche(form.niche)
+  const categories = niche?.categories ?? TREATMENT_CATEGORIES
+  const validReviews = (form.reviews || []).filter((r) => r.name.trim() && r.text.trim().length >= 2)
+  const validSlots = (form.timetable || []).filter((c) => c.name.trim().length >= 2 && c.time.trim())
+  const runsClasses = niche?.id === 'yoga'
   const validTreatments = form.treatments.filter((t) => t.name.trim().length >= 2)
   const ok = {
     basics: form.brand_name.trim().length >= 2 && form.brand_type.trim().length >= 2 && form.city.trim().length >= 2,
@@ -213,6 +392,7 @@ export default function WellnessWizardPage() {
 
   function buildPayload(): WellnessInput {
     return {
+      niche: niche?.id,
       brand: {
         name: form.brand_name.trim(),
         type: form.brand_type.trim(),
@@ -224,9 +404,11 @@ export default function WellnessWizardPage() {
         phone: form.phone.trim(),
         email: form.email.trim(),
         address: form.address.trim() || undefined,
-        booking_url: form.booking_url.trim() || undefined,
         hours: formatHours(form.hours) || undefined,
         cancellation_policy: form.cancellation_policy.trim() || undefined,
+        // Most owners here take bookings on their mobile, so the phone doubles as WhatsApp.
+        whatsapp: (form.whatsapp || '').trim() || form.phone.trim() || undefined,
+        map_url: /^https?:\/\//.test((form.map_url || '').trim()) ? form.map_url.trim() : undefined,
       },
       treatments: validTreatments.map((t) => ({
         name: t.name.trim(),
@@ -251,7 +433,17 @@ export default function WellnessWizardPage() {
         review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
         review_count: form.review_count.trim() || undefined,
         certifications: form.certifications.trim() || undefined,
+        reviews: validReviews.map((r) => ({
+          name: r.name.trim(),
+          text: r.text.trim(),
+          treatment: r.treatment.trim() || undefined,
+          rating: Number(r.rating) || 5,
+        })),
+        reviews_url: /^https?:\/\//.test((form.reviews_url || '').trim()) ? form.reviews_url.trim() : undefined,
       },
+      timetable: runsClasses && validSlots.length
+        ? validSlots.map((c) => ({ day: c.day, time: c.time.trim(), name: c.name.trim(), teacher: c.teacher.trim() || undefined, level: c.level.trim() || undefined }))
+        : undefined,
       visuals: {
         hero_image_url: /^https?:\/\//.test(form.hero_image_url) ? form.hero_image_url.trim() : undefined,
         space_image_urls: form.space_image_urls.filter(Boolean).join('\n') || undefined,
@@ -324,6 +516,9 @@ export default function WellnessWizardPage() {
       note: 'أدخل اسم الاستوديو ونوعه والمدينة.',
       body: (
         <Grid>
+          <Block title="ما نوع نشاطك؟" hint={niche ? `${niche.label}: ${niche.hint}. سنختار الصور والأيقونات وطريقة الكتابة والألوان لهذا النشاط.` : 'اختر الأقرب لنشاطك. سنختار الصور والأيقونات وطريقة الكتابة والألوان لهذا النشاط.'}>
+            <Chips options={WELLNESS_NICHES.map((n) => ({ id: n.id, label: n.label }))} value={form.niche || ''} onChange={pickNiche} allowNone={false} />
+          </Block>
           <Field label="اسم الاستوديو" required>
             <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="سَكينة للعافية" />
           </Field>
@@ -359,8 +554,11 @@ export default function WellnessWizardPage() {
           <Field label="العنوان">
             <Input value={form.address} onChange={(e) => update('address', e.target.value)} placeholder="طريق الكورنيش، حي الشاطئ، جدة" />
           </Field>
-          <Field label="رابط الحجز الإلكتروني (اختياري)">
-            <Input dir="ltr" value={form.booking_url} onChange={(e) => update('booking_url', e.target.value)} placeholder="https://..." />
+          <Field label="رقم واتساب للحجز" hint="اتركه فارغًا وسنستخدم رقم الهاتف. يظهر زر «احجز على واتساب» بجانب الحجز.">
+            <Input dir="ltr" value={form.whatsapp || ''} onChange={(e) => update('whatsapp', e.target.value)} placeholder="+966 55 555 0182" />
+          </Field>
+          <Field label="رابط الموقع على خرائط Google (اختياري)" hint="إن تركته فارغًا نضع الخريطة من العنوان.">
+            <Input dir="ltr" value={form.map_url || ''} onChange={(e) => update('map_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Field label="سياسة الإلغاء" wide>
             <Input value={form.cancellation_policy} onChange={(e) => update('cancellation_policy', e.target.value)} placeholder="يلزم إشعار قبل 24 ساعة" />
@@ -389,7 +587,7 @@ export default function WellnessWizardPage() {
                     </Field>
                     <Field label="الفئة">
                       <Select value={t.category} onChange={(e) => updateTreatment(t.id, { category: e.target.value })}>
-                        {TREATMENT_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {(categories.includes(t.category) ? categories : [t.category, ...categories]).map((c) => <option key={c} value={c}>{c}</option>)}
                       </Select>
                     </Field>
                     <Field label="المدّة">
@@ -413,6 +611,45 @@ export default function WellnessWizardPage() {
         </Grid>
       ),
     },
+    ...(runsClasses ? [{
+      id: 'timetable',
+      title: 'جدول الحصص',
+      sub: 'حصص الأسبوع كما تُقام. يظهر في موقعك يومًا بيوم.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <Block hint={(form.timetable || []).length === 0 ? 'أضف الحصص الأسبوعية، أو تخطَّ الخطوة وأضفها لاحقًا من لوحة التحكم.' : undefined}>
+            <div className="zb-list">
+              {(form.timetable || []).map((c, i) => (
+                <Card key={c.id} title={'الحصة ' + (i + 1)} onRemove={() => removeSlot(c.id)} removeLabel={'حذف الحصة ' + (i + 1)}>
+                  <Grid>
+                    <Field label="اليوم">
+                      <Select value={c.day} onChange={(e) => updateSlot(c.id, { day: e.target.value })}>
+                        {DEFAULT_STUDIO_HOURS.map((h) => <option key={h.day} value={h.label}>{h.label}</option>)}
+                      </Select>
+                    </Field>
+                    <Field label="الوقت">
+                      <Input value={c.time} onChange={(e) => updateSlot(c.id, { time: e.target.value })} placeholder="6:30 ص" />
+                    </Field>
+                    <Field label="اسم الحصة">
+                      <Input value={c.name} onChange={(e) => updateSlot(c.id, { name: e.target.value })} placeholder="يوغا للمبتدئين" />
+                    </Field>
+                    <Field label="المدرّب (اختياري)">
+                      <Input value={c.teacher} onChange={(e) => updateSlot(c.id, { teacher: e.target.value })} placeholder="نورة" />
+                    </Field>
+                    <Field label="المستوى (اختياري)">
+                      <Input value={c.level} onChange={(e) => updateSlot(c.id, { level: e.target.value })} placeholder="مبتدئ، كل المستويات..." />
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              <AddButton onClick={addSlot}>أضف حصة</AddButton>
+            </div>
+          </Block>
+        </Grid>
+      ),
+    } satisfies WizardStep] : []),
     {
       id: 'philosophy',
       title: 'قصة الاستوديو وفلسفته',
@@ -472,18 +709,49 @@ export default function WellnessWizardPage() {
     },
     {
       id: 'social',
-      title: 'الدليل الاجتماعي',
-      sub: 'التقييمات والشهادات المهنية.',
+      title: 'التقييمات',
+      sub: 'تقييمات حقيقية من زبائنك فقط. لا نكتب تقييمات من عندنا.',
       optional: true,
       complete: true,
       body: (
         <Grid>
-          <Field label="متوسط التقييم">
-            <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="5.0" />
+          <Field label="رابط نشاطك على خرائط Google (أو Trustpilot أو Facebook)" wide hint="الصق رابط Google واضغط «اجلب تقييماتي». الرابط يظهر أيضًا كزر «اقرأ كل التقييمات» في موقعك.">
+            <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => update('reviews_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
+          </Field>
+          <Block>
+            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} mode={importMode} onImport={importGoogle} />
+          </Block>
+          <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
+            <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.8" />
           </Field>
           <Field label="عدد التقييمات">
-            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="+340" />
+            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="120" />
           </Field>
+          <Block title="تقييمات تريد عرضها" hint={(form.reviews || []).length === 0 ? 'انسخ تقييمات من Google والصقها هنا. تقدر تعدّلها لاحقًا من لوحة التحكم.' : undefined}>
+            <div className="zb-list">
+              {(form.reviews || []).map((r, i) => (
+                <Card key={r.id} title={'التقييم ' + (i + 1)} onRemove={() => removeReview(r.id)} removeLabel={'حذف التقييم ' + (i + 1)}>
+                  <Grid>
+                    <Field label="اسم الزبون">
+                      <Input value={r.name} onChange={(e) => updateReview(r.id, { name: e.target.value })} placeholder="نورة س." />
+                    </Field>
+                    <Field label="النجوم">
+                      <Select value={r.rating} onChange={(e) => updateReview(r.id, { rating: e.target.value })}>
+                        {['5', '4', '3', '2', '1'].map((n) => <option key={n} value={n}>{n} من 5</option>)}
+                      </Select>
+                    </Field>
+                    <Field label="نص التقييم" wide>
+                      <Textarea rows={3} value={r.text} onChange={(e) => updateReview(r.id, { text: e.target.value })} placeholder="الصق التقييم كما كتبه الزبون" />
+                    </Field>
+                    <Field label="الجلسة (اختياري)" wide>
+                      <Input value={r.treatment} onChange={(e) => updateReview(r.id, { treatment: e.target.value })} placeholder="تدليك الأنسجة العميقة" />
+                    </Field>
+                  </Grid>
+                </Card>
+              ))}
+              <AddButton onClick={addReview}>أضف تقييمًا</AddButton>
+            </div>
+          </Block>
           <Field label="الشهادات / العضويات" wide>
             <Input value={form.certifications} onChange={(e) => update('certifications', e.target.value)} placeholder="ABMP، AMTA، 200 ساعة RYT..." />
           </Field>
@@ -532,11 +800,13 @@ export default function WellnessWizardPage() {
               { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
               { label: 'الجلسات', value: validTreatments.length },
               { label: 'الفريق', value: form.team.filter((m) => m.name.trim().length >= 2).length },
+              { label: 'التقييمات', value: validReviews.length },
               { label: 'أيام مفتوحة', value: `${form.hours.filter((h) => !h.closed).length} من 7` },
               { label: 'النمط', value: WELLNESS_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
             ]}
             recap={[
               { label: 'اسم الاستوديو', value: form.brand_name },
+              { label: 'النشاط', value: niche?.label ?? 'لم يُحدَّد' },
               { label: 'النوع', value: form.brand_type },
               { label: 'المدينة', value: [form.city, form.region].filter(Boolean).join('، ') },
               { label: 'الهاتف', value: form.phone },
@@ -545,7 +815,7 @@ export default function WellnessWizardPage() {
               { label: 'الفلسفة', value: form.philosophy_brief },
             ]}
           >
-            <Handoff title="جاهز لتوليد موقع العافية الخاص بك." body="سنبني الموقع الفاخر كاملًا وننقلك إلى المعاينة الحيّة." />
+            <Handoff title="جاهز لتوليد موقع العافية الخاص بك." body="سنبني الموقع كاملًا وننقلك إلى المعاينة الحيّة." />
           </Review>
         </Grid>
       ),
@@ -562,8 +832,8 @@ export default function WellnessWizardPage() {
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
         eyebrow="قالب استوديو العافية"
-        title="ابنِ موقع استوديو عافية فاخرًا."
-        sub="أخبرنا عن استوديوك وجلساتك وفريقك. تولّد زينيا موقعًا متكاملًا — واجهة رئيسية وقائمة جلسات وملفات الفريق ومسار حجز."
+        title="ابنِ موقعًا لمركزك أو صالونك أو عيادتك."
+        sub="اختر نوع نشاطك، وأخبرنا عن جلساتك وفريقك. تولّد زينيا موقعًا كاملًا بصور وكلام يناسب نشاطك: واجهة رئيسية وقائمة جلسات والفريق والحجز."
         steps={steps}
         step={step}
         onStep={setStep}
