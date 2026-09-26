@@ -62,8 +62,11 @@ export function GscConnect({
       <div className="min-w-0">
         <h3 className="zy-h3">Google Search Console</h3>
         {status === 'connected' ? (
-          <p className="zy-sub mt-0.5 truncate">
-            مربوط بحساب <span dir="ltr" className="font-bold text-[#171717]">{email}</span>
+          <p className="zy-sub mt-0.5 flex min-w-0 flex-wrap items-baseline gap-x-1">
+            <span className="shrink-0">مربوط بحساب</span>
+            {/* Its own LTR box, so a long address on a narrow phone loses its
+                end ("nadia.almadina@gm…"), never its start. */}
+            <span dir="ltr" className="min-w-0 max-w-full truncate font-bold text-[#171717]">{email}</span>
           </p>
         ) : (
           <p className="zy-sub mt-0.5">زر واحد: نربط حسابك في جوجل ونضيف موقعك إليه، ثم ترى في التحليلات كم مرة ظهر في البحث وبأي كلمات.</p>
