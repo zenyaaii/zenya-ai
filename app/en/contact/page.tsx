@@ -54,7 +54,7 @@ function ContactForm() {
       if (!res.ok) throw new Error('failed')
       setSent(true)
     } catch {
-      setError('That did not go through. Please email support@zenyaai.co directly and we will pick it up.')
+      setError('That did not go through. Please email team@zenyaai.co directly and we will pick it up.')
     } finally {
       setSubmitting(false)
     }
@@ -188,13 +188,13 @@ export default function EnContact() {
 
         <div className="mt-10 grid gap-3 sm:grid-cols-2">
           <a
-            href="mailto:support@zenyaai.co"
+            href="mailto:team@zenyaai.co"
             className="flex items-center gap-3 rounded-2xl border border-token bg-white px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.30)]"
           >
             <Mail className="h-4 w-4 flex-shrink-0 text-primary" strokeWidth={2} aria-hidden />
             <span>
               <span className="block text-[12px] uppercase tracking-[0.08em] text-subtle">Email</span>
-              <span className="block text-[14px] font-medium text-foreground">support@zenyaai.co</span>
+              <span className="block text-[14px] font-medium text-foreground">team@zenyaai.co</span>
             </span>
           </a>
           <div className="flex items-center gap-3 rounded-2xl border border-token bg-white px-5 py-4">

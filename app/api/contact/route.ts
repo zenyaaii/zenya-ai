@@ -17,7 +17,7 @@ const schema = z.object({
 const REVIEW_PROMO_CODE = REVIEW_REWARD_CODE
 
 /** Where a contact message is meant to arrive. */
-const INBOX = process.env.CONTACT_INBOX || 'support@zenyaai.co'
+const INBOX = process.env.CONTACT_INBOX || 'team@zenyaai.co'
 /** Resend requires a verified sender on the account's own domain. */
 const FROM = process.env.CONTACT_FROM || 'Zenya Contact <noreply@zenyaai.co>'
 

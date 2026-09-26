@@ -138,8 +138,8 @@ export default function EnAbout() {
             Zenya is the first Muslim company dedicated to building AI websites, run as a Dutch sole
             proprietorship and operated from the European Union. If you want to
             reach a person rather than a form, write to{' '}
-            <a href="mailto:support@zenyaai.co" className="font-medium text-primary hover:text-foreground">
-              support@zenyaai.co
+            <a href="mailto:team@zenyaai.co" className="font-medium text-primary hover:text-foreground">
+              team@zenyaai.co
             </a>
             .
           </p>

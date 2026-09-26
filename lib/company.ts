@@ -43,8 +43,8 @@ export const COMPANY = {
   POSTAL_CODE: '7776 BA',
   CITY: '',
 
-  // Contact — using personal Outlook mailbox until a real support@ mailbox is set up.
-  SUPPORT_EMAIL: 'zenyaai@outlook.com',
+  // Contact — support moved off the personal Outlook mailbox on 2026-09-26.
+  SUPPORT_EMAIL: 'team@zenyaai.co',
   PRIVACY_EMAIL: 'zenyaai@outlook.com',
   LEGAL_EMAIL: 'zenyaai@outlook.com',
   DPO_EMAIL: 'zenyaai@outlook.com',
