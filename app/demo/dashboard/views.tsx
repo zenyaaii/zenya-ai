@@ -19,6 +19,8 @@ import { SeoScreen } from '@/components/dashboard/screens/seo'
 import { DomainsScreen } from '@/components/dashboard/screens/domains'
 import { BillingScreen } from '@/components/dashboard/screens/billing'
 import { SettingsScreen } from '@/components/dashboard/screens/settings'
+import { ReviewsScreen, ReviewsSheet, type ReviewRow } from '@/components/dashboard/screens/reviews'
+import { useState } from 'react'
 import {
   ASSETS, BOOKINGS, CHANNELS, DOMAINS, INVOICES, PAGES, PLAN_INCLUDES,
   PREV_SERIES, SERIES, SEO_SITE, SITES, TOTALS,
@@ -52,14 +54,70 @@ export function HomeView({ go }: { go: (v: string) => void }) {
 }
 
 export function SitesView({ filter, setFilter }: { filter: string; setFilter: (f: string) => void }) {
+  const [sheet, setSheet] = useState<string | null>(null)
+  const panel = useReviewsPanel()
+  const site = SITES.find((s) => s.id === sheet)
   return (
+    <>
+    {site && <ReviewsSheet siteName={site.name} onClose={() => setSheet(null)} {...panel} />}
     <SitesScreen
       filter={filter as SiteFilter}
       setFilter={setFilter}
       sites={SITES.map((s) => ({
         id: s.id, name: s.name, kind: s.kind, host: s.host, live: s.live, updated: s.updated,
         primary: { label: s.live ? 'أضف نطاقًا' : 'انشر' },
+        reviews: s.id === 's5' ? undefined : { onClick: () => setSheet(s.id) },
       }))}
+    />
+    </>
+  )
+}
+
+/* Sample reviews: two the owner typed, and what the Google fetch returns. */
+const SAMPLE_REVIEWS: ReviewRow[] = [
+  { id: 'm1', name: 'سارة القحطاني', rating: 5, source: 'manual', shown: true, text: 'جلسة المساج كانت ممتازة، والمكان هادئ ونظيف. أنصح فيه بقوة.' },
+  { id: 'm2', name: 'ريم', rating: 4, source: 'manual', shown: false, text: 'التعامل راقي والمواعيد مضبوطة، بس المواقف قليلة.' },
+]
+const GOOGLE_REVIEWS: ReviewRow[] = [
+  { id: 'g1', name: 'Noura A.', rating: 5, source: 'google', when: 'قبل أسبوع', shown: true, text: 'أفضل مركز جربته في الرياض. الأخصائية فاهمة شغلها وتسمع لك قبل ما تبدأ.' },
+  { id: 'g2', name: 'منى الشهري', rating: 5, source: 'google', when: 'قبل شهر', shown: true, text: 'نظافة وراحة وأسعار معقولة. رجعت له ثلاث مرات.' },
+  { id: 'g3', name: 'Lama', rating: 3, source: 'google', when: 'قبل شهرين', shown: false, text: 'الخدمة حلوة لكن انتظرت ٢٠ دقيقة بعد موعدي.' },
+  { id: 'g4', name: 'هيفاء', rating: 5, source: 'google', when: 'قبل 3 أشهر', shown: true, text: 'جلسة الحجامة كانت مريحة جدًا والموظفات لطيفات.' },
+]
+
+function useReviewsPanel() {
+  const [link, setLink] = useState('')
+  const [fetching, setFetching] = useState(false)
+  const [google, setGoogle] = useState<{ rating: number; count: number } | null>(null)
+  const [reviews, setReviews] = useState<ReviewRow[]>(SAMPLE_REVIEWS)
+  return {
+    link, setLink, fetching, google, reviews,
+    onFetch: {
+      onClick: () => {
+        if (!link) setLink('https://maps.app.goo.gl/waha-riyadh')
+        setFetching(true)
+        setTimeout(() => {
+          setFetching(false)
+          setGoogle({ rating: 4.8, count: 212 })
+          setReviews((rs) => [...GOOGLE_REVIEWS.filter((g) => !rs.some((r) => r.id === g.id)), ...rs])
+        }, 900)
+      },
+    },
+    onToggle: (id: string) => setReviews((rs) => rs.map((r) => (r.id === id ? { ...r, shown: !r.shown } : r))),
+    onAdd: { onClick: () => {} },
+    onEdit: () => {},
+  }
+}
+
+export function ReviewsView() {
+  const [siteId, setSiteId] = useState('s3')
+  const panel = useReviewsPanel()
+  return (
+    <ReviewsScreen
+      sites={SITES.filter((s) => s.id !== 's5').map((s) => ({ id: s.id, name: s.name }))}
+      siteId={siteId}
+      setSiteId={setSiteId}
+      {...panel}
     />
   )
 }

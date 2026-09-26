@@ -15,6 +15,7 @@ export type SiteCardData = {
   updated: string
   edit?: Action
   preview?: Action
+  reviews?: Action
   primary: { label: string; action?: Action }
 }
 
@@ -74,6 +75,7 @@ export function SitesScreen({
               <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
                 <Act action={s.edit} className="zy-btn-q">تعديل</Act>
                 <Act action={s.preview} className="zy-btn-q">معاينة</Act>
+                {s.reviews && <Act action={s.reviews} className="zy-btn-q">التقييمات</Act>}
                 <Act action={s.primary.action} className="zy-btn">{s.primary.label}</Act>
               </div>
             </div>
