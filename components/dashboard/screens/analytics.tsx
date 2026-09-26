@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { BarChart3, Eye, LogOut, MousePointerClick, Timer, Users } from 'lucide-react'
 import { Segmented } from '@/components/app/Segmented'
 import TrendChart from '@/components/dashboard/analytics/TrendChart'
@@ -27,11 +28,13 @@ export type AnalyticsScreenProps = {
   pages: Row[]
   avgDuration: string
   avgDurationDelta: number | null
+  /** Google's numbers (see ./search-console). */
+  searchConsole?: ReactNode
 }
 
 export function AnalyticsScreen({
   metric, setMetric, range, setRange, totals, deltas, series, prevSeries, channels, pages,
-  avgDuration, avgDurationDelta,
+  avgDuration, avgDurationDelta, searchConsole,
 }: AnalyticsScreenProps) {
   return (
     <Page>
@@ -96,6 +99,8 @@ export function AnalyticsScreen({
         </div>
         <Delta value={avgDurationDelta} />
       </div>
+
+      {searchConsole}
     </Page>
   )
 }

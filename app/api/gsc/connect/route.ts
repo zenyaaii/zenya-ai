@@ -38,5 +38,18 @@ export async function GET(req: NextRequest) {
     maxAge: 600,
     ...(isLocal ? {} : { domain: '.zenyaai.co' }),
   })
+  // The site the owner was looking at rides along, so the callback can hand
+  // it back and the SEO page can finish adding it to Google in the same click.
+  const site = req.nextUrl.searchParams.get('site')
+  if (site && /^[0-9a-zA-Z-]{1,64}$/.test(site)) {
+    res.cookies.set('gsc_oauth_site', site, {
+      httpOnly: true,
+      secure: !isLocal,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 600,
+      ...(isLocal ? {} : { domain: '.zenyaai.co' }),
+    })
+  }
   return res
 }

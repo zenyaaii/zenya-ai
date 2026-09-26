@@ -26,6 +26,8 @@ export type Action = {
   onClick?: () => void
   /** Opens in a new tab (a live site, an invoice PDF). */
   external?: boolean
+  /** A full page load in this tab: a route handler that redirects (OAuth). */
+  document?: boolean
   disabled?: boolean
 }
 
@@ -39,6 +41,9 @@ export function Act({
   style?: CSSProperties
 }) {
   if (action?.href) {
+    if (action.document) {
+      return <a href={action.href} className={className} title={title} style={style}>{children}</a>
+    }
     return action.external ? (
       <a href={action.href} target="_blank" rel="noreferrer" className={className} title={title} style={style}>
         {children}
