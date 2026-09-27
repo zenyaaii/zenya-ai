@@ -230,7 +230,8 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
             title: m.title || String(aiM.title || ''),
             specialty: m.specialty || String(aiM.specialty || ''),
             bio: String(aiM.bio || m.bio || ''),
-            image: m.image_url || unsplash(niche.team[i % niche.team.length].photo, 600)
+            // A real person gets their own photo or none — never a stranger's.
+            image: m.image_url || undefined
           }
         })
       // No team given: stand-in roles for this niche, not invented people.

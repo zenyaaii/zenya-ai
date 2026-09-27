@@ -36,8 +36,6 @@ const FALLBACK_DISH_IMAGES = [
   'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
 ]
 
-const FALLBACK_CHEF_IMAGE =
-  'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=1200&q=80'
 
 const FALLBACK_ACCENT_IMAGE =
   'https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1600&q=80'
@@ -292,7 +290,8 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
 
   const hero_image = input.visuals.hero_image_url || FALLBACK_HERO_IMAGES[0]
   const accent_image = input.visuals.accent_image_url || FALLBACK_ACCENT_IMAGE
-  const chef_photo = input.visuals.chef_photo_url || (input.story.chef_name ? FALLBACK_CHEF_IMAGE : undefined)
+  // The chef's own photo or none — a stock face would be passed off as them.
+  const chef_photo = input.visuals.chef_photo_url || undefined
 
   // CTA label — reservations go through Zenya's own form; `phone` is the only
   // call-out fallback.

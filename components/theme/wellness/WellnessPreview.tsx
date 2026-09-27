@@ -584,7 +584,9 @@ function JourneySection({ content, isDark }: { content: WellnessContent; isDark:
             <motion.div key={i} {...revealAnim(rm,i * 0.1)} className="relative text-center">
               {/* Connector line */}
               {i < content.journey.steps.length - 1 && (
-                <div className="absolute left-[calc(50%+2.5rem)] top-6 hidden h-px w-[calc(100%-5rem)] sm:block" style={{ background: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.2)' }} />
+                // Logical start: in RTL the next step sits to the left, so the
+                // line leaves this circle on its left and stops at the next one.
+                <div className="absolute top-6 hidden h-px sm:block" style={{ insetInlineStart: 'calc(50% + 2.5rem)', width: 'calc(100% - 3rem)', background: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.2)' }} />
               )}
               <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
                 style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
@@ -644,21 +646,25 @@ function TeamCard({ member, index, isDark }: { member: WellnessTeamMember; index
       {/* Photo */}
       <div className="relative h-64 overflow-hidden">
         {member.image ? (
-          <img src={member.image} alt={member.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center" style={{ background: 'var(--wl-bg)' }}>
-            <div className="flex h-20 w-20 items-center justify-center rounded-full text-3xl font-light" style={{ background: 'var(--wl-border)', color: 'var(--wl-accent)', fontFamily: 'var(--wl-heading)' }}>
-              {member.name.charAt(0)}
+          <>
+            <img src={member.image} alt={member.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <p className="text-[0.6rem] uppercase tracking-[0.25em] text-white/70">{member.title}</p>
             </div>
+          </>
+        ) : (
+          /* No photo: a calm panel with the first letter of the name, so the
+             card keeps its height beside members who have one. */
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4" style={{ background: 'color-mix(in srgb, var(--wl-accent) 14%, var(--wl-surface))' }}>
+            <span className="text-7xl font-light leading-none" style={{ color: 'var(--wl-accent)', fontFamily: 'var(--wl-heading)' }}>{member.name.trim().charAt(0)}</span>
+            <span className="h-px w-10" style={{ background: 'var(--wl-accent)', opacity: 0.5 }} />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute bottom-4 left-4">
-          <p className="text-[0.6rem] uppercase tracking-[0.25em] text-white/70">{member.title}</p>
-        </div>
       </div>
       <div className="p-6">
         <h3 className="mb-1 text-xl font-semibold" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>{member.name}</h3>
+        {!member.image && member.title && <p className="mb-2 text-sm" style={{ color: 'var(--wl-accent)' }}>{member.title}</p>}
         {member.specialty && (
           <p className="mb-3 text-xs uppercase tracking-[0.15em]" style={{ color: 'var(--wl-accent)' }}>{member.specialty}</p>
         )}
