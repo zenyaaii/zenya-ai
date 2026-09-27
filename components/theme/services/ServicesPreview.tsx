@@ -185,10 +185,8 @@ function TopBar({ content, isDark }: { content: ServiceContent; isDark: boolean 
       <Container className="flex flex-col gap-2 py-3 text-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
           <span>{content.brand.city}{content.brand.region ? `, ${content.brand.region}` : ''}</span>
-          <span>•</span>
-          <span>{content.areas.availability}</span>
-          <span>•</span>
-          <span>{content.areas.response_time}</span>
+          {content.areas.availability ? <><span>•</span><span>{content.areas.availability}</span></> : null}
+          {content.areas.response_time ? <><span>•</span><span>{content.areas.response_time}</span></> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
           <a href={`tel:${content.footer.phone}`} className="transition hover:opacity-75">{content.footer.phone}</a>
@@ -327,6 +325,7 @@ function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean })
               </a>
             </div>
           </div>
+          {content.hero.stats?.length ? (
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
             {content.hero.stats.slice(0, 3).map((stat) => (
               <div key={stat.label} className="rounded-[28px] p-5" style={{ ...surfaceCard(true), background: 'rgba(255,255,255,0.08)' }}>
@@ -335,6 +334,7 @@ function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean })
               </div>
             ))}
           </div>
+          ) : null}
         </motion.div>
       </Container>
     </section>
@@ -342,6 +342,7 @@ function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean })
 }
 
 function TrustBar({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  if (!content.trust_bar?.items?.length) return null
   return (
     <section data-section="trust_bar" className="border-y py-5" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.7)' }}>
       <Container className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
@@ -387,7 +388,7 @@ function ServicesSection({ content, isDark }: { content: ServiceContent; isDark:
               <h3 className="mt-7 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800, letterSpacing: '-0.03em' }}>
                 {item.name}
               </h3>
-              <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.description}</p>
+              {item.description ? <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.description}</p> : null}
               {item.price_from && <p className="mt-5 text-sm font-semibold" style={{ color: 'var(--sv-primary)' }}>{item.price_from}</p>}
             </motion.div>
           ))}
@@ -428,6 +429,7 @@ function StorySection({ content, isDark }: { content: ServiceContent; isDark: bo
 }
 
 function ProofSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  if (!content.proof?.items?.length) return null
   return (
     <section id="proof" data-section="proof" className="py-24 md:py-28">
       <Container>
@@ -474,6 +476,7 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
               </div>
             </div>
           </div>
+          {content.before_after.highlights?.length ? (
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
             <p className="text-sm font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>لقطة التحوّل</p>
             <div className="mt-8 space-y-5">
@@ -485,6 +488,7 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
               ))}
             </div>
           </div>
+          ) : null}
         </motion.div>
       </Container>
     </section>
@@ -523,16 +527,22 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
             <Eyebrow>منطقة الخدمة</Eyebrow>
             <Heading className="mt-5">{content.areas.heading}</Heading>
             <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.areas.subheading}</p>
+            {content.areas.response_time || content.areas.availability ? (
             <div className="mt-8 grid gap-4 md:grid-cols-2">
+              {content.areas.response_time ? (
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
                 <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>الاستجابة</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.response_time}</p>
               </div>
+              ) : null}
+              {content.areas.availability ? (
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
                 <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>التوفّر</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.availability}</p>
               </div>
+              ) : null}
             </div>
+            ) : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {content.areas.areas_served.map((area, index) => (
@@ -561,6 +571,7 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
             )}
             <Heading className="mt-6">{content.offer.heading}</Heading>
             <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.offer.subheading}</p>
+            {content.offer.points?.length ? (
             <div className="mt-7 space-y-3">
               {content.offer.points.slice(0, 3).map((point) => (
                 <div key={point} className="flex items-start gap-3 rounded-[22px] border p-4" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.6)' }}>
@@ -569,6 +580,7 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
                 </div>
               ))}
             </div>
+            ) : null}
           </div>
           <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
             <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
@@ -652,7 +664,7 @@ function TestimonialsSection({ content, isDark }: { content: ServiceContent; isD
 
 function FaqSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
   const [open, setOpen] = useState(0)
-
+  if (!content.faq?.items?.length) return null
   return (
     <section id="faq" data-section="faq" className="py-24 md:py-28">
       <Container>
@@ -732,7 +744,7 @@ function Footer({ content, isDark }: { content: ServiceContent; isDark: boolean 
           </div>
         </div>
         <div className="md:text-right">
-          <p className="text-sm font-semibold">{content.final_cta.secondary_text}</p>
+          {content.final_cta.secondary_text ? <p className="text-sm font-semibold">{content.final_cta.secondary_text}</p> : null}
           <a href="#quote" className="mt-4 inline-flex rounded-full px-6 py-3 text-sm font-bold" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
             {content.final_cta.cta_label}
           </a>

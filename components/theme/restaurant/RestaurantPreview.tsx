@@ -310,12 +310,19 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
 
 function NavBar({ content, isDark, view, setView }: { content: RestaurantContent; isDark: boolean; view: RestaurantView; setView: (v: RestaurantView) => void }) {
   const { reduce } = useMotionKit()
+  // The reviews page holds the owner's reviews and the FAQ. With neither,
+  // there is no page to link to; with only the FAQ, it is named for that.
+  const hiddenSet = new Set(content.hidden_sections || [])
+  const hasReviews = !hiddenSet.has('reviews') && !!content.reviews?.testimonials?.length
+  const hasFaq = !hiddenSet.has('faq') && !!content.faq?.items?.length
   const links: { label: string; view: RestaurantView }[] = [
     { label: 'من نحن', view: 'about' },
     { label: 'القائمة', view: 'menu' },
     { label: 'المعرض', view: 'gallery' },
     { label: 'زورونا', view: 'visit' },
-    { label: 'الآراء', view: 'reviews' },
+    ...(hasReviews || hasFaq
+      ? [{ label: hasReviews ? 'الآراء' : 'الأسئلة', view: 'reviews' as RestaurantView }]
+      : []),
   ]
   const [menuOpen, setMenuOpen] = useState(false)
   // Close the mobile menu whenever the page changes.
@@ -459,12 +466,14 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
           animate="show"
         >
           {/* Eyebrow with an accent hairline — one refined kicker, not a stacked label. */}
+          {content.hero.eyebrow ? (
           <motion.div variants={staggerChild} className="mb-8 flex items-center gap-3">
             <span className="h-px w-10" style={{ background: 'var(--rb-accent)' }} />
             <span className="text-[0.72rem] uppercase" style={{ color: 'var(--rb-accent)', letterSpacing: '0.34em', fontWeight: 500 }}>
               {content.hero.eyebrow}
             </span>
           </motion.div>
+          ) : null}
           <motion.h1
             variants={staggerChild}
             className="mb-8 text-6xl md:text-8xl lg:text-[6.5rem]"
@@ -582,13 +591,14 @@ function Story({ content, isDark }: { content: RestaurantContent; isDark: boolea
 
 function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
+  if (!content.signature_dishes?.length) return null
   return (
     <section data-section="signature_dishes" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
         <Reveal className="text-center max-w-2xl mx-auto mb-16">
           <Eyebrow className="mb-5">أطباق التوقيع</Eyebrow>
           <Heading size="lg" className="mb-5">
-            {content.signature_dishes_heading || 'الأطباق التي يشتهر بها مطبخنا'}
+            {content.signature_dishes_heading || 'مختارات من قائمتنا'}
           </Heading>
           <Divider />
         </Reveal>
@@ -621,7 +631,9 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
               >
                 {dish.name}
               </h3>
-              <p style={{ color: 'var(--rb-muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>{dish.description}</p>
+              {dish.description ? (
+                <p style={{ color: 'var(--rb-muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>{dish.description}</p>
+              ) : null}
             </motion.div>
           ))}
         </motion.div>
@@ -644,7 +656,9 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
           <Heading size="xl" className="mb-5">
             {content.menu.heading}
           </Heading>
-          <p style={{ color: 'var(--rb-muted)', lineHeight: 1.6 }}>{content.menu.subheading}</p>
+          {content.menu.subheading ? (
+            <p style={{ color: 'var(--rb-muted)', lineHeight: 1.6 }}>{content.menu.subheading}</p>
+          ) : null}
         </Reveal>
 
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-14">
@@ -732,7 +746,9 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
                           </span>
                         )}
                       </div>
-                      <p style={{ color: 'var(--rb-muted)', fontSize: '0.95rem', lineHeight: 1.55 }}>{item.description}</p>
+                      {item.description ? (
+                        <p style={{ color: 'var(--rb-muted)', fontSize: '0.95rem', lineHeight: 1.55 }}>{item.description}</p>
+                      ) : null}
                     </div>
                     <div
                       style={{
@@ -766,7 +782,9 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
           <Heading size="lg" className="mb-5">
             {content.gallery.heading}
           </Heading>
-          <p style={{ color: 'var(--rb-muted)' }}>{content.gallery.subheading}</p>
+          {content.gallery.subheading ? (
+            <p style={{ color: 'var(--rb-muted)' }}>{content.gallery.subheading}</p>
+          ) : null}
         </Reveal>
         <motion.div
           className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-3"
@@ -1145,6 +1163,7 @@ function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: b
 function FAQ({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { reduce } = useMotionKit()
   const [open, setOpen] = useState<number | null>(0)
+  if (!content.faq?.items?.length) return null
   return (
     <section data-section="faq" className="py-24 md:py-32">
       <Container>
@@ -1248,7 +1267,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
             </p>
             <div className="space-y-1.5 text-sm">
               {/* Editor-driven social links — only show what the owner
-                  actually provided. If they added none, only the press
+                  actually provided. If they added none, only the contact
                   email shows below. */}
               {content.social_links && (
                 <>
@@ -1291,7 +1310,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
                 </>
               )}
               <a href={`mailto:${content.hours_location.email}`} className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                استفسارات الصحافة
+                راسلنا
               </a>
             </div>
           </div>

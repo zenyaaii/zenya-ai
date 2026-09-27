@@ -83,7 +83,7 @@ function buildPrompt(input: RestaurantInput) {
 
   const restaurantType = (input.brand as any).restaurant_type as string | undefined
   const toneByType: Record<string, string> = {
-    fine_dining:     'quiet, confident, sensory, editorial — restaurant criticism, not marketing copy. Long sentences are welcome. Mention sourcing, technique, the room.',
+    fine_dining:     'quiet, confident, sensory, editorial — restaurant criticism, not marketing copy. Long sentences are welcome. Mention sourcing, technique and the room only as the brief describes them.',
     bistro:          'warm, casual, generous — neighbourhood-bistro voice. Plainspoken, a little playful, full plates and real people.',
     cafe:            'morning-energy, light, welcoming — soft and inviting. Mention the room, the regulars, the smell of coffee.',
     coffee_takeaway: 'direct, modern, energetic — efficiency, good beans, fast. Short sentences. No nostalgia.',
@@ -132,7 +132,7 @@ Hard rules:
 - Eyebrow labels: 2–5 words. ALL CAPS feel via context, write in normal case.
 - Do not invent specific dietary certifications, awards, or Michelin stars unless they are in the brief.
 - Do not use words like "delicious," "world-class," "best in the city."
-- Use specific produce, technique, region names where natural (e.g., "Hudson Valley duck," "brown butter," "fig leaf").
+- Name produce, technique or a region only when the menu or the brief names it. Never add an ingredient, farm, supplier or origin of your own.
 - NEVER mention any external reservation platform (Resy, OpenTable, SevenRooms, Tock, etc.) in ANY field — not the reservations heading, subheading, cta_label, eyebrow, or note. Reservations run through this site's own booking form. Write reservation copy as if guests book directly with the restaurant.
 
 OUTPUT
@@ -140,7 +140,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
 
 {
   "hero": {
-    "eyebrow": "Short context line, e.g. 'Reservations open · Spring tasting menu'",
+    "eyebrow": "Short context line built from the brief, e.g. the cuisine and the neighbourhood. No season, menu name or event the brief does not give.",
     "headline": "Two-line poetic headline. Use \\n between lines.",
     "subheadline": "1–2 sentences positioning the restaurant.",
     "primary_cta": "Reserve a Table",
@@ -153,14 +153,14 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
     "chef_bio": "1–2 sentences if chef name given, else empty string."
   },
   "signature_dishes": [
-    { "name": "Pick from menu, exact name", "description": "6–14 words sensory description", "price": "exact price from menu" }
+    { "name": "Pick from menu, exact name", "description": "6–14 words, only what the menu says or the dish name makes plain" }
   ],
   "menu_descriptions": [
-    { "category_name": "exact category name", "item_name": "exact item name", "description": "6–14 words sensory description if missing/weak, else keep existing" }
+    { "category_name": "exact category name", "item_name": "exact item name", "description": "6–14 words. Only what the dish name and category make plain — no ingredient, origin or method the menu does not give" }
   ],
   "gallery": {
     "heading": "Gallery section headline (max 8 words)",
-    "subheading": "One short sentence."
+    "subheading": "One short sentence.${(input.visuals.gallery_image_urls || []).length === 0 ? ' The owner uploaded no photos, so the gallery shows stock images: do not describe them as this restaurant\'s room, kitchen or dishes.' : ''}"
   },
   "hours_location": {
     "heading": "Visit section headline (max 4 words)",
@@ -168,7 +168,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
   },
   "reservations": {
     "heading": "Reservations section headline (max 8 words)",
-    "subheading": "1–2 sentences on booking policy, deposits, lead time.",
+    "subheading": "1–2 sentences on how to book. State a policy, deposit, lead time or group size only if the reservation note gives it.",
     "cta_label": "Short Arabic reservation CTA, e.g. 'احجز طاولتك' or 'اتصل للحجز'. NEVER name an external platform (no Resy/OpenTable/SevenRooms) — reservations run through the site's own booking form."
   },
   "reviews": {
@@ -192,11 +192,12 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
 }
 
 Requirements:
-- signature_dishes: exactly 4 items chosen from the strongest menu items
+- signature_dishes: 0–4 items, each an exact item name from the menu above. Never a dish that is not on the menu. Prices are taken from the menu, do not write them.
 - menu_descriptions: write descriptions ONLY for items that currently have none. Cap at the 24 most prominent such items — do NOT list every item on a large menu (items you skip keep a sensible default). Never repeat items that already have a description.
 ${NO_REVIEWS_RULE}
 - Never name a newspaper, magazine, guide, award, star or ranking the brief does not give. The press list is the owner's own, shown as given.
-- faq: 5–7 items
+- faq: 0–6 items. Ask only questions the brief can answer (location, how to book, what is on the menu) and answer only from the brief. Return fewer items rather than guess.
+- Never state a price, deposit, cancellation policy, dress code, age rule, parking or valet, private room, seat count, opening year, farm or supplier, dietary claim (halal, organic, vegan, gluten-free), award, rating, chef credential, seasonal or tasting menu, delivery or catering that the brief does not give. This applies to every field.
 - Use the restaurant's name ("${input.brand.name}") sparingly (max twice across all copy)`
 }
 
@@ -238,7 +239,8 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       description:
         item.description && item.description.length > 0
           ? item.description
-          : aiDescMap.get(`${cat.name}::${item.name}`) || `${cat.name.toLowerCase()} · ${input.brand.cuisine.toLowerCase()}`,
+          : // No filler line: an empty description is simply not drawn.
+            aiDescMap.get(`${cat.name}::${item.name}`) || '',
       price: item.price,
       badge: item.badge,
       // Pass through user-uploaded item image so the renderer can show a thumb.
@@ -246,27 +248,29 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     }))
   }))
 
-  // Signature dishes — from AI selection if present, else first 4 from menu
-  const signatureFromAi = Array.isArray(ai?.signature_dishes) ? ai.signature_dishes.slice(0, 4) : []
+  // Signature dishes — only real menu items. The AI may pick which ones and
+  // word the line; name and price always come from the owner's menu.
   const flatItems = menuCategories.flatMap((c) => c.items)
   const sigImages = input.visuals.signature_dish_image_urls || []
-  const signature_dishes =
-    signatureFromAi.length === 4
-      ? signatureFromAi.map((d: any, i: number) => {
-          const matched = flatItems.find((it) => it.name === d.name) || flatItems[i]
-          return {
-            name: String(d.name || matched?.name || mock.signature_dishes[i].name),
-            description: String(d.description || matched?.description || mock.signature_dishes[i].description),
-            price: String(d.price || matched?.price || mock.signature_dishes[i].price),
-            image: pickNth(sigImages, i, FALLBACK_DISH_IMAGES[i % FALLBACK_DISH_IMAGES.length])
-          }
-        })
-      : flatItems.slice(0, 4).map((it, i) => ({
-          name: it.name,
-          description: it.description,
-          price: it.price,
-          image: pickNth(sigImages, i, FALLBACK_DISH_IMAGES[i % FALLBACK_DISH_IMAGES.length])
-        }))
+  const picked: { item: (typeof flatItems)[number]; aiDesc: string }[] = []
+  if (Array.isArray(ai?.signature_dishes)) {
+    for (const d of ai.signature_dishes) {
+      const item = flatItems.find((it) => it.name === String(d?.name || '').trim())
+      if (item && !picked.some((p) => p.item === item)) {
+        picked.push({ item, aiDesc: typeof d?.description === 'string' ? d.description : '' })
+      }
+      if (picked.length === 4) break
+    }
+  }
+  const sigSource = picked.length > 0 ? picked : flatItems.slice(0, 4).map((item) => ({ item, aiDesc: '' }))
+  const signature_dishes = sigSource.map(({ item, aiDesc }, i) => ({
+    name: item.name,
+    description: item.description || aiDesc,
+    price: item.price,
+    // The dish's own uploaded photo first, then the owner's signature photos.
+    // The stock fallback stays because the card is built around a photo.
+    image: item.image || pickNth(sigImages, i, FALLBACK_DISH_IMAGES[i % FALLBACK_DISH_IMAGES.length])
+  }))
 
   // Provider object — Zenya's own booking form by default; `phone` only as an
   // opt-in call-to-reserve fallback. No external platforms.
@@ -297,26 +301,31 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   // call-out fallback.
   const defaultCta = r.provider_type === 'phone' ? 'اتصل للحجز' : 'احجز طاولتك'
 
+  // Neutral lines written from the owner's own input, used wherever the AI
+  // left a field out. Never the demo restaurant's copy.
+  const place = input.brand.neighborhood ? `${input.brand.neighborhood}، ${input.brand.city}` : input.brand.city
+  const neutralLine = `${input.brand.cuisine} · ${input.brand.city}`
+
   const content: RestaurantContent = {
     brand: {
       name: input.brand.name,
       cuisine: input.brand.cuisine,
-      tagline: String(ai?.hero?.subheadline || mock.brand.tagline),
+      tagline: String(ai?.hero?.subheadline || neutralLine),
       city: input.brand.city,
       neighborhood: input.brand.neighborhood
     },
     hero: {
-      eyebrow: unlessRatingClaim(String(ai?.hero?.eyebrow || mock.hero.eyebrow), mock.hero.eyebrow, owner),
+      eyebrow: unlessRatingClaim(String(ai?.hero?.eyebrow || neutralLine), neutralLine, owner),
       headline: String(ai?.hero?.headline || mock.hero.headline),
-      subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
+      subheadline: String(ai?.hero?.subheadline || `${input.brand.cuisine} في ${place}.`),
       primary_cta: String(ai?.hero?.primary_cta || 'احجز طاولة'),
       secondary_cta: String(ai?.hero?.secondary_cta || 'شاهد القائمة'),
       image: hero_image
     },
     story: {
       eyebrow: String(ai?.story?.eyebrow || 'قصتنا'),
-      heading: String(ai?.story?.heading || mock.story.heading),
-      body: String(ai?.story?.body || input.story.brief || mock.story.body),
+      heading: String(ai?.story?.heading || 'حكايتنا.'),
+      body: String(ai?.story?.body || input.story.brief),
       chef_name: input.story.chef_name,
       chef_title: input.story.chef_title,
       chef_bio: String(ai?.story?.chef_bio || input.story.chef_bio_brief || ''),
@@ -324,17 +333,17 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       accent_image: accent_image
     },
     signature_dishes,
-    signature_dishes_heading: String(ai?.signature_dishes_heading || mock.signature_dishes_heading),
+    signature_dishes_heading: String(ai?.signature_dishes_heading || 'مختارات من قائمتنا'),
     menu: {
       heading: String(ai?.menu?.heading || 'قائمة الطعام'),
       subheading: String(
-        ai?.menu?.subheading || `تُقدَّم في قاعة الطعام في ${input.brand.neighborhood || input.brand.city}.`
+        ai?.menu?.subheading || `${input.brand.cuisine} في ${place}.`
       ),
       categories: menuCategories
     },
     gallery: {
-      heading: String(ai?.gallery?.heading || mock.gallery.heading),
-      subheading: String(ai?.gallery?.subheading || mock.gallery.subheading),
+      heading: String(ai?.gallery?.heading || 'لمحات.'),
+      subheading: String(ai?.gallery?.subheading || ''),
       images: galleryImages,
       // Truth-in-photography note for the live site: was the gallery
       // filled from the venue's own uploads, or from Unsplash fallbacks?
@@ -354,7 +363,12 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     },
     reservations: {
       heading: String(ai?.reservations?.heading || 'احجز أمسيتك.'),
-      subheading: String(ai?.reservations?.subheading || mock.reservations.subheading),
+      subheading: String(
+        ai?.reservations?.subheading ||
+          (r.provider_type === 'phone'
+            ? 'اتصل بنا لحجز طاولتك.'
+            : 'أرسل طلب الحجز، ونتواصل معك لتأكيده.')
+      ),
       cta_label: String(ai?.reservations?.cta_label || defaultCta),
       provider,
       note: input.reservations.note
@@ -371,27 +385,31 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       items: press_items
     },
     newsletter: {
-      heading: String(ai?.newsletter?.heading || 'رسالة الموسم.'),
-      subheading: String(ai?.newsletter?.subheading || mock.newsletter.subheading),
+      heading: String(ai?.newsletter?.heading || 'ابقَ على اطّلاع.'),
+      subheading: String(ai?.newsletter?.subheading || 'اشترك لتصلك أخبارنا وجديد قائمتنا.'),
       button_label: String(ai?.newsletter?.button_label || 'اشترك')
     },
     faq: {
       heading: String(ai?.faq_heading || 'قبل أن تأتي.'),
-      items:
-        Array.isArray(ai?.faq) && ai.faq.length >= 4
-          ? ai.faq.slice(0, 7).map((f: any) => ({ q: String(f?.q || ''), a: String(f?.a || '') }))
-          : mock.faq.items
+      // The AI's answers from the brief, or none: the demo's FAQ names
+      // another restaurant's deposit, dress code and parking.
+      items: Array.isArray(ai?.faq)
+        ? ai.faq
+            .slice(0, 6)
+            .map((f: any) => ({ q: String(f?.q || '').trim(), a: String(f?.a || '').trim() }))
+            .filter((f: { q: string; a: string }) => f.q && f.a)
+        : []
     },
     footer: {
       // Never the demo's line: it names opening days that are not this restaurant's.
-      tagline: String(ai?.footer?.tagline || `${input.brand.cuisine} · ${input.brand.city}`),
+      tagline: String(ai?.footer?.tagline || neutralLine),
       legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`
     },
     seo: {
       title: String(
         ai?.seo?.title || `${input.brand.name} · ${input.brand.cuisine} · ${input.brand.city}`
       ),
-      description: String(ai?.seo?.description || mock.seo.description)
+      description: String(ai?.seo?.description || `${input.brand.name} — ${input.brand.cuisine} في ${place}.`)
     },
     // Editor fields — start with everything visible + empty social links.
     // The editor populates these later; the renderer treats them as
