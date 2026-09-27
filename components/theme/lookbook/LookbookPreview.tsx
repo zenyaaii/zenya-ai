@@ -281,7 +281,8 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
 // ─── Lookbook Grid ─────────────────────────────────────────────────────────────
 function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   const rm = !!useReducedMotion()
-  const looks = content.lookbook.looks.slice(0, 6)
+  const looks = (content.lookbook.looks || []).slice(0, 6)
+  if (!looks.length) return null
 
   return (
     <section data-section="lookbook_section" className="px-6 py-20 md:px-12 md:py-28" style={{ background: colors.background, fontFamily: bodyFont }}>
@@ -290,7 +291,7 @@ function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: Loo
         <h2 className="text-5xl font-black tracking-tight md:text-6xl" style={{ fontFamily: headingFont, color: colors.text }}>
           <Headline text={content.lookbook.heading} />
         </h2>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed" style={{ color: colors.muted }}>{content.lookbook.subheading}</p>
+        {content.lookbook.subheading ? <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed" style={{ color: colors.muted }}>{content.lookbook.subheading}</p> : null}
       </motion.div>
 
       {/* Asymmetric editorial grid */}
@@ -315,7 +316,7 @@ function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: Loo
 }
 
 function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }: {
-  look: LookbookContent['lookbook']['looks'][0]
+  look: LookbookContent['lookbook']['looks'][0] | undefined
   image: string
   colors: Colors
   headingFont: string
@@ -324,6 +325,7 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
 }) {
   const rm = !!useReducedMotion()
   const [hovered, setHovered] = useState(false)
+  if (!look) return null
   return (
     <motion.div
       {...revealAnim(rm,delay)}
@@ -365,7 +367,8 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
 // ─── Bestsellers ───────────────────────────────────────────────────────────────
 function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   const rm = !!useReducedMotion()
-  const products = content.bestsellers.products.slice(0, 8)
+  const products = (content.bestsellers.products || []).slice(0, 8)
+  if (!products.length) return null
 
   return (
     <section data-section="bestsellers" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
@@ -432,14 +435,16 @@ function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
         </motion.div>
       </div>
       <div>
-        <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em]" style={{ color: colors.muted }}>{product.category}</p>
+        {product.category ? <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em]" style={{ color: colors.muted }}>{product.category}</p> : null}
         <p className="mt-0.5 text-sm font-semibold leading-snug" style={{ color: colors.text, fontFamily: headingFont }}>{product.name}</p>
+        {product.price ? (
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-black" style={{ color: colors.text }}>{product.price}</span>
           {product.original_price && (
             <span className="text-xs line-through" style={{ color: colors.muted }}>{product.original_price}</span>
           )}
         </div>
+        ) : null}
       </div>
     </motion.div>
   )
@@ -468,8 +473,9 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
           <h2 className="mb-6 text-4xl font-black leading-[1.1] tracking-tight md:text-5xl" style={{ fontFamily: headingFont, color: colors.text }}>
             <Headline text={content.brand_story.heading} />
           </h2>
-          <p className="mb-10 text-sm leading-relaxed" style={{ color: colors.muted }}>{content.brand_story.body}</p>
+          {content.brand_story.body ? <p className="mb-10 text-sm leading-relaxed" style={{ color: colors.muted }}>{content.brand_story.body}</p> : null}
 
+          {content.brand_story.values?.length ? (
           <div className="space-y-6">
             {content.brand_story.values.map((val, i) => (
               <motion.div key={i} {...revealAnim(rm,0.1 + 0.08 * i)} className="flex items-start gap-4">
@@ -481,6 +487,7 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
               </motion.div>
             ))}
           </div>
+          ) : null}
         </motion.div>
       </div>
     </section>
@@ -581,7 +588,7 @@ function SizeGuideStrip({ colors, bodyFont }: { colors: Colors; bodyFont: string
   return (
     <section className="px-6 py-10 text-center" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
       <p className="mb-5 text-[0.65rem] font-bold uppercase tracking-[0.3em]" style={{ color: colors.muted }}>
-        Size guide · All styles run true to size
+        Size guide
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
         {sizes.map((s) => (
@@ -625,7 +632,7 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
         <p className="mb-8 text-sm leading-relaxed text-white/70">{content.newsletter.subheading}</p>
 
         {submitted ? (
-          <p className="text-sm font-semibold text-white">✓ You're on the list. Watch your inbox.</p>
+          <p className="text-sm font-semibold text-white">✓ أصبحت على القائمة. ترقّب بريدك.</p>
         ) : (
           <form
             onSubmit={(e) => { e.preventDefault(); if (email) setSubmitted(true) }}
@@ -648,7 +655,7 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
             </button>
           </form>
         )}
-        <p className="mt-4 text-[0.65rem] text-white/40">{content.newsletter.note}</p>
+        {content.newsletter.note ? <p className="mt-4 text-[0.65rem] text-white/40">{content.newsletter.note}</p> : null}
       </motion.div>
     </section>
   )
@@ -672,7 +679,7 @@ function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: L
               {content.brand.name}
             </p>
             <p className="mb-5 text-sm" style={{ color: colors.muted }}>{content.footer.tagline}</p>
-            <p className="text-xs" style={{ color: colors.muted }}>{content.footer.email}</p>
+            {content.footer.email ? <p className="text-xs" style={{ color: colors.muted }}>{content.footer.email}</p> : null}
           </div>
 
           {/* Link columns */}

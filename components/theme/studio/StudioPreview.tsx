@@ -140,6 +140,11 @@ export default function StudioPreview({
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
   const rm = !!useReducedMotion()
+  // A page with nothing on it gets no link. The team page is only the team section.
+  const hasTeam = !!content.team?.members?.length
+  const hasPress = !!content.press?.items?.length
+  const navLinks = ([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][])
+    .filter(([, page]) => page !== 'team' || hasTeam)
 
   return (
     <div className={`relative min-h-screen ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
@@ -166,7 +171,7 @@ export default function StudioPreview({
           )}
         </button>
         <nav className="hidden items-center gap-10 md:flex">
-          {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
+          {navLinks.map(([label, page]) => (
             <button key={page} onClick={() => setView(page)} className="text-xs font-medium tracking-widest uppercase transition-opacity hover:opacity-60" style={{ color: view === page ? colors.accent : colors.text, fontFamily: fonts.body, opacity: view === page ? 1 : undefined }}>
               {label}
             </button>
@@ -198,7 +203,7 @@ export default function StudioPreview({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
+            {navLinks.map(([label, page]) => (
               <button
                 key={page}
                 onClick={() => { setView(page); setNavOpen(false) }}
@@ -280,9 +285,11 @@ export default function StudioPreview({
               >
                 &ldquo;{content.mission.statement}&rdquo;
               </p>
-              <p className="mt-8 text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                {content.mission.elaboration}
-              </p>
+              {content.mission.elaboration ? (
+                <p className="mt-8 text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                  {content.mission.elaboration}
+                </p>
+              ) : null}
             </motion.div>
           </div>
           <Rule color={colors.border} className="mt-16" />
@@ -290,7 +297,7 @@ export default function StudioPreview({
       </section>}
 
       {/* ── FOUNDER LETTER ───────────────────────────────────────────────────── */}
-      {view === 'about' && content.founder_letter && (
+      {view === 'about' && !!content.founder_letter?.paragraphs?.length && (
         <section data-section="founder_letter" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-16 md:grid-cols-[5fr_4fr] md:items-start">
@@ -310,14 +317,18 @@ export default function StudioPreview({
                     </p>
                   ))}
                 </div>
-                <div className="mt-10">
-                  <p className="text-xl italic" style={{ fontFamily: fonts.heading, color: colors.text }}>
-                    — {content.founder_letter.signature}
-                  </p>
-                  <p className="mt-1 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                    {content.founder_letter.signature_role}
-                  </p>
-                </div>
+                {content.founder_letter.signature ? (
+                  <div className="mt-10">
+                    <p className="text-xl italic" style={{ fontFamily: fonts.heading, color: colors.text }}>
+                      — {content.founder_letter.signature}
+                    </p>
+                    {content.founder_letter.signature_role ? (
+                      <p className="mt-1 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                        {content.founder_letter.signature_role}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </motion.div>
 
               {/* Founder image */}
@@ -337,7 +348,7 @@ export default function StudioPreview({
       )}
 
       {/* ── TIMELINE ─────────────────────────────────────────────────────────── */}
-      {view === 'about' && content.timeline && (
+      {view === 'about' && !!content.timeline?.events?.length && (
         <section data-section="timeline" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16 grid md:grid-cols-[1fr_2fr]" {...revealAnim(rm,0)}>
@@ -388,9 +399,11 @@ export default function StudioPreview({
                       <h3 className="text-xl font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>
                         {event.title}
                       </h3>
-                      <p className="mt-2 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                        {event.description}
-                      </p>
+                      {event.description ? (
+                        <p className="mt-2 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                          {event.description}
+                        </p>
+                      ) : null}
                     </div>
                   </motion.div>
                 ))}
@@ -401,7 +414,7 @@ export default function StudioPreview({
       )}
 
       {/* ── VALUES ───────────────────────────────────────────────────────────── */}
-      {view === 'about' && content.values && (
+      {view === 'about' && !!content.values?.items?.length && (
         <section data-section="values" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -451,7 +464,7 @@ export default function StudioPreview({
       )}
 
       {/* ── PROCESS ──────────────────────────────────────────────────────────── */}
-      {(view === 'process' || view === 'home') && content.process && (
+      {(view === 'process' || view === 'home') && !!content.process?.steps?.length && (
         <section data-section="process" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 grid gap-12 md:grid-cols-2 md:items-end">
@@ -464,11 +477,13 @@ export default function StudioPreview({
                   {content.process.heading}
                 </h2>
               </motion.div>
-              <motion.div {...revealAnim(rm,0.15)}>
-                <p className="text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                  {content.process.body}
-                </p>
-              </motion.div>
+              {content.process.body ? (
+                <motion.div {...revealAnim(rm,0.15)}>
+                  <p className="text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                    {content.process.body}
+                  </p>
+                </motion.div>
+              ) : null}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -491,9 +506,11 @@ export default function StudioPreview({
                   <h3 className="mt-4 text-lg font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                    {step.description}
-                  </p>
+                  {step.description ? (
+                    <p className="mt-3 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                      {step.description}
+                    </p>
+                  ) : null}
                 </motion.div>
               ))}
             </div>
@@ -512,7 +529,7 @@ export default function StudioPreview({
       )}
 
       {/* ── TEAM ─────────────────────────────────────────────────────────────── */}
-      {view === 'team' && content.team && (
+      {view === 'team' && hasTeam && (
         <section data-section="team" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -614,7 +631,7 @@ export default function StudioPreview({
       )}
 
       {/* ── COMMUNITY STATS ──────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'contact') && content.community && (
+      {(view === 'home' || view === 'contact') && !!content.community?.stats?.length && (
         <section data-section="community" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -736,12 +753,14 @@ export default function StudioPreview({
             >
               <ML text={content.cta.heading} />
             </h2>
-            <p
-              className="mx-auto mt-8 max-w-md text-base leading-relaxed"
-              style={{ color: colors.muted, fontFamily: fonts.body }}
-            >
-              {content.cta.subheading}
-            </p>
+            {content.cta.subheading ? (
+              <p
+                className="mx-auto mt-8 max-w-md text-base leading-relaxed"
+                style={{ color: colors.muted, fontFamily: fonts.body }}
+              >
+                {content.cta.subheading}
+              </p>
+            ) : null}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
               <button
                 className="rounded-full px-10 py-5 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
@@ -793,7 +812,9 @@ export default function StudioPreview({
               </span>
             </div>
             <div className="flex flex-wrap gap-8">
-              {['قصتنا', 'آلية العمل', 'الفريق', 'الصحافة', 'تواصل'].map((link) => (
+              {['قصتنا', 'آلية العمل', 'الفريق', 'الصحافة', 'تواصل']
+                .filter((link) => (link !== 'الفريق' || hasTeam) && (link !== 'الصحافة' || hasPress))
+                .map((link) => (
                 <button key={link} className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {link}
                 </button>
