@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ownerReviewsFields } from '@/lib/owner-reviews'
 
 export const atlasInputSchema = z.object({
   brand: z.object({
@@ -22,7 +23,9 @@ export const atlasInputSchema = z.object({
     user_count: z.string().optional(),
     review_rating: z.number().optional(),
     review_count: z.string().optional(),
-    notable_customers: z.string().optional()
+    notable_customers: z.string().optional(),
+    // The owner's own reviews. The generator never writes reviews itself.
+    ...ownerReviewsFields
   }).optional(),
   style_preset: z.enum(['orbit', 'midnight', 'aurora', 'carbon']).default('orbit')
 })

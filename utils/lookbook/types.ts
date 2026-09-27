@@ -40,6 +40,9 @@ export type LookbookReview = {
   text: string
   item?: string
   verified?: boolean
+  /** Taken from Google: the dashboard never rewords its text. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type LookbookContent = {
@@ -85,8 +88,9 @@ export type LookbookContent = {
   testimonials: {
     eyebrow: string
     heading: string
-    average_rating: number
-    review_count: string
+    /** The owner's own, or absent: never generated. */
+    average_rating?: number
+    review_count?: string
     items: LookbookReview[]
   }
   newsletter: {
@@ -106,4 +110,6 @@ export type LookbookContent = {
     title: string
     description: string
   }
+  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
+  links?: { reviews_url?: string }
 }

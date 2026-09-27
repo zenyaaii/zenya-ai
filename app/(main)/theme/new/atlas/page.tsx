@@ -14,6 +14,7 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Select, Textarea, Toggle,
   type WizardStep,
@@ -37,6 +38,8 @@ type Form = {
   user_count: string
   review_rating: string
   review_count: string
+  reviews: ReviewDraft[]
+  reviews_url: string
   notable_customers: string
   style_preset: AtlasStylePresetId
 }
@@ -62,6 +65,10 @@ function buildSampleForm(): Form {
     user_count: '+4,200 فريق',
     review_rating: '4.9',
     review_count: '+620 تقييم',
+    reviews: [
+      { id: uid(), name: 'ريم ع.', text: 'نقلنا تخطيط السبرنت كله إلى «تدفّق» في أسبوع. صرنا نعرف من يعيق من قبل الاجتماع لا بعده.', detail: 'مديرة منتج', rating: '5' },
+    ],
+    reviews_url: '',
     notable_customers: 'Vercel, Stripe, Notion, Linear, Anthropic',
     style_preset: 'orbit',
   }
@@ -79,8 +86,10 @@ const INITIAL_FORM: Form = {
   pro_price: '49$ شهريًا',
   enterprise: true,
   user_count: '',
-  review_rating: '4.9',
+  review_rating: '',
   review_count: '',
+  reviews: [],
+  reviews_url: '',
   notable_customers: '',
   style_preset: 'orbit',
 }
@@ -127,6 +136,10 @@ export default function AtlasWizardPage() {
   }
 
   const validFeatures = form.features.filter((f) => f.title.trim().length >= 2)
+  const validReviews = validReviewsOf(form.reviews)
+  function patchReviews(fn: (prev: ReviewsForm) => Partial<ReviewsForm>) {
+    setForm((prev) => ({ ...prev, ...fn(prev) }))
+  }
   const checks = [
     form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 5, form.brand_category.trim().length >= 2,
     form.target_audience.trim().length >= 10, form.problem_solved.trim().length >= 10,
@@ -159,6 +172,8 @@ export default function AtlasWizardPage() {
         review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
         notable_customers: form.notable_customers.trim() || undefined,
+        reviews: reviewsPayload(form.reviews),
+        reviews_url: reviewsUrlOf(form.reviews_url),
       },
       style_preset: form.style_preset,
     }
@@ -301,19 +316,17 @@ export default function AtlasWizardPage() {
     },
     {
       id: 'social',
-      title: 'الدليل الاجتماعي',
-      sub: 'اختياري لكنه يجعل الموقع أكثر مصداقية بكثير.',
+      title: 'التقييمات',
+      sub: 'تقييمات حقيقية من عملائك فقط. لا نكتب تقييمات من عندنا.',
       optional: true,
       complete: true,
       body: (
         <Grid>
+          <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city="" detail={{ label: 'الدور أو الشركة (اختياري)', placeholder: 'مديرة منتج · شركة ناشئة' }} />
           <Field label="عدد المستخدمين">
             <Input value={form.user_count} onChange={(e) => update('user_count', e.target.value)} placeholder="مثلاً: +4,200 فريق" />
           </Field>
-          <Field label="عدد التقييمات">
-            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +500 تقييم" />
-          </Field>
-          <Field label="عملاء بارزون" wide hint="اتركها فارغة إن لم يكن لديك عملاء تذكرهم.">
+          <Field label="عملاء بارزون" hint="اتركها فارغة إن لم يكن لديك عملاء تذكرهم.">
             <Input value={form.notable_customers} onChange={(e) => update('notable_customers', e.target.value)} placeholder="مثلاً: Vercel, Stripe, Notion" />
           </Field>
         </Grid>
@@ -338,6 +351,7 @@ export default function AtlasWizardPage() {
             facts={[
               { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
               { label: 'المزايا', value: validFeatures.length },
+              { label: 'التقييمات', value: validReviews.length },
               { label: 'النمط', value: ATLAS_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
             ]}
             recap={[
@@ -382,8 +396,7 @@ export default function AtlasWizardPage() {
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
         items={[
-          'reviews', 'certs', 'prices',
-          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          'certs', 'prices',
           ...(validFeatures.some((f) => !f.description.trim()) || !form.integrations.trim() ? ['text' as const] : []),
         ]}
       />

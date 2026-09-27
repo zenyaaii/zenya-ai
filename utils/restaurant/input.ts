@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ownerReviewsFields } from '@/lib/owner-reviews'
 
 /** What kind of place is it? Drives AI copy tone + (later) image picks. */
 export const RESTAURANT_TYPE_VALUES = [
@@ -87,6 +88,12 @@ export const restaurantInputSchema = z.object({
     signature_dish_image_urls: z.array(z.string().url().max(800)).max(8).optional()
   }),
   press_outlets: z.array(z.string().min(2).max(60)).max(8).optional(),
+  // The owner's own rating and reviews. The generator never writes reviews itself.
+  social_proof: z.object({
+    review_rating: z.number().min(1).max(5).optional(),
+    review_count: z.string().max(40).optional(),
+    ...ownerReviewsFields
+  }).optional().default({}),
   style_preset: z.enum(['onyx', 'trattoria', 'coastal', 'forest']).default('onyx')
 })
 

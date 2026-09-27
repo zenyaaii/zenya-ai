@@ -38,6 +38,11 @@ export type ServiceTestimonial = {
   text: string
   source?: string
   rating: number
+  /** What the review was about, from the owner. */
+  service?: string
+  /** Taken from Google: the dashboard never rewords its text. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type ServiceFaqItem = {
@@ -121,8 +126,9 @@ export type ServiceContent = {
   testimonials: {
     heading: string
     subheading: string
-    average_rating: number
-    review_count: string
+    /** The owner's own, or absent: never generated. */
+    average_rating?: number
+    review_count?: string
     items: ServiceTestimonial[]
   }
   faq: {
@@ -150,4 +156,6 @@ export type ServiceContent = {
     title: string
     description: string
   }
+  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
+  links?: { reviews_url?: string }
 }

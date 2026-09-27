@@ -14,6 +14,7 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Select, Textarea, Toggle, Uploads,
   type WizardStep,
@@ -37,6 +38,8 @@ type Form = {
   press_features: string
   review_rating: string
   review_count: string
+  reviews: ReviewDraft[]
+  reviews_url: string
   hero_image_url: string
   gallery_image_urls: string[]
   style_preset: LookbookStylePresetId
@@ -72,6 +75,10 @@ function buildSampleForm(): Form {
     press_features: 'ڤوغ العربية، هي، سيدتي، الجميلة',
     review_rating: '4.9',
     review_count: '+2,400 تقييم',
+    reviews: [
+      { id: uid(), name: 'لمى ر.', text: 'العباية وصلت أجمل من الصور. الحرير ثقيل ولا يلمع، والمقاس مضبوط من أول مرة.', detail: 'عباية حريرية · عاجية', rating: '5' },
+    ],
+    reviews_url: '',
     hero_image_url: '',
     gallery_image_urls: [],
     style_preset: 'noir',
@@ -90,8 +97,10 @@ const INITIAL_FORM: Form = {
   brand_story: '',
   sustainability_focus: false,
   press_features: '',
-  review_rating: '4.9',
+  review_rating: '',
   review_count: '',
+  reviews: [],
+  reviews_url: '',
   hero_image_url: '',
   gallery_image_urls: [],
   style_preset: 'noir',
@@ -141,6 +150,10 @@ export default function LookbookWizardPage() {
   }
 
   const validProducts = form.products.filter((p) => p.name.trim().length >= 2)
+  const validReviews = validReviewsOf(form.reviews)
+  function patchReviews(fn: (prev: ReviewsForm) => Partial<ReviewsForm>) {
+    setForm((prev) => ({ ...prev, ...fn(prev) }))
+  }
   const brandChecks = [
     form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 3, form.brand_category.trim().length >= 2,
     form.style_direction.trim().length >= 10, form.target_customer.trim().length >= 10,
@@ -191,6 +204,8 @@ export default function LookbookWizardPage() {
         social_proof: {
           review_rating: ratingOf(form.review_rating),
           review_count: form.review_count.trim() || undefined,
+          reviews: reviewsPayload(form.reviews),
+          reviews_url: reviewsUrlOf(form.reviews_url),
         },
         visuals: {
           hero_image_url: form.hero_image_url.trim() || undefined,
@@ -340,21 +355,25 @@ export default function LookbookWizardPage() {
       ),
     },
     {
-      id: 'credibility',
-      title: 'المصداقية',
-      sub: 'التقييمات والظهور الصحفي والاستدامة.',
+      id: 'social',
+      title: 'التقييمات',
+      sub: 'تقييمات حقيقية من زبائنك فقط. لا نكتب تقييمات من عندنا.',
       optional: true,
       complete: true,
       body: (
         <Grid>
-          <Field label="عدد التقييمات">
-            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +2,400 تقييم" />
-          </Field>
-          <Field label="متوسط التقييم">
-            <Select value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)}>
-              {['5.0', '4.9', '4.8', '4.7'].map((r) => <option key={r} value={r}>{r} ★</option>)}
-            </Select>
-          </Field>
+          <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city="" detail={{ label: 'القطعة (اختياري)', placeholder: 'عباية حريرية · عاجية' }} />
+        </Grid>
+      ),
+    },
+    {
+      id: 'credibility',
+      title: 'المصداقية',
+      sub: 'الظهور الصحفي والاستدامة.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
           <Field label="ظهور في الصحافة" wide hint="مفصولة بفواصل. اتركها فارغة إن لم يكن لديك ظهور تذكره.">
             <Input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="مثلاً: ڤوغ العربية، هي، سيدتي" />
           </Field>
@@ -385,6 +404,7 @@ export default function LookbookWizardPage() {
             facts={[
               { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
               { label: 'المنتجات', value: validProducts.length },
+              { label: 'التقييمات', value: validReviews.length },
               { label: 'النمط', value: LOOKBOOK_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
             ]}
             recap={[
@@ -429,8 +449,6 @@ export default function LookbookWizardPage() {
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
         items={[
-          'reviews',
-          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
           ...(form.press_features.trim() ? [] : ['certs' as const]),
           ...(validProducts.some((p) => !p.price.trim()) ? ['prices' as const] : []),
           ...(!form.brand_story.trim() || !form.collection_name.trim() ? ['text' as const] : []),

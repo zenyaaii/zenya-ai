@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
@@ -50,8 +51,7 @@ Returns: ${input.returns_policy || '14-day free returns'}
 
 Social proof:
 - Customer count: ${input.social_proof?.customer_count || '25,000+'}
-- Review count: ${input.social_proof?.review_count || '6,000+ verified reviews'}
-- Rating: ${input.social_proof?.review_rating || 4.9}/5
+- ${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 
 WRITING DIRECTION
 You are a luxury retail copywriter. The tone is elevated, editorial, and confident — like Net-a-Porter, Ssense, or Monocle. Think quality over quantity. Understated sophistication, not flashy luxury.
@@ -60,7 +60,6 @@ Hard rules:
 - Headlines use \\n for line breaks (2–3 short lines, 3–7 words each)
 - Subheadlines: 2–3 sentences, specific and editorial — never generic
 - Product names: realistic, elegant (e.g. "Linen Throw — Warm Sand", "The Daily Moisturiser SPF50")
-- Testimonials: 45–65 words, specific product details, genuine voice
 - Collection taglines: poetic and specific, 6–10 words
 - Never use buzzwords like "premium", "luxury", "amazing", "stunning" in product copy
 
@@ -93,7 +92,7 @@ Return ONLY valid JSON, no markdown, no prose:
     "eyebrow": "Just landed",
     "heading": "New this week.",
     "products": [
-      { "name": "Product name", "price": "$XXX", "badge": "New", "category": "Category", "rating": 5 }
+      { "name": "Product name", "price": "$XXX", "badge": "New", "category": "Category" }
     ]
   },
   "brand_promise": {
@@ -109,7 +108,7 @@ Return ONLY valid JSON, no markdown, no prose:
     "heading": "Bestseller heading with \\n",
     "subheading": "1 sentence",
     "products": [
-      { "name": "Product name", "price": "$XXX", "category": "Category", "rating": 5, "badge": "optional badge" }
+      { "name": "Product name", "price": "$XXX", "category": "Category", "badge": "optional badge" }
     ]
   },
   "perks": {
@@ -119,12 +118,7 @@ Return ONLY valid JSON, no markdown, no prose:
   },
   "testimonials": {
     "eyebrow": "From our customers",
-    "heading": "Testimonials heading",
-    "average_rating": 4.9,
-    "review_count": "X,XXX+ verified reviews",
-    "items": [
-      { "quote": "45-65 word testimonial", "author": "First name L.", "location": "City, Country", "rating": 5, "avatar_letter": "A", "product": "Product name" }
-    ]
+    "heading": "Heading for the owner's customer reviews"
   },
   "newsletter": {
     "eyebrow": "The ${input.brand.name} Edit",
@@ -148,18 +142,46 @@ Return ONLY valid JSON, no markdown, no prose:
 Requirements:
 - collections.items: use the provided collections (${input.collections.length} items), expand with product counts and tags
 - new_arrivals.products: exactly 6 products across different categories
-- brand_promise.stats: exactly 4 stats (products, rating, returns, customer metric)
+- brand_promise.stats: exactly 4 stats (products, returns, shipping, customer metric)
 - bestsellers.products: exactly 8 products with realistic names and prices
 - perks.items: exactly 4 perks covering shipping, returns, quality, sustainability
-- testimonials.items: exactly 3 testimonials with different avatar_letters
 - Each product name should be specific and elegant, not generic
+${NO_REVIEWS_RULE}
 
 ${ICON_VOCAB_PROMPT}
 Every "icon" field (perks.items) MUST be one name from the list above — never an emoji.`
 }
 
+/** Products carry no stars: a rating is never generated. */
+function unrated(products: any[]): any[] {
+  return products.map((p) => {
+    const { rating: _rating, ...rest } = p || {}
+    return rest
+  })
+}
+
 function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
   const mock = COLLECTIVE_MOCK_CONTENT
+  const rating = input.social_proof?.review_rating
+  const rated = typeof rating === 'number'
+  const owner = { rating, count: input.social_proof?.review_count }
+  // Reviews are only ever the owner's own. With none, the section is not drawn.
+  const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
+    quote: r.text,
+    author: r.name,
+    rating: starsOf(r.rating),
+    avatar_letter: r.name.charAt(0),
+    product: r.detail,
+    origin: r.origin,
+    when: r.when
+  }))
+  // The rating stat is the owner's, or not there at all.
+  const stats = dropRatingClaims(
+    Array.isArray(ai.brand_promise?.stats) ? ai.brand_promise.stats : mock.brand_promise.stats,
+    (st: any) => `${st?.value ?? ''} ${st?.label ?? ''}`,
+    {}
+  )
+  const promiseStats = rated ? [{ value: `${rating}★`, label: 'متوسط التقييم' }, ...stats].slice(0, 4) : stats.slice(0, 4)
 
   return {
     brand: {
@@ -168,12 +190,12 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
       description: ai.brand?.description || input.brand.description
     },
     hero: {
-      eyebrow: ai.hero?.eyebrow || mock.hero.eyebrow,
+      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || mock.hero.eyebrow, mock.hero.eyebrow, owner),
       headline: ai.hero?.headline || mock.hero.headline,
       subheadline: ai.hero?.subheadline || mock.hero.subheadline,
       cta_primary: ai.hero?.cta_primary || mock.hero.cta_primary,
       cta_secondary: ai.hero?.cta_secondary || mock.hero.cta_secondary,
-      badge: ai.hero?.badge || mock.hero.badge
+      badge: unlessRatingClaim(ai.hero?.badge || mock.hero.badge, mock.hero.badge, owner)
     },
     collections: {
       eyebrow: ai.collections?.eyebrow || mock.collections.eyebrow,
@@ -184,19 +206,19 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
     new_arrivals: {
       eyebrow: ai.new_arrivals?.eyebrow || mock.new_arrivals.eyebrow,
       heading: ai.new_arrivals?.heading || mock.new_arrivals.heading,
-      products: Array.isArray(ai.new_arrivals?.products) ? ai.new_arrivals.products : mock.new_arrivals.products
+      products: unrated(Array.isArray(ai.new_arrivals?.products) ? ai.new_arrivals.products : mock.new_arrivals.products)
     },
     brand_promise: {
       eyebrow: ai.brand_promise?.eyebrow || mock.brand_promise.eyebrow,
       headline: ai.brand_promise?.headline || mock.brand_promise.headline,
       body: ai.brand_promise?.body || mock.brand_promise.body,
-      stats: Array.isArray(ai.brand_promise?.stats) ? ai.brand_promise.stats : mock.brand_promise.stats
+      stats: promiseStats
     },
     bestsellers: {
       eyebrow: ai.bestsellers?.eyebrow || mock.bestsellers.eyebrow,
       heading: ai.bestsellers?.heading || mock.bestsellers.heading,
       subheading: ai.bestsellers?.subheading || mock.bestsellers.subheading,
-      products: Array.isArray(ai.bestsellers?.products) ? ai.bestsellers.products : mock.bestsellers.products
+      products: unrated(Array.isArray(ai.bestsellers?.products) ? ai.bestsellers.products : mock.bestsellers.products)
     },
     perks: {
       items: Array.isArray(ai.perks?.items) ? ai.perks.items : mock.perks.items
@@ -204,9 +226,9 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
       heading: ai.testimonials?.heading || mock.testimonials.heading,
-      average_rating: ai.testimonials?.average_rating || mock.testimonials.average_rating,
-      review_count: ai.testimonials?.review_count || mock.testimonials.review_count,
-      items: Array.isArray(ai.testimonials?.items) ? ai.testimonials.items : mock.testimonials.items
+      average_rating: rating,
+      review_count: countOf(input.social_proof?.review_count),
+      items: testimonials
     },
     newsletter: {
       eyebrow: ai.newsletter?.eyebrow || mock.newsletter.eyebrow,
@@ -223,8 +245,9 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
-      description: ai.seo?.description || mock.seo.description
-    }
+      description: unlessRatingClaim(ai.seo?.description || mock.seo.description, mock.seo.description, owner)
+    },
+    links: { reviews_url: input.social_proof?.reviews_url || undefined }
   }
 }
 

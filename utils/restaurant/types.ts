@@ -147,8 +147,9 @@ export type RestaurantContent = {
   reviews: {
     heading: string
     subheading: string
-    overall_rating: number
-    review_count: string
+    /** The owner's own, or absent: never generated. */
+    overall_rating?: number
+    review_count?: string
     testimonials: RestaurantTestimonial[]
   }
   press: {
@@ -172,6 +173,9 @@ export type RestaurantContent = {
     title: string
     description: string
   }
+
+  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
+  links?: { reviews_url?: string }
 
   /**
    * Sections the owner has hidden in the editor. The renderer checks

@@ -12,6 +12,7 @@ import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
+import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
   type WizardStep,
@@ -43,6 +44,8 @@ type Form = {
   gallery_image_urls: string[]
   review_rating: string
   review_count: string
+  reviews: ReviewDraft[]
+  reviews_url: string
   licenses: string
   guarantees: string
   promo_offer: string
@@ -84,6 +87,10 @@ function buildSampleForm(): Form {
     gallery_image_urls: [],
     review_rating: '4.9',
     review_count: '+320',
+    reviews: [
+      { id: newId(), name: 'سلطان ح.', text: 'اتصلت الصبح على تسريب تحت المغسلة، ووصل الفني قبل الظهر. السعر نفس اللي قالوه بالتلفون.', detail: 'إصلاح التسريبات الطارئ', rating: '5' },
+    ],
+    reviews_url: '',
     licenses: 'رخصة سباكة احترافية رقم M-39817\nشهادة اعتماد فنّي',
     guarantees: 'ضمان على جودة العمل لسنتين\nرضا تام أو نعيد العمل',
     promo_offer: 'فحص مجاني مع أي عرض سعر للتركيب',
@@ -115,8 +122,10 @@ const INITIAL_FORM: Form = {
   before_image_url: '',
   after_image_url: '',
   gallery_image_urls: [],
-  review_rating: '4.9',
-  review_count: '+200',
+  review_rating: '',
+  review_count: '',
+  reviews: [],
+  reviews_url: '',
   licenses: '',
   guarantees: '',
   promo_offer: '',
@@ -172,6 +181,10 @@ export default function ServicesWizardPage() {
   }
 
   const validServices = form.services.filter((s) => s.name.trim().length >= 2)
+  const validReviews = validReviewsOf(form.reviews)
+  function patchReviews(fn: (prev: ReviewsForm) => Partial<ReviewsForm>) {
+    setForm((prev) => ({ ...prev, ...fn(prev) }))
+  }
   const ok = {
     basics: form.brand_name.trim().length >= 2 && form.category.trim().length >= 2 && form.city.trim().length >= 2,
     contact: form.phone.trim().length >= 4 && EMAIL_RE.test(form.email.trim()),
@@ -236,6 +249,8 @@ export default function ServicesWizardPage() {
       social_proof: {
         review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
+        reviews: reviewsPayload(form.reviews),
+        reviews_url: reviewsUrlOf(form.reviews_url),
         licenses: splitLines(form.licenses).slice(0, 6),
         guarantees: splitLines(form.guarantees).slice(0, 6),
         promo_offer: form.promo_offer.trim() || undefined,
@@ -417,15 +432,21 @@ export default function ServicesWizardPage() {
           <Field label="الضمانات / الطمأنة" hint="واحدة في كل سطر.">
             <Textarea value={form.guarantees} onChange={(e) => update('guarantees', e.target.value)} />
           </Field>
-          <Field label="متوسط التقييم">
-            <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.9" />
-          </Field>
-          <Field label="عدد التقييمات">
-            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="+320" />
-          </Field>
           <Field label="عرض ترويجي" wide>
             <Input value={form.promo_offer} onChange={(e) => update('promo_offer', e.target.value)} placeholder="فحص مجاني مع عرض سعر التركيب" />
           </Field>
+        </Grid>
+      ),
+    },
+    {
+      id: 'social',
+      title: 'التقييمات',
+      sub: 'تقييمات حقيقية من عملائك فقط. لا نكتب تقييمات من عندنا.',
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city={form.city} detail={{ label: 'الخدمة (اختياري)', placeholder: 'إصلاح التسريبات' }} />
         </Grid>
       ),
     },
@@ -495,6 +516,7 @@ export default function ServicesWizardPage() {
             facts={[
               { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
               { label: 'الخدمات', value: validServices.length },
+              { label: 'التقييمات', value: validReviews.length },
               { label: 'النمط', value: SERVICE_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
             ]}
             recap={[
@@ -539,7 +561,6 @@ export default function ServicesWizardPage() {
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
         items={[
-          'reviews', 'rating',
           ...(form.licenses.trim() || form.guarantees.trim() ? [] : ['certs' as const]),
           ...(validServices.some((s) => !s.price_from.trim()) ? ['prices' as const] : []),
           ...(validServices.some((s) => !s.description.trim()) || !form.years_in_business.trim() ? ['text' as const] : []),

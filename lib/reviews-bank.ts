@@ -71,7 +71,7 @@ const ADAPTERS: Record<string, Adapter> = {
   wellness: inTestimonials('name', 'text', true),
   services: inTestimonials('name', 'text', true),
   lookbook: inTestimonials('author', 'text', true),
-  atlas: inTestimonials('author', 'quote', false),
+  atlas: inTestimonials('author', 'quote', true),
   studio: inTestimonials('name', 'text', true),
   collective: inTestimonials('author', 'quote', true),
   restaurant: {
@@ -97,10 +97,31 @@ export function hasReviews(businessType: string): boolean {
   return businessType in ADAPTERS
 }
 
+/**
+ * A saved theme keeps the template's own content under its key
+ * (content.wellness, content.restaurant), and that is what the site and the
+ * editor render. The adapters' paths are inside it. Bare template content,
+ * with no such key, is its own section. review_bank stays at the top, where
+ * the daily check and the bell look for it.
+ */
+function sectionOf(bt: string, c: any): any {
+  const inner = c?.[bt]
+  return inner && typeof inner === 'object' && !Array.isArray(inner) ? inner : c
+}
+
 function adapter(bt: string): Adapter {
   const a = ADAPTERS[bt]
   if (!a) throw new Error(`no reviews section on ${bt}`)
-  return a
+  const s = a.summary
+  return {
+    ...a,
+    get: (c) => a.get(sectionOf(bt, c)),
+    set: (c, items) => a.set(sectionOf(bt, c), items),
+    heading: (c) => a.heading(sectionOf(bt, c)),
+    summary: s
+      ? { get: (c) => s.get(sectionOf(bt, c)), set: (c, rating, count) => s.set(sectionOf(bt, c), rating, count) }
+      : undefined,
+  }
 }
 
 function bankOf(c: any): { hidden: Item[]; google?: GoogleSource } {
@@ -141,7 +162,8 @@ export function readReviews(bt: string, content: any): ReviewsView {
     ...shown.map((it, i) => toRow(a, it, `s${i}`, true)),
     ...bank.hidden.map((it, i) => toRow(a, it, `h${i}`, false)),
   ]
-  const link = bank.google?.link || (typeof content?.links?.reviews_url === 'string' ? content.links.reviews_url : '')
+  const links = sectionOf(bt, content)?.links
+  const link = bank.google?.link || (typeof links?.reviews_url === 'string' ? links.reviews_url : '')
   const summary = a.summary?.get(content)
   const google: GoogleSource | null = link
     ? {
@@ -278,6 +300,7 @@ export function mergeGoogleCounted(bt: string, content: any, link: string, r: Fe
   const c = s.commit()
   c.review_bank.google = { link, rating: r.place.rating, count: r.place.count, fetched_at: new Date().toISOString(), ...(r.place.id ? { place_id: r.place.id } : {}) }
   if (r.place.rating != null && r.place.count != null) s.a.summary?.set(c, r.place.rating, r.place.count)
-  if (bt === 'wellness' && !c.links?.reviews_url) c.links = { ...(c.links || {}), reviews_url: link }
+  const sec = sectionOf(bt, c)
+  if (bt === 'wellness' && !sec.links?.reviews_url) sec.links = { ...(sec.links || {}), reviews_url: link }
   return { content: c, added }
 }

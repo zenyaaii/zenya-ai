@@ -6,6 +6,7 @@ import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { serviceInputSchema, type ServiceInput } from '@/utils/services/input'
 import type { ServiceContent } from '@/utils/services/types'
 import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -93,6 +94,7 @@ Response time: ${input.contact.response_time || 'Fast local response'}
 Promo offer: ${input.social_proof.promo_offer || 'N/A'}
 Licenses and trust items: ${(input.social_proof.licenses || []).join(', ') || 'N/A'}
 Guarantees: ${(input.social_proof.guarantees || []).join(', ') || 'N/A'}
+${ratingBrief(input.social_proof.review_rating, input.social_proof.review_count)}
 
 WRITING DIRECTION
 You are writing premium copy for a local service business website. The tone is modern, reassuring, specific, and conversion-minded. It should feel like a high-end service company, not a generic directory listing and not cheesy sales copy.
@@ -101,7 +103,6 @@ Hard rules:
 - Headlines: 4-11 words.
 - Subheadlines: 1-2 short sentences.
 - Service descriptions: 10-24 words.
-- Testimonials: 18-40 words, believable and specific.
 - FAQ answers: 1-2 direct sentences.
 - Use the business name sparingly.
 - Make the copy feel local, competent, fast, and trustworthy.
@@ -119,7 +120,7 @@ Return ONLY valid JSON matching this exact shape. No prose. No markdown.
     "primary_cta": "Book now",
     "secondary_cta": "See services",
     "stats": [
-      { "value": "4.9/5", "label": "Average rating" }
+      { "value": "Short value", "label": "Short label" }
     ]
   },
   "trust_bar": [
@@ -176,13 +177,8 @@ Return ONLY valid JSON matching this exact shape. No prose. No markdown.
     "cta_label": "CTA label"
   },
   "testimonials": {
-    "heading": "Testimonials heading",
-    "subheading": "One short sentence",
-    "average_rating": 4.9,
-    "review_count": "200+",
-    "items": [
-      { "name": "Plausible first name + initial", "text": "18-40 words", "source": "Google Reviews", "rating": 5 }
-    ]
+    "heading": "Heading for the owner's customer reviews",
+    "subheading": "One short sentence"
   },
   "faq": [
     { "q": "Question", "a": "Answer" }
@@ -212,7 +208,8 @@ Requirements:
 - process.steps: exactly 3 items
 - before_after.highlights: exactly 3 items
 - offer.points: exactly 3 items
-- testimonials.items: exactly 3 items
+- hero.stats: 3 items built only from the brief (years in business, response time, areas, guarantees); never a rating
+${NO_REVIEWS_RULE}
 - faq: 5-7 items
 - areas heading and offer heading should feel useful, not generic`
 }
@@ -256,8 +253,11 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
           badge: service.badge
         }))
 
+  const rating = input.social_proof.review_rating
+  const rated = typeof rating === 'number' && rating > 0
+  const owner = { rating, count: input.social_proof.review_count }
   const trustBar = Array.isArray(ai?.trust_bar) && ai.trust_bar.length >= 3
-    ? ai.trust_bar.slice(0, 4).map((item: any) => String(item))
+    ? dropRatingClaims(ai.trust_bar.slice(0, 4).map((item: any) => String(item)), (t: string) => t, owner)
     : [
         ...(input.social_proof.licenses || []).slice(0, 2),
         ...(input.social_proof.guarantees || []).slice(0, 2)
@@ -283,15 +283,32 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
         }))
       : mock.process.steps
 
-  const testimonials =
-    Array.isArray(ai?.testimonials?.items) && ai.testimonials.items.length >= 3
-      ? ai.testimonials.items.slice(0, 3).map((item: any) => ({
-          name: String(item?.name || 'عميل موثّق'),
-          text: String(item?.text || ''),
-          source: item?.source ? String(item.source) : undefined,
-          rating: typeof item?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(item.rating))) : 5
+  // Reviews are only ever the owner's own. With none, the section is not drawn.
+  const testimonials = cleanOwnerReviews(input.social_proof.reviews).map((r) => ({
+    name: r.name,
+    text: r.text,
+    source: r.origin === 'google' ? 'Google' : undefined,
+    service: r.detail,
+    rating: starsOf(r.rating),
+    origin: r.origin,
+    when: r.when
+  }))
+
+  // The hero never claims a rating the owner did not give.
+  const plainStats = dropRatingClaims(
+    Array.isArray(ai?.hero?.stats) && ai.hero.stats.length >= 3
+      ? ai.hero.stats.slice(0, 6).map((item: any) => ({
+          value: String(item?.value || ''),
+          label: String(item?.label || '')
         }))
-      : mock.testimonials.items
+      : [
+          { value: input.brand.years_in_business || '+10 سنوات', label: 'في السوق' },
+          { value: input.contact.response_time || 'رد سريع', label: 'وقت الرد' }
+        ],
+    (st: { value: string; label: string }) => `${st.value} ${st.label}`,
+    {}
+  )
+  const heroStats = (rated ? [{ value: `${rating.toFixed(1)}/5`, label: 'متوسط التقييم' }, ...plainStats] : plainStats).slice(0, 3)
 
   const faqItems =
     Array.isArray(ai?.faq) && ai.faq.length >= 5
@@ -313,23 +330,13 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
       owner_name: input.brand.owner_name
     },
     hero: {
-      eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
+      eyebrow: unlessRatingClaim(String(ai?.hero?.eyebrow || mock.hero.eyebrow), mock.hero.eyebrow, owner),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
       primary_cta: String(ai?.hero?.primary_cta || (input.contact.booking_url ? 'احجز زيارة' : 'اطلب عرض سعر')),
       secondary_cta: String(ai?.hero?.secondary_cta || 'تصفّح الخدمات'),
       image: heroImage,
-      stats:
-        Array.isArray(ai?.hero?.stats) && ai.hero.stats.length >= 3
-          ? ai.hero.stats.slice(0, 3).map((item: any) => ({
-              value: String(item?.value || ''),
-              label: String(item?.label || '')
-            }))
-          : [
-              { value: `${(input.social_proof.review_rating || 4.9).toFixed(1)}/5`, label: 'متوسط التقييم' },
-              { value: input.brand.years_in_business || '+10 سنوات', label: 'في السوق' },
-              { value: input.contact.response_time || 'رد سريع', label: 'وقت الرد' }
-            ]
+      stats: heroStats
     },
     trust_bar: {
       items: fallbackTrust.slice(0, 4)
@@ -390,11 +397,8 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
     testimonials: {
       heading: String(ai?.testimonials?.heading || mock.testimonials.heading),
       subheading: String(ai?.testimonials?.subheading || mock.testimonials.subheading),
-      average_rating:
-        typeof ai?.testimonials?.average_rating === 'number'
-          ? Math.max(4, Math.min(5, ai.testimonials.average_rating))
-          : input.social_proof.review_rating || mock.testimonials.average_rating,
-      review_count: String(ai?.testimonials?.review_count || input.social_proof.review_count || mock.testimonials.review_count),
+      average_rating: rated ? rating : undefined,
+      review_count: countOf(input.social_proof.review_count),
       items: testimonials
     },
     faq: {
@@ -424,7 +428,8 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
         ai?.seo?.description ||
           `${input.brand.name} يقدّم ${input.brand.category} في ${input.brand.city}${input.brand.region ? `، ${input.brand.region}` : ''}.`
       )
-    }
+    },
+    links: { reviews_url: input.social_proof.reviews_url || undefined }
   }
 }
 

@@ -514,6 +514,10 @@ function LookbookPress({ content, colors, headingFont, bodyFont }: { content: Lo
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function LookbookTestimonials({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
   const rm = !!useReducedMotion()
+  // Only the owner's own reviews and rating are ever here. No reviews: no section.
+  const t = content.testimonials
+  if (!t?.items?.length) return null
+  const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
   return (
     <section data-section="testimonials" className="px-6 py-20 md:px-12 md:py-24" style={{ background: colors.background, fontFamily: bodyFont }}>
       <div className="mx-auto max-w-6xl">
@@ -522,12 +526,14 @@ function LookbookTestimonials({ content, colors, headingFont, bodyFont }: { cont
           <h2 className="text-4xl font-black tracking-tight md:text-5xl" style={{ fontFamily: headingFont, color: colors.text }}>
             {content.testimonials.heading}
           </h2>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <Stars rating={5} color={colors.accent} />
-            <span className="text-sm font-semibold" style={{ color: colors.muted }}>
-              {content.testimonials.average_rating} · {content.testimonials.review_count}
-            </span>
-          </div>
+          {avg ? (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Stars rating={Math.round(avg)} color={colors.accent} />
+              <span className="text-sm font-semibold" style={{ color: colors.muted }}>
+                {[avg.toFixed(1), t.review_count].filter(Boolean).join(' · ')}
+              </span>
+            </div>
+          ) : null}
         </motion.div>
 
         <div className="grid gap-6 md:grid-cols-3">

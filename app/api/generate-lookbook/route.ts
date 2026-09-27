@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
@@ -42,8 +43,7 @@ Collection: ${input.collection_name || 'Current collection'}
 Season: ${input.collection_season || 'SS25'}
 Sustainability focus: ${input.sustainability_focus ? 'Yes' : 'No'}
 Press features: ${input.press_features || 'Not specified'}
-Review rating: ${input.social_proof?.review_rating || 4.9}/5
-Review count: ${input.social_proof?.review_count || '1,000+ reviews'}
+${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 
 Brand story:
 ${input.brand_story || 'A considered contemporary fashion brand.'}
@@ -58,7 +58,6 @@ Hard rules:
 - Headlines: use \\n to break into 2–3 short poetic lines (3–6 words per line)
 - Subheadlines: 1–2 short sentences, evocative and specific
 - Product descriptions: keep names exactly as provided
-- Testimonials: 45–65 words, first-person, specific about the product, what they loved
 - Look titles: "Look 01" through "Look 06" format — keep the numbering
 - Look subtitles: use or improve provided product names
 - Newsletter: editorial, intimate tone — like a letter from the brand
@@ -107,12 +106,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
   },
   "testimonials": {
     "eyebrow": "Short eyebrow",
-    "heading": "Short heading",
-    "average_rating": 4.9,
-    "review_count": "Keep provided",
-    "items": [
-      { "author": "First name + initial", "rating": 5, "text": "45–65 word review", "item": "Product name", "verified": true }
-    ]
+    "heading": "Short heading for the owner's customer reviews"
   },
   "newsletter": {
     "eyebrow": "Short eyebrow",
@@ -137,7 +131,7 @@ Requirements:
 - lookbook.looks: exactly 6 looks with Look 01–06 numbering
 - bestsellers.products: include all ${input.products.length} provided products
 - brand_story.values: exactly 3 values
-- testimonials.items: exactly 3 reviews, each referencing a different product
+${NO_REVIEWS_RULE}
 - newsletter.heading: use \\n for 2-line break
 
 ${ICON_VOCAB_PROMPT}
@@ -146,6 +140,16 @@ Every "icon" field (brand_story.values) MUST be one name from the list above —
 
 function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
   const mock = LOOKBOOK_MOCK_CONTENT
+  const owner = { rating: input.social_proof?.review_rating, count: input.social_proof?.review_count }
+  // Reviews are only ever the owner's own. With none, the section is not drawn.
+  const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
+    author: r.name,
+    rating: starsOf(r.rating),
+    text: r.text,
+    item: r.detail,
+    origin: r.origin,
+    when: r.when
+  }))
 
   return {
     brand: {
@@ -154,16 +158,16 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
       category: input.brand.category
     },
     hero: {
-      eyebrow: ai.hero?.eyebrow || mock.hero.eyebrow,
+      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || mock.hero.eyebrow, mock.hero.eyebrow, owner),
       headline: ai.hero?.headline || mock.hero.headline,
       subheadline: ai.hero?.subheadline || mock.hero.subheadline,
       cta_primary: ai.hero?.cta_primary || mock.hero.cta_primary,
       cta_secondary: ai.hero?.cta_secondary || mock.hero.cta_secondary,
-      badge: ai.hero?.badge || mock.hero.badge
+      badge: unlessRatingClaim(ai.hero?.badge || mock.hero.badge, mock.hero.badge, owner)
     },
     drop_banner: {
       label: ai.drop_banner?.label || mock.drop_banner.label,
-      text: ai.drop_banner?.text || mock.drop_banner.text,
+      text: unlessRatingClaim(ai.drop_banner?.text || mock.drop_banner.text, mock.drop_banner.text, owner),
       cta: ai.drop_banner?.cta || mock.drop_banner.cta
     },
     lookbook: {
@@ -192,9 +196,9 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
       heading: ai.testimonials?.heading || mock.testimonials.heading,
-      average_rating: input.social_proof?.review_rating || mock.testimonials.average_rating,
-      review_count: input.social_proof?.review_count || mock.testimonials.review_count,
-      items: Array.isArray(ai.testimonials?.items) ? ai.testimonials.items : mock.testimonials.items
+      average_rating: input.social_proof?.review_rating,
+      review_count: countOf(input.social_proof?.review_count),
+      items: testimonials
     },
     newsletter: {
       eyebrow: ai.newsletter?.eyebrow || mock.newsletter.eyebrow,
@@ -211,8 +215,9 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
-      description: ai.seo?.description || mock.seo.description
-    }
+      description: unlessRatingClaim(ai.seo?.description || mock.seo.description, mock.seo.description, owner)
+    },
+    links: { reviews_url: input.social_proof?.reviews_url || undefined }
   }
 }
 

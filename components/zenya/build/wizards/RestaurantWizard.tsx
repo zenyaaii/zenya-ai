@@ -12,6 +12,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { generateErrorText } from '@/lib/generate-error'
+import { ratingOf } from '@/lib/rating'
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import { RESTAURANT_PRESETS } from "@/utils/restaurant/presets"
@@ -27,6 +28,7 @@ import WizardShell, {
   AddButton, Block, Card, Chips, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Textarea, Uploads,
   type WizardStep,
 } from "../WizardShell"
+import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from "../OwnerReviewsFields"
 
 /** Restaurant type chips — drives AI copy tone. Optional. */
 const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string }> = [
@@ -82,6 +84,10 @@ type Form = {
   gallery_image_urls: string[]
   signature_dish_image_urls: string[]
   press_outlets: string
+  review_rating: string
+  review_count: string
+  reviews: ReviewDraft[]
+  reviews_url: string
   style_preset: RestaurantInput["style_preset"]
 }
 
@@ -141,6 +147,12 @@ function buildSampleForm(): Form {
     gallery_image_urls: [],
     signature_dish_image_urls: [],
     press_outlets: "النهار\nدليل ميشلان\nتايم آوت بيروت\nالشرق الأوسط",
+    review_rating: "4.8",
+    review_count: "+630",
+    reviews: [
+      { id: newId(), name: "رنا ك.", text: "الكبة النية طازجة فعلًا، والخدمة هادئة بلا استعجال. رجعنا الأسبوع اللي بعده.", detail: "كبة نية", rating: "5" },
+    ],
+    reviews_url: "",
     style_preset: "onyx",
   }
 }
@@ -155,6 +167,7 @@ const initialForm = (): Form => ({
   hero_image_url: "", chef_photo_url: "", accent_image_url: "",
   gallery_image_urls: [], signature_dish_image_urls: [],
   press_outlets: "",
+  review_rating: "", review_count: "", reviews: [], reviews_url: "",
   style_preset: "onyx",
 })
 
@@ -177,7 +190,8 @@ function loadDraft(userId: string): Form | null {
     const raw = localStorage.getItem(DRAFT_KEY_PREFIX + userId)
     if (!raw) return null
     const parsed = JSON.parse(raw)
-    if (parsed && Array.isArray(parsed.categories) && Array.isArray(parsed.hours)) return parsed as Form
+    // Over the defaults: a draft saved before a field existed still loads.
+    if (parsed && Array.isArray(parsed.categories) && Array.isArray(parsed.hours)) return { ...initialForm(), ...parsed } as Form
   } catch {}
   return null
 }
@@ -233,6 +247,9 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
+  }
+  function patchReviews(fn: (prev: ReviewsForm) => Partial<ReviewsForm>) {
+    setForm((prev) => ({ ...prev, ...fn(prev) }))
   }
   function updateHour(idx: number, patch: Partial<Hour>) {
     setForm((prev) => ({ ...prev, hours: prev.hours.map((h, i) => (i === idx ? { ...h, ...patch } : h)) }))
@@ -403,6 +420,12 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
         signature_dish_image_urls: form.signature_dish_image_urls.filter(Boolean),
       },
       press_outlets: form.press_outlets.split(/[\n,]/).map((s) => s.trim()).filter((s) => s.length >= 2).slice(0, 8),
+      social_proof: {
+        review_rating: ratingOf(form.review_rating),
+        review_count: form.review_count.trim() || undefined,
+        reviews: reviewsPayload(form.reviews),
+        reviews_url: reviewsUrlOf(form.reviews_url),
+      },
       style_preset: form.style_preset,
     }
   }
@@ -724,6 +747,18 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
       ),
     },
     {
+      id: "social",
+      title: "التقييمات",
+      sub: "تقييمات حقيقية من ضيوفك فقط. لا نكتب تقييمات من عندنا.",
+      optional: true,
+      complete: true,
+      body: (
+        <Grid>
+          <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city={form.city} detail={{ label: "الطبق (اختياري)", placeholder: "كبة نية" }} />
+        </Grid>
+      ),
+    },
+    {
       id: "press",
       title: "الصحافة والجوائز",
       sub: "اختياري. واحدة في كل سطر.",
@@ -753,6 +788,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
               { label: "أصناف القائمة", value: counts.dropped ? `${counts.valid} (+${counts.dropped} ناقصة)` : counts.valid },
               { label: "أيام مفتوحة", value: `${form.hours.filter((h) => !h.closed).length} من 7` },
               { label: "الصور", value: photoCount },
+              { label: "التقييمات", value: validReviewsOf(form.reviews).length },
             ]}
             recap={[
               { label: "اسم المطعم", value: form.brand_name },
@@ -829,7 +865,6 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
             onClose={() => setDisclaimerOpen(false)}
             onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
             items={[
-              "reviews", "rating",
               ...(form.chef_name.trim() && !form.chef_bio_brief.trim() ? ["people" as const] : []),
               ...(form.press_outlets.split(/[\n,]/).filter((s) => s.trim().length >= 2).length >= 4 ? [] : ["certs" as const]),
               ...(form.categories.some((c) => c.items.some((i) => i.name.trim() && !i.description.trim())) ? ["text" as const] : []),

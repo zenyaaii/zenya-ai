@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ownerReviewsFields } from '@/lib/owner-reviews'
 
 export const lookbookInputSchema = z.object({
   brand: z.object({
@@ -20,7 +21,9 @@ export const lookbookInputSchema = z.object({
   press_features: z.string().optional(),
   social_proof: z.object({
     review_count: z.string().optional(),
-    review_rating: z.number().optional()
+    review_rating: z.number().optional(),
+    // The owner's own reviews. The generator never writes reviews itself.
+    ...ownerReviewsFields
   }).optional(),
   visuals: z.object({
     hero_image_url: z.string().url().optional(),

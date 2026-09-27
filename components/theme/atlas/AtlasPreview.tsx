@@ -633,6 +633,10 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
 // ─── Testimonials ──────────────────────────────────────────────────────────────
 function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
+  // Only the owner's own reviews are ever here. None given: no section.
+  if (!content.testimonials?.items?.length) return null
+  const t = content.testimonials
+  const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
   return (
     <section data-section="testimonials" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
@@ -643,6 +647,14 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
           <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
             {content.testimonials.heading}
           </h2>
+          {avg ? (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Stars rating={Math.round(avg)} color={colors.primary} />
+              <span className="text-sm font-semibold" style={{ color: colors.muted }}>
+                {[avg.toFixed(1), t.review_count].filter(Boolean).join(' · ')}
+              </span>
+            </div>
+          ) : null}
         </motion.div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -662,11 +674,13 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
                   className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-black text-white"
                   style={{ background: colors.gradient }}
                 >
-                  {item.avatar_letter}
+                  {item.avatar_letter || item.author.trim().charAt(0)}
                 </div>
                 <div>
                   <p className="text-sm font-black" style={{ color: colors.text }}>{item.author}</p>
-                  <p className="text-xs" style={{ color: colors.muted }}>{item.role} · {item.company}</p>
+                  {item.role || item.company ? (
+                    <p className="text-xs" style={{ color: colors.muted }}>{[item.role, item.company].filter(Boolean).join(' · ')}</p>
+                  ) : null}
                 </div>
               </div>
             </motion.div>
