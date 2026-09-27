@@ -183,6 +183,7 @@ export function ReviewsView() {
   const [siteId, setSiteId] = useState('s3')
   const [reviews, setReviews] = useState<ReviewRow[]>(SAMPLE_REVIEWS)
   const [fetching, setFetching] = useState(false)
+  const [undo, setUndo] = useState<{ name: string; before: ReviewRow[] } | null>(null)
   const source: ReviewSource = { link: 'https://maps.app.goo.gl/waha-riyadh', rating: 4.8, count: 212, fetched: 'قبل 3 دقائق' }
   return (
     <ReviewsScreen
@@ -199,7 +200,11 @@ export function ReviewsView() {
       onSave={(id, v) => setReviews((rs) => id
         ? rs.map((r) => (r.id === id ? { ...r, ...v } : r))
         : [...rs, { id: 'm' + Date.now(), origin: 'manual', shown: true, ...v }])}
-      onDelete={(id) => setReviews((rs) => rs.filter((r) => r.id !== id))}
+      onDelete={(id) => {
+        setUndo({ name: reviews.find((r) => r.id === id)?.name || '', before: reviews })
+        setReviews((rs) => rs.filter((r) => r.id !== id))
+      }}
+      undo={undo && { name: undo.name, onUndo: () => { setReviews(undo.before); setUndo(null) } }}
     />
   )
 }

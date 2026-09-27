@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { ReviewsScreen, type ReviewDraft } from '@/components/dashboard/screens/reviews'
@@ -33,6 +33,9 @@ export default function ReviewsPage() {
   const [fetching, setFetching] = useState(false)
   const [error, setError] = useState('')
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+  /** The content from just before the last delete, so one tap can bring it back. */
+  const [undo, setUndo] = useState<{ name: string; before: any } | null>(null)
+  const undoTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const load = useCallback(async () => {
     const { data: { user } } = await createClient().auth.getUser()
@@ -91,6 +94,16 @@ export default function ReviewsPage() {
     }
   }
 
+  function remove(id: string) {
+    if (!theme) return
+    const row = view?.rows.find((r) => r.id === id)
+    const before = theme.content
+    commit(deleteReview(bt, before, id))
+    setUndo({ name: row?.name || '', before })
+    clearTimeout(undoTimer.current)
+    undoTimer.current = setTimeout(() => setUndo(null), 6000)
+  }
+
   if (!themes) return null
 
   const sites = themes.map((t) => ({ id: t.id, name: t.product_name || 'موقع بلا اسم' }))
@@ -100,7 +113,7 @@ export default function ReviewsPage() {
     <ReviewsScreen
       sites={sites}
       siteId={siteId}
-      setSiteId={(id) => { setSiteId(id); setError(''); setSaveState('idle'); setDraftLink('') }}
+      setSiteId={(id) => { setSiteId(id); setError(''); setSaveState('idle'); setDraftLink(''); setUndo(null) }}
       source={g ? { link: g.link, rating: g.rating, count: g.count, fetched: g.fetched_at ? relTime(g.fetched_at) : undefined } : null}
       draftLink={draftLink}
       setDraftLink={setDraftLink}
@@ -112,7 +125,8 @@ export default function ReviewsPage() {
       reviews={(view?.rows || []).map((r) => ({ ...r }))}
       onToggle={(id) => theme && commit(toggleReview(bt, theme.content, id))}
       onSave={(id, v: ReviewDraft) => theme && commit(saveReview(bt, theme.content, id, v))}
-      onDelete={(id) => theme && commit(deleteReview(bt, theme.content, id))}
+      onDelete={remove}
+      undo={undo && { name: undo.name, onUndo: () => { commit(undo.before); setUndo(null) } }}
       empty={themes.length === 0 ? (
         <EmptyHint>لا يوجد عندك موقع فيه قسم تقييمات بعد. أنشئ موقعًا وسيظهر هنا.</EmptyHint>
       ) : undefined}

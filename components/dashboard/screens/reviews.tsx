@@ -11,8 +11,8 @@ import { Act, EmptyHint, Page, PageHead, type Action } from './kit'
  * The pool is every review the owner has: the ones pulled from their Google
  * listing and the ones they typed in themselves. A switch on each row says
  * whether it is on the site. Google's reviews can be shown or hidden but never
- * reworded (Google's terms); the owner's own can be edited. Any review can be
- * deleted, after a one-tap confirm on the row itself.
+ * reworded (Google's terms); the owner's own can be edited. Any review is
+ * deleted with one tap, and a bar at the bottom offers to undo it.
  *
  * The Google link the owner gave in the wizard is already the source here, so
  * a site built with a link opens connected, not on an empty field.
@@ -62,6 +62,8 @@ export type ReviewsScreenProps = {
   /** id null adds a new review. */
   onSave?: (id: string | null, v: ReviewDraft) => void
   onDelete?: (id: string) => void
+  /** Set just after a delete: the review's name, with a way to bring it back. */
+  undo?: { name: string; onUndo: () => void } | null
   /** Shown instead of the page body, e.g. "no sites with a reviews section". */
   empty?: ReactNode
 }
@@ -129,12 +131,11 @@ function OriginTag({ origin }: { origin: ReviewRow['origin'] }) {
 
 /** The add / edit form for a review the owner types. */
 function Editor({
-  initial, onSave, onCancel, onDelete,
+  initial, onSave, onCancel,
 }: {
   initial: ReviewDraft
   onSave: (v: ReviewDraft) => void
   onCancel: () => void
-  onDelete?: () => void
 }) {
   const [v, setV] = useState(initial)
   const ok = v.name.trim().length > 0 && v.text.trim().length > 0
@@ -175,9 +176,6 @@ function Editor({
       <div className="flex flex-wrap items-center gap-2">
         <button type="submit" disabled={!ok} className="zy-btn disabled:opacity-50">احفظ</button>
         <button type="button" onClick={onCancel} className="zy-btn-q">إلغاء</button>
-        {onDelete && (
-          <button type="button" onClick={onDelete} className="ms-auto text-[13.5px] font-bold text-[var(--error,#c0362c)]">حذف التقييم</button>
-        )}
       </div>
     </form>
   )
@@ -242,7 +240,6 @@ function SourceBlock({
 export function ReviewsScreen(p: ReviewsScreenProps) {
   const { source, reviews } = p
   const [editing, setEditing] = useState<string | 'new' | null>(null)
-  const [confirming, setConfirming] = useState<string | null>(null)
   const shown = reviews.filter((r) => r.shown)
   const saveNote = p.saveState === 'saving' ? 'جارٍ الحفظ…' : p.saveState === 'saved' ? 'حُفظ. يظهر في موقعك خلال دقيقة.' : null
 
@@ -259,7 +256,7 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
           className="mb-4"
           label="اختر الموقع"
           value={p.siteId}
-          onChange={(id) => { setEditing(null); setConfirming(null); p.setSiteId(id) }}
+          onChange={(id) => { setEditing(null); p.setSiteId(id) }}
           items={p.sites.map((s) => ({ key: s.id, label: s.name }))}
         />
       )}
@@ -325,7 +322,6 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
                         initial={{ name: r.name, text: r.text, rating: r.rating }}
                         onSave={(v) => { p.onSave?.(r.id, v); setEditing(null) }}
                         onCancel={() => setEditing(null)}
-                        onDelete={p.onDelete ? () => { p.onDelete?.(r.id); setEditing(null) } : undefined}
                       />
                     </li>
                   ) : (
@@ -341,23 +337,13 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
                           {r.when && <span className="text-[13px] font-medium text-[#8a8a92]">· {r.when}</span>}
                         </div>
                         <p className="mt-2 text-[14.5px] font-medium leading-[1.85] text-[#3a3a40]" dir="auto">{r.text}</p>
-                        {confirming === r.id ? (
-                          <div className="mt-2 flex flex-wrap items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'var(--error-fill, #fdecea)' }} role="alert">
-                            <span className="text-[13.5px] font-bold text-[#171717]">
-                              {r.origin === 'google' ? 'تحذفه من القائمة؟ لن يرجع عند التحديث من Google.' : 'تحذف هذا التقييم نهائيًا؟'}
-                            </span>
-                            <span className="ms-auto flex gap-2">
-                              <button type="button" onClick={() => { p.onDelete?.(r.id); setConfirming(null) }} className="min-h-[36px] rounded-lg px-3 text-[13.5px] font-bold text-white" style={{ background: 'var(--error, #c0362c)' }}>نعم، احذف</button>
-                              <button type="button" onClick={() => setConfirming(null)} className="zy-btn-q">لا</button>
-                            </span>
-                          </div>
-                        ) : (p.onSave || p.onDelete) && (
+                        {(p.onSave || p.onDelete) && (
                           <div className="mt-1.5 flex items-center gap-4">
                             {r.origin === 'manual' && p.onSave && (
                               <button type="button" onClick={() => setEditing(r.id)} className="zy-link min-h-[32px] text-[13.5px] font-bold">تعديل</button>
                             )}
                             {p.onDelete && (
-                              <button type="button" onClick={() => setConfirming(r.id)} className="inline-flex min-h-[32px] items-center gap-1 text-[13.5px] font-bold text-[#8a8a92] hover:text-[var(--error,#c0362c)]" aria-label={`حذف تقييم ${r.name}`}>
+                              <button type="button" onClick={() => p.onDelete?.(r.id)} className="inline-flex min-h-[32px] items-center gap-1 text-[13.5px] font-bold text-[#8a8a92] hover:text-[var(--error,#c0362c)]" aria-label={`حذف تقييم ${r.name}`}>
                                 <Trash2 className="h-3.5 w-3.5" strokeWidth={2.25} />حذف
                               </button>
                             )}
@@ -402,6 +388,12 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
             Google يعطي آخر 5 تقييمات فقط، ونصها يبقى كما كتبه أصحابها. التقييمات التي تضيفها أنت يمكنك تعديلها. ويمكنك حذف أي تقييم.
           </p>
         </>
+      )}
+      {p.undo && (
+        <div role="status" className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-[#171717] px-4 py-3 text-white shadow-lg">
+          <span className="min-w-0 flex-1 truncate text-[14px] font-bold" dir="auto">حُذف تقييم {p.undo.name}</span>
+          <button type="button" onClick={p.undo.onUndo} className="min-h-[36px] shrink-0 rounded-lg px-3 text-[14px] font-black text-[#b9c0ff] hover:bg-white/10">تراجع</button>
+        </div>
       )}
     </Page>
   )
