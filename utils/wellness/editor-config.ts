@@ -175,6 +175,7 @@ export const WELLNESS_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'testimonials', label: 'Reviews', icon: Star, page: 'home',
       fields: [
+        { type: 'reviews', path: 'testimonials.items' },
         { type: 'text',     path: 'links.reviews_url',           label: 'Reviews link (Google, Trustpilot, Facebook)' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'Subheading', rows: 2 },

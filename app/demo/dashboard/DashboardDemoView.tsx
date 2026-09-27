@@ -44,6 +44,8 @@ import {
 import { DASHBOARD_CSS } from '@/components/app/dashboard-style'
 import { chromeFont } from '@/components/app/chrome-font'
 import ZenyaMark from '@/components/ZenyaMark'
+import { ReportProblem } from '@/components/app/ReportProblem'
+import { NotificationsBell } from '@/components/app/NotificationsBell'
 import {
   AnalyticsView, BillingView, BookingsView, DomainsView, GalleryView,
   HomeView, ReviewsView, SeoView, SettingsView, SitesView,
@@ -90,6 +92,7 @@ export default function DashboardDemoView() {
   const [range, setRange] = useState('30d')
   const [bookingFilter, setBookingFilter] = useState('all')
   const [siteFilter, setSiteFilter] = useState('all')
+  const fakeSend = () => new Promise<void>((r) => setTimeout(r, 700))
 
   /* Read the address on mount. Deliberately in an effect rather than in the
      useState initialiser: the initialiser also runs on the server, where
@@ -169,6 +172,7 @@ export default function DashboardDemoView() {
         </div>
         <nav className="flex-1 overflow-y-auto py-3">{navRows(() => {})}</nav>
         <div className="zy-rail-foot">
+          <ReportProblem email="nadia@example.com" onSend={fakeSend} />
           <a href="https://zenyaai.co/?home=1">→ العودة إلى الموقع التسويقي</a>
         </div>
       </aside>
@@ -186,6 +190,7 @@ export default function DashboardDemoView() {
             </div>
             <nav className="flex-1 overflow-y-auto py-3">{navRows(() => setDrawer(false))}</nav>
             <div className="zy-rail-foot">
+              <ReportProblem email="nadia@example.com" onSend={fakeSend} />
               <a href="https://zenyaai.co/?home=1">→ العودة إلى الموقع التسويقي</a>
             </div>
           </aside>
@@ -212,9 +217,7 @@ export default function DashboardDemoView() {
               <Plus className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
               <span className="hidden text-[14.5px] sm:inline">موقع جديد</span>
             </span>
-            <span className="zy-icon-btn relative hidden sm:inline-flex" aria-hidden>
-              <Bell className="h-4 w-4" />
-            </span>
+            <NotificationsBell items={[{ id: 'r1', title: 'تقييمان جديدان من Google', site: 'واحة العافية', when: 'اليوم 9:12 ص', onOpen: () => go('reviews') }]} />
             <span className="zy-top-acct" role="presentation">
               <span className="zy-top-av">ن</span>
               <span className="zy-top-name hidden sm:block">نادية</span>

@@ -1,97 +1,112 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Sparkles, ChevronDown } from 'lucide-react'
 
 /**
  * AiContentDisclaimer — the honesty gate every generator shows once before the
- * first build. Generated sites lean on invented copy (bios, testimonials,
- * ratings, certifications); the merchant must own verifying/replacing it before
- * publishing, and Zenya disclaims responsibility for inaccurate info that gets
- * shipped. Shared across all eight template generators so the wording — and the
- * legal disclaimer — never drift.
+ * first build. It lists only what the owner left empty and the AI will write
+ * in their place, so an owner who typed in their own reviews is not told the
+ * reviews are invented. When nothing is left for the AI, the box is skipped.
+ * Shared by every generator so the wording, and the legal text, never drift.
  */
 
-const DEFAULT_ITEMS = [
-  'التقييمات وآراء العملاء والشهادات',
-  'الأسماء والسيَر والمسمّيات (الفريق، الطهاة، المختصّون)',
-  'متوسط التقييم وعدد المراجعات',
-  'الشهادات والجوائز والعضويات',
-  'الأسعار وتفاصيل المنتجات والخدمات',
-  'أي وصف أو نصّ يُترك فارغًا فيكتبه الذكاء الاصطناعي',
-]
+export type AiFill = 'reviews' | 'people' | 'rating' | 'certs' | 'prices' | 'text'
+
+const LABELS: Record<AiFill, string> = {
+  reviews: 'آراء العملاء',
+  people: 'أسماء الفريق وسيرهم',
+  rating: 'متوسط التقييم وعدد المراجعات',
+  certs: 'الشهادات والجوائز',
+  prices: 'الأسعار وتفاصيل الخدمات',
+  text: 'الأوصاف والنصوص التي تركتها فارغة',
+}
+
+const ORDER: AiFill[] = ['reviews', 'rating', 'people', 'certs', 'prices', 'text']
+
+const LEGAL =
+  'بالمتابعة، تُقرّ بأن هذه التفاصيل أمثلة مولَّدة لإكمال تصميم الموقع فقط، وأن مسؤوليتك مراجعتها واستبدالها بمحتواك وتقييماتك الحقيقية قبل النشر. زينيا غير مسؤولة — أمام الله ولا أمام أي عميل يشتري منك — عن أي ضرر ينتج عن نشر معلومات أو مراجعات غير صحيحة.'
 
 export default function AiContentDisclaimer({
   open,
   onClose,
   onConfirm,
-  items = DEFAULT_ITEMS,
+  items,
 }: {
   open: boolean
   onClose: () => void
   onConfirm: () => void
-  items?: string[]
+  /** What the owner left empty. Omitted: assume only free text. */
+  items?: AiFill[]
 }) {
-  if (!open) return null
+  const [more, setMore] = useState(false)
+  const list = ORDER.filter((k) => (items ?? ['text']).includes(k))
+  const nothing = list.length === 0
+
+  // Everything was filled in by the owner: nothing to warn about.
+  useEffect(() => {
+    if (open && nothing) onConfirm()
+  }, [open, nothing, onConfirm])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open || nothing) return null
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4"
+      className="fixed inset-0 z-[90] flex items-end justify-center bg-[rgba(17,17,17,0.42)] p-3 backdrop-blur-[2px] sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="تنبيه بمحتوى مولَّد بالذكاء الاصطناعي"
+      aria-labelledby="ai-fill-title"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="flex max-h-[85vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className="flex max-h-[88vh] w-full max-w-[480px] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(17,17,17,0.08),0_24px_60px_-20px_rgba(17,17,17,0.35)]"
         dir="rtl"
       >
-        <div className="border-b border-token bg-amber-50 px-6 py-5">
-          <h2 className="text-base font-bold text-foreground">
-            تنبيه — بعض محتوى القالب من إنشاء الذكاء الاصطناعي
-          </h2>
-          <p className="mt-1 text-[14.5px] text-muted">
-            نملأ الفراغات بأمثلة واقعية حتى يكتمل تصميم موقعك — لكنها ليست معلومات حقيقية.
-          </p>
+        <div className="flex items-start gap-3 border-b border-[rgba(17,17,17,0.08)] px-6 py-5">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#171717] text-white"><Sparkles size={18} strokeWidth={2} aria-hidden /></span>
+          <div>
+            <h2 id="ai-fill-title" className="text-[18px] font-extrabold leading-snug text-[#171717]">لم تضف هذه، فسنكتب لها أمثلة</h2>
+            <p className="mt-1 text-[14px] leading-relaxed text-[#56565a]">حتى يكتمل تصميم موقعك. ليست معلومات حقيقية، فاستبدلها بمعلوماتك قبل النشر.</p>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <p className="text-[14.5px] text-muted">قد يشمل المحتوى المولَّد:</p>
-          <ul className="mt-3 space-y-2">
-            {items.map((t) => (
-              <li
-                key={t}
-                className="flex items-start gap-2.5 rounded-xl border border-token bg-surface/60 p-3 text-[14.5px] text-foreground"
-              >
-                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
-                {t}
+        <div className="flex-1 overflow-y-auto px-6 py-3">
+          <ul className="divide-y divide-[rgba(17,17,17,0.07)]">
+            {list.map((k) => (
+              <li key={k} className="flex items-center gap-3 py-3 text-[14.5px] font-medium text-[#171717]">
+                <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[rgba(94,106,210,0.12)] text-[#5e6ad2]"><Sparkles size={11} strokeWidth={2.4} aria-hidden /></span>
+                {LABELS[k]}
               </li>
             ))}
           </ul>
+          <button
+            type="button"
+            onClick={() => setMore((m) => !m)}
+            aria-expanded={more}
+            className="mt-2 inline-flex items-center gap-1 rounded-md text-[13.5px] font-bold text-[#56565a] hover:text-[#171717] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]"
+          >
+            المسؤولية
+            <ChevronDown size={15} className={more ? 'rotate-180 transition' : 'transition'} aria-hidden />
+          </button>
+          {more ? <p className="mt-2 rounded-xl bg-[#f4f4f6] p-3 text-[13px] leading-[1.8] text-[#56565a]">{LEGAL}</p> : null}
         </div>
 
-        <div className="border-t border-token px-6 py-4">
-          <p className="mb-3 text-[14.5px] leading-relaxed text-muted">
-            بالمتابعة، تُقرّ بأن هذه التفاصيل وآراء العملاء أمثلة مولَّدة لإكمال تصميم الموقع
-            فقط، وأن مسؤوليتك مراجعتها واستبدالها بمحتواك وتقييماتك الحقيقية قبل النشر. زينيا
-            غير مسؤولة — أمام الله ولا أمام أي عميل يشتري منك — عن أي ضرر ينتج عن نشر معلومات
-            أو مراجعات غير صحيحة.
-          </p>
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-token bg-white px-4 py-2 text-[14.5px] font-semibold text-foreground hover:bg-black/5"
-            >
-              رجوع
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className="rounded-full bg-foreground px-6 py-2.5 text-[14.5px] font-semibold text-white transition hover:scale-[1.02]"
-            >
-              فهمت — أكمل التوليد
-            </button>
-          </div>
+        <div className="flex gap-2 border-t border-[rgba(17,17,17,0.08)] px-6 py-4">
+          <button type="button" onClick={onConfirm} className="min-h-[46px] flex-1 rounded-full bg-[#171717] px-6 text-[14.5px] font-bold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5e6ad2]">
+            فهمت، أكمل التوليد
+          </button>
+          <button type="button" onClick={onClose} className="min-h-[46px] rounded-full px-5 text-[14.5px] font-bold text-[#171717] shadow-[0_0_0_1px_rgba(17,17,17,0.12)] hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]">
+            رجوع
+          </button>
         </div>
       </motion.div>
     </div>

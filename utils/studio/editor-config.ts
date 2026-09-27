@@ -1,6 +1,7 @@
 import {
   Sparkles, Mail, Newspaper, Users, Award, Quote, Clock,
   Home as HomeIcon, BookOpen, Workflow, Phone,
+  Star,
 } from 'lucide-react'
 import { STUDIO_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -170,6 +171,27 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
           itemFields: [
             { type: 'text', path: 'value', label: 'Value' },
             { type: 'text', path: 'label', label: 'Label' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'testimonials', label: 'Reviews', icon: Star, page: 'home',
+      fields: [
+        { type: 'reviews', path: 'testimonials.items' },
+        { type: 'text',     path: 'testimonials.eyebrow',        label: 'Eyebrow' },
+        { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
+        { type: 'number',   path: 'testimonials.average_rating', label: 'Average rating', min: 0, max: 5, step: 0.1 },
+        { type: 'text',     path: 'testimonials.review_count',   label: 'Review count text' },
+        {
+          type: 'array', path: 'testimonials.items',
+          label: 'Reviews', itemLabel: 'review', itemTitle: 'name',
+          makeItem: () => ({ name: 'Client', text: '', detail: '', rating: 5 }),
+          itemFields: [
+            { type: 'text',     path: 'name',   label: 'Name' },
+            { type: 'textarea', path: 'text',   label: 'Quote', rows: 3 },
+            { type: 'text',     path: 'detail', label: 'Detail (city · product)' },
+            { type: 'number',   path: 'rating', label: 'Rating', min: 1, max: 5 },
           ],
         },
       ],

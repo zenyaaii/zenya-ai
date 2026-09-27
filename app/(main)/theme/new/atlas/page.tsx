@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { ATLAS_PRESETS } from '@/utils/atlas/presets'
@@ -154,7 +156,7 @@ export default function AtlasWizardPage() {
       pricing: { free_tier: form.free_tier, pro_price: form.pro_price.trim() || undefined, enterprise: form.enterprise },
       social_proof: {
         user_count: form.user_count.trim() || undefined,
-        review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+        review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
         notable_customers: form.notable_customers.trim() || undefined,
       },
@@ -189,7 +191,7 @@ export default function AtlasWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = ATLAS_PRESETS.find((p) => p.id === form.style_preset) || ATLAS_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
@@ -379,6 +381,11 @@ export default function AtlasWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'reviews', 'certs', 'prices',
+          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          ...(validFeatures.some((f) => !f.description.trim()) || !form.integrations.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

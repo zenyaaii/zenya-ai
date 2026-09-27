@@ -15,6 +15,8 @@ export type EditorFieldDef =
   | { type: 'image';     path: string; label: string; hint?: string }
   | { type: 'number';    path: string; label: string; min?: number; max?: number; step?: number }
   | { type: 'note';      content: string }
+  /** A card that says where the site's reviews are managed, with a link to the dashboard's Reviews page. */
+  | { type: 'reviews';   path: string }
   | {
       type: 'strings'
       path: string

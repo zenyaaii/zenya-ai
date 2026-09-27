@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ReportProblem } from './ReportProblem'
 import { useSearchParams } from 'next/navigation'
 import {
   Home, Folder, BarChart3, Search, Globe, Image as ImageIcon,
@@ -127,6 +128,7 @@ export default function Sidebar({
 
       {/* Foot — small marketing link out */}
       <div className="zy-rail-foot">
+        <ReportProblem />
         {/* Dashboard runs on dashboard.zenyaai.co, so this must be the absolute
             apex URL. ?home=1 tells the apex NOT to bounce a logged-in user back
             to accounts/dashboard — they explicitly want to see the marketing site. */}

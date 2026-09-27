@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
@@ -49,8 +51,10 @@ const GOOGLE_ERRORS: Record<string, string> = {
 
 /** Looks the business up on Google and shows its reviews with a tick box on
  *  each, so the owner picks which go on the site. */
-function GoogleReviewsImport({ url, name, city, onImport }: {
+function GoogleReviewsImport({ url, name, city, onPlace, onImport }: {
   url: string; name: string; city: string
+  /** Fills the rating and count the moment Google answers, before any pick. */
+  onPlace: (r: GoogleResult) => void
   onImport: (r: GoogleResult, chosen: GoogleFound[]) => void
 }) {
   const [busy, setBusy] = useState(false)
@@ -70,6 +74,7 @@ function GoogleReviewsImport({ url, name, city, onImport }: {
       if (!res.ok) { setError(GOOGLE_ERRORS[json.error] || 'لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.'); return }
       const r = json as GoogleResult
       setFound(r); setKeep(r.reviews.map(() => true))
+      onPlace(r)
     } catch {
       setError('لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.')
     } finally {
@@ -101,7 +106,7 @@ function GoogleReviewsImport({ url, name, city, onImport }: {
             {found.place.count != null ? ' · ' + found.place.count + ' تقييم' : ''}
           </p>
           <p style={{ margin: 0, fontSize: 14, color: '#6b6b6b' }}>
-            {found.reviews.length ? 'Google تعطينا حتى 5 تقييمات. اختر ما تريد عرضه في موقعك.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
+            {found.reviews.length ? 'هذه كل التقييمات التي تعطينا إياها Google (5 على الأكثر). أخذنا التقييم والعدد، واختر ما تريد عرضه.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
           </p>
           {found.reviews.map((r, i) => (
             <label key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.625rem', alignItems: 'start', padding: '0.625rem', borderRadius: 10, background: keep[i] ? 'rgba(94,106,210,0.06)' : 'transparent', cursor: 'pointer' }}>
@@ -311,6 +316,14 @@ export default function WellnessWizardPage() {
   function addReview() {
     setForm((prev) => ({ ...prev, reviews: [...(prev.reviews || []), { id: uid(), name: '', text: '', treatment: '', rating: '5' }] }))
   }
+  function placeGoogle(r: GoogleResult) {
+    setForm((prev) => ({
+      ...prev,
+      reviews_url: prev.reviews_url?.trim() ? prev.reviews_url : r.place.url,
+      review_rating: r.place.rating != null ? r.place.rating.toFixed(1) : prev.review_rating,
+      review_count: r.place.count != null ? String(r.place.count) : prev.review_count,
+    }))
+  }
   function importGoogle(r: GoogleResult, chosen: GoogleFound[]) {
     setForm((prev) => {
       const have = new Set((prev.reviews || []).map((x) => x.name.trim() + '|' + x.text.trim()))
@@ -421,16 +434,17 @@ export default function WellnessWizardPage() {
       philosophy: { brief: form.philosophy_brief.trim(), approach: form.philosophy_approach.trim() || undefined },
       amenities: form.amenities.trim() || undefined,
       social_proof: {
-        review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+        review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
         certifications: form.certifications.trim() || undefined,
-        reviews: validReviews.map((r) => ({
-          name: r.name.trim(),
-          text: r.text.trim(),
-          treatment: r.treatment.trim() || undefined,
-          rating: Number(r.rating) || 5,
+        // Clamped to the schema's limits: a long Google review must not block the build.
+        reviews: validReviews.slice(0, 12).map((r) => ({
+          name: r.name.trim().slice(0, 80),
+          text: r.text.trim().slice(0, 600),
+          treatment: r.treatment.trim().slice(0, 120) || undefined,
+          rating: Math.min(5, Math.max(1, Number(r.rating) || 5)),
           origin: r.origin,
-          when: r.when,
+          when: r.when?.slice(0, 60),
         })),
         reviews_url: /^https?:\/\//.test((form.reviews_url || '').trim()) ? form.reviews_url.trim() : undefined,
       },
@@ -473,7 +487,7 @@ export default function WellnessWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = WELLNESS_PRESETS.find((p) => p.id === form.style_preset) || WELLNESS_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
@@ -712,7 +726,7 @@ export default function WellnessWizardPage() {
             <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => update('reviews_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Block>
-            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onImport={importGoogle} />
+            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onPlace={placeGoogle} onImport={importGoogle} />
           </Block>
           <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
             <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.8" />
@@ -839,6 +853,13 @@ export default function WellnessWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          ...(form.review_rating.trim() ? [] : ['rating' as const]),
+          ...(form.team.some((m) => m.name.trim().length >= 2 && !m.bio.trim()) ? ['people' as const] : []),
+          ...(form.certifications.trim() ? [] : ['certs' as const]),
+          ...(validTreatments.some((t) => !t.price.trim()) ? ['prices' as const] : []),
+          ...(validTreatments.some((t) => !t.description.trim()) || !form.amenities.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

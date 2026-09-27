@@ -40,6 +40,15 @@ export type StudioPressItem = {
   year?: string
 }
 
+/** One customer review. Shape matches reviews-bank's inTestimonials('name', 'text'). */
+export type StudioTestimonial = {
+  name: string
+  text: string
+  rating?: number
+  /** Optional: city, or the piece the customer bought. */
+  detail?: string
+}
+
 export type StudioContent = {
   brand: {
     name: string
@@ -97,6 +106,14 @@ export type StudioContent = {
     heading: string
     subheading: string
     stats: { value: string; label: string }[]
+  }
+  /** Customer reviews. Optional; the section renders nothing without items. */
+  testimonials?: {
+    eyebrow?: string
+    heading: string
+    average_rating?: number
+    review_count?: string
+    items: StudioTestimonial[]
   }
   cta: {
     eyebrow: string

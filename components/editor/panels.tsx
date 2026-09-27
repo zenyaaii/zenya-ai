@@ -25,6 +25,8 @@ import {
   SmallNote, Collapsible, AddRowButton, StringList, ColorRow, MoodChip,
 } from './EditorFields'
 import { useNotify } from '@/components/ui/Notify'
+import { useEditorEnv } from './env'
+import { MessageSquareQuote } from 'lucide-react'
 import {
   getPath, setPath, SECTION_TEXT_SCALES,
   type EditorConfig, type EditorFieldDef, type SectionStyle, type SectionTextAlign,
@@ -58,6 +60,9 @@ function RenderField({
   const { confirm } = useNotify()
   if (field.type === 'note') {
     return <SmallNote>{field.content}</SmallNote>
+  }
+  if (field.type === 'reviews') {
+    return <ReviewsCard content={content} path={field.path} />
   }
   if (field.type === 'text') {
     return (
@@ -460,6 +465,40 @@ export function SectionStyleHeader({
       <p className="ze-hint">
         {t.editor.appliesToSection} <strong>{panelLabel || panelId}</strong>
       </p>
+    </div>
+  )
+}
+
+/**
+ * The top of every Reviews section in the editor: how many reviews the site
+ * shows and how many are set aside, and the way to the dashboard's Reviews
+ * page, where they are switched on and off, put in order, fetched from
+ * Google and deleted. The list below it still edits the shown reviews here.
+ */
+function ReviewsCard({ content, path }: { content: any; path: string }) {
+  const { themeId } = useEditorEnv()
+  const shown: any[] = (getPath(content, path) as any[]) || []
+  const hidden: any[] = Array.isArray(content?.review_bank?.hidden) ? content.review_bank.hidden : []
+  const fresh = [...shown, ...hidden].filter((r) => r?.is_new).length
+  return (
+    <div className="ze-reviews-card" style={{ display: 'grid', gap: 8, padding: 14, borderRadius: 14, background: '#f4f4f6', boxShadow: '0 0 0 1px rgba(17,17,17,0.06)', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 14.5, color: '#171717' }}>
+        <MessageSquareQuote style={{ width: 16, height: 16 }} />
+        تقييماتك
+        {fresh > 0 && <span style={{ borderRadius: 999, padding: '1px 8px', fontSize: 12, fontWeight: 900, background: '#fdecea', color: '#c0362c' }}>{fresh} جديد</span>}
+      </div>
+      <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.8, color: '#56565a', fontWeight: 500 }}>
+        يظهر في موقعك <b style={{ color: '#171717' }}>{shown.length}</b>{hidden.length > 0 ? <>، ومخفي <b style={{ color: '#171717' }}>{hidden.length}</b></> : null}.
+        {' '}اختر ما يظهر، ورتّبها، واجلبها من Google، واحذفها من صفحة التقييمات. ويمكنك تعديل نصوص تقييماتك هنا في الأسفل.
+      </p>
+      <a
+        href={themeId ? `/dashboard/reviews?site=${encodeURIComponent(themeId)}` : '/dashboard/reviews'}
+        target="_blank"
+        rel="noreferrer"
+        style={{ justifySelf: 'start', display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 10, padding: '8px 14px', background: '#171717', color: '#fff', fontSize: 13.5, fontWeight: 800 }}
+      >
+        افتح صفحة التقييمات ←
+      </a>
     </div>
   )
 }

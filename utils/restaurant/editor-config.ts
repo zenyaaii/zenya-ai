@@ -196,6 +196,7 @@ export const RESTAURANT_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'reviews', label: 'Reviews', icon: Star, page: 'reviews',
       fields: [
+        { type: 'reviews', path: 'reviews.testimonials' },
         { type: 'textarea', path: 'reviews.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'reviews.subheading',     label: 'Subheading', rows: 2 },
         { type: 'number',   path: 'reviews.overall_rating', label: 'Overall rating', min: 0, max: 5, step: 0.1 },

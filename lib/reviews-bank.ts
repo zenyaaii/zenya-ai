@@ -13,7 +13,9 @@
  * content.review_bank.google.
  *
  * An item that came from Google carries origin: 'google'. Its text is never
- * edited here: Google's terms do not allow rewording a review.
+ * edited here: Google's terms do not allow rewording a review. It can be
+ * deleted; its key then goes in content.review_bank.removed so a later fetch
+ * skips it.
  */
 
 export type ReviewOrigin = 'google' | 'manual'
@@ -25,10 +27,14 @@ export type BankRow = {
   rating: number
   origin: ReviewOrigin
   when?: string
+  /** When the review was written, if Google said (ISO). */
+  at?: string
+  /** Brought in by a fetch and not yet seen on the Reviews page. */
+  isNew?: boolean
   shown: boolean
 }
 
-export type GoogleSource = { link: string; rating: number | null; count: number | null; fetched_at?: string }
+export type GoogleSource = { link: string; rating: number | null; count: number | null; fetched_at?: string; place_id?: string }
 
 type Item = Record<string, any>
 
@@ -46,7 +52,8 @@ type Adapter = {
 
 const inTestimonials = (name: string, text: string, withSummary: boolean): Adapter => ({
   get: (c) => c?.testimonials?.items,
-  set: (c, items) => { c.testimonials = { ...(c.testimonials || {}), items } },
+  // A site that never had the section gets a heading with its first review, so the template has one to draw.
+  set: (c, items) => { c.testimonials = { heading: 'آراء العملاء', ...(c.testimonials || {}), items } },
   name,
   text,
   heading: (c) => c?.testimonials?.heading || 'آراء العملاء',
@@ -65,6 +72,8 @@ const ADAPTERS: Record<string, Adapter> = {
   services: inTestimonials('name', 'text', true),
   lookbook: inTestimonials('author', 'text', true),
   atlas: inTestimonials('author', 'quote', false),
+  studio: inTestimonials('name', 'text', true),
+  collective: inTestimonials('author', 'quote', true),
   restaurant: {
     get: (c) => c?.reviews?.testimonials,
     set: (c, items) => { c.reviews = { ...(c.reviews || {}), testimonials: items } },
@@ -111,6 +120,8 @@ function toRow(a: Adapter, it: Item, id: string, shown: boolean): BankRow {
     rating: Math.max(1, Math.min(5, Math.round(Number(it?.rating) || 5))),
     origin: it?.origin === 'google' ? 'google' : 'manual',
     when: typeof it?.when === 'string' ? it.when : undefined,
+    at: typeof it?.at === 'string' ? it.at : undefined,
+    isNew: it?.is_new === true || undefined,
     shown,
   }
 }
@@ -185,18 +196,60 @@ export function saveReview(bt: string, content: any, id: string | null, v: { nam
   return s.commit()
 }
 
-/** Remove a review the owner typed. Google's are hidden instead, since a fetch would bring them back. */
+/**
+ * Remove a review, whichever kind. A Google one leaves its name|text key in
+ * content.review_bank.removed, so the next fetch from Google does not bring it back.
+ */
 export function deleteReview(bt: string, content: any, id: string): any {
   const s = split(bt, content)
   const [list, i] = s.pick(id)
-  if (!list[i] || list[i].origin === 'google') return content
+  const item = list[i]
+  if (!item) return content
   list.splice(i, 1)
+  const c = s.commit()
+  if (item.origin === 'google') {
+    const removed: string[] = Array.isArray(c.review_bank.removed) ? c.review_bank.removed : []
+    const k = keyOf(s.a, item)
+    if (!removed.includes(k)) c.review_bank.removed = [...removed, k]
+  }
+  return c
+}
+
+function keyOf(a: Adapter, it: Item): string {
+  return String(it?.[a.name] || '').trim() + '|' + String(it?.[a.text] || '').trim()
+}
+
+/** Move a shown review one place up or down the site's list. */
+export function moveReview(bt: string, content: any, id: string, to: 'up' | 'down'): any {
+  if (!id.startsWith('s')) return content
+  const s = split(bt, content)
+  const i = Number(id.slice(1))
+  const j = to === 'up' ? i - 1 : i + 1
+  if (!s.shown[i] || j < 0 || j >= s.shown.length) return content
+  ;[s.shown[i], s.shown[j]] = [s.shown[j], s.shown[i]]
   return s.commit()
 }
 
-type Fetched = {
-  place: { rating: number | null; count: number | null; url: string }
-  reviews: { name: string; text: string; rating: number; when?: string }[]
+/** How many reviews on this site are still marked new. */
+export function countNew(bt: string, content: any): number {
+  if (!hasReviews(bt)) return 0
+  const a = adapter(bt)
+  return [...(a.get(content) || []), ...bankOf(content).hidden].filter((it) => it?.is_new === true).length
+}
+
+/** Clear the "new" mark from every review, once the owner has seen them. Returns null when nothing was new. */
+export function markSeen(bt: string, content: any): any | null {
+  if (countNew(bt, content) === 0) return null
+  const s = split(bt, content)
+  const clear = (list: Item[]) => list.forEach((it, i) => { if (it?.is_new) { const { is_new: _, ...rest } = it; list[i] = rest } })
+  clear(s.shown)
+  clear(s.hidden)
+  return s.commit()
+}
+
+export type Fetched = {
+  place: { id?: string; rating: number | null; count: number | null; url: string }
+  reviews: { name: string; text: string; rating: number; when?: string; at?: string }[]
 }
 
 /**
@@ -205,19 +258,26 @@ type Fetched = {
  * reviews at all, in which case they go straight on.
  */
 export function mergeGoogle(bt: string, content: any, link: string, r: Fetched): any {
+  return mergeGoogleCounted(bt, content, link, r).content
+}
+
+/** mergeGoogle, also saying how many reviews were new. The daily check uses the count. */
+export function mergeGoogleCounted(bt: string, content: any, link: string, r: Fetched): { content: any; added: number } {
   const s = split(bt, content)
-  const key = (it: Item) => String(it?.[s.a.name] || '').trim() + '|' + String(it?.[s.a.text] || '').trim()
-  const have = new Set([...s.shown, ...s.hidden].map(key))
+  const key = (it: Item) => keyOf(s.a, it)
+  const removed: string[] = Array.isArray(s.c.review_bank?.removed) ? s.c.review_bank.removed : []
+  const have = new Set([...s.shown, ...s.hidden].map(key).concat(removed))
   const target = s.shown.length === 0 ? s.shown : s.hidden
+  let added = 0
   for (const g of r.reviews) {
-    const it: Item = { [s.a.name]: g.name, [s.a.text]: g.text, rating: g.rating, origin: 'google', when: g.when || undefined }
+    const it: Item = { [s.a.name]: g.name, [s.a.text]: g.text, rating: g.rating, origin: 'google', when: g.when || undefined, at: g.at || undefined, is_new: true }
     if (bt === 'atlas') it.avatar_letter = g.name.trim().charAt(0)
     if (bt === 'restaurant' || bt === 'services') it.source = 'Google'
-    if (!have.has(key(it))) { target.push(it); have.add(key(it)) }
+    if (!have.has(key(it))) { target.push(it); have.add(key(it)); added++ }
   }
   const c = s.commit()
-  c.review_bank.google = { link, rating: r.place.rating, count: r.place.count, fetched_at: new Date().toISOString() }
+  c.review_bank.google = { link, rating: r.place.rating, count: r.place.count, fetched_at: new Date().toISOString(), ...(r.place.id ? { place_id: r.place.id } : {}) }
   if (r.place.rating != null && r.place.count != null) s.a.summary?.set(c, r.place.rating, r.place.count)
   if (bt === 'wellness' && !c.links?.reviews_url) c.links = { ...(c.links || {}), reviews_url: link }
-  return c
+  return { content: c, added }
 }
