@@ -167,6 +167,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'testimonials', label: 'Testimonials', icon: Star, page: 'home',
       fields: [
+        { type: 'reviews', path: 'testimonials.items' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'Subheading', rows: 2 },
         { type: 'number',   path: 'testimonials.average_rating', label: 'Average rating', min: 0, max: 5, step: 0.1 },

@@ -100,6 +100,14 @@ export const COLLECTIVE_MOCK_CONTENT: CollectiveContent = {
         rating: 5,
         avatar_letter: 'س',
         product: 'سيروم فيتامين C — 20%'
+      },
+      {
+        quote: 'الروب القطني أنعم مما توقّعت، لكن المقاس جاء أكبر قليلًا من الجدول. خدمة العملاء بدّلته خلال أيام بلا أي سؤال.',
+        author: 'فيصل العنزي',
+        location: 'الكويت',
+        rating: 4,
+        avatar_letter: 'ف',
+        product: 'روب قطن عضوي'
       }
     ]
   },

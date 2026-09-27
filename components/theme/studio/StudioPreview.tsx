@@ -89,6 +89,21 @@ function Eyebrow({ text, colors, fonts }: { text: string; colors: ReturnType<typ
   )
 }
 
+// ─── Rating stars ──────────────────────────────────────────────────────────────
+// Hairline outline for the empty ones so a 4 reads as a 4, not as a smudge.
+function Stars({ value, color, size = 12 }: { value: number; color: string; size?: number }) {
+  const n = Math.max(0, Math.min(5, Math.round(value)))
+  return (
+    <span className="inline-flex gap-[3px]" role="img" aria-label={`${n} من 5`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} viewBox="0 0 20 20" width={size} height={size} fill={i < n ? color : 'none'} stroke={color} strokeWidth="1.2" aria-hidden>
+          <path d="M10 1.8l2.47 5.3 5.8.68-4.28 3.98 1.13 5.73L10 14.6l-5.12 2.89 1.13-5.73L1.73 7.78l5.8-.68z" />
+        </svg>
+      ))}
+    </span>
+  )
+}
+
 // ─── صور (بلا نساء) ───────────────────────────────────────────────────────────
 // سياسة الصور: لا صور لنساء غير محجّبات. الواجهة = مشهد ورشة/حِرفة، وصورة
 // المؤسّس = رجل. يُرجى التحقّق البصري والاستبدال عند الحاجة.
@@ -639,6 +654,64 @@ export default function StudioPreview({
           </div>
         </section>
       )}
+
+      {/* ── REVIEWS ──────────────────────────────────────────────────────────── */}
+      {/* Renders nothing without items. */}
+      {view === 'home' && !!content.testimonials?.items?.length && (() => {
+        const t = content.testimonials!
+        const items = t.items.filter(it => it && (it.text || '').trim())
+        if (!items.length) return null
+        const hasSummary = typeof t.average_rating === 'number' && t.average_rating > 0
+
+        return (
+          <section data-section="testimonials" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
+            <div className="mx-auto grid max-w-5xl gap-16 md:grid-cols-[1fr_2fr]">
+              <motion.div className="md:sticky md:top-28 md:self-start" {...revealAnim(rm,0)}>
+                {t.eyebrow && <Eyebrow text={t.eyebrow} colors={colors} fonts={fonts} />}
+                <h2 className="mt-6 text-4xl font-semibold leading-tight" style={{ fontFamily: fonts.heading, color: colors.text }}>
+                  <ML text={t.heading} />
+                </h2>
+                {hasSummary && (
+                  <div className="mt-10 pt-8" style={{ borderTop: `1px solid ${colors.border}` }}>
+                    <div className="leading-none" style={{ fontFamily: fonts.display, color: colors.text, fontWeight: 700, fontSize: 'clamp(4rem, 8vw, 6rem)', letterSpacing: '-0.02em' }}>
+                      {t.average_rating!.toFixed(1)}
+                    </div>
+                    <div className="mt-4"><Stars value={t.average_rating!} color={colors.accent} size={14} /></div>
+                    {t.review_count && (
+                      <p className="mt-3 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>{t.review_count}</p>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {items.map((it, i) => (
+                  <motion.figure
+                    key={i}
+                    className="flex flex-col rounded-2xl p-8"
+                    style={{ background: colors.surfaceAlt, border: `1px solid ${colors.border}` }}
+                    initial={rm ? {} : { opacity: 0, y: 32 }}
+                    whileInView={rm ? {} : { opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.15 }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: (i % 2) * 0.12 }}
+                  >
+                    {typeof it.rating === 'number' && <Stars value={it.rating} color={colors.accent} />}
+                    <blockquote className="mt-5 flex-1 text-base leading-[1.9]" style={{ color: colors.text, fontFamily: fonts.body }}>
+                      {it.text}
+                    </blockquote>
+                    <figcaption className="mt-8 pt-5" style={{ borderTop: `1px solid ${colors.border}` }}>
+                      <span className="block text-lg font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>{it.name}</span>
+                      {it.detail && (
+                        <span className="mt-1 block text-[11px] uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>{it.detail}</span>
+                      )}
+                    </figcaption>
+                  </motion.figure>
+                ))}
+              </div>
+            </div>
+          </section>
+        )
+      })()}
 
       {/* ── CTA ──────────────────────────────────────────────────────────────── */}
       {(view === 'home' || view === 'contact') && content.cta && (

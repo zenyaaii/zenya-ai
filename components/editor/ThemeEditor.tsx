@@ -118,7 +118,7 @@ export default function ThemeEditor({
   // Settled by the time loading ends, so MobileEditor opens in the right form
   // at once instead of mounting the phone tree's iframe and then the dock's.
   const wide = useMediaQuery('(min-width: 768px)')
-  const env = useMemo(() => ({ offline: !!store }), [store])
+  const env = useMemo(() => ({ offline: !!store, themeId }), [store, themeId])
 
   // ── State ────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)

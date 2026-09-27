@@ -170,7 +170,17 @@ export function SettingsView() {
 
 /* Sample reviews: four pulled from Google with the link the owner gave in
    the wizard, and two the owner typed. */
+/** Today (or yesterday) at a clock time, so the sample always reads "اليوم 9:12 ص". */
+function todayAt(h: number, m: number, daysAgo = 0) {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  d.setHours(h, m, 0, 0)
+  return d.toISOString()
+}
+
 const SAMPLE_REVIEWS: ReviewRow[] = [
+  { id: 'n1', name: 'عبير م.', rating: 5, origin: 'google', at: todayAt(9, 12), isNew: true, shown: false, text: 'أول مرة أجرب المساج عندهم وما راح تكون الأخيرة. المكان هادي جدًا.' },
+  { id: 'n2', name: 'Dana K.', rating: 4, origin: 'google', at: todayAt(20, 40, 1), isNew: true, shown: false, text: 'خدمة ممتازة والموظفات محترفات. تمنيت لو المواعيد المسائية أكثر.' },
   { id: 'g1', name: 'Noura A.', rating: 5, origin: 'google', when: 'قبل أسبوع', shown: true, text: 'أفضل مركز جربته في الرياض. الأخصائية فاهمة شغلها وتسمع لك قبل ما تبدأ.' },
   { id: 'g2', name: 'منى الشهري', rating: 5, origin: 'google', when: 'قبل شهر', shown: true, text: 'نظافة وراحة وأسعار معقولة. رجعت له ثلاث مرات.' },
   { id: 'g3', name: 'Lama', rating: 3, origin: 'google', when: 'قبل شهرين', shown: false, text: 'الخدمة حلوة لكن انتظرت ٢٠ دقيقة بعد موعدي.' },
@@ -205,6 +215,15 @@ export function ReviewsView() {
         setReviews((rs) => rs.filter((r) => r.id !== id))
       }}
       undo={undo && { name: undo.name, onUndo: () => { setReviews(undo.before); setUndo(null) } }}
+      onMove={(id, to) => setReviews((rs) => {
+        const shown = rs.filter((r) => r.shown)
+        const i = shown.findIndex((r) => r.id === id)
+        const j = to === 'up' ? i - 1 : i + 1
+        if (i < 0 || j < 0 || j >= shown.length) return rs
+        const [it] = shown.splice(i, 1)
+        shown.splice(j, 0, it)
+        return [...shown, ...rs.filter((r) => !r.shown)]
+      })}
     />
   )
 }

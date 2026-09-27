@@ -7,7 +7,7 @@ import { ReviewsScreen, type ReviewDraft } from '@/components/dashboard/screens/
 import { EmptyHint, relTime } from '@/components/dashboard/screens/kit'
 import { businessTypeOf, type ThemeRow } from '@/components/dashboard/site-kinds'
 import {
-  deleteReview, hasReviews, mergeGoogle, readReviews, saveReview, toggleReview,
+  deleteReview, hasReviews, markSeen, mergeGoogle, moveReview, readReviews, saveReview, toggleReview,
 } from '@/lib/reviews-bank'
 
 /** What /api/reviews/google says when it cannot help, in the owner's words. */
@@ -53,6 +53,29 @@ export default function ReviewsPage() {
   const bt = theme ? businessTypeOf(theme) : ''
   const view = useMemo(() => (theme ? readReviews(bt, theme.content) : null), [theme, bt])
 
+  /**
+   * Reviews marked new stay marked for this visit, even though we clear the
+   * mark in the database as soon as the owner opens the site here: next
+   * visit they are no longer new, and the bell stops counting them.
+   */
+  const [fresh, setFresh] = useState<Set<string>>(new Set())
+  const seenFor = useRef<string>('')
+  useEffect(() => {
+    if (!theme || seenFor.current === theme.id) return
+    seenFor.current = theme.id
+    const keys = new Set((view?.rows || []).filter((r) => r.isNew).map((r) => r.name + '|' + r.text))
+    setFresh(keys)
+    const cleared = markSeen(bt, theme.content)
+    if (cleared) {
+      setThemes((ts) => ts && ts.map((t) => (t.id === theme.id ? { ...t, content: cleared } : t)))
+      fetch(`/api/themes/${theme.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: cleared }),
+      }).catch(() => {})
+    }
+  }, [theme, bt, view])
+
   /** Apply a change locally at once, then save it. A failed save puts it back. */
   async function commit(next: any) {
     if (!theme) return
@@ -88,7 +111,11 @@ export default function ReviewsPage() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) { setError(FETCH_ERRORS[data?.error] || 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.'); return }
-      await commit(mergeGoogle(bt, theme.content, data.place?.url || link, data))
+      const merged = mergeGoogle(bt, theme.content, data.place?.url || link, data)
+      // Just fetched, so the owner is looking at them now: badge them for this visit, not the next.
+      const added = readReviews(bt, merged).rows.filter((r) => r.isNew).map((r) => r.name + '|' + r.text)
+      setFresh((f) => new Set([...f, ...added]))
+      await commit(markSeen(bt, merged) || merged)
     } finally {
       setFetching(false)
     }
@@ -122,10 +149,11 @@ export default function ReviewsPage() {
       error={error}
       saveState={saveState}
       heading={view?.heading || ''}
-      reviews={(view?.rows || []).map((r) => ({ ...r }))}
+      reviews={(view?.rows || []).map((r) => ({ ...r, isNew: fresh.has(r.name + '|' + r.text) }))}
       onToggle={(id) => theme && commit(toggleReview(bt, theme.content, id))}
       onSave={(id, v: ReviewDraft) => theme && commit(saveReview(bt, theme.content, id, v))}
       onDelete={remove}
+      onMove={(id, to) => theme && commit(moveReview(bt, theme.content, id, to))}
       undo={undo && { name: undo.name, onUndo: () => { commit(undo.before); setUndo(null) } }}
       empty={themes.length === 0 ? (
         <EmptyHint>لا يوجد عندك موقع فيه قسم تقييمات بعد. أنشئ موقعًا وسيظهر هنا.</EmptyHint>

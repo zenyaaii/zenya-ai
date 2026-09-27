@@ -127,6 +127,7 @@ export const LOOKBOOK_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'testimonials', label: 'Reviews', icon: Star, page: 'home',
       fields: [
+        { type: 'reviews', path: 'testimonials.items' },
         { type: 'text',     path: 'testimonials.eyebrow',        label: 'Eyebrow' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'Heading', rows: 2 },
         { type: 'number',   path: 'testimonials.average_rating', label: 'Average rating', min: 0, max: 5, step: 0.1 },

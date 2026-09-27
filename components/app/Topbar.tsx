@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,6 +15,8 @@ import { chromeFont } from './chrome-font'
 import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 import type { Messages } from '@/lib/i18n/messages'
 import { useDashboardPath } from './useDashboardPath'
+import { NotificationsBell, type BellItem } from './NotificationsBell'
+import { whenLabel } from '@/components/dashboard/screens/reviews'
 
 /** Map known dashboard routes to a page title, in the active locale. */
 function titlesFor(t: Messages): Record<string, string> {
@@ -53,6 +55,20 @@ export default function Topbar({
   const supabase = createClient()
   const [menuOpen, setMenuOpen] = useState(false)
   const t = useT()
+
+  // The bell: sites whose daily Google check found reviews the owner has not seen.
+  const [news, setNews] = useState<{ id: string; name: string; count: number; at: string | null }[]>([])
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/reviews/new').then((r) => (r.ok ? r.json() : { sites: [] })).then((d) => setNews(d.sites || [])).catch(() => {})
+  }, [user, pathname])
+  const bellItems: BellItem[] = news.map((s) => ({
+    id: s.id,
+    title: s.count === 1 ? 'تقييم جديد من Google' : s.count === 2 ? 'تقييمان جديدان من Google' : `${s.count} تقييمات جديدة من Google`,
+    site: s.name,
+    when: whenLabel(s.at || undefined, ''),
+    href: linkTo(`/dashboard/reviews?site=${s.id}`),
+  }))
 
   const title = titleFor(pathname, t)
   const fullName = user?.user_metadata?.full_name as string | undefined
@@ -103,15 +119,8 @@ export default function Topbar({
             user keeps whatever page and state they were on. */}
         <LanguageSwitcher variant="inline" className="hidden sm:inline-flex" />
 
-        {/* Notifications — placeholder, no inbox yet */}
-        <button
-          type="button"
-          className="zy-icon-btn relative hidden sm:inline-flex"
-          aria-label={t.nav.notifications}
-          title={t.nav.noNotifications}
-        >
-          <Bell className="h-4 w-4" />
-        </button>
+        {/* Notifications: new Google reviews, from the daily check. */}
+        <NotificationsBell items={bellItems} label={t.nav.notifications} />
 
         {/* Profile dropdown */}
         <DropdownMenu.Root open={menuOpen} onOpenChange={setMenuOpen}>

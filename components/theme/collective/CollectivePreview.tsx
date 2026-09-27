@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion'
 import { Icon } from '@/components/icons'
 import type { CollectiveContent, CollectiveProduct, CollectiveCollection, CollectiveTestimonial } from '@/utils/collective/types'
@@ -295,7 +295,7 @@ function TestimonialCard({ item, index, colors, fonts }: {
           className="inline-flex self-start rounded-full px-3 py-1 text-[10px] font-medium tracking-wide"
           style={{ background: colors.accentMuted, color: colors.accent }}
         >
-          Re: {item.product}
+          عن: {item.product}
         </div>
       )}
       <div className="flex items-center gap-3 border-t pt-4" style={{ borderColor: colors.borderGlass }}>
@@ -303,7 +303,7 @@ function TestimonialCard({ item, index, colors, fonts }: {
           className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold"
           style={{ background: colors.primary, color: colors.textInverse, fontFamily: fonts.heading }}
         >
-          {item.avatar_letter}
+          {item.avatar_letter || item.author.trim().charAt(0)}
         </div>
         <div>
           <p className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{item.author}</p>
@@ -317,6 +317,49 @@ function TestimonialCard({ item, index, colors, fonts }: {
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
+/**
+ * The summary tile's live strip: one review types itself out, holds, fades,
+ * and the next one types. Reduced motion shows each whole, in turn.
+ */
+function TypingReviews({ items, colors, fonts, reduced }: {
+  items: CollectiveTestimonial[]; colors: any; fonts: any; reduced: boolean
+}) {
+  const [i, setI] = useState(0)
+  const [n, setN] = useState(0)
+  const [fading, setFading] = useState(false)
+  const item = items[i % items.length]
+  const text = (item?.quote || '').trim()
+  useEffect(() => {
+    if (!text) return
+    if (reduced) {
+      setN(text.length)
+      const t = setTimeout(() => setI((x) => x + 1), 6000)
+      return () => clearTimeout(t)
+    }
+    if (n < text.length) {
+      const t = setTimeout(() => setN((x) => x + 1), 32)
+      return () => clearTimeout(t)
+    }
+    const hold = setTimeout(() => setFading(true), 2600)
+    const next = setTimeout(() => { setFading(false); setN(0); setI((x) => x + 1) }, 3100)
+    return () => { clearTimeout(hold); clearTimeout(next) }
+  }, [n, text, reduced])
+  if (!item) return null
+  const done = n >= text.length
+  return (
+    <figure className="m-0 min-h-[9.5rem]" aria-live="off" style={{ opacity: fading ? 0 : 1, transition: 'opacity .45s ease' }}>
+      <blockquote className="m-0 text-lg leading-relaxed" style={{ color: colors.text, fontFamily: fonts.body }}>
+        {text.slice(0, n)}
+        {!done && <span className="ms-0.5 inline-block w-[2px] animate-pulse align-middle" style={{ height: '1.1em', background: colors.accent }} aria-hidden />}
+      </blockquote>
+      <figcaption className="mt-3 flex items-center gap-2 text-sm" style={{ color: colors.muted, fontFamily: fonts.body, opacity: done ? 1 : 0, transition: 'opacity .3s ease' }}>
+        <Stars count={item.rating} color={colors.accent} />
+        <span className="font-semibold" style={{ color: colors.text }}>{item.author}</span>
+      </figcaption>
+    </figure>
+  )
+}
+
 export default function CollectivePreview({ content, presetId, className = '' }: Props) {
   const preset = useMemo(() => getCollectivePreset(presetId ?? 'jade'), [presetId])
   const { colors } = preset
@@ -613,39 +656,62 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── TESTIMONIALS ─────────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'about') && content.testimonials && (
-        <section className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
-          <div className="mx-auto max-w-6xl">
-            <motion.div className="mb-12 text-center" {...revealAnim(rm,0)}>
-              <span className="mb-3 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
-                {content.testimonials.eyebrow}
-              </span>
-              <h2 className="text-4xl font-bold md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
-                {content.testimonials.heading}
-              </h2>
-              <div className="mt-4 flex items-center justify-center gap-3">
-                <Stars count={Math.round(content.testimonials.average_rating)} color={colors.accent} />
-                <span className="text-sm font-semibold" style={{ color: colors.text }}>{content.testimonials.average_rating}</span>
-                <span className="text-sm" style={{ color: colors.muted }}>{content.testimonials.review_count}</span>
-              </div>
-            </motion.div>
+      {/* Renders nothing without items. */}
+      {(view === 'home' || view === 'about') && !!content.testimonials?.items?.length && (() => {
+        const t = content.testimonials
+        const items = t.items.filter(it => it && (it.quote || '').trim())
+        if (!items.length) return null
+        const hasSummary = typeof t.average_rating === 'number' && t.average_rating > 0
 
-            <div className="grid gap-6 md:grid-cols-3">
-              {content.testimonials.items.map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={rm ? {} : { opacity: 0, y: 32 }}
-                  whileInView={rm ? {} : { opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.1 }}
-                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.12 }}
-                >
-                  <TestimonialCard item={item} index={i} colors={colors} fonts={fonts} />
-                </motion.div>
-              ))}
+        return (
+          <section data-section="testimonials" className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
+            <div className="mx-auto max-w-6xl">
+              <motion.div className="mb-12 max-w-xl" {...revealAnim(rm,0)}>
+                {t.eyebrow && (
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>{t.eyebrow}</span>
+                )}
+                <h2 className="text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
+                  <Headline text={t.heading} />
+                </h2>
+              </motion.div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {hasSummary && (
+                  <motion.div className="md:row-span-2" {...revealAnim(rm,0.05)}>
+                    <GlassCard colors={colors} className="flex h-full flex-col justify-between gap-10 p-8" hover={false} style={{ background: colors.accentMuted }}>
+                      <div>
+                        <div className="text-7xl font-bold leading-none md:text-8xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
+                          {t.average_rating.toFixed(1)}
+                        </div>
+                        <div className="mt-4"><Stars count={Math.round(t.average_rating)} color={colors.accent} /></div>
+                      </div>
+                      <TypingReviews items={items} colors={colors} fonts={fonts} reduced={!!rm} />
+                      {t.review_count && (
+                        <p className="text-sm leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{t.review_count}</p>
+                      )}
+                    </GlassCard>
+                  </motion.div>
+                )}
+                {/* Phone: a swipe rail so four cards do not become a wall; laptop: 2x2 beside the summary. */}
+                <div className={`-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 ${hasSummary ? 'md:col-span-2 md:row-span-2' : 'md:col-span-3 md:grid-cols-3'}`} style={{ scrollbarWidth: 'none' }}>
+                  {items.slice(0, hasSummary ? 4 : 6).map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-[82%] shrink-0 snap-start md:w-auto"
+                      initial={rm ? {} : { opacity: 0, y: 32 }}
+                      whileInView={rm ? {} : { opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.1 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: i * 0.1 }}
+                    >
+                      <TestimonialCard item={item} index={i} colors={colors} fonts={fonts} />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      })()}
 
       {/* ── NEWSLETTER ───────────────────────────────────────────────────────── */}
       {view === 'home' && content.newsletter && (

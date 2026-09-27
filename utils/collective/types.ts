@@ -42,9 +42,10 @@ export type CollectiveCollection = {
 export type CollectiveTestimonial = {
   quote: string
   author: string
-  location: string
+  location?: string
   rating: number
-  avatar_letter: string
+  /** Falls back to the author's first letter. */
+  avatar_letter?: string
   product?: string
 }
 

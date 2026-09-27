@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { Link2, MapPin, MessageSquareQuote, Plus, RefreshCw, Star, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Link2, MapPin, MessageSquareQuote, Plus, RefreshCw, Star, Trash2 } from 'lucide-react'
 import { Segmented } from '@/components/app/Segmented'
 import { Act, EmptyHint, Page, PageHead, type Action } from './kit'
 
@@ -28,6 +28,10 @@ export type ReviewRow = {
   text: string
   origin: 'google' | 'manual'
   when?: string
+  /** When the review was written, if Google told us (ISO). */
+  at?: string
+  /** Found by the daily check and not looked at yet. */
+  isNew?: boolean
   shown: boolean
 }
 
@@ -62,6 +66,8 @@ export type ReviewsScreenProps = {
   /** id null adds a new review. */
   onSave?: (id: string | null, v: ReviewDraft) => void
   onDelete?: (id: string) => void
+  /** Move a shown review one place up or down the site's list. */
+  onMove?: (id: string, to: 'up' | 'down') => void
   /** Set just after a delete: the review's name, with a way to bring it back. */
   undo?: { name: string; onUndo: () => void } | null
   /** Shown instead of the page body, e.g. "no sites with a reviews section". */
@@ -127,6 +133,24 @@ function OriginTag({ origin }: { origin: ReviewRow['origin'] }) {
   return origin === 'google'
     ? <span className="inline-flex items-center gap-1 text-[13px] font-bold text-[#56565a]"><MapPin className="h-3.5 w-3.5 text-[#d6453d]" strokeWidth={2.25} />Google</span>
     : <span className="text-[13px] font-bold text-[#66666e]">أضفته أنت</span>
+}
+
+/** "اليوم 3:40 م", "أمس 8:10 م", or the date; Google's own words when there is no time. */
+export function whenLabel(at?: string, fallback?: string, now = new Date()): string {
+  if (!at) return fallback || ''
+  const d = new Date(at)
+  if (Number.isNaN(d.getTime())) return fallback || ''
+  const h = d.getHours()
+  const time = `${h % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')} ${h < 12 ? 'ص' : 'م'}`
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime()
+  const diff = Math.round((day(now) - day(d)) / 86400000)
+  if (diff === 0) return `اليوم ${time}`
+  if (diff === 1) return `أمس ${time}`
+  return d.toLocaleDateString('ar', { day: 'numeric', month: 'long', numberingSystem: 'latn' } as Intl.DateTimeFormatOptions)
+}
+
+function NewTag() {
+  return <span className="rounded-full px-2 py-px text-[12px] font-black" style={{ background: '#fdecea', color: '#c0362c' }}>جديد</span>
 }
 
 /** The add / edit form for a review the owner types. */
@@ -241,6 +265,8 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
   const { source, reviews } = p
   const [editing, setEditing] = useState<string | 'new' | null>(null)
   const shown = reviews.filter((r) => r.shown)
+  const shownIndex = (id: string) => shown.findIndex((r) => r.id === id)
+  const fresh = reviews.filter((r) => r.isNew).length
   const saveNote = p.saveState === 'saving' ? 'جارٍ الحفظ…' : p.saveState === 'saved' ? 'حُفظ. يظهر في موقعك خلال دقيقة.' : null
 
   return (
@@ -298,7 +324,7 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
           <div className="mt-5 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div>
               <div className="mb-3 flex items-center justify-between gap-2 px-1">
-                <h3 className="zy-h3">كل التقييمات</h3>
+                <h3 className="zy-h3 flex items-center gap-2">كل التقييمات{fresh > 0 && <NewTag />}{fresh > 1 && <span className="text-[13px] font-bold text-[#c0362c]">{fresh}</span>}</h3>
                 {p.onSave && (
                   <button type="button" onClick={() => setEditing('new')} className="zy-btn-q">
                     <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />أضف تقييمًا
@@ -326,21 +352,28 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
                     </li>
                   ) : (
                     <li key={r.id} className="flex gap-3 p-4 sm:p-5">
-                      <div style={{ opacity: r.shown ? 1 : 0.45 }} className="transition-opacity"><Avatar name={r.name} /></div>
-                      <div className="min-w-0 flex-1 transition-opacity" style={{ opacity: r.shown ? 1 : 0.55 }}>
+                      <div style={{ opacity: r.shown || r.isNew ? 1 : 0.45 }} className="transition-opacity"><Avatar name={r.name} /></div>
+                      <div className="min-w-0 flex-1 transition-opacity" style={{ opacity: r.shown || r.isNew ? 1 : 0.55 }}>
                         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
                           <span className="text-[14.5px] font-black text-[#171717]" dir="auto">{r.name}</span>
                           <Stars n={r.rating} size={13} />
+                          {r.isNew && <NewTag />}
                         </div>
                         <div className="mt-0.5 flex items-center gap-2">
                           <OriginTag origin={r.origin} />
-                          {r.when && <span className="text-[13px] font-medium text-[#8a8a92]">· {r.when}</span>}
+                          {(r.at || r.when) && <span className="text-[13px] font-medium text-[#8a8a92]">· {whenLabel(r.at, r.when)}</span>}
                         </div>
                         <p className="mt-2 text-[14.5px] font-medium leading-[1.85] text-[#3a3a40]" dir="auto">{r.text}</p>
                         {(p.onSave || p.onDelete) && (
                           <div className="mt-1.5 flex items-center gap-4">
                             {r.origin === 'manual' && p.onSave && (
                               <button type="button" onClick={() => setEditing(r.id)} className="zy-link min-h-[32px] text-[13.5px] font-bold">تعديل</button>
+                            )}
+                            {r.shown && p.onMove && (
+                              <span className="inline-flex items-center gap-1">
+                                <button type="button" disabled={shownIndex(r.id) === 0} onClick={() => p.onMove?.(r.id, 'up')} className="zy-icon-btn inline-flex disabled:opacity-30" aria-label={`قدّم تقييم ${r.name}`}><ArrowUp className="h-4 w-4" /></button>
+                                <button type="button" disabled={shownIndex(r.id) === shown.length - 1} onClick={() => p.onMove?.(r.id, 'down')} className="zy-icon-btn inline-flex disabled:opacity-30" aria-label={`أخّر تقييم ${r.name}`}><ArrowDown className="h-4 w-4" /></button>
+                              </span>
                             )}
                             {p.onDelete && (
                               <button type="button" onClick={() => p.onDelete?.(r.id)} className="inline-flex min-h-[32px] items-center gap-1 text-[13.5px] font-bold text-[#8a8a92] hover:text-[var(--error,#c0362c)]" aria-label={`حذف تقييم ${r.name}`}>

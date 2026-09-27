@@ -140,6 +140,7 @@ export const ATLAS_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'testimonials', label: 'Testimonials', icon: Star, page: 'home',
       fields: [
+        { type: 'reviews', path: 'testimonials.items' },
         { type: 'text',     path: 'testimonials.eyebrow', label: 'Eyebrow' },
         { type: 'textarea', path: 'testimonials.heading', label: 'Heading', rows: 2 },
         {
