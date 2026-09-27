@@ -13,7 +13,9 @@
  * content.review_bank.google.
  *
  * An item that came from Google carries origin: 'google'. Its text is never
- * edited here: Google's terms do not allow rewording a review.
+ * edited here: Google's terms do not allow rewording a review. It can be
+ * deleted; its key then goes in content.review_bank.removed so a later fetch
+ * skips it.
  */
 
 export type ReviewOrigin = 'google' | 'manual'
@@ -185,13 +187,27 @@ export function saveReview(bt: string, content: any, id: string | null, v: { nam
   return s.commit()
 }
 
-/** Remove a review the owner typed. Google's are hidden instead, since a fetch would bring them back. */
+/**
+ * Remove a review, whichever kind. A Google one leaves its name|text key in
+ * content.review_bank.removed, so the next fetch from Google does not bring it back.
+ */
 export function deleteReview(bt: string, content: any, id: string): any {
   const s = split(bt, content)
   const [list, i] = s.pick(id)
-  if (!list[i] || list[i].origin === 'google') return content
+  const item = list[i]
+  if (!item) return content
   list.splice(i, 1)
-  return s.commit()
+  const c = s.commit()
+  if (item.origin === 'google') {
+    const removed: string[] = Array.isArray(c.review_bank.removed) ? c.review_bank.removed : []
+    const k = keyOf(s.a, item)
+    if (!removed.includes(k)) c.review_bank.removed = [...removed, k]
+  }
+  return c
+}
+
+function keyOf(a: Adapter, it: Item): string {
+  return String(it?.[a.name] || '').trim() + '|' + String(it?.[a.text] || '').trim()
 }
 
 type Fetched = {
@@ -206,8 +222,9 @@ type Fetched = {
  */
 export function mergeGoogle(bt: string, content: any, link: string, r: Fetched): any {
   const s = split(bt, content)
-  const key = (it: Item) => String(it?.[s.a.name] || '').trim() + '|' + String(it?.[s.a.text] || '').trim()
-  const have = new Set([...s.shown, ...s.hidden].map(key))
+  const key = (it: Item) => keyOf(s.a, it)
+  const removed: string[] = Array.isArray(s.c.review_bank?.removed) ? s.c.review_bank.removed : []
+  const have = new Set([...s.shown, ...s.hidden].map(key).concat(removed))
   const target = s.shown.length === 0 ? s.shown : s.hidden
   for (const g of r.reviews) {
     const it: Item = { [s.a.name]: g.name, [s.a.text]: g.text, rating: g.rating, origin: 'google', when: g.when || undefined }
