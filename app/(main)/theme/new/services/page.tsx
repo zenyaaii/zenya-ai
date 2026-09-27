@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { SERVICE_PRESETS } from '@/utils/services/presets'
@@ -233,7 +234,7 @@ export default function ServicesWizardPage() {
         gallery_image_urls: form.gallery_image_urls.filter((url) => /^https?:\/\//.test(url)).slice(0, 8),
       },
       social_proof: {
-        review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+        review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
         licenses: splitLines(form.licenses).slice(0, 6),
         guarantees: splitLines(form.guarantees).slice(0, 6),

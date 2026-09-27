@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react"
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import { RESTAURANT_PRESETS } from "@/utils/restaurant/presets"
@@ -442,7 +443,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || "فشل التوليد")
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = RESTAURANT_PRESETS.find((p) => p.id === form.style_preset) || RESTAURANT_PRESETS[0]
       const saveRes = await fetch("/api/themes", {

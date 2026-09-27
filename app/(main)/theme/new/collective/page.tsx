@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { COLLECTIVE_PRESETS } from '@/utils/collective/presets'
@@ -165,7 +167,7 @@ export default function CollectiveWizardPage() {
       returns_policy: form.returns_policy.trim() || undefined,
       social_proof: {
         review_count: form.review_count.trim() || undefined,
-        review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+        review_rating: ratingOf(form.review_rating),
         customer_count: form.customer_count.trim() || undefined,
       },
       style_preset: form.style_preset,
@@ -199,7 +201,7 @@ export default function CollectiveWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = COLLECTIVE_PRESETS.find((p) => p.id === form.style_preset) || COLLECTIVE_PRESETS[0]
       const saveRes = await fetch('/api/themes', {

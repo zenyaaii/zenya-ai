@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
@@ -432,16 +434,17 @@ export default function WellnessWizardPage() {
       philosophy: { brief: form.philosophy_brief.trim(), approach: form.philosophy_approach.trim() || undefined },
       amenities: form.amenities.trim() || undefined,
       social_proof: {
-        review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+        review_rating: ratingOf(form.review_rating),
         review_count: form.review_count.trim() || undefined,
         certifications: form.certifications.trim() || undefined,
-        reviews: validReviews.map((r) => ({
-          name: r.name.trim(),
-          text: r.text.trim(),
-          treatment: r.treatment.trim() || undefined,
-          rating: Number(r.rating) || 5,
+        // Clamped to the schema's limits: a long Google review must not block the build.
+        reviews: validReviews.slice(0, 12).map((r) => ({
+          name: r.name.trim().slice(0, 80),
+          text: r.text.trim().slice(0, 600),
+          treatment: r.treatment.trim().slice(0, 120) || undefined,
+          rating: Math.min(5, Math.max(1, Number(r.rating) || 5)),
           origin: r.origin,
-          when: r.when,
+          when: r.when?.slice(0, 60),
         })),
         reviews_url: /^https?:\/\//.test((form.reviews_url || '').trim()) ? form.reviews_url.trim() : undefined,
       },
@@ -484,7 +487,7 @@ export default function WellnessWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = WELLNESS_PRESETS.find((p) => p.id === form.style_preset) || WELLNESS_PRESETS[0]
       const saveRes = await fetch('/api/themes', {

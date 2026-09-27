@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { ratingOf } from '@/lib/rating'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { LOOKBOOK_PRESETS } from '@/utils/lookbook/presets'
@@ -187,7 +189,7 @@ export default function LookbookWizardPage() {
         sustainability_focus: form.sustainability_focus,
         press_features: form.press_features.trim() || undefined,
         social_proof: {
-          review_rating: Number.isFinite(Number(form.review_rating)) ? Number(form.review_rating) : undefined,
+          review_rating: ratingOf(form.review_rating),
           review_count: form.review_count.trim() || undefined,
         },
         visuals: {
@@ -203,7 +205,7 @@ export default function LookbookWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = LOOKBOOK_PRESETS.find((p) => p.id === form.style_preset) || LOOKBOOK_PRESETS[0]
       const saveRes = await fetch('/api/themes', {

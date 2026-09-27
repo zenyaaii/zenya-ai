@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { generateErrorText } from '@/lib/generate-error'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { STUDIO_PRESETS } from '@/utils/studio/presets'
@@ -220,7 +221,7 @@ export default function StudioWizardPage() {
         body: JSON.stringify(payload),
       })
       const genJson = await genRes.json()
-      if (!genRes.ok || !genJson?.content) throw new Error(genJson?.error || 'فشل التوليد')
+      if (!genRes.ok || !genJson?.content) throw new Error(generateErrorText(genJson))
 
       const preset = STUDIO_PRESETS.find((p) => p.id === form.style_preset) || STUDIO_PRESETS[0]
       const saveRes = await fetch('/api/themes', {
