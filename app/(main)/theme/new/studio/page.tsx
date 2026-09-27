@@ -430,6 +430,11 @@ export default function StudioWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'people', 'certs',
+          ...(form.avg_rating.trim() && form.customer_count.trim() ? [] : ['rating' as const]),
+          ...(!form.founder_story.trim() || !form.process_steps.trim() || !form.milestones.some((m) => m.year.trim() && m.event.trim()) ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

@@ -381,6 +381,11 @@ export default function AtlasWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'reviews', 'certs', 'prices',
+          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          ...(validFeatures.some((f) => !f.description.trim()) || !form.integrations.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

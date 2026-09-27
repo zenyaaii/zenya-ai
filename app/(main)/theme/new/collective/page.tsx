@@ -402,6 +402,11 @@ export default function CollectiveWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'reviews', 'prices',
+          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          ...(!form.curation_story.trim() || validCollections.some((c) => !c.tagline.trim()) ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

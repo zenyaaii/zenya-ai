@@ -853,6 +853,13 @@ export default function WellnessWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          ...(form.review_rating.trim() ? [] : ['rating' as const]),
+          ...(form.team.some((m) => m.name.trim().length >= 2 && !m.bio.trim()) ? ['people' as const] : []),
+          ...(form.certifications.trim() ? [] : ['certs' as const]),
+          ...(validTreatments.some((t) => !t.price.trim()) ? ['prices' as const] : []),
+          ...(validTreatments.some((t) => !t.description.trim()) || !form.amenities.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

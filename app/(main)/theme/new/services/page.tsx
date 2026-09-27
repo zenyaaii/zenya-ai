@@ -538,6 +538,12 @@ export default function ServicesWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'reviews', 'rating',
+          ...(form.licenses.trim() || form.guarantees.trim() ? [] : ['certs' as const]),
+          ...(validServices.some((s) => !s.price_from.trim()) ? ['prices' as const] : []),
+          ...(validServices.some((s) => !s.description.trim()) || !form.years_in_business.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>

@@ -428,6 +428,13 @@ export default function LookbookWizardPage() {
         open={disclaimerOpen}
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
+        items={[
+          'reviews',
+          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          ...(form.press_features.trim() ? [] : ['certs' as const]),
+          ...(validProducts.some((p) => !p.price.trim()) ? ['prices' as const] : []),
+          ...(!form.brand_story.trim() || !form.collection_name.trim() ? ['text' as const] : []),
+        ]}
       />
       <GenerationOverlay open={loading} />
     </>
