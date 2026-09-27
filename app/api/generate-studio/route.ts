@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { studioInputSchema, type StudioInput } from '@/utils/studio/input'
 import type { StudioContent } from '@/utils/studio/types'
 import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
@@ -36,7 +37,8 @@ function buildPrompt(input: StudioInput): string {
     .join('\n') || '- No milestones provided'
 
   const processSteps = input.process?.steps?.join(', ') || 'Source, Make, Inspect, Ship'
-  const pressPublications = input.press_features || 'The New York Times, Wallpaper*, Monocle'
+  // Only publications the owner named. None given, no press section.
+  const pressPublications = input.press_features || ''
 
   return `BRAND STORY BRIEF
 Brand name: ${input.brand.name}
@@ -56,7 +58,7 @@ Process steps: ${processSteps}
 Key milestones:
 ${milestonesText}
 
-Press features: ${pressPublications}
+Press features: ${pressPublications || 'None. Do not name any publication.'}
 
 Social proof:
 - Customer count: ${input.social_proof?.customer_count || '10,000+ customers'}
@@ -75,7 +77,7 @@ Hard rules:
 - timeline events: each has a title (2-4 words) and description (2-3 sentences)
 - values: expand on provided values — each body should be 40-55 words, substantive not fluffy
 - process steps: each description is 1-2 specific sentences
-- press quotes: make them feel real — specific, credible, not hyperbolic
+- Never write a quote and put a publication's name on it, and never name a publication, award or ranking the brief does not give
 - community.subheading: reference the repeat customer rate specifically
 
 OUTPUT
@@ -143,10 +145,7 @@ Return ONLY valid JSON, no markdown, no prose:
     ]
   },
   "press": {
-    "heading": "What they've said",
-    "items": [
-      { "publication": "Publication name", "quote": "30-45 word credible press quote", "year": "202X" }
-    ]
+    "heading": "Short heading for the list of publications that featured the brand"
   },
   "community": {
     "eyebrow": "The people who live with our work",
@@ -164,9 +163,7 @@ Return ONLY valid JSON, no markdown, no prose:
     "cta_secondary": "Secondary CTA"
   },
   "footer": {
-    "tagline": "${input.brand.tagline}",
-    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
-    "email": "hello@${input.brand.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.co"
+    "tagline": "${input.brand.tagline}"
   },
   "seo": {
     "title": "60 chars max",
@@ -179,7 +176,6 @@ Requirements:
 - values.items: use provided values (${input.values.length} items), numbered 01/02/03 etc.
 - process.steps: use provided steps or invent 4 logical steps for the brand category
 - team.members: invent 3 realistic team members with names appropriate for the brand's origin region
-- press.items: use provided publications (${pressPublications.split(',').length} sources), write credible short quotes
 - community.stats: exactly 4 stats (objects/customers, repeat rate, rating, catalog size or similar)
 - All content should feel like it belongs to this specific brand — not a generic template`
 }
@@ -237,7 +233,12 @@ function mergeIntoContent(input: StudioInput, ai: any): StudioContent {
     },
     press: {
       heading: ai.press?.heading || mock.press.heading,
-      items: Array.isArray(ai.press?.items) ? ai.press.items : mock.press.items
+      items: (input.press_features || '')
+        .split(/[,\n]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 6)
+        .map((publication) => ({ publication, quote: '' }))
     },
     community: {
       eyebrow: ai.community?.eyebrow || mock.community.eyebrow,
@@ -254,8 +255,9 @@ function mergeIntoContent(input: StudioInput, ai: any): StudioContent {
     },
     footer: {
       tagline: ai.footer?.tagline || mock.footer.tagline,
-      legal: ai.footer?.legal || mock.footer.legal,
-      email: ai.footer?.email || mock.footer.email
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
+      // The wizard asks for no email, so none is made up; the owner adds it in the editor.
+      email: ''
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
@@ -275,6 +277,8 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
+      const off = aiUnavailable()
+      if (off) return off
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
@@ -309,16 +313,13 @@ export async function POST(req: NextRequest) {
     try {
       ai = parseJsonSafe(raw)
     } catch {
-      console.error('[generate-studio] JSON parse failed, using mock fallback', raw.slice(0, 300))
+      return aiFailed('generate-studio', raw.slice(0, 300))
     }
 
     const content = mergeIntoContent(input, ai)
     return NextResponse.json({ content })
   } catch (err: any) {
     console.error('[generate-studio]', err)
-    return NextResponse.json(
-      { error: err?.message || 'Generation failed' },
-      { status: 500 }
-    )
+    return aiFailed('generate-studio', err)
   }
 }

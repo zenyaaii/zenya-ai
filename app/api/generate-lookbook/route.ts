@@ -4,6 +4,7 @@ import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unle
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
@@ -191,7 +192,7 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
       heading: mock.press.heading,
       publications: input.press_features
         ? input.press_features.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)
-        : mock.press.publications
+        : []
     },
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
@@ -232,6 +233,8 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
+      const off = aiUnavailable()
+      if (off) return off
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
@@ -258,12 +261,12 @@ export async function POST(req: NextRequest) {
     try {
       ai = parseJsonSafe(raw)
     } catch {
-      console.error('[generate-lookbook] JSON parse failed, using mock fallback', raw.slice(0, 300))
+      return aiFailed('generate-lookbook', raw.slice(0, 300))
     }
 
     return NextResponse.json({ content: mergeIntoContent(input, ai) })
   } catch (err: any) {
     console.error('[generate-lookbook]', err)
-    return NextResponse.json({ error: err?.message || 'Generation failed' }, { status: 500 })
+    return aiFailed('generate-lookbook', err)
   }
 }

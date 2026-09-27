@@ -4,6 +4,7 @@ import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { collectiveInputSchema, type CollectiveInput } from '@/utils/collective/input'
 import type { CollectiveContent } from '@/utils/collective/types'
@@ -129,9 +130,7 @@ Return ONLY valid JSON, no markdown, no prose:
     "note": "No noise. Unsubscribe any time."
   },
   "footer": {
-    "tagline": "${input.brand.tagline}",
-    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
-    "email": "hello@${input.brand.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.co"
+    "tagline": "${input.brand.tagline}"
   },
   "seo": {
     "title": "60 chars max",
@@ -240,8 +239,9 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
     },
     footer: {
       tagline: ai.footer?.tagline || mock.footer.tagline,
-      legal: ai.footer?.legal || mock.footer.legal,
-      email: ai.footer?.email || mock.footer.email
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
+      // The wizard asks for no email, so none is made up; the owner adds it in the editor.
+      email: ''
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
@@ -262,6 +262,8 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
+      const off = aiUnavailable()
+      if (off) return off
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
@@ -296,16 +298,13 @@ export async function POST(req: NextRequest) {
     try {
       ai = parseJsonSafe(raw)
     } catch {
-      console.error('[generate-collective] JSON parse failed, using mock fallback', raw.slice(0, 300))
+      return aiFailed('generate-collective', raw.slice(0, 300))
     }
 
     const content = mergeIntoContent(input, ai)
     return NextResponse.json({ content })
   } catch (err: any) {
     console.error('[generate-collective]', err)
-    return NextResponse.json(
-      { error: err?.message || 'Generation failed' },
-      { status: 500 }
-    )
+    return aiFailed('generate-collective', err)
   }
 }

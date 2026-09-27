@@ -489,6 +489,8 @@ function LookbookStory({ content, colors, headingFont, bodyFont }: { content: Lo
 
 // ─── Press ─────────────────────────────────────────────────────────────────────
 function LookbookPress({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+  // Only publications the owner named. None given, no section.
+  if (!content.press?.publications?.length) return null
   return (
     <section data-section="press" className="border-y px-8 py-10" style={{ borderColor: colors.border, background: colors.surfaceAlt, fontFamily: bodyFont }}>
       <div className="mx-auto max-w-5xl">

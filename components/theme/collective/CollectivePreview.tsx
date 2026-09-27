@@ -767,9 +767,11 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           </div>
           <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t pt-8 md:flex-row md:items-center" style={{ borderColor: colors.border }}>
             <p className="text-xs" style={{ color: colors.muted, fontFamily: fonts.body }}>{content.footer.legal}</p>
-            <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
-              {content.footer.email}
-            </a>
+            {content.footer.email ? (
+              <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                {content.footer.email}
+              </a>
+            ) : null}
           </div>
         </div>
       </footer>

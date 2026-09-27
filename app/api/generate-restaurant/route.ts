@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { restaurantInputSchema, type RestaurantInput } from '@/utils/restaurant/input'
 import type { RestaurantContent } from '@/utils/restaurant/types'
@@ -176,9 +177,6 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
     "heading": "Headline for the owner's guest reviews (max 6 words)",
     "subheading": "One short sentence."
   },
-  "press": [
-    { "outlet": "Outlet name from brief or plausible default", "quote": "Optional short pull quote (max 8 words). Empty string if none." }
-  ],
   "newsletter": {
     "heading": "Newsletter section headline (max 4 words)",
     "subheading": "One short sentence."
@@ -199,7 +197,7 @@ Requirements:
 - signature_dishes: exactly 4 items chosen from the strongest menu items
 - menu_descriptions: write descriptions ONLY for items that currently have none. Cap at the 24 most prominent such items — do NOT list every item on a large menu (items you skip keep a sensible default). Never repeat items that already have a description.
 ${NO_REVIEWS_RULE}
-- press: 4–6 items
+- Never name a newspaper, magazine, guide, award, star or ranking the brief does not give. The press list is the owner's own, shown as given.
 - faq: 5–7 items
 - Use the restaurant's name ("${input.brand.name}") sparingly (max twice across all copy)`
 }
@@ -280,18 +278,10 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       ? { type: 'phone', number: r.provider_value || input.location.phone }
       : { type: 'form' }
 
-  // Press
-  const pressFromAi = Array.isArray(ai?.press) ? ai.press : []
-  const pressFromInput = (input.press_outlets || []).map((o) => ({ outlet: o }))
-  const press_items =
-    pressFromInput.length >= 4
-      ? pressFromInput.slice(0, 6)
-      : pressFromAi.length >= 4
-      ? pressFromAi.slice(0, 6).map((p: any) => ({
-          outlet: String(p?.outlet || ''),
-          quote: typeof p?.quote === 'string' && p.quote.length > 0 ? p.quote : undefined
-        }))
-      : mock.press.items
+  // Press — only the outlets the owner named. Nothing is invented or filled
+  // from the demo content: a made-up "Michelin star" on a real restaurant's
+  // site is a false claim. With none, the section is not drawn.
+  const press_items = (input.press_outlets || []).slice(0, 6).map((o) => ({ outlet: o }))
 
   // Gallery — user-provided first, fall back to defaults
   const galleryUrls = (input.visuals.gallery_image_urls || []).slice(0, 8)
@@ -437,6 +427,8 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
+    const off = aiUnavailable()
+    if (off) return off
     return NextResponse.json(
       {
         content: buildFallbackContent(input),
@@ -476,8 +468,8 @@ export async function POST(req: NextRequest) {
     let aiJson: any = {}
     try {
       aiJson = parseJsonSafe(raw)
-    } catch {
-      aiJson = {}
+    } catch (e) {
+      return aiFailed('generate-restaurant', e)
     }
 
     const content = mergeIntoContent(input, aiJson)
@@ -486,12 +478,6 @@ export async function POST(req: NextRequest) {
       _meta: { source: 'openai', model: AI_MODEL }
     })
   } catch (e: any) {
-    return NextResponse.json(
-      {
-        content: buildFallbackContent(input),
-        _meta: { source: 'fallback_error', error: String(e?.message || e) }
-      },
-      { status: 200 }
-    )
+    return aiFailed('generate-restaurant', e)
   }
 }

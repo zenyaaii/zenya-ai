@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { atlasInputSchema, type AtlasInput } from '@/utils/atlas/input'
 import type { AtlasContent } from '@/utils/atlas/types'
@@ -53,9 +54,9 @@ Pricing:
 - Enterprise: ${input.pricing?.enterprise ? 'Yes' : 'No'}
 
 Social proof:
-- User count: ${input.social_proof?.user_count || '1,000+ teams'}
+- User count: ${input.social_proof?.user_count || 'Not given. Do not state any number of users, teams or customers.'}
 - ${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
-- Notable customers: ${input.social_proof?.notable_customers || 'Various tech companies'}
+- Notable customers: ${input.social_proof?.notable_customers || 'None given. Do not name any customer or company.'}
 
 WRITING DIRECTION
 You are writing premium marketing copy for a modern SaaS product landing page. The tone is confident, clear, and slightly technical — like Linear, Vercel, or Stripe. Speak to technical decision-makers and product teams who care about quality, speed, and ROI.
@@ -79,12 +80,11 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "subheadline": "2–3 sentence benefit-focused description",
     "cta_primary": "Primary CTA label",
     "cta_secondary": "Secondary CTA label",
-    "social_proof": "Short social proof (e.g. 'Trusted by 2,000+ teams · No credit card')",
+    "social_proof": "Short line under the buttons (e.g. 'No credit card needed'). Use a number only if the brief gives it.",
     "badge": "Optional short badge text"
   },
   "trust_bar": {
-    "label": "Trusted by teams at",
-    "logos": ["CompanyA", "CompanyB", "CompanyC", "CompanyD", "CompanyE", "CompanyF", "CompanyG", "CompanyH"]
+    "label": "Short label above the owner's customer names"
   },
   "features": {
     "eyebrow": "Short section eyebrow",
@@ -148,9 +148,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     ]
   },
   "footer": {
-    "tagline": "Short brand tagline",
-    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
-    "email": "hello@${input.brand.name.toLowerCase().replace(/\\s+/g, '')}.io"
+    "tagline": "Short brand tagline"
   },
   "seo": {
     "title": "60 chars max",
@@ -159,7 +157,7 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
 }
 
 Requirements:
-- trust_bar.logos: exactly 8 realistic tech company names
+- Never name a customer, company, user count or award the brief does not give
 - features.items: exactly 6 items (use provided features + expand/improve)
 - how_it_works.steps: exactly 3 steps
 - pricing.tiers: exactly 3 tiers — Starter (free), Pro (paid), Enterprise (custom)
@@ -204,7 +202,12 @@ function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
     },
     trust_bar: {
       label: ai.trust_bar?.label || mock.trust_bar.label,
-      logos: Array.isArray(ai.trust_bar?.logos) ? ai.trust_bar.logos : mock.trust_bar.logos
+      // Only the customers the owner named. None given, the bar is not drawn.
+      logos: (input.social_proof?.notable_customers || '')
+        .split(/[,\n،]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 8)
     },
     features: {
       eyebrow: ai.features?.eyebrow || mock.features.eyebrow,
@@ -254,8 +257,9 @@ function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
     },
     footer: {
       tagline: ai.footer?.tagline || mock.footer.tagline,
-      legal: ai.footer?.legal || mock.footer.legal,
-      email: ai.footer?.email || mock.footer.email
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
+      // The wizard asks for no email, so none is made up; the owner adds it in the editor.
+      email: ''
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
@@ -276,6 +280,8 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
+      const off = aiUnavailable()
+      if (off) return off
       // Return mock content in dev if no API key
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
@@ -311,16 +317,13 @@ export async function POST(req: NextRequest) {
     try {
       ai = parseJsonSafe(raw)
     } catch {
-      console.error('[generate-atlas] JSON parse failed, using mock fallback', raw.slice(0, 300))
+      return aiFailed('generate-atlas', raw.slice(0, 300))
     }
 
     const content = mergeIntoContent(input, ai)
     return NextResponse.json({ content })
   } catch (err: any) {
     console.error('[generate-atlas]', err)
-    return NextResponse.json(
-      { error: err?.message || 'Generation failed' },
-      { status: 500 }
-    )
+    return aiFailed('generate-atlas', err)
   }
 }

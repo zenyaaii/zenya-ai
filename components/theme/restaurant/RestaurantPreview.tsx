@@ -1065,6 +1065,8 @@ function Stars({ rating, small = false }: { rating: number; small?: boolean }) {
 
 function Press({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
+  // Only the outlets the owner named. None given, no section.
+  if (!content.press?.items?.length) return null
   return (
     <section data-section="press" className="py-20 md:py-28">
       <Container>

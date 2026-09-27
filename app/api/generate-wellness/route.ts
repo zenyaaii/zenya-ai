@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { wellnessInputSchema, type WellnessInput } from '@/utils/wellness/input'
 import type { WellnessContent } from '@/utils/wellness/types'
@@ -398,6 +399,8 @@ export async function POST(req: NextRequest) {
   const input = parsed.data
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
+    const off = aiUnavailable()
+    if (off) return off
     return NextResponse.json({ content: buildFallbackContent(input), _meta: { source: 'fallback_no_api_key' } }, { status: 200 })
   }
 
@@ -427,13 +430,10 @@ export async function POST(req: NextRequest) {
 
     const raw = response.choices?.[0]?.message?.content || '{}'
     let aiJson: any = {}
-    try { aiJson = parseJsonSafe(raw) } catch { aiJson = {} }
+    try { aiJson = parseJsonSafe(raw) } catch (e) { return aiFailed('generate-wellness', e) }
 
     return NextResponse.json({ content: mergeIntoContent(input, aiJson), _meta: { source: 'openai', model: AI_MODEL } })
   } catch (error: any) {
-    return NextResponse.json(
-      { content: buildFallbackContent(input), _meta: { source: 'fallback_error', error: String(error?.message || error) } },
-      { status: 200 }
-    )
+    return aiFailed('generate-wellness', error)
   }
 }

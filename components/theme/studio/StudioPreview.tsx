@@ -563,7 +563,7 @@ export default function StudioPreview({
       )}
 
       {/* ── PRESS ────────────────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'about') && content.press && (
+      {(view === 'home' || view === 'about') && content.press?.items?.length > 0 && (
         <section data-section="press" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -593,12 +593,14 @@ export default function StudioPreview({
                   >
                     {item.publication}
                   </span>
-                  <p
-                    className="text-xl font-medium italic leading-snug"
-                    style={{ fontFamily: fonts.heading, color: colors.text }}
-                  >
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
+                  {item.quote ? (
+                    <p
+                      className="text-xl font-medium italic leading-snug"
+                      style={{ fontFamily: fonts.heading, color: colors.text }}
+                    >
+                      &ldquo;{item.quote}&rdquo;
+                    </p>
+                  ) : <span />}
                   {item.year && (
                     <span className="text-xs self-start" style={{ color: colors.muted, fontFamily: fonts.body }}>
                       {item.year}
@@ -801,9 +803,11 @@ export default function StudioPreview({
           <Rule color={colors.border} className="my-8" />
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <p className="text-xs" style={{ color: colors.muted, fontFamily: fonts.body }}>{content.footer.legal}</p>
-            <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
-              {content.footer.email}
-            </a>
+            {content.footer.email ? (
+              <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                {content.footer.email}
+              </a>
+            ) : null}
           </div>
         </div>
       </footer>

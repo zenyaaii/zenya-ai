@@ -368,6 +368,8 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
 
 // ─── Trust bar ─────────────────────────────────────────────────────────────────
 function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  // Only the customers the owner named. None given, no bar.
+  if (!content.trust_bar?.logos?.length) return null
   return (
     <section data-section="trust_bar" className="border-y px-6 py-8" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
@@ -830,7 +832,7 @@ function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors:
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-xs" style={{ borderColor: colors.border, color: colors.muted }}>
-          {content.footer.legal} · {content.footer.email}
+          {content.footer.legal}{content.footer.email ? ` · ${content.footer.email}` : ''}
         </div>
       </div>
     </footer>

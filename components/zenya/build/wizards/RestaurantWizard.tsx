@@ -866,7 +866,6 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
             onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
             items={[
               ...(form.chef_name.trim() && !form.chef_bio_brief.trim() ? ["people" as const] : []),
-              ...(form.press_outlets.split(/[\n,]/).filter((s) => s.trim().length >= 2).length >= 4 ? [] : ["certs" as const]),
               ...(form.categories.some((c) => c.items.some((i) => i.name.trim() && !i.description.trim())) ? ["text" as const] : []),
             ]}
           />
