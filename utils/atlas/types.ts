@@ -40,10 +40,13 @@ export type AtlasIntegration = {
 export type AtlasTestimonial = {
   quote: string
   author: string
-  role: string
-  company: string
+  role?: string
+  company?: string
   rating: number
   avatar_letter: string
+  /** Taken from Google: the dashboard never rewords its text. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type AtlasFaqItem = {
@@ -103,6 +106,9 @@ export type AtlasContent = {
   testimonials: {
     eyebrow: string
     heading: string
+    /** The owner's own, or absent: never generated. */
+    average_rating?: number
+    review_count?: string
     items: AtlasTestimonial[]
   }
   security: {
@@ -130,4 +136,6 @@ export type AtlasContent = {
     title: string
     description: string
   }
+  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
+  links?: { reviews_url?: string }
 }

@@ -609,6 +609,10 @@ function servicesPalette(isDark: boolean) {
 }
 
 function TestimonialsSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  // Only the owner's own reviews and rating are ever here. No reviews: no section.
+  const t = content.testimonials
+  if (!t?.items?.length) return null
+  const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
   return (
     <section id="reviews" data-section="testimonials" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
@@ -616,12 +620,14 @@ function TestimonialsSection({ content, isDark }: { content: ServiceContent; isD
           <Eyebrow>الآراء</Eyebrow>
           <Heading className="mt-5">{content.testimonials.heading}</Heading>
           <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.testimonials.subheading}</p>
-          <div className="mt-6 flex items-center gap-3">
-            <Stars rating={content.testimonials.average_rating} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--sv-muted)' }}>
-              {content.testimonials.average_rating.toFixed(1)} average · {content.testimonials.review_count} reviews
-            </span>
-          </div>
+          {avg ? (
+            <div className="mt-6 flex items-center gap-3">
+              <Stars rating={avg} />
+              <span className="text-sm font-semibold" style={{ color: 'var(--sv-muted)' }}>
+                {avg.toFixed(1)} من 5{t.review_count ? ` · ${t.review_count}${/^[\d\s.,+٠-٩]+$/.test(t.review_count) ? ' تقييم' : ''}` : ''}
+              </span>
+            </div>
+          ) : null}
         </motion.div>
         <div className="grid gap-5 lg:grid-cols-3">
           {content.testimonials.items.map((item, index) => (
@@ -632,7 +638,9 @@ function TestimonialsSection({ content, isDark }: { content: ServiceContent; isD
               </p>
               <div className="mt-6">
                 <p className="font-bold">{item.name}</p>
-                {item.source && <p className="text-xs uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>{item.source}</p>}
+                {item.service || item.source ? (
+                  <p className="text-xs uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>{[item.service, item.source].filter(Boolean).join(' · ')}</p>
+                ) : null}
               </div>
             </motion.div>
           ))}

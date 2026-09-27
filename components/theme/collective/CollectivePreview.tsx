@@ -661,7 +661,9 @@ export default function CollectivePreview({ content, presetId, className = '' }:
         const t = content.testimonials
         const items = t.items.filter(it => it && (it.quote || '').trim())
         if (!items.length) return null
-        const hasSummary = typeof t.average_rating === 'number' && t.average_rating > 0
+        // The owner's own rating, or no summary tile at all.
+        const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
+        const hasSummary = avg > 0
 
         return (
           <section data-section="testimonials" className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
@@ -681,9 +683,9 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                     <GlassCard colors={colors} className="flex h-full flex-col justify-between gap-10 p-8" hover={false} style={{ background: colors.accentMuted }}>
                       <div>
                         <div className="text-7xl font-bold leading-none md:text-8xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
-                          {t.average_rating.toFixed(1)}
+                          {avg.toFixed(1)}
                         </div>
-                        <div className="mt-4"><Stars count={Math.round(t.average_rating)} color={colors.accent} /></div>
+                        <div className="mt-4"><Stars count={Math.round(avg)} color={colors.accent} /></div>
                       </div>
                       <TypingReviews items={items} colors={colors} fonts={fonts} reduced={!!rm} />
                       {t.review_count && (

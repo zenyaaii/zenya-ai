@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ownerReviewsFields } from '@/lib/owner-reviews'
 
 export const serviceInputSchema = z.object({
   brand: z.object({
@@ -48,7 +49,9 @@ export const serviceInputSchema = z.object({
     review_count: z.string().max(40).optional(),
     licenses: z.array(z.string().min(2).max(80)).max(6).optional(),
     guarantees: z.array(z.string().min(2).max(120)).max(6).optional(),
-    promo_offer: z.string().max(180).optional()
+    promo_offer: z.string().max(180).optional(),
+    // The owner's own reviews. The generator never writes reviews itself.
+    ...ownerReviewsFields
   }),
   style_preset: z.enum(['cobalt', 'graphite', 'amber', 'emerald']).default('cobalt')
 })

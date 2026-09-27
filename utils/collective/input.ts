@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ownerReviewsFields } from '@/lib/owner-reviews'
 
 export const collectiveInputSchema = z.object({
   brand: z.object({
@@ -23,7 +24,9 @@ export const collectiveInputSchema = z.object({
   social_proof: z.object({
     review_count: z.string().optional(),
     review_rating: z.number().optional(),
-    customer_count: z.string().optional()
+    customer_count: z.string().optional(),
+    // The owner's own reviews. The generator never writes reviews itself.
+    ...ownerReviewsFields
   }).optional(),
   style_preset: z.enum(['jade', 'dusk', 'pearl', 'iris']).default('jade')
 })

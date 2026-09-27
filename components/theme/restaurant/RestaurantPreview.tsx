@@ -988,6 +988,9 @@ function restaurantPalette(isDark: boolean) {
 function Reviews({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
   const r = content.reviews
+  // Only the owner's own reviews and rating are ever here. No reviews: no section.
+  if (!r?.testimonials?.length) return null
+  const avg = typeof r.overall_rating === 'number' && r.overall_rating > 0 ? r.overall_rating : 0
   return (
     <section data-section="reviews" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
@@ -996,15 +999,19 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
           <Heading size="lg" className="mb-7">
             {r.heading}
           </Heading>
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Stars rating={r.overall_rating} />
-            <span style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.5rem' }}>
-              {r.overall_rating.toFixed(1)}
-            </span>
-          </div>
-          <p style={{ color: 'var(--rb-muted)' }} className="text-sm">
-            بناءً على {r.review_count} تقييم موثّق من ضيوفنا
-          </p>
+          {avg ? (
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <Stars rating={avg} />
+              <span style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.5rem' }}>
+                {avg.toFixed(1)}
+              </span>
+            </div>
+          ) : null}
+          {avg && r.review_count ? (
+            <p style={{ color: 'var(--rb-muted)' }} className="text-sm">
+              بناءً على {r.review_count} تقييم من ضيوفنا
+            </p>
+          ) : null}
         </Reveal>
         <motion.div
           className="grid md:grid-cols-2 gap-6 md:gap-8"

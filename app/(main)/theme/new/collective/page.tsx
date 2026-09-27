@@ -15,6 +15,7 @@ import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { useWizardDraft, clearWizardDraft } from '@/lib/useWizardDraft'
+import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle,
   type WizardStep,
@@ -40,6 +41,8 @@ type Form = {
   customer_count: string
   review_count: string
   review_rating: string
+  reviews: ReviewDraft[]
+  reviews_url: string
   style_preset: CollectiveStylePresetId
 }
 
@@ -65,6 +68,10 @@ function buildSampleForm(): Form {
     customer_count: '+28,000 أسرة',
     review_count: '+6,800 تقييم',
     review_rating: '4.9',
+    reviews: [
+      { id: uid(), name: 'هند م.', text: 'البطانية الكتانية وصلت ملفوفة بعناية، والقماش أثقل مما توقعت. غسلتها مرتين وما تغيّر لونها.', detail: 'بطانية كتان', rating: '5' },
+    ],
+    reviews_url: '',
     style_preset: 'jade',
   }
 }
@@ -84,7 +91,9 @@ const INITIAL_FORM: Form = {
   returns_policy: '',
   customer_count: '',
   review_count: '',
-  review_rating: '4.9',
+  review_rating: '',
+  reviews: [],
+  reviews_url: '',
   style_preset: 'jade',
 }
 
@@ -135,6 +144,10 @@ export default function CollectiveWizardPage() {
   }
 
   const validCollections = form.collections.filter((c) => c.name.trim().length >= 2)
+  const validReviews = validReviewsOf(form.reviews)
+  function patchReviews(fn: (prev: ReviewsForm) => Partial<ReviewsForm>) {
+    setForm((prev) => ({ ...prev, ...fn(prev) }))
+  }
   const storeChecks = [
     form.brand_name.trim().length >= 2, form.brand_tagline.trim().length >= 5,
     form.brand_description.trim().length >= 10, form.categories.trim().length >= 2,
@@ -169,6 +182,8 @@ export default function CollectiveWizardPage() {
         review_count: form.review_count.trim() || undefined,
         review_rating: ratingOf(form.review_rating),
         customer_count: form.customer_count.trim() || undefined,
+        reviews: reviewsPayload(form.reviews),
+        reviews_url: reviewsUrlOf(form.reviews_url),
       },
       style_preset: form.style_preset,
     }
@@ -323,20 +338,15 @@ export default function CollectiveWizardPage() {
     },
     {
       id: 'social',
-      title: 'الدليل الاجتماعي',
-      sub: 'يضيف تقييمات وأعداد عملاء إلى التصميم.',
+      title: 'التقييمات',
+      sub: 'تقييمات حقيقية من زبائنك فقط. لا نكتب تقييمات من عندنا.',
       optional: true,
       complete: true,
       body: (
         <Grid>
-          <Field label="عدد العملاء">
+          <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city="" detail={{ label: 'المنتج (اختياري)', placeholder: 'بطانية كتان' }} />
+          <Field label="عدد العملاء" wide>
             <Input value={form.customer_count} onChange={(e) => update('customer_count', e.target.value)} placeholder="مثلاً: +28,000" />
-          </Field>
-          <Field label="عدد التقييمات">
-            <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="مثلاً: +6,800 تقييم" />
-          </Field>
-          <Field label="متوسط التقييم">
-            <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.9" />
           </Field>
         </Grid>
       ),
@@ -360,6 +370,7 @@ export default function CollectiveWizardPage() {
             facts={[
               { label: 'الحقول المطلوبة', value: `${required.filter(Boolean).length} من ${required.length}` },
               { label: 'التشكيلات', value: validCollections.length },
+              { label: 'التقييمات', value: validReviews.length },
               { label: 'النمط', value: COLLECTIVE_PRESETS.find((p) => p.id === form.style_preset)?.name ?? '—' },
             ]}
             recap={[
@@ -403,8 +414,7 @@ export default function CollectiveWizardPage() {
         onClose={() => setDisclaimerOpen(false)}
         onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
         items={[
-          'reviews', 'prices',
-          ...(form.review_rating.trim() && form.review_count.trim() ? [] : ['rating' as const]),
+          'prices',
           ...(!form.curation_story.trim() || validCollections.some((c) => !c.tagline.trim()) ? ['text' as const] : []),
         ]}
       />

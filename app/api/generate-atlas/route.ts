@@ -7,6 +7,7 @@ import { atlasInputSchema, type AtlasInput } from '@/utils/atlas/input'
 import type { AtlasContent } from '@/utils/atlas/types'
 import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -53,8 +54,7 @@ Pricing:
 
 Social proof:
 - User count: ${input.social_proof?.user_count || '1,000+ teams'}
-- Rating: ${input.social_proof?.review_rating || 4.9}/5
-- Review count: ${input.social_proof?.review_count || '500+ reviews'}
+- ${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 - Notable customers: ${input.social_proof?.notable_customers || 'Various tech companies'}
 
 WRITING DIRECTION
@@ -64,7 +64,6 @@ Hard rules:
 - Headlines use \\n to break into 2–3 short punchy lines (4–8 words each)
 - Subheadlines: 2–3 sentences, concrete and specific — no fluff
 - Feature descriptions: 25–40 words, benefits-focused, avoid generic buzzwords
-- Testimonials: 40–60 words, specific metrics or outcomes, first-person voice
 - Pricing: create 3 tiers (Starter/free, Pro/paid, Enterprise/custom) with 6–8 features each
 - Integrations: list 12 realistic integrations with an appropriate icon name (from the ICON NAMES list) and category
 - FAQ: exactly 6 questions covering setup, migration, AI features, trial end, discounts, security
@@ -127,18 +126,8 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     ]
   },
   "testimonials": {
-    "eyebrow": "Short eyebrow",
-    "heading": "Section heading",
-    "items": [
-      {
-        "quote": "40–60 word specific testimonial",
-        "author": "First name + initial",
-        "role": "Role",
-        "company": "Company name",
-        "rating": 5,
-        "avatar_letter": "S"
-      }
-    ]
+    "eyebrow": "Short eyebrow for the owner's customer reviews",
+    "heading": "Section heading"
   },
   "security": {
     "heading": "1 sentence",
@@ -176,9 +165,9 @@ Requirements:
 - pricing.tiers: exactly 3 tiers — Starter (free), Pro (paid), Enterprise (custom)
 - pricing tiers: Starter has 6 features, Pro has 8 features, Enterprise has 8 features
 - integrations.items: exactly 12 items with a relevant icon name from the ICON NAMES list
-- testimonials.items: exactly 3 testimonials, each with a different avatar_letter
 - security.items: exactly 6 items
 - faq.items: exactly 6 questions
+${NO_REVIEWS_RULE}
 
 ${ICON_VOCAB_PROMPT}
 Every "icon" field above (features, how_it_works steps, integrations) MUST be one name from the list — never an emoji.`
@@ -186,6 +175,17 @@ Every "icon" field above (features, how_it_works steps, integrations) MUST be on
 
 function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
   const mock = ATLAS_MOCK_CONTENT
+  const owner = { rating: input.social_proof?.review_rating, count: input.social_proof?.review_count }
+  // Reviews are only ever the owner's own. With none, the section is not drawn.
+  const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
+    quote: r.text,
+    author: r.name,
+    role: r.detail,
+    rating: starsOf(r.rating),
+    avatar_letter: r.name.charAt(0),
+    origin: r.origin,
+    when: r.when
+  }))
 
   return {
     brand: {
@@ -194,13 +194,13 @@ function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
       category: input.brand.category
     },
     hero: {
-      eyebrow: ai.hero?.eyebrow || mock.hero.eyebrow,
+      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || mock.hero.eyebrow, mock.hero.eyebrow, owner),
       headline: ai.hero?.headline || mock.hero.headline,
       subheadline: ai.hero?.subheadline || mock.hero.subheadline,
       cta_primary: ai.hero?.cta_primary || mock.hero.cta_primary,
       cta_secondary: ai.hero?.cta_secondary || mock.hero.cta_secondary,
-      social_proof: ai.hero?.social_proof || mock.hero.social_proof,
-      badge: ai.hero?.badge
+      social_proof: unlessRatingClaim(ai.hero?.social_proof || mock.hero.social_proof, mock.hero.social_proof, owner),
+      badge: ai.hero?.badge ? unlessRatingClaim(ai.hero.badge, '', owner) || undefined : undefined
     },
     trust_bar: {
       label: ai.trust_bar?.label || mock.trust_bar.label,
@@ -232,11 +232,13 @@ function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
       heading: ai.testimonials?.heading || mock.testimonials.heading,
-      items: Array.isArray(ai.testimonials?.items) ? ai.testimonials.items : mock.testimonials.items
+      average_rating: input.social_proof?.review_rating,
+      review_count: countOf(input.social_proof?.review_count),
+      items: testimonials
     },
     security: {
       heading: ai.security?.heading || mock.security.heading,
-      items: Array.isArray(ai.security?.items) ? ai.security.items : mock.security.items
+      items: dropRatingClaims(Array.isArray(ai.security?.items) ? ai.security.items : mock.security.items, (t: any) => String(t), owner)
     },
     cta: {
       eyebrow: ai.cta?.eyebrow || mock.cta.eyebrow,
@@ -257,8 +259,9 @@ function mergeIntoContent(input: AtlasInput, ai: any): AtlasContent {
     },
     seo: {
       title: ai.seo?.title || mock.seo.title,
-      description: ai.seo?.description || mock.seo.description
-    }
+      description: unlessRatingClaim(ai.seo?.description || mock.seo.description, mock.seo.description, owner)
+    },
+    links: { reviews_url: input.social_proof?.reviews_url || undefined }
   }
 }
 

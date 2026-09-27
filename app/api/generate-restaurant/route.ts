@@ -6,6 +6,7 @@ import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { restaurantInputSchema, type RestaurantInput } from '@/utils/restaurant/input'
 import type { RestaurantContent } from '@/utils/restaurant/types'
 import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -118,6 +119,7 @@ Reservations: ${reservationsText}
 ${input.reservations.note ? `Reservation note: ${input.reservations.note}` : ''}
 
 Press outlets mentioned: ${(input.press_outlets || []).join(', ') || 'N/A'}
+${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 
 WRITING DIRECTION
 Tone for this place: ${tone}
@@ -127,7 +129,6 @@ Hard rules:
 - Headlines: 4–10 words. Quiet, evocative, specific.
 - Subheadlines: one or two sentences. Specific to this restaurant.
 - Menu item descriptions: 6–14 words. Sensory and concrete.
-- Testimonials: 18–40 words. Believable. Specific dish or detail. Reference the restaurant by name at most once.
 - FAQ answers: 1–2 sentences. Direct. No padding.
 - Eyebrow labels: 2–5 words. ALL CAPS feel via context, write in normal case.
 - Do not invent specific dietary certifications, awards, or Michelin stars unless they are in the brief.
@@ -172,13 +173,8 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
     "cta_label": "Short Arabic reservation CTA, e.g. 'احجز طاولتك' or 'اتصل للحجز'. NEVER name an external platform (no Resy/OpenTable/SevenRooms) — reservations run through the site's own booking form."
   },
   "reviews": {
-    "heading": "Reviews section headline (max 6 words)",
-    "subheading": "One short sentence.",
-    "overall_rating": 4.8,
-    "review_count": "200+",
-    "testimonials": [
-      { "name": "Plausible first + last initial", "text": "18–40 words", "source": "Plausible source (e.g. 'Resy · Verified diner', 'OpenTable · Verified diner', 'Eater'). For one of four, you may use a press outlet from the brief if any.", "rating": 5 }
-    ]
+    "heading": "Headline for the owner's guest reviews (max 6 words)",
+    "subheading": "One short sentence."
   },
   "press": [
     { "outlet": "Outlet name from brief or plausible default", "quote": "Optional short pull quote (max 8 words). Empty string if none." }
@@ -202,7 +198,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
 Requirements:
 - signature_dishes: exactly 4 items chosen from the strongest menu items
 - menu_descriptions: write descriptions ONLY for items that currently have none. Cap at the 24 most prominent such items — do NOT list every item on a large menu (items you skip keep a sensible default). Never repeat items that already have a description.
-- testimonials: exactly 4
+${NO_REVIEWS_RULE}
 - press: 4–6 items
 - faq: 5–7 items
 - Use the restaurant's name ("${input.brand.name}") sparingly (max twice across all copy)`
@@ -215,6 +211,17 @@ function pickNth<T>(arr: T[], i: number, fallback: T): T {
 
 function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   const mock = RESTAURANT_MOCK_CONTENT
+  const rating = input.social_proof?.review_rating
+  const owner = { rating, count: input.social_proof?.review_count }
+  // Reviews are only ever the owner's own. With none, the section is not drawn.
+  const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
+    name: r.name,
+    text: r.text,
+    source: [r.detail, r.origin === 'google' ? 'Google' : undefined].filter(Boolean).join(' · ') || undefined,
+    rating: starsOf(r.rating),
+    origin: r.origin,
+    when: r.when
+  }))
 
   // Build menu with AI-polished descriptions when missing/weak
   const aiDescMap = new Map<string, string>()
@@ -310,7 +317,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
       neighborhood: input.brand.neighborhood
     },
     hero: {
-      eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
+      eyebrow: unlessRatingClaim(String(ai?.hero?.eyebrow || mock.hero.eyebrow), mock.hero.eyebrow, owner),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
       primary_cta: String(ai?.hero?.primary_cta || 'احجز طاولة'),
@@ -366,21 +373,9 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     reviews: {
       heading: String(ai?.reviews?.heading || 'في القاعة.'),
       subheading: String(ai?.reviews?.subheading || 'كلماتٌ من ضيوفٍ زارونا مؤخّرًا.'),
-      overall_rating:
-        typeof ai?.reviews?.overall_rating === 'number'
-          ? Math.max(4.0, Math.min(5.0, ai.reviews.overall_rating))
-          : 4.8,
-      review_count: String(ai?.reviews?.review_count || '200+'),
-      testimonials:
-        Array.isArray(ai?.reviews?.testimonials) && ai.reviews.testimonials.length >= 3
-          ? ai.reviews.testimonials.slice(0, 4).map((t: any) => ({
-              name: String(t?.name || 'ضيف موثّق'),
-              text: String(t?.text || ''),
-              source: t?.source ? String(t.source) : undefined,
-              rating:
-                typeof t?.rating === 'number' ? Math.max(1, Math.min(5, Math.round(t.rating))) : 5
-            }))
-          : mock.reviews.testimonials
+      overall_rating: rating,
+      review_count: countOf(input.social_proof?.review_count),
+      testimonials
     },
     press: {
       heading: String(ai?.press_heading || 'في الصحافة.'),
@@ -413,6 +408,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     // optional and defaults to "all visible".
     hidden_sections: [],
     social_links: {},
+    links: { reviews_url: input.social_proof?.reviews_url || undefined },
   }
 
   return content

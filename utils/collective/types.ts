@@ -47,6 +47,9 @@ export type CollectiveTestimonial = {
   /** Falls back to the author's first letter. */
   avatar_letter?: string
   product?: string
+  /** Taken from Google: the dashboard never rewords its text. */
+  origin?: 'google' | 'manual'
+  when?: string
 }
 
 export type CollectiveContent = {
@@ -92,8 +95,9 @@ export type CollectiveContent = {
   testimonials: {
     eyebrow: string
     heading: string
-    average_rating: number
-    review_count: string
+    /** The owner's own, or absent: never generated. */
+    average_rating?: number
+    review_count?: string
     items: CollectiveTestimonial[]
   }
   newsletter: {
@@ -113,4 +117,6 @@ export type CollectiveContent = {
     title: string
     description: string
   }
+  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
+  links?: { reviews_url?: string }
 }
