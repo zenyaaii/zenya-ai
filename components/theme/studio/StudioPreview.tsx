@@ -375,10 +375,10 @@ export default function StudioPreview({
             <div className="relative">
               {/* Vertical line */}
               <div
-                className="absolute left-0 top-0 hidden w-px md:block"
+                className="absolute start-0 top-0 hidden w-px md:block"
                 style={{ background: colors.border, height: '100%' }}
               />
-              <div className="space-y-0 md:ml-8">
+              <div className="space-y-0 md:ms-8">
                 {content.timeline.events.map((event, i) => (
                   <motion.div
                     key={i}
@@ -392,7 +392,7 @@ export default function StudioPreview({
                     {/* Year dot */}
                     <div className="hidden md:block">
                       <div
-                        className="absolute -left-[9px] top-[calc(2.5rem_+_2px)] h-4 w-4 rounded-full border-2"
+                        className="absolute -start-[40px] top-[calc(2.5rem_+_2px)] h-4 w-4 rounded-full border-2"
                         style={{ background: colors.background, borderColor: colors.accent }}
                       />
                       <span

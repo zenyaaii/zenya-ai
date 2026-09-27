@@ -500,8 +500,8 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
         <div className="relative grid gap-8 md:grid-cols-3">
           {/* Connector line */}
           <div
-            className="absolute left-0 right-0 top-8 hidden h-px md:block"
-            style={{ background: `linear-gradient(90deg, transparent, ${colors.border}, ${colors.primary}50, ${colors.border}, transparent)` }}
+            className="absolute inset-x-[16.67%] top-8 hidden h-px md:block"
+            style={{ background: `linear-gradient(90deg, ${colors.border}, ${colors.primary}50, ${colors.border})` }}
           />
 
           {content.how_it_works.steps.map((step, i) => (
