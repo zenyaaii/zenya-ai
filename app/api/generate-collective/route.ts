@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
-import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
+import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
-import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { collectiveInputSchema, type CollectiveInput } from '@/utils/collective/input'
-import type { CollectiveContent } from '@/utils/collective/types'
+import type { CollectiveContent, CollectiveProduct } from '@/utils/collective/types'
 import { COLLECTIVE_MOCK_CONTENT } from '@/utils/collective/mock-content'
 
 export const dynamic = 'force-dynamic'
@@ -40,18 +39,18 @@ Store name: ${input.brand.name}
 Tagline: ${input.brand.tagline}
 Description: ${input.brand.description}
 Categories: ${categoriesText}
-Curation story: ${input.curation_story || 'We test everything ourselves before listing it.'}
+Curation story: ${input.curation_story || 'N/A'}
 
 Collections:
 ${collectionsText}
 
-Price range: ${input.price_range?.min || '$50'} – ${input.price_range?.max || '$500'}
+Price range: ${input.price_range?.min || 'N/A'} – ${input.price_range?.max || 'N/A'}${input.price_range?.average ? ` (average ${input.price_range.average})` : ''}
 Sustainability vetted: ${input.sustainability ? 'Yes' : 'No'}
-Shipping: ${input.shipping_perks || 'Free over $150, 3-5 business days'}
-Returns: ${input.returns_policy || '14-day free returns'}
+Shipping: ${input.shipping_perks || 'N/A'}
+Returns: ${input.returns_policy || 'N/A'}
 
 Social proof:
-- Customer count: ${input.social_proof?.customer_count || '25,000+'}
+- Customer count: ${input.social_proof?.customer_count || 'N/A'}
 - ${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 
 WRITING DIRECTION
@@ -59,8 +58,8 @@ You are a luxury retail copywriter. The tone is elevated, editorial, and confide
 
 Hard rules:
 - Headlines use \\n for line breaks (2–3 short lines, 3–7 words each)
-- Subheadlines: 2–3 sentences, specific and editorial — never generic
-- Product names: realistic, elegant (e.g. "Linen Throw — Warm Sand", "The Daily Moisturiser SPF50")
+- Subheadlines: 2–3 sentences, editorial, drawn only from what the brief says — never generic, never an invented detail
+- Product names are placeholders the owner replaces with their real products: a plain item type from one of the brief's categories or collections plus at most a colour or shape (e.g. "Throw — Warm Sand", "Serving Board"). No brand, maker, material, ingredient, origin, size, percentage or other spec.
 - Collection taglines: poetic and specific, 6–10 words
 - Never use buzzwords like "premium", "luxury", "amazing", "stunning" in product copy
 
@@ -74,47 +73,38 @@ Return ONLY valid JSON, no markdown, no prose:
     "description": "2-sentence store description"
   },
   "hero": {
-    "eyebrow": "New season · Season/Year or relevant short line",
+    "eyebrow": "Short line naming what the store sells, from the categories (no season or year)",
     "headline": "Hero headline with \\n",
     "subheadline": "2-3 sentence description",
     "cta_primary": "Primary CTA",
-    "cta_secondary": "Secondary CTA",
-    "badge": "Short perk badge (e.g. 'Free shipping over $150')"
+    "cta_secondary": "Secondary CTA"
   },
   "collections": {
     "eyebrow": "Short eyebrow",
     "heading": "Section heading with \\n",
     "subheading": "1–2 sentence description",
     "items": [
-      { "name": "Collection name", "tagline": "Short poetic tagline", "product_count": "NN pieces", "tag": "e.g. New season / Bestseller / Staff picks" }
+      { "name": "Collection name, exactly as given", "tagline": "Short poetic tagline" }
     ]
   },
   "new_arrivals": {
     "eyebrow": "Just landed",
     "heading": "New this week.",
     "products": [
-      { "name": "Product name", "price": "$XXX", "badge": "New", "category": "Category" }
+      { "name": "Placeholder product name", "category": "One of the brief's categories, exactly as given" }
     ]
   },
   "brand_promise": {
     "eyebrow": "Short eyebrow",
     "headline": "Headline with \\n",
-    "body": "2-3 sentence brand promise paragraph",
-    "stats": [
-      { "value": "XXX+", "label": "Short label" }
-    ]
+    "body": "2-3 sentence brand promise paragraph, restating only the brief's description and curation story"
   },
   "bestsellers": {
-    "eyebrow": "Consistently loved",
-    "heading": "Bestseller heading with \\n",
-    "subheading": "1 sentence",
+    "eyebrow": "Short eyebrow for a selection from the store (no sales or popularity claim)",
+    "heading": "Heading for a selection from the store, with \\n",
+    "subheading": "1 sentence, no sales, stock or popularity claim",
     "products": [
-      { "name": "Product name", "price": "$XXX", "category": "Category", "badge": "optional badge" }
-    ]
-  },
-  "perks": {
-    "items": [
-      { "icon": "shipping", "title": "Perk title", "description": "1-2 sentence perk description" }
+      { "name": "Placeholder product name", "category": "One of the brief's categories, exactly as given" }
     ]
   },
   "testimonials": {
@@ -124,7 +114,7 @@ Return ONLY valid JSON, no markdown, no prose:
   "newsletter": {
     "eyebrow": "The ${input.brand.name} Edit",
     "heading": "Newsletter heading with \\n",
-    "subheading": "1-2 sentence newsletter description",
+    "subheading": "1-2 sentence newsletter description (no frequency, no discount, no gift)",
     "placeholder": "your@email.com",
     "cta": "Subscribe",
     "note": "No noise. Unsubscribe any time."
@@ -139,24 +129,38 @@ Return ONLY valid JSON, no markdown, no prose:
 }
 
 Requirements:
-- collections.items: use the provided collections (${input.collections.length} items), expand with product counts and tags
-- new_arrivals.products: exactly 6 products across different categories
-- brand_promise.stats: exactly 4 stats (products, returns, shipping, customer metric)
-- bestsellers.products: exactly 8 products with realistic names and prices
-- perks.items: exactly 4 perks covering shipping, returns, quality, sustainability
-- Each product name should be specific and elegant, not generic
-${NO_REVIEWS_RULE}
-
-${ICON_VOCAB_PROMPT}
-Every "icon" field (perks.items) MUST be one name from the list above — never an emoji.`
+- collections.items: the provided collections (${input.collections.length} items), same names, same order. Write a tagline only where the brief gives none.
+- new_arrivals.products: exactly 6 placeholder products across the brief's categories. No prices, badges or discounts.
+- bestsellers.products: exactly 8 placeholder products across the brief's categories. No prices, badges or discounts.
+- Never state, in any field, a fact the brief does not give: a price, discount, sale, shipping threshold or delivery time, return period or policy, number of products, customers, brands, studios or years, a founding year, season or date, stock level ("almost gone", "sold out", "restocked"), sales rank ("bestseller", "most loved", "reordered"), a named person, brand, maker or city, a material, ingredient or certification, or a sustainability or testing claim. Shipping, returns, customer count and sustainability may be restated only as the brief words them, and only when it gives them.
+${NO_REVIEWS_RULE}`
 }
 
-/** Products carry no stars: a rating is never generated. */
-function unrated(products: any[]): any[] {
-  return products.map((p) => {
-    const { rating: _rating, ...rest } = p || {}
-    return rest
-  })
+function str(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : ''
+}
+
+/**
+ * The product grids are placeholders the owner replaces with their real
+ * products. The AI may name one; it may not price it, badge it, discount it
+ * or rate it. A category the owner did not list is dropped.
+ */
+function placeholderProducts(list: unknown, categories: string[], max: number): CollectiveProduct[] {
+  if (!Array.isArray(list)) return []
+  return list
+    .map((p: any) => {
+      const category = str(p?.category)
+      return { name: str(p?.name), price: '', category: categories.includes(category) ? category : '' }
+    })
+    .filter((p) => p.name)
+    .slice(0, max)
+}
+
+/** First sentence of the owner's text, or '' when it is too long for a line. */
+function firstSentence(text: string | undefined, max = 155): string {
+  const t = str(text)
+  const s = (t.match(/^[^.!?؟۔\n]+[.!?؟۔]?/) || [''])[0].trim()
+  return s.length <= max ? s : ''
 }
 
 function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
@@ -164,6 +168,10 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
   const rating = input.social_proof?.review_rating
   const rated = typeof rating === 'number'
   const owner = { rating, count: input.social_proof?.review_count }
+  const categories = input.categories.map((c) => c.trim()).filter(Boolean)
+  const shipping = str(input.shipping_perks)
+  const returns = str(input.returns_policy)
+  const customers = str(input.social_proof?.customer_count)
   // Reviews are only ever the owner's own. With none, the section is not drawn.
   const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
     quote: r.text,
@@ -174,13 +182,26 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
     origin: r.origin,
     when: r.when
   }))
-  // The rating stat is the owner's, or not there at all.
-  const stats = dropRatingClaims(
-    Array.isArray(ai.brand_promise?.stats) ? ai.brand_promise.stats : mock.brand_promise.stats,
-    (st: any) => `${st?.value ?? ''} ${st?.label ?? ''}`,
-    {}
-  )
-  const promiseStats = rated ? [{ value: `${rating}★`, label: 'متوسط التقييم' }, ...stats].slice(0, 4) : stats.slice(0, 4)
+  // Stats are the owner's numbers only: their rating and their customer count.
+  // Nothing is generated; with neither, the strip is not drawn.
+  const promiseStats: { value: string; label: string }[] = [
+    ...(rated ? [{ value: `${rating}★`, label: 'متوسط التقييم' }] : []),
+    ...(customers ? [{ value: customers, label: 'عملاؤنا' }] : [])
+  ]
+  // Perks restate what the owner wrote, word for word. Nothing else is promised.
+  const perks = [
+    ...(shipping ? [{ icon: 'shipping', title: 'الشحن', description: shipping }] : []),
+    ...(returns ? [{ icon: 'returns', title: 'الإرجاع', description: returns }] : []),
+    ...(input.sustainability ? [{ icon: 'eco', title: 'منتجات مُدقَّقة للاستدامة', description: '' }] : [])
+  ]
+  // The owner's collections, in their order. The AI may only add a missing tagline.
+  const aiCollections: any[] = Array.isArray(ai.collections?.items) ? ai.collections.items : []
+  const collectionItems = input.collections.map((c, i) => ({
+    name: c.name,
+    tagline: str(c.tagline) || str(aiCollections[i]?.tagline),
+    product_count: ''
+  }))
+  const ownerLine = categories.slice(0, 3).join(' · ')
 
   return {
     brand: {
@@ -189,38 +210,39 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
       description: ai.brand?.description || input.brand.description
     },
     hero: {
-      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || mock.hero.eyebrow, mock.hero.eyebrow, owner),
+      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || ownerLine, ownerLine, owner),
       headline: ai.hero?.headline || mock.hero.headline,
-      subheadline: ai.hero?.subheadline || mock.hero.subheadline,
+      subheadline: unlessRatingClaim(ai.hero?.subheadline || input.brand.description, input.brand.description, owner),
       cta_primary: ai.hero?.cta_primary || mock.hero.cta_primary,
       cta_secondary: ai.hero?.cta_secondary || mock.hero.cta_secondary,
-      badge: unlessRatingClaim(ai.hero?.badge || mock.hero.badge, mock.hero.badge, owner)
+      // The owner's shipping line, or no badge.
+      badge: shipping || undefined
     },
     collections: {
       eyebrow: ai.collections?.eyebrow || mock.collections.eyebrow,
       heading: ai.collections?.heading || mock.collections.heading,
-      subheading: ai.collections?.subheading || mock.collections.subheading,
-      items: Array.isArray(ai.collections?.items) ? ai.collections.items : mock.collections.items
+      subheading: ai.collections?.subheading || '',
+      items: collectionItems
     },
     new_arrivals: {
       eyebrow: ai.new_arrivals?.eyebrow || mock.new_arrivals.eyebrow,
       heading: ai.new_arrivals?.heading || mock.new_arrivals.heading,
-      products: unrated(Array.isArray(ai.new_arrivals?.products) ? ai.new_arrivals.products : mock.new_arrivals.products)
+      products: placeholderProducts(ai.new_arrivals?.products, categories, 6)
     },
     brand_promise: {
-      eyebrow: ai.brand_promise?.eyebrow || mock.brand_promise.eyebrow,
-      headline: ai.brand_promise?.headline || mock.brand_promise.headline,
-      body: ai.brand_promise?.body || mock.brand_promise.body,
+      eyebrow: ai.brand_promise?.eyebrow || `لماذا ${input.brand.name}`,
+      headline: ai.brand_promise?.headline || 'ما نختاره،\nولماذا.',
+      body: ai.brand_promise?.body || input.curation_story || input.brand.description,
       stats: promiseStats
     },
     bestsellers: {
-      eyebrow: ai.bestsellers?.eyebrow || mock.bestsellers.eyebrow,
-      heading: ai.bestsellers?.heading || mock.bestsellers.heading,
-      subheading: ai.bestsellers?.subheading || mock.bestsellers.subheading,
-      products: unrated(Array.isArray(ai.bestsellers?.products) ? ai.bestsellers.products : mock.bestsellers.products)
+      eyebrow: ai.bestsellers?.eyebrow || 'من المتجر',
+      heading: ai.bestsellers?.heading || 'مختارات\nمن المتجر.',
+      subheading: ai.bestsellers?.subheading || '',
+      products: placeholderProducts(ai.bestsellers?.products, categories, 8)
     },
     perks: {
-      items: Array.isArray(ai.perks?.items) ? ai.perks.items : mock.perks.items
+      items: perks
     },
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
@@ -230,22 +252,26 @@ function mergeIntoContent(input: CollectiveInput, ai: any): CollectiveContent {
       items: testimonials
     },
     newsletter: {
-      eyebrow: ai.newsletter?.eyebrow || mock.newsletter.eyebrow,
+      eyebrow: ai.newsletter?.eyebrow || `نشرة ${input.brand.name}`,
       heading: ai.newsletter?.heading || mock.newsletter.heading,
-      subheading: ai.newsletter?.subheading || mock.newsletter.subheading,
+      subheading: ai.newsletter?.subheading || 'جديد المتجر، في بريدك.',
       placeholder: ai.newsletter?.placeholder || mock.newsletter.placeholder,
       cta: ai.newsletter?.cta || mock.newsletter.cta,
-      note: ai.newsletter?.note || mock.newsletter.note
+      note: ai.newsletter?.note || ''
     },
     footer: {
-      tagline: ai.footer?.tagline || mock.footer.tagline,
+      tagline: ai.footer?.tagline || input.brand.tagline,
       legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
       // The wizard asks for no email, so none is made up; the owner adds it in the editor.
       email: ''
     },
     seo: {
-      title: ai.seo?.title || mock.seo.title,
-      description: unlessRatingClaim(ai.seo?.description || mock.seo.description, mock.seo.description, owner)
+      title: ai.seo?.title || `${input.brand.name} — ${input.brand.tagline}`,
+      description: unlessRatingClaim(
+        ai.seo?.description || firstSentence(input.brand.description) || input.brand.tagline,
+        input.brand.tagline,
+        owner
+      )
     },
     links: { reviews_url: input.social_proof?.reviews_url || undefined }
   }

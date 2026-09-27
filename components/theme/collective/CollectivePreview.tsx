@@ -205,7 +205,7 @@ function ProductCard({ product, index, colors, fonts }: {
         </p>
         <div className="mt-auto flex items-center justify-between pt-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{product.price}</span>
+            {product.price ? <span className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{product.price}</span> : null}
             {product.original_price && (
               <span className="text-xs line-through" style={{ color: colors.muted }}>{product.original_price}</span>
             )}
@@ -487,7 +487,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
         </div>
 
         {/* Hero stats strip */}
-        {content.brand_promise?.stats && (
+        {!!content.brand_promise?.stats?.length && (
           <motion.div
             className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-4 md:grid-cols-4"
             initial={rm ? {} : { opacity: 0, y: 24 }}
@@ -547,7 +547,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── NEW ARRIVALS ──────────────────────────────────────────────────────── */}
-      {(view === 'collections' || view === 'arrivals') && content.new_arrivals && (
+      {(view === 'collections' || view === 'arrivals') && !!content.new_arrivals?.products?.length && (
         <section className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-6xl">
             <motion.div className="mb-12 flex items-end justify-between" {...revealAnim(rm,0)}>
@@ -592,6 +592,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 <p className="mb-8 text-lg leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {content.brand_promise.body}
                 </p>
+                {!!content.brand_promise.stats?.length && (
                 <div className="grid grid-cols-2 gap-4">
                   {content.brand_promise.stats.map((stat, i) => (
                     <GlassCard key={i} colors={colors} className="p-5" hover={false}>
@@ -600,6 +601,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                     </GlassCard>
                   ))}
                 </div>
+                )}
               </motion.div>
             </div>
           </div>
@@ -607,7 +609,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── BESTSELLERS ────────────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'arrivals') && content.bestsellers && (
+      {(view === 'home' || view === 'arrivals') && !!content.bestsellers?.products?.length && (
         <section className="px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
             <motion.div className="mb-12 max-w-xl" {...revealAnim(rm,0)}>
@@ -632,7 +634,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── PERKS BAR ────────────────────────────────────────────────────────── */}
-      {view === 'home' && content.perks && (
+      {view === 'home' && !!content.perks?.items?.length && (
         <div style={{ background: colors.surfaceAlt, borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
           <div className="mx-auto grid max-w-6xl grid-cols-2 px-6 py-10 md:grid-cols-4 md:px-10">
             {content.perks.items.map((perk, i) => (
@@ -647,7 +649,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 <span><Icon name={perk.icon} size={24} animation="pop" /></span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{perk.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{perk.description}</p>
+                  {perk.description ? <p className="mt-1 text-xs leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{perk.description}</p> : null}
                 </div>
               </motion.div>
             ))}
@@ -725,9 +727,11 @@ export default function CollectivePreview({ content, presetId, className = '' }:
             <h2 className="mb-4 text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
               <Headline text={content.newsletter.heading} />
             </h2>
+            {content.newsletter.subheading ? (
             <p className="mb-8 leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>
               {content.newsletter.subheading}
             </p>
+            ) : null}
             <GlassCard colors={colors} className="flex overflow-hidden rounded-2xl p-1.5" hover={false}>
               <input
                 type="email"
