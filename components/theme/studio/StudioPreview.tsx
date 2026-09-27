@@ -139,6 +139,13 @@ export default function StudioPreview({
   const setView = (v: StudioView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
+  // Buttons outside the nav (CTAs, footer links) open a page and start it at
+  // the top. The template has no collection page, so "shop"/"visit" CTAs go to
+  // contact — the booking form and the owner's email live there.
+  const goTo = (v: StudioView) => {
+    setView(v)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+  }
   const rm = !!useReducedMotion()
   // A page with nothing on it gets no link. The team page is only the team section.
   const hasTeam = !!content.team?.members?.length
@@ -178,6 +185,7 @@ export default function StudioPreview({
           ))}
         </nav>
         <button
+          onClick={() => goTo('contact')}
           className="hidden rounded-full border px-6 py-2 text-xs font-semibold uppercase tracking-widest transition-all hover:opacity-80 md:block"
           style={{ borderColor: colors.accent, color: colors.accent, fontFamily: fonts.body }}
         >
@@ -254,12 +262,14 @@ export default function StudioPreview({
             </p>
             <div className="flex gap-4">
               <button
+                onClick={() => goTo('contact')}
                 className="rounded-full px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
                 style={{ background: colors.accent, color: colors.background, fontFamily: fonts.body }}
               >
                 {content.hero.cta_primary}
               </button>
               <button
+                onClick={() => goTo('about')}
                 className="rounded-full border px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:opacity-60"
                 style={{ borderColor: colors.border, color: colors.text, fontFamily: fonts.body }}
               >
@@ -763,12 +773,14 @@ export default function StudioPreview({
             ) : null}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
               <button
+                onClick={() => goTo('contact')}
                 className="rounded-full px-10 py-5 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
                 style={{ background: colors.text, color: colors.background, fontFamily: fonts.body }}
               >
                 {content.cta.cta_primary}
               </button>
               <button
+                onClick={() => goTo('contact')}
                 className="rounded-full border px-10 py-5 text-sm font-semibold tracking-wide transition-all hover:opacity-60"
                 style={{ borderColor: colors.border, color: colors.text, fontFamily: fonts.body }}
               >
@@ -812,10 +824,10 @@ export default function StudioPreview({
               </span>
             </div>
             <div className="flex flex-wrap gap-8">
-              {['قصتنا', 'آلية العمل', 'الفريق', 'الصحافة', 'تواصل']
-                .filter((link) => (link !== 'الفريق' || hasTeam) && (link !== 'الصحافة' || hasPress))
-                .map((link) => (
-                <button key={link} className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+              {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['الصحافة', 'about'], ['تواصل', 'contact']] as [string, StudioView][])
+                .filter(([link]) => (link !== 'الفريق' || hasTeam) && (link !== 'الصحافة' || hasPress))
+                .map(([link, page]) => (
+                <button key={link} onClick={() => goTo(page)} className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {link}
                 </button>
               ))}
