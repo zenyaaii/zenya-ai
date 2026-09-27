@@ -6,6 +6,7 @@ import { Icon } from '@/components/icons'
 import type { LookbookContent, LookbookReview } from '@/utils/lookbook/types'
 import { getLookbookPreset } from '@/utils/lookbook/presets'
 import BookingSection from '@/components/site/BookingSection'
+import { useBookingContext } from '@/components/site/BookingContext'
 import {
   TYPOGRAPHY_PRESETS,
   buildGoogleFontsUrl,
@@ -154,7 +155,7 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
         {/* Nav right */}
         <div className="hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.18em] md:flex" style={{ color: colors.muted }}>
           <button onClick={() => setView('shop')} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.7 }}>تخفيضات</button>
-          <button className="text-lg" style={{ color: colors.text }}>🛍</button>
+          <button onClick={() => setView('shop')} className="text-lg" style={{ color: colors.text }} aria-label="المتجر">🛍</button>
         </div>
 
         {/* Cart — mobile only (end side), keeps the brand centered. */}
@@ -195,7 +196,7 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
 }
 
 // ─── Drop Banner ───────────────────────────────────────────────────────────────
-function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; colors: Colors; bodyFont: string }) {
+function DropBanner({ content, colors, bodyFont, go }: { content: LookbookContent; colors: Colors; bodyFont: string; go: (v: LookbookView) => void }) {
   const [visible, setVisible] = useState(true)
   if (!visible) return null
   return (
@@ -207,14 +208,14 @@ function DropBanner({ content, colors, bodyFont }: { content: LookbookContent; c
       <span>{content.drop_banner.label}</span>
       <span className="hidden sm:block" style={{ opacity: 0.7 }}>·</span>
       <span className="hidden sm:block">{content.drop_banner.text}</span>
-      <span className="cursor-pointer underline underline-offset-2">{content.drop_banner.cta}</span>
+      <button type="button" onClick={() => go('shop')} className="cursor-pointer underline underline-offset-2">{content.drop_banner.cta}</button>
       <button onClick={() => setVisible(false)} aria-label="إغلاق" className="absolute right-4 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"><Icon name="close" size={14} animation="none" hover={false} /></button>
     </div>
   )
 }
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
-function LookbookHero({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+function LookbookHero({ content, colors, headingFont, bodyFont, go }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; go: (v: LookbookView) => void }) {
   const rm = !!useReducedMotion()
   return (
     <section data-section="hero" className="relative flex h-screen min-h-[600px] items-end overflow-hidden">
@@ -252,12 +253,16 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
         </motion.h1>
         <motion.div {...fadeAnim(rm,0.35)} className="flex flex-wrap gap-3">
           <button
+            type="button"
+            onClick={() => go('shop')}
             className="rounded-full px-8 py-3.5 text-sm font-black uppercase tracking-wider text-white transition hover:scale-105"
             style={{ background: colors.primary, letterSpacing: '0.12em' }}
           >
             {content.hero.cta_primary}
           </button>
           <button
+            type="button"
+            onClick={() => go('lookbook')}
             className="rounded-full border px-8 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-white/10"
             style={{ borderColor: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em' }}
           >
@@ -279,7 +284,7 @@ function LookbookHero({ content, colors, headingFont, bodyFont }: { content: Loo
 }
 
 // ─── Lookbook Grid ─────────────────────────────────────────────────────────────
-function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+function LookbookGrid({ content, colors, headingFont, bodyFont, go }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; go: (v: LookbookView) => void }) {
   const rm = !!useReducedMotion()
   const looks = (content.lookbook.looks || []).slice(0, 6)
   if (!looks.length) return null
@@ -298,16 +303,16 @@ function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: Loo
       <div className="mx-auto max-w-7xl">
         {/* Row 1: large left + 2 stacked right */}
         <div className="mb-4 grid gap-4 md:grid-cols-[1.4fr_1fr]">
-          <LookCard look={looks[0]} image={LOOK_IMAGES[0]} colors={colors} headingFont={headingFont} tall delay={0} />
+          <LookCard look={looks[0]} image={LOOK_IMAGES[0]} colors={colors} headingFont={headingFont} tall delay={0} onOpen={() => go('shop')} />
           <div className="grid grid-rows-2 gap-4">
-            <LookCard look={looks[1]} image={LOOK_IMAGES[1]} colors={colors} headingFont={headingFont} delay={0.08} />
-            <LookCard look={looks[2]} image={LOOK_IMAGES[2]} colors={colors} headingFont={headingFont} delay={0.14} />
+            <LookCard look={looks[1]} image={LOOK_IMAGES[1]} colors={colors} headingFont={headingFont} delay={0.08} onOpen={() => go('shop')} />
+            <LookCard look={looks[2]} image={LOOK_IMAGES[2]} colors={colors} headingFont={headingFont} delay={0.14} onOpen={() => go('shop')} />
           </div>
         </div>
         {/* Row 2: 3 equal */}
         <div className="grid gap-4 sm:grid-cols-3">
           {looks.slice(3, 6).map((look, i) => (
-            <LookCard key={i} look={look} image={LOOK_IMAGES[3 + i]} colors={colors} headingFont={headingFont} delay={0.06 * i} />
+            <LookCard key={i} look={look} image={LOOK_IMAGES[3 + i]} colors={colors} headingFont={headingFont} delay={0.06 * i} onOpen={() => go('shop')} />
           ))}
         </div>
       </div>
@@ -315,13 +320,14 @@ function LookbookGrid({ content, colors, headingFont, bodyFont }: { content: Loo
   )
 }
 
-function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }: {
+function LookCard({ look, image, colors, headingFont, tall = false, delay = 0, onOpen }: {
   look: LookbookContent['lookbook']['looks'][0] | undefined
   image: string
   colors: Colors
   headingFont: string
   tall?: boolean
   delay?: number
+  onOpen: () => void
 }) {
   const rm = !!useReducedMotion()
   const [hovered, setHovered] = useState(false)
@@ -331,6 +337,11 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
       {...revealAnim(rm,delay)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } }}
+      role="link"
+      tabIndex={0}
+      aria-label={look.title}
       className={`group relative overflow-hidden ${tall ? 'h-[520px] md:h-[680px]' : 'h-[260px] md:h-[320px]'}`}
       style={{ cursor: 'pointer' }}
     >
@@ -365,7 +376,7 @@ function LookCard({ look, image, colors, headingFont, tall = false, delay = 0 }:
 }
 
 // ─── Bestsellers ───────────────────────────────────────────────────────────────
-function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+function LookbookBestsellers({ content, colors, headingFont, bodyFont, go }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; go?: (v: LookbookView) => void }) {
   const rm = !!useReducedMotion()
   const products = (content.bestsellers.products || []).slice(0, 8)
   if (!products.length) return null
@@ -379,31 +390,45 @@ function LookbookBestsellers({ content, colors, headingFont, bodyFont }: { conte
             <Headline text={content.bestsellers.heading} />
           </h2>
         </div>
-        <span className="hidden cursor-pointer text-sm font-semibold underline underline-offset-4 md:block" style={{ color: colors.muted }}>
-          عرض الكل ←
-        </span>
+        {go ? (
+          <button type="button" onClick={() => go('shop')} className="hidden cursor-pointer text-sm font-semibold underline underline-offset-4 md:block" style={{ color: colors.muted }}>
+            عرض الكل ←
+          </button>
+        ) : null}
       </motion.div>
 
       <div className="mx-auto max-w-7xl grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 md:grid-cols-4">
         {products.map((product, i) => (
-          <ProductCard key={i} product={product} image={PRODUCT_IMAGES[i % PRODUCT_IMAGES.length]} colors={colors} headingFont={headingFont} delay={0.04 * i} />
+          <ProductCard key={i} product={product} image={PRODUCT_IMAGES[i % PRODUCT_IMAGES.length]} colors={colors} headingFont={headingFont} delay={0.04 * i} onOpen={go ? () => go('shop') : undefined} />
         ))}
       </div>
     </section>
   )
 }
 
-function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
+function ProductCard({ product, image, colors, headingFont, delay = 0, onOpen }: {
   product: LookbookContent['bestsellers']['products'][0]
   image: string
   colors: Colors
   headingFont: string
   delay?: number
+  /** Where a tap goes. Absent on the shop page itself, which is already there. */
+  onOpen?: () => void
 }) {
   const rm = !!useReducedMotion()
   const [hovered, setHovered] = useState(false)
   return (
-    <motion.div {...revealAnim(rm,delay)} className="group cursor-pointer">
+    <motion.div
+      {...revealAnim(rm,delay)}
+      className={`group ${onOpen ? 'cursor-pointer' : ''}`}
+      {...(onOpen ? {
+        onClick: onOpen,
+        onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() } },
+        role: 'link',
+        tabIndex: 0,
+        'aria-label': product.name,
+      } : {})}
+    >
       <div
         className="relative mb-3 overflow-hidden"
         style={{ aspectRatio: '3/4' }}
@@ -431,7 +456,7 @@ function ProductCard({ product, image, colors, headingFont, delay = 0 }: {
           className="absolute bottom-0 left-0 right-0 py-3 text-center text-xs font-black uppercase tracking-wider text-white"
           style={{ background: colors.overlay, backdropFilter: 'blur(4px)' }}
         >
-          Quick add +
+          إضافة سريعة +
         </motion.div>
       </div>
       <div>
@@ -570,11 +595,11 @@ function ReviewCard({ review, colors, headingFont, delay = 0 }: { review: Lookbo
       <div className="mt-6 border-t pt-5" style={{ borderColor: colors.border }}>
         <p className="text-sm font-black" style={{ color: colors.text, fontFamily: headingFont }}>{review.author}</p>
         {review.item && (
-          <p className="mt-0.5 text-xs" style={{ color: colors.muted }}>Purchased: {review.item}</p>
+          <p className="mt-0.5 text-xs" style={{ color: colors.muted }}>القطعة: {review.item}</p>
         )}
         {review.verified && (
           <p className="mt-1 flex items-center gap-1 text-[0.65rem] font-semibold" style={{ color: colors.accent }}>
-            ✓ Verified purchase
+            ✓ شراء موثّق
           </p>
         )}
       </div>
@@ -588,7 +613,7 @@ function SizeGuideStrip({ colors, bodyFont }: { colors: Colors; bodyFont: string
   return (
     <section className="px-6 py-10 text-center" style={{ background: colors.surfaceAlt, fontFamily: bodyFont }}>
       <p className="mb-5 text-[0.65rem] font-bold uppercase tracking-[0.3em]" style={{ color: colors.muted }}>
-        Size guide
+        دليل المقاسات
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
         {sizes.map((s) => (
@@ -600,8 +625,8 @@ function SizeGuideStrip({ colors, bodyFont }: { colors: Colors; bodyFont: string
             {s}
           </div>
         ))}
-        <span className="ml-3 cursor-pointer text-xs font-semibold underline underline-offset-4" style={{ color: colors.muted }}>
-          Full size guide →
+        <span className="ml-3 text-xs font-semibold underline underline-offset-4" style={{ color: colors.muted }}>
+          دليل المقاسات الكامل ←
         </span>
       </div>
     </section>
@@ -662,11 +687,36 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
 }
 
 // ─── Footer ────────────────────────────────────────────────────────────────────
-function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string }) {
+function LookbookFooter({ content, colors, headingFont, bodyFont, go }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; go: (v: LookbookView) => void }) {
   const links = {
     'التسوّق': ['وصل حديثًا', 'فساتين', 'بلوزات', 'تنانير', 'معاطف', 'إكسسوارات'],
     'المساعدة': ['دليل المقاسات', 'الشحن', 'الإرجاع', 'الأسئلة الشائعة', 'تواصل'],
     'العلامة': ['قصتنا', 'الاستدامة', 'الصحافة', 'الوظائف', 'المتاجر']
+  }
+  // Only items with a real destination on this site are clickable. The rest
+  // (shipping, returns, careers, stores…) have no page — they stay plain text.
+  const { enabled: bookingOn } = useBookingContext()
+  const email = content.footer.email?.trim()
+  const hasPress = !!content.press?.publications?.length
+  const toContact = () => {
+    const el = typeof document !== 'undefined' ? document.getElementById('booking') : null
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    else if (email) window.location.href = `mailto:${email}`
+  }
+  const actionFor = (item: string): (() => void) | null => {
+    switch (item) {
+      case 'وصل حديثًا': case 'فساتين': case 'بلوزات': case 'تنانير': case 'معاطف': case 'إكسسوارات':
+      case 'دليل المقاسات':
+        return () => go('shop')
+      case 'قصتنا':
+        return () => go('about')
+      case 'الصحافة':
+        return hasPress ? () => go('about') : null
+      case 'تواصل':
+        return bookingOn || email ? toContact : null
+      default:
+        return null
+    }
   }
 
   return (
@@ -687,11 +737,18 @@ function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: L
             <div key={group}>
               <p className="mb-4 text-[0.65rem] font-black uppercase tracking-[0.2em]" style={{ color: colors.text }}>{group}</p>
               <ul className="space-y-2.5">
-                {items.map((item) => (
-                  <li key={item}>
-                    <span className="cursor-pointer text-xs transition hover:opacity-100" style={{ color: colors.muted, opacity: 0.7 }}>{item}</span>
-                  </li>
-                ))}
+                {items.map((item) => {
+                  const act = actionFor(item)
+                  return (
+                    <li key={item}>
+                      {act ? (
+                        <button type="button" onClick={act} className="cursor-pointer text-xs transition hover:opacity-100" style={{ color: colors.muted, opacity: 0.7 }}>{item}</button>
+                      ) : (
+                        <span className="text-xs" style={{ color: colors.muted, opacity: 0.7 }}>{item}</span>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           ))}
@@ -701,7 +758,7 @@ function LookbookFooter({ content, colors, headingFont, bodyFont }: { content: L
           <p className="text-xs" style={{ color: colors.muted, opacity: 0.55 }}>{content.footer.legal}</p>
           <div className="flex gap-6 text-xs" style={{ color: colors.muted, opacity: 0.55 }}>
             {['الخصوصية', 'الشروط', 'إمكانية الوصول'].map((l) => (
-              <span key={l} className="cursor-pointer hover:opacity-100">{l}</span>
+              <span key={l}>{l}</span>
             ))}
           </div>
         </div>
@@ -734,17 +791,22 @@ export default function LookbookPreview({
   const setView = (v: LookbookView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
+  // In-page links (hero, banner, cards, footer) change page and start at the top.
+  const go = (v: LookbookView) => {
+    setView(v)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+  }
 
   return (
     <div className={`min-h-screen ${className}`} style={{ background: colors.background, color: colors.text }}>
       <link rel="stylesheet" href={buildGoogleFontsUrl(TYPOGRAPHY_PRESETS)} />
-      <DropBanner content={content} colors={colors} bodyFont={bodyFont} />
+      <DropBanner content={content} colors={colors} bodyFont={bodyFont} go={go} />
       <LookbookNav content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} view={view} setView={setView} />
 
       {view === 'home' && (
         <>
-          <LookbookHero content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
-          <LookbookBestsellers content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+          <LookbookHero content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} go={go} />
+          <LookbookBestsellers content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} go={go} />
           <LookbookTestimonials content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
           <LookbookNewsletter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
         </>
@@ -755,7 +817,7 @@ export default function LookbookPreview({
           <SizeGuideStrip colors={colors} bodyFont={bodyFont} />
         </>
       )}
-      {view === 'lookbook' && <LookbookGrid content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />}
+      {view === 'lookbook' && <LookbookGrid content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} go={go} />}
       {view === 'about' && (
         <>
           <LookbookStory content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
@@ -782,7 +844,7 @@ export default function LookbookPreview({
         }}
       />
 
-      <LookbookFooter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} />
+      <LookbookFooter content={content} colors={colors} headingFont={headingFont} bodyFont={bodyFont} go={go} />
     </div>
   )
 }
