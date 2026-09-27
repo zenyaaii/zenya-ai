@@ -183,7 +183,7 @@ Return ONLY valid JSON matching this exact shape. No prose, no markdown.
     { "q": "Question (max 12 words)", "a": "Direct answer (1–2 sentences)" }
   ],
   "footer": {
-    "tagline": "Short closing line referencing hours or vibe."
+    "tagline": "Short closing line about the vibe. Never mention days, hours or opening times — the real hours are shown next to it."
   },
   "seo": {
     "title": "<= 60 chars. Format: '${input.brand.name} · ${input.brand.cuisine} · ${input.brand.city}'",
@@ -383,7 +383,8 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
           : mock.faq.items
     },
     footer: {
-      tagline: String(ai?.footer?.tagline || mock.footer.tagline),
+      // Never the demo's line: it names opening days that are not this restaurant's.
+      tagline: String(ai?.footer?.tagline || `${input.brand.cuisine} · ${input.brand.city}`),
       legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`
     },
     seo: {

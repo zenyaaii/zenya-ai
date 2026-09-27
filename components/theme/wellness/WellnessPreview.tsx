@@ -392,6 +392,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 // ─── Trust Bar ────────────────────────────────────────────────────────────────
 function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
+  if (!content.trust_bar?.items?.length) return null
   return (
     <div
       data-section="trust_bar"
@@ -695,6 +696,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
             </motion.p>
           </div>
           {/* Amenities */}
+          {content.space.amenities?.length ? (
           <motion.div {...revealAnim(rm,0.22)} className="grid grid-cols-2 gap-3">
             {content.space.amenities.map((a, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-2xl border p-3"
@@ -704,6 +706,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
               </div>
             ))}
           </motion.div>
+          ) : null}
         </div>
 
         {/* Photo grid */}
@@ -871,7 +874,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
             </motion.a>
             <WhatsAppBookButton content={content} onDark />
             </div>
-            <p className="text-xs text-white/50">{content.booking_cta.note}</p>
+            {content.booking_cta.note ? <p className="text-xs text-white/50">{content.booking_cta.note}</p> : null}
           </motion.div>
         )}
       </div>
@@ -904,6 +907,7 @@ function wellnessPalette(isDark: boolean) {
 function FaqSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
+  if (!content.faq?.items?.length) return null
   return (
     <section data-section="faq" className="px-8 py-24" style={{ background: 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-3xl">

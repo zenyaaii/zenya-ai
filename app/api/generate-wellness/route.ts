@@ -57,7 +57,7 @@ Team:
 ${teamText}
 
 Amenities: ${input.amenities || 'N/A'}
-Rating: ${input.social_proof?.review_rating || 5}/5
+Rating: ${input.social_proof?.review_rating ? `${input.social_proof.review_rating}/5` : 'N/A'}
 Review count: ${input.social_proof?.review_count || 'N/A'}
 Weekly classes: ${input.timetable?.length ? input.timetable.map((s) => `${s.day} ${s.time} ${s.name}`).join('; ') : 'N/A'}
 Certifications: ${input.social_proof?.certifications || 'N/A'}
@@ -165,19 +165,27 @@ Return ONLY valid JSON, no prose, no markdown, matching this exact shape:
 }
 
 Requirements:
-- trust_bar: exactly 4–5 items
+- trust_bar: 0–5 items. Each one restates a fact the brief gives (a treatment offered, the city, a listed amenity or certification, the founding year). Write fewer items rather than invent one. Return [] when the brief gives nothing to restate.
 - philosophy.pillars: exactly 3 items
 - treatments.items: rewrite every provided treatment
 - journey.steps: exactly 3 steps
 - team.members: include all provided team members
-- space.amenities: 4–6 items (use provided amenities if any)
+- space.amenities: only the amenities the brief lists, reworded; [] when the brief gives none
 - Do not write reviews or testimonials. Only the owner's real reviews are shown.
-- faq: 5–7 items
+- faq: 5–7 items. Answers use only what the brief says. Where it says nothing, the answer tells the reader to ask the studio directly.
+- Never state a price, discount, membership, gift card, fee, cancellation policy, session count, rating, licence, certification, product brand, amenity, room, drink or number of clients that the brief does not give. This applies to every field, including booking_cta.note and the journey steps.
 
 ${ICON_VOCAB_PROMPT}
 For this niche, pick the pillar icons from this shortlist first: ${niche.icons.join(', ')}. Each pillar gets a different icon that matches its text.
 Every "icon" field (philosophy.pillars) MUST be one name from the list above — never an emoji.`
 }
+
+// Used when the AI leaves the steps out. Nothing here is a fact about a studio.
+const NEUTRAL_JOURNEY = [
+  { step: '01', title: 'اختر جلستك', text: 'تصفّح الجلسات واختر ما يناسبك، أو راسلنا لنساعدك في الاختيار.' },
+  { step: '02', title: 'احجز موعدك', text: 'اختر اليوم والوقت المناسبين، وسنؤكّد لك الموعد.' },
+  { step: '03', title: 'تعال في موعدك', text: 'احضر قبل موعدك بقليل، وسنكون في انتظارك.' }
+]
 
 function splitLines(value: string): string[] {
   return value.split(/[\n,]/).map((s) => s.trim()).filter((s) => s.length > 0)
@@ -205,19 +213,20 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
           const aiT = ai.treatments.items[i] || {}
           return {
             name: t.name,
-            category: t.category || String(aiT.category || mock.treatments.items[i % mock.treatments.items.length].category),
-            duration: t.duration || String(aiT.duration || '60 min'),
-            price: t.price || String(aiT.price || ''),
-            description: String(aiT.description || t.description || mock.treatments.items[i % mock.treatments.items.length].description),
-            badge: t.badge || (aiT.badge ? String(aiT.badge) : undefined)
+            category: t.category || String(aiT.category || ''),
+            // Duration, price and badge are the owner's facts. The AI may not supply them.
+            duration: t.duration || '',
+            price: t.price || '',
+            description: String(aiT.description || t.description || ''),
+            badge: t.badge || undefined
           }
         })
       : input.treatments.map((t, i) => ({
           name: t.name,
-          category: t.category || mock.treatments.items[i % mock.treatments.items.length].category,
-          duration: t.duration || '60 min',
+          category: t.category || '',
+          duration: t.duration || '',
           price: t.price || '',
-          description: t.description || mock.treatments.items[i % mock.treatments.items.length].description,
+          description: t.description || '',
           badge: t.badge
         }))
 
@@ -251,10 +260,10 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     Array.isArray(ai?.journey?.steps) && ai.journey.steps.length >= 3
       ? ai.journey.steps.slice(0, 3).map((s: any, i: number) => ({
           step: `0${i + 1}`,
-          title: String(s?.title || mock.journey.steps[i].title),
-          text: String(s?.text || mock.journey.steps[i].text)
+          title: String(s?.title || NEUTRAL_JOURNEY[i].title),
+          text: String(s?.text || NEUTRAL_JOURNEY[i].text)
         }))
-      : mock.journey.steps
+      : NEUTRAL_JOURNEY
 
   // Reviews are only ever the owner's own. With none, the section shows the
   // link to their public reviews, or is not drawn at all.
@@ -271,19 +280,19 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   const faqItems =
     Array.isArray(ai?.faq) && ai.faq.length >= 5
       ? ai.faq.slice(0, 7).map((f: any) => ({ q: String(f?.q || ''), a: String(f?.a || '') }))
-      : mock.faq.items
+      : []
 
+  // Amenities are the owner's list. The AI may reword it, never add to it.
+  const ownerAmenities = splitLines(input.amenities || '').slice(0, 6)
   const amenities =
-    Array.isArray(ai?.space?.amenities) && ai.space.amenities.length >= 4
-      ? ai.space.amenities.slice(0, 6).map((a: any) => String(a))
-      : splitLines(input.amenities || '').length >= 4
-        ? splitLines(input.amenities || '').slice(0, 6)
-        : mock.space.amenities
+    ownerAmenities.length === 0
+      ? []
+      : Array.isArray(ai?.space?.amenities) && ai.space.amenities.length === ownerAmenities.length
+        ? ai.space.amenities.map((a: any) => String(a))
+        : ownerAmenities
 
   const trustBar =
-    Array.isArray(ai?.trust_bar) && ai.trust_bar.length >= 3
-      ? ai.trust_bar.slice(0, 5).map((t: any) => String(t))
-      : mock.trust_bar.items
+    Array.isArray(ai?.trust_bar) ? ai.trust_bar.slice(0, 5).map((t: any) => String(t)).filter(Boolean) : []
 
   return {
     niche: niche.id,
@@ -307,7 +316,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
       tagline: String(ai?.hero?.subheadline || mock.brand.tagline)
     },
     hero: {
-      eyebrow: String(ai?.hero?.eyebrow || mock.hero.eyebrow),
+      eyebrow: String(ai?.hero?.eyebrow || `${input.brand.type} · ${input.brand.city}`),
       headline: String(ai?.hero?.headline || mock.hero.headline),
       subheadline: String(ai?.hero?.subheadline || mock.hero.subheadline),
       cta_primary: String(ai?.hero?.cta_primary || 'احجز جلسة'),
@@ -334,7 +343,7 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     },
     team: {
       heading: String(ai?.team?.heading || mock.team.heading),
-      subheading: String(ai?.team?.subheading || mock.team.subheading),
+      subheading: String(ai?.team?.subheading || 'الفريق الذي سيستقبلك ويعتني بك.'),
       members: teamMembers
     },
     space: {
@@ -353,9 +362,9 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
     booking_cta: {
       eyebrow: String(ai?.booking_cta?.eyebrow || mock.booking_cta.eyebrow),
       heading: String(ai?.booking_cta?.heading || mock.booking_cta.heading),
-      subheading: String(ai?.booking_cta?.subheading || mock.booking_cta.subheading),
+      subheading: String(ai?.booking_cta?.subheading || 'اختر الجلسة والموعد المناسبين، وسنؤكّد لك الحجز.'),
       cta_label: String(ai?.booking_cta?.cta_label || 'احجز جلستك'),
-      note: String(ai?.booking_cta?.note || mock.booking_cta.note),
+      note: String(ai?.booking_cta?.note || ''),
       image: bookingImage
     },
     faq: {
