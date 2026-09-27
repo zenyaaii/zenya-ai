@@ -301,6 +301,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang={locale} dir={dir}>
       <head>
+        {/* Inline so it applies before the stylesheet arrives. Scripts can run
+            and measure the page while the CSS is still loading; a full-bleed
+            2000px hero photo at its natural width then made phone browsers
+            widen the page to fit it and zoom out, and it stayed that way. */}
+        <style dangerouslySetInnerHTML={{ __html: 'img,video{max-width:100%;height:auto}' }} />
         {isShopifyRoute && shopifyApiKey && (
           <>
             <meta name="shopify-api-key" content={shopifyApiKey} />

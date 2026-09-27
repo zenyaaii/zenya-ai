@@ -1319,7 +1319,8 @@ const CSS = `
    house rule this page's sibling broke twice: a browser without view()
    support never runs the animation and reads a finished panel.
 
-   IT RUNS AT EVERY WIDTH, AND THE GATE THAT USED TO STOP IT WAS INHERITED
+   IT USED TO RUN AT EVERY WIDTH (it no longer runs on touch screens, see the
+   gate on the rule below). THE GATE THAT USED TO STOP IT WAS INHERITED
    RATHER THAN EARNED. The rule came over from .zp-compare, which is fenced
    above 701px because the comparison TABLE becomes 1267px tall on a phone and
    would sit visibly oversized for the whole read. Measured on this page's own
@@ -1359,8 +1360,13 @@ const CSS = `
   from { transform: scale(var(--settle-from, 1.09)); }
   to { transform: scale(1); }
 }
+/* NOT ON TOUCH SCREENS. The owner opened this page on his phone and watched
+   it keep growing and not stop. Chromium runs the settle correctly, but phone
+   engines are newer at view() timelines and this is the one thing on the page
+   that scales. A phone reader gets the finished panel at scale 1, which is the
+   base rule's resting state anyway. */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) {
     .zt-panel {
       transform-origin: 50% 50%;
       animation: zt-settle linear both;
