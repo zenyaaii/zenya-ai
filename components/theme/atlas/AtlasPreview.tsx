@@ -77,7 +77,7 @@ function Stars({ rating = 5, color }: { rating?: number; color: string }) {
 }
 
 // ─── Mock dashboard UI in hero ────────────────────────────────────────────────
-function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>['colors'] }) {
+function DashboardMockup({ colors, brandName }: { colors: ReturnType<typeof getAtlasPreset>['colors']; brandName: string }) {
   const isDark = colors.background.startsWith('#0') || colors.background.startsWith('#02') || colors.background.startsWith('#08')
   const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
   const barBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)'
@@ -101,7 +101,7 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
           <div className="h-3 w-3 rounded-full bg-green-400/70" />
         </div>
         <div className="mx-auto flex h-6 w-48 items-center justify-center rounded-md text-[10px]" style={{ background: cardBg, color: textColor }}>
-          app.streamline.io/workspace
+          {brandName}
         </div>
       </div>
 
@@ -209,12 +209,18 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
 
 // ─── Navbar ────────────────────────────────────────────────────────────────────
 function AtlasNav({ content, colors, font, view, setView }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; view: AtlasView; setView: (v: AtlasView) => void }) {
+  const hasPricing = !!content.pricing?.tiers?.length
   const navLinks: { label: string; view: AtlasView }[] = [
-    { label: 'المزايا', view: 'features' },
-    { label: 'الأسعار', view: 'pricing' },
-    { label: 'التكاملات', view: 'integrations' },
-    { label: 'التوثيق', view: 'docs' },
-  ]
+    { label: 'المزايا', view: 'features' as AtlasView },
+    { label: 'الأسعار', view: 'pricing' as AtlasView },
+    { label: 'التكاملات', view: 'integrations' as AtlasView },
+    { label: 'التوثيق', view: 'docs' as AtlasView },
+  ].filter((l) =>
+    l.view === 'pricing' ? hasPricing
+    : l.view === 'integrations' ? !!content.integrations?.items?.length
+    : l.view === 'docs' ? !!content.faq?.items?.length
+    : true
+  )
   const [menuOpen, setMenuOpen] = useState(false)
   // Close the mobile menu whenever the page changes.
   const go = (v: AtlasView) => { setView(v); setMenuOpen(false) }
@@ -242,7 +248,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
         <div className="flex items-center gap-3">
           <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
           <button
-            onClick={() => setView('pricing')}
+            onClick={() => setView(hasPricing ? 'pricing' : 'features')}
             className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
             style={{ background: colors.primary }}
           >
@@ -353,13 +359,15 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
         </motion.div>
 
         {/* Social proof */}
-        <motion.p {...revealCtas} className="mt-4 text-xs" style={{ color: colors.muted }}>
-          {content.hero.social_proof}
-        </motion.p>
+        {content.hero.social_proof ? (
+          <motion.p {...revealCtas} className="mt-4 text-xs" style={{ color: colors.muted }}>
+            {content.hero.social_proof}
+          </motion.p>
+        ) : null}
 
         {/* Dashboard mockup */}
         <motion.div {...revealMock} className="mt-14 mx-auto max-w-5xl">
-          <DashboardMockup colors={colors} />
+          <DashboardMockup colors={colors} brandName={content.brand.name} />
         </motion.div>
       </div>
     </section>
@@ -513,6 +521,7 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
 // ─── Pricing ───────────────────────────────────────────────────────────────────
 function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
+  if (!content.pricing?.tiers?.length) return null
   return (
     <section data-section="pricing" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
@@ -559,11 +568,11 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
         </p>
         <div className="mt-3 flex items-end gap-1">
           <span className="text-5xl font-black" style={{ color: tier.highlighted ? '#fff' : colors.text }}>{tier.price}</span>
-          {tier.price !== 'حسب الطلب' && (
+          {tier.price !== 'حسب الطلب' && tier.period && (
             <span className="mb-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.7)' : colors.muted }}>/{tier.period}</span>
           )}
         </div>
-        <p className="mt-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.75)' : colors.muted }}>{tier.description}</p>
+        {tier.description ? <p className="mt-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.75)' : colors.muted }}>{tier.description}</p> : null}
 
         <button
           className="mt-6 w-full rounded-full py-3 text-sm font-black transition hover:scale-105"
@@ -594,6 +603,7 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
 // ─── Integrations ──────────────────────────────────────────────────────────────
 function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
+  if (!content.integrations?.items?.length) return null
   return (
     <section data-section="integrations" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
@@ -614,19 +624,17 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
             >
               <span style={{ color: colors.primary }}><Icon name={item.icon} size={24} animation="pop" /></span>
               <span className="text-[0.65rem] font-black" style={{ color: colors.text }}>{item.name}</span>
-              <span
-                className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"
-                style={{ background: colors.primaryMuted, color: colors.primary }}
-              >
-                {item.category}
-              </span>
+              {item.category ? (
+                <span
+                  className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"
+                  style={{ background: colors.primaryMuted, color: colors.primary }}
+                >
+                  {item.category}
+                </span>
+              ) : null}
             </motion.div>
           ))}
         </div>
-
-        <motion.p {...revealAnim(rm,0.3)} className="mt-8 text-sm" style={{ color: colors.muted }}>
-          + 68 more integrations via Zapier and native API
-        </motion.p>
       </div>
     </section>
   )
@@ -695,6 +703,7 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
 
 // ─── Security strip ────────────────────────────────────────────────────────────
 function AtlasSecurity({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  if (!content.security?.items?.length) return null
   return (
     <section data-section="security" className="border-y px-6 py-10" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
@@ -723,6 +732,7 @@ function AtlasSecurity({ content, colors, font }: { content: AtlasContent; color
 function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
+  if (!content.faq?.items?.length) return null
 
   return (
     <section data-section="faq" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
@@ -803,7 +813,7 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
               {content.cta.cta_secondary}
             </button>
           </div>
-          <p className="mt-4 text-xs text-white/60">{content.cta.note}</p>
+          {content.cta.note ? <p className="mt-4 text-xs text-white/60">{content.cta.note}</p> : null}
         </div>
       </motion.div>
     </section>
