@@ -6,6 +6,7 @@ import { Icon } from '@/components/icons'
 import type { AtlasContent, AtlasTestimonial, AtlasFaqItem, AtlasPricingTier, AtlasIntegration } from '@/utils/atlas/types'
 import { getAtlasPreset } from '@/utils/atlas/presets'
 import BookingSection from '@/components/site/BookingSection'
+import { useBookingContext } from '@/components/site/BookingContext'
 import {
   TYPOGRAPHY_PRESETS,
   buildGoogleFontsUrl,
@@ -25,6 +26,18 @@ type Props = {
 }
 
 type AtlasView = 'home' | 'features' | 'pricing' | 'integrations' | 'docs'
+
+/** Where the in-page buttons go. Built once in the root, handed to sections. */
+type AtlasActions = {
+  /** Switch page via the same setView the nav uses, then start at the top. */
+  goView: (v: AtlasView) => void
+  /** "Start" CTAs: pricing when the site has tiers, else contact. */
+  goStart: () => void
+  /** Contact: the booking form when it is on the page, else the owner's email. */
+  goContact: () => void
+  hasPricing: boolean
+  hasDocs: boolean
+}
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
 // Plain functions (not hooks!) so they can be called safely inside .map()
@@ -246,7 +259,8 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
+          {/* No app/login URL exists for generated sites, so this is not a link. */}
+          <span className="hidden text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</span>
           <button
             onClick={() => setView(hasPricing ? 'pricing' : 'features')}
             className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
@@ -299,7 +313,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
 }
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
-function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasHero({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
   const rm = !!useReducedMotion()
   const reveal = fadeUpAnim(rm, 0)
   const revealSub = fadeUpAnim(rm, 0.12)
@@ -345,12 +359,14 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
         {/* CTAs */}
         <motion.div {...revealCtas} className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <button
+            onClick={actions.goStart}
             className="rounded-full px-8 py-3.5 text-sm font-black text-white transition hover:scale-105 hover:shadow-lg"
             style={{ background: colors.primary, boxShadow: `0 8px 24px -4px ${colors.glowPrimary}` }}
           >
             {content.hero.cta_primary}
           </button>
           <button
+            onClick={() => actions.goView('features')}
             className="inline-flex items-center gap-2 rounded-full border px-8 py-3.5 text-sm font-bold transition hover:scale-105"
             style={{ borderColor: colors.border, color: colors.text, background: colors.surfaceAlt }}
           >
@@ -519,7 +535,7 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
 }
 
 // ─── Pricing ───────────────────────────────────────────────────────────────────
-function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasPricing({ content, colors, font, onTier }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; onTier: () => void }) {
   const rm = !!useReducedMotion()
   if (!content.pricing?.tiers?.length) return null
   return (
@@ -537,7 +553,7 @@ function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors
 
         <div className="grid gap-6 md:grid-cols-3">
           {content.pricing.tiers.map((tier, i) => (
-            <PricingCard key={i} tier={tier} colors={colors} delay={0.08 * i} />
+            <PricingCard key={i} tier={tier} colors={colors} delay={0.08 * i} onSelect={onTier} />
           ))}
         </div>
       </div>
@@ -545,7 +561,7 @@ function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors
   )
 }
 
-function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: ReturnType<typeof getAtlasPreset>['colors']; delay: number }) {
+function PricingCard({ tier, colors, delay, onSelect }: { tier: AtlasPricingTier; colors: ReturnType<typeof getAtlasPreset>['colors']; delay: number; onSelect: () => void }) {
   const rm = !!useReducedMotion()
   return (
     <motion.div
@@ -575,6 +591,7 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
         {tier.description ? <p className="mt-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.75)' : colors.muted }}>{tier.description}</p> : null}
 
         <button
+          onClick={onSelect}
           className="mt-6 w-full rounded-full py-3 text-sm font-black transition hover:scale-105"
           style={{
             background: tier.highlighted ? '#fff' : colors.primary,
@@ -785,7 +802,7 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
 }
 
 // ─── CTA section ───────────────────────────────────────────────────────────────
-function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasCta({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
   const rm = !!useReducedMotion()
   return (
     <section data-section="cta" className="px-6 py-24" style={{ fontFamily: font }}>
@@ -806,10 +823,10 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base text-white/75">{content.cta.subheading}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button className="rounded-full bg-white px-8 py-3.5 text-sm font-black transition hover:scale-105" style={{ color: colors.primary }}>
+            <button onClick={actions.goStart} className="rounded-full bg-white px-8 py-3.5 text-sm font-black transition hover:scale-105" style={{ color: colors.primary }}>
               {content.cta.cta_primary}
             </button>
-            <button className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
+            <button onClick={actions.goContact} className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
               {content.cta.cta_secondary}
             </button>
           </div>
@@ -821,7 +838,17 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
 }
 
 // ─── Footer ────────────────────────────────────────────────────────────────────
-function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasFooter({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
+  // Only the items that match a real page are links. The blog and the legal
+  // pages do not exist on generated sites, so they stay plain text.
+  const footerLinks: { label: string; view: AtlasView | null }[] = [
+    { label: 'المنتج', view: 'features' },
+    { label: 'الأسعار', view: actions.hasPricing ? 'pricing' : null },
+    { label: 'التوثيق', view: actions.hasDocs ? 'docs' : null },
+    { label: 'المدوّنة', view: null },
+    { label: 'الخصوصية', view: null },
+    { label: 'الشروط', view: null },
+  ]
   return (
     <footer data-section="footer" className="border-t px-6 py-12" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
@@ -836,9 +863,13 @@ function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors:
             <p className="mt-2 text-sm" style={{ color: colors.muted }}>{content.footer.tagline}</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: colors.muted }}>
-            {['المنتج', 'الأسعار', 'التوثيق', 'المدوّنة', 'الخصوصية', 'الشروط'].map((link) => (
-              <span key={link} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.65 }}>{link}</span>
-            ))}
+            {footerLinks.map(({ label, view }) =>
+              view ? (
+                <button key={label} type="button" onClick={() => actions.goView(view)} className="transition hover:opacity-100" style={{ opacity: 0.65 }}>{label}</button>
+              ) : (
+                <span key={label} style={{ opacity: 0.65 }}>{label}</span>
+              )
+            )}
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-xs" style={{ borderColor: colors.border, color: colors.muted }}>
@@ -876,6 +907,29 @@ export default function AtlasPreview({
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
 
+  const booking = useBookingContext()
+  const hasPricing = !!content.pricing?.tiers?.length
+  const actions: AtlasActions = {
+    hasPricing,
+    hasDocs: !!content.faq?.items?.length,
+    goView: (v) => {
+      setView(v)
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+    },
+    // The booking form is rendered on every page when the owner's plan has it;
+    // otherwise the owner's footer email is the only contact route there is.
+    goContact: () => {
+      if (typeof window === 'undefined') return
+      const form = booking.enabled ? document.getElementById('booking') : null
+      if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      else if (content.footer.email) window.location.href = `mailto:${content.footer.email}`
+    },
+    goStart: () => {
+      if (hasPricing) actions.goView('pricing')
+      else actions.goContact()
+    },
+  }
+
   return (
     <div
       className={`min-h-screen ${className}`}
@@ -886,11 +940,11 @@ export default function AtlasPreview({
 
       {view === 'home' && (
         <>
-          <AtlasHero content={content} colors={colors} font={headingFont} />
+          <AtlasHero content={content} colors={colors} font={headingFont} actions={actions} />
           <AtlasTrustBar content={content} colors={colors} font={bodyFont} />
           <AtlasHowItWorks content={content} colors={colors} font={bodyFont} />
           <AtlasTestimonials content={content} colors={colors} font={bodyFont} />
-          <AtlasCta content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} actions={actions} />
         </>
       )}
       {view === 'features' && (
@@ -900,12 +954,12 @@ export default function AtlasPreview({
           <AtlasIntegrations content={content} colors={colors} font={bodyFont} />
         </>
       )}
-      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={bodyFont} />}
+      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={bodyFont} onTier={actions.goContact} />}
       {view === 'integrations' && <AtlasIntegrations content={content} colors={colors} font={bodyFont} />}
       {view === 'docs' && (
         <>
           <AtlasFaq content={content} colors={colors} font={bodyFont} />
-          <AtlasCta content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} actions={actions} />
         </>
       )}
 
@@ -928,7 +982,7 @@ export default function AtlasPreview({
         }}
       />
 
-      <AtlasFooter content={content} colors={colors} font={bodyFont} />
+      <AtlasFooter content={content} colors={colors} font={bodyFont} actions={actions} />
     </div>
   )
 }
