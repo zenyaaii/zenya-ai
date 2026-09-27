@@ -49,8 +49,10 @@ const GOOGLE_ERRORS: Record<string, string> = {
 
 /** Looks the business up on Google and shows its reviews with a tick box on
  *  each, so the owner picks which go on the site. */
-function GoogleReviewsImport({ url, name, city, onImport }: {
+function GoogleReviewsImport({ url, name, city, onPlace, onImport }: {
   url: string; name: string; city: string
+  /** Fills the rating and count the moment Google answers, before any pick. */
+  onPlace: (r: GoogleResult) => void
   onImport: (r: GoogleResult, chosen: GoogleFound[]) => void
 }) {
   const [busy, setBusy] = useState(false)
@@ -70,6 +72,7 @@ function GoogleReviewsImport({ url, name, city, onImport }: {
       if (!res.ok) { setError(GOOGLE_ERRORS[json.error] || 'لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.'); return }
       const r = json as GoogleResult
       setFound(r); setKeep(r.reviews.map(() => true))
+      onPlace(r)
     } catch {
       setError('لم نقدر نجلب التقييمات الآن. جرّب مرة ثانية.')
     } finally {
@@ -101,7 +104,7 @@ function GoogleReviewsImport({ url, name, city, onImport }: {
             {found.place.count != null ? ' · ' + found.place.count + ' تقييم' : ''}
           </p>
           <p style={{ margin: 0, fontSize: 14, color: '#6b6b6b' }}>
-            {found.reviews.length ? 'Google تعطينا حتى 5 تقييمات. اختر ما تريد عرضه في موقعك.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
+            {found.reviews.length ? 'هذه كل التقييمات التي تعطينا إياها Google (5 على الأكثر). أخذنا التقييم والعدد، واختر ما تريد عرضه.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
           </p>
           {found.reviews.map((r, i) => (
             <label key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.625rem', alignItems: 'start', padding: '0.625rem', borderRadius: 10, background: keep[i] ? 'rgba(94,106,210,0.06)' : 'transparent', cursor: 'pointer' }}>
@@ -310,6 +313,14 @@ export default function WellnessWizardPage() {
   }
   function addReview() {
     setForm((prev) => ({ ...prev, reviews: [...(prev.reviews || []), { id: uid(), name: '', text: '', treatment: '', rating: '5' }] }))
+  }
+  function placeGoogle(r: GoogleResult) {
+    setForm((prev) => ({
+      ...prev,
+      reviews_url: prev.reviews_url?.trim() ? prev.reviews_url : r.place.url,
+      review_rating: r.place.rating != null ? r.place.rating.toFixed(1) : prev.review_rating,
+      review_count: r.place.count != null ? String(r.place.count) : prev.review_count,
+    }))
   }
   function importGoogle(r: GoogleResult, chosen: GoogleFound[]) {
     setForm((prev) => {
@@ -712,7 +723,7 @@ export default function WellnessWizardPage() {
             <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => update('reviews_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Block>
-            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onImport={importGoogle} />
+            <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onPlace={placeGoogle} onImport={importGoogle} />
           </Block>
           <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
             <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.8" />
