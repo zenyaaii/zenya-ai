@@ -197,7 +197,7 @@ function DashboardMockup({ colors, brandName }: { colors: ReturnType<typeof getA
 
         {/* Right panel */}
         <div className="hidden w-36 border-l p-3 sm:block" style={{ borderColor: colors.border }}>
-          <p className="mb-3 text-[9px] font-bold uppercase tracking-wider" style={{ color: textColor }}>رؤى الذكاء الاصطناعي</p>
+          <p className="mb-3 text-[9px] font-bold uppercase" style={{ color: textColor }}>رؤى الذكاء الاصطناعي</p>
           {[
             { label: 'سرعة الإنجاز', value: '+18%' },
             { label: 'عوائق مكتشفة', value: 'خطران' },
@@ -251,7 +251,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
           <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-black" style={{ background: colors.gradient }}>
             {content.brand.name[0]}
           </div>
-          <span className="text-base font-black tracking-tight" style={{ color: colors.text }}>{content.brand.name}</span>
+          <span className="text-base font-black" style={{ color: colors.text }}>{content.brand.name}</span>
         </button>
         <div className="hidden items-center gap-8 text-sm font-medium md:flex" style={{ color: colors.muted }}>
           {navLinks.map((item) => (
@@ -339,7 +339,7 @@ function AtlasHero({ content, colors, font, actions }: { content: AtlasContent; 
         </motion.div>
 
         {/* Headline */}
-        <motion.h1 {...reveal} className="mx-auto max-w-4xl text-5xl font-black leading-[1.08] tracking-tight sm:text-6xl md:text-7xl" style={{ color: colors.text }}>
+        <motion.h1 {...reveal} className="mx-auto max-w-4xl text-5xl font-black leading-[1.08] sm:text-6xl md:text-7xl" style={{ color: colors.text }}>
           <Headline
             text={content.hero.headline}
             style={{
@@ -397,14 +397,14 @@ function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; color
   return (
     <section data-section="trust_bar" className="border-y px-6 py-8" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
-        <p className="mb-5 text-center text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: colors.muted }}>
+        <p className="mb-5 text-center text-xs font-semibold uppercase" style={{ color: colors.muted }}>
           {content.trust_bar.label}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8">
           {content.trust_bar.logos.map((logo) => (
             <span
               key={logo}
-              className="text-base font-black tracking-tight transition hover:opacity-100"
+              className="text-base font-black transition hover:opacity-100"
               style={{ color: colors.muted, opacity: 0.5, fontFamily: font }}
             >
               {logo}
@@ -423,10 +423,10 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
     <section data-section="features" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.features.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.features.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed" style={{ color: colors.muted }}>
@@ -461,7 +461,7 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
                   </div>
                   {feature.badge && (
                     <span
-                      className="rounded-full px-2.5 py-0.5 text-[0.65rem] font-black uppercase tracking-wider"
+                      className="rounded-full px-2.5 py-0.5 text-[0.65rem] font-black uppercase"
                       style={{ background: colors.primary, color: '#fff' }}
                     >
                       {feature.badge}
@@ -486,10 +486,10 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
     <section data-section="how_it_works" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.how_it_works.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.how_it_works.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed" style={{ color: colors.muted }}>
@@ -542,10 +542,10 @@ function AtlasPricing({ content, colors, font, onTier }: { content: AtlasContent
     <section data-section="pricing" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.pricing.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.pricing.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base" style={{ color: colors.muted }}>{content.pricing.subheading}</p>
@@ -574,12 +574,12 @@ function PricingCard({ tier, colors, delay, onSelect }: { tier: AtlasPricingTier
       }}
     >
       {tier.highlighted && (
-        <div className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white">
+        <div className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-[0.65rem] font-black uppercase text-white">
           الأكثر شيوعًا
         </div>
       )}
       <div className={tier.highlighted ? 'text-white' : ''}>
-        <p className="text-sm font-black uppercase tracking-wider" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.8)' : colors.muted }}>
+        <p className="text-sm font-black uppercase" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.8)' : colors.muted }}>
           {tier.name}
         </p>
         <div className="mt-3 flex items-end gap-1">
@@ -625,7 +625,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
     <section data-section="integrations" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
         <motion.div {...revealAnim(rm,0)} className="mb-14">
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.integrations.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base" style={{ color: colors.muted }}>{content.integrations.subheading}</p>
@@ -643,7 +643,7 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
               <span className="text-[0.65rem] font-black" style={{ color: colors.text }}>{item.name}</span>
               {item.category ? (
                 <span
-                  className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"
+                  className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase"
                   style={{ background: colors.primaryMuted, color: colors.primary }}
                 >
                   {item.category}
@@ -668,10 +668,10 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
     <section data-section="testimonials" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-14 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.testimonials.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             {content.testimonials.heading}
           </h2>
           {avg ? (
@@ -754,7 +754,7 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
   return (
     <section data-section="faq" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-3xl">
-        <motion.h2 {...revealAnim(rm,0)} className="mb-10 text-center text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+        <motion.h2 {...revealAnim(rm,0)} className="mb-10 text-center text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
           {content.faq.heading}
         </motion.h2>
         <div className="space-y-3">
@@ -817,8 +817,8 @@ function AtlasCta({ content, colors, font, actions }: { content: AtlasContent; c
           <div className="absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
         </div>
         <div className="relative">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-white/70">{content.cta.eyebrow}</p>
-          <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
+          <p className="mb-3 text-xs font-bold uppercase text-white/70">{content.cta.eyebrow}</p>
+          <h2 className="text-4xl font-black text-white sm:text-5xl">
             <Headline text={content.cta.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base text-white/75">{content.cta.subheading}</p>

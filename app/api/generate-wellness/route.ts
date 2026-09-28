@@ -195,17 +195,13 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   const mock = WELLNESS_MOCK_CONTENT
   const niche = resolveWellnessNiche(input.niche, input.brand.type)
 
-  // Owner uploads win; anything missing comes from the niche's own photos.
+  // Owner uploads win. The hero and booking backdrops may fall back to the
+  // niche's mood photos, which claim nothing. "The space" is shown as theirs,
+  // so it takes only their own photos: none uploaded, no photo grid.
   const heroImage = input.visuals?.hero_image_url || unsplash(niche.photos.hero, 2400)
   const bookingImage = input.visuals?.hero_image_url || unsplash(niche.photos.booking, 2000)
   const spaceUrls = splitLines(input.visuals?.space_image_urls || '').filter((u) => /^https?:\/\//.test(u))
-  const spaceImages =
-    spaceUrls.length >= 4
-      ? spaceUrls.slice(0, 4).map((url) => ({ url }))
-      : [
-          ...spaceUrls.map((url) => ({ url })),
-          ...niche.photos.space.slice(0, 4 - spaceUrls.length).map((id) => ({ url: unsplash(id, 1200) }))
-        ]
+  const spaceImages = spaceUrls.slice(0, 4).map((url) => ({ url }))
 
   const treatments =
     Array.isArray(ai?.treatments?.items) && ai.treatments.items.length >= 3
@@ -243,9 +239,10 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
             image: m.image_url || undefined
           }
         })
-      // No team given: stand-in roles for this niche, not invented people.
-      // The owner swaps in real names and photos from the editor.
-      : niche.team.map((m) => ({ name: m.title, title: '', specialty: m.specialty, bio: '', image: unsplash(m.photo, 600) }))
+      // No team given: stand-in roles for this niche, not invented people, and
+      // no stranger's face on them. The owner adds real names and photos from
+      // the editor.
+      : niche.team.map((m) => ({ name: m.title, title: '', specialty: m.specialty, bio: '', image: undefined }))
 
   const philosophyPillars =
     Array.isArray(ai?.philosophy?.pillars) && ai.philosophy.pillars.length >= 3

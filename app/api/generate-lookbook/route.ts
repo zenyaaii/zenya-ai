@@ -240,7 +240,13 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
       title: ai.seo?.title || seoFallback,
       description: unlessRatingClaim(ai.seo?.description || seoDescFallback, seoDescFallback, owner)
     },
-    links: { reviews_url: input.social_proof?.reviews_url || undefined }
+    links: { reviews_url: input.social_proof?.reviews_url || undefined },
+    // Only what the owner uploaded. No uploads, no photos: the renderer draws
+    // the product and look tiles without one rather than borrow stock.
+    images: {
+      hero: input.visuals?.hero_image_url || undefined,
+      gallery: (input.visuals?.gallery_image_urls || []).filter(Boolean)
+    }
   }
 }
 

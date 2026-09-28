@@ -112,4 +112,10 @@ export type LookbookContent = {
   }
   /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
   links?: { reviews_url?: string }
+  /**
+   * The owner's own uploads, from the wizard. Products, looks and the brand
+   * story show only these: a stock photo is never passed off as their work.
+   * Absent on sites generated before this field existed.
+   */
+  images?: { hero?: string; gallery?: string[] }
 }
