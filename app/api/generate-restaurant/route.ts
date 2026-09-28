@@ -3,6 +3,7 @@ import OpenAI from 'openai'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
+import { dishPhoto } from '@/lib/dish-photos'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { restaurantInputSchema, type RestaurantInput } from '@/utils/restaurant/input'
 import type { RestaurantContent } from '@/utils/restaurant/types'
@@ -28,14 +29,6 @@ const FALLBACK_GALLERY = [
   'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80',
   'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=1400&q=80'
 ]
-
-const FALLBACK_DISH_IMAGES = [
-  'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
-]
-
 
 const FALLBACK_ACCENT_IMAGE =
   'https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1600&q=80'
@@ -201,11 +194,6 @@ ${NO_REVIEWS_RULE}
 - Use the restaurant's name ("${input.brand.name}") sparingly (max twice across all copy)`
 }
 
-function pickNth<T>(arr: T[], i: number, fallback: T): T {
-  if (!Array.isArray(arr) || arr.length === 0) return fallback
-  return arr[i % arr.length] ?? fallback
-}
-
 function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   const mock = RESTAURANT_MOCK_CONTENT
   const rating = input.social_proof?.review_rating
@@ -267,9 +255,10 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     name: item.name,
     description: item.description || aiDesc,
     price: item.price,
-    // The dish's own uploaded photo first, then the owner's signature photos.
-    // The stock fallback stays because the card is built around a photo.
-    image: item.image || pickNth(sigImages, i, FALLBACK_DISH_IMAGES[i % FALLBACK_DISH_IMAGES.length])
+    // The dish's own uploaded photo first, then the owner's signature photos,
+    // then a stock photo only if it shows this kind of dish. A dish nothing
+    // matches gets no photo: a pizza over "شاورما" tells the visitor a lie.
+    image: item.image || sigImages[i] || dishPhoto(item.name)
   }))
 
   // Provider object — Zenya's own booking form by default; `phone` only as an

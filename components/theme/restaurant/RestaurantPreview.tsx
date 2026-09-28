@@ -21,6 +21,7 @@ import {
 } from '@/utils/restaurant/typography'
 import BookingForm from '@/components/site/BookingForm'
 import { useBookingContext } from '@/components/site/BookingContext'
+import { shownDishPhoto } from '@/lib/dish-photos'
 
 export type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
 
@@ -609,15 +610,26 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
           whileInView="show"
           viewport={viewport}
         >
-          {content.signature_dishes.slice(0, 4).map((dish, i) => (
+          {content.signature_dishes.slice(0, 4).map((dish, i) => {
+            // A photo only if it shows this dish. Without one the card keeps
+            // its shape as a panel in the accent, so the row still lines up.
+            const photo = shownDishPhoto(dish)
+            return (
             <motion.div key={i} variants={staggerChild} className="group">
-              <div className="relative aspect-[3/4] overflow-hidden mb-5">
-                <img
-                  src={dish.image}
-                  alt={dish.name}
-                  className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 transition" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%)' }} />
+              <div
+                className="relative aspect-[3/4] overflow-hidden mb-5"
+                style={photo ? undefined : { background: 'color-mix(in srgb, var(--rb-accent) 16%, transparent)' }}
+              >
+                {photo && (
+                  <>
+                    <img
+                      src={photo}
+                      alt={dish.name}
+                      className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 transition" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%)' }} />
+                  </>
+                )}
                 <p
                   className="absolute bottom-4 right-4 text-[0.78rem]"
                   style={{ color: 'var(--rb-accent)', fontFamily: 'var(--rb-heading-font)', fontSize: '1.1rem' }}
@@ -635,7 +647,8 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
                 <p style={{ color: 'var(--rb-muted)', fontSize: '0.92rem', lineHeight: 1.6 }}>{dish.description}</p>
               ) : null}
             </motion.div>
-          ))}
+            )
+          })}
         </motion.div>
       </Container>
     </section>

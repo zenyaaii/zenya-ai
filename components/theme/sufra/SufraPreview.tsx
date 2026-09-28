@@ -36,6 +36,7 @@ import {
 import { Phone, MapPin, Clock, ArrowLeft, Plus, Minus } from 'lucide-react'
 import type { RestaurantContent } from '@/utils/restaurant/types'
 import { getSufraPreset, type SufraPresetId } from '@/utils/sufra/presets'
+import { shownDishPhoto } from '@/lib/dish-photos'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -457,8 +458,10 @@ function Dishes({ content }: { content: RestaurantContent }) {
             {...reveal}
             className="w-[78vw] shrink-0 snap-start sm:w-[46vw] lg:w-[30vw]"
           >
-            <div className="relative aspect-[4/5] overflow-hidden">
-              <img src={d.image} alt={d.name} className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.04]" />
+            {/* No photo that shows this dish: a panel in the accent, never a
+                picture of some other food. */}
+            <div className="relative aspect-[4/5] overflow-hidden" style={shownDishPhoto(d) ? undefined : { background: 'color-mix(in srgb, var(--sf-accent) 16%, transparent)' }}>
+              {shownDishPhoto(d) && <img src={shownDishPhoto(d)} alt={d.name} className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.04]" />}
             </div>
             <div className="flex items-baseline justify-between gap-4 pt-5">
               <h3 style={{ fontFamily: 'var(--sf-display)', fontSize: '1.2rem', fontWeight: 600 }}>{d.name}</h3>
