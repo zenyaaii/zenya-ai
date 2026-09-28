@@ -96,7 +96,8 @@ export default function RestaurantPreview({
   const headingFont   = typoPreset?.heading_font   ?? preset.heading_font
   const bodyFont      = typoPreset?.body_font      ?? preset.body_font
   const headingWeight = typoPreset?.heading_weight ?? 500
-  const headingTrack  = typoPreset?.heading_tracking ?? '-0.02em'
+  // The preset's heading_tracking is not read: every heading here is Arabic,
+  // and Arabic letters join, so they take no tracking in either direction.
   const headingLead   = typoPreset?.heading_leading  ?? 1.04
   const bodyWeight    = typoPreset?.body_weight    ?? 400
 
@@ -124,11 +125,10 @@ export default function RestaurantPreview({
         '--rb-heading-font': headingFont,
         '--rb-body-font': bodyFont,
         '--rb-heading-weight': String(headingWeight),
-        '--rb-heading-tracking': headingTrack,
         '--rb-heading-leading': String(headingLead),
         '--rb-body-weight': String(bodyWeight),
       }) as React.CSSProperties,
-    [c, headingFont, bodyFont, headingWeight, headingTrack, headingLead, bodyWeight]
+    [c, headingFont, bodyFont, headingWeight, headingLead, bodyWeight]
   )
 
   const isDark = preset.id === 'onyx'
@@ -222,7 +222,6 @@ function Heading({
       style={{
         fontFamily: 'var(--rb-heading-font)',
         lineHeight: 'var(--rb-heading-leading, 1.04)',
-        letterSpacing: 'var(--rb-heading-tracking, -0.02em)',
         fontWeight: 'var(--rb-heading-weight, 500)' as any,
       }}
     >
@@ -235,7 +234,7 @@ function Eyebrow({ children, className = '' }: { children: React.ReactNode; clas
   return (
     <p
       className={`text-[0.7rem] uppercase ${className}`}
-      style={{ color: 'var(--rb-accent)', letterSpacing: '0.32em', fontWeight: 500 }}
+      style={{ color: 'var(--rb-accent)', fontWeight: 500 }}
     >
       {children}
     </p>
@@ -296,11 +295,11 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
           <span>{content.hours_location.address}</span>
         </div>
         <div className="flex items-center gap-6" style={{ color: 'var(--rb-muted)' }}>
-          <a href={`tel:${content.hours_location.phone}`} className="hover:opacity-80 transition">
+          <a href={`tel:${content.hours_location.phone}`} className="inline-flex min-h-[44px] -my-[13px] items-center hover:opacity-80 transition">
             {content.hours_location.phone}
           </a>
           <span>·</span>
-          <a href={`mailto:${content.hours_location.email}`} className="hover:opacity-80 transition">
+          <a href={`mailto:${content.hours_location.email}`} className="inline-flex min-h-[44px] -my-[13px] items-center hover:opacity-80 transition">
             {content.hours_location.email}
           </a>
         </div>
@@ -342,7 +341,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
       <Container className="flex items-center justify-between py-5">
         <button onClick={() => setView('home')} className="flex items-baseline gap-2">
           <span
-            style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.45rem', fontWeight: 500, letterSpacing: '0.02em' }}
+            style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.45rem', fontWeight: 500 }}
           >
             {content.brand.name}
           </span>
@@ -353,7 +352,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
               key={l.view}
               onClick={() => setView(l.view)}
               className="text-[0.78rem] uppercase transition hover:opacity-100"
-              style={{ color: view === l.view ? 'var(--rb-accent)' : 'var(--rb-muted)', letterSpacing: '0.22em', fontWeight: view === l.view ? 600 : 500 }}
+              style={{ color: view === l.view ? 'var(--rb-accent)' : 'var(--rb-muted)', fontWeight: view === l.view ? 600 : 500 }}
             >
               {l.label}
             </button>
@@ -366,7 +365,6 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
             style={{
               background: 'var(--rb-accent)',
               color: isDark ? '#0a0a0c' : '#ffffff',
-              letterSpacing: '0.22em',
               fontWeight: 600
             }}
             whileHover={{ y: -2 }}
@@ -408,7 +406,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
                 key={l.view}
                 onClick={() => go(l.view)}
                 className="py-3 text-right text-[0.85rem] uppercase transition"
-                style={{ color: view === l.view ? 'var(--rb-accent)' : 'var(--rb-text)', letterSpacing: '0.2em', fontWeight: view === l.view ? 600 : 500 }}
+                style={{ color: view === l.view ? 'var(--rb-accent)' : 'var(--rb-text)', fontWeight: view === l.view ? 600 : 500 }}
               >
                 {l.label}
               </button>
@@ -470,7 +468,7 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
           {content.hero.eyebrow ? (
           <motion.div variants={staggerChild} className="mb-8 flex items-center gap-3">
             <span className="h-px w-10" style={{ background: 'var(--rb-accent)' }} />
-            <span className="text-[0.72rem] uppercase" style={{ color: 'var(--rb-accent)', letterSpacing: '0.34em', fontWeight: 500 }}>
+            <span className="text-[0.72rem] uppercase" style={{ color: 'var(--rb-accent)', fontWeight: 500 }}>
               {content.hero.eyebrow}
             </span>
           </motion.div>
@@ -482,7 +480,6 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
               fontFamily: 'var(--rb-heading-font)',
               color: '#ffffff',
               lineHeight: 1.0,
-              letterSpacing: '-0.03em',
               fontWeight: 500,
               whiteSpace: 'pre-line',
               textShadow: '0 2px 40px rgba(0,0,0,0.35)'
@@ -501,7 +498,7 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
             <motion.a
               href="#reservations"
               className="inline-flex items-center px-8 py-4 text-[0.78rem] uppercase"
-              style={{ background: 'var(--rb-accent)', color: '#0a0a0c', letterSpacing: '0.24em', fontWeight: 600 }}
+              style={{ background: 'var(--rb-accent)', color: '#0a0a0c', fontWeight: 600 }}
               whileHover={{ y: -2, boxShadow: '0 16px 44px -14px var(--rb-accent)' }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
@@ -511,7 +508,7 @@ function Hero({ content, isDark }: { content: RestaurantContent; isDark: boolean
             <motion.a
               href="#menu"
               className="inline-flex items-center px-8 py-4 text-[0.78rem] uppercase transition hover:bg-white/10"
-              style={{ border: '1px solid rgba(255,255,255,0.5)', color: '#ffffff', letterSpacing: '0.24em', fontWeight: 500 }}
+              style={{ border: '1px solid rgba(255,255,255,0.5)', color: '#ffffff', fontWeight: 500 }}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
@@ -550,10 +547,10 @@ function Story({ content, isDark }: { content: RestaurantContent; isDark: boolea
                   />
                 )}
                 <div>
-                  <p style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.15rem', letterSpacing: '0.01em' }}>
+                  <p style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.15rem' }}>
                     {content.story.chef_name}
                   </p>
-                  <p className="text-[0.78rem] uppercase mt-0.5" style={{ color: 'var(--rb-accent)', letterSpacing: '0.22em' }}>
+                  <p className="text-[0.78rem] uppercase mt-0.5" style={{ color: 'var(--rb-accent)' }}>
                     {content.story.chef_title}
                   </p>
                 </div>
@@ -638,7 +635,7 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
                 </p>
               </div>
               <h3
-                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.35rem', letterSpacing: '-0.01em' }}
+                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.35rem' }}
                 className="mb-2"
               >
                 {dish.name}
@@ -681,7 +678,6 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
               onClick={() => setActive(cat.id)}
               className="relative px-5 py-2.5 text-[0.78rem] uppercase"
               style={{
-                letterSpacing: '0.24em',
                 fontWeight: 500,
                 color: active === cat.id ? (isDark ? '#0a0a0c' : '#ffffff') : 'var(--rb-muted)',
                 background: active === cat.id ? 'var(--rb-accent)' : 'transparent',
@@ -741,7 +737,7 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
                     <div className="flex-1">
                       <div className="flex items-baseline gap-3 mb-1.5">
                         <h4
-                          style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.3rem', letterSpacing: '-0.01em' }}
+                          style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.3rem' }}
                         >
                           {item.name}
                         </h4>
@@ -752,7 +748,6 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
                               background: 'transparent',
                               color: 'var(--rb-accent)',
                               border: `1px solid var(--rb-accent)`,
-                              letterSpacing: '0.2em'
                             }}
                           >
                             {item.badge}
@@ -844,24 +839,24 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
 
             <div className="space-y-5 mb-10">
               <div>
-                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)' }}>
                   العنوان
                 </p>
                 <p style={{ color: 'var(--rb-text)' }}>{content.hours_location.address}</p>
               </div>
               <div>
-                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)' }}>
                   الهاتف
                 </p>
-                <a href={`tel:${content.hours_location.phone}`} style={{ color: 'var(--rb-text)' }}>
+                <a href={`tel:${content.hours_location.phone}`} className="inline-flex min-h-[44px] -my-2.5 items-center" style={{ color: 'var(--rb-text)' }}>
                   {content.hours_location.phone}
                 </a>
               </div>
               <div>
-                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+                <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)' }}>
                   البريد الإلكتروني
                 </p>
-                <a href={`mailto:${content.hours_location.email}`} style={{ color: 'var(--rb-text)' }}>
+                <a href={`mailto:${content.hours_location.email}`} className="inline-flex min-h-[44px] -my-2.5 items-center" style={{ color: 'var(--rb-text)' }}>
                   {content.hours_location.email}
                 </a>
               </div>
@@ -873,7 +868,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-6 py-3 text-[0.78rem] uppercase"
-                style={{ border: `1px solid var(--rb-accent)`, color: 'var(--rb-accent)', letterSpacing: '0.24em', fontWeight: 500 }}
+                style={{ border: `1px solid var(--rb-accent)`, color: 'var(--rb-accent)', fontWeight: 500 }}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.2, ease: EASE_OUT }}
@@ -885,7 +880,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
 
           <Reveal className="lg:col-span-7" delay={0.08}>
             <div className="p-8 md:p-10" style={{ background: 'var(--rb-surface)', border: `1px solid var(--rb-border)` }}>
-              <p className="text-[0.72rem] uppercase mb-6" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+              <p className="text-[0.72rem] uppercase mb-6" style={{ color: 'var(--rb-accent)' }}>
                 ساعات العمل
               </p>
               <div className="divide-y" style={{ borderColor: 'var(--rb-border)' }}>
@@ -983,7 +978,7 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
             <motion.a
               href={`tel:${fallbackPhone}`}
               className="inline-flex items-center px-9 py-4 text-[0.78rem] uppercase"
-              style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', letterSpacing: '0.26em', fontWeight: 600 }}
+              style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', fontWeight: 600 }}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
@@ -1060,7 +1055,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
             >
               <Stars rating={t.rating} small />
               <p
-                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.25rem', lineHeight: 1.5, letterSpacing: '-0.01em' }}
+                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.25rem', lineHeight: 1.5 }}
                 className="mt-5 mb-6 italic"
               >
                 “{t.text}”
@@ -1070,7 +1065,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
                   {t.name}
                 </p>
                 {t.source && (
-                  <p className="text-[0.72rem] uppercase mt-1" style={{ color: 'var(--rb-accent)', letterSpacing: '0.22em' }}>
+                  <p className="text-[0.72rem] uppercase mt-1" style={{ color: 'var(--rb-accent)' }}>
                     {t.source}
                   </p>
                 )}
@@ -1114,12 +1109,12 @@ function Press({ content, isDark }: { content: RestaurantContent; isDark: boolea
           {content.press.items.slice(0, 6).map((item, i) => (
             <motion.div key={i} variants={staggerChild} className="text-center">
               <p
-                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.1rem', letterSpacing: '0.01em' }}
+                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.1rem' }}
               >
                 {item.outlet}
               </p>
               {item.quote && (
-                <p className="text-[0.72rem] uppercase mt-1.5" style={{ color: 'var(--rb-accent)', letterSpacing: '0.18em' }}>
+                <p className="text-[0.72rem] uppercase mt-1.5" style={{ color: 'var(--rb-accent)' }}>
                   {item.quote}
                 </p>
               )}
@@ -1132,6 +1127,44 @@ function Press({ content, isDark }: { content: RestaurantContent; isDark: boolea
 }
 
 function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
+  // Sign-ups land in the owner's bookings inbox as a contact request, through
+  // the same entitlement as the reservation form. In the editor a submit is a
+  // no-op that shows the outcome; on a live site whose owner is not entitled
+  // there is nowhere for the address to go, so the block does not render.
+  const { slug, enabled, preview } = useBookingContext()
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  if (!preview && !enabled) return null
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const address = email.trim()
+    if (!address) return
+    if (preview || !slug) {
+      setStatus('done')
+      return
+    }
+    setStatus('sending')
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          type: 'contact',
+          name: 'مشترك في النشرة البريدية',
+          email: address,
+          message: 'طلب اشتراك في النشرة البريدية',
+          path: window.location.pathname,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      setStatus(res.ok && data?.ok ? 'done' : 'error')
+    } catch {
+      setStatus('error')
+    }
+  }
+
   return (
     <section data-section="newsletter" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(200,169,106,0.06)' : 'rgba(0,0,0,0.04)' }}>
       <Container>
@@ -1143,30 +1176,45 @@ function Newsletter({ content, isDark }: { content: RestaurantContent; isDark: b
           <p style={{ color: 'var(--rb-muted)' }} className="mb-9">
             {content.newsletter.subheading}
           </p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-            <input
-              type="email"
-              required
-              dir="ltr"
-              placeholder="name@email.com"
-              className="flex-1 px-5 py-3.5 text-sm focus:outline-none"
-              style={{
-                background: 'var(--rb-surface)',
-                color: 'var(--rb-text)',
-                border: `1px solid var(--rb-border)`
-              }}
-            />
-            <motion.button
-              type="submit"
-              className="px-7 py-3.5 text-[0.78rem] uppercase"
-              style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', letterSpacing: '0.24em', fontWeight: 600 }}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.2, ease: EASE_OUT }}
-            >
-              {content.newsletter.button_label}
-            </motion.button>
-          </form>
+          {status === 'done' ? (
+            <p role="status" className="max-w-lg mx-auto" style={{ color: 'var(--rb-text)' }}>
+              {preview ? 'معاينة — لن يُرسَل هذا الاشتراك فعليًا.' : 'تم استلام اشتراكك. شكرًا لك.'}
+            </p>
+          ) : (
+            <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={onSubmit}>
+              <input
+                type="email"
+                required
+                dir="ltr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-label="البريد الإلكتروني"
+                placeholder="name@email.com"
+                className="flex-1 px-5 py-3.5 text-sm focus:outline-none"
+                style={{
+                  background: 'var(--rb-surface)',
+                  color: 'var(--rb-text)',
+                  border: `1px solid var(--rb-border)`
+                }}
+              />
+              <motion.button
+                type="submit"
+                disabled={status === 'sending'}
+                className="px-7 py-3.5 text-[0.78rem] uppercase disabled:opacity-60"
+                style={{ background: 'var(--rb-accent)', color: isDark ? '#0a0a0c' : '#ffffff', fontWeight: 600 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2, ease: EASE_OUT }}
+              >
+                {status === 'sending' ? 'جارٍ الإرسال…' : content.newsletter.button_label}
+              </motion.button>
+            </form>
+          )}
+          {status === 'error' && (
+            <p role="alert" className="mt-4 text-sm" style={{ color: 'var(--rb-muted)' }}>
+              تعذّر إرسال اشتراكك، حاول مرة أخرى.
+            </p>
+          )}
         </Reveal>
       </Container>
     </section>
@@ -1197,7 +1245,7 @@ function FAQ({ content, isDark }: { content: RestaurantContent; isDark: boolean 
                       className="w-full flex items-center justify-between py-5 text-left"
                     >
                       <span
-                        style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.15rem', letterSpacing: '-0.01em' }}
+                        style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.15rem' }}
                       >
                         {item.q}
                       </span>
@@ -1254,7 +1302,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
         <div className="grid md:grid-cols-3 gap-10 mb-16">
           <div>
             <p
-              style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.5rem', letterSpacing: '0.01em' }}
+              style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.5rem' }}
               className="mb-3"
             >
               {content.brand.name}
@@ -1264,7 +1312,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
             </p>
           </div>
           <div>
-            <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+            <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)' }}>
               زورونا
             </p>
             <p style={{ color: 'var(--rb-text)' }} className="text-sm mb-1">
@@ -1275,7 +1323,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
             </p>
           </div>
           <div>
-            <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)', letterSpacing: '0.24em' }}>
+            <p className="text-[0.72rem] uppercase mb-4" style={{ color: 'var(--rb-accent)' }}>
               تواصل معنا
             </p>
             <div className="space-y-1.5 text-sm">
@@ -1322,7 +1370,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
                   )}
                 </>
               )}
-              <a href={`mailto:${content.hours_location.email}`} className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
+              <a href={`mailto:${content.hours_location.email}`} className="flex min-h-[44px] items-center hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
                 راسلنا
               </a>
             </div>
@@ -1332,7 +1380,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
           <p className="text-xs" style={{ color: 'var(--rb-muted)' }}>
             {content.footer.legal}
           </p>
-          <p className="text-[0.7rem] uppercase" style={{ color: 'var(--rb-muted)', letterSpacing: '0.24em' }}>
+          <p className="text-[0.7rem] uppercase" style={{ color: 'var(--rb-muted)' }}>
 صُنع بواسطة زينيا
           </p>
         </div>

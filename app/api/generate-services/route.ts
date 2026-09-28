@@ -20,21 +20,12 @@ const FALLBACK_HERO_IMAGES = [
   'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=2000&q=80'
 ]
 
-const FALLBACK_GALLERY = [
-  'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1400&q=80'
-]
+// There is no stock fallback for the gallery or the before/after pair: those
+// sections present photos as this business's own work, so they carry the
+// owner's uploads or nothing, and the template leaves an empty one out.
 
 const FALLBACK_TEAM_IMAGE =
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80'
-
-const FALLBACK_BEFORE_IMAGE =
-  'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80'
-
-const FALLBACK_AFTER_IMAGE =
-  'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80'
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -227,17 +218,9 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
   const mock = SERVICE_MOCK_CONTENT
   const heroImage = input.visuals.hero_image_url || FALLBACK_HERO_IMAGES[0]
   const teamImage = input.visuals.team_image_url || FALLBACK_TEAM_IMAGE
-  const beforeImage = input.visuals.before_image_url || FALLBACK_BEFORE_IMAGE
-  const afterImage = input.visuals.after_image_url || FALLBACK_AFTER_IMAGE
-  const galleryUrls = input.visuals.gallery_image_urls || []
-
-  const galleryImages =
-    galleryUrls.length >= 4
-      ? galleryUrls.slice(0, 4).map((url) => ({ url }))
-      : [
-          ...galleryUrls.map((url) => ({ url })),
-          ...FALLBACK_GALLERY.slice(0, 4 - galleryUrls.length).map((url) => ({ url }))
-        ]
+  const beforeImage = input.visuals.before_image_url || ''
+  const afterImage = input.visuals.after_image_url || ''
+  const galleryImages = (input.visuals.gallery_image_urls || []).slice(0, 4).map((url) => ({ url }))
 
   const services =
     Array.isArray(ai?.services?.items) && ai.services.items.length >= 3

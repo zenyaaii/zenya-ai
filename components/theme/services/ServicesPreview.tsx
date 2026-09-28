@@ -149,7 +149,7 @@ function Heading({ children, className = '', size = 'lg' }: { children: React.Re
   return (
     <h2
       className={`${sizes[size]} ${className}`}
-      style={{ fontFamily: 'var(--sv-heading-font)', letterSpacing: '-0.04em', lineHeight: 1.02, fontWeight: 800 }}
+      style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.02, fontWeight: 800 }}
     >
       {children}
     </h2>
@@ -158,7 +158,7 @@ function Heading({ children, className = '', size = 'lg' }: { children: React.Re
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[0.72rem] font-semibold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>
+    <p className="text-[0.72rem] font-semibold" style={{ color: 'var(--sv-accent)' }}>
       {children}
     </p>
   )
@@ -189,9 +189,9 @@ function TopBar({ content, isDark }: { content: ServiceContent; isDark: boolean 
           {content.areas.response_time ? <><span>•</span><span>{content.areas.response_time}</span></> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
-          <a href={`tel:${content.footer.phone}`} className="transition hover:opacity-75">{content.footer.phone}</a>
+          <a href={`tel:${content.footer.phone}`} className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.phone}</a>
           <span>•</span>
-          <a href={`mailto:${content.footer.email}`} className="transition hover:opacity-75">{content.footer.email}</a>
+          <a href={`mailto:${content.footer.email}`} className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.email}</a>
         </div>
       </Container>
     </div>
@@ -306,12 +306,15 @@ function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean })
         />
       </div>
       <Container className="relative py-24 md:py-32 lg:py-36">
-        <motion.div {...reveal} className="grid gap-10 lg:grid-cols-[1.1fr_0.72fr] lg:items-end">
+        {/* The stats column is the owner's numbers only. Without any, the grid
+            collapses to one track so the copy is not pushed to one side of an
+            empty column. */}
+        <motion.div {...reveal} className={`grid gap-10 lg:items-end ${content.hero.stats?.length ? 'lg:grid-cols-[1.1fr_0.72fr]' : ''}`}>
           <div className="max-w-3xl text-white">
             <Eyebrow>{content.hero.eyebrow}</Eyebrow>
             <h1
               className="mt-6 whitespace-pre-line text-5xl md:text-7xl"
-              style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 0.96, letterSpacing: '-0.05em', fontWeight: 800 }}
+              style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 0.96, fontWeight: 800 }}
             >
               {content.hero.headline}
             </h1>
@@ -380,12 +383,12 @@ function ServicesSection({ content, isDark }: { content: ServiceContent; isDark:
                   0{index + 1}
                 </div>
                 {item.badge && (
-                  <span className="rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.2em]" style={{ background: `${isDark ? '#ffffff' : 'var(--sv-primary)'}14`, color: 'var(--sv-accent)' }}>
+                  <span className="rounded-full px-3 py-1 text-[0.7rem] font-bold" style={{ background: `${isDark ? '#ffffff' : 'var(--sv-primary)'}14`, color: 'var(--sv-accent)' }}>
                     {item.badge}
                   </span>
                 )}
               </div>
-              <h3 className="mt-7 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800, letterSpacing: '-0.03em' }}>
+              <h3 className="mt-7 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>
                 {item.name}
               </h3>
               {item.description ? <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.description}</p> : null}
@@ -442,7 +445,7 @@ function ProofSection({ content, isDark }: { content: ServiceContent; isDark: bo
           {content.proof.items.slice(0, 3).map((item, index) => (
             <motion.div key={item.title} {...reveal} transition={{ ...reveal.transition, delay: 0.05 * index }} className="rounded-[30px] p-7" style={surfaceCard(isDark)}>
               <p className="text-sm font-black uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>0{index + 1}</p>
-              <h3 className="mt-5 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800, letterSpacing: '-0.03em' }}>{item.title}</h3>
+              <h3 className="mt-5 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>{item.title}</h3>
               <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.text}</p>
             </motion.div>
           ))}
@@ -453,6 +456,10 @@ function ProofSection({ content, isDark }: { content: ServiceContent; isDark: bo
 }
 
 function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  // A comparison is only ever the owner's own two photos. The generator no
+  // longer fills a missing one with stock, and a stock pair would present
+  // someone else's work as this business's, so without both there is no section.
+  if (!content.before_after?.before_image || !content.before_after?.after_image) return null
   return (
     <section data-section="before_after" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
@@ -466,19 +473,19 @@ function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDa
             <div className="overflow-hidden rounded-[30px]" style={surfaceCard(isDark)}>
               <div className="relative">
                 <img src={content.before_after.before_image} alt={content.before_after.before_label} className="aspect-[4/5] w-full object-cover" />
-                <span className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white">{content.before_after.before_label}</span>
+                <span className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white">{content.before_after.before_label}</span>
               </div>
             </div>
             <div className="overflow-hidden rounded-[30px]" style={surfaceCard(isDark)}>
               <div className="relative">
                 <img src={content.before_after.after_image} alt={content.before_after.after_label} className="aspect-[4/5] w-full object-cover" />
-                <span className="absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>{content.before_after.after_label}</span>
+                <span className="absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>{content.before_after.after_label}</span>
               </div>
             </div>
           </div>
           {content.before_after.highlights?.length ? (
           <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <p className="text-sm font-semibold uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>لقطة التحوّل</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--sv-accent)' }}>لقطة التحوّل</p>
             <div className="mt-8 space-y-5">
               {content.before_after.highlights.slice(0, 3).map((item) => (
                 <div key={item} className="flex items-start gap-3 rounded-[22px] border p-4" style={{ borderColor: 'var(--sv-border)' }}>
@@ -508,7 +515,7 @@ function ProcessSection({ content, isDark }: { content: ServiceContent; isDark: 
           {content.process.steps.map((step, index) => (
             <motion.div key={step.step} {...reveal} transition={{ ...reveal.transition, delay: 0.05 * index }} className="rounded-[30px] p-7" style={surfaceCard(isDark)}>
               <p className="text-4xl font-black" style={{ color: 'var(--sv-primary)' }}>{step.step}</p>
-              <h3 className="mt-6 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800, letterSpacing: '-0.03em' }}>{step.title}</h3>
+              <h3 className="mt-6 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>{step.title}</h3>
               <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p>
             </motion.div>
           ))}
@@ -531,13 +538,13 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {content.areas.response_time ? (
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>الاستجابة</p>
+                <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>الاستجابة</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.response_time}</p>
               </div>
               ) : null}
               {content.areas.availability ? (
               <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>التوفّر</p>
+                <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>التوفّر</p>
                 <p className="mt-3 text-base font-semibold">{content.areas.availability}</p>
               </div>
               ) : null}
@@ -558,14 +565,24 @@ function AreasSection({ content, isDark }: { content: ServiceContent; isDark: bo
 }
 
 function OfferSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  const { enabled } = useBookingContext()
+  const { enabled, preview } = useBookingContext()
+  // The quote form only exists where a request can reach the owner: an
+  // entitled live site, or the editor, where a submit is a harmless no-op. On
+  // any other live site it would take a visitor's request and lose it, so the
+  // card offers the owner's own phone (call and WhatsApp), else their email,
+  // and with neither the card is left out.
+  const showForm = enabled || preview
+  const phone = (content.footer.phone || '').trim()
+  const email = (content.footer.email || '').trim()
+  const whatsapp = whatsappLink(phone)
+  const hasContact = !!phone || !!email
   return (
     <section id="quote" data-section="offer" className="py-24 md:py-28">
       <Container>
-        <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+        <motion.div {...reveal} className={`grid gap-6 ${showForm || hasContact ? 'lg:grid-cols-[1fr_0.9fr]' : ''}`}>
           <div className="rounded-[36px] p-8 md:p-10" style={{ ...surfaceCard(isDark), background: isDark ? 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,255,255,0.05))' : 'linear-gradient(135deg, rgba(34,199,242,0.14), rgba(255,255,255,0.95))' }}>
             {content.offer.badge && (
-              <span className="inline-flex rounded-full px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.2em]" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
+              <span className="inline-flex rounded-full px-3 py-1 text-[0.7rem] font-bold" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
                 {content.offer.badge}
               </span>
             )}
@@ -582,28 +599,57 @@ function OfferSection({ content, isDark }: { content: ServiceContent; isDark: bo
             </div>
             ) : null}
           </div>
-          <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <p className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
-            {enabled ? (
+          {showForm ? (
+            <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
+              <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
               <div className="mt-6">
                 <BookingForm type="quote" palette={servicesPalette(isDark)} />
               </div>
-            ) : (
-              <form className="mt-6 space-y-4" onSubmit={(event) => event.preventDefault()}>
-                <input className={fieldClass(isDark)} placeholder="الاسم" />
-                <input className={fieldClass(isDark)} placeholder="الهاتف أو البريد" />
-                <input className={fieldClass(isDark)} placeholder="الخدمة المطلوبة" />
-                <textarea className={`${fieldClass(isDark)} min-h-[120px] resize-none`} placeholder="أخبرنا بما تحتاج المساعدة فيه" />
-                <button type="submit" className="w-full rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-                  {content.offer.cta_label}
-                </button>
-              </form>
-            )}
-          </div>
+            </div>
+          ) : hasContact ? (
+            <div className="flex flex-col rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
+              <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
+              <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>
+                {phone ? 'تواصل معنا مباشرةً بمكالمة أو رسالة واتساب، ونرتّب معك التفاصيل.' : 'راسلنا بتفاصيل ما تحتاجه، ونعود إليك.'}
+              </p>
+              <div className="mt-8 space-y-3">
+                {phone ? (
+                  <a href={`tel:${phone}`} className="flex min-h-[52px] w-full items-center flex-wrap justify-center gap-x-2 rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
+                    اتصل بنا
+                    <span dir="ltr" className="font-semibold opacity-80">{phone}</span>
+                  </a>
+                ) : null}
+                {whatsapp ? (
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex min-h-[52px] w-full items-center justify-center rounded-full border px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-text)' }}>
+                    راسلنا على واتساب
+                  </a>
+                ) : null}
+                {!phone && email ? (
+                  <a href={`mailto:${email}`} className="flex min-h-[52px] w-full items-center flex-wrap justify-center gap-x-2 rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
+                    راسلنا بالبريد
+                    <span dir="ltr" className="break-all font-semibold opacity-80">{email}</span>
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
         </motion.div>
       </Container>
     </section>
   )
+}
+
+/**
+ * wa.me takes the number in international form, digits only. A number the
+ * owner wrote locally (no + or 00 prefix) has no country code to recover, and
+ * a guessed one would open a chat with a stranger, so it gets no WhatsApp link
+ * and the card keeps the call button alone.
+ */
+function whatsappLink(phone: string): string | null {
+  const raw = phone.trim()
+  if (!/^(\+|00)/.test(raw)) return null
+  const digits = raw.replace(/\D/g, '').replace(/^00/, '')
+  return digits.length >= 8 ? `https://wa.me/${digits}` : null
 }
 
 function servicesPalette(isDark: boolean) {
@@ -651,7 +697,7 @@ function TestimonialsSection({ content, isDark }: { content: ServiceContent; isD
               <div className="mt-6">
                 <p className="font-bold">{item.name}</p>
                 {item.service || item.source ? (
-                  <p className="text-xs uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>{[item.service, item.source].filter(Boolean).join(' · ')}</p>
+                  <p className="text-xs" style={{ color: 'var(--sv-accent)' }}>{[item.service, item.source].filter(Boolean).join(' · ')}</p>
                 ) : null}
               </div>
             </motion.div>
@@ -684,7 +730,7 @@ function FaqSection({ content, isDark }: { content: ServiceContent; isDark: bool
                   onClick={() => setOpen(open === index ? -1 : index)}
                   className="flex w-full items-center justify-between gap-4 px-4 py-5 text-left"
                 >
-                  <span className="text-lg font-semibold" style={{ fontFamily: 'var(--sv-heading-font)', letterSpacing: '-0.02em' }}>{item.q}</span>
+                  <span className="text-lg font-semibold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{item.q}</span>
                   <span className="text-2xl" style={{ color: 'var(--sv-accent)' }}>{open === index ? '−' : '+'}</span>
                 </button>
                 {open === index && <p className="px-4 pb-5 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.a}</p>}
@@ -698,6 +744,8 @@ function FaqSection({ content, isDark }: { content: ServiceContent; isDark: bool
 }
 
 function GallerySection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+  // The owner's uploads only, as with the before/after pair. None: no section.
+  if (!content.gallery?.images?.length) return null
   return (
     <section data-section="gallery" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
       <Container>
@@ -732,15 +780,15 @@ function Footer({ content, isDark }: { content: ServiceContent; isDark: boolean 
     <footer className="border-t py-16" style={{ borderColor: 'var(--sv-border)' }}>
       <Container className="grid gap-8 md:grid-cols-3">
         <div>
-          <p style={{ fontFamily: 'var(--sv-heading-font)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em' }}>{content.brand.name}</p>
+          <p style={{ fontFamily: 'var(--sv-heading-font)', fontSize: '1.6rem', fontWeight: 800 }}>{content.brand.name}</p>
           <p className="mt-4 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{content.footer.tagline}</p>
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: 'var(--sv-accent)' }}>تواصل</p>
-          <div className="mt-4 space-y-2 text-sm">
-            <a href={`tel:${content.footer.phone}`} className="block">{content.footer.phone}</a>
-            <a href={`mailto:${content.footer.email}`} className="block">{content.footer.email}</a>
-            {content.footer.address && <p style={{ color: 'var(--sv-muted)' }}>{content.footer.address}</p>}
+          <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>تواصل</p>
+          <div className="mt-2 text-sm">
+            {content.footer.phone ? <a href={`tel:${content.footer.phone}`} className="flex min-h-[44px] items-center">{content.footer.phone}</a> : null}
+            {content.footer.email ? <a href={`mailto:${content.footer.email}`} className="flex min-h-[44px] items-center">{content.footer.email}</a> : null}
+            {content.footer.address && <p className="mt-2" style={{ color: 'var(--sv-muted)' }}>{content.footer.address}</p>}
           </div>
         </div>
         <div className="md:text-right">
@@ -764,10 +812,4 @@ function Stars({ rating }: { rating: number }) {
       ))}
     </div>
   )
-}
-
-function fieldClass(isDark: boolean) {
-  return `w-full rounded-[22px] border px-4 py-3.5 text-sm outline-none transition placeholder:text-current/40 ${
-    isDark ? 'bg-white/5 text-white' : 'bg-white text-slate-900'
-  }`
 }
