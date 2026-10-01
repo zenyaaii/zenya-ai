@@ -219,9 +219,17 @@ let demoRead: Promise<{ categories: Category[]; ok: boolean; error?: string }[]>
  * are always on the CDN) and put it through the same single vision call the
  * wizard would. Runs at most once per server instance.
  */
-async function readDemoSample(openai: OpenAI, origin: string) {
-  const res = await fetch(new URL(DEMO_SAMPLE, origin).toString())
+async function readDemoSample(openai: OpenAI, origin: string, cookie: string | null) {
+  // A protected preview deployment answers an anonymous fetch with its login
+  // page, not the photo. The visitor's own cookie carries their preview
+  // access, so it goes along; production has no protection and ignores it.
+  const res = await fetch(new URL(DEMO_SAMPLE, origin).toString(), {
+    headers: cookie ? { cookie } : undefined,
+    cache: 'no-store',
+  })
   if (!res.ok) throw new Error(`demo_sample_${res.status}`)
+  const type = res.headers.get('content-type') || ''
+  if (!type.startsWith('image/')) throw new Error(`demo_sample_not_image:${type}`)
   const image = `data:image/jpeg;base64,${Buffer.from(await res.arrayBuffer()).toString('base64')}`
   return Promise.all([analyzeOne(openai, image, DEMO_CUISINE, null)])
 }
@@ -330,7 +338,7 @@ export async function POST(req: NextRequest) {
     if (demo) {
       // The bundled sample, read once per server instance and then shared.
       if (!demoRead) {
-        demoRead = readDemoSample(openai, req.nextUrl.origin)
+        demoRead = readDemoSample(openai, req.nextUrl.origin, req.headers.get('cookie'))
           .catch((e) => { demoRead = null; throw e })
       }
       results = await demoRead
