@@ -32,7 +32,7 @@ import {
   type EditorConfig, type EditorFieldDef, type SectionStyle, type SectionTextAlign,
 } from '@/utils/theme-editor-types'
 import {
-  TYPOGRAPHY_PRESETS, TYPOGRAPHY_MOODS,
+  TYPOGRAPHY_PRESETS, TYPOGRAPHY_MOODS, TYPOGRAPHY_MOOD_LABELS,
 } from '@/utils/theme-editor-typography'
 
 export type Status = 'idle' | 'saving' | 'saved' | 'error'
@@ -212,7 +212,7 @@ export function ColorsPanel({
                 <span style={{ background: cols.surface }} />
               </span>
               <span className="ze-preset-n" style={{ fontFamily: p.heading_font }}>{p.name}</span>
-              <span className="ze-preset-v">{p.vibe}</span>
+              <span className="ze-preset-v">{vibeAr(p.vibe)}</span>
               {selected && (
                 <span className="ze-check">
                   <Check strokeWidth={3} aria-hidden />
@@ -250,6 +250,40 @@ export function ColorsPanel({
   )
 }
 
+/** The colour presets' mood lines are English (the marketing site shows them
+ *  as written); the editor shows the owner the Arabic. Unknown lines pass. */
+const PRESET_VIBE_AR: Record<string, string> = {
+  'clean · modern': 'نظيف · حديث',
+  'dark · bold': 'داكن · جريء',
+  'dark · electric': 'داكن · نابض',
+  'enterprise · professional': 'مؤسسي · احترافي',
+  'dark luxury · aurora': 'فخامة داكنة · وهج',
+  'warm luxury · glow': 'فخامة دافئة · توهّج',
+  'light luxury · classic': 'فخامة فاتحة · كلاسيكي',
+  'dark violet · aurora': 'بنفسجي داكن · وهج',
+  'editorial · minimal': 'تحريري · بسيط',
+  'warm · feminine': 'دافئ · ناعم',
+  'natural · conscious': 'طبيعي · هادئ',
+  'dark · avant-garde': 'داكن · جريء',
+  'cinematic luxury': 'فخامة سينمائية',
+  'rustic warm': 'ريفي دافئ',
+  'breezy refined': 'خفيف وراقٍ',
+  'earthy elevated': 'ترابي راقٍ',
+  'trusted modern': 'حديث وموثوق',
+  'premium dark': 'داكن فاخر',
+  'warm premium': 'دافئ فاخر',
+  'calm elevated': 'هادئ وراقٍ',
+  'editorial · stark': 'تحريري · حادّ',
+  'heritage · warmth': 'تراثي · دافئ',
+  'dark editorial · warm': 'تحريري داكن · دافئ',
+  'swiss · contemporary': 'سويسري · معاصر',
+  'serene · natural': 'هادئ · طبيعي',
+  'feminine · romantic': 'ناعم · رومانسي',
+  'premium · earthy': 'فاخر · ترابي',
+  'dark · ultra-luxury': 'داكن · فخم جدًا',
+}
+const vibeAr = (v: string) => PRESET_VIBE_AR[v] ?? v
+
 /* ── Typography panel ────────────────────────────────────────────────── */
 
 export function TypographyPanel({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -262,7 +296,7 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
       <div className="ze-chips" role="group">
         <MoodChip active={mood === 'all'} onClick={() => setMood('all')}>{t.editor.all}</MoodChip>
         {TYPOGRAPHY_MOODS.map((m) => (
-          <MoodChip key={m} active={mood === m} onClick={() => setMood(m)}>{m}</MoodChip>
+          <MoodChip key={m} active={mood === m} onClick={() => setMood(m)}>{TYPOGRAPHY_MOOD_LABELS[m]}</MoodChip>
         ))}
       </div>
       <div className="ze-types">
@@ -281,7 +315,7 @@ export function TypographyPanel({ value, onChange }: { value: string; onChange: 
                   sample that did would teach the reader otherwise. */}
               <span className="ze-type-n">
                 <span style={{ fontFamily: p.heading_font, fontWeight: p.heading_weight ?? 600 }}>{p.name}</span>
-                <span className="ze-type-m">{p.mood}</span>
+                <span className="ze-type-m">{TYPOGRAPHY_MOOD_LABELS[p.mood]}</span>
               </span>
               <span className="ze-type-v" style={{ fontFamily: p.body_font }}>{p.vibe}</span>
               {selected && (
