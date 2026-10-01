@@ -168,7 +168,7 @@ ABSOLUTE RULES:
 - Transcribe ONLY what you can actually read. Never invent, guess, or embellish a dish, a price, or a description. If the menu shows no descriptions, leave every description empty.
 - Preserve the menu's OWN language and the exact dish names as printed. Do NOT translate.
 - Keep prices as printed. Include the currency if shown (e.g. "45 ج.م", "$18"); otherwise just the number. No visible price → empty string, never a guess.
-- Group items under the section headings the menu uses (المشروبات الساخنة / الحلويات اليمنية / Appetizers / etc.). Items with no heading go under one sensible category.
+- Group items under the section headings the menu uses (المشروبات الساخنة / الحلويات اليمنية / Appetizers / etc.). Items with no heading go under one category named "القائمة" (or "Menu" if the menu is not in Arabic). Never name a category after the cuisine or the restaurant.
 - Only set "badge" if the menu itself marks an item (e.g. "جديد", "الأكثر طلبًا", "Chef's special"). Otherwise empty.
 - If the image is genuinely not a menu or is fully unreadable, return an empty categories array — but do not give up on a menu just because it is dense.
 
