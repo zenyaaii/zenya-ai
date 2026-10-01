@@ -215,17 +215,17 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
     >
       <div className="flex items-center justify-between gap-4">
         <button onClick={() => go('home')} style={{ fontFamily: 'var(--wl-heading)' }}>
-          <span className="text-xl font-semibold tracking-wide" style={{ color: 'var(--wl-text)' }}>
+          <span className="text-xl font-semibold" style={{ color: 'var(--wl-text)' }}>
             {content.brand.name}
           </span>
-          <span className="ml-2 hidden text-xs uppercase tracking-[0.2em] opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
+          <span className="ml-2 hidden text-xs uppercase opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
             {content.brand.type}
           </span>
         </button>
         {/* Desktop nav — drop 'home' (the wordmark already returns home). */}
         <div className="hidden items-center gap-7 sm:flex">
           {navLinks.filter((l) => l.view !== 'home').map((item) => (
-            <button key={item.view} onClick={() => go(item.view)} className="text-xs uppercase tracking-[0.18em] transition hover:opacity-100" style={{ color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)', opacity: view === item.view ? 1 : 0.6, fontWeight: view === item.view ? 600 : 400 }}>
+            <button key={item.view} onClick={() => go(item.view)} className="text-xs uppercase transition hover:opacity-100" style={{ color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)', opacity: view === item.view ? 1 : 0.6, fontWeight: view === item.view ? 600 : 400 }}>
               {item.label}
             </button>
           ))}
@@ -235,7 +235,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => go('contact')}
-            className="rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.16em] shadow-sm"
+            className="rounded-full px-5 py-2.5 text-xs font-bold uppercase shadow-sm"
             style={{ background: 'var(--wl-accent)', color: isDark ? '#0e0e0e' : 'var(--wl-primary)' }}
           >
             {content.hero.cta_primary}
@@ -269,7 +269,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
             <button
               key={item.view}
               onClick={() => go(item.view)}
-              className="rounded-xl px-4 py-3 text-right text-sm uppercase tracking-[0.16em] transition"
+              className="rounded-xl px-4 py-3 text-right text-sm uppercase transition"
               style={{
                 color: view === item.view ? 'var(--wl-accent)' : 'var(--wl-text)',
                 background: view === item.view ? 'color-mix(in srgb, var(--wl-accent) 12%, transparent)' : 'transparent',
@@ -306,7 +306,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
               initial={rm ? {} : { opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium uppercase tracking-[0.2em] text-white backdrop-blur-sm"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium uppercase text-white backdrop-blur-sm"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
               {content.hero.badge}
@@ -318,7 +318,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
             initial={rm ? {} : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.08 }}
-            className="mb-4 text-xs uppercase tracking-[0.35em] text-white/70"
+            className="mb-4 text-xs uppercase text-white/70"
           >
             {content.hero.eyebrow}
           </motion.p>
@@ -358,7 +358,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               onClick={onBook}
-              className="rounded-full px-8 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] shadow-xl"
+              className="rounded-full px-8 py-3.5 text-sm font-semibold uppercase shadow-xl"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
             >
               {content.hero.cta_primary}
@@ -367,7 +367,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               href="#treatments"
-              className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-medium uppercase tracking-[0.14em] text-white backdrop-blur-sm transition hover:bg-white/10"
+              className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-medium uppercase text-white backdrop-blur-sm transition hover:bg-white/10"
             >
               {content.hero.cta_secondary}
             </motion.a>
@@ -392,6 +392,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 // ─── Trust Bar ────────────────────────────────────────────────────────────────
 function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
+  if (!content.trust_bar?.items?.length) return null
   return (
     <div
       data-section="trust_bar"
@@ -403,7 +404,7 @@ function TrustBar({ content, isDark }: { content: WellnessContent; isDark: boole
           <motion.div
             key={i}
             {...fadeAnim(rm,i * 0.08)}
-            className="flex items-center gap-2.5 text-xs uppercase tracking-[0.2em]"
+            className="flex items-center gap-2.5 text-xs uppercase"
             style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.85)' }}
           >
             <span className="opacity-80" style={{ color: 'var(--wl-accent)' }}><Icon name="sparkle" size={14} animation="none" hover={false} /></span>
@@ -423,7 +424,7 @@ function PhilosophySection({ content, isDark }: { content: WellnessContent; isDa
       <div className="mx-auto max-w-5xl">
         {/* Header */}
         <div className="mb-16 text-center">
-          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>
             {content.philosophy.eyebrow}
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.1)} className="text-4xl font-light leading-[1.15] sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
@@ -468,7 +469,7 @@ function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDa
     <section id="treatments" data-section="treatments" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-surface)' : 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-12 text-center">
-          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>
             ما نقدّمه
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
@@ -487,7 +488,7 @@ function TreatmentsSection({ content, isDark }: { content: WellnessContent; isDa
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className="rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.18em] font-medium transition"
+                className="rounded-full border px-4 py-1.5 text-xs uppercase font-medium transition"
                 style={{
                   background: activeCategory === cat ? 'var(--wl-accent)' : 'transparent',
                   borderColor: activeCategory === cat ? 'var(--wl-accent)' : 'var(--wl-border)',
@@ -526,7 +527,7 @@ function TreatmentCard({ treatment: t, index, isDark }: { treatment: WellnessTre
       <div className="flex flex-1 flex-col p-6">
         {/* Badge */}
         {t.badge && (
-          <span className="mb-3 self-start rounded-full border px-3 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.18em]"
+          <span className="mb-3 self-start rounded-full border px-3 py-0.5 text-[0.6rem] font-bold uppercase"
             style={{ borderColor: 'var(--wl-accent)', color: 'var(--wl-accent)' }}>
             {t.badge}
           </span>
@@ -549,7 +550,7 @@ function TreatmentCard({ treatment: t, index, isDark }: { treatment: WellnessTre
               </span>
             )}
             {t.category && (
-              <span className="rounded px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.15em]"
+              <span className="rounded px-2 py-0.5 text-[0.6rem] uppercase"
                 style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'var(--wl-surface)', color: 'var(--wl-muted)' }}>
                 {t.category}
               </span>
@@ -584,7 +585,9 @@ function JourneySection({ content, isDark }: { content: WellnessContent; isDark:
             <motion.div key={i} {...revealAnim(rm,i * 0.1)} className="relative text-center">
               {/* Connector line */}
               {i < content.journey.steps.length - 1 && (
-                <div className="absolute left-[calc(50%+2.5rem)] top-6 hidden h-px w-[calc(100%-5rem)] sm:block" style={{ background: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.2)' }} />
+                // Logical start: in RTL the next step sits to the left, so the
+                // line leaves this circle on its left and stops at the next one.
+                <div className="absolute top-6 hidden h-px sm:block" style={{ insetInlineStart: 'calc(50% + 2.5rem)', width: 'calc(100% - 3rem)', background: isDark ? 'var(--wl-border)' : 'rgba(255,255,255,0.2)' }} />
               )}
               <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
                 style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
@@ -612,7 +615,7 @@ function TeamSection({ content, isDark }: { content: WellnessContent; isDark: bo
     <section data-section="team" className="px-8 py-24" style={{ background: 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
-          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>
             من يقف خلف المركز
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
@@ -644,23 +647,27 @@ function TeamCard({ member, index, isDark }: { member: WellnessTeamMember; index
       {/* Photo */}
       <div className="relative h-64 overflow-hidden">
         {member.image ? (
-          <img src={member.image} alt={member.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center" style={{ background: 'var(--wl-bg)' }}>
-            <div className="flex h-20 w-20 items-center justify-center rounded-full text-3xl font-light" style={{ background: 'var(--wl-border)', color: 'var(--wl-accent)', fontFamily: 'var(--wl-heading)' }}>
-              {member.name.charAt(0)}
+          <>
+            <img src={member.image} alt={member.name} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <p className="text-[0.6rem] uppercase text-white/70">{member.title}</p>
             </div>
+          </>
+        ) : (
+          /* No photo: a calm panel with the first letter of the name, so the
+             card keeps its height beside members who have one. */
+          <div className="flex h-full w-full flex-col items-center justify-center gap-4" style={{ background: 'color-mix(in srgb, var(--wl-accent) 14%, var(--wl-surface))' }}>
+            <span className="text-7xl font-light leading-none" style={{ color: 'var(--wl-accent)', fontFamily: 'var(--wl-heading)' }}>{member.name.trim().charAt(0)}</span>
+            <span className="h-px w-10" style={{ background: 'var(--wl-accent)', opacity: 0.5 }} />
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute bottom-4 left-4">
-          <p className="text-[0.6rem] uppercase tracking-[0.25em] text-white/70">{member.title}</p>
-        </div>
       </div>
       <div className="p-6">
         <h3 className="mb-1 text-xl font-semibold" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>{member.name}</h3>
+        {!member.image && member.title && <p className="mb-2 text-sm" style={{ color: 'var(--wl-accent)' }}>{member.title}</p>}
         {member.specialty && (
-          <p className="mb-3 text-xs uppercase tracking-[0.15em]" style={{ color: 'var(--wl-accent)' }}>{member.specialty}</p>
+          <p className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>{member.specialty}</p>
         )}
         <p className="text-sm font-light leading-relaxed" style={{ color: 'var(--wl-muted)' }}>{member.bio}</p>
       </div>
@@ -677,7 +684,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end">
           <div>
-            <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+            <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>
               المكان
             </motion.p>
             <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light leading-snug sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
@@ -689,6 +696,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
             </motion.p>
           </div>
           {/* Amenities */}
+          {content.space.amenities?.length ? (
           <motion.div {...revealAnim(rm,0.22)} className="grid grid-cols-2 gap-3">
             {content.space.amenities.map((a, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-2xl border p-3"
@@ -698,10 +706,11 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
               </div>
             ))}
           </motion.div>
+          ) : null}
         </div>
 
-        {/* Photo grid */}
-        {imgs.length >= 4 ? (
+        {/* Photo grid — the owner's own photos only; none, no grid. */}
+        {!imgs.length ? null : imgs.length >= 4 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             {imgs.slice(0, 4).map((img, i) => (
               <motion.div key={i} {...revealAnim(rm,i * 0.08)} className={`relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}
@@ -737,7 +746,7 @@ function TestimonialsSection({ content, isDark }: { content: WellnessContent; is
     <section data-section="testimonials" className="px-8 py-24" style={{ background: isDark ? 'var(--wl-bg)' : 'var(--wl-bg)' }}>
       <div className="mx-auto max-w-5xl">
         <div className="mb-16 text-center">
-          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>
+          <motion.p {...fadeAnim(rm,)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>
             قصص عملائنا
           </motion.p>
           <motion.h2 {...revealAnim(rm,0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
@@ -801,7 +810,7 @@ function TestimonialCard({ testimonial: t, index, isDark }: { testimonial: Welln
       <div className="mt-5 border-t pt-4" style={{ borderColor: 'var(--wl-border)' }}>
         <p className="text-sm font-semibold" style={{ color: 'var(--wl-text)' }}>{t.name}</p>
         {t.treatment && (
-          <p className="mt-0.5 text-xs uppercase tracking-[0.15em]" style={{ color: 'var(--wl-accent)' }}>{t.treatment}</p>
+          <p className="mt-0.5 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>{t.treatment}</p>
         )}
       </div>
     </motion.div>
@@ -819,7 +828,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
       </div>
       <div className="relative z-10 mx-auto max-w-3xl text-center">
-        <motion.p {...fadeAnim(rm,)} className="mb-4 text-xs uppercase tracking-[0.35em] text-white/60">
+        <motion.p {...fadeAnim(rm,)} className="mb-4 text-xs uppercase text-white/60">
           {content.booking_cta.eyebrow}
         </motion.p>
         <motion.h2 {...revealAnim(rm,0.1)} className="text-5xl font-light leading-[1.1] text-white sm:text-6xl" style={{ fontFamily: 'var(--wl-heading)' }}>
@@ -858,14 +867,14 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
               href={contactHref(content)}
-              className="inline-block rounded-full px-12 py-4 text-sm font-bold uppercase tracking-[0.14em] shadow-2xl"
+              className="inline-block rounded-full px-12 py-4 text-sm font-bold uppercase shadow-2xl"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}
             >
               {content.booking_cta.cta_label}
             </motion.a>
             <WhatsAppBookButton content={content} onDark />
             </div>
-            <p className="text-xs text-white/50">{content.booking_cta.note}</p>
+            {content.booking_cta.note ? <p className="text-xs text-white/50">{content.booking_cta.note}</p> : null}
           </motion.div>
         )}
       </div>
@@ -898,6 +907,7 @@ function wellnessPalette(isDark: boolean) {
 function FaqSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
+  if (!content.faq?.items?.length) return null
   return (
     <section data-section="faq" className="px-8 py-24" style={{ background: 'var(--wl-surface)' }}>
       <div className="mx-auto max-w-3xl">
@@ -956,7 +966,7 @@ function FooterSection({ content, isDark, onBook }: { content: WellnessContent; 
           </div>
           {/* Contact */}
           <div>
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
+            <p className="mb-4 text-xs font-bold uppercase" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
               تواصل
             </p>
             <div className="space-y-2 text-sm font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
@@ -967,14 +977,14 @@ function FooterSection({ content, isDark, onBook }: { content: WellnessContent; 
           </div>
           {/* Hours */}
           <div>
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
+            <p className="mb-4 text-xs font-bold uppercase" style={{ color: isDark ? 'var(--wl-accent)' : 'rgba(255,255,255,0.5)' }}>
               ساعات العمل
             </p>
             <p className="text-sm font-light leading-relaxed" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
               {content.footer.hours || 'تواصل معنا لمعرفة المواعيد'}
             </p>
             <button type="button" onClick={onBook}
-              className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em]"
+              className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
               احجز الآن
             </button>
@@ -1043,7 +1053,7 @@ function WhatsAppBookButton({ content, onDark = false }: { content: WellnessCont
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-bold tracking-[0.06em]"
+      className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-bold"
       style={onDark
         ? { borderColor: 'rgba(255,255,255,0.55)', color: '#fff', background: 'rgba(255,255,255,0.08)' }
         : { borderColor: 'var(--wl-border)', color: 'var(--wl-text)', background: 'var(--wl-surface)' }}
@@ -1063,7 +1073,7 @@ function LocationSection({ content, isDark }: { content: WellnessContent; isDark
   const details = (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="mb-2 text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--wl-accent)' }}>موقعنا</p>
+        <p className="mb-2 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>موقعنا</p>
         <h2 className="text-3xl font-light sm:text-4xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>
           {content.brand.name}
         </h2>
@@ -1123,7 +1133,7 @@ function TimetableSection({ content, isDark }: { content: WellnessContent; isDar
   const byDay = (d: string) => slots.filter((s) => s.day === d).sort((a, b) => a.time.localeCompare(b.time))
   const header = (
     <div className="mb-10 text-center">
-      <motion.p {...fadeAnim(rm)} className="mb-3 text-xs uppercase tracking-[0.35em]" style={{ color: 'var(--wl-accent)' }}>جدول الحصص</motion.p>
+      <motion.p {...fadeAnim(rm)} className="mb-3 text-xs uppercase" style={{ color: 'var(--wl-accent)' }}>جدول الحصص</motion.p>
       <motion.h2 {...revealAnim(rm, 0.08)} className="text-4xl font-light sm:text-5xl" style={{ fontFamily: 'var(--wl-heading)', color: 'var(--wl-text)' }}>{tt.heading || 'جدول الحصص'}</motion.h2>
       {tt.subheading ? <p className="mx-auto mt-4 max-w-xl text-base font-light" style={{ color: 'var(--wl-muted)' }}>{tt.subheading}</p> : null}
     </div>

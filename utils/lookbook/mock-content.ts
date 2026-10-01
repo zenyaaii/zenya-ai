@@ -122,5 +122,20 @@ export const LOOKBOOK_MOCK_CONTENT: LookbookContent = {
     title: 'وَقار — أزياء نسائية محتشمة · تشكيلة SS25',
     description:
       'قطع أساسية راقية ومدروسة للمرأة التي تمضي باحتشام وثقة. كميات محدودة، وألياف طبيعية، وإنتاج أخلاقي. تسوّقي تشكيلة SS25.'
+  },
+  // Demo only: this brand is fictional, so its "uploads" are stock. The
+  // generator never copies these into an owner's site.
+  images: {
+    hero: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1800&q=85',
+    gallery: [
+      'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1551232864-3f0890e580d9?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1582142839970-2b9e04b60f65?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80'
+    ]
   }
 }

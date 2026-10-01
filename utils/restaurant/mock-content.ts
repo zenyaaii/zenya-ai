@@ -34,29 +34,29 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
   },
   signature_dishes: [
     {
-      name: 'إسكالوب البحر المصطاد يدويًا',
-      description: 'زبدة بنّية، وكشمش مخلّل، وغبار الشمر.',
+      name: 'سلمون مشوي على الحطب',
+      description: 'زبدة بنّية، ليمون محروق، أعشاب الحديقة.',
       price: '$36',
       image:
-        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1200&q=80'
+        'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'بطّ الوادي',
-      description: 'مُعتَّق أربعين يومًا، ورق التين، ملح مدخّن، خوخ مشوي.',
+      name: 'ريش لحم مدخّنة',
+      description: 'متبّلة اثنتي عشرة ساعة، طماطم مشوية، صلصة الدخان.',
       price: '$58',
       image:
         'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'تالياتيلّي مقطّعة يدويًا',
-      description: 'قنفذ البحر، زبدة بنّية، قشر الليمون، فتات العجين المخمّر.',
+      name: 'بيني أرابياتا',
+      description: 'صلصة طماطم حارّة، ثوم، جبن بارميزان.',
       price: '$42',
       image:
-        'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1200&q=80'
+        'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1200&q=80'
     },
     {
-      name: 'كريم بروليه باللافندر',
-      description: 'لافندر، حبّة الفانيليا، قشرة سكر الديميرارا.',
+      name: 'آيس كريم بالكراميل',
+      description: 'فانيليا، صلصة كراميل مملّحة، بسكويت مقرمش.',
       price: '$18',
       image:
         'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=80'
@@ -83,9 +83,9 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
         name: 'الأطباق الرئيسية',
         description: 'قلب القائمة.',
         items: [
-          { name: 'بطّ الوادي', description: 'مُعتَّق أربعين يومًا، ورق التين، ملح مدخّن.', price: '$58', badge: 'طبق التوقيع' },
+          { name: 'ريش لحم مدخّنة', description: 'متبّلة اثنتي عشرة ساعة، صلصة الدخان.', price: '$58', badge: 'طبق التوقيع' },
           { name: 'قاروص بحري بري', description: 'زبدة بنّية، كبر، ليمون مشوي.', price: '$48' },
-          { name: 'تالياتيلّي', description: 'قنفذ البحر، زبدة بنّية، قشر الليمون.', price: '$42' },
+          { name: 'بيني أرابياتا', description: 'صلصة طماطم حارّة، ثوم، بارميزان.', price: '$42' },
           { name: 'ريب آي مُعتَّق', description: 'لشخصين. نخاع العظم، جرجير، بطاطس مهروسة.', price: '$120' },
           { name: 'قرنبيط محمّر', description: 'زبدة بنّية، كبر، برالين اللوز.', price: '$32' }
         ]
@@ -95,7 +95,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
         name: 'الحلويات',
         description: 'ختامٌ هادئ.',
         items: [
-          { name: 'كريم بروليه باللافندر', description: 'لافندر، فانيليا، قشرة الديميرارا.', price: '$18', badge: 'طبق التوقيع' },
+          { name: 'آيس كريم بالكراميل', description: 'فانيليا، كراميل مملّح.', price: '$18', badge: 'طبق التوقيع' },
           { name: 'سوفليه الشوكولاتة', description: 'شوكولاتة فالرونا، كريمة إنجليزية.', price: '$20' },
           { name: 'تارت التفّاح المقلوب', description: 'تفّاح، كراميل مملّح، كريمة فريش.', price: '$18' },
           { name: 'تشكيلة أجبان', description: 'ثلاثة أجبان حرفية، شهد العسل، خبز الجوز.', price: '$24' }

@@ -81,7 +81,7 @@ function Rule({ color, className = '' }: { color: string; className?: string }) 
 function Eyebrow({ text, colors, fonts }: { text: string; colors: ReturnType<typeof getStudioPreset>['colors']; fonts: { body: string } }) {
   return (
     <span
-      className="block text-[10px] font-semibold uppercase tracking-[0.25em]"
+      className="block text-[10px] font-semibold uppercase"
       style={{ color: colors.muted, fontFamily: fonts.body }}
     >
       {text}
@@ -105,11 +105,10 @@ function Stars({ value, color, size = 12 }: { value: number; color: string; size
 }
 
 // ─── صور (بلا نساء) ───────────────────────────────────────────────────────────
-// سياسة الصور: لا صور لنساء غير محجّبات. الواجهة = مشهد ورشة/حِرفة، وصورة
-// المؤسّس = رجل. يُرجى التحقّق البصري والاستبدال عند الحاجة.
+// سياسة الصور: لا صور لنساء غير محجّبات. الواجهة = مشهد ورشة/حِرفة بشفافية
+// 15%، للأجواء فقط. لا صورة للمؤسّس ولا لـ«طريقة العمل»: صورة من مكتبة عامة
+// هناك تُقرأ على أنها المؤسّس نفسه أو عمله.
 const HERO_IMG = 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=1400&q=85'
-const FOUNDER_IMG = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80'
-const PROCESS_IMG = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80'
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
 export default function StudioPreview({
@@ -139,13 +138,25 @@ export default function StudioPreview({
   const setView = (v: StudioView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
+  // Buttons outside the nav (CTAs, footer links) open a page and start it at
+  // the top. The template has no collection page, so "shop"/"visit" CTAs go to
+  // contact — the booking form and the owner's email live there.
+  const goTo = (v: StudioView) => {
+    setView(v)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+  }
   const rm = !!useReducedMotion()
+  // A page with nothing on it gets no link. The team page is only the team section.
+  const hasTeam = !!content.team?.members?.length
+  const hasPress = !!content.press?.items?.length
+  const navLinks = ([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][])
+    .filter(([, page]) => page !== 'team' || hasTeam)
 
   return (
     <div className={`relative min-h-screen ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
-      `}</style>
+      {/* Raw HTML, not a text child: React escapes the quotes in a text child,
+          which broke hydration and fetched the font URL as a relative path. */}
+      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');" }} />
 
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <header
@@ -158,22 +169,23 @@ export default function StudioPreview({
         }}
       >
         <button onClick={() => setView('home')}>
-          <span className="text-sm font-semibold tracking-[0.18em] uppercase" style={{ fontFamily: fonts.body, color: colors.text }}>
+          <span className="text-sm font-semibold uppercase" style={{ fontFamily: fonts.body, color: colors.text }}>
             {content.brand.name}
           </span>
           {content.brand.founded && (
-            <span className="ml-2 text-[10px] tracking-widest" style={{ color: colors.muted }}>تأسّس {content.brand.founded}</span>
+            <span className="ml-2 text-[10px]" style={{ color: colors.muted }}>تأسّس {content.brand.founded}</span>
           )}
         </button>
         <nav className="hidden items-center gap-10 md:flex">
-          {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
-            <button key={page} onClick={() => setView(page)} className="text-xs font-medium tracking-widest uppercase transition-opacity hover:opacity-60" style={{ color: view === page ? colors.accent : colors.text, fontFamily: fonts.body, opacity: view === page ? 1 : undefined }}>
+          {navLinks.map(([label, page]) => (
+            <button key={page} onClick={() => setView(page)} className="text-xs font-medium uppercase transition-opacity hover:opacity-60" style={{ color: view === page ? colors.accent : colors.text, fontFamily: fonts.body, opacity: view === page ? 1 : undefined }}>
               {label}
             </button>
           ))}
         </nav>
         <button
-          className="hidden rounded-full border px-6 py-2 text-xs font-semibold uppercase tracking-widest transition-all hover:opacity-80 md:block"
+          onClick={() => goTo('contact')}
+          className="hidden rounded-full border px-6 py-2 text-xs font-semibold uppercase transition-all hover:opacity-80 md:block"
           style={{ borderColor: colors.accent, color: colors.accent, fontFamily: fonts.body }}
         >
           {content.cta.cta_secondary}
@@ -198,11 +210,11 @@ export default function StudioPreview({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['تواصل', 'contact']] as [string, StudioView][]).map(([label, page]) => (
+            {navLinks.map(([label, page]) => (
               <button
                 key={page}
                 onClick={() => { setView(page); setNavOpen(false) }}
-                className="block w-full py-4 text-right text-sm uppercase tracking-widest transition"
+                className="block w-full py-4 text-right text-sm uppercase transition"
                 style={{ color: view === page ? colors.accent : colors.text, borderBottom: `1px solid ${colors.border}`, fontFamily: fonts.body }}
               >
                 {label}
@@ -227,13 +239,12 @@ export default function StudioPreview({
           </motion.div>
 
           <motion.h1
-            className="mt-6 leading-[0.9] tracking-tight"
+            className="mt-6 leading-[0.9]"
             style={{
               fontFamily: fonts.display,
               color: colors.text,
               fontWeight: 700,
-              fontSize: 'clamp(3.5rem, 10vw, 11rem)',
-              letterSpacing: '-0.02em'
+              fontSize: 'clamp(3.5rem, 10vw, 11rem)'
             }}
             {...fadeInAnim(rm,0.3)}
           >
@@ -249,13 +260,15 @@ export default function StudioPreview({
             </p>
             <div className="flex gap-4">
               <button
-                className="rounded-full px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
+                onClick={() => goTo('contact')}
+                className="rounded-full px-8 py-4 text-sm font-semibold transition-all hover:opacity-80"
                 style={{ background: colors.accent, color: colors.background, fontFamily: fonts.body }}
               >
                 {content.hero.cta_primary}
               </button>
               <button
-                className="rounded-full border px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:opacity-60"
+                onClick={() => goTo('about')}
+                className="rounded-full border px-8 py-4 text-sm font-semibold transition-all hover:opacity-60"
                 style={{ borderColor: colors.border, color: colors.text, fontFamily: fonts.body }}
               >
                 {content.hero.cta_secondary}
@@ -280,9 +293,11 @@ export default function StudioPreview({
               >
                 &ldquo;{content.mission.statement}&rdquo;
               </p>
-              <p className="mt-8 text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                {content.mission.elaboration}
-              </p>
+              {content.mission.elaboration ? (
+                <p className="mt-8 text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                  {content.mission.elaboration}
+                </p>
+              ) : null}
             </motion.div>
           </div>
           <Rule color={colors.border} className="mt-16" />
@@ -290,10 +305,12 @@ export default function StudioPreview({
       </section>}
 
       {/* ── FOUNDER LETTER ───────────────────────────────────────────────────── */}
-      {view === 'about' && content.founder_letter && (
+      {view === 'about' && !!content.founder_letter?.paragraphs?.length && (
         <section data-section="founder_letter" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
-            <div className="grid gap-16 md:grid-cols-[5fr_4fr] md:items-start">
+            {/* The letter stands alone: the wizard takes no founder photo, and a
+                stock face beside a signed letter would pass as the founder. */}
+            <div className="max-w-3xl">
               {/* Letter */}
               <motion.div {...revealAnim(rm,0)}>
                 <Eyebrow text={content.founder_letter.eyebrow} colors={colors} fonts={fonts} />
@@ -310,26 +327,18 @@ export default function StudioPreview({
                     </p>
                   ))}
                 </div>
-                <div className="mt-10">
-                  <p className="text-xl italic" style={{ fontFamily: fonts.heading, color: colors.text }}>
-                    — {content.founder_letter.signature}
-                  </p>
-                  <p className="mt-1 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                    {content.founder_letter.signature_role}
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Founder image */}
-              <motion.div
-                className="relative aspect-[3/4] overflow-hidden rounded-2xl"
-                {...revealAnim(rm,0.2)}
-              >
-                <img src={FOUNDER_IMG} alt="Founder" className="h-full w-full object-cover" style={{ filter: 'grayscale(30%)' }} />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: `linear-gradient(to top, ${colors.background}60 0%, transparent 50%)` }}
-                />
+                {content.founder_letter.signature ? (
+                  <div className="mt-10">
+                    <p className="text-xl italic" style={{ fontFamily: fonts.heading, color: colors.text }}>
+                      — {content.founder_letter.signature}
+                    </p>
+                    {content.founder_letter.signature_role ? (
+                      <p className="mt-1 text-xs uppercase" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                        {content.founder_letter.signature_role}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </motion.div>
             </div>
           </div>
@@ -337,7 +346,7 @@ export default function StudioPreview({
       )}
 
       {/* ── TIMELINE ─────────────────────────────────────────────────────────── */}
-      {view === 'about' && content.timeline && (
+      {view === 'about' && !!content.timeline?.events?.length && (
         <section data-section="timeline" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16 grid md:grid-cols-[1fr_2fr]" {...revealAnim(rm,0)}>
@@ -354,10 +363,10 @@ export default function StudioPreview({
             <div className="relative">
               {/* Vertical line */}
               <div
-                className="absolute left-0 top-0 hidden w-px md:block"
+                className="absolute start-0 top-0 hidden w-px md:block"
                 style={{ background: colors.border, height: '100%' }}
               />
-              <div className="space-y-0 md:ml-8">
+              <div className="space-y-0 md:ms-8">
                 {content.timeline.events.map((event, i) => (
                   <motion.div
                     key={i}
@@ -371,7 +380,7 @@ export default function StudioPreview({
                     {/* Year dot */}
                     <div className="hidden md:block">
                       <div
-                        className="absolute -left-[9px] top-[calc(2.5rem_+_2px)] h-4 w-4 rounded-full border-2"
+                        className="absolute -start-[40px] top-[calc(2.5rem_+_2px)] h-4 w-4 rounded-full border-2"
                         style={{ background: colors.background, borderColor: colors.accent }}
                       />
                       <span
@@ -388,9 +397,11 @@ export default function StudioPreview({
                       <h3 className="text-xl font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>
                         {event.title}
                       </h3>
-                      <p className="mt-2 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                        {event.description}
-                      </p>
+                      {event.description ? (
+                        <p className="mt-2 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                          {event.description}
+                        </p>
+                      ) : null}
                     </div>
                   </motion.div>
                 ))}
@@ -401,7 +412,7 @@ export default function StudioPreview({
       )}
 
       {/* ── VALUES ───────────────────────────────────────────────────────────── */}
-      {view === 'about' && content.values && (
+      {view === 'about' && !!content.values?.items?.length && (
         <section data-section="values" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -451,7 +462,7 @@ export default function StudioPreview({
       )}
 
       {/* ── PROCESS ──────────────────────────────────────────────────────────── */}
-      {(view === 'process' || view === 'home') && content.process && (
+      {(view === 'process' || view === 'home') && !!content.process?.steps?.length && (
         <section data-section="process" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <div className="mb-16 grid gap-12 md:grid-cols-2 md:items-end">
@@ -464,11 +475,13 @@ export default function StudioPreview({
                   {content.process.heading}
                 </h2>
               </motion.div>
-              <motion.div {...revealAnim(rm,0.15)}>
-                <p className="text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                  {content.process.body}
-                </p>
-              </motion.div>
+              {content.process.body ? (
+                <motion.div {...revealAnim(rm,0.15)}>
+                  <p className="text-base leading-[1.9]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                    {content.process.body}
+                  </p>
+                </motion.div>
+              ) : null}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -491,28 +504,20 @@ export default function StudioPreview({
                   <h3 className="mt-4 text-lg font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>
                     {step.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
-                    {step.description}
-                  </p>
+                  {step.description ? (
+                    <p className="mt-3 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                      {step.description}
+                    </p>
+                  ) : null}
                 </motion.div>
               ))}
             </div>
-
-            {/* Process image */}
-            <motion.div className="mt-12 overflow-hidden rounded-2xl" {...revealAnim(rm,0.2)}>
-              <img
-                src={PROCESS_IMG}
-                alt="Process"
-                className="h-64 w-full object-cover md:h-80"
-                style={{ filter: 'grayscale(20%)' }}
-              />
-            </motion.div>
           </div>
         </section>
       )}
 
       {/* ── TEAM ─────────────────────────────────────────────────────────────── */}
-      {view === 'team' && content.team && (
+      {view === 'team' && hasTeam && (
         <section data-section="team" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -549,7 +554,7 @@ export default function StudioPreview({
                   <h3 className="text-xl font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>
                     {member.name}
                   </h3>
-                  <p className="mt-1 text-xs font-medium uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+                  <p className="mt-1 text-xs font-medium uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
                     {member.role}
                   </p>
                   <p className="mt-4 text-sm leading-[1.85]" style={{ color: colors.muted, fontFamily: fonts.body }}>
@@ -563,7 +568,7 @@ export default function StudioPreview({
       )}
 
       {/* ── PRESS ────────────────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'about') && content.press && (
+      {(view === 'home' || view === 'about') && content.press?.items?.length > 0 && (
         <section data-section="press" className="px-8 py-28 md:px-12" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -588,17 +593,19 @@ export default function StudioPreview({
                   transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1], delay: i * 0.08 }}
                 >
                   <span
-                    className="text-sm font-bold uppercase tracking-widest"
+                    className="text-sm font-bold uppercase"
                     style={{ color: colors.text, fontFamily: fonts.body }}
                   >
                     {item.publication}
                   </span>
-                  <p
-                    className="text-xl font-medium italic leading-snug"
-                    style={{ fontFamily: fonts.heading, color: colors.text }}
-                  >
-                    &ldquo;{item.quote}&rdquo;
-                  </p>
+                  {item.quote ? (
+                    <p
+                      className="text-xl font-medium italic leading-snug"
+                      style={{ fontFamily: fonts.heading, color: colors.text }}
+                    >
+                      &ldquo;{item.quote}&rdquo;
+                    </p>
+                  ) : <span />}
                   {item.year && (
                     <span className="text-xs self-start" style={{ color: colors.muted, fontFamily: fonts.body }}>
                       {item.year}
@@ -612,7 +619,7 @@ export default function StudioPreview({
       )}
 
       {/* ── COMMUNITY STATS ──────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'contact') && content.community && (
+      {(view === 'home' || view === 'contact') && !!content.community?.stats?.length && (
         <section data-section="community" className="px-8 py-28 md:px-12">
           <div className="mx-auto max-w-5xl">
             <motion.div className="mb-16" {...revealAnim(rm,0)}>
@@ -645,7 +652,7 @@ export default function StudioPreview({
                   >
                     {stat.value}
                   </div>
-                  <div className="mt-2 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                  <div className="mt-2 text-xs uppercase" style={{ color: colors.muted, fontFamily: fonts.body }}>
                     {stat.label}
                   </div>
                 </motion.div>
@@ -678,7 +685,7 @@ export default function StudioPreview({
                     </div>
                     <div className="mt-4"><Stars value={t.average_rating!} color={colors.accent} size={14} /></div>
                     {t.review_count && (
-                      <p className="mt-3 text-xs uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>{t.review_count}</p>
+                      <p className="mt-3 text-xs uppercase" style={{ color: colors.muted, fontFamily: fonts.body }}>{t.review_count}</p>
                     )}
                   </div>
                 )}
@@ -702,7 +709,7 @@ export default function StudioPreview({
                     <figcaption className="mt-8 pt-5" style={{ borderTop: `1px solid ${colors.border}` }}>
                       <span className="block text-lg font-semibold" style={{ fontFamily: fonts.heading, color: colors.text }}>{it.name}</span>
                       {it.detail && (
-                        <span className="mt-1 block text-[11px] uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>{it.detail}</span>
+                        <span className="mt-1 block text-[11px] uppercase" style={{ color: colors.muted, fontFamily: fonts.body }}>{it.detail}</span>
                       )}
                     </figcaption>
                   </motion.figure>
@@ -723,32 +730,35 @@ export default function StudioPreview({
           <motion.div className="mx-auto max-w-3xl text-center" {...revealAnim(rm,0)}>
             <Eyebrow text={content.cta.eyebrow} colors={{ ...colors, muted: colors.accent === '#0a0a0a' ? colors.muted : `${colors.background}99` }} fonts={fonts} />
             <h2
-              className="mt-8 leading-[0.95] tracking-tight"
+              className="mt-8 leading-[0.95]"
               style={{
                 fontFamily: fonts.display,
                 color: colors.accent === '#c9a84c' ? '#1a1008' : colors.text,
                 fontWeight: 700,
-                fontSize: 'clamp(2.5rem, 7vw, 7rem)',
-                letterSpacing: '-0.02em'
+                fontSize: 'clamp(2.5rem, 7vw, 7rem)'
               }}
             >
               <ML text={content.cta.heading} />
             </h2>
-            <p
-              className="mx-auto mt-8 max-w-md text-base leading-relaxed"
-              style={{ color: colors.muted, fontFamily: fonts.body }}
-            >
-              {content.cta.subheading}
-            </p>
+            {content.cta.subheading ? (
+              <p
+                className="mx-auto mt-8 max-w-md text-base leading-relaxed"
+                style={{ color: colors.muted, fontFamily: fonts.body }}
+              >
+                {content.cta.subheading}
+              </p>
+            ) : null}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
               <button
-                className="rounded-full px-10 py-5 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
+                onClick={() => goTo('contact')}
+                className="rounded-full px-10 py-5 text-sm font-semibold transition-all hover:opacity-80"
                 style={{ background: colors.text, color: colors.background, fontFamily: fonts.body }}
               >
                 {content.cta.cta_primary}
               </button>
               <button
-                className="rounded-full border px-10 py-5 text-sm font-semibold tracking-wide transition-all hover:opacity-60"
+                onClick={() => goTo('contact')}
+                className="rounded-full border px-10 py-5 text-sm font-semibold transition-all hover:opacity-60"
                 style={{ borderColor: colors.border, color: colors.text, fontFamily: fonts.body }}
               >
                 {content.cta.cta_secondary}
@@ -783,7 +793,7 @@ export default function StudioPreview({
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
-              <span className="block text-sm font-semibold tracking-[0.18em] uppercase" style={{ fontFamily: fonts.body, color: colors.text }}>
+              <span className="block text-sm font-semibold uppercase" style={{ fontFamily: fonts.body, color: colors.text }}>
                 {content.brand.name}
               </span>
               <span className="mt-1 block text-xs italic" style={{ fontFamily: fonts.heading, color: colors.muted }}>
@@ -791,8 +801,10 @@ export default function StudioPreview({
               </span>
             </div>
             <div className="flex flex-wrap gap-8">
-              {['قصتنا', 'آلية العمل', 'الفريق', 'الصحافة', 'تواصل'].map((link) => (
-                <button key={link} className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+              {([['قصتنا', 'about'], ['آلية العمل', 'process'], ['الفريق', 'team'], ['الصحافة', 'about'], ['تواصل', 'contact']] as [string, StudioView][])
+                .filter(([link]) => (link !== 'الفريق' || hasTeam) && (link !== 'الصحافة' || hasPress))
+                .map(([link, page]) => (
+                <button key={link} onClick={() => goTo(page)} className="text-xs uppercase transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {link}
                 </button>
               ))}
@@ -801,9 +813,11 @@ export default function StudioPreview({
           <Rule color={colors.border} className="my-8" />
           <div className="flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
             <p className="text-xs" style={{ color: colors.muted, fontFamily: fonts.body }}>{content.footer.legal}</p>
-            <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
-              {content.footer.email}
-            </a>
+            {content.footer.email ? (
+              <a href={`mailto:${content.footer.email}`} className="inline-flex min-h-[44px] items-center text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                {content.footer.email}
+              </a>
+            ) : null}
           </div>
         </div>
       </footer>

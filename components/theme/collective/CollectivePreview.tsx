@@ -171,7 +171,7 @@ function ProductCard({ product, index, colors, fonts }: {
         {/* Badge */}
         {product.badge && (
           <div
-            className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-widest uppercase"
+            className="absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
             style={{ background: colors.accent, color: colors.textInverse, fontFamily: fonts.body }}
           >
             {product.badge}
@@ -181,7 +181,7 @@ function ProductCard({ product, index, colors, fonts }: {
         <AnimatePresence>
           {hovered && (
             <motion.button
-              className="absolute inset-x-3 bottom-3 rounded-xl py-2.5 text-xs font-semibold tracking-wider uppercase"
+              className="absolute inset-x-3 bottom-3 rounded-xl py-2.5 text-xs font-semibold uppercase"
               style={{ background: colors.primary, color: colors.textInverse, fontFamily: fonts.body }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -196,7 +196,7 @@ function ProductCard({ product, index, colors, fonts }: {
       {/* Info */}
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         {product.category && (
-          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: colors.muted, fontFamily: fonts.body }}>
+          <span className="text-[10px] font-semibold uppercase" style={{ color: colors.muted, fontFamily: fonts.body }}>
             {product.category}
           </span>
         )}
@@ -205,7 +205,7 @@ function ProductCard({ product, index, colors, fonts }: {
         </p>
         <div className="mt-auto flex items-center justify-between pt-1">
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{product.price}</span>
+            {product.price ? <span className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{product.price}</span> : null}
             {product.original_price && (
               <span className="text-xs line-through" style={{ color: colors.muted }}>{product.original_price}</span>
             )}
@@ -246,7 +246,7 @@ function CollectionCard({ collection, index, colors, fonts }: {
       <div className="absolute inset-0 flex flex-col justify-end p-6">
         {collection.tag && (
           <span
-            className="mb-2 inline-block self-start rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-widest"
+            className="mb-2 inline-block self-start rounded-full px-3 py-1 text-[10px] font-semibold uppercase"
             style={{ background: colors.accentMuted, color: colors.accent, border: `1px solid ${colors.accent}40` }}
           >
             {collection.tag}
@@ -292,7 +292,7 @@ function TestimonialCard({ item, index, colors, fonts }: {
       </p>
       {item.product && (
         <div
-          className="inline-flex self-start rounded-full px-3 py-1 text-[10px] font-medium tracking-wide"
+          className="inline-flex self-start rounded-full px-3 py-1 text-[10px] font-medium"
           style={{ background: colors.accentMuted, color: colors.accent }}
         >
           عن: {item.product}
@@ -372,9 +372,10 @@ export default function CollectivePreview({ content, presetId, className = '' }:
 
   return (
     <div className={`relative min-h-screen ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');
-      `}</style>
+      {/* As raw HTML: a text child gets its quotes escaped, so the server and
+          client markup differed (a hydration error) and the font URL was
+          fetched as a relative path. */}
+      <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap');" }} />
 
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <header
@@ -386,7 +387,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           borderBottom: `1px solid ${colors.borderGlass}`
         }}
       >
-        <button onClick={() => setView('home')} className="text-xl font-bold tracking-tight" style={{ fontFamily: fonts.heading, color: colors.text }}>
+        <button onClick={() => setView('home')} className="text-xl font-bold" style={{ fontFamily: fonts.heading, color: colors.text }}>
           {content.brand.name}
         </button>
         <nav className="hidden items-center gap-8 md:flex">
@@ -441,7 +442,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {view === 'home' && <AuroraBackground colors={colors} className="relative px-6 pb-24 pt-24 md:px-10 md:pt-32">
         <div className="mx-auto max-w-5xl text-center">
           <motion.span
-            className="mb-6 inline-block rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-widest"
+            className="mb-6 inline-block rounded-full border px-4 py-1.5 text-xs font-semibold uppercase"
             style={{ borderColor: colors.borderGlass, background: colors.surfaceGlass, color: colors.muted, backdropFilter: 'blur(8px)', fontFamily: fonts.body }}
             {...fadeUpAnim(rm,0.1)}
           >
@@ -449,7 +450,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           </motion.span>
 
           <motion.h1
-            className="mx-auto mb-6 max-w-3xl text-5xl font-bold leading-[1.1] tracking-tight md:text-7xl"
+            className="mx-auto mb-6 max-w-3xl text-5xl font-bold leading-[1.1] md:text-7xl"
             style={{ fontFamily: fonts.heading, color: colors.text }}
             {...fadeUpAnim(rm,0.2)}
           >
@@ -466,13 +467,13 @@ export default function CollectivePreview({ content, presetId, className = '' }:
 
           <motion.div className="flex flex-wrap items-center justify-center gap-4" {...fadeUpAnim(rm,0.4)}>
             <button
-              className="rounded-2xl px-8 py-4 text-sm font-semibold tracking-wide shadow-lg transition-all hover:-translate-y-0.5"
+              className="rounded-2xl px-8 py-4 text-sm font-semibold shadow-lg transition-all hover:-translate-y-0.5"
               style={{ background: colors.primary, color: colors.textInverse, boxShadow: `0 8px 32px -8px ${colors.glowPrimary}`, fontFamily: fonts.body }}
             >
               {content.hero.cta_primary}
             </button>
             <button
-              className="rounded-2xl border px-8 py-4 text-sm font-semibold tracking-wide transition-all hover:opacity-80"
+              className="rounded-2xl border px-8 py-4 text-sm font-semibold transition-all hover:opacity-80"
               style={{ borderColor: colors.borderGlass, color: colors.text, background: colors.surfaceGlass, backdropFilter: 'blur(8px)', fontFamily: fonts.body }}
             >
               {content.hero.cta_secondary}
@@ -487,7 +488,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
         </div>
 
         {/* Hero stats strip */}
-        {content.brand_promise?.stats && (
+        {!!content.brand_promise?.stats?.length && (
           <motion.div
             className="mx-auto mt-20 grid max-w-3xl grid-cols-2 gap-4 md:grid-cols-4"
             initial={rm ? {} : { opacity: 0, y: 24 }}
@@ -514,7 +515,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
         <section className="px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
             <motion.div className="mb-14 max-w-xl" {...revealAnim(rm,0)}>
-              <span className="mb-3 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+              <span className="mb-3 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
                 {content.collections.eyebrow}
               </span>
               <h2 className="text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
@@ -547,12 +548,12 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── NEW ARRIVALS ──────────────────────────────────────────────────────── */}
-      {(view === 'collections' || view === 'arrivals') && content.new_arrivals && (
+      {(view === 'collections' || view === 'arrivals') && !!content.new_arrivals?.products?.length && (
         <section className="px-6 py-24 md:px-10" style={{ background: colors.surface }}>
           <div className="mx-auto max-w-6xl">
             <motion.div className="mb-12 flex items-end justify-between" {...revealAnim(rm,0)}>
               <div>
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+                <span className="mb-2 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
                   {content.new_arrivals.eyebrow}
                 </span>
                 <h2 className="text-4xl font-bold md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
@@ -581,7 +582,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-16 md:grid-cols-2 md:items-center">
               <motion.div {...revealAnim(rm,0)}>
-                <span className="mb-4 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+                <span className="mb-4 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
                   {content.brand_promise.eyebrow}
                 </span>
                 <h2 className="text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
@@ -592,6 +593,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 <p className="mb-8 text-lg leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>
                   {content.brand_promise.body}
                 </p>
+                {!!content.brand_promise.stats?.length && (
                 <div className="grid grid-cols-2 gap-4">
                   {content.brand_promise.stats.map((stat, i) => (
                     <GlassCard key={i} colors={colors} className="p-5" hover={false}>
@@ -600,6 +602,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                     </GlassCard>
                   ))}
                 </div>
+                )}
               </motion.div>
             </div>
           </div>
@@ -607,11 +610,11 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── BESTSELLERS ────────────────────────────────────────────────────────── */}
-      {(view === 'home' || view === 'arrivals') && content.bestsellers && (
+      {(view === 'home' || view === 'arrivals') && !!content.bestsellers?.products?.length && (
         <section className="px-6 py-24 md:px-10">
           <div className="mx-auto max-w-6xl">
             <motion.div className="mb-12 max-w-xl" {...revealAnim(rm,0)}>
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+              <span className="mb-2 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
                 {content.bestsellers.eyebrow}
               </span>
               <h2 className="text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
@@ -632,7 +635,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       )}
 
       {/* ── PERKS BAR ────────────────────────────────────────────────────────── */}
-      {view === 'home' && content.perks && (
+      {view === 'home' && !!content.perks?.items?.length && (
         <div style={{ background: colors.surfaceAlt, borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
           <div className="mx-auto grid max-w-6xl grid-cols-2 px-6 py-10 md:grid-cols-4 md:px-10">
             {content.perks.items.map((perk, i) => (
@@ -647,7 +650,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
                 <span><Icon name={perk.icon} size={24} animation="pop" /></span>
                 <div>
                   <p className="text-sm font-semibold" style={{ color: colors.text, fontFamily: fonts.body }}>{perk.title}</p>
-                  <p className="mt-1 text-xs leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{perk.description}</p>
+                  {perk.description ? <p className="mt-1 text-xs leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>{perk.description}</p> : null}
                 </div>
               </motion.div>
             ))}
@@ -670,7 +673,7 @@ export default function CollectivePreview({ content, presetId, className = '' }:
             <div className="mx-auto max-w-6xl">
               <motion.div className="mb-12 max-w-xl" {...revealAnim(rm,0)}>
                 {t.eyebrow && (
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>{t.eyebrow}</span>
+                  <span className="mb-2 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>{t.eyebrow}</span>
                 )}
                 <h2 className="text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
                   <Headline text={t.heading} />
@@ -719,15 +722,17 @@ export default function CollectivePreview({ content, presetId, className = '' }:
       {view === 'home' && content.newsletter && (
         <AuroraBackground colors={colors} className="px-6 py-28 md:px-10">
           <motion.div className="mx-auto max-w-xl text-center" {...revealAnim(rm,0)}>
-            <span className="mb-4 block text-xs font-semibold uppercase tracking-widest" style={{ color: colors.accent, fontFamily: fonts.body }}>
+            <span className="mb-4 block text-xs font-semibold uppercase" style={{ color: colors.accent, fontFamily: fonts.body }}>
               {content.newsletter.eyebrow}
             </span>
             <h2 className="mb-4 text-4xl font-bold leading-tight md:text-5xl" style={{ fontFamily: fonts.heading, color: colors.text }}>
               <Headline text={content.newsletter.heading} />
             </h2>
+            {content.newsletter.subheading ? (
             <p className="mb-8 leading-relaxed" style={{ color: colors.muted, fontFamily: fonts.body }}>
               {content.newsletter.subheading}
             </p>
+            ) : null}
             <GlassCard colors={colors} className="flex overflow-hidden rounded-2xl p-1.5" hover={false}>
               <input
                 type="email"
@@ -767,9 +772,11 @@ export default function CollectivePreview({ content, presetId, className = '' }:
           </div>
           <div className="mt-8 flex flex-col items-start justify-between gap-2 border-t pt-8 md:flex-row md:items-center" style={{ borderColor: colors.border }}>
             <p className="text-xs" style={{ color: colors.muted, fontFamily: fonts.body }}>{content.footer.legal}</p>
-            <a href={`mailto:${content.footer.email}`} className="text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
-              {content.footer.email}
-            </a>
+            {content.footer.email ? (
+              <a href={`mailto:${content.footer.email}`} className="inline-flex min-h-[44px] items-center text-xs transition-opacity hover:opacity-60" style={{ color: colors.muted, fontFamily: fonts.body }}>
+                {content.footer.email}
+              </a>
+            ) : null}
           </div>
         </div>
       </footer>

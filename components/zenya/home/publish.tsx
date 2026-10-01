@@ -500,7 +500,7 @@ function LiveSite() {
           pictures pulled down for section two's upload slots, where they are
           only ever shown as "some photographs" — they do NOT correspond to
           this template's signature dishes. Checked: dish-1 is a pizza and
-          signature_dishes[0] is hand-dived scallops. Putting a name under a
+          signature_dishes[0] is grilled salmon. Putting a name under a
           picture of something else is inventing, in the one way this page
           never does, so the list is typeset instead — real names, real
           descriptions, real prices, correctly paired. */}

@@ -18,7 +18,7 @@ import { createClient } from "@/utils/supabase/client"
 import { RESTAURANT_PRESETS } from "@/utils/restaurant/presets"
 import type { RestaurantInput, RestaurantTypeId } from "@/utils/restaurant/input"
 import ImageUploadField from "@/components/ImageUploadField"
-import MenuImageAnalyzer, { type ExtractedCategory } from "@/components/restaurant/MenuImageAnalyzer"
+import MenuImageAnalyzer, { type ExtractedCategory, type MenuApplyMode } from "@/components/restaurant/MenuImageAnalyzer"
 import DevFillButton from "@/components/DevFillButton"
 import ExampleFillButton from "@/components/ExampleFillButton"
 import GenerationOverlay from "@/components/GenerationOverlay"
@@ -286,10 +286,11 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
   }
 
   /**
-   * Categories read from a menu photo. An untouched default menu is replaced;
-   * otherwise they are appended, so hand-typed work is never wiped.
+   * Categories read from a menu photo. An untouched default menu is replaced.
+   * When the form already holds dishes, the analyzer asks the owner first and
+   * passes their answer as `mode`, so a menu is never wiped or merged unasked.
    */
-  function applyExtractedMenu(extracted: ExtractedCategory[]): { categories: number; items: number } {
+  function applyExtractedMenu(extracted: ExtractedCategory[], mode?: MenuApplyMode): { categories: number; items: number } {
     const mapped = extracted
       .map((c) => ({
         id: newId(),
@@ -312,7 +313,8 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
       const isDefaultEmpty = prev.categories.every(
         (c) => c.name.trim() === "" || (c.name.trim() === "القائمة" && c.items.every((i) => i.name.trim() === "" && i.price.trim() === ""))
       )
-      return { ...prev, categories: isDefaultEmpty ? mapped : [...prev.categories, ...mapped] }
+      const replace = isDefaultEmpty || mode === "replace"
+      return { ...prev, categories: replace ? mapped : [...prev.categories, ...mapped] }
     })
     return { categories: mapped.length, items: mapped.reduce((n, c) => n + c.items.length, 0) }
   }
@@ -589,7 +591,12 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
         <Grid>
           <Block>
             <div className="zb-analyzer">
-              <MenuImageAnalyzer cuisine={form.cuisine} demo={demo} onExtract={applyExtractedMenu} />
+              <MenuImageAnalyzer
+                cuisine={form.cuisine}
+                demo={demo}
+                existingItems={form.categories.reduce((n, c) => n + c.items.filter((i) => i.name.trim()).length, 0)}
+                onExtract={applyExtractedMenu}
+              />
               {demo ? (
                 <p className="zb-note">
                   على هذه الصفحة العامة يقرأ التحليل قائمة نموذجية جاهزة، لا الصورة التي ترفعها. داخل المنشئ الحقيقي يُقرأ ملفك أنت.
@@ -866,7 +873,6 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
             onConfirm={() => { setAcked(true); setDisclaimerOpen(false); void handleGenerate() }}
             items={[
               ...(form.chef_name.trim() && !form.chef_bio_brief.trim() ? ["people" as const] : []),
-              ...(form.press_outlets.split(/[\n,]/).filter((s) => s.trim().length >= 2).length >= 4 ? [] : ["certs" as const]),
               ...(form.categories.some((c) => c.items.some((i) => i.name.trim() && !i.description.trim())) ? ["text" as const] : []),
             ]}
           />

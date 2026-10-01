@@ -45,7 +45,7 @@ export default function BookingSection({
         {eyebrow && (
           <p
             className="mb-3 text-[0.7rem] font-bold uppercase"
-            style={{ color: palette.accent, letterSpacing: '0.3em', fontFamily: palette.bodyFont }}
+            style={{ color: palette.accent, fontFamily: palette.bodyFont }}
           >
             {eyebrow}
           </p>

@@ -12,6 +12,7 @@ import ExampleFillButton from '@/components/ExampleFillButton'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
+import { generateErrorText } from '@/lib/generate-error'
 import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
@@ -287,7 +288,7 @@ export default function ServicesWizardPage() {
         body: JSON.stringify(payload),
       })
       const generateJson = await generateRes.json()
-      if (!generateRes.ok || !generateJson?.content) throw new Error(generateJson?.error || 'فشل التوليد')
+      if (!generateRes.ok || !generateJson?.content) throw new Error(generateErrorText(generateJson))
 
       const preset = SERVICE_PRESETS.find((p) => p.id === form.style_preset) || SERVICE_PRESETS[0]
       const saveRes = await fetch('/api/themes', {

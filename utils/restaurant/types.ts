@@ -37,7 +37,8 @@ export type RestaurantSignatureDish = {
   name: string
   description: string
   price: string
-  image: string
+  /** Absent when the owner uploaded none and no stock photo shows this dish. */
+  image?: string
 }
 
 export type RestaurantTestimonial = {

@@ -4,6 +4,7 @@ import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unle
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
+import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
 import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
@@ -39,29 +40,25 @@ Tagline: ${input.brand.tagline}
 Category: ${input.brand.category}
 Style direction: ${input.style_direction}
 Target customer: ${input.target_customer}
-Collection: ${input.collection_name || 'Current collection'}
-Season: ${input.collection_season || 'SS25'}
-Sustainability focus: ${input.sustainability_focus ? 'Yes' : 'No'}
+Collection name: ${input.collection_name || 'none given — never name a collection'}
+Season: ${input.collection_season || 'none given — never name a season or a year'}
+Sustainability focus: ${input.sustainability_focus ? 'Yes' : 'No — make no sustainability, ethical or material claim'}
 Press features: ${input.press_features || 'Not specified'}
 ${ratingBrief(input.social_proof?.review_rating, input.social_proof?.review_count)}
 
 Brand story:
-${input.brand_story || 'A considered contemporary fashion brand.'}
+${input.brand_story || 'Not given.'}
 
 Products:
 ${productsText}
 
 WRITING DIRECTION
-You are writing premium copy for a high-end fashion brand website. The tone is editorial, minimal, and confident — like Jacquemus, The Row, or Reformation. Use short, evocative sentences. Avoid corporate speak, avoid overly enthusiastic exclamation marks. Fashion copy should feel like a magazine, not a billboard.
+You are writing premium copy for a high-end fashion brand website. The tone is editorial, minimal, and confident, like a fashion magazine. Use short, evocative sentences. Avoid corporate speak, avoid overly enthusiastic exclamation marks. Fashion copy should feel like a magazine, not a billboard.
 
 Hard rules:
 - Headlines: use \\n to break into 2–3 short poetic lines (3–6 words per line)
-- Subheadlines: 1–2 short sentences, evocative and specific
-- Product descriptions: keep names exactly as provided
-- Look titles: "Look 01" through "Look 06" format — keep the numbering
-- Look subtitles: use or improve provided product names
+- Subheadlines: 1–2 short sentences, evocative
 - Newsletter: editorial, intimate tone — like a letter from the brand
-- Press: keep exactly as provided (these are real publications)
 - Avoid: "elevate", "journey", "game-changer", "curated", "bespoke"
 
 OUTPUT
@@ -69,37 +66,28 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
 
 {
   "hero": {
-    "eyebrow": "Season · Year (e.g. Spring · Summer 2025)",
     "headline": "Poetic headline with \\n breaks",
     "subheadline": "1–2 evocative sentences",
     "cta_primary": "Shop the collection",
-    "cta_secondary": "View lookbook",
-    "badge": "Short urgency/season badge"
+    "cta_secondary": "View lookbook"
   },
   "drop_banner": {
-    "label": "Emoji + short label (e.g. 🖤 New drop)",
-    "text": "Short announcement with shipping/offer info",
+    "label": "Short label, no emoji",
+    "text": "One short line saying the collection is available now",
     "cta": "Shop now →"
   },
   "lookbook": {
-    "eyebrow": "Short season eyebrow",
-    "heading": "Collection name with \\n",
-    "subheading": "1–2 evocative sentences",
-    "looks": [
-      { "title": "Look 01", "subtitle": "Product name", "tag": "Shop this look or New arrival or Almost gone" }
-    ]
+    "heading": "Short heading with \\n",
+    "subheading": "1–2 evocative sentences"
   },
   "bestsellers": {
     "eyebrow": "Short section eyebrow",
-    "heading": "Short evocative heading with \\n",
-    "products": [
-      { "name": "Keep exact name", "price": "Keep exact price", "original_price": "Keep if provided", "badge": "Keep or improve badge", "category": "Keep or infer category" }
-    ]
+    "heading": "Short evocative heading with \\n"
   },
   "brand_story": {
     "eyebrow": "Our story",
     "heading": "Poetic heading with \\n (3 lines)",
-    "body": "3–4 sentences, brand voice, specific and grounded",
+    "body": "2–4 sentences, brand voice",
     "values": [
       { "icon": "sparkle", "title": "Short title", "text": "1 sentence" }
     ]
@@ -112,14 +100,10 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
     "eyebrow": "Short eyebrow",
     "heading": "Short evocative heading with \\n",
     "subheading": "1–2 sentences, brand voice",
-    "placeholder": "your@email.com",
-    "cta": "Join the list",
-    "note": "Short reassurance line"
+    "note": "Short line, or \\"\\""
   },
   "footer": {
-    "tagline": "Keep brand tagline",
-    "legal": "© 2025 ${input.brand.name}. جميع الحقوق محفوظة.",
-    "email": "hello@${input.brand.name.toLowerCase().replace(/\\s+/g, '')}.co"
+    "tagline": "Keep brand tagline"
   },
   "seo": {
     "title": "60 chars max",
@@ -128,19 +112,28 @@ Return ONLY valid JSON, no markdown, no prose, matching this exact shape:
 }
 
 Requirements:
-- lookbook.looks: exactly 6 looks with Look 01–06 numbering
-- bestsellers.products: include all ${input.products.length} provided products
-- brand_story.values: exactly 3 values
+- lookbook.heading: a short poetic line. It is never a collection name — the site shows the owner's own collection name itself.
+- brand_story.body: retell only what the brand story above says. If it is "Not given.", write 2 sentences from the style direction and target customer only.
+- brand_story.values: 0–3 items, each restating something the brief says (style direction, target customer, brand story${input.sustainability_focus ? ', the sustainability focus' : ''}). Write fewer rather than invent one. Return [] when there is nothing to restate.
+- bestsellers: do not call the products bestsellers, favourites, sold out, limited or reordered — the brief says nothing about sales.
 ${NO_REVIEWS_RULE}
 - newsletter.heading: use \\n for 2-line break
+- newsletter.note: no sending frequency, discount, gift, early access or unsubscribe promise. "" is fine.
+- Never state, in any field, a price, currency, discount, sale, shipping, delivery, returns or exchange policy, season code or year (such as "SS25" or "2025"), collection name, number of pieces, stock level, founding year, founder or designer name, city, workshop, factory, material, fabric, certification, production method, stockist, another brand or publication, or an email address — unless the brief above gives it.
 
 ${ICON_VOCAB_PROMPT}
 Every "icon" field (brand_story.values) MUST be one name from the list above — never an emoji.`
 }
 
+function str(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
   const mock = LOOKBOOK_MOCK_CONTENT
   const owner = { rating: input.social_proof?.review_rating, count: input.social_proof?.review_count }
+  const season = input.collection_season?.trim() || ''
+  const collection = input.collection_name?.trim() || ''
   // Reviews are only ever the owner's own. With none, the section is not drawn.
   const testimonials = cleanOwnerReviews(input.social_proof?.reviews).map((r) => ({
     author: r.name,
@@ -151,6 +144,34 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
     when: r.when
   }))
 
+  // Products, prices and categories are the owner's. The AI never supplies a
+  // price, a sale price or a badge.
+  const products = input.products.map((p) => ({
+    name: p.name,
+    price: p.price?.trim() || '',
+    category: p.category?.trim() || undefined
+  }))
+
+  // Six looks, each one of the owner's products. With fewer than six products
+  // they repeat, so the grid keeps its shape without an invented product name.
+  const looks = products.length
+    ? Array.from({ length: 6 }, (_, i) => ({
+        title: `إطلالة 0${i + 1}`,
+        subtitle: products[i % products.length].name
+      }))
+    : []
+
+  const values = Array.isArray(ai.brand_story?.values)
+    ? ai.brand_story.values
+        .slice(0, 3)
+        .map((v: any) => ({ icon: str(v?.icon) || 'sparkle', title: str(v?.title), text: str(v?.text) }))
+        .filter((v: { title: string; text: string }) => v.title && v.text)
+    : []
+
+  const bannerFallback = collection ? `تشكيلة «${collection}» متوفّرة الآن.` : 'التشكيلة متوفّرة الآن في المتجر.'
+  const seoFallback = `${input.brand.name} — ${input.brand.category}`
+  const seoDescFallback = `${input.brand.name}: ${input.brand.tagline}`
+
   return {
     brand: {
       name: input.brand.name,
@@ -158,40 +179,41 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
       category: input.brand.category
     },
     hero: {
-      eyebrow: unlessRatingClaim(ai.hero?.eyebrow || mock.hero.eyebrow, mock.hero.eyebrow, owner),
+      // Season and collection are the owner's facts; the AI does not write them.
+      eyebrow: [season, input.brand.category].filter(Boolean).join(' · '),
       headline: ai.hero?.headline || mock.hero.headline,
-      subheadline: ai.hero?.subheadline || mock.hero.subheadline,
+      subheadline: ai.hero?.subheadline || input.brand.tagline,
       cta_primary: ai.hero?.cta_primary || mock.hero.cta_primary,
       cta_secondary: ai.hero?.cta_secondary || mock.hero.cta_secondary,
-      badge: unlessRatingClaim(ai.hero?.badge || mock.hero.badge, mock.hero.badge, owner)
+      badge: collection || undefined
     },
     drop_banner: {
       label: ai.drop_banner?.label || mock.drop_banner.label,
-      text: unlessRatingClaim(ai.drop_banner?.text || mock.drop_banner.text, mock.drop_banner.text, owner),
+      text: unlessRatingClaim(ai.drop_banner?.text || bannerFallback, bannerFallback, owner),
       cta: ai.drop_banner?.cta || mock.drop_banner.cta
     },
     lookbook: {
-      eyebrow: ai.lookbook?.eyebrow || mock.lookbook.eyebrow,
-      heading: ai.lookbook?.heading || mock.lookbook.heading,
-      subheading: ai.lookbook?.subheading || mock.lookbook.subheading,
-      looks: Array.isArray(ai.lookbook?.looks) ? ai.lookbook.looks : mock.lookbook.looks
+      eyebrow: season ? `لوك بوك · ${season}` : 'لوك بوك',
+      heading: collection || ai.lookbook?.heading || 'التشكيلة.',
+      subheading: ai.lookbook?.subheading || '',
+      looks
     },
     bestsellers: {
-      eyebrow: ai.bestsellers?.eyebrow || mock.bestsellers.eyebrow,
-      heading: ai.bestsellers?.heading || mock.bestsellers.heading,
-      products: Array.isArray(ai.bestsellers?.products) ? ai.bestsellers.products : mock.bestsellers.products
+      eyebrow: ai.bestsellers?.eyebrow || 'المتجر',
+      heading: ai.bestsellers?.heading || 'قطع التشكيلة.',
+      products
     },
     brand_story: {
       eyebrow: ai.brand_story?.eyebrow || mock.brand_story.eyebrow,
-      heading: ai.brand_story?.heading || mock.brand_story.heading,
-      body: ai.brand_story?.body || mock.brand_story.body,
-      values: Array.isArray(ai.brand_story?.values) ? ai.brand_story.values : mock.brand_story.values
+      heading: ai.brand_story?.heading || 'من نحن.',
+      body: ai.brand_story?.body || input.brand_story || '',
+      values
     },
     press: {
       heading: mock.press.heading,
       publications: input.press_features
         ? input.press_features.split(/[,\n]/).map((s) => s.trim()).filter(Boolean)
-        : mock.press.publications
+        : []
     },
     testimonials: {
       eyebrow: ai.testimonials?.eyebrow || mock.testimonials.eyebrow,
@@ -203,21 +225,28 @@ function mergeIntoContent(input: LookbookInput, ai: any): LookbookContent {
     newsletter: {
       eyebrow: ai.newsletter?.eyebrow || mock.newsletter.eyebrow,
       heading: ai.newsletter?.heading || mock.newsletter.heading,
-      subheading: ai.newsletter?.subheading || mock.newsletter.subheading,
+      subheading: ai.newsletter?.subheading || 'اتركوا بريدكم لتصلكم أخبار التشكيلات الجديدة.',
       placeholder: mock.newsletter.placeholder,
       cta: mock.newsletter.cta,
-      note: ai.newsletter?.note || mock.newsletter.note
+      note: ai.newsletter?.note || ''
     },
     footer: {
       tagline: ai.footer?.tagline || input.brand.tagline,
-      legal: ai.footer?.legal || `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
-      email: ai.footer?.email || `hello@${input.brand.name.toLowerCase().replace(/\s+/g, '')}.co`
+      // The year is today's and the brief holds no email, so none is made up.
+      legal: `© ${new Date().getFullYear()} ${input.brand.name}. جميع الحقوق محفوظة.`,
+      email: ''
     },
     seo: {
-      title: ai.seo?.title || mock.seo.title,
-      description: unlessRatingClaim(ai.seo?.description || mock.seo.description, mock.seo.description, owner)
+      title: ai.seo?.title || seoFallback,
+      description: unlessRatingClaim(ai.seo?.description || seoDescFallback, seoDescFallback, owner)
     },
-    links: { reviews_url: input.social_proof?.reviews_url || undefined }
+    links: { reviews_url: input.social_proof?.reviews_url || undefined },
+    // Only what the owner uploaded. No uploads, no photos: the renderer draws
+    // the product and look tiles without one rather than borrow stock.
+    images: {
+      hero: input.visuals?.hero_image_url || undefined,
+      gallery: (input.visuals?.gallery_image_urls || []).filter(Boolean)
+    }
   }
 }
 
@@ -232,6 +261,8 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
+      const off = aiUnavailable()
+      if (off) return off
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
@@ -258,12 +289,12 @@ export async function POST(req: NextRequest) {
     try {
       ai = parseJsonSafe(raw)
     } catch {
-      console.error('[generate-lookbook] JSON parse failed, using mock fallback', raw.slice(0, 300))
+      return aiFailed('generate-lookbook', raw.slice(0, 300))
     }
 
     return NextResponse.json({ content: mergeIntoContent(input, ai) })
   } catch (err: any) {
     console.error('[generate-lookbook]', err)
-    return NextResponse.json({ error: err?.message || 'Generation failed' }, { status: 500 })
+    return aiFailed('generate-lookbook', err)
   }
 }

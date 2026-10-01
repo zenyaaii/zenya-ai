@@ -6,6 +6,7 @@ import { Icon } from '@/components/icons'
 import type { AtlasContent, AtlasTestimonial, AtlasFaqItem, AtlasPricingTier, AtlasIntegration } from '@/utils/atlas/types'
 import { getAtlasPreset } from '@/utils/atlas/presets'
 import BookingSection from '@/components/site/BookingSection'
+import { useBookingContext } from '@/components/site/BookingContext'
 import {
   TYPOGRAPHY_PRESETS,
   buildGoogleFontsUrl,
@@ -25,6 +26,18 @@ type Props = {
 }
 
 type AtlasView = 'home' | 'features' | 'pricing' | 'integrations' | 'docs'
+
+/** Where the in-page buttons go. Built once in the root, handed to sections. */
+type AtlasActions = {
+  /** Switch page via the same setView the nav uses, then start at the top. */
+  goView: (v: AtlasView) => void
+  /** "Start" CTAs: pricing when the site has tiers, else contact. */
+  goStart: () => void
+  /** Contact: the booking form when it is on the page, else the owner's email. */
+  goContact: () => void
+  hasPricing: boolean
+  hasDocs: boolean
+}
 
 // ─── Motion helpers ────────────────────────────────────────────────────────────
 // Plain functions (not hooks!) so they can be called safely inside .map()
@@ -77,7 +90,7 @@ function Stars({ rating = 5, color }: { rating?: number; color: string }) {
 }
 
 // ─── Mock dashboard UI in hero ────────────────────────────────────────────────
-function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>['colors'] }) {
+function DashboardMockup({ colors, brandName }: { colors: ReturnType<typeof getAtlasPreset>['colors']; brandName: string }) {
   const isDark = colors.background.startsWith('#0') || colors.background.startsWith('#02') || colors.background.startsWith('#08')
   const cardBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.9)'
   const barBg = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)'
@@ -101,7 +114,7 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
           <div className="h-3 w-3 rounded-full bg-green-400/70" />
         </div>
         <div className="mx-auto flex h-6 w-48 items-center justify-center rounded-md text-[10px]" style={{ background: cardBg, color: textColor }}>
-          app.streamline.io/workspace
+          {brandName}
         </div>
       </div>
 
@@ -184,7 +197,7 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
 
         {/* Right panel */}
         <div className="hidden w-36 border-l p-3 sm:block" style={{ borderColor: colors.border }}>
-          <p className="mb-3 text-[9px] font-bold uppercase tracking-wider" style={{ color: textColor }}>رؤى الذكاء الاصطناعي</p>
+          <p className="mb-3 text-[9px] font-bold uppercase" style={{ color: textColor }}>رؤى الذكاء الاصطناعي</p>
           {[
             { label: 'سرعة الإنجاز', value: '+18%' },
             { label: 'عوائق مكتشفة', value: 'خطران' },
@@ -209,12 +222,18 @@ function DashboardMockup({ colors }: { colors: ReturnType<typeof getAtlasPreset>
 
 // ─── Navbar ────────────────────────────────────────────────────────────────────
 function AtlasNav({ content, colors, font, view, setView }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; view: AtlasView; setView: (v: AtlasView) => void }) {
+  const hasPricing = !!content.pricing?.tiers?.length
   const navLinks: { label: string; view: AtlasView }[] = [
-    { label: 'المزايا', view: 'features' },
-    { label: 'الأسعار', view: 'pricing' },
-    { label: 'التكاملات', view: 'integrations' },
-    { label: 'التوثيق', view: 'docs' },
-  ]
+    { label: 'المزايا', view: 'features' as AtlasView },
+    { label: 'الأسعار', view: 'pricing' as AtlasView },
+    { label: 'التكاملات', view: 'integrations' as AtlasView },
+    { label: 'التوثيق', view: 'docs' as AtlasView },
+  ].filter((l) =>
+    l.view === 'pricing' ? hasPricing
+    : l.view === 'integrations' ? !!content.integrations?.items?.length
+    : l.view === 'docs' ? !!content.faq?.items?.length
+    : true
+  )
   const [menuOpen, setMenuOpen] = useState(false)
   // Close the mobile menu whenever the page changes.
   const go = (v: AtlasView) => { setView(v); setMenuOpen(false) }
@@ -232,7 +251,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
           <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white text-sm font-black" style={{ background: colors.gradient }}>
             {content.brand.name[0]}
           </div>
-          <span className="text-base font-black tracking-tight" style={{ color: colors.text }}>{content.brand.name}</span>
+          <span className="text-base font-black" style={{ color: colors.text }}>{content.brand.name}</span>
         </button>
         <div className="hidden items-center gap-8 text-sm font-medium md:flex" style={{ color: colors.muted }}>
           {navLinks.map((item) => (
@@ -240,9 +259,10 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <button className="hidden cursor-pointer text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</button>
+          {/* No app/login URL exists for generated sites, so this is not a link. */}
+          <span className="hidden text-sm font-semibold md:block" style={{ color: colors.muted }}>تسجيل الدخول</span>
           <button
-            onClick={() => setView('pricing')}
+            onClick={() => setView(hasPricing ? 'pricing' : 'features')}
             className="rounded-full px-5 py-2 text-sm font-bold text-white transition hover:scale-105"
             style={{ background: colors.primary }}
           >
@@ -293,7 +313,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
 }
 
 // ─── Hero ──────────────────────────────────────────────────────────────────────
-function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasHero({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
   const rm = !!useReducedMotion()
   const reveal = fadeUpAnim(rm, 0)
   const revealSub = fadeUpAnim(rm, 0.12)
@@ -319,7 +339,7 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
         </motion.div>
 
         {/* Headline */}
-        <motion.h1 {...reveal} className="mx-auto max-w-4xl text-5xl font-black leading-[1.08] tracking-tight sm:text-6xl md:text-7xl" style={{ color: colors.text }}>
+        <motion.h1 {...reveal} className="mx-auto max-w-4xl text-5xl font-black leading-[1.08] sm:text-6xl md:text-7xl" style={{ color: colors.text }}>
           <Headline
             text={content.hero.headline}
             style={{
@@ -339,12 +359,14 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
         {/* CTAs */}
         <motion.div {...revealCtas} className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <button
+            onClick={actions.goStart}
             className="rounded-full px-8 py-3.5 text-sm font-black text-white transition hover:scale-105 hover:shadow-lg"
             style={{ background: colors.primary, boxShadow: `0 8px 24px -4px ${colors.glowPrimary}` }}
           >
             {content.hero.cta_primary}
           </button>
           <button
+            onClick={() => actions.goView('features')}
             className="inline-flex items-center gap-2 rounded-full border px-8 py-3.5 text-sm font-bold transition hover:scale-105"
             style={{ borderColor: colors.border, color: colors.text, background: colors.surfaceAlt }}
           >
@@ -353,13 +375,15 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
         </motion.div>
 
         {/* Social proof */}
-        <motion.p {...revealCtas} className="mt-4 text-xs" style={{ color: colors.muted }}>
-          {content.hero.social_proof}
-        </motion.p>
+        {content.hero.social_proof ? (
+          <motion.p {...revealCtas} className="mt-4 text-xs" style={{ color: colors.muted }}>
+            {content.hero.social_proof}
+          </motion.p>
+        ) : null}
 
         {/* Dashboard mockup */}
         <motion.div {...revealMock} className="mt-14 mx-auto max-w-5xl">
-          <DashboardMockup colors={colors} />
+          <DashboardMockup colors={colors} brandName={content.brand.name} />
         </motion.div>
       </div>
     </section>
@@ -368,17 +392,19 @@ function AtlasHero({ content, colors, font }: { content: AtlasContent; colors: R
 
 // ─── Trust bar ─────────────────────────────────────────────────────────────────
 function AtlasTrustBar({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  // Only the customers the owner named. None given, no bar.
+  if (!content.trust_bar?.logos?.length) return null
   return (
     <section data-section="trust_bar" className="border-y px-6 py-8" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
-        <p className="mb-5 text-center text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: colors.muted }}>
+        <p className="mb-5 text-center text-xs font-semibold uppercase" style={{ color: colors.muted }}>
           {content.trust_bar.label}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8">
           {content.trust_bar.logos.map((logo) => (
             <span
               key={logo}
-              className="text-base font-black tracking-tight transition hover:opacity-100"
+              className="text-base font-black transition hover:opacity-100"
               style={{ color: colors.muted, opacity: 0.5, fontFamily: font }}
             >
               {logo}
@@ -397,10 +423,10 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
     <section data-section="features" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.features.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.features.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed" style={{ color: colors.muted }}>
@@ -435,7 +461,7 @@ function AtlasFeatures({ content, colors, font }: { content: AtlasContent; color
                   </div>
                   {feature.badge && (
                     <span
-                      className="rounded-full px-2.5 py-0.5 text-[0.65rem] font-black uppercase tracking-wider"
+                      className="rounded-full px-2.5 py-0.5 text-[0.65rem] font-black uppercase"
                       style={{ background: colors.primary, color: '#fff' }}
                     >
                       {feature.badge}
@@ -460,10 +486,10 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
     <section data-section="how_it_works" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.how_it_works.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.how_it_works.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed" style={{ color: colors.muted }}>
@@ -474,8 +500,8 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
         <div className="relative grid gap-8 md:grid-cols-3">
           {/* Connector line */}
           <div
-            className="absolute left-0 right-0 top-8 hidden h-px md:block"
-            style={{ background: `linear-gradient(90deg, transparent, ${colors.border}, ${colors.primary}50, ${colors.border}, transparent)` }}
+            className="absolute inset-x-[16.67%] top-8 hidden h-px md:block"
+            style={{ background: `linear-gradient(90deg, ${colors.border}, ${colors.primary}50, ${colors.border})` }}
           />
 
           {content.how_it_works.steps.map((step, i) => (
@@ -509,16 +535,17 @@ function AtlasHowItWorks({ content, colors, font }: { content: AtlasContent; col
 }
 
 // ─── Pricing ───────────────────────────────────────────────────────────────────
-function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasPricing({ content, colors, font, onTier }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; onTier: () => void }) {
   const rm = !!useReducedMotion()
+  if (!content.pricing?.tiers?.length) return null
   return (
     <section data-section="pricing" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-16 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.pricing.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.pricing.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base" style={{ color: colors.muted }}>{content.pricing.subheading}</p>
@@ -526,7 +553,7 @@ function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors
 
         <div className="grid gap-6 md:grid-cols-3">
           {content.pricing.tiers.map((tier, i) => (
-            <PricingCard key={i} tier={tier} colors={colors} delay={0.08 * i} />
+            <PricingCard key={i} tier={tier} colors={colors} delay={0.08 * i} onSelect={onTier} />
           ))}
         </div>
       </div>
@@ -534,7 +561,7 @@ function AtlasPricing({ content, colors, font }: { content: AtlasContent; colors
   )
 }
 
-function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: ReturnType<typeof getAtlasPreset>['colors']; delay: number }) {
+function PricingCard({ tier, colors, delay, onSelect }: { tier: AtlasPricingTier; colors: ReturnType<typeof getAtlasPreset>['colors']; delay: number; onSelect: () => void }) {
   const rm = !!useReducedMotion()
   return (
     <motion.div
@@ -547,23 +574,24 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
       }}
     >
       {tier.highlighted && (
-        <div className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-[0.65rem] font-black uppercase tracking-wider text-white">
+        <div className="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-[0.65rem] font-black uppercase text-white">
           الأكثر شيوعًا
         </div>
       )}
       <div className={tier.highlighted ? 'text-white' : ''}>
-        <p className="text-sm font-black uppercase tracking-wider" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.8)' : colors.muted }}>
+        <p className="text-sm font-black uppercase" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.8)' : colors.muted }}>
           {tier.name}
         </p>
         <div className="mt-3 flex items-end gap-1">
           <span className="text-5xl font-black" style={{ color: tier.highlighted ? '#fff' : colors.text }}>{tier.price}</span>
-          {tier.price !== 'حسب الطلب' && (
+          {tier.price !== 'حسب الطلب' && tier.period && (
             <span className="mb-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.7)' : colors.muted }}>/{tier.period}</span>
           )}
         </div>
-        <p className="mt-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.75)' : colors.muted }}>{tier.description}</p>
+        {tier.description ? <p className="mt-2 text-sm" style={{ color: tier.highlighted ? 'rgba(255,255,255,0.75)' : colors.muted }}>{tier.description}</p> : null}
 
         <button
+          onClick={onSelect}
           className="mt-6 w-full rounded-full py-3 text-sm font-black transition hover:scale-105"
           style={{
             background: tier.highlighted ? '#fff' : colors.primary,
@@ -592,11 +620,12 @@ function PricingCard({ tier, colors, delay }: { tier: AtlasPricingTier; colors: 
 // ─── Integrations ──────────────────────────────────────────────────────────────
 function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
+  if (!content.integrations?.items?.length) return null
   return (
     <section data-section="integrations" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
         <motion.div {...revealAnim(rm,0)} className="mb-14">
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             <Headline text={content.integrations.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base" style={{ color: colors.muted }}>{content.integrations.subheading}</p>
@@ -612,19 +641,17 @@ function AtlasIntegrations({ content, colors, font }: { content: AtlasContent; c
             >
               <span style={{ color: colors.primary }}><Icon name={item.icon} size={24} animation="pop" /></span>
               <span className="text-[0.65rem] font-black" style={{ color: colors.text }}>{item.name}</span>
-              <span
-                className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase tracking-wider"
-                style={{ background: colors.primaryMuted, color: colors.primary }}
-              >
-                {item.category}
-              </span>
+              {item.category ? (
+                <span
+                  className="rounded-full px-2 py-0.5 text-[0.55rem] font-semibold uppercase"
+                  style={{ background: colors.primaryMuted, color: colors.primary }}
+                >
+                  {item.category}
+                </span>
+              ) : null}
             </motion.div>
           ))}
         </div>
-
-        <motion.p {...revealAnim(rm,0.3)} className="mt-8 text-sm" style={{ color: colors.muted }}>
-          + 68 more integrations via Zapier and native API
-        </motion.p>
       </div>
     </section>
   )
@@ -641,10 +668,10 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
     <section data-section="testimonials" className="px-6 py-24" style={{ fontFamily: font }}>
       <div className="mx-auto max-w-6xl">
         <motion.div {...revealAnim(rm,0)} className="mb-14 text-center">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.25em]" style={{ color: colors.primary }}>
+          <p className="mb-3 text-xs font-bold uppercase" style={{ color: colors.primary }}>
             {content.testimonials.eyebrow}
           </p>
-          <h2 className="text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+          <h2 className="text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
             {content.testimonials.heading}
           </h2>
           {avg ? (
@@ -693,6 +720,7 @@ function AtlasTestimonials({ content, colors, font }: { content: AtlasContent; c
 
 // ─── Security strip ────────────────────────────────────────────────────────────
 function AtlasSecurity({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+  if (!content.security?.items?.length) return null
   return (
     <section data-section="security" className="border-y px-6 py-10" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl text-center">
@@ -721,11 +749,12 @@ function AtlasSecurity({ content, colors, font }: { content: AtlasContent; color
 function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
   const rm = !!useReducedMotion()
   const [open, setOpen] = useState<number | null>(null)
+  if (!content.faq?.items?.length) return null
 
   return (
     <section data-section="faq" className="px-6 py-24" style={{ background: colors.surfaceAlt, fontFamily: font }}>
       <div className="mx-auto max-w-3xl">
-        <motion.h2 {...revealAnim(rm,0)} className="mb-10 text-center text-4xl font-black tracking-tight sm:text-5xl" style={{ color: colors.text }}>
+        <motion.h2 {...revealAnim(rm,0)} className="mb-10 text-center text-4xl font-black sm:text-5xl" style={{ color: colors.text }}>
           {content.faq.heading}
         </motion.h2>
         <div className="space-y-3">
@@ -773,7 +802,7 @@ function AtlasFaq({ content, colors, font }: { content: AtlasContent; colors: Re
 }
 
 // ─── CTA section ───────────────────────────────────────────────────────────────
-function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasCta({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
   const rm = !!useReducedMotion()
   return (
     <section data-section="cta" className="px-6 py-24" style={{ fontFamily: font }}>
@@ -788,20 +817,20 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
           <div className="absolute -bottom-16 -right-16 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
         </div>
         <div className="relative">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-white/70">{content.cta.eyebrow}</p>
-          <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl">
+          <p className="mb-3 text-xs font-bold uppercase text-white/70">{content.cta.eyebrow}</p>
+          <h2 className="text-4xl font-black text-white sm:text-5xl">
             <Headline text={content.cta.heading} />
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base text-white/75">{content.cta.subheading}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button className="rounded-full bg-white px-8 py-3.5 text-sm font-black transition hover:scale-105" style={{ color: colors.primary }}>
+            <button onClick={actions.goStart} className="rounded-full bg-white px-8 py-3.5 text-sm font-black transition hover:scale-105" style={{ color: colors.primary }}>
               {content.cta.cta_primary}
             </button>
-            <button className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
+            <button onClick={actions.goContact} className="rounded-full border border-white/30 px-8 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
               {content.cta.cta_secondary}
             </button>
           </div>
-          <p className="mt-4 text-xs text-white/60">{content.cta.note}</p>
+          {content.cta.note ? <p className="mt-4 text-xs text-white/60">{content.cta.note}</p> : null}
         </div>
       </motion.div>
     </section>
@@ -809,7 +838,17 @@ function AtlasCta({ content, colors, font }: { content: AtlasContent; colors: Re
 }
 
 // ─── Footer ────────────────────────────────────────────────────────────────────
-function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string }) {
+function AtlasFooter({ content, colors, font, actions }: { content: AtlasContent; colors: ReturnType<typeof getAtlasPreset>['colors']; font: string; actions: AtlasActions }) {
+  // Only the items that match a real page are links. The blog and the legal
+  // pages do not exist on generated sites, so they stay plain text.
+  const footerLinks: { label: string; view: AtlasView | null }[] = [
+    { label: 'المنتج', view: 'features' },
+    { label: 'الأسعار', view: actions.hasPricing ? 'pricing' : null },
+    { label: 'التوثيق', view: actions.hasDocs ? 'docs' : null },
+    { label: 'المدوّنة', view: null },
+    { label: 'الخصوصية', view: null },
+    { label: 'الشروط', view: null },
+  ]
   return (
     <footer data-section="footer" className="border-t px-6 py-12" style={{ borderColor: colors.border, fontFamily: font }}>
       <div className="mx-auto max-w-5xl">
@@ -824,13 +863,17 @@ function AtlasFooter({ content, colors, font }: { content: AtlasContent; colors:
             <p className="mt-2 text-sm" style={{ color: colors.muted }}>{content.footer.tagline}</p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-6 text-sm" style={{ color: colors.muted }}>
-            {['المنتج', 'الأسعار', 'التوثيق', 'المدوّنة', 'الخصوصية', 'الشروط'].map((link) => (
-              <span key={link} className="cursor-pointer transition hover:opacity-100" style={{ opacity: 0.65 }}>{link}</span>
-            ))}
+            {footerLinks.map(({ label, view }) =>
+              view ? (
+                <button key={label} type="button" onClick={() => actions.goView(view)} className="transition hover:opacity-100" style={{ opacity: 0.65 }}>{label}</button>
+              ) : (
+                <span key={label} style={{ opacity: 0.65 }}>{label}</span>
+              )
+            )}
           </div>
         </div>
         <div className="mt-8 border-t pt-6 text-center text-xs" style={{ borderColor: colors.border, color: colors.muted }}>
-          {content.footer.legal} · {content.footer.email}
+          {content.footer.legal}{content.footer.email ? ` · ${content.footer.email}` : ''}
         </div>
       </div>
     </footer>
@@ -864,6 +907,29 @@ export default function AtlasPreview({
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
 
+  const booking = useBookingContext()
+  const hasPricing = !!content.pricing?.tiers?.length
+  const actions: AtlasActions = {
+    hasPricing,
+    hasDocs: !!content.faq?.items?.length,
+    goView: (v) => {
+      setView(v)
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
+    },
+    // The booking form is rendered on every page when the owner's plan has it;
+    // otherwise the owner's footer email is the only contact route there is.
+    goContact: () => {
+      if (typeof window === 'undefined') return
+      const form = booking.enabled ? document.getElementById('booking') : null
+      if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      else if (content.footer.email) window.location.href = `mailto:${content.footer.email}`
+    },
+    goStart: () => {
+      if (hasPricing) actions.goView('pricing')
+      else actions.goContact()
+    },
+  }
+
   return (
     <div
       className={`min-h-screen ${className}`}
@@ -874,11 +940,11 @@ export default function AtlasPreview({
 
       {view === 'home' && (
         <>
-          <AtlasHero content={content} colors={colors} font={headingFont} />
+          <AtlasHero content={content} colors={colors} font={headingFont} actions={actions} />
           <AtlasTrustBar content={content} colors={colors} font={bodyFont} />
           <AtlasHowItWorks content={content} colors={colors} font={bodyFont} />
           <AtlasTestimonials content={content} colors={colors} font={bodyFont} />
-          <AtlasCta content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} actions={actions} />
         </>
       )}
       {view === 'features' && (
@@ -888,12 +954,12 @@ export default function AtlasPreview({
           <AtlasIntegrations content={content} colors={colors} font={bodyFont} />
         </>
       )}
-      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={bodyFont} />}
+      {view === 'pricing' && <AtlasPricing content={content} colors={colors} font={bodyFont} onTier={actions.goContact} />}
       {view === 'integrations' && <AtlasIntegrations content={content} colors={colors} font={bodyFont} />}
       {view === 'docs' && (
         <>
           <AtlasFaq content={content} colors={colors} font={bodyFont} />
-          <AtlasCta content={content} colors={colors} font={bodyFont} />
+          <AtlasCta content={content} colors={colors} font={bodyFont} actions={actions} />
         </>
       )}
 
@@ -916,7 +982,7 @@ export default function AtlasPreview({
         }}
       />
 
-      <AtlasFooter content={content} colors={colors} font={bodyFont} />
+      <AtlasFooter content={content} colors={colors} font={bodyFont} actions={actions} />
     </div>
   )
 }
