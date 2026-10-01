@@ -49,16 +49,12 @@ export default function BuildSuccessOverlay({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.1, type: 'spring', stiffness: 260, damping: 16 }}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
-              style={{
-                background: 'radial-gradient(circle at 35% 30%, #b9b8ff, #5e6ad2 60%, #4f5ab8)',
-                boxShadow: '0 0 40px rgba(94,106,210,0.5)',
-              }}
+              className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e7f4ea]"
             >
-              <Check className="h-8 w-8 text-white" strokeWidth={3} />
+              <Check className="h-[26px] w-[26px] text-[#15803d]" strokeWidth={2.5} />
             </motion.div>
 
-            <h2 className="mt-5 text-2xl font-extrabold tracking-tight text-foreground">
+            <h2 className="mt-5 text-2xl font-extrabold text-foreground">
               تم إنشاء موقعك! 🎉
             </h2>
             <p className="mt-2 text-sm text-muted">

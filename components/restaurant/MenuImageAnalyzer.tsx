@@ -33,6 +33,9 @@ export type ExtractedCategory = {
   items: ExtractedItem[]
 }
 
+/** What to do with a read menu when the form already has one. */
+export type MenuApplyMode = 'replace' | 'append'
+
 type Shot = { id: string; preview: string; parts: string[]; name: string }
 
 const MAX_SHOTS = 3
@@ -176,6 +179,7 @@ async function fileToShot(file: File): Promise<Shot> {
 export default function MenuImageAnalyzer({
   cuisine,
   demo,
+  existingItems = 0,
   onExtract,
 }: {
   cuisine?: string
@@ -186,8 +190,14 @@ export default function MenuImageAnalyzer({
    * everywhere else, so the wizard is unaffected.
    */
   demo?: boolean
+  /**
+   * How many dishes the form already holds. When it is more than zero, a
+   * fresh read is held back and the owner chooses whether it replaces the
+   * menu or is added to it, instead of the two being silently merged.
+   */
+  existingItems?: number
   /** Called with the parsed categories. Returns how many items were applied. */
-  onExtract: (categories: ExtractedCategory[]) => { categories: number; items: number }
+  onExtract: (categories: ExtractedCategory[], mode?: MenuApplyMode) => { categories: number; items: number }
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [shots, setShots] = useState<Shot[]>([])
@@ -196,6 +206,7 @@ export default function MenuImageAnalyzer({
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ categories: number; items: number } | null>(null)
+  const [pending, setPending] = useState<ExtractedCategory[] | null>(null)
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -282,6 +293,10 @@ export default function MenuImageAnalyzer({
         setError(msg || 'لم نجد أصنافًا في الصور. جرّب صورة أوضح أو أدخل الأصناف يدويًا.')
         return
       }
+      if (existingItems > 0) {
+        setPending(merged)
+        return
+      }
       const applied = onExtract(merged)
       setResult(applied)
     } catch {
@@ -292,7 +307,50 @@ export default function MenuImageAnalyzer({
     }
   }
 
+  function choose(mode: MenuApplyMode) {
+    if (!pending) return
+    setResult(onExtract(pending, mode))
+    setPending(null)
+  }
+
   const busy = preparing || analyzing
+  const pendingItems = pending ? pending.reduce((n, c) => n + c.items.length, 0) : 0
+  const choice = pending ? (
+    <div
+      role="dialog"
+      aria-modal
+      aria-labelledby="menu-choice-h"
+      className="w-full max-w-[420px] rounded-2xl bg-white p-5 shadow-[0_24px_60px_-20px_rgba(17,17,17,0.35)] ring-1 ring-black/5"
+    >
+      <p id="menu-choice-h" className="text-[15.5px] font-bold text-foreground">قرأنا الأصناف من صورتك ({pendingItems})</p>
+      <p className="mt-1 text-[14.5px] leading-[1.6] text-muted">
+        في قائمتك أصناف من قبل. ماذا نفعل بالأصناف الجديدة؟
+      </p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => choose('replace')}
+          className="min-h-[44px] rounded-full bg-foreground px-4 text-[14.5px] font-bold text-white transition hover:opacity-90"
+        >
+          استبدال القائمة الحالية
+        </button>
+        <button
+          type="button"
+          onClick={() => choose('append')}
+          className="min-h-[44px] rounded-full border border-token bg-surface px-4 text-[14.5px] font-semibold text-foreground transition hover:bg-elevated"
+        >
+          إضافتها إلى القائمة
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={() => setPending(null)}
+        className="mx-auto mt-2 block min-h-[44px] px-3 text-[14px] font-medium text-muted underline-offset-4 hover:underline"
+      >
+        إلغاء
+      </button>
+    </div>
+  ) : null
 
   return (
     <div
@@ -386,6 +444,10 @@ export default function MenuImageAnalyzer({
           <X className="h-3.5 w-3.5" /> {error}
         </p>
       )}
+
+      {choice ? (
+        <div className="fixed inset-0 z-[80] flex items-end justify-center bg-black/40 p-4 sm:items-center" onClick={(e) => { if (e.target === e.currentTarget) setPending(null) }}>{choice}</div>
+      ) : null}
 
       {result && (
         <p className="mt-3 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-[#15803d]">
