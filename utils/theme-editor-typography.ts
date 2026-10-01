@@ -48,7 +48,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'maison',
     name: 'Maison',
-    vibe: 'Couture editorial · serif display',
+    vibe: 'تحريري فاخر · خط مذيّل للعناوين',
     mood: 'editorial',
     heading_font: '"Playfair Display", "Times New Roman", serif',
     body_font: '"Inter", "Helvetica Neue", sans-serif',
@@ -57,7 +57,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'gazette',
     name: 'Gazette',
-    vibe: 'Print broadsheet · tight & long-form',
+    vibe: 'صحيفة مطبوعة · متقارب ويناسب النصوص الطويلة',
     mood: 'editorial',
     heading_font: '"DM Serif Display", Georgia, serif',
     body_font: '"DM Sans", sans-serif',
@@ -66,7 +66,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'libre',
     name: 'Libre',
-    vibe: 'Bookish & literary',
+    vibe: 'أدبي كأنه كتاب',
     mood: 'editorial',
     heading_font: '"Libre Caslon Display", Georgia, serif',
     body_font: '"Libre Franklin", system-ui, sans-serif',
@@ -74,7 +74,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'cormorant',
     name: 'Cormorant',
-    vibe: 'High-contrast couture serif',
+    vibe: 'خط مذيّل فاخر عالي التباين',
     mood: 'luxury',
     heading_font: '"Cormorant Garamond", Georgia, serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -83,7 +83,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'fraunces',
     name: 'Fraunces',
-    vibe: 'Warm variable serif',
+    vibe: 'خط مذيّل دافئ',
     mood: 'editorial',
     heading_font: '"Fraunces", Georgia, serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -92,7 +92,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'manuscript',
     name: 'Manuscript',
-    vibe: 'Old-world calligraphic serif',
+    vibe: 'خط مذيّل كلاسيكي بلمسة خطّية',
     mood: 'luxury',
     heading_font: '"EB Garamond", Garamond, Georgia, serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -103,7 +103,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'helvetique',
     name: 'Helvetique',
-    vibe: 'Swiss neutral · all sans',
+    vibe: 'سويسري محايد · بلا تذييل',
     mood: 'minimal',
     heading_font: '"Inter", "Helvetica Neue", sans-serif',
     body_font: '"Inter", "Helvetica Neue", sans-serif',
@@ -113,7 +113,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'soft-sans',
     name: 'Soft Sans',
-    vibe: 'Friendly rounded sans',
+    vibe: 'خط مستدير ودود',
     mood: 'modern',
     heading_font: '"Manrope", system-ui, sans-serif',
     body_font: '"Manrope", system-ui, sans-serif',
@@ -123,7 +123,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'objectif',
     name: 'Objectif',
-    vibe: 'Geometric · architectural',
+    vibe: 'هندسي · معماري',
     mood: 'minimal',
     heading_font: '"Space Grotesk", system-ui, sans-serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -133,7 +133,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'satoshi',
     name: 'Satoshi',
-    vibe: 'Modern tech utility',
+    vibe: 'تقني وعملي حديث',
     mood: 'modern',
     heading_font: '"Plus Jakarta Sans", system-ui, sans-serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -143,7 +143,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'studio',
     name: 'Studio',
-    vibe: 'Compact studio sans',
+    vibe: 'خط مضغوط لاستوديو',
     mood: 'minimal',
     heading_font: '"Outfit", system-ui, sans-serif',
     body_font: '"Outfit", system-ui, sans-serif',
@@ -155,7 +155,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'impact',
     name: 'Impact',
-    vibe: 'Bold condensed display',
+    vibe: 'عناوين عريضة مضغوطة',
     mood: 'modern',
     heading_font: '"Archivo Black", "Inter", system-ui, sans-serif',
     body_font: '"Archivo", system-ui, sans-serif',
@@ -165,7 +165,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'kanit',
     name: 'Kanit',
-    vibe: 'Athletic display',
+    vibe: 'عناوين رياضية',
     mood: 'modern',
     heading_font: '"Bebas Neue", "Inter", sans-serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -175,7 +175,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'oswald',
     name: 'Oswald',
-    vibe: 'Tall condensed signage',
+    vibe: 'لافتات طويلة مضغوطة',
     mood: 'classic',
     heading_font: '"Oswald", "Inter", sans-serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -187,7 +187,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'monograph',
     name: 'Monograph',
-    vibe: 'Serif heading + serif body',
+    vibe: 'عناوين ونصوص بخط مذيّل',
     mood: 'classic',
     heading_font: '"Playfair Display", Georgia, serif',
     body_font: '"Lora", Georgia, serif',
@@ -196,7 +196,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'trattoria-classic',
     name: 'Trattoria',
-    vibe: 'Warm Italian neighborhood serif',
+    vibe: 'مطعم إيطالي دافئ في الحي',
     mood: 'rustic',
     heading_font: '"Lora", Georgia, serif',
     body_font: '"Inter", "Helvetica Neue", sans-serif',
@@ -205,7 +205,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'oxford',
     name: 'Oxford',
-    vibe: 'Academic transitional serif',
+    vibe: 'خط مذيّل أكاديمي',
     mood: 'classic',
     heading_font: '"Crimson Pro", Georgia, serif',
     body_font: '"Crimson Pro", Georgia, serif',
@@ -214,7 +214,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'bistro',
     name: 'Bistro',
-    vibe: 'Café signage serif',
+    vibe: 'لافتة مقهى',
     mood: 'rustic',
     heading_font: '"Fraunces", "DM Serif Display", Georgia, serif',
     body_font: '"DM Sans", system-ui, sans-serif',
@@ -225,7 +225,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'kitchen',
     name: 'Kitchen',
-    vibe: 'Handwritten · approachable',
+    vibe: 'خط يد · قريب من الناس',
     mood: 'playful',
     heading_font: '"Caveat", "Comic Sans MS", cursive',
     body_font: '"Inter", system-ui, sans-serif',
@@ -234,7 +234,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'patisserie',
     name: 'Pâtisserie',
-    vibe: 'Script display + clean body',
+    vibe: 'عناوين بخط يد ونص واضح',
     mood: 'playful',
     heading_font: '"Pacifico", "Brush Script MT", cursive',
     body_font: '"Inter", system-ui, sans-serif',
@@ -243,7 +243,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'streetfood',
     name: 'Street food',
-    vibe: 'Bold hand-painted feel',
+    vibe: 'كأنه مرسوم باليد بجرأة',
     mood: 'casual',
     heading_font: '"Permanent Marker", "Impact", sans-serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -255,7 +255,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'mono-spec',
     name: 'Mono spec',
-    vibe: 'Technical · machined',
+    vibe: 'تقني · دقيق',
     mood: 'minimal',
     heading_font: '"JetBrains Mono", "Menlo", monospace',
     body_font: '"Inter", system-ui, sans-serif',
@@ -265,7 +265,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'mono-grotesk',
     name: 'Mono grotesk',
-    vibe: 'Mono heading + grotesk body',
+    vibe: 'عناوين بخط ثابت العرض ونص بسيط',
     mood: 'modern',
     heading_font: '"IBM Plex Mono", "Menlo", monospace',
     body_font: '"IBM Plex Sans", system-ui, sans-serif',
@@ -277,7 +277,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'noctis',
     name: 'Noctis',
-    vibe: 'Late-night cocktail bar',
+    vibe: 'جلسة مسائية هادئة',
     mood: 'luxury',
     heading_font: '"Cormorant Garamond", serif',
     body_font: '"Cormorant Garamond", serif',
@@ -287,7 +287,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'farmtable',
     name: 'Farmtable',
-    vibe: 'Foraged · seasonal',
+    vibe: 'طبيعي · موسمي',
     mood: 'rustic',
     heading_font: '"Fraunces", "Lora", serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -297,7 +297,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'noodle-bar',
     name: 'Noodle bar',
-    vibe: 'Asian street market energy',
+    vibe: 'حيوية أسواق الطعام الآسيوية',
     mood: 'casual',
     heading_font: '"Archivo", system-ui, sans-serif',
     body_font: '"Archivo", system-ui, sans-serif',
@@ -307,7 +307,7 @@ export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
     id: 'bordeaux',
     name: 'Bordeaux',
-    vibe: 'Wine bar editorial',
+    vibe: 'تحريري راقٍ',
     mood: 'luxury',
     heading_font: '"Cormorant Garamond", Georgia, serif',
     body_font: '"Inter", system-ui, sans-serif',
@@ -321,6 +321,12 @@ export const DEFAULT_TYPOGRAPHY_PRESET_ID = 'maison'
 export function getTypographyPreset(id?: string): TypographyPreset {
   if (!id) return TYPOGRAPHY_PRESETS[0]
   return TYPOGRAPHY_PRESETS.find((p) => p.id === id) ?? TYPOGRAPHY_PRESETS[0]
+}
+
+/** The mood a reader sees on the filter chips and cards; the key stays English. */
+export const TYPOGRAPHY_MOOD_LABELS: Record<TypographyPreset['mood'], string> = {
+  editorial: 'تحريري', classic: 'كلاسيكي', modern: 'حديث', minimal: 'بسيط',
+  rustic: 'ريفي', playful: 'مرح', luxury: 'فاخر', casual: 'عفوي',
 }
 
 export const TYPOGRAPHY_MOODS: Array<TypographyPreset['mood']> = [
