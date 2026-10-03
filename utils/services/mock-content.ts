@@ -17,7 +17,7 @@ export const SERVICE_MOCK_CONTENT: ServiceContent = {
     primary_cta: 'احجز زيارة',
     secondary_cta: 'شاهد الخدمات',
     image:
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=2000&q=80',
+      'https://images.unsplash.com/photo-1545649311-24d0ac00ae82?auto=format&fit=crop&w=2000&q=80',
     stats: [
       { value: '4.9/5', label: 'متوسط التقييم' },
       { value: '12 سنة', label: 'في السوق' },
@@ -59,7 +59,7 @@ export const SERVICE_MOCK_CONTENT: ServiceContent = {
     owner_title: 'المؤسّس',
     quote: 'يتذكّر الناس شعورهم تجاه شركة الخدمة. صمّمنا التجربة كلها حول الوضوح والعناية.',
     image:
-      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80'
+      'https://images.unsplash.com/photo-1724488751821-1415f5cf4960?auto=format&fit=crop&w=1400&q=80'
   },
   proof: {
     heading: 'لماذا يختارنا أصحاب المنازل',
@@ -151,8 +151,8 @@ export const SERVICE_MOCK_CONTENT: ServiceContent = {
     images: [
       { url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80', alt: 'قبل الخدمة الداخلية' },
       { url: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=80', alt: 'بعد الخدمة الداخلية' },
-      { url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1400&q=80', alt: 'تجهيزات حديثة' },
-      { url: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=1400&q=80', alt: 'أدوات العمل' }
+      { url: 'https://images.unsplash.com/photo-1718203862467-c33159fdc504?auto=format&fit=crop&w=1400&q=80', alt: 'تجهيزات حديثة' },
+      { url: 'https://images.unsplash.com/photo-1567361808960-dec9cb578182?auto=format&fit=crop&w=1400&q=80', alt: 'أدوات العمل' }
     ]
   },
   footer: {

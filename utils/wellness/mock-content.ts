@@ -164,15 +164,15 @@ export const WELLNESS_MOCK_CONTENT: WellnessContent = {
     subheading: 'مصمَّمة حول السكينة — مكان يبدأ فيه التحوّل لحظة دخولك.',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1620733723572-11c53f73a416?auto=format&fit=crop&w=1200&q=80',
         alt: 'غرفة العلاج'
       },
       {
-        url: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1706795033855-eee02f726868?auto=format&fit=crop&w=1200&q=80',
         alt: 'صالة الاسترخاء'
       },
       {
-        url: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=80',
+        url: 'https://images.unsplash.com/photo-1646239646963-b0b9be56d6b5?auto=format&fit=crop&w=1200&q=80',
         alt: 'استوديو اليوغا'
       },
       {
@@ -224,7 +224,7 @@ export const WELLNESS_MOCK_CONTENT: WellnessContent = {
     cta_label: 'احجز جلستك',
     note: 'إلغاء مجاني حتى 24 ساعة قبل الموعد · لا حاجة لبطاقة للحجز',
     image:
-      'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=2000&q=80'
+      'https://images.unsplash.com/photo-1706795033917-dee116e7cba2?auto=format&fit=crop&w=2000&q=80'
   },
   faq: {
     heading: 'أسئلة قبل أن تحجز',
