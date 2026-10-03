@@ -35,7 +35,7 @@ export default function Slideshow({
           {/* Background Image (Mock) */}
           <div className="absolute inset-0 opacity-50">
              <img
-               src={slides[current].image || `https://images.unsplash.com/photo-1558317374-a309d244678e?q=80&w=1920&auto=format&fit=crop`}
+               src={slides[current].image || `https://images.unsplash.com/photo-1653990480360-31a12ce9723e?q=80&w=1920&auto=format&fit=crop`}
                alt={slides[current].heading}
                className="h-full w-full object-cover"
                loading="eager"
