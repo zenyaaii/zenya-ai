@@ -38,21 +38,21 @@ export type ThemeId =
 
 const FALLBACKS: Record<ThemeId, string> = {
   restaurant:
-    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1669310097451-826ff0e66b9a?auto=format&fit=crop&w=1600&q=80',
   one_product:
     'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=80',
   storefront:
     'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1600&q=80',
   atlas:
-    'https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1449247709967-d4461a6a6103?auto=format&fit=crop&w=1600&q=80',
   services:
     'https://images.unsplash.com/photo-1567361808960-dec9cb578182?auto=format&fit=crop&w=1600&q=80',
   collective:
-    'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1616429368325-d5d7542b0ec3?auto=format&fit=crop&w=1600&q=80',
   studio:
     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1600&q=80',
   lookbook:
-    'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1769107805412-90d9191d53e9?auto=format&fit=crop&w=1600&q=80',
   wellness:
     'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80',
 }
