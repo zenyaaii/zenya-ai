@@ -7,6 +7,7 @@ import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { serviceInputSchema, type ServiceInput } from '@/utils/services/input'
 import type { ServiceContent } from '@/utils/services/types'
 import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
+import { pickServicePhotos, resolveServiceNiche, unsplash } from '@/utils/services/niches'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 export const dynamic = 'force-dynamic'
@@ -14,18 +15,17 @@ export const revalidate = 0
 
 const TIMEOUT_MS = 45_000
 
-const FALLBACK_HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=2000&q=80',
-  'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=2000&q=80',
-  'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=2000&q=80'
-]
+// For a trade no pack matches: hand tools on a workbench, and a wall of tools.
+// Neither shows a person, so neither claims to be this business's team.
+const FALLBACK_HERO_IMAGE =
+  'https://images.unsplash.com/photo-1567361808960-dec9cb578182?auto=format&fit=crop&w=2000&q=80'
 
 // There is no stock fallback for the gallery or the before/after pair: those
 // sections present photos as this business's own work, so they carry the
 // owner's uploads or nothing, and the template leaves an empty one out.
 
 const FALLBACK_TEAM_IMAGE =
-  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1400&q=80'
+  'https://images.unsplash.com/photo-1426927308491-6380b6a9936f?auto=format&fit=crop&w=1400&q=80'
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -216,8 +216,13 @@ function pickNth<T>(items: T[], index: number, fallback: T): T {
 
 function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
   const mock = SERVICE_MOCK_CONTENT
-  const heroImage = input.visuals.hero_image_url || FALLBACK_HERO_IMAGES[0]
-  const teamImage = input.visuals.team_image_url || FALLBACK_TEAM_IMAGE
+  // The trade's photo pack, guessed from the typed category; the generic
+  // fallbacks only when no trade matches. Which of the pack's photos is this
+  // business's own pick, from its name.
+  const niche = resolveServiceNiche(input.brand.category)
+  const photos = niche ? pickServicePhotos(niche, input.brand.name) : undefined
+  const heroImage = input.visuals.hero_image_url || (photos ? unsplash(photos.hero, 2000) : FALLBACK_HERO_IMAGE)
+  const teamImage = input.visuals.team_image_url || (photos ? unsplash(photos.story, 1400) : FALLBACK_TEAM_IMAGE)
   const beforeImage = input.visuals.before_image_url || ''
   const afterImage = input.visuals.after_image_url || ''
   const galleryImages = (input.visuals.gallery_image_urls || []).slice(0, 4).map((url) => ({ url }))

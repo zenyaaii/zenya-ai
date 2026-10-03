@@ -10,7 +10,12 @@ import type { WellnessStylePresetId } from './types'
  * the voice the copy is written in.
  *
  * Photos are hand-picked Unsplash IDs, each looked at before it went in. The
- * owner's own uploads always win over these.
+ * owner's own uploads always win over these. The house rule for every photo
+ * here: no women (no women's hands, nails or legs either), no visible tattoos;
+ * where a person appears it is a man, and tools, products and empty rooms come
+ * first. Each niche keeps several photos and each business gets its own,
+ * picked from a hash of its name, so the same business always keeps the same
+ * ones.
  */
 
 export type WellnessNicheId =
@@ -26,6 +31,7 @@ export type WellnessNicheId =
   | 'physio'
   | 'nutrition'
   | 'aesthetic'
+  | 'gym'
 
 export type WellnessStarterSession = { name: string; category: string; duration: string; description: string }
 
@@ -42,10 +48,11 @@ export type WellnessNiche = {
   preset: WellnessStylePresetId
   categories: string[]
   starters: WellnessStarterSession[]
-  photos: { hero: string; booking: string; space: string[] }
+  /** Hero and booking candidates; each business gets one of each (pickWellnessPhotos). */
+  photos: { hero: string[]; booking: string[]; space: string[] }
   /**
-   * Stand-in team for owners who add none: roles, not invented people, and
-   * photos that show no one's face in niches whose staff are mostly women.
+   * Stand-in team for owners who add none: roles, not invented people. The
+   * photos are the niche's tools and rooms, or a man's portrait, never a woman.
    */
   team: { title: string; specialty: string; photo: string }[]
   /** Icon names the AI should choose from for this niche. */
@@ -62,6 +69,23 @@ export function unsplash(id: string, w = 1600): string {
   return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`
 }
 
+/** A small stable hash (FNV-1a) of a business name: the same name, the same photos. */
+export function photoSeed(key?: string | null): number {
+  let h = 0x811c9dc5
+  for (const ch of (key || '').trim().toLowerCase()) {
+    h ^= ch.codePointAt(0) || 0
+    h = Math.imul(h, 0x01000193) >>> 0
+  }
+  return h
+}
+
+/** One photo from a pack for this seed, skipping `avoid` (the hero) when the pack has another. */
+export function pickPhoto(pool: string[], seed: number, avoid?: string): string {
+  const rest = pool.filter((id) => id !== avoid)
+  const from = rest.length ? rest : pool
+  return from[seed % from.length]
+}
+
 export const WELLNESS_NICHES: WellnessNiche[] = [
   {
     id: 'massage',
@@ -76,10 +100,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'مساج الأنسجة العميقة', category: 'علاجي', duration: '60 دقيقة', description: '' },
       { name: 'مساج سويدي للاسترخاء', category: 'استرخاء', duration: '60 دقيقة', description: '' },
     ],
+    // Hero: massage room with orange walls and a wooden table · massage bed by a window.
+    // Booking: amber dropper bottle on a turned stand · rolled towels and tea lights.
     photos: {
-      hero: '1544161515-4ab6ce6db874',
-      booking: '1515377905703-c4788e51af15',
-      space: ['1519823551278-64ac92734fb1', '1600334129128-685c5582fd35', '1596178060671-7a80dc8059ea', '1620733723572-11c53f73a416'],
+      hero: ['1772378452022-94ee7971fe80', '1787651343620-8d5303006ecb'],
+      booking: ['1608571423539-e951b9b3871e', '1706795033917-dee116e7cba2'],
+      space: ['1620733723572-11c53f73a416', '1787651343599-92563927b750', '1787651343496-35b3666dd7d2', '1630226040750-d934f017f0e4'],
     },
     team: [
       { title: 'معالج مساج علاجي', specialty: 'الرقبة والظهر · الأنسجة العميقة', photo: '1560250097-0b93528c311a' },
@@ -105,10 +131,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'مساج بالزيوت العطرية', category: 'مساج', duration: '60 دقيقة', description: '' },
       { name: 'باقة العروس', category: 'باقات', duration: '3 ساعات', description: '' },
     ],
+    // Hero: pump bottle, towel and tulips · rolled towels and a candle under fairy lights.
+    // Booking: marble hammam basins and brass taps · rolled towels and tea lights.
     photos: {
-      hero: '1540555700478-4be289fbecef',
-      booking: '1600334089648-b0d9d3028eb2',
-      space: ['1507652313519-d4e9174996dd', '1620733723572-11c53f73a416', '1596178060671-7a80dc8059ea', '1600334129128-685c5582fd35'],
+      hero: ['1540555700478-4be289fbecef', '1706795033855-eee02f726868'],
+      booking: ['1659614536075-2cf8f82cf9db', '1706795033917-dee116e7cba2'],
+      space: ['1507652313519-d4e9174996dd', '1620733723572-11c53f73a416', '1760722974657-f64bce2f9cc5', '1523471826770-c437b4636fe6'],
     },
     team: [
       { title: 'مسؤول الحمام المغربي', specialty: 'التقشير بالكيس · الصابون البلدي', photo: '1560250097-0b93528c311a' },
@@ -134,15 +162,17 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'هيدرافيشيال', category: 'فيشيال', duration: '60 دقيقة', description: '' },
       { name: 'جلسة لحب الشباب', category: 'علاج', duration: '45 دقيقة', description: '' },
     ],
+    // Hero: plain white tube among water drops · amber bottles and tubes on a dark table.
+    // Booking: amber dropper bottle on a turned stand · reed diffuser, towel and candles.
     photos: {
-      hero: '1570172619644-dfd03ed5d881',
-      booking: '1512290923902-8a9f81dc236c',
-      space: ['1552693673-1bf958298935', '1616394584738-fc6e612e71b9', '1629198688000-71f23e745b6e', '1598440947619-2c35fc9aa908'],
+      hero: ['1616750819456-5cdee9b85d22', '1631730359585-38a4935cbec4'],
+      booking: ['1608571423539-e951b9b3871e', '1620733723572-11c53f73a416'],
+      space: ['1786937680099-779e1da6f7f7', '1760722974657-f64bce2f9cc5', '1620733723572-11c53f73a416', '1631730359585-38a4935cbec4'],
     },
     team: [
-      { title: 'أخصائية بشرة', specialty: 'التنظيف العميق · الهيدرافيشيال', photo: '1598440947619-2c35fc9aa908' },
-      { title: 'أخصائية علاج حب الشباب', specialty: 'التقشير · العناية المنزلية', photo: '1629198688000-71f23e745b6e' },
-      { title: 'استشارية العناية', specialty: 'تحليل البشرة · الخطط الشهرية', photo: '1556228720-195a672e8a03' },
+      { title: 'أخصائية بشرة', specialty: 'التنظيف العميق · الهيدرافيشيال', photo: '1616750819456-5cdee9b85d22' },
+      { title: 'أخصائية علاج حب الشباب', specialty: 'التقشير · العناية المنزلية', photo: '1608571423539-e951b9b3871e' },
+      { title: 'استشارية العناية', specialty: 'تحليل البشرة · الخطط الشهرية', photo: '1631730359585-38a4935cbec4' },
     ],
     icons: ['cosmetics', 'water', 'vision', 'sun', 'verified', 'calendar-check', 'leaf', 'sparkles'],
     voice:
@@ -163,10 +193,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'بيلاتس ماط', category: 'بيلاتس', duration: '60 دقيقة', description: '' },
       { name: 'اشتراك شهري مفتوح', category: 'اشتراك', duration: 'شهر', description: '' },
     ],
+    // Hero: white studio with three mats and round windows · pilates reformers in a bright studio.
+    // Booking: cork blocks on a mat · reformers and a tower by the plants.
     photos: {
-      hero: '1544367567-0f2fcb009e0b',
-      booking: '1599901860904-17e6ed7083a0',
-      space: ['1575052814086-f385e2e2ad1b', '1552196563-55cd4e45efb3', '1603988363607-e1e4a66962c6', '1506126613408-eca07ce68773'],
+      hero: ['1676496962536-d8ef110ff6f0', '1717500252709-05a73fc4f1da'],
+      booking: ['1646239646963-b0b9be56d6b5', '1717500252297-b09508db7ceb'],
+      space: ['1717500252297-b09508db7ceb', '1646239646963-b0b9be56d6b5', '1676496962536-d8ef110ff6f0', '1717500252709-05a73fc4f1da'],
     },
     team: [
       { title: 'مدرّب يوغا', specialty: 'المبتدئون · فينياسا', photo: '1560250097-0b93528c311a' },
@@ -192,10 +224,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'تمارين تنفس للتوتر', category: 'تنفس', duration: '60 دقيقة', description: '' },
       { name: 'حمام صوتي', category: 'حمام صوتي', duration: '60 دقيقة', description: '' },
     ],
+    // Hero: meditation hall with floor cushions and lattice windows · tatami room with a round garden window.
+    // Booking: singing bowl on two books · quiet room with low tables.
     photos: {
-      hero: '1508672019048-805c876b67e2',
-      booking: '1506126613408-eca07ce68773',
-      space: ['1593811167562-9cef47bfc4d7', '1591343395902-1adcb454c4e2', '1552196563-55cd4e45efb3', '1620733723572-11c53f73a416'],
+      hero: ['1749642955698-ebe5e4579034', '1758970081655-a9c08d367e68'],
+      booking: ['1746802401350-b99c6e692a05', '1764507887582-6e3f1fc100a6'],
+      space: ['1764507887582-6e3f1fc100a6', '1746802401350-b99c6e692a05', '1758970081655-a9c08d367e68', '1620733723572-11c53f73a416'],
     },
     team: [
       { title: 'مرشد تأمل', specialty: 'التأمل الموجّه · النوم', photo: '1560250097-0b93528c311a' },
@@ -221,15 +255,17 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'صبغة كاملة', category: 'صبغة', duration: '2 ساعة', description: '' },
       { name: 'مكياج سهرة', category: 'مكياج', duration: '60 دقيقة', description: '' },
     ],
+    // Hero: row of wash basins and chairs · styling chair by a white brick wall.
+    // Booking: hair dryer, brush and comb · scissors and combs on a towel.
     photos: {
-      hero: '1562322140-8baeececf3df',
-      booking: '1595476108010-b4d1f102b1b1',
-      space: ['1600948836101-f9ffda59d250', '1560066984-138dadb4c035', '1522337360788-8b13dee7a37e', '1487412947147-5cebf100ffc2'],
+      hero: ['1637777269308-6a072f24e8a4', '1626383120723-2a941488860d'],
+      booking: ['1522336284037-91f7da073525', '1549271568-e87e07c5406b'],
+      space: ['1626379501846-0df4067b8bb9', '1781450090585-1a511b7066d9', '1637777269327-c4d5c7944d7b', '1626383120723-2a941488860d'],
     },
     team: [
-      { title: 'خبيرة صبغة', specialty: 'الصبغة · الهايلايت', photo: '1522337360788-8b13dee7a37e' },
-      { title: 'مصففة شعر', specialty: 'القص · التسريحات', photo: '1560066984-138dadb4c035' },
-      { title: 'خبيرة مكياج', specialty: 'السهرات · العرائس', photo: '1600948836101-f9ffda59d250' },
+      { title: 'خبيرة صبغة', specialty: 'الصبغة · الهايلايت', photo: '1549271568-e87e07c5406b' },
+      { title: 'مصففة شعر', specialty: 'القص · التسريحات', photo: '1522336284037-91f7da073525' },
+      { title: 'خبيرة مكياج', specialty: 'السهرات · العرائس', photo: '1626379501846-0df4067b8bb9' },
     ],
     icons: ['salon', 'cosmetics', 'sparkles', 'calendar-check', 'users', 'timer', 'secure', 'verified'],
     voice:
@@ -250,15 +286,17 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'باديكير سبا', category: 'باديكير', duration: '60 دقيقة', description: '' },
       { name: 'جل مع رسم', category: 'جل وأكريليك', duration: '75 دقيقة', description: '' },
     ],
+    // Hero: manicure tools and file on a towel · six polish bottles on white.
+    // Booking: manicure and pedicure tools on a blue towel · open bottle of pink polish.
     photos: {
-      hero: '1604654894610-df63bc536371',
-      booking: '1610992015732-2449b76344bc',
-      space: ['1519415510236-718bdfcd89c8', '1600948836101-f9ffda59d250', '1598440947619-2c35fc9aa908', '1631730359585-38a4935cbec4'],
+      hero: ['1775500835259-d3b3f6d6e2f2', '1636019411401-82485711b6ba'],
+      booking: ['1779636198585-658170ee0283', '1692881423829-9a2f80d7a84d'],
+      space: ['1602585578130-c9076e09330d', '1636019411480-58321fcb11ce', '1663229050017-503dbebdd573', '1631730359585-38a4935cbec4'],
     },
     team: [
-      { title: 'فنية أظافر', specialty: 'الجل · الرسم على الأظافر', photo: '1604654894610-df63bc536371' },
-      { title: 'فنية مانيكير وباديكير', specialty: 'العناية · التنظيف', photo: '1610992015732-2449b76344bc' },
-      { title: 'فنية تركيب أظافر', specialty: 'الأكريليك · الإطالة', photo: '1519415510236-718bdfcd89c8' },
+      { title: 'فنية أظافر', specialty: 'الجل · الرسم على الأظافر', photo: '1636019411401-82485711b6ba' },
+      { title: 'فنية مانيكير وباديكير', specialty: 'العناية · التنظيف', photo: '1779636198585-658170ee0283' },
+      { title: 'فنية تركيب أظافر', specialty: 'الأكريليك · الإطالة', photo: '1663229050017-503dbebdd573' },
     ],
     icons: ['sparkle', 'secure', 'timer', 'palette', 'calendar-check', 'verified', 'care', 'sparkles'],
     voice:
@@ -279,10 +317,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'غرفة بخار', category: 'بخار', duration: '30 دقيقة', description: '' },
       { name: 'ساونا ثم غطس بارد', category: 'غطس بارد', duration: '60 دقيقة', description: '' },
     ],
+    // Hero: empty wooden sauna, benches and stone bowl.
+    // Booking: freestanding tub in a stone bathroom.
     photos: {
-      hero: '1583416750470-965b2707b355',
-      booking: '1507652313519-d4e9174996dd',
-      space: ['1540206395-68808572332f', '1620733723572-11c53f73a416', '1600334089648-b0d9d3028eb2', '1540555700478-4be289fbecef'],
+      hero: ['1583416750470-965b2707b355'],
+      booking: ['1507652313519-d4e9174996dd'],
+      space: ['1540206395-68808572332f', '1620733723572-11c53f73a416', '1706795033917-dee116e7cba2', '1540555700478-4be289fbecef'],
     },
     team: [
       { title: 'مسؤول الساونا', specialty: 'الحرارة · أوقات الجلسات', photo: '1560250097-0b93528c311a' },
@@ -308,10 +348,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'عناية بالوجه', category: 'عناية بالوجه', duration: '60 دقيقة', description: '' },
       { name: 'باقة نصف يوم', category: 'باقات', duration: '3 ساعات', description: '' },
     ],
+    // Hero: pump bottle, towel and tulips · rolled towels and a candle under fairy lights.
+    // Booking: rolled towels and tea lights · amber dropper bottle on a turned stand.
     photos: {
-      hero: '1540555700478-4be289fbecef',
-      booking: '1600334089648-b0d9d3028eb2',
-      space: ['1575052814086-f385e2e2ad1b', '1544161515-4ab6ce6db874', '1552693673-1bf958298935', '1583416750470-965b2707b355'],
+      hero: ['1540555700478-4be289fbecef', '1706795033855-eee02f726868'],
+      booking: ['1706795033917-dee116e7cba2', '1608571423539-e951b9b3871e'],
+      space: ['1620733723572-11c53f73a416', '1583416750470-965b2707b355', '1772378452022-94ee7971fe80', '1646239646963-b0b9be56d6b5'],
     },
     team: [
       { title: 'معالج مساج', specialty: 'الاسترخاء · العلاجي', photo: '1560250097-0b93528c311a' },
@@ -337,10 +379,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'علاج آلام الظهر والرقبة', category: 'آلام الظهر والرقبة', duration: '45 دقيقة', description: '' },
       { name: 'تأهيل بعد الإصابة', category: 'إصابات رياضية', duration: '60 دقيقة', description: '' },
     ],
+    // Hero: treatment bench and a skeleton model · treatment room with an adjustable bench.
+    // Booking: empty white treatment room · squat rack and dumbbells by a mirror.
     photos: {
-      hero: '1571019614242-c5c5dee9f50b',
-      booking: '1584515933487-779824d29309',
-      space: ['1519823551278-64ac92734fb1', '1519494026892-80bbd2d6fd0d', '1551076805-e1869033e561', '1518611012118-696072aa579a'],
+      hero: ['1622878179314-0b25f2ad50e4', '1630226040750-d934f017f0e4'],
+      booking: ['1551076805-e1869033e561', '1558611848-73f7eb4001a1'],
+      space: ['1551076805-e1869033e561', '1630226040750-d934f017f0e4', '1622878179314-0b25f2ad50e4', '1558611848-73f7eb4001a1'],
     },
     team: [
       { title: 'أخصائي علاج طبيعي', specialty: 'الظهر والرقبة · التقييم', photo: '1560250097-0b93528c311a' },
@@ -366,10 +410,12 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'متابعة أسبوعية', category: 'متابعة', duration: '20 دقيقة', description: '' },
       { name: 'باقة 3 أشهر', category: 'باقات', duration: '3 أشهر', description: '' },
     ],
+    // Hero: salad bowl with eggs and avocado · vegetable bowl with chickpeas.
+    // Booking: vegetable bowl with chickpeas · chopping board of vegetables.
     photos: {
-      hero: '1490645935967-10de6ba17061',
-      booking: '1512621776951-a57141f2eefd',
-      space: ['1505576399279-565b52d4ac71', '1466637574441-749b8f19452f', '1473093295043-cdd812d0e601', '1576091160550-2173dba999ef'],
+      hero: ['1490645935967-10de6ba17061', '1512621776951-a57141f2eefd'],
+      booking: ['1512621776951-a57141f2eefd', '1466637574441-749b8f19452f'],
+      space: ['1466637574441-749b8f19452f', '1473093295043-cdd812d0e601', '1490645935967-10de6ba17061', '1512621776951-a57141f2eefd'],
     },
     team: [
       { title: 'أخصائي تغذية', specialty: 'إنقاص الوزن · الخطط العملية', photo: '1560250097-0b93528c311a' },
@@ -395,21 +441,54 @@ export const WELLNESS_NICHES: WellnessNiche[] = [
       { name: 'ليزر إزالة الشعر', category: 'ليزر', duration: '30 دقيقة', description: '' },
       { name: 'نضارة البشرة', category: 'بشرة', duration: '45 دقيقة', description: '' },
     ],
+    // Hero: clinic corridor with framed prints and armchairs · empty white treatment room.
+    // Booking: amber bottles and tubes on a dark table · plain white tube among water drops.
     photos: {
-      hero: '1616394584738-fc6e612e71b9',
-      booking: '1631730359585-38a4935cbec4',
-      space: ['1551076805-e1869033e561', '1552693673-1bf958298935', '1519494026892-80bbd2d6fd0d', '1629198688000-71f23e745b6e'],
+      hero: ['1787496994867-939269b4d323', '1551076805-e1869033e561'],
+      booking: ['1631730359585-38a4935cbec4', '1616750819456-5cdee9b85d22'],
+      space: ['1551076805-e1869033e561', '1787496994867-939269b4d323', '1786937680099-779e1da6f7f7', '1620733723572-11c53f73a416'],
     },
     team: [
       { title: 'طبيبة تجميل', specialty: 'الاستشارة · الحقن', photo: '1631730359585-38a4935cbec4' },
       { title: 'أخصائية ليزر', specialty: 'إزالة الشعر · البشرة', photo: '1551076805-e1869033e561' },
-      { title: 'أخصائية بشرة', specialty: 'النضارة · العناية بعد الجلسة', photo: '1629198688000-71f23e745b6e' },
+      { title: 'أخصائية بشرة', specialty: 'النضارة · العناية بعد الجلسة', photo: '1616750819456-5cdee9b85d22' },
     ],
     icons: ['clinic', 'verified', 'secure', 'vision', 'calendar-check', 'cosmetics', 'users', 'timer'],
     voice:
       'A laser and cosmetic clinic. Clients worry about safety, pain, and looking unnatural. Lead with the doctor, a consultation first, the device used if given, natural results, and honest session counts. Calm and medical-professional, not salesy.',
     avoid: ['miracle', 'painless guaranteed', 'journey', 'transformation', 'flawless'],
     keywords: ['ليزر', 'تجميل', 'فيلر', 'بوتوكس', 'laser', 'aesthetic', 'clinic'],
+  },
+  {
+    id: 'gym',
+    label: 'جيم ولياقة',
+    hint: 'جيم، EMS، تدريب شخصي',
+    type: 'صالة رياضية (جيم)',
+    icon: 'gym',
+    preset: 'noir',
+    categories: ['اشتراكات', 'تدريب شخصي', 'EMS', 'كلاسات', 'أخرى'],
+    starters: [
+      { name: 'اشتراك شهري', category: 'اشتراكات', duration: 'شهر', description: '' },
+      { name: 'حصة تدريب شخصي', category: 'تدريب شخصي', duration: '60 دقيقة', description: '' },
+      { name: 'جلسة EMS', category: 'EMS', duration: '20 دقيقة', description: '' },
+    ],
+    // Hero: dark weights floor, benches and racks · row of dumbbells in a warehouse gym · open industrial weights floor · dumbbell racks in black and white.
+    // Booking: hand taking a hex dumbbell off the rack · dumbbells on a rack by a block wall · orange-rimmed dumbbells on a rack.
+    photos: {
+      hero: ['1689877020200-403d8542d95d', '1576678927484-cc907957088c', '1623874514711-0f321325f318', '1544033527-b192daee1f5b'],
+      booking: ['1674834727149-00812f907676', '1597076537061-a6b58163aa45', '1741156229623-da94e6d7977d'],
+      space: ['1558611848-73f7eb4001a1', '1778828494354-9b717d36dc99', '1623874514711-0f321325f318', '1576678927484-cc907957088c'],
+    },
+    team: [
+      { title: 'مدرب لياقة', specialty: 'الأوزان · خطة التمرين', photo: '1576678927484-cc907957088c' },
+      { title: 'مدرب شخصي', specialty: 'خسارة الوزن · بناء العضلات', photo: '1674834727149-00812f907676' },
+      { title: 'مدرب EMS', specialty: 'جلسات EMS · المتابعة', photo: '1623874514711-0f321325f318' },
+    ],
+    icons: ['gym', 'heartbeat', 'timer', 'calendar-check', 'users', 'target', 'trophy', 'secure'],
+    voice:
+      'A gym or fitness studio (weights, cardio, personal training, EMS). Clients want to lose weight, get stronger or get back in shape and worry about not knowing the machines, crowded hours and quitting after a month. Talk about a coach who shows them the basics, a plan that fits their schedule, women-only hours if the owner gives them, and steady progress they can measure. No before/after promises, no kilos-in-a-month numbers.',
+    avoid: ['beast mode', 'no pain no gain', 'shredded', 'journey', 'transformation', 'miracle'],
+    keywords: ['جيم', 'صالة رياضية', 'لياقة', 'كمال أجسام', 'كروس فيت', 'ems', 'gym', 'fitness', 'crossfit'],
   },
 ]
 
@@ -429,4 +508,12 @@ export function resolveWellnessNiche(id?: string | null, typed?: string | null):
     if (hit) return hit
   }
   return getWellnessNiche(DEFAULT_WELLNESS_NICHE)!
+}
+
+/** This business's hero and booking backdrop from its niche: never the same photo twice on one site. */
+export function pickWellnessPhotos(niche: WellnessNiche, key?: string | null): { hero: string; booking: string } {
+  const seed = photoSeed(key)
+  const hero = pickPhoto(niche.photos.hero, seed)
+  // The high bits pick the second photo, so it turns independently of the hero.
+  return { hero, booking: pickPhoto(niche.photos.booking, seed >>> 16, hero) }
 }
