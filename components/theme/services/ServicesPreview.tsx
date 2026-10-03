@@ -189,7 +189,7 @@ function TopBar({ content, isDark }: { content: ServiceContent; isDark: boolean 
           {content.areas.response_time ? <><span>•</span><span>{content.areas.response_time}</span></> : null}
         </div>
         <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
-          <a href={`tel:${content.footer.phone}`} className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.phone}</a>
+          <a href={`tel:${content.footer.phone}`} dir="ltr" className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.phone}</a>
           <span>•</span>
           <a href={`mailto:${content.footer.email}`} className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.email}</a>
         </div>
@@ -786,7 +786,7 @@ function Footer({ content, isDark }: { content: ServiceContent; isDark: boolean 
         <div>
           <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>تواصل</p>
           <div className="mt-2 text-sm">
-            {content.footer.phone ? <a href={`tel:${content.footer.phone}`} className="flex min-h-[44px] items-center">{content.footer.phone}</a> : null}
+            {content.footer.phone ? <a href={`tel:${content.footer.phone}`} className="flex min-h-[44px] items-center"><bdi dir="ltr">{content.footer.phone}</bdi></a> : null}
             {content.footer.email ? <a href={`mailto:${content.footer.email}`} className="flex min-h-[44px] items-center">{content.footer.email}</a> : null}
             {content.footer.address && <p className="mt-2" style={{ color: 'var(--sv-muted)' }}>{content.footer.address}</p>}
           </div>

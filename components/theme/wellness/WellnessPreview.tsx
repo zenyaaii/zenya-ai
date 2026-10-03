@@ -199,7 +199,8 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
     { label: 'الرئيسية', view: 'home' },
     { label: 'الجلسات', view: 'treatments' },
     { label: 'مساحتنا', view: 'space' },
-    { label: 'الفريق', view: 'team' },
+    // No team, no team page: TeamSection renders nothing without members.
+    ...(content.team.members.length ? [{ label: 'الفريق', view: 'team' as WellnessView }] : []),
     { label: 'من نحن', view: 'about' },
   ]
   const [menuOpen, setMenuOpen] = useState(false)
@@ -970,7 +971,7 @@ function FooterSection({ content, isDark, onBook }: { content: WellnessContent; 
               تواصل
             </p>
             <div className="space-y-2 text-sm font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
-              <p>{content.footer.phone}</p>
+              {content.footer.phone ? <p><bdi dir="ltr">{content.footer.phone}</bdi></p> : null}
               <p>{content.footer.email}</p>
               {content.footer.address && <p>{content.footer.address}</p>}
             </div>
