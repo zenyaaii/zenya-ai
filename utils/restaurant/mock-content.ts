@@ -16,7 +16,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
     primary_cta: 'احجز طاولة',
     secondary_cta: 'شاهد القائمة',
     image:
-      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=80'
+      'https://images.unsplash.com/photo-1669310097451-826ff0e66b9a?auto=format&fit=crop&w=2000&q=80'
   },
   story: {
     eyebrow: 'قصتنا',
@@ -122,7 +122,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
       { url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1400&q=80', alt: 'طبق من الأعلى' },
       { url: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1400&q=80', alt: 'طبق التوقيع' },
       { url: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=1400&q=80', alt: 'تفاصيل طبق' },
-      { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&q=80', alt: 'قاعة الطعام' },
+      { url: 'https://images.unsplash.com/photo-1602232037779-30b01ac3c457?auto=format&fit=crop&w=1400&q=80', alt: 'قاعة الطعام' },
       { url: 'https://images.unsplash.com/photo-1485921325833-c519f76c4927?auto=format&fit=crop&w=1400&q=80', alt: 'خضراوات موسمية' }
     ]
   },

@@ -46,7 +46,7 @@ export default function DemoPage() {
   }
 
   // Using a placeholder image that looks like a product
-  const mockImage = "https://images.unsplash.com/photo-1558317374-a354d5f6d40b?q=80&w=1000&auto=format&fit=crop"
+  const mockImage = "https://images.unsplash.com/photo-1653990480360-31a12ce9723e?q=80&w=1000&auto=format&fit=crop"
   const colors = { primary: "#3b82f6", secondary: "#10b981" }
 
   return (

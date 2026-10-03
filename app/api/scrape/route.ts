@@ -334,10 +334,10 @@ export async function POST(req: NextRequest) {
         name: 'Smart Yoga Mat (Demo Product)',
         description: 'A smart yoga mat that helps you stay consistent with guided sessions and posture feedback.',
         images: [
-          'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1544367563-12123d897577?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1763004871583-4183d64096b1?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1570882676925-4d3fac25f94f?auto=format&fit=crop&w=800&q=80',
           'https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=800&q=80',
-          'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1767605523281-8b54b3692078?auto=format&fit=crop&w=800&q=80',
         ],
         price: 49.99,
         originalPrice: 99.99,
