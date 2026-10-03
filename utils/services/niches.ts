@@ -85,8 +85,8 @@ export const SERVICE_NICHES: ServiceNiche[] = [
       // Foam sprayed on a black sports car in a garage · white car under foam ·
       // wet black wheel on a dark bay.
       hero: ['1608506375591-b90e1f955e4b', '1611239179213-d972da54091a', '1708805283017-c662be2c7a44'],
-      // Brush on a foamed red rim · gloved hand brushing a tyre · man machine-polishing a black car.
-      story: ['1565689876697-e467b6c54da2', '1708805282683-50a060eba80f', '1708805282706-f44730b7e527'],
+      // Brush on a foamed red rim · gloved hand brushing a tyre.
+      story: ['1565689876697-e467b6c54da2', '1708805282683-50a060eba80f'],
     },
     keywords: ['غسيل سيارات', 'غسيل وتلميع', 'تلميع', 'مغسلة', 'ديتيلنج', 'car wash', 'detailing'],
   },
