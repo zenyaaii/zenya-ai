@@ -8,7 +8,7 @@ import { ICON_VOCAB_PROMPT } from '@/components/icons/vocab'
 import { wellnessInputSchema, type WellnessInput } from '@/utils/wellness/input'
 import type { WellnessContent } from '@/utils/wellness/types'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
-import { resolveWellnessNiche, unsplash } from '@/utils/wellness/niches'
+import { pickWellnessPhotos, resolveWellnessNiche, unsplash } from '@/utils/wellness/niches'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -198,8 +198,10 @@ function mergeIntoContent(input: WellnessInput, ai: any): WellnessContent {
   // Owner uploads win. The hero and booking backdrops may fall back to the
   // niche's mood photos, which claim nothing. "The space" is shown as theirs,
   // so it takes only their own photos: none uploaded, no photo grid.
-  const heroImage = input.visuals?.hero_image_url || unsplash(niche.photos.hero, 2400)
-  const bookingImage = input.visuals?.hero_image_url || unsplash(niche.photos.booking, 2000)
+  // Which of the niche's photos is this business's own pick, from its name.
+  const photos = pickWellnessPhotos(niche, input.brand.name)
+  const heroImage = input.visuals?.hero_image_url || unsplash(photos.hero, 2400)
+  const bookingImage = input.visuals?.hero_image_url || unsplash(photos.booking, 2000)
   const spaceUrls = splitLines(input.visuals?.space_image_urls || '').filter((u) => /^https?:\/\//.test(u))
   const spaceImages = spaceUrls.slice(0, 4).map((url) => ({ url }))
 
