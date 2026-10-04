@@ -70,7 +70,10 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const url = `${SITE}/templates/${t.slug}`
   const article = ARTICLES[t.key as Article["key"]]
   return {
-    title: t.title,
+    // absolute, with the wordmark written out: templates/layout.tsx sets a
+    // plain title, which stops the root "· زينيا" template from reaching
+    // this page, and every other page of the site ends in the name.
+    title: { absolute: `${t.title} · زينيا` },
     description: t.metaDescription,
     keywords: Array.from(new Set([...t.keywords, ...(article?.meta.keywords ?? [])])),
     alternates: {
