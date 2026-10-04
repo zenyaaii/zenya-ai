@@ -32,16 +32,17 @@
 import type { Metadata } from 'next'
 import ReviewView from '@/components/zenya/review/ReviewView'
 import { REVIEW_REWARD_AR } from '@/lib/review-reward'
+import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
   title: 'قيّم تجربتك مع زينيا',
   description: `شارك تجربتك الصادقة مع زينيا — في صالحنا أو لم تكن — واحصل على ${REVIEW_REWARD_AR} كشكرٍ على وقتك. نقرأ كل مراجعة قبل نشرها.`,
   alternates: { canonical: '/review' },
-  openGraph: {
+  ...share({
     title: 'قيّم تجربتك مع زينيا',
     description: 'شارك تجربتك الصادقة. نقرأ كل مراجعة قبل نشرها، ولا نعرض شهادات مُختلَقة.',
     url: 'https://zenyaai.co/review',
-  },
+  }),
 }
 
 export default function ReviewPage() {

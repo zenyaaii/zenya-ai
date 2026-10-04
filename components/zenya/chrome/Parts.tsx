@@ -158,6 +158,7 @@ export function CtaBand({
   title = "جرّب زينيا مجانًا الآن",
   subtitle = "اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.",
   primaryLabel = "ابدأ الإنشاء مجانًا",
+  primaryHref = "/login?mode=signup",
   secondaryLabel = "شاهد الأسعار",
   secondaryHref = "/pricing",
   children,
@@ -169,6 +170,8 @@ export function CtaBand({
   title?: string
   subtitle?: string
   primaryLabel?: string
+  /** A template page sends its band to that template's wizard, not signup. */
+  primaryHref?: string
   secondaryLabel?: string
   secondaryHref?: string
   children?: React.ReactNode
@@ -185,7 +188,7 @@ export function CtaBand({
       <p className="zx-band-p">{subtitle}</p>
       {children}
       <div className="zx-acts">
-        <Link href="/login?mode=signup" className="zx-act-1">{primaryLabel}</Link>
+        <Link href={primaryHref} className="zx-act-1">{primaryLabel}</Link>
         <Link href={secondaryHref} className="zx-act-2">{secondaryLabel}</Link>
       </div>
     </section>

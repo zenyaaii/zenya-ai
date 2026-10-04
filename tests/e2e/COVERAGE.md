@@ -11,7 +11,7 @@ Status legend: ✅ covered · 🟡 partial · ⬜ not yet · 🔒 needs test-mod
       (dark mode intentionally N/A — product is light-only by design)
 - ⬜ Nav + footer links all resolve (no 404s)
 - ⬜ `/compare/[slug]` for all 5 competitor pages
-- ⬜ `/websites/[slug]` gallery pages
+- ⬜ `/templates/[slug]` template pages
 - ⬜ SEO: sitemap.xml, robots, llms.txt, per-page `<title>`/OG/JSON-LD
 - ⬜ Visual regression snapshots (per-page pixel baseline)
 

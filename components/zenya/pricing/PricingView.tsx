@@ -64,14 +64,14 @@ const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "90
 const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
 
 const TEMPLATES = [
-  { href: "/demo", label: "متجر" },
-  { href: "/demo/restaurant", label: "مطعم" },
-  { href: "/demo/atlas", label: "تطبيق" },
-  { href: "/demo/lookbook", label: "أزياء" },
-  { href: "/demo/collective", label: "تشكيلة" },
-  { href: "/demo/studio", label: "ستوديو" },
-  { href: "/demo/services", label: "خدمات" },
-  { href: "/demo/wellness", label: "عافية" },
+  { href: "/templates/one-product-store", label: "متجر" },
+  { href: "/templates/restaurant", label: "مطعم" },
+  { href: "/templates/app-landing-page", label: "تطبيق" },
+  { href: "/templates/fashion-lookbook", label: "أزياء" },
+  { href: "/templates/online-store", label: "تشكيلة" },
+  { href: "/templates/brand-story", label: "ستوديو" },
+  { href: "/templates/services", label: "خدمات" },
+  { href: "/templates/wellness", label: "عافية" },
 ]
 
 /* A definite closed width is what makes the sideways growth animatable at all:

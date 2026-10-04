@@ -141,14 +141,14 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * as an Unsplash cover standing in for a template.
  */
 const TEMPLATES = [
-  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, demo: "/demo",            build: "/build",                  shopify: true, soon: true },
-  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, demo: "/demo/restaurant", build: "/theme/new/restaurant" },
-  { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, demo: "/demo/atlas",      build: "/theme/new/atlas" },
-  { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, demo: "/demo/lookbook",   build: "/theme/new/lookbook" },
-  { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, demo: "/demo/collective", build: "/theme/new/collective" },
-  { id: "studio",      label: "ستوديو", name: "موقع علامة تجارية وقصة",    tagline: "قصة علامة · تحرير",        sections: 12, presets: 4, demo: "/demo/studio",     build: "/theme/new/studio" },
-  { id: "services",    label: "خدمات",  name: "موقع خدمات",                tagline: "خدمات محلية · حِرف",       sections: 13, presets: 4, demo: "/demo/services",   build: "/theme/new/services" },
-  { id: "wellness",    label: "عافية",  name: "موقع مركز عافية",           tagline: "سبا · يوغا · عافية",       sections: 12, presets: 3, demo: "/demo/wellness",   build: "/theme/new/wellness" },
+  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, page: "/templates/one-product-store", demo: "/templates/one-product-store/demo",            build: "/build",                  shopify: true, soon: true },
+  { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, page: "/templates/restaurant", demo: "/templates/restaurant/demo", build: "/theme/new/restaurant" },
+  { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, page: "/templates/app-landing-page", demo: "/templates/app-landing-page/demo",      build: "/theme/new/atlas" },
+  { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, page: "/templates/fashion-lookbook", demo: "/templates/fashion-lookbook/demo",   build: "/theme/new/lookbook" },
+  { id: "collective",  label: "تشكيلة", name: "متجر بمنتجات متعددة",       tagline: "كتالوج · منتجات متعددة",   sections: 10, presets: 4, page: "/templates/online-store", demo: "/templates/online-store/demo", build: "/theme/new/collective" },
+  { id: "studio",      label: "ستوديو", name: "موقع علامة تجارية وقصة",    tagline: "قصة علامة · تحرير",        sections: 12, presets: 4, page: "/templates/brand-story", demo: "/templates/brand-story/demo",     build: "/theme/new/studio" },
+  { id: "services",    label: "خدمات",  name: "موقع خدمات",                tagline: "خدمات محلية · حِرف",       sections: 13, presets: 4, page: "/templates/services", demo: "/templates/services/demo",   build: "/theme/new/services" },
+  { id: "wellness",    label: "عافية",  name: "موقع مركز عافية",           tagline: "سبا · يوغا · عافية",       sections: 12, presets: 3, page: "/templates/wellness", demo: "/templates/wellness/demo",   build: "/theme/new/wellness" },
 ] as const
 
 /* How many tiles lead the grid at 2-across. Two, because eight minus two is
@@ -458,7 +458,7 @@ export default function TemplatesView() {
             row: pushed to the edge by space-between it was 200px of empty
             plate away from the word it belongs to and read as a stray glyph. */}
         <h3 className="zt-name">
-          <Link href={t.demo} className="zt-name-link">{t.name}</Link>
+          <Link href={t.page} className="zt-name-link">{t.name}</Link>
           <ArrowLeft className="zt-arrow" size={16} strokeWidth={1.75} aria-hidden />
         </h3>
         {/* Real counts on the start, the build control on the end. One row, so
@@ -607,7 +607,7 @@ export default function TemplatesView() {
             <div className="zt-drawer-clip">
               <div className="zt-tray-grid">
                 {TEMPLATES.map((t) => (
-                  <Link key={t.id} href={t.demo} className="zt-tray-row" onClick={() => setTrayOpen(false)}>
+                  <Link key={t.id} href={t.page} className="zt-tray-row" onClick={() => setTrayOpen(false)}>
                     {t.label}
                   </Link>
                 ))}
@@ -1253,10 +1253,11 @@ const CSS = `
 
    RAISED ABOVE THE STRETCHED LINK. .zt-name-link::after covers the card, so
    without this the button is under the overlay and every press opens the
-   preview instead of the builder. Verified by clicking rather than by
+   template's page instead of the builder. Verified by clicking rather than by
    reading: elementFromPoint at the button's centre returns .sb-face, a real
    press lands on /theme/new/atlas, and a press anywhere else on the plate or
-   the cover still lands on /demo/atlas.
+   the cover still lands on the card's link: /demo/atlas when this was
+   measured, /templates/app-landing-page since the tiles link to their pages.
 
    WHAT IT COSTS, measured at 1440: the cover's share of a 3-across tile goes
    66.5% -> 63.6% and the tile grows 283 -> 296. The plate is still the

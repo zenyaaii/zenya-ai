@@ -2,11 +2,12 @@ import type { Metadata } from 'next'
 import { hreflangAlternates } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
 import { AR_FAQS } from '@/lib/faq-data'
+import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
   title: 'أسئلة شائعة عن إنشاء موقع بالذكاء الاصطناعي',
   description:
-    'كل ما تريد معرفته عن زينيا — كيف تعمل، القوالب الثمانية، الأسعار، الاستضافة الأوروبية، ربط النطاق، التصدير إلى شوبيفاي، ولغة المحتوى. إجابات واضحة بالعربية والإنجليزية.',
+    'إجابات واضحة عن زينيا: كيف تعمل، القوالب الثمانية، الأسعار، الاستضافة، ربط النطاق، والتصدير إلى شوبيفاي.',
   keywords: [
     'أسئلة شائعة زينيا',
     'كيف تعمل زينيا',
@@ -19,11 +20,11 @@ export const metadata: Metadata = {
     canonical: '/faq',
     languages: hreflangAlternates('https://zenyaai.co/faq', 'https://zenyaai.co/en/faq'),
   },
-  openGraph: {
-    title: 'الأسئلة الشائعة — زينيا',
+  ...share({
+    title: 'الأسئلة الشائعة · زينيا',
     description: 'إجابات واضحة عن زينيا: كيف تعمل، القوالب، الأسعار، الاستضافة، والتصدير.',
     url: 'https://zenyaai.co/faq',
-  },
+  }),
 }
 
 // FAQPage structured data — makes the Q&A eligible for rich results in
