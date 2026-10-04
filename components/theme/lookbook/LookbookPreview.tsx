@@ -74,11 +74,11 @@ function Stars({ rating = 5, color }: { rating?: number; color: string }) {
 }
 
 // ─── صور أزياء (بلا أشخاص) ───────────────────────────────────────────────────
-// سياسة الصور: لا صور لنساء غير محجّبات. صورة الخلفية هنا للأجواء فقط (الواجهة
+// سياسة الصور: لا نساء (ولا أيدٍ أو أرجل نسائية)، ولا وشوم، ولا شعارات أو نصوص. صورة الخلفية هنا للأجواء فقط (الواجهة
 // والنشرة البريدية) ولا تُقدَّم على أنها من أعمال العلامة.
 // المنتجات والإطلالات وقصة العلامة لا تعرض إلا صور المالك المرفوعة، فلا تُنسب
 // صورة من مكتبة عامة إلى العلامة. بلا صور مرفوعة تُرسم البطاقات بلا صورة.
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1800&q=85'
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1540221652346-e5dd6b50f3e7?auto=format&fit=crop&w=1800&q=85'
 const NEWSLETTER_IMAGE = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1800&q=80'
 
 /** The owner's uploaded photo for tile i, cycling through the gallery. None uploaded: undefined. */

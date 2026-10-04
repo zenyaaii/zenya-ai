@@ -54,7 +54,7 @@ function DemoFullContent() {
         heading: "نظّف بذكاء لا بجهد",
         subheading: "أكثر مكنسة لاسلكية تطوّرًا في السوق.",
         cta: "تسوّق الآن",
-        image: "https://images.unsplash.com/photo-1558317374-a309d244678e?q=80&w=1920&auto=format&fit=crop"
+        image: "https://images.unsplash.com/photo-1653990480360-31a12ce9723e?q=80&w=1920&auto=format&fit=crop"
       },
       {
         heading: "أصحاب الحيوانات يحبّوننا",
@@ -90,7 +90,7 @@ function DemoFullContent() {
 
   // Using a reliable placeholder image
   const mockImages = [
-    "https://images.unsplash.com/photo-1558317374-a309d244678e?q=80&w=1000&auto=format&fit=crop", // Hero
+    "https://images.unsplash.com/photo-1653990480360-31a12ce9723e?q=80&w=1000&auto=format&fit=crop", // Hero
     "https://images.unsplash.com/photo-1527515545081-5db817172677?q=80&w=1000&auto=format&fit=crop", // Problem
     "https://images.unsplash.com/photo-1585773690161-7b1cd0accfcf?q=80&w=1000&auto=format&fit=crop", // Solution
     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop"  // Visual Showcase

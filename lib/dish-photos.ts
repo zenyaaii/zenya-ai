@@ -46,7 +46,7 @@ const KINDS: { words: string[]; photo: string }[] = [
   { words: ['فطور', 'افطار', 'breakfast'], photo: u('1533089860892-a7c6f0a88666') },
   { words: ['سلطه', 'تبوله', 'فتوش', 'salad', 'tabbouleh', 'fattoush'], photo: u('1512621776951-a57141f2eefd') },
   { words: ['ساندويش', 'سندويش', 'ساندوتش', 'سندوتش', 'توست', 'sandwich', 'toast', 'panini'], photo: u('1528735602780-2552fd46c7af') },
-  { words: ['بطاطا مقليه', 'بطاطس مقليه', 'فرايز', 'fries'], photo: u('1573080496219-bb080dd4f877') },
+  { words: ['بطاطا مقليه', 'بطاطس مقليه', 'فرايز', 'fries'], photo: u('1665117861973-fffa50c1afec') },
   { words: ['ارز', 'رز', 'rice'], photo: u('1512058564366-18510be2db19') },
   { words: ['عصير برتقال', 'برتقال', 'orange juice'], photo: u('1600271886742-f049cd451bba') },
   { words: ['سموذي', 'عصير', 'smoothie', 'juice'], photo: u('1622597467836-f3285f2131b8') },

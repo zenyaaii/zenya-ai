@@ -21,7 +21,7 @@ export default function Upsell({
     name: "حافظة حماية مميزة",
     price: COMPANY.STARTER_PRICE_USD,
     originalPrice: 29.99,
-    image: "https://images.unsplash.com/photo-1541140532154-b024d705b909?q=80&w=400&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1606039042070-0df93222b09b?q=80&w=400&auto=format&fit=crop"
   }
 
   const handleAdd = () => {
