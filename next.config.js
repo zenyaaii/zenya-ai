@@ -126,15 +126,17 @@ const nextConfig = {
       ]),
       { source: '/websites', destination: '/templates', permanent: true, has: ZENYA_HOST },
       { source: '/websites/:slug', destination: '/templates/:slug', permanent: true, has: ZENYA_HOST },
+      // The embedded app's URL in shopify.app.zenya-ai.toml is /app. The app
+      // itself lives under /shopify; the old builder that sat at /app was
+      // retired, so these always forward (query string, including host and
+      // shop, is kept). /app/license is the app proxy and is not matched.
       {
         source: '/app',
-        has: [{ type: 'query', key: 'host' }],
         destination: '/shopify',
         permanent: false,
       },
       {
         source: '/app/create',
-        has: [{ type: 'query', key: 'host' }],
         destination: '/shopify/new',
         permanent: false,
       },

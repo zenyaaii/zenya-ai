@@ -1,50 +1,176 @@
-interface ShopifyProduct {
-  title: string;
-  body_html: string;
-  vendor: string;
-  product_type: string;
-  images: { src?: string; attachment?: string; filename?: string }[];
-  variants: {
-    price: string;
-    compare_at_price?: string;
-    inventory_policy: string; // 'deny' or 'continue'
-    inventory_management?: string; // 'shopify'
-  }[];
+/**
+ * Creates the scraped product in a merchant's Shopify store.
+ *
+ * GraphQL, not REST. Creating products through REST `products.json` has been
+ * deprecated since 2024-04 and new public apps must use the GraphQL Admin API
+ * only, so this module uses `productCreate` + `productVariantsBulkUpdate`.
+ *
+ * What the merchant gets:
+ *   • every image they picked (up to MAX_IMAGES), re-hosted on Shopify's CDN.
+ *     We download each image ourselves and hand Shopify the bytes through a
+ *     staged upload, because supplier CDNs (AliExpress especially) often refuse
+ *     Shopify's own fetcher. If our download fails we still pass the URL and
+ *     let Shopify try.
+ *   • the price and the "was" price they typed — never a default.
+ *   • stock NOT tracked. The theme and admin would otherwise show "0 in stock"
+ *     for a dropshipping product nobody counted.
+ *   • the product published to the Online Store, so the theme can find it.
+ *     That needs `write_publications`; without it the product is created as a
+ *     hidden draft-for-the-store and `published: false` tells the caller to
+ *     ask the merchant for one click.
+ */
+import { adminGraphql } from '@/lib/build/shopify-push'
+
+const MAX_IMAGES = 10
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024
+const IMAGE_FETCH_TIMEOUT_MS = 8000
+
+export type CreatedShopifyProduct = {
+  /** Numeric id, as used in admin URLs. */
+  id: string
+  gid: string
+  handle: string | null
+  /** True when the product is visible on the Online Store. */
+  published: boolean
+  /** Why it isn't, when it isn't. */
+  publishError: string | null
+  /** Images Shopify was given (it processes them in the background). */
+  imageCount: number
 }
 
-const SHOPIFY_ADMIN_API_VERSION = '2026-01';
+function numericId(gid: string): string {
+  return gid.split('/').pop() || gid
+}
 
-async function fetchImageAttachment(imageUrl: string) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+/** Scraped text → safe HTML paragraphs. Scraped pages are not trusted markup. */
+function descriptionHtml(text: string): string {
+  return text
+    .split(/\n{2,}|\r\n\r\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+    .join('')
+}
+
+function userErrors(label: string, errs: Array<{ field?: string[] | null; message: string }> | undefined) {
+  if (errs?.length) throw new Error(`${label}: ${errs.map((e) => e.message).join('; ').slice(0, 300)}`)
+}
+
+async function downloadImage(url: string): Promise<{ bytes: ArrayBuffer; mimeType: string; filename: string } | null> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), IMAGE_FETCH_TIMEOUT_MS)
   try {
-    const res = await fetch(imageUrl, { signal: controller.signal });
-    if (!res.ok) return null;
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.toLowerCase().startsWith('image/')) return null;
-    const arrayBuffer = await res.arrayBuffer();
-    const buf = Buffer.from(arrayBuffer);
-    if (buf.length === 0) return null;
-    if (buf.length > 2 * 1024 * 1024) return null;
-
-    const filenameFromUrl = (() => {
-      try {
-        const u = new URL(imageUrl);
-        const base = u.pathname.split('/').pop() || 'image';
-        if (base.includes('.')) return base.split('?')[0];
-        const ext = contentType.split('/')[1] || 'jpg';
-        return `${base}.${ext}`;
-      } catch {
-        const ext = contentType.split('/')[1] || 'jpg';
-        return `image.${ext}`;
-      }
-    })();
-
-    return { attachment: buf.toString('base64'), filename: filenameFromUrl };
+    const res = await fetch(url, { signal: controller.signal })
+    if (!res.ok) return null
+    const mimeType = (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase()
+    if (!mimeType.startsWith('image/')) return null
+    const bytes = await res.arrayBuffer()
+    if (bytes.byteLength === 0 || bytes.byteLength > MAX_IMAGE_BYTES) return null
+    const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg'
+    let base = 'image'
+    try {
+      base = (new URL(url).pathname.split('/').pop() || 'image').split('.')[0].replace(/[^\w-]+/g, '') || 'image'
+    } catch {}
+    return { bytes, mimeType, filename: `${base.slice(0, 60)}.${ext}` }
   } catch {
-    return null;
+    return null
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(timeout)
+  }
+}
+
+/**
+ * Turn the picked image URLs into `originalSource` values Shopify can read:
+ * a staged-upload resource URL where we could fetch the bytes, the original
+ * URL where we couldn't.
+ */
+async function stageImages(shop: string, accessToken: string, urls: string[]): Promise<string[]> {
+  const downloads = await Promise.all(urls.map(downloadImage))
+  const toStage = downloads
+    .map((d, i) => ({ d, i }))
+    .filter((x): x is { d: NonNullable<typeof x.d>; i: number } => x.d !== null)
+
+  const sources = [...urls]
+  if (toStage.length === 0) return sources
+
+  try {
+    const data = await adminGraphql(
+      shop,
+      accessToken,
+      `mutation ZenyaStagedImages($input: [StagedUploadInput!]!) {
+        stagedUploadsCreate(input: $input) {
+          stagedTargets { url resourceUrl parameters { name value } }
+          userErrors { field message }
+        }
+      }`,
+      {
+        input: toStage.map(({ d }) => ({
+          resource: 'IMAGE',
+          filename: d.filename,
+          mimeType: d.mimeType,
+          httpMethod: 'POST',
+          fileSize: String(d.bytes.byteLength),
+        })),
+      },
+    )
+    userErrors('stagedUploadsCreate', data?.stagedUploadsCreate?.userErrors)
+    const targets = data?.stagedUploadsCreate?.stagedTargets || []
+
+    await Promise.all(
+      toStage.map(async ({ d, i }, k) => {
+        const target = targets[k]
+        if (!target?.url || !target?.resourceUrl) return
+        const form = new FormData()
+        for (const p of target.parameters || []) form.append(p.name, p.value)
+        form.append('file', new Blob([d.bytes], { type: d.mimeType }), d.filename)
+        const up = await fetch(target.url, { method: 'POST', body: form }).catch(() => null)
+        if (up && (up.ok || up.status === 201)) sources[i] = target.resourceUrl
+      }),
+    )
+  } catch (e) {
+    // Staging is an improvement, not a requirement: fall back to the URLs.
+    console.warn('stageImages: staged upload failed, passing URLs instead:', e)
+  }
+  return sources
+}
+
+async function publishToOnlineStore(shop: string, accessToken: string, productGid: string): Promise<string | null> {
+  try {
+    const data = await adminGraphql(
+      shop,
+      accessToken,
+      `query ZenyaPublications { publications(first: 25) { nodes { id catalog { title } } } }`,
+      {},
+    )
+    const nodes: Array<{ id: string; catalog?: { title?: string } | null }> = data?.publications?.nodes || []
+    const online = nodes.find((n) => /online store/i.test(n.catalog?.title || ''))
+    if (!online) return 'The store has no Online Store sales channel.'
+
+    const res = await adminGraphql(
+      shop,
+      accessToken,
+      `mutation ZenyaPublish($id: ID!, $input: [PublicationInput!]!) {
+        publishablePublish(id: $id, input: $input) { userErrors { field message } }
+      }`,
+      { id: productGid, input: [{ publicationId: online.id }] },
+    )
+    userErrors('publishablePublish', res?.publishablePublish?.userErrors)
+    return null
+  } catch (e: any) {
+    const msg = String(e?.message || e)
+    // Older installs granted only write_products. Say so plainly.
+    if (/access denied|publications/i.test(msg)) {
+      return 'Zenya is missing permission to publish products (write_publications). Reconnect the store, or press Publish on the product in Shopify.'
+    }
+    return msg.slice(0, 300)
   }
 }
 
@@ -52,102 +178,121 @@ export async function createShopifyProduct(
   shop: string,
   accessToken: string,
   productData: {
-    name: string;
-    description: string;
-    images: string[];
-    price: number;
-    originalPrice: number;
-    vendor?: string;
+    name: string
+    description: string
+    images: string[]
+    price: number
+    originalPrice: number
+    /** Brand shown on the product. Left out, Shopify uses the store's name. */
+    vendor?: string
+  },
+): Promise<CreatedShopifyProduct> {
+  const title = productData.name.trim()
+  if (!title) throw new Error('Product name is required.')
+  if (!Number.isFinite(productData.price) || productData.price <= 0) {
+    throw new Error('A sale price above zero is required.')
   }
-) {
-  try {
-    const requestedImages = (productData.images || []).filter(Boolean).slice(0, 5);
-    const firstThree = requestedImages.slice(0, 3);
-    const attachments = await Promise.all(firstThree.map((u) => fetchImageAttachment(u)));
 
-    const imagesPayload = firstThree.map((src, idx) => {
-      const att = attachments[idx];
-      if (att?.attachment) return { attachment: att.attachment, filename: att.filename };
-      return { src };
-    });
-    const remaining = requestedImages.slice(3).map((src) => ({ src }));
+  const imageUrls = (productData.images || [])
+    .map((u) => String(u || '').trim())
+    .filter((u) => /^https?:\/\//i.test(u))
+    .slice(0, MAX_IMAGES)
+  const sources = await stageImages(shop, accessToken, imageUrls)
 
-    const newProduct: ShopifyProduct = {
-      title: productData.name,
-      body_html: productData.description,
-      vendor: productData.vendor || 'Zenya',
-      product_type: 'Zenya Product',
-      images: [...imagesPayload, ...remaining],
-      variants: [
-        {
-          price: productData.price.toString(),
-          compare_at_price: productData.originalPrice > productData.price 
-            ? productData.originalPrice.toString() 
-            : undefined,
-          inventory_policy: 'continue', 
-          inventory_management: 'shopify'
-        }
-      ]
-    };
-
-    const response = await fetch(`https://${shop}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/products.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken,
+  const created = await adminGraphql(
+    shop,
+    accessToken,
+    `mutation ZenyaProductCreate($product: ProductCreateInput!, $media: [CreateMediaInput!]) {
+      productCreate(product: $product, media: $media) {
+        product { id handle variants(first: 1) { nodes { id } } }
+        userErrors { field message }
+      }
+    }`,
+    {
+      product: {
+        title,
+        descriptionHtml: descriptionHtml(productData.description || ''),
+        ...(productData.vendor?.trim() ? { vendor: productData.vendor.trim() } : {}),
+        status: 'ACTIVE',
       },
-      body: JSON.stringify({ product: newProduct }),
-    });
+      media: sources.map((src) => ({ originalSource: src, mediaContentType: 'IMAGE', alt: title })),
+    },
+  )
+  userErrors('productCreate', created?.productCreate?.userErrors)
+  const product = created?.productCreate?.product
+  if (!product?.id) throw new Error('productCreate returned no product.')
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Failed to create Shopify product:', errorText);
-      throw new Error(`Shopify API Error: ${response.statusText}`);
-    }
+  const variantId = product.variants?.nodes?.[0]?.id
+  if (variantId) {
+    const compareAt =
+      Number.isFinite(productData.originalPrice) && productData.originalPrice > productData.price
+        ? productData.originalPrice.toFixed(2)
+        : null
+    const priced = await adminGraphql(
+      shop,
+      accessToken,
+      `mutation ZenyaVariantPrice($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+        productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+          productVariants { id }
+          userErrors { field message }
+        }
+      }`,
+      {
+        productId: product.id,
+        variants: [{
+          id: variantId,
+          price: productData.price.toFixed(2),
+          compareAtPrice: compareAt,
+          inventoryItem: { tracked: false },
+        }],
+      },
+    )
+    userErrors('productVariantsBulkUpdate', priced?.productVariantsBulkUpdate?.userErrors)
+  }
 
-    const data = await response.json();
-    return data.product; // Returns the created product object (id, handle, etc.)
-  } catch (error) {
-    console.error('Error in createShopifyProduct:', error);
-    throw error;
+  const publishError = await publishToOnlineStore(shop, accessToken, product.id)
+
+  return {
+    id: numericId(product.id),
+    gid: product.id,
+    handle: product.handle || null,
+    published: publishError === null,
+    publishError,
+    imageCount: sources.length,
   }
 }
 
 export async function upsertProductMetafield(params: {
-  shop: string;
-  accessToken: string;
-  productId: number | string;
-  namespace: string;
-  key: string;
-  type: string;
-  value: unknown;
+  shop: string
+  accessToken: string
+  productId: number | string
+  namespace: string
+  key: string
+  type: string
+  value: unknown
 }) {
-  const { shop, accessToken, productId, namespace, key, type, value } = params;
+  const { shop, accessToken, productId, namespace, key, type, value } = params
+  const ownerId = String(productId).startsWith('gid://') ? String(productId) : `gid://shopify/Product/${productId}`
 
-  const response = await fetch(
-    `https://${shop}/admin/api/${SHOPIFY_ADMIN_API_VERSION}/products/${productId}/metafields.json`,
+  const data = await adminGraphql(
+    shop,
+    accessToken,
+    `mutation ZenyaMetafield($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) {
+        metafields { id }
+        userErrors { field message }
+      }
+    }`,
     {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': accessToken,
-      },
-      body: JSON.stringify({
-        metafield: {
-          namespace,
-          key,
-          type,
-          value: typeof value === 'string' ? value : JSON.stringify(value),
-        },
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Failed to save metafield: ${response.status} ${errorText.slice(0, 400)}`);
-  }
-
-  const data = await response.json();
-  return data.metafield;
+      metafields: [{
+        ownerId,
+        namespace,
+        key,
+        type,
+        value: typeof value === 'string' ? value : JSON.stringify(value),
+      }],
+    },
+  )
+  userErrors('metafieldsSet', data?.metafieldsSet?.userErrors)
+  return data?.metafieldsSet?.metafields?.[0] || null
 }

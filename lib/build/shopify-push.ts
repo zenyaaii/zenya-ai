@@ -7,9 +7,10 @@
 import JSZip from 'jszip'
 import type { ThemeFiles } from './theme-generator'
 
-const API_VERSION = '2026-01'
+export const SHOPIFY_ADMIN_API_VERSION = '2026-01'
+const API_VERSION = SHOPIFY_ADMIN_API_VERSION
 
-async function adminGraphql(shop: string, accessToken: string, query: string, variables: Record<string, unknown>) {
+export async function adminGraphql(shop: string, accessToken: string, query: string, variables: Record<string, unknown>) {
   const res = await fetch(`https://${shop}/admin/api/${API_VERSION}/graphql.json`, {
     method: 'POST',
     headers: {
