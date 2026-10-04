@@ -70,7 +70,7 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
     links: [
       { href: "/templates", label: "تصفّح القوالب" },
       { href: "/features", label: "الميزات" },
-      { href: "/websites", label: "أنواع المواقع" },
+      { href: "/templates/restaurant", label: "موقع مطعم" },
       { href: "/pricing", label: "الأسعار" },
       { href: "/compare", label: "المقارنات" },
     ],

@@ -16,15 +16,19 @@ import type { QA } from '@/lib/faq-data'
 export type TemplatePage = {
   /** business_type key — also the theme-preview id + aurora tint key. */
   key: string
-  /** URL slug under /websites/<slug>. */
+  /** URL slug: the page lives at /templates/<slug>. */
   slug: string
   /** Short Arabic label (matches auroraTints). */
   label: string
   /** Full Arabic page name, e.g. "موقع مطعم". */
   name: string
   accent: string
-  /** Live demo route. */
+  /** Live demo, at /templates/<slug>/demo. next.config rewrites it onto the
+   *  real route under app/demo and 301s the old /demo/<key> address here. */
   demoHref: string
+  /** Where "start building" goes: the wizard for this type. one_product has no
+   *  public wizard yet (/build is admin-only), so it points at the gallery. */
+  buildHref: string
   title: string
   metaDescription: string
   h1: ReactNode
@@ -62,7 +66,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'مطعم',
     name: 'موقع مطعم',
     accent: '#c8a96a',
-    demoHref: '/demo/restaurant',
+    demoHref: '/templates/restaurant/demo',
+    buildHref: '/theme/new/restaurant',
     title: 'إنشاء موقع مطعم احترافي بالذكاء الاصطناعي',
     metaDescription:
       'أنشئ موقع مطعم احترافيًّا بالعربية خلال دقائق: قائمة طعام أنيقة، صور الأطباق، ساعات العمل والموقع، ودعوة للحجز — يكتبها الذكاء الاصطناعي. استضافة ونطاق مخصّص.',
@@ -94,7 +99,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'تطبيق',
     name: 'صفحة هبوط لتطبيق',
     accent: '#5e6ad2',
-    demoHref: '/demo/atlas',
+    demoHref: '/templates/app-landing-page/demo',
+    buildHref: '/theme/new/atlas',
     title: 'إنشاء صفحة هبوط لتطبيق بالذكاء الاصطناعي',
     metaDescription:
       'صفحة هبوط احترافية لتطبيقك أو منتجك البرمجي خلال دقائق: عرض المميزات، لقطات الشاشة، الأسعار، ودعوات التحميل — يكتبها الذكاء الاصطناعي بالعربية. استضافة ونطاق.',
@@ -126,7 +132,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'أزياء',
     name: 'موقع أزياء ولوك بوك',
     accent: '#1c1c1c',
-    demoHref: '/demo/lookbook',
+    demoHref: '/templates/fashion-lookbook/demo',
+    buildHref: '/theme/new/lookbook',
     title: 'إنشاء موقع أزياء ولوك بوك بالذكاء الاصطناعي',
     metaDescription:
       'موقع أزياء أو لوك بوك بصري راقٍ خلال دقائق: معرض تشكيلات، صور بأسلوب المجلة، وقصة العلامة — يكتبه الذكاء الاصطناعي بالعربية. استضافة ونطاق مخصّص.',
@@ -158,7 +165,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'تشكيلة',
     name: 'متجر إلكتروني بمنتجات متعددة',
     accent: '#10b981',
-    demoHref: '/demo/collective',
+    demoHref: '/templates/online-store/demo',
+    buildHref: '/theme/new/collective',
     title: 'إنشاء متجر إلكتروني بمنتجات متعددة بالذكاء الاصطناعي',
     metaDescription:
       'متجر إلكتروني احترافي بمنتجات متعددة خلال دقائق: عرض التشكيلة والفئات، بطاقات منتجات، وقصة العلامة — يكتبه الذكاء الاصطناعي بالعربية، مع تصدير إلى شوبيفاي للدفع الآمن.',
@@ -190,7 +198,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'ستوديو',
     name: 'موقع علامة تجارية وقصة',
     accent: '#1c1c1c',
-    demoHref: '/demo/studio',
+    demoHref: '/templates/brand-story/demo',
+    buildHref: '/theme/new/studio',
     title: 'إنشاء موقع علامة تجارية وقصة بالذكاء الاصطناعي',
     metaDescription:
       'موقع تحريري يحكي قصة علامتك التجارية خلال دقائق: القيم، الأعمال، الفريق، والتواصل — يكتبه الذكاء الاصطناعي بالعربية. استضافة أوروبية ونطاق مخصّص.',
@@ -222,7 +231,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'خدمات',
     name: 'موقع خدمات',
     accent: '#f59e0b',
-    demoHref: '/demo/services',
+    demoHref: '/templates/services/demo',
+    buildHref: '/theme/new/services',
     title: 'إنشاء موقع خدمات احترافي بالذكاء الاصطناعي',
     metaDescription:
       'موقع خدمات احترافي خلال دقائق: قائمة الخدمات، الباقات والأسعار، لماذا تختارنا، ودعوة للحجز — يكتبه الذكاء الاصطناعي بالعربية. استضافة ونطاق مخصّص.',
@@ -254,7 +264,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'عافية',
     name: 'موقع مركز عافية',
     accent: '#14b8a6',
-    demoHref: '/demo/wellness',
+    demoHref: '/templates/wellness/demo',
+    buildHref: '/theme/new/wellness',
     title: 'إنشاء موقع مركز عافية وسبا بالذكاء الاصطناعي',
     metaDescription:
       'موقع هادئ يبعث الثقة لمركز عافية أو سبا أو يوغا خلال دقائق: الجلسات، الجدول، المدرّبون، ودعوة للحجز — يكتبه الذكاء الاصطناعي بالعربية. استضافة ونطاق.',
@@ -286,7 +297,8 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
     label: 'متجر',
     name: 'متجر بمنتج واحد',
     accent: '#6366f1',
-    demoHref: '/demo',
+    demoHref: '/templates/one-product-store/demo',
+    buildHref: '/templates',
     title: 'إنشاء متجر بمنتج واحد عالي التحويل بالذكاء الاصطناعي',
     metaDescription:
       'صفحة متجر مركّزة لمنتج واحد عالية التحويل خلال دقائق: فوائد المنتج، صور، تقييمات، ودعوة قوية للشراء — يكتبها الذكاء الاصطناعي بالعربية، مع تصدير إلى شوبيفاي للدفع.',
@@ -316,4 +328,10 @@ export const TEMPLATE_PAGES: TemplatePage[] = [
 
 export function getTemplatePage(slug: string): TemplatePage | undefined {
   return TEMPLATE_PAGES.find((t) => t.slug === slug)
+}
+
+/** The template page for a business_type key, e.g. 'atlas' → '/templates/app-landing-page'. */
+export function templateHrefForKey(key: string): string {
+  const t = TEMPLATE_PAGES.find((x) => x.key === key)
+  return t ? `/templates/${t.slug}` : '/templates'
 }

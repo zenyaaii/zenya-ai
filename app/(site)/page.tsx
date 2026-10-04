@@ -282,14 +282,14 @@ type PanelId = "themes" | "account"
    which is not a page of this site and was never a candidate for one. The
    labels track lib/aurora-tints. */
 const TEMPLATES = [
-  { href: "/demo", label: "متجر" },
-  { href: "/demo/restaurant", label: "مطعم" },
-  { href: "/demo/atlas", label: "تطبيق" },
-  { href: "/demo/lookbook", label: "أزياء" },
-  { href: "/demo/collective", label: "تشكيلة" },
-  { href: "/demo/studio", label: "ستوديو" },
-  { href: "/demo/services", label: "خدمات" },
-  { href: "/demo/wellness", label: "عافية" },
+  { href: "/templates/one-product-store", label: "متجر" },
+  { href: "/templates/restaurant", label: "مطعم" },
+  { href: "/templates/app-landing-page", label: "تطبيق" },
+  { href: "/templates/fashion-lookbook", label: "أزياء" },
+  { href: "/templates/online-store", label: "تشكيلة" },
+  { href: "/templates/brand-story", label: "ستوديو" },
+  { href: "/templates/services", label: "خدمات" },
+  { href: "/templates/wellness", label: "عافية" },
 ]
 
 /* The deck: how long one screen takes to replace the other, and how long the

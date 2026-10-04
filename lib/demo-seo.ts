@@ -3,7 +3,7 @@
  *
  * Why this file exists: every `/demo/*` page is a `"use client"` component,
  * so it cannot export `metadata` itself. Before this, all nine demo URLs were
- * shipped in sitemap.xml while inheriting the ROOT title verbatim — nine
+ * shipped in sitemap.xml (they are out of it now, and noindexed, see below) while inheriting the ROOT title verbatim — nine
  * different pages telling Google they were the same page. Google resolves that
  * by keeping one and dropping the rest, which is exactly what was happening.
  *
@@ -24,7 +24,7 @@ export type DemoSeo = {
   title: string
   description: string
   keywords: string[]
-  /** The matching long-form landing page, for the canonical cluster. */
+  /** The template's own page. The demo is served at `${related}/demo`. */
   related: string
 }
 
@@ -35,7 +35,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'شاهد قالب متجر المنتج الواحد وهو يعمل: صفحة هبوط كاملة بالعربية مع عرض المنتج والمزايا والأسئلة الشائعة ودعوة الشراء. معاينة حقيقية قابلة للتصفّح قبل أن تنشئ متجرك.',
     keywords: ['معاينة قالب متجر', 'قالب متجر منتج واحد', 'صفحة هبوط منتج', 'متجر إلكتروني عربي', 'نموذج متجر جاهز'],
-    related: '/websites/one-product-store',
+    related: '/templates/one-product-store',
   },
   {
     slug: 'restaurant',
@@ -43,7 +43,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب موقع المطعم كاملًا: قائمة الطعام والصور وساعات العمل والموقع وحجز الطاولات. تصفّح النموذج بالعربية كما سيراه زبائنك قبل أن تبني موقع مطعمك.',
     keywords: ['قالب موقع مطعم', 'تصميم موقع مطعم', 'موقع مطعم جاهز', 'قائمة طعام إلكترونية', 'حجز طاولات أونلاين'],
-    related: '/websites/restaurant',
+    related: '/templates/restaurant',
   },
   {
     slug: 'atlas',
@@ -51,7 +51,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب صفحة هبوط التطبيقات والبرمجيات: عرض المزايا وخطط الأسعار والتكاملات والوثائق. نموذج عربي حيّ يوضّح كيف ستبدو صفحة إطلاق تطبيقك.',
     keywords: ['صفحة هبوط تطبيق', 'قالب موقع تطبيق', 'صفحة هبوط SaaS', 'موقع برنامج', 'landing page عربي'],
-    related: '/websites/app-landing-page',
+    related: '/templates/app-landing-page',
   },
   {
     slug: 'lookbook',
@@ -59,7 +59,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب الأزياء واللوك بوك: عرض المجموعات بالصور الكبيرة، صفحة المتجر، وقصة العلامة. تصفّح النموذج العربي كاملًا قبل أن تنشئ موقع علامتك.',
     keywords: ['قالب موقع أزياء', 'لوك بوك إلكتروني', 'موقع براند ملابس', 'عرض مجموعات أزياء', 'متجر أزياء عربي'],
-    related: '/websites/fashion-lookbook',
+    related: '/templates/fashion-lookbook',
   },
   {
     slug: 'collective',
@@ -67,7 +67,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب المتجر متعدّد المنتجات: عرض الأصناف والتصنيفات وصفحات المنتج ورحلة الشراء. نموذج عربي حيّ للمتاجر التي تبيع أكثر من منتج واحد.',
     keywords: ['قالب متجر إلكتروني', 'تصميم متجر أونلاين', 'موقع بيع منتجات', 'متجر متعدد المنتجات', 'تجارة إلكترونية عربية'],
-    related: '/websites/online-store',
+    related: '/templates/online-store',
   },
   {
     slug: 'studio',
@@ -75,7 +75,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب الاستوديو وقصة العلامة: صفحة "من نحن"، منهجية العمل، الفريق، والتواصل. مناسب للوكالات والاستوديوهات والعلامات التي تبيع بالسرد لا بالكتالوج.',
     keywords: ['موقع وكالة', 'قالب استوديو تصميم', 'صفحة من نحن', 'موقع قصة علامة تجارية', 'موقع شركة إبداعية'],
-    related: '/websites/brand-story',
+    related: '/templates/brand-story',
   },
   {
     slug: 'services',
@@ -83,7 +83,7 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب مقدّمي الخدمات: قائمة الخدمات والأسعار وخطوات العمل ونموذج طلب الخدمة. نموذج عربي حيّ للعيادات والمكاتب والحرفيّين والمستقلّين.',
     keywords: ['موقع خدمات', 'قالب موقع شركة خدمات', 'موقع مكتب استشارات', 'صفحة عرض خدمات', 'موقع مستقل فريلانسر'],
-    related: '/websites/services',
+    related: '/templates/services',
   },
   {
     slug: 'wellness',
@@ -91,23 +91,31 @@ export const DEMO_SEO: DemoSeo[] = [
     description:
       'قالب مراكز العافية والسبا واليوغا: الجلسات والمعالجات والفريق والمساحة وحجز المواعيد. تصفّح النموذج العربي قبل أن تبني موقع مركزك.',
     keywords: ['موقع سبا', 'قالب مركز عافية', 'موقع يوغا', 'حجز جلسات أونلاين', 'موقع مركز تجميل'],
-    related: '/websites/wellness',
+    related: '/templates/wellness',
   },
 ]
 
 const BY_SLUG = new Map(DEMO_SEO.map((d) => [d.slug, d]))
 
-/** Build the Next metadata for one demo route. `slug` '' is the /demo index. */
+/**
+ * Build the Next metadata for one demo route. `slug` '' is the /demo index.
+ *
+ * NOINDEX, FOLLOW (2026-10-04). The demos used to be indexed, and a search
+ * for the brand once put the wellness demo first: a preview of a customer's
+ * spa standing in for Zenya. Each demo now lives under its template at
+ * /templates/<slug>/demo, and only the template page is meant to rank.
+ * follow stays on so the links inside the demo still count.
+ */
 export function demoMetadata(slug: string): Metadata {
   const d = BY_SLUG.get(slug)
   if (!d) return {}
-  const url = d.slug ? `${SITE}/demo/${d.slug}` : `${SITE}/demo`
+  const url = `${SITE}${d.related}/demo`
   return {
     title: d.title,
     description: d.description,
     keywords: d.keywords,
     alternates: { canonical: url },
     ...share({ title: d.title, description: d.description, url }),
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: true },
   }
 }

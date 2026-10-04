@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { COMPARISONS } from '@/lib/comparisons'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
-import { BILINGUAL_PAIRS, type BilingualRoute } from '@/lib/i18n-routes'
+import type { BilingualRoute } from '@/lib/i18n-routes'
 import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
 const BASE = 'https://zenyaai.co'
@@ -24,15 +24,14 @@ type Freq = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 /** Arabic-only routes (no English twin). */
 const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
-  // Demos (publicly browsable showcases)
-  { path: '/demo',            priority: 0.7, freq: 'weekly' },
-  { path: '/demo/restaurant', priority: 0.6, freq: 'weekly' },
-  { path: '/demo/atlas',      priority: 0.6, freq: 'weekly' },
-  { path: '/demo/lookbook',   priority: 0.6, freq: 'weekly' },
-  { path: '/demo/collective', priority: 0.6, freq: 'weekly' },
-  { path: '/demo/studio',     priority: 0.6, freq: 'weekly' },
-  { path: '/demo/services',   priority: 0.6, freq: 'weekly' },
-  { path: '/demo/wellness',   priority: 0.6, freq: 'weekly' },
+  // One page per template, under the gallery (2026-10-04). These replaced
+  // /websites/<slug>, /why/<key> and /demo/<key>, which 301 here from
+  // next.config.js. The demos themselves, now at /templates/<slug>/demo, are
+  // noindexed and left out on purpose: a sitemap should only list pages we
+  // want in Google, and a search for the brand once put a spa demo first.
+  // Arabic only for now: the English twins still live at /en/websites/<slug>
+  // and the English edition is switched off.
+  ...TEMPLATE_PAGES.map((t) => ({ path: `/templates/${t.slug}`, priority: 0.8, freq: 'monthly' as Freq })),
   // The review channel. Arabic only: it writes into the reviews table through
   // app/api/reviews, which has no English counterpart, so there is nothing to
   // pair it with and an hreflang alternate would 404.
@@ -51,7 +50,6 @@ const AR_ONLY: { path: string; priority: number; freq: Freq }[] = [
 const PAIRED_STATIC: { path: BilingualRoute; priority: number; freq: Freq }[] = [
   { path: '/',         priority: 1.0, freq: 'weekly' },
   { path: '/features', priority: 0.9, freq: 'monthly' },
-  { path: '/websites', priority: 0.9, freq: 'monthly' },
   { path: '/compare',  priority: 0.8, freq: 'monthly' },
   { path: '/pricing',  priority: 0.9, freq: 'monthly' },
   { path: '/faq',      priority: 0.8, freq: 'monthly' },
@@ -66,11 +64,10 @@ const PAIRED_STATIC: { path: BilingualRoute; priority: number; freq: Freq }[] = 
 ]
 
 /** Slug parity for both sections is verified: comparisons.ts / comparisons-en.ts
- *  and template-pages.tsx / template-pages-en.tsx publish the same slugs. */
+ *  publish the same slugs. */
 const PAIRED: { path: string; priority: number; freq: Freq }[] = [
   ...PAIRED_STATIC,
   ...COMPARISONS.map((c) => ({ path: `/compare/${c.slug}`, priority: 0.75, freq: 'monthly' as Freq })),
-  ...TEMPLATE_PAGES.map((t) => ({ path: `/websites/${t.slug}`, priority: 0.75, freq: 'monthly' as Freq })),
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -100,21 +97,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ]
   })
 
-  // The /why articles are bilingual but do NOT share a slug (Arabic uses the
-  // business_type key, English uses a keyword slug), so they pair via the
-  // explicit map in lib/i18n-routes rather than the /en{path} rule above.
-  const whyArticles: MetadataRoute.Sitemap = Object.entries(BILINGUAL_PAIRS).flatMap(([ar, en]) => {
-    const arUrl = `${BASE}${ar}`
-    if (!ENGLISH_ENABLED) {
-      return [{ url: arUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.65 }]
-    }
-    const enUrl = `${BASE}${en}`
-    const languages = { ar: arUrl, en: enUrl }
-    return [
-      { url: arUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.65, alternates: { languages } },
-      { url: enUrl, lastModified: now, changeFrequency: 'monthly' as Freq, priority: 0.6, alternates: { languages } },
-    ]
-  })
-
-  return [...paired, ...whyArticles, ...arOnly]
+  return [...paired, ...arOnly]
 }

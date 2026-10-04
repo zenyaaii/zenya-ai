@@ -3,8 +3,8 @@ const { chromium } = require('playwright')
 const ROUTES = [
   // The public site.
   '/', '/about', '/faq', '/features', '/pricing', '/templates',
-  '/websites', '/websites/restaurant', '/compare', '/compare/wix',
-  '/why/restaurant', '/privacy', '/terms', '/cookies', '/refund',
+  '/templates/restaurant', '/templates/app-landing-page', '/compare', '/compare/wix',
+  '/privacy', '/terms', '/cookies', '/refund',
   '/subprocessors', '/contact', '/login', '/review', '/checkout',
 
   /* The PRODUCT surfaces, added when app/(main) and the accounts portal

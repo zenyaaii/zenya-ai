@@ -1,3 +1,20 @@
+/**
+ * The eight templates: [business_type key, public slug]. Mirrors key and slug
+ * in lib/template-pages.tsx, which this file cannot import (it is CommonJS and
+ * that is TSX). Change one, change the other.
+ */
+const TEMPLATE_ROUTES = [
+  ['restaurant', 'restaurant'],
+  ['atlas', 'app-landing-page'],
+  ['lookbook', 'fashion-lookbook'],
+  ['collective', 'online-store'],
+  ['studio', 'brand-story'],
+  ['services', 'services'],
+  ['wellness', 'wellness'],
+  ['one_product', 'one-product-store'],
+]
+const ZENYA_HOST = [{ type: 'host', value: '(?:(?:www\\.)?zenyaai\\.co|localhost)' }]
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -96,6 +113,19 @@ const nextConfig = {
         destination: '/en/templates',
         permanent: true,
       },
+      // ONE ADDRESS PER TEMPLATE (2026-10-04). Each template used to have
+      // three indexed pages: /websites/<slug>, /why/<key> and /demo/<key>.
+      // They are one page now, /templates/<slug>, with the demo under it. All
+      // PERMANENT, for the same reason as /themes above: the 301 carries the
+      // old page's ranking to the new one. Gated to Zenya's own host so a
+      // customer site on a custom domain that happens to have a /demo path is
+      // never sent here.
+      ...TEMPLATE_ROUTES.flatMap(([key, slug]) => [
+        { source: `/why/${key}`, destination: `/templates/${slug}`, permanent: true, has: ZENYA_HOST },
+        { source: `/demo${key === 'one_product' ? '' : `/${key}`}`, destination: `/templates/${slug}/demo`, permanent: true, has: ZENYA_HOST },
+      ]),
+      { source: '/websites', destination: '/templates', permanent: true, has: ZENYA_HOST },
+      { source: '/websites/:slug', destination: '/templates/:slug', permanent: true, has: ZENYA_HOST },
       {
         source: '/app',
         has: [{ type: 'query', key: 'host' }],
@@ -112,6 +142,13 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // The demos still live under app/demo; this serves each one at its
+      // template's address. Redirects run before rewrites, so the 301 from
+      // /demo/<key> above does not loop back.
+      ...TEMPLATE_ROUTES.map(([key, slug]) => ({
+        source: `/templates/${slug}/demo`,
+        destination: key === 'one_product' ? '/demo' : `/demo/${key}`,
+      })),
       {
         source: '/app/api/webhooks/:path*',
         destination: '/api/webhooks/:path*',
@@ -121,3 +158,4 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
+module.exports.TEMPLATE_ROUTES = TEMPLATE_ROUTES
