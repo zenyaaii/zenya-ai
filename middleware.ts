@@ -208,6 +208,19 @@ async function lookupCustomDomain(host: string): Promise<LookupResult> {
   }
 }
 
+/**
+ * A customer site has no tab icon until its owner can upload a logo. It must
+ * not show Zenya's: browsers and Google ask every host for /favicon.ico, and
+ * Next links the root app/favicon.ico from every page, so on a customer host
+ * the path answers 404 and the browser draws its own blank icon.
+ */
+function noSiteIcon() {
+  return new NextResponse(null, {
+    status: 404,
+    headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' },
+  })
+}
+
 export async function middleware(request: NextRequest) {
   const host = (request.headers.get('host') || '').toLowerCase()
   const pathname = request.nextUrl.pathname
@@ -246,6 +259,7 @@ export async function middleware(request: NextRequest) {
     // Google HTML-file verification, served from the site root.
     const gsc = await gscFileResponse(zenyaSlug, pathname)
     if (gsc) return gsc
+    if (pathname === '/favicon.ico') return noSiteIcon()
     const url = request.nextUrl.clone()
     url.pathname = `/s/${zenyaSlug}${pathname === '/' ? '' : pathname}`
     // Mark this as a customer site so the root layout suppresses Zenya's own
@@ -255,6 +269,11 @@ export async function middleware(request: NextRequest) {
     h.set('x-zenya-site', '1')
     return NextResponse.rewrite(url, { request: { headers: h } })
   }
+
+  // Zenya's own hosts serve app/favicon.ico as a static file. The matcher no
+  // longer skips /favicon.ico (customer sites need it, see noSiteIcon), so
+  // let it straight through here before any session or redirect logic.
+  if (pathname === '/favicon.ico' && isOwnHost(host)) return NextResponse.next()
 
   // ---- demo.zenyaai.co → retired -------------------------------------------
   // The subdomain existed to hold the candidate set while the restyle was
@@ -428,6 +447,7 @@ export async function middleware(request: NextRequest) {
       // Google HTML-file verification, served from the domain root.
       const gsc = await gscFileResponse(found.slug, pathname)
       if (gsc) return gsc
+      if (pathname === '/favicon.ico') return noSiteIcon()
 
       const url = request.nextUrl.clone()
       // sitemap.xml / robots.txt keep their path (per-site handlers); every
@@ -499,9 +519,10 @@ export const config = {
      * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
      * - common image static files
+     * favicon.ico is NOT skipped: a customer site must not get Zenya's
+     * (noSiteIcon); on Zenya's own hosts it passes straight through.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

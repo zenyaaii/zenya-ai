@@ -210,7 +210,7 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
 
   // The site is the owner's. The root layout describes Zenya's own site and
   // a page inherits whatever it does not set, so every field that names Zenya
-  // there (app name, author, publisher, generator, category) is
+  // there (app name, author, publisher, generator, category, the tab icon) is
   // set again here to the business, or cleared.
   return {
     title: { absolute: title },
@@ -220,6 +220,10 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     publisher: siteName,
     generator: null,
     category: null,
+    // No tab icon until owners can upload a logo; empty lists drop the root
+    // layout's app/icon.png and apple-icon.png (Zenya's mark). The root
+    // favicon.ico link Next always adds answers 404 on customer hosts.
+    icons: { icon: [], apple: [], shortcut: [] },
     description,
     keywords: seo.keywords,
     metadataBase: new URL(seo.canonical),
