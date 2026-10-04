@@ -221,6 +221,22 @@ function noSiteIcon() {
   })
 }
 
+/**
+ * /s/<slug>/… typed on a customer host. The route is internal; served as is,
+ * one customer's address would show any other customer's site
+ * (satorispa.zenyaai.co/s/othersite). The site's own /s/ path goes to the
+ * clean address; anyone else's is not found here.
+ */
+function ownSitePath(request: NextRequest, slug: string) {
+  const m = request.nextUrl.pathname.match(/^\/s\/([^/]+)(\/.*)?$/)
+  if (!m || m[1].toLowerCase() !== slug.toLowerCase()) {
+    return new NextResponse('Not found', { status: 404 })
+  }
+  const url = request.nextUrl.clone()
+  url.pathname = m[2] || '/'
+  return NextResponse.redirect(url, 301)
+}
+
 export async function middleware(request: NextRequest) {
   const host = (request.headers.get('host') || '').toLowerCase()
   const pathname = request.nextUrl.pathname
@@ -249,10 +265,10 @@ export async function middleware(request: NextRequest) {
   // e.g. myrestaurant.zenya.co → /s/myrestaurant (no DB lookup needed)
   const zenyaSlug = getZenyaCoSlug(host)
   if (zenyaSlug) {
+    if (pathname.startsWith('/s/')) return ownSitePath(request, zenyaSlug)
     if (
       pathname.startsWith('/_next/') ||
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/s/')
+      pathname.startsWith('/api/')
     ) {
       return NextResponse.next()
     }
@@ -437,12 +453,13 @@ export async function middleware(request: NextRequest) {
     // Don't recurse / interfere with framework + API plumbing.
     if (
       pathname.startsWith('/_next/') ||
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/s/')
+      pathname.startsWith('/api/')
     ) {
       return NextResponse.next()
     }
     const found = await lookupCustomDomain(host)
+    if (found && pathname.startsWith('/s/')) return ownSitePath(request, found.slug)
+    if (pathname.startsWith('/s/')) return NextResponse.next()
     if (found) {
       // Google HTML-file verification, served from the domain root.
       const gsc = await gscFileResponse(found.slug, pathname)
