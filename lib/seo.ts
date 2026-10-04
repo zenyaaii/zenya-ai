@@ -51,6 +51,9 @@ export type SeoTheme = {
   content?: any
   template_type?: string | null
   is_published?: boolean | null
+  /** The owner's own live domain (e.g. "satorispa.com"), when one is bound.
+   *  It is then the site's address for Google, not slug.zenyaai.co. */
+  custom_domain?: string | null
 }
 
 const TYPE_LABEL_AR: Record<string, string> = {
@@ -239,8 +242,9 @@ export function resolveSeo(theme: SeoTheme): ResolvedSeo {
 
   // ── Image / canonical / verification / index ───────────────────────────────
   const ogImage = clean(overrides.ogImage, 500) || extractOgImage(theme.content, businessType)
-  const canonical = slug ? publicSiteUrl(slug) : ''
-  const host = slug ? publicSiteHost(slug) : ''
+  const domain = (theme.custom_domain || '').toLowerCase().trim()
+  const canonical = domain ? `https://${domain}` : slug ? publicSiteUrl(slug) : ''
+  const host = domain || (slug ? publicSiteHost(slug) : '')
   const gscVerification = clean(overrides.gscVerification, 200) || undefined
   const index = overrides.noindex ? false : !!theme.is_published
 

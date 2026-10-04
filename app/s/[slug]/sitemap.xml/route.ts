@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { publicSiteUrl } from '@/lib/portal-urls'
+import { siteBaseUrl } from '@/lib/public-site'
 import { extractImageUrls } from '@/lib/extract-image-urls'
 import { pagesFor } from '@/lib/site-pages'
 
@@ -31,7 +32,8 @@ function xmlEscape(s: string): string {
 
 export async function GET(_req: Request, { params }: { params: { slug: string } }) {
   const slug = (params.slug || '').toLowerCase()
-  const base = publicSiteUrl(slug)
+  // The owner's own domain when one is live, so Google is sent there.
+  const base = await siteBaseUrl(slug).catch(() => publicSiteUrl(slug))
 
   let lastmod = new Date().toISOString()
   let published = false

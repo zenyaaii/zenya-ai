@@ -10,6 +10,7 @@ import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import { resolveSeo, buildJsonLd } from '@/lib/seo'
+import { publicSiteUrl } from '@/lib/portal-urls'
 import type { SitePage } from '@/lib/site-pages'
 import {
   browserFromUA, deviceFromUA, isBotUA, osFromUA, pathFromLegacySlug, referrerHost,
@@ -43,6 +44,44 @@ export type PublicTheme = {
    *  one-month free trial). When false the templates fall back to their plain
    *  CTA so the site still works. */
   bookings_enabled: boolean
+  /** The owner's own live domain, if one is bound to this site. */
+  custom_domain: string | null
+}
+
+/**
+ * The owner's own domain for a site, when one is live. Oldest first, so the
+ * domain they bought first stays the address Google is told about.
+ */
+async function liveCustomDomain(a: ReturnType<typeof admin>, themeId: string): Promise<string | null> {
+  try {
+    const { data } = await a
+      .from('domains')
+      .select('domain')
+      .eq('theme_id', themeId)
+      .eq('status', 'live')
+      .order('created_at', { ascending: true })
+      .limit(1)
+    const d = data?.[0]?.domain
+    return typeof d === 'string' && d ? d.toLowerCase() : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * The address a site's sitemap and robots.txt should name: the owner's own
+ * domain when one is live, else slug.zenyaai.co.
+ */
+export async function siteBaseUrl(slug: string): Promise<string> {
+  const a = admin()
+  const { data } = await a
+    .from('themes')
+    .select('id')
+    .ilike('slug', slug)
+    .eq('is_published', true)
+    .maybeSingle()
+  const domain = data?.id ? await liveCustomDomain(a, data.id) : null
+  return domain ? `https://${domain}` : publicSiteUrl(slug)
 }
 
 export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | null> {
@@ -57,11 +96,14 @@ export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | 
 
   if (error || !data) return null
 
-  const { data: profile } = await a
-    .from('profiles')
-    .select('has_hosting, plan, bookings_trial_started_at')
-    .eq('id', data.user_id)
-    .maybeSingle()
+  const [{ data: profile }, custom_domain] = await Promise.all([
+    a
+      .from('profiles')
+      .select('has_hosting, plan, bookings_trial_started_at')
+      .eq('id', data.user_id)
+      .maybeSingle(),
+    liveCustomDomain(a, data.id),
+  ])
 
   const owner_has_hosting = !!profile?.has_hosting || profile?.plan === 'admin'
   const bookings_enabled = bookingAccess(profile).entitled
@@ -75,6 +117,7 @@ export async function lookupPublishedTheme(slug: string): Promise<PublicTheme | 
     user_id: data.user_id,
     owner_has_hosting,
     bookings_enabled,
+    custom_domain,
   }
 }
 
@@ -155,6 +198,7 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     content: theme.content,
     template_type: theme.template_type,
     is_published: true,
+    custom_domain: theme.custom_domain,
   })
   const siteName = theme.product_name || theme.slug
   const isSub = !!page && page.slug !== ''
@@ -164,8 +208,22 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     ? `${page!.label} — ${siteName}. ${seo.description}`.slice(0, 160)
     : seo.description
 
+  // The site is the owner's. The root layout describes Zenya's own site and
+  // a page inherits whatever it does not set, so every field that names Zenya
+  // there (app name, author, publisher, generator, category, the tab icon) is
+  // set again here to the business, or cleared.
   return {
     title: { absolute: title },
+    applicationName: siteName,
+    authors: [{ name: siteName }],
+    creator: siteName,
+    publisher: siteName,
+    generator: null,
+    category: null,
+    // No tab icon until owners can upload a logo; empty lists drop the root
+    // layout's app/icon.png and apple-icon.png (Zenya's mark). The root
+    // favicon.ico link Next always adds answers 404 on customer hosts.
+    icons: { icon: [], apple: [], shortcut: [] },
     description,
     keywords: seo.keywords,
     metadataBase: new URL(seo.canonical),
@@ -212,6 +270,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
     content: theme.content,
     template_type: theme.template_type,
     is_published: true,
+    custom_domain: theme.custom_domain,
   })
   const jsonLd = buildJsonLd(
     { product_name: theme.product_name, slug: theme.slug, content: theme.content, template_type: theme.template_type },
