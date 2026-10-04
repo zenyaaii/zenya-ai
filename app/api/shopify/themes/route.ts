@@ -148,13 +148,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const price = Number(themeData.price)
+    if (!Number.isFinite(price) || price <= 0) {
+      return NextResponse.json({ error: 'A sale price above zero is required.', code: 'INVALID_PRICE' }, { status: 400 });
+    }
+    const originalPrice = Number(themeData.originalPrice) || 0
+
+    // No invented defaults: the product gets only what the merchant gave us.
+    // A missing vendor lets Shopify use the store's own name.
     const createdProduct = await createShopifyProduct(shop, session.accessToken, {
       name: themeData.productName,
-      description: themeData.description || themeData.content?.hero?.subheadline || 'AI Generated Product',
+      description: themeData.description || '',
       images: themeData.images || [],
-      price: Number(themeData.price) || 49.99,
-      originalPrice: Number(themeData.originalPrice) || 99.99,
-      vendor: themeData.vendor || 'Zenya',
+      price,
+      originalPrice,
+      vendor: themeData.vendor,
     });
 
     const designPayload = {
@@ -162,22 +170,22 @@ export async function POST(req: NextRequest) {
       colors: themeData.colors || { primary: '#4f46e5', secondary: '#06b6d4' },
       content: themeData.content || null,
       images: themeData.images || [],
-      price: Number(themeData.price) || 49.99,
-      originalPrice: Number(themeData.originalPrice) || 99.99,
+      price,
+      originalPrice,
       generatedAt: new Date().toISOString(),
     };
 
     await upsertProductMetafield({
       shop,
       accessToken: session.accessToken,
-      productId: createdProduct.id,
+      productId: createdProduct.gid,
       namespace: 'zenya',
       key: 'design',
       type: 'json',
       value: designPayload,
     });
 
-    const productHandle = (createdProduct as any)?.handle || null;
+    const productHandle = createdProduct.handle;
     const adminProductUrl = `https://${shop}/admin/products/${createdProduct.id}`;
     const themeEditorUrl = `https://${shop}/admin/templates/current/editor?context=apps`;
     const storefrontUrl = productHandle ? `https://${shop}/products/${productHandle}` : null;
@@ -186,6 +194,8 @@ export async function POST(req: NextRequest) {
       success: true,
       productId: createdProduct.id,
       productHandle,
+      published: createdProduct.published,
+      publishError: createdProduct.publishError,
       adminProductUrl,
       themeEditorUrl,
       storefrontUrl,

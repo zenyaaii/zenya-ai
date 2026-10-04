@@ -156,17 +156,25 @@ export async function POST(req: NextRequest) {
   // 1. Create the product first so the theme attaches to it on first
   //    render. A product failure shouldn't block the theme push —
   //    report it as partial success instead.
-  let product: { id: number | string; handle?: string } | null = null
+  let product: { id: number | string; handle?: string | null } | null = null
   let productError: string | null = null
   try {
-    product = await createShopifyProduct(shop, accessToken, {
+    const created = await createShopifyProduct(shop, accessToken, {
       name: config.productName,
-      description: config.description || `${config.productName} — sold by ${config.storeName}.`,
+      description: config.description || '',
       images: config.images,
       price: config.salePrice,
       originalPrice: config.originalPrice,
       vendor: config.storeName,
     })
+    product = created
+    if (!created.published) {
+      // Created, but hidden from the storefront (usually a missing
+      // write_publications grant on an older install). The theme can't
+      // show a product that isn't on the Online Store, so say so.
+      console.warn('publish: product created but not published:', created.publishError)
+      productError = 'أُنشئ المنتج لكنه غير ظاهر في المتجر بعد. افتحه في Shopify واضغط «نشر» (Publish).'
+    }
   } catch (e: any) {
     productError = e?.message || 'Product creation failed'
     console.error('publish: product creation failed:', e)

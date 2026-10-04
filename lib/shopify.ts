@@ -157,9 +157,9 @@ function createShopify() {
       process.env.SHOPIFY_SCOPES?.split(',') ||
       process.env.SCOPES?.split(',') ||
       // write_themes powers the one-click theme publish from /build.
-      ['read_products', 'write_products', 'read_themes', 'write_themes'],
+      ['read_products', 'write_products', 'read_themes', 'write_themes', 'read_publications', 'write_publications'],
     hostName: appUrl.replace(/^https:\/\//, ''),
-    apiVersion: ApiVersion.October24,
+    apiVersion: ApiVersion.January26,
     isEmbeddedApp: true,
     sessionStorage: sessionStorage,
   });
