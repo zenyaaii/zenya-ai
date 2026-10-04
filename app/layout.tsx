@@ -343,7 +343,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             {children}
           </NotifyProvider>
         </LocaleProvider>
-        <CookieConsent />
+        {/* Customer sites draw their own notice in their own theme
+            (components/site/SiteCookieBanner, from lib/public-site). This one
+            names Zenya and links Zenya's policies, so it stays on Zenya. */}
+        {!isCustomerSite && <CookieConsent />}
         <Analytics />
       </body>
     </html>

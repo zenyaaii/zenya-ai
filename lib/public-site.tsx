@@ -4,6 +4,8 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
 import SiteBeacon from '@/components/site/SiteBeacon'
+import SiteCookieBanner from '@/components/site/SiteCookieBanner'
+import { resolveSitePalette } from '@/lib/site-palette'
 import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
@@ -202,6 +204,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
   const colorOverrides = (typeof c === 'object' && (c as any).color_overrides) || undefined
   const sectionStyles = (typeof c === 'object' && (c as any).section_styles) || undefined
   const templateContent = (typeof c === 'object' && (c as any)[businessType]) || c
+  const cookiePalette = resolveSitePalette(businessType, presetId, colorOverrides, typographyPreset)
 
   const seo = resolveSeo({
     product_name: theme.product_name,
@@ -245,6 +248,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
       </BookingProvider>
       <MadeWithZenya hide={theme.owner_has_hosting} />
       <SiteBeacon slug={theme.slug} />
+      {cookiePalette && <SiteCookieBanner palette={cookiePalette} />}
     </>
   )
 }
