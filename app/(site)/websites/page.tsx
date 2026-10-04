@@ -44,13 +44,14 @@ import { Breadcrumbs, Hero, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/websites/styles"
 
 import { hreflangAlternates } from '@/lib/i18n/config'
+import { share } from '@/lib/site-share'
 
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
   title: 'أنواع المواقع: مطعم، تطبيق، متجر، خدمات، عافية',
   description:
-    'أيًّا كان نشاطك، لزينيا قالب له: موقع مطعم، صفحة هبوط لتطبيق، متجر إلكتروني، موقع أزياء، موقع خدمات، مركز عافية، قصة علامة، أو متجر بمنتج واحد. اختر نوعك وأطلق موقعك بالذكاء الاصطناعي خلال دقائق.',
+    'لكل نشاط موقع: مطعم، تطبيق، متجر، أزياء، خدمات، عافية، علامة تجارية، أو منتج واحد. اختر نوعك وأطلق موقعك بالذكاء الاصطناعي خلال دقائق.',
   keywords: [
     'أنواع المواقع',
     'إنشاء موقع مطعم',
@@ -64,13 +65,12 @@ export const metadata: Metadata = {
     canonical: `${SITE}/websites`,
     languages: hreflangAlternates(`${SITE}/websites`, `${SITE}/en/websites`),
   },
-  openGraph: {
+  ...share({
     title: 'أنواع المواقع التي تبنيها زينيا',
     description:
       'قالب لكل نشاط: مطعم، تطبيق، متجر، أزياء، خدمات، عافية، علامة تجارية، ومنتج واحد — بالذكاء الاصطناعي وبالعربية.',
     url: `${SITE}/websites`,
-    type: 'website',
-  },
+  }),
 }
 
 export default function WebsitesHubPage() {

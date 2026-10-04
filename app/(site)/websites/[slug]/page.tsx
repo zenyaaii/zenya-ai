@@ -38,6 +38,7 @@ import { themePreview } from "@/lib/theme-previews"
 import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/websites/styles"
+import { share } from '@/lib/site-share'
 
 const SITE = 'https://zenyaai.co'
 
@@ -57,14 +58,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       canonical: url,
       languages: hreflangAlternates(url, `${SITE}/en/websites/${t.slug}`),
     },
-    openGraph: {
+    ...share({
       title: t.title,
       description: t.metaDescription,
       url,
-      type: 'website',
-      images: [{ url: themePreview(t.key), width: 1200, height: 630, alt: t.name }],
-    },
-    twitter: { card: 'summary_large_image', title: t.title, description: t.metaDescription },
+    }),
   }
 }
 

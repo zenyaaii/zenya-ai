@@ -27,17 +27,18 @@
 
 import type { Metadata } from 'next'
 import ContactView from '@/components/zenya/contact/ContactView'
+import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
   title: 'تواصل معنا',
   description:
     'تواصل مع فريق زينيا — الدعم، طلب قالب جديد، المبيعات، أو أي شيء آخر. نردّ خلال يوم عمل واحد.',
   alternates: { canonical: '/contact' },
-  openGraph: {
+  ...share({
     title: 'تواصل مع زينيا',
     description: 'الدعم، طلب قالب، المبيعات. نردّ خلال يوم عمل واحد.',
     url: 'https://zenyaai.co/contact',
-  },
+  }),
 }
 
 type Topic = 'support' | 'request' | 'sales' | 'review' | 'other'

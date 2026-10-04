@@ -12,11 +12,18 @@ import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/cookies"
 
 import { COMPANY } from '@/lib/company'
+import { share } from '@/lib/site-share'
+
+// The root template appends "· زينيا", so the title is the page's own name
+// alone. It used to carry "— زينيا" too, and read "… — زينيا · زينيا".
+const TITLE = 'سياسة ملفات تعريف الارتباط'
+const DESCRIPTION = `كيف ولماذا يستخدم ${COMPANY.PRODUCT_NAME} ملفات تعريف الارتباط والتقنيات المشابهة.`
 
 export const metadata: Metadata = {
-  title: `سياسة ملفات تعريف الارتباط — ${COMPANY.BRAND_NAME}`,
-  description: `كيف ولماذا يستخدم ${COMPANY.PRODUCT_NAME} ملفات تعريف الارتباط والتقنيات المشابهة.`,
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/cookies' },
+  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://zenyaai.co/cookies' }),
 }
 
 export default function Page() {

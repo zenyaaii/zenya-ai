@@ -466,7 +466,7 @@ export default function Page() {
 
      It re-runs when the face changes, when the window resizes and once the
      webfont has landed, since a fallback face measures differently. */
-  const wordsRef = useRef<HTMLHeadingElement>(null)
+  const wordsRef = useRef<HTMLDivElement>(null)
   /* Every word's width at the fitted size: [column][row]. The columns are
      driven from this, so a row change is a width the browser can animate to
      rather than a reflow it does instantly. */
@@ -4513,10 +4513,12 @@ export default function Page() {
             </button>
           }
         >
-          {/* Every row previews itself, which is the only honest way to pick a
+          {/* data-nosnippet: the tray is fifty rows of "ابن" and a font name,
+              and Google was quoting them as the page's text.
+              Every row previews itself, which is the only honest way to pick a
               face. That does mean extending this pulls all 50 files; they are
               small, they cache, and none of them load until it is opened. */}
-          <div id="type-tray" className="zn-list max-h-[min(52vh,340px)] overflow-y-auto px-1.5 pb-1 pt-1.5">
+          <div id="type-tray" data-nosnippet className="zn-list max-h-[min(52vh,340px)] overflow-y-auto px-1.5 pb-1 pt-1.5">
             {STYLES.map((st) => (
               <button
                 key={st.id}
@@ -4658,7 +4660,13 @@ export default function Page() {
             build then manage then publish. Slow and short-travelled so it
             settles rather than announces itself. Changing the face swaps the
             type in place, with no movement of its own. */}
-        <h1
+        {/* The page's heading for search engines and screen readers. The
+            three words below are the visual headline, but as text they are
+            twelve verbs in a row ("ابن تبني بناء تحسين ..."), which is what
+            Google was reading as the page's h1. This says what Zenya is, in
+            the words of the page title, and draws nothing. */}
+        <h1 className="sr-only">زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري</h1>
+        <div
           id="hero-words"
           ref={wordsRef}
           className={`${type.cls} zn-words relative z-[1] flex flex-nowrap items-baseline justify-center gap-x-[0.22em] text-center`}
@@ -4694,7 +4702,7 @@ export default function Page() {
               ))}
             </span>
           ))}
-        </h1>
+        </div>
 
         {/* The claim, typed once over the light. Real content, not decoration,
             so it is in the document and readable with animation off. */}

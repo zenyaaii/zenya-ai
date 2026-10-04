@@ -57,6 +57,7 @@ import { themePreview } from "@/lib/theme-previews"
 import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/why/styles"
+import { share } from '@/lib/site-share'
 
 export function generateStaticParams() {
   return Object.keys(ARTICLES).map((type) => ({ type }))
@@ -76,17 +77,12 @@ export function generateMetadata({ params }: { params: { type: string } }): Meta
     description: article.meta.description,
     keywords: article.meta.keywords,
     alternates: { canonical: `${SITE}/why/${article.key}` },
-    openGraph: {
+    ...share({
       title: article.meta.title,
       description: article.meta.description,
       url: `${SITE}/why/${article.key}`,
       type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: article.meta.title,
-      description: article.meta.description,
-    },
+    }),
     robots: { index: true, follow: true },
   }
 }

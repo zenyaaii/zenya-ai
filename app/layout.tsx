@@ -12,17 +12,25 @@ import { dirFor } from '@/lib/i18n/config'
 import { LocaleProvider } from '@/components/i18n/LocaleProvider'
 import { Analytics } from '@vercel/analytics/next'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
+import { COMPANY } from '@/lib/company'
+import { LOGO_URL, SHARE_IMAGE, share } from '@/lib/site-share'
 
 const SITE_URL = 'https://zenyaai.co'
+
+const HOME_DESCRIPTION =
+  'اكتب نبذة قصيرة عن نشاطك، ويبني لك الذكاء الاصطناعي موقعًا عربيًا كاملًا خلال دقائق: مطاعم، متاجر، خدمات، عافية والمزيد. المعاينة مجانية.'
 
 const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
+    default: 'زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
     template: '%s · زينيا',
   },
-  description:
-    'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. اختر من بين 8 قوالب احترافية — مطاعم، أزياء، تطبيقات، عافية، خدمات والمزيد — اكتب نبذة قصيرة، وتتكفّل زينيا بكتابة المحتوى ونشر الموقع خلال دقائق. ‎14.99$ شهريًا (Starter) أو 24.99$ شهريًا مع استضافة كاملة (Pro).',
+  // Shopify's pattern: say what the reader gets and how to start, in about
+  // 150 characters so Google shows it whole instead of cutting it off. No
+  // "try it free": the preview is free but generating starts at the Entry
+  // price, and the description has to be true.
+  description: HOME_DESCRIPTION,
   applicationName: 'زينيا',
   generator: 'زينيا',
   keywords: [
@@ -49,25 +57,10 @@ const baseMetadata: Metadata = {
   creator: 'زينيا',
   publisher: 'زينيا',
   category: 'technology',
-  openGraph: {
-    type: 'website',
-    locale: 'ar_SA',
-    url: SITE_URL,
-    siteName: 'زينيا',
-    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
-    description:
-      '8 قوالب مواقع احترافية مبنية بالذكاء الاصطناعي للمطاعم والأزياء والتطبيقات والعافية والخدمات ومتاجر شوبيفاي. اكتب نبذة → احصل على موقع كامل: نصوص وتصميم وصور جاهزة للنشر.',
-    images: [
-      { url: '/opengraph-image', width: 1200, height: 630, alt: 'زينيا — منشئ المواقع بالذكاء الاصطناعي' },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'زينيا — منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
-    description:
-      'اكتب نبذة → احصل على موقع كامل. 8 قوالب مبنية بالذكاء الاصطناعي لكل نشاط تجاري. ‎14.99$ شهريًا (Starter) أو 24.99$ شهريًا مع استضافة (Pro).',
-    images: ['/opengraph-image'],
-  },
+  ...share({
+    title: 'زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
+    description: HOME_DESCRIPTION,
+  }),
   alternates: {
     canonical: SITE_URL,
     languages: hreflangAlternates(SITE_URL, `${SITE_URL}/en`),
@@ -83,10 +76,6 @@ const baseMetadata: Metadata = {
       'max-video-preview': -1,
     },
   },
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/logo.png',
-  },
 }
 
 /**
@@ -100,7 +89,7 @@ export function generateMetadata(): Metadata {
   if (locale !== 'en') return baseMetadata
   return {
     ...baseMetadata,
-    title: { default: 'Zenya — The Arabic-First AI Website Builder', template: '%s · Zenya' },
+    title: { default: 'Zenya: The Arabic-First AI Website Builder', template: '%s · Zenya' },
   }
 }
 
@@ -115,7 +104,7 @@ const ORG_ID = `${SITE_URL}/#organization`
 const SITE_ID = `${SITE_URL}/#website`
 
 // حسابات حقيقية فقط. sameAs هو أقوى إشارة تربط اسم العلامة بكيانٍ واحد لدى
-// جوجل، ويجب أن تطابق الروابط الظاهرة في التذييل (components/Footer.tsx).
+// جوجل، ويجب أن تطابق الروابط الظاهرة في التذييل (components/zenya/home/FooterSection.tsx).
 const SOCIAL_PROFILES = [
   'https://www.tiktok.com/@zenyaai.co',
   'https://www.instagram.com/zenyaai.co',
@@ -133,12 +122,20 @@ const structuredData = [
     // يُسمّى اليوم "زينيا"، فتُدمج الإشارتان بدل أن تتنافسا.
     alternateName: ['Zenya', 'Zenya AI', 'زينيا للذكاء الاصطناعي', 'Zenya AI Website Builder'],
     url: SITE_URL,
+    // Shopify names the company behind the brand; so does this. An eenmanszaak's
+    // legal name is its trade name, so this is what the KvK register shows.
+    legalName: COMPANY.LEGAL_NAME,
+    // Square, on its own dark ground, so it reads on Google's white and dark
+    // result pages alike. The old /logo.png was black on transparent and
+    // vanished on a dark results page.
     logo: {
       '@type': 'ImageObject',
-      url: `${SITE_URL}/logo.png`,
+      url: LOGO_URL,
+      width: 512,
+      height: 512,
       caption: 'زينيا',
     },
-    image: `${SITE_URL}/opengraph-image`,
+    image: `${SITE_URL}${SHARE_IMAGE.url}`,
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
     // schema.org's purpose-built field for telling apart entities that share a
@@ -204,7 +201,7 @@ const structuredData = [
     description:
       'منشئ مواقع بالذكاء الاصطناعي. اختر قالبًا، اكتب نبذة، واحصل على موقع متكامل بالنصوص والتصميم والصور — جاهز للنشر.',
     url: SITE_URL,
-    screenshot: `${SITE_URL}/opengraph-image`,
+    screenshot: `${SITE_URL}${SHARE_IMAGE.url}`,
     featureList: [
       'توليد نصوص الموقع بالعربية بالذكاء الاصطناعي',
       '8 قوالب احترافية جاهزة',
@@ -219,11 +216,11 @@ const structuredData = [
       {
         '@type': 'Offer',
         name: 'Starter',
-        price: '14.99',
+        price: COMPANY.STARTER_PRICE_USD.toFixed(2),
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '14.99',
+          price: COMPANY.STARTER_PRICE_USD.toFixed(2),
           priceCurrency: 'USD',
           billingDuration: 'P1M',
           unitText: 'MONTH',
@@ -233,11 +230,11 @@ const structuredData = [
       {
         '@type': 'Offer',
         name: 'Pro',
-        price: '24.99',
+        price: COMPANY.PRO_PRICE_USD.toFixed(2),
         priceCurrency: 'USD',
         priceSpecification: {
           '@type': 'UnitPriceSpecification',
-          price: '24.99',
+          price: COMPANY.PRO_PRICE_USD.toFixed(2),
           priceCurrency: 'USD',
           billingDuration: 'P1M',
           unitText: 'MONTH',
@@ -247,10 +244,10 @@ const structuredData = [
       },
       {
         '@type': 'Offer',
-        name: 'مجاني',
-        price: '0',
+        name: 'Entry',
+        price: COMPANY.ENTRY_PRICE_USD.toFixed(2),
         priceCurrency: 'USD',
-        description: 'توليدان مجانيان بالذكاء الاصطناعي لتجربة زينيا. جميع القوالب الـ8 متاحة.',
+        description: 'دفعة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي. المعاينة مجانية.',
       },
     ],
     // No aggregateRating: Zenya is early and we never publish invented ratings.

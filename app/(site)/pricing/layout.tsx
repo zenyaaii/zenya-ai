@@ -3,6 +3,7 @@ import { hreflangAlternates } from '@/lib/i18n/config'
 import type { ReactNode } from 'react'
 import { FAQS } from '@/lib/pricing-faqs'
 import { COMPANY, usdTrailing } from '@/lib/company'
+import { share } from '@/lib/site-share'
 
 /**
  * This route is the ARABIC pricing page — /en/pricing is the English twin.
@@ -17,7 +18,7 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: `الأسعار — Entry بـ ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} مرّة واحدة، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
   description:
-    `ابدأ بخطة Entry: ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على اسمك.zenyaai.co. Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا لتوليد غير محدود ونطاقك الخاص والحجوزات والتحليلات وتصدير شوبيفاي. Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا يضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. الإلغاء متاح في أي وقت.`,
+    `المعاينة مجانية. Entry بـ ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} مرّة واحدة، وStarter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
   keywords: [
     'أسعار منشئ المواقع',
     'كم تكلفة إنشاء موقع',
@@ -30,19 +31,12 @@ export const metadata: Metadata = {
     canonical: `${SITE}/pricing`,
     languages: hreflangAlternates(`${SITE}/pricing`, `${SITE}/en/pricing`),
   },
-  openGraph: {
-    type: 'website',
-    locale: 'ar_SA',
+  ...share({
     title: `أسعار زينيا — من ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description:
       'ثلاث خطط واضحة: Entry لمرة واحدة، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
     url: `${SITE}/pricing`,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `أسعار زينيا — من ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
-    description: 'ثلاث خطط واضحة، بلا عقود، والإلغاء في أي وقت.',
-  },
+  }),
 }
 
 // Built from FAQS so the markup can never describe a question the page does

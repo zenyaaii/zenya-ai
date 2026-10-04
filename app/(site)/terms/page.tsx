@@ -12,11 +12,18 @@ import LegalShell from "@/components/zenya/legal/LegalShell"
 import Doc, { SECTIONS } from "@/components/zenya/legal/documents/terms"
 
 import { COMPANY } from '@/lib/company'
+import { share } from '@/lib/site-share'
+
+// The root template appends "· زينيا", so the title is the page's own name
+// alone. It used to carry "— زينيا" too, and read "… — زينيا · زينيا".
+const TITLE = 'شروط الخدمة'
+const DESCRIPTION = `الشروط التي تحكم استخدامك لـ ${COMPANY.PRODUCT_NAME}.`
 
 export const metadata: Metadata = {
-  title: `شروط الخدمة — ${COMPANY.BRAND_NAME}`,
-  description: `الشروط التي تحكم استخدامك لـ ${COMPANY.PRODUCT_NAME}.`,
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/terms' },
+  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://zenyaai.co/terms' }),
 }
 
 export default function Page() {

@@ -14,6 +14,7 @@
  */
 
 import type { Metadata } from 'next'
+import { share } from './site-share'
 
 const SITE = 'https://zenyaai.co'
 
@@ -106,17 +107,7 @@ export function demoMetadata(slug: string): Metadata {
     description: d.description,
     keywords: d.keywords,
     alternates: { canonical: url },
-    openGraph: {
-      type: 'website',
-      url,
-      title: d.title,
-      description: d.description,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: d.title,
-      description: d.description,
-    },
+    ...share({ title: d.title, description: d.description, url }),
     robots: { index: true, follow: true },
   }
 }

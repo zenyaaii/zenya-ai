@@ -49,13 +49,14 @@ import type { QA } from "@/lib/faq-data"
 import { CSS } from "@/components/zenya/features/styles"
 
 import { hreflangAlternates } from '@/lib/i18n/config'
+import { share } from '@/lib/site-share'
 
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
   title: 'المزايا: محتوى بالذكاء الاصطناعي، استضافة ونطاق',
   description:
-    'كل ما تقدّمه زينيا: محتوى عربي يكتبه الذكاء الاصطناعي، 8 قوالب لكل نشاط، استضافة داخل الاتحاد الأوروبي مع SSL وGDPR، نطاق مخصّص مجاني على Pro، تصدير إلى شوبيفاي مع دفع آمن، محرّر مباشر، تحليلات، وجاهزية كاملة لمحرّكات البحث.',
+    'محتوى عربي يكتبه الذكاء الاصطناعي، 8 قوالب، استضافة أوروبية مع SSL، نطاق مخصّص، حجوزات وتحليلات، وتصدير إلى شوبيفاي. كل ما يحتاجه موقعك في مكان واحد.',
   keywords: [
     'ميزات زينيا',
     'استضافة مواقع عربية',
@@ -69,13 +70,12 @@ export const metadata: Metadata = {
     canonical: `${SITE}/features`,
     languages: hreflangAlternates(`${SITE}/features`, `${SITE}/en/features`),
   },
-  openGraph: {
+  ...share({
     title: 'ميزات زينيا — محتوى بالذكاء الاصطناعي، استضافة، نطاق، ودفع',
     description:
       'محتوى عربي بالذكاء الاصطناعي، 8 قوالب، استضافة أوروبية + SSL + GDPR، نطاق مخصّص، تصدير شوبيفاي مع دفع آمن، محرّر مباشر، وتحليلات.',
     url: `${SITE}/features`,
-    type: 'website',
-  },
+  }),
 }
 
 /** The live page's ten features, titles and bodies unchanged. */

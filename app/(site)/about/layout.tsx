@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
   title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
   description:
-    'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. ثمانية قوالب احترافية — مطاعم، أزياء، تطبيقات، عافية، خدمات، متاجر إلكترونية والمزيد. اكتب نبذة، واحصل على موقع كامل خلال دقائق، باستضافة أوروبية متوافقة مع GDPR.',
+    'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي: منصّة عربية تبني لكل نشاط تجاري موقعًا كاملًا خلال دقائق، باستضافة أوروبية آمنة.',
   keywords: [
     'من نحن زينيا',
     'زينيا',
@@ -16,12 +17,12 @@ export const metadata: Metadata = {
     'AI website builder',
   ],
   alternates: { canonical: '/about' },
-  openGraph: {
+  ...share({
     title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري: ثمانية قوالب، محتوى بالعربية، واستضافة أوروبية.',
     url: 'https://zenyaai.co/about',
-  },
+  }),
 }
 
 // AboutPage + Organization structured data so search engines understand who
@@ -43,7 +44,7 @@ const ABOUT_SCHEMA = {
     name: 'زينيا',
     alternateName: ['Zenya', 'Zenya AI'],
     url: 'https://zenyaai.co',
-    logo: 'https://zenyaai.co/logo.png',
+    logo: 'https://zenyaai.co/brand/logo-square.png',
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري — ثمانية قوالب احترافية، محتوى بالعربية، واستضافة أوروبية متوافقة مع GDPR.',
     foundingDate: '2025',

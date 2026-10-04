@@ -39,13 +39,14 @@ import { Breadcrumbs, Hero, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
 
 import { hreflangAlternates } from '@/lib/i18n/config'
+import { share } from '@/lib/site-share'
 
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
   title: 'مقارنة مع ويكس وشوبيفاي وووردبريس وسكوير سبيس',
   description:
-    'كيف تقارن زينيا بأشهر منشئات المواقع والبدائل؟ مقارنات صريحة مع ويكس (Wix)، شوبيفاي، ووردبريس، سكوير سبيس، والوكالات — في اللغة العربية وRTL، كتابة المحتوى بالذكاء الاصطناعي، السعر، ووقت الإطلاق.',
+    'مقارنات صريحة بين زينيا وويكس وشوبيفاي وووردبريس وسكوير سبيس والوكالات: العربية، الذكاء الاصطناعي، السعر، ووقت الإطلاق.',
   keywords: [
     'أفضل منشئ مواقع بالذكاء الاصطناعي',
     'أفضل منشئ مواقع عربي',
@@ -59,13 +60,12 @@ export const metadata: Metadata = {
     canonical: `${SITE}/compare`,
     languages: hreflangAlternates(`${SITE}/compare`, `${SITE}/en/compare`),
   },
-  openGraph: {
+  ...share({
     title: 'زينيا مقابل المنافسين — مقارنات صريحة',
     description:
       'مقارنات صريحة بين زينيا وويكس وشوبيفاي وووردبريس وسكوير سبيس والوكالات: اللغة العربية، الذكاء الاصطناعي، السعر، والاستضافة.',
     url: `${SITE}/compare`,
-    type: 'website',
-  },
+  }),
 }
 
 export default function CompareHubPage() {

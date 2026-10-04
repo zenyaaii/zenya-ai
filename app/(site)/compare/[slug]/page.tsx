@@ -41,6 +41,7 @@ import { COMPARISONS, getComparison } from "@/lib/comparisons"
 import Shell from "@/components/zenya/chrome/Shell"
 import { Breadcrumbs, Hero, CompareTable, ChooseBlocks, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
+import { share } from '@/lib/site-share'
 
 const SITE = 'https://zenyaai.co'
 
@@ -67,13 +68,12 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
       canonical: url,
       languages: hreflangAlternates(url, `${SITE}/en/compare/${c.slug}`),
     },
-    openGraph: {
+    ...share({
       title: c.title,
       description: c.metaDescription,
       url,
       type: 'article',
-    },
-    twitter: { card: 'summary_large_image', title: c.title, description: c.metaDescription },
+    }),
   }
 }
 
