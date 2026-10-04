@@ -6,9 +6,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        // /s/ is the published-sites namespace and should be crawled. Auth +
+        // Customer sites live on their own subdomain or domain, with their own
+        // robots.txt. zenyaai.co/s/<slug> only 301s there (middleware). Auth +
         // API + preview routes stay out.
-        allow: ['/', '/s/'],
+        allow: ['/'],
         disallow: [
           '/api/',
           '/auth/',

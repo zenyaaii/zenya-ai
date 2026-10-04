@@ -487,6 +487,18 @@ export async function middleware(request: NextRequest) {
   // root layout drops Zenya's own brand JSON-LD (subdomain/custom-domain hits
   // are flagged in their own branches above).
   if (pathname.startsWith('/s/')) {
+    // On Zenya's own address a customer site is a second copy of a page that
+    // lives at slug.zenyaai.co, and Google would see Zenya and the customer
+    // sharing one site. Send it to the site's own address for good. Preview
+    // deployments and localhost have no subdomains and keep serving /s/.
+    if (host === 'zenyaai.co' || host === 'www.zenyaai.co') {
+      const m = pathname.match(/^\/s\/([a-z0-9-]+)(\/.*)?$/i)
+      if (m) {
+        const target = new URL(`https://${m[1].toLowerCase()}.zenyaai.co${m[2] || '/'}`)
+        target.search = request.nextUrl.search
+        return NextResponse.redirect(target, 301)
+      }
+    }
     forwardedHeaders.set('x-zenya-site', '1')
     return NextResponse.next({ request: { headers: forwardedHeaders } })
   }
