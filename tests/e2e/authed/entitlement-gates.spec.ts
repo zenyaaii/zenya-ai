@@ -3,8 +3,8 @@ import { TEST_USER } from '../helpers/testUser'
 import { getUserIdByEmail, setProfile, insertTheme, deleteThemesByPrefix, adminDb } from '../helpers/db'
 
 // Behavioral proof of the capability gates that separate the tiers (2026-08-18):
-//   • Publish on subdomain → base tier (Entry unlocked / grandfathered / paid);
-//     a locked account (not entry_unlocked) is blocked.
+//   • Publish on subdomain → every account, the free plan included (the
+//     $0.50 Entry unlock became the free plan on 2026-10-05).
 //   • Export to Shopify    → requires is_pro (any paid; Entry/Free blocked)
 // We flip the test user's plan via service-role and drive the real endpoints.
 
@@ -39,13 +39,13 @@ test.afterAll(async () => {
 })
 
 test.describe('Publish gate (base tier can publish on subdomain)', () => {
-  test('LOCKED account (not entry-unlocked) is blocked from publishing', async ({ request }) => {
+  test('FREE plan (never paid) can publish on its subdomain', async ({ request }) => {
     await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, entry_unlocked: false })
     const res = await request.post(`/api/themes/${hostableThemeId}/publish`, {
       data: { slug: `e2e-gate-${Date.now()}` },
     })
-    expect(res.status(), 'Locked account must be denied publish').toBe(402)
-    expect((await res.json()).error).toBe('entry_required')
+    expect(res.status(), 'Free plan must pass the publish gate').toBe(200)
+    expect((await res.json()).ok).toBeTruthy()
   })
 
   test('ENTRY (unlocked) can publish on its subdomain', async ({ request }) => {

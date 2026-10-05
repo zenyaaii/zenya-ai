@@ -34,13 +34,9 @@ export function pickPriceId(
   }
 
   if (plan === 'entry') {
-    // Entry: a one-time $0.50 unlock for AI generation (2 templates).
-    const usd = process.env.STRIPE_PRICE_ID_ENTRY_USD || ''
-    const eur = process.env.STRIPE_PRICE_ID_ENTRY_EUR || ''
-    if (isEu && eur) return { priceId: eur, currency: 'eur' }
-    if (usd) return { priceId: usd, currency: 'usd' }
-    if (eur) return { priceId: eur, currency: 'eur' }
-    return { error: 'No Entry price configured (STRIPE_PRICE_ID_ENTRY_*).' }
+    // Entry was a one-time $0.50 unlock until 2026-10-05. It is the free plan
+    // now, so there is nothing to sell: never send anyone to Stripe for it.
+    return { error: 'Entry is free; it has no Stripe checkout.' }
   }
 
   if (plan === 'starter') {
@@ -92,9 +88,9 @@ export async function createCheckoutSession(opts: {
     cancel_url: `${opts.origin}/pricing?checkout=cancelled&plan=${opts.plan}`,
   }
 
-  // One-time payment plans (no recurring subscription): the legacy 'onetime'
-  // Pro purchase and the new $0.50 'entry' generation unlock.
-  if (opts.plan === 'onetime' || opts.plan === 'entry') {
+  // One-time payment plan (no recurring subscription): the legacy 'onetime'
+  // Pro purchase. ('entry' is free and never reaches this point.)
+  if (opts.plan === 'onetime') {
     return stripe.checkout.sessions.create({
       ...baseCommon,
       mode: 'payment',

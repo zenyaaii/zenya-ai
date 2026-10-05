@@ -81,8 +81,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .maybeSingle()
 
   // New model: subdomain publishing (slug.zenyaai.co) is part of the base tier.
-  // Anyone who has unlocked generation — the $0.50 Entry unlock, a grandfathered
-  // free account, or any paid plan — can publish on their subdomain. Custom
+  // Every account — the free plan (which replaced the $0.50 Entry unlock on
+  // 2026-10-05) or any paid plan — can publish on its subdomain. Custom
   // domains (Starter+) and a free domain (Pro) are the paid differentiators,
   // not subdomain hosting itself.
   const PUBLISH_PLANS = new Set(['entry', 'free', 'starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'])
@@ -95,8 +95,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json(
       {
         error: 'entry_required',
-        message: 'يتطلّب النشر فتح خطة Entry (0.50$ لمرة واحدة) على الأقل.',
-        cta: '/checkout?plan=entry',
+        message: 'تعذّر التحقق من حسابك للنشر. سجّل الدخول من جديد أو تواصل معنا.',
+        cta: '/contact',
       },
       { status: 402 }
     )

@@ -16,9 +16,9 @@ import { share } from '@/lib/site-share'
 const SITE = 'https://zenyaai.co'
 
 export const metadata: Metadata = {
-  title: `الأسعار — Entry بـ ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} مرّة واحدة، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
+  title: `الأسعار — باقة مجانية، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
   description:
-    `المعاينة مجانية. Entry بـ ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} مرّة واحدة، وStarter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
+    `ابدأ مجانًا بقالبين بالذكاء الاصطناعي، ثم Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
   keywords: [
     'أسعار منشئ المواقع',
     'كم تكلفة إنشاء موقع',
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     languages: hreflangAlternates(`${SITE}/pricing`, `${SITE}/en/pricing`),
   },
   ...share({
-    title: `أسعار زينيا — من ${usdTrailing(COMPANY.ENTRY_PRICE_USD)} لمرة واحدة إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
+    title: `أسعار زينيا — من باقة مجانية إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description:
-      'ثلاث خطط واضحة: Entry لمرة واحدة، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
+      'ثلاث خطط واضحة: باقة مجانية للبداية، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
     url: `${SITE}/pricing`,
   }),
 }
@@ -65,12 +65,12 @@ const PRICING_OFFER_SCHEMA = {
   offers: [
     {
       '@type': 'Offer',
-      name: 'Entry',
-      price: COMPANY.ENTRY_PRICE_USD.toFixed(2),
+      name: 'الباقة المجانية',
+      price: '0.00',
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
-      description: 'دفعة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
+      description: 'مجانًا: توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
     },
     {
       '@type': 'Offer',

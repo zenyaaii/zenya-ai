@@ -50,8 +50,8 @@
  * content never does this. So a card is not a key. Cards take the ring token;
  * only what is pressable is a key.
  *
- * Every number here is the one the rest of the codebase charges: Entry $0.50
- * once, Starter $14.99/mo, Pro $24.99/mo. Nothing on this page is invented:
+ * Every number here is the one the rest of the codebase charges: Free at $0,
+ * Starter $14.99/mo, Pro $24.99/mo. Nothing on this page is invented:
  * no counts, no ratings, no "trusted by". The comparison table's rows are
  * copied verbatim from the live page, because a claim about a competitor that
  * nobody has checked is not a design decision.

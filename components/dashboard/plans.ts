@@ -18,7 +18,7 @@ export function asPlan(v: unknown): Plan {
 /** The short name on the home screen's pill. */
 export const PLAN_LABEL: Record<Plan, string> = {
   free: 'الباقة المجانية',
-  entry: 'Entry',
+  entry: 'الباقة المجانية',
   pro_onetime: 'برو · مدى الحياة',
   pro_hosting: 'برو · استضافة',
   starter: 'Starter',
@@ -65,8 +65,8 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     ],
   },
   entry: {
-    label: 'خطة Entry',
-    price: '0.50$ لمرة واحدة',
+    label: 'الباقة المجانية',
+    price: '0$',
     includes: [
       'توليد قالبين (٢) بالذكاء الاصطناعي',
       'جميع القوالب الثمانية للمعاينة',
@@ -99,9 +99,17 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     price: 'بلا رسوم',
     includes: ['كل المزايا مفتوحة'],
   },
+  // Since 2026-10-05 'free' gets everything Entry had (the $0.50 unlock is
+  // gone), so both labels show the same plan.
   free: {
     label: 'الباقة المجانية',
     price: '0$',
-    includes: ['توليدان مجانيان عند التسجيل', 'جميع القوالب الثمانية للمعاينة'],
+    includes: [
+      'توليد قالبين (٢) بالذكاء الاصطناعي',
+      'جميع القوالب الثمانية للمعاينة',
+      'انشر موقعك على اسمك.zenyaai.co',
+      'كل أدوات التحرير والإدارة',
+      'شهر تجربة للحجوزات وتحليلات الموقع',
+    ],
   },
 }

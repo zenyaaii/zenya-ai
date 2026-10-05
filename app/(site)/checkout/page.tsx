@@ -91,6 +91,13 @@ export default async function CheckoutPage({
     redirect(`/login?mode=signup&next=/checkout?plan=${plan}`)
   }
 
+  // Entry is the free plan now (it was a one-time $0.50 unlock until
+  // 2026-10-05). There is nothing to pay, so a signed-in account goes
+  // straight to its dashboard. Old links to ?plan=entry land here.
+  if (plan === 'entry') {
+    redirect('https://dashboard.zenyaai.co')
+  }
+
   if (!process.env.STRIPE_SECRET_KEY) {
     return <CheckoutError message="لم تُهيّأ المدفوعات بعد. مفتاح STRIPE_SECRET_KEY مفقود." />
   }
@@ -100,22 +107,9 @@ export default async function CheckoutPage({
   // redirect, because they have to read it to find that out.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('is_pro, has_hosting, plan, entry_unlocked')
+    .select('is_pro, has_hosting, plan')
     .eq('id', user.id)
     .maybeSingle()
-
-  // Entry is a one-time generation unlock. Anyone who already unlocked it
-  // (grandfathered free user, paid Entry, or on any paid plan) skips it.
-  if (
-    plan === 'entry' &&
-    (profile?.entry_unlocked ||
-      profile?.is_pro ||
-      ['entry', 'starter', 'pro', 'pro_hosting', 'pro_onetime', 'admin'].includes(
-        String(profile?.plan || ''),
-      ))
-  ) {
-    redirect('https://dashboard.zenyaai.co?already_unlocked=1')
-  }
 
   if (plan === 'onetime' && profile?.is_pro) {
     redirect('https://dashboard.zenyaai.co?already_pro=1')
