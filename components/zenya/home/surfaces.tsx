@@ -405,11 +405,6 @@ function Count({ n, fmt }: { n: number; fmt: (v: number) => string }) {
     const a = from.current
     const b = n
     if (a === b) return
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      from.current = b
-      setShown(b)
-      return
-    }
     let raf = 0
     const t0 = performance.now()
     const tick = (t: number) => {

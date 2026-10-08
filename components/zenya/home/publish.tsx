@@ -432,13 +432,9 @@ export const publish: SurfaceDef = {
        surface bought, and the dashboard gives way to the site. */
     await move("url", 0.5, 0.5)
     await click()
-    if (c.reduced) {
-      set({ url: BOUGHT })
-    } else {
-      for (let i = 1; i <= BOUGHT.length; i += 1) {
-        set({ url: BOUGHT.slice(0, i) })
-        await wait(52)
-      }
+    for (let i = 1; i <= BOUGHT.length; i += 1) {
+      set({ url: BOUGHT.slice(0, i) })
+      await wait(52)
     }
     await wait(420)
 

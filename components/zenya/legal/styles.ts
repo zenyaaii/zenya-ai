@@ -448,7 +448,8 @@ export const CSS = `
   transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zl-js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .zl-js [data-reveal] { transform: none; }
+  .zl-js [data-reveal][data-in] { transition-property: opacity; }
   .zl-chev { transition: none; }
   .zl-root * { scroll-behavior: auto !important; }
 }

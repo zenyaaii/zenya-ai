@@ -612,8 +612,12 @@ html.lenis body {
 .zi:hover .zi-twinkle2,.group:hover .zi-twinkle2{ animation: zi-twinkle .6s ease-in-out .1s; }
 .zi:hover .zi-twinkle3,.group:hover .zi-twinkle3{ animation: zi-twinkle .6s ease-in-out .18s; }
 
+/* Less motion: the icon answers the hover with a short dim instead of a
+   swing or a hop. The hover rules above still set each duration; only the
+   keyframe is swapped. */
+@keyframes zy-soft-dip { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) {
-  .zi * { animation: none !important; }
+  .zi * { animation-name: zy-soft-dip !important; }
 }
 
 /* ==========================================================================
@@ -783,15 +787,14 @@ html.lenis body {
 }
 .sb[data-variant="quiet"]:active { transform: translateY(1px); }
 
+/* Less motion: the two labels share one window and cross-fade in place
+   instead of rolling past each other, and the press darkens rather than
+   drops. */
 @media (prefers-reduced-motion: reduce) {
-  .sb, .sb-track, .sb-face { transition: none; }
+  .sb { transition: box-shadow 120ms var(--sb-ease); }
+  .sb-track { display: grid; transition: none; }
+  .sb-face { grid-area: 1 / 1; }
   .sb:hover .sb-track, .sb:focus-visible .sb-track, .sb:active .sb-track { transform: none; }
-  .sb:hover .sb-face:first-child,
-  .sb:focus-visible .sb-face:first-child,
-  .sb:active .sb-face:first-child { opacity: 1; }
-  .sb:hover .sb-face:last-child,
-  .sb:focus-visible .sb-face:last-child,
-  .sb:active .sb-face:last-child { opacity: 0; }
   .sb:active { transform: none; }
 }
 
@@ -878,5 +881,13 @@ html.lenis body {
 .ss-tip[data-hide] { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ss-dot::before, .ss-tip { transition: none; }
+  .ss-dot::before { transition-property: background-color; }
 }
+
+/* ==========================================================================
+   Soft motion — the shared fade for prefers-reduced-motion
+   ==========================================================================
+   A device that asks for less motion gets fades, never travel. Surfaces that
+   open (header trays, drawers) and screens that change in place use this one
+   keyframe so the whole site fades the same way. */
+@keyframes zy-soft-in { from { opacity: 0; } }

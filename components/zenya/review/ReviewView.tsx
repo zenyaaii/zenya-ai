@@ -183,12 +183,9 @@ export default function ReviewView() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    /* Less motion still arrives: the stylesheet turns the rise into a plain
+       fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    if (reduce) {
-      targets.forEach((el) => el.setAttribute("data-in", "true"))
-      return
-    }
     root.classList.add("zr-js")
     const io = new IntersectionObserver(
       (entries) => {

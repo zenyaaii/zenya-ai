@@ -193,12 +193,6 @@ export default function BuildSection({
       await move(key, ax)
       await click()
       setFocus(key)
-      if (reduced) {
-        set({ [key]: text })
-        await wait(140)
-        setFocus(null)
-        return
-      }
       for (let i = 1; i <= text.length; i += 1) {
         set({ [key]: text.slice(0, i) })
         await wait(KEY + Math.random() * 30)

@@ -219,7 +219,7 @@ export const CSS = `
    hover, and not at all under reduced motion. */
 .zc-ch-go { margin-inline-start: auto; flex: 0 0 auto; display: flex; color: var(--stone-2); transition: color 200ms var(--ease-out), transform 260ms var(--ease-out); }
 .zc-ch-row:hover .zc-ch-go { color: var(--violet); transform: translate(-2px, -2px); }
-@media (prefers-reduced-motion: reduce) { .zc-ch-go { transition: none; } .zc-ch-row:hover .zc-ch-go { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zc-ch-go { transition-property: opacity, color, background-color, border-color, box-shadow; } .zc-ch-row:hover .zc-ch-go { transform: none; } }
 .zc-ch-note { margin: 0.75rem 0 0; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone-2); }
 
 /* ---- the well ----------------------------------------------------------
@@ -496,10 +496,12 @@ export const CSS = `
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zc-js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .zc-js .zc-h1-mark::after { transform: none; }
-  .zc-chip, .zc-in, .zc-ch-row, .zc-soc a { transition: none; }
-  .zc-js .zc-done > * { animation: none; }
+  .zc-js [data-reveal] { transform: none; }
+  .zc-js [data-reveal][data-in] { transition-property: opacity; }
+  .zc-js .zc-h1-mark::after { transform: none; opacity: 0; }
+  .zc-js [data-in] .zc-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  .zc-chip, .zc-in, .zc-ch-row, .zc-soc a { transition-property: opacity, color, background-color, border-color, box-shadow; }
+  @keyframes zc-rise { from { opacity: 0; } }
   .zc-js .zc-tick-p { stroke-dashoffset: 0; animation: none; }
 }
 

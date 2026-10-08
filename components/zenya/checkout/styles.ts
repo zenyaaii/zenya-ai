@@ -109,6 +109,8 @@ export const CSS = `
 .zk-swap[data-out] { opacity: 0; transform: translateY(6px); transition: opacity 180ms var(--ease-in), transform 180ms var(--ease-in); }
 .zk-swap-2 { transition-delay: 70ms; }
 .zk-swap-2[data-out] { transition-delay: 0ms; }
+/* Less motion: the figures still fade out and back, without the drop. */
+@media (prefers-reduced-motion: reduce) { .zk-swap[data-out] { transform: none; } }
 
 /* ---- the terms rows: what recurs, when, what cancelling does ------------ */
 .zk-rows { margin: clamp(1.125rem, 3vw, 1.5rem) 0 0; display: grid; gap: 0.875rem; }

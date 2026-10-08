@@ -149,7 +149,10 @@ export const MARKETING_CSS = `
 }
 .zx-js .gradient-text::after { transform: scaleX(0); }
 .zx-js [data-in] .gradient-text::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
-@media (prefers-reduced-motion: reduce) { .zx-js .gradient-text::after { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .zx-js .gradient-text::after { transform: none; opacity: 0; }
+  .zx-js [data-in] .gradient-text::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+}
 
 /* ---- shared section type ------------------------------------------------ */
 .zx-h2 {
@@ -184,8 +187,10 @@ export const MARKETING_CSS = `
   transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zx-js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .zx-js .zx-h1-mark::after { transform: none; }
+  .zx-js [data-reveal] { transform: none; }
+  .zx-js [data-reveal][data-in] { transition-property: opacity; }
+  .zx-js .zx-h1-mark::after { transform: none; opacity: 0; }
+  .zx-js [data-in] .zx-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
 }
 .zx-root :where(a, button, summary):focus-visible {
   outline: 2px solid var(--violet-ink); outline-offset: 3px; border-radius: 6px;

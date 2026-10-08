@@ -274,12 +274,9 @@ export default function TemplatesView() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    /* Less motion still arrives: the stylesheet turns the rise into a plain
+       fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    if (reduce) {
-      targets.forEach((el) => el.setAttribute("data-in", "true"))
-      return
-    }
     root.classList.add("zt-js")
     const io = new IntersectionObserver(
       (entries) => {
@@ -821,7 +818,7 @@ const CSS = `
     box-shadow 520ms var(--ease-out);
 }
 .zt-phone-pill[data-open] { transition-delay: 0s; }
-@media (prefers-reduced-motion: reduce) { .zt-phone-pill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .zt-phone-pill { transition-property: background-color, box-shadow; } }
 .zt-phone-bar {
   display: grid; grid-template-columns: 1fr auto 1fr;
   align-items: center; gap: 0.375rem;
@@ -879,7 +876,7 @@ const CSS = `
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .zt-pill, .zt-phone-pill { background: #f2f2f5; }
 }
-@media (prefers-reduced-motion: reduce) { .zt-pill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .zt-pill { transition-property: background-color, box-shadow; } }
 
 /* The deck's own measurements: 48px tall, pe-1.5 ps-3, nav items 10px 12px. */
 .zt-bar {
@@ -965,7 +962,10 @@ const CSS = `
   transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms;
 }
 .zt-drawer[data-open] { transition-delay: 0s, 0s; }
-@media (prefers-reduced-motion: reduce) { .zt-drawer { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .zt-drawer { transition: none; }
+  .zt-drawer[data-open] > * { animation: zy-soft-in 260ms var(--ease-out); }
+}
 .zt-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
 .zt-tray-grid {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1187,7 +1187,7 @@ const CSS = `
 }
 .zt-tile:focus-within::before, .zt-tile:focus-within::after { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
-  .zt-tile::before, .zt-tile::after { transition: none; }
+  .zt-tile::before, .zt-tile::after { transition-property: opacity, color, background-color, border-color, box-shadow; }
 }
 
 /* Three tight lines, not four stacked bands with a button under them. */
@@ -1432,7 +1432,8 @@ const CSS = `
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zt-js [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .zt-js [data-reveal] { transform: none; }
+  .zt-js [data-reveal][data-in] { transition-property: opacity; }
 }
 
 /* ---- the phone's picker -------------------------------------------------
@@ -1529,7 +1530,7 @@ const CSS = `
 }
 .zt-key[aria-selected="true"] .zt-key-label { color: var(--violet); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
-  .zt-key-shot, .zt-key-label { transition: none; }
+  .zt-key-shot, .zt-key-label { transition-property: opacity, color, background-color, border-color, box-shadow; }
 }
 /* Under about 360 the four keys stop leaving room for a word under each. */
 @media (max-width: 359px) {
