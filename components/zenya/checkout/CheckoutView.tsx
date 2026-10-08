@@ -176,8 +176,6 @@ export default function CheckoutView({
 
   function pick(next: PlanId) {
     if (next === plan) return
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    if (reduce) { setPlan(next); return }
     setOut(true)
     window.setTimeout(() => { setPlan(next); setOut(false) }, 180)
   }

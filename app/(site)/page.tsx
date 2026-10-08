@@ -3070,11 +3070,12 @@ export default function Page() {
           .zn-manage .zn3-path { padding-top: 34px; }
         }
 
+        /* Less motion: the screen fades up where it stands instead of
+           rising into place. The cast already only fades, so it keeps its
+           own transition. */
         @media (prefers-reduced-motion: reduce) {
-          .zn3-device { transition: none; }
-          .zn3-device[data-down] { transform: none; }
-          .zn3-cast { transition: none; }
-          .zn3-cast[data-down] { opacity: 0.17; }
+          .zn3-device { transition: opacity 900ms cubic-bezier(0.22, 1, 0.36, 1); }
+          .zn3-device[data-down] { transform: translateX(var(--dev-x, 0px)); opacity: 0; }
         }
 
         /* The cursor. Paper on obsidian rather than obsidian on paper — the
@@ -4218,37 +4219,79 @@ export default function Page() {
         }
 
 
+        /* SOFT MOTION. A reader whose device asks for less motion still gets
+           a page that answers them: things fade, nothing travels. Every
+           change of state keeps its fade and its colour; transforms, widths
+           and heights land at once instead of moving. Entrances keep their
+           timing and lose their distance, by redefining the keyframes rather
+           than switching them off. Loops that only decorate (the breathing
+           light, the blinking carets, the spinner) stay off. */
         @media (prefers-reduced-motion: reduce) {
+          @keyframes zn-rise { from { opacity: 0; } }
+          @keyframes zn-card-in { from { opacity: 0; } }
+          @keyframes zn-dish-in { from { opacity: 0; } }
+          @keyframes zn-service-in { from { opacity: 0; } }
+          @keyframes zn-shot-in { from { opacity: 0; } }
+          @keyframes zn-finish-in { from { opacity: 0; } }
+          @keyframes zn-swatch-in { from { opacity: 0; } }
+          @keyframes zn3-land { from { opacity: 0; } }
+          @keyframes zn3-pop { from { opacity: 0; } }
+          @keyframes zn3-draw { from { opacity: 0; } }
+          @keyframes zn5-rise { from { opacity: 0; } }
+          @keyframes zn5-lift { from { opacity: 0; } }
+          @keyframes zn-soft-deck { from { opacity: 0; } }
+
+          /* The deck changes screen in place, and the new screen fades up. */
           #zn-track { transition: none; }
-          .zn-card, .zn-dish, .zn-finish, .zn-service, .zn-shot img { animation: none; }
-          .zn-finish .go, .zn-word > span, .zn-hero-only { transition: none; }
-          .zn-cursor, .zn-cursor svg, .zn-tile, .zn-tile .go, .zn-chip,
-          .zn-preset, .zn-hour u, .zn-in { transition: none; }
+          #zn-deck[data-moving="true"] #zn-track {
+            animation: zn-soft-deck 460ms cubic-bezier(0.22, 1, 0.36, 1);
+          }
+
+          /* The rotating words cross-fade in their own place, column by
+             column, on the same beat as the full version. */
+          .zn-w, .zn-word > span, .zn4-word > span { transition-property: opacity; }
+          .zn-w[data-state="out"], .zn-w[data-state="idle"],
+          .zn-word > span[data-state="out"], .zn-word > span[data-state="idle"],
+          .zn4-word > span[data-state="out"], .zn4-word > span[data-state="idle"] { transform: none; }
+          .zn-slot { transition: none; }
+
+          .zn-hero-only { transition-property: opacity, visibility; }
+          .zn-hero-only[data-lit="false"] { transform: none; }
+
+          /* Controls: colour and fade only. */
+          .zn-finish .go, .zn-tile, .zn-tile .go, .zn-chip, .zn-preset, .zn-hour u, .zn-in,
+          .zn3-chart .cross, .zn3-chart .dot, .zn3-chart .tip,
+          .zn4-site .status, .zn4-domrow .disc, .zn4-switch button, .zn4-app,
+          .zn5-cta, .zn5-mail, .zn5-col a, .zn5-social a {
+            transition-property: opacity, color, background-color, border-color, box-shadow;
+          }
+          .zn-cursor, .zn-cursor svg, .zn4-cursor, .zn4-cursor svg { transition: none; }
           .zn-in[data-on="true"] em::after { animation: none; }
-          .zn-words > span { animation: none; }
-          .zn3-chart .line, .zn3-chart .area, .zn3-chart .tip { animation: none; }
-          .zn3-chart .cross, .zn3-chart .dot, .zn3-chart .tip { transition: none; }
-          .zn-w, .zn-slot { transition: none; }
-          .zn-pill, .zn-drawer, .zn-corner, .zn-phone-pill, .zn-phone-drawer { transition: none; }
-          #zn-glow i { animation: none; }
-          #zn-glow { transition: none; }
-          .zn-swatch, .zn-swatch i { animation: none; }
-          .zn-glowlabel > span { transition: none; }
-          #zn-claim .line[data-state="read"] > .text { animation: none; clip-path: none; }
+
+          /* The header and the corner controls open at once, and what is in
+             them fades in. Their colour change between screens still eases. */
+          .zn-pill, .zn-corner, .zn-phone-pill {
+            transition: background 900ms cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 900ms cubic-bezier(0.22, 1, 0.36, 1);
+          }
+          .zn-drawer, .zn-phone-drawer { transition: none; }
+          .zn-drawer[data-open="true"] > *, .zn-phone-drawer[data-open="true"] > * {
+            animation: zn-soft-deck 260ms cubic-bezier(0.22, 1, 0.36, 1);
+          }
+
+          #zn-glow i, .zn3-glow i { animation: none; }
+          .zn-swatch i { animation: none; }
+
+          /* The claim still types; only the travelling caret goes. The dot
+             fades between sides instead of walking. */
           #zn-claim .line > .caret { display: none; }
-          #zn-claim .line, #zn-claim .dot { transition: none; }
-          .zn4-win, .zn4-cursor, .zn4-cursor svg, .zn4-word > span,
-          .zn4-site .status, .zn4-domrow .disc, .zn4-switch button { transition: none; }
-          .zn4-in, .zn4-tr, .zn4-domrow, .zn4-site .host { animation: none; }
+          #zn-claim .dot { transition-property: opacity; }
+          #zn-claim .line[data-state="leave"],
+          #zn-claim .line[data-state="between"] { transform: none; }
+
+          .zn4-win { transition-property: opacity; }
+          .zn4-win[data-down] { transform: none; }
           .zn4-load[data-on], .zn4-site .status .dot, .spin { animation: none; }
-          .zn4-win[data-down] { transform: none; opacity: 1; }
-          .zn4-app { transition: none; }
-          .zn5-stack[data-run] .zn5-card,
-          .zn5-stack[data-run] .zn5-sig,
-          .zn5-stack[data-run] .zn5-brand,
-          .zn5-stack[data-run] .zn5-col,
-          .zn5-stack[data-run] .zn5-bottom { animation: none; }
-          .zn5-cta, .zn5-mail, .zn5-col a, .zn5-social a { transition: none; }
         }
       ` }} />
 

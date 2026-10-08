@@ -118,7 +118,7 @@ export const PARTS_CSS = `
 .zx-qa { padding: 0 0 clamp(1.125rem, 2.6vw, 1.5rem); font-size: clamp(14.5px, 1.6vw, 16px); font-weight: 400; line-height: 1.95; color: var(--stone); }
 .zx-q[open] .zx-qa { animation: zx-qa-in 380ms var(--ease-out) both; }
 @keyframes zx-qa-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .zx-q[open] .zx-qa { animation: none; } .zx-qchev { transition: none; } }
+@media (prefers-reduced-motion: reduce) { @keyframes zx-qa-in { from { opacity: 0; } } .zx-qchev { transition: none; } }
 
 /* ---- the closing band --------------------------------------------------- */
 .zx-band { padding: clamp(3rem, 7vw, 4.5rem) 0 clamp(1.5rem, 4vw, 2.5rem); border-top: 1px solid rgba(0,0,0,0.08); margin-top: clamp(2.5rem, 6vw, 4rem); }

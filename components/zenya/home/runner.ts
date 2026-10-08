@@ -57,7 +57,11 @@ export function makeRunner({
   reduced: boolean
   alive: () => boolean
 }): Runner {
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 120) : ms))
+  /* Less motion keeps the script's pace: typing and clicking are not motion,
+     and a demo run at five times the speed reads as flicker. What it drops
+     is travel, so the frame jumps rather than scrolls and the cursor (in CSS)
+     lands rather than glides. */
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
   const wait = async (ms: number) => { await sleep(ms); if (!alive()) throw HALT }
 
   /* Where a target sits inside the frame. Rects come back in RENDERED pixels,
@@ -133,7 +137,7 @@ export function makeRunner({
     await bring(el)
     const p = at(el, ax, ay)
     if (p) setCursor((c) => ({ x: p.x, y: p.y, press: c ? c.press : false }))
-    await wait(reduced ? 0 : MOVE)
+    await wait(MOVE)
   }
   const move = (key: string, ax?: number, ay?: number) => moveEl(find(key), ax, ay)
 

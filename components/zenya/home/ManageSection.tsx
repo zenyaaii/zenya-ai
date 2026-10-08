@@ -129,7 +129,6 @@ export default function ManageSection({
       await r.move(t, 0.88)
       await click()
       setFocus(t)
-      if (reduced) { set({ [key]: text }); await wait(140); setFocus(null); return }
       for (let i = 1; i <= text.length; i += 1) {
         set({ [key]: text.slice(0, i) })
         await wait(KEY + Math.random() * 30)
@@ -151,7 +150,6 @@ export default function ManageSection({
       /* No focus() call. The value setter does not need one, and focusing a
          real input on a phone raises the on-screen keyboard over a form the
          reader is only meant to be watching. */
-      if (reduced) { writeValue(node, text); await wait(140); return }
       for (let i = 1; i <= text.length; i += 1) {
         writeValue(node, text.slice(0, i))
         await wait(KEY + Math.random() * 30)

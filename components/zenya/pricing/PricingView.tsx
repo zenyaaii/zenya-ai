@@ -350,12 +350,9 @@ export default function PricingView() {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    /* Less motion still arrives: the stylesheet turns the rise into a plain
+       fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    if (reduce) {
-      targets.forEach((el) => el.setAttribute("data-in", "true"))
-      return
-    }
     root.classList.add("zp-js")
     const io = new IntersectionObserver(
       (entries) => {
@@ -759,7 +756,7 @@ const CSS = `
     box-shadow 520ms var(--ease-out);
 }
 .zp-phone-pill[data-open] { transition-delay: 0s; }
-@media (prefers-reduced-motion: reduce) { .zp-phone-pill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .zp-phone-pill { transition-property: background-color, box-shadow; } }
 .zp-phone-bar {
   display: grid; grid-template-columns: 1fr auto 1fr;
   align-items: center; gap: 0.375rem;
@@ -823,7 +820,7 @@ const CSS = `
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .zp-pill, .zp-phone-pill { background: #f2f2f5; }
 }
-@media (prefers-reduced-motion: reduce) { .zp-pill { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .zp-pill { transition-property: background-color, box-shadow; } }
 
 /* The words hold the middle and the surface opens around them. */
 /* The deck's own measurements, taken from app/demo/home/page.tsx rather than
@@ -917,7 +914,10 @@ const CSS = `
   transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms;
 }
 .zp-drawer[data-open] { transition-delay: 0s, 0s; }
-@media (prefers-reduced-motion: reduce) { .zp-drawer { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .zp-drawer { transition: none; }
+  .zp-drawer[data-open] > * { animation: zy-soft-in 260ms var(--ease-out); }
+}
 .zp-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
 .zp-tray-grid {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1146,7 +1146,8 @@ const CSS = `
     transform 500ms var(--ease-out) calc(var(--i, 0) * 55ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zp-js [data-reveal], .zp-js tr[data-reveal] { opacity: 1; transform: none; transition: none; }
+  .zp-js [data-reveal], .zp-js tr[data-reveal] { transform: none; }
+  .zp-js [data-reveal][data-in], .zp-js tr[data-reveal][data-in] { transition-property: opacity; }
 }
 
 /* ---- narrow ------------------------------------------------------------- */

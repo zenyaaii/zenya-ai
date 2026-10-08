@@ -141,6 +141,13 @@ export const CHROME_CSS = `
 .zx-account:hover { opacity: 0.86; }
 .zx-drawer { display: grid; transition: grid-template-rows 440ms var(--ease-out), visibility 0s linear 440ms; }
 .zx-drawer[data-open] { transition-delay: 0s, 0s; }
+/* Less motion: the pill and its tray open at once, the tray's contents fade
+   in, and the colour change between grounds still eases. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-phone-pill { transition: background-color 520ms var(--ease-out), box-shadow 520ms var(--ease-out); }
+  .zx-drawer { transition: none; }
+  .zx-drawer[data-open] > * { animation: zy-soft-in 260ms var(--ease-out); }
+}
 .zx-drawer-clip { width: 0; min-width: 100%; overflow: hidden; }
 .zx-tray-row { display: block; border-radius: 8px; padding: 0.6875rem 0.75rem; font-size: 14.5px; line-height: 1.24; text-decoration: none; color: #666; }
 .zx-tray-row:hover { background: rgba(0,0,0,0.04); color: var(--obsidian); }

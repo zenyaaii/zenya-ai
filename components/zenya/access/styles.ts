@@ -489,9 +489,14 @@ export const CSS = `
 @keyframes za-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .za-js .za-card, .za-js .za-foot-note { animation: none; }
+  /* Soft motion: the cards fade up in place, controls change colour and
+     fade, and the tray opens at once with its contents fading in. */
+  @keyframes za-rise { from { opacity: 0; } }
   .za-roll-face, .za-switch-ind, .za-slot, .za-meter-fill, .za-acc-go,
-  .za-card::before, .za-card::after, .za-phone-pill, .za-drawer { transition: none; }
+  .za-card::before, .za-card::after { transition-property: opacity, color, background-color, border-color, box-shadow; }
+  .za-phone-pill { transition-property: background-color, box-shadow; }
+  .za-drawer { transition: none; }
+  .za-drawer[data-open] > * { animation: zy-soft-in 260ms var(--ease-out); }
 }
 
 /* ---- narrow ------------------------------------------------------------- */

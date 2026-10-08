@@ -511,12 +511,13 @@ export const CSS = `
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zr-js [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .zr-js .zr-h1-mark::after { transform: none; }
-  .zr-star, .zr-star-in, .zr-star-out, .zr-verdict-face, .zr-in, .zr-slot-grow { transition: none; }
-  /* The confirmation still has to BE there, so the mark rests drawn and the
-     panel rests visible rather than animating into place. */
-  .zr-js .zr-thanks > * { animation: none; }
+  .zr-js [data-reveal] { transform: none; }
+  .zr-js [data-reveal][data-in] { transition-property: opacity; }
+  .zr-js .zr-h1-mark::after { transform: none; opacity: 0; }
+  .zr-js [data-in] .zr-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  .zr-star, .zr-star-in, .zr-star-out, .zr-verdict-face, .zr-in, .zr-slot-grow { transition-property: opacity, color, background-color, border-color, box-shadow; }
+  /* The confirmation fades in where it rests; the tick is drawn already. */
+  @keyframes zr-rise { from { opacity: 0; } }
   .zr-js .zr-tick-p { stroke-dashoffset: 0; animation: none; }
 }
 

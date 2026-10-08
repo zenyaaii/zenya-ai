@@ -52,7 +52,7 @@ export const CSS = `
 .zx-q[open] .zx-qa { animation: zx-qa-in 380ms var(--ease-out) both; }
 @keyframes zx-qa-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .zx-q[open] .zx-qa { animation: none; }
+  @keyframes zx-qa-in { from { opacity: 0; } }
   .zx-qchev { transition: none; }
 }
 

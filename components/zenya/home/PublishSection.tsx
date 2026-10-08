@@ -129,7 +129,6 @@ export default function PublishSection({
       await r.move(t, 0.88)
       await click()
       setFocus(t)
-      if (reduced) { set({ [key]: text }); await wait(140); setFocus(null); return }
       for (let i = 1; i <= text.length; i += 1) {
         set({ [key]: text.slice(0, i) })
         await wait(KEY + Math.random() * 30)
