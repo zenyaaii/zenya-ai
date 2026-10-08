@@ -184,6 +184,8 @@ async function recordOneTimePurchase(
 }
 
 // ---------- entry unlock (one-time $0.50 generation unlock) ---------------
+// No longer sold: Entry became the free plan on 2026-10-05. Kept so a late
+// webhook for an old Entry payment still records the purchase.
 
 /**
  * Entry: a one-time $0.50 payment that unlocks AI generation (2 templates)

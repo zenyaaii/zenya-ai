@@ -27,9 +27,9 @@ const baseMetadata: Metadata = {
     template: '%s · زينيا',
   },
   // Shopify's pattern: say what the reader gets and how to start, in about
-  // 150 characters so Google shows it whole instead of cutting it off. No
-  // "try it free": the preview is free but generating starts at the Entry
-  // price, and the description has to be true.
+  // 150 characters so Google shows it whole instead of cutting it off. The
+  // description has to be true: since 2026-10-05 the first two generations
+  // are free too (the Free plan replaced the $0.50 Entry unlock).
   description: HOME_DESCRIPTION,
   applicationName: 'زينيا',
   generator: 'زينيا',
@@ -244,10 +244,10 @@ const structuredData = [
       },
       {
         '@type': 'Offer',
-        name: 'Entry',
-        price: COMPANY.ENTRY_PRICE_USD.toFixed(2),
+        name: 'الباقة المجانية',
+        price: '0.00',
         priceCurrency: 'USD',
-        description: 'دفعة واحدة تفتح توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي. المعاينة مجانية.',
+        description: 'مجانًا: توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
       },
     ],
     // No aggregateRating: Zenya is early and we never publish invented ratings.

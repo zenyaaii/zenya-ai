@@ -87,18 +87,18 @@ const NBSP = " "
 const PLANS = [
   {
     id: "entry",
-    name: "Entry",
-    amount: "$0.50",
-    per: "/لمرة واحدة",
-    sub: "ابنِ، أدِر، وانشر — جرّب زينيا بأقل تكلفة.",
-    cta: "ابدأ بـ 0.50$",
+    name: "مجانية",
+    amount: "$0",
+    per: "/بلا دفع",
+    sub: "ابنِ، أدِر، وانشر — جرّب زينيا مجانًا.",
+    cta: "ابدأ مجانًا",
     /* The arriving label says what the plan hands over, so the movement
        carries a second piece of information rather than repeating the first. */
     ctaSlide: "ولّد أول موقع",
-    href: "/checkout?plan=entry",
-    foot: "دفعة واحدة — بلا اشتراك",
+    href: "/login?mode=signup",
+    foot: "مجانًا — بلا بطاقة ولا اشتراك",
     features: [
-      "توليد قالبين (٢) بالذكاء الاصطناعي — دفعة واحدة",
+      "توليد قالبين (٢) بالذكاء الاصطناعي — مجانًا",
       "جميع القوالب الثمانية للمعاينة",
       "انشر موقعك على اسمك.zenyaai.co",
       "كل أدوات التحرير والإدارة",
@@ -160,14 +160,14 @@ const PLANS = [
 const COMPARE = [
   {
     feature: "السعر",
-    zenya: [COMPANY.ENTRY_PRICE_USD, COMPANY.STARTER_PRICE_USD, COMPANY.PRO_PRICE_USD]
-      .map(usdTrailing).join(" / "),
+    zenya: ["مجانًا", ...[COMPANY.STARTER_PRICE_USD, COMPANY.PRO_PRICE_USD].map(usdTrailing)]
+      .join(" / "),
     other: "+29$ شهريًا",
     agency: "+2,000$",
   },
   { feature: "وقت الإعداد", zenya: "أقل من 60 ثانية", other: "دقائق", agency: "أسابيع" },
   { feature: "القوالب", zenya: "8 قوالب", other: "1-2", agency: "مخصّص" },
-  { feature: "النشر مشمول", zenya: "من خطة Entry", other: "في معظمها", agency: "تتولّاها بنفسك" },
+  { feature: "النشر مشمول", zenya: "من الباقة المجانية", other: "في معظمها", agency: "تتولّاها بنفسك" },
   { feature: "نطاق مخصّص", zenya: "من خطة Starter", other: "في معظمها", agency: "نعم" },
   { feature: "تصدير شوبيفاي", zenya: "من خطة Starter", other: "نادر", agency: "مخصّص" },
   { feature: "الارتباط بالمنصّة", zenya: "لا يوجد", other: "مرتفع", agency: "لا يوجد" },
@@ -578,10 +578,10 @@ export default function PricingView() {
         <h1 className="zp-h1">
           المعاينة مجانية.
           <br />
-          التوليد يبدأ بنصف دولار.
+          وأول قالبين مجانًا أيضًا.
         </h1>
         <p className="zp-lede-sub">
-          خطة تُدفع مرّة واحدة، وخطّتان شهريتان. الاشتراك يُلغى متى شئت.
+          باقة مجانية، وخطّتان شهريتان. الاشتراك يُلغى متى شئت.
         </p>
       </div>
 

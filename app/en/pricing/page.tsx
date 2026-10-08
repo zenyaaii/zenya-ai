@@ -10,7 +10,7 @@ const SITE = 'https://zenyaai.co'
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    `Zenya pricing in plain terms. Preview free, unlock two AI generations for a one-time ${usd(COMPANY.ENTRY_PRICE_USD)} (Entry), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation, a custom domain, bookings and analytics, or Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding a free domain for a year and no Zenya badge.`,
+    `Zenya pricing in plain terms. Start free with two AI generations (Free plan), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation, a custom domain, bookings and analytics, or Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding a free domain for a year and no Zenya badge.`,
   keywords: ['Zenya pricing', 'AI website builder pricing', 'Arabic website builder cost'],
   alternates: {
     canonical: `${SITE}/en/pricing`,
@@ -40,20 +40,20 @@ type Plan = {
 /** Mirrors the Arabic pricing page (app/(main)/pricing/page.tsx). Keep in sync. */
 const PLANS: Plan[] = [
   {
-    name: 'Entry',
-    price: '$0.50',
-    cadence: 'one-time',
-    tagline: 'Build, manage, and publish — try Zenya for next to nothing.',
+    name: 'Free',
+    price: '$0',
+    cadence: 'no card needed',
+    tagline: 'Build, manage, and publish — try Zenya for free.',
     features: [
-      'Generate two (2) templates with AI — one-time',
+      'Generate two (2) templates with AI — free',
       'All eight templates to preview',
       'Publish your site on yourname.zenyaai.co',
       'Every editing and management tool',
       'One-month trial of bookings and site analytics',
       'Community support',
     ],
-    cta: { label: 'Start for $0.50', href: '/checkout?plan=entry' },
-    note: 'One-time payment. Previewing templates is always free.',
+    cta: { label: 'Start free', href: '/login?mode=signup' },
+    note: 'No payment and no subscription. Upgrade only when you need more.',
   },
   {
     name: 'Starter',
@@ -127,8 +127,8 @@ export default function EnPricing() {
             Pricing, <span className="gradient-text">without the asterisks.</span>
           </h1>
           <p className="mt-6 text-[17px] leading-[1.9] text-muted">
-            Preview the templates for free. Unlock two AI generations for a one-time $0.50, then upgrade to
-            Starter or Pro once you have seen the site the AI writes for your business.
+            Start free with two AI generations, then upgrade to Starter or Pro once you have seen the
+            site the AI writes for your business.
           </p>
         </div>
 
@@ -264,7 +264,7 @@ export default function EnPricing() {
 
         <CtaBand
           title="Start building with Zenya"
-          subtitle="Preview free, then unlock two AI generations for a one-time $0.50. Pick a template, write a brief, and see what the AI builds."
+          subtitle="Start free with two AI generations. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Get started"
           secondaryLabel="Browse templates"
           secondaryHref="/en/websites"

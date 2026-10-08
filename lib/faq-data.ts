@@ -48,7 +48,7 @@ export const AR_FAQS: QA[] = [
   },
   {
     q: 'كم تكلفة زينيا؟',
-    a: 'المعاينة مجانية. يفتح التوليد بخطة Entry (0.50$ لمرة واحدة) لقالبين ونشرهما على اسمك.zenyaai.co. ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاق مخصّص وحجوزات وتحليلات، وخطة Pro بـ 24.99$ شهريًا تضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. راجع صفحة الأسعار للتفاصيل.',
+    a: 'البداية مجانية: الباقة المجانية تتيح توليد قالبين بالذكاء الاصطناعي ونشرهما على اسمك.zenyaai.co دون دفع. ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاق مخصّص وحجوزات وتحليلات، وخطة Pro بـ 24.99$ شهريًا تضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. راجع صفحة الأسعار للتفاصيل.',
   },
   {
     q: 'هل يمكنني الإلغاء في أي وقت؟',
@@ -95,7 +95,7 @@ export const EN_FAQS: QA[] = [
   },
   {
     q: 'How much does Zenya cost?',
-    a: 'Previewing is free. AI generation unlocks with Entry, a one-time $0.50 that gives you two templates and publishing on yourname.zenyaai.co. Then Starter is $14.99/month for unlimited generation, a custom domain, bookings and analytics, and Pro is $24.99/month adding a free domain for a year and no Zenya badge. See the pricing page for details.',
+    a: 'Starting is free. The Free plan gives you two AI-generated templates and publishing on yourname.zenyaai.co, with no card needed. Then Starter is $14.99/month for unlimited generation, a custom domain, bookings and analytics, and Pro is $24.99/month adding a free domain for a year and no Zenya badge. See the pricing page for details.',
   },
   {
     q: 'Can I cancel anytime?',

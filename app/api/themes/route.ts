@@ -47,10 +47,12 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
-    // The enforce_theme_quota trigger raises P0001 for two paywalls:
-    //   'entry_locked:'        → account hasn't bought the $0.50 Entry unlock.
-    //   'trial_limit_reached:' → unlocked base tier used up its 2 templates.
-    // Surface both as 402 so the UI can route to checkout/pricing.
+    // The enforce_theme_quota trigger raises P0001 for:
+    //   'trial_limit_reached:' → the free tier used up its 2 templates.
+    //   'entry_locked:'        → the old $0.50 paywall. The 2026-10-05
+    //                            migration removed it; kept until that
+    //                            migration is applied everywhere.
+    // Surface both as 402 so the UI can route to sign-up/pricing.
     if (error.message?.startsWith('entry_locked')) {
       admin().from('activity_logs').insert({
         user_id: user.id,
@@ -60,8 +62,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'entry_locked',
-          message: 'يتطلّب التوليد فتح خطة Entry (0.50$ لمرة واحدة).',
-          cta: '/checkout?plan=entry',
+          message: 'تعذّر بدء التوليد على حسابك. تواصل معنا وسنفتحه لك مجانًا.',
+          cta: '/contact',
         },
         { status: 402 }
       )

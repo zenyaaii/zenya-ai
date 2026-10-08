@@ -68,8 +68,8 @@ type Plan = {
 const PLANS: Plan[] = [
   {
     id: "entry",
-    name: "Entry",
-    kind: "دفعة واحدة — بوّابة الدخول إلى التوليد",
+    name: "مجانية",
+    kind: "مجانًا — بوّابة الدخول إلى التوليد",
     price: null,
     recurring: false,
     legacy: false,
@@ -127,11 +127,12 @@ const PLANS: Plan[] = [
   },
 ]
 
-/** The three the reader can actually pick today. The two legacy plans stay
+/** The two the reader can actually pick today (Entry became the free plan
+ *  on 2026-10-05, so there is nothing to pay for it). The two legacy plans stay
  *  reachable through ?plan=, exactly as the live route accepts them, but they
  *  are not offered as a choice, because offering them would be an invitation
  *  to buy something that is not on sale. */
-const OFFERED: PlanId[] = ["entry", "starter", "pro"]
+const OFFERED: PlanId[] = ["starter", "pro"]
 
 const findPlan = (id: PlanId) => PLANS.find((p) => p.id === id) ?? PLANS[0]
 
@@ -531,11 +532,11 @@ const STATES: State[] = [
     cond: "if (!process.env.STRIPE_SECRET_KEY)",
   },
   {
-    name: "التوليد مفتوح سلفًا",
+    name: "الباقة المجانية",
     tag: "تحويل",
     icon: <Check size={16} strokeWidth={2.5} aria-hidden />,
-    body: "من فتح خطة Entry من قبل، أو كان على أي خطة مدفوعة، لا يدفع ثمنها مرّة ثانية.",
-    cond: "plan === 'entry' && (entry_unlocked || is_pro || plan in {entry, starter, pro, ...}) -> ?already_unlocked=1",
+    body: "الباقة المجانية لا تُدفع. رابط قديم إلى خطة Entry يذهب مباشرة إلى لوحة التحكم.",
+    cond: "plan === 'entry' -> redirect(dashboard)",
   },
   {
     name: "Pro مملوكة سلفًا",

@@ -65,8 +65,9 @@ export const COMPANY = {
   // formatted constants built from it; do not type the digits.
   STARTER_PRICE_USD: 14.99,
   PRO_PRICE_USD: 24.99,
-  /** The one-time Entry unlock: two AI generations. */
-  ENTRY_PRICE_USD: 0.5,
+  /** The free plan: two AI generations, publishing on a zenyaai.co address.
+   *  It was a one-time $0.50 "Entry" unlock until 2026-10-05. */
+  ENTRY_PRICE_USD: 0,
   STARTER_PRICE_DISPLAY: '14.99 دولارًا شهريًا',
   PRO_PRICE_DISPLAY: '24.99 دولارًا شهريًا',
   PRICE_DISPLAY: 'اشتراك شهري — 14.99 دولارًا لخطة Starter أو 24.99 دولارًا لخطة Pro',

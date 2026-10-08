@@ -30,16 +30,21 @@ test.afterAll(async () => {
   await setProfile(userId, { plan: 'entry', is_pro: false, has_hosting: false, entry_unlocked: true, trial_themes_used: 0, trial_themes_limit: 2 })
 })
 
-test('LOCKED account (not entry-unlocked) is blocked from generating', async ({ request }) => {
+test('FREE plan (never paid) can generate, capped at 2', async ({ request }) => {
+  // Since 2026-10-05 there is no $0.50 paywall: entry_unlocked no longer gates.
   await deleteThemesByPrefix(userId, PREFIX)
   await setProfile(userId, { plan: 'free', is_pro: false, has_hosting: false, entry_unlocked: false, trial_themes_used: 0, trial_themes_limit: 2 })
 
-  const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}locked-1`) })
-  expect(res.status(), 'locked account must be blocked before generating').toBe(402)
-  expect((await res.json()).error).toBe('entry_locked')
+  for (let i = 1; i <= 2; i++) {
+    const res = await request.post('/api/themes', { data: themeBody(`${PREFIX}free-${i}`) })
+    expect(res.status(), `free save #${i} should succeed`).toBe(200)
+  }
+  const third = await request.post('/api/themes', { data: themeBody(`${PREFIX}free-3`) })
+  expect(third.status()).toBe(402)
+  expect((await third.json()).error).toBe('limit_reached')
 
   const prof = await getProfile(userId)
-  expect(prof?.trial_themes_used).toBe(0)
+  expect(prof?.trial_themes_used).toBe(2)
 })
 
 test('ENTRY (unlocked) is hard-capped at the trial limit (2), enforced on save', async ({ request }) => {
