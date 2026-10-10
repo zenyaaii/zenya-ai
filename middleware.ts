@@ -209,16 +209,17 @@ async function lookupCustomDomain(host: string): Promise<LookupResult> {
 }
 
 /**
- * A customer site has no tab icon until its owner can upload a logo. It must
- * not show Zenya's: browsers and Google ask every host for /favicon.ico, and
- * Next links the root app/favicon.ico from every page, so on a customer host
- * the path answers 404 and the browser draws its own blank icon.
+ * A customer site's /favicon.ico is the logo its owner uploaded, or nothing.
+ * It must never be Zenya's: browsers and Google ask every host for
+ * /favicon.ico, and Next links the root app/favicon.ico from every page. So on
+ * a customer host the path goes to the site's icon route, which serves the
+ * owner's logo or answers 404 (the browser then draws its own blank icon).
  */
-function noSiteIcon() {
-  return new NextResponse(null, {
-    status: 404,
-    headers: { 'Cache-Control': 'public, max-age=3600, s-maxage=3600' },
-  })
+function siteIconRewrite(request: NextRequest, slug: string) {
+  const url = request.nextUrl.clone()
+  url.pathname = `/s/${slug}/site-icon`
+  url.search = '?s=48'
+  return NextResponse.rewrite(url)
 }
 
 /**
@@ -261,6 +262,27 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ---- /s/<slug> is never an address ---------------------------------------
+  // app/s/[slug] is the internal route customer sites are rewritten to. On
+  // any of Zenya's own hosts (apex, www, accounts, dashboard, demo) it would
+  // be a second copy of the site under Zenya's name, so it always hands off
+  // to the site's one real address, slug.zenyaai.co. Customer hosts handle
+  // their own /s/ paths below (ownSitePath). Preview deployments and
+  // localhost have no subdomains and still serve /s/.
+  if (
+    pathname.startsWith('/s/') &&
+    (host === 'zenyaai.co' || host.endsWith('.zenyaai.co')) &&
+    !getZenyaCoSlug(host)
+  ) {
+    const m = pathname.match(/^\/s\/([a-z0-9-]+)(\/.*)?$/i)
+    if (m) {
+      const target = new URL(`https://${m[1].toLowerCase()}.zenyaai.co${m[2] || '/'}`)
+      target.search = request.nextUrl.search
+      return NextResponse.redirect(target, 301)
+    }
+    return new NextResponse('Not found', { status: 404 })
+  }
+
   // ---- WILDCARD *.zenya.co → customer site by slug -----------------------
   // e.g. myrestaurant.zenya.co → /s/myrestaurant (no DB lookup needed)
   const zenyaSlug = getZenyaCoSlug(host)
@@ -275,7 +297,7 @@ export async function middleware(request: NextRequest) {
     // Google HTML-file verification, served from the site root.
     const gsc = await gscFileResponse(zenyaSlug, pathname)
     if (gsc) return gsc
-    if (pathname === '/favicon.ico') return noSiteIcon()
+    if (pathname === '/favicon.ico') return siteIconRewrite(request, zenyaSlug)
     const url = request.nextUrl.clone()
     url.pathname = `/s/${zenyaSlug}${pathname === '/' ? '' : pathname}`
     // Mark this as a customer site so the root layout suppresses Zenya's own
@@ -287,7 +309,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Zenya's own hosts serve app/favicon.ico as a static file. The matcher no
-  // longer skips /favicon.ico (customer sites need it, see noSiteIcon), so
+  // longer skips /favicon.ico (customer sites need it, see siteIconRewrite), so
   // let it straight through here before any session or redirect logic.
   if (pathname === '/favicon.ico' && isOwnHost(host)) return NextResponse.next()
 
@@ -464,7 +486,7 @@ export async function middleware(request: NextRequest) {
       // Google HTML-file verification, served from the domain root.
       const gsc = await gscFileResponse(found.slug, pathname)
       if (gsc) return gsc
-      if (pathname === '/favicon.ico') return noSiteIcon()
+      if (pathname === '/favicon.ico') return siteIconRewrite(request, found.slug)
 
       const url = request.nextUrl.clone()
       // sitemap.xml / robots.txt keep their path (per-site handlers); every
@@ -499,23 +521,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect('https://accounts.zenyaai.co')
   }
 
-  // ---- DIRECT CUSTOMER-SITE ACCESS (zenyaai.co/s/slug) -------------------
-  // /s/* is exclusively the published-customer-site namespace. Flag it so the
-  // root layout drops Zenya's own brand JSON-LD (subdomain/custom-domain hits
-  // are flagged in their own branches above).
+  // ---- DIRECT CUSTOMER-SITE ACCESS (preview deployments, localhost) -------
+  // Only hosts without subdomains get here: zenyaai.co hosts redirected /s/
+  // at the top. Flag it so the root layout drops Zenya's own brand JSON-LD.
   if (pathname.startsWith('/s/')) {
-    // On Zenya's own address a customer site is a second copy of a page that
-    // lives at slug.zenyaai.co, and Google would see Zenya and the customer
-    // sharing one site. Send it to the site's own address for good. Preview
-    // deployments and localhost have no subdomains and keep serving /s/.
-    if (host === 'zenyaai.co' || host === 'www.zenyaai.co') {
-      const m = pathname.match(/^\/s\/([a-z0-9-]+)(\/.*)?$/i)
-      if (m) {
-        const target = new URL(`https://${m[1].toLowerCase()}.zenyaai.co${m[2] || '/'}`)
-        target.search = request.nextUrl.search
-        return NextResponse.redirect(target, 301)
-      }
-    }
     forwardedHeaders.set('x-zenya-site', '1')
     return NextResponse.next({ request: { headers: forwardedHeaders } })
   }
@@ -550,7 +559,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - common image static files
      * favicon.ico is NOT skipped: a customer site must not get Zenya's
-     * (noSiteIcon); on Zenya's own hosts it passes straight through.
+     * (siteIconRewrite); on Zenya's own hosts it passes straight through.
      */
     '/((?!_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

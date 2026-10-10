@@ -220,10 +220,20 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     publisher: siteName,
     generator: null,
     category: null,
-    // No tab icon until owners can upload a logo; empty lists drop the root
-    // layout's app/icon.png and apple-icon.png (Zenya's mark). The root
-    // favicon.ico link Next always adds answers 404 on customer hosts.
-    icons: { icon: [], apple: [], shortcut: [] },
+    // The tab icon is the owner's uploaded logo, or nothing. Empty lists still
+    // drop the root layout's app/icon.png and apple-icon.png (Zenya's mark);
+    // the root favicon.ico link Next always adds goes to the same logo, or
+    // 404s, on customer hosts (middleware siteIconRewrite).
+    icons: seo.logo
+      ? {
+          icon: [
+            { url: `${seo.canonical}/site-icon?s=32`, sizes: '32x32', type: 'image/png' },
+            { url: `${seo.canonical}/site-icon?s=192`, sizes: '192x192', type: 'image/png' },
+          ],
+          apple: [{ url: `${seo.canonical}/site-icon?s=180`, sizes: '180x180', type: 'image/png' }],
+          shortcut: [],
+        }
+      : { icon: [], apple: [], shortcut: [] },
     description,
     keywords: seo.keywords,
     metadataBase: new URL(seo.canonical),
