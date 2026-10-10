@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { resolveSeo, readSeoOverrides, parseGscVerification, SEO_TITLE_MAX, SEO_DESC_MAX, type SeoOverrides } from '@/lib/seo'
+import { resolveSeo, readSeoOverrides, parseGscVerification, isUploadedImageUrl, SEO_TITLE_MAX, SEO_DESC_MAX, type SeoOverrides } from '@/lib/seo'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -42,7 +42,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
 /**
  * PATCH /api/themes/[id]/seo
- * Body: { title?, description?, keywords?, ogImage?, gscVerification?, noindex? }
+ * Body: { title?, description?, keywords?, ogImage?, logo?, gscVerification?, noindex? }
  * Merges the given SEO overrides into themes.content.seo (leaving the rest of
  * the content untouched). Empty string clears an override.
  */
@@ -83,6 +83,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if ('description' in body)     setOrClear('description', str(body.description, SEO_DESC_MAX))
   if ('keywords' in body)        setOrClear('keywords', str(body.keywords, 300))
   if ('ogImage' in body)         setOrClear('ogImage', str(body.ogImage, 500))
+  if ('logo' in body) {
+    // The tab icon. Only a file the owner uploaded to Zenya; '' removes it.
+    if (body.logo === '' || body.logo === null) delete next.logo
+    else if (isUploadedImageUrl(body.logo) && body.logo.includes(`/theme-uploads/${user.id}/`)) next.logo = body.logo
+    else return NextResponse.json({ error: 'bad_logo', message: 'Upload the logo first.' }, { status: 400 })
+  }
   if ('gscVerification' in body) {
     // Smart paste: figure out whether the user gave us Google's HTML *file*
     // (google<hash>.html) or the meta *tag* / token, and store the right one,

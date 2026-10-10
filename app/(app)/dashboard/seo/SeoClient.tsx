@@ -143,6 +143,50 @@ export default function SeoClient({ sites: initial }: { sites: SeoSite[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId])
 
+  const [logoBusy, setLogoBusy] = useState(false)
+
+  /** Store the logo (a URL from /api/upload, or '' to remove) on the site. */
+  async function setLogo(url: string) {
+    if (!site) return
+    const res = await fetch(`/api/themes/${site.id}/seo`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ logo: url }),
+    })
+    const j = await res.json()
+    if (!res.ok) throw new Error(j?.message || j?.error)
+    setSites((prev) => prev.map((s) => (s.id === site.id ? { ...s, overrides: j.overrides } : s)))
+  }
+
+  async function uploadLogo(file: File) {
+    setLogoBusy(true)
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const r = await fetch('/api/upload', { method: 'POST', body: form })
+      const j = await r.json()
+      if (!r.ok || !j?.url) throw new Error(j?.message || 'تعذّر رفع الصورة')
+      await setLogo(j.url)
+      toast({ type: 'success', message: 'تم حفظ الشعار', description: 'يظهر في تبويب المتصفح خلال دقائق.' })
+    } catch (e: any) {
+      toast({ type: 'error', message: 'تعذّر رفع الشعار', description: e?.message })
+    } finally {
+      setLogoBusy(false)
+    }
+  }
+
+  async function removeLogo() {
+    setLogoBusy(true)
+    try {
+      await setLogo('')
+      toast({ type: 'success', message: 'حُذف الشعار' })
+    } catch (e: any) {
+      toast({ type: 'error', message: 'تعذّر الحذف', description: e?.message })
+    } finally {
+      setLogoBusy(false)
+    }
+  }
+
   async function save() {
     if (!site) return
     setSaving(true)
@@ -193,6 +237,10 @@ export default function SeoClient({ sites: initial }: { sites: SeoSite[] }) {
       save={{ onClick: save, disabled: saving }}
       saving={saving}
       reset={{ onClick: () => site && setFields(fieldsOf(site)) }}
+      logo={site?.overrides.logo || null}
+      onLogoFile={uploadLogo}
+      removeLogo={{ onClick: removeLogo, disabled: logoBusy }}
+      logoBusy={logoBusy}
       searchConsole={gsc && (
         <GscConnect
           status={!gsc.configured ? 'off' : gsc.connected ? 'connected' : 'disconnected'}

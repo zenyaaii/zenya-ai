@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { Search } from 'lucide-react'
+import { Globe, Search } from 'lucide-react'
 import { Act, EmptyHint, Page, PageHead, type Action } from './kit'
 
 export type SeoScreenProps = {
@@ -22,12 +22,18 @@ export type SeoScreenProps = {
   reset?: Action
   /** The Search Console block (see ./search-console). */
   searchConsole?: ReactNode
+  /** The site's uploaded logo: its browser-tab icon. null = no icon at all. */
+  logo?: string | null
+  /** A file the owner picked. Absent on the demo, where the button is inert. */
+  onLogoFile?: (file: File) => void
+  removeLogo?: Action
+  logoBusy?: boolean
 }
 
 export function SeoScreen({
   sites, selectedId, onSelect, site, title, description, keywords, titleMax, descMax,
   onTitle, onDescription, onKeywords, save, saving = false, reset,
-  searchConsole,
+  searchConsole, logo = null, onLogoFile, removeLogo, logoBusy = false,
 }: SeoScreenProps) {
   return (
     <Page>
@@ -74,8 +80,12 @@ export function SeoScreen({
                 <h3 className="zy-h3 mb-3">معاينة نتيجة جوجل</h3>
                 <div className="rounded-[10px] bg-[#f4f4f6] p-3">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-[14.5px] font-black text-[#5e6ad2]">
-                      {site.name.trim().charAt(0)}
+                    {/* The site's own logo, or the plain globe Google shows
+                        for a site with no icon. Never a letter. */}
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white text-[#66666e]">
+                      {logo
+                        ? <img src={logo} alt="" className="h-[18px] w-[18px] object-contain" /> // eslint-disable-line @next/next/no-img-element
+                        : <Globe size={14} strokeWidth={2} aria-hidden />}
                     </span>
                     <div className="min-w-0">
                       <div className="truncate text-[14.5px] font-bold text-[#171717]">{site.name}</div>
@@ -107,6 +117,43 @@ export function SeoScreen({
                   <Act action={save} className="zy-btn">{saving ? 'جارٍ الحفظ…' : 'احفظ التغييرات'}</Act>
                   <Act action={reset} className="zy-btn-q">إعادة تعيين</Act>
                 </div>
+              </div>
+
+              <div className="mt-4 rounded-2xl zy-card p-4 sm:p-5">
+                <h3 className="zy-h3">شعار الموقع</h3>
+                <p className="zy-sub mt-1.5">يظهر كأيقونة في تبويب المتصفح وبجانب موقعك في جوجل. بدون شعار لا تظهر أي أيقونة.</p>
+                <div className="mt-4 flex flex-wrap items-center gap-4">
+                  <div
+                    className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#d4d4d8] bg-white"
+                    aria-label={logo ? 'الشعار الحالي' : 'لا يوجد شعار'}
+                  >
+                    {logo
+                      ? <img src={logo} alt="" className="h-12 w-12 object-contain" /> // eslint-disable-line @next/next/no-img-element
+                      : <span className="text-[13px] font-medium text-[#66666e]">لا يوجد</span>}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {onLogoFile ? (
+                      <label className={'zy-btn cursor-pointer' + (logoBusy ? ' pointer-events-none opacity-60' : '')}>
+                        {logoBusy ? 'جارٍ الرفع…' : logo ? 'غيّر الشعار' : 'ارفع الشعار'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="sr-only"
+                          disabled={logoBusy}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0]
+                            e.target.value = ''
+                            if (f) onLogoFile(f)
+                          }}
+                        />
+                      </label>
+                    ) : (
+                      <span className="zy-btn" role="presentation">{logo ? 'غيّر الشعار' : 'ارفع الشعار'}</span>
+                    )}
+                    {logo && <Act action={removeLogo} className="zy-btn-q">احذف الشعار</Act>}
+                  </div>
+                </div>
+                <p className="zy-sub mt-3">صورة مربّعة أفضل، PNG أو JPG، حتى 5 ميغابايت.</p>
               </div>
             </section>
           </div>

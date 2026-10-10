@@ -28,6 +28,17 @@ export type SeoOverrides = {
   gscFile?: string
   /** Owner explicitly hid the site from search engines. */
   noindex?: boolean
+  /** The owner's logo, uploaded from the SEO page. It is the site's tab icon
+   *  and Google's site icon. No logo means no icon at all: never a letter,
+   *  never Zenya's mark. Must be a file in Zenya's upload bucket. */
+  logo?: string
+}
+
+/** Only images the owner uploaded through /api/upload may be a site's logo. */
+export function isUploadedImageUrl(url: unknown): url is string {
+  if (typeof url !== 'string') return false
+  const base = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
+  return !!base && url.startsWith(`${base}/storage/v1/object/public/theme-uploads/`) && url.length <= 500
 }
 
 /** Fully-resolved SEO — defaults merged with overrides, ready to render. */
@@ -38,6 +49,8 @@ export type ResolvedSeo = {
   canonical: string
   host: string
   ogImage?: string
+  /** The owner's uploaded logo, if any. */
+  logo?: string
   gscVerification?: string
   index: boolean
   /** True for each field the owner has explicitly overridden (for the UI). */
@@ -255,6 +268,7 @@ export function resolveSeo(theme: SeoTheme): ResolvedSeo {
     canonical,
     host,
     ogImage: ogImage || undefined,
+    logo: isUploadedImageUrl(overrides.logo) ? overrides.logo : undefined,
     gscVerification,
     index,
     overridden: {
@@ -292,6 +306,7 @@ export function buildJsonLd(theme: SeoTheme, resolved: ResolvedSeo): Record<stri
       url: resolved.canonical,
       description: resolved.description,
       ...(resolved.ogImage ? { image: resolved.ogImage } : {}),
+      ...(resolved.logo ? { logo: resolved.logo } : {}),
     })
   }
   return graph
