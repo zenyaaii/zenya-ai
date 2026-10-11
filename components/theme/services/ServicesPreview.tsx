@@ -270,10 +270,10 @@ function Btn({
   label?: string
 }) {
   const cls =
-    `inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-px hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:hover:translate-y-0 ` +
-    (size === 'lg' ? 'h-[52px] px-6 text-[0.95rem] ' : 'h-11 px-4 text-sm ') +
+    `inline-flex max-w-full shrink-0 items-center justify-center gap-2 text-balance text-center leading-snug rounded-xl font-semibold transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-px hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:hover:translate-y-0 ` +
+    (size === 'lg' ? 'min-h-[52px] py-2 px-6 text-[0.95rem] ' : 'min-h-11 py-1.5 px-4 text-sm ') +
     (full ? 'w-full ' : '') + className
-  const inner = <>{icon}<span>{children}</span></>
+  const inner = <>{icon ? <span className="shrink-0">{icon}</span> : null}<span className="min-w-0">{children}</span></>
   if (href) {
     return (
       <a href={href} aria-label={label} className={cls} style={btnStyle(kind)} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
@@ -352,7 +352,7 @@ function Header() {
             <Mark className="h-5 w-5" strokeWidth={2} />
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-[1rem] font-bold leading-6 md:text-[1.05rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>
+            <span className="line-clamp-2 block break-words text-[1rem] font-bold leading-6 md:text-[1.05rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>
               {content.brand.name}
             </span>
             {content.brand.category ? (
@@ -487,7 +487,7 @@ function Hero() {
           {h.eyebrow ? (
             <motion.p {...enter(rm, 0.05)} className="inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium md:text-sm" style={{ borderColor: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)' }}>
               <BadgeCheck className="h-4 w-4 shrink-0" style={{ color: 'var(--sv-accent)' }} aria-hidden />
-              <span className="truncate">{h.eyebrow}</span>
+              <span className="min-w-0 leading-6">{h.eyebrow}</span>
             </motion.p>
           ) : null}
           <motion.h1 {...enter(rm, 0.12)} className="mt-5 whitespace-pre-line text-balance text-[2.1rem] md:text-[3.5rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.22, fontWeight: 700 }}>
@@ -598,7 +598,7 @@ function ServicesSection({ inner }: { inner?: boolean }) {
     <Section id="services" name="services">
       <Container>
         <SectionHead eyebrow={inner ? undefined : 'خدماتنا'} title={s.heading} sub={s.subheading} />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-5">
           {items.map((item, i) => {
             const Icon = serviceIcon(item.name, content.brand.category)
             const ask = wa ? withText(wa, `مرحبًا ${content.brand.name}، أريد الاستفسار عن خدمة: ${item.name}`) : null
@@ -656,7 +656,7 @@ function ProofSection() {
     <Section id="proof" name="proof" tint>
       <Container>
         <SectionHead eyebrow="لماذا نحن" title={p.heading} sub={p.subheading} />
-        <div className={`grid gap-4 sm:grid-cols-2 md:gap-5 ${items.length === 3 ? 'lg:grid-cols-3' : items.length >= 4 ? 'lg:grid-cols-4' : ''}`}>
+        <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-5 ${items.length === 3 ? 'lg:grid-cols-3' : items.length >= 4 ? 'lg:grid-cols-4' : ''}`}>
           {items.map((item, i) => (
             <motion.div key={`${item.title}-${i}`} {...rise(rm, i * 0.06)} className="p-6" style={{ ...card(isDark), background: 'var(--sv-bg)' }}>
               <IconTile icon={PROOF_ICONS[i % PROOF_ICONS.length]} />
@@ -734,7 +734,7 @@ function TestimonialsSection() {
             </motion.div>
           ) : null}
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5">
           {items.slice(0, 6).map((item, i) => (
             <motion.figure key={`${item.name}-${i}`} {...rise(rm, Math.min(i, 5) * 0.06)} className="flex flex-col p-6" style={{ ...card(isDark), background: 'var(--sv-bg)' }}>
               <div className="flex items-center justify-between">
@@ -798,7 +798,7 @@ function OfferSection({ inner }: { inner?: boolean }) {
   return (
     <Section id="quote" name="offer">
       <Container>
-        <motion.div {...rise(rm)} className={`grid overflow-hidden ${showForm || hasContact ? 'lg:grid-cols-[1.05fr_1fr]' : ''}`} style={{ ...card(isDark), borderRadius: 28 }}>
+        <motion.div {...rise(rm)} className={`grid grid-cols-1 overflow-hidden ${showForm || hasContact ? 'lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]' : ''}`} style={{ ...card(isDark), borderRadius: 28 }}>
           <div className="relative p-6 text-white md:p-10" style={{ background: 'var(--sv-primary)' }}>
             <div aria-hidden className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full" style={{ background: 'var(--sv-accent)', opacity: 0.18, filter: 'blur(10px)' }} />
             {o.badge ? (
@@ -919,7 +919,7 @@ function StorySection() {
   const image = s.image || content.hero.image
   return (
     <Section name="story">
-      <Container className={`grid gap-10 md:items-center md:gap-14 ${image ? 'md:grid-cols-2' : ''}`}>
+      <Container className={`grid grid-cols-1 gap-10 md:items-center md:gap-14 ${image ? 'md:grid-cols-2' : ''}`}>
         <motion.div {...rise(rm)} className="order-2 md:order-1">
           {s.eyebrow ? (
             <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--sv-brand)' }}>
@@ -1045,7 +1045,7 @@ function AreasSection() {
     <Section id="areas" name="areas" tint>
       <Container>
         <SectionHead eyebrow="أين نعمل" title={a.heading} sub={a.subheading} />
-        <div className={`grid gap-6 ${areas.length && facts.length ? 'lg:grid-cols-[1.2fr_1fr]' : ''}`}>
+        <div className={`grid grid-cols-1 gap-6 ${areas.length && facts.length ? 'lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]' : ''}`}>
           {areas.length ? (
             <motion.ul {...rise(rm)} className="flex flex-wrap content-start gap-2.5">
               {areas.map((area) => (
@@ -1091,7 +1091,7 @@ function FaqSection() {
   if (!items.length) return null
   return (
     <Section id="faq" name="faq">
-      <Container className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+      <Container className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-14">
         <div>
           <SectionHead eyebrow="أسئلة شائعة" title={content.faq.heading} />
           {wa ? (
@@ -1245,7 +1245,7 @@ function Footer() {
       className="text-white"
       style={{ background: isDark ? 'var(--sv-surface)' : 'color-mix(in srgb, var(--sv-primary) 18%, #0b1220)' }}
     >
-      <Container className="grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_1.2fr]">
+      <Container className="grid grid-cols-1 gap-10 py-14 md:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <div>
           <p className="text-xl font-bold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{content.brand.name}</p>
           {f.tagline ? <p className="mt-3 max-w-sm text-[0.95rem] leading-7" style={{ color: 'rgba(255,255,255,0.7)' }}>{f.tagline}</p> : null}
