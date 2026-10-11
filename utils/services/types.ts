@@ -63,6 +63,11 @@ export type ServiceContent = {
     region?: string
     tagline: string
     owner_name?: string
+    /** How a name written in two languages shows in the header. Unset
+     *  means 'rotate'. A one-language name always shows as written. */
+    name_display?: ServiceNameDisplay
+    /** false hides the mark beside the name. Unset means shown. */
+    show_logo?: boolean
   }
   hero: {
     eyebrow: string
@@ -178,3 +183,5 @@ export type ServiceSocialLinks = {
   x?: string
   youtube?: string
 }
+
+export type ServiceNameDisplay = 'rotate' | 'stack' | 'arabic' | 'latin'

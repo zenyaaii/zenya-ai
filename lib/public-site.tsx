@@ -311,6 +311,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
           typographyPreset={typographyPreset}
           colorOverrides={colorOverrides}
           productName={theme.product_name || undefined}
+          logo={seo.logo}
           view={view}
           enableRouting
         />

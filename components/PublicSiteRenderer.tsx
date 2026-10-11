@@ -31,6 +31,8 @@ type Props = {
    * where the template keeps its internal client-side view state.
    */
   enableRouting?: boolean
+  /** The owner's uploaded logo (content.seo.logo), for templates that show one. */
+  logo?: string
 }
 
 const TEMPLATE_KEY: Record<string, string> = {
@@ -50,6 +52,7 @@ export default function PublicSiteRenderer({
   typographyPreset,
   view,
   enableRouting,
+  logo,
 }: Props) {
   const router = useRouter()
   const key = TEMPLATE_KEY[businessType]
@@ -88,6 +91,7 @@ export default function PublicSiteRenderer({
         typographyPreset={typographyPreset}
         view={enableRouting ? view : undefined}
         onViewChange={onViewChange}
+        logo={logo}
       />
     </Suspense>
   )

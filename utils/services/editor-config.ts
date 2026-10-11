@@ -36,6 +36,18 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       id: 'brand', label: 'النشاط التجاري', icon: Sparkles,
       fields: [
         { type: 'text', path: 'brand.name',       label: 'اسم النشاط' },
+        {
+          type: 'choice', path: 'brand.name_display', label: 'إذا كان الاسم بالعربي والإنجليزي', fallback: 'rotate',
+          options: [
+            { value: 'rotate', label: 'يتبدّل' },
+            { value: 'stack', label: 'الاثنان معًا' },
+            { value: 'arabic', label: 'العربي فقط' },
+            { value: 'latin', label: 'الإنجليزي فقط' },
+          ],
+          hint: 'الاسم المكتوب بلغة واحدة يظهر كما هو.',
+        },
+        { type: 'logo' },
+        { type: 'toggle', path: 'brand.show_logo', label: 'الشعار بجانب الاسم', fallback: true },
         { type: 'text', path: 'brand.category',   label: 'المجال (مثل: سباكة)' },
         { type: 'text', path: 'brand.city',       label: 'المدينة' },
         { type: 'text', path: 'brand.region',     label: 'المنطقة' },

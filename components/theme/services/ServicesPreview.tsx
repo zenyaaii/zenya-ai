@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   Award, BadgeCheck, Bug, CalendarDays, Camera, Car, ChevronDown, ChevronLeft, CircleCheck, Clock, Droplets,
@@ -8,7 +8,7 @@ import {
   ShieldCheck, Siren, Smile, Snowflake, Sparkles, Star, Stethoscope, Tag, ThumbsUp, Timer, Trees, Truck,
   Wrench, X as Close, Zap, Ghost, type LucideIcon,
 } from 'lucide-react'
-import type { ServiceContent, ServiceSocialLinks } from '@/utils/services/types'
+import type { ServiceContent, ServiceNameDisplay, ServiceSocialLinks } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
@@ -23,6 +23,9 @@ type Props = {
   typographyPreset?: string
   view?: string
   onViewChange?: (v: string) => void
+  /** The owner's uploaded logo (content.seo.logo), passed from outside the
+   *  template content by the site renderer and the editor. */
+  logo?: string
 }
 
 type ServiceView = 'home' | 'services' | 'about' | 'process' | 'contact'
@@ -36,6 +39,8 @@ type Ctx = {
   go: (v: ServiceView) => void
   /** The owner's WhatsApp chat, or null when there is no usable number. */
   wa: string | null
+  /** The owner's uploaded logo, if any. */
+  logo?: string
 }
 const PageCtx = createContext<Ctx | null>(null)
 function usePage(): Ctx {
@@ -87,6 +92,7 @@ export default function ServicesPreview({
   typographyPreset,
   view: controlledView,
   onViewChange,
+  logo,
 }: Props) {
   const preset = getServicePreset(presetId)
   const colors = useMemo(() => ({ ...preset.colors, ...(colorOverrides || {}) }), [preset.colors, colorOverrides])
@@ -125,7 +131,7 @@ export default function ServicesPreview({
     [colors, brand, headingFont, bodyFont]
   )
 
-  const ctx: Ctx = { content, isDark, view, go, wa: whatsappChat(content) }
+  const ctx: Ctx = { content, isDark, view, go, wa: whatsappChat(content), logo: logo?.trim() || undefined }
 
   return (
     <PageCtx.Provider value={ctx}>
@@ -311,8 +317,98 @@ function WaGlyph({ className = 'h-5 w-5' }: { className?: string }) {
 
 /* ─────────────────────────────────────────────────────────── header */
 
+/* ───────────────────────────────────────────────────── two-language name */
+
+const ARABIC_CHAR = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
+const LATIN_CHAR = /[A-Za-z]/
+
+/** Splits "Dr. Air Conditioning د. التكييف" into its Arabic and Latin
+ *  words. Either side is empty when the name is in one language only. */
+export function splitBrandName(name: string): { arabic: string; latin: string } {
+  const ar: string[] = []
+  const la: string[] = []
+  for (const w of name.trim().split(/\s+/)) {
+    if (ARABIC_CHAR.test(w)) ar.push(w)
+    else if (LATIN_CHAR.test(w)) la.push(w)
+    else (la.length > ar.length ? la : ar).push(w)
+  }
+  return { arabic: ar.join(' '), latin: la.join(' ') }
+}
+
+const NAME_HOLD_MS = { arabic: 5000, latin: 4000 }
+
+/** The visitor's own "less motion" setting, read from the document the
+ *  element is in. The editor preview reports "less motion" to every template
+ *  on purpose (its scroll reveals cannot run inside an iframe), but the name
+ *  swap needs no scroll, so it asks the frame's own window instead. */
+function useOwnReducedMotion(ref: React.RefObject<HTMLElement>): boolean {
+  const [reduce, setReduce] = useState(false)
+  useEffect(() => {
+    const win = ref.current?.ownerDocument?.defaultView
+    if (!win?.matchMedia) return
+    const mq = win.matchMedia('(prefers-reduced-motion: reduce)')
+    const on = () => setReduce(mq.matches)
+    on()
+    mq.addEventListener?.('change', on)
+    return () => mq.removeEventListener?.('change', on)
+  }, [ref])
+  return reduce
+}
+
+function BrandName({ name, mode = 'rotate' }: { name: string; mode?: ServiceNameDisplay }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const rm = useOwnReducedMotion(ref)
+  const { arabic, latin } = splitBrandName(name)
+  const both = !!arabic && !!latin
+  const [side, setSide] = useState<'arabic' | 'latin'>('arabic')
+  const rotating = both && mode === 'rotate' && !rm
+
+  useEffect(() => {
+    if (!rotating) return
+    const t = window.setTimeout(() => setSide((s) => (s === 'arabic' ? 'latin' : 'arabic')), NAME_HOLD_MS[side])
+    return () => window.clearTimeout(t)
+  }, [rotating, side])
+
+  const line = 'block break-words text-[1rem] font-bold leading-6 md:text-[1.05rem]'
+  const font = { fontFamily: 'var(--sv-heading-font)' }
+
+  if (!both || mode === 'arabic' || mode === 'latin') {
+    const text = !both ? name : mode === 'latin' ? latin : arabic
+    return <span ref={ref} className={`line-clamp-2 ${line}`} style={font} dir={!both ? undefined : mode === 'latin' ? 'ltr' : 'rtl'}>{text}</span>
+  }
+  // Stacked: also what "rotate" falls back to when the visitor asks for less motion.
+  if (!rotating) {
+    return (
+      <span ref={ref} className="block min-w-0">
+        <span className={`truncate ${line}`} style={font}>{arabic}</span>
+        <bdi dir="ltr" className="block truncate text-right text-[0.8rem] font-semibold leading-5" style={{ ...font, color: 'var(--sv-muted)' }}>{latin}</bdi>
+      </span>
+    )
+  }
+  // Both names sit in one grid cell, so the header keeps the width of the
+  // longer one and nothing beside it moves when they swap.
+  return (
+    <span ref={ref} className="grid min-w-0">
+      {(['arabic', 'latin'] as const).map((k) => (
+        <motion.span
+          key={k}
+          aria-hidden
+          dir={k === 'latin' ? 'ltr' : 'rtl'}
+          className={`truncate text-right ${line}`}
+          style={{ ...font, gridArea: '1 / 1' }}
+          initial={false}
+          animate={{ opacity: side === k ? 1 : 0, y: side === k ? 0 : 6 }}
+          transition={{ duration: 0.45, ease: EASE }}
+        >
+          {k === 'arabic' ? arabic : latin}
+        </motion.span>
+      ))}
+    </span>
+  )
+}
+
 function Header() {
-  const { content, isDark, view, go, wa } = usePage()
+  const { content, isDark, view, go, wa, logo } = usePage()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const rm = !!useReducedMotion()
@@ -344,17 +440,22 @@ function Header() {
     >
       <Container className="flex min-h-16 items-center justify-between gap-3 py-2 md:min-h-[76px]">
         <button onClick={() => go('home')} className="flex min-w-0 items-center gap-3 text-right" aria-label={`${content.brand.name}، الصفحة الرئيسية`}>
-          <span
-            aria-hidden
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl md:h-11 md:w-11"
-            style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)' }}
-          >
-            <Mark className="h-5 w-5" strokeWidth={2} />
-          </span>
-          <span className="min-w-0">
-            <span className="line-clamp-2 block break-words text-[1rem] font-bold leading-6 md:text-[1.05rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>
-              {content.brand.name}
+          {content.brand.show_logo === false ? null : logo ? (
+            <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border bg-white md:h-11 md:w-11" style={{ borderColor: 'var(--sv-border)' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logo} alt="" className="h-full w-full object-contain p-1" />
             </span>
+          ) : (
+            <span
+              aria-hidden
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl md:h-11 md:w-11"
+              style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)' }}
+            >
+              <Mark className="h-5 w-5" strokeWidth={2} />
+            </span>
+          )}
+          <span className="min-w-0">
+            <BrandName name={content.brand.name} mode={content.brand.name_display} />
             {content.brand.category ? (
               <span className="block truncate text-xs leading-5" style={{ color: 'var(--sv-muted)' }}>{content.brand.category}</span>
             ) : null}
