@@ -38,7 +38,7 @@ function buildNav(t: Messages): NavGroup[] {
         { href: '/dashboard/gallery',    label: t.nav.gallery,   icon: ImageIcon },
         { href: '/dashboard/analytics',  label: t.nav.analytics, icon: BarChart3,     tour: 'analytics' },
         { href: '/dashboard/bookings',   label: t.nav.bookings,  icon: CalendarCheck, tour: 'bookings' },
-        { href: '/dashboard/reviews',    label: t.nav.reviews,   icon: MessageSquareQuote },
+        { href: '/dashboard/reviews',    label: t.nav.reviews,   icon: MessageSquareQuote, tour: 'reviews' },
         { href: '/dashboard/seo',        label: t.nav.seo,       icon: Search,        tour: 'seo' },
         { href: '/dashboard/domains',    label: t.nav.domains,   icon: Globe,         tour: 'domains' },
       ],
