@@ -478,6 +478,8 @@ const S = {
   owner_name: "عبدالله الحربي",
   years: "12",
   phone: "+966 11 555 0142",
+  whatsapp: "+966 55 555 0142",
+  instagram: "@aletqan",
   email: "hello@aletqan.sa",
   availability: "من السبت إلى الخميس، 8 صباحًا — 8 مساءً",
   response: "نرد خلال ساعة في أوقات العمل",
@@ -503,7 +505,7 @@ export const services: TemplateDef = {
   ],
   empty: {
     business_name: "", category: "", city: "", area: "", owner_name: "", years: "",
-    phone: "", email: "", availability: "", response: "",
+    phone: "", whatsapp: "", email: "", instagram: "", availability: "", response: "",
     services: [], areas_served: "", differentiators: "", promo: "",
     story: "", owner_title: "", quote: "", preset: "", shots: [],
   },
@@ -526,7 +528,9 @@ export const services: TemplateDef = {
         return (
           <div className="zn-row">
             <Field label="الهاتف" t="phone" on={focus === "phone"} value={f.phone} ph="+966 11 555 0142" ltr />
+            <Field label="واتساب" t="whatsapp" on={focus === "whatsapp"} value={f.whatsapp} ph="+966 55 555 0142" ltr />
             <Field label="البريد الإلكتروني" t="email" on={focus === "email"} value={f.email} ph="hello@business.sa" ltr />
+            <Field label="إنستغرام" t="instagram" on={focus === "instagram"} value={f.instagram} ph="@yourbusiness" ltr />
             <Field label="سطر التوفّر" t="availability" on={focus === "availability"} value={f.availability} wide
               ph="من السبت إلى الخميس، 8 صباحًا — 8 مساءً" />
             <Field label="سطر وقت الاستجابة" t="response" on={focus === "response"} value={f.response} wide
@@ -607,7 +611,9 @@ export const services: TemplateDef = {
     /* 2 · التواصل والتوفّر */
     c.card(1); await c.wait(600)
     await c.type("phone", S.phone, 0.14)
+    await c.type("whatsapp", S.whatsapp, 0.14)
     await c.type("email", S.email, 0.14)
+    await c.type("instagram", S.instagram, 0.14)
     await c.type("availability", S.availability)
     await c.type("response", S.response)
     await c.beat()

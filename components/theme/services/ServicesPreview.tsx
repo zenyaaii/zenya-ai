@@ -41,6 +41,9 @@ type Ctx = {
   wa: string | null
   /** The owner's uploaded logo, if any. */
   logo?: string
+  /** The accent is itself a green, so a green WhatsApp button beside it
+   *  would read as a second copy of the same button. */
+  waOnWhite: boolean
 }
 const PageCtx = createContext<Ctx | null>(null)
 function usePage(): Ctx {
@@ -83,6 +86,18 @@ function enter(rm: boolean, delay = 0) {
 // Arabic glyphs take the Arabic face; Latin letters and digits keep the preset's.
 const ARABIC_FACE = '"IBM Plex Sans Arabic", system-ui, sans-serif'
 const WA_GREEN = '#1fa855'
+
+/** True when a colour is a green close enough to WhatsApp's to be mistaken for it. */
+function isGreenish(hex: string): boolean {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m) return false
+  const n = parseInt(m[1], 16)
+  const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min
+  if (max === 0 || d / max < 0.3 || max < 0.35) return false
+  const hue = max === r ? (60 * ((g - b) / d) + 360) % 360 : max === g ? 60 * ((b - r) / d) + 120 : 60 * ((r - g) / d) + 240
+  return hue >= 85 && hue <= 175
+}
 
 export default function ServicesPreview({
   content,
@@ -131,7 +146,7 @@ export default function ServicesPreview({
     [colors, brand, headingFont, bodyFont]
   )
 
-  const ctx: Ctx = { content, isDark, view, go, wa: whatsappChat(content), logo: logo?.trim() || undefined }
+  const ctx: Ctx = { content, isDark, view, go, wa: whatsappChat(content), logo: logo?.trim() || undefined, waOnWhite: isGreenish(colors.accent) }
 
   return (
     <PageCtx.Provider value={ctx}>
@@ -245,12 +260,13 @@ function SectionHead({ eyebrow, title, sub, center }: { eyebrow?: string; title:
   )
 }
 
-type BtnKind = 'brand' | 'accent' | 'whatsapp' | 'white' | 'outline' | 'outline-light'
+type BtnKind = 'brand' | 'accent' | 'whatsapp' | 'whatsapp-white' | 'white' | 'outline' | 'outline-light'
 function btnStyle(kind: BtnKind): React.CSSProperties {
   switch (kind) {
     case 'brand': return { background: 'var(--sv-brand)', color: 'var(--sv-on-brand)' }
     case 'accent': return { background: 'var(--sv-accent)', color: 'var(--sv-on-accent)' }
     case 'whatsapp': return { background: WA_GREEN, color: '#ffffff' }
+    case 'whatsapp-white': return { background: '#ffffff', color: '#0f172a' }
     case 'white': return { background: '#ffffff', color: '#0f172a' }
     case 'outline': return { border: '1px solid var(--sv-border)', color: 'var(--sv-text)', background: 'var(--sv-surface)' }
     case 'outline-light': return { border: '1px solid rgba(255,255,255,0.45)', color: '#ffffff', background: 'rgba(255,255,255,0.06)' }
@@ -562,7 +578,7 @@ function Header() {
 /* ─────────────────────────────────────────────────────────── hero */
 
 function Hero() {
-  const { content, wa } = usePage()
+  const { content, wa, waOnWhite } = usePage()
   const rm = !!useReducedMotion()
   const h = content.hero
   const trust = content.trust_bar?.items?.filter(Boolean).slice(0, 4) || []
@@ -602,7 +618,11 @@ function Hero() {
           <motion.div {...enter(rm, 0.28)} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Btn kind="accent" href="#quote" icon={<CalendarDays className="h-5 w-5" aria-hidden />}>{h.primary_cta || 'اطلب عرض سعر'}</Btn>
             {wa ? (
-              <Btn kind="whatsapp" href={wa} external icon={<WaGlyph />}>تواصل على واتساب</Btn>
+              waOnWhite ? (
+                <Btn kind="whatsapp-white" href={wa} external icon={<WaGlyph className="h-5 w-5 text-[#1fa855]" />}>تواصل على واتساب</Btn>
+              ) : (
+                <Btn kind="whatsapp" href={wa} external icon={<WaGlyph />}>تواصل على واتساب</Btn>
+              )
             ) : h.secondary_cta ? (
               <Btn kind="outline-light" href="#services">{h.secondary_cta}</Btn>
             ) : null}
