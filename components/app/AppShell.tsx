@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
+import WelcomeTour from './WelcomeTour'
 import { DASHBOARD_CSS } from './dashboard-style'
 import { chromeFont } from './chrome-font'
 
@@ -92,6 +93,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+
+      {/* First-visit tour. It sits on the shell, not a page, because it points
+          at the shell's own controls and has to open the phone drawer. */}
+      <WelcomeTour setDrawer={setMobileOpen} />
     </div>
   )
 }

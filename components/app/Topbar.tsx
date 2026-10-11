@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import {
   Menu, Plus, Bell, ChevronDown,
-  LayoutDashboard, Settings, LogOut,
+  LayoutDashboard, Settings, LogOut, Compass,
 } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { useT } from '@/components/i18n/LocaleProvider'
@@ -17,6 +17,7 @@ import type { Messages } from '@/lib/i18n/messages'
 import { useDashboardPath } from './useDashboardPath'
 import { NotificationsBell, type BellItem } from './NotificationsBell'
 import { whenLabel } from '@/components/dashboard/screens/reviews'
+import { REPLAY_EVENT } from './WelcomeTour'
 
 /** Map known dashboard routes to a page title, in the active locale. */
 function titlesFor(t: Messages): Record<string, string> {
@@ -110,6 +111,7 @@ export default function Topbar({
         <Link
           href="/theme/new"
           className="zy-top-cta"
+          data-tour="new-site"
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
           <span className="hidden sm:inline">{t.nav.newSite}</span>
@@ -184,6 +186,20 @@ export default function Topbar({
                         <Settings className="h-3.5 w-3.5" strokeWidth={2} />
                         {t.nav.settings}
                       </Link>
+                    </DropdownMenu.Item>
+
+                    <DropdownMenu.Item asChild>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false)
+                          window.dispatchEvent(new Event(REPLAY_EVENT))
+                        }}
+                        className="zy-menu-row"
+                      >
+                        <Compass className="h-3.5 w-3.5" strokeWidth={2} />
+                        {t.tour.replay}
+                      </button>
                     </DropdownMenu.Item>
 
                     <div className="mt-1 border-t border-[rgba(17,17,17,0.07)] pt-1">

@@ -1038,6 +1038,38 @@ ${PRODUCT_TOKENS_CSS}
    Motion on a product surface is feedback, not choreography. Everything
    above transitions colour, opacity and a 8px growth; nothing moves the
    layout. Under reduced motion it all stops. */
+/* ---- the welcome tour (components/app/WelcomeTour.tsx) ---------------
+   It portals to body, outside .zy-app, so these rules are scoped to their
+   own classes and the tour root carries .zy-tokens for the variables. The
+   card is the one object floating over a dimmed page, so it is the one place
+   in this file with a real drop shadow under its hairline ring. */
+.zy-tour-card {
+  background: #fff;
+  border-radius: var(--r-card);
+  box-shadow: 0 0 0 1px rgba(17,17,17,0.10), 0 24px 48px -16px rgba(0,0,0,0.35);
+}
+.zy-tour-card .zy-h3 { font-size: 17px; }
+.zy-tour-body { margin: 0; font-size: 15px; line-height: 1.75; color: var(--stone); }
+.zy-tour-scrim { background: rgba(19,19,22,0.62); }
+/* The hole: a white edge, a violet halo, and a shadow big enough to dim
+   the whole screen around it. */
+.zy-tour-hole {
+  border-radius: 14px;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 6px rgba(94,106,210,0.55), 0 0 0 9999px rgba(19,19,22,0.62);
+  transition: top 320ms var(--ease-out), left 320ms var(--ease-out), width 320ms var(--ease-out), height 320ms var(--ease-out);
+}
+.zy-tour-dot {
+  width: 6px; height: 6px; border-radius: 999px;
+  background: rgba(17,17,17,0.14);
+  transition: width 240ms var(--ease-out), background-color 240ms var(--ease-out);
+}
+.zy-tour-dot[data-done] { background: rgba(94,106,210,0.45); }
+.zy-tour-dot[data-on] { width: 18px; background: var(--violet); }
+/* Soft motion: under "less motion" the hole jumps and only the card fades. */
+@media (prefers-reduced-motion: reduce) {
+  .zy-tour-hole, .zy-tour-dot { transition: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .zy-app *,
   .zy-app *::before,
