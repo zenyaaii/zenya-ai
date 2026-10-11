@@ -3,98 +3,168 @@
 /**
  * WelcomeTour — a one-time guided tour on the owner's first dashboard visit.
  *
- * It first asks, in big words, whether they'd like a quick tour. If yes, it
- * runs a spotlight walkthrough: the whole page dims and each real sidebar
- * button lights up one at a time with a one-sentence explanation, so the owner
- * literally sees *where* each page is. Next / Back move through them; any exit
- * marks it seen so it never shows again.
+ * It first asks whether they'd like a quick tour. If yes, it runs a spotlight
+ * walkthrough: the page dims and each real control lights up in turn with one
+ * plain sentence, so the owner sees *where* each page is. Any exit marks it
+ * seen, here and on the profile row, so it never replays on its own. The
+ * account menu can replay it (REPLAY_EVENT).
  *
- * Targets are found by the `data-tour="<slug>"` attributes on the sidebar rows
- * (see components/app/Sidebar.tsx). On small screens the sidebar is a hidden
- * drawer, so when a target can't be measured the step falls back to a centered
- * card with the same explanation.
+ * TARGETS ARE FOUND BY NAME, NOT POSITION. Each step looks for
+ * `[data-tour="<slug>"]` — the sidebar rows (Sidebar.tsx) and the top bar's
+ * "new site" button (Topbar.tsx). A control that moves or is restyled is still
+ * found. A step whose target is gone (a page removed, a row renamed without
+ * its slug) is skipped rather than shown pointing at nothing.
+ *
+ * THE PHONE. Below lg the rail is a drawer, and it is rendered twice (desktop
+ * aside + drawer), so the tour opens the drawer for rail steps through
+ * `setDrawer` and picks whichever copy is actually on screen. The old tour
+ * measured the hidden copy, got a zero rect and fell back to a card in the
+ * middle of an undimmed page.
+ *
+ * It portals to <body>, outside .zy-app, so the root carries .zy-tokens or
+ * every var() in it resolves to nothing.
  */
 
-import { useT } from '@/components/i18n/LocaleProvider'
+import { useLocale, useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import {
+  X, ArrowLeft, ArrowRight, Home, Plus, Folder, MessageSquareQuote, BarChart3,
+  CalendarCheck, Globe, type LucideIcon,
+} from 'lucide-react'
 
 const LS_KEY = 'zenya_welcome_seen_v2'
 
-type Step = { slug: string; title: string; desc: string }
+/** Fire this on window to run the tour again (the account menu does). */
+export const REPLAY_EVENT = 'zenya:tour-replay'
 
-/** One sentence each, matched to the real sidebar rows they highlight. */
+type Step = { slug: string; inRail: boolean; icon: LucideIcon; title: string; desc: string }
+
+/** One sentence each, matched to the real controls they highlight. */
 function buildTour(t: Messages): Step[] {
   return [
-    { slug: 'home',      title: t.nav.dashboard, desc: t.tour.dashboardBody },
-    { slug: 'sites',     title: t.nav.sites,     desc: t.tour.sitesBody },
-    { slug: 'analytics', title: t.nav.analytics, desc: t.tour.analyticsBody },
-    { slug: 'seo',       title: t.nav.seo,       desc: t.tour.seoBody },
-    { slug: 'bookings',  title: t.nav.bookings,  desc: t.tour.bookingsBody },
-    { slug: 'domains',   title: t.nav.domains,   desc: t.tour.domainsBody },
+    { slug: 'home',      inRail: true,  icon: Home,               title: t.nav.home,      desc: t.tour.homeBody },
+    { slug: 'new-site',  inRail: false, icon: Plus,               title: t.nav.newSite,   desc: t.tour.newSiteBody },
+    { slug: 'sites',     inRail: true,  icon: Folder,             title: t.nav.sites,     desc: t.tour.sitesBody },
+    { slug: 'reviews',   inRail: true,  icon: MessageSquareQuote, title: t.nav.reviews,   desc: t.tour.reviewsBody },
+    { slug: 'analytics', inRail: true,  icon: BarChart3,          title: t.nav.analytics, desc: t.tour.analyticsBody },
+    { slug: 'bookings',  inRail: true,  icon: CalendarCheck,      title: t.nav.bookings,  desc: t.tour.bookingsBody },
+    { slug: 'domains',   inRail: true,  icon: Globe,              title: t.nav.domains,   desc: t.tour.domainsBody },
   ]
 }
 
-const TIP_W = 300
+/** The copy of a target that is on screen — the rail exists twice. */
+function findTarget(slug: string): Element | null {
+  const all = Array.from(document.querySelectorAll(`[data-tour="${slug}"]`))
+  return all.find((el) => {
+    const r = el.getBoundingClientRect()
+    return r.width > 0 && r.height > 0
+  }) || null
+}
 
-export default function WelcomeTour() {
+const PAD = 6
+const GUTTER = 16
+const CARD_W = 320
+/** Below this the rail is a drawer (AppShell's lg breakpoint). */
+const RAIL_MIN = 1024
+
+export default function WelcomeTour({ setDrawer }: { setDrawer: (open: boolean) => void }) {
   const t = useT()
+  const { dir } = useLocale()
+  const reduce = useReducedMotion()
   const TOUR = buildTour(t)
   const [stage, setStage] = useState<'hidden' | 'ask' | 'tour'>('hidden')
   const [mounted, setMounted] = useState(false)
   const [index, setIndex] = useState(0)
   const [rect, setRect] = useState<DOMRect | null>(null)
+  const [view, setView] = useState({ w: 1440, h: 900 })
+  /** Which way the owner is walking, so a missing step is skipped the same way. */
+  const direction = useRef<1 | -1>(1)
 
   useEffect(() => {
     setMounted(true)
+    function replay() {
+      direction.current = 1
+      setIndex(0)
+      setStage('tour')
+    }
+    window.addEventListener(REPLAY_EVENT, replay)
+
     // If this browser already saw it, never show again — no flash, no fetch race.
     let seenLocally = false
     try { seenLocally = !!window.localStorage.getItem(LS_KEY) } catch {}
-    if (seenLocally) return
 
     // Fresh browser: the server row is the source of truth, so the tour doesn't
     // replay just because the owner opened the dashboard on a new device.
     let cancelled = false
-    ;(async () => {
-      try {
-        const r = await fetch('/api/onboarding', { cache: 'no-store' })
-        if (cancelled) return
-        if (r.ok) {
-          const j = await r.json()
-          if (j?.welcomeSeen) {
-            try { window.localStorage.setItem(LS_KEY, '1') } catch {}
-            return
+    if (!seenLocally) {
+      ;(async () => {
+        try {
+          const r = await fetch('/api/onboarding', { cache: 'no-store' })
+          if (cancelled) return
+          if (r.ok) {
+            const j = await r.json()
+            if (j?.welcomeSeen) {
+              try { window.localStorage.setItem(LS_KEY, '1') } catch {}
+              return
+            }
           }
+          setStage((s) => (s === 'hidden' ? 'ask' : s))
+        } catch {
+          // Offline / API down — fall back to showing it (localStorage still guards repeats).
+          if (!cancelled) setStage((s) => (s === 'hidden' ? 'ask' : s))
         }
-        setStage('ask')
-      } catch {
-        // Offline / API down — fall back to showing it (localStorage still guards repeats).
-        if (!cancelled) setStage('ask')
-      }
-    })()
-    return () => { cancelled = true }
+      })()
+    }
+    return () => {
+      cancelled = true
+      window.removeEventListener(REPLAY_EVENT, replay)
+    }
   }, [])
 
-  // Measure the highlighted sidebar row for the current step, keeping it in
-  // sync on resize / scroll. Null rect → centered fallback.
+  const step = TOUR[index]
+  const phone = view.w < RAIL_MIN
+
+  // Rail steps on a phone need the drawer open; everything else needs it shut.
+  useEffect(() => {
+    if (stage !== 'tour') return
+    setDrawer(phone && step.inRail)
+  }, [stage, index, phone]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Measure the current target and keep it in sync on resize / scroll. The
+  // drawer mounts a frame after setDrawer, so measure again after two frames;
+  // a target still missing after that is skipped.
   useLayoutEffect(() => {
     if (stage !== 'tour') return
+    let raf = 0
+    let skip = 0
     function measure() {
-      const el = document.querySelector(`[data-tour="${TOUR[index].slug}"]`)
-      const r = el?.getBoundingClientRect()
-      setRect(r && r.width > 0 && r.height > 0 ? r : null)
+      setView({ w: window.innerWidth, h: window.innerHeight })
+      const r = findTarget(step.slug)?.getBoundingClientRect()
+      setRect(r ?? null)
+      return !!r
     }
     measure()
+    raf = requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (measure()) return
+      skip = window.setTimeout(() => {
+        if (measure()) return
+        const nextIndex = index + direction.current
+        if (nextIndex < 0 || nextIndex >= TOUR.length) close()
+        else setIndex(nextIndex)
+      }, 250)
+    }))
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
     return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(skip)
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [stage, index])
+  }, [stage, index]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function close() {
     try { window.localStorage.setItem(LS_KEY, '1') } catch {}
@@ -104,167 +174,152 @@ export default function WelcomeTour() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ welcomeSeen: true }),
     }).catch(() => {})
+    setDrawer(false)
     setStage('hidden')
   }
 
   function next() {
+    direction.current = 1
     if (index >= TOUR.length - 1) close()
     else setIndex((i) => i + 1)
   }
   function back() {
+    direction.current = -1
     setIndex((i) => Math.max(0, i - 1))
   }
 
+  // Escape ends the tour, like every other overlay on the dashboard.
+  useEffect(() => {
+    if (stage === 'hidden') return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [stage]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!mounted || stage === 'hidden') return null
 
-  // ── Ask stage: big yes/no modal ──────────────────────────────────────────
+  // Arrows point the way the reader travels: left in Arabic, right in English.
+  const Forward = dir === 'rtl' ? ArrowLeft : ArrowRight
+  const Backward = dir === 'rtl' ? ArrowRight : ArrowLeft
+
+  // ── Ask stage ─────────────────────────────────────────────────────────────
   if (stage === 'ask') {
     return createPortal(
-      <AnimatePresence>
+      <div className="zy-tokens fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center" dir={dir}>
+        <div className="zy-tour-scrim absolute inset-0" onClick={close} aria-hidden />
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} dir="rtl"
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          className="zy-tour-card relative w-full max-w-[420px] p-6 sm:p-7"
+          role="dialog" aria-modal="true" aria-labelledby="zy-tour-ask"
         >
-          <div className="absolute inset-0 bg-[#16171b]/45 backdrop-blur-sm" onClick={close} aria-hidden />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-token bg-white px-8 pb-8 pt-10 text-center shadow-2xl"
-            role="dialog" aria-modal="true"
-          >
+          <button type="button" onClick={close} className="zy-icon-btn absolute end-3 top-3 inline-flex" aria-label={t.tour.close}>
+            <X className="h-4 w-4" />
+          </button>
+          <div className="zy-eyebrow">{t.tour.welcomeEyebrow}</div>
+          <h2 id="zy-tour-ask" className="zy-h1 mt-2">{t.tour.welcomeTitle}</h2>
+          <p className="zy-tour-body mt-2.5">
+            {t.tour.welcomeBody}
+            <span className="block text-[var(--ghost)]">{t.tour.welcomeSteps.replace('{n}', String(TOUR.length))}</span>
+          </p>
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <button
-              type="button" onClick={close}
-              className="absolute end-3.5 top-3.5 rounded-full p-1.5 text-muted transition hover:bg-black/5 hover:text-foreground"
-              aria-label={t.tour.close}
+              type="button" className="zy-btn justify-center sm:flex-1"
+              onClick={() => { direction.current = 1; setIndex(0); setStage('tour') }}
             >
-              <X className="h-4 w-4" />
+              {t.tour.welcomeYes} <Forward className="h-4 w-4" strokeWidth={2.5} />
             </button>
-            <div
-              className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl"
-              style={{ background: 'white', boxShadow: '0 10px 30px -8px rgba(94,106,210,0.45), 0 0 0 1px rgba(94,106,210,0.2) inset' }}
-            >
-              <Sparkles className="h-7 w-7 text-primary" strokeWidth={1.75} />
-            </div>
-            <h2 className="display-ar text-[30px] font-bold leading-tight tracking-tight text-foreground">
-              {t.tour.welcomeTitle}
-            </h2>
-            <p className="mx-auto mt-3 max-w-sm text-[15px] leading-[1.6] text-muted">
-              {t.tour.welcomeBody}
-            </p>
-            <div className="mt-7 flex flex-col gap-2.5 sm:flex-row-reverse sm:justify-center">
-              <button
-                type="button" onClick={() => { setIndex(0); setStage('tour') }}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 text-[15px] font-semibold text-white shadow-lg shadow-primary/25 transition hover:scale-[1.02]"
-              >
-                {t.tour.welcomeYes}
-                <ArrowLeft className="h-4 w-4" strokeWidth={2.5} />
-              </button>
-              <button
-                type="button" onClick={close}
-                className="rounded-full border border-token px-7 py-3 text-[15px] font-medium text-muted transition hover:bg-black/[0.03] hover:text-foreground"
-              >
-                {t.tour.welcomeNo}
-              </button>
-            </div>
-          </motion.div>
+            <button type="button" className="zy-btn-q justify-center sm:flex-1" onClick={close}>
+              {t.tour.welcomeNo}
+            </button>
+          </div>
         </motion.div>
-      </AnimatePresence>,
+      </div>,
       document.body
     )
   }
 
   // ── Tour stage: spotlight walkthrough ────────────────────────────────────
-  const step = TOUR[index]
-  const pad = 8
   const hole = rect
-    ? { top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 }
+    ? { top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2 }
     : null
 
-  // Tooltip placement: to the inner side of the highlighted row; flips or
-  // centers when there's no room (or no target on mobile).
+  // Card placement. Phone: full width, under the target when it sits in the
+  // top half, above it otherwise. Wider: beside a rail row (on whichever side
+  // has room, so it works in both directions), or under a top-bar control.
   let tipStyle: React.CSSProperties
-  if (hole) {
-    let left = hole.left - TIP_W - 14
-    if (left < 12) left = hole.left + hole.width + 14
-    if (left + TIP_W > window.innerWidth - 12) left = window.innerWidth - TIP_W - 12
-    const top = Math.max(12, Math.min(hole.top, window.innerHeight - 210))
-    tipStyle = { position: 'fixed', top, left, width: TIP_W }
+  if (phone) {
+    const width = view.w - GUTTER * 2
+    if (hole && hole.top + hole.height < view.h * 0.5) tipStyle = { top: hole.top + hole.height + 12, left: GUTTER, width }
+    else if (hole) tipStyle = { bottom: view.h - hole.top + 12, left: GUTTER, width }
+    else tipStyle = { bottom: GUTTER, left: GUTTER, width }
+  } else if (hole && !step.inRail) {
+    const left = Math.max(GUTTER, Math.min(hole.left + hole.width / 2 - CARD_W / 2, view.w - CARD_W - GUTTER))
+    tipStyle = { top: hole.top + hole.height + 12, left, width: CARD_W }
+  } else if (hole) {
+    let left = hole.left - CARD_W - 16
+    if (left < GUTTER) left = hole.left + hole.width + 16
+    left = Math.max(GUTTER, Math.min(left, view.w - CARD_W - GUTTER))
+    const top = Math.max(GUTTER, Math.min(hole.top - 8, view.h - 240))
+    tipStyle = { top, left, width: CARD_W }
   } else {
-    tipStyle = {
-      position: 'fixed', width: TIP_W,
-      top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-    }
+    tipStyle = { top: '50%', left: '50%', width: CARD_W, transform: 'translate(-50%, -50%)' }
   }
 
+  const Icon = step.icon
+  const last = index >= TOUR.length - 1
   return createPortal(
-    <div className="fixed inset-0 z-[100]" dir="rtl">
-      {/* Dim + spotlight hole (box-shadow paints everything outside the hole). */}
+    <div className="zy-tokens fixed inset-0 z-[100]" dir={dir}>
+      {/* Dim + spotlight hole (the outer shadow paints everything outside it). */}
       {hole ? (
         <div
-          className="pointer-events-none absolute rounded-xl ring-2 ring-white/80"
-          style={{
-            top: hole.top, left: hole.left, width: hole.width, height: hole.height,
-            boxShadow: '0 0 0 9999px rgba(22,23,27,0.66)',
-            transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
-          }}
+          className="zy-tour-hole pointer-events-none absolute"
+          style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
         />
       ) : (
-        <div className="absolute inset-0 bg-[#16171b]/66" />
+        <div className="zy-tour-scrim absolute inset-0" />
       )}
 
-      {/* Click-catcher over the dim area so the page underneath stays inert. */}
-      <div className="absolute inset-0" onClick={next} aria-hidden />
+      {/* Click-catcher so the page underneath stays inert. */}
+      <div className="absolute inset-0" aria-hidden />
 
-      {/* Tooltip */}
       <motion.div
         key={index}
-        initial={{ opacity: 0, y: 6 }}
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.22 }}
-        style={tipStyle}
-        className="z-10 rounded-2xl border border-token bg-white p-4 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        style={{ position: 'fixed', ...tipStyle }}
+        className="zy-tour-card p-4"
+        role="dialog" aria-modal="true" aria-labelledby="zy-tour-step"
       >
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold tabular-nums text-primary">
-            {index + 1} / {TOUR.length}
-          </span>
-          <button
-            type="button" onClick={close}
-            className="rounded-full p-1 text-muted transition hover:bg-black/5 hover:text-foreground"
-            aria-label={t.tour.finishTour}
-          >
-            <X className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2.5">
+          <span className="zy-tile"><Icon className="h-4 w-4" strokeWidth={2} /></span>
+          <h3 id="zy-tour-step" className="zy-h3 flex-1">{step.title}</h3>
+          <button type="button" onClick={close} className="zy-icon-btn inline-flex" aria-label={t.tour.finishTour}>
+            <X className="h-4 w-4" />
           </button>
         </div>
+        <p className="zy-tour-body mt-2">{step.desc}</p>
 
-        <h3 className="mt-1.5 text-[16px] font-bold tracking-tight text-foreground">{step.title}</h3>
-        <p className="mt-1 text-[13px] leading-[1.55] text-muted">{step.desc}</p>
-
-        <div className="mt-3.5 flex items-center justify-between">
-          <button
-            type="button" onClick={close}
-            className="text-[12px] font-medium text-muted transition hover:text-foreground"
+        <div className="mt-3.5 flex items-center justify-between gap-2">
+          <div
+            className="flex items-center gap-1" role="img"
+            aria-label={t.tour.stepOf.replace('{n}', String(index + 1)).replace('{total}', String(TOUR.length))}
           >
-            {t.tour.skip}
-          </button>
+            {TOUR.map((s, i) => (
+              <span key={s.slug} className="zy-tour-dot" data-on={i === index ? '' : undefined} data-done={i < index ? '' : undefined} />
+            ))}
+          </div>
           <div className="flex items-center gap-2">
             {index > 0 && (
-              <button
-                type="button" onClick={back}
-                className="inline-flex items-center gap-1 rounded-full border border-token px-3.5 py-1.5 text-[12.5px] font-semibold text-foreground transition hover:bg-black/[0.03]"
-              >
-                <ArrowRight className="h-3 w-3" strokeWidth={2.5} />
-                {t.tour.previous}
+              <button type="button" onClick={back} className="zy-btn-q">
+                <Backward className="h-3.5 w-3.5" strokeWidth={2.5} /> {t.tour.previous}
               </button>
             )}
-            <button
-              type="button" onClick={next}
-              className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-1.5 text-[12.5px] font-semibold text-white shadow-sm shadow-primary/25 transition hover:scale-[1.03]"
-            >
-              {index >= TOUR.length - 1 ? t.tour.finish : t.tour.next}
-              {index < TOUR.length - 1 && <ArrowLeft className="h-3 w-3" strokeWidth={2.5} />}
+            <button type="button" onClick={next} className="zy-btn" autoFocus>
+              {last ? t.tour.finish : t.tour.next}
+              {!last && <Forward className="h-3.5 w-3.5" strokeWidth={2.5} />}
             </button>
           </div>
         </div>
