@@ -178,7 +178,7 @@ export default function ReviewView() {
   const headRef = useRef<HTMLElement | null>(null)
   const starsRef = useRef<HTMLDivElement | null>(null)
 
-  /* Arrival. The hidden half lives under .zr-js so a browser that never runs
+  /* Arrival. The hidden half lives under .zy-js so a browser that never runs
      the script reads a finished page rather than an invisible one. */
   useEffect(() => {
     const root = rootRef.current
@@ -186,7 +186,6 @@ export default function ReviewView() {
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zr-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

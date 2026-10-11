@@ -84,8 +84,8 @@ export const MARKETING_CSS = `
   content: ""; position: absolute; inset-inline: -0.06em; bottom: 0.02em; height: 0.07em;
   border-radius: 999px; background: var(--violet); transform-origin: right center;
 }
-.zx-js .zx-h1-mark::after { transform: scaleX(0); }
-.zx-js [data-in] .zx-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
+:where(.zy-js) .zx-root .zx-h1-mark::after { transform: scaleX(0); }
+:where(.zy-js) .zx-root [data-in] .zx-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
 .zx-lede {
   margin: clamp(1rem, 2.4vw, 1.5rem) 0 0;
   font-size: clamp(15px, 1.7vw, 16.5px); font-weight: 500; line-height: 1.85; color: var(--stone);
@@ -147,11 +147,11 @@ export const MARKETING_CSS = `
   content: ""; position: absolute; inset-inline: -0.06em; bottom: 0.02em; height: 0.07em;
   border-radius: 999px; background: var(--violet); transform-origin: right center;
 }
-.zx-js .gradient-text::after { transform: scaleX(0); }
-.zx-js [data-in] .gradient-text::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
+:where(.zy-js) .zx-root .gradient-text::after { transform: scaleX(0); }
+:where(.zy-js) .zx-root [data-in] .gradient-text::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
 @media (prefers-reduced-motion: reduce) {
-  .zx-js .gradient-text::after { transform: none; opacity: 0; }
-  .zx-js [data-in] .gradient-text::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  :where(.zy-js) .zx-root .gradient-text::after { transform: none; opacity: 0; }
+  :where(.zy-js) .zx-root [data-in] .gradient-text::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
 }
 
 /* ---- shared section type ------------------------------------------------ */
@@ -175,22 +175,22 @@ export const MARKETING_CSS = `
 
 /* ---- arrival -----------------------------------------------------------
    MOTION_INTENSITY 4: one fade per section on the way in, and the rule under
-   the marked word. The hidden half lives under .zx-js, which the script adds
-   on mount, so a browser that never runs it reads a finished page. The live
+   the marked word. The hidden half lives under .zy-js, which the root layout puts
+   on <html> before first paint, so a browser that never runs it reads a finished page. The live
    pages ship the opposite: framer-motion's initial={{opacity:0}} is
    server-rendered as style="opacity:0", nine blocks of it on /about and
    three on /faq, so both are blank with JavaScript disabled.
 ------------------------------------------------------------------------- */
-.zx-js [data-reveal] { opacity: 0; transform: translateY(16px); }
-.zx-js [data-reveal][data-in] {
+:where(.zy-js) .zx-root [data-reveal] { opacity: 0; transform: translateY(16px); }
+:where(.zy-js) .zx-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition: opacity 620ms var(--ease-out), transform 620ms var(--ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zx-js [data-reveal] { transform: none; }
-  .zx-js [data-reveal][data-in] { transition-property: opacity; }
-  .zx-js .zx-h1-mark::after { transform: none; opacity: 0; }
-  .zx-js [data-in] .zx-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  :where(.zy-js) .zx-root [data-reveal] { transform: none; }
+  :where(.zy-js) .zx-root [data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zx-root .zx-h1-mark::after { transform: none; opacity: 0; }
+  :where(.zy-js) .zx-root [data-in] .zx-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
 }
 .zx-root :where(a, button, summary):focus-visible {
   outline: 2px solid var(--violet-ink); outline-offset: 3px; border-radius: 6px;

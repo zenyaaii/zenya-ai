@@ -14,6 +14,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import { COMPANY } from '@/lib/company'
 import { LOGO_URL, SHARE_IMAGE, share } from '@/lib/site-share'
+import { REVEAL_BOOT } from '@/components/zenya/chrome/reveal-boot'
 
 const SITE_URL = 'https://zenyaai.co'
 
@@ -296,13 +297,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const dir = dirFor(locale)
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         {/* Inline so it applies before the stylesheet arrives. Scripts can run
             and measure the page while the CSS is still loading; a full-bleed
             2000px hero photo at its natural width then made phone browsers
             widen the page to fit it and zoom out, and it stayed that way. */}
         <style dangerouslySetInnerHTML={{ __html: 'img,video{max-width:100%;height:auto}' }} />
+        {/* Before first paint, so a page never shows, vanishes and fades back
+            in when the bundle lands. See reveal-boot.ts. */}
+        {!isCustomerSite && <script dangerouslySetInnerHTML={{ __html: REVEAL_BOOT }} />}
         {isShopifyRoute && shopifyApiKey && (
           <>
             <meta name="shopify-api-key" content={shopifyApiKey} />

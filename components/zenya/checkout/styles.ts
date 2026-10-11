@@ -28,7 +28,7 @@
  *   - Height animates by grid-template-rows: 0fr -> 1fr. There is not a
  *     hard-coded pixel height in this file.
  *   - A RESTING STATE IS THE FINISHED STATE. Every hidden half lives behind
- *     .zx-js, which Shell adds on mount, so a browser that never runs the
+ *     .zy-js, which the root layout puts on <html> before first paint, so a browser that never runs the
  *     script reads a finished page rather than an invisible one.
  */
 
@@ -166,7 +166,7 @@ export const CSS = `
    broken, the session simply did not start. */
 .zk-tick-bad { color: #b45309; }
 .zk-tick-p { stroke-dasharray: 26; stroke-dashoffset: 0; }
-.zx-js .zk-door[data-in] .zk-tick-p { animation: zk-draw 620ms var(--ease-out) both; }
+:where(.zy-js) .zx-root .zk-door[data-in] .zk-tick-p { animation: zk-draw 620ms var(--ease-out) both; }
 @keyframes zk-draw { from { stroke-dashoffset: 26; } to { stroke-dashoffset: 0; } }
 .zk-door-h { margin: 0.875rem 0 0; font-size: clamp(19px, 2.4vw, 23px); font-weight: 900; line-height: 1.5; color: var(--obsidian); }
 .zk-door-p { margin: 0.625rem 0 0; font-size: clamp(15px, 1.7vw, 16.5px); font-weight: 500; line-height: 1.9; color: var(--stone); }

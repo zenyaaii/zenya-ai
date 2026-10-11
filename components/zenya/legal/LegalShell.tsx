@@ -87,7 +87,7 @@ export default function LegalShell({
 
   const doc = DOCS.find((d) => d.slug === slug) ?? DOCS[0]
 
-  /* Arrival. The hidden half lives under .zl-js so a browser that never runs
+  /* Arrival. The hidden half lives under .zy-js so a browser that never runs
      the script reads a finished page rather than an invisible one. */
   useEffect(() => {
     const root = rootRef.current
@@ -95,7 +95,6 @@ export default function LegalShell({
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zl-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

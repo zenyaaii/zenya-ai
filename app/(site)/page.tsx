@@ -522,6 +522,7 @@ export default function Page() {
          font size, but reading them beats trusting that they do. */
       wordWidths.current = measure(slots)
       applyWidths()
+      el.dataset.fit = "true"
     }
     /* Measured straight away, not on the next animation frame: a page opened in
        a background tab never gets one, and the line would sit at its small
@@ -1020,6 +1021,26 @@ export default function Page() {
              word leaves, the column moves, the new word arrives. */
           transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
           transition-delay: calc(var(--i) * var(--beat) + 260ms);
+        }
+        /* Before the first measurement there are no column widths, so each
+           column would be as wide as its widest word and the opening line
+           would read "ابن     ادر     انشر" until the script lands, then snap
+           together. Until then only the word on show takes up room, so the
+           first paint is already the tight line the measurement settles on. */
+        .zn-words:not([data-fit]) .zn-w:not([data-state="in"]) { position: absolute; }
+        /* The same goes for the size. The --fit default of 0.5 is a guess, so
+           the first paint was a few percent small and grew a second later when
+           the measurement landed. For the opening face the measurement always
+           comes out the same way: the widest row is 9.445em, scaled to 86% of
+           the room inside the padding. Doing that sum here, in vw, paints the
+           line at its final size before the script runs. The other two terms
+           are the measurement's own ceiling and the 60vh cap. */
+        .zn-words:not([data-fit]) {
+          font-size: min(
+            calc((100vw - 2 * (var(--gut) + 1.25rem)) * 0.86 / 9.445),
+            calc(var(--display) * 1.05),
+            calc(60vh / var(--lh, 1.24))
+          );
         }
         /* The distance between one column changing and the next. Long enough
            that a reader sees one word change, then the next, then the next,

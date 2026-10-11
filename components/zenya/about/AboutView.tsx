@@ -75,7 +75,7 @@ export default function AboutView() {
   const rootRef = useRef<HTMLElement | null>(null)
   const { headRef, onDark } = useOnDark(rootRef)
 
-  /* Arrival. The hidden half lives under .zx-js so a browser that never runs
+  /* Arrival. The hidden half lives under .zy-js so a browser that never runs
      the script reads a finished page rather than an invisible one. */
   useEffect(() => {
     const root = rootRef.current
@@ -83,7 +83,6 @@ export default function AboutView() {
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zx-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {

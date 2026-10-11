@@ -163,8 +163,8 @@ export const CSS = `
   content: ""; position: absolute; inset-inline: -0.06em; bottom: 0.02em; height: 0.075em;
   border-radius: 999px; background: var(--violet); transform-origin: right center;
 }
-.zc-js .zc-h1-mark::after { transform: scaleX(0); }
-.zc-js [data-in] .zc-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
+:where(.zy-js) .zc-root .zc-h1-mark::after { transform: scaleX(0); }
+:where(.zy-js) .zc-root [data-in] .zc-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
 .zc-lede {
   margin: clamp(0.875rem, 2vw, 1.25rem) 0 0; max-width: 54ch;
   font-size: clamp(14.5px, 1.6vw, 16.5px); font-weight: 500; line-height: 1.95; color: var(--stone);
@@ -360,7 +360,7 @@ export const CSS = `
 .zc-tick svg { width: 19px; height: 19px; }
 /* The check DRAWS. 26 is the path's own length, measured rather than
    guessed. A mark that fades in is a picture of a confirmation. */
-.zc-js .zc-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zc-draw 460ms var(--ease-out) 120ms forwards; }
+:where(.zy-js) .zc-root .zc-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zc-draw 460ms var(--ease-out) 120ms forwards; }
 @keyframes zc-draw { to { stroke-dashoffset: 0; } }
 .zc-done-h { margin: 0.875rem 0 0; font-size: clamp(20px, 2.6vw, 25px); font-weight: 900; line-height: 1.4; color: var(--obsidian); letter-spacing: 0; }
 .zc-done-b { margin: 0.875rem 0 0; max-width: 46ch; font-size: 14.5px; font-weight: 500; line-height: 1.95; color: var(--stone); }
@@ -399,8 +399,8 @@ export const CSS = `
 @media (pointer: coarse) { .zc-quiet { padding-block: 0.8125rem; margin-block: -0.8125rem; } }
 
 /* The receipt arrives in sequence rather than as a block: mark, heading,
-   message, slip, note. Under .zc-js only, off entirely for reduced motion. */
-.zc-js .zc-done > * { animation: zc-rise 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 90ms); }
+   message, slip, note. Under .zy-js only, off entirely for reduced motion. */
+:where(.zy-js) .zc-root .zc-done > * { animation: zc-rise 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 90ms); }
 @keyframes zc-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ---- the aside ---------------------------------------------------------- */
@@ -482,27 +482,27 @@ export const CSS = `
 .zc-link:hover { text-decoration: underline; }
 
 /* ---- arrival -----------------------------------------------------------
-   The hidden half lives under .zc-js, which the script adds on mount, so a
+   The hidden half lives under .zy-js, which the root layout puts on <html> before first paint, so a
    browser that never runs it reads a finished page. A resting state is the
    finished state. The live contact page ships the opposite: its three blocks
    are server-rendered with style="opacity:0;transform:translateY(20px)" and
    the whole page is blank with JavaScript off. Measured, not assumed.
 ------------------------------------------------------------------------- */
-.zc-js [data-reveal] { opacity: 0; transform: translateY(18px); }
-.zc-js [data-reveal][data-in] {
+:where(.zy-js) .zc-root [data-reveal] { opacity: 0; transform: translateY(18px); }
+:where(.zy-js) .zc-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition:
     opacity 640ms var(--ease-out) calc(var(--i, 0) * 70ms),
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zc-js [data-reveal] { transform: none; }
-  .zc-js [data-reveal][data-in] { transition-property: opacity; }
-  .zc-js .zc-h1-mark::after { transform: none; opacity: 0; }
-  .zc-js [data-in] .zc-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  :where(.zy-js) .zc-root [data-reveal] { transform: none; }
+  :where(.zy-js) .zc-root [data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zc-root .zc-h1-mark::after { transform: none; opacity: 0; }
+  :where(.zy-js) .zc-root [data-in] .zc-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
   .zc-chip, .zc-in, .zc-ch-row, .zc-soc a { transition-property: opacity, color, background-color, border-color, box-shadow; }
   @keyframes zc-rise { from { opacity: 0; } }
-  .zc-js .zc-tick-p { stroke-dashoffset: 0; animation: none; }
+  :where(.zy-js) .zc-root .zc-tick-p { stroke-dashoffset: 0; animation: none; }
 }
 
 /* ---- the remodel -------------------------------------------------------
