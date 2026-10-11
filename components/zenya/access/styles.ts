@@ -480,12 +480,12 @@ export const CSS = `
 .za-card:focus-within::before, .za-card:focus-within::after { opacity: 1; width: 34px; height: 34px; }
 
 /* ---- arrival ------------------------------------------------------------
-   Under .za-js only, so a browser that never runs the script reads a finished
+   Under .zy-js only, so a browser that never runs the script reads a finished
    card. A surface that rests invisible has shipped on this codebase twice; it
    does not get to happen a third time.
 ------------------------------------------------------------------------- */
-.za-js .za-card { animation: za-rise 520ms var(--ease-out) both; }
-.za-js .za-foot-note { animation: za-rise 520ms var(--ease-out) 140ms both; }
+:where(.zy-js) .za-root .za-card { animation: za-rise 520ms var(--ease-out) both; }
+:where(.zy-js) .za-root .za-foot-note { animation: za-rise 520ms var(--ease-out) 140ms both; }
 @keyframes za-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {

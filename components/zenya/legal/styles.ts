@@ -433,7 +433,7 @@ export const CSS = `
 .zl-link:hover { color: var(--obsidian); }
 
 /* ---- arrival ------------------------------------------------------------
-   The hidden half lives under .zl-js, which the script adds on mount, so a
+   The hidden half lives under .zy-js, which the root layout puts on <html> before first paint, so a
    browser that never runs it reads a finished page. A resting state is the
    finished state, and the live /contact page is the counter-example: its
    blocks are server-rendered with style="opacity:0", so it is blank with
@@ -442,14 +442,14 @@ export const CSS = `
    MOTION_INTENSITY is 2 here. One fade on arrival, and the spine's dot. A
    legal document should not move while somebody is reading a clause.
 ------------------------------------------------------------------------- */
-.zl-js [data-reveal] { opacity: 0; transform: translateY(12px); }
-.zl-js [data-reveal][data-in] {
+:where(.zy-js) .zl-root [data-reveal] { opacity: 0; transform: translateY(12px); }
+:where(.zy-js) .zl-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zl-js [data-reveal] { transform: none; }
-  .zl-js [data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zl-root [data-reveal] { transform: none; }
+  :where(.zy-js) .zl-root [data-reveal][data-in] { transition-property: opacity; }
   .zl-chev { transition: none; }
   .zl-root * { scroll-behavior: auto !important; }
 }

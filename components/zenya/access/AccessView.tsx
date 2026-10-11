@@ -23,8 +23,8 @@
  * negative margin, so the grace for descenders costs no layout.
  *
  * MOTION, and the one rule that governs it: a resting state is the finished
- * state. The card's arrival borrows its hidden half from .za-js, which the
- * script adds on mount, so a browser that never runs it reads a finished
+ * state. The card's arrival borrows its hidden half from .zy-js, which the
+ * root layout puts on <html> before first paint, so a browser that never runs it reads a finished
  * form. The rolls need no such guard: their faces are positioned from state
  * that exists in the server-rendered HTML, so the resting face is visible
  * with no script at all. Everything collapses under prefers-reduced-motion.
@@ -228,10 +228,6 @@ export default function AccessView({
   const chooser = mode === "signin" && !typing && !handed && accounts.length > 0
 
   useEffect(() => { setAccounts(loadAccounts()) }, [])
-
-  /* Arrival. The hidden half lives under .za-js so a browser that never runs
-     the script reads a finished card rather than an invisible one. */
-  useEffect(() => { rootRef.current?.classList.add("za-js") }, [])
 
   /* The header takes the ground it is standing on. Same mechanic as the four
      sibling pages: the band is the strip the pill occupies, in CSS pixels.

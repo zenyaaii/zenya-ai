@@ -353,7 +353,6 @@ export default function PricingView() {
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zp-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -1127,27 +1126,27 @@ const CSS = `
 .zp-table tbody tr + tr .zp-td-zenya { box-shadow: inset 0 1px 0 rgba(151, 160, 238, 0.20); }
 
 /* ---- arrival ------------------------------------------------------------
-   The hidden half applies only under .zp-js, which the script adds on mount,
+   The hidden half applies only under .zy-js, which the root layout puts on <html> before first paint,
    so a browser that never runs it reads a finished page. Stagger rides a
    custom property, so no element carries a hand-written delay.
 ------------------------------------------------------------------------- */
-.zp-js [data-reveal] { opacity: 0; transform: translateY(18px); }
-.zp-js [data-reveal][data-in] {
+:where(.zy-js) .zp-root [data-reveal] { opacity: 0; transform: translateY(18px); }
+:where(.zy-js) .zp-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition:
     opacity 640ms var(--ease-out) calc(var(--i, 0) * 90ms),
     transform 640ms var(--ease-out) calc(var(--i, 0) * 90ms);
 }
-.zp-js tr[data-reveal] { opacity: 0; transform: translateY(10px); }
-.zp-js tr[data-reveal][data-in] {
+:where(.zy-js) .zp-root tr[data-reveal] { opacity: 0; transform: translateY(10px); }
+:where(.zy-js) .zp-root tr[data-reveal][data-in] {
   opacity: 1; transform: none;
   transition:
     opacity 500ms var(--ease-out) calc(var(--i, 0) * 55ms),
     transform 500ms var(--ease-out) calc(var(--i, 0) * 55ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zp-js [data-reveal], .zp-js tr[data-reveal] { transform: none; }
-  .zp-js [data-reveal][data-in], .zp-js tr[data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zp-root [data-reveal], :where(.zy-js) .zp-root tr[data-reveal] { transform: none; }
+  :where(.zy-js) .zp-root [data-reveal][data-in], :where(.zy-js) .zp-root tr[data-reveal][data-in] { transition-property: opacity; }
 }
 
 /* ---- narrow ------------------------------------------------------------- */

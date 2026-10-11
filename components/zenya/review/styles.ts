@@ -138,8 +138,8 @@ export const CSS = `
   content: ""; position: absolute; inset-inline: -0.06em; bottom: 0.02em; height: 0.075em;
   border-radius: 999px; background: var(--violet); transform-origin: right center;
 }
-.zr-js .zr-h1-mark::after { transform: scaleX(0); }
-.zr-js [data-in] .zr-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
+:where(.zy-js) .zr-root .zr-h1-mark::after { transform: scaleX(0); }
+:where(.zy-js) .zr-root [data-in] .zr-h1-mark::after { transform: none; transition: transform 720ms var(--ease-out) 260ms; }
 .zr-lede {
   margin: clamp(0.875rem, 2vw, 1.25rem) 0 0; max-width: 56ch;
   font-size: clamp(14.5px, 1.6vw, 16.5px); font-weight: 500; line-height: 1.95; color: var(--stone);
@@ -318,7 +318,7 @@ export const CSS = `
 /* The check DRAWS. A mark that fades in is a picture of a confirmation; one
    that is drawn is the confirmation happening. 26 is the path's own length,
    measured rather than guessed. */
-.zr-js .zr-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zr-draw 460ms var(--ease-out) 120ms forwards; }
+:where(.zy-js) .zr-root .zr-tick-p { stroke-dasharray: 26; stroke-dashoffset: 26; animation: zr-draw 460ms var(--ease-out) 120ms forwards; }
 @keyframes zr-draw { to { stroke-dashoffset: 0; } }
 .zr-thanks-h {
   margin: 0.875rem 0 0; font-size: clamp(20px, 2.6vw, 25px); font-weight: 900;
@@ -395,8 +395,8 @@ export const CSS = `
 
 /* The panel arrives in sequence rather than as a block: mark, then heading,
    then rating, then message, then reward. It reads in the order it is meant
-   to be read. Under .zr-js only, and off entirely for reduced motion. */
-.zr-js .zr-thanks > * { animation: zr-rise 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 90ms); }
+   to be read. Under .zy-js only, and off entirely for reduced motion. */
+:where(.zy-js) .zr-root .zr-thanks > * { animation: zr-rise 520ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 90ms); }
 @keyframes zr-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ---- the aside ---------------------------------------------------------- */
@@ -499,26 +499,26 @@ export const CSS = `
 .zr-link:hover { text-decoration: underline; }
 
 /* ---- arrival -----------------------------------------------------------
-   The hidden half lives under .zr-js, which the script adds on mount, so a
+   The hidden half lives under .zy-js, which the root layout puts on <html> before first paint, so a
    browser that never runs it reads a finished page. A resting state is the
    finished state; this codebase has shipped the opposite twice.
 ------------------------------------------------------------------------- */
-.zr-js [data-reveal] { opacity: 0; transform: translateY(18px); }
-.zr-js [data-reveal][data-in] {
+:where(.zy-js) .zr-root [data-reveal] { opacity: 0; transform: translateY(18px); }
+:where(.zy-js) .zr-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition:
     opacity 640ms var(--ease-out) calc(var(--i, 0) * 70ms),
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zr-js [data-reveal] { transform: none; }
-  .zr-js [data-reveal][data-in] { transition-property: opacity; }
-  .zr-js .zr-h1-mark::after { transform: none; opacity: 0; }
-  .zr-js [data-in] .zr-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
+  :where(.zy-js) .zr-root [data-reveal] { transform: none; }
+  :where(.zy-js) .zr-root [data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zr-root .zr-h1-mark::after { transform: none; opacity: 0; }
+  :where(.zy-js) .zr-root [data-in] .zr-h1-mark::after { opacity: 1; transition: opacity 720ms var(--ease-out) 260ms; }
   .zr-star, .zr-star-in, .zr-star-out, .zr-verdict-face, .zr-in, .zr-slot-grow { transition-property: opacity, color, background-color, border-color, box-shadow; }
   /* The confirmation fades in where it rests; the tick is drawn already. */
   @keyframes zr-rise { from { opacity: 0; } }
-  .zr-js .zr-tick-p { stroke-dashoffset: 0; animation: none; }
+  :where(.zy-js) .zr-root .zr-tick-p { stroke-dashoffset: 0; animation: none; }
 }
 
 /* ---- the remodel -------------------------------------------------------

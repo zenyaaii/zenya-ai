@@ -63,7 +63,6 @@ export default function FaqView() {
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zx-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {

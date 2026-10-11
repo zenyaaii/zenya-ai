@@ -89,10 +89,6 @@ export default function WizardShell({
     setVisited((p) => (p.has(step) ? p : new Set(p).add(step)))
   }, [step])
 
-  /* The hidden half of every arrival lives under .zb-js, so a browser that
-     never runs the script reads a finished form. */
-  useEffect(() => { rootRef.current?.classList.add("zb-js") }, [])
-
   const scrollToStage = () => {
     const el = stageRef.current
     if (!el) return
@@ -928,11 +924,11 @@ textarea.zb-in { resize: vertical; min-height: 96px; }
 .zb-card:focus-within::before, .zb-card:focus-within::after { opacity: 1; }
 
 /* ---- arrival ------------------------------------------------------------- */
-.zb-js .zb-card { animation: zb-rise 460ms var(--ease-out) both; }
-.zb-js .zb-card .zb-cell { animation: zb-rise 420ms var(--ease-out) both; animation-delay: 90ms; }
+:where(.zy-js) .zb-root .zb-card { animation: zb-rise 460ms var(--ease-out) both; }
+:where(.zy-js) .zb-root .zb-card .zb-cell { animation: zb-rise 420ms var(--ease-out) both; animation-delay: 90ms; }
 @keyframes zb-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .zb-js .zb-card, .zb-js .zb-card .zb-cell { animation: none; }
+  :where(.zy-js) .zb-root .zb-card, :where(.zy-js) .zb-root .zb-card .zb-cell { animation: none; }
   .zb-card::before, .zb-card::after, .zb-meter::before, .zb-meter::after { transition: none; }
 }
 

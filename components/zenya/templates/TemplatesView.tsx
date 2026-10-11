@@ -277,7 +277,6 @@ export default function TemplatesView() {
     /* Less motion still arrives: the stylesheet turns the rise into a plain
        fade under prefers-reduced-motion, so the observer runs for everyone. */
     const targets = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"))
-    root.classList.add("zt-js")
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -1421,19 +1420,19 @@ const CSS = `
 .zt-floor-body { margin: 0; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: #a8a8b2; }
 
 /* ---- arrival ------------------------------------------------------------
-   The hidden half applies only under .zt-js, which the script adds on mount,
+   The hidden half applies only under .zy-js, which the root layout puts on <html> before first paint,
    so a browser that never runs it reads a finished page.
 ------------------------------------------------------------------------- */
-.zt-js [data-reveal] { opacity: 0; transform: translateY(18px); }
-.zt-js [data-reveal][data-in] {
+:where(.zy-js) .zt-root [data-reveal] { opacity: 0; transform: translateY(18px); }
+:where(.zy-js) .zt-root [data-reveal][data-in] {
   opacity: 1; transform: none;
   transition:
     opacity 640ms var(--ease-out) calc(var(--i, 0) * 70ms),
     transform 640ms var(--ease-out) calc(var(--i, 0) * 70ms);
 }
 @media (prefers-reduced-motion: reduce) {
-  .zt-js [data-reveal] { transform: none; }
-  .zt-js [data-reveal][data-in] { transition-property: opacity; }
+  :where(.zy-js) .zt-root [data-reveal] { transform: none; }
+  :where(.zy-js) .zt-root [data-reveal][data-in] { transition-property: opacity; }
 }
 
 /* ---- the phone's picker -------------------------------------------------
