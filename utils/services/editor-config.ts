@@ -1,6 +1,6 @@
 import {
   Sparkles, Wrench, Star, MapPin, Phone, Award, HelpCircle, Image as ImageIcon,
-  Quote, Home as HomeIcon, BookOpen, Workflow,
+  Quote, Home as HomeIcon, BookOpen, Workflow, MessageCircle,
 } from 'lucide-react'
 import { SERVICE_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
@@ -70,7 +70,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'services', label: 'الخدمات', icon: Wrench, page: 'services',
+      id: 'services', label: 'الخدمات', icon: Wrench, pages: ['home', 'services'],
       fields: [
         { type: 'textarea', path: 'services.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'services.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -100,7 +100,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'proof', label: 'لماذا نحن', icon: Award, page: 'services',
+      id: 'proof', label: 'لماذا نحن', icon: Award, pages: ['home', 'about'],
       fields: [
         { type: 'textarea', path: 'proof.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'proof.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -128,7 +128,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'process', label: 'طريقة العمل', icon: Award, page: 'process',
+      id: 'process', label: 'طريقة العمل', icon: Workflow, pages: ['home', 'process'],
       fields: [
         { type: 'textarea', path: 'process.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'process.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -155,7 +155,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'offer', label: 'العرض', icon: Sparkles, page: 'home',
+      id: 'offer', label: 'طلب عرض السعر', icon: Sparkles, pages: ['home', 'contact'],
       fields: [
         { type: 'text',     path: 'offer.badge',      label: 'شارة' },
         { type: 'textarea', path: 'offer.heading',    label: 'العنوان', rows: 2 },
@@ -165,7 +165,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'testimonials', label: 'آراء العملاء', icon: Star, page: 'home',
+      id: 'testimonials', label: 'آراء العملاء', icon: Star, pages: ['home', 'about'],
       fields: [
         { type: 'reviews', path: 'testimonials.items' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'العنوان', rows: 2 },
@@ -201,7 +201,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'faq', label: 'الأسئلة الشائعة', icon: HelpCircle, page: 'contact',
+      id: 'faq', label: 'الأسئلة الشائعة', icon: HelpCircle, pages: ['process', 'contact'],
       fields: [
         { type: 'text', path: 'faq.heading', label: 'العنوان' },
         {
@@ -216,7 +216,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'final_cta', label: 'الدعوة الختامية', icon: Sparkles, page: 'home',
+      id: 'final_cta', label: 'الدعوة الختامية', icon: Sparkles, pages: ['services', 'about', 'process'],
       fields: [
         { type: 'textarea', path: 'final_cta.heading',        label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'final_cta.subheading',     label: 'العنوان الفرعي', rows: 2 },
@@ -226,6 +226,20 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
     },
   ],
   globalPanels: [
+    {
+      id: 'links', label: 'واتساب والتواصل الاجتماعي', icon: MessageCircle,
+      fields: [
+        { type: 'note', content: 'كل رابط فارغ لا يظهر في الموقع. اكتب الرابط كاملًا أو اسم الحساب فقط.' },
+        { type: 'text', path: 'links.whatsapp',         label: 'رقم واتساب (بمفتاح الدولة)', placeholder: '+966 55 555 0187' },
+        { type: 'text', path: 'social_links.instagram', label: 'إنستغرام', placeholder: '@yourbusiness' },
+        { type: 'text', path: 'social_links.tiktok',    label: 'تيك توك', placeholder: '@yourbusiness' },
+        { type: 'text', path: 'social_links.snapchat',  label: 'سناب شات', placeholder: 'yourbusiness' },
+        { type: 'text', path: 'social_links.facebook',  label: 'فيسبوك', placeholder: 'facebook.com/yourbusiness' },
+        { type: 'text', path: 'social_links.x',         label: 'إكس (تويتر)', placeholder: '@yourbusiness' },
+        { type: 'text', path: 'social_links.youtube',   label: 'يوتيوب', placeholder: 'youtube.com/@yourbusiness' },
+        { type: 'text', path: 'links.reviews_url',      label: 'رابط تقييماتك على Google' },
+      ],
+    },
     {
       id: 'footer', label: 'تذييل الصفحة', icon: Phone,
       fields: [

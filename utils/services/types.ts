@@ -156,6 +156,25 @@ export type ServiceContent = {
     title: string
     description: string
   }
-  /** The owner's public reviews page, from the wizard. The dashboard's Reviews page reads it. */
-  links?: { reviews_url?: string }
+  /**
+   * The owner's own links, from the wizard or the editor. Each one is drawn
+   * only when present. `whatsapp` is a number or a wa.me link; without it the
+   * site falls back to footer.phone when that is written in international form.
+   */
+  links?: {
+    /** The owner's public reviews page. The dashboard's Reviews page reads it. */
+    reviews_url?: string
+    whatsapp?: string
+  }
+  /** Social profiles: full links, or a handle the template turns into one. */
+  social_links?: ServiceSocialLinks
+}
+
+export type ServiceSocialLinks = {
+  instagram?: string
+  tiktok?: string
+  snapchat?: string
+  facebook?: string
+  x?: string
+  youtube?: string
 }

@@ -1,12 +1,19 @@
 "use client"
 
-import { useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import type { ServiceContent } from '@/utils/services/types'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import {
+  Award, BadgeCheck, Bug, CalendarDays, Camera, Car, ChevronDown, ChevronLeft, CircleCheck, Clock, Droplets,
+  Hammer, KeyRound, Mail, MapPin, Menu, Navigation, Paintbrush, PartyPopper, Phone, Quote, Scissors,
+  ShieldCheck, Siren, Smile, Snowflake, Sparkles, Star, Stethoscope, Tag, ThumbsUp, Timer, Trees, Truck,
+  Wrench, X as Close, Zap, Ghost, type LucideIcon,
+} from 'lucide-react'
+import type { ServiceContent, ServiceSocialLinks } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
 import { useBookingContext } from '@/components/site/BookingContext'
+import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/marketing/BrandMarks'
 
 type Props = {
   content: ServiceContent
@@ -20,12 +27,57 @@ type Props = {
 
 type ServiceView = 'home' | 'services' | 'about' | 'process' | 'contact'
 
-const reveal = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.18 },
-  transition: { duration: 0.45, ease: 'easeOut' as const }
+/* ─────────────────────────────────────────────────────────── page context */
+
+type Ctx = {
+  content: ServiceContent
+  isDark: boolean
+  view: ServiceView
+  go: (v: ServiceView) => void
+  /** The owner's WhatsApp chat, or null when there is no usable number. */
+  wa: string | null
 }
+const PageCtx = createContext<Ctx | null>(null)
+function usePage(): Ctx {
+  const c = useContext(PageCtx)
+  if (!c) throw new Error('services page context missing')
+  return c
+}
+
+const PAGES: { label: string; view: ServiceView }[] = [
+  { label: 'الرئيسية', view: 'home' },
+  { label: 'خدماتنا', view: 'services' },
+  { label: 'من نحن', view: 'about' },
+  { label: 'كيف نعمل', view: 'process' },
+  { label: 'تواصل', view: 'contact' },
+]
+
+/* ─────────────────────────────────────────────────────────── motion */
+
+// Plain functions, not hooks, so they are safe inside .map(). A device that
+// asks for less motion gets a fade with no travel.
+const EASE = [0.22, 1, 0.36, 1] as const
+function rise(rm: boolean, delay = 0) {
+  return {
+    initial: rm ? { opacity: 0 } : { opacity: 0, y: 18 },
+    whileInView: rm ? { opacity: 1 } : { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.1 },
+    transition: { duration: rm ? 0.3 : 0.55, ease: EASE, delay: rm ? 0 : delay },
+  }
+}
+function enter(rm: boolean, delay = 0) {
+  return {
+    initial: rm ? { opacity: 0 } : { opacity: 0, y: 14 },
+    animate: rm ? { opacity: 1 } : { opacity: 1, y: 0 },
+    transition: { duration: rm ? 0.3 : 0.6, ease: EASE, delay: rm ? 0 : delay },
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── root */
+
+// Arabic glyphs take the Arabic face; Latin letters and digits keep the preset's.
+const ARABIC_FACE = '"IBM Plex Sans Arabic", system-ui, sans-serif'
+const WA_GREEN = '#1fa855'
 
 export default function ServicesPreview({
   content,
@@ -37,91 +89,105 @@ export default function ServicesPreview({
   onViewChange,
 }: Props) {
   const preset = getServicePreset(presetId)
-  const colors = useMemo(
-    () => ({ ...preset.colors, ...(colorOverrides || {}) }),
-    [preset.colors, colorOverrides]
-  )
+  const colors = useMemo(() => ({ ...preset.colors, ...(colorOverrides || {}) }), [preset.colors, colorOverrides])
   const typo = typographyPreset ? getTypographyPreset(typographyPreset) : null
-  const headingFont = typo?.heading_font ?? preset.heading_font
-  const bodyFont    = typo?.body_font    ?? preset.body_font
+  const headingFont = `${typo?.heading_font ?? preset.heading_font}, ${ARABIC_FACE}`
+  const bodyFont = `${typo?.body_font ?? preset.body_font}, ${ARABIC_FACE}`
   const isDark = preset.id === 'graphite'
   const [internalView, setInternalView] = useState<ServiceView>('home')
-  const view = (controlledView as ServiceView) || internalView
-  const setView = (v: ServiceView) => {
-    if (onViewChange) onViewChange(v); else setInternalView(v)
+  const view = ((controlledView as ServiceView) || internalView)
+  const go = (v: ServiceView) => {
+    if (onViewChange) { onViewChange(v); return }
+    setInternalView(v)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 })
   }
 
+  // The colour that carries actions. On the dark preset the primary is near
+  // black, so the accent takes its place.
+  const brand = isDark ? colors.accent : colors.primary
   const cssVars = useMemo(
     () =>
       ({
         '--sv-primary': colors.primary,
         '--sv-accent': colors.accent,
+        '--sv-on-accent': readableOn(colors.accent),
+        '--sv-brand': brand,
+        '--sv-on-brand': readableOn(brand),
         '--sv-bg': colors.background,
         '--sv-surface': colors.surface,
         '--sv-text': colors.text,
         '--sv-muted': colors.muted,
         '--sv-border': colors.border,
+        '--sv-tint': `color-mix(in srgb, ${brand} 11%, transparent)`,
         '--sv-heading-font': headingFont,
         '--sv-body-font': bodyFont,
       }) as React.CSSProperties,
-    [colors, headingFont, bodyFont]
+    [colors, brand, headingFont, bodyFont]
   )
 
+  const ctx: Ctx = { content, isDark, view, go, wa: whatsappChat(content) }
+
   return (
-    <div
-      className={className}
-      style={{
-        ...cssVars,
-        background: 'var(--sv-bg)',
-        color: 'var(--sv-text)',
-        fontFamily: 'var(--sv-body-font)',
-        minHeight: '100%'
-      }}
-    >
-      <FontPreload />
-      <TopBar content={content} isDark={isDark} />
-      <NavBar content={content} isDark={isDark} view={view} setView={setView} />
+    <PageCtx.Provider value={ctx}>
+      <div
+        className={className}
+        dir="rtl"
+        style={{ ...cssVars, background: 'var(--sv-bg)', color: 'var(--sv-text)', fontFamily: 'var(--sv-body-font)', minHeight: '100%' }}
+      >
+        <FontPreload />
+        <Header />
 
-      {view === 'home' && (
-        <>
-          <Hero content={content} isDark={isDark} />
-          <TrustBar content={content} isDark={isDark} />
-          <ServicesSection content={content} isDark={isDark} />
-          <TestimonialsSection content={content} isDark={isDark} />
-          <OfferSection content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'services' && (
-        <>
-          <ServicesSection content={content} isDark={isDark} />
-          <ProofSection content={content} isDark={isDark} />
-          <BeforeAfterSection content={content} isDark={isDark} />
-          <GallerySection content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'about' && (
-        <>
-          <StorySection content={content} isDark={isDark} />
-          <ProofSection content={content} isDark={isDark} />
-          <TestimonialsSection content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'process' && (
-        <>
-          <ProcessSection content={content} isDark={isDark} />
-          <BeforeAfterSection content={content} isDark={isDark} />
-        </>
-      )}
-      {view === 'contact' && (
-        <>
-          <AreasSection content={content} isDark={isDark} />
-          <FaqSection content={content} isDark={isDark} />
-          <OfferSection content={content} isDark={isDark} />
-        </>
-      )}
+        <main>
+          {view === 'home' && (
+            <>
+              <Hero />
+              <ServicesSection />
+              <ProofSection />
+              <ProcessSection />
+              <TestimonialsSection />
+              <OfferSection />
+            </>
+          )}
+          {view === 'services' && (
+            <>
+              <PageBanner title="خدماتنا" />
+              <ServicesSection inner />
+              <BeforeAfterSection />
+              <GallerySection />
+              <FinalCta />
+            </>
+          )}
+          {view === 'about' && (
+            <>
+              <PageBanner title="من نحن" />
+              <StorySection />
+              <ProofSection />
+              <TestimonialsSection />
+              <FinalCta />
+            </>
+          )}
+          {view === 'process' && (
+            <>
+              <PageBanner title="كيف نعمل" />
+              <ProcessSection inner />
+              <FaqSection />
+              <FinalCta />
+            </>
+          )}
+          {view === 'contact' && (
+            <>
+              <PageBanner title="تواصل معنا" />
+              <OfferSection inner />
+              <AreasSection />
+              <FaqSection />
+            </>
+          )}
+        </main>
 
-      <Footer content={content} isDark={isDark} />
-    </div>
+        <Footer />
+        <WhatsAppFloat />
+      </div>
+    </PageCtx.Provider>
   )
 }
 
@@ -129,687 +195,1148 @@ function FontPreload() {
   return (
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@500;600;700;800&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
     />
   )
 }
 
+/* ─────────────────────────────────────────────────────────── building blocks */
+
 function Container({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-[1280px] px-6 md:px-10 lg:px-16 ${className}`}>{children}</div>
+  return <div className={`mx-auto w-full max-w-[1200px] px-5 md:px-8 ${className}`}>{children}</div>
 }
 
-function Heading({ children, className = '', size = 'lg' }: { children: React.ReactNode; className?: string; size?: 'md' | 'lg' | 'xl' | '2xl' }) {
-  const sizes = {
-    md: 'text-3xl md:text-4xl',
-    lg: 'text-4xl md:text-5xl',
-    xl: 'text-5xl md:text-6xl',
-    '2xl': 'text-5xl md:text-7xl'
-  } as const
-
+function Section({
+  children, id, name, tint, className = '',
+}: { children: React.ReactNode; id?: string; name: string; tint?: boolean; className?: string }) {
   return (
-    <h2
-      className={`${sizes[size]} ${className}`}
-      style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.02, fontWeight: 800 }}
+    <section
+      id={id}
+      data-section={name}
+      className={`py-16 md:py-24 ${className}`}
+      style={tint ? { background: 'var(--sv-surface)', borderBlock: '1px solid var(--sv-border)' } : undefined}
     >
       {children}
-    </h2>
-  )
-}
-
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[0.72rem] font-semibold" style={{ color: 'var(--sv-accent)' }}>
-      {children}
-    </p>
-  )
-}
-
-function surfaceCard(isDark: boolean) {
-  return {
-    background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.82)',
-    border: '1px solid var(--sv-border)',
-    boxShadow: isDark ? '0 20px 60px rgba(0,0,0,0.28)' : '0 18px 50px rgba(15, 23, 42, 0.08)',
-    backdropFilter: 'blur(18px)'
-  } as React.CSSProperties
-}
-
-function TopBar({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <div
-      className="border-b"
-      style={{
-        borderColor: 'var(--sv-border)',
-        background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.65)'
-      }}
-    >
-      <Container className="flex flex-col gap-2 py-3 text-sm md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
-          <span>{content.brand.city}{content.brand.region ? `, ${content.brand.region}` : ''}</span>
-          {content.areas.availability ? <><span>•</span><span>{content.areas.availability}</span></> : null}
-          {content.areas.response_time ? <><span>•</span><span>{content.areas.response_time}</span></> : null}
-        </div>
-        <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--sv-muted)' }}>
-          <a href={`tel:${content.footer.phone}`} dir="ltr" className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.phone}</a>
-          <span>•</span>
-          <a href={`mailto:${content.footer.email}`} className="inline-flex min-h-[44px] -my-3 items-center transition hover:opacity-75">{content.footer.email}</a>
-        </div>
-      </Container>
-    </div>
-  )
-}
-
-function NavBar({ content, isDark, view, setView }: { content: ServiceContent; isDark: boolean; view: ServiceView; setView: (v: ServiceView) => void }) {
-  const links: { label: string; view: ServiceView }[] = [
-    { label: 'الخدمات', view: 'services' },
-    { label: 'من نحن', view: 'about' },
-    { label: 'آلية العمل', view: 'process' },
-    { label: 'تواصل', view: 'contact' },
-  ]
-  const [menuOpen, setMenuOpen] = useState(false)
-  // Close the mobile menu whenever the page changes.
-  const go = (v: ServiceView) => { setView(v); setMenuOpen(false) }
-
-  return (
-    <div
-      className="sticky top-0 z-30 border-b backdrop-blur-xl"
-      style={{
-        background: isDark ? 'rgba(9,12,18,0.78)' : 'rgba(244,248,252,0.78)',
-        borderColor: 'var(--sv-border)'
-      }}
-    >
-      <Container className="flex items-center justify-between py-4">
-        <button onClick={() => setView('home')} className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl text-sm font-black" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-            {content.brand.name.slice(0, 2).toUpperCase()}
-          </span>
-          <div>
-            <p style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>{content.brand.name}</p>
-            <p className="text-xs" style={{ color: 'var(--sv-muted)' }}>{content.brand.category}</p>
-          </div>
-        </button>
-        <nav className="hidden items-center gap-7 md:flex">
-          {links.map((link) => (
-            <button key={link.view} onClick={() => setView(link.view)} className="text-sm font-medium transition hover:opacity-75" style={{ color: view === link.view ? 'var(--sv-accent)' : 'var(--sv-muted)', fontWeight: view === link.view ? 700 : 500 }}>
-              {link.label}
-            </button>
-          ))}
-        </nav>
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setView('contact')}
-            className="rounded-full px-5 py-3 text-sm font-bold transition hover:-translate-y-0.5"
-            style={{ background: 'var(--sv-accent)', color: '#08111d' }}
-          >
-            {content.hero.primary_cta}
-          </button>
-          {/* Hamburger — only below md, where the inline nav is hidden. */}
-          <button
-            type="button"
-            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-11 w-11 items-center justify-center rounded-2xl md:hidden"
-            style={{ border: '1px solid var(--sv-border)', color: 'var(--sv-text)' }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-              {menuOpen
-                ? <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                : <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
-          </button>
-        </div>
-      </Container>
-
-      {/* Mobile dropdown — the page list, unreachable below md without this. */}
-      {menuOpen && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="overflow-hidden border-t md:hidden"
-          style={{ borderColor: 'var(--sv-border)' }}
-        >
-          <Container className="flex flex-col py-2">
-            {links.map((link) => (
-              <button
-                key={link.view}
-                onClick={() => go(link.view)}
-                className="py-3 text-right text-[0.95rem] font-medium transition"
-                style={{ color: view === link.view ? 'var(--sv-accent)' : 'var(--sv-text)', fontWeight: view === link.view ? 700 : 500 }}
-              >
-                {link.label}
-              </button>
-            ))}
-          </Container>
-        </motion.div>
-      )}
-    </div>
-  )
-}
-
-function Hero({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <section id="top" data-section="hero" className="relative overflow-hidden">
-      <div className="absolute inset-0">
-        <img
-          src={content.hero.image}
-          alt=""
-          className="h-full w-full object-cover"
-          style={{ filter: isDark ? 'brightness(0.38)' : 'brightness(0.48)' }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background: isDark
-              ? 'linear-gradient(135deg, rgba(9,12,18,0.9) 8%, rgba(9,12,18,0.45) 58%, rgba(9,12,18,0.8) 100%)'
-              : 'linear-gradient(135deg, rgba(6,14,24,0.72) 0%, rgba(6,14,24,0.3) 56%, rgba(255,255,255,0.15) 100%)'
-          }}
-        />
-      </div>
-      <Container className="relative py-24 md:py-32 lg:py-36">
-        {/* The stats column is the owner's numbers only. Without any, the grid
-            collapses to one track so the copy is not pushed to one side of an
-            empty column. */}
-        <motion.div {...reveal} className={`grid gap-10 lg:items-end ${content.hero.stats?.length ? 'lg:grid-cols-[1.1fr_0.72fr]' : ''}`}>
-          <div className="max-w-3xl text-white">
-            <Eyebrow>{content.hero.eyebrow}</Eyebrow>
-            <h1
-              className="mt-6 whitespace-pre-line text-5xl md:text-7xl"
-              style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 0.96, fontWeight: 800 }}
-            >
-              {content.hero.headline}
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-white/82">{content.hero.subheadline}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#quote" className="rounded-full px-7 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
-                {content.hero.primary_cta}
-              </a>
-              <a href="#services" className="rounded-full border px-7 py-4 text-sm font-semibold transition hover:bg-white/10" style={{ borderColor: 'rgba(255,255,255,0.4)', color: '#ffffff' }}>
-                {content.hero.secondary_cta}
-              </a>
-            </div>
-          </div>
-          {content.hero.stats?.length ? (
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            {content.hero.stats.slice(0, 3).map((stat) => (
-              <div key={stat.label} className="rounded-[28px] p-5" style={{ ...surfaceCard(true), background: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-3xl font-black text-white">{stat.value}</p>
-                <p className="mt-2 text-sm text-white/72">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-          ) : null}
-        </motion.div>
-      </Container>
     </section>
   )
 }
 
-function TrustBar({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  if (!content.trust_bar?.items?.length) return null
+function SectionHead({ eyebrow, title, sub, center }: { eyebrow?: string; title: string; sub?: string; center?: boolean }) {
+  const rm = !!useReducedMotion()
   return (
-    <section data-section="trust_bar" className="border-y py-5" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.7)' }}>
-      <Container className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-        {content.trust_bar.items.map((item) => (
-          <div key={item} className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm" style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-text)' }}>
-            <span className="h-2 w-2 rounded-full" style={{ background: 'var(--sv-accent)' }} />
-            {item}
-          </div>
-        ))}
-      </Container>
-    </section>
+    <motion.div {...rise(rm)} className={`mb-10 max-w-2xl md:mb-12 ${center ? 'mx-auto text-center' : ''}`}>
+      {eyebrow ? (
+        <p className={`flex items-center gap-2 text-sm font-semibold ${center ? 'justify-center' : ''}`} style={{ color: 'var(--sv-brand)' }}>
+          <span aria-hidden className="h-[2px] w-6 rounded-full" style={{ background: 'var(--sv-brand)' }} />
+          {eyebrow}
+        </p>
+      ) : null}
+      <h2 className="mt-3 text-balance text-[1.75rem] md:text-[2.4rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.3, fontWeight: 700 }}>
+        {title}
+      </h2>
+      {sub ? <p className="mt-3 text-base leading-8 md:text-lg" style={{ color: 'var(--sv-muted)' }}>{sub}</p> : null}
+    </motion.div>
   )
 }
 
-function ServicesSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <section id="services" data-section="services" className="py-24 md:py-28">
-      <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>الخدمات</Eyebrow>
-          <Heading className="mt-5">{content.services.heading}</Heading>
-          <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.services.subheading}</p>
-        </motion.div>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {content.services.items.map((item, index) => (
-            <motion.div
-              key={`${item.name}-${index}`}
-              {...reveal}
-              transition={{ ...reveal.transition, delay: 0.04 * index }}
-              className="rounded-[30px] p-7"
-              style={surfaceCard(isDark)}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl text-sm font-black" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-                  0{index + 1}
-                </div>
-                {item.badge && (
-                  <span className="rounded-full px-3 py-1 text-[0.7rem] font-bold" style={{ background: `${isDark ? '#ffffff' : 'var(--sv-primary)'}14`, color: 'var(--sv-accent)' }}>
-                    {item.badge}
-                  </span>
-                )}
-              </div>
-              <h3 className="mt-7 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>
-                {item.name}
-              </h3>
-              {item.description ? <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.description}</p> : null}
-              {item.price_from && <p className="mt-5 text-sm font-semibold" style={{ color: 'var(--sv-primary)' }}>{item.price_from}</p>}
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-function StorySection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <section data-section="story" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.55)' }}>
-      <Container>
-        <motion.div {...reveal} className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-          <div className="relative overflow-hidden rounded-[34px]">
-            <img src={content.story.image || content.hero.image} alt="" className="h-full w-full object-cover" />
-          </div>
-          <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <Eyebrow>{content.story.eyebrow}</Eyebrow>
-            <Heading className="mt-5">{content.story.heading}</Heading>
-            <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.story.body}</p>
-            {content.story.quote && (
-              <blockquote className="mt-8 rounded-[26px] border p-6 text-lg leading-8 italic" style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-text)', background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)' }}>
-                "{content.story.quote}"
-              </blockquote>
-            )}
-            {(content.story.owner_name || content.story.owner_title) && (
-              <div className="mt-6">
-                <p className="font-bold">{content.story.owner_name}</p>
-                <p className="text-sm" style={{ color: 'var(--sv-muted)' }}>{content.story.owner_title}</p>
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </Container>
-    </section>
-  )
-}
-
-function ProofSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  if (!content.proof?.items?.length) return null
-  return (
-    <section id="proof" data-section="proof" className="py-24 md:py-28">
-      <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>لماذا تختارنا</Eyebrow>
-          <Heading className="mt-5">{content.proof.heading}</Heading>
-          <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.proof.subheading}</p>
-        </motion.div>
-        <div className="grid gap-5 md:grid-cols-3">
-          {content.proof.items.slice(0, 3).map((item, index) => (
-            <motion.div key={item.title} {...reveal} transition={{ ...reveal.transition, delay: 0.05 * index }} className="rounded-[30px] p-7" style={surfaceCard(isDark)}>
-              <p className="text-sm font-black uppercase tracking-[0.28em]" style={{ color: 'var(--sv-accent)' }}>0{index + 1}</p>
-              <h3 className="mt-5 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>{item.title}</h3>
-              <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.text}</p>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-function BeforeAfterSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  // A comparison is only ever the owner's own two photos. The generator no
-  // longer fills a missing one with stock, and a stock pair would present
-  // someone else's work as this business's, so without both there is no section.
-  if (!content.before_after?.before_image || !content.before_after?.after_image) return null
-  return (
-    <section data-section="before_after" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
-      <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>النتائج</Eyebrow>
-          <Heading className="mt-5">{content.before_after.heading}</Heading>
-          <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.before_after.subheading}</p>
-        </motion.div>
-        <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="overflow-hidden rounded-[30px]" style={surfaceCard(isDark)}>
-              <div className="relative">
-                <img src={content.before_after.before_image} alt={content.before_after.before_label} className="aspect-[4/5] w-full object-cover" />
-                <span className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white">{content.before_after.before_label}</span>
-              </div>
-            </div>
-            <div className="overflow-hidden rounded-[30px]" style={surfaceCard(isDark)}>
-              <div className="relative">
-                <img src={content.before_after.after_image} alt={content.before_after.after_label} className="aspect-[4/5] w-full object-cover" />
-                <span className="absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>{content.before_after.after_label}</span>
-              </div>
-            </div>
-          </div>
-          {content.before_after.highlights?.length ? (
-          <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <p className="text-sm font-semibold" style={{ color: 'var(--sv-accent)' }}>لقطة التحوّل</p>
-            <div className="mt-8 space-y-5">
-              {content.before_after.highlights.slice(0, 3).map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-[22px] border p-4" style={{ borderColor: 'var(--sv-border)' }}>
-                  <span className="mt-1 h-2.5 w-2.5 rounded-full" style={{ background: 'var(--sv-accent)' }} />
-                  <p className="text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-          ) : null}
-        </motion.div>
-      </Container>
-    </section>
-  )
-}
-
-function ProcessSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <section data-section="process" className="py-24 md:py-28">
-      <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>آلية العمل</Eyebrow>
-          <Heading className="mt-5">{content.process.heading}</Heading>
-          <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.process.subheading}</p>
-        </motion.div>
-        <div className="grid gap-5 lg:grid-cols-3">
-          {content.process.steps.map((step, index) => (
-            <motion.div key={step.step} {...reveal} transition={{ ...reveal.transition, delay: 0.05 * index }} className="rounded-[30px] p-7" style={surfaceCard(isDark)}>
-              <p className="text-4xl font-black" style={{ color: 'var(--sv-primary)' }}>{step.step}</p>
-              <h3 className="mt-6 text-2xl" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 800 }}>{step.title}</h3>
-              <p className="mt-3 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-function AreasSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  return (
-    <section id="areas" data-section="areas" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
-      <Container>
-        <motion.div {...reveal} className="grid gap-6 lg:grid-cols-[0.88fr_1.12fr]">
-          <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <Eyebrow>منطقة الخدمة</Eyebrow>
-            <Heading className="mt-5">{content.areas.heading}</Heading>
-            <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.areas.subheading}</p>
-            {content.areas.response_time || content.areas.availability ? (
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              {content.areas.response_time ? (
-              <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>الاستجابة</p>
-                <p className="mt-3 text-base font-semibold">{content.areas.response_time}</p>
-              </div>
-              ) : null}
-              {content.areas.availability ? (
-              <div className="rounded-[24px] border p-5" style={{ borderColor: 'var(--sv-border)' }}>
-                <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>التوفّر</p>
-                <p className="mt-3 text-base font-semibold">{content.areas.availability}</p>
-              </div>
-              ) : null}
-            </div>
-            ) : null}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {content.areas.areas_served.map((area, index) => (
-              <motion.div key={area} {...reveal} transition={{ ...reveal.transition, delay: 0.03 * index }} className="rounded-[26px] border px-5 py-4 text-sm font-semibold" style={{ ...surfaceCard(isDark), padding: '1rem 1.25rem' }}>
-                {area}
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </Container>
-    </section>
-  )
-}
-
-function OfferSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  const { enabled, preview } = useBookingContext()
-  // The quote form only exists where a request can reach the owner: an
-  // entitled live site, or the editor, where a submit is a harmless no-op. On
-  // any other live site it would take a visitor's request and lose it, so the
-  // card offers the owner's own phone (call and WhatsApp), else their email,
-  // and with neither the card is left out.
-  const showForm = enabled || preview
-  const phone = (content.footer.phone || '').trim()
-  const email = (content.footer.email || '').trim()
-  const whatsapp = whatsappLink(phone)
-  const hasContact = !!phone || !!email
-  return (
-    <section id="quote" data-section="offer" className="py-24 md:py-28">
-      <Container>
-        <motion.div {...reveal} className={`grid gap-6 ${showForm || hasContact ? 'lg:grid-cols-[1fr_0.9fr]' : ''}`}>
-          <div className="rounded-[36px] p-8 md:p-10" style={{ ...surfaceCard(isDark), background: isDark ? 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(255,255,255,0.05))' : 'linear-gradient(135deg, rgba(34,199,242,0.14), rgba(255,255,255,0.95))' }}>
-            {content.offer.badge && (
-              <span className="inline-flex rounded-full px-3 py-1 text-[0.7rem] font-bold" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
-                {content.offer.badge}
-              </span>
-            )}
-            <Heading className="mt-6">{content.offer.heading}</Heading>
-            <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.offer.subheading}</p>
-            {content.offer.points?.length ? (
-            <div className="mt-7 space-y-3">
-              {content.offer.points.slice(0, 3).map((point) => (
-                <div key={point} className="flex items-start gap-3 rounded-[22px] border p-4" style={{ borderColor: 'var(--sv-border)', background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.6)' }}>
-                  <span className="mt-1 h-2.5 w-2.5 rounded-full" style={{ background: 'var(--sv-accent)' }} />
-                  <p className="text-sm leading-7">{point}</p>
-                </div>
-              ))}
-            </div>
-            ) : null}
-          </div>
-          {showForm ? (
-            <div className="rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
-              <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
-              <div className="mt-6">
-                <BookingForm type="quote" palette={servicesPalette(isDark)} />
-              </div>
-            </div>
-          ) : hasContact ? (
-            <div className="flex flex-col rounded-[36px] p-8 md:p-10" style={surfaceCard(isDark)}>
-              <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>اطلب عرض سعر</p>
-              <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>
-                {phone ? 'تواصل معنا مباشرةً بمكالمة أو رسالة واتساب، ونرتّب معك التفاصيل.' : 'راسلنا بتفاصيل ما تحتاجه، ونعود إليك.'}
-              </p>
-              <div className="mt-8 space-y-3">
-                {phone ? (
-                  <a href={`tel:${phone}`} className="flex min-h-[52px] w-full items-center flex-wrap justify-center gap-x-2 rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-                    اتصل بنا
-                    <span dir="ltr" className="font-semibold opacity-80">{phone}</span>
-                  </a>
-                ) : null}
-                {whatsapp ? (
-                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="flex min-h-[52px] w-full items-center justify-center rounded-full border px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-text)' }}>
-                    راسلنا على واتساب
-                  </a>
-                ) : null}
-                {!phone && email ? (
-                  <a href={`mailto:${email}`} className="flex min-h-[52px] w-full items-center flex-wrap justify-center gap-x-2 rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-                    راسلنا بالبريد
-                    <span dir="ltr" className="break-all font-semibold opacity-80">{email}</span>
-                  </a>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-        </motion.div>
-      </Container>
-    </section>
-  )
-}
-
-/**
- * wa.me takes the number in international form, digits only. A number the
- * owner wrote locally (no + or 00 prefix) has no country code to recover, and
- * a guessed one would open a chat with a stranger, so it gets no WhatsApp link
- * and the card keeps the call button alone.
- */
-function whatsappLink(phone: string): string | null {
-  const raw = phone.trim()
-  if (!/^(\+|00)/.test(raw)) return null
-  const digits = raw.replace(/\D/g, '').replace(/^00/, '')
-  return digits.length >= 8 ? `https://wa.me/${digits}` : null
-}
-
-function servicesPalette(isDark: boolean) {
-  return {
-    accent: 'var(--sv-primary)',
-    accentText: '#ffffff',
-    text: 'var(--sv-text)',
-    muted: 'var(--sv-muted)',
-    surface: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.9)',
-    border: 'var(--sv-border)',
-    headingFont: 'var(--sv-heading-font)',
-    bodyFont: 'var(--sv-body-font)',
-    radius: 14,
+type BtnKind = 'brand' | 'accent' | 'whatsapp' | 'white' | 'outline' | 'outline-light'
+function btnStyle(kind: BtnKind): React.CSSProperties {
+  switch (kind) {
+    case 'brand': return { background: 'var(--sv-brand)', color: 'var(--sv-on-brand)' }
+    case 'accent': return { background: 'var(--sv-accent)', color: 'var(--sv-on-accent)' }
+    case 'whatsapp': return { background: WA_GREEN, color: '#ffffff' }
+    case 'white': return { background: '#ffffff', color: '#0f172a' }
+    case 'outline': return { border: '1px solid var(--sv-border)', color: 'var(--sv-text)', background: 'var(--sv-surface)' }
+    case 'outline-light': return { border: '1px solid rgba(255,255,255,0.45)', color: '#ffffff', background: 'rgba(255,255,255,0.06)' }
   }
 }
 
-function TestimonialsSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  // Only the owner's own reviews and rating are ever here. No reviews: no section.
-  const t = content.testimonials
-  if (!t?.items?.length) return null
-  const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
+/**
+ * One button for the whole template: two heights only, never wraps, the icon
+ * always on the reading-start side of the label.
+ */
+function Btn({
+  children, kind = 'brand', size = 'lg', href, onClick, external, icon, full, className = '', label,
+}: {
+  children: React.ReactNode
+  kind?: BtnKind
+  size?: 'md' | 'lg'
+  href?: string
+  onClick?: () => void
+  external?: boolean
+  icon?: React.ReactNode
+  full?: boolean
+  className?: string
+  label?: string
+}) {
+  const cls =
+    `inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-px hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:hover:translate-y-0 ` +
+    (size === 'lg' ? 'h-[52px] px-6 text-[0.95rem] ' : 'h-11 px-4 text-sm ') +
+    (full ? 'w-full ' : '') + className
+  const inner = <>{icon}<span>{children}</span></>
+  if (href) {
+    return (
+      <a href={href} aria-label={label} className={cls} style={btnStyle(kind)} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+        {inner}
+      </a>
+    )
+  }
+  return <button type="button" aria-label={label} onClick={onClick} className={cls} style={btnStyle(kind)}>{inner}</button>
+}
+
+function IconTile({ icon: Icon, size = 'md' }: { icon: LucideIcon; size?: 'md' | 'lg' }) {
+  const box = size === 'lg' ? 'h-14 w-14 rounded-2xl' : 'h-12 w-12 rounded-xl'
   return (
-    <section id="reviews" data-section="testimonials" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
-      <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>الآراء</Eyebrow>
-          <Heading className="mt-5">{content.testimonials.heading}</Heading>
-          <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.testimonials.subheading}</p>
-          {avg ? (
-            <div className="mt-6 flex items-center gap-3">
-              <Stars rating={avg} />
-              <span className="text-sm font-semibold" style={{ color: 'var(--sv-muted)' }}>
-                {avg.toFixed(1)} من 5{t.review_count ? ` · ${t.review_count}${/^[\d\s.,+٠-٩]+$/.test(t.review_count) ? ' تقييم' : ''}` : ''}
-              </span>
-            </div>
-          ) : null}
-        </motion.div>
-        <div className="grid gap-5 lg:grid-cols-3">
-          {content.testimonials.items.map((item, index) => (
-            <motion.div key={`${item.name}-${index}`} {...reveal} transition={{ ...reveal.transition, delay: 0.05 * index }} className="rounded-[30px] p-7" style={surfaceCard(isDark)}>
-              <Stars rating={item.rating} />
-              <p className="mt-5 text-base leading-8 italic" style={{ color: 'var(--sv-text)' }}>
-                "{item.text}"
-              </p>
-              <div className="mt-6">
-                <p className="font-bold">{item.name}</p>
-                {item.service || item.source ? (
-                  <p className="text-xs" style={{ color: 'var(--sv-accent)' }}>{[item.service, item.source].filter(Boolean).join(' · ')}</p>
-                ) : null}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <span className={`grid shrink-0 place-items-center ${box}`} style={{ background: 'var(--sv-tint)', color: 'var(--sv-brand)' }}>
+      <Icon className={size === 'lg' ? 'h-7 w-7' : 'h-6 w-6'} strokeWidth={1.8} aria-hidden />
+    </span>
   )
 }
 
-function FaqSection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  const [open, setOpen] = useState(0)
-  if (!content.faq?.items?.length) return null
+function card(isDark: boolean): React.CSSProperties {
+  return {
+    background: isDark ? 'rgba(255,255,255,0.03)' : 'var(--sv-surface)',
+    border: '1px solid var(--sv-border)',
+    borderRadius: 20,
+  }
+}
+
+function WaGlyph({ className = 'h-5 w-5' }: { className?: string }) {
   return (
-    <section id="faq" data-section="faq" className="py-24 md:py-28">
-      <Container>
-        <motion.div {...reveal} className="grid gap-8 lg:grid-cols-[0.86fr_1.14fr]">
-          <div className="rounded-[34px] p-8 md:p-10" style={surfaceCard(isDark)}>
-            <Eyebrow>الأسئلة الشائعة</Eyebrow>
-            <Heading className="mt-5">{content.faq.heading}</Heading>
-            <p className="mt-5 text-lg leading-8" style={{ color: 'var(--sv-muted)' }}>{content.final_cta.subheading}</p>
-            <a href="#quote" className="mt-8 inline-flex rounded-full px-6 py-4 text-sm font-bold transition hover:-translate-y-0.5" style={{ background: 'var(--sv-accent)', color: '#08111d' }}>
-              {content.final_cta.cta_label}
+    <svg viewBox={WHATSAPP.viewBox} fill="currentColor" aria-hidden className={className}>
+      <path d={WHATSAPP.path} />
+    </svg>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── header */
+
+function Header() {
+  const { content, isDark, view, go, wa } = usePage()
+  const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const rm = !!useReducedMotion()
+  const phone = (content.footer.phone || '').trim()
+
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 8)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+  // Close the menu whenever the page changes.
+  useEffect(() => { setOpen(false) }, [view])
+
+  // The trade's own icon as the mark: an Arabic name's first letter alone
+  // (often an alef with hamza) reads as a stray glyph.
+  const Mark = serviceIcon(content.brand.category || '', content.brand.name || '')
+
+  return (
+    <header
+      className="sticky top-0 z-40 border-b transition-shadow duration-300"
+      style={{
+        background: isDark ? 'rgba(9,12,18,0.9)' : 'color-mix(in srgb, var(--sv-bg) 90%, transparent)',
+        borderColor: 'var(--sv-border)',
+        backdropFilter: 'saturate(160%) blur(12px)',
+        WebkitBackdropFilter: 'saturate(160%) blur(12px)',
+        boxShadow: scrolled ? '0 6px 24px rgba(15,23,42,0.08)' : 'none',
+      }}
+    >
+      <Container className="flex h-16 items-center justify-between gap-3 md:h-[76px]">
+        <button onClick={() => go('home')} className="flex min-w-0 items-center gap-3 text-right" aria-label={`${content.brand.name}، الصفحة الرئيسية`}>
+          <span
+            aria-hidden
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl md:h-11 md:w-11"
+            style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)' }}
+          >
+            <Mark className="h-5 w-5" strokeWidth={2} />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-[1rem] font-bold leading-6 md:text-[1.05rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>
+              {content.brand.name}
+            </span>
+            {content.brand.category ? (
+              <span className="block truncate text-xs leading-5" style={{ color: 'var(--sv-muted)' }}>{content.brand.category}</span>
+            ) : null}
+          </span>
+        </button>
+
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="صفحات الموقع">
+          {PAGES.map((p) => {
+            const active = view === p.view
+            return (
+              <button
+                key={p.view}
+                onClick={() => go(p.view)}
+                aria-current={active ? 'page' : undefined}
+                className="relative inline-flex h-11 items-center rounded-lg px-3 text-[0.95rem] transition-colors hover:opacity-80"
+                style={{ color: active ? 'var(--sv-text)' : 'var(--sv-muted)', fontWeight: active ? 600 : 500 }}
+              >
+                {p.label}
+                {active ? <span aria-hidden className="absolute inset-x-3 bottom-1 h-[2px] rounded-full" style={{ background: 'var(--sv-brand)' }} /> : null}
+              </button>
+            )
+          })}
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {phone ? (
+            <a
+              href={`tel:${phone}`}
+              aria-label={`اتصل بنا ${phone}`}
+              className="hidden h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-opacity hover:opacity-80 md:inline-flex"
+              style={{ borderColor: 'var(--sv-border)' }}
+            >
+              <Phone className="h-4 w-4" style={{ color: 'var(--sv-brand)' }} aria-hidden />
+              <bdi dir="ltr">{phone}</bdi>
             </a>
-          </div>
-          <div className="rounded-[34px] p-4 md:p-5" style={surfaceCard(isDark)}>
-            {content.faq.items.map((item, index) => (
-              <div key={item.q} className="border-b last:border-b-0" style={{ borderColor: 'var(--sv-border)' }}>
-                <button
-                  onClick={() => setOpen(open === index ? -1 : index)}
-                  className="flex w-full items-center justify-between gap-4 px-4 py-5 text-left"
-                >
-                  <span className="text-lg font-semibold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{item.q}</span>
-                  <span className="text-2xl" style={{ color: 'var(--sv-accent)' }}>{open === index ? '−' : '+'}</span>
-                </button>
-                {open === index && <p className="px-4 pb-5 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{item.a}</p>}
+          ) : null}
+          <span className="hidden md:inline-flex">
+            <Btn size="md" kind="brand" onClick={() => go('contact')}>{content.hero.primary_cta || 'تواصل معنا'}</Btn>
+          </span>
+          {wa ? (
+            <a
+              href={wa}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="راسلنا على واتساب"
+              className="grid h-11 w-11 place-items-center rounded-xl text-white md:hidden"
+              style={{ background: WA_GREEN }}
+            >
+              <WaGlyph className="h-5 w-5" />
+            </a>
+          ) : null}
+          <button
+            type="button"
+            aria-label={open ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+            className="grid h-11 w-11 place-items-center rounded-xl border lg:hidden"
+            style={{ borderColor: 'var(--sv-border)' }}
+          >
+            {open ? <Close className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+          </button>
+        </div>
+      </Container>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key="menu"
+            initial={rm ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            animate={rm ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
+            exit={rm ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="overflow-hidden border-t lg:hidden"
+            style={{ borderColor: 'var(--sv-border)', background: 'var(--sv-bg)' }}
+          >
+            <Container className="py-3">
+              <nav className="flex flex-col" aria-label="صفحات الموقع">
+                {PAGES.map((p) => (
+                  <button
+                    key={p.view}
+                    onClick={() => go(p.view)}
+                    aria-current={view === p.view ? 'page' : undefined}
+                    className="flex min-h-[52px] items-center justify-between border-b text-right text-base last:border-b-0"
+                    style={{ borderColor: 'var(--sv-border)', fontWeight: view === p.view ? 700 : 500, color: view === p.view ? 'var(--sv-brand)' : 'var(--sv-text)' }}
+                  >
+                    {p.label}
+                    <ChevronLeft className="h-4 w-4 opacity-50" aria-hidden />
+                  </button>
+                ))}
+              </nav>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {phone ? <Btn size="md" kind="outline" href={`tel:${phone}`} icon={<Phone className="h-4 w-4" aria-hidden />} full>اتصل بنا</Btn> : null}
+                {wa ? <Btn size="md" kind="whatsapp" href={wa} external icon={<WaGlyph className="h-4 w-4" />} full>واتساب</Btn> : null}
+              </div>
+              <SocialRow className="mt-4 justify-center" />
+            </Container>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </header>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── hero */
+
+function Hero() {
+  const { content, wa } = usePage()
+  const rm = !!useReducedMotion()
+  const h = content.hero
+  const trust = content.trust_bar?.items?.filter(Boolean).slice(0, 4) || []
+  const stats = h.stats?.filter((s) => s.value && s.label).slice(0, 3) || []
+  return (
+    <section id="top" data-section="hero" className="relative isolate overflow-hidden" style={{ background: '#0b1220' }}>
+      {h.image ? (
+        <motion.img
+          src={h.image}
+          alt=""
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+          initial={rm ? { opacity: 0 } : { opacity: 0, scale: 1.06 }}
+          animate={rm ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+          transition={{ duration: rm ? 0.4 : 1.4, ease: EASE }}
+        />
+      ) : null}
+      {/* Darkest behind the text (the right, in Arabic), so any photo reads. */}
+      <div aria-hidden className="absolute inset-0 -z-10" style={{ background: 'linear-gradient(to left, rgba(6,10,18,0.9) 0%, rgba(6,10,18,0.72) 50%, rgba(6,10,18,0.42) 100%)' }} />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-40" style={{ background: 'linear-gradient(to top, rgba(6,10,18,0.7), transparent)' }} />
+
+      <Container className="pb-12 pt-16 text-white md:pb-16 md:pt-28">
+        <div className="max-w-2xl">
+          {h.eyebrow ? (
+            <motion.p {...enter(rm, 0.05)} className="inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium md:text-sm" style={{ borderColor: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.08)' }}>
+              <BadgeCheck className="h-4 w-4 shrink-0" style={{ color: 'var(--sv-accent)' }} aria-hidden />
+              <span className="truncate">{h.eyebrow}</span>
+            </motion.p>
+          ) : null}
+          <motion.h1 {...enter(rm, 0.12)} className="mt-5 whitespace-pre-line text-balance text-[2.1rem] md:text-[3.5rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.22, fontWeight: 700 }}>
+            {h.headline}
+          </motion.h1>
+          {h.subheadline ? (
+            <motion.p {...enter(rm, 0.2)} className="mt-5 max-w-xl text-base leading-8 md:text-lg" style={{ color: 'rgba(255,255,255,0.84)' }}>
+              {h.subheadline}
+            </motion.p>
+          ) : null}
+          <motion.div {...enter(rm, 0.28)} className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Btn kind="accent" href="#quote" icon={<CalendarDays className="h-5 w-5" aria-hidden />}>{h.primary_cta || 'اطلب عرض سعر'}</Btn>
+            {wa ? (
+              <Btn kind="whatsapp" href={wa} external icon={<WaGlyph />}>تواصل على واتساب</Btn>
+            ) : h.secondary_cta ? (
+              <Btn kind="outline-light" href="#services">{h.secondary_cta}</Btn>
+            ) : null}
+          </motion.div>
+          {trust.length ? (
+            <motion.ul {...enter(rm, 0.36)} data-section="trust_bar" className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm" style={{ color: 'rgba(255,255,255,0.86)' }}>
+              {trust.map((t) => (
+                <li key={t} className="inline-flex items-center gap-1.5">
+                  <CircleCheck className="h-4 w-4 shrink-0" style={{ color: 'var(--sv-accent)' }} aria-hidden />
+                  {t}
+                </li>
+              ))}
+            </motion.ul>
+          ) : null}
+        </div>
+
+        {stats.length ? (
+          <motion.dl {...enter(rm, 0.44)} className="mt-12 grid max-w-3xl grid-cols-3 gap-3 border-t pt-6 md:mt-16 md:gap-6" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
+            {stats.map((s) => (
+              <div key={s.label} className="flex min-w-0 flex-col-reverse justify-end">
+                <dt className="mt-1 text-xs leading-5 md:text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.label}</dt>
+                <dd className="text-lg font-bold leading-snug md:text-[1.75rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>{s.value}</dd>
               </div>
             ))}
-          </div>
-        </motion.div>
+          </motion.dl>
+        ) : null}
       </Container>
     </section>
   )
 }
 
-function GallerySection({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
-  // The owner's uploads only, as with the before/after pair. None: no section.
-  if (!content.gallery?.images?.length) return null
+/** The photo band that opens every page except the home page. */
+function PageBanner({ title }: { title: string }) {
+  const { content, go } = usePage()
+  const rm = !!useReducedMotion()
   return (
-    <section data-section="gallery" className="py-24 md:py-28" style={{ background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.58)' }}>
+    <section className="relative isolate overflow-hidden" style={{ background: '#0b1220' }}>
+      {content.hero.image ? <img src={content.hero.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" /> : null}
+      <div aria-hidden className="absolute inset-0 -z-10" style={{ background: 'linear-gradient(to left, rgba(6,10,18,0.9), rgba(6,10,18,0.62))' }} />
+      <Container className="py-12 text-white md:py-16">
+        <motion.nav {...enter(rm)} aria-label="مسار الصفحة" className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+          <button onClick={() => go('home')} className="-my-3 inline-flex min-h-[44px] items-center hover:text-white">الرئيسية</button>
+          <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
+          <span className="text-white">{title}</span>
+        </motion.nav>
+        <motion.h1 {...enter(rm, 0.08)} className="mt-3 text-[2rem] md:text-[2.8rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.25, fontWeight: 700 }}>
+          {title}
+        </motion.h1>
+        <motion.p {...enter(rm, 0.14)} className="mt-2 text-base" style={{ color: 'rgba(255,255,255,0.8)' }}>
+          {[content.brand.category, content.brand.city].filter(Boolean).join(' · ')}
+        </motion.p>
+      </Container>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── services */
+
+// An icon for a service, from words in its name, else the business's
+// category. Order matters: the specific trades before the general verbs.
+const ICON_RULES: [RegExp, LucideIcon][] = [
+  [/تكييف|تبريد|مكيف|مكيّف|تكيف|hvac|\bac\b|air ?con/i, Snowflake],
+  [/سباك|تسريب|مياه|مواسير|سخان|سخّان|صرف|plumb|leak|water/i, Droplets],
+  [/كهرب|إنارة|اناره|إضاءة|electri|wiring/i, Zap],
+  [/غسيل سيار|سيار|ميكانيك|ورشة|بنشر|car|auto|vehicle|detailing/i, Car],
+  [/تنظيف|نظاف|تعقيم|غسيل|جلي|clean|wash/i, Sparkles],
+  [/دهان|طلاء|ديكور|paint|decor/i, Paintbrush],
+  [/حلاق|حلاقة|شعر|لحية|barber|hair|cut|fade/i, Scissors],
+  [/أسنان|اسنان|تبييض|تقويم|dental|teeth/i, Smile],
+  [/عيادة|طبي|علاج|clinic|medical/i, Stethoscope],
+  [/نقل|شحن|عفش|توصيل|mov|deliver/i, Truck],
+  [/حشرات|مكافحة|رش|pest/i, Bug],
+  [/حدائق|حديقة|زراعة|تنسيق|نجيل|garden|landscap/i, Trees],
+  [/أقفال|اقفال|مفاتيح|lock|key/i, KeyRound],
+  [/تصوير|كاميرا|مراقبة|photo|camera|cctv/i, Camera],
+  [/قاعة|حفلات|مناسبات|أفراح|افراح|event|wedding|ballroom/i, PartyPopper],
+  [/طوارئ|طارئ|عاجل|emergency|urgent/i, Siren],
+  [/تركيب|تجهيز|install/i, Hammer],
+  [/صيانة|إصلاح|اصلاح|تصليح|فحص|تشخيص|repair|maint|fix/i, Wrench],
+]
+function serviceIcon(name: string, category: string): LucideIcon {
+  for (const [re, icon] of ICON_RULES) if (re.test(name)) return icon
+  for (const [re, icon] of ICON_RULES) if (re.test(category)) return icon
+  return BadgeCheck
+}
+
+function ServicesSection({ inner }: { inner?: boolean }) {
+  const { content, isDark, wa, go } = usePage()
+  const rm = !!useReducedMotion()
+  const s = content.services
+  const items = (s.items || []).filter((i) => i.name)
+  if (!items.length) return null
+  return (
+    <Section id="services" name="services">
       <Container>
-        <motion.div {...reveal} className="mb-12 max-w-2xl">
-          <Eyebrow>المعرض</Eyebrow>
-          <Heading className="mt-5">{content.gallery.heading}</Heading>
-        </motion.div>
-        <div className="grid gap-4 md:grid-cols-4">
-          {content.gallery.images.slice(0, 4).map((image, index) => (
-            <motion.div
-              key={`${image.url}-${index}`}
-              {...reveal}
-              transition={{ ...reveal.transition, delay: 0.04 * index }}
-              className={`overflow-hidden rounded-[28px] ${index === 0 ? 'md:col-span-2 md:row-span-2' : ''}`}
-              style={surfaceCard(isDark)}
-            >
-              <img
-                src={image.url}
-                alt={image.alt || ''}
-                className={`w-full object-cover ${index === 0 ? 'aspect-[16/12] h-full md:aspect-auto md:min-h-[420px]' : 'aspect-[4/5]'}`}
-              />
+        <SectionHead eyebrow={inner ? undefined : 'خدماتنا'} title={s.heading} sub={s.subheading} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-5">
+          {items.map((item, i) => {
+            const Icon = serviceIcon(item.name, content.brand.category)
+            const ask = wa ? withText(wa, `مرحبًا ${content.brand.name}، أريد الاستفسار عن خدمة: ${item.name}`) : null
+            return (
+              <motion.article
+                key={`${item.name}-${i}`}
+                {...rise(rm, Math.min(i, 5) * 0.06)}
+                className="group flex flex-col p-6 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-xl motion-reduce:hover:translate-y-0 md:p-7"
+                style={card(isDark)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <IconTile icon={Icon} />
+                  {item.badge ? (
+                    <span className="rounded-full px-2.5 py-1 text-xs font-semibold" style={{ background: 'var(--sv-tint)', color: 'var(--sv-brand)' }}>{item.badge}</span>
+                  ) : null}
+                </div>
+                <h3 className="mt-5 text-[1.2rem] leading-8" style={{ fontFamily: 'var(--sv-heading-font)', fontWeight: 700 }}>{item.name}</h3>
+                <p className="mt-2 flex-1 text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{item.description}</p>
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--sv-border)' }}>
+                  {item.price_from ? (
+                    <span className="inline-flex items-center gap-1.5 text-[0.95rem] font-semibold" style={{ color: 'var(--sv-brand)' }}>
+                      <Tag className="h-4 w-4" aria-hidden />{item.price_from}
+                    </span>
+                  ) : <span />}
+                  {ask ? (
+                    <a href={ask} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-75" style={{ color: WA_GREEN }}>
+                      <WaGlyph className="h-4 w-4" /> اطلب الخدمة
+                    </a>
+                  ) : (
+                    <button onClick={() => go('contact')} className="inline-flex min-h-[44px] items-center gap-1 text-sm font-semibold transition-opacity hover:opacity-75" style={{ color: 'var(--sv-brand)' }}>
+                      اطلب الخدمة <ChevronLeft className="h-4 w-4" aria-hidden />
+                    </button>
+                  )}
+                </div>
+              </motion.article>
+            )
+          })}
+        </div>
+      </Container>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── why us */
+
+const PROOF_ICONS: LucideIcon[] = [ShieldCheck, Clock, Award, ThumbsUp]
+
+function ProofSection() {
+  const { content, isDark } = usePage()
+  const rm = !!useReducedMotion()
+  const p = content.proof
+  const items = (p?.items || []).filter((i) => i.title || i.text).slice(0, 4)
+  if (!items.length) return null
+  return (
+    <Section id="proof" name="proof" tint>
+      <Container>
+        <SectionHead eyebrow="لماذا نحن" title={p.heading} sub={p.subheading} />
+        <div className={`grid gap-4 sm:grid-cols-2 md:gap-5 ${items.length === 3 ? 'lg:grid-cols-3' : items.length >= 4 ? 'lg:grid-cols-4' : ''}`}>
+          {items.map((item, i) => (
+            <motion.div key={`${item.title}-${i}`} {...rise(rm, i * 0.06)} className="p-6" style={{ ...card(isDark), background: 'var(--sv-bg)' }}>
+              <IconTile icon={PROOF_ICONS[i % PROOF_ICONS.length]} />
+              {item.title ? <h3 className="mt-5 text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{item.title}</h3> : null}
+              {item.text ? <p className="mt-2 text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{item.text}</p> : null}
             </motion.div>
           ))}
         </div>
       </Container>
-    </section>
+    </Section>
   )
 }
 
-function Footer({ content, isDark }: { content: ServiceContent; isDark: boolean }) {
+/* ─────────────────────────────────────────────────────────── process */
+
+function ProcessSection({ inner }: { inner?: boolean }) {
+  const { content } = usePage()
+  const rm = !!useReducedMotion()
+  const p = content.process
+  const steps = (p?.steps || []).filter((s) => s.title || s.text)
+  if (!steps.length) return null
   return (
-    <footer className="border-t py-16" style={{ borderColor: 'var(--sv-border)' }}>
-      <Container className="grid gap-8 md:grid-cols-3">
-        <div>
-          <p style={{ fontFamily: 'var(--sv-heading-font)', fontSize: '1.6rem', fontWeight: 800 }}>{content.brand.name}</p>
-          <p className="mt-4 text-sm leading-7" style={{ color: 'var(--sv-muted)' }}>{content.footer.tagline}</p>
-        </div>
-        <div>
-          <p className="text-xs font-bold" style={{ color: 'var(--sv-accent)' }}>تواصل</p>
-          <div className="mt-2 text-sm">
-            {content.footer.phone ? <a href={`tel:${content.footer.phone}`} className="flex min-h-[44px] items-center"><bdi dir="ltr">{content.footer.phone}</bdi></a> : null}
-            {content.footer.email ? <a href={`mailto:${content.footer.email}`} className="flex min-h-[44px] items-center">{content.footer.email}</a> : null}
-            {content.footer.address && <p className="mt-2" style={{ color: 'var(--sv-muted)' }}>{content.footer.address}</p>}
-          </div>
-        </div>
-        <div className="md:text-right">
-          {content.final_cta.secondary_text ? <p className="text-sm font-semibold">{content.final_cta.secondary_text}</p> : null}
-          <a href="#quote" className="mt-4 inline-flex rounded-full px-6 py-3 text-sm font-bold" style={{ background: 'var(--sv-primary)', color: '#ffffff' }}>
-            {content.final_cta.cta_label}
-          </a>
-          <p className="mt-5 text-xs" style={{ color: 'var(--sv-muted)' }}>{content.footer.legal}</p>
-        </div>
+    <Section name="process">
+      <Container>
+        <SectionHead eyebrow={inner ? undefined : 'كيف نعمل'} title={p.heading} sub={p.subheading} />
+        <ol className={`relative grid gap-8 md:gap-6 ${steps.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+          {/* The thread that joins the steps: down the side on a phone, across on a laptop. */}
+          <span aria-hidden className="absolute bottom-6 right-6 top-6 w-px md:hidden" style={{ background: 'var(--sv-border)' }} />
+          <span aria-hidden className="absolute inset-x-[16%] top-6 hidden h-px md:block" style={{ background: 'var(--sv-border)' }} />
+          {steps.map((step, i) => (
+            <motion.li key={`${step.title}-${i}`} {...rise(rm, i * 0.1)} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
+              <span
+                className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full text-lg font-bold"
+                style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)', boxShadow: '0 0 0 6px var(--sv-bg)', fontFamily: 'var(--sv-heading-font)' }}
+              >
+                {i + 1}
+              </span>
+              <div className="pt-2 md:pt-4">
+                <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
+                {step.text ? <p className="mt-1.5 max-w-xs text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
+              </div>
+            </motion.li>
+          ))}
+        </ol>
       </Container>
-    </footer>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── reviews */
+
+function TestimonialsSection() {
+  // Only the owner's own reviews and rating are ever here. No reviews: no section.
+  const { content, isDark } = usePage()
+  const rm = !!useReducedMotion()
+  const t = content.testimonials
+  const items = (t?.items || []).filter((i) => i.text)
+  if (!items.length) return null
+  const avg = typeof t.average_rating === 'number' && t.average_rating > 0 ? t.average_rating : 0
+  const reviewsUrl = content.links?.reviews_url
+  return (
+    <Section id="reviews" name="testimonials" tint>
+      <Container>
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <SectionHead eyebrow="آراء العملاء" title={t.heading} sub={t.subheading} />
+          {avg ? (
+            <motion.div {...rise(rm)} className="mb-10 flex shrink-0 items-center gap-4 rounded-2xl border px-5 py-4 md:mb-12" style={{ borderColor: 'var(--sv-border)', background: 'var(--sv-bg)' }}>
+              <span className="text-[2rem] font-bold leading-none" style={{ fontFamily: 'var(--sv-heading-font)' }}>{avg.toFixed(1)}</span>
+              <span>
+                <Stars rating={avg} />
+                <span className="mt-1 block text-sm" style={{ color: 'var(--sv-muted)' }}>
+                  من 5{t.review_count ? ` · ${t.review_count}${/^[\d\s.,+٠-٩]+$/.test(t.review_count) ? ' تقييم' : ''}` : ''}
+                </span>
+              </span>
+            </motion.div>
+          ) : null}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-5">
+          {items.slice(0, 6).map((item, i) => (
+            <motion.figure key={`${item.name}-${i}`} {...rise(rm, Math.min(i, 5) * 0.06)} className="flex flex-col p-6" style={{ ...card(isDark), background: 'var(--sv-bg)' }}>
+              <div className="flex items-center justify-between">
+                <Stars rating={item.rating || 5} />
+                <Quote className="h-6 w-6" style={{ color: 'var(--sv-brand)', opacity: 0.35 }} aria-hidden />
+              </div>
+              <blockquote className="mt-4 text-[0.98rem] leading-8">{item.text}</blockquote>
+              <figcaption className="mt-auto flex items-center gap-3 pt-5">
+                <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-sm font-bold" style={{ background: 'var(--sv-tint)', color: 'var(--sv-brand)' }}>
+                  {Array.from(item.name.trim())[0] || '•'}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate font-semibold">{item.name}</span>
+                  {item.service || item.source ? (
+                    <span className="block truncate text-xs" style={{ color: 'var(--sv-muted)' }}>{[item.service, item.source].filter(Boolean).join(' · ')}</span>
+                  ) : null}
+                </span>
+              </figcaption>
+            </motion.figure>
+          ))}
+        </div>
+        {reviewsUrl ? (
+          <div className="mt-8 flex justify-center">
+            <Btn kind="outline" size="md" href={reviewsUrl} external icon={<Star className="h-4 w-4" aria-hidden />}>اقرأ كل التقييمات</Btn>
+          </div>
+        ) : null}
+      </Container>
+    </Section>
   )
 }
 
 function Stars({ rating }: { rating: number }) {
   const filled = Math.round(rating)
   return (
-    <div className="inline-flex gap-1" style={{ color: 'var(--sv-accent)' }}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <span key={index} style={{ opacity: index < filled ? 1 : 0.28 }}>★</span>
+    <span className="inline-flex gap-0.5" aria-label={`${rating} من 5`} role="img">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} className="h-4 w-4" aria-hidden style={{ color: '#f5a524', fill: i < filled ? '#f5a524' : 'transparent', opacity: i < filled ? 1 : 0.45 }} />
       ))}
-    </div>
+    </span>
   )
+}
+
+/* ─────────────────────────────────────────────────────────── quote / contact */
+
+function OfferSection({ inner }: { inner?: boolean }) {
+  const { content, isDark, wa } = usePage()
+  const rm = !!useReducedMotion()
+  const { enabled, preview } = useBookingContext()
+  // The quote form only exists where a request can reach the owner: an
+  // entitled live site, or the editor, where a submit is a harmless no-op.
+  // Elsewhere the card offers call, WhatsApp and email, and with none of them
+  // the card is left out.
+  const showForm = enabled || preview
+  const o = content.offer
+  const phone = (content.footer.phone || '').trim()
+  const email = (content.footer.email || '').trim()
+  const hasContact = !!phone || !!email || !!wa
+  const points = (o.points || []).filter(Boolean).slice(0, 3)
+  const hours = content.areas?.availability
+
+  return (
+    <Section id="quote" name="offer">
+      <Container>
+        <motion.div {...rise(rm)} className={`grid overflow-hidden ${showForm || hasContact ? 'lg:grid-cols-[1.05fr_1fr]' : ''}`} style={{ ...card(isDark), borderRadius: 28 }}>
+          <div className="relative p-6 text-white md:p-10" style={{ background: 'var(--sv-primary)' }}>
+            <div aria-hidden className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full" style={{ background: 'var(--sv-accent)', opacity: 0.18, filter: 'blur(10px)' }} />
+            {o.badge ? (
+              <span className="relative inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold" style={{ background: 'var(--sv-accent)', color: 'var(--sv-on-accent)' }}>
+                <Sparkles className="h-3.5 w-3.5" aria-hidden />{o.badge}
+              </span>
+            ) : null}
+            <h2 className="relative mt-4 text-balance text-[1.7rem] md:text-[2.2rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.3, fontWeight: 700 }}>
+              {inner ? (o.heading || 'أخبرنا بما تحتاج') : o.heading}
+            </h2>
+            {o.subheading ? <p className="relative mt-3 text-base leading-8" style={{ color: 'rgba(255,255,255,0.84)' }}>{o.subheading}</p> : null}
+            {points.length ? (
+              <ul className="relative mt-6 space-y-3">
+                {points.map((pt) => (
+                  <li key={pt} className="flex items-start gap-2.5 text-[0.95rem] leading-7">
+                    <CircleCheck className="mt-1 h-4 w-4 shrink-0" style={{ color: 'var(--sv-accent)' }} aria-hidden />{pt}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <ul className="relative mt-8 space-y-1 border-t pt-5 text-[0.95rem]" style={{ borderColor: 'rgba(255,255,255,0.18)' }}>
+              {phone ? (
+                <li><a href={`tel:${phone}`} className="inline-flex min-h-[44px] items-center gap-2.5 hover:opacity-80"><Phone className="h-4 w-4 opacity-80" aria-hidden /><bdi dir="ltr">{phone}</bdi></a></li>
+              ) : null}
+              {email ? (
+                <li><a href={`mailto:${email}`} className="inline-flex min-h-[44px] items-center gap-2.5 break-all hover:opacity-80"><Mail className="h-4 w-4 shrink-0 opacity-80" aria-hidden />{email}</a></li>
+              ) : null}
+              {hours ? <li className="flex min-h-[44px] items-center gap-2.5"><Clock className="h-4 w-4 shrink-0 opacity-80" aria-hidden />{hours}</li> : null}
+            </ul>
+          </div>
+
+          {showForm ? (
+            <div className="p-6 md:p-10" style={{ background: 'var(--sv-surface)' }}>
+              <p className="text-lg font-bold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{o.cta_label || 'اطلب عرض سعر'}</p>
+              <p className="mt-1 text-sm" style={{ color: 'var(--sv-muted)' }}>اكتب طلبك وسنعود إليك.</p>
+              <div className="mt-6">
+                <BookingForm type="quote" palette={servicesPalette(isDark)} />
+              </div>
+              {wa ? (
+                <div className="mt-5 flex items-center gap-3 text-sm" style={{ color: 'var(--sv-muted)' }}>
+                  <span className="h-px flex-1" style={{ background: 'var(--sv-border)' }} />أو<span className="h-px flex-1" style={{ background: 'var(--sv-border)' }} />
+                </div>
+              ) : null}
+              {wa ? <div className="mt-5"><Btn kind="whatsapp" href={wa} external icon={<WaGlyph />} full>تواصل على واتساب</Btn></div> : null}
+            </div>
+          ) : hasContact ? (
+            <div className="flex flex-col justify-center p-6 md:p-10" style={{ background: 'var(--sv-surface)' }}>
+              <p className="text-lg font-bold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{o.cta_label || 'اطلب عرض سعر'}</p>
+              <p className="mt-2 text-base leading-8" style={{ color: 'var(--sv-muted)' }}>
+                {wa || phone ? 'تواصل معنا مباشرةً برسالة واتساب أو مكالمة، ونرتّب معك التفاصيل.' : 'راسلنا بتفاصيل ما تحتاجه، ونعود إليك.'}
+              </p>
+              <div className="mt-6 grid gap-3">
+                {wa ? <Btn kind="whatsapp" href={wa} external icon={<WaGlyph />} full>تواصل على واتساب</Btn> : null}
+                {phone ? <Btn kind={wa ? 'outline' : 'brand'} href={`tel:${phone}`} icon={<Phone className="h-5 w-5" aria-hidden />} full>اتصل بنا</Btn> : null}
+                {!phone && !wa && email ? <Btn kind="brand" href={`mailto:${email}`} icon={<Mail className="h-5 w-5" aria-hidden />} full>راسلنا بالبريد</Btn> : null}
+              </div>
+            </div>
+          ) : null}
+        </motion.div>
+      </Container>
+    </Section>
+  )
+}
+
+/**
+ * wa.me takes the number in international form, digits only. A number with no
+ * country code has none to recover, and a guessed one would open a chat with
+ * a stranger, so it gets no WhatsApp link.
+ */
+function whatsappNumber(raw: string, strict: boolean): string | null {
+  const v = raw.trim()
+  if (!v) return null
+  const digits = v.replace(/\D/g, '')
+  if (/^(\+|00)/.test(v)) {
+    const d = digits.replace(/^00/, '')
+    return d.length >= 8 ? d : null
+  }
+  // A WhatsApp field the owner filled in themselves may carry the country code
+  // without the plus. One starting with 0 is a local number.
+  if (!strict && digits.length >= 10 && !digits.startsWith('0')) return digits
+  return null
+}
+
+/** The owner's WhatsApp: the WhatsApp field first, else the phone. */
+function whatsappChat(content: ServiceContent): string | null {
+  const own = (content.links?.whatsapp || '').trim()
+  if (/^https?:\/\//i.test(own)) return own
+  const n = whatsappNumber(own, false) || whatsappNumber(content.footer.phone || '', true)
+  if (!n) return null
+  return withText(`https://wa.me/${n}`, `مرحبًا ${content.brand.name}، أريد الاستفسار عن خدماتكم.`)
+}
+
+function withText(href: string, text: string): string {
+  const base = href.replace(/\?text=.*$/, '')
+  return `${base}${base.includes('?') ? '&' : '?'}text=${encodeURIComponent(text)}`
+}
+
+function servicesPalette(isDark: boolean) {
+  return {
+    accent: 'var(--sv-brand)',
+    accentText: 'var(--sv-on-brand)',
+    text: 'var(--sv-text)',
+    muted: 'var(--sv-muted)',
+    surface: isDark ? 'rgba(255,255,255,0.04)' : 'var(--sv-bg)',
+    border: 'var(--sv-border)',
+    headingFont: 'var(--sv-heading-font)',
+    bodyFont: 'var(--sv-body-font)',
+    radius: 12,
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── about */
+
+function StorySection() {
+  const { content } = usePage()
+  const rm = !!useReducedMotion()
+  const s = content.story
+  const image = s.image || content.hero.image
+  return (
+    <Section name="story">
+      <Container className={`grid gap-10 md:items-center md:gap-14 ${image ? 'md:grid-cols-2' : ''}`}>
+        <motion.div {...rise(rm)} className="order-2 md:order-1">
+          {s.eyebrow ? (
+            <p className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--sv-brand)' }}>
+              <span aria-hidden className="h-[2px] w-6 rounded-full" style={{ background: 'var(--sv-brand)' }} />{s.eyebrow}
+            </p>
+          ) : null}
+          <h2 className="mt-3 text-balance text-[1.75rem] md:text-[2.4rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.3, fontWeight: 700 }}>{s.heading}</h2>
+          {s.body ? <p className="mt-4 text-base leading-8 md:text-lg" style={{ color: 'var(--sv-muted)' }}>{s.body}</p> : null}
+          {s.quote ? (
+            <blockquote className="mt-7 rounded-2xl p-5 text-base leading-8" style={{ background: 'var(--sv-tint)' }}>
+              <Quote className="mb-2 h-6 w-6" style={{ color: 'var(--sv-brand)' }} aria-hidden />
+              {s.quote}
+            </blockquote>
+          ) : null}
+          {s.owner_name || s.owner_title ? (
+            <p className="mt-5 text-sm">
+              <span className="font-bold">{s.owner_name}</span>
+              {s.owner_title ? <span style={{ color: 'var(--sv-muted)' }}> · {s.owner_title}</span> : null}
+            </p>
+          ) : null}
+        </motion.div>
+        {image ? (
+          <motion.div {...rise(rm, 0.1)} className="relative order-1 md:order-2">
+            <div aria-hidden className="absolute -bottom-4 -left-4 hidden h-full w-full rounded-3xl md:block" style={{ background: 'var(--sv-tint)' }} />
+            <img src={image} alt="" className="relative aspect-[4/3] w-full rounded-3xl object-cover" />
+          </motion.div>
+        ) : null}
+      </Container>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── work */
+
+function BeforeAfterSection() {
+  // A comparison is only ever the owner's own two photos; without both there is no section.
+  const { content } = usePage()
+  const rm = !!useReducedMotion()
+  const b = content.before_after
+  if (!b?.before_image || !b?.after_image) return null
+  const highlights = (b.highlights || []).filter(Boolean).slice(0, 3)
+  return (
+    <Section name="before_after" tint>
+      <Container>
+        <SectionHead eyebrow="النتائج" title={b.heading} sub={b.subheading} />
+        <div className="grid grid-cols-2 gap-3 md:gap-5">
+          {[{ src: b.before_image, label: b.before_label || 'قبل', after: false }, { src: b.after_image, label: b.after_label || 'بعد', after: true }].map((x, i) => (
+            <motion.figure key={i} {...rise(rm, i * 0.08)} className="relative overflow-hidden rounded-2xl">
+              <img src={x.src} alt={x.label} className="aspect-[4/5] w-full object-cover md:aspect-[4/3]" />
+              <figcaption
+                className="absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold"
+                style={x.after ? { background: 'var(--sv-accent)', color: 'var(--sv-on-accent)' } : { background: 'rgba(0,0,0,0.65)', color: '#fff' }}
+              >
+                {x.label}
+              </figcaption>
+            </motion.figure>
+          ))}
+        </div>
+        {highlights.length ? (
+          <ul className="mt-6 grid gap-3 md:grid-cols-3">
+            {highlights.map((h) => (
+              <li key={h} className="flex items-start gap-2 text-[0.95rem] leading-7"><CircleCheck className="mt-1 h-4 w-4 shrink-0" style={{ color: 'var(--sv-brand)' }} aria-hidden />{h}</li>
+            ))}
+          </ul>
+        ) : null}
+      </Container>
+    </Section>
+  )
+}
+
+function GallerySection() {
+  // The owner's uploads only. None: no section.
+  const { content } = usePage()
+  const rm = !!useReducedMotion()
+  const images = (content.gallery?.images || []).filter((i) => i.url).slice(0, 8)
+  if (!images.length) return null
+  return (
+    <Section name="gallery">
+      <Container>
+        <SectionHead eyebrow="من أعمالنا" title={content.gallery.heading} />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          {images.map((image, i) => (
+            <motion.div
+              key={`${image.url}-${i}`}
+              {...rise(rm, Math.min(i, 5) * 0.05)}
+              className={`overflow-hidden rounded-2xl ${i === 0 && images.length >= 3 ? 'col-span-2 row-span-2' : ''}`}
+            >
+              <img
+                src={image.url}
+                alt={image.alt || ''}
+                className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.04] motion-reduce:hover:scale-100"
+                style={{ aspectRatio: i === 0 && images.length >= 3 ? 'auto' : '1 / 1', minHeight: i === 0 && images.length >= 3 ? '100%' : undefined }}
+              />
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── areas */
+
+function mapsLink(content: ServiceContent): string | null {
+  const q = [content.footer.address, content.brand.city].filter(Boolean).join('، ')
+  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : null
+}
+
+function AreasSection() {
+  const { content, isDark } = usePage()
+  const rm = !!useReducedMotion()
+  const a = content.areas
+  const areas = (a?.areas_served || []).filter(Boolean)
+  const address = content.footer.address
+  const maps = mapsLink(content)
+  const facts: { icon: LucideIcon; label: string; value: string }[] = [
+    ...(a?.availability ? [{ icon: Clock, label: 'أوقات العمل', value: a.availability }] : []),
+    ...(a?.response_time ? [{ icon: Timer, label: 'سرعة الاستجابة', value: a.response_time }] : []),
+    ...(address ? [{ icon: MapPin, label: 'العنوان', value: address }] : []),
+  ]
+  if (!areas.length && !facts.length) return null
+  return (
+    <Section id="areas" name="areas" tint>
+      <Container>
+        <SectionHead eyebrow="أين نعمل" title={a.heading} sub={a.subheading} />
+        <div className={`grid gap-6 ${areas.length && facts.length ? 'lg:grid-cols-[1.2fr_1fr]' : ''}`}>
+          {areas.length ? (
+            <motion.ul {...rise(rm)} className="flex flex-wrap content-start gap-2.5">
+              {areas.map((area) => (
+                <li key={area} className="inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[0.95rem]" style={{ borderColor: 'var(--sv-border)', background: 'var(--sv-bg)' }}>
+                  <MapPin className="h-4 w-4" style={{ color: 'var(--sv-brand)' }} aria-hidden />{area}
+                </li>
+              ))}
+            </motion.ul>
+          ) : null}
+          {facts.length ? (
+            <motion.div {...rise(rm, 0.08)} className="p-5 md:p-6" style={{ ...card(isDark), background: 'var(--sv-bg)' }}>
+              <dl className="space-y-4">
+                {facts.map((f) => (
+                  <div key={f.label} className="flex items-start gap-3">
+                    <IconTile icon={f.icon} />
+                    <div className="min-w-0 pt-0.5">
+                      <dt className="text-sm" style={{ color: 'var(--sv-muted)' }}>{f.label}</dt>
+                      <dd className="mt-0.5 font-semibold leading-7">{f.value}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
+              {maps ? (
+                <div className="mt-5">
+                  <Btn kind="outline" size="md" href={maps} external icon={<Navigation className="h-4 w-4" aria-hidden />} full>افتح في خرائط Google</Btn>
+                </div>
+              ) : null}
+            </motion.div>
+          ) : null}
+        </div>
+      </Container>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── faq */
+
+function FaqSection() {
+  const { content, isDark, wa } = usePage()
+  const rm = !!useReducedMotion()
+  const [open, setOpen] = useState(0)
+  const items = (content.faq?.items || []).filter((i) => i.q)
+  if (!items.length) return null
+  return (
+    <Section id="faq" name="faq">
+      <Container className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+        <div>
+          <SectionHead eyebrow="أسئلة شائعة" title={content.faq.heading} />
+          {wa ? (
+            <motion.div {...rise(rm, 0.1)} className="-mt-4 p-5" style={card(isDark)}>
+              <p className="font-bold">لم تجد إجابتك؟</p>
+              <p className="mt-1 text-sm leading-6" style={{ color: 'var(--sv-muted)' }}>اسألنا مباشرة، ونرد عليك في أقرب وقت.</p>
+              <div className="mt-4"><Btn kind="whatsapp" size="md" href={withText(wa, `مرحبًا ${content.brand.name}، عندي سؤال:`)} external icon={<WaGlyph className="h-4 w-4" />}>اسألنا على واتساب</Btn></div>
+            </motion.div>
+          ) : null}
+        </div>
+        <motion.div {...rise(rm, 0.05)} className="space-y-3">
+          {items.map((item, i) => {
+            const isOpen = open === i
+            return (
+              <div key={`${item.q}-${i}`} className="overflow-hidden transition-colors" style={{ ...card(isDark), borderRadius: 16, borderColor: isOpen ? 'var(--sv-brand)' : 'var(--sv-border)' }}>
+                <h3>
+                  <button
+                    onClick={() => setOpen(isOpen ? -1 : i)}
+                    aria-expanded={isOpen}
+                    className="flex min-h-[60px] w-full items-center justify-between gap-4 px-5 py-4 text-right"
+                  >
+                    <span className="text-[1rem] font-semibold leading-7 md:text-[1.05rem]">{item.q}</span>
+                    <ChevronDown className={`h-5 w-5 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} style={{ color: 'var(--sv-brand)' }} aria-hidden />
+                  </button>
+                </h3>
+                <AnimatePresence initial={false}>
+                  {isOpen ? (
+                    <motion.div
+                      key="a"
+                      initial={rm ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                      animate={rm ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
+                      exit={rm ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: EASE }}
+                    >
+                      <p className="px-5 pb-5 text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{item.a}</p>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            )
+          })}
+        </motion.div>
+      </Container>
+    </Section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── closing call */
+
+function FinalCta() {
+  const { content, wa, go } = usePage()
+  const rm = !!useReducedMotion()
+  const f = content.final_cta
+  if (!f?.heading) return null
+  return (
+    <section data-section="final_cta" className="pb-16 md:pb-24">
+      <Container>
+        <motion.div
+          {...rise(rm)}
+          className="relative isolate overflow-hidden rounded-[28px] px-6 py-10 text-white md:px-12 md:py-14"
+          style={{ background: 'var(--sv-primary)' }}
+        >
+          <div aria-hidden className="absolute -left-24 -top-24 -z-10 h-72 w-72 rounded-full" style={{ background: 'var(--sv-accent)', opacity: 0.2, filter: 'blur(12px)' }} />
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-xl">
+              <h2 className="text-balance text-[1.6rem] md:text-[2.1rem]" style={{ fontFamily: 'var(--sv-heading-font)', lineHeight: 1.3, fontWeight: 700 }}>{f.heading}</h2>
+              {f.subheading ? <p className="mt-2 text-base leading-8" style={{ color: 'rgba(255,255,255,0.84)' }}>{f.subheading}</p> : null}
+              {f.secondary_text ? <p className="mt-3 flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}><CircleCheck className="h-4 w-4" style={{ color: 'var(--sv-accent)' }} aria-hidden />{f.secondary_text}</p> : null}
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Btn kind="accent" onClick={() => go('contact')}>{f.cta_label || 'تواصل معنا'}</Btn>
+              {wa ? <Btn kind="whatsapp" href={wa} external icon={<WaGlyph />}>واتساب</Btn> : null}
+            </div>
+          </div>
+        </motion.div>
+      </Container>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── social */
+
+const X_PATH = 'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'
+
+type SocialKey = keyof ServiceSocialLinks
+const SOCIAL: { key: SocialKey; label: string; url: (h: string) => string; path?: string; Icon?: LucideIcon }[] = [
+  { key: 'instagram', label: 'إنستغرام', url: (h) => `https://instagram.com/${h}`, path: INSTAGRAM.path },
+  { key: 'tiktok', label: 'تيك توك', url: (h) => `https://www.tiktok.com/@${h}`, path: TIKTOK.path },
+  { key: 'snapchat', label: 'سناب شات', url: (h) => `https://www.snapchat.com/add/${h}`, Icon: Ghost },
+  { key: 'facebook', label: 'فيسبوك', url: (h) => `https://facebook.com/${h}`, path: FACEBOOK.path },
+  { key: 'x', label: 'إكس', url: (h) => `https://x.com/${h}`, path: X_PATH },
+  { key: 'youtube', label: 'يوتيوب', url: (h) => `https://www.youtube.com/@${h}`, path: YOUTUBE.path },
+]
+
+/** A full link as given; "site.com/x" gets https; a bare handle becomes the profile link. */
+function socialHref(raw: string, url: (h: string) => string): string | null {
+  const v = raw.trim()
+  if (!v) return null
+  if (/^https?:\/\//i.test(v)) return v
+  if (/^[\w.-]+\.[a-z]{2,}\//i.test(v)) return `https://${v}`
+  const handle = v.replace(/^@/, '').replace(/\s+/g, '')
+  return handle ? url(handle) : null
+}
+
+function socialLinks(content: ServiceContent) {
+  const s = content.social_links || {}
+  return SOCIAL.flatMap((p) => {
+    const href = socialHref(s[p.key] || '', p.url)
+    return href ? [{ ...p, href }] : []
+  })
+}
+
+function SocialRow({ className = '', onDark }: { className?: string; onDark?: boolean }) {
+  const { content } = usePage()
+  const links = socialLinks(content)
+  if (!links.length) return null
+  return (
+    <ul className={`flex flex-wrap gap-2 ${className}`} aria-label="حساباتنا على التواصل الاجتماعي">
+      {links.map((l) => (
+        <li key={l.key}>
+          <a
+            href={l.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={l.label}
+            title={l.label}
+            className="grid h-11 w-11 place-items-center rounded-xl border transition-[transform,opacity] duration-200 hover:-translate-y-px hover:opacity-80 motion-reduce:hover:translate-y-0"
+            style={onDark ? { borderColor: 'rgba(255,255,255,0.18)', color: '#fff' } : { borderColor: 'var(--sv-border)', color: 'var(--sv-text)' }}
+          >
+            {l.Icon ? <l.Icon className="h-5 w-5" aria-hidden /> : (
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className="h-[18px] w-[18px]"><path d={l.path} /></svg>
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── footer */
+
+function Footer() {
+  const { content, isDark, go, wa } = usePage()
+  const f = content.footer
+  const hours = content.areas?.availability
+  const maps = mapsLink(content)
+  const year = new Date().getFullYear()
+  return (
+    <footer
+      data-section="footer"
+      className="text-white"
+      style={{ background: isDark ? 'var(--sv-surface)' : 'color-mix(in srgb, var(--sv-primary) 18%, #0b1220)' }}
+    >
+      <Container className="grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_1.2fr]">
+        <div>
+          <p className="text-xl font-bold" style={{ fontFamily: 'var(--sv-heading-font)' }}>{content.brand.name}</p>
+          {f.tagline ? <p className="mt-3 max-w-sm text-[0.95rem] leading-7" style={{ color: 'rgba(255,255,255,0.7)' }}>{f.tagline}</p> : null}
+          <SocialRow onDark className="mt-5" />
+        </div>
+        <nav aria-label="صفحات الموقع">
+          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>الصفحات</p>
+          <ul className="mt-3 grid grid-cols-2 gap-x-6 md:grid-cols-1">
+            {PAGES.map((p) => (
+              <li key={p.view}><button onClick={() => go(p.view)} className="flex min-h-[44px] items-center text-[0.95rem] hover:opacity-75" style={{ color: 'rgba(255,255,255,0.85)' }}>{p.label}</button></li>
+            ))}
+          </ul>
+        </nav>
+        <div>
+          <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>تواصل معنا</p>
+          <ul className="mt-3 space-y-1 text-[0.95rem]" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            {f.phone ? <li><a href={`tel:${f.phone}`} className="flex min-h-[40px] items-center gap-2.5 hover:opacity-75"><Phone className="h-4 w-4 opacity-70" aria-hidden /><bdi dir="ltr">{f.phone}</bdi></a></li> : null}
+            {wa ? <li><a href={wa} target="_blank" rel="noopener noreferrer" className="flex min-h-[40px] items-center gap-2.5 hover:opacity-75"><WaGlyph className="h-4 w-4 opacity-70" />واتساب</a></li> : null}
+            {f.email ? <li><a href={`mailto:${f.email}`} className="flex min-h-[40px] items-center gap-2.5 break-all hover:opacity-75"><Mail className="h-4 w-4 shrink-0 opacity-70" aria-hidden />{f.email}</a></li> : null}
+            {f.address ? (
+              <li>
+                {maps ? (
+                  <a href={maps} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2.5 py-2 leading-7 hover:opacity-75"><MapPin className="mt-1.5 h-4 w-4 shrink-0 opacity-70" aria-hidden />{f.address}</a>
+                ) : <span className="flex items-start gap-2.5 py-2 leading-7"><MapPin className="mt-1.5 h-4 w-4 shrink-0 opacity-70" aria-hidden />{f.address}</span>}
+              </li>
+            ) : null}
+            {hours ? <li className="flex items-start gap-2.5 py-2 leading-7"><Clock className="mt-1.5 h-4 w-4 shrink-0 opacity-70" aria-hidden />{hours}</li> : null}
+          </ul>
+        </div>
+      </Container>
+      <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        <Container className="py-5 text-xs" >
+          <p style={{ color: 'rgba(255,255,255,0.55)' }}>{f.legal || `© ${year} ${content.brand.name}`}</p>
+        </Container>
+      </div>
+    </footer>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── floating WhatsApp */
+
+/**
+ * A WhatsApp button that stays with the visitor once they scroll past the
+ * first screen. Bottom left: the Made with Zenya badge holds bottom right, and
+ * the cookie box, which opens bottom left, sits above this until it is closed.
+ */
+function WhatsAppFloat() {
+  const { wa } = usePage()
+  const rm = !!useReducedMotion()
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    const on = () => setShow(window.scrollY > 520)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+  if (!wa) return null
+  return (
+    <AnimatePresence>
+      {show ? (
+        <motion.a
+          key="wa"
+          href={wa}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="تواصل معنا على واتساب"
+          initial={rm ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.92 }}
+          animate={rm ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+          exit={rm ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.92 }}
+          transition={{ duration: 0.3, ease: EASE }}
+          className="fixed left-4 z-50 inline-flex h-[52px] items-center gap-2 rounded-full pe-5 ps-4 text-sm font-bold text-white"
+          style={{ bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', background: WA_GREEN, boxShadow: '0 10px 28px rgba(0,0,0,0.25)', fontFamily: 'var(--sv-body-font)' }}
+        >
+          <WaGlyph className="h-6 w-6" />
+          <span>واتساب</span>
+        </motion.a>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────── colour */
+
+/** Dark ink or white, whichever reads on a solid colour. Anything not hex gets white. */
+function readableOn(color: string): string {
+  const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec((color || '').trim())
+  if (!m) return '#ffffff'
+  let h = m[1]
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b
+  // Contrast with white vs with #0b1220 (L≈0.006).
+  return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.056) ? '#ffffff' : '#0b1220'
 }

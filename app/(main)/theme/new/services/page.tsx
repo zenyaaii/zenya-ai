@@ -27,8 +27,15 @@ type Form = {
   owner_name: string
   years_in_business: string
   phone: string
+  whatsapp: string
   email: string
   address: string
+  instagram: string
+  tiktok: string
+  snapchat: string
+  facebook: string
+  x: string
+  youtube: string
   emergency_service: boolean
   availability: string
   response_time: string
@@ -66,7 +73,14 @@ function buildSampleForm(): Form {
     owner_name: 'خالد العتيبي',
     years_in_business: '12 سنة',
     phone: '+966 11 555 0187',
+    whatsapp: '+966 55 555 0187',
     email: 'hello@itqan.sa',
+    instagram: '@itqan.sa',
+    tiktok: '',
+    snapchat: 'itqan.sa',
+    facebook: '',
+    x: '',
+    youtube: '',
     address: 'طريق الملك فهد، حي العليا، الرياض',
     emergency_service: true,
     availability: 'السبت–الخميس، 8 ص – 6 م',
@@ -107,7 +121,14 @@ const INITIAL_FORM: Form = {
   owner_name: '',
   years_in_business: '',
   phone: '',
+  whatsapp: '',
   email: '',
+  instagram: '',
+  tiktok: '',
+  snapchat: '',
+  facebook: '',
+  x: '',
+  youtube: '',
   address: '',
   emergency_service: false,
   availability: 'السبت–الخميس، 8 ص – 6 م',
@@ -221,6 +242,7 @@ export default function ServicesWizardPage() {
       },
       contact: {
         phone: form.phone.trim(),
+        whatsapp: form.whatsapp.trim() || undefined,
         email: form.email.trim(),
         address: form.address.trim() || undefined,
         emergency_service: form.emergency_service,
@@ -233,6 +255,14 @@ export default function ServicesWizardPage() {
         price_from: s.price_from.trim() || undefined,
         badge: s.badge.trim() || undefined,
       })),
+      social: {
+        instagram: form.instagram.trim() || undefined,
+        tiktok: form.tiktok.trim() || undefined,
+        snapchat: form.snapchat.trim() || undefined,
+        facebook: form.facebook.trim() || undefined,
+        x: form.x.trim() || undefined,
+        youtube: form.youtube.trim() || undefined,
+      },
       areas_served: splitLines(form.areas_served).slice(0, 12),
       differentiators: splitLines(form.differentiators).slice(0, 8),
       story: {
@@ -359,6 +389,9 @@ export default function ServicesWizardPage() {
           <Field label="الهاتف" required>
             <Input dir="ltr" value={form.phone} onChange={(e) => update('phone', e.target.value)} placeholder="+966 11 555 0187" />
           </Field>
+          <Field label="واتساب" hint="بمفتاح الدولة، مثل ‎+966. فارغ = نستخدم رقم الهاتف إن كان بمفتاح الدولة.">
+            <Input dir="ltr" value={form.whatsapp} onChange={(e) => update('whatsapp', e.target.value)} placeholder="+966 55 555 0187" />
+          </Field>
           <Field label="البريد الإلكتروني" required>
             <Input dir="ltr" value={form.email} onChange={(e) => update('email', e.target.value)} placeholder="hello@business.com" />
           </Field>
@@ -370,6 +403,24 @@ export default function ServicesWizardPage() {
           </Field>
           <Field label="سطر وقت الاستجابة">
             <Input value={form.response_time} onChange={(e) => update('response_time', e.target.value)} placeholder="استجابة في نفس اليوم لمعظم المناطق" />
+          </Field>
+          <Field label="إنستغرام">
+            <Input dir="ltr" value={form.instagram} onChange={(e) => update('instagram', e.target.value)} placeholder="@yourbusiness" />
+          </Field>
+          <Field label="تيك توك">
+            <Input dir="ltr" value={form.tiktok} onChange={(e) => update('tiktok', e.target.value)} placeholder="@yourbusiness" />
+          </Field>
+          <Field label="سناب شات">
+            <Input dir="ltr" value={form.snapchat} onChange={(e) => update('snapchat', e.target.value)} placeholder="yourbusiness" />
+          </Field>
+          <Field label="فيسبوك">
+            <Input dir="ltr" value={form.facebook} onChange={(e) => update('facebook', e.target.value)} placeholder="facebook.com/yourbusiness" />
+          </Field>
+          <Field label="إكس (تويتر)">
+            <Input dir="ltr" value={form.x} onChange={(e) => update('x', e.target.value)} placeholder="@yourbusiness" />
+          </Field>
+          <Field label="يوتيوب">
+            <Input dir="ltr" value={form.youtube} onChange={(e) => update('youtube', e.target.value)} placeholder="youtube.com/@yourbusiness" />
           </Field>
           <Block>
             <Toggle on={form.emergency_service} onChange={(v) => update('emergency_service', v)}>

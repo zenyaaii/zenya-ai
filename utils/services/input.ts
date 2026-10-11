@@ -12,6 +12,7 @@ export const serviceInputSchema = z.object({
   }),
   contact: z.object({
     phone: z.string().min(4).max(40),
+    whatsapp: z.string().max(60).optional(),
     email: z.string().email().max(120),
     address: z.string().max(200).optional(),
     booking_url: z.string().url().max(500).optional(),
@@ -30,6 +31,16 @@ export const serviceInputSchema = z.object({
     )
     .min(1)
     .max(12),
+  social: z
+    .object({
+      instagram: z.string().max(200).optional(),
+      tiktok: z.string().max(200).optional(),
+      snapchat: z.string().max(200).optional(),
+      facebook: z.string().max(200).optional(),
+      x: z.string().max(200).optional(),
+      youtube: z.string().max(200).optional()
+    })
+    .optional(),
   areas_served: z.array(z.string().min(2).max(60)).max(12).optional().default([]),
   differentiators: z.array(z.string().min(4).max(120)).max(8).optional().default([]),
   story: z.object({

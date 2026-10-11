@@ -421,8 +421,24 @@ function mergeIntoContent(input: ServiceInput, ai: any): ServiceContent {
           `${input.brand.name} يقدّم ${input.brand.category} في ${input.brand.city}${input.brand.region ? `، ${input.brand.region}` : ''}.`
       )
     },
-    links: { reviews_url: input.social_proof.reviews_url || undefined }
+    links: {
+      reviews_url: input.social_proof.reviews_url || undefined,
+      whatsapp: input.contact.whatsapp?.trim() || undefined
+    },
+    social_links: cleanSocial(input.social)
   }
+}
+
+// The owner's own profiles, as typed. Empty entries are dropped so the
+// template draws an icon only for a profile that exists.
+function cleanSocial(social: ServiceInput['social']): ServiceContent['social_links'] {
+  if (!social) return undefined
+  const out: NonNullable<ServiceContent['social_links']> = {}
+  for (const key of ['instagram', 'tiktok', 'snapchat', 'facebook', 'x', 'youtube'] as const) {
+    const v = social[key]?.trim()
+    if (v) out[key] = v
+  }
+  return Object.keys(out).length ? out : undefined
 }
 
 function buildFallbackContent(input: ServiceInput): ServiceContent {
