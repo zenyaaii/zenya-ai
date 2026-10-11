@@ -342,7 +342,7 @@ function Header() {
         boxShadow: scrolled ? '0 6px 24px rgba(15,23,42,0.08)' : 'none',
       }}
     >
-      <Container className="flex h-16 items-center justify-between gap-3 md:h-[76px]">
+      <Container className="flex min-h-16 items-center justify-between gap-3 py-2 md:min-h-[76px]">
         <button onClick={() => go('home')} className="flex min-w-0 items-center gap-3 text-right" aria-label={`${content.brand.name}، الصفحة الرئيسية`}>
           <span
             aria-hidden
