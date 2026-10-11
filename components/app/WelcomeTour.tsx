@@ -35,7 +35,9 @@ import {
   CalendarCheck, Globe, type LucideIcon,
 } from 'lucide-react'
 
-const LS_KEY = 'zenya_welcome_seen_v2'
+// v3 (2026-10-11): the rebuilt tour is shown once more to every owner, so a
+// browser that saw the old one must not skip it.
+const LS_KEY = 'zenya_welcome_seen_v3'
 
 /** Fire this on window to run the tour again (the account menu does). */
 export const REPLAY_EVENT = 'zenya:tour-replay'
