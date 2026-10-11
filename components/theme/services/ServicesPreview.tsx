@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import type { ServiceContent, ServiceNameDisplay, ServiceSocialLinks } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
+import { splitBrandName } from '@/utils/services/brand-name'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
 import { useBookingContext } from '@/components/site/BookingContext'
@@ -234,7 +235,7 @@ function Section({
     <section
       id={id}
       data-section={name}
-      className={`py-16 md:py-24 ${className}`}
+      className={`scroll-mt-20 py-16 md:scroll-mt-24 md:py-24 ${className}`}
       style={tint ? { background: 'var(--sv-surface)', borderBlock: '1px solid var(--sv-border)' } : undefined}
     >
       {children}
@@ -334,22 +335,6 @@ function WaGlyph({ className = 'h-5 w-5' }: { className?: string }) {
 /* ─────────────────────────────────────────────────────────── header */
 
 /* ───────────────────────────────────────────────────── two-language name */
-
-const ARABIC_CHAR = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
-const LATIN_CHAR = /[A-Za-z]/
-
-/** Splits "Dr. Air Conditioning د. التكييف" into its Arabic and Latin
- *  words. Either side is empty when the name is in one language only. */
-export function splitBrandName(name: string): { arabic: string; latin: string } {
-  const ar: string[] = []
-  const la: string[] = []
-  for (const w of name.trim().split(/\s+/)) {
-    if (ARABIC_CHAR.test(w)) ar.push(w)
-    else if (LATIN_CHAR.test(w)) la.push(w)
-    else (la.length > ar.length ? la : ar).push(w)
-  }
-  return { arabic: ar.join(' '), latin: la.join(' ') }
-}
 
 const NAME_HOLD_MS = { arabic: 5000, latin: 4000 }
 
@@ -456,7 +441,7 @@ function Header() {
     >
       <Container className="flex min-h-16 items-center justify-between gap-3 py-2 md:min-h-[76px]">
         <button onClick={() => go('home')} className="flex min-w-0 items-center gap-3 text-right" aria-label={`${content.brand.name}، الصفحة الرئيسية`}>
-          {content.brand.show_logo === false ? null : logo ? (
+          {content.brand.show_logo !== true ? null : logo ? (
             <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border bg-white md:h-11 md:w-11" style={{ borderColor: 'var(--sv-border)' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logo} alt="" className="h-full w-full object-contain p-1" />
@@ -799,31 +784,88 @@ function ProcessSection({ inner }: { inner?: boolean }) {
   const p = content.process
   const steps = (p?.steps || []).filter((s) => s.title || s.text)
   if (!steps.length) return null
+  const variant = (content as any).__steps_variant === 'cards' ? 'cards' : 'rows'
   return (
     <Section name="process">
       <Container>
         <SectionHead eyebrow={inner ? undefined : 'كيف نعمل'} title={p.heading} sub={p.subheading} />
-        <ol className={`relative grid gap-8 md:gap-6 ${steps.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-          {/* The thread that joins the steps: down the side on a phone, across on a laptop. */}
-          <span aria-hidden className="absolute bottom-6 right-6 top-6 w-px md:hidden" style={{ background: 'var(--sv-border)' }} />
-          <span aria-hidden className="absolute inset-x-[16%] top-6 hidden h-px md:block" style={{ background: 'var(--sv-border)' }} />
-          {steps.map((step, i) => (
-            <motion.li key={`${step.title}-${i}`} {...rise(rm, i * 0.1)} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
-              <span
-                className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full text-lg font-bold"
-                style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)', boxShadow: '0 0 0 6px var(--sv-bg)', fontFamily: 'var(--sv-heading-font)' }}
-              >
-                {i + 1}
-              </span>
-              <div className="pt-2 md:pt-4">
-                <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
-                {step.text ? <p className="mt-1.5 max-w-xs text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
-              </div>
-            </motion.li>
-          ))}
-        </ol>
+        {variant === 'cards' ? <StepCards steps={steps} rm={rm} /> : <StepRows steps={steps} rm={rm} />}
       </Container>
     </Section>
+  )
+}
+
+type Step = NonNullable<ServiceContent['process']>['steps'][number]
+
+/** Columns on a laptop for any number of steps: one row up to four, then rows of three or four. */
+function stepCols(n: number) {
+  if (n <= 4) return n
+  if (n <= 6) return 3
+  return 4
+}
+
+function StepNumber({ i }: { i: number }) {
+  return (
+    <span
+      className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full text-lg font-bold"
+      style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)', boxShadow: '0 0 0 6px var(--sv-bg)', fontFamily: 'var(--sv-heading-font)' }}
+    >
+      {i + 1}
+    </span>
+  )
+}
+
+/**
+ * Steps joined by a thread. On a phone it is one line down the side, however
+ * many steps there are. On a laptop each step draws the piece of line to the
+ * next one in its own row, so a second row gets its own line and a short last
+ * row never has a line running past its final step.
+ */
+function StepRows({ steps, rm }: { steps: Step[]; rm: boolean }) {
+  const cols = stepCols(steps.length)
+  return (
+    <ol
+      className="relative grid gap-8 md:gap-x-6 md:gap-y-12 md:[grid-template-columns:repeat(var(--sv-cols),minmax(0,1fr))]"
+      style={{ ['--sv-cols' as string]: cols }}
+    >
+      <span aria-hidden className="absolute bottom-6 right-6 top-6 w-px md:hidden" style={{ background: 'var(--sv-border)' }} />
+      {steps.map((step, i) => {
+        const joins = i < steps.length - 1 && i % cols !== cols - 1
+        return (
+          <motion.li key={i} {...rise(rm, Math.min(i, 5) * 0.08)} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
+            {joins ? (
+              <span aria-hidden className="absolute top-6 hidden h-px md:block" style={{ left: '-50%', right: 'calc(50% + 24px)', background: 'var(--sv-border)' }} />
+            ) : null}
+            <StepNumber i={i} />
+            <div className="min-w-0 pt-2 md:pt-4">
+              <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
+              {step.text ? <p className="mx-auto mt-1.5 max-w-xs text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
+            </div>
+          </motion.li>
+        )
+      })}
+    </ol>
+  )
+}
+
+/** Steps as numbered cards: no line to keep joined, any count fills the grid. */
+function StepCards({ steps, rm }: { steps: Step[]; rm: boolean }) {
+  const cols = Math.min(stepCols(steps.length), 4)
+  return (
+    <ol
+      className="grid gap-4 sm:grid-cols-2 md:[grid-template-columns:repeat(var(--sv-cols),minmax(0,1fr))]"
+      style={{ ['--sv-cols' as string]: Math.max(cols, 2) }}
+    >
+      {steps.map((step, i) => (
+        <motion.li key={i} {...rise(rm, Math.min(i, 5) * 0.08)} className="flex min-w-0 flex-col gap-4 rounded-2xl border p-6" style={{ borderColor: 'var(--sv-border)', background: 'var(--sv-surface)' }}>
+          <StepNumber i={i} />
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
+            {step.text ? <p className="mt-1.5 text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
+          </div>
+        </motion.li>
+      ))}
+    </ol>
   )
 }
 
@@ -913,7 +955,7 @@ function OfferSection({ inner }: { inner?: boolean }) {
   const phone = (content.footer.phone || '').trim()
   const email = (content.footer.email || '').trim()
   const hasContact = !!phone || !!email || !!wa
-  const points = (o.points || []).filter(Boolean).slice(0, 3)
+  const points = (o.points || []).filter(Boolean).slice(0, 8)
   const hours = content.areas?.availability
 
   return (

@@ -199,10 +199,14 @@ export default function SectionOverlay({
     function ensureVisible(target: Element) {
       const r = target.getBoundingClientRect()
       const band = w.innerHeight - obscuredRef.current
-      if (r.bottom > 24 && r.top < band - 24) return
+      // A template with a sticky header gives its sections a scroll-margin-top
+      // as tall as that header, so a picked section lands below it instead of
+      // under it.
+      const under = parseFloat(w.getComputedStyle(target).scrollMarginTop) || 0
+      if (r.bottom > under + 24 && r.top < band - 24 && r.top >= under) return
       const reduce = w.matchMedia('(prefers-reduced-motion: reduce)').matches
       const scroller = d.body.scrollHeight > d.body.clientHeight ? d.body : (d.scrollingElement || d.documentElement)
-      scroller.scrollBy({ top: r.top - 12, behavior: reduce ? 'auto' : 'smooth' })
+      scroller.scrollBy({ top: r.top - 12 - under, behavior: reduce ? 'auto' : 'smooth' })
     }
 
     api.current = {
