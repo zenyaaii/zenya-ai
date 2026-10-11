@@ -430,7 +430,6 @@ function useHeaderFold(
   meter: React.RefObject<HTMLDivElement>,
   hasNumber: boolean,
   hasIcon: boolean,
-  two = false,
 ): Fold | null {
   const [fold, setFold] = useState<Fold | null>(null)
   useEffect(() => {
@@ -446,7 +445,7 @@ function useHeaderFold(
       const brand = w('brand')
       const links = w('nav')
       const cta = w('cta')
-      const icon = hasIcon ? (HDR_ICON + HDR_IN) * (two ? 2 : 1) : 0
+      const icon = hasIcon ? HDR_ICON + HDR_IN : 0
       const wide = brand + HDR_GAP + links + HDR_GAP
       let next: Fold = 3
       if (wide + (hasNumber ? w('phone') + HDR_IN : 0) + cta <= room) next = 0
@@ -459,7 +458,7 @@ function useHeaderFold(
     ro.observe(r)
     ro.observe(m) // the measured text changes when the owner edits it or a font loads
     return () => ro.disconnect()
-  }, [row, meter, hasNumber, hasIcon, two])
+  }, [row, meter, hasNumber, hasIcon])
   return fold
 }
 
@@ -471,8 +470,7 @@ function Header() {
   const phone = (content.footer.phone || '').trim()
   const rowRef = useRef<HTMLDivElement>(null)
   const meterRef = useRef<HTMLDivElement>(null)
-  const both = (content as any).__hdr_variant === 'both' && !!wa && !!phone // TEMP sample switch
-  const fold = useHeaderFold(rowRef, meterRef, !!phone, !!(wa || phone), both)
+  const fold = useHeaderFold(rowRef, meterRef, !!phone, !!(wa || phone))
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 8)
@@ -607,16 +605,6 @@ function Header() {
               <WaGlyph className="h-5 w-5" />
             </a>
           ) : phone ? (
-            <a
-              href={`tel:${phone}`}
-              aria-label={`اتصل بنا ${phone}`}
-              className={`${show.icon} h-11 w-11 place-items-center rounded-xl border`}
-              style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-brand)' }}
-            >
-              <Phone className="h-5 w-5" aria-hidden />
-            </a>
-          ) : null}
-          {both ? (
             <a
               href={`tel:${phone}`}
               aria-label={`اتصل بنا ${phone}`}
