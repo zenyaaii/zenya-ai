@@ -15,6 +15,12 @@ export type EditorFieldDef =
   | { type: 'image';     path: string; label: string; hint?: string }
   | { type: 'number';    path: string; label: string; min?: number; max?: number; step?: number }
   | { type: 'note';      content: string }
+  /** One of a few fixed values, shown as a row of chips. An unset value shows `fallback` as chosen. */
+  | { type: 'choice';    path: string; label: string; options: { value: string; label: string }[]; fallback: string; hint?: string }
+  /** On or off. Unset reads as `fallback`. */
+  | { type: 'toggle';    path: string; label: string; fallback: boolean; hint?: string }
+  /** The owner's logo from the dashboard SEO page, shown with a link there to add or change it. */
+  | { type: 'logo' }
   /** A card that says where the site's reviews are managed, with a link to the dashboard's Reviews page. */
   | { type: 'reviews';   path: string }
   | {

@@ -14,7 +14,13 @@ import { createContext, useContext } from 'react'
  * The default is the live editor, so a field used anywhere else behaves
  * exactly as it always has.
  */
-export type EditorEnv = { offline: boolean; themeId?: string }
+export type EditorEnv = {
+  offline: boolean
+  themeId?: string
+  /** The owner's uploaded logo (content.seo.logo). It lives outside the
+   *  template content, so the preview and the brand panel read it here. */
+  logo?: string
+}
 
 const EditorEnvContext = createContext<EditorEnv>({ offline: false })
 

@@ -26,7 +26,7 @@ import {
 } from './EditorFields'
 import { useNotify } from '@/components/ui/Notify'
 import { useEditorEnv } from './env'
-import { MessageSquareQuote } from 'lucide-react'
+import { MessageSquareQuote, Image as ImageIcon } from 'lucide-react'
 import {
   getPath, setPath, SECTION_TEXT_SCALES,
   type EditorConfig, type EditorFieldDef, type SectionStyle, type SectionTextAlign,
@@ -63,6 +63,38 @@ function RenderField({
   }
   if (field.type === 'reviews') {
     return <ReviewsCard content={content} path={field.path} />
+  }
+  if (field.type === 'logo') {
+    return <LogoCard />
+  }
+  if (field.type === 'choice') {
+    const raw = getPath(content, field.path)
+    const value = typeof raw === 'string' && field.options.some((o) => o.value === raw) ? raw : field.fallback
+    return (
+      <div className="ze-field">
+        <SectionLabel>{field.label}</SectionLabel>
+        <div className="ze-chips" role="group" aria-label={field.label}>
+          {field.options.map((o) => (
+            <MoodChip key={o.value} active={value === o.value} onClick={() => patchPath(field.path, o.value)}>{o.label}</MoodChip>
+          ))}
+        </div>
+        {field.hint ? <SmallNote>{field.hint}</SmallNote> : null}
+      </div>
+    )
+  }
+  if (field.type === 'toggle') {
+    const raw = getPath(content, field.path)
+    const on = typeof raw === 'boolean' ? raw : field.fallback
+    return (
+      <div className="ze-field">
+        <SectionLabel>{field.label}</SectionLabel>
+        <div className="ze-chips" role="group" aria-label={field.label}>
+          <MoodChip active={on} onClick={() => patchPath(field.path, true)}>إظهار</MoodChip>
+          <MoodChip active={!on} onClick={() => patchPath(field.path, false)}>إخفاء</MoodChip>
+        </div>
+        {field.hint ? <SmallNote>{field.hint}</SmallNote> : null}
+      </div>
+    )
   }
   if (field.type === 'text') {
     return (
@@ -533,6 +565,43 @@ function ReviewsCard({ content, path }: { content: any; path: string }) {
       >
         افتح صفحة التقييمات ←
       </a>
+    </div>
+  )
+}
+
+/**
+ * The owner's logo as the site shows it. The logo is uploaded once, on the
+ * dashboard's SEO page, and is the site's browser-tab icon too, so this card
+ * shows it and links there instead of keeping a second copy here.
+ */
+function LogoCard() {
+  const { themeId, logo } = useEditorEnv()
+  return (
+    <div className="ze-field">
+      <SectionLabel>الشعار</SectionLabel>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, background: '#f4f4f6', boxShadow: '0 0 0 1px rgba(17,17,17,0.06)' }}>
+        <span style={{ display: 'grid', placeItems: 'center', width: 56, height: 56, flex: '0 0 auto', borderRadius: 12, background: '#ffffff', boxShadow: '0 0 0 1px rgba(17,17,17,0.08)', overflow: 'hidden' }}>
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt="شعارك" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />
+          ) : (
+            <ImageIcon aria-hidden style={{ width: 22, height: 22, color: '#8a8a90' }} />
+          )}
+        </span>
+        <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
+          <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.7, color: '#56565a', fontWeight: 500 }}>
+            {logo ? 'هذا شعارك. يظهر بجانب اسمك وفي تبويب المتصفح.' : 'لم ترفع شعارًا بعد. حتى ترفعه تظهر أيقونة مجالك.'}
+          </p>
+          <a
+            href={themeId ? `/dashboard/seo?site=${encodeURIComponent(themeId)}` : '/dashboard/seo'}
+            target="_blank"
+            rel="noreferrer"
+            style={{ justifySelf: 'start', display: 'inline-flex', alignItems: 'center', minHeight: 40, borderRadius: 10, padding: '0 14px', background: '#171717', color: '#fff', fontSize: 14, fontWeight: 800 }}
+          >
+            {logo ? 'غيّر الشعار ←' : 'ارفع شعارك ←'}
+          </a>
+        </div>
+      </div>
     </div>
   )
 }

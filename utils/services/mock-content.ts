@@ -165,5 +165,7 @@ export const SERVICE_MOCK_CONTENT: ServiceContent = {
   seo: {
     title: 'إتقان للخدمات المنزلية · قالب موقع خدمات محلية',
     description: 'موقع خدمات محلية عصري بواجهة، وخدمات، وإثبات، وقبل/بعد، وتقييمات، وأسئلة شائعة، ودعوة لطلب عرض سعر.'
-  }
+  },
+  links: { whatsapp: '+966 55 555 0187' },
+  social_links: { instagram: '@itqan.sa', snapchat: 'itqan.sa', tiktok: '@itqan.sa', x: '@itqan_sa' }
 }

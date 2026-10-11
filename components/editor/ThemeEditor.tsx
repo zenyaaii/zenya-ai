@@ -41,6 +41,7 @@ import MobileEditor from './MobileEditor'
 import { useIsMobile, useMediaQuery } from './useIsMobile'
 import { EditorStyle, RailRow, DeviceToggle } from './chrome'
 import { EditorEnvProvider } from './env'
+import { isUploadedImageUrl } from '@/lib/seo'
 import {
   FieldsRenderer, ColorsPanel, TypographyPanel, SectionStyleHeader,
   UndoRedo, StatusPill, type Status,
@@ -71,6 +72,8 @@ export type PreviewProps = {
   sectionStyles?: SectionStyles
   view?: string
   onViewChange?: (v: string) => void
+  /** The owner's uploaded logo. Templates that show one in their header read it. */
+  logo?: string
 }
 
 /**
@@ -118,7 +121,8 @@ export default function ThemeEditor({
   // Settled by the time loading ends, so MobileEditor opens in the right form
   // at once instead of mounting the phone tree's iframe and then the dock's.
   const wide = useMediaQuery('(min-width: 768px)')
-  const env = useMemo(() => ({ offline: !!store, themeId }), [store, themeId])
+  const [ownerLogo, setOwnerLogo] = useState<string | undefined>(undefined)
+  const env = useMemo(() => ({ offline: !!store, themeId, logo: ownerLogo }), [store, themeId, ownerLogo])
 
   // ── State ────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
@@ -193,6 +197,7 @@ export default function ThemeEditor({
       const nextSections = (c.section_styles as SectionStyles) || {}
 
       setContent(nextContent)
+      setOwnerLogo(isUploadedImageUrl(c?.seo?.logo) ? c.seo.logo : undefined)
       setPresetId(nextPreset)
       setTypographyPreset(nextTypo)
       setColorOverrides(nextOverrides)
@@ -387,8 +392,9 @@ export default function ThemeEditor({
       sectionStyles={sectionStyles}
       view={view}
       onViewChange={setView}
+      logo={ownerLogo}
     />
-  ) : null), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view])
+  ) : null), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view, ownerLogo])
 
   const sectionStylesCss = useMemo(
     () => (Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''),

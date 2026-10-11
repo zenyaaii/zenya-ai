@@ -54,6 +54,7 @@ import {
   UndoRedo, StatusPill, type Status,
 } from './panels'
 import { SmallNote } from './EditorFields'
+import { useEditorEnv } from './env'
 import {
   getPath, panelInView, panelViews, sectionStylesToCss,
   type EditorConfig, type EditorPanel, type SectionStyle, type SectionStyles,
@@ -145,6 +146,7 @@ function useConsentInset(): number {
 
 export default function MobileEditor(props: MobileEditorProps) {
   const t = useT()
+  const { logo } = useEditorEnv()
   const {
     themeName, backHref, config, Preview,
     content, presetId, colorOverrides, typographyPreset, sectionStyles,
@@ -432,8 +434,9 @@ export default function MobileEditor(props: MobileEditorProps) {
       sectionStyles={sectionStyles}
       view={view}
       onViewChange={setView}
+      logo={logo}
     />
-  ), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view, setView])
+  ), [Preview, content, presetId, colorOverrides, typographyPreset, sectionStyles, view, setView, logo])
 
   const sectionStylesCss = useMemo(
     () => (Object.keys(sectionStyles).length ? sectionStylesToCss(sectionStyles) : ''),
