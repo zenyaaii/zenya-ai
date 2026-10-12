@@ -156,6 +156,13 @@ const TEMPLATES = [
    on this one number. */
 const LEAD = 2
 
+/* The phone's order: the templates you can build today, then the one that is
+   coming. The wide grid keeps the catalogue's own order. */
+const PHONE = [
+  ...TEMPLATES.filter((t) => !("soon" in t && t.soon)),
+  ...TEMPLATES.filter((t) => "soon" in t && t.soon),
+]
+
 /**
  * The lede's three totals, summed from the array above rather than typed out,
  * so they cannot drift when a template's counts change. They are the only
@@ -200,11 +207,10 @@ export default function TemplatesView() {
      about where the grid becomes a deck. Starts false so the server and the
      first client render agree, then corrects on mount. */
   const [narrow, setNarrow] = useState(false)
-  /* WHICH TEMPLATE THE PHONE IS SHOWING. It starts on index 1, not 0, and
-     that is deliberate: the array's first entry is the one-product builder,
-     which is قريبًا for everyone who is not an admin. Opening the page on the
-     one template nobody can build would make the first screen a dead end. */
-  const [picked, setPicked] = useState(1)
+  /* WHICH TEMPLATE THE PHONE IS SHOWING, as an index into PHONE. That order
+     puts the one-product builder (قريبًا) last, so the first screen opens on
+     a template the reader can build. */
+  const [picked, setPicked] = useState(0)
   const keyRefs = useRef<Array<HTMLButtonElement | null>>([])
   const rootRef = useRef<HTMLElement | null>(null)
   const headRef = useRef<HTMLElement | null>(null)
@@ -312,7 +318,7 @@ export default function TemplatesView() {
    * and ArrowRight goes back — the arrow follows the eye, not the array.
    */
   const onKeyNav = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
-    const last = TEMPLATES.length - 1
+    const last = PHONE.length - 1
     let next = -1
     if (e.key === "ArrowLeft") next = i === last ? 0 : i + 1
     else if (e.key === "ArrowRight") next = i === 0 ? last : i - 1
@@ -325,7 +331,7 @@ export default function TemplatesView() {
   }
 
   const picker = () => {
-    const t = TEMPLATES[picked]
+    const t = PHONE[picked]
     const soon = "soon" in t && t.soon
     return (
       <section className="zt-pick" aria-label="القوالب">
@@ -344,6 +350,14 @@ export default function TemplatesView() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={themePreview(t.id)} alt={soon ? "" : "معاينة قالب " + t.name} decoding="async" className={soon ? "zt-blur" : undefined} />
             <span className="zt-edge" aria-hidden />
+            {/* The same template as a phone shows it, over the cover's corner,
+                so a reader on a phone sees what their own customers will. */}
+            {soon ? null : (
+              <span className="zt-device" aria-hidden>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={"/theme-previews/phone/" + t.id + ".webp"} alt="" decoding="async" />
+              </span>
+            )}
             {soon ? <span className="zt-veil"><span>قريبًا</span></span> : null}
           </div>
 
@@ -372,7 +386,7 @@ export default function TemplatesView() {
         </article>
 
         <div className="zt-keys" role="tablist" aria-label="القوالب الثمانية" data-reveal>
-          {TEMPLATES.map((k, i) => (
+          {PHONE.map((k, i) => (
             <button
               key={k.id}
               ref={(el) => { keyRefs.current[i] = el }}
@@ -1593,6 +1607,35 @@ const CSS = `
   /* Under ~560 the count and the button stop fitting one line together. */
   .zt-foot { flex-wrap: wrap; gap: 0.5rem 0.625rem; }
 }
+
+/* ---- the phone picker, quieter ----------------------------------------
+   Smaller type and softer rings, after the template stores read on a phone
+   (Shopify, Wix, Squarespace): the covers carry the page, the chrome whispers.
+   The phone frame over the cover's corner is the template as a phone shows it,
+   from public/theme-previews/phone, taken at 390x844 from each demo. */
+@media (max-width: 760px) {
+  .zt-hero { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07), 0 12px 32px -18px rgba(0, 0, 0, 0.28); }
+  .zt-hero-shot { overflow: visible; }
+  .zt-hero-shot > img { border-radius: var(--r-control); }
+  .zt-hero-body { padding: 1.75rem 1rem 0.875rem; }
+  .zt-hero-name { font-size: 19px; }
+  .zt-hero-meta { font-size: 13.5px; }
+  .zt-hero-demo { min-height: 46px; font-size: 14.5px; }
+  .zt-hero-build.sb { min-height: 46px; font-size: 14.5px; }
+  .zt-keys { gap: 0.875rem 0.625rem; margin-top: 0.375rem; }
+  .zt-key { gap: 0.375rem; }
+  .zt-key-shot { border-radius: 10px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08); }
+  .zt-key[aria-selected="true"] .zt-key-shot { box-shadow: 0 0 0 2px var(--violet); }
+  .zt-key-label { font-size: 12.5px; font-weight: 500; color: var(--stone); }
+  .zt-key[aria-selected="true"] .zt-key-label { color: var(--obsidian); font-weight: 700; }
+}
+.zt-device {
+  position: absolute; inset-inline-end: 0.75rem; bottom: -1.25rem; width: 74px;
+  display: block; overflow: hidden; background: #0b0b0d;
+  border: 3px solid #0b0b0d; border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 16px 28px -14px rgba(0, 0, 0, 0.45);
+}
+.zt-device img { display: block; width: 100%; height: auto; border-radius: 11px; }
 
 /* ---------------------------------------------------------------------------
    TARGET FLOOR.
