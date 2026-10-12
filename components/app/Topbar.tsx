@@ -18,6 +18,7 @@ import { useDashboardPath } from './useDashboardPath'
 import { NotificationsBell, type BellItem } from './NotificationsBell'
 import { whenLabel } from '@/components/dashboard/screens/reviews'
 import { REPLAY_EVENT } from './WelcomeTour'
+import { siteUrl } from '@/lib/portal-urls'
 
 /** Map known dashboard routes to a page title, in the active locale. */
 function titlesFor(t: Messages): Record<string, string> {
@@ -63,13 +64,45 @@ export default function Topbar({
     if (!user) return
     fetch('/api/reviews/new').then((r) => (r.ok ? r.json() : { sites: [] })).then((d) => setNews(d.sites || [])).catch(() => {})
   }, [user, pathname])
-  const bellItems: BellItem[] = news.map((s) => ({
+
+  // And a site Zenya handed over to this account, until the owner answers it.
+  const [handover, setHandover] = useState<{ token: string; site: string; host: string; plan: string; sent_at?: string; done?: boolean } | null>(null)
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/handover').then((r) => (r.ok ? r.json() : null)).then((d) => setHandover(d?.handover || null)).catch(() => {})
+  }, [user, pathname])
+
+  async function answerYes() {
+    if (!handover) return
+    const r = await fetch(`/api/handover/${encodeURIComponent(handover.token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer: 'yes' }),
+    }).catch(() => null)
+    if (r?.ok) setHandover({ ...handover, done: true })
+  }
+
+  const handoverItems: BellItem[] = handover ? [{
+    id: `handover-${handover.token}`,
+    title: `موقع «${handover.site}» أصبح في حسابك`,
+    site: handover.site,
+    when: whenLabel(handover.sent_at, ''),
+    handover: {
+      host: handover.host,
+      plan: handover.plan,
+      done: handover.done,
+      onYes: answerYes,
+      noHref: siteUrl(`/handover/${encodeURIComponent(handover.token)}?a=no`),
+    },
+  }] : []
+
+  const bellItems: BellItem[] = [...handoverItems, ...news.map((s) => ({
     id: s.id,
     title: s.count === 1 ? 'تقييم جديد من Google' : s.count === 2 ? 'تقييمان جديدان من Google' : `${s.count} تقييمات جديدة من Google`,
     site: s.name,
     when: whenLabel(s.at || undefined, ''),
     href: linkTo(`/dashboard/reviews?site=${s.id}`),
-  }))
+  }))]
 
   const title = titleFor(pathname, t)
   const fullName = user?.user_metadata?.full_name as string | undefined
@@ -121,7 +154,7 @@ export default function Topbar({
             user keeps whatever page and state they were on. */}
         <LanguageSwitcher variant="inline" className="hidden sm:inline-flex" />
 
-        {/* Notifications: new Google reviews, from the daily check. */}
+        {/* Notifications: a site handed over to this account, and new Google reviews. */}
         <NotificationsBell items={bellItems} label={t.nav.notifications} />
 
         {/* Profile dropdown */}

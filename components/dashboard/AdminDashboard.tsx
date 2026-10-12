@@ -7,6 +7,7 @@ import { ArrowRight, Cpu, DollarSign, RefreshCw, Repeat, Users } from 'lucide-re
 import {
   BarList, Panel, PanelWithTitle, Section, SkeletonTile, Tile, rise,
 } from './analytics/primitives'
+import HandoversPanel from './admin/HandoversPanel'
 
 /**
  * Founder-only business dashboard.
@@ -92,6 +93,8 @@ export default function AdminDashboard() {
           </button>
         </div>
       </motion.header>
+
+      <HandoversPanel />
 
       {loading ? (
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
