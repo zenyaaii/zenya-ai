@@ -45,7 +45,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
       description: 'متبّلة اثنتي عشرة ساعة، طماطم مشوية، صلصة الدخان.',
       price: '$58',
       image:
-        'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80'
+        'https://images.unsplash.com/photo-1615937657715-bc7b4b7962c1?auto=format&fit=crop&w=1200&q=80'
     },
     {
       name: 'بيني أرابياتا',
