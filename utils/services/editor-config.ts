@@ -4,6 +4,7 @@ import {
 } from 'lucide-react'
 import { SERVICE_PRESETS } from './presets'
 import type { EditorConfig } from '@/utils/theme-editor-types'
+import { isTwoLanguageName } from './brand-name'
 
 const TOKENS = [
   { key: 'primary',    label: 'الأساسي' },
@@ -38,6 +39,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
         { type: 'text', path: 'brand.name',       label: 'اسم النشاط' },
         {
           type: 'choice', path: 'brand.name_display', label: 'إذا كان الاسم بالعربي والإنجليزي', fallback: 'rotate',
+          when: (c: any) => isTwoLanguageName(c?.brand?.name),
           options: [
             { value: 'rotate', label: 'يتبدّل' },
             { value: 'stack', label: 'الاثنان معًا' },
@@ -47,7 +49,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
           hint: 'الاسم المكتوب بلغة واحدة يظهر كما هو.',
         },
         { type: 'logo' },
-        { type: 'toggle', path: 'brand.show_logo', label: 'الشعار بجانب الاسم', fallback: true },
+        { type: 'toggle', path: 'brand.show_logo', label: 'الشعار بجانب الاسم', fallback: false },
         { type: 'text', path: 'brand.category',   label: 'المجال (مثل: سباكة)' },
         { type: 'text', path: 'brand.city',       label: 'المدينة' },
         { type: 'text', path: 'brand.region',     label: 'المنطقة' },
@@ -147,9 +149,8 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
         {
           type: 'array', path: 'process.steps',
           label: 'الخطوات', itemLabel: 'خطوة', itemTitle: 'title',
-          makeItem: () => ({ step: '01', title: '', text: '' }),
+          makeItem: () => ({ step: '', title: '', text: '' }),
           itemFields: [
-            { type: 'text',     path: 'step',  label: 'رقم الخطوة' },
             { type: 'text',     path: 'title', label: 'العنوان' },
             { type: 'textarea', path: 'text',  label: 'النص', rows: 3 },
           ],

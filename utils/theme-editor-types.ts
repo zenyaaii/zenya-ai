@@ -15,8 +15,9 @@ export type EditorFieldDef =
   | { type: 'image';     path: string; label: string; hint?: string }
   | { type: 'number';    path: string; label: string; min?: number; max?: number; step?: number }
   | { type: 'note';      content: string }
-  /** One of a few fixed values, shown as a row of chips. An unset value shows `fallback` as chosen. */
-  | { type: 'choice';    path: string; label: string; options: { value: string; label: string }[]; fallback: string; hint?: string }
+  /** One of a few fixed values, shown as a row of chips. An unset value shows `fallback` as chosen.
+   *  `when` hides the field while it has nothing to choose between. */
+  | { type: 'choice';    path: string; label: string; options: { value: string; label: string }[]; fallback: string; hint?: string; when?: (content: any) => boolean }
   /** On or off. Unset reads as `fallback`. */
   | { type: 'toggle';    path: string; label: string; fallback: boolean; hint?: string }
   /** The owner's logo from the dashboard SEO page, shown with a link there to add or change it. */

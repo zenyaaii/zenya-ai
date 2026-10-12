@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import type { ServiceContent, ServiceNameDisplay, ServiceSocialLinks } from '@/utils/services/types'
 import { getServicePreset } from '@/utils/services/presets'
+import { splitBrandName } from '@/utils/services/brand-name'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
 import { useBookingContext } from '@/components/site/BookingContext'
@@ -223,8 +224,8 @@ function FontPreload() {
 
 /* ─────────────────────────────────────────────────────────── building blocks */
 
-function Container({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-[1200px] px-5 md:px-8 ${className}`}>{children}</div>
+function Container({ children, className = '', boxRef }: { children: React.ReactNode; className?: string; boxRef?: React.Ref<HTMLDivElement> }) {
+  return <div ref={boxRef} className={`mx-auto w-full max-w-[1200px] px-5 md:px-8 ${className}`}>{children}</div>
 }
 
 function Section({
@@ -234,7 +235,7 @@ function Section({
     <section
       id={id}
       data-section={name}
-      className={`py-16 md:py-24 ${className}`}
+      className={`scroll-mt-20 py-16 md:scroll-mt-24 md:py-24 ${className}`}
       style={tint ? { background: 'var(--sv-surface)', borderBlock: '1px solid var(--sv-border)' } : undefined}
     >
       {children}
@@ -335,22 +336,6 @@ function WaGlyph({ className = 'h-5 w-5' }: { className?: string }) {
 
 /* ───────────────────────────────────────────────────── two-language name */
 
-const ARABIC_CHAR = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/
-const LATIN_CHAR = /[A-Za-z]/
-
-/** Splits "Dr. Air Conditioning د. التكييف" into its Arabic and Latin
- *  words. Either side is empty when the name is in one language only. */
-export function splitBrandName(name: string): { arabic: string; latin: string } {
-  const ar: string[] = []
-  const la: string[] = []
-  for (const w of name.trim().split(/\s+/)) {
-    if (ARABIC_CHAR.test(w)) ar.push(w)
-    else if (LATIN_CHAR.test(w)) la.push(w)
-    else (la.length > ar.length ? la : ar).push(w)
-  }
-  return { arabic: ar.join(' '), latin: la.join(' ') }
-}
-
 const NAME_HOLD_MS = { arabic: 5000, latin: 4000 }
 
 /** The visitor's own "less motion" setting, read from the document the
@@ -423,12 +408,69 @@ function BrandName({ name, mode = 'rotate' }: { name: string; mode?: ServiceName
   )
 }
 
+/**
+ * How much the header shows, from roomiest to tightest:
+ *   0  every page link, the phone number and the booking button
+ *   1  the number becomes one icon: WhatsApp, or a phone when there is no WhatsApp
+ *   2  the page links fold into the ☰ menu
+ *   3  the button goes too (the hero right under it carries the same one)
+ * Picked by measuring what this header has to hold at the width it actually
+ * has, not by screen-size steps, so a long name, a long number or the narrow
+ * editor preview folds a step early instead of breaking words onto two lines.
+ * null until it has measured: the server render uses plain breakpoints.
+ */
+type Fold = 0 | 1 | 2 | 3
+
+const HDR_GAP = 12 // gap-3 between brand, links and actions
+const HDR_IN = 8 // gap-2 between the actions
+const HDR_ICON = 44 // the square icon buttons
+
+function useHeaderFold(
+  row: React.RefObject<HTMLDivElement>,
+  meter: React.RefObject<HTMLDivElement>,
+  hasNumber: boolean,
+  hasIcon: boolean,
+): Fold | null {
+  const [fold, setFold] = useState<Fold | null>(null)
+  useEffect(() => {
+    const r = row.current
+    const m = meter.current
+    if (!r || !m) return
+    const win = r.ownerDocument.defaultView || window
+    const w = (k: string) => m.querySelector(`[data-m="${k}"]`)?.getBoundingClientRect().width || 0
+    const pick = () => {
+      const cs = win.getComputedStyle(r)
+      // A few pixels spare so a font that lands a hair wider never wraps.
+      const room = r.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 8
+      const brand = w('brand')
+      const links = w('nav')
+      const cta = w('cta')
+      const icon = hasIcon ? HDR_ICON + HDR_IN : 0
+      const wide = brand + HDR_GAP + links + HDR_GAP
+      let next: Fold = 3
+      if (wide + (hasNumber ? w('phone') + HDR_IN : 0) + cta <= room) next = 0
+      else if (wide + icon + cta <= room) next = 1
+      else if (brand + HDR_GAP + icon + cta + HDR_IN + HDR_ICON <= room) next = 2
+      setFold(next)
+    }
+    pick()
+    const ro = new (win as typeof window).ResizeObserver(pick)
+    ro.observe(r)
+    ro.observe(m) // the measured text changes when the owner edits it or a font loads
+    return () => ro.disconnect()
+  }, [row, meter, hasNumber, hasIcon])
+  return fold
+}
+
 function Header() {
   const { content, isDark, view, go, wa, logo } = usePage()
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const rm = !!useReducedMotion()
   const phone = (content.footer.phone || '').trim()
+  const rowRef = useRef<HTMLDivElement>(null)
+  const meterRef = useRef<HTMLDivElement>(null)
+  const fold = useHeaderFold(rowRef, meterRef, !!phone, !!(wa || phone))
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 8)
@@ -436,12 +478,26 @@ function Header() {
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
   }, [])
-  // Close the menu whenever the page changes.
+  // Close the menu whenever the page changes, or when the links come back out of it.
   useEffect(() => { setOpen(false) }, [view])
+  useEffect(() => { if (fold !== null && fold < 2) setOpen(false) }, [fold])
 
   // The trade's own icon as the mark: an Arabic name's first letter alone
   // (often an alef with hamza) reads as a stray glyph.
   const Mark = serviceIcon(content.brand.category || '', content.brand.name || '')
+  const showMark = content.brand.show_logo === true
+  const cta = content.hero.primary_cta || 'تواصل معنا'
+  const { arabic, latin } = splitBrandName(content.brand.name || '')
+  const names = arabic && latin ? [arabic, latin] : [content.brand.name || '']
+
+  // Before the first measurement (the server render) the old breakpoints stand in.
+  const show = {
+    nav: fold === null ? 'hidden lg:flex' : fold <= 1 ? 'flex' : 'hidden',
+    number: fold === null ? 'hidden md:inline-flex' : fold === 0 ? 'inline-flex' : 'hidden',
+    icon: fold === null ? 'grid md:hidden' : fold >= 1 ? 'grid' : 'hidden',
+    cta: fold === null ? 'hidden md:inline-flex' : fold <= 2 ? 'inline-flex' : 'hidden',
+    menu: fold === null ? 'grid lg:hidden' : fold >= 2 ? 'grid' : 'hidden',
+  }
 
   return (
     <header
@@ -454,9 +510,35 @@ function Header() {
         boxShadow: scrolled ? '0 6px 24px rgba(15,23,42,0.08)' : 'none',
       }}
     >
-      <Container className="flex min-h-16 items-center justify-between gap-3 py-2 md:min-h-[76px]">
+      {/* Unseen copies of the header's parts at their one-line widths, for useHeaderFold. */}
+      <div aria-hidden className="pointer-events-none invisible absolute inset-x-0 top-0 h-0 overflow-hidden">
+        <div ref={meterRef} className="flex w-max flex-col items-start whitespace-nowrap">
+          <span data-m="brand" className="flex w-max items-center gap-3">
+            {showMark ? <span className="h-10 w-10 shrink-0 md:h-11 md:w-11" /> : null}
+            <span className="block w-max">
+              {names.map((n, i) => (
+                <span key={i} className="block text-[1rem] font-bold leading-6 md:text-[1.05rem]" style={{ fontFamily: 'var(--sv-heading-font)' }}>{n}</span>
+              ))}
+              {content.brand.category ? <span className="block text-xs leading-5">{content.brand.category}</span> : null}
+            </span>
+          </span>
+          <span data-m="nav" className="flex w-max items-center gap-1">
+            {PAGES.map((p) => (
+              <span key={p.view} className="inline-flex h-11 items-center px-3 text-[0.95rem]" style={{ fontWeight: 600 }}>{p.label}</span>
+            ))}
+          </span>
+          {phone ? (
+            <span data-m="phone" className="inline-flex h-11 w-max items-center gap-2 rounded-xl border px-3 text-sm font-semibold">
+              <span className="h-4 w-4" /><bdi dir="ltr">{phone}</bdi>
+            </span>
+          ) : null}
+          <span data-m="cta" className="inline-flex min-h-11 w-max items-center px-4 py-1.5 text-sm font-semibold">{cta}</span>
+        </div>
+      </div>
+
+      <Container boxRef={rowRef} className="flex min-h-16 items-center justify-between gap-3 py-2 md:min-h-[76px]">
         <button onClick={() => go('home')} className="flex min-w-0 items-center gap-3 text-right" aria-label={`${content.brand.name}، الصفحة الرئيسية`}>
-          {content.brand.show_logo === false ? null : logo ? (
+          {!showMark ? null : logo ? (
             <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl border bg-white md:h-11 md:w-11" style={{ borderColor: 'var(--sv-border)' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={logo} alt="" className="h-full w-full object-contain p-1" />
@@ -478,7 +560,7 @@ function Header() {
           </span>
         </button>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="صفحات الموقع">
+        <nav className={`${show.nav} items-center gap-1`} aria-label="صفحات الموقع">
           {PAGES.map((p) => {
             const active = view === p.view
             return (
@@ -486,7 +568,7 @@ function Header() {
                 key={p.view}
                 onClick={() => go(p.view)}
                 aria-current={active ? 'page' : undefined}
-                className="relative inline-flex h-11 items-center rounded-lg px-3 text-[0.95rem] transition-colors hover:opacity-80"
+                className="relative inline-flex h-11 items-center whitespace-nowrap rounded-lg px-3 text-[0.95rem] transition-colors hover:opacity-80"
                 style={{ color: active ? 'var(--sv-text)' : 'var(--sv-muted)', fontWeight: active ? 600 : 500 }}
               >
                 {p.label}
@@ -501,15 +583,15 @@ function Header() {
             <a
               href={`tel:${phone}`}
               aria-label={`اتصل بنا ${phone}`}
-              className="hidden h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition-opacity hover:opacity-80 md:inline-flex"
+              className={`${show.number} h-11 items-center gap-2 whitespace-nowrap rounded-xl border px-3 text-sm font-semibold transition-opacity hover:opacity-80`}
               style={{ borderColor: 'var(--sv-border)' }}
             >
               <Phone className="h-4 w-4" style={{ color: 'var(--sv-brand)' }} aria-hidden />
               <bdi dir="ltr">{phone}</bdi>
             </a>
           ) : null}
-          <span className="hidden md:inline-flex">
-            <Btn size="md" kind="brand" onClick={() => go('contact')}>{content.hero.primary_cta || 'تواصل معنا'}</Btn>
+          <span className={`${show.cta} whitespace-nowrap`}>
+            <Btn size="md" kind="brand" onClick={() => go('contact')}>{cta}</Btn>
           </span>
           {wa ? (
             <a
@@ -517,10 +599,19 @@ function Header() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="راسلنا على واتساب"
-              className="grid h-11 w-11 place-items-center rounded-xl text-white md:hidden"
+              className={`${show.icon} h-11 w-11 place-items-center rounded-xl text-white`}
               style={{ background: WA_GREEN }}
             >
               <WaGlyph className="h-5 w-5" />
+            </a>
+          ) : phone ? (
+            <a
+              href={`tel:${phone}`}
+              aria-label={`اتصل بنا ${phone}`}
+              className={`${show.icon} h-11 w-11 place-items-center rounded-xl border`}
+              style={{ borderColor: 'var(--sv-border)', color: 'var(--sv-brand)' }}
+            >
+              <Phone className="h-5 w-5" aria-hidden />
             </a>
           ) : null}
           <button
@@ -528,7 +619,7 @@ function Header() {
             aria-label={open ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="grid h-11 w-11 place-items-center rounded-xl border lg:hidden"
+            className={`${show.menu} h-11 w-11 place-items-center rounded-xl border`}
             style={{ borderColor: 'var(--sv-border)' }}
           >
             {open ? <Close className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
@@ -544,7 +635,7 @@ function Header() {
             animate={rm ? { opacity: 1 } : { opacity: 1, height: 'auto' }}
             exit={rm ? { opacity: 0 } : { opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="overflow-hidden border-t lg:hidden"
+            className={`overflow-hidden border-t ${fold === null ? 'lg:hidden' : ''}`}
             style={{ borderColor: 'var(--sv-border)', background: 'var(--sv-bg)' }}
           >
             <Container className="py-3">
@@ -803,27 +894,62 @@ function ProcessSection({ inner }: { inner?: boolean }) {
     <Section name="process">
       <Container>
         <SectionHead eyebrow={inner ? undefined : 'كيف نعمل'} title={p.heading} sub={p.subheading} />
-        <ol className={`relative grid gap-8 md:gap-6 ${steps.length >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-          {/* The thread that joins the steps: down the side on a phone, across on a laptop. */}
-          <span aria-hidden className="absolute bottom-6 right-6 top-6 w-px md:hidden" style={{ background: 'var(--sv-border)' }} />
-          <span aria-hidden className="absolute inset-x-[16%] top-6 hidden h-px md:block" style={{ background: 'var(--sv-border)' }} />
-          {steps.map((step, i) => (
-            <motion.li key={`${step.title}-${i}`} {...rise(rm, i * 0.1)} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
-              <span
-                className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full text-lg font-bold"
-                style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)', boxShadow: '0 0 0 6px var(--sv-bg)', fontFamily: 'var(--sv-heading-font)' }}
-              >
-                {i + 1}
-              </span>
-              <div className="pt-2 md:pt-4">
-                <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
-                {step.text ? <p className="mt-1.5 max-w-xs text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
-              </div>
-            </motion.li>
-          ))}
-        </ol>
+        <StepRows steps={steps} rm={rm} />
       </Container>
     </Section>
+  )
+}
+
+type Step = NonNullable<ServiceContent['process']>['steps'][number]
+
+/** Columns on a laptop for any number of steps: one row up to four, then rows of three or four. */
+function stepCols(n: number) {
+  if (n <= 4) return n
+  if (n <= 6) return 3
+  return 4
+}
+
+function StepNumber({ i }: { i: number }) {
+  return (
+    <span
+      className="relative z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full text-lg font-bold"
+      style={{ background: 'var(--sv-brand)', color: 'var(--sv-on-brand)', boxShadow: '0 0 0 6px var(--sv-bg)', fontFamily: 'var(--sv-heading-font)' }}
+    >
+      {i + 1}
+    </span>
+  )
+}
+
+/**
+ * Steps joined by a thread. On a phone it is one line down the side, however
+ * many steps there are. On a laptop each step draws the piece of line to the
+ * next one in its own row, so a second row gets its own line and a short last
+ * row never has a line running past its final step.
+ */
+function StepRows({ steps, rm }: { steps: Step[]; rm: boolean }) {
+  const cols = stepCols(steps.length)
+  return (
+    <ol
+      className="relative grid gap-8 md:gap-x-6 md:gap-y-12 md:[grid-template-columns:repeat(var(--sv-cols),minmax(0,1fr))]"
+      style={{ ['--sv-cols' as string]: cols }}
+    >
+      <span aria-hidden className="absolute bottom-6 right-6 top-6 w-px md:hidden" style={{ background: 'var(--sv-border)' }} />
+      {steps.map((step, i) => {
+        const joins = i < steps.length - 1 && i % cols !== cols - 1
+        return (
+          <motion.li key={i} {...rise(rm, Math.min(i, 5) * 0.08)} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
+            {joins ? (
+              <span aria-hidden className="absolute top-6 hidden h-px md:block" style={{ left: '-50%', right: 'calc(50% + 24px)', background: 'var(--sv-border)' }} />
+            ) : null}
+            <StepNumber i={i} />
+            <div className="min-w-0 pt-2 md:pt-4">
+              <h3 className="text-lg font-bold leading-7" style={{ fontFamily: 'var(--sv-heading-font)' }}>{step.title}</h3>
+              {step.text ? <p className="mx-auto mt-1.5 max-w-xs text-[0.95rem] leading-7" style={{ color: 'var(--sv-muted)' }}>{step.text}</p> : null}
+            </div>
+          </motion.li>
+        )
+      })}
+    </ol>
   )
 }
 
@@ -913,7 +1039,7 @@ function OfferSection({ inner }: { inner?: boolean }) {
   const phone = (content.footer.phone || '').trim()
   const email = (content.footer.email || '').trim()
   const hasContact = !!phone || !!email || !!wa
-  const points = (o.points || []).filter(Boolean).slice(0, 3)
+  const points = (o.points || []).filter(Boolean).slice(0, 8)
   const hours = content.areas?.availability
 
   return (

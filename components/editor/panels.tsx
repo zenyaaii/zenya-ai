@@ -68,6 +68,7 @@ function RenderField({
     return <LogoCard />
   }
   if (field.type === 'choice') {
+    if (field.when && !field.when(content)) return null
     const raw = getPath(content, field.path)
     const value = typeof raw === 'string' && field.options.some((o) => o.value === raw) ? raw : field.fallback
     return (
@@ -175,7 +176,9 @@ function RenderField({
               <Collapsible
                 key={i}
                 title={title}
-                defaultOpen={arr.length === 1}
+                // A just-added item has no title yet: open it, so the reader
+                // can fill it in instead of facing a closed, empty row.
+                defaultOpen={arr.length === 1 || (!!f.itemTitle && !getPath(item, f.itemTitle))}
                 onRemove={async () => {
                   const { confirmed } = await confirm({
                     title: t.editor.removeConfirm.replace('{title}', title),
@@ -590,7 +593,7 @@ function LogoCard() {
         </span>
         <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
           <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.7, color: '#56565a', fontWeight: 500 }}>
-            {logo ? 'هذا شعارك. يظهر بجانب اسمك وفي تبويب المتصفح.' : 'لم ترفع شعارًا بعد. حتى ترفعه تظهر أيقونة مجالك.'}
+            {logo ? 'هذا شعارك، وهو أيقونة موقعك في المتصفح. ليظهر بجانب اسمك اختر «إظهار» تحت.' : 'لم ترفع شعارًا بعد. إذا اخترت «إظهار» تحت، تظهر أيقونة مجالك حتى ترفعه.'}
           </p>
           <a
             href={themeId ? `/dashboard/seo?site=${encodeURIComponent(themeId)}` : '/dashboard/seo'}
