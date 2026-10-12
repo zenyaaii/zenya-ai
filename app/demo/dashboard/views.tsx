@@ -54,6 +54,11 @@ export function HomeView({ go }: { go: (v: string) => void }) {
   )
 }
 
+/* The fixture sites carry a label, not a template id. */
+const KIND_COVER: Record<string, string> = {
+  'مطعم': 'restaurant', 'تطبيق': 'atlas', 'عافية': 'wellness', 'أزياء': 'lookbook', 'شوبيفاي': 'collective',
+}
+
 export function SitesView({ filter, setFilter }: { filter: string; setFilter: (f: string) => void }) {
   return (
     <SitesScreen
@@ -61,6 +66,7 @@ export function SitesView({ filter, setFilter }: { filter: string; setFilter: (f
       setFilter={setFilter}
       sites={SITES.map((s) => ({
         id: s.id, name: s.name, kind: s.kind, host: s.host, live: s.live, updated: s.updated,
+        cover: KIND_COVER[s.kind] ? `/theme-previews/thumb/${KIND_COVER[s.kind]}.webp` : undefined,
         primary: { label: s.live ? 'أضف نطاقًا' : 'انشر' },
       }))}
     />

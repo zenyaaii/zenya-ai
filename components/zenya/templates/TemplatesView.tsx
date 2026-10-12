@@ -141,7 +141,7 @@ const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"],
  * as an Unsplash cover standing in for a template.
  */
 const TEMPLATES = [
-  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر شوبيفاي · منتج واحد", sections: 24, presets: 3, page: "/templates/one-product-store", demo: "/templates/one-product-store/demo",            build: "/build",                  shopify: true, soon: true },
+  { id: "one_product", label: "متجر",   name: "متجر بمنتج واحد",           tagline: "متجر · منتج واحد",          sections: 24, presets: 3, page: "/templates/one-product-store", demo: "/templates/one-product-store/demo",            build: "/build",                  soon: true },
   { id: "restaurant",  label: "مطعم",   name: "موقع مطعم",                 tagline: "مطعم · قائمة · حجوزات",    sections: 13, presets: 4, page: "/templates/restaurant", demo: "/templates/restaurant/demo", build: "/theme/new/restaurant" },
   { id: "atlas",       label: "تطبيق",  name: "صفحة هبوط لتطبيق",          tagline: "تطبيق · برمجيات · B2B",    sections: 12, presets: 4, page: "/templates/app-landing-page", demo: "/templates/app-landing-page/demo",      build: "/theme/new/atlas" },
   { id: "lookbook",    label: "أزياء",  name: "موقع أزياء ولوك بوك",       tagline: "أزياء · ملابس · علامة",    sections: 11, presets: 4, page: "/templates/fashion-lookbook", demo: "/templates/fashion-lookbook/demo",   build: "/theme/new/lookbook" },
@@ -342,32 +342,32 @@ export default function TemplatesView() {
               they wanted to look. */}
           <div className="zt-shot zt-hero-shot">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={themePreview(t.id)} alt={"معاينة قالب " + t.name} decoding="async" />
+            <img src={themePreview(t.id)} alt={soon ? "" : "معاينة قالب " + t.name} decoding="async" className={soon ? "zt-blur" : undefined} />
             <span className="zt-edge" aria-hidden />
-            {"shopify" in t && t.shopify ? <span className="zt-flag">شوبيفاي</span> : null}
+            {soon ? <span className="zt-veil"><span>قريبًا</span></span> : null}
           </div>
 
           <div className="zt-hero-body">
             <p className="zt-tag">{t.tagline}</p>
             <h2 className="zt-hero-name">{t.name}</h2>
-            <p className="zt-meta zt-hero-meta">
-              <span>{t.sections} قسمًا</span>
-              <span className="zt-dot" aria-hidden>·</span>
-              <span>{t.presets} أنماط جاهزة</span>
-            </p>
+            {/* The one being rebuilt says قريبًا on its cover and nothing
+                else: no counts and no preview of the old builder. */}
+            {soon ? null : (
+              <>
+                <p className="zt-meta zt-hero-meta">
+                  <span>{t.sections} قسمًا</span>
+                  <span className="zt-dot" aria-hidden>·</span>
+                  <span>{t.presets} أنماط جاهزة</span>
+                </p>
 
-            <div className="zt-hero-acts">
-              <Link href={t.demo} className="zt-hero-demo">معاينة</Link>
-              {soon ? (
-                <span className="zt-soon zt-hero-soon" title="نعمل على نسخة جديدة كليًا — قريبًا">
-                  قريبًا
-                </span>
-              ) : (
-                <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-hero-build">
-                  ابنِ بهذا القالب
-                </SlideButton>
-              )}
-            </div>
+                <div className="zt-hero-acts">
+                  <Link href={t.demo} className="zt-hero-demo">معاينة</Link>
+                  <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-hero-build">
+                    ابنِ بهذا القالب
+                  </SlideButton>
+                </div>
+              </>
+            )}
           </div>
         </article>
 
@@ -390,7 +390,7 @@ export default function TemplatesView() {
                 {/* Decorative: the label beside it already names the template,
                     so an alt here would have a screen reader say it twice. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={themePreview(k.id)} alt="" loading="lazy" decoding="async" />
+                <img src={themePreview(k.id)} alt="" loading="lazy" decoding="async" className={"soon" in k && k.soon ? "zt-blur" : undefined} />
                 <span className="zt-edge" aria-hidden />
               </span>
               <span className="zt-key-label">{k.label}</span>
@@ -416,7 +416,9 @@ export default function TemplatesView() {
    * build had two links per tile to the same URL, which is sixteen tab stops
    * for eight destinations.
    */
-  const tile = (t: (typeof TEMPLATES)[number], i: number) => (
+  const tile = (t: (typeof TEMPLATES)[number], i: number) => {
+    const soon = "soon" in t && t.soon
+    return (
     <article
       key={t.id}
       className="zt-tile"
@@ -434,17 +436,15 @@ export default function TemplatesView() {
             next/image would have to be pointed at the redirect target, which is
             the thing the resolver exists to keep out of the components. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={themePreview(t.id)} alt={"معاينة قالب " + t.name} loading="lazy" decoding="async" />
+        <img src={themePreview(t.id)} alt={soon ? "" : "معاينة قالب " + t.name} loading="lazy" decoding="async" className={soon ? "zt-blur" : undefined} />
         {/* The screenshots are not all dark at the top: atlas, studio and
             lookbook open on near-white, and against a white card they lose
             their own top edge. A hairline drawn OVER the image gives every
             cover the same definite boundary. It has to be a pseudo-element:
             an inset shadow on the box sits under the img that fills it. */}
         <span className="zt-edge" aria-hidden />
-        {/* The "in" guard, not a bare t.shopify: `as const` makes TEMPLATES a
-            union in which only the one Shopify entry carries the key at all.
-            Same idiom the sibling uses for its optional badge. */}
-        {"shopify" in t && t.shopify ? <span className="zt-flag">شوبيفاي</span> : null}
+        {/* The one being rebuilt: its old cover blurred under one word. */}
+        {soon ? <span className="zt-veil"><span>قريبًا</span></span> : null}
       </div>
 
       <div className="zt-body">
@@ -453,12 +453,18 @@ export default function TemplatesView() {
             leading it. It sits NEXT TO the name and not at the far end of the
             row: pushed to the edge by space-between it was 200px of empty
             plate away from the word it belongs to and read as a stray glyph. */}
-        <h3 className="zt-name">
-          <Link href={t.page} className="zt-name-link">{t.name}</Link>
-          <ArrowLeft className="zt-arrow" size={16} strokeWidth={1.75} aria-hidden />
-        </h3>
+        {soon ? (
+          /* Not a link: the page behind it describes the old builder. */
+          <h3 className="zt-name">{t.name}</h3>
+        ) : (
+          <h3 className="zt-name">
+            <Link href={t.page} className="zt-name-link">{t.name}</Link>
+            <ArrowLeft className="zt-arrow" size={16} strokeWidth={1.75} aria-hidden />
+          </h3>
+        )}
         {/* Real counts on the start, the build control on the end. One row, so
             the action costs the plate a line of height rather than a band. */}
+        {soon ? null : (
         <div className="zt-foot">
           <p className="zt-meta">
             <span>{t.sections} قسمًا</span>
@@ -472,28 +478,22 @@ export default function TemplatesView() {
               button sits UNDER that overlay and every press opens the preview
               instead. .zt-act carries position/z-index for exactly that. */}
           <span className="zt-act">
-            {"soon" in t && t.soon ? (
-              /* What the live catalogue shows the public for this one. Not a
-                 button: there is nothing behind it to press. */
-              <span className="zt-soon" title="نعمل على نسخة جديدة كليًا — قريبًا">
-                قريبًا
-              </span>
-            ) : (
-              /* SlideButton takes no aria-label — it builds the accessible
+            {/* SlideButton takes no aria-label — it builds the accessible
                  name from children, into its own visually-hidden .sb-a11y
                  copy. Left as bare "ابنِ" that is eight links with identical
                  names in one list, so the template rides along hidden: the
                  visible face still reads ابنِ, the name reads ابنِ بقالب مطعم.
-                 Same shape as the live catalogue's aria-label. */
-              <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-build">
-                ابنِ<span className="sr-only">{" بقالب " + t.label}</span>
-              </SlideButton>
-            )}
+                 Same shape as the live catalogue's aria-label. */}
+            <SlideButton href={t.build} variant="violet" slide="هيا بنا" className="zt-build">
+              ابنِ<span className="sr-only">{" بقالب " + t.label}</span>
+            </SlideButton>
           </span>
         </div>
+        )}
       </div>
     </article>
-  )
+    )
+  }
 
   return (
     <main className={"zt-root " + tajawal.className} dir="rtl" ref={rootRef}>
@@ -1133,13 +1133,21 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .zt-shot img, .zt-tile:hover .zt-shot img { transition: none; transform: none; }
 }
-/* The one flag on the catalogue, on the one template that carries the flag in
-   lib/templates-en.ts. Glass over the shot rather than a filled chip, so it does
-   not add a colour to a page whose colour budget belongs to the covers. */
-.zt-flag {
-  position: absolute; inset-block-start: 0.75rem; inset-inline-start: 0.75rem;
-  border-radius: 999px; padding: 0.3125rem 0.6875rem;
-  font-size: 14.5px; font-weight: 700; line-height: 1.4; letter-spacing: 0;
+/* The one being rebuilt. Its old cover is blurred past reading, scaled so the
+   blur's soft edge stays outside the frame, under one glass word. */
+.zt-shot img.zt-blur, .zt-key-shot img.zt-blur {
+  filter: blur(14px) saturate(0.85);
+  transform: scale(1.15);
+}
+.zt-tile:hover .zt-shot img.zt-blur { transform: scale(1.15); }
+.zt-veil {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  pointer-events: none;
+}
+.zt-veil > span {
+  border-radius: 999px; padding: 0.5rem 1.25rem;
+  font-size: 20px; font-weight: 900; line-height: 1.4;
   color: #fafafa;
   background: rgba(32, 32, 38, 0.72);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -1282,17 +1290,6 @@ const CSS = `
   font-size: 14.5px;
 }
 .zt-tile[data-lead] .zt-build.sb { font-size: 14.5px; padding: 0.25rem 1rem; }
-
-/* The one that has no builder to open. Quiet, not violet: nothing to press. */
-.zt-soon {
-  display: inline-flex; align-items: center;
-  border-radius: var(--r-control);
-  padding: 0.4375rem 0.75rem;
-  font-size: 14.5px; font-weight: 700; line-height: 1.35;
-  color: var(--stone);
-  background: rgba(17, 17, 17, 0.04);
-  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.07);
-}
 
 /* ---- the floor, on its own ground ---------------------------------------
    TWO COLUMNS, UNEVEN, AND A BAND OF PAPER UNDER IT. The margin-bottom is not
@@ -1488,10 +1485,6 @@ const CSS = `
 }
 .zt-hero-demo:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
 .zt-hero-build { width: 100%; }
-.zt-hero-soon {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 44px; border-radius: var(--r-control);
-}
 
 .zt-keys {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));

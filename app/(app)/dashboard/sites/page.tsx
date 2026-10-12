@@ -9,12 +9,17 @@ import { useNotify } from '@/components/ui/Notify'
 import { publicSiteHost, publicSiteUrl } from '@/lib/portal-urls'
 import { SitesScreen, type SiteCardData, type SiteFilter } from '@/components/dashboard/screens/sites'
 import { relTime } from '@/components/dashboard/screens/kit'
+import { themePreview } from '@/lib/theme-previews'
 import {
   HOSTABLE_TYPES, SHOPIFY_TYPES, businessTypeOf, editUrlFor, templateLabel, type ThemeRow,
 } from '@/components/dashboard/site-kinds'
 
 // First 30 days: hosting is free on every plan (kept in sync with the publish API).
 const TRIAL_DAYS = 30
+
+// Templates with a small cover in public/theme-previews/thumb. A card is a few
+// hundred pixels wide, so it takes the thumb rather than the full screenshot.
+const THUMBS = new Set(['restaurant', 'one_product', 'atlas', 'services', 'collective', 'studio', 'lookbook', 'wellness'])
 
 type Profile = {
   plan: string | null
@@ -84,6 +89,7 @@ export default function SitesPage() {
       host: live ? publicSiteHost(t.slug!) : null,
       live,
       updated: relTime(t.updated_at || t.created_at),
+      cover: THUMBS.has(bt) ? `/theme-previews/thumb/${bt}.webp` : themePreview(bt),
       edit: { href: editUrlFor(t.id, bt) },
       preview: { href: live ? publicSiteUrl(t.slug!) : `/preview/${t.id}`, external: true },
       primary,
