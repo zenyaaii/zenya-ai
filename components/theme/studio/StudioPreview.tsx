@@ -153,7 +153,7 @@ export default function StudioPreview({
     .filter(([, page]) => page !== 'team' || hasTeam)
 
   return (
-    <div className={`relative min-h-screen ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
+    <div className={`relative min-h-screen overflow-x-clip ${className}`} style={{ background: colors.background, fontFamily: fonts.body, color: colors.text }}>
       {/* Raw HTML, not a text child: React escapes the quotes in a text child,
           which broke hydration and fetched the font URL as a relative path. */}
       <style dangerouslySetInnerHTML={{ __html: "@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');" }} />

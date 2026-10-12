@@ -32,7 +32,7 @@ const KINDS: { words: string[]; photo: string }[] = [
   { words: ['كيك', 'كعكه', 'تورته', 'cake', 'gateau'], photo: u('1578985545062-69928b1d9587') },
   { words: ['بقلاوه', 'baklava'], photo: u('1598110750624-207050c4f28c') },
   { words: ['كريب', 'crepe'], photo: u('1519676867240-f03562e64548') },
-  { words: ['ريش', 'اضلاع', 'ribs'], photo: u('1544025162-d76694265947') },
+  { words: ['ريش', 'اضلاع', 'ribs'], photo: u('1615937657715-bc7b4b7962c1') },
   { words: ['مشاوي', 'مشويات', 'كباب', 'كفته', 'شيش', 'تكه', 'اوصال', 'kebab', 'kabab', 'kofta', 'shish', 'mixed grill'], photo: u('1555939594-58d7cb561ad1') },
   { words: ['ستيك', 'انتركوت', 'تندرلوين', 'steak', 'ribeye', 'entrecote', 'tenderloin'], photo: u('1600891964092-4316c288032e') },
   { words: ['روبيان', 'جمبري', 'قريدس', 'shrimp', 'prawn'], photo: u('1565680018434-b513d5e5fd47') },
