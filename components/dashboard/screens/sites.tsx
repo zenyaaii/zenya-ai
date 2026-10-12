@@ -13,6 +13,8 @@ export type SiteCardData = {
   host: string | null
   live: boolean
   updated: string
+  /** The template's cover picture. Without one the card shows the initial. */
+  cover?: string
   edit?: Action
   preview?: Action
   primary: { label: string; action?: Action }
@@ -55,14 +57,20 @@ export function SitesScreen({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {rows.map((s) => (
           <article key={s.id} className="flex flex-col overflow-hidden rounded-2xl zy-card">
-            {/* Stands in for the site's own screenshot, carrying its initial:
-                a flat grey field with a lone glyph reads as a failed image. */}
-            <div className="relative flex aspect-[16/10] items-center justify-center bg-[#f4f4f6] sm:aspect-[16/9]">
-              <span className="select-none text-[56px] font-black leading-none text-[rgba(17,17,17,0.17)]">
-                {s.name.trim().charAt(0)}
-              </span>
+            {/* The template's cover picture. Without one, the site's initial
+                stands in: a flat grey field with a lone glyph. */}
+            <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden bg-[#f4f4f6] sm:aspect-[16/9]">
+              {s.cover ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={s.cover} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-top" />
+              ) : (
+                <span className="select-none text-[56px] font-black leading-none text-[rgba(17,17,17,0.17)]">
+                  {s.name.trim().charAt(0)}
+                </span>
+              )}
               <span className="absolute top-3" style={{ insetInlineStart: '0.75rem' }}>
-                <span className="zy-pill" data-tone={s.live ? 'ok' : 'warn'}>{s.live ? 'مباشر' : 'مسوّدة'}</span>
+                {/* Solid white over a picture, so the state reads on any cover. */}
+                <span className="zy-pill" data-tone={s.live ? 'ok' : 'warn'} style={s.cover ? { background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.18)' } : undefined}>{s.live ? 'مباشر' : 'مسوّدة'}</span>
               </span>
             </div>
             <div className="flex min-w-0 flex-1 flex-col p-4">

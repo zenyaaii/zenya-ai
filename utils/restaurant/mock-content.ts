@@ -16,7 +16,7 @@ export const RESTAURANT_MOCK_CONTENT: RestaurantContent = {
     primary_cta: 'احجز طاولة',
     secondary_cta: 'شاهد القائمة',
     image:
-      'https://images.unsplash.com/photo-1669310097451-826ff0e66b9a?auto=format&fit=crop&w=2000&q=80'
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=2000&q=80'
   },
   story: {
     eyebrow: 'قصتنا',

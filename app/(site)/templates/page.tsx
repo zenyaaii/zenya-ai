@@ -23,11 +23,9 @@
  *     same as the pricing cards. The key recipe stays scoped to CTAs, because
  *     the style doc says plainly that content never does this.
  *
- *   - SHOPIFY IS A BADGE ON ONE TILE, NOT A SECTION. Exactly one template
- *     carries shopify: true in lib/templates-en.ts and on the live catalogue, and
- *     the live page renders that flag as شوبيفاي / مباشر. Giving the export its
- *     own block would overweight one of eight and re-assert the "Shopify theme
- *     generator" reading that Zenya is not. A badge is proportionate.
+ *   - THE ONE-PRODUCT STORE IS قريبًا AND NOTHING ELSE. It is being rebuilt,
+ *     so its tile shows the old cover blurred under one word, with no counts,
+ *     no link and no Shopify badge (the owner's call, 2026-10-12).
  *
  * NOTHING HERE IS INVENTED. Names, short labels and audiences are read from
  * lib/template-pages.tsx; section and preset counts from lib/templates-en.ts; the
