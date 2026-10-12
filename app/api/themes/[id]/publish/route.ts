@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { validateSlug, slugErrorMessage } from '@/lib/slug'
+import { sendEmail, sitePublishedEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // 1. Verify ownership + check template_type/content
   const { data: theme, error: themeErr } = await supabase
     .from('themes')
-    .select('id, user_id, template_type, content, slug')
+    .select('id, user_id, template_type, content, slug, product_name, published_at')
     .eq('id', params.id)
     .maybeSingle()
 
@@ -143,6 +144,30 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     event_type: 'theme.published',
     metadata: { theme_id: theme.id, slug, business_type: businessType, trial_hosting: trialHosting } as any,
   })
+
+  // 6. First publish only: send the live link. A re-publish (after an
+  // unpublish, or a slug change) keeps published_at set and sends nothing.
+  // Awaited because a serverless function can freeze once it responds; a
+  // mail failure never fails the publish.
+  if (!theme.published_at && user.email) {
+    try {
+      const meta = (user.user_metadata || {}) as any
+      const tmpl = sitePublishedEmail({
+        firstName: String(meta.full_name || meta.name || '').trim().split(/\s+/)[0] || null,
+        siteName: (theme as any).product_name || slug,
+        siteUrl,
+      })
+      await sendEmail({
+        to: user.email,
+        subject: tmpl.subject,
+        text: tmpl.text,
+        html: tmpl.html,
+        tags: [{ name: 'type', value: 'site_published' }],
+      })
+    } catch (e) {
+      console.error('[publish] site published email failed (non-fatal):', e)
+    }
+  }
 
   return NextResponse.json({
     ok: true,

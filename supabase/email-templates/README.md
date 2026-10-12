@@ -45,7 +45,7 @@ For each template below, paste the **Subject** into the "Subject heading" field 
 >    password update, and leave Supabase's default off. That path is fully
 >    branded and under our control.
 
-All six OAuth templates share the **site look** — cream `#f7f4ed` page, white card with an `#e5e2d9` border, ink `#16171b` headings, indigo `#5e6ad2` accent + pill CTA, and the hosted زينيا wordmark — fully Arabic / RTL to match the app and the Resend transactional emails in `lib/email.ts`. They render well in Gmail / Outlook / Apple Mail and use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`).
+All templates share the **paper and light** look of the site and of the Resend emails in `lib/email.ts`: a `#fafafa` page, a white sheet with a hairline `#e6e6e6` border and no shadow, obsidian `#171717` type, an obsidian pill button, and one header picture, `public/brand/email-header.png` (served at `https://zenyaai.co/brand/email-header.png`), which is the site's light glowing behind the زينيا wordmark. It is a picture because mail clients drop blur, gradients and SVG. Fully Arabic / RTL. They use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`). Questions go to `team@zenyaai.co`, never `noreply@`.
 
 > **Fastest way to apply everything:** `SUPABASE_ACCESS_TOKEN=sbp_… node supabase/email-templates/_apply.mjs`
 > (add `ENABLE_HIBP=1` once the project is on the Pro plan to turn on leaked-password protection). The manual dashboard steps below are an alternative.
@@ -56,7 +56,7 @@ All six OAuth templates share the **site look** — cream `#f7f4ed` page, white 
 
 | Flow | Email button → | What the user sees |
 | --- | --- | --- |
-| Confirm signup | `/auth/callback?next=/dashboard` | Logged in, lands on the dashboard with their 3 free credits |
+| Confirm signup | `/auth/callback?next=/dashboard` | Logged in, lands on the dashboard with their 2 free sites |
 | Reset password | `/auth/callback?next=/auth/reset-password` | Form to choose a new password, then auto-redirect to `/dashboard` |
 | Magic link | `/auth/callback?next=/dashboard` | Logged in, lands on the dashboard |
 | Invite user | `/auth/callback?next=/dashboard` | Sets a password (via Supabase invite flow), then dashboard |

@@ -4,7 +4,10 @@ import { createClient } from '@supabase/supabase-js'
 import type Stripe from 'stripe'
 import { registerDomain, createDnsRecord, checkDomainCached, PorkbunError } from '@/lib/porkbun'
 import { addDomainToProject } from '@/lib/vercel-domains'
-import { sendEmail, domainPurchasedEmail, domainRefundEmail, paymentReceiptEmail } from '@/lib/email'
+import {
+  sendEmail, domainPurchasedEmail, domainRefundEmail, paymentReceiptEmail,
+  paymentFailedEmail, subscriptionEndedEmail,
+} from '@/lib/email'
 
 // Stripe sends raw body for signature verification. Force the runtime to
 // avoid Next's default body parsing transforms.
@@ -49,6 +52,26 @@ function invoiceTaxCents(inv: Stripe.Invoice): number {
   if (typeof flat === 'number') return flat
   const amounts = (inv as any).total_tax_amounts as Array<{ amount?: number }> | undefined
   return (amounts || []).reduce((s, t) => s + (t.amount || 0), 0)
+}
+
+/** What each subscription tier is called in an email. */
+const PLAN_LABEL: Record<string, string> = {
+  starter: 'Starter',
+  pro: 'Pro',
+  hosting: 'الاستضافة الكاملة',
+}
+
+/** The address and first name an account-level email goes to. */
+async function profileContact(supabase: Admin, userId: string) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('email, full_name')
+    .eq('id', userId)
+    .maybeSingle()
+  return {
+    email: (data?.email as string | null) || null,
+    firstName: String(data?.full_name || '').trim().split(/\s+/)[0] || null,
+  }
 }
 
 async function logEvent(
@@ -294,7 +317,7 @@ async function upsertHostingSubscription(
   supabase: Admin,
   sub: Stripe.Subscription,
   userIdHint?: string | null
-) {
+): Promise<string | null> {
   let userId =
     userIdHint ||
     (sub.metadata?.user_id as string | undefined) ||
@@ -311,7 +334,7 @@ async function upsertHostingSubscription(
 
   if (!userId) {
     console.warn('[webhook] hosting sub with no resolvable user_id', sub.id)
-    return
+    return null
   }
 
   const item = sub.items?.data?.[0]
@@ -365,7 +388,7 @@ async function upsertHostingSubscription(
       subscription_id: sub.id,
       status: sub.status,
     })
-    return
+    return null
   }
 
   // Tier → profile plan label + whether it includes Zenya hosting.
@@ -414,6 +437,7 @@ async function upsertHostingSubscription(
     cancel_at_period_end: sub.cancel_at_period_end,
     current_period_end: row.current_period_end,
   })
+  return userId
 }
 
 async function recordRefund(supabase: Admin, charge: Stripe.Charge) {
@@ -897,10 +921,37 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted': {
+      case 'customer.subscription.updated': {
         const sub = event.data.object as Stripe.Subscription
         await upsertHostingSubscription(supabase, sub)
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object as Stripe.Subscription
+        const userId = await upsertHostingSubscription(supabase, sub)
+        // The plan has actually ended: say so, and that the sites stay up.
+        if (userId) {
+          try {
+            const who = await profileContact(supabase, userId)
+            if (who.email) {
+              const tier = (sub.metadata?.plan as string | undefined) || 'hosting'
+              const tmpl = subscriptionEndedEmail({
+                firstName: who.firstName,
+                planLabel: PLAN_LABEL[tier] || PLAN_LABEL.hosting,
+              })
+              await sendEmail({
+                to: who.email,
+                subject: tmpl.subject,
+                text: tmpl.text,
+                html: tmpl.html,
+                tags: [{ name: 'type', value: 'subscription_ended' }],
+              })
+            }
+          } catch (e) {
+            console.error('[webhook] subscription ended email failed (non-fatal):', e)
+          }
+        }
         break
       }
 
@@ -927,7 +978,37 @@ export async function POST(req: NextRequest) {
         const subId = (inv as any).subscription
         if (typeof subId === 'string') {
           const sub = await stripe.subscriptions.retrieve(subId)
-          await upsertHostingSubscription(supabase, sub)
+          const userId = await upsertHostingSubscription(supabase, sub)
+
+          // Tell them once, on the first refusal. Stripe retries by itself;
+          // a mail per retry would read as nagging.
+          if (inv.attempt_count === 1) {
+            try {
+              const who = userId ? await profileContact(supabase, userId) : null
+              const email = inv.customer_email || who?.email || null
+              if (email) {
+                const tier = (sub.metadata?.plan as string | undefined) || 'hosting'
+                const tmpl = paymentFailedEmail({
+                  firstName: who?.firstName || null,
+                  planLabel: PLAN_LABEL[tier] || PLAN_LABEL.hosting,
+                  amountCents: inv.amount_due ?? 0,
+                  currency: inv.currency || 'usd',
+                  nextAttemptIso: inv.next_payment_attempt
+                    ? new Date(inv.next_payment_attempt * 1000).toISOString()
+                    : null,
+                })
+                await sendEmail({
+                  to: email,
+                  subject: tmpl.subject,
+                  text: tmpl.text,
+                  html: tmpl.html,
+                  tags: [{ name: 'type', value: 'payment_failed' }],
+                })
+              }
+            } catch (e) {
+              console.error('[webhook] payment failed email failed (non-fatal):', e)
+            }
+          }
         }
         break
       }

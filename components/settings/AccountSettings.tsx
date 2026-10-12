@@ -314,6 +314,7 @@ export default function AccountSettings() {
     pwS.set('loading')
     const { error } = await supabase.auth.updateUser({ password: pw1 })
     if (error) return pwS.set('error', error.message)
+    fetch('/api/account/password-changed', { method: 'POST', keepalive: true }).catch(() => {})
     setPw1(''); setPw2('')
     pwS.set('success', 'تم تحديث كلمة المرور.')
   }

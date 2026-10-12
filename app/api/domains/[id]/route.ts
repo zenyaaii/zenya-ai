@@ -7,6 +7,7 @@ import {
   verifyProjectDomain,
   VercelDomainError,
 } from '@/lib/vercel-domains'
+import { sendEmail, domainLiveEmail } from '@/lib/email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,20 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     const a = admin()
     const now = new Date().toISOString()
+
+    // Claim the not-live -> live step before the general update, so two polls
+    // racing each other cannot both send the "your domain works" mail.
+    let becameLive = false
+    if (summary.status === 'live' && ctx.row.status !== 'live') {
+      const { data: claimed } = await a
+        .from('domains')
+        .update({ status: 'live' })
+        .eq('id', ctx.row.id)
+        .neq('status', 'live')
+        .select('id')
+      becameLive = !!claimed?.length
+    }
+
     await a
       .from('domains')
       .update({
@@ -60,12 +75,26 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       })
       .eq('id', ctx.row.id)
 
-    if (summary.status === 'live' && ctx.row.status !== 'live') {
+    if (becameLive) {
       await a.from('activity_logs').insert({
         user_id: ctx.user.id,
         event_type: 'domain.verified',
         metadata: { domain: ctx.row.domain, theme_id: ctx.row.theme_id } as any,
       })
+      if (ctx.user.email) {
+        try {
+          const tmpl = domainLiveEmail({ domain: ctx.row.domain })
+          await sendEmail({
+            to: ctx.user.email,
+            subject: tmpl.subject,
+            text: tmpl.text,
+            html: tmpl.html,
+            tags: [{ name: 'type', value: 'domain_live' }],
+          })
+        } catch (e) {
+          console.error('[domains] domain live email failed (non-fatal):', e)
+        }
+      }
     }
 
     return NextResponse.json({
