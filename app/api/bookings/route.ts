@@ -5,9 +5,7 @@ import {
 import { isBotUA, normalizePath } from '@/lib/analytics-core'
 import { bookingAccess } from '@/lib/booking-entitlement'
 
-import { bookingConfirmationEmail, bookingReceivedEmail, fromWithName, sendEmail } from '@/lib/email'
-import { readableOn, resolveSitePalette } from '@/lib/site-palette'
-import { publicSiteUrl } from '@/lib/portal-urls'
+import { bookingReceivedEmail, sendEmail } from '@/lib/email'
 import { readPrefs } from '@/lib/notification-prefs'
 
 const TYPE_AR: Record<string, string> = {
@@ -83,7 +81,7 @@ export async function POST(req: NextRequest) {
     // ---- owner entitlement -------------------------------------------------
     const { data: t } = await a
       .from('themes')
-      .select('user_id, product_name, template_type, content')
+      .select('user_id, product_name')
       .eq('id', theme.id)
       .maybeSingle()
     if (!t?.user_id) return json({ ok: false, error: 'unavailable' }, 404)
@@ -138,8 +136,6 @@ export async function POST(req: NextRequest) {
 
     if (insErr) return json({ ok: false, error: 'server_error' }, 500)
 
-    let ownerEmail: string | null = null
-
     // ---- tell the owner ------------------------------------------------------
     // Awaited rather than fired and forgotten: a serverless function can be
     // frozen the moment it responds. A mail failure never fails the booking.
@@ -147,7 +143,6 @@ export async function POST(req: NextRequest) {
       try {
         const { data: owner } = await a.auth.admin.getUserById(t.user_id)
         const u = owner?.user
-        ownerEmail = u?.email || null
         if (u?.email && readPrefs(u.user_metadata?.notification_prefs).booking) {
           const meta = (u.user_metadata || {}) as any
           const tmpl = bookingReceivedEmail({
@@ -172,62 +167,6 @@ export async function POST(req: NextRequest) {
         }
       } catch {
         // The booking is saved; the owner still sees it in the dashboard.
-      }
-    }
-
-    // ---- tell the visitor ----------------------------------------------------
-    // A real booking, quote or appointment gets a "your request arrived" mail
-    // in the site's own colours. Plain contact (the newsletter forms post
-    // here too) gets none. One per address per site per day, so the public
-    // form cannot be used to flood someone's inbox.
-    if (!bot && email && type !== 'contact') {
-      try {
-        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-        const { count } = await a
-          .from('site_bookings')
-          .select('id', { count: 'exact', head: true })
-          .eq('theme_id', theme.id)
-          .eq('email', email)
-          .gte('created_at', since)
-        if ((count ?? 0) <= 1) {
-          const c = ((t as any).content || {}) as Record<string, any>
-          const businessType = String(c.business_type || (t as any).template_type || '')
-          const pal = resolveSitePalette(businessType, c.style_preset, c.color_overrides, c.typography_preset)
-          const siteName = (t as any).product_name || slug
-          const tmpl = bookingConfirmationEmail({
-            siteName,
-            siteUrl: publicSiteUrl(theme.slug),
-            kind: TYPE_AR[type] || TYPE_AR.contact,
-            when: [preferredDate, preferredTime].filter(Boolean).join(' · ') || null,
-            party: partySize,
-            palette: pal
-              ? {
-                  background: pal.background,
-                  surface: pal.surface,
-                  text: pal.text,
-                  muted: pal.muted,
-                  border: pal.border,
-                  button: pal.button,
-                  buttonText: readableOn(pal.button, [pal.background, pal.surface]),
-                  buttonRadius: pal.buttonRadius,
-                }
-              : {
-                  background: '#fafafa', surface: '#ffffff', text: '#171717', muted: '#666666',
-                  border: '#e6e6e6', button: '#171717', buttonText: '#ffffff', buttonRadius: 999,
-                },
-          })
-          await sendEmail({
-            to: email,
-            from: fromWithName(siteName),
-            subject: tmpl.subject,
-            text: tmpl.text,
-            html: tmpl.html,
-            replyTo: ownerEmail || undefined,
-            tags: [{ name: 'type', value: 'booking_confirmation' }],
-          })
-        }
-      } catch {
-        // The booking is saved either way.
       }
     }
 

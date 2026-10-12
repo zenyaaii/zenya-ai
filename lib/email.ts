@@ -45,14 +45,6 @@ export type SendEmailResult =
   | { ok: false; skipped: true; reason: string }
   | { ok: false; error: string }
 
-/** The sending address under another display name, e.g. a customer's site. */
-export function fromWithName(name: string): string {
-  const base = process.env.EMAIL_FROM || DEFAULT_FROM
-  const addr = base.match(/<([^>]+)>/)?.[1] || base.trim()
-  const clean = name.replace(/[<>"\r\n,;]/g, '').trim().slice(0, 60) || 'Zenya'
-  return `${clean} <${addr}>`
-}
-
 let _client: Resend | null = null
 function client(): Resend | null {
   const key = process.env.RESEND_API_KEY
@@ -1075,83 +1067,6 @@ export function domainLiveEmail(args: {
     ctaLabel: 'افتح موقعك',
     footnoteHtml: `<p style="${NOTE}">تدير نطاقاتك من <a href="${manageUrl}" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
   })
-
-  return { subject, text, html }
-}
-
-/** The colours a customer site paints itself in, as the booking mail needs them. */
-export type SiteMailPalette = {
-  background: string
-  surface: string
-  text: string
-  muted: string
-  border: string
-  button: string
-  buttonText: string
-  buttonRadius: number
-}
-
-/**
- * Sent to the VISITOR who booked on a customer's site (app/api/bookings), in
- * that site's own colours and name, with no Zenya branding: to the visitor
- * this is the restaurant writing, not us. Reply-To is the owner.
- *
- * Abuse guard: anyone can type any address into a public form, so this mail
- * repeats nothing the visitor typed (no name, no message), only the site's
- * name and the checked date, time and party size.
- */
-export function bookingConfirmationEmail(args: {
-  siteName: string
-  siteUrl: string
-  kind: string
-  when?: string | null
-  party?: number | null
-  phone?: string | null
-  palette: SiteMailPalette
-}): { subject: string; text: string; html: string } {
-  const { palette: c } = args
-  const name = esc(args.siteName)
-  const subject = `وصل طلبك إلى ${args.siteName}`
-
-  const facts: Array<[string, string]> = [
-    ['الطلب', args.kind],
-    ...(args.when ? [['الموعد', args.when] as [string, string]] : []),
-    ...(args.party ? [['عدد الأشخاص', String(args.party)] as [string, string]] : []),
-  ]
-
-  const text = [
-    'أهلًا بك،',
-    '',
-    `وصل طلبك إلى ${args.siteName}. سيتواصلون معك قريبًا لتأكيده.`,
-    '',
-    ...facts.map(([k, v]) => `${k}: ${v}`),
-    ...(args.phone ? ['', `للتواصل معهم: ${args.phone}`] : []),
-    '',
-    args.siteUrl,
-  ].join('\n')
-
-  const html = `
-<!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><title>${esc(subject)}</title></head>
-<body style="margin:0;padding:0;font-family:${FONT};background:${c.background};color:${c.text};direction:rtl;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${c.background};padding:32px 12px;direction:rtl;"><tr><td align="center">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" style="max-width:520px;width:100%;background:${c.surface};border:1px solid ${c.border};border-radius:16px;"><tr><td style="padding:32px;text-align:right;font-family:${FONT};">
-    <p style="margin:0 0 22px;font-size:18px;font-weight:700;color:${c.text};">${name}</p>
-    <h1 style="margin:0 0 14px;font-size:24px;line-height:1.45;font-weight:700;color:${c.text};">وصل طلبك</h1>
-    <p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:${c.muted};">شكرًا لك. سيتواصل معك فريق ${name} قريبًا لتأكيد طلبك.</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;border-top:1px solid ${c.border};">
-      ${facts.map(([k, v]) => `<tr><td style="padding:10px 0;font-size:15px;color:${c.muted};border-bottom:1px solid ${c.border};white-space:nowrap;">${k}</td><td style="padding:10px 12px 10px 0;font-size:15px;font-weight:700;color:${c.text};border-bottom:1px solid ${c.border};">${esc(v)}</td></tr>`).join('')}
-    </table>
-    ${args.phone ? `<p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:${c.muted};">للتواصل معهم: <a href="tel:${esc(args.phone.replace(/[^\d+]/g, ''))}" style="color:${c.text};font-weight:700;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${esc(args.phone)}</a></p>` : ''}
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-      <td style="border-radius:${c.buttonRadius}px;background:${c.button};">
-        <a href="${args.siteUrl}" style="display:inline-block;padding:12px 26px;font-size:15px;font-weight:700;color:${c.buttonText};text-decoration:none;border-radius:${c.buttonRadius}px;">زيارة الموقع</a>
-      </td>
-    </tr></table>
-  </td></tr></table>
-  <p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.7;color:${c.muted};text-align:right;">وصلتك هذه الرسالة لأن بريدك كُتب في نموذج الحجز على موقع ${name}. إن لم تكن أنت، تجاهلها.</p>
-  </td></tr></table>
-</body></html>`.trim()
 
   return { subject, text, html }
 }

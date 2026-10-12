@@ -15,7 +15,6 @@ import {
   subscriptionEndedEmail,
   sitePublishedEmail,
   domainLiveEmail,
-  bookingConfirmationEmail,
 } from '../../../lib/email'
 
 // Every transactional email must render: Arabic + RTL, real injected data, a
@@ -155,21 +154,4 @@ test('site published email — carries the live link and escapes the name', () =
 
 test('domain live email', () => {
   assertClean(domainLiveEmail({ domain: 'matjari.com' }), ['https://matjari.com'])
-})
-
-test('booking confirmation — site colours, no Zenya branding', () => {
-  const r = bookingConfirmationEmail({
-    siteName: 'مطعم الشام',
-    siteUrl: 'https://alsham.zenyaai.co',
-    kind: 'حجز طاولة',
-    when: '2026-10-17 · 20:30',
-    party: 4,
-    palette: {
-      background: '#f6f1e7', surface: '#fffdf8', text: '#2a1d14', muted: '#7a6a5c',
-      border: '#e7dccb', button: '#9c3b1b', buttonText: '#ffffff', buttonRadius: 2,
-    },
-  })
-  assertClean(r, ['مطعم الشام', '#9c3b1b', '2026-10-17 · 20:30'])
-  expect(r.html).not.toContain('زينيا')
-  expect(r.html).not.toContain('zenyaai.co/brand')
 })

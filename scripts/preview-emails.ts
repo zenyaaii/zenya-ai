@@ -24,7 +24,6 @@ import {
   subscriptionEndedEmail,
   sitePublishedEmail,
   domainLiveEmail,
-  bookingConfirmationEmail,
 } from '../lib/email'
 
 const outDir = join(process.cwd(), '.email-previews')
@@ -158,18 +157,6 @@ const samples: { file: string; label: string; tmpl: { subject: string; html: str
     file: 'domain-live.html',
     label: 'نطاقك يعمل الآن (جديد)',
     tmpl: domainLiveEmail({ domain: 'beitalsham.com' }),
-  },
-  {
-    file: 'booking-confirmation.html',
-    label: 'تأكيد وصول الحجز للزبون (جديد، بألوان الموقع)',
-    tmpl: bookingConfirmationEmail({
-      siteName: 'مطعم بيت الشام', siteUrl: 'https://beitalsham.zenyaai.co', kind: 'حجز طاولة',
-      when: '2026-10-17 · 20:30', party: 4,
-      palette: {
-        background: '#f6f1e7', surface: '#fffdf8', text: '#2a1d14', muted: '#7a6a5c', border: '#e7dccb',
-        button: '#9c3b1b', buttonText: '#ffffff', buttonRadius: 2,
-      },
-    }),
   },
 ]
 
