@@ -17,6 +17,14 @@ import {
   trialReminderEmail,
   quotaReachedEmail,
   hostingExpiringEmail,
+  passwordChangedEmail,
+  accountDeletedEmail,
+  bookingReceivedEmail,
+  paymentFailedEmail,
+  subscriptionEndedEmail,
+  sitePublishedEmail,
+  domainLiveEmail,
+  bookingConfirmationEmail,
 } from '../lib/email'
 
 const outDir = join(process.cwd(), '.email-previews')
@@ -110,6 +118,59 @@ const samples: { file: string; label: string; tmpl: { subject: string; html: str
       retailUsd: 8.46,
     }),
   },
+  {
+    file: 'password-changed.html',
+    label: 'تم تغيير كلمة المرور',
+    tmpl: passwordChangedEmail({ email: 'owner@example.com' }),
+  },
+  {
+    file: 'account-deleted.html',
+    label: 'تم حذف الحساب',
+    tmpl: accountDeletedEmail({ email: 'owner@example.com' }),
+  },
+  {
+    file: 'booking-received.html',
+    label: 'حجز جديد (لصاحب الموقع)',
+    tmpl: bookingReceivedEmail({
+      firstName: 'محمد', siteName: 'مطعم بيت الشام', kind: 'حجز طاولة', name: 'سارة أحمد',
+      phone: '+20 100 555 2211', when: '2026-10-17 · 20:30', party: 4, message: 'نريد طاولة قرب الشباك لو أمكن.',
+    }),
+  },
+  {
+    file: 'payment-failed.html',
+    label: 'فشل الدفع (جديد)',
+    tmpl: paymentFailedEmail({
+      firstName: 'محمد', planLabel: 'Pro', amountCents: 2499, currency: 'usd',
+      nextAttemptIso: new Date(Date.now() + 3 * 864e5).toISOString(),
+    }),
+  },
+  {
+    file: 'subscription-ended.html',
+    label: 'انتهى الاشتراك (جديد)',
+    tmpl: subscriptionEndedEmail({ firstName: 'محمد', planLabel: 'Pro' }),
+  },
+  {
+    file: 'site-published.html',
+    label: 'موقعك نُشر (جديد)',
+    tmpl: sitePublishedEmail({ firstName: 'محمد', siteName: 'مطعم بيت الشام', siteUrl: 'https://beitalsham.zenyaai.co' }),
+  },
+  {
+    file: 'domain-live.html',
+    label: 'نطاقك يعمل الآن (جديد)',
+    tmpl: domainLiveEmail({ domain: 'beitalsham.com' }),
+  },
+  {
+    file: 'booking-confirmation.html',
+    label: 'تأكيد وصول الحجز للزبون (جديد، بألوان الموقع)',
+    tmpl: bookingConfirmationEmail({
+      siteName: 'مطعم بيت الشام', siteUrl: 'https://beitalsham.zenyaai.co', kind: 'حجز طاولة',
+      when: '2026-10-17 · 20:30', party: 4,
+      palette: {
+        background: '#f6f1e7', surface: '#fffdf8', text: '#2a1d14', muted: '#7a6a5c', border: '#e7dccb',
+        button: '#9c3b1b', buttonText: '#ffffff', buttonRadius: 2,
+      },
+    }),
+  },
 ]
 
 for (const s of samples) {
@@ -120,13 +181,13 @@ for (const s of samples) {
 const index = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <title>معاينة رسائل زينيا</title>
 <style>
-  body{margin:0;background:#e9e6dd;font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:#16171b}
-  header{padding:20px 24px;background:#16171b;color:#fff}
+  body{margin:0;background:#f0f0f0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:#171717}
+  header{padding:20px 24px;background:#171717;color:#fff}
   h1{margin:0;font-size:18px}
   .row{padding:22px 16px}
-  .label{max-width:560px;margin:0 auto 10px;font-size:13px;font-weight:700;color:#5e6ad2}
-  .subj{max-width:560px;margin:0 auto 10px;font-size:13px;color:#5f5f5d}
-  iframe{display:block;width:100%;max-width:600px;height:760px;margin:0 auto;border:1px solid #cfcabb;border-radius:14px;background:#fff}
+  .label{max-width:560px;margin:0 auto 10px;font-size:13px;font-weight:700;color:#171717}
+  .subj{max-width:560px;margin:0 auto 10px;font-size:13px;color:#555555}
+  iframe{display:block;width:100%;max-width:600px;height:760px;margin:0 auto;border:1px solid #dddddd;border-radius:14px;background:#fff}
 </style></head><body>
 <header><h1>معاينة رسائل البريد — زينيا (هذه نسخة محلية، لم تُرسل لأحد)</h1></header>
 ${samples

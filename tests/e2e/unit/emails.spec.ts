@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test'
 import {
   domainPurchasedEmail,
   domainRefundEmail,
-  planPurchasedEmail,
   paymentReceiptEmail,
   domainExpiringEmail,
   accountDeletedEmail,
@@ -11,6 +10,12 @@ import {
   trialReminderEmail,
   quotaReachedEmail,
   hostingExpiringEmail,
+  passwordChangedEmail,
+  paymentFailedEmail,
+  subscriptionEndedEmail,
+  sitePublishedEmail,
+  domainLiveEmail,
+  bookingConfirmationEmail,
 } from '../../../lib/email'
 
 // Every transactional email must render: Arabic + RTL, real injected data, a
@@ -35,6 +40,9 @@ function assertClean(r: Rendered, mustContain: string[]) {
   expect(r.subject, 'subject clean').not.toMatch(BROKEN)
   expect(r.text, 'text clean').not.toMatch(BROKEN)
   expect(r.html, 'html clean').not.toMatch(BROKEN)
+  // Nobody reads noreply@; every "write to us" points at a real inbox.
+  expect(r.html, 'no noreply contact').not.toContain('noreply@')
+  expect(r.text, 'no noreply contact').not.toContain('noreply@')
 }
 
 test('domain purchased email', () => {
@@ -72,11 +80,6 @@ test('payment receipt — each plan renders with the amount', () => {
       ['ABCD-1234']
     )
   }
-})
-
-test('plan purchased email', () => {
-  const r = planPurchasedEmail({ plan: 'hosting', manageUrl: 'https://zenyaai.co/dashboard' })
-  assertClean(r, [])
 })
 
 test('domain expiring email', () => {
@@ -126,4 +129,47 @@ test('hosting expiring email — across the reminder window', () => {
       []
     )
   }
+})
+
+test('password changed email', () => {
+  assertClean(passwordChangedEmail({ email: 'user@example.com' }), ['user@example.com'])
+})
+
+test('payment failed email — with and without a next attempt date', () => {
+  assertClean(
+    paymentFailedEmail({ firstName: 'محمد', planLabel: 'Pro', amountCents: 2499, currency: 'usd', nextAttemptIso: '2026-10-15T00:00:00Z' }),
+    ['محمد', '$24.99', 'Pro']
+  )
+  assertClean(paymentFailedEmail({ planLabel: 'Starter', amountCents: 1499, currency: 'usd' }), ['$14.99'])
+})
+
+test('subscription ended email', () => {
+  assertClean(subscriptionEndedEmail({ firstName: 'سارة', planLabel: 'Starter' }), ['سارة', 'Starter'])
+})
+
+test('site published email — carries the live link and escapes the name', () => {
+  const r = sitePublishedEmail({ siteName: 'مطعم <b>الشام</b>', siteUrl: 'https://alsham.zenyaai.co' })
+  assertClean(r, ['https://alsham.zenyaai.co', 'alsham.zenyaai.co'])
+  expect(r.html).not.toContain('<b>الشام</b>')
+})
+
+test('domain live email', () => {
+  assertClean(domainLiveEmail({ domain: 'matjari.com' }), ['https://matjari.com'])
+})
+
+test('booking confirmation — site colours, no Zenya branding', () => {
+  const r = bookingConfirmationEmail({
+    siteName: 'مطعم الشام',
+    siteUrl: 'https://alsham.zenyaai.co',
+    kind: 'حجز طاولة',
+    when: '2026-10-17 · 20:30',
+    party: 4,
+    palette: {
+      background: '#f6f1e7', surface: '#fffdf8', text: '#2a1d14', muted: '#7a6a5c',
+      border: '#e7dccb', button: '#9c3b1b', buttonText: '#ffffff', buttonRadius: 2,
+    },
+  })
+  assertClean(r, ['مطعم الشام', '#9c3b1b', '2026-10-17 · 20:30'])
+  expect(r.html).not.toContain('زينيا')
+  expect(r.html).not.toContain('zenyaai.co/brand')
 })

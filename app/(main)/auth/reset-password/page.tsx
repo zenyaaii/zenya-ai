@@ -49,6 +49,9 @@ export default function ResetPasswordPage() {
       return
     }
 
+    // Security notice to the account's own inbox. Never blocks the redirect.
+    fetch('/api/account/password-changed', { method: 'POST', keepalive: true }).catch(() => {})
+
     setStatus({ type: 'success', message: 'تم تحديث كلمة المرور. جارٍ إعادة التوجيه…' })
     setTimeout(() => {
       window.location.href = 'https://dashboard.zenyaai.co'

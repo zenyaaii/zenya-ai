@@ -16,6 +16,7 @@
  */
 
 import { Resend } from 'resend'
+import { COMPANY } from './company'
 
 const DEFAULT_FROM = 'Zenya <noreply@zenyaai.co>'
 
@@ -43,6 +44,14 @@ export type SendEmailResult =
   | { ok: true; id: string }
   | { ok: false; skipped: true; reason: string }
   | { ok: false; error: string }
+
+/** The sending address under another display name, e.g. a customer's site. */
+export function fromWithName(name: string): string {
+  const base = process.env.EMAIL_FROM || DEFAULT_FROM
+  const addr = base.match(/<([^>]+)>/)?.[1] || base.trim()
+  const clean = name.replace(/[<>"\r\n,;]/g, '').trim().slice(0, 60) || 'Zenya'
+  return `${clean} <${addr}>`
+}
 
 let _client: Resend | null = null
 function client(): Resend | null {
@@ -74,7 +83,7 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
       from: args.from || process.env.EMAIL_FROM || DEFAULT_FROM,
       to,
       subject: args.subject,
-      replyTo: args.replyTo,
+      replyTo: args.replyTo || SUPPORT_EMAIL,
       tags: args.tags,
     }
     if (args.text) payload.text = args.text
@@ -92,13 +101,21 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
 }
 
 /* ── Templates ───────────────────────────────────────────────────────── */
-/* Kept inline to avoid a templates/ folder for two-three emails. If we
-   grow past five templates, lift them into separate files and switch to
-   react-email for component-based authoring.
+/* Every template shares one frame, "paper and light", the email form of the
+   house style in docs/zenya-hero-style.md: a #fafafa page, a white sheet with
+   a hairline border and no shadow, obsidian #171717 type, an obsidian pill
+   button, and the site's light (the شفق palette) glowing behind the wordmark.
 
-   All templates share the website look: cream #f7f4ed page, white card with a
-   #e5e2d9 border, ink #16171b headings, indigo #5e6ad2 accent + pill CTA, and
-   the hosted pixel wordmark logo. Arabic / RTL to match the site. */
+   The glow and the wordmark are one picture, /brand/email-header.png, because
+   mail clients cannot be trusted with blur, oklch or SVG: Outlook drops
+   gradients and Gmail drops SVG. With images off, the cell's own background
+   and the alt text stand in for it. Arabic / RTL throughout. */
+
+/** Where a reader writes back. Every send sets it as Reply-To too. */
+export const SUPPORT_EMAIL = COMPANY.SUPPORT_EMAIL
+
+const HEADER_IMG = 'https://zenyaai.co/brand/email-header.png'
+const FONT = `'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif`
 
 /** Shared chrome so every transactional email matches the auth templates. */
 function emailShell(opts: {
@@ -113,34 +130,29 @@ function emailShell(opts: {
   const { title, eyebrow, heading, bodyHtml, ctaHref, ctaLabel, footnoteHtml } = opts
   return `
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><title>${title}</title></head>
-<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:#f7f4ed; color:#16171b; direction:rtl;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f4ed;padding:40px 16px;direction:rtl;"><tr><td align="center">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e5e2d9;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(28,28,28,0.14);">
-    <tr><td align="center" style="padding:28px 40px;background:#ffffff;border-bottom:1px solid #f0ede6;">
-      <img src="https://zenyaai.co/brand/wordmark.png" alt="زينيا" width="128" style="display:block;border:0;height:auto;width:128px;" />
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><meta name="supported-color-schemes" content="light"/><title>${esc(title)}</title></head>
+<body style="margin:0;padding:0;font-family:${FONT};background:#fafafa;color:#171717;direction:rtl;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;"><tr><td align="center">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
+    <tr><td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
+      <img src="${HEADER_IMG}" alt="زينيا" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
     </td></tr>
-    <tr><td style="padding:40px;text-align:right;">
-      <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:0.04em; color:#5e6ad2;">${eyebrow}</p>
-      <h1 style="margin:0 0 16px; font-size:26px; line-height:1.35; font-weight:800; letter-spacing:-0.01em; color:#16171b;">${heading}</h1>
+    <tr><td style="padding:20px 40px 8px;text-align:right;font-family:${FONT};">
+      <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">${eyebrow}</p>
+      <h1 style="margin:0 0 18px;font-size:26px;line-height:1.45;font-weight:700;color:#171717;">${heading}</h1>
       ${bodyHtml}
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr>
-        <td style="border-radius:999px;background:#5e6ad2;box-shadow:0 10px 28px -10px rgba(94,106,210,0.55);">
-          <a href="${ctaHref}" style="display:inline-block; padding:14px 34px; font-size:15px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:999px;">${ctaLabel}</a>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px;"><tr>
+        <td style="border-radius:999px;background:#171717;">
+          <a href="${ctaHref}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">${ctaLabel}</a>
         </td>
       </tr></table>
-      ${footnoteHtml ? `<div style="border-top:1px solid #ececf2;padding-top:22px;margin-top:8px;">${footnoteHtml}</div>` : ''}
-    </td></tr>
-    <tr><td style="padding:24px 40px;background:#faf8f3;border-top:1px solid #ececf2;text-align:right;">
-      <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#9b9b94;">أُرسلت من <strong style="color:#5f5f5d;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي</p>
-      <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#9b9b94;">
-        <a href="https://zenyaai.co" style="color:#5e6ad2;text-decoration:none;">zenyaai.co</a> &nbsp;·&nbsp;
-        <a href="https://zenyaai.co/privacy" style="color:#9b9b94;text-decoration:underline;">الخصوصية</a> &nbsp;·&nbsp;
-        <a href="https://zenyaai.co/terms" style="color:#9b9b94;text-decoration:underline;">الشروط</a>
-      </p>
-      <p style="margin:0;font-size:12px;line-height:1.6;color:#b3b3ab;">زينيا علامة تجارية مملوكة لشركة Musannef · للتواصل: <a href="mailto:noreply@zenyaai.co" style="color:#9b9b94;text-decoration:underline;">noreply@zenyaai.co</a></p>
+      ${footnoteHtml ? `<div style="padding:0 0 28px;">${footnoteHtml}</div>` : ''}
     </td></tr>
   </table>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;"><tr><td style="padding:20px 40px 0;text-align:right;font-family:${FONT};">
+    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">زينيا، منشئ المواقع بالذكاء الاصطناعي · <a href="https://zenyaai.co" style="color:#171717;text-decoration:none;">zenyaai.co</a></p>
+    <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#8f8f8f;">${SUPPORT_EMAIL}</a> · <a href="https://zenyaai.co/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://zenyaai.co/terms" style="color:#a3a3a3;">الشروط</a></p>
+  </td></tr></table>
   </td></tr></table>
 </body></html>`.trim()
 }
@@ -177,14 +189,14 @@ export function domainPurchasedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      شكرًا لك! تم تسجيل نطاقك <strong style="color:#16171b;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
+      شكرًا لك! تم تسجيل نطاقك <strong style="color:#171717;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#8a8a83;">النطاق: <strong style="color:#16171b;direction:ltr;display:inline-block;">${domain}</strong></p>
-        <p style="margin:0 0 6px;font-size:13px;color:#8a8a83;">المدة: <strong style="color:#16171b;">${yearWord}</strong></p>
-        <p style="margin:0;font-size:13px;color:#8a8a83;">ينتهي في: <strong style="color:#16171b;">${expiry}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">النطاق: <strong style="color:#171717;direction:ltr;display:inline-block;">${domain}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المدة: <strong style="color:#171717;">${yearWord}</strong></p>
+        <p style="margin:0;font-size:13px;color:#8f8f8f;">ينتهي في: <strong style="color:#171717;">${expiry}</strong></p>
       </td></tr>
     </table>`
 
@@ -195,7 +207,7 @@ export function domainPurchasedEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'إدارة نطاقاتي',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">يتم تجديد النطاق تلقائيًا قبل انتهائه حتى يبقى موقعك مباشرًا. يمكنك إدارة ذلك في أي وقت من لوحة التحكم.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">سنذكّرك قبل انتهاء النطاق بوقت كافٍ لتجدّده. تدير نطاقاتك في أي وقت من لوحة التحكم.</p>`,
   })
 
   return { subject, text, html }
@@ -232,13 +244,13 @@ export function domainRefundEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      حاولنا تسجيل النطاق <strong style="color:#16171b;direction:ltr;display:inline-block;">${domain}</strong>، لكن لم تكتمل العملية لدى جهة التسجيل — لذلك أعدنا إليك كامل المبلغ تلقائيًا. لم نأخذ منك شيئًا.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
+      حاولنا تسجيل النطاق <strong style="color:#171717;direction:ltr;display:inline-block;">${domain}</strong>، لكن لم تكتمل العملية لدى جهة التسجيل — لذلك أعدنا إليك كامل المبلغ تلقائيًا. لم نأخذ منك شيئًا.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#f3f7f3;border:1px solid #d9e7d9;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#5f8a5f;">المبلغ المُعاد: <strong style="color:#1f6f3f;">${amount}</strong></p>
-        <p style="margin:0;font-size:13px;color:#8a8a83;">قد يستغرق ظهوره في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المبلغ المُعاد: <strong style="color:#171717;">${amount}</strong></p>
+        <p style="margin:0;font-size:13px;color:#8f8f8f;">قد يستغرق ظهوره في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.</p>
       </td></tr>
     </table>`
 
@@ -249,58 +261,7 @@ export function domainRefundEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'جرّب نطاقًا آخر',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">نعتذر عن الإزعاج. إن تكرّر الأمر أو كانت لديك أي أسئلة، راسلنا وسنساعدك فورًا.</p>`,
-  })
-
-  return { subject, text, html }
-}
-
-/**
- * Sent right after a plan purchase clears (Stripe webhook). Two flavours:
- *   - 'onetime'  → the $9.99 lifetime Pro purchase
- *   - 'hosting'  → the $19.99/mo full-hosting subscription (first activation)
- */
-export function planPurchasedEmail(args: {
-  plan: 'onetime' | 'hosting'
-  manageUrl: string
-}): { subject: string; text: string; html: string } {
-  const { plan, manageUrl } = args
-  const isHosting = plan === 'hosting'
-
-  const subject = isHosting
-    ? 'تم تفعيل الاستضافة الكاملة في زينيا 🎉'
-    : 'أهلًا بك في زينيا برو 🎉'
-
-  const heading = isHosting ? 'تم تفعيل اشتراكك' : 'أهلًا بك في زينيا برو'
-  const eyebrow = isHosting ? 'الاستضافة الكاملة' : 'ترقية'
-  const intro = isHosting
-    ? 'شكرًا لك! اشتراك الاستضافة الكاملة نشطٌ الآن. مواقعك مستضافة ومُدارة بالكامل مع التحديثات التلقائية والنسخ الاحتياطية ودعم الأولوية.'
-    : 'شكرًا لك! تم تفعيل خطتك مدى الحياة بنجاح. يمكنك الآن إنشاء ونشر مواقع احترافية بكل ميزات زينيا — بدفعة واحدة فقط، إلى الأبد.'
-
-  const text = [
-    `شكرًا لك!`,
-    ``,
-    isHosting
-      ? `تم تفعيل اشتراك الاستضافة الكاملة في زينيا.`
-      : `تم تفعيل خطة زينيا برو مدى الحياة في حسابك.`,
-    ``,
-    `ابدأ من لوحة التحكم: ${manageUrl}`,
-    ``,
-    `— زينيا`,
-  ].join('\n')
-
-  const html = emailShell({
-    title: subject.replace(' 🎉', ''),
-    eyebrow,
-    heading,
-    bodyHtml: `<p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">${intro}</p>`,
-    ctaHref: manageUrl,
-    ctaLabel: isHosting ? 'الذهاب إلى لوحة التحكم' : 'ابدأ الإنشاء',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">${
-      isHosting
-        ? 'يمكنك إدارة اشتراكك أو إلغاءه في أي وقت من صفحة الفوترة في لوحة التحكم.'
-        : 'تحتاج مساعدة في إطلاق أول موقع؟ راسلنا في أي وقت — يسعدنا أن نساعدك.'
-    }</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">نعتذر عن الإزعاج. إن تكرّر الأمر أو كانت لديك أي أسئلة، راسلنا وسنساعدك فورًا.</p>`,
   })
 
   return { subject, text, html }
@@ -329,27 +290,27 @@ export function announcementEmail(args?: {
     '',
     `عُد وجرّبها الآن: ${manageUrl}`,
     '',
-    'لأي استفسار راسلنا على noreply@zenyaai.co',
+    'لأي استفسار راسلنا على team@zenyaai.co',
     '— زينيا (Musannef)',
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      جدّدنا <strong style="color:#16171b;">زينيا</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
+      جدّدنا <strong style="color:#171717;">زينيا</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
     </p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      والأهم: أضفنا زر <strong style="color:#16171b;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
+      والأهم: أضفنا زر <strong style="color:#171717;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
     </p>`
 
   const html = emailShell({
     title: 'زينيا بحُلّة جديدة',
     eyebrow: 'جديد',
-    heading: 'زينيا بحُلّة جديدة ✨',
+    heading: 'زينيا بحُلّة جديدة',
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'عُد إلى زينيا',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -420,47 +381,47 @@ export function paymentReceiptEmail(args: {
     dateStr ? `التاريخ: ${dateStr}` : null,
     '',
     `لوحة التحكم: ${manageUrl}`,
-    'لأي استفسار: noreply@zenyaai.co',
+    'لأي استفسار: team@zenyaai.co',
     '',
     '— زينيا (Musannef)',
   ].filter((l) => l !== null).join('\n')
 
   const summary = `
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
-            <td style="font-size:14px;color:#16171b;text-align:right;padding:6px 0;">${itemName}</td>
-            <td style="font-size:14px;color:#16171b;text-align:left;padding:6px 0;direction:ltr;white-space:nowrap;">${subtotal}</td>
+            <td style="font-size:14px;color:#171717;text-align:right;padding:6px 0;">${itemName}</td>
+            <td style="font-size:14px;color:#171717;text-align:left;padding:6px 0;direction:ltr;white-space:nowrap;">${subtotal}</td>
           </tr>
           ${taxCents > 0 ? `<tr>
-            <td style="font-size:13px;color:#8a8a83;text-align:right;padding:8px 0;border-top:1px solid #ececf2;">${taxLabel}</td>
-            <td style="font-size:13px;color:#8a8a83;text-align:left;padding:8px 0;border-top:1px solid #ececf2;direction:ltr;white-space:nowrap;">${tax}</td>
+            <td style="font-size:13px;color:#8f8f8f;text-align:right;padding:8px 0;border-top:1px solid #ececec;">${taxLabel}</td>
+            <td style="font-size:13px;color:#8f8f8f;text-align:left;padding:8px 0;border-top:1px solid #ececec;direction:ltr;white-space:nowrap;">${tax}</td>
           </tr>` : ''}
           <tr>
-            <td style="font-size:15px;font-weight:800;color:#16171b;text-align:right;padding:12px 0 4px;border-top:2px solid #e5e2d9;">المبلغ المدفوع</td>
-            <td style="font-size:15px;font-weight:800;color:#16171b;text-align:left;padding:12px 0 4px;border-top:2px solid #e5e2d9;direction:ltr;white-space:nowrap;">${total}</td>
+            <td style="font-size:15px;font-weight:800;color:#171717;text-align:right;padding:12px 0 4px;border-top:2px solid #e3e3e3;">المبلغ المدفوع</td>
+            <td style="font-size:15px;font-weight:800;color:#171717;text-align:left;padding:12px 0 4px;border-top:2px solid #e3e3e3;direction:ltr;white-space:nowrap;">${total}</td>
           </tr>
         </table>
       </td></tr>
     </table>`
 
   const bodyHtml = `
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">${intro}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">${intro}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;">
       <tr>
         <td style="text-align:right;vertical-align:top;padding:0 0 8px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#9b9b94;">المبلغ المدفوع</p>
-          <p style="margin:0;font-size:22px;font-weight:800;color:#16171b;direction:ltr;text-align:right;">${total}</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#8f8f8f;">المبلغ المدفوع</p>
+          <p style="margin:0;font-size:22px;font-weight:800;color:#171717;direction:ltr;text-align:right;">${total}</p>
         </td>
         <td style="text-align:left;vertical-align:top;padding:0 0 8px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#9b9b94;">التاريخ</p>
-          <p style="margin:0;font-size:14px;color:#16171b;">${dateStr}</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#8f8f8f;">التاريخ</p>
+          <p style="margin:0;font-size:14px;color:#171717;">${dateStr}</p>
         </td>
       </tr>
     </table>
     ${summary}
-    <p style="margin:0;font-size:12px;color:#9b9b94;">رقم الإيصال: <strong style="color:#5f5f5d;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
+    <p style="margin:0;font-size:12px;color:#8f8f8f;">رقم الإيصال: <strong style="color:#555555;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
 
   const html = emailShell({
     title: `إيصال الدفع من زينيا`,
@@ -469,7 +430,7 @@ export function paymentReceiptEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'الذهاب إلى لوحة التحكم',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">${
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">${
       {
         onetime: 'هذا إيصال عن شرائك خطة زينيا برو مدى الحياة.',
         hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
@@ -477,7 +438,7 @@ export function paymentReceiptEmail(args: {
         pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
         entry: 'هذا إيصال عن فتح التوليد بالذكاء الاصطناعي (خطة Entry، دفعة واحدة).',
       }[plan]
-    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -505,18 +466,18 @@ export function passwordChangedEmail(args: {
     `إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.`,
     ``,
     `لم تقم بهذا التغيير؟ أمّن حسابك فورًا بإعادة تعيين كلمة المرور من: ${secureUrl}`,
-    `وراسلنا على noreply@zenyaai.co`,
+    `وراسلنا على team@zenyaai.co`,
     ``,
     `— زينيا`,
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      هذا تأكيد بأن كلمة المرور لحسابك <strong style="color:#16171b;direction:ltr;display:inline-block;">${email}</strong> قد تغيّرت للتو. إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
+      هذا تأكيد بأن كلمة المرور لحسابك <strong style="color:#171717;direction:ltr;display:inline-block;">${email}</strong> قد تغيّرت للتو. إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">🔒 &nbsp;لأمانك، لن نُرسل لك كلمة المرور أبدًا عبر البريد، ولن نطلبها منك.</p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأمانك، لن نُرسل لك كلمة المرور أبدًا عبر البريد، ولن نطلبها منك.</p>
       </td></tr>
     </table>`
 
@@ -527,7 +488,7 @@ export function passwordChangedEmail(args: {
     bodyHtml,
     ctaHref: secureUrl,
     ctaLabel: 'تأمين حسابي',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;"><strong style="color:#5f5f5d;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;"><strong style="color:#555555;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -557,36 +518,15 @@ export function domainExpiringEmail(args: {
     `— زينيا`,
   ].join('\n')
 
-  const html = `
-<!doctype html>
-<html lang="ar" dir="rtl"><body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif; background:#f7f4ed; color:#16171b; direction:rtl;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f7f4ed;padding:40px 16px;direction:rtl;"><tr><td align="center">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e5e2d9;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px -16px rgba(28,28,28,0.14);">
-    <tr><td align="center" style="padding:28px 40px;background:#ffffff;border-bottom:1px solid #f0ede6;">
-      <img src="https://zenyaai.co/brand/wordmark.png" alt="زينيا" width="128" style="display:block;border:0;height:auto;width:128px;" />
-    </td></tr>
-    <tr><td style="padding:40px;text-align:right;">
-      <p style="margin:0 0 10px; font-size:12px; font-weight:700; letter-spacing:0.04em; color:#5e6ad2;">تذكير بالتجديد</p>
-      <h1 style="margin:0 0 16px; font-size:24px; line-height:1.4; font-weight:800; letter-spacing:-0.01em; color:#16171b;">
-        نطاقك ${domain} ينتهي خلال ${dayWord}
-      </h1>
-      <p style="font-size:16px; line-height:1.85; color:#5f5f5d; margin:0 0 26px;">
-        جدِّده الآن لإبقاء موقعك مباشرًا دون انقطاع. يبدأ التجديد التلقائي إن لم تتحرّك، لكن التجديد يدويًا يضمن لك سنة إضافية اليوم.
-      </p>
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr>
-        <td style="border-radius:999px;background:#5e6ad2;box-shadow:0 10px 28px -10px rgba(94,106,210,0.55);">
-          <a href="${renewUrl}" style="display:inline-block; padding:14px 34px; font-size:15px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:999px;">
-            تجديد ${domain} · $${retailUsd.toFixed(2)}/سنة
-          </a>
-        </td>
-      </tr></table>
-      <p style="font-size:12px; line-height:1.7; color:#9b9b94; margin:0; border-top:1px solid #ececf2; padding-top:22px;">
-        أُرسلت هذه الرسالة لأن نطاقك ${domain} يقترب من تاريخ انتهائه. أدِر نطاقاتك من <a href="https://zenyaai.co/dashboard/domains" style="color:#5e6ad2;text-decoration:none;">zenyaai.co/dashboard/domains</a>.
-      </p>
-    </td></tr>
-  </table>
-  </td></tr></table>
-</body></html>`.trim()
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'تذكير بالتجديد',
+    heading: `نطاقك <span style="direction:ltr;unicode-bidi:isolate;">${domain}</span> ينتهي خلال ${dayWord}`,
+    bodyHtml: `<p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:#555555;">جدِّده الآن ليبقى موقعك ظاهرًا دون انقطاع. إن لم تجدِّده، يتوقف النطاق عن العمل، وقد يسجّله شخص آخر بعد فترة قصيرة.</p>`,
+    ctaHref: renewUrl,
+    ctaLabel: `جدِّد النطاق · $${retailUsd.toFixed(2)} للسنة`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن نطاقك يقترب من تاريخ انتهائه. تدير نطاقاتك من <a href="https://zenyaai.co/dashboard/domains" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
+  })
 
   return { subject, text, html }
 }
@@ -618,27 +558,27 @@ export function welcomeEmail(args: {
     'اكتب فكرتك، أو ابدأ من مثال جاهز، وولّد موقعًا احترافيًا في ثوانٍ.',
     `ابدأ من هنا: ${manageUrl}`,
     '',
-    'لأي سؤال راسلنا على noreply@zenyaai.co — نحن هنا للمساعدة.',
+    'لأي سؤال راسلنا على team@zenyaai.co — نحن هنا للمساعدة.',
     '— زينيا',
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      يسعدنا انضمامك إلى <strong style="color:#16171b;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي. حسابك جاهز، ولديك <strong style="color:#16171b;">${genWord}</strong> لتبدأ بها فورًا.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
+      يسعدنا انضمامك إلى <strong style="color:#171717;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي. حسابك جاهز، ولديك <strong style="color:#171717;">${genWord}</strong> لتبدأ بها فورًا.
     </p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      اكتب فكرتك، أو ابدأ من <strong style="color:#16171b;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
+      اكتب فكرتك، أو ابدأ من <strong style="color:#171717;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
     </p>`
 
   const html = emailShell({
     title: 'أهلًا بك في زينيا',
     eyebrow: 'مرحبًا',
-    heading: 'أهلًا بك في زينيا 👋',
+    heading: 'أهلًا بك في زينيا',
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'ابدأ إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a> ويسعدنا أن نأخذ بيدك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a> ويسعدنا أن نأخذ بيدك.</p>`,
   })
 
   return { subject, text, html }
@@ -693,14 +633,14 @@ export function bookingReceivedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      وصلك <strong style="color:#16171b;">${esc(args.kind)}</strong> جديد على موقعك «${esc(args.siteName)}».
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
+      وصلك <strong style="color:#171717;">${esc(args.kind)}</strong> جديد على موقعك «${esc(args.siteName)}».
     </p>
     <table role="presentation" style="width:100%; border-collapse:collapse; margin:0 0 18px;">
-      ${facts.map(([k, v]) => `<tr><td style="padding:6px 0; font-size:15px; color:#8a8a83; white-space:nowrap;">${k}</td><td style="padding:6px 12px 6px 0; font-size:15px; color:#16171b; font-weight:700;">${esc(v)}</td></tr>`).join('')}
+      ${facts.map(([k, v]) => `<tr><td style="padding:6px 0; font-size:15px; color:#8f8f8f; white-space:nowrap;">${k}</td><td style="padding:6px 12px 6px 0; font-size:15px; color:#171717; font-weight:700;">${esc(v)}</td></tr>`).join('')}
     </table>
-    ${args.message ? `<p style="margin:0 0 22px; padding:12px 14px; background:#f4f4f6; border-radius:10px; font-size:15px; line-height:1.8; color:#5f5f5d;">${esc(args.message)}</p>` : ''}`
+    ${args.message ? `<p style="margin:0 0 22px; padding:12px 14px; background:#f5f5f5; border-radius:10px; font-size:15px; line-height:1.8; color:#555555;">${esc(args.message)}</p>` : ''}`
 
   const html = emailShell({
     title: subject,
@@ -709,7 +649,7 @@ export function bookingReceivedEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'افتح الحجوزات',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن إشعار «حجز جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن إشعار «حجز جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
   })
 
   return { subject, text, html }
@@ -735,7 +675,7 @@ export function trialReminderEmail(args: {
   const text = [
     greeting,
     '',
-    `تجربتك في زينيا ما زالت مفتوحة، ولا يزال لديك ${remWord}.`,
+    `حسابك في زينيا جاهز، ولا يزال لديك ${remWord} في الباقة المجانية.`,
     'لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك في ثوانٍ.',
     '',
     `تابع من حيث توقفت: ${manageUrl}`,
@@ -744,19 +684,19 @@ export function trialReminderEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      تجربتك في زينيا ما زالت مفتوحة، ولا يزال لديك <strong style="color:#16171b;">${remWord}</strong>. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
+      حسابك في زينيا جاهز، ولا يزال لديك <strong style="color:#171717;">${remWord}</strong> في الباقة المجانية. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
     </p>`
 
   const html = emailShell({
     title: 'لا يزال لديك مواقع مجانية في زينيا',
-    eyebrow: 'تذكير بتجربتك',
+    eyebrow: 'الباقة المجانية',
     heading: `لا يزال لديك ${remWord}`,
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'أكمل إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن لديك تجربة مجانية نشطة في زينيا. عند الترقية تحصل على توليد غير محدود.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة مرة واحدة فقط. مع خطة Starter أو Pro تولّد مواقع بلا حدود.</p>`,
   })
 
   return { subject, text, html }
@@ -777,49 +717,50 @@ export function quotaReachedEmail(args: {
   const genWord = limit === 1 ? 'موقعك المجاني' : limit === 2 ? 'موقعيك المجانيين' : `مواقعك المجانية الـ${limit}`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
-  const subject = 'استنفدت تجربتك المجانية في زينيا'
+  const subject = 'استخدمت مواقعك المجانية في زينيا'
 
   const text = [
     greeting,
     '',
     `لقد استخدمت ${genWord} بالكامل — نأمل أن تكون النتائج أعجبتك!`,
-    'للاستمرار في توليد مواقع بلا حدود، بالإضافة إلى تصدير شوبيفاي وملفات المشاريع، اشترك في إحدى خططنا.',
+    'مع خطة Starter أو Pro تولّد مواقع بلا حدود، وتربط نطاقك الخاص، وتستقبل الحجوزات.',
     '',
     `طالع الخطط: ${upgradeUrl}`,
     '',
-    'مواقعك التي أنشأتها تبقى محفوظة في حسابك.',
+    'مواقعك التي أنشأتها تبقى محفوظة ومنشورة كما هي.',
     '— زينيا',
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      لقد استخدمت <strong style="color:#16171b;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! للاستمرار في توليد مواقع <strong style="color:#16171b;">بلا حدود</strong>، مع تصدير شوبيفاي وملفات المشاريع، اشترك في إحدى خططنا.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
+      لقد استخدمت <strong style="color:#171717;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! مع خطة Starter أو Pro تولّد مواقع <strong style="color:#171717;">بلا حدود</strong>، وتربط نطاقك الخاص، وتستقبل الحجوزات.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">✅ &nbsp;مواقعك التي أنشأتها تبقى محفوظة في حسابك — لن تفقد أي عمل.</p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك التي أنشأتها تبقى محفوظة ومنشورة كما هي. لن تفقد أي شيء.</p>
       </td></tr>
     </table>`
 
   const html = emailShell({
-    title: 'استنفدت تجربتك المجانية في زينيا',
-    eyebrow: 'انتهت التجربة',
-    heading: 'استنفدت تجربتك المجانية',
+    title: 'استخدمت مواقعك المجانية في زينيا',
+    eyebrow: 'الباقة المجانية',
+    heading: 'استخدمت مواقعك المجانية',
     bodyHtml,
     ctaHref: upgradeUrl,
     ctaLabel: 'طالع الخطط والترقية',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">لأي سؤال عن الخطط راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأي سؤال عن الخطط راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
   })
 
   return { subject, text, html }
 }
 
 /**
- * Sent when a hosting subscription is set to lapse — the user canceled (or
- * payment won't renew) and the paid period is ending within the reminder
- * window. The point is churn prevention: warn them their live sites will go
- * offline unless they resubscribe, before it actually happens.
+ * Sent when a Pro (or legacy hosting) subscription is set to lapse: the owner
+ * canceled and the paid period ends within the reminder window. Their sites
+ * stay published on the free plan; what goes is the Pro extras, most visibly
+ * the "made with Zenya" badge coming back. Churn prevention, sent before it
+ * happens.
  */
 export function hostingExpiringEmail(args: {
   firstName?: string | null
@@ -830,47 +771,46 @@ export function hostingExpiringEmail(args: {
   const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/billing'
   const daysUntil = Math.max(0, args.daysUntil)
   const dayWord = daysUntil === 0 ? 'اليوم' : daysUntil === 1 ? 'يوم واحد' : daysUntil === 2 ? 'يومين' : `${daysUntil} أيام`
+  const when = daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
   let endStr = args.endDate
   try {
     endStr = new Date(args.endDate).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
   } catch { /* keep ISO fallback */ }
 
-  const urgency = daysUntil <= 3 ? 'عاجل — ' : ''
-  const subject = `${urgency}استضافتك في زينيا تنتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}`
+  const subject = `اشتراكك في زينيا ينتهي ${when}`
 
   const text = [
     greeting,
     '',
-    `اشتراك الاستضافة الكاملة في حسابك ينتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`} (${endStr}).`,
-    'عند انتهائه، ستتوقف مواقعك المستضافة عن الظهور على الإنترنت.',
+    `اشتراكك في زينيا ينتهي ${when} (${endStr}).`,
+    'بعدها يرجع حسابك إلى الباقة المجانية. مواقعك تبقى منشورة، لكن تعود شارة «صُنع بزينيا» وتتوقف مزايا خطتك.',
     '',
-    `لإبقاء مواقعك مباشرة، جدّد اشتراكك من: ${manageUrl}`,
+    `لتبقى على خطتك، جدّد اشتراكك من: ${manageUrl}`,
     '',
-    'ملفاتك ومحتواك يبقى محفوظًا في حسابك — الاستضافة فقط هي ما يتوقف.',
     '— زينيا',
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">${greeting}</p>
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      اشتراك الاستضافة الكاملة في حسابك ينتهي <strong style="color:#16171b;">${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}</strong>. عند انتهائه، ستتوقف مواقعك المستضافة عن الظهور على الإنترنت.
+    <p style="margin:0 0 18px;font-size:16px;line-height:1.85;color:#555555;">${greeting}</p>
+    <p style="margin:0 0 20px;font-size:16px;line-height:1.85;color:#555555;">
+      اشتراكك في زينيا ينتهي <strong style="color:#171717;">${when}</strong>. بعدها يرجع حسابك إلى الباقة المجانية.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fdf4f0;border:1px solid #f0dcd2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#a05a3a;">ينتهي في: <strong style="color:#8a3c1f;">${endStr}</strong></p>
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">ملفاتك ومحتواك يبقى محفوظًا في حسابك — الاستضافة فقط هي ما يتوقف.</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">ينتهي في: <strong style="color:#171717;">${endStr}</strong></p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك تبقى منشورة ومحفوظة. ما يتوقف: مزايا خطتك، وتعود شارة «صُنع بزينيا» أسفل مواقعك.</p>
       </td></tr>
     </table>`
 
   const html = emailShell({
-    title: 'استضافتك في زينيا تقترب من الانتهاء',
-    eyebrow: 'تنبيه الاستضافة',
-    heading: `استضافتك تنتهي ${daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`}`,
+    title: subject,
+    eyebrow: 'اشتراكك',
+    heading: `اشتراكك ينتهي ${when}`,
     bodyHtml,
     ctaHref: manageUrl,
-    ctaLabel: 'جدّد الاستضافة الآن',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">تصلك هذه الرسالة لأن اشتراك الاستضافة في حسابك مُجدوَل للإيقاف. لأي سؤال راسلنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a>.</p>`,
+    ctaLabel: 'جدّد اشتراكك',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن اشتراكك أُلغي وسينتهي في آخر يوم مدفوع.</p>`,
   })
 
   return { subject, text, html }
@@ -899,17 +839,17 @@ export function accountDeletedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#5f5f5d;">
-      تم حذف حسابك المرتبط بـ <strong style="color:#16171b;">${args.email}</strong> نهائيًا وفق طلبك.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
+      تم حذف حسابك المرتبط بـ <strong style="color:#171717;">${args.email}</strong> نهائيًا وفق طلبك.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;background:#faf8f3;border:1px solid #ececf2;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 8px;font-size:13px;color:#8a8a83;">✅ &nbsp;تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.</p>
-        <p style="margin:0;font-size:13px;color:#8a8a83;">🔒 &nbsp;يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#8f8f8f;">تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.</p>
+        <p style="margin:0;font-size:13px;color:#8f8f8f;">يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).</p>
       </td></tr>
     </table>
-    <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#8a8a83;">
-      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://zenyaai.co/signup" style="color:#5e6ad2;text-decoration:none;">zenyaai.co</a>.
+    <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#8f8f8f;">
+      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://zenyaai.co/signup" style="color:#171717;text-decoration:none;">zenyaai.co</a>.
     </p>`
 
   const html = emailShell({
@@ -919,8 +859,299 @@ export function accountDeletedEmail(args: {
     bodyHtml,
     ctaHref: 'https://zenyaai.co/signup',
     ctaLabel: 'إنشاء حساب جديد',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8a8a83;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:noreply@zenyaai.co" style="color:#5e6ad2;text-decoration:none;">noreply@zenyaai.co</a> فورًا.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a> فورًا.</p>`,
   })
+
+  return { subject, text, html }
+}
+
+const P = 'margin:0 0 18px;font-size:16px;line-height:1.85;color:#555555;'
+const NOTE = 'margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;'
+const BOX = 'margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;'
+const hello = (firstName?: string | null) => (firstName ? `أهلًا ${firstName}،` : 'أهلًا بك،')
+
+function arDate(iso?: string | null): string {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch {
+    return iso
+  }
+}
+
+/**
+ * Sent when Stripe fails to take a subscription payment (webhook
+ * invoice.payment_failed, first attempt only). Stripe retries on its own, so
+ * the message is "your card was refused, update it before the next try", not
+ * "you lost your plan".
+ */
+export function paymentFailedEmail(args: {
+  firstName?: string | null
+  planLabel: string
+  amountCents: number
+  currency: string
+  nextAttemptIso?: string | null
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/billing'
+  const amount = fmtMoney(args.amountCents, args.currency)
+  const next = arDate(args.nextAttemptIso)
+  const subject = 'لم نتمكن من تجديد اشتراكك في زينيا'
+
+  const text = [
+    hello(args.firstName),
+    '',
+    `حاولنا تجديد اشتراكك (${args.planLabel}، ${amount}) لكن البطاقة رُفضت.`,
+    next ? `سنحاول مرة أخرى في ${next}.` : 'سنحاول مرة أخرى خلال أيام.',
+    'حدّث بطاقتك قبل ذلك حتى لا تتوقف مزايا خطتك.',
+    '',
+    `حدّث بطاقتك من: ${manageUrl}`,
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="${P}">${hello(args.firstName)}</p>
+    <p style="${P}">حاولنا تجديد اشتراكك لكن البطاقة <strong style="color:#171717;">رُفضت</strong>. حدّث بطاقتك قبل المحاولة القادمة حتى لا تتوقف مزايا خطتك.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">الخطة: <strong style="color:#171717;">${args.planLabel}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المبلغ: <strong style="color:#171717;direction:ltr;display:inline-block;">${amount}</strong></p>
+        ${next ? `<p style="margin:0;font-size:13px;color:#8f8f8f;">المحاولة القادمة: <strong style="color:#171717;">${next}</strong></p>` : ''}
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'الدفع',
+    heading: 'البطاقة رُفضت',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'حدّث بطاقتك',
+    footnoteHtml: `<p style="${NOTE}">مواقعك منشورة ولم يتغيّر فيها شيء. أسباب الرفض الشائعة: بطاقة منتهية، أو رصيد غير كافٍ، أو البنك أوقف الدفع عبر الإنترنت.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent the day a paid subscription actually ends (webhook
+ * customer.subscription.deleted). The account is back on the free plan; the
+ * sites stay up. Says plainly what changed and how to come back.
+ */
+export function subscriptionEndedEmail(args: {
+  firstName?: string | null
+  planLabel: string
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/pricing'
+  const subject = 'انتهى اشتراكك في زينيا'
+
+  const text = [
+    hello(args.firstName),
+    '',
+    `انتهى اشتراكك (${args.planLabel})، ورجع حسابك إلى الباقة المجانية.`,
+    'مواقعك تبقى منشورة ومحفوظة. ما توقف: مزايا خطتك، مثل التوليد بلا حدود.',
+    '',
+    `ترجع متى شئت من: ${manageUrl}`,
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="${P}">${hello(args.firstName)}</p>
+    <p style="${P}">انتهى اشتراكك في <strong style="color:#171717;">${args.planLabel}</strong>، ورجع حسابك إلى الباقة المجانية.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
+      <tr><td style="padding:16px 18px;text-align:right;">
+        <p style="margin:0 0 6px;font-size:13px;line-height:1.8;color:#8f8f8f;">باقٍ كما هو: <strong style="color:#171717;">مواقعك ومحتواها، منشورة ومحفوظة.</strong></p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">توقف: <strong style="color:#171717;">مزايا خطتك، مثل التوليد بلا حدود.</strong></p>
+      </td></tr>
+    </table>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'اشتراكك',
+    heading: 'انتهى اشتراكك',
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'ارجع إلى خطتك',
+    footnoteHtml: `<p style="${NOTE}">إن لم تقصد إلغاء الاشتراك، ردّ على هذه الرسالة ونساعدك.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent the first time a site is published (POST /api/themes/[id]/publish when
+ * the theme had never been published). The live link is the point: it is
+ * what the owner forwards to their customers.
+ */
+export function sitePublishedEmail(args: {
+  firstName?: string | null
+  siteName: string
+  siteUrl: string
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const host = args.siteUrl.replace(/^https?:\/\//, '')
+  const name = esc(args.siteName)
+  const subject = `موقع «${args.siteName}» أصبح على الإنترنت`
+
+  const text = [
+    hello(args.firstName),
+    '',
+    `موقع «${args.siteName}» منشور الآن، ويستطيع أي شخص فتحه:`,
+    args.siteUrl,
+    '',
+    'أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط Google.',
+    '',
+    `عدّل موقعك في أي وقت من: ${manageUrl}`,
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="${P}">${hello(args.firstName)}</p>
+    <p style="${P}">موقع <strong style="color:#171717;">«${name}»</strong> منشور الآن، ويستطيع أي شخص فتحه من هذا الرابط:</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
+      <tr><td style="padding:18px;text-align:center;">
+        <a href="${args.siteUrl}" style="font-size:17px;font-weight:700;color:#171717;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${host}</a>
+      </td></tr>
+    </table>
+    <p style="${P}">أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط Google.</p>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'تم النشر',
+    heading: 'موقعك على الإنترنت',
+    bodyHtml,
+    ctaHref: args.siteUrl,
+    ctaLabel: 'افتح موقعك',
+    footnoteHtml: `<p style="${NOTE}">تعدّل موقعك وتتابع زياراته من <a href="${manageUrl}" style="color:#171717;text-decoration:none;">لوحة التحكم</a>. التعديلات تظهر خلال دقيقة.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
+ * Sent when a custom domain first turns live (DNS verified, SSL issued) on
+ * GET /api/domains/[id]. Owners often close the page while DNS settles; this
+ * tells them it worked without them checking back.
+ */
+export function domainLiveEmail(args: {
+  domain: string
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/domains'
+  const url = `https://${args.domain}`
+  const subject = `نطاقك ${args.domain} يعمل الآن`
+
+  const text = [
+    'أهلًا بك،',
+    '',
+    `نطاقك ${args.domain} يعمل الآن، وموقعك يفتح عليه بأمان (https).`,
+    url,
+    '',
+    'حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.',
+    '',
+    '— زينيا',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="${P}">نطاقك يعمل الآن، وموقعك يفتح عليه بأمان (https):</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
+      <tr><td style="padding:18px;text-align:center;">
+        <a href="${url}" style="font-size:17px;font-weight:700;color:#171717;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${args.domain}</a>
+      </td></tr>
+    </table>
+    <p style="${P}">حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.</p>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'النطاق',
+    heading: 'نطاقك يعمل الآن',
+    bodyHtml,
+    ctaHref: url,
+    ctaLabel: 'افتح موقعك',
+    footnoteHtml: `<p style="${NOTE}">تدير نطاقاتك من <a href="${manageUrl}" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/** The colours a customer site paints itself in, as the booking mail needs them. */
+export type SiteMailPalette = {
+  background: string
+  surface: string
+  text: string
+  muted: string
+  border: string
+  button: string
+  buttonText: string
+  buttonRadius: number
+}
+
+/**
+ * Sent to the VISITOR who booked on a customer's site (app/api/bookings), in
+ * that site's own colours and name, with no Zenya branding: to the visitor
+ * this is the restaurant writing, not us. Reply-To is the owner.
+ *
+ * Abuse guard: anyone can type any address into a public form, so this mail
+ * repeats nothing the visitor typed (no name, no message), only the site's
+ * name and the checked date, time and party size.
+ */
+export function bookingConfirmationEmail(args: {
+  siteName: string
+  siteUrl: string
+  kind: string
+  when?: string | null
+  party?: number | null
+  phone?: string | null
+  palette: SiteMailPalette
+}): { subject: string; text: string; html: string } {
+  const { palette: c } = args
+  const name = esc(args.siteName)
+  const subject = `وصل طلبك إلى ${args.siteName}`
+
+  const facts: Array<[string, string]> = [
+    ['الطلب', args.kind],
+    ...(args.when ? [['الموعد', args.when] as [string, string]] : []),
+    ...(args.party ? [['عدد الأشخاص', String(args.party)] as [string, string]] : []),
+  ]
+
+  const text = [
+    'أهلًا بك،',
+    '',
+    `وصل طلبك إلى ${args.siteName}. سيتواصلون معك قريبًا لتأكيده.`,
+    '',
+    ...facts.map(([k, v]) => `${k}: ${v}`),
+    ...(args.phone ? ['', `للتواصل معهم: ${args.phone}`] : []),
+    '',
+    args.siteUrl,
+  ].join('\n')
+
+  const html = `
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><title>${esc(subject)}</title></head>
+<body style="margin:0;padding:0;font-family:${FONT};background:${c.background};color:${c.text};direction:rtl;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:${c.background};padding:32px 12px;direction:rtl;"><tr><td align="center">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" style="max-width:520px;width:100%;background:${c.surface};border:1px solid ${c.border};border-radius:16px;"><tr><td style="padding:32px;text-align:right;font-family:${FONT};">
+    <p style="margin:0 0 22px;font-size:18px;font-weight:700;color:${c.text};">${name}</p>
+    <h1 style="margin:0 0 14px;font-size:24px;line-height:1.45;font-weight:700;color:${c.text};">وصل طلبك</h1>
+    <p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:${c.muted};">شكرًا لك. سيتواصل معك فريق ${name} قريبًا لتأكيد طلبك.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;border-top:1px solid ${c.border};">
+      ${facts.map(([k, v]) => `<tr><td style="padding:10px 0;font-size:15px;color:${c.muted};border-bottom:1px solid ${c.border};white-space:nowrap;">${k}</td><td style="padding:10px 12px 10px 0;font-size:15px;font-weight:700;color:${c.text};border-bottom:1px solid ${c.border};">${esc(v)}</td></tr>`).join('')}
+    </table>
+    ${args.phone ? `<p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:${c.muted};">للتواصل معهم: <a href="tel:${esc(args.phone.replace(/[^\d+]/g, ''))}" style="color:${c.text};font-weight:700;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${esc(args.phone)}</a></p>` : ''}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-radius:${c.buttonRadius}px;background:${c.button};">
+        <a href="${args.siteUrl}" style="display:inline-block;padding:12px 26px;font-size:15px;font-weight:700;color:${c.buttonText};text-decoration:none;border-radius:${c.buttonRadius}px;">زيارة الموقع</a>
+      </td>
+    </tr></table>
+  </td></tr></table>
+  <p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.7;color:${c.muted};text-align:right;">وصلتك هذه الرسالة لأن بريدك كُتب في نموذج الحجز على موقع ${name}. إن لم تكن أنت، تجاهلها.</p>
+  </td></tr></table>
+</body></html>`.trim()
 
   return { subject, text, html }
 }
