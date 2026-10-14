@@ -21,7 +21,7 @@ import { photoSeed, pickPhoto, unsplash } from '@/utils/wellness/niches'
 
 export { unsplash }
 
-export type ServiceNicheId = 'carpet' | 'pest' | 'barber' | 'ac' | 'carwash' | 'carrepair' | 'cleaning'
+export type ServiceNicheId = 'carpet' | 'pest' | 'barber' | 'ac' | 'carwash' | 'carrepair' | 'cleaning' | 'hall' | 'dental'
 
 export type ServiceNiche = {
   id: ServiceNicheId
@@ -110,6 +110,31 @@ export const SERVICE_NICHES: ServiceNiche[] = [
       story: ['1616360072047-70557844db53', '1689127903369-aef916b0c40d', '1787205598829-e945bf8594ce'],
     },
     keywords: ['تنظيف', 'نظافة', 'cleaning'],
+  },
+  {
+    id: 'hall',
+    photos: {
+      // White kosha stage under crystal chandeliers · gold hall with one great
+      // chandelier and a flower stage · white hall with arches and chandeliers ·
+      // flower-arch aisle between dressed tables. All empty, no people.
+      hero: ['1698934641149-93431f3bd4f7', '1712314947761-a8d718bd8c32', '1549964336-96c968e00d5b', '1779308936221-89739e035a53'],
+      // Set round tables under draped fabric · white tables with flower centres ·
+      // gilded mirrored ballroom.
+      story: ['1666617710768-425d2d9088f8', '1775918427144-51f0bf53f8c4', '1549895058-36748fa6c6a7'],
+    },
+    keywords: ['قاعة', 'قاعات', 'أفراح', 'افراح', 'زفاف', 'احتفالات', 'مناسبات', 'wedding', 'ballroom', 'banquet', 'event hall'],
+  },
+  {
+    id: 'dental',
+    photos: {
+      // Bright white treatment room · orange dental chair by a window ·
+      // grey chair in a plain white room. No people.
+      hero: ['1629909613654-28e377c37b09', '1598256989800-fe5f95da9787', '1704455306251-b4634215d98f'],
+      // Implant model on a dark table · mirror and explorer on white ·
+      // a dentist reading scans on a light box (man) · blue chair by a mural.
+      story: ['1593022356769-11f762e25ed9', '1606811856475-5e6fcdc6e509', '1588776814546-1ffcf47267a5', '1643660526741-094639fbe53a'],
+    },
+    keywords: ['أسنان', 'اسنان', 'تقويم', 'dental', 'dentist', 'orthodont'],
   },
 ]
 
