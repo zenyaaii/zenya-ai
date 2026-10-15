@@ -1,5 +1,4 @@
 import type { MetadataRoute } from 'next'
-import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,7 +7,9 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         // Customer sites live on their own subdomain or domain, with their own
         // robots.txt. zenyaai.co/s/<slug> only 301s there (middleware). Auth +
-        // API + preview routes stay out.
+        // API + preview routes stay out. /en is NOT disallowed: while English is
+        // off it 301s to Arabic (next.config.js), and a crawler blocked from
+        // /en would never see that redirect, so old /en URLs would linger.
         allow: ['/'],
         disallow: [
           '/api/',
@@ -19,8 +20,6 @@ export default function robots(): MetadataRoute.Robots {
           '/checkout',
           '/preview/',
           '/shopify/',
-          // English edition is paused and 404s; keep crawlers off it.
-          ...(ENGLISH_ENABLED ? [] : ['/en']),
         ],
       },
     ],

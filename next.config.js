@@ -15,6 +15,28 @@ const TEMPLATE_ROUTES = [
 ]
 const ZENYA_HOST = [{ type: 'host', value: '(?:(?:www\\.)?zenyaai\\.co|localhost)' }]
 
+/**
+ * Mirrors ENGLISH_ENABLED in lib/i18n/config.ts, which this file cannot import
+ * (CommonJS vs TS). Change one, change the other.
+ */
+const ENGLISH_ENABLED = false
+
+/**
+ * While English is off, every /en address 301s to its Arabic page. A 404 told
+ * Google the page was gone but left it listed for weeks; a 301 hands whatever
+ * the English URL earned to the Arabic one and drops it from the index.
+ * Specific rules first: /en/websites and /en/why moved to /templates, and the
+ * English /why slugs are the template slugs. Everything else keeps its path.
+ */
+const ENGLISH_TO_ARABIC = [
+  { source: '/en', destination: '/', permanent: true, has: ZENYA_HOST },
+  { source: '/en/themes', destination: '/templates', permanent: true, has: ZENYA_HOST },
+  { source: '/en/websites', destination: '/templates', permanent: true, has: ZENYA_HOST },
+  { source: '/en/websites/:slug', destination: '/templates/:slug', permanent: true, has: ZENYA_HOST },
+  { source: '/en/why/:slug', destination: '/templates/:slug', permanent: true, has: ZENYA_HOST },
+  { source: '/en/:path*', destination: '/:path*', permanent: true, has: ZENYA_HOST },
+]
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -107,12 +129,11 @@ const nextConfig = {
         destination: '/templates',
         permanent: true,
       },
-      // The English route moved with it, for the same reason.
-      {
-        source: '/en/themes',
-        destination: '/en/templates',
-        permanent: true,
-      },
+      // English is off: every /en address goes to its Arabic page. When it
+      // comes back, /en/themes still moves to /en/templates like /themes did.
+      ...(ENGLISH_ENABLED
+        ? [{ source: '/en/themes', destination: '/en/templates', permanent: true }]
+        : ENGLISH_TO_ARABIC),
       // ONE ADDRESS PER TEMPLATE (2026-10-04). Each template used to have
       // three indexed pages: /websites/<slug>, /why/<key> and /demo/<key>.
       // They are one page now, /templates/<slug>, with the demo under it. All

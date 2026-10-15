@@ -23,13 +23,12 @@
  * The English work is paused, not abandoned — every page, the catalog, and the
  * switcher all stay in the repo. While this is `false`:
  *
- *   • /en/* returns 404 (app/en/layout.tsx)
+ *   • /en/* 301s to the Arabic page (next.config.js, which mirrors this flag)
  *   • the language switcher renders nothing, everywhere
  *   • the sitemap advertises Arabic only, with no hreflang alternates
- *   • robots.txt disallows /en
  *   • the locale cookie cannot flip the app to English
  *
- * Flip to `true` to bring it all back. Nothing else needs editing.
+ * Flip to `true` here AND in next.config.js to bring it all back.
  */
 export const ENGLISH_ENABLED = false
 
