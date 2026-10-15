@@ -1454,12 +1454,22 @@ const CSS = `
    cards: no plate, no inset, no corner bracket. A key is a cropped square and
    a word, because it has to read as a control and not as a ninth template.
 ------------------------------------------------------------------------- */
+/* THE COLUMN IS minmax(0, 1fr), NOT THE IMPLICIT auto. An auto track sizes
+   from what is in it, and on iPhone Safari what was in it fed itself: the
+   cover's width set its height through the ratio, the image's 100% height fed
+   back into the width, and every relayout (the toolbar folding on scroll is
+   one) came out larger than the last. The owner watched the restaurant cover
+   swell until "مغلق اليوم" filled the screen and the page shrank to fit it.
+   A fixed track, a zero floor on the card and an image taken out of flow
+   (below) leave the loop nothing to grow from. */
 .zt-pick {
   max-width: 34rem;
   margin-inline: auto;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.875rem;
 }
+.zt-pick > * { min-width: 0; }
 
 .zt-hero {
   position: relative;
@@ -1615,8 +1625,12 @@ const CSS = `
    from public/theme-previews/phone, taken at 390x844 from each demo. */
 @media (max-width: 760px) {
   .zt-hero { box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.07), 0 12px 32px -18px rgba(0, 0, 0, 0.28); }
-  .zt-hero-shot { overflow: visible; }
-  .zt-hero-shot > img { border-radius: var(--r-control); }
+  .zt-hero-shot { overflow: visible; min-height: 0; }
+  /* Out of flow, so the box's size comes from its width and the 16/10 ratio
+     alone. With overflow visible (the phone frame hangs out of the corner) a
+     ratio box may not shrink below its content, and an in-flow image at 100%
+     height is content whose size is the box's own: the loop above. */
+  .zt-hero-shot > img { position: absolute; inset: 0; border-radius: var(--r-control); }
   .zt-hero-body { padding: 1.75rem 1rem 0.875rem; }
   .zt-hero-name { font-size: 19px; }
   .zt-hero-meta { font-size: 13.5px; }
