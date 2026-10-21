@@ -191,7 +191,7 @@ async function recordOneTimePurchase(
         country,
         receiptNumber: receiptNumber(session),
         dateIso: new Date().toISOString(),
-        manageUrl: 'https://zenyaai.co/dashboard',
+        manageUrl: 'https://beynoun.com/dashboard',
       })
       await sendEmail({
         to: buyerEmail,
@@ -296,7 +296,7 @@ async function recordEntryUnlock(
         country,
         receiptNumber: receiptNumber(session),
         dateIso: new Date().toISOString(),
-        manageUrl: 'https://zenyaai.co/dashboard',
+        manageUrl: 'https://beynoun.com/dashboard',
       })
       await sendEmail({
         to: buyerEmail,
@@ -602,7 +602,7 @@ async function fulfillDomainPurchase(
         const tmpl = domainRefundEmail({
           domain,
           amountUsd: refundUsd,
-          manageUrl: 'https://zenyaai.co/dashboard/sites',
+          manageUrl: 'https://beynoun.com/dashboard/sites',
         })
         await sendEmail({
           to: buyerEmail,
@@ -710,7 +710,7 @@ async function fulfillDomainPurchase(
         domain,
         years,
         expiresAt: expiresAt.toISOString(),
-        manageUrl: 'https://zenyaai.co/dashboard/sites',
+        manageUrl: 'https://beynoun.com/dashboard/sites',
       })
       await sendEmail({
         to: buyerEmail,
@@ -903,7 +903,7 @@ export async function POST(req: NextRequest) {
                 country: session.customer_details?.address?.country || null,
                 receiptNumber: receiptNumber(session),
                 dateIso: new Date().toISOString(),
-                manageUrl: 'https://zenyaai.co/dashboard',
+                manageUrl: 'https://beynoun.com/dashboard',
               })
               await sendEmail({
                 to: email,
@@ -1041,7 +1041,7 @@ export async function POST(req: NextRequest) {
               country: (inv as any).customer_address?.country || null,
               receiptNumber: inv.number || shortReceipt(inv.id || ''),
               dateIso: new Date(created * 1000).toISOString(),
-              manageUrl: 'https://zenyaai.co/dashboard',
+              manageUrl: 'https://beynoun.com/dashboard',
             })
             await sendEmail({
               to: email,

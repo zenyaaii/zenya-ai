@@ -6,9 +6,9 @@ import { extractImageUrls } from '@/lib/extract-image-urls'
 import { pagesFor } from '@/lib/site-pages'
 
 /**
- * Per-site sitemap, served at `slug.zenyaai.co/sitemap.xml`.
+ * Per-site sitemap, served at `slug.beynoun.com/sitemap.xml`.
  *
- * The middleware rewrites `slug.zenyaai.co/sitemap.xml` → `/s/<slug>/sitemap.xml`,
+ * The middleware rewrites `slug.beynoun.com/sitemap.xml` → `/s/<slug>/sitemap.xml`,
  * so this handler owns every published customer site's sitemap. It lists the
  * homepage PLUS every real page of the multi-page brochure (menu, about, …),
  * and emits an **image sitemap** (Google's `image:` extension) on the homepage

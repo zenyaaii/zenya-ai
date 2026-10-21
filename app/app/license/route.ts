@@ -4,7 +4,7 @@ import crypto from 'crypto'
 
 // Reached via the Shopify app proxy: a storefront request to
 //   https://{shop}/apps/zenya/license
-// is forwarded by Shopify to https://zenyaai.co/app/license with the shop
+// is forwarded by Shopify to https://beynoun.com/app/license with the shop
 // domain + an HMAC `signature` appended. We verify that signature, resolve
 // the shop → linked Zenya account → subscription, and answer whether the
 // Zenya-generated theme content is licensed to render right now.

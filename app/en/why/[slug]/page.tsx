@@ -6,7 +6,7 @@ import { ARTICLES_EN, getArticleEn } from '@/lib/why-articles-en'
 import { auroraTints } from '@/lib/aurora-tints'
 import { Breadcrumbs, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export function generateStaticParams() {
   return ARTICLES_EN.map((a) => ({ slug: a.slug }))

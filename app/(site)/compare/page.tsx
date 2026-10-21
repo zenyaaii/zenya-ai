@@ -41,7 +41,7 @@ import { CSS } from "@/components/zenya/compare/styles"
 import { hreflangAlternates } from '@/lib/i18n/config'
 import { share } from '@/lib/site-share'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'مقارنة مع ويكس وشوبيفاي وووردبريس وسكوير سبيس',

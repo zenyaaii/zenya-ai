@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
 import { sendWelcomeOnce } from '@/lib/lifecycle-email'
+import { isCompanyHost } from '@/lib/domain'
 
 /**
  * Fire the once-only welcome email for a freshly-authenticated user.
@@ -58,12 +59,12 @@ export async function GET(request: Request) {
 function redirect(request: Request, origin: string, next: string) {
   // Allow an absolute `next` as long as it stays within our own domain — this
   // lets the accounts portal send a confirmed user straight to
-  // dashboard.zenyaai.co after email verification.
+  // dashboard.beynoun.com after email verification.
   if (/^https?:\/\//i.test(next)) {
     try {
       const u = new URL(next)
       const h = u.hostname.toLowerCase()
-      if (h === 'zenyaai.co' || h.endsWith('.zenyaai.co')) {
+      if (isCompanyHost(h)) {
         return NextResponse.redirect(next)
       }
     } catch { /* fall through to relative handling */ }

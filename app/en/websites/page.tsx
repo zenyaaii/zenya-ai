@@ -5,7 +5,7 @@ import { TEMPLATE_PAGES_EN } from '@/lib/template-pages-en'
 import { themePreview } from '@/lib/theme-previews'
 import { Breadcrumbs, CompareHero, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Website Types: Restaurant, App, Store, Services, Wellness & More',

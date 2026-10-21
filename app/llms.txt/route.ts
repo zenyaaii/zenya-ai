@@ -16,7 +16,7 @@ import { AR_FAQS, EN_FAQS } from '@/lib/faq-data'
 
 export const dynamic = 'force-static'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 function build(): string {
   const compareLines = COMPARISONS.map(
@@ -61,7 +61,7 @@ Category: AI website builder / no-code site generator for the Arab market.
 
 ## Pricing (USD)
 - Free: $0, no card — 2 AI generations (all 8 templates), publish on a
-  yourname.zenyaai.co subdomain, every editing tool, and a one-month trial of
+  yourname.beynoun.com subdomain, every editing tool, and a one-month trial of
   bookings + site analytics.
 - Starter: $14.99/month — unlimited AI generation (incl. template updates), a
   custom domain, bookings + analytics, Shopify export + project ZIP.

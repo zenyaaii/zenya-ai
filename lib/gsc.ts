@@ -11,6 +11,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { DASHBOARD_HOST } from '@/lib/portal-urls'
 
 const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
@@ -47,7 +48,7 @@ export function callbackUrlFor(host: string | null): string {
   const configured = process.env.GOOGLE_OAUTH_REDIRECT_URI
   const isLocal = (host || '').startsWith('localhost') || (host || '').startsWith('127.0.0.1')
   if (configured && !isLocal) return configured
-  const h = host || 'dashboard.zenyaai.co'
+  const h = host || DASHBOARD_HOST
   const proto = isLocal ? 'http' : 'https'
   return `${proto}://${h}/api/gsc/callback`
 }
@@ -173,7 +174,7 @@ export type SearchAnalyticsRow = {
 
 /**
  * Query search analytics for a property. `siteUrl` must be a property the
- * account owns (URL-prefix like `https://slug.zenyaai.co/` or `sc-domain:...`).
+ * account owns (URL-prefix like `https://slug.beynoun.com/` or `sc-domain:...`).
  */
 export async function querySearchAnalytics(
   accessToken: string,
@@ -278,7 +279,7 @@ export function matchProperty(siteUrl: string, properties: string[]): string | n
   // exact URL-prefix property
   const exact = properties.find((p) => p === withSlash || p === siteUrl)
   if (exact) return exact
-  // domain property covering this host, e.g. sc-domain:zenyaai.co
+  // domain property covering this host, e.g. sc-domain:beynoun.com
   try {
     const host = new URL(siteUrl).hostname
     const domainProp = properties.find(

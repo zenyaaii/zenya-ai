@@ -5,7 +5,7 @@ import { ArrowRight, Check, Globe, Info } from 'lucide-react'
 import { EN_FAQS } from '@/lib/faq-data'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -47,7 +47,7 @@ const PLANS: Plan[] = [
     features: [
       'Generate two (2) templates with AI — free',
       'All eight templates to preview',
-      'Publish your site on yourname.zenyaai.co',
+      'Publish your site on yourname.beynoun.com',
       'Every editing and management tool',
       'One-month trial of bookings and site analytics',
       'Community support',

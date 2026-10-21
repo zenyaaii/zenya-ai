@@ -4,7 +4,7 @@ import { Sparkles, Languages, LayoutTemplate, Server, Globe, CreditCard, PencilR
 import { Breadcrumbs, CompareHero, FaqList, CtaBand } from '@/components/marketing/CompareParts'
 import type { QA } from '@/lib/faq-data'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Zenya Features: AI Content, Hosting, Domains & Payments',

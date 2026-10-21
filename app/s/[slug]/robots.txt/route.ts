@@ -3,7 +3,7 @@ import { publicSiteUrl } from '@/lib/portal-urls'
 import { siteBaseUrl } from '@/lib/public-site'
 
 /**
- * Per-site robots.txt, served at `slug.zenyaai.co/robots.txt`.
+ * Per-site robots.txt, served at `slug.beynoun.com/robots.txt`.
  *
  * Points crawlers at the site's own sitemap so Google can discover it even
  * before the owner submits it manually. Every published customer site is

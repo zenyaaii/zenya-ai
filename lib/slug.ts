@@ -26,7 +26,7 @@ const RESERVED = new Set([
   'shopify', 'signin', 'signup', 'site', 'sitemap', 'sites',
   'status', 'store', 'subprocessors', 'support', 'team', 'teams',
   'terms', 'theme', 'themes', 'tos', 'verify', 'webhook', 'webhooks',
-  'workspace', 'www', 'you', 'zenya', 'zenyaai',
+  'workspace', 'www', 'you', 'zenya', 'zenyaai', 'beynoun',
 ])
 
 /**

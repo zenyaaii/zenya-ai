@@ -102,7 +102,7 @@ const TEMPLATES: Template[] = [
 ];
 
 /** Where "generate more templates" sends merchants — the full web catalog. */
-const WEBSITE_TEMPLATES_URL = 'https://zenyaai.co/templates';
+const WEBSITE_TEMPLATES_URL = 'https://beynoun.com/templates';
 
 function DashboardContent() {
   const { toast } = useNotify();
@@ -517,7 +517,7 @@ function TemplateCard({ template, index, queryString }: { template: Template; in
   const Icon = template.icon;
   const isLive = template.status === 'live';
   const buildHref = `/shopify/new${queryString}${queryString ? '&' : '?'}type=${template.type}`;
-  const demoHref = `https://zenyaai.co/demo/${template.id === 'one_product' ? '' : template.id}`;
+  const demoHref = `https://beynoun.com/demo/${template.id === 'one_product' ? '' : template.id}`;
 
   return (
     <motion.div

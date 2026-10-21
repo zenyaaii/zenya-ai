@@ -6,7 +6,7 @@ import { EN_FAQS } from '@/lib/faq-data'
 import { TEMPLATE_PAGES_EN } from '@/lib/template-pages-en'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: { absolute: 'Zenya — The Arabic-First AI Website Builder' },

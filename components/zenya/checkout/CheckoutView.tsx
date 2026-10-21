@@ -75,7 +75,7 @@ const PLANS: Plan[] = [
     legacy: false,
     includes: [
       "توليد قالبين بالذكاء الاصطناعي",
-      "النشر على نطاق فرعي من zenyaai.co",
+      "النشر على نطاق فرعي من beynoun.com",
       "أدوات التحرير كاملة",
     ],
   },
@@ -597,9 +597,9 @@ function StateGallery() {
 
         {/* THE ERROR CARD, AND THE ADDRESS ON IT.
             The live card links to mailto:support@zenya.app, which is a THIRD
-            address: not zenyaai@outlook.com, which lib/company.ts carries as
+            address: not team@beynoun.com, which lib/company.ts carries as
             SUPPORT_EMAIL and every legal page prints, and not
-            support@zenyaai.co either. It is reported here and left alone in
+            support@beynoun.com either. It is reported here and left alone in
             the live file, which is not this candidate's to edit. */}
         <li className="zk-state" data-flag>
           <div className="zk-state-h">

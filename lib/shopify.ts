@@ -21,7 +21,7 @@ normalizeEnv('SHOPIFY_SCOPES');
 const isProduction = process.env.NODE_ENV === 'production' && process.env.VERCEL_ENV === 'production';
 const appUrl = (process.env.VERCEL_URL && !isProduction) 
   ? `https://${process.env.VERCEL_URL}` 
-  : (process.env.SHOPIFY_APP_URL || 'https://zenyaai.co');
+  : (process.env.SHOPIFY_APP_URL || 'https://beynoun.com');
 
 /**
  * Explicitly typed, and the annotation is load-bearing.

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
 import { createClient } from '@/utils/supabase/server'
 import { buildAuthUrl, callbackUrlFor, gscConfigured } from '@/lib/gsc'
+import { cookieDomainForHost } from '@/lib/cookie-domain'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/gsc/connect
  * Kicks off the Google OAuth consent flow. Sets a short-lived CSRF `state`
- * cookie (scoped to .zenyaai.co so the callback subdomain can read it), then
+ * cookie (scoped to .beynoun.com so the callback subdomain can read it), then
  * redirects the user to Google.
  */
 export async function GET(req: NextRequest) {
@@ -30,13 +31,16 @@ export async function GET(req: NextRequest) {
 
   const res = NextResponse.redirect(buildAuthUrl(redirectUri, state))
   const isLocal = (host || '').startsWith('localhost') || (host || '').startsWith('127.0.0.1')
+  // The callback must be on this same domain to read the state back, so
+  // GOOGLE_OAUTH_REDIRECT_URI has to be on beynoun.com once the site is.
+  const cookieDomain = isLocal ? undefined : cookieDomainForHost(host)
   res.cookies.set('gsc_oauth_state', state, {
     httpOnly: true,
     secure: !isLocal,
     sameSite: 'lax',
     path: '/',
     maxAge: 600,
-    ...(isLocal ? {} : { domain: '.zenyaai.co' }),
+    ...(cookieDomain ? { domain: cookieDomain } : {}),
   })
   // The site the owner was looking at rides along, so the callback can hand
   // it back and the SEO page can finish adding it to Google in the same click.
@@ -48,7 +52,7 @@ export async function GET(req: NextRequest) {
       sameSite: 'lax',
       path: '/',
       maxAge: 600,
-      ...(isLocal ? {} : { domain: '.zenyaai.co' }),
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     })
   }
   return res

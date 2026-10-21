@@ -173,7 +173,7 @@ export default function DashboardDemoView() {
         <nav className="flex-1 overflow-y-auto py-3">{navRows(() => {})}</nav>
         <div className="zy-rail-foot">
           <ReportProblem email="nadia@example.com" onSend={fakeSend} />
-          <a href="https://zenyaai.co/?home=1">→ العودة إلى الموقع التسويقي</a>
+          <a href="https://beynoun.com/?home=1">→ العودة إلى الموقع التسويقي</a>
         </div>
       </aside>
 
@@ -191,7 +191,7 @@ export default function DashboardDemoView() {
             <nav className="flex-1 overflow-y-auto py-3">{navRows(() => setDrawer(false))}</nav>
             <div className="zy-rail-foot">
               <ReportProblem email="nadia@example.com" onSend={fakeSend} />
-              <a href="https://zenyaai.co/?home=1">→ العودة إلى الموقع التسويقي</a>
+              <a href="https://beynoun.com/?home=1">→ العودة إلى الموقع التسويقي</a>
             </div>
           </aside>
         </>

@@ -15,9 +15,9 @@ import { readableOn, type SitePalette } from '@/lib/site-palette'
  * Every style is inline for the same reason MadeWithZenya's are: none of the
  * house custom properties exist on a customer site.
  *
- * Stored under its own key, so a choice made on zenyaai.co is never read as a
+ * Stored under its own key, so a choice made on beynoun.com is never read as a
  * choice made on a customer's site that happens to share the origin
- * (zenyaai.co/s/<slug>).
+ * (beynoun.com/s/<slug>).
  */
 
 const STORAGE_KEY = 'zy_site_consent'

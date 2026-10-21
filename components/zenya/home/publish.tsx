@@ -71,7 +71,7 @@ export type SurfaceDef = {
    picks one screen up. The whole page follows one company through. */
 const BRAND = MOCK.brand.name
 const NAME = "darnoor"
-const SUB = NAME + ".zenyaai.co"
+const SUB = NAME + ".beynoun.com"
 const BOUGHT = NAME + ".site"
 
 /* The one photograph either surface uses. room-1 is the dining room, NOT the
@@ -116,7 +116,7 @@ const LADDER = [
 export const domains: SurfaceDef = {
   id: "domains",
   label: "النطاق",
-  host: "zenyaai.co",
+  host: "beynoun.com",
   path: "/dashboard/domains",
   empty: { q: "", rows: [], searching: false, step: -1 },
 
@@ -340,7 +340,7 @@ const ONYX = RESTAURANT_PRESETS.find((p) => p.id === "onyx")!.colors
 export const publish: SurfaceDef = {
   id: "publish",
   label: "النشر",
-  host: "zenyaai.co",
+  host: "beynoun.com",
   path: "/dashboard/sites",
   empty: { live: false, busy: false, url: "", loading: 0, site: false },
 
@@ -402,7 +402,7 @@ export const publish: SurfaceDef = {
 
         <div className="zn4-note">
           <Lock className="ic" />
-          كل موقع منشور يحصل على نطاق <span dir="ltr">اسمك.zenyaai.co</span> مجانًا، بشهادة SSL.
+          كل موقع منشور يحصل على نطاق <span dir="ltr">اسمك.beynoun.com</span> مجانًا، بشهادة SSL.
         </div>
       </div>
     )

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Layers, Zap, Languages, ShieldCheck } from 'lucide-react'
 import { CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -138,8 +138,8 @@ export default function EnAbout() {
             Zenya is the first Muslim company dedicated to building AI websites, run as a Dutch sole
             proprietorship and operated from the European Union. If you want to
             reach a person rather than a form, write to{' '}
-            <a href="mailto:team@zenyaai.co" className="font-medium text-primary hover:text-foreground">
-              team@zenyaai.co
+            <a href="mailto:team@beynoun.com" className="font-medium text-primary hover:text-foreground">
+              team@beynoun.com
             </a>
             .
           </p>

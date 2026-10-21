@@ -11,8 +11,8 @@ import ProductShell from '@/components/zenya/chrome/ProductShell'
  *   /theme/new/*   the seven generator wizards
  *   /build         the Shopify one-product builder
  *   /auth/*        the reset-password card and the auth-code error
- *   /account       a redirect to dashboard.zenyaai.co
- *   /settings      a redirect to dashboard.zenyaai.co/settings
+ *   /account       a redirect to dashboard.beynoun.com
+ *   /settings      a redirect to dashboard.beynoun.com/settings
  *
  * These carried components/Navbar and components/Footer until now, which is
  * why they were the last surfaces on the old visual language: a house-style

@@ -96,8 +96,8 @@ export default function SiteBeacon({ slug }: { slug: string }) {
     if (!slug) return
 
     /**
-     * The same page has three possible URLs: zina.zenyaai.co/menu (subdomain),
-     * customdomain.com/menu, and zenyaai.co/s/zina/menu (direct). Only the
+     * The same page has three possible URLs: zina.beynoun.com/menu (subdomain),
+     * customdomain.com/menu, and beynoun.com/s/zina/menu (direct). Only the
      * last carries the /s/<slug> prefix. Left in, it would split one page into
      * two rows AND break the match against the server-written row, which
      * records "/menu" — so the beacon would insert a duplicate instead of

@@ -89,7 +89,7 @@ export function SeoScreen({
                     </span>
                     <div className="min-w-0">
                       <div className="truncate text-[14.5px] font-bold text-[#171717]">{site.name}</div>
-                      <div className="truncate text-[14.5px] text-[#56565a]" dir="ltr">{site.host || 'yourname.zenyaai.co'}</div>
+                      <div className="truncate text-[14.5px] text-[#56565a]" dir="ltr">{site.host || 'yourname.beynoun.com'}</div>
                     </div>
                   </div>
                   <p className="mt-2 text-[15px] font-medium leading-[1.5] text-[#1a0dab]">{title}</p>

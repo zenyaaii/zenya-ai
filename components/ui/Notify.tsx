@@ -3,7 +3,7 @@
 /**
  * Zenya's in-app notification layer — a branded replacement for the browser's
  * native `alert()` / `confirm()` dialogs (which render as ugly, host-labelled
- * Chrome popups like "dashboard.zenyaai.co says…").
+ * Chrome popups like "dashboard.beynoun.com says…").
  *
  * Two primitives, exposed through `useNotify()`:
  *   • toast({ type, message, description? })  — transient bottom notification

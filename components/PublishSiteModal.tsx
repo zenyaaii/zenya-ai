@@ -3,7 +3,7 @@
 /**
  * PUBLISH A SITE — take a generated site from private draft to live.
  *
- * It confirms the address the site will answer on (slug.zenyaai.co, or the
+ * It confirms the address the site will answer on (slug.beynoun.com, or the
  * custom domain if one is connected), and it is the last screen before
  * something the customer made becomes something the public can open. Opened
  * from the dashboard's Sites page.
@@ -149,7 +149,7 @@ export default function PublishSiteModal({
         <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
           اختر اسمًا لموقعك. سيكون عنوانك الخاص:{' '}
           <code dir="ltr" style={{ background: '#f3f0e8', padding: '1px 5px', borderRadius: 4, fontSize: 12, color: '#5e6ad2', fontWeight: 600 }}>
-            {slug || 'your-name'}.zenyaai.co
+            {slug || 'your-name'}.beynoun.com
           </code>
         </p>
 
@@ -209,7 +209,7 @@ export default function PublishSiteModal({
               lineHeight: 1.55,
             }}
           >
-            احصل على موقعك المباشر على <strong>اسمك.zenyaai.co</strong> مع{' '}
+            احصل على موقعك المباشر على <strong>اسمك.beynoun.com</strong> مع{' '}
             <strong>خطة Starter ({usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا)</strong>.{' '}
             <a href="/pricing?upgrade=starter" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
               ابدأ الآن ←
@@ -254,13 +254,13 @@ export default function PublishSiteModal({
           </button>
         </div>
 
-        {/* For Pro users, a custom domain is an optional extra — slug.zenyaai.co
+        {/* For Pro users, a custom domain is an optional extra — slug.beynoun.com
             is already included. Point them to the Domains page instead of
             forcing a domain step. */}
         {isPro && (
           <p style={{ margin: '14px 0 0', textAlign: 'center', fontSize: 12.5, color: '#6b6b6b' }}>
             <a
-              href="https://dashboard.zenyaai.co/domains"
+              href="https://dashboard.beynoun.com/domains"
               style={{ color: '#5e6ad2', textDecoration: 'none', fontWeight: 500 }}
             >
               هل تريد نطاقًا خاصًا؟ اربطه من صفحة النطاقات ←

@@ -95,7 +95,7 @@ export default async function CheckoutPage({
   // 2026-10-05). There is nothing to pay, so a signed-in account goes
   // straight to its dashboard. Old links to ?plan=entry land here.
   if (plan === 'entry') {
-    redirect('https://dashboard.zenyaai.co')
+    redirect('https://dashboard.beynoun.com')
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -112,16 +112,16 @@ export default async function CheckoutPage({
     .maybeSingle()
 
   if (plan === 'onetime' && profile?.is_pro) {
-    redirect('https://dashboard.zenyaai.co?already_pro=1')
+    redirect('https://dashboard.beynoun.com?already_pro=1')
   }
   if (plan === 'hosting' && profile?.has_hosting) {
-    redirect('https://dashboard.zenyaai.co?already_hosting=1')
+    redirect('https://dashboard.beynoun.com?already_hosting=1')
   }
   if (plan === 'starter' && (profile?.plan === 'starter' || profile?.plan === 'pro')) {
-    redirect('https://dashboard.zenyaai.co?already_pro=1')
+    redirect('https://dashboard.beynoun.com?already_pro=1')
   }
   if (plan === 'pro' && profile?.plan === 'pro') {
-    redirect('https://dashboard.zenyaai.co?already_pro=1')
+    redirect('https://dashboard.beynoun.com?already_pro=1')
   }
 
   return <CheckoutView initialPlan={plan} start={startCheckout} />

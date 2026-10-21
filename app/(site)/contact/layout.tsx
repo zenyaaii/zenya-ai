@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   ...share({
     title: 'تواصل مع زينيا',
     description: 'أسئلة عن القوالب أو الفوترة أو الدعم؟ راسلنا.',
-    url: 'https://zenyaai.co/contact',
+    url: 'https://beynoun.com/contact',
   }),
 }
 

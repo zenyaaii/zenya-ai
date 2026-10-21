@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   const origin =
     req.headers.get('origin') ||
     req.nextUrl.origin ||
-    'https://zenyaai.co'
+    'https://beynoun.com'
 
   try {
     const session = await stripe.billingPortal.sessions.create({

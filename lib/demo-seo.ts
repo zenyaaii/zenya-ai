@@ -16,7 +16,7 @@
 import type { Metadata } from 'next'
 import { share } from './site-share'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export type DemoSeo = {
   /** Route segment under /demo (empty string = the /demo index itself). */

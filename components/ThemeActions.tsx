@@ -53,7 +53,7 @@ export default function ThemeActions({
     <div className="fixed bottom-0 left-0 right-0 border-t border-token bg-elevated p-4 md:static md:border-0 md:bg-transparent md:p-0">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
         <div className="hidden md:block">
-          <Link href="https://dashboard.zenyaai.co" className="text-sm font-medium text-muted hover:text-foreground">
+          <Link href="https://dashboard.beynoun.com" className="text-sm font-medium text-muted hover:text-foreground">
             &larr; Back to Dashboard
           </Link>
         </div>

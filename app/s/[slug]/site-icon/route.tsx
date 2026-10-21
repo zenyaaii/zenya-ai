@@ -3,7 +3,7 @@ import { lookupPublishedTheme } from '@/lib/public-site'
 import { resolveSeo } from '@/lib/seo'
 
 /**
- * A customer site's tab icon: slug.zenyaai.co/site-icon, and /favicon.ico,
+ * A customer site's tab icon: slug.beynoun.com/site-icon, and /favicon.ico,
  * which middleware maps here. It is the logo the owner uploaded on the SEO
  * page, fitted into a square at the asked size. A site with no logo has no
  * icon: this answers 404 and the browser draws its own blank one. Never a

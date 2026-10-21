@@ -6,7 +6,7 @@ import { TEMPLATE_PAGES_EN, getTemplatePageEn } from '@/lib/template-pages-en'
 import { themePreview } from '@/lib/theme-previews'
 import { Breadcrumbs, FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export function generateStaticParams() {
   return TEMPLATE_PAGES_EN.map((t) => ({ slug: t.slug }))

@@ -4,7 +4,7 @@ import { lookupPublishedTheme, recordView, buildSiteMetadata, PublicSiteBody } f
 import { pageBySlug } from '@/lib/site-pages'
 
 /**
- * A single content page of a customer site, e.g. slug.zenyaai.co/menu.
+ * A single content page of a customer site, e.g. slug.beynoun.com/menu.
  *
  * Reuses the exact same generated content and themed renderer as the home
  * page — it just tells the template which `view` to render, and gives the page

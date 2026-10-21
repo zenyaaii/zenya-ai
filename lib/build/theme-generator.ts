@@ -266,8 +266,8 @@ function fileSettingsSchema(c: BuildConfig): string {
         theme_name: 'Zenya Dropship',
         theme_version: '1.0.0',
         theme_author: 'Zenya AI',
-        theme_documentation_url: 'https://zenyaai.co/docs/templates',
-        theme_support_url: 'https://zenyaai.co/support',
+        theme_documentation_url: 'https://beynoun.com/docs/templates',
+        theme_support_url: 'https://beynoun.com/support',
       },
       {
         name: 'Brand',
@@ -2469,7 +2469,7 @@ ${c.sourceUrl ? `Scraped from: ${c.sourceUrl}` : 'Built from URL scrape via Zeny
 
 Palette: **${c.paletteName}** (${c.paletteVibe})
 
-Built with Zenya AI · https://zenyaai.co
+Built with Zenya AI · https://beynoun.com
 `
 }
 

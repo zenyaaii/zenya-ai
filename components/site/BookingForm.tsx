@@ -44,7 +44,7 @@ export type BookingPalette = {
 
 /**
  * The site-relative path, matching the analytics beacon's normalisation: the
- * same page is reachable at slug.zenyaai.co/menu, customdomain.com/menu, and
+ * same page is reachable at slug.beynoun.com/menu, customdomain.com/menu, and
  * localhost/s/slug/menu — only the last carries the /s/<slug> prefix, which
  * would otherwise show up as "/s/slug" in the owner's inbox. Strip it so the
  * recorded path is always the clean, site-relative one.

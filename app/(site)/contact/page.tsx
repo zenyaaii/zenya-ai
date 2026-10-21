@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   ...share({
     title: 'تواصل مع زينيا',
     description: 'الدعم، طلب قالب، المبيعات. نردّ خلال يوم عمل واحد.',
-    url: 'https://zenyaai.co/contact',
+    url: 'https://beynoun.com/contact',
   }),
 }
 

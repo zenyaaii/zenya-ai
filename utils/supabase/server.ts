@@ -4,7 +4,7 @@ import { cookieDomainForHost } from '@/lib/cookie-domain'
 
 export function createClient() {
   const cookieStore = cookies()
-  // Scope auth cookies to .zenyaai.co so the session is shared across the
+  // Scope auth cookies to .beynoun.com so the session is shared across the
   // accounts / dashboard / apex subdomains.
   const domain = cookieDomainForHost(headers().get('host'))
 

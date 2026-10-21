@@ -292,7 +292,7 @@ export default function ManageSection({
           <span className="zn3-cam" aria-hidden />
           <div className="zn3-app" ref={frameRef}>
             <div className="zn3-path" dir="ltr">
-              <span>zenyaai.co</span>
+              <span>beynoun.com</span>
               <b>{sf.path}</b>
             </div>
 

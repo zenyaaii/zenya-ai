@@ -13,7 +13,7 @@ const TEMPLATE_ROUTES = [
   ['wellness', 'wellness'],
   ['one_product', 'one-product-store'],
 ]
-const ZENYA_HOST = [{ type: 'host', value: '(?:(?:www\\.)?zenyaai\\.co|localhost)' }]
+const ZENYA_HOST = [{ type: 'host', value: '(?:(?:www\\.)?(?:beynoun\\.com|zenyaai\\.co)|localhost)' }]
 
 /**
  * Mirrors ENGLISH_ENABLED in lib/i18n/config.ts, which this file cannot import
@@ -76,7 +76,7 @@ const nextConfig = {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "https://zenyaai.co" },
+          { key: "Access-Control-Allow-Origin", value: "https://beynoun.com" },
           { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization" },
           { key: "Vary", value: "Origin" },

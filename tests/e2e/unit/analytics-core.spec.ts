@@ -93,7 +93,7 @@ test.describe('referrer + channel', () => {
     expect(classifyChannel({ utmSource: 'newsletter' })).toBe('campaign')
   })
   test('a click within the site itself is not a referral', () => {
-    expect(classifyChannel({ referrerHost: 'zina.zenyaai.co', selfHost: 'zina.zenyaai.co' })).toBe('direct')
+    expect(classifyChannel({ referrerHost: 'zina.beynoun.com', selfHost: 'zina.beynoun.com' })).toBe('direct')
   })
 })
 

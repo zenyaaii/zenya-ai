@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { EN_FAQS } from '@/lib/faq-data'
 import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'FAQ',

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري: ثمانية قوالب، محتوى بالعربية، واستضافة أوروبية.',
-    url: 'https://zenyaai.co/about',
+    url: 'https://beynoun.com/about',
   }),
 }
 
@@ -31,7 +31,7 @@ const ABOUT_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
   name: 'من نحن — زينيا',
-  url: 'https://zenyaai.co/about',
+  url: 'https://beynoun.com/about',
   inLanguage: 'ar',
   mainEntity: {
     '@type': 'Organization',
@@ -40,15 +40,15 @@ const ABOUT_SCHEMA = {
     // which is the exact splitting we are trying to undo. Matching ids tells a
     // consumer these are one entity described twice, so the address and email
     // here enrich the root node instead of competing with it.
-    '@id': 'https://zenyaai.co/#organization',
+    '@id': 'https://beynoun.com/#organization',
     name: 'زينيا',
     alternateName: ['Zenya', 'Zenya AI'],
-    url: 'https://zenyaai.co',
-    logo: 'https://zenyaai.co/brand/logo-square.png',
+    url: 'https://beynoun.com',
+    logo: 'https://beynoun.com/brand/logo-square.png',
     description:
       'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري — ثمانية قوالب احترافية، محتوى بالعربية، واستضافة أوروبية متوافقة مع GDPR.',
     foundingDate: '2025',
-    email: 'zenyaai@outlook.com',
+    email: 'team@beynoun.com',
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'NL',

@@ -43,7 +43,7 @@ import { Breadcrumbs, Hero, CompareTable, ChooseBlocks, FaqList, CtaBand } from 
 import { CSS } from "@/components/zenya/compare/styles"
 import { share } from '@/lib/site-share'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export function generateStaticParams() {
   return COMPARISONS.map((c) => ({ slug: c.slug }))

@@ -3,7 +3,7 @@
  *
  * Every brochure template already renders several internal "views" (home, menu,
  * about, …) driven by a `view` prop — but historically on ONE URL. This maps
- * each template's views to real, crawlable URLs (slug.zenyaai.co/<slug>) so
+ * each template's views to real, crawlable URLs (slug.beynoun.com/<slug>) so
  * every view becomes its own indexable page, reusing the exact same content.
  *
  * The `view` values MUST match each template Preview's `View` union.

@@ -44,14 +44,14 @@ export const COMPANY = {
   CITY: '',
 
   // Contact — support moved off the personal Outlook mailbox on 2026-09-26.
-  SUPPORT_EMAIL: 'team@zenyaai.co',
-  PRIVACY_EMAIL: 'zenyaai@outlook.com',
-  LEGAL_EMAIL: 'zenyaai@outlook.com',
-  DPO_EMAIL: 'zenyaai@outlook.com',
+  SUPPORT_EMAIL: 'team@beynoun.com',
+  PRIVACY_EMAIL: 'team@beynoun.com',
+  LEGAL_EMAIL: 'team@beynoun.com',
+  DPO_EMAIL: 'team@beynoun.com',
 
   // Sites
-  WEBSITE_URL: 'https://zenyaai.co',
-  APP_URL: 'https://zenyaai.co',
+  WEBSITE_URL: 'https://beynoun.com',
+  APP_URL: 'https://beynoun.com',
 
   // Pricing — monthly subscriptions since 2026-07-02. One-time purchases made
   // before that date are grandfathered and keep what they paid for.
@@ -65,7 +65,7 @@ export const COMPANY = {
   // formatted constants built from it; do not type the digits.
   STARTER_PRICE_USD: 14.99,
   PRO_PRICE_USD: 24.99,
-  /** The free plan: two AI generations, publishing on a zenyaai.co address.
+  /** The free plan: two AI generations, publishing on a beynoun.com address.
    *  It was a one-time $0.50 "Entry" unlock until 2026-10-05. */
   ENTRY_PRICE_USD: 0,
   STARTER_PRICE_DISPLAY: '14.99 دولارًا شهريًا',

@@ -18,7 +18,7 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { sendEmail, welcomeEmail, quotaReachedEmail } from '@/lib/email'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zenyaai.co'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beynoun.com'
 
 function adminDb() {
   return createAdminClient(

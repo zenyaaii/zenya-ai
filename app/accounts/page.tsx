@@ -9,7 +9,7 @@ import { createClient } from '@/utils/supabase/client'
 import { dashboardUrl } from '@/lib/portal-urls'
 
 /**
- * Account chooser — the landing page of accounts.zenyaai.co.
+ * Account chooser — the landing page of accounts.beynoun.com.
  *
  *  • Signed in  → "continue as <account>" card (name + avatar) → dashboard,
  *    plus "use another account" and "sign out".

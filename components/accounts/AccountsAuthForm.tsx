@@ -59,7 +59,7 @@ function initialsFor(a: SavedAccount): string {
 /**
  * The accounts-portal auth card. Same auth logic as the legacy /login page,
  * but headerless, premium-styled, and it lands the user on the dashboard
- * subdomain after success (session is shared via .zenyaai.co cookies).
+ * subdomain after success (session is shared via .beynoun.com cookies).
  */
 export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMode?: Mode }) {
   const [email, setEmail] = useState('')

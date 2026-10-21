@@ -4,7 +4,7 @@ import { TEMPLATE_PAGES } from '@/lib/template-pages'
 import type { BilingualRoute } from '@/lib/i18n-routes'
 import { ENGLISH_ENABLED } from '@/lib/i18n/config'
 
-const BASE = 'https://zenyaai.co'
+const BASE = 'https://beynoun.com'
 
 /**
  * One timestamp, captured when the module is first evaluated, rather than a

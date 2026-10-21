@@ -65,7 +65,7 @@ export type SeoTheme = {
   template_type?: string | null
   is_published?: boolean | null
   /** The owner's own live domain (e.g. "satorispa.com"), when one is bound.
-   *  It is then the site's address for Google, not slug.zenyaai.co. */
+   *  It is then the site's address for Google, not slug.beynoun.com. */
   custom_domain?: string | null
 }
 

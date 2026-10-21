@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'قوالب زينيا الثمانية — مواقع احترافية بالذكاء الاصطناعي',
     description:
       'ثمانية قوالب لكل نوع نشاط تجاري. اختر قالبًا، اكتب نبذة، وتتكفّل زينيا بكتابة المحتوى وبناء الموقع.',
-    url: 'https://zenyaai.co/templates',
+    url: 'https://beynoun.com/templates',
   }),
 }
 

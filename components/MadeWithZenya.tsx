@@ -2,7 +2,7 @@
  * The "Made with Zenya" badge on free-tier hosted sites.
  *
  * WHAT IT IS. Every site Zenya generates for a customer on the free tier
- * carries this in the corner, linking back to zenyaai.co with ?ref=badge.
+ * carries this in the corner, linking back to beynoun.com with ?ref=badge.
  * Paid hosting removes it: lib/public-site.tsx passes hide={theme.owner_has_hosting},
  * and "the Made with Zenya badge removed" is a line item on the pricing page,
  * so the prop is a paid promise and not a preference.
@@ -37,7 +37,7 @@ export default function MadeWithZenya({ hide = false }: { hide?: boolean }) {
   if (hide) return null
   return (
     <a
-      href="https://zenyaai.co?ref=badge"
+      href="https://beynoun.com?ref=badge"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Made with Zenya"

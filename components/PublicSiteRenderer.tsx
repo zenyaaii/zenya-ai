@@ -26,7 +26,7 @@ type Props = {
   view?: string
   /**
    * When true (the public multi-page site), nav clicks navigate to the page's
-   * real URL (slug.zenyaai.co/<page>) instead of just flipping client state —
+   * real URL (slug.beynoun.com/<page>) instead of just flipping client state —
    * so each page is a shareable, indexable URL. Left off for preview/demo,
    * where the template keeps its internal client-side view state.
    */

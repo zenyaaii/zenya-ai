@@ -70,7 +70,7 @@ async function liveCustomDomain(a: ReturnType<typeof admin>, themeId: string): P
 
 /**
  * The address a site's sitemap and robots.txt should name: the owner's own
- * domain when one is live, else slug.zenyaai.co.
+ * domain when one is live, else slug.beynoun.com.
  */
 export async function siteBaseUrl(slug: string): Promise<string> {
   const a = admin()

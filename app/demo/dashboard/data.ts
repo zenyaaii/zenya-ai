@@ -74,9 +74,9 @@ export type DemoSite = {
 }
 
 export const SITES: DemoSite[] = [
-  { id: 's1', name: 'مطعم المدينة', kind: 'مطعم',   host: 'al-madina.zenyaai.co',   live: true,  views: 4821, updated: 'قبل يومين' },
-  { id: 's2', name: 'أطلس ستوديو',  kind: 'تطبيق',  host: 'atlas-studio.zenyaai.co', live: true,  views: 1264, updated: 'قبل 6 أيام' },
-  { id: 's3', name: 'واحة العافية',  kind: 'عافية',  host: 'waha.zenyaai.co',        live: true,  views: 738,  updated: 'قبل أسبوعين' },
+  { id: 's1', name: 'مطعم المدينة', kind: 'مطعم',   host: 'al-madina.beynoun.com',   live: true,  views: 4821, updated: 'قبل يومين' },
+  { id: 's2', name: 'أطلس ستوديو',  kind: 'تطبيق',  host: 'atlas-studio.beynoun.com', live: true,  views: 1264, updated: 'قبل 6 أيام' },
+  { id: 's3', name: 'واحة العافية',  kind: 'عافية',  host: 'waha.beynoun.com',        live: true,  views: 738,  updated: 'قبل أسبوعين' },
   { id: 's4', name: 'لوك بوك ٢٦',   kind: 'أزياء',  host: null,                     live: false, views: 0,    updated: 'قبل شهر' },
   { id: 's5', name: 'متجر الخيط',   kind: 'شوبيفاي', host: null,                    live: false, views: 0,    updated: 'قبل شهرين' },
 ]
@@ -143,7 +143,7 @@ export const INVOICES = [
 
 export const PLAN_INCLUDES = [
   'توليد غير محدود بالذكاء الاصطناعي',
-  'استضافة مشمولة على zenyaai.co',
+  'استضافة مشمولة على beynoun.com',
   'نطاق مخصّص + شهادة SSL تلقائية',
   'الحجوزات وصندوق الطلبات',
   'أدوات السيو ومعاينة نتيجة جوجل',
@@ -154,7 +154,7 @@ export const PLAN_INCLUDES = [
 
 export const SEO_SITE = {
   name: 'مطعم المدينة',
-  host: 'al-madina.zenyaai.co',
+  host: 'al-madina.beynoun.com',
   title: 'مطعم المدينة | مطعم شامي معاصر في قلب المدينة',
   description: 'مطعم المدينة — مطبخ شامي معاصر. تصفّح القائمة، تواصل معنا، واحجز طاولتك مباشرة من الموقع.',
   keywords: 'مطعم شامي, حجز طاولة, مطعم المدينة',
