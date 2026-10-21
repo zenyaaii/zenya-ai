@@ -12,13 +12,13 @@
  *
  * Env required for real delivery:
  *   RESEND_API_KEY  — `re_…` from resend.com/api-keys
- *   EMAIL_FROM      — defaults to "Beynoun <noreply@zenyaai.co>" if unset
+ *   EMAIL_FROM      — defaults to "Beynoun <noreply@beynoun.com>" if unset
  */
 
 import { Resend } from 'resend'
 import { COMPANY } from './company'
 
-const DEFAULT_FROM = 'Beynoun <noreply@zenyaai.co>'
+const DEFAULT_FROM = 'Beynoun <noreply@beynoun.com>'
 
 /** Format a minor-unit amount (cents) with a sensible currency symbol.
  *  Amount stays LTR even inside an RTL email so "€9.99" never flips. */
