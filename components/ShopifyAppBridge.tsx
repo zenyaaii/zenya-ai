@@ -136,7 +136,7 @@ export function ShopifyAppBridge({
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold mb-4">Zenya AI Shopify App</h1>
+          <h1 className="text-xl font-bold mb-4">Beynoun Shopify App</h1>
           <p className="mb-4">Missing SHOPIFY_API_KEY configuration.</p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export function ShopifyAppBridge({
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold mb-4">Zenya AI Shopify App</h1>
+          <h1 className="text-xl font-bold mb-4">Beynoun Shopify App</h1>
           <p className="mb-4">Please open this app from your Shopify Admin.</p>
           <form action="/api/shopify/auth" method="GET">
             <input 

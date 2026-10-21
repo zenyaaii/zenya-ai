@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 /**
- * ZenyaMark — the official زينيا wordmark, rendered as inline SVG code (vector,
+ * ZenyaMark — the official بينون wordmark, rendered as inline SVG code (vector,
  * not an image file). The square-Kufi lettering was vectorized from the brand
  * artwork into 27 rectangles, so it stays razor-sharp at any size and needs no
  * network request. Fills with `currentColor`, so set its color via text color
@@ -15,7 +15,7 @@ export default function ZenyaMark({ className }: { className?: string }) {
     <svg
       viewBox="0 0 486 102"
       role="img"
-      aria-label="زينيا"
+      aria-label="بينون"
       fill="currentColor"
       preserveAspectRatio="xMidYMid meet"
       className={cn('block w-auto', className)}

@@ -24,7 +24,7 @@ export default function DemoPage() {
       text: "المكانس التقليدية ثقيلة وصاخبة وتفقد قوة الشفط بعد بضعة أشهر. لا ينبغي أن تصارع أدوات التنظيف لديك."
     },
     solution: {
-      headline: "تعرّف على زينيا V2",
+      headline: "تعرّف على بينون V2",
       text: "تصميم خفيف كالريشة يلتقي بقوة صناعية. أعدنا تصوّر ما يجب أن تكون عليه المكنسة، لنجعل التنظيف سهلًا بل وممتعًا."
     },
     testimonials: [
@@ -40,7 +40,7 @@ export default function DemoPage() {
     ],
     guarantee: {
       title: "ضمان استرداد دون مخاطرة لمدة 30 يومًا",
-      text: "نحن واثقون تمامًا أنك ستحب زينيا V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
+      text: "نحن واثقون تمامًا أنك ستحب بينون V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
       days: 30
     }
   }
@@ -55,14 +55,14 @@ export default function DemoPage() {
     // top toolbar. Actions live in the shared bottom pill instead.
     <div className="min-h-screen bg-white">
       <ThemePreview
-        name="Zenya V2"
+        name="Beynoun V2"
         images={[mockImage, mockImage]}
         primaryColor={colors.primary}
         secondaryColor={colors.secondary}
         content={mockContent}
       />
       <DemoStorefrontToolbar
-        name="Zenya V2"
+        name="Beynoun V2"
         content={mockContent}
         colors={colors}
         images={[mockImage, mockImage]}

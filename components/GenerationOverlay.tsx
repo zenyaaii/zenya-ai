@@ -6,7 +6,7 @@ import ReviewOffer from '@/components/ReviewOffer'
 
 /**
  * GenerationOverlay — the full-screen "building" animation shown while a theme
- * is generated. The Square-Kufic زينيا wordmark melts into liquid droplets that
+ * is generated. The Square-Kufic بينون wordmark melts into liquid droplets that
  * pool into a ball, then build themselves up through a series of shapes (tower →
  * page layout → content rows) and re-form back into the word — a literal "we're
  * assembling your site" metaphor. The wordmark and droplets live under one
@@ -23,7 +23,7 @@ import ReviewOffer from '@/components/ReviewOffer'
 
 const DEFAULT_MESSAGES = [
   'نمزج أقسام موقعك معًا…',
-  'نصوغ النصوص بالذكاء الاصطناعي…',
+  'نصوغ النصوص…',
   'ننسّق الألوان والخطوط…',
   'نرتّب الصفحات والمعرض…',
   'نضيف اللمسات الأخيرة…',
@@ -71,7 +71,7 @@ const PHASES: Record<string, BlobGeom[]> = {
 }
 const STAGGER = [0, 70, 30, 90, 45] // ms — organic offset per droplet
 
-// زينيا — Square-Kufic (kufigraph) wordmark, traced from the brand mark. Sits
+// بينون — Square-Kufic (kufigraph) wordmark, traced from the brand mark. Sits
 // under the same melt + goo filters as the blobs so it liquefies like batter.
 const BRAND_RECTS: Array<[number, number, number, number]> = [
   [40.0, 159.0, 9.9, 62.0], [92.1, 159.0, 64.5, 9.9], [186.3, 159.0, 9.9, 9.9],
@@ -290,7 +290,7 @@ export default function GenerationOverlay({
               </defs>
 
               <g filter="url(#zgoo)">
-                {/* زينيا — kufigraph wordmark, melts under #zmelt like the blobs */}
+                {/* بينون — kufigraph wordmark, melts under #zmelt like the blobs */}
                 <g ref={brandRef} className="zbuild-brand" filter="url(#zmelt)">
                   {BRAND_RECTS.map(([x, y, w, h], i) => (
                     <rect key={i} x={x} y={y} width={w} height={h} />

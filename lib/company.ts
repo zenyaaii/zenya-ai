@@ -15,9 +15,9 @@
  */
 export const COMPANY = {
   // Brand
-  BRAND_NAME: 'زينيا',
-  PRODUCT_NAME: 'زينيا AI',
-  TAGLINE: 'مولّد المواقع بالذكاء الاصطناعي لكل نشاط تجاري',
+  BRAND_NAME: 'بينون',
+  PRODUCT_NAME: 'بينون',
+  TAGLINE: 'مولّد المواقع لكل نشاط تجاري',
 
   // Legal entity — Dutch eenmanszaak operating under the trade name "Musannef".
   // For an eenmanszaak the legal entity IS the natural person; the owner's

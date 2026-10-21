@@ -11,14 +11,14 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'Templates',
   description:
-    'All eight Zenya templates, one per business type: restaurant, app landing page, fashion lookbook, multi-brand catalogue, brand story, services, wellness, and a single-product Shopify storefront. Preview any of them live.',
-  keywords: ['Zenya templates', 'AI website templates', 'Arabic website templates', 'restaurant website template'],
+    'All eight Beynoun templates, one per business type: restaurant, app landing page, fashion lookbook, multi-brand catalogue, brand story, services, wellness, and a single-product Shopify storefront. Preview any of them live.',
+  keywords: ['Beynoun templates', 'AI website templates', 'Arabic website templates', 'restaurant website template'],
   alternates: {
     canonical: `${SITE}/en/templates`,
     languages: { en: `${SITE}/en/templates`, ar: `${SITE}/templates`, 'x-default': `${SITE}/templates` },
   },
   openGraph: {
-    title: 'Zenya templates',
+    title: 'Beynoun templates',
     description: 'Eight templates, one per business type. Preview any of them live before you build.',
     url: `${SITE}/en/templates`,
     type: 'website',
@@ -34,9 +34,9 @@ export default function EnThemes() {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     inLanguage: 'en',
-    name: 'Zenya templates',
+    name: 'Beynoun templates',
     url: `${SITE}/en/templates`,
-    description: 'The eight Zenya website templates, one per business type.',
+    description: 'The eight Beynoun website templates, one per business type.',
   }
 
   return (
@@ -60,7 +60,7 @@ export default function EnThemes() {
         {/* Hosted brochure templates */}
         <section className="mt-14">
           <h2 className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-subtle">
-            Hosted by Zenya
+            Hosted by Beynoun
           </h2>
           <p className="mb-6 text-[13.5px] text-muted">
             Live at your own domain on Pro, or downloadable as a project you host yourself.
@@ -98,7 +98,7 @@ export default function EnThemes() {
         </div>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

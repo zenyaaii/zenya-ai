@@ -16,7 +16,7 @@ function admin() {
 }
 
 // Only the e-commerce templates ship to Shopify. Everything else is
-// Zenya-hosted; we want the user to use /api/themes/[id]/publish for those.
+// Beynoun-hosted; we want the user to use /api/themes/[id]/publish for those.
 const SHOPIFY_EXPORTABLE = new Set(['one_product', 'storefront', 'collective'])
 
 /**
@@ -69,7 +69,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json(
       {
         error: 'not_shopify_exportable',
-        message: `Template "${businessType}" is hosted on Zenya — use Publish to Zenya instead. Shopify export is only for Storefront and Collective.`,
+        message: `Template "${businessType}" is hosted on Beynoun — use Publish to Beynoun instead. Shopify export is only for Storefront and Collective.`,
       },
       { status: 400 }
     )
@@ -96,7 +96,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     // modern one_product layout but returns a Blob directly, which is
     // less convenient for streaming the response. Stick with v1.
     const zip = prepareThemeZip(
-      theme.product_name || 'Zenya Theme',
+      theme.product_name || 'Beynoun Theme',
       productContent as any,
       colors,
       images

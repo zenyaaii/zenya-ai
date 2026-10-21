@@ -23,7 +23,7 @@
  *
  * THE REASSURING FACTS ARE PROVABLE, not invented. Every claim this page
  * makes about the payment is read out of lib/checkout.ts:
- *   - Stripe takes the card, not Zenya. app/(main)/checkout/page.tsx only
+ *   - Stripe takes the card, not Beynoun. app/(main)/checkout/page.tsx only
  *     ever calls redirect(session.url); there is no card field on this side.
  *   - Tax is calculated at Stripe: automatic_tax: { enabled: true }.
  *   - A discount code is accepted there: allow_promotion_codes: true.
@@ -74,7 +74,7 @@ const PLANS: Plan[] = [
     recurring: false,
     legacy: false,
     includes: [
-      "توليد قالبين بالذكاء الاصطناعي",
+      "توليد قالبين",
       "النشر على نطاق فرعي من beynoun.com",
       "أدوات التحرير كاملة",
     ],
@@ -87,7 +87,7 @@ const PLANS: Plan[] = [
     recurring: true,
     legacy: false,
     includes: [
-      "توليد وتصدير غير محدودين بالذكاء الاصطناعي",
+      "توليد وتصدير غير محدودين",
       "النشر على نطاقك الخاص",
       "الحجوزات والتحليلات",
       "تصدير ثيم شوبيفاي",
@@ -102,7 +102,7 @@ const PLANS: Plan[] = [
     legacy: false,
     includes: [
       "كل ما في خطة Starter",
-      "استضافة زينيا الكاملة",
+      "استضافة بينون الكاملة",
       "نطاق مخصّص وشهادة SSL",
       "التحليلات",
     ],
@@ -137,7 +137,7 @@ const OFFERED: PlanId[] = ["starter", "pro"]
 const findPlan = (id: PlanId) => PLANS.find((p) => p.id === id) ?? PLANS[0]
 
 /* THE SPINE. Four steps, and the honest shape of the journey rather than a
-   flattering one: Zenya owns the first two and the return, and the third —
+   flattering one: Beynoun owns the first two and the return, and the third —
    the one where the money moves — belongs to Stripe and is named as theirs. */
 const STEPS = [
   { n: 1, label: "اختر خطتك" },
@@ -226,8 +226,8 @@ export default function CheckoutView({
           ثم تنتقل إلى <bdi dir="ltr">Stripe</bdi> لإتمام الدفع.
         </p>
         <p className="zx-lede">
-          <strong>زينيا لا ترى بطاقتك.</strong> بيانات البطاقة تُدخَل في صفحة{" "}
-          <bdi dir="ltr">Stripe</bdi> وحدها، ولا يمرّ منها شيء عبر خوادم زينيا.
+          <strong>بينون لا ترى بطاقتك.</strong> بيانات البطاقة تُدخَل في صفحة{" "}
+          <bdi dir="ltr">Stripe</bdi> وحدها، ولا يمرّ منها شيء عبر خوادم بينون.
         </p>
       </section>
 
@@ -377,7 +377,7 @@ function Summary({
           <ShieldCheck size={15} strokeWidth={2} aria-hidden
                        style={{ display: "inline", verticalAlign: "-2px", color: "var(--violet)", marginInlineEnd: "0.375rem" }} />
           الخطوة التالية تفتح صفحة <bdi dir="ltr">Stripe</bdi> الآمنة.{" "}
-          <strong>هي من يستقبل بيانات بطاقتك، لا زينيا.</strong>
+          <strong>هي من يستقبل بيانات بطاقتك، لا بينون.</strong>
         </p>
         {/* ONCE SPENT IT IS NOT A DEAD GREY SLAB. A disabled control the reader
             just pressed reads as a page that broke rather than one that
@@ -396,7 +396,7 @@ function Summary({
         </button>
         <p className="zk-fine">
           تُدخَل بيانات البطاقة في صفحة <bdi dir="ltr">Stripe</bdi> وحدها. لا يمرّ منها شيء عبر
-          خوادم زينيا، ولا نحتفظ برقم بطاقتك.
+          خوادم بينون، ولا نحتفظ برقم بطاقتك.
         </p>
       </div>
 

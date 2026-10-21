@@ -266,7 +266,7 @@ export default function AtlasWizardPage() {
     {
       id: 'features',
       title: 'المزايا الرئيسية',
-      sub: 'حتى ميزة واحدة تكفي — أضف حتى 6. سيوسّع الذكاء الاصطناعي الأوصاف ويضيف الأيقونات تلقائيًا.',
+      sub: 'حتى ميزة واحدة تكفي — أضف حتى 6. ستوسّع بينون الأوصاف وتضيف الأيقونات تلقائيًا.',
       complete: validFeatures.length >= 1,
       note: 'أضف ميزة واحدة على الأقل.',
       body: (
@@ -280,7 +280,7 @@ export default function AtlasWizardPage() {
                       <Input value={f.title} onChange={(e) => updateFeature(f.id, { title: e.target.value })} placeholder="سجلّ تغييرات لحظي" />
                     </Field>
                     <Field label="وصف موجز (اختياري)">
-                      <Input value={f.description} onChange={(e) => updateFeature(f.id, { description: e.target.value })} placeholder="سيكتبه الذكاء الاصطناعي إن تُرك فارغًا" />
+                      <Input value={f.description} onChange={(e) => updateFeature(f.id, { description: e.target.value })} placeholder="ستكتبه بينون إن تُرك فارغًا" />
                     </Field>
                   </Grid>
                 </Card>
@@ -294,12 +294,12 @@ export default function AtlasWizardPage() {
     {
       id: 'pricing',
       title: 'التكاملات والتسعير',
-      sub: 'اتركها كما هي وسيختار الذكاء الاصطناعي قيمًا مناسبة لفئتك.',
+      sub: 'اتركها كما هي وستختار بينون قيمًا مناسبة لفئتك.',
       optional: true,
       complete: true,
       body: (
         <Grid>
-          <Field label="شركاء التكامل" wide hint="مفصولة بفواصل. اتركها فارغة وسيختار الذكاء الاصطناعي قيمًا مناسبة.">
+          <Field label="شركاء التكامل" wide hint="مفصولة بفواصل. اتركها فارغة وستختار بينون قيمًا مناسبة.">
             <Input value={form.integrations} onChange={(e) => update('integrations', e.target.value)} placeholder="Slack, GitHub, Figma, Notion, Jira, Stripe" dir="ltr" />
           </Field>
           <Field label="سعر الباقة الاحترافية">
@@ -364,7 +364,7 @@ export default function AtlasWizardPage() {
               { label: 'التكاملات', value: form.integrations },
             ]}
           >
-            <Handoff title="جاهز لتوليد موقع أطلس." body="يصوغ الذكاء الاصطناعي نصوصك وتسعيرك وتخطيطك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لتوليد موقع أطلس." body="تصوغ بينون نصوصك وتسعيرك وتخطيطك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -382,7 +382,7 @@ export default function AtlasWizardPage() {
       <WizardShell
         eyebrow="أطلس · قالب SaaS"
         title="ابنِ صفحة هبوط SaaS فاخرة."
-        sub="أخبرنا عن منتجك وتولّد زينيا موقع SaaS متكاملًا مُحسَّنًا للتحويل — واجهة رئيسية ومزايا وتسعير وتكاملات وأسئلة شائعة."
+        sub="أخبرنا عن منتجك وتولّد بينون موقع SaaS متكاملًا مُحسَّنًا للتحويل — واجهة رئيسية ومزايا وتسعير وتكاملات وأسئلة شائعة."
         steps={steps}
         step={step}
         onStep={setStep}

@@ -63,7 +63,7 @@ export default function FeaturesSection() {
       <div className="mx-auto max-w-6xl px-6">
         {/* Header */}
         <Reveal className="mb-14 max-w-xl">
-          <p className="kicker mb-4">لماذا زينيا</p>
+          <p className="kicker mb-4">لماذا بينون</p>
           <h2 className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground">
             كل ما تحتاجه كي{' '}
             <span className="gradient-text">تنطلق بسرعة.</span>

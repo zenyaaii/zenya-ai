@@ -265,13 +265,13 @@ export default function LiveUsersGlobe() {
             <span>حول العالم</span>
           )}
         </div>
-        <h2 id="zg-heading">زينيا، مباشرةً حول العالم</h2>
-        <p>كل نقطة برتقالية هي شخصٌ متصل بزينيا الآن. اسحب الكرة لتستكشف من أين يتصفّحون.</p>
+        <h2 id="zg-heading">بينون، مباشرةً حول العالم</h2>
+        <p>كل نقطة برتقالية هي شخصٌ متصل ببينون الآن. اسحب الكرة لتستكشف من أين يتصفّحون.</p>
       </div>
 
       <div className="zg-stage" ref={stageRef}>
         <div className="zg-holder" ref={holderRef}>
-          <canvas ref={canvasRef} className="zg-globe" aria-label="كرة أرضية تفاعلية، كل نقطة برتقالية شخص متصل بزينيا الآن" />
+          <canvas ref={canvasRef} className="zg-globe" aria-label="كرة أرضية تفاعلية، كل نقطة برتقالية شخص متصل ببينون الآن" />
         </div>
         <div className="zg-tip" ref={tipRef} />
       </div>

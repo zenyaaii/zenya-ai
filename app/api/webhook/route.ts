@@ -391,7 +391,7 @@ async function upsertHostingSubscription(
     return null
   }
 
-  // Tier → profile plan label + whether it includes Zenya hosting.
+  // Tier → profile plan label + whether it includes Beynoun hosting.
   //   hosting (legacy, grandfathered): pro_hosting, hosting included
   //   starter (new, $14.99/mo):        starter,     no hosting
   //   pro     (new, $24.99/mo):        pro,         hosting included
@@ -731,7 +731,7 @@ async function fulfillDomainPurchase(
  *
  * Doesn't call any Porkbun renew endpoint — Porkbun's public JSON API
  * doesn't expose one. The Porkbun-side renewal is handled by their
- * auto-renew (which we leave on by default for every Zenya-managed
+ * auto-renew (which we leave on by default for every Beynoun-managed
  * domain). When auto-renew fires, it'll debit our balance at wholesale
  * — by which point we've already collected this retail charge.
  */

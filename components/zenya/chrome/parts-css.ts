@@ -54,14 +54,14 @@ export const PARTS_CSS = `
 .zx-tw table { width: 100%; border-collapse: collapse; }
 .zx-tw th, .zx-tw td { text-align: start; vertical-align: top; font-size: clamp(14.5px, 1.6vw, 15.5px); line-height: 1.85; }
 .zx-tw thead th { font-weight: 700; color: var(--obsidian); }
-/* The Zenya column is named in the accent, and the accent's READING step:
+/* The Beynoun column is named in the accent, and the accent's READING step:
    #5e6ad2 measures 4.16:1 on this fill and #4f5ab8 measures 5.48:1. */
 .zx-tw .zx-th-us { color: var(--violet-ink); }
 .zx-tw tbody th { font-weight: 700; color: var(--obsidian); }
 .zx-tw tbody td { font-weight: 400; color: var(--stone); }
 .zx-tw .zx-td-us { color: var(--obsidian); }
 .zx-win { display: inline-flex; align-items: center; gap: 0.375rem; }
-/* A DOT, NOT A GREEN DISC. The live table marks a Zenya win with a #27a644
+/* A DOT, NOT A GREEN DISC. The live table marks a Beynoun win with a #27a644
    check in a tinted circle, and green here reports no state: it is an
    opinion about a feature, not a status. The page has one accent. */
 .zx-win-dot { flex: 0 0 auto; width: 5px; height: 5px; border-radius: 999px; background: var(--violet); margin-block-start: 0.62em; align-self: flex-start; }

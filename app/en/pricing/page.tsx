@@ -10,14 +10,14 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'Pricing',
   description:
-    `Zenya pricing in plain terms. Start free with two AI generations (Free plan), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation, a custom domain, bookings and analytics, or Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding a free domain for a year and no Zenya badge.`,
-  keywords: ['Zenya pricing', 'AI website builder pricing', 'Arabic website builder cost'],
+    `Beynoun pricing in plain terms. Start free with two AI generations (Free plan), then Starter at ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation, a custom domain, bookings and analytics, or Pro at ${usd(COMPANY.PRO_PRICE_USD)}/month adding a free domain for a year and no Beynoun badge.`,
+  keywords: ['Beynoun pricing', 'AI website builder pricing', 'Arabic website builder cost'],
   alternates: {
     canonical: `${SITE}/en/pricing`,
     languages: { en: `${SITE}/en/pricing`, ar: `${SITE}/pricing`, 'x-default': `${SITE}/pricing` },
   },
   openGraph: {
-    title: 'Zenya pricing',
+    title: 'Beynoun pricing',
     description:
       `Start free, then ${usd(COMPANY.STARTER_PRICE_USD)}/month for unlimited generation or ${usd(COMPANY.PRO_PRICE_USD)}/month with full hosting and a custom domain.`,
     url: `${SITE}/en/pricing`,
@@ -43,7 +43,7 @@ const PLANS: Plan[] = [
     name: 'Free',
     price: '$0',
     cadence: 'no card needed',
-    tagline: 'Build, manage, and publish — try Zenya for free.',
+    tagline: 'Build, manage, and publish — try Beynoun for free.',
     features: [
       'Generate two (2) templates with AI — free',
       'All eight templates to preview',
@@ -83,7 +83,7 @@ const PLANS: Plan[] = [
       'Everything in Starter, plus:',
       'A custom domain free for one year on standard extensions',
       '30% off pricier domains such as .com',
-      'The "Made with Zenya" badge removed',
+      'The "Made with Beynoun" badge removed',
       'Full management of your site and domain',
       'Top priority support',
     ],
@@ -98,7 +98,7 @@ const PLANS: Plan[] = [
  * rather than duplicating that page.
  */
 const PRICING_FAQ_QUESTIONS = new Set([
-  'How much does Zenya cost?',
+  'How much does Beynoun cost?',
   'Can I cancel anytime?',
   'Can I connect my own custom domain?',
   'Where are sites hosted, and what about privacy?',
@@ -111,10 +111,10 @@ export default function EnPricing() {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     inLanguage: 'en',
-    name: 'Zenya pricing',
+    name: 'Beynoun pricing',
     url: `${SITE}/en/pricing`,
     description:
-      `Zenya plans: free to try, Starter at ${usd(COMPANY.STARTER_PRICE_USD)} per month, Pro at ${usd(COMPANY.PRO_PRICE_USD)} per month with hosting and a custom domain.`,
+      `Beynoun plans: free to try, Starter at ${usd(COMPANY.STARTER_PRICE_USD)} per month, Pro at ${usd(COMPANY.PRO_PRICE_USD)} per month with hosting and a custom domain.`,
   }
 
   return (
@@ -205,7 +205,7 @@ export default function EnPricing() {
         <div className="mt-4 flex items-start gap-3 rounded-2xl border border-token bg-[var(--surface-2)] px-5 py-4">
           <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-muted" strokeWidth={2} aria-hidden />
           <p className="text-[13px] leading-[1.75] text-muted">
-            Worth knowing before you sign up: Zenya is Arabic-first. The builder, the dashboard, and the
+            Worth knowing before you sign up: Beynoun is Arabic-first. The builder, the dashboard, and the
             websites it generates are in Arabic and laid out right-to-left. These English pages describe the
             product; the product itself speaks Arabic.
           </p>
@@ -257,13 +257,13 @@ export default function EnPricing() {
             href="/en/compare"
             className="inline-flex items-center gap-2 text-[14px] font-medium text-muted transition-colors hover:text-foreground"
           >
-            Compare Zenya to Wix, Shopify, and agencies
+            Compare Beynoun to Wix, Shopify, and agencies
             <ArrowRight className="h-4 w-4" strokeWidth={2.25} />
           </Link>
         </div>
 
         <CtaBand
-          title="Start building with Zenya"
+          title="Start building with Beynoun"
           subtitle="Start free with two AI generations. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Get started"
           secondaryLabel="Browse templates"

@@ -138,7 +138,7 @@ const MIN_PASS = 6
    class of lie as a fake POST. */
 const HEADS = ["أهلًا بعودتك", "أنشئ حسابك", "إعادة تعيين كلمة المرور", "أهلًا بعودتك"]
 const SUBS = [
-  "سجّل الدخول للوصول إلى قوالبك في زينيا.",
+  "سجّل الدخول للوصول إلى قوالبك في بينون.",
   "ابدأ بناء قوالب عالية التحويل اليوم.",
   "أدخل بريدك الإلكتروني لتصلك رابط إعادة التعيين.",
   "اختر حسابًا محفوظًا، أو سجّل الدخول بحساب آخر.",
@@ -439,7 +439,7 @@ export default function AccessView({
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
+            <Link href="/" aria-label="بينون" className="za-phone-mark"><ZenyaMark className="za-mark-svg-sm" /></Link>
             {/* The set's own end control, unchanged. On this page it doubles as
                 the exit to the real thing, which is where it already pointed. */}
             <AccountControl className="za-account za-account-phone" />
@@ -459,7 +459,7 @@ export default function AccessView({
         <div className="za-pill">
           <div className="za-bar">
             <span className="za-side za-side-start">
-              <Link href="/" className="za-mark" aria-label="زينيا"><ZenyaMark className="za-mark-svg" /></Link>
+              <Link href="/" className="za-mark" aria-label="بينون"><ZenyaMark className="za-mark-svg" /></Link>
             </span>
             <nav className="za-nav">
               {NAV.map((i) => (
@@ -490,7 +490,7 @@ export default function AccessView({
         <div className="za-well">
           <span className="za-sig" aria-hidden><ZenyaMark className="za-sig-svg" /></span>
         <section className="za-card" aria-labelledby="za-h1">
-          <Link href="/" className="za-card-mark" aria-label="زينيا">
+          <Link href="/" className="za-card-mark" aria-label="بينون">
             <ZenyaMark className="za-card-mark-svg" />
           </Link>
 

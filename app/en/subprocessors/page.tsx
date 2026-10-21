@@ -5,7 +5,7 @@ const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Subprocessors',
-  description: 'The third-party providers that process data on behalf of Zenya, what each receives, where it sits, and the transfer safeguard that applies.',
+  description: 'The third-party providers that process data on behalf of Beynoun, what each receives, where it sits, and the transfer safeguard that applies.',
   alternates: {
     canonical: `${SITE}/en/subprocessors`,
     languages: {
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'Zenya subprocessors',
-    description: 'Every third-party processor Zenya uses, with location and transfer safeguard.',
+    title: 'Beynoun subprocessors',
+    description: 'Every third-party processor Beynoun uses, with location and transfer safeguard.',
     url: `${SITE}/en/subprocessors`,
     type: 'website',
     locale: 'en_US',
@@ -84,7 +84,7 @@ export default function EnSubprocessors() {
       </p>
 
       <p>
-        Zenya relies on the third-party services below to operate. Each acts as a data processor under the
+        Beynoun relies on the third-party services below to operate. Each acts as a data processor under the
         EU General Data Protection Regulation (GDPR). Personal data is shared only to the extent necessary,
         is governed by a data processing agreement where applicable, and is protected by an appropriate
         transfer safeguard.

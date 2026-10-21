@@ -130,7 +130,7 @@ export function ReportProblem({
             <div className="min-w-0 flex-1">
               <Dialog.Title className="text-[17px] font-black leading-[1.5] text-[#171717]">أخبرنا بالمشكلة</Dialog.Title>
               <Dialog.Description className="text-[13.5px] font-medium leading-[1.7] text-[#66666e]">
-                فريق زينيا يقرأ كل رسالة ويرد عليك بالبريد.
+                فريق بينون يقرأ كل رسالة ويرد عليك بالبريد.
               </Dialog.Description>
             </div>
             <Dialog.Close className="zy-icon-btn inline-flex" aria-label="إغلاق"><X className="h-4 w-4" /></Dialog.Close>

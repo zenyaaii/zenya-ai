@@ -19,7 +19,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
- * POST /api/bookings — capture a reservation/booking from a published Zenya
+ * POST /api/bookings — capture a reservation/booking from a published Beynoun
  * site's booking form.
  *
  * Rides the same slug → theme → owner pipeline as the analytics beacon

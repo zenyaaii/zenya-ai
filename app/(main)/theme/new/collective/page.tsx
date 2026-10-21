@@ -285,7 +285,7 @@ export default function CollectiveWizardPage() {
     {
       id: 'collections',
       title: 'التشكيلات',
-      sub: 'حتى تشكيلة واحدة تكفي — أضف حتى 6. سيكتب الذكاء الاصطناعي الشعارات ويبني شبكات المنتجات.',
+      sub: 'حتى تشكيلة واحدة تكفي — أضف حتى 6. ستكتب بينون الشعارات وتبني شبكات المنتجات.',
       complete: validCollections.length >= 1,
       note: 'أضف تشكيلة واحدة على الأقل.',
       body: (
@@ -381,7 +381,7 @@ export default function CollectiveWizardPage() {
               { label: 'التشكيلات', value: validCollections.map((c) => c.name).join('، ') },
             ]}
           >
-            <Handoff title="جاهز لتوليد متجرك." body="يكتب الذكاء الاصطناعي النصوص ويبني التشكيلات وينسّق كتالوجك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لتوليد متجرك." body="تكتب بينون النصوص وتبني التشكيلات وتنسّق كتالوجك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -399,7 +399,7 @@ export default function CollectiveWizardPage() {
       <WizardShell
         eyebrow="نُخبة · قالب الكتالوج"
         title="ابنِ متجرًا منتقى متعدد العلامات."
-        sub="أخبرنا عن كتالوجك وتولّد زينيا واجهة متجر متعددة العلامات — واجهة رئيسية وتشكيلات والأكثر مبيعًا وقصة العلامة."
+        sub="أخبرنا عن كتالوجك وتولّد بينون واجهة متجر متعددة العلامات — واجهة رئيسية وتشكيلات والأكثر مبيعًا وقصة العلامة."
         ledeExtra={<div style={{ marginTop: '1.25rem' }}><ShopifyAffiliateCallout placement="theme_new_ecom_picker" variant="banner" /></div>}
         steps={steps}
         step={step}

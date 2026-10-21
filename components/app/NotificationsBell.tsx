@@ -5,7 +5,7 @@ import { Bell, MapPin, PackageCheck } from 'lucide-react'
 
 /**
  * The bell in the top bar. It carries two kinds of news: new Google reviews
- * that the daily check found for one of the owner's sites, and a site Zenya
+ * that the daily check found for one of the owner's sites, and a site Beynoun
  * handed over to this account, which asks yes or no.
  */
 export type BellItem = {

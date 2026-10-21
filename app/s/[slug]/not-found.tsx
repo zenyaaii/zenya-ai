@@ -33,7 +33,7 @@ export default function PublicSiteNotFound() {
           404 · Site not found
         </p>
         <h1 style={{ fontSize: 28, fontWeight: 600, lineHeight: 1.15, marginBottom: 12 }}>
-          This Zenya site isn’t live.
+          This Beynoun site isn’t live.
         </h1>
         <p style={{ color: '#6b6b6b', lineHeight: 1.6, marginBottom: 24 }}>
           It may have been unpublished, the slug may have changed, or you may have followed an old link.
@@ -52,7 +52,7 @@ export default function PublicSiteNotFound() {
             boxShadow: '0 4px 14px rgba(94,106,210,0.25)',
           }}
         >
-          Build your own with Zenya →
+          Build your own with Beynoun →
         </Link>
       </div>
     </main>

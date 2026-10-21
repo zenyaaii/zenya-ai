@@ -19,7 +19,7 @@ const REVIEW_PROMO_CODE = REVIEW_REWARD_CODE
 /** Where a contact message is meant to arrive. */
 const INBOX = process.env.CONTACT_INBOX || 'team@beynoun.com'
 /** Resend requires a verified sender on the account's own domain. */
-const FROM = process.env.CONTACT_FROM || 'Zenya Contact <noreply@zenyaai.co>'
+const FROM = process.env.CONTACT_FROM || 'Beynoun Contact <noreply@zenyaai.co>'
 
 const TOPIC_LABEL: Record<string, string> = {
   support: 'دعم',

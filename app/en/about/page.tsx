@@ -8,14 +8,14 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'Zenya is the first Muslim company to build AI websites. Small businesses in the Arab world were stuck choosing between a cheap site that looks it and an agency that costs thousands. Zenya is the third option, built Arabic-first and hosted in the EU.',
-  keywords: ['about Zenya', 'first Muslim AI website builder', 'Arabic AI website builder', 'Zenya company'],
+    'Beynoun is the first Muslim company to build AI websites. Small businesses in the Arab world were stuck choosing between a cheap site that looks it and an agency that costs thousands. Beynoun is the third option, built Arabic-first and hosted in the EU.',
+  keywords: ['about Beynoun', 'first Muslim AI website builder', 'Arabic AI website builder', 'Beynoun company'],
   alternates: {
     canonical: `${SITE}/en/about`,
     languages: { en: `${SITE}/en/about`, ar: `${SITE}/about`, 'x-default': `${SITE}/about` },
   },
   openGraph: {
-    title: 'About Zenya',
+    title: 'About Beynoun',
     description: 'Agency-quality websites for Arab small businesses, written by AI and hosted in the EU.',
     url: `${SITE}/en/about`,
     type: 'website',
@@ -39,7 +39,7 @@ const PILLARS = [
   {
     icon: Languages,
     title: 'Genuinely Arabic-first',
-    body: 'Zenya is built for the Arab market: correct Arabic copy, right-to-left layout, and fonts designed for Arabic. Arabic by design, not a translation added afterwards.',
+    body: 'Beynoun is built for the Arab market: correct Arabic copy, right-to-left layout, and fonts designed for Arabic. Arabic by design, not a translation added afterwards.',
     color: '#27a644',
   },
   {
@@ -62,9 +62,9 @@ export default function EnAbout() {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
     inLanguage: 'en',
-    name: 'About Zenya',
+    name: 'About Beynoun',
     url: `${SITE}/en/about`,
-    description: 'Why Zenya exists and what it stands for.',
+    description: 'Why Beynoun exists and what it stands for.',
   }
 
   return (
@@ -76,7 +76,7 @@ export default function EnAbout() {
             Every business deserves a <span className="gradient-text">professional website.</span>
           </h1>
           <p className="mt-6 text-[17px] leading-[1.9] text-muted">
-            Zenya is the <strong className="font-semibold text-foreground">first Muslim company</strong> to
+            Beynoun is the <strong className="font-semibold text-foreground">first Muslim company</strong> to
             build AI websites. It turns a short brief into a finished, publish-ready website. Built for the
             Arab market, hosted in Europe, and priced for businesses that are just getting started.
           </p>
@@ -85,7 +85,7 @@ export default function EnAbout() {
         <section className="mt-16">
           <h2 className="heading-ar text-[clamp(22px,3.6vw,30px)] text-foreground">Our story</h2>
           <p className="mt-4 text-[15px] leading-[1.95] text-muted">
-            Zenya started from a simple observation. Small business owners in the Arab world were choosing
+            Beynoun started from a simple observation. Small business owners in the Arab world were choosing
             between two bad options: a cheap website that looks cheap, or an agency that costs thousands and
             takes weeks of back-and-forth revisions. We wanted a third option, with agency-level quality,
             without the agency price or the wait.
@@ -99,7 +99,7 @@ export default function EnAbout() {
 
         <section className="mt-16">
           <h2 className="heading-ar mb-8 text-[clamp(22px,3.6vw,30px)] text-foreground">
-            What makes Zenya different
+            What makes Beynoun different
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {PILLARS.map((p) => (
@@ -133,9 +133,9 @@ export default function EnAbout() {
         </section>
 
         <section className="mt-16 rounded-2xl border border-token bg-[var(--surface-2)] p-6">
-          <h2 className="text-[16px] font-bold text-foreground">Who is behind Zenya</h2>
+          <h2 className="text-[16px] font-bold text-foreground">Who is behind Beynoun</h2>
           <p className="mt-2 text-[13.5px] leading-[1.8] text-muted">
-            Zenya is the first Muslim company dedicated to building AI websites, run as a Dutch sole
+            Beynoun is the first Muslim company dedicated to building AI websites, run as a Dutch sole
             proprietorship and operated from the European Union. If you want to
             reach a person rather than a form, write to{' '}
             <a href="mailto:team@beynoun.com" className="font-medium text-primary hover:text-foreground">
@@ -153,7 +153,7 @@ export default function EnAbout() {
         </section>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Start building free"
           secondaryLabel="Browse templates"

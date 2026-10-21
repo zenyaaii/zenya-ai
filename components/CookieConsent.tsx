@@ -111,7 +111,7 @@ export default function CookieConsent() {
             id="cookie-consent-title"
             className="text-[15px] font-semibold text-foreground"
           >
-            ملفات تعريف الارتباط في زينيا
+            ملفات تعريف الارتباط في بينون
           </h2>
           <p
             id="cookie-consent-desc"

@@ -21,7 +21,7 @@
  * Supabase returns THE SAME error for "no account with this address" and
  * "wrong password", deliberately. Splitting them would turn the sign-in form
  * into an account checker: type an address, read the error, learn whether that
- * person has a Zenya account. That is user enumeration, and it is the reason
+ * person has a Beynoun account. That is user enumeration, and it is the reason
  * the API is built this way — so this module does not defeat it with a lookup.
  *
  * WHAT IT DOES INSTEAD, and it covers the case the owner actually described:

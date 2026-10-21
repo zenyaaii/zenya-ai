@@ -10,14 +10,14 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'Website Types: Restaurant, App, Store, Services, Wellness & More',
   description:
-    'Whatever your business, Zenya has a template: a restaurant website, an app landing page, an online store, a fashion site, a services website, a wellness center, a brand story, or a one-product store. Pick your type and launch with AI in minutes.',
+    'Whatever your business, Beynoun has a template: a restaurant website, an app landing page, an online store, a fashion site, a services website, a wellness center, a brand story, or a one-product store. Pick your type and launch with AI in minutes.',
   keywords: ['website types', 'restaurant website', 'app landing page', 'online store', 'services website', 'wellness website', 'ai website builder'],
   alternates: {
     canonical: `${SITE}/en/websites`,
     languages: { en: `${SITE}/en/websites`, ar: `${SITE}/websites`, 'x-default': `${SITE}/websites` },
   },
   openGraph: {
-    title: 'Website types Zenya builds',
+    title: 'Website types Beynoun builds',
     description: 'A template for every business: restaurant, app, store, fashion, services, wellness, brand, and one-product — with AI.',
     url: `${SITE}/en/websites`,
     type: 'website',
@@ -38,7 +38,7 @@ export default function WebsitesHubEn() {
     {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Website types in Zenya',
+      name: 'Website types in Beynoun',
       itemListElement: TEMPLATE_PAGES_EN.map((t, i) => ({
         '@type': 'ListItem',
         position: i + 1,
@@ -58,7 +58,7 @@ export default function WebsitesHubEn() {
           kicker="A template for every business"
           title={
             <>
-              Whatever your business, Zenya has a <span className="gradient-text">template for it.</span>
+              Whatever your business, Beynoun has a <span className="gradient-text">template for it.</span>
             </>
           }
           intro={[
@@ -92,7 +92,7 @@ export default function WebsitesHubEn() {
         </div>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Pick a template, write a brief, and get a professional site in minutes. No card required."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

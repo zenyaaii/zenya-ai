@@ -6,7 +6,7 @@ import { classifyLink } from '@/lib/analytics-core'
 /**
  * The customer-site analytics beacon.
  *
- * Rendered once inside every published Zenya site. It exists because the
+ * Rendered once inside every published Beynoun site. It exists because the
  * server cannot see three things that decide whether the owner's site is
  * working: where the visitor actually came from (the `referer` header is
  * stripped on most social and in-app navigations — it was NULL on 100% of

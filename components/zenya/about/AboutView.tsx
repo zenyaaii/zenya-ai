@@ -49,11 +49,11 @@ const PILLARS = [
   },
   {
     title: "من الفكرة إلى موقع خلال دقائق",
-    desc: "اكتب نبذة قصيرة عن نشاطك، ويتكفّل الذكاء الاصطناعي بكتابة المحتوى واختيار التصميم وترتيب الأقسام. لا حاجة لبرمجة، ولا لمصمّم، ولا لأسابيع من الانتظار.",
+    desc: "اكتب نبذة قصيرة عن نشاطك، وتتكفّل بينون بكتابة المحتوى واختيار التصميم وترتيب الأقسام. لا حاجة لبرمجة، ولا لمصمّم، ولا لأسابيع من الانتظار.",
   },
   {
     title: "عربية أولًا، حقيقية",
-    desc: "زينيا مبنية للسوق العربي — محتوى بلغة عربية سليمة، وتخطيط من اليمين إلى اليسار، وخطوط مصمّمة للعربية. ليست ترجمة لاحقة، بل تصميم عربيّ من الأساس.",
+    desc: "بينون مبنية للسوق العربي — محتوى بلغة عربية سليمة، وتخطيط من اليمين إلى اليسار، وخطوط مصمّمة للعربية. ليست ترجمة لاحقة، بل تصميم عربيّ من الأساس.",
   },
   {
     title: "استضافة أوروبية متوافقة مع GDPR",
@@ -124,7 +124,7 @@ export default function AboutView() {
               copy is over the cap is a finding for the owner, not an edit to
               make on his behalf. */}
           <p className="zx-lede">
-            زينيا <strong>أوّل شركة إسلامية</strong> لإنشاء المواقع بالذكاء الاصطناعي — منصّة عربية
+            بينون <strong>أوّل شركة إسلامية</strong> لإنشاء المواقع — منصّة عربية
             لكل نشاط تجاري. نؤمن أن كل نشاط — مهما كان صغيرًا — يستحقّ موقعًا يبدو احترافيًا ويكسب
             ثقة العملاء، دون أن يدفع آلاف الدولارات لوكالة أو ينتظر أسابيع.
           </p>
@@ -138,7 +138,7 @@ export default function AboutView() {
         <section className="zx-story" data-reveal>
           <h2 className="zx-h2">قصتنا</h2>
           <p className="zx-p zx-p-lead">
-            بدأت زينيا من ملاحظة بسيطة: أصحاب الأنشطة التجارية الصغيرة في العالم العربي أمام
+            بدأت بينون من ملاحظة بسيطة: أصحاب الأنشطة التجارية الصغيرة في العالم العربي أمام
             خيارَين سيّئَين — إمّا موقع يبدو مبنيًا بالهواة يُبعد العملاء، أو فاتورة وكالة باهظة
             وأسابيع من التعديلات. أردنا خيارًا ثالثًا: مواقع بجودة الوكالات، بسرعة الذكاء
             الاصطناعي، وبسعر في متناول أي نشاط.
@@ -146,7 +146,7 @@ export default function AboutView() {
           <p className="zx-p">
             اليوم، لم نعد نصنع قالبًا واحدًا. صرنا نصنع <strong>ثمانية قوالب</strong> — واحدًا لكل
             نوع نشاط تجاري — كلٌّ منها مبنيّ حول ما يحتاجه ذلك النشاط فعلًا لتحويل الزائر إلى
-            عميل. تكتب نبذة، ويكتب الذكاء الاصطناعي الباقي.
+            عميل. تكتب نبذة، وتكتب بينون الباقي.
           </p>
         </section>
 
@@ -182,10 +182,10 @@ export default function AboutView() {
             with the KvK number read from lib/company.ts rather than retyped
             into the sentence. */}
         <section className="zx-who" data-reveal>
-          <h2 className="zx-h2">من يقف خلف زينيا</h2>
+          <h2 className="zx-h2">من يقف خلف بينون</h2>
           <div className="zx-record">
             <p className="zx-p">
-              زينيا هي <strong>أوّل شركة إسلامية</strong> متخصّصة في بناء المواقع بالذكاء الاصطناعي.
+              بينون هي <strong>أوّل شركة إسلامية</strong> متخصّصة في بناء المواقع.
               تُشغّلها <strong>{COMPANY.LEGAL_NAME}</strong>، مؤسسة فردية مسجّلة في هولندا لدى الغرفة
               التجارية الهولندية (KvK رقم <bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi>). هذا يعني بنية
               أوروبية موثوقة لاستضافة مواقعك وحماية بياناتك، مع التزام كامل بلوائح حماية البيانات
@@ -199,18 +199,18 @@ export default function AboutView() {
         <section className="zx-mirror" dir="ltr" data-reveal>
             <p className={"zx-eyebrow " + plex.className}>
               <span className="zx-eyebrow-dot" aria-hidden />
-              About Zenya (English)
+              About Beynoun (English)
             </p>
             <h2>We turn your idea into a professional website.</h2>
             <p>
-              Zenya is the <strong>first Muslim company</strong> to build AI websites — an AI
+              Beynoun is the <strong>first Muslim company</strong> to build websites — a
               website builder made for the Arab market. We believe every business — no matter how
               small — deserves a site that looks professional and earns customer trust, without
-              paying thousands to an agency or waiting weeks. You write a short brief; our AI
+              paying thousands to an agency or waiting weeks. You write a short brief; Beynoun
               writes the copy, picks the design, and lays out the sections.
             </p>
             <p>
-              Instead of one generic template, Zenya ships <strong>eight templates</strong> — one
+              Instead of one generic template, Beynoun ships <strong>eight templates</strong> — one
               per business type: restaurant, fashion lookbook, app landing page, brand story,
               wellness center, services, multi-product store, and single-product storefront. Each
               is built around what that business actually needs to convert visitors into
@@ -218,7 +218,7 @@ export default function AboutView() {
               hosted in the EU with automatic SSL and full GDPR compliance.
             </p>
             <p>
-              Zenya is the first Muslim company dedicated to building AI websites. It is operated
+              Beynoun is the first Muslim company dedicated to building websites. It is operated
               by <strong>{COMPANY.LEGAL_NAME}</strong>, a Dutch sole proprietorship registered
               with the Netherlands Chamber of Commerce (KvK no.{" "}
               <bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi>).

@@ -254,8 +254,8 @@ const WORD_HOLD = 4600
 /* The one claim the page makes, in both languages. It types itself out, holds
    long enough to be read twice over, then retypes in the other language. */
 const CLAIMS = [
-  { id: "ar", dir: "rtl" as const, text: "أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي" },
-  { id: "en", dir: "ltr" as const, text: "The first Muslim company building websites with AI" },
+  { id: "ar", dir: "rtl" as const, text: "أوّل شركة إسلامية لإنشاء المواقع" },
+  { id: "en", dir: "ltr" as const, text: "The first Muslim company building websites" },
 ]
 
 /* One full turn of the claim: it types, holds long enough to be read twice,
@@ -4375,7 +4375,7 @@ export default function Page() {
                 {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
               </button>
 
-              <Link href="/?home=1" aria-label="زينيا" className="flex min-h-[38px] shrink-0 items-center justify-self-center px-1.5">
+              <Link href="/?home=1" aria-label="بينون" className="flex min-h-[38px] shrink-0 items-center justify-self-center px-1.5">
                 {/* Pure black is permitted here: the reference reserves #000 for
                     logo marks and graphic glyphs, nowhere else. */}
                 <ZenyaMark className="h-[16px] text-black" />
@@ -4431,7 +4431,7 @@ export default function Page() {
             <div className="flex h-12 items-center justify-between gap-2 pe-1.5 ps-3">
               <Link
                 href="/?home=1"
-                aria-label="زينيا"
+                aria-label="بينون"
                 className="flex min-h-[38px] shrink-0 items-center px-1"
                 onMouseEnter={() => setPanel(null)}
               >
@@ -4727,9 +4727,9 @@ export default function Page() {
         {/* The page's heading for search engines and screen readers. The
             three words below are the visual headline, but as text they are
             twelve verbs in a row ("ابن تبني بناء تحسين ..."), which is what
-            Google was reading as the page's h1. This says what Zenya is, in
+            Google was reading as the page's h1. This says what Beynoun is, in
             the words of the page title, and draws nothing. */}
-        <h1 className="sr-only">زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري</h1>
+        <h1 className="sr-only">بينون: منشئ المواقع العربي لكل نشاط تجاري</h1>
         <div
           id="hero-words"
           ref={wordsRef}

@@ -203,7 +203,7 @@ export const domains: SurfaceDef = {
                 </div>
               ))}
               <div className="zn4-tf">
-                شراء نطاق عبر زينيا يجهّزه تلقائيًا — التسجيل وDNS وSSL. لا سجلّات يدوية للنسخ.
+                شراء نطاق عبر بينون يجهّزه تلقائيًا — التسجيل وDNS وSSL. لا سجلّات يدوية للنسخ.
               </div>
             </div>
           )}
@@ -322,7 +322,7 @@ export const domains: SurfaceDef = {
    app/(app)/dashboard/sites · components/dashboard/SiteCard.tsx
 
    The real card, with its real status pill, its real draft line and its real
-   buttons. The cursor presses انشر على زينيا, the pill turns مباشر with the
+   buttons. The cursor presses انشر على بينون, the pill turns مباشر with the
    product's own pulsing dot, the free subdomain appears where SiteCard puts
    it — and then the ADDRESS BAR takes over.
 
@@ -351,7 +351,7 @@ export const publish: SurfaceDef = {
       <div className="zn4-screen-in">
         <div className="zn4-head">
           <h2>مواقعك</h2>
-          <p>كل موقع بنيته يعيش هنا. انشره على زينيا، أو اربطه بنطاقك.</p>
+          <p>كل موقع بنيته يعيش هنا. انشره على بينون، أو اربطه بنطاقك.</p>
         </div>
 
         <div className="zn4-site" data-t="card">
@@ -373,7 +373,7 @@ export const publish: SurfaceDef = {
 
           <div className="body">
             <h3>{BRAND}</h3>
-            <p className="kind">مطعم · مبني بزينيا</p>
+            <p className="kind">مطعم · مبني ببينون</p>
 
             {f.live ? (
               <span className="host" data-t="host">
@@ -393,7 +393,7 @@ export const publish: SurfaceDef = {
                 </button>
               ) : (
                 <button type="button" className="zn4-go" data-t="publish" data-busy={f.busy}>
-                  {f.busy ? "جارٍ النشر…" : "انشر على زينيا"}
+                  {f.busy ? "جارٍ النشر…" : "انشر على بينون"}
                 </button>
               )}
             </div>

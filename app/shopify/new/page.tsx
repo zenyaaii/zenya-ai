@@ -224,7 +224,7 @@ function NewThemeContent() {
   return (
     <div className="relative min-h-screen bg-[#F7F7FB] pb-24">
       <TitleBar title="إنشاء قالب جديد" />
-      {/* Ambient wash — subtle indigo/purple background that matches Zenya's website */}
+      {/* Ambient wash — subtle indigo/purple background that matches Beynoun's website */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
         <div className="absolute -top-32 -right-32 h-[420px] w-[420px] rounded-full bg-gradient-to-br from-indigo-200/40 via-purple-200/30 to-transparent blur-3xl" />
         <div className="absolute top-1/3 -left-40 h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-purple-200/30 via-pink-100/20 to-transparent blur-3xl" />
@@ -344,7 +344,7 @@ function NewThemeContent() {
                       type="button"
                       onClick={generateNameAI}
                       disabled={nameLoading}
-                      title="ولّد اسمًا احترافيًا بالذكاء الاصطناعي"
+                      title="اقترح اسمًا احترافيًا"
                       className="flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-500/20 transition hover:scale-[1.02] active:scale-95 disabled:opacity-60"
                     >
                       {nameLoading ? (
@@ -352,11 +352,11 @@ function NewThemeContent() {
                       ) : (
                         <SparklesIcon />
                       )}
-                      <span className="hidden sm:inline">اسم بالذكاء الاصطناعي</span>
+                      <span className="hidden sm:inline">اقترح اسمًا</span>
                       <span className="sm:hidden">اقتراح</span>
                     </button>
                   </div>
-                  <p className="mt-1.5 text-[11px] text-gray-500">اضغط «اسم بالذكاء الاصطناعي» لاقتراح اسم عربي احترافي بناءً على وصف المنتج.</p>
+                  <p className="mt-1.5 text-[11px] text-gray-500">اضغط «اقترح اسمًا» لاقتراح اسم عربي احترافي بناءً على وصف المنتج.</p>
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-3">
@@ -819,7 +819,7 @@ function HonestyModal({
         className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
       >
         <div className="border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
-          <h2 className="text-base font-bold text-gray-900">تنبيه — بعض أجزاء هذا القالب من اختراع الذكاء الاصطناعي</h2>
+          <h2 className="text-base font-bold text-gray-900">تنبيه — بعض أجزاء هذا القالب مقترحة تلقائيًا</h2>
           <p className="mt-0.5 text-xs text-gray-600">{high.length} يجب إصلاحها · {medium.length} للتحقّق منها. أنت وحدك من يجعلها صحيحة قبل الإطلاق.</p>
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4">
@@ -836,7 +836,7 @@ function HonestyModal({
         <div className="border-t border-gray-200 px-6 py-4">
           <p className="mb-3 text-xs leading-relaxed text-gray-500">
             بالمتابعة فإنك تُقرّ بأن أعداد المخزون، وإشعارات المشترين، واقتباسات الصحافة، ونصوص المراجعات النائبة،
-            وما شابهها هي أمثلة مولّدة بالذكاء الاصطناعي — وليست معلومات حقيقية — وأنه تقع على عاتقك مسؤولية استبدالها أو
+            وما شابهها هي أمثلة مقترحة تلقائيًا — وليست معلومات حقيقية — وأنه تقع على عاتقك مسؤولية استبدالها أو
             التحقّق منها قبل النشر.
           </p>
           <div className="flex items-center justify-between gap-3">

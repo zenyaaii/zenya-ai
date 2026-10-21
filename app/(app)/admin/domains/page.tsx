@@ -10,7 +10,7 @@ import RefundButton from './RefundButton'
 
 /**
  * Admin-only operational view of every domain ever bought through
- * Zenya. Renders server-side because the data is sensitive (margins,
+ * Beynoun. Renders server-side because the data is sensitive (margins,
  * Stripe IDs, errors) and we don't want anything leaking client-side.
  *
  * Access gate: profile.plan === 'admin'. Non-admins get redirected to
@@ -128,7 +128,7 @@ export default async function AdminDomainsPage({
           <div className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted">الإدارة</div>
           <h1 className="mt-0.5 text-[24px] font-bold tracking-tight text-foreground">النطاقات</h1>
           <p className="mt-1 text-[13px] text-muted">
-            كل نطاق اشتُري عبر زينيا. استردّ هنا إن فشل تسجيل أو طلب المستخدم ذلك.
+            كل نطاق اشتُري عبر بينون. استردّ هنا إن فشل تسجيل أو طلب المستخدم ذلك.
           </p>
         </div>
         <Link href="/dashboard" className="inline-flex items-center gap-1 text-[12.5px] text-muted hover:text-foreground">

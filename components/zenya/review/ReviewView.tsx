@@ -27,7 +27,7 @@
  * put a row in the production reviews table that no customer ever wrote.
  *
  * AND THE WALL IS EMPTY ON PURPOSE. components/Testimonials.tsx refuses to
- * ship invented testimonials while Zenya is early; filling this page with
+ * ship invented testimonials while Beynoun is early; filling this page with
  * three plausible founders would be that same refusal broken in a nicer
  * typeface. The wall holds labelled placeholders instead.
  *
@@ -74,7 +74,7 @@ const SEND_FAILED = "تعذّر حفظ مراجعتك — يُرجى المحا�
  * They are the demo's own words — the live page prints no verdict at all, it
  * just colours stars — so they are written to describe the READER'S rating
  * rather than to grade the product: "استثنائية" is what five stars means, not
- * a claim Zenya is making about itself.
+ * a claim Beynoun is making about itself.
  */
 const VERDICTS = [
   "اختر عدد النجوم",
@@ -110,7 +110,7 @@ const validateEmail = (v: string) => z.string().email().safeParse(v).success
  *  words are the product's, and this page is restyling the moment, not
  *  rewording it. */
 const REAL_SUCCESS =
-  "شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة بزينيا."
+  "شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة ببينون."
 
 /**
  * The heading, and it is the ONE string on this screen the demo changed.
@@ -130,7 +130,7 @@ const STEPS: Array<{ h: string; b: string }> = [
   },
   {
     h: "نقرأها قبل نشرها",
-    b: "تصل المراجعة بحالة (قيد المراجعة)، ولا تظهر للعامّة حتى يعتمدها أحد مؤسّسي زينيا.",
+    b: "تصل المراجعة بحالة (قيد المراجعة)، ولا تظهر للعامّة حتى يعتمدها أحد مؤسّسي بينون.",
   },
   {
     h: "تُنشر كما كتبتها",
@@ -336,7 +336,7 @@ export default function ReviewView() {
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
+            <Link href="/" aria-label="بينون" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
             <AccountControl className="zr-account zr-account-phone" />
           </div>
           <div className="zr-drawer" data-open={menuOpen ? "true" : undefined}
@@ -354,7 +354,7 @@ export default function ReviewView() {
         <div className="zr-pill">
           <div className="zr-bar">
             <span className="zr-side zr-side-start">
-              <Link href="/" className="zr-mark" aria-label="زينيا"><ZenyaMark className="zr-mark-svg" /></Link>
+              <Link href="/" className="zr-mark" aria-label="بينون"><ZenyaMark className="zr-mark-svg" /></Link>
             </span>
             <nav className="zr-nav">
               {NAV.map((i) => (
@@ -376,7 +376,7 @@ export default function ReviewView() {
             آراء العملاء
           </p>
           <h1 className="zr-h1">
-            قيّم <span className="zr-h1-mark">تجربتك</span> مع زينيا.
+            قيّم <span className="zr-h1-mark">تجربتك</span> مع بينون.
           </h1>
           <p className="zr-lede">
             خمس نجمات وبضعة أسطر. مراجعتك تصل إلينا كما كتبتها، ونقرؤها قبل أن تُنشر،
@@ -393,7 +393,7 @@ export default function ReviewView() {
           <section className="zr-card" aria-labelledby="zr-inst-q" data-reveal style={{ ["--i" as string]: "1" }}>
             <Grow on={!handed}>
               <div className="zr-inst">
-                <p className="zr-inst-q" id="zr-inst-q">كيف كانت تجربتك مع زينيا؟</p>
+                <p className="zr-inst-q" id="zr-inst-q">كيف كانت تجربتك مع بينون؟</p>
 
                 {/* A radiogroup, because that is what five mutually exclusive
                     values are. The arrows move it, so the whole instrument is
@@ -493,7 +493,7 @@ export default function ReviewView() {
                     </Field>
                   </div>
 
-                  <Field id="zr-site" label="موقعك في زينيا" hint="اختياري">
+                  <Field id="zr-site" label="موقعك في بينون" hint="اختياري">
                     <input id="zr-site" className="zr-in zr-ltr" type="text" value={site} dir="ltr"
                       placeholder="myshop.beynoun.com" onChange={(e) => setSite(e.target.value)} />
                   </Field>
@@ -606,7 +606,7 @@ export default function ReviewView() {
             ))}
           </div>
           <p className="zr-wall-b" data-reveal>
-            زينيا منصّة جديدة، ونؤمن بأن نعرض آراءً حقيقية فقط — لا شهادات مُختلَقة. هذه الأماكن
+            بينون منصّة جديدة، ونؤمن بأن نعرض آراءً حقيقية فقط — لا شهادات مُختلَقة. هذه الأماكن
             تبقى فارغة إلى أن تصل مراجعات حقيقية ويعتمدها أحد المؤسّسين، وعندها تحلّ محلّها كما
             كُتبت تمامًا.
           </p>

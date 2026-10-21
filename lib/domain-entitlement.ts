@@ -6,7 +6,7 @@
  *
  *   1. Free domain — a Pro account gets ONE free 1-year registration, but
  *      only on a "standard" domain (retail at or under FREE_DOMAIN_MAX_RETAIL_USD
- *      and not a registry premium). Zenya still pays Porkbun the wholesale
+ *      and not a registry premium). Beynoun still pays Porkbun the wholesale
  *      cost; the customer pays $0 via a 100%-off Stripe coupon. Redeemed
  *      once — tracked by profiles.free_domain_claimed_at.
  *
@@ -33,7 +33,7 @@ export const PRO_DOMAIN_DISCOUNT_PCT = Number(
 
 /**
  * WHOLESALE price ceiling (USD/first year) for the FREE perk — the raw
- * price Zenya pays Porkbun, NOT the retail we charge. Rule of thumb:
+ * price Beynoun pays Porkbun, NOT the retail we charge. Rule of thumb:
  * "if we can get it for four dollars or less, the Pro subscriber gets
  * it on us." That covers the promotional/cheap TLDs — .store, .site,
  * .online, .shop, .xyz, .club, and .restaurant when it's on promo —
@@ -95,7 +95,7 @@ export function isProProfile(p: ProfileForEntitlement | null | undefined): boole
 }
 
 export type FreeDomainCheck = {
-  /** Wholesale first-year price (USD) — what Porkbun charges Zenya.
+  /** Wholesale first-year price (USD) — what Porkbun charges Beynoun.
    *  This is the free-perk gate. */
   wholesale: number
   /** Domain retail (USD/year) we'd otherwise charge. Kept for callers

@@ -10,7 +10,7 @@ import { getAccessToken } from '../helpers/session'
 // OR by talking to the database directly with A's own token (real RLS).
 
 const USER_B_EMAIL = 'e2e-stranger@zenya-test.local'
-const USER_B_PW = 'Zenya-E2E-stranger-7k2!z'
+const USER_B_PW = 'Beynoun-E2E-stranger-7k2!z'
 
 let bUserId: string
 let bThemeId: string

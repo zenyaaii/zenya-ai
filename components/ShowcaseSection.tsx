@@ -167,7 +167,7 @@ export default function ShowcaseSection() {
               id="showcase-heading"
               className="heading-ar text-[clamp(32px,5vw,50px)] text-foreground"
             >
-              مبنيّ بـ <span className="gradient-text">زينيا.</span>
+              مبنيّ بـ <span className="gradient-text">بينون.</span>
             </h2>
           </div>
           <Link
@@ -189,7 +189,7 @@ export default function ShowcaseSection() {
         tabIndex={0}
         role="region"
         aria-roledescription="carousel"
-        aria-label="قوالب زينيا"
+        aria-label="قوالب بينون"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={pokePause}
@@ -369,7 +369,7 @@ function InfoCard({
             style={{ background: `${tint.accent}18`, color: tint.accent }}
           >
             <Sparkles className="h-2.5 w-2.5" strokeWidth={2.25} />
-            قالب زينيا
+            قالب بينون
           </span>
         </div>
 

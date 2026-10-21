@@ -31,7 +31,7 @@ export default function RibbonDemo() {
 
         <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
           <h1 className="max-w-[20ch] text-[clamp(36px,6vw,68px)] font-bold leading-[1.28]">
-            موقعك الكامل، بالذكاء الاصطناعي
+            موقعك الكامل،
           </h1>
           <p className="mt-6 max-w-[46ch] text-[17px] leading-[1.9] text-[#5f5f5d]">
             اختر قالبًا، واكتب نبذة قصيرة عن نشاطك، وشاهد الموقع يُبنى أمامك.

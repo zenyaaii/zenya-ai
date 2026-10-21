@@ -12,7 +12,7 @@
  * apps. On the live page the channels are a side column, which on a phone
  * means they land below a nine-field card and a 229px consent banner.
  *
- * AND THE PAGE SAYS WHO IT IS. Zenya is owned and operated by Musannef, a
+ * AND THE PAGE SAYS WHO IT IS. Beynoun is owned and operated by Musannef, a
  * Dutch eenmanszaak, and the register that says so is public. The KvK number
  * and the VAT status are printed on the page rather than buried in the legal
  * pages, because "who am I actually writing to" is a contact question. Every
@@ -138,7 +138,7 @@ const TOPIC_SUCCESS: Record<Topic, string> = {
   sales:
     "شكرًا لك — سيتواصل معك أحد أعضاء الفريق خلال يوم عمل واحد لمناقشة احتياجاتك.",
   review:
-    "شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة بزينيا.",
+    "شكرًا جزيلًا على مشاركتك تجربتك الصادقة! سنراجعها، وسنرسل إليك رمز خصم كشكرٍ على وقتك. رأيك يساعد مؤسّسين آخرين على الثقة ببينون.",
   other: "شكرًا لك — تمّ استلام رسالتك. سنردّ عليك قريبًا.",
 }
 
@@ -319,7 +319,7 @@ export default function ContactView({
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="zc-phone-mark"><ZenyaMark className="zc-mark-svg-sm" /></Link>
+            <Link href="/" aria-label="بينون" className="zc-phone-mark"><ZenyaMark className="zc-mark-svg-sm" /></Link>
             <AccountControl className="zc-account zc-account-phone" />
           </div>
           <div className="zc-drawer" data-open={menuOpen ? "true" : undefined}
@@ -340,7 +340,7 @@ export default function ContactView({
         <div className="zc-pill">
           <div className="zc-bar">
             <span className="zc-side zc-side-start">
-              <Link href="/" className="zc-mark" aria-label="زينيا"><ZenyaMark className="zc-mark-svg" /></Link>
+              <Link href="/" className="zc-mark" aria-label="بينون"><ZenyaMark className="zc-mark-svg" /></Link>
             </span>
             <nav className="zc-nav">
               {NAV.map((i) => (
@@ -486,7 +486,7 @@ export default function ContactView({
                         topic === "request"
                           ? "أي نوع من قوالب الأعمال سيساعد عملك؟ كن محدّدًا: «قالب صالون حلاقة» أفضل من «قالب خدمات»."
                           : topic === "sales"
-                          ? "ما حجم نشاطك، وما الذي تحتاجه من زينيا؟"
+                          ? "ما حجم نشاطك، وما الذي تحتاجه من بينون؟"
                           : "أخبرنا قليلًا عمّا تحتاجه."
                       }
                       onChange={(e) => setMessage(e.target.value)} />
@@ -546,7 +546,7 @@ export default function ContactView({
                     <bdi dir="ltr">{OWNER_SITE_LABEL}</bdi>
                     <ArrowUpRight size={13} strokeWidth={2.25} aria-hidden />
                   </span>
-                  <span className="zc-owner-r">المالك الكامل لزينيا</span>
+                  <span className="zc-owner-r">المالك الكامل لبينون</span>
                 </span>
               </a>
 
@@ -564,7 +564,7 @@ export default function ContactView({
               </dl>
 
               <p className="zc-note-b" style={{ marginTop: "1rem" }}>
-                زينيا منتج تملكه وتشغّله {COMPANY.LEGAL_NAME}. العنوان المسجَّل كامل متاح في
+                بينون منتج تملكه وتشغّله {COMPANY.LEGAL_NAME}. العنوان المسجَّل كامل متاح في
                 السجل العام للغرفة التجارية الهولندية برقم KvK أعلاه، أو بطلب خطّي على البريد
                 نفسه.
               </p>
@@ -577,7 +577,7 @@ export default function ContactView({
               </p>
               <p className="zc-note-b">
                 نحن على ثلاث منصّات فقط، والحسابات الثلاثة هي الوحيدة الرسمية.
-                أي حساب آخر باسم زينيا ليس منّا.
+                أي حساب آخر باسم بينون ليس منّا.
               </p>
               <div className="zc-soc">
                 {SOCIALS.map(({ label, href, Icon }) => (

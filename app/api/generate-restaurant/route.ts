@@ -261,7 +261,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
     image: item.image || sigImages[i] || dishPhoto(item.name)
   }))
 
-  // Provider object — Zenya's own booking form by default; `phone` only as an
+  // Provider object — Beynoun's own booking form by default; `phone` only as an
   // opt-in call-to-reserve fallback. No external platforms.
   const r = input.reservations
   const provider: RestaurantContent['reservations']['provider'] =
@@ -286,7 +286,7 @@ function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantContent {
   // The chef's own photo or none — a stock face would be passed off as them.
   const chef_photo = input.visuals.chef_photo_url || undefined
 
-  // CTA label — reservations go through Zenya's own form; `phone` is the only
+  // CTA label — reservations go through Beynoun's own form; `phone` is the only
   // call-out fallback.
   const defaultCta = r.provider_type === 'phone' ? 'اتصل للحجز' : 'احجز طاولتك'
 

@@ -6,7 +6,7 @@ import { createOrGetUser, deleteUserById } from '../helpers/db'
 // Runs in the `public` project (no storageState) — it logs in fresh itself.
 
 const EMAIL = 'e2e-logout@zenya-test.local'
-const PW = 'Zenya-E2E-logout-5m8!q'
+const PW = 'Beynoun-E2E-logout-5m8!q'
 let uid: string
 
 test.beforeAll(async () => { uid = await createOrGetUser(EMAIL, PW) })

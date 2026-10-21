@@ -6,10 +6,10 @@ import { Reveal } from '@/components/marketing/Reveal'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
-/** Illustrative "amateur site" pain points vs what Zenya delivers. These are
+/** Illustrative "amateur site" pain points vs what Beynoun delivers. These are
  *  generic, honest contrasts — not claims about any specific customer. */
 const BEFORE = ['ألوان متضاربة وخطوط عشوائية', 'نصوص مكتوبة على عجل', 'يبدو مبنيًا بالهواة', 'بطيء وغير متجاوب مع الجوال']
-const AFTER = ['تصميم متناسق بهوية واضحة', 'محتوى مقنع يكتبه الذكاء الاصطناعي', 'يبدو أنك دفعت لوكالة', 'سريع ومتجاوب على كل شاشة']
+const AFTER = ['تصميم متناسق بهوية واضحة', 'محتوى مقنع تكتبه بينون', 'يبدو أنك دفعت لوكالة', 'سريع ومتجاوب على كل شاشة']
 
 export default function BeforeAfterSection() {
   return (
@@ -24,7 +24,7 @@ export default function BeforeAfterSection() {
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.85] text-muted">
               الزائر يحكم على نشاطك في ثوانٍ. موقع غير احترافي يُفقدك الثقة — ومعها المبيعات.
-              زينيا يقلب المعادلة.
+              بينون يقلب المعادلة.
             </p>
           </div>
         </Reveal>
@@ -81,7 +81,7 @@ function Label({ tone }: { tone: 'bad' | 'good' }) {
           : { background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' }
       }
     >
-      {bad ? 'قبل' : 'بعد · مع زينيا'}
+      {bad ? 'قبل' : 'بعد · مع بينون'}
     </span>
   )
 }
@@ -204,7 +204,7 @@ function Chrome({ tone }: { tone: 'bad' | 'good' }) {
         className="ms-auto rounded px-2 py-0.5 text-[9px] font-semibold"
         style={bad ? { background: 'rgba(220,38,38,0.10)', color: '#dc2626' } : { background: 'rgba(39,166,68,0.10)', color: '#27a644' }}
       >
-        {bad ? 'موقع هاوٍ' : 'مع زينيا'}
+        {bad ? 'موقع هاوٍ' : 'مع بينون'}
       </span>
     </div>
   )
@@ -233,7 +233,7 @@ function StoreMock({ tone }: { tone: 'bad' | 'good' }) {
           </div>
         </div>
       ) : (
-        // Zenya: clean, calm, on-brand
+        // Beynoun: clean, calm, on-brand
         <div className="min-h-[122px] p-3.5 sm:min-h-[168px] sm:p-4 md:min-h-[200px] md:p-5" style={{ background: '#f7f4ed' }}>
           <div className="mb-4 flex items-center justify-between">
             <div className="h-3 w-16 rounded-full" style={{ background: 'linear-gradient(90deg,#5e6ad2,#8b93e0)' }} />

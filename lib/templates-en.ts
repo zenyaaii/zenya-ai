@@ -28,7 +28,7 @@ export type ThemeEn = {
   demoHref: string
   /** The real wizard / builder for this template. */
   createHref: string
-  /** True for the Shopify-exportable template, false for Zenya-hosted sites. */
+  /** True for the Shopify-exportable template, false for Beynoun-hosted sites. */
   shopify?: boolean
 }
 

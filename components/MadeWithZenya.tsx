@@ -1,10 +1,10 @@
 /**
- * The "Made with Zenya" badge on free-tier hosted sites.
+ * The "Made with Beynoun" badge on free-tier hosted sites.
  *
- * WHAT IT IS. Every site Zenya generates for a customer on the free tier
+ * WHAT IT IS. Every site Beynoun generates for a customer on the free tier
  * carries this in the corner, linking back to beynoun.com with ?ref=badge.
  * Paid hosting removes it: lib/public-site.tsx passes hide={theme.owner_has_hosting},
- * and "the Made with Zenya badge removed" is a line item on the pricing page,
+ * and "the Made with Beynoun badge removed" is a line item on the pricing page,
  * so the prop is a paid promise and not a preference.
  *
  * IT IS THE ONE PIECE OF ZENYA'S OWN CHROME THAT RENDERS ON SOMEBODY ELSE'S
@@ -40,7 +40,7 @@ export default function MadeWithZenya({ hide = false }: { hide?: boolean }) {
       href="https://beynoun.com?ref=badge"
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Made with Zenya"
+      aria-label="Made with Beynoun"
       style={{
         position: 'fixed',
         bottom: 16,
@@ -75,7 +75,7 @@ export default function MadeWithZenya({ hide = false }: { hide?: boolean }) {
           background: '#5e6ad2',
         }}
       />
-      Made with <strong style={{ fontWeight: 600 }}>Zenya</strong>
+      Made with <strong style={{ fontWeight: 600 }}>Beynoun</strong>
     </a>
   )
 }

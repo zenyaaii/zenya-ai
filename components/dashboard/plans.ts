@@ -47,7 +47,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
       'كل ما في خطة Starter',
       'نطاق مخصّص مجاني لسنة — ‏.store، .site، .online، .shop',
       'خصم 30% على النطاقات الأغلى (.com وأمثالها)',
-      'إزالة شارة «صُنع بزينيا»',
+      'إزالة شارة «صُنع ببينون»',
       'إدارة كاملة لموقعك ونطاقك',
       'دعم أولوية قصوى',
     ],
@@ -68,7 +68,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     label: 'الباقة المجانية',
     price: '0$',
     includes: [
-      'توليد قالبين (٢) بالذكاء الاصطناعي',
+      'توليد قالبين (٢)',
       'جميع القوالب الثمانية للمعاينة',
       'انشر موقعك على اسمك.beynoun.com',
       'كل أدوات التحرير والإدارة',
@@ -105,7 +105,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     label: 'الباقة المجانية',
     price: '0$',
     includes: [
-      'توليد قالبين (٢) بالذكاء الاصطناعي',
+      'توليد قالبين (٢)',
       'جميع القوالب الثمانية للمعاينة',
       'انشر موقعك على اسمك.beynoun.com',
       'كل أدوات التحرير والإدارة',

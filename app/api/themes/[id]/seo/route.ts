@@ -84,7 +84,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if ('keywords' in body)        setOrClear('keywords', str(body.keywords, 300))
   if ('ogImage' in body)         setOrClear('ogImage', str(body.ogImage, 500))
   if ('logo' in body) {
-    // The tab icon. Only a file the owner uploaded to Zenya; '' removes it.
+    // The tab icon. Only a file the owner uploaded to Beynoun; '' removes it.
     if (body.logo === '' || body.logo === null) delete next.logo
     else if (isUploadedImageUrl(body.logo) && body.logo.includes(`/theme-uploads/${user.id}/`)) next.logo = body.logo
     else return NextResponse.json({ error: 'bad_logo', message: 'Upload the logo first.' }, { status: 400 })

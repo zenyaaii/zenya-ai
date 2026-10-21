@@ -3,14 +3,14 @@ import { test, expect, type Page } from '@playwright/test'
 // Public pages that must render for an anonymous visitor. [path, a string that
 // must appear in the rendered HTML to prove it's the real page, not an error].
 const PAGES: Array<[string, RegExp]> = [
-  ['/', /زينيا/],
-  ['/about', /زينيا|من نحن|قصّة|قصة/],
-  ['/features', /ميزات|المميزات|زينيا/],
+  ['/', /بينون/],
+  ['/about', /بينون|من نحن|قصّة|قصة/],
+  ['/features', /ميزات|المميزات|بينون/],
   ['/pricing', /الأسعار|السعر|شهري|مجان/],
   ['/faq', /الأسئلة|سؤال|شائع/],
   ['/contact', /تواصل|راسلنا|البريد/],
   ['/templates', /قوالب|قالب/],
-  ['/compare', /مقارنة|زينيا/],
+  ['/compare', /مقارنة|بينون/],
   ['/privacy', /الخصوصية/],
   ['/terms', /الشروط|الخدمة/],
   ['/cookies', /الكوكيز|ملفات|تعريف/],

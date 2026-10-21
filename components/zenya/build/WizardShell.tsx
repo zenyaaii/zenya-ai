@@ -283,7 +283,7 @@ function DemoHeader({ rootRef }: { rootRef: React.MutableRefObject<HTMLElement |
             aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
-          <Link href="/" aria-label="زينيا" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
+          <Link href="/" aria-label="بينون" className="zb-phone-mark"><ZenyaMark className="zb-mark-svg-sm" /></Link>
           <AccountControl className="zb-account zb-account-phone" />
         </div>
         <div className="zb-drawer" data-open={menuOpen ? "true" : undefined}
@@ -301,7 +301,7 @@ function DemoHeader({ rootRef }: { rootRef: React.MutableRefObject<HTMLElement |
       <div className="zb-pill">
         <div className="zb-bar">
           <span className="zb-side zb-side-start">
-            <Link href="/" className="zb-mark" aria-label="زينيا"><ZenyaMark className="zb-mark-svg" /></Link>
+            <Link href="/" className="zb-mark" aria-label="بينون"><ZenyaMark className="zb-mark-svg" /></Link>
           </span>
           <nav className="zb-nav">
             {NAV.map((i) => (

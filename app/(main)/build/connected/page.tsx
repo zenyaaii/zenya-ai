@@ -15,7 +15,7 @@ export default function ShopifyConnectedPage() {
         </div>
         <h1 className="mt-4 text-[20px] font-bold text-foreground">تم ربط المتجر</h1>
         <p className="mt-2 text-[14.5px] leading-relaxed text-muted">
-          أصبح متجر Shopify الخاص بك مرتبطًا بزينيا الآن. عُد إلى التبويب الذي كنت تبني فيه
+          أصبح متجر Shopify الخاص بك مرتبطًا ببينون الآن. عُد إلى التبويب الذي كنت تبني فيه
           قالبك — سيلتقط الاتصال تلقائيًا.
         </p>
         <p className="mt-4 text-[14.5px] text-muted">يمكنك إغلاق هذا التبويب.</p>

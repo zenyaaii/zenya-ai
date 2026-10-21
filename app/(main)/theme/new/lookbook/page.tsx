@@ -274,7 +274,7 @@ export default function LookbookWizardPage() {
           <Field label="التوجّه التصميمي" required wide>
             <Textarea value={form.style_direction} onChange={(e) => update('style_direction', e.target.value)} placeholder="مثلاً: فخامة محتشمة وعصرية — خطوط نظيفة وأقمشة طبيعية، أناقة خالدة لا موسمية." />
           </Field>
-          <Field label="قصة العلامة" wide hint="سيستخدم الذكاء الاصطناعي هذا لكتابة قسم «قصتنا».">
+          <Field label="قصة العلامة" wide hint="ستستخدم بينون هذا لكتابة قسم «قصتنا».">
             <Textarea rows={4} value={form.brand_story} onChange={(e) => update('brand_story', e.target.value)} placeholder="قصة البداية أو القيم التأسيسية أو ما يميّز العلامة." />
           </Field>
         </Grid>
@@ -417,7 +417,7 @@ export default function LookbookWizardPage() {
               { label: 'المنتجات', value: validProducts.map((p) => p.name).join('، ') },
             ]}
           >
-            <Handoff title="جاهز لتوليد موقع اللوك بوك." body="يصوغ الذكاء الاصطناعي نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لتوليد موقع اللوك بوك." body="تصوغ بينون نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -435,7 +435,7 @@ export default function LookbookWizardPage() {
       <WizardShell
         eyebrow="لوك بوك · قالب الأزياء المحتشمة"
         title="ابنِ موقع أزياء فاخرًا."
-        sub="أخبرنا عن علامتك وتشكيلتك. تولّد زينيا موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة."
+        sub="أخبرنا عن علامتك وتشكيلتك. تولّد بينون موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة."
         steps={steps}
         step={step}
         onStep={setStep}

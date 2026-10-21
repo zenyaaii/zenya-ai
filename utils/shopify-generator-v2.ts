@@ -124,7 +124,7 @@ function escapeJson(value: string) {
 function normalize(content: Partial<NovaThemeContent>): NovaThemeContent {
   const base: NovaThemeContent = {
     brand: {
-      name: 'Zenya',
+      name: 'Beynoun',
       tagline: 'Modern commerce experiences built for conversion.'
     },
     hero: {
@@ -335,9 +335,9 @@ export function prepareThemeZipV2(
   const settingsSchema = [
     {
       name: 'theme_info',
-      theme_name: 'Zenya Nova',
+      theme_name: 'Beynoun Nova',
       theme_version: '2.0.0',
-      theme_author: 'Zenya AI',
+      theme_author: 'Beynoun',
       theme_documentation_url: 'https://shopify.dev/docs/storefronts/themes/architecture',
       theme_support_url: 'https://shopify.dev/docs/storefronts/themes/tools/theme-check/checks'
     },
@@ -357,9 +357,9 @@ export function prepareThemeZipV2(
   ]
 
   const settingsData = {
-    current: 'Zenya Nova',
+    current: 'Beynoun Nova',
     presets: {
-      'Zenya Nova': {
+      'Beynoun Nova': {
         brand_name: content.brand.name,
         brand_tagline: content.brand.tagline,
         color_primary: colorPrimary,

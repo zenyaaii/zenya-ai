@@ -27,7 +27,7 @@ test('GET /api/account/export requires auth', async ({ request }) => {
   expect(res.status()).toBeLessThan(500)
 })
 
-// BY DESIGN: generation is public so guests can try Zenya before signing up
+// BY DESIGN: generation is public so guests can try Beynoun before signing up
 // (/theme/new/* and /build are guest-accessible). It is not auth-gated (400 on
 // a bad body, never 401); abuse is bounded by the edge rate-limiter in
 // middleware.ts (60 req/min/IP), and the real entitlement cap sits on theme

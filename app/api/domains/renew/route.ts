@@ -105,8 +105,8 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: `Renew: ${purchase.domain}`,
             description: years === 1
-              ? `1-year renewal via Zenya`
-              : `${years}-year renewal via Zenya`,
+              ? `1-year renewal via Beynoun`
+              : `${years}-year renewal via Beynoun`,
           },
         },
       },

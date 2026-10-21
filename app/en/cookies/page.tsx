@@ -5,14 +5,14 @@ const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'How and why Zenya uses cookies and similar technologies, which categories are set, and how to change your choices.',
+  description: 'How and why Beynoun uses cookies and similar technologies, which categories are set, and how to change your choices.',
   alternates: {
     canonical: `${SITE}/en/cookies`,
     languages: { en: `${SITE}/en/cookies`, ar: `${SITE}/cookies`, 'x-default': `${SITE}/cookies` },
   },
   openGraph: {
-    title: 'Zenya cookie policy',
-    description: 'Which cookies Zenya sets, why, and how long they last.',
+    title: 'Beynoun cookie policy',
+    description: 'Which cookies Beynoun sets, why, and how long they last.',
     url: `${SITE}/en/cookies`,
     type: 'website',
     locale: 'en_US',

@@ -12,13 +12,13 @@
  *
  * Env required for real delivery:
  *   RESEND_API_KEY  — `re_…` from resend.com/api-keys
- *   EMAIL_FROM      — defaults to "Zenya <noreply@zenyaai.co>" if unset
+ *   EMAIL_FROM      — defaults to "Beynoun <noreply@zenyaai.co>" if unset
  */
 
 import { Resend } from 'resend'
 import { COMPANY } from './company'
 
-const DEFAULT_FROM = 'Zenya <noreply@zenyaai.co>'
+const DEFAULT_FROM = 'Beynoun <noreply@zenyaai.co>'
 
 /** Format a minor-unit amount (cents) with a sensible currency symbol.
  *  Amount stays LTR even inside an RTL email so "€9.99" never flips. */
@@ -127,7 +127,7 @@ function emailShell(opts: {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;"><tr><td align="center">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
     <tr><td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
-      <img src="${HEADER_IMG}" alt="زينيا" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
+      <img src="${HEADER_IMG}" alt="بينون" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
     </td></tr>
     <tr><td style="padding:20px 40px 8px;text-align:right;font-family:${FONT};">
       <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">${eyebrow}</p>
@@ -142,7 +142,7 @@ function emailShell(opts: {
     </td></tr>
   </table>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;"><tr><td style="padding:20px 40px 0;text-align:right;font-family:${FONT};">
-    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">زينيا، منشئ المواقع بالذكاء الاصطناعي · <a href="https://beynoun.com" style="color:#171717;text-decoration:none;">beynoun.com</a></p>
+    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">بينون، منشئ المواقع · <a href="https://beynoun.com" style="color:#171717;text-decoration:none;">beynoun.com</a></p>
     <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#8f8f8f;">${SUPPORT_EMAIL}</a> · <a href="https://beynoun.com/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#a3a3a3;">الشروط</a></p>
   </td></tr></table>
   </td></tr></table>
@@ -171,13 +171,13 @@ export function domainPurchasedEmail(args: {
   const text = [
     `شكرًا لك!`,
     ``,
-    `تم تسجيل نطاقك ${domain} بنجاح وربطه بموقعك على زينيا.`,
+    `تم تسجيل نطاقك ${domain} بنجاح وربطه بموقعك على بينون.`,
     `المدة: ${yearWord} · ينتهي في: ${expiry}`,
     ``,
     `قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.`,
     `أدِر نطاقاتك من: ${manageUrl}`,
     ``,
-    `— زينيا`,
+    `— بينون`,
   ].join('\n')
 
   const bodyHtml = `
@@ -232,7 +232,7 @@ export function domainRefundEmail(args: {
     `يمكنك تجربة نطاق آخر في أي وقت من: ${manageUrl}`,
     ``,
     `نعتذر عن الإزعاج، ونحن هنا للمساعدة إن احتجت أي شيء.`,
-    `— زينيا`,
+    `— بينون`,
   ].join('\n')
 
   const bodyHtml = `
@@ -260,7 +260,7 @@ export function domainRefundEmail(args: {
 }
 
 /**
- * One-off broadcast: "Zenya has a new look" announcement. Sent to the
+ * One-off broadcast: "Beynoun has a new look" announcement. Sent to the
  * existing user base after the 2026 rebrand so they see the new identity
  * and come back. Generic enough to reuse for future announcements via the
  * `headline` / `bodyHtml` overrides, but ships with sensible defaults.
@@ -272,37 +272,37 @@ export function announcementEmail(args?: {
   const manageUrl = args?.manageUrl || 'https://beynoun.com/dashboard'
   const greeting = args?.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
-  const subject = 'زينيا بحُلّة جديدة ✨'
+  const subject = 'بينون بحُلّة جديدة ✨'
 
   const text = [
     greeting,
     '',
-    'جدّدنا زينيا بالكامل — هوية جديدة، تصميم أوضح، ورسائل أجمل.',
+    'جدّدنا بينون بالكامل — هوية جديدة، تصميم أوضح، ورسائل أجمل.',
     'وأضفنا زر «جرّب مثالاً جاهزًا» في منشئ المواقع: ابدأ من مثال جاهز، عدّله، وولّد موقعك في ثوانٍ.',
     '',
     `عُد وجرّبها الآن: ${manageUrl}`,
     '',
     'لأي استفسار راسلنا على team@beynoun.com',
-    '— زينيا (Musannef)',
+    '— بينون (Musannef)',
   ].join('\n')
 
   const bodyHtml = `
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      جدّدنا <strong style="color:#171717;">زينيا</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
+      جدّدنا <strong style="color:#171717;">بينون</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
     </p>
     <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
       والأهم: أضفنا زر <strong style="color:#171717;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
     </p>`
 
   const html = emailShell({
-    title: 'زينيا بحُلّة جديدة',
+    title: 'بينون بحُلّة جديدة',
     eyebrow: 'جديد',
-    heading: 'زينيا بحُلّة جديدة',
+    heading: 'بينون بحُلّة جديدة',
     bodyHtml,
     ctaHref: manageUrl,
-    ctaLabel: 'عُد إلى زينيا',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
+    ctaLabel: 'عُد إلى بينون',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في بينون. لأي استفسار راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -337,11 +337,11 @@ export function paymentReceiptEmail(args: {
   const taxLabel = taxCents > 0 ? `ضريبة القيمة المضافة (${rate}% شامل)` : ''
 
   const itemName = {
-    onetime: 'زينيا برو — وصول مدى الحياة',
+    onetime: 'بينون برو — وصول مدى الحياة',
     hosting: 'الاستضافة الكاملة — اشتراك شهري',
-    starter: 'زينيا Starter — اشتراك شهري',
-    pro: 'زينيا Pro — اشتراك شهري مع الاستضافة',
-    entry: 'زينيا Entry — فتح التوليد (دفعة واحدة)',
+    starter: 'بينون Starter — اشتراك شهري',
+    pro: 'بينون Pro — اشتراك شهري مع الاستضافة',
+    entry: 'بينون Entry — فتح التوليد (دفعة واحدة)',
   }[plan]
 
   let dateStr = ''
@@ -356,10 +356,10 @@ export function paymentReceiptEmail(args: {
     hosting: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.',
     starter: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Starter. هذا إيصال رسمي بعمليتك.',
     pro: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Pro. هذا إيصال رسمي بعمليتك.',
-    entry: 'شكرًا لك! تم استلام دفعتك وفتح التوليد بالذكاء الاصطناعي في حسابك. هذا إيصال رسمي بعمليتك.',
+    entry: 'شكرًا لك! تم استلام دفعتك وفتح التوليد في حسابك. هذا إيصال رسمي بعمليتك.',
   }[plan]
 
-  const subject = `إيصال الدفع من زينيا — ${total}`
+  const subject = `إيصال الدفع من بينون — ${total}`
 
   const text = [
     'شكرًا لك! تم استلام دفعتك.',
@@ -375,7 +375,7 @@ export function paymentReceiptEmail(args: {
     `لوحة التحكم: ${manageUrl}`,
     'لأي استفسار: team@beynoun.com',
     '',
-    '— زينيا (Musannef)',
+    '— بينون (Musannef)',
   ].filter((l) => l !== null).join('\n')
 
   const summary = `
@@ -416,7 +416,7 @@ export function paymentReceiptEmail(args: {
     <p style="margin:0;font-size:12px;color:#8f8f8f;">رقم الإيصال: <strong style="color:#555555;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
 
   const html = emailShell({
-    title: `إيصال الدفع من زينيا`,
+    title: `إيصال الدفع من بينون`,
     eyebrow: 'إيصال الدفع',
     heading: 'شكرًا لك! تم استلام دفعتك',
     bodyHtml,
@@ -424,11 +424,11 @@ export function paymentReceiptEmail(args: {
     ctaLabel: 'الذهاب إلى لوحة التحكم',
     footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">${
       {
-        onetime: 'هذا إيصال عن شرائك خطة زينيا برو مدى الحياة.',
+        onetime: 'هذا إيصال عن شرائك خطة بينون برو مدى الحياة.',
         hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
         starter: 'هذا إيصال عن اشتراكك الشهري في خطة Starter.',
         pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
-        entry: 'هذا إيصال عن فتح التوليد بالذكاء الاصطناعي (خطة Entry، دفعة واحدة).',
+        entry: 'هذا إيصال عن فتح التوليد (خطة Entry، دفعة واحدة).',
       }[plan]
     } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
@@ -449,7 +449,7 @@ export function passwordChangedEmail(args: {
   const { email } = args
   const secureUrl = args.secureUrl || 'https://beynoun.com/login'
 
-  const subject = 'تم تغيير كلمة مرور حسابك في زينيا'
+  const subject = 'تم تغيير كلمة مرور حسابك في بينون'
 
   const text = [
     `مرحبًا،`,
@@ -460,7 +460,7 @@ export function passwordChangedEmail(args: {
     `لم تقم بهذا التغيير؟ أمّن حسابك فورًا بإعادة تعيين كلمة المرور من: ${secureUrl}`,
     `وراسلنا على team@beynoun.com`,
     ``,
-    `— زينيا`,
+    `— بينون`,
   ].join('\n')
 
   const bodyHtml = `
@@ -507,7 +507,7 @@ export function domainExpiringEmail(args: {
     ``,
     `إن لم تجدِّده، سيتوقف النطاق عن العمل ويمكن لشخص آخر تسجيله بعد فترة سماح قصيرة.`,
     ``,
-    `— زينيا`,
+    `— بينون`,
   ].join('\n')
 
   const html = emailShell({
@@ -539,34 +539,34 @@ export function welcomeEmail(args: {
   const genWord = limit === 1 ? 'موقع مجاني واحد' : limit === 2 ? 'موقعين مجانيين' : `${limit} مواقع مجانية`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
-  const subject = 'أهلًا بك في زينيا 👋'
+  const subject = 'أهلًا بك في بينون 👋'
 
   const text = [
     greeting,
     '',
-    'يسعدنا انضمامك إلى زينيا — منشئ المواقع بالذكاء الاصطناعي.',
+    'يسعدنا انضمامك إلى بينون — منشئ المواقع.',
     `حسابك جاهز، ولديك ${genWord} لتبدأ بها فورًا.`,
     '',
     'اكتب فكرتك، أو ابدأ من مثال جاهز، وولّد موقعًا احترافيًا في ثوانٍ.',
     `ابدأ من هنا: ${manageUrl}`,
     '',
     'لأي سؤال راسلنا على team@beynoun.com — نحن هنا للمساعدة.',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      يسعدنا انضمامك إلى <strong style="color:#171717;">زينيا</strong> — منشئ المواقع بالذكاء الاصطناعي. حسابك جاهز، ولديك <strong style="color:#171717;">${genWord}</strong> لتبدأ بها فورًا.
+      يسعدنا انضمامك إلى <strong style="color:#171717;">بينون</strong> — منشئ المواقع. حسابك جاهز، ولديك <strong style="color:#171717;">${genWord}</strong> لتبدأ بها فورًا.
     </p>
     <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
       اكتب فكرتك، أو ابدأ من <strong style="color:#171717;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
     </p>`
 
   const html = emailShell({
-    title: 'أهلًا بك في زينيا',
+    title: 'أهلًا بك في بينون',
     eyebrow: 'مرحبًا',
-    heading: 'أهلًا بك في زينيا',
+    heading: 'أهلًا بك في بينون',
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'ابدأ إنشاء موقعك',
@@ -621,7 +621,7 @@ export function bookingReceivedEmail(args: {
     '',
     `كل حجوزاتك: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
@@ -662,27 +662,27 @@ export function trialReminderEmail(args: {
   const remWord = remaining === 1 ? 'موقع مجاني واحد' : remaining === 2 ? 'موقعان مجانيان' : `${remaining} مواقع مجانية`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
-  const subject = `لا يزال لديك ${remWord} في زينيا`
+  const subject = `لا يزال لديك ${remWord} في بينون`
 
   const text = [
     greeting,
     '',
-    `حسابك في زينيا جاهز، ولا يزال لديك ${remWord} في الباقة المجانية.`,
+    `حسابك في بينون جاهز، ولا يزال لديك ${remWord} في الباقة المجانية.`,
     'لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك في ثوانٍ.',
     '',
     `تابع من حيث توقفت: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
     <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
-      حسابك في زينيا جاهز، ولا يزال لديك <strong style="color:#171717;">${remWord}</strong> في الباقة المجانية. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
+      حسابك في بينون جاهز، ولا يزال لديك <strong style="color:#171717;">${remWord}</strong> في الباقة المجانية. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
     </p>`
 
   const html = emailShell({
-    title: 'لا يزال لديك مواقع مجانية في زينيا',
+    title: 'لا يزال لديك مواقع مجانية في بينون',
     eyebrow: 'الباقة المجانية',
     heading: `لا يزال لديك ${remWord}`,
     bodyHtml,
@@ -709,7 +709,7 @@ export function quotaReachedEmail(args: {
   const genWord = limit === 1 ? 'موقعك المجاني' : limit === 2 ? 'موقعيك المجانيين' : `مواقعك المجانية الـ${limit}`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
-  const subject = 'استخدمت مواقعك المجانية في زينيا'
+  const subject = 'استخدمت مواقعك المجانية في بينون'
 
   const text = [
     greeting,
@@ -720,7 +720,7 @@ export function quotaReachedEmail(args: {
     `طالع الخطط: ${upgradeUrl}`,
     '',
     'مواقعك التي أنشأتها تبقى محفوظة ومنشورة كما هي.',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
@@ -735,7 +735,7 @@ export function quotaReachedEmail(args: {
     </table>`
 
   const html = emailShell({
-    title: 'استخدمت مواقعك المجانية في زينيا',
+    title: 'استخدمت مواقعك المجانية في بينون',
     eyebrow: 'الباقة المجانية',
     heading: 'استخدمت مواقعك المجانية',
     bodyHtml,
@@ -751,7 +751,7 @@ export function quotaReachedEmail(args: {
  * Sent when a Pro (or legacy hosting) subscription is set to lapse: the owner
  * canceled and the paid period ends within the reminder window. Their sites
  * stay published on the free plan; what goes is the Pro extras, most visibly
- * the "made with Zenya" badge coming back. Churn prevention, sent before it
+ * the "made with Beynoun" badge coming back. Churn prevention, sent before it
  * happens.
  */
 export function hostingExpiringEmail(args: {
@@ -770,28 +770,28 @@ export function hostingExpiringEmail(args: {
     endStr = new Date(args.endDate).toLocaleDateString('ar', { year: 'numeric', month: 'long', day: 'numeric' })
   } catch { /* keep ISO fallback */ }
 
-  const subject = `اشتراكك في زينيا ينتهي ${when}`
+  const subject = `اشتراكك في بينون ينتهي ${when}`
 
   const text = [
     greeting,
     '',
-    `اشتراكك في زينيا ينتهي ${when} (${endStr}).`,
-    'بعدها يرجع حسابك إلى الباقة المجانية. مواقعك تبقى منشورة، لكن تعود شارة «صُنع بزينيا» وتتوقف مزايا خطتك.',
+    `اشتراكك في بينون ينتهي ${when} (${endStr}).`,
+    'بعدها يرجع حسابك إلى الباقة المجانية. مواقعك تبقى منشورة، لكن تعود شارة «صُنع ببينون» وتتوقف مزايا خطتك.',
     '',
     `لتبقى على خطتك، جدّد اشتراكك من: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
     <p style="margin:0 0 18px;font-size:16px;line-height:1.85;color:#555555;">${greeting}</p>
     <p style="margin:0 0 20px;font-size:16px;line-height:1.85;color:#555555;">
-      اشتراكك في زينيا ينتهي <strong style="color:#171717;">${when}</strong>. بعدها يرجع حسابك إلى الباقة المجانية.
+      اشتراكك في بينون ينتهي <strong style="color:#171717;">${when}</strong>. بعدها يرجع حسابك إلى الباقة المجانية.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
         <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">ينتهي في: <strong style="color:#171717;">${endStr}</strong></p>
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك تبقى منشورة ومحفوظة. ما يتوقف: مزايا خطتك، وتعود شارة «صُنع بزينيا» أسفل مواقعك.</p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك تبقى منشورة ومحفوظة. ما يتوقف: مزايا خطتك، وتعود شارة «صُنع ببينون» أسفل مواقعك.</p>
       </td></tr>
     </table>`
 
@@ -815,19 +815,19 @@ export function hostingExpiringEmail(args: {
 export function accountDeletedEmail(args: {
   email: string
 }): { subject: string; text: string; html: string } {
-  const subject = 'تم حذف حسابك في زينيا'
+  const subject = 'تم حذف حسابك في بينون'
 
   const text = [
     `مرحبًا،`,
     ``,
-    `تم حذف حسابك في زينيا (${args.email}) نهائيًا وفق طلبك.`,
+    `تم حذف حسابك في بينون (${args.email}) نهائيًا وفق طلبك.`,
     ``,
     `ما تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.`,
     `ما يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).`,
     ``,
     `إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت.`,
     ``,
-    `— زينيا`,
+    `— بينون`,
   ].join('\n')
 
   const bodyHtml = `
@@ -845,7 +845,7 @@ export function accountDeletedEmail(args: {
     </p>`
 
   const html = emailShell({
-    title: 'تم حذف حسابك في زينيا',
+    title: 'تم حذف حسابك في بينون',
     eyebrow: 'طلب الحذف',
     heading: 'تم حذف حسابك',
     bodyHtml,
@@ -888,7 +888,7 @@ export function paymentFailedEmail(args: {
   const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard/billing'
   const amount = fmtMoney(args.amountCents, args.currency)
   const next = arDate(args.nextAttemptIso)
-  const subject = 'لم نتمكن من تجديد اشتراكك في زينيا'
+  const subject = 'لم نتمكن من تجديد اشتراكك في بينون'
 
   const text = [
     hello(args.firstName),
@@ -899,7 +899,7 @@ export function paymentFailedEmail(args: {
     '',
     `حدّث بطاقتك من: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
@@ -937,7 +937,7 @@ export function subscriptionEndedEmail(args: {
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
   const manageUrl = args.manageUrl || 'https://beynoun.com/pricing'
-  const subject = 'انتهى اشتراكك في زينيا'
+  const subject = 'انتهى اشتراكك في بينون'
 
   const text = [
     hello(args.firstName),
@@ -947,7 +947,7 @@ export function subscriptionEndedEmail(args: {
     '',
     `ترجع متى شئت من: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
@@ -999,7 +999,7 @@ export function sitePublishedEmail(args: {
     '',
     `عدّل موقعك في أي وقت من: ${manageUrl}`,
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `
@@ -1046,7 +1046,7 @@ export function domainLiveEmail(args: {
     '',
     'حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.',
     '',
-    '— زينيا',
+    '— بينون',
   ].join('\n')
 
   const bodyHtml = `

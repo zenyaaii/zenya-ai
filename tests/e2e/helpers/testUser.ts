@@ -8,8 +8,8 @@ import { createClient } from '@supabase/supabase-js'
  */
 export const TEST_USER = {
   email: process.env.E2E_TEST_EMAIL || 'e2e-runner@zenya-test.local',
-  password: process.env.E2E_TEST_PASSWORD || 'Zenya-E2E-pw-9f3!x',
-  fullName: 'Zenya E2E Runner',
+  password: process.env.E2E_TEST_PASSWORD || 'Beynoun-E2E-pw-9f3!x',
+  fullName: 'Beynoun E2E Runner',
 }
 
 function adminClient() {

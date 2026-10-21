@@ -921,7 +921,7 @@ ${PRODUCT_TOKENS_CSS}
 
 /* ---- 3. THE FIELD ---------------------------------------------------
    Copied from app/demo/access/styles.ts, which is the settled vocabulary
-   for a Zenya form control: fill #f4f4f6, control radius, a hairline at
+   for a Beynoun form control: fill #f4f4f6, control radius, a hairline at
    rest, and on focus the violet ring plus a 4px halo. The violet says
    "you are here", which is the one thing an accent on a form is for.
 

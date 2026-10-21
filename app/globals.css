@@ -3,7 +3,7 @@
    Primary UI + display face for the whole RTL product. ── */
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 /* ── Brand display face — Cairo: rounded, modern, fully-connected Arabic.
-   Used for the giant زينيا signature so the wordmark reads as a designed,
+   Used for the giant بينون signature so the wordmark reads as a designed,
    legible logotype (not the broken/blocky Kufic stretch). Kept off the rest
    of the UI on purpose. ── */
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap');
@@ -103,7 +103,7 @@
     background-color: var(--background);
     color: var(--foreground);
     /* Tajawal renders Arabic; Inter is the Latin fallback for the few Latin
-       tokens (numerals, the "Zenya" wordmark, code). */
+       tokens (numerals, the "Beynoun" wordmark, code). */
     font-family: 'Tajawal', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
 
@@ -442,7 +442,7 @@
       radial-gradient(ellipse 110% 60% at 50% 112%, rgba(217,119,6,0.12)   0%, transparent 60%);
   }
 
-  /* Brand signature face — the giant footer زينيا only. */
+  /* Brand signature face — the giant footer بينون only. */
   .font-brandmark {
     font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
   }
@@ -497,7 +497,7 @@
     transform: scaleX(-1);
   }
 
-  /* ── Animated Arabic wordmark (زينيا) ──
+  /* ── Animated Arabic wordmark (بينون) ──
      The brand gradient flows through the connected letters with a slow shine
      sweep, so the logotype always feels alive. Pairs with the per-letter
      RTL reveal in components/ZenyaWordmark.tsx. Ligatures stay intact because

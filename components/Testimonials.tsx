@@ -7,7 +7,7 @@ import { Reveal } from '@/components/marketing/Reveal'
 /**
  * Honest "first reviews" invitation.
  *
- * We deliberately do NOT ship invented testimonials. Zenya is early, so
+ * We deliberately do NOT ship invented testimonials. Beynoun is early, so
  * instead of faking social proof we invite real founders to share their
  * experience in exchange for a thank-you discount. Once real, approved
  * reviews exist they'll render here in place of this invite.
@@ -40,7 +40,7 @@ export default function Testimonials() {
                 كن من <span className="gradient-text">أوائل من يشارك تجربته.</span>
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-[15px] leading-[1.85] text-muted">
-                زينيا منصّة جديدة، ونؤمن بأن نعرض آراءً حقيقية فقط — لا شهادات
+                بينون منصّة جديدة، ونؤمن بأن نعرض آراءً حقيقية فقط — لا شهادات
                 مُختلَقة. أطلقت موقعك معنا؟ شاركنا رأيك الصادق، وسنشكرك بخصمٍ على
                 خطوتك القادمة.
               </p>

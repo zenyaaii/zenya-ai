@@ -516,7 +516,7 @@ export default function WellnessWizardPage() {
                       <Input value={t.price} onChange={(e) => updateTreatment(t.id, { price: e.target.value })} placeholder="يبدأ من 120 ﷼" />
                     </Field>
                     <Field label="وصف موجز (اختياري)" wide>
-                      <Input value={t.description} onChange={(e) => updateTreatment(t.id, { description: e.target.value })} placeholder="سيكتبه الذكاء الاصطناعي إن تُرك فارغًا" />
+                      <Input value={t.description} onChange={(e) => updateTreatment(t.id, { description: e.target.value })} placeholder="ستكتبه بينون إن تُرك فارغًا" />
                     </Field>
                     <Field label="شارة">
                       <Input value={t.badge} onChange={(e) => updateTreatment(t.id, { badge: e.target.value })} placeholder="الأكثر طلبًا، جديد، مميّزة..." />
@@ -572,7 +572,7 @@ export default function WellnessWizardPage() {
     {
       id: 'philosophy',
       title: 'قصة الاستوديو وفلسفته',
-      sub: 'روح الاستوديو في بضع جمل — سيصقلها الذكاء الاصطناعي.',
+      sub: 'روح الاستوديو في بضع جمل — ستصقلها بينون.',
       complete: ok.philosophy,
       note: 'أخبرنا المزيد عن فلسفة الاستوديو (20 حرفًا على الأقل).',
       body: (
@@ -592,7 +592,7 @@ export default function WellnessWizardPage() {
     {
       id: 'team',
       title: 'أعضاء الفريق',
-      sub: 'أضف أبرز مختصّيك — سيكتب الذكاء الاصطناعي سيرهم إن أعطيتنا تفاصيلهم.',
+      sub: 'أضف أبرز مختصّيك — ستكتب بينون سيرهم إن أعطيتنا تفاصيلهم.',
       optional: true,
       complete: true,
       body: (
@@ -612,7 +612,7 @@ export default function WellnessWizardPage() {
                       <Input value={m.specialty} onChange={(e) => updateTeam(m.id, { specialty: e.target.value })} placeholder="الأنسجة العميقة · الاسترخاء · ريكي" />
                     </Field>
                     <Field label="سيرة موجزة" wide>
-                      <Textarea value={m.bio} onChange={(e) => updateTeam(m.id, { bio: e.target.value })} placeholder="سيصقلها الذكاء الاصطناعي" />
+                      <Textarea value={m.bio} onChange={(e) => updateTeam(m.id, { bio: e.target.value })} placeholder="ستصقلها بينون" />
                     </Field>
                     <Field label="رابط الصورة (اختياري)" wide>
                       <Input dir="ltr" value={m.image_url} onChange={(e) => updateTeam(m.id, { image_url: e.target.value })} placeholder="https://..." />
@@ -752,7 +752,7 @@ export default function WellnessWizardPage() {
       <WizardShell
         eyebrow="قالب استوديو العافية"
         title="ابنِ موقعًا لمركزك أو صالونك أو عيادتك."
-        sub="اختر نوع نشاطك، وأخبرنا عن جلساتك وفريقك. تولّد زينيا موقعًا كاملًا بصور وكلام يناسب نشاطك: واجهة رئيسية وقائمة جلسات والفريق والحجز."
+        sub="اختر نوع نشاطك، وأخبرنا عن جلساتك وفريقك. تولّد بينون موقعًا كاملًا بصور وكلام يناسب نشاطك: واجهة رئيسية وقائمة جلسات والفريق والحجز."
         steps={steps}
         step={step}
         onStep={setStep}

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   try {
     switch (topic) {
       case 'customers/data_request': {
-        // Zenya doesn't store Shopify customer PII directly. We log the request
+        // Beynoun doesn't store Shopify customer PII directly. We log the request
         // and respond 200; if we ever start storing Shopify customer data we'd
         // gather and email it to the merchant here.
         console.log(`[GDPR] customers/data_request for ${shop}`);
@@ -59,9 +59,9 @@ export async function POST(req: NextRequest) {
         // Wipe everything tied to this shop: stored Shopify sessions AND the
         // shop→account link. Removing the link means the theme app extension's
         // license check (/app/license) can no longer resolve an active
-        // subscription for this shop, so the premium Zenya content degrades to
+        // subscription for this shop, so the premium Beynoun content degrades to
         // its "reconnect to restore" state. (Themes & generated content live
-        // under Zenya user accounts, not shop accounts, so they're untouched.)
+        // under Beynoun user accounts, not shop accounts, so they're untouched.)
         if (shop) {
           try {
             const sessions = await shopify.config.sessionStorage.findSessionsByShop(shop);

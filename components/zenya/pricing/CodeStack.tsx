@@ -23,7 +23,7 @@
  *      because that is what this page already means by "yours".
  *
  * WHAT IS ON THE CARDS IS THE HARD PART, and it is not a design question.
- * Zenya hands out exactly ONE code a person can type: the review code in
+ * Beynoun hands out exactly ONE code a person can type: the review code in
  * lib/review-reward.ts, allowlisted at app/api/promo-codes/route.ts. The other two
  * discounts are real but are NOT codes: lib/domain-entitlement.ts applies them
  * server-side at checkout and says in as many words that they are "never
@@ -71,7 +71,7 @@ const CARDS: Card[] = [
     chip: "كود تُدخِله بنفسك",
     figure: REVIEW_REWARD_PCT + "%",
     figureSub: "على أول شهر",
-    body: "شاركنا رأيك الصادق عن زينيا. الكود لك مهما كان رأيك، ودقيقة واحدة تكفي.",
+    body: "شاركنا رأيك الصادق عن بينون. الكود لك مهما كان رأيك، ودقيقة واحدة تكفي.",
     cta: { label: "قيّمنا واحصل عليه", href: REVIEW_URL },
   },
   {
@@ -376,7 +376,7 @@ const CSS = `
    panel keeps the same document offset throughout.
 
    TWO CURVES, BECAUSE THERE ARE TWO MATERIALS. The ground takes the site's
-   own cubic-bezier(0.22, 1, 0.36, 1) — what everything else in Zenya moves
+   own cubic-bezier(0.22, 1, 0.36, 1) — what everything else in Beynoun moves
    on — and what comes out of it takes a softer one.
 
    THE CARDS TAKE OPACITY AND NOTHING ELSE, and this is not a preference:

@@ -1,4 +1,4 @@
-# Zenya E2E — Full Coverage Map (A→Z)
+# Beynoun E2E — Full Coverage Map (A→Z)
 
 Status legend: ✅ covered · 🟡 partial · ⬜ not yet · 🔒 needs test-mode keys · ⚠️ finding
 

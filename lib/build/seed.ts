@@ -1403,7 +1403,7 @@ export function collectClaims(c: BuildConfig): ThemeClaim[] {
       location: 'Reviews, star summary, customer photos, UGC gallery',
       claim: 'All reviews, the 4.9★ average, and "2,431 verified reviews" are invented',
       why: 'No real reviews could be scraped from the source listing, so placeholder reviews were generated.',
-      fix: 'Import real reviews (e.g. a reviews app, or re-generate from an AliExpress URL so Zenya can pull the real ones), then replace these.',
+      fix: 'Import real reviews (e.g. a reviews app, or re-generate from an AliExpress URL so Beynoun can pull the real ones), then replace these.',
     })
   } else {
     claims.push({

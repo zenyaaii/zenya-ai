@@ -196,7 +196,7 @@ export default function LegalShell({
               aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
+            <Link href="/" aria-label="بينون" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
             <AccountControl className="zl-account zl-account-phone" />
           </div>
           <div className="zl-drawer" data-open={menuOpen ? "true" : undefined}
@@ -216,7 +216,7 @@ export default function LegalShell({
         <div className="zl-pill">
           <div className="zl-bar">
             <span className="zl-side zl-side-start">
-              <Link href="/" className="zl-mark" aria-label="زينيا"><ZenyaMark className="zl-mark-svg" /></Link>
+              <Link href="/" className="zl-mark" aria-label="بينون"><ZenyaMark className="zl-mark-svg" /></Link>
             </span>
             <nav className="zl-nav">
               {NAV.map((i) => (

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/account/billing — the signed-in owner's saved card and invoices,
  * read live from Stripe for the billing screen.
  *
- * Zenya stores neither: the card and the invoices exist only in Stripe, under
+ * Beynoun stores neither: the card and the invoices exist only in Stripe, under
  * the customer mapped in stripe_customers. An owner who has never paid has no
  * customer, and gets an honest empty answer rather than an error.
  */

@@ -103,7 +103,7 @@ export default function ThemePreview({
 
   const styles = useMemo(() => getPreviewSectionStyles(content), [content])
   const productName = name || shopName || "منتج مميّز"
-  const shopBrand = shopName || name || "متجر زينيا"
+  const shopBrand = shopName || name || "متجر بينون"
 
   // Normalize content fields
   const hero = content?.hero || {}

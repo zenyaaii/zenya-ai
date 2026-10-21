@@ -913,11 +913,11 @@ const EXTERNAL_BOOKING_RE = /resy|opentable|sevenrooms|tock/i
 
 /**
  * Scrub any external-platform branding (Resy / OpenTable / …) out of stored
- * reservation copy at render time. This fixes sites generated before Zenya
+ * reservation copy at render time. This fixes sites generated before Beynoun
  * dropped external providers — their heading/subheading/CTA may still read
  * "الحجز على RESY" — without needing a regeneration. When a field is *about*
  * the platform (e.g. the whole heading is "الحجز على RESY"), stripping leaves
- * too little, so we fall back to a clean Zenya-native default.
+ * too little, so we fall back to a clean Beynoun-native default.
  */
 function scrubExternal(text: string | undefined, fallback: string): string {
   const t = (text || '').trim()
@@ -937,7 +937,7 @@ function scrubExternal(text: string | undefined, fallback: string): string {
 function Reservations({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const r = content.reservations
   const { enabled } = useBookingContext()
-  // Reservations always run through Zenya's own booking system. Entitled
+  // Reservations always run through Beynoun's own booking system. Entitled
   // owners (Pro / free trial) get the interactive form that captures straight
   // into their dashboard inbox; everyone else falls back to a "call to reserve"
   // button so the section still works on free sites. External platforms are no
@@ -1381,7 +1381,7 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
             {content.footer.legal}
           </p>
           <p className="text-[0.7rem] uppercase" style={{ color: 'var(--rb-muted)' }}>
-صُنع بواسطة زينيا
+صُنع بواسطة بينون
           </p>
         </div>
       </Container>

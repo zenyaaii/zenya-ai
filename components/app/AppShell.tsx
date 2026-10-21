@@ -18,7 +18,7 @@ import { chromeFont } from './chrome-font'
  * Ground: flat #fafafa - the house ground, shared with the five candidate
  * pages at demo.beynoun.com. It replaces the old #f7f4ed marketing cream,
  * which was the single biggest visual break between this surface and the
- * rest of Zenya. See components/app/dashboard-style.ts for the whole
+ * rest of Beynoun. See components/app/dashboard-style.ts for the whole
  * token layer and the reasoning behind each value.
  */
 

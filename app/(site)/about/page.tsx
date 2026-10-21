@@ -1,5 +1,5 @@
 /**
- * The about page — the house style applied to the story Zenya tells
+ * The about page — the house style applied to the story Beynoun tells
  * about itself.
  *
  * DESIGN READ: a redesign of a trust page for someone deciding whether a new

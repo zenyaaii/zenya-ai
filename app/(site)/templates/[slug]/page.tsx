@@ -71,9 +71,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const article = ARTICLES[t.key as Article["key"]]
   return {
     // absolute, with the wordmark written out: templates/layout.tsx sets a
-    // plain title, which stops the root "· زينيا" template from reaching
+    // plain title, which stops the root "· بينون" template from reaching
     // this page, and every other page of the site ends in the name.
-    title: { absolute: `${t.title} · زينيا` },
+    title: { absolute: `${t.title} · بينون` },
     description: t.metaDescription,
     keywords: Array.from(new Set([...t.keywords, ...(article?.meta.keywords ?? [])])),
     alternates: {
@@ -125,7 +125,7 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
 
         <div className="zx-frame">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={themePreview(t.key)} alt={`نموذج ${t.name} من زينيا`} loading="eager" />
+          <img src={themePreview(t.key)} alt={`نموذج ${t.name} من بينون`} loading="eager" />
         </div>
       </section>
 
@@ -209,7 +209,7 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
 
       <CtaBand
         title={`أنشئ ${t.name} خلال دقائق`}
-        subtitle="اكتب نبذة قصيرة عن نشاطك، ويبني لك الذكاء الاصطناعي موقعًا عربيًا احترافيًا. المعاينة مجانية."
+        subtitle="اكتب نبذة قصيرة عن نشاطك، وتبني لك بينون موقعًا عربيًا احترافيًا. المعاينة مجانية."
         primaryLabel="ابدأ ببناء موقعك"
         primaryHref={t.buildHref}
         secondaryLabel="شاهد نموذجًا حيًّا"

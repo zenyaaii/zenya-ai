@@ -6,8 +6,8 @@ import crypto from 'crypto'
 //   https://{shop}/apps/zenya/license
 // is forwarded by Shopify to https://beynoun.com/app/license with the shop
 // domain + an HMAC `signature` appended. We verify that signature, resolve
-// the shop → linked Zenya account → subscription, and answer whether the
-// Zenya-generated theme content is licensed to render right now.
+// the shop → linked Beynoun account → subscription, and answer whether the
+// Beynoun-generated theme content is licensed to render right now.
 //
 // This is the enforcement point for graceful degradation: an inactive
 // subscription (cancelled) or an uninstalled app both resolve to
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = admin()
 
-    // shop → the Zenya account(s) that connected it.
+    // shop → the Beynoun account(s) that connected it.
     const { data: connections } = await supabase
       .from('shopify_connections')
       .select('user_id')
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
     const active = (profiles || []).some((p) => p.is_pro === true)
     return json(active)
   } catch {
-    // Fail OPEN on our own errors: a Zenya-side hiccup must never make a
+    // Fail OPEN on our own errors: a Beynoun-side hiccup must never make a
     // paying merchant's storefront look broken. Only an explicit, verified
     // "not licensed" answer degrades the content.
     return json(true)

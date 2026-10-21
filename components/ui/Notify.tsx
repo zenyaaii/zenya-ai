@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Zenya's in-app notification layer — a branded replacement for the browser's
+ * Beynoun's in-app notification layer — a branded replacement for the browser's
  * native `alert()` / `confirm()` dialogs (which render as ugly, host-labelled
  * Chrome popups like "dashboard.beynoun.com says…").
  *

@@ -68,8 +68,8 @@ export function CompareTable({
 }) {
   const t =
     locale === 'en'
-      ? { caption: `Zenya vs ${themName} compared`, item: 'Feature', zenya: 'Zenya' }
-      : { caption: `مقارنة زينيا مقابل ${themName}`, item: 'البند', zenya: 'زينيا' }
+      ? { caption: `Beynoun vs ${themName} compared`, item: 'Feature', zenya: 'Beynoun' }
+      : { caption: `مقارنة بينون مقابل ${themName}`, item: 'البند', zenya: 'بينون' }
   return (
     <div className="overflow-hidden rounded-2xl border border-token bg-white">
       <table className="w-full border-collapse text-start">
@@ -130,8 +130,8 @@ export function ChooseBlocks({
 }) {
   const h =
     locale === 'en'
-      ? { zenya: 'When to choose Zenya', them: `When to choose ${themName}` }
-      : { zenya: 'متى تختار زينيا', them: `متى تختار ${themName}` }
+      ? { zenya: 'When to choose Beynoun', them: `When to choose ${themName}` }
+      : { zenya: 'متى تختار بينون', them: `متى تختار ${themName}` }
   return (
     <div className="mt-10 grid gap-4 md:grid-cols-2">
       <div
@@ -173,7 +173,7 @@ export function FaqList({ title, faqs }: { title: string; faqs: QA[] }) {
 
 /** Closing call-to-action band, reused across SEO pages. */
 export function CtaBand({
-  title = 'جرّب زينيا مجانًا الآن',
+  title = 'جرّب بينون مجانًا الآن',
   subtitle = 'اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.',
   primaryLabel = 'ابدأ الإنشاء مجانًا',
   secondaryLabel = 'شاهد الأسعار',

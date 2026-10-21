@@ -8,11 +8,11 @@
  *
  * It renders the moment now: the plan, the amount, when it renews, and what
  * happens if it is cancelled — then the handoff. The rules underneath are
- * unchanged, and so is the fact that Zenya never sees a card: there is no
+ * unchanged, and so is the fact that Beynoun never sees a card: there is no
  * card field anywhere in this tree, and app/(site)/checkout/actions.ts is the
  * only thing that talks to Stripe.
  *
- * DESIGN READ: a payment handoff for someone deciding whether to trust Zenya
+ * DESIGN READ: a payment handoff for someone deciding whether to trust Beynoun
  * with a card. Calm and confident rather than busy — bare #fafafa paper,
  * hairline rings instead of shadows, obsidian Arabic type, violet spent only
  * as a mark. The order summary is the centre of the page rather than a

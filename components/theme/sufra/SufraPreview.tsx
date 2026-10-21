@@ -686,7 +686,7 @@ function Reservations({ content }: { content: RestaurantContent }) {
                 </a>
               </>
             ) : (
-              /* Form UI only — on a generated site these fields post to Zenya's
+              /* Form UI only — on a generated site these fields post to Beynoun's
                  own bookings endpoint and land in the owner's dashboard inbox. */
               <form className="grid gap-5" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid gap-5 sm:grid-cols-2">

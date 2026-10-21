@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
     .eq('id', user.id)
     .maybeSingle()
 
-  // Free-perk gate is now the WHOLESALE first-year price (what Zenya pays
+  // Free-perk gate is now the WHOLESALE first-year price (what Beynoun pays
   // Porkbun), capped at $4 by default — that's the rule the pricing page
   // advertises. We pass retail for record-keeping only.
   const pricing = priceDomainFor(profile, {
@@ -263,8 +263,8 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: `Domain: ${domain}`,
             description: years === 1
-              ? `1-year registration via Zenya`
-              : `${years}-year registration via Zenya`,
+              ? `1-year registration via Beynoun`
+              : `${years}-year registration via Beynoun`,
           },
         },
       },

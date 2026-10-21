@@ -47,8 +47,8 @@ export default function EnWhyArticle({ params }: { params: { slug: string } }) {
     headline: a.hero.h1,
     description: a.meta.description,
     url: `${SITE}/en/why/${a.slug}`,
-    author: { '@type': 'Organization', name: 'Zenya' },
-    publisher: { '@type': 'Organization', name: 'Zenya' },
+    author: { '@type': 'Organization', name: 'Beynoun' },
+    publisher: { '@type': 'Organization', name: 'Beynoun' },
   }
 
   const others = ARTICLES_EN.filter((x) => x.slug !== a.slug).slice(0, 3)
@@ -161,7 +161,7 @@ export default function EnWhyArticle({ params }: { params: { slug: string } }) {
         </section>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

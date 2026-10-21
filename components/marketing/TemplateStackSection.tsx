@@ -384,7 +384,7 @@ function CarouselCard({
               className="flex h-full w-full items-center justify-center"
               style={{ background: template.gradient }}
             >
-              <span className="font-brandmark text-2xl text-white">زينيا</span>
+              <span className="font-brandmark text-2xl text-white">بينون</span>
             </div>
           )}
           <div

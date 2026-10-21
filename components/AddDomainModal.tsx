@@ -135,7 +135,7 @@ function EnterStep({
         اربط نطاقًا مخصصًا
       </h2>
       <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        اكتب النطاق الذي تملكه — وسنعرض لك سجلَّي DNS لإضافتهما. تتحقّق زينيا وتُصدِر شهادة SSL تلقائيًا.
+        اكتب النطاق الذي تملكه — وسنعرض لك سجلَّي DNS لإضافتهما. تتحقّق بينون وتُصدِر شهادة SSL تلقائيًا.
       </p>
 
       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
@@ -172,8 +172,8 @@ function EnterStep({
           lineHeight: 1.55,
         }}
       >
-        <strong>تنبيه:</strong> ربط نطاقك بزينيا{' '}
-        <strong>لا يؤثّر على بريدك الإلكتروني</strong>. يبقى بريدك الحالي (مثل info@yourdomain.com) يعمل — تُغيّر زينيا فقط السجلّات التي توجّه زيارات الويب.
+        <strong>تنبيه:</strong> ربط نطاقك ببينون{' '}
+        <strong>لا يؤثّر على بريدك الإلكتروني</strong>. يبقى بريدك الحالي (مثل info@yourdomain.com) يعمل — تُغيّر بينون فقط السجلّات التي توجّه زيارات الويب.
       </div>
 
       {error && (
@@ -244,7 +244,7 @@ function DnsStep({
       </h2>
       <p style={{ margin: '6px 0 14px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
         افتح لوحة DNS لدى مُسجِّل نطاقك وأضف السجلات أدناه.
-        تتحقّق زينيا تلقائيًا — عادةً خلال 5 إلى 15 دقيقة. الحالة:{' '}
+        تتحقّق بينون تلقائيًا — عادةً خلال 5 إلى 15 دقيقة. الحالة:{' '}
         <strong style={{ color: status === 'live' ? '#15803d' : '#5e6ad2' }}>
           {status === 'live' ? '🔒 منشور' : 'بانتظار DNS'}
         </strong>

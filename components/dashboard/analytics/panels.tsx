@@ -25,7 +25,7 @@ export function OverviewPanel({ d }: { d: AnalyticsPayload }) {
         <EmptyState
           icon={Folder}
           title="لا مواقع بعد"
-          body="أنشئ موقعك الأول وانشره على زينيا — وسنبدأ فورًا بتتبّع الزيارات ومصادرها ونقرات التواصل هنا."
+          body="أنشئ موقعك الأول وانشره على بينون — وسنبدأ فورًا بتتبّع الزيارات ومصادرها ونقرات التواصل هنا."
           cta={{ href: '/theme/new', label: 'أنشئ موقعك الأول' }}
         />
       </Section>

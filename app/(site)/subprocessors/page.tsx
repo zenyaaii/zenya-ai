@@ -14,8 +14,8 @@ import Doc, { SECTIONS } from "@/components/zenya/legal/documents/subprocessors"
 import { COMPANY } from '@/lib/company'
 import { share } from '@/lib/site-share'
 
-// The root template appends "· زينيا", so the title is the page's own name
-// alone. It used to carry "— زينيا" too, and read "… — زينيا · زينيا".
+// The root template appends "· بينون", so the title is the page's own name
+// alone. It used to carry "— بينون" too, and read "… — بينون · بينون".
 const TITLE = 'المعالجون الفرعيون'
 const DESCRIPTION = `مزوّدو الخدمات الخارجيون الذين يعالجون البيانات نيابةً عن ${COMPANY.PRODUCT_NAME}.`
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/subprocessors' },
-  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://beynoun.com/subprocessors' }),
+  ...share({ title: `${TITLE} · بينون`, description: DESCRIPTION, url: 'https://beynoun.com/subprocessors' }),
 }
 
 export default function Page() {

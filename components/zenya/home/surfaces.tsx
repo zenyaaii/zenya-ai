@@ -313,7 +313,7 @@ const METRICS = [
 
    These numbers are SAMPLE DATA for a restaurant that does not exist. They
    are not measured, they are not anybody's traffic, and they are not a claim
-   about what a Zenya site earns. They are here because the owner asked for a
+   about what a Beynoun site earns. They are here because the owner asked for a
    populated dashboard rather than an empty one, twice and explicitly, after
    the honest-empty-state version was built and shown.
 
@@ -772,7 +772,7 @@ export const seo: SurfaceDef = {
               <h3>بيانات البحث</h3>
             </div>
             <p className="zn3-cardsub">
-              زينيا يكتب هذه الحقول تلقائيًا من محتوى موقعك. اترك الحقل فارغًا لاستخدام النص التلقائي، أو اكتب نصك للتحكّم الكامل.
+              بينون يكتب هذه الحقول تلقائيًا من محتوى موقعك. اترك الحقل فارغًا لاستخدام النص التلقائي، أو اكتب نصك للتحكّم الكامل.
             </p>
 
             <SeoField

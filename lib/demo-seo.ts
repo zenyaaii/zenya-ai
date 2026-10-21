@@ -10,7 +10,7 @@
  * Each entry gets a thin sibling `layout.tsx` that spreads `demoMetadata(key)`.
  *
  * Titles deliberately omit the wordmark: the root layout's title template
- * already appends "· زينيا".
+ * already appends "· بينون".
  */
 
 import type { Metadata } from 'next'
@@ -102,7 +102,7 @@ const BY_SLUG = new Map(DEMO_SEO.map((d) => [d.slug, d]))
  *
  * NOINDEX, FOLLOW (2026-10-04). The demos used to be indexed, and a search
  * for the brand once put the wellness demo first: a preview of a customer's
- * spa standing in for Zenya. Each demo now lives under its template at
+ * spa standing in for Beynoun. Each demo now lives under its template at
  * /templates/<slug>/demo, and only the template page is meant to rank.
  * follow stays on so the links inside the demo still count.
  */

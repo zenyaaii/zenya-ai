@@ -3,34 +3,34 @@ import type { ReactNode } from 'react'
 import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
-  title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
+  title: 'أوّل شركة إسلامية لإنشاء المواقع',
   description:
-    'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي: منصّة عربية تبني لكل نشاط تجاري موقعًا كاملًا خلال دقائق، باستضافة أوروبية آمنة.',
+    'بينون أوّل شركة إسلامية لإنشاء المواقع: منصّة عربية تبني لكل نشاط تجاري موقعًا كاملًا خلال دقائق، باستضافة أوروبية آمنة.',
   keywords: [
-    'من نحن زينيا',
-    'زينيا',
+    'من نحن بينون',
+    'بينون',
     'أول شركة إسلامية لإنشاء المواقع',
-    'منشئ مواقع بالذكاء الاصطناعي',
+    'منشئ مواقع',
     'شركة إنشاء مواقع عربية',
-    'about Zenya',
-    'first Muslim AI website builder',
-    'AI website builder',
+    'about Beynoun',
+    'first Muslim website builder',
+    'Arabic website builder',
   ],
   alternates: { canonical: '/about' },
   ...share({
-    title: 'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي',
+    title: 'أوّل شركة إسلامية لإنشاء المواقع',
     description:
-      'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري: ثمانية قوالب، محتوى بالعربية، واستضافة أوروبية.',
+      'أوّل شركة إسلامية لإنشاء المواقع، ومنصّة عربية لكل نشاط تجاري: ثمانية قوالب، محتوى بالعربية، واستضافة أوروبية.',
     url: 'https://beynoun.com/about',
   }),
 }
 
 // AboutPage + Organization structured data so search engines understand who
-// Zenya is (an AI website builder), who operates it, and where it's based.
+// Beynoun is (an AI website builder), who operates it, and where it's based.
 const ABOUT_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'AboutPage',
-  name: 'من نحن — زينيا',
+  name: 'من نحن — بينون',
   url: 'https://beynoun.com/about',
   inLanguage: 'ar',
   mainEntity: {
@@ -41,12 +41,12 @@ const ABOUT_SCHEMA = {
     // consumer these are one entity described twice, so the address and email
     // here enrich the root node instead of competing with it.
     '@id': 'https://beynoun.com/#organization',
-    name: 'زينيا',
-    alternateName: ['Zenya', 'Zenya AI'],
+    name: 'بينون',
+    alternateName: ['Beynoun', 'Beynoun'],
     url: 'https://beynoun.com',
     logo: 'https://beynoun.com/brand/logo-square.png',
     description:
-      'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري — ثمانية قوالب احترافية، محتوى بالعربية، واستضافة أوروبية متوافقة مع GDPR.',
+      'أوّل شركة إسلامية لإنشاء المواقع، ومنصّة عربية لكل نشاط تجاري — ثمانية قوالب احترافية، محتوى بالعربية، واستضافة أوروبية متوافقة مع GDPR.',
     foundingDate: '2025',
     email: 'team@beynoun.com',
     address: {

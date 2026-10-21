@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
 
       <div className="zs-card">
         <div className="zs-top">
-          <Link href="/" className="zs-mark" aria-label="زينيا">
+          <Link href="/" className="zs-mark" aria-label="بينون">
             <ZenyaMark className="h-6" />
           </Link>
           <h1 className="zs-h1">تعيين كلمة مرور جديدة</h1>

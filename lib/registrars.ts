@@ -1,5 +1,5 @@
 /**
- * Per-registrar instructions for adding the Zenya DNS records.
+ * Per-registrar instructions for adding the Beynoun DNS records.
  *
  * The hardest part of custom domains is the user not knowing where to
  * click. This file gives the modal a friendly per-registrar set of
@@ -34,7 +34,7 @@ export const REGISTRARS: RegistrarGuide[] = [
       'Sign in to your GoDaddy account and open Domain Portfolio.',
       'Click your domain, then click the DNS button at the top right.',
       'Add the records below. For the apex (root) record, GoDaddy calls the Name "@". TTL: leave default (600 sec or 1 hour).',
-      'Save. Come back to this page — Zenya will detect the change automatically (usually within 5-15 minutes).',
+      'Save. Come back to this page — Beynoun will detect the change automatically (usually within 5-15 minutes).',
     ],
     notes: [
       'If a conflicting A or CNAME record already exists, delete it before saving.',
@@ -49,7 +49,7 @@ export const REGISTRARS: RegistrarGuide[] = [
       'Sign in to Namecheap and click Domain List in the left sidebar.',
       'Find your domain and click Manage, then open the Advanced DNS tab.',
       'Under Host Records, click Add New Record and enter the values from below. Use "@" for the Host of an apex record. TTL: Automatic.',
-      'Click the green checkmark to save each record. Wait a few minutes — Zenya checks automatically.',
+      'Click the green checkmark to save each record. Wait a few minutes — Beynoun checks automatically.',
     ],
     notes: [
       'Remove the default Parking Page CNAME on @ if Namecheap added one — it conflicts.',
@@ -63,7 +63,7 @@ export const REGISTRARS: RegistrarGuide[] = [
       'Sign in to Cloudflare and click on the domain you want to connect.',
       'In the left sidebar choose DNS → Records.',
       'Click Add record. Set the type and value from below. Use "@" as the Name for an apex record. Proxy status: turn OFF (DNS only — the grey cloud, not orange).',
-      'Save. Zenya will verify automatically. Cloudflare DNS usually propagates in under a minute.',
+      'Save. Beynoun will verify automatically. Cloudflare DNS usually propagates in under a minute.',
     ],
     notes: [
       'IMPORTANT: keep the proxy OFF (grey cloud). Vercel issues its own SSL — Cloudflare proxy would conflict.',
@@ -78,7 +78,7 @@ export const REGISTRARS: RegistrarGuide[] = [
       'Sign in to Porkbun and click Details next to your domain.',
       'Scroll to the DNS Records section.',
       'Add the records below. Leave the "Host" field empty for an apex record (Porkbun fills "@" automatically). TTL: 600.',
-      'Click Add. Zenya checks automatically — usually live within 5 minutes.',
+      'Click Add. Beynoun checks automatically — usually live within 5 minutes.',
     ],
   },
   {
@@ -100,7 +100,7 @@ export const REGISTRARS: RegistrarGuide[] = [
       'Sign in to your domain registrar\'s dashboard.',
       'Find the DNS / Nameservers / Records section for your domain.',
       'Add the records exactly as shown below. For an apex (root) domain, the Host or Name field is usually "@".',
-      'Save. Zenya verifies automatically — usually within 5-30 minutes.',
+      'Save. Beynoun verifies automatically — usually within 5-30 minutes.',
     ],
     notes: [
       'If you\'re unsure, search your registrar\'s help center for "add CNAME record" or "add A record".',

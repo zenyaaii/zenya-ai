@@ -5,13 +5,13 @@ const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'The terms governing your use of Zenya: eligibility, acceptable use, pricing and billing, ownership of generated content, liability, and governing law.',
+  description: 'The terms governing your use of Beynoun: eligibility, acceptable use, pricing and billing, ownership of generated content, liability, and governing law.',
   alternates: {
     canonical: `${SITE}/en/terms`,
     languages: { en: `${SITE}/en/terms`, ar: `${SITE}/terms`, 'x-default': `${SITE}/terms` },
   },
   openGraph: {
-    title: 'Zenya terms of service',
+    title: 'Beynoun terms of service',
     description: 'Eligibility, acceptable use, billing, content ownership, and governing law.',
     url: `${SITE}/en/terms`,
     type: 'website',
@@ -27,7 +27,7 @@ export default function EnTermsOfService() {
 
       <p>
         These terms of service (the &quot;Terms&quot;) govern your access to and use of{' '}
-        <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a> and the Zenya AI service (together, the
+        <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a> and the Beynoun service (together, the
         &quot;Service&quot;), operated by <strong>{COMPANY.LEGAL_NAME}</strong> (a Dutch sole proprietorship,
         eenmanszaak, registered with the Dutch Chamber of Commerce under number {COMPANY.KVK_NUMBER}). By
         creating an account or using the Service, you agree to be bound by these Terms.
@@ -50,7 +50,7 @@ export default function EnTermsOfService() {
 
       <h2>3. The Service</h2>
       <p>
-        Zenya AI is an AI-assisted generator of websites and Shopify themes. You provide the inputs (business
+        Beynoun is an AI-assisted generator of websites and Shopify themes. You provide the inputs (business
         description, product links, brand details); we generate content and visual designs using third-party
         AI models. The quality, accuracy, and fitness of the output for your particular purpose are{' '}
         <strong>not guaranteed</strong>, and you are responsible for reviewing Generated Content before
@@ -82,7 +82,7 @@ export default function EnTermsOfService() {
       <h2>6. Pricing and billing</h2>
       <ul>
         <li><strong>Free plan:</strong> up to {COMPANY.FREE_GENERATIONS} trial generations per account, no credit card.</li>
-        <li><strong>Starter:</strong> {usd(COMPANY.STARTER_PRICE_USD)}/month — unlimited AI generation and export. <strong>Pro:</strong> {usd(COMPANY.PRO_PRICE_USD)}/month — adds full Zenya hosting, a custom domain, SSL, and analytics.</li>
+        <li><strong>Starter:</strong> {usd(COMPANY.STARTER_PRICE_USD)}/month — unlimited AI generation and export. <strong>Pro:</strong> {usd(COMPANY.PRO_PRICE_USD)}/month — adds full Beynoun hosting, a custom domain, SSL, and analytics.</li>
         <li>Both plans are a <strong>monthly subscription that renews automatically</strong> at the end of each billing cycle until you cancel. You can cancel at any time from your dashboard, and your subscription stays active until the end of the current paid cycle.</li>
         <li>Existing customers on the previous one-time plan ($9.99) or the hosting plan ($19.99/month) keep their plan and price unchanged.</li>
         <li>Currency is set by your country: US dollars outside the EEA and the UK, euros within them.</li>
@@ -107,10 +107,10 @@ export default function EnTermsOfService() {
       <ul>
         <li>You retain ownership of <strong>your inputs</strong> (descriptions, product data, brand materials).</li>
         <li>To the extent permitted by law, you own the <strong>output</strong> generated for you, and may use it commercially for your own business.</li>
-        <li>We retain ownership of the Service, the underlying AI prompts, the templates, the platform code, and the Zenya brand.</li>
+        <li>We retain ownership of the Service, the underlying AI prompts, the templates, the platform code, and the Beynoun brand.</li>
         <li>AI-generated content is not copyrightable in every jurisdiction, and we give no warranty of exclusivity. Other users may receive similar output from similar inputs.</li>
         <li>You grant us a worldwide, non-exclusive, royalty-free licence to host, display, and process your inputs and outputs solely for the purpose of providing the Service.</li>
-        <li><strong>Dynamic content on Shopify is a licensed service:</strong> when you publish a Shopify-running theme via the Zenya app, the dynamic content Zenya generates and serves (such as product page sections delivered by the Zenya app) remains a <strong>licensed service that requires an active subscription</strong>. If your subscription is cancelled or expires, or the Zenya app is removed from your store, that dynamic content automatically stops appearing, while your underlying store and products remain untouched. You can restore it by reactivating a paid subscription. This does not apply to static export files you have already downloaded, which remain yours.</li>
+        <li><strong>Dynamic content on Shopify is a licensed service:</strong> when you publish a Shopify-running theme via the Beynoun app, the dynamic content Beynoun generates and serves (such as product page sections delivered by the Beynoun app) remains a <strong>licensed service that requires an active subscription</strong>. If your subscription is cancelled or expires, or the Beynoun app is removed from your store, that dynamic content automatically stops appearing, while your underlying store and products remain untouched. You can restore it by reactivating a paid subscription. This does not apply to static export files you have already downloaded, which remain yours.</li>
       </ul>
 
       <h2>9. Third-party services</h2>

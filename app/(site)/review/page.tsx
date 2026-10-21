@@ -23,7 +23,7 @@
  * invented gold would be a second hue on an achromatic page, and it would be
  * the only colour on it that means nothing.
  *
- * THE WALL IS EMPTY ON PURPOSE. Zenya is early and has refused to ship
+ * THE WALL IS EMPTY ON PURPOSE. Beynoun is early and has refused to ship
  * invented testimonials from the beginning. The wall holds labelled
  * placeholders and says plainly what they are waiting for. Filling it with
  * three plausible founders would break that refusal in a nicer typeface.
@@ -35,11 +35,11 @@ import { REVIEW_REWARD_AR } from '@/lib/review-reward'
 import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
-  title: 'قيّم تجربتك مع زينيا',
-  description: `شارك تجربتك الصادقة مع زينيا — في صالحنا أو لم تكن — واحصل على ${REVIEW_REWARD_AR} كشكرٍ على وقتك. نقرأ كل مراجعة قبل نشرها.`,
+  title: 'قيّم تجربتك مع بينون',
+  description: `شارك تجربتك الصادقة مع بينون — في صالحنا أو لم تكن — واحصل على ${REVIEW_REWARD_AR} كشكرٍ على وقتك. نقرأ كل مراجعة قبل نشرها.`,
   alternates: { canonical: '/review' },
   ...share({
-    title: 'قيّم تجربتك مع زينيا',
+    title: 'قيّم تجربتك مع بينون',
     description: 'شارك تجربتك الصادقة. نقرأ كل مراجعة قبل نشرها، ولا نعرض شهادات مُختلَقة.',
     url: 'https://beynoun.com/review',
   }),

@@ -23,7 +23,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 /**
  * POST /api/gsc/setup  { themeId }
  *
- * One-click Search Console setup for a published Zenya site — no manual steps:
+ * One-click Search Console setup for a published Beynoun site — no manual steps:
  *   1. Ask Google for a META verification token.
  *   2. Plant it on the live site (themes.content.seo.gscVerification → rendered
  *      as <meta name="google-site-verification">).

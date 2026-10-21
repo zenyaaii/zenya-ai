@@ -153,7 +153,7 @@ export default function FooterSection({
             <div className="zn5-body">
               <div className="zn5-cols">
                 <div className="zn5-brand" style={{ "--d": 1 } as React.CSSProperties}>
-                  <Link href="/?home=1" aria-label="زينيا" className="zn5-mark">
+                  <Link href="/?home=1" aria-label="بينون" className="zn5-mark">
                     <ZenyaMark className="h-[22px]" />
                   </Link>
 
@@ -161,7 +161,7 @@ export default function FooterSection({
                       foot of it. Nothing else on this page argues, and the
                       footer is not the place to start. */}
                   <p className="zn5-claim">
-                    أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي. اكتب نبذة عن
+                    أوّل شركة إسلامية لإنشاء المواقع. اكتب نبذة عن
                     نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
                   </p>
 
@@ -211,7 +211,7 @@ export default function FooterSection({
                   ))}
                 </div>
                 <p className="zn5-legal">
-                  © {year} زينيا. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
+                  © {year} بينون. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
                 </p>
               </div>
             </div>

@@ -1,5 +1,5 @@
 /**
- * English editorial for /en/why/[type] — one article per Zenya template.
+ * English editorial for /en/why/[type] — one article per Beynoun template.
  *
  * These are NOT translations of app/(main)/why/[type]/copy.ts. English and
  * Arabic search intent differ, so each article is written natively against
@@ -46,7 +46,7 @@ const restaurant: ArticleEn = {
   demoHref: '/demo/restaurant',
   buildHref: '/theme/new/restaurant',
   hero: {
-    kicker: 'Zenya guide · Restaurant template',
+    kicker: 'Beynoun guide · Restaurant template',
     h1: 'Why your restaurant needs a proper website in 2026',
     lead: 'More than three quarters of guests look your restaurant up online before deciding to come in. The website is not marketing decoration. It is the first table your guest sits at, and the meal starts there.',
   },
@@ -106,7 +106,7 @@ const one_product: ArticleEn = {
   demoHref: '/demo',
   buildHref: '/build',
   hero: {
-    kicker: 'Zenya guide · Storefront template',
+    kicker: 'Beynoun guide · Storefront template',
     h1: 'Why a one-product store outsells a general shop',
     lead: 'Seven in ten carts are abandoned. A page that sells one thing, and answers every objection to that one thing, does not give the visitor a reason to wander off.',
   },
@@ -166,7 +166,7 @@ const atlas: ArticleEn = {
   demoHref: '/demo/atlas',
   buildHref: '/theme/new/atlas',
   hero: {
-    kicker: 'Zenya guide · Atlas template',
+    kicker: 'Beynoun guide · Atlas template',
     h1: 'Why your app needs a landing page, not an app-store link',
     lead: 'You get about five seconds to explain what your software does. An app-store listing does not give you those five seconds; a landing page you control does.',
   },
@@ -226,7 +226,7 @@ const lookbook: ArticleEn = {
   demoHref: '/demo/lookbook',
   buildHref: '/theme/new/lookbook',
   hero: {
-    kicker: 'Zenya guide · Lookbook template',
+    kicker: 'Beynoun guide · Lookbook template',
     h1: 'Why a fashion brand needs more than an Instagram grid',
     lead: 'Visuals are the deciding factor in most clothing purchases. A social grid shows the clothes; a lookbook site shows the brand, and only one of those you actually own.',
   },
@@ -286,7 +286,7 @@ const collective: ArticleEn = {
   demoHref: '/demo/collective',
   buildHref: '/theme/new/collective',
   hero: {
-    kicker: 'Zenya guide · Collective template',
+    kicker: 'Beynoun guide · Collective template',
     h1: 'Why curation sells more than a bigger catalogue',
     lead: 'More choice does not mean more sales. The classic Columbia University study found the opposite, and a curated storefront is how you put that finding to work.',
   },
@@ -346,7 +346,7 @@ const studio: ArticleEn = {
   demoHref: '/demo/studio',
   buildHref: '/theme/new/studio',
   hero: {
-    kicker: 'Zenya guide · Studio template',
+    kicker: 'Beynoun guide · Studio template',
     h1: 'Why your brand story is a commercial asset',
     lead: 'Most purchase decisions are emotional and justified afterwards. The story page is where that emotional case gets made, which makes it one of the most commercial pages you own.',
   },
@@ -406,7 +406,7 @@ const services: ArticleEn = {
   demoHref: '/demo/services',
   buildHref: '/theme/new/services',
   hero: {
-    kicker: 'Zenya guide · Services template',
+    kicker: 'Beynoun guide · Services template',
     h1: 'Why local service businesses lose work without a website',
     lead: 'Most people searching for a local service visit a business within a day. If they cannot find you, or cannot tell whether you are any good, that visit goes to whoever they could find.',
   },
@@ -466,7 +466,7 @@ const wellness: ArticleEn = {
   demoHref: '/demo/wellness',
   buildHref: '/theme/new/wellness',
   hero: {
-    kicker: 'Zenya guide · Wellness template',
+    kicker: 'Beynoun guide · Wellness template',
     h1: 'Why online booking is the whole business for a wellness studio',
     lead: 'People book treatments on their phone, late, and they will not call. A studio without online booking is closed at exactly the moment its customers are deciding.',
   },
