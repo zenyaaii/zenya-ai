@@ -25,9 +25,11 @@ const DEFAULT_FROM = 'Beynoun <noreply@beynoun.com>'
  *  lost while the domain waits for its DNS check. */
 export const LEGACY_FROM = 'Beynoun <noreply@zenyaai.co>'
 
-/** Resend's answer when the sending domain has not passed its DNS check. */
+/** Resend's answer when it will not send from the new domain yet: the domain
+ *  has not passed its DNS check, or the API key is limited to the old domain
+ *  ("This API key is not authorized to send emails from beynoun.com"). */
 export function isUnverifiedDomainError(message?: string | null): boolean {
-  return /not verified|verify (?:a|your) domain/i.test(message || '')
+  return /not verified|verify (?:a|your) domain|not authorized to send emails from/i.test(message || '')
 }
 
 /** Format a minor-unit amount (cents) with a sensible currency symbol.
