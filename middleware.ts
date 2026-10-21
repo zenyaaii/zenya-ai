@@ -27,6 +27,10 @@ const OWN_HOSTS = new Set([
  */
 const LEGACY_KEEP_PREFIXES = ['/api/', '/_next/', '/auth/', '/app', '/shopify']
 
+// Google Search Console proves ownership of the old zenyaai.co property with a
+// file at its root, and refuses a redirect. Those files stay on the old domain.
+const GOOGLE_VERIFY_FILE = /^\/google[0-9a-f]+\.html$/
+
 // Subdomains that are reserved for the app (not customer sites)
 const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
@@ -284,6 +288,7 @@ export async function middleware(request: NextRequest) {
   // moves each page's ranking across. LEGACY_KEEP_PREFIXES stay put.
   if (isLegacyHost(host)) {
     if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) return NextResponse.next()
+    if (GOOGLE_VERIFY_FILE.test(pathname)) return NextResponse.next()
     const keep = LEGACY_KEEP_PREFIXES.some((p) => {
       const base = p.replace(/\/$/, '')
       return pathname === base || pathname.startsWith(base + '/')
