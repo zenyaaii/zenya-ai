@@ -20,5 +20,5 @@ export const metadata = { title: 'الإعدادات', robots: { index: false, f
  * which is correct: nobody deletes an account without proving it is theirs.
  */
 export default function SettingsRedirect() {
-  redirect('https://dashboard.zenyaai.co/settings')
+  redirect('https://dashboard.beynoun.com/settings')
 }

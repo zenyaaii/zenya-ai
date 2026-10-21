@@ -16,7 +16,7 @@ import { COMPANY } from '@/lib/company'
 import { LOGO_URL, SHARE_IMAGE, share } from '@/lib/site-share'
 import { REVEAL_BOOT } from '@/components/zenya/chrome/reveal-boot'
 
-const SITE_URL = 'https://zenyaai.co'
+const SITE_URL = 'https://beynoun.com'
 
 const HOME_DESCRIPTION =
   'اكتب نبذة قصيرة عن نشاطك، ويبني لك الذكاء الاصطناعي موقعًا عربيًا كاملًا خلال دقائق: مطاعم، متاجر، خدمات، عافية والمزيد. المعاينة مجانية.'
@@ -147,7 +147,7 @@ const structuredData = [
     // market, the domain, and the fact that it builds sites for every kind of
     // business rather than one kind.
     disambiguatingDescription:
-      'زينيا (Zenya AI) منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي على النطاق zenyaai.co. تُنشئ وتدير وتنشر مواقع كاملة لكل أنواع الأنشطة التجارية — مطاعم، علامات أزياء، تطبيقات، مراكز عافية، شركات خدمات، ومتاجر إلكترونية — وليست متجرًا إلكترونيًا ولا أداة لإنشاء متاجر المنتج الواحد فقط.',
+      'زينيا (Zenya AI) منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي على النطاق beynoun.com. تُنشئ وتدير وتنشر مواقع كاملة لكل أنواع الأنشطة التجارية — مطاعم، علامات أزياء، تطبيقات، مراكز عافية، شركات خدمات، ومتاجر إلكترونية — وليست متجرًا إلكترونيًا ولا أداة لإنشاء متاجر المنتج الواحد فقط.',
     slogan: 'اكتب نبذة، واحصل على موقع.',
     foundingDate: '2025',
     knowsLanguage: ['ar', 'en'],
@@ -183,7 +183,7 @@ const structuredData = [
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
-      email: 'team@zenyaai.co',
+      email: 'team@beynoun.com',
       url: `${SITE_URL}/contact`,
       availableLanguage: ['Arabic', 'English'],
     },
@@ -279,7 +279,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const hdrs = headers()
   const pathname = hdrs.get('x-pathname') || ''
   const isShopifyRoute = pathname.startsWith('/shopify')
-  // Customer sites (slug.zenyaai.co / custom domains) must NOT carry Zenya's
+  // Customer sites (slug.beynoun.com / custom domains) must NOT carry Zenya's
   // own brand JSON-LD — that would tell Google their page is about Zenya.
   // Middleware flags these requests; they inject their own correct schema.
   const isCustomerSite = hdrs.get('x-zenya-site') === '1' || pathname.startsWith('/s/')

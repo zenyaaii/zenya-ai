@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   ...share({
     title: 'قيّم تجربتك مع زينيا',
     description: 'شارك تجربتك الصادقة. نقرأ كل مراجعة قبل نشرها، ولا نعرض شهادات مُختلَقة.',
-    url: 'https://zenyaai.co/review',
+    url: 'https://beynoun.com/review',
   }),
 }
 

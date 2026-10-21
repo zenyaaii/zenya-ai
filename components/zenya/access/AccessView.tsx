@@ -86,7 +86,7 @@ type SavedAccount = { email: string; name?: string }
  *
  * components/accounts/AccountsAuthForm remembers accounts under this key and
  * this page writes the same shape into it, so someone who signs in here finds
- * their account waiting at accounts.zenyaai.co and the other way round. While
+ * their account waiting at accounts.beynoun.com and the other way round. While
  * this page was a proposal it kept a separate key, because writing into the
  * real list would have put a name on the real sign-in screen that nobody had
  * typed there. It is the real sign-in screen now.

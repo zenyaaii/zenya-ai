@@ -146,7 +146,7 @@ export async function GET(req: NextRequest) {
         const s = stats.get(t.id)
         rows.push([
           t.product_name || t.slug || 'موقع بلا اسم',
-          t.slug ? `${t.slug}.zenyaai.co` : '—',
+          t.slug ? `${t.slug}.beynoun.com` : '—',
           (t.content && typeof t.content === 'object' && (t.content as any).business_type) || t.template_type || '—',
           t.is_published ? 'منشور' : 'مسودة',
           num(s, 'views'), num(s, 'sessions'), num(s, 'visitors'),
@@ -181,7 +181,7 @@ const DATASET_LABEL_AR: Record<Dataset, string> = {
 function brandHeader(dataset: Dataset, siteName: string, from: Date, to: Date): string[][] {
   const d = (x: Date) => x.toISOString().slice(0, 10)
   return [
-    ['زينيا · zenyaai.co'],
+    ['زينيا · beynoun.com'],
     [`تقرير التحليلات — ${DATASET_LABEL_AR[dataset]}`],
     ['الموقع', siteName],
     ['النطاق الزمني', `${d(from)} ← ${d(to)}`],

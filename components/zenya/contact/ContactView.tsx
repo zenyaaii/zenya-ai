@@ -111,7 +111,7 @@ const PHONE_E164 = "+31684508903"
 const PHONE_READ = "+31 6 8450 8903"
 const OWNER_SITE = "https://musannef.com"
 const OWNER_SITE_LABEL = "musannef.com"
-const SITE_LABEL = "zenyaai.co"
+const SITE_LABEL = "beynoun.com"
 
 type Topic = "support" | "request" | "sales" | "review" | "other"
 

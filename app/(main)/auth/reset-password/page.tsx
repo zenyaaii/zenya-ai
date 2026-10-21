@@ -54,7 +54,7 @@ export default function ResetPasswordPage() {
 
     setStatus({ type: 'success', message: 'تم تحديث كلمة المرور. جارٍ إعادة التوجيه…' })
     setTimeout(() => {
-      window.location.href = 'https://dashboard.zenyaai.co'
+      window.location.href = 'https://dashboard.beynoun.com'
       router.refresh()
     }, 1200)
   }

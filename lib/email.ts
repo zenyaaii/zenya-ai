@@ -106,7 +106,7 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
 /** Where a reader writes back. Every send sets it as Reply-To too. */
 export const SUPPORT_EMAIL = COMPANY.SUPPORT_EMAIL
 
-const HEADER_IMG = 'https://zenyaai.co/brand/email-header.png'
+const HEADER_IMG = 'https://beynoun.com/brand/email-header.png'
 const FONT = `'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif`
 
 /** Shared chrome so every transactional email matches the auth templates. */
@@ -142,8 +142,8 @@ function emailShell(opts: {
     </td></tr>
   </table>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;"><tr><td style="padding:20px 40px 0;text-align:right;font-family:${FONT};">
-    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">زينيا، منشئ المواقع بالذكاء الاصطناعي · <a href="https://zenyaai.co" style="color:#171717;text-decoration:none;">zenyaai.co</a></p>
-    <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#8f8f8f;">${SUPPORT_EMAIL}</a> · <a href="https://zenyaai.co/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://zenyaai.co/terms" style="color:#a3a3a3;">الشروط</a></p>
+    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">زينيا، منشئ المواقع بالذكاء الاصطناعي · <a href="https://beynoun.com" style="color:#171717;text-decoration:none;">beynoun.com</a></p>
+    <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#8f8f8f;">${SUPPORT_EMAIL}</a> · <a href="https://beynoun.com/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#a3a3a3;">الشروط</a></p>
   </td></tr></table>
   </td></tr></table>
 </body></html>`.trim()
@@ -269,7 +269,7 @@ export function announcementEmail(args?: {
   manageUrl?: string
   firstName?: string | null
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args?.manageUrl || 'https://zenyaai.co/dashboard'
+  const manageUrl = args?.manageUrl || 'https://beynoun.com/dashboard'
   const greeting = args?.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
 
   const subject = 'زينيا بحُلّة جديدة ✨'
@@ -282,7 +282,7 @@ export function announcementEmail(args?: {
     '',
     `عُد وجرّبها الآن: ${manageUrl}`,
     '',
-    'لأي استفسار راسلنا على team@zenyaai.co',
+    'لأي استفسار راسلنا على team@beynoun.com',
     '— زينيا (Musannef)',
   ].join('\n')
 
@@ -302,7 +302,7 @@ export function announcementEmail(args?: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'عُد إلى زينيا',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في زينيا. لأي استفسار راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -373,7 +373,7 @@ export function paymentReceiptEmail(args: {
     dateStr ? `التاريخ: ${dateStr}` : null,
     '',
     `لوحة التحكم: ${manageUrl}`,
-    'لأي استفسار: team@zenyaai.co',
+    'لأي استفسار: team@beynoun.com',
     '',
     '— زينيا (Musannef)',
   ].filter((l) => l !== null).join('\n')
@@ -430,7 +430,7 @@ export function paymentReceiptEmail(args: {
         pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
         entry: 'هذا إيصال عن فتح التوليد بالذكاء الاصطناعي (خطة Entry، دفعة واحدة).',
       }[plan]
-    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
+    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -447,7 +447,7 @@ export function passwordChangedEmail(args: {
   secureUrl?: string
 }): { subject: string; text: string; html: string } {
   const { email } = args
-  const secureUrl = args.secureUrl || 'https://zenyaai.co/login'
+  const secureUrl = args.secureUrl || 'https://beynoun.com/login'
 
   const subject = 'تم تغيير كلمة مرور حسابك في زينيا'
 
@@ -458,7 +458,7 @@ export function passwordChangedEmail(args: {
     `إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.`,
     ``,
     `لم تقم بهذا التغيير؟ أمّن حسابك فورًا بإعادة تعيين كلمة المرور من: ${secureUrl}`,
-    `وراسلنا على team@zenyaai.co`,
+    `وراسلنا على team@beynoun.com`,
     ``,
     `— زينيا`,
   ].join('\n')
@@ -480,7 +480,7 @@ export function passwordChangedEmail(args: {
     bodyHtml,
     ctaHref: secureUrl,
     ctaLabel: 'تأمين حسابي',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;"><strong style="color:#555555;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;"><strong style="color:#555555;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -517,7 +517,7 @@ export function domainExpiringEmail(args: {
     bodyHtml: `<p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:#555555;">جدِّده الآن ليبقى موقعك ظاهرًا دون انقطاع. إن لم تجدِّده، يتوقف النطاق عن العمل، وقد يسجّله شخص آخر بعد فترة قصيرة.</p>`,
     ctaHref: renewUrl,
     ctaLabel: `جدِّد النطاق · $${retailUsd.toFixed(2)} للسنة`,
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن نطاقك يقترب من تاريخ انتهائه. تدير نطاقاتك من <a href="https://zenyaai.co/dashboard/domains" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن نطاقك يقترب من تاريخ انتهائه. تدير نطاقاتك من <a href="https://beynoun.com/dashboard/domains" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -534,7 +534,7 @@ export function welcomeEmail(args: {
   trialLimit?: number
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard'
   const limit = Math.max(1, args.trialLimit ?? 2)
   const genWord = limit === 1 ? 'موقع مجاني واحد' : limit === 2 ? 'موقعين مجانيين' : `${limit} مواقع مجانية`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
@@ -550,7 +550,7 @@ export function welcomeEmail(args: {
     'اكتب فكرتك، أو ابدأ من مثال جاهز، وولّد موقعًا احترافيًا في ثوانٍ.',
     `ابدأ من هنا: ${manageUrl}`,
     '',
-    'لأي سؤال راسلنا على team@zenyaai.co — نحن هنا للمساعدة.',
+    'لأي سؤال راسلنا على team@beynoun.com — نحن هنا للمساعدة.',
     '— زينيا',
   ].join('\n')
 
@@ -570,7 +570,7 @@ export function welcomeEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'ابدأ إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a> ويسعدنا أن نأخذ بيدك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a> ويسعدنا أن نأخذ بيدك.</p>`,
   })
 
   return { subject, text, html }
@@ -599,7 +599,7 @@ export function bookingReceivedEmail(args: {
   message?: string | null
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://dashboard.zenyaai.co/bookings'
+  const manageUrl = args.manageUrl || 'https://dashboard.beynoun.com/bookings'
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
   const subject = `${args.kind} جديد من ${args.name} — ${args.siteName}`
 
@@ -657,7 +657,7 @@ export function trialReminderEmail(args: {
   remaining: number
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard'
   const remaining = Math.max(0, args.remaining)
   const remWord = remaining === 1 ? 'موقع مجاني واحد' : remaining === 2 ? 'موقعان مجانيان' : `${remaining} مواقع مجانية`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
@@ -704,7 +704,7 @@ export function quotaReachedEmail(args: {
   trialLimit: number
   upgradeUrl?: string
 }): { subject: string; text: string; html: string } {
-  const upgradeUrl = args.upgradeUrl || 'https://zenyaai.co/pricing'
+  const upgradeUrl = args.upgradeUrl || 'https://beynoun.com/pricing'
   const limit = Math.max(1, args.trialLimit)
   const genWord = limit === 1 ? 'موقعك المجاني' : limit === 2 ? 'موقعيك المجانيين' : `مواقعك المجانية الـ${limit}`
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
@@ -741,7 +741,7 @@ export function quotaReachedEmail(args: {
     bodyHtml,
     ctaHref: upgradeUrl,
     ctaLabel: 'طالع الخطط والترقية',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأي سؤال عن الخطط راسلنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأي سؤال عن الخطط راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -760,7 +760,7 @@ export function hostingExpiringEmail(args: {
   endDate: string
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/billing'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard/billing'
   const daysUntil = Math.max(0, args.daysUntil)
   const dayWord = daysUntil === 0 ? 'اليوم' : daysUntil === 1 ? 'يوم واحد' : daysUntil === 2 ? 'يومين' : `${daysUntil} أيام`
   const when = daysUntil === 0 ? 'اليوم' : `خلال ${dayWord}`
@@ -841,7 +841,7 @@ export function accountDeletedEmail(args: {
       </td></tr>
     </table>
     <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#8f8f8f;">
-      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://zenyaai.co/signup" style="color:#171717;text-decoration:none;">zenyaai.co</a>.
+      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://beynoun.com/signup" style="color:#171717;text-decoration:none;">beynoun.com</a>.
     </p>`
 
   const html = emailShell({
@@ -849,9 +849,9 @@ export function accountDeletedEmail(args: {
     eyebrow: 'طلب الحذف',
     heading: 'تم حذف حسابك',
     bodyHtml,
-    ctaHref: 'https://zenyaai.co/signup',
+    ctaHref: 'https://beynoun.com/signup',
     ctaLabel: 'إنشاء حساب جديد',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:team@zenyaai.co" style="color:#171717;text-decoration:none;">team@zenyaai.co</a> فورًا.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a> فورًا.</p>`,
   })
 
   return { subject, text, html }
@@ -885,7 +885,7 @@ export function paymentFailedEmail(args: {
   nextAttemptIso?: string | null
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/billing'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard/billing'
   const amount = fmtMoney(args.amountCents, args.currency)
   const next = arDate(args.nextAttemptIso)
   const subject = 'لم نتمكن من تجديد اشتراكك في زينيا'
@@ -936,7 +936,7 @@ export function subscriptionEndedEmail(args: {
   planLabel: string
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/pricing'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/pricing'
   const subject = 'انتهى اشتراكك في زينيا'
 
   const text = [
@@ -984,7 +984,7 @@ export function sitePublishedEmail(args: {
   siteUrl: string
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard'
   const host = args.siteUrl.replace(/^https?:\/\//, '')
   const name = esc(args.siteName)
   const subject = `موقع «${args.siteName}» أصبح على الإنترنت`
@@ -1034,7 +1034,7 @@ export function domainLiveEmail(args: {
   domain: string
   manageUrl?: string
 }): { subject: string; text: string; html: string } {
-  const manageUrl = args.manageUrl || 'https://zenyaai.co/dashboard/domains'
+  const manageUrl = args.manageUrl || 'https://beynoun.com/dashboard/domains'
   const url = `https://${args.domain}`
   const subject = `نطاقك ${args.domain} يعمل الآن`
 

@@ -495,7 +495,7 @@ export default function ReviewView() {
 
                   <Field id="zr-site" label="موقعك في زينيا" hint="اختياري">
                     <input id="zr-site" className="zr-in zr-ltr" type="text" value={site} dir="ltr"
-                      placeholder="myshop.zenyaai.co" onChange={(e) => setSite(e.target.value)} />
+                      placeholder="myshop.beynoun.com" onChange={(e) => setSite(e.target.value)} />
                   </Field>
 
                   <Field id="zr-body" label="مراجعتك" required>

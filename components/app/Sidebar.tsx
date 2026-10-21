@@ -129,10 +129,10 @@ export default function Sidebar({
       {/* Foot — small marketing link out */}
       <div className="zy-rail-foot">
         <ReportProblem />
-        {/* Dashboard runs on dashboard.zenyaai.co, so this must be the absolute
+        {/* Dashboard runs on dashboard.beynoun.com, so this must be the absolute
             apex URL. ?home=1 tells the apex NOT to bounce a logged-in user back
             to accounts/dashboard — they explicitly want to see the marketing site. */}
-        <a href="https://zenyaai.co/?home=1" onClick={onMobileClose}>
+        <a href="https://beynoun.com/?home=1" onClick={onMobileClose}>
           → العودة إلى الموقع التسويقي
         </a>
       </div>

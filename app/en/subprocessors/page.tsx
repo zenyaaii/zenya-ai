@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { COMPANY } from '@/lib/company'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Subprocessors',
@@ -127,7 +127,7 @@ export default function EnSubprocessors() {
       <hr />
       <p className="text-sm text-muted">
         This is an English translation provided for convenience. The Arabic version at{' '}
-        <a href="/subprocessors">zenyaai.co/subprocessors</a> is the authoritative text; if the two differ,
+        <a href="/subprocessors">beynoun.com/subprocessors</a> is the authoritative text; if the two differ,
         the Arabic version prevails.
       </p>
     </main>

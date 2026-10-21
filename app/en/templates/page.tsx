@@ -6,7 +6,7 @@ import { auroraTints } from '@/lib/aurora-tints'
 import { themePreview } from '@/lib/theme-previews'
 import { CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Templates',

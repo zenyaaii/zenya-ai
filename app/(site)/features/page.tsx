@@ -51,7 +51,7 @@ import { CSS } from "@/components/zenya/features/styles"
 import { hreflangAlternates } from '@/lib/i18n/config'
 import { share } from '@/lib/site-share'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'المزايا: محتوى بالذكاء الاصطناعي، استضافة ونطاق',

@@ -50,7 +50,7 @@ export default function HandoverAnswer({ token, site, initial }: Props) {
               : 'سنراجع المشكلة ونتواصل معك قريبًا.'}
           </p>
         </div>
-        <a href="https://dashboard.zenyaai.co" className="zs-submit zs-submit-link">افتح لوحة التحكم</a>
+        <a href="https://dashboard.beynoun.com" className="zs-submit zs-submit-link">افتح لوحة التحكم</a>
       </>
     )
   }

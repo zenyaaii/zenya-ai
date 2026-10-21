@@ -337,7 +337,7 @@ export default function BuildSection({
         {/* Where this is. The path changes on the click, which is the point of
             the first beat: the picker really does open the wizard. */}
         <div className="zn-path" dir="ltr">
-          <span>zenyaai.co</span>
+          <span>beynoun.com</span>
           <b>{view === "picker" ? "/templates" : tpl.path}</b>
         </div>
 

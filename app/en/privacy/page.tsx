@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { COMPANY, formatAddress } from '@/lib/company'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -264,7 +264,7 @@ export default function EnPrivacyPolicy() {
       <hr />
       <p className="text-sm text-muted">
         This is an English translation provided for convenience. The Arabic version at{' '}
-        <a href="/privacy">zenyaai.co/privacy</a> is the authoritative text; if the two differ, the Arabic
+        <a href="/privacy">beynoun.com/privacy</a> is the authoritative text; if the two differ, the Arabic
         version prevails.
       </p>
     </main>

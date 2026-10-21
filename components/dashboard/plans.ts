@@ -70,7 +70,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     includes: [
       'توليد قالبين (٢) بالذكاء الاصطناعي',
       'جميع القوالب الثمانية للمعاينة',
-      'انشر موقعك على اسمك.zenyaai.co',
+      'انشر موقعك على اسمك.beynoun.com',
       'كل أدوات التحرير والإدارة',
       'شهر تجربة للحجوزات وتحليلات الموقع',
     ],
@@ -81,7 +81,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     includes: [
       'توليد غير محدود',
       'تصدير ثيم شوبيفاي جاهز',
-      'مباشر على الاسم.zenyaai.co',
+      'مباشر على الاسم.beynoun.com',
       'نطاق مخصّص + SSL تلقائي',
     ],
   },
@@ -107,7 +107,7 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     includes: [
       'توليد قالبين (٢) بالذكاء الاصطناعي',
       'جميع القوالب الثمانية للمعاينة',
-      'انشر موقعك على اسمك.zenyaai.co',
+      'انشر موقعك على اسمك.beynoun.com',
       'كل أدوات التحرير والإدارة',
       'شهر تجربة للحجوزات وتحليلات الموقع',
     ],

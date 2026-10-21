@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { exchangeCode, callbackUrlFor, emailFromIdToken } from '@/lib/gsc'
+import { DASHBOARD_HOST } from '@/lib/portal-urls'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,7 +17,7 @@ function admin() {
 
 /** Land the user back on the SEO page with a status flag (+ optional reason). */
 function backToSeo(req: NextRequest, status: string, reason?: string) {
-  const host = req.headers.get('host') || 'dashboard.zenyaai.co'
+  const host = req.headers.get('host') || DASHBOARD_HOST
   const isLocal = host.startsWith('localhost') || host.startsWith('127.0.0.1')
   const base = isLocal ? `http://${host}` : `https://${host}`
   const url = new URL('/dashboard/seo', base)

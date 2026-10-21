@@ -5,7 +5,7 @@ import { sendEmail, trialReminderEmail, hostingExpiringEmail } from '@/lib/email
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zenyaai.co'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://beynoun.com'
 
 function adminDb() {
   return createAdminClient(

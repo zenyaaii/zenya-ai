@@ -12,7 +12,7 @@ import {
   CtaBand,
 } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export function generateStaticParams() {
   return COMPARISONS_EN.map((c) => ({ slug: c.slug }))

@@ -81,7 +81,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     .eq('id', user.id)
     .maybeSingle()
 
-  // New model: subdomain publishing (slug.zenyaai.co) is part of the base tier.
+  // New model: subdomain publishing (slug.beynoun.com) is part of the base tier.
   // Every account — the free plan (which replaced the $0.50 Entry unlock on
   // 2026-10-05) or any paid plan — can publish on its subdomain. Custom
   // domains (Starter+) and a free domain (Pro) are the paid differentiators,
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   // 4. Publish (service role to bypass RLS for the slug uniqueness path)
   const now = new Date().toISOString()
-  const siteUrl = `https://${slug}.zenyaai.co`
+  const siteUrl = `https://${slug}.beynoun.com`
 
   const { error: updErr } = await a
     .from('themes')

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/privacy' },
-  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://zenyaai.co/privacy' }),
+  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://beynoun.com/privacy' }),
 }
 
 export default function Page() {

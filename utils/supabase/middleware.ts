@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest, forwardedHeaders?: Hea
     return withFrameHeaders(response)
   }
 
-  // Scope auth cookies to .zenyaai.co so the session is shared across the
+  // Scope auth cookies to .beynoun.com so the session is shared across the
   // accounts / dashboard / apex subdomains (host-only on localhost/preview).
   const cookieDomain = cookieDomainForHost(request.headers.get('host'))
 
@@ -126,7 +126,7 @@ export async function updateSession(request: NextRequest, forwardedHeaders?: Hea
   // token is stale or already rotated (refresh_token_already_used /
   // refresh_token_not_found) — a race that happens when the browser client and
   // this middleware both try to refresh the same session across the shared
-  // .zenyaai.co cookie. Swallow it: a transient rotation race must NOT 500 the
+  // .beynoun.com cookie. Swallow it: a transient rotation race must NOT 500 the
   // navigation or bounce the user to login. supabase-ssr has already written
   // any fresh cookie it obtained; the next request settles on the new token.
   try {

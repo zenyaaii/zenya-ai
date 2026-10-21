@@ -8,7 +8,7 @@ import { DASHBOARD_HOST, dashboardPortalPath, dashboardRoutePath } from '@/lib/p
  * The dashboard chrome's view of the address, on either host.
  *
  * `pathname` is always the route form (/dashboard/sites), so active states and
- * titles match the same keys whether the page is read on dashboard.zenyaai.co
+ * titles match the same keys whether the page is read on dashboard.beynoun.com
  * (browser path /sites) or on localhost (/dashboard/sites).
  *
  * `linkTo` turns a route into the address to put in an href. The host is only

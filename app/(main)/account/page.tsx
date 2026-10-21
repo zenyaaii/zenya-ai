@@ -14,5 +14,5 @@ export const metadata = { title: 'الحساب', robots: { index: false, follow:
  * it was pretending to be.
  */
 export default function AccountRedirect() {
-  redirect('https://dashboard.zenyaai.co')
+  redirect('https://dashboard.beynoun.com')
 }

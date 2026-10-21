@@ -16,7 +16,7 @@
  * THE ACCOUNT CHOOSER IS SHARED WITH THE PORTAL. Both this page and
  * components/accounts/AccountsAuthForm remember addresses under
  * "zenya_accounts", so an account used here is waiting at
- * accounts.zenyaai.co and the other way round. No password is ever stored;
+ * accounts.beynoun.com and the other way round. No password is ever stored;
  * the chooser prefills the address and focuses the password field.
  *
  * WHAT IT CALLS. supabase.auth.signInWithPassword, signUp and

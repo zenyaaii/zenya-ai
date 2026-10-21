@@ -13,7 +13,7 @@ import { share } from '@/lib/site-share'
  * schema is generated from the same array the accordion renders.
  */
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: `الأسعار — باقة مجانية، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,

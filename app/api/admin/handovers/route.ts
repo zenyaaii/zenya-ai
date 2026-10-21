@@ -44,7 +44,7 @@ export async function GET() {
 /**
  * POST /api/admin/handovers { site, test }
  *   site  the site's address or slug ("hybridautoservice" or
- *         "hybridautoservice.zenyaai.co")
+ *         "hybridautoservice.beynoun.com")
  *   test  true puts it in the admin's own bell, as if they owned the site, so
  *         they can see it first
  *
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     .toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/\/.*$/, '')
-    .replace(/\.zenyaai\.co$/, '')
+    .replace(/\.(?:beynoun\.com|zenyaai\.co)$/, '')
   const test = body?.test === true
   if (!/^[a-z0-9-]{1,63}$/.test(slug)) {
     return NextResponse.json({ error: 'bad_site', message: 'اكتب عنوان الموقع، مثل hybridautoservice' }, { status: 400 })

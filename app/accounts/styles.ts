@@ -1,5 +1,5 @@
 /**
- * The house style for accounts.zenyaai.co — the sign-in card, the sign-up
+ * The house style for accounts.beynoun.com — the sign-in card, the sign-up
  * card, the reset card, and the account chooser.
  *
  * DESIGN READ: a redesign-preserve of the portal door for returning

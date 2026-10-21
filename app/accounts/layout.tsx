@@ -13,7 +13,7 @@ export function generateMetadata() {
 }
 
 /**
- * accounts.zenyaai.co — the ground the portal stands on.
+ * accounts.beynoun.com — the ground the portal stands on.
  *
  * IT USED TO MOUNT AccountsBackground: three blurred aurora orbs drifting on
  * 26-, 32- and 38-second loops, a moving mesh, and two sparkles, over a cream

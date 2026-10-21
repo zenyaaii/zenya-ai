@@ -2,7 +2,7 @@
  * WHAT A PERSON IS TOLD WHEN SIGNING IN GOES WRONG.
  *
  * Both doors — components/zenya/access/AccessView on the apex and
- * components/accounts/AccountsAuthForm on accounts.zenyaai.co — used to do
+ * components/accounts/AccountsAuthForm on accounts.beynoun.com — used to do
  * this:
  *
  *     setError(err.message)

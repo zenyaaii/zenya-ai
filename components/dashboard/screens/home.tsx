@@ -36,7 +36,7 @@ export function HomeScreen({
       <div className="mt-6">
         <StatGrid>
           <StatCard label="إجمالي المواقع" value={String(stats.sites)} sub={`${stats.live} مباشر`} icon={Folder} />
-          <StatCard label="مواقع مباشرة" value={String(stats.live)} sub="على zenyaai.co" icon={Globe} />
+          <StatCard label="مواقع مباشرة" value={String(stats.live)} sub="على beynoun.com" icon={Globe} />
           <StatCard label="المشاهدات" value={stats.views.toLocaleString('ar')} sub="مدى الحياة" icon={Eye} />
           <StatCard label="الحجوزات" value={String(stats.bookings)} sub="هذا الشهر" icon={CalendarCheck} />
         </StatGrid>

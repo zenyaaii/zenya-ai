@@ -53,7 +53,7 @@ import { CSS as TEMPLATE_CSS } from "@/components/zenya/websites/styles"
 import { CSS as ARTICLE_CSS } from "@/components/zenya/why/styles"
 import { share } from '@/lib/site-share'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 // The article stylesheet opens by shrinking .zx-h1 for its long question
 // headline. Here the h1 is the template's own short one, so that rule is cut

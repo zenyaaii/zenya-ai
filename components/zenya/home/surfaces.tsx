@@ -191,7 +191,7 @@ export const bookings: SurfaceDef = {
 
         {/* The guest's side: the published site, and the form on it. */}
         <div className="zn3-site" ref={siteRef} data-t="site">
-          <div className="zn3-sitebar" dir="ltr">darnoor.zenyaai.co</div>
+          <div className="zn3-sitebar" dir="ltr">darnoor.beynoun.com</div>
           <div className="zn3-sitebody">
             <span className="eyebrow">الحجوزات</span>
             <h3>احجز طاولتك</h3>
@@ -826,7 +826,7 @@ export const seo: SurfaceDef = {
                 <span className="fav">د</span>
                 <div>
                   <p className="nm">دار نُور</p>
-                  <p className="host">darnoor.zenyaai.co</p>
+                  <p className="host">darnoor.beynoun.com</p>
                 </div>
               </div>
               <p className="ttl" dir="auto">{effTitle}</p>
@@ -850,7 +850,7 @@ export const seo: SurfaceDef = {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/demo/restaurant/room-1.webp" alt="" loading="lazy" decoding="async" />
               <div className="cap">
-                <p className="host" dir="ltr">darnoor.zenyaai.co</p>
+                <p className="host" dir="ltr">darnoor.beynoun.com</p>
                 <p className="ttl" dir="auto">{effTitle}</p>
                 <p className="dsc" dir="auto">{effDesc}</p>
               </div>

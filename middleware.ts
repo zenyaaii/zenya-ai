@@ -1,31 +1,46 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 import { DASHBOARD_HOST, dashboardPortalPath, hasDashboardPrefix } from '@/lib/portal-urls'
+import { LEGACY_DOMAIN, ROOT_DOMAIN, SITE_URL, isLegacyHost, isRootDomainHost, rootHostFor, siteUrl } from '@/lib/domain'
 
+const APEX = ROOT_DOMAIN
+const WWW_HOST = `www.${ROOT_DOMAIN}`
+const ACCOUNTS_HOST = `accounts.${ROOT_DOMAIN}`
+const DEMO_HOST = `demo.${ROOT_DOMAIN}`
+
+// Both domains' app hosts. The old domain's are here because the paths it
+// still serves itself (the Shopify app, /auth) run the own-host branch below.
 const OWN_HOSTS = new Set([
-  'zenyaai.co',
-  'www.zenyaai.co',
-  'dashboard.zenyaai.co',
-  'accounts.zenyaai.co',
-  'demo.zenyaai.co',
+  ...[ROOT_DOMAIN, LEGACY_DOMAIN].flatMap((d) => [d, `www.${d}`, `dashboard.${d}`, `accounts.${d}`, `demo.${d}`]),
   'localhost',
   'localhost:3000',
 ])
 
-// Subdomains of zenyaai.co that are reserved for the app (not customer sites)
+/**
+ * zenyaai.co paths that are NOT sent to beynoun.com.
+ *
+ * Every page moves, but these are called by machines that were registered
+ * with the old address and cannot follow a redirect: the Shopify app
+ * (application_url and its OAuth/webhooks), Stripe's webhook, Supabase's
+ * auth callback (the login cookie it needs lives on .zenyaai.co) and the
+ * Google Search Console callback. They keep answering where they are.
+ */
+const LEGACY_KEEP_PREFIXES = ['/api/', '/_next/', '/auth/', '/app', '/shopify']
+
+// Subdomains that are reserved for the app (not customer sites)
 const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
   'dashboard',
   'accounts',
   // Still reserved even though the host is retired. Without the entry the
-  // wildcard below claims the name and demo.zenyaai.co rewrites to /s/demo —
+  // wildcard below claims the name and demo.beynoun.com rewrites to /s/demo —
   // a customer site that does not exist — so an old link would 404 instead of
   // reaching the hand-off that sends it to the apex.
   'demo',
 ])
 
 /**
- * THE THREE PRETTY ADDRESSES demo.zenyaai.co used to have.
+ * THE THREE PRETTY ADDRESSES demo.beynoun.com used to have.
  *
  * The subdomain is retired. It existed to hold the candidate set while the
  * restyle was under review, and that set is the site now — /pricing, /themes,
@@ -42,11 +57,11 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
  *                   /theme/new/restaurant, which is a public route and
  *                   therefore cannot reach the generator it proposes for
  *
- * They live at zenyaai.co/demo/dashboard, /demo/editor and /demo/build, which
+ * They live at beynoun.com/demo/dashboard, /demo/editor and /demo/build, which
  * is where they always lived — the subdomain was an alias, not a home.
  *
  * This set is only what the retired host needs in order to send an old link
- * to the right place: demo.zenyaai.co/dashboard was the alias for
+ * to the right place: demo.beynoun.com/dashboard was the alias for
  * /demo/dashboard, so the bare segment has to be mapped back rather than
  * handed to the apex as /dashboard, which is the real logged-in dashboard.
  */
@@ -71,13 +86,13 @@ function isOwnHost(host: string) {
 }
 
 /**
- * If the host is a *.zenyaai.co wildcard subdomain (not a reserved one),
+ * If the host is a *.beynoun.com wildcard subdomain (not a reserved one),
  * return the subdomain slug so we can route to /s/[slug].
- * e.g. "myrestaurant.zenyaai.co" → "myrestaurant"
+ * e.g. "myrestaurant.beynoun.com" → "myrestaurant"
  */
 function getZenyaCoSlug(host: string): string | null {
-  if (!host.endsWith('.zenyaai.co')) return null
-  const sub = host.slice(0, -'.zenyaai.co'.length)
+  if (!host.endsWith(`.${ROOT_DOMAIN}`)) return null
+  const sub = host.slice(0, -`.${ROOT_DOMAIN}`.length)
   if (!sub || ZENYAAI_CO_APP_SUBDOMAINS.has(sub)) return null
   return sub
 }
@@ -136,7 +151,7 @@ const GOOGLE_FILE_RE = /^\/google[a-z0-9]+\.html$/i
 
 /**
  * Serve Google Search Console's "HTML file" verification at the site root
- * (slug.zenyaai.co/google<hash>.html) — but ONLY the exact filename the owner
+ * (slug.beynoun.com/google<hash>.html) — but ONLY the exact filename the owner
  * saved (content.seo.gscFile), so nobody can verify someone else's site.
  * Returns a Response when the path is a google-file request (200 if it matches
  * the owner's file, 404 otherwise), or null when the path isn't one.
@@ -225,7 +240,7 @@ function siteIconRewrite(request: NextRequest, slug: string) {
 /**
  * /s/<slug>/… typed on a customer host. The route is internal; served as is,
  * one customer's address would show any other customer's site
- * (satorispa.zenyaai.co/s/othersite). The site's own /s/ path goes to the
+ * (satorispa.beynoun.com/s/othersite). The site's own /s/ path goes to the
  * clean address; anyone else's is not found here.
  */
 function ownSitePath(request: NextRequest, slug: string) {
@@ -262,29 +277,46 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // ---- zenyaai.co → beynoun.com ----------------------------------------------
+  // The business was Zenya at zenyaai.co and is Beynoun at beynoun.com. Every
+  // page on the old domain goes to the same page on the new one, subdomain
+  // included: slug.zenyaai.co/menu → slug.beynoun.com/menu. 308 so Google
+  // moves each page's ranking across. LEGACY_KEEP_PREFIXES stay put.
+  if (isLegacyHost(host)) {
+    if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) return NextResponse.next()
+    const keep = LEGACY_KEEP_PREFIXES.some((p) => {
+      const base = p.replace(/\/$/, '')
+      return pathname === base || pathname.startsWith(base + '/')
+    })
+    const target = rootHostFor(host)
+    if (!keep && target) {
+      return NextResponse.redirect(new URL(pathname + request.nextUrl.search, `https://${target}`), 308)
+    }
+  }
+
   // ---- /s/<slug> is never an address ---------------------------------------
   // app/s/[slug] is the internal route customer sites are rewritten to. On
   // any of Zenya's own hosts (apex, www, accounts, dashboard, demo) it would
   // be a second copy of the site under Zenya's name, so it always hands off
-  // to the site's one real address, slug.zenyaai.co. Customer hosts handle
+  // to the site's one real address, slug.beynoun.com. Customer hosts handle
   // their own /s/ paths below (ownSitePath). Preview deployments and
   // localhost have no subdomains and still serve /s/.
   if (
     pathname.startsWith('/s/') &&
-    (host === 'zenyaai.co' || host.endsWith('.zenyaai.co')) &&
+    (isRootDomainHost(host) || isLegacyHost(host)) &&
     !getZenyaCoSlug(host)
   ) {
     const m = pathname.match(/^\/s\/([a-z0-9-]+)(\/.*)?$/i)
     if (m) {
-      const target = new URL(`https://${m[1].toLowerCase()}.zenyaai.co${m[2] || '/'}`)
+      const target = new URL(`${siteUrl(m[1].toLowerCase())}${m[2] || '/'}`)
       target.search = request.nextUrl.search
       return NextResponse.redirect(target, 301)
     }
     return new NextResponse('Not found', { status: 404 })
   }
 
-  // ---- WILDCARD *.zenya.co → customer site by slug -----------------------
-  // e.g. myrestaurant.zenya.co → /s/myrestaurant (no DB lookup needed)
+  // ---- WILDCARD *.beynoun.com → customer site by slug ----------------------
+  // e.g. myrestaurant.beynoun.com → /s/myrestaurant (no DB lookup needed)
   const zenyaSlug = getZenyaCoSlug(host)
   if (zenyaSlug) {
     if (pathname.startsWith('/s/')) return ownSitePath(request, zenyaSlug)
@@ -313,11 +345,11 @@ export async function middleware(request: NextRequest) {
   // let it straight through here before any session or redirect logic.
   if (pathname === '/favicon.ico' && isOwnHost(host)) return NextResponse.next()
 
-  // ---- demo.zenyaai.co → retired -------------------------------------------
+  // ---- demo.beynoun.com → retired -------------------------------------------
   // The subdomain existed to hold the candidate set while the restyle was
   // under review. The candidates are the site, and the three pages that were
   // still here — the dashboard and editor previews and the wizard proposal —
-  // are reachable on the main domain at zenyaai.co/demo/dashboard,
+  // are reachable on the main domain at beynoun.com/demo/dashboard,
   // /demo/editor and /demo/build, which is where every link to them now
   // points. A second host for three pages is a second host to keep correct.
   //
@@ -329,7 +361,7 @@ export async function middleware(request: NextRequest) {
   // owner's side without asking readers to clear their cache. The host is
   // being retired, not deleted, and keeping this reversible costs one
   // uncached round trip on a host that no link points at any more.
-  if (host === 'demo.zenyaai.co') {
+  if (host === DEMO_HOST) {
     if (
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/api/') ||
@@ -338,20 +370,20 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
-    // demo.zenyaai.co/dashboard was the pretty address for /demo/dashboard,
+    // demo.beynoun.com/dashboard was the pretty address for /demo/dashboard,
     // so the bare segments are mapped back rather than 404ing on the apex.
     const segment = pathname === '/' ? 'demo/dashboard' : pathname.replace(/^\//, '').replace(/\/$/, '')
     const target = RETIRED_DEMO_SEGMENTS.has(segment) ? `/demo/${segment}` : `/${segment}`
 
     return NextResponse.redirect(
-      new URL(target + request.nextUrl.search, 'https://zenyaai.co'),
+      new URL(target + request.nextUrl.search, SITE_URL),
     )
   }
 
-  // ---- dashboard.zenyaai.co → dashboard portal (like Shopify admin) ---------
+  // ---- dashboard.beynoun.com → dashboard portal (like Shopify admin) ---------
   // Rewrites all paths to /dashboard/* internally so the URL bar shows
-  // dashboard.zenyaai.co/sites — never dashboard.zenyaai.co/dashboard/sites.
-  if (host === 'dashboard.zenyaai.co') {
+  // dashboard.beynoun.com/sites — never dashboard.beynoun.com/dashboard/sites.
+  if (host === DASHBOARD_HOST || host === `dashboard.${LEGACY_DOMAIN}`) {
     if (
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/api/') ||
@@ -363,7 +395,7 @@ export async function middleware(request: NextRequest) {
     // The doubled address. Links in the code are written /dashboard/<page>
     // (the route, and the address on localhost); on this host that prefix is
     // the rewrite's job, so a link, bookmark or server redirect that spells it
-    // lands on dashboard.zenyaai.co/dashboard/sites. Send it to /sites, which
+    // lands on dashboard.beynoun.com/dashboard/sites. Send it to /sites, which
     // the rewrite below serves. 308: this is the page's address for good, and
     // a cached hop can never loop — /sites rewrites, it never redirects back.
     if (hasDashboardPrefix(pathname)) {
@@ -383,8 +415,8 @@ export async function middleware(request: NextRequest) {
     // /dashboard/*). This keeps the portal self-contained: the theme-creation
     // wizard, template browser, live preview/editor, and pricing/checkout all
     // live under app/(main)/* and would 404 if rewritten to /dashboard/<path>.
-    // Serving them as-is lets dashboard.zenyaai.co/theme/new (etc.) render the
-    // existing pages so users never bounce back to zenyaai.co.
+    // Serving them as-is lets dashboard.beynoun.com/theme/new (etc.) render the
+    // existing pages so users never bounce back to beynoun.com.
     const PORTAL_PASSTHROUGH_PREFIXES = [
       '/login',
       '/auth',
@@ -394,7 +426,7 @@ export async function middleware(request: NextRequest) {
       // with it: next.config.js redirects /themes BEFORE middleware runs, so
       // a '/themes' entry here can never match anything again, and without
       // '/templates' the portal rewrites it to /dashboard/templates — which
-      // does not exist. That is a 404 on dashboard.zenyaai.co/templates.
+      // does not exist. That is a 404 on dashboard.beynoun.com/templates.
       '/templates',
       '/demo',      // template demos (/demo, /demo/restaurant, …)
       '/demo-full', // full storefront demo
@@ -416,8 +448,8 @@ export async function middleware(request: NextRequest) {
       PORTAL_PASSTHROUGH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
     if (!alreadyRouted) {
-      // Rewrite: dashboard.zenyaai.co/       → /dashboard
-      //          dashboard.zenyaai.co/sites   → /dashboard/sites
+      // Rewrite: dashboard.beynoun.com/       → /dashboard
+      //          dashboard.beynoun.com/sites   → /dashboard/sites
       const url = request.nextUrl.clone()
       url.pathname = pathname === '/' ? '/dashboard' : `/dashboard${pathname}`
       const rewriteRes = NextResponse.rewrite(url)
@@ -431,11 +463,11 @@ export async function middleware(request: NextRequest) {
     return sessionRes
   }
 
-  // ---- accounts.zenyaai.co → auth portal (login / signup / chooser) ---------
+  // ---- accounts.beynoun.com → auth portal (login / signup / chooser) ---------
   // Rewrites all paths to /accounts/* internally so the URL bar shows
-  // accounts.zenyaai.co/login, accounts.zenyaai.co/signup, etc. These ARE the
+  // accounts.beynoun.com/login, accounts.beynoun.com/signup, etc. These ARE the
   // auth pages, so we never redirect an unauthenticated visitor away.
-  if (host === 'accounts.zenyaai.co') {
+  if (host === ACCOUNTS_HOST || host === `accounts.${LEGACY_DOMAIN}`) {
     if (
       pathname.startsWith('/_next/') ||
       pathname.startsWith('/api/') ||
@@ -444,8 +476,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next({ request: { headers: forwardedHeaders } })
     }
 
-    // Refresh auth cookies (scoped to .zenyaai.co) so the session carries over
-    // to dashboard.zenyaai.co after the user signs in / picks an account.
+    // Refresh auth cookies (scoped to .beynoun.com) so the session carries over
+    // to dashboard.beynoun.com after the user signs in / picks an account.
     const sessionRes = await updateSession(request)
 
     // Already under /accounts (or framework auth callbacks) — serve as-is.
@@ -505,7 +537,7 @@ export async function middleware(request: NextRequest) {
 
   // ---- APEX: returning visitors → accounts portal ------------------------
   // A visitor who has logged in before (auth cookie present) landing on the
-  // apex root is sent to accounts.zenyaai.co, which shows "continue as
+  // apex root is sent to accounts.beynoun.com, which shows "continue as
   // <account>" → dashboard. New visitors (no cookie) get the marketing home.
   //
   // Exception: `?home=1` is the explicit "I actually want to see the marketing
@@ -513,16 +545,16 @@ export async function middleware(request: NextRequest) {
   // it a logged-in user could never reach the homepage — they'd bounce straight
   // to accounts every time.
   if (
-    (host === 'zenyaai.co' || host === 'www.zenyaai.co') &&
+    (host === APEX || host === WWW_HOST) &&
     pathname === '/' &&
     hasAuthCookie(request) &&
     request.nextUrl.searchParams.get('home') !== '1'
   ) {
-    return NextResponse.redirect('https://accounts.zenyaai.co')
+    return NextResponse.redirect(`https://${ACCOUNTS_HOST}`)
   }
 
   // ---- DIRECT CUSTOMER-SITE ACCESS (preview deployments, localhost) -------
-  // Only hosts without subdomains get here: zenyaai.co hosts redirected /s/
+  // Only hosts without subdomains get here: our own hosts redirected /s/
   // at the top. Flag it so the root layout drops Zenya's own brand JSON-LD.
   if (pathname.startsWith('/s/')) {
     forwardedHeaders.set('x-zenya-site', '1')

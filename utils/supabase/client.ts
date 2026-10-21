@@ -13,8 +13,8 @@ let browserClient: SupabaseClient | undefined
 export function createClient() {
   if (typeof window !== 'undefined' && browserClient) return browserClient
 
-  // Scope auth cookies to .zenyaai.co so a session created on
-  // accounts.zenyaai.co is shared with dashboard.zenyaai.co and the apex.
+  // Scope auth cookies to .beynoun.com so a session created on
+  // accounts.beynoun.com is shared with dashboard.beynoun.com and the apex.
   const domain =
     typeof window !== 'undefined'
       ? cookieDomainForHost(window.location.hostname)

@@ -1254,7 +1254,7 @@ export function generateShopifyThemeV3OneProduct(
       theme_author: 'Zenya AI',
       theme_version: '3.0.0',
       theme_documentation_url: 'https://shopify.dev/docs/storefronts/themes/architecture',
-      theme_support_url: 'https://zenyaai.co'
+      theme_support_url: 'https://beynoun.com'
     },
     { name: 'Brand', settings: [{ type: 'text', id: 'brand_name', label: 'Brand name', default: content.brand.name }] },
     {

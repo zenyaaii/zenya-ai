@@ -16,7 +16,7 @@ import { chromeFont } from './chrome-font'
  * Layout: a rail (desktop) + drawer (mobile) + topbar + scrollable content.
  *
  * Ground: flat #fafafa - the house ground, shared with the five candidate
- * pages at demo.zenyaai.co. It replaces the old #f7f4ed marketing cream,
+ * pages at demo.beynoun.com. It replaces the old #f7f4ed marketing cream,
  * which was the single biggest visual break between this surface and the
  * rest of Zenya. See components/app/dashboard-style.ts for the whole
  * token layer and the reasoning behind each value.

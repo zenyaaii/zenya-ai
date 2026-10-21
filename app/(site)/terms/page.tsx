@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/terms' },
-  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://zenyaai.co/terms' }),
+  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://beynoun.com/terms' }),
 }
 
 export default function Page() {

@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { COMPARISONS_EN } from '@/lib/comparisons-en'
 import { Breadcrumbs, CompareHero, CtaBand } from '@/components/marketing/CompareParts'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Zenya vs Wix, Shopify, WordPress, Squarespace & Agencies',

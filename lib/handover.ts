@@ -41,5 +41,8 @@ export function handoverSiteName(t: ThemeForHandover): string {
 }
 
 export function handoverSiteUrl(t: ThemeForHandover): string {
-  return t.published_url || (t.slug ? publicSiteUrl(t.slug) : 'https://zenyaai.co/dashboard')
+  // The slug first: published_url was stored on the old zenyaai.co domain for
+  // every site published before the move to beynoun.com.
+  if (t.slug) return publicSiteUrl(t.slug)
+  return t.published_url || 'https://beynoun.com/dashboard'
 }

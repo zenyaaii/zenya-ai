@@ -18,7 +18,7 @@ import type { Metadata } from 'next'
  * happen again.
  */
 
-export const SITE_URL = 'https://zenyaai.co'
+export const SITE_URL = 'https://beynoun.com'
 export const SITE_NAME = 'زينيا'
 
 /** 2400x1260 like Shopify's, so it stays sharp on high-density screens. The

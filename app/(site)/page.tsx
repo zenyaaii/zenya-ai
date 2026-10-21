@@ -401,9 +401,9 @@ export default function Page() {
   const paintGrad = lit ? glow.grad : lastGrad.current
 
   /* THE DEMO'S SIGN-IN IS THE DEMO'S OWN.
-     login and signup used to resolve to accounts.zenyaai.co after mount,
+     login and signup used to resolve to accounts.beynoun.com after mount,
      which walked the reader straight out of the candidate set on the header's
-     one call to action — and on demo.zenyaai.co it landed them on the real
+     one call to action — and on demo.beynoun.com it landed them on the real
      product. Now that the set has an auth page they point at it, and because
      they are constants there is nothing to upgrade after mount and nothing to
      mismatch on hydration.

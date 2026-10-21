@@ -18,12 +18,12 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: '/faq',
-    languages: hreflangAlternates('https://zenyaai.co/faq', 'https://zenyaai.co/en/faq'),
+    languages: hreflangAlternates('https://beynoun.com/faq', 'https://beynoun.com/en/faq'),
   },
   ...share({
     title: 'الأسئلة الشائعة · زينيا',
     description: 'إجابات واضحة عن زينيا: كيف تعمل، القوالب، الأسعار، الاستضافة، والتصدير.',
-    url: 'https://zenyaai.co/faq',
+    url: 'https://beynoun.com/faq',
   }),
 }
 

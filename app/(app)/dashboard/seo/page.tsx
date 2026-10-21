@@ -6,13 +6,13 @@ import SeoClient, { type SeoSite } from './SeoClient'
 
 export const dynamic = 'force-dynamic'
 
-// SEO tooling applies to any site that lives on a real slug.zenyaai.co address.
+// SEO tooling applies to any site that lives on a real slug.beynoun.com address.
 // That means: every published site (whatever its template — storefront sites
 // are hosted on Zenya too), PLUS brochure-type drafts so owners can pre-set SEO
 // before publishing. Only pure Shopify installs (no Zenya URL) are left out.
 const BROCHURE = new Set(['restaurant', 'atlas', 'lookbook', 'wellness', 'studio', 'services'])
 function isSeoEligible(t: any): boolean {
-  if (t.is_published && t.slug) return true       // live on slug.zenyaai.co
+  if (t.is_published && t.slug) return true       // live on slug.beynoun.com
   return BROCHURE.has(t.template_type)             // draft that will get a URL
 }
 

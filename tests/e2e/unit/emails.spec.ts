@@ -50,7 +50,7 @@ test('domain purchased email', () => {
       domain: 'matjari.com',
       years: 1,
       expiresAt: '2027-07-08T00:00:00Z',
-      manageUrl: 'https://zenyaai.co/dashboard/sites',
+      manageUrl: 'https://beynoun.com/dashboard/sites',
     }),
     ['matjari.com']
   )
@@ -58,7 +58,7 @@ test('domain purchased email', () => {
 
 test('domain refund email', () => {
   assertClean(
-    domainRefundEmail({ domain: 'matjari.com', amountUsd: 17.99, manageUrl: 'https://zenyaai.co' }),
+    domainRefundEmail({ domain: 'matjari.com', amountUsd: 17.99, manageUrl: 'https://beynoun.com' }),
     ['matjari.com', '17.99']
   )
 })
@@ -74,7 +74,7 @@ test('payment receipt — each plan renders with the amount', () => {
         country: 'SA',
         receiptNumber: 'ABCD-1234',
         dateIso: '2026-07-08T00:00:00Z',
-        manageUrl: 'https://zenyaai.co/dashboard',
+        manageUrl: 'https://beynoun.com/dashboard',
       }),
       ['ABCD-1234']
     )
@@ -85,7 +85,7 @@ test('domain expiring email', () => {
   const r = domainExpiringEmail({
     domain: 'matjari.com',
     daysUntil: 7,
-    renewUrl: 'https://zenyaai.co/dashboard/sites',
+    renewUrl: 'https://beynoun.com/dashboard/sites',
     retailUsd: 17.99,
   })
   assertClean(r, ['matjari.com', '17.99'])
@@ -101,18 +101,18 @@ test('announcement email', () => {
 })
 
 test('welcome email — named and anonymous', () => {
-  assertClean(welcomeEmail({ firstName: 'محمد', trialLimit: 2, manageUrl: 'https://zenyaai.co/dashboard' }), ['محمد'])
+  assertClean(welcomeEmail({ firstName: 'محمد', trialLimit: 2, manageUrl: 'https://beynoun.com/dashboard' }), ['محمد'])
   assertClean(welcomeEmail({}), [])
 })
 
 test('trial reminder email — pluralized remaining counts', () => {
   for (const remaining of [1, 2, 3]) {
-    assertClean(trialReminderEmail({ firstName: 'سارة', remaining, manageUrl: 'https://zenyaai.co/dashboard' }), ['سارة'])
+    assertClean(trialReminderEmail({ firstName: 'سارة', remaining, manageUrl: 'https://beynoun.com/dashboard' }), ['سارة'])
   }
 })
 
 test('quota reached email', () => {
-  assertClean(quotaReachedEmail({ firstName: 'محمد', trialLimit: 2, upgradeUrl: 'https://zenyaai.co/pricing' }), ['محمد'])
+  assertClean(quotaReachedEmail({ firstName: 'محمد', trialLimit: 2, upgradeUrl: 'https://beynoun.com/pricing' }), ['محمد'])
   assertClean(quotaReachedEmail({ trialLimit: 1 }), [])
 })
 
@@ -123,7 +123,7 @@ test('hosting expiring email — across the reminder window', () => {
         firstName: 'سارة',
         daysUntil,
         endDate: '2026-08-01T00:00:00Z',
-        manageUrl: 'https://zenyaai.co/dashboard/billing',
+        manageUrl: 'https://beynoun.com/dashboard/billing',
       }),
       []
     )
@@ -147,8 +147,8 @@ test('subscription ended email', () => {
 })
 
 test('site published email — carries the live link and escapes the name', () => {
-  const r = sitePublishedEmail({ siteName: 'مطعم <b>الشام</b>', siteUrl: 'https://alsham.zenyaai.co' })
-  assertClean(r, ['https://alsham.zenyaai.co', 'alsham.zenyaai.co'])
+  const r = sitePublishedEmail({ siteName: 'مطعم <b>الشام</b>', siteUrl: 'https://alsham.beynoun.com' })
+  assertClean(r, ['https://alsham.beynoun.com', 'alsham.beynoun.com'])
   expect(r.html).not.toContain('<b>الشام</b>')
 })
 

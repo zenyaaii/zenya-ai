@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { COMPANY, usd } from '@/lib/company'
 
-const SITE = 'https://zenyaai.co'
+const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Cancellation & Refund Policy',
@@ -116,7 +116,7 @@ export default function EnRefundPolicy() {
       <hr />
       <p className="text-sm text-muted">
         This is an English translation provided for convenience. The Arabic version at{' '}
-        <a href="/refund">zenyaai.co/refund</a> is the authoritative text; if the two differ, the Arabic
+        <a href="/refund">beynoun.com/refund</a> is the authoritative text; if the two differ, the Arabic
         version prevails.
       </p>
     </main>
