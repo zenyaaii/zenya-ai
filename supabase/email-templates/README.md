@@ -1,6 +1,6 @@
-# Zenya — Supabase Auth Email Templates
+# Beynoun — Supabase Auth Email Templates
 
-Branded HTML email templates for every Supabase Auth flow Zenya uses (or might use). Copy each file's contents into the matching template in the Supabase Dashboard.
+Branded HTML email templates for every Supabase Auth flow Beynoun uses (or might use). Copy each file's contents into the matching template in the Supabase Dashboard.
 
 ---
 
@@ -10,8 +10,8 @@ Supabase Dashboard → **Authentication → URL Configuration**
 
 | Field | Value |
 | --- | --- |
-| **Site URL** | `https://zenyaai.co` |
-| **Redirect URLs** | `https://zenyaai.co/auth/callback`<br>`https://www.zenyaai.co/auth/callback`<br>`https://zenyaai.co/auth/reset-password`<br>`http://localhost:3000/auth/callback`<br>`http://localhost:3000/auth/reset-password` |
+| **Site URL** | `https://beynoun.com` |
+| **Redirect URLs** | `https://beynoun.com/auth/callback`<br>`https://www.beynoun.com/auth/callback`<br>`https://beynoun.com/auth/reset-password`<br>`http://localhost:3000/auth/callback`<br>`http://localhost:3000/auth/reset-password` |
 
 Any URL not listed here is rejected as `redirect_to`, which is why the buttons in real emails appear broken in dev if you skip this step.
 
@@ -25,13 +25,13 @@ For each template below, paste the **Subject** into the "Subject heading" field 
 
 | Template in dashboard | File | Subject |
 | --- | --- | --- |
-| **Confirm signup** | [`confirm-signup.html`](confirm-signup.html) | `أكِّد حسابك في زينيا` |
-| **Invite user** | [`invite-user.html`](invite-user.html) | `دعوة للانضمام إلى زينيا` |
-| **Magic Link** | [`magic-link.html`](magic-link.html) | `رابط الدخول إلى زينيا` |
-| **Change Email Address** | [`change-email.html`](change-email.html) | `أكِّد بريدك الجديد في زينيا` |
-| **Reset Password** | [`reset-password.html`](reset-password.html) | `إعادة تعيين كلمة المرور في زينيا` |
-| **Reauthentication** | [`reauthentication.html`](reauthentication.html) | `رمز التحقق من زينيا` |
-| **Password Changed**¹ | [`password-changed.html`](password-changed.html) | `تم تغيير كلمة مرور حسابك في زينيا` |
+| **Confirm signup** | [`confirm-signup.html`](confirm-signup.html) | `أكِّد حسابك في بينون` |
+| **Invite user** | [`invite-user.html`](invite-user.html) | `دعوة للانضمام إلى بينون` |
+| **Magic Link** | [`magic-link.html`](magic-link.html) | `رابط الدخول إلى بينون` |
+| **Change Email Address** | [`change-email.html`](change-email.html) | `أكِّد بريدك الجديد في بينون` |
+| **Reset Password** | [`reset-password.html`](reset-password.html) | `إعادة تعيين كلمة المرور في بينون` |
+| **Reauthentication** | [`reauthentication.html`](reauthentication.html) | `رمز التحقق من بينون` |
+| **Password Changed**¹ | [`password-changed.html`](password-changed.html) | `تم تغيير كلمة مرور حسابك في بينون` |
 
 > **¹ Note on "Password Changed".** This is the branded version of the plain
 > *"Your password has been changed"* security email (the ugly English one).
@@ -45,7 +45,7 @@ For each template below, paste the **Subject** into the "Subject heading" field 
 >    password update, and leave Supabase's default off. That path is fully
 >    branded and under our control.
 
-All templates share the **paper and light** look of the site and of the Resend emails in `lib/email.ts`: a `#fafafa` page, a white sheet with a hairline `#e6e6e6` border and no shadow, obsidian `#171717` type, an obsidian pill button, and one header picture, `public/brand/email-header.png` (served at `https://zenyaai.co/brand/email-header.png`), which is the site's light glowing behind the زينيا wordmark. It is a picture because mail clients drop blur, gradients and SVG. Fully Arabic / RTL. They use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`). Questions go to `team@zenyaai.co`, never `noreply@`.
+All templates share the **paper and light** look of the site and of the Resend emails in `lib/email.ts`: a `#fafafa` page, a white sheet with a hairline `#e6e6e6` border and no shadow, obsidian `#171717` type, an obsidian pill button, and one header picture, `public/brand/email-header.png` (served at `https://beynoun.com/brand/email-header.png`), which is the site's light glowing behind the بينون wordmark. It is a picture because mail clients drop blur, gradients and SVG. Fully Arabic / RTL. They use Supabase template variables (`{{ .SiteURL }}`, `{{ .TokenHash }}`, `{{ .Email }}`, `{{ .NewEmail }}`, `{{ .Token }}`). Questions go to `team@beynoun.com`, never `noreply@`.
 
 > **Fastest way to apply everything:** `SUPABASE_ACCESS_TOKEN=sbp_… node supabase/email-templates/_apply.mjs`
 > (add `ENABLE_HIBP=1` once the project is on the Pro plan to turn on leaked-password protection). The manual dashboard steps below are an alternative.
@@ -84,8 +84,8 @@ By default Supabase sends from `noreply@mail.app.supabase.io`, which has a low d
 
 | Field | Value |
 | --- | --- |
-| Sender email | `noreply@zenyaai.co` (or `hello@zenyaai.co`) |
-| Sender name | `Zenya` |
+| Sender email | `noreply@beynoun.com` (or `hello@beynoun.com`) |
+| Sender name | `Beynoun` |
 | Host / port / user / pass | from Resend, Postmark, SES, etc. |
 
 After switching SMTP, send yourself one of each template to verify rendering in Gmail, Outlook, and Apple Mail.
