@@ -13,7 +13,7 @@ import { REVIEW_REWARD_CODE, REVIEW_REWARD_PCT, REVIEW_REWARD_AR_SHORT } from '@
  *
  * IMPORTANT (honest by design): the reward is for SHARING FEEDBACK, never
  * conditional on a positive or public review — so it stays compliant with
- * review-platform policies and with Zenya's "no fake data" principle. Opening
+ * review-platform policies and with Beynoun's "no fake data" principle. Opening
  * the feedback page happens in a NEW TAB so the in-progress generation is never
  * interrupted. The code itself is a real Stripe promotion code restricted to
  * first-time customers, so it only ever discounts a genuine first month.

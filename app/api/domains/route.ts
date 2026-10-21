@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   }
   if (!theme.is_published || !theme.slug) {
     return NextResponse.json(
-      { error: 'theme_not_published', message: 'Publish this theme to Zenya first, then connect a domain.' },
+      { error: 'theme_not_published', message: 'Publish this theme to Beynoun first, then connect a domain.' },
       { status: 400 }
     )
   }
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   if (existing && existing.user_id !== user.id) {
-    return NextResponse.json({ error: 'domain_taken', message: 'That domain is already connected to another Zenya site.' }, { status: 409 })
+    return NextResponse.json({ error: 'domain_taken', message: 'That domain is already connected to another Beynoun site.' }, { status: 409 })
   }
 
   // 4. Add to Vercel

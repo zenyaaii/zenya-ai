@@ -1,6 +1,6 @@
-# Zenya End-to-End Tests (Playwright)
+# Beynoun End-to-End Tests (Playwright)
 
-Full-stack E2E coverage for Zenya: public site, authenticated app, AI
+Full-stack E2E coverage for Beynoun: public site, authenticated app, AI
 generators, and the money/registrar flows (Stripe + Porkbun).
 
 ## Layout

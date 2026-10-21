@@ -27,7 +27,7 @@ function DemoFullContent() {
       text: "المكانس التقليدية ثقيلة وصاخبة وتفقد قوة الشفط بعد بضعة أشهر. لا ينبغي أن تصارع أدوات التنظيف لديك."
     },
     solution: {
-      headline: "تعرّف على زينيا V2",
+      headline: "تعرّف على بينون V2",
       text: "تصميم خفيف كالريشة يلتقي بقوة صناعية. أعدنا تصوّر ما يجب أن تكون عليه المكنسة، لنجعل التنظيف سهلًا بل وممتعًا."
     },
     testimonials: [
@@ -43,7 +43,7 @@ function DemoFullContent() {
     ],
     guarantee: {
       title: "ضمان استرداد دون مخاطرة لمدة 30 يومًا",
-      text: "نحن واثقون تمامًا أنك ستحب زينيا V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
+      text: "نحن واثقون تمامًا أنك ستحب بينون V2 لدرجة أننا نتيح لك تجربتها في منزلك لمدة 30 يومًا. دون أي شروط.",
       days: 30
     },
     scrolling_text: [
@@ -79,7 +79,7 @@ function DemoFullContent() {
     ],
     video_hero: {
       heading: "شاهدها أثناء العمل",
-      subheading: "شاهد كيف تتعامل زينيا V2 مع أصعب الفوضى بسهولة.",
+      subheading: "شاهد كيف تتعامل بينون V2 مع أصعب الفوضى بسهولة.",
       cta: "مشاهدة العرض"
     },
     newsletter: {
@@ -100,7 +100,7 @@ function DemoFullContent() {
   return (
     <div className="min-h-screen bg-white">
       <ThemePreview 
-        name="Zenya V2"
+        name="Beynoun V2"
         images={mockImages}
         primaryColor={colors.primary}
         secondaryColor={colors.secondary}
@@ -111,7 +111,7 @@ function DemoFullContent() {
         isPro={true}
         content={mockContent}
         colors={colors}
-        name="Zenya V2"
+        name="Beynoun V2"
       />
     </div>
   )

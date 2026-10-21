@@ -182,9 +182,9 @@ const TOTAL_PRESETS = TEMPLATES.reduce((n, t) => n + t.presets, 0)
  * the pricing page's own "المعاينة مجانية". No claim here is new.
  */
 const FLOOR = [
-  { head: "نصوص عربية جاهزة",   body: "تكتب نبذة قصيرة عن نشاطك، ويولّد الذكاء الاصطناعي عناوين الموقع وأوصافه ودعواته بالعربية." },
+  { head: "نصوص عربية جاهزة",   body: "تكتب نبذة قصيرة عن نشاطك، وتولّد بينون عناوين الموقع وأوصافه ودعواته بالعربية." },
   { head: "عربي من اليمين",     body: "كل قالب مبني للعربية أصلًا — الاتجاه والخطوط والتباعد — ومتجاوب مع الجوال." },
-  { head: "ابدأ مجانًا",        body: "تصفّح القوالب الثمانية كاملة، وولّد أول قالبين بالذكاء الاصطناعي دون أن تدفع شيئًا." },
+  { head: "ابدأ مجانًا",        body: "تصفّح القوالب الثمانية كاملة، وولّد أول قالبين دون أن تدفع شيئًا." },
   { head: "استضافة ونطاق",      body: "استضافة داخل الاتحاد الأوروبي مع شهادة SSL، ونطاقك الخاص على الخطط المدفوعة." },
 ] as const
 
@@ -536,7 +536,7 @@ export default function TemplatesView() {
             >
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="zt-phone-mark">
+            <Link href="/" aria-label="بينون" className="zt-phone-mark">
               {/* Pure black is permitted here: the style reserves #000 for logo
                   marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zt-mark-svg-sm" />
@@ -576,7 +576,7 @@ export default function TemplatesView() {
               the words rather than dragging them along. */}
           <div className="zt-bar">
             <span className="zt-side zt-side-start">
-              <Link href="/" className="zt-mark" aria-label="زينيا" onMouseEnter={() => setTrayOpen(false)}>
+              <Link href="/" className="zt-mark" aria-label="بينون" onMouseEnter={() => setTrayOpen(false)}>
                 <ZenyaMark className="zt-mark-svg" />
               </Link>
             </span>
@@ -641,8 +641,8 @@ export default function TemplatesView() {
             كلّها جاهزة للنشر.
           </h1>
           <p className="zt-lede-sub">
-            كل قالب موقع كامل بالعربية — تختار واحدًا، وتكتب نبذة عن نشاطك، ويكتب
-            الذكاء الاصطناعي الباقي. المعاينة مجانية.
+            كل قالب موقع كامل بالعربية — تختار واحدًا، وتكتب نبذة عن نشاطك، وتكتب
+            بينون الباقي. المعاينة مجانية.
           </p>
         </div>
         {/* "107 قسمًا" on its own reads as a count PER template, which would

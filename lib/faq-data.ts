@@ -11,16 +11,16 @@ export type QA = { q: string; a: string }
 
 export const AR_FAQS: QA[] = [
   {
-    q: 'ما هي زينيا؟',
-    a: 'زينيا أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. تختار قالبًا مناسبًا لنوع نشاطك، وتكتب نبذة قصيرة، ويتكفّل الذكاء الاصطناعي بكتابة المحتوى واختيار التصميم وترتيب الأقسام — لتحصل على موقع احترافي جاهز للنشر خلال دقائق.',
+    q: 'ما هي بينون؟',
+    a: 'بينون أوّل شركة إسلامية لإنشاء المواقع، ومنصّة عربية لكل نشاط تجاري. تختار قالبًا مناسبًا لنوع نشاطك، وتكتب نبذة قصيرة، وتتكفّل بينون بكتابة المحتوى واختيار التصميم وترتيب الأقسام — لتحصل على موقع احترافي جاهز للنشر خلال دقائق.',
   },
   {
-    q: 'كيف تعمل زينيا؟',
-    a: 'ثلاث خطوات: (١) اختر واحدًا من ثمانية قوالب حسب نوع نشاطك. (٢) اكتب نبذة قصيرة أو الصق رابط منتجك. (٣) يولّد الذكاء الاصطناعي موقعًا كاملًا بالنصوص والتصميم، يمكنك تعديله ونشره فورًا.',
+    q: 'كيف تعمل بينون؟',
+    a: 'ثلاث خطوات: (١) اختر واحدًا من ثمانية قوالب حسب نوع نشاطك. (٢) اكتب نبذة قصيرة أو الصق رابط منتجك. (٣) تولّد بينون موقعًا كاملًا بالنصوص والتصميم، يمكنك تعديله ونشره فورًا.',
   },
   {
     q: 'هل أحتاج خبرة في البرمجة أو التصميم؟',
-    a: 'لا. زينيا مصمّمة لأصحاب الأنشطة التجارية، لا للمبرمجين. لا حاجة لكتابة أي كود أو التعامل مع مصمّم — كل شيء يتمّ بكتابة نبذة بسيطة، ويمكنك تعديل المحتوى بأوامر بسيطة لاحقًا.',
+    a: 'لا. بينون مصمّمة لأصحاب الأنشطة التجارية، لا للمبرمجين. لا حاجة لكتابة أي كود أو التعامل مع مصمّم — كل شيء يتمّ بكتابة نبذة بسيطة، ويمكنك تعديل المحتوى بأوامر بسيطة لاحقًا.',
   },
   {
     q: 'ما القوالب المتاحة؟',
@@ -28,11 +28,11 @@ export const AR_FAQS: QA[] = [
   },
   {
     q: 'كم من الوقت يستغرق إنشاء الموقع؟',
-    a: 'دقائق. بمجرّد كتابة نبذتك، يولّد الذكاء الاصطناعي الموقع كاملًا. ثم تراجعه وتعدّله وتنشره في نفس الجلسة.',
+    a: 'دقائق. بمجرّد كتابة نبذتك، تولّد بينون الموقع كاملًا. ثم تراجعه وتعدّله وتنشره في نفس الجلسة.',
   },
   {
     q: 'بأي لغة يكون محتوى الموقع؟',
-    a: 'زينيا عربية أولًا — المحتوى المُولّد بلغة عربية سليمة، والتخطيط من اليمين إلى اليسار، والخطوط مصمّمة للعربية. ليست ترجمة لاحقة، بل تصميم عربيّ من الأساس.',
+    a: 'بينون عربية أولًا — المحتوى المُولّد بلغة عربية سليمة، والتخطيط من اليمين إلى اليسار، والخطوط مصمّمة للعربية. ليست ترجمة لاحقة، بل تصميم عربيّ من الأساس.',
   },
   {
     q: 'أين تُستضاف المواقع؟ وماذا عن الخصوصية؟',
@@ -40,15 +40,15 @@ export const AR_FAQS: QA[] = [
   },
   {
     q: 'هل يمكنني ربط نطاقي المخصّص؟',
-    a: 'نعم، على خطة Pro. تربط نطاقك الخاص (مثل mystore.com)، وتحصل على شهادة SSL تلقائية وإزالة شارة زينيا. كما نقدّم نطاقًا مخصّصًا مجانيًا لسنة كاملة (نطاق قياسي) مع خطة Pro، وخصم 30% على النطاقات الأخرى.',
+    a: 'نعم، على خطة Pro. تربط نطاقك الخاص (مثل mystore.com)، وتحصل على شهادة SSL تلقائية وإزالة شارة بينون. كما نقدّم نطاقًا مخصّصًا مجانيًا لسنة كاملة (نطاق قياسي) مع خطة Pro، وخصم 30% على النطاقات الأخرى.',
   },
   {
     q: 'هل يمكنني التصدير إلى شوبيفاي؟',
-    a: 'نعم. قالبا التجارة الإلكترونية (المتجر والتشكيلة) يُصدَّران كثيمات شوبيفاي جاهزة تعمل مباشرة على متجرك، حيث يتولّى شوبيفاي السلة والدفع والمنتجات. أما القوالب الأخرى فهي مواقع عرض تستضيفها زينيا.',
+    a: 'نعم. قالبا التجارة الإلكترونية (المتجر والتشكيلة) يُصدَّران كثيمات شوبيفاي جاهزة تعمل مباشرة على متجرك، حيث يتولّى شوبيفاي السلة والدفع والمنتجات. أما القوالب الأخرى فهي مواقع عرض تستضيفها بينون.',
   },
   {
-    q: 'كم تكلفة زينيا؟',
-    a: 'البداية مجانية: الباقة المجانية تتيح توليد قالبين بالذكاء الاصطناعي ونشرهما على اسمك.beynoun.com دون دفع. ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاق مخصّص وحجوزات وتحليلات، وخطة Pro بـ 24.99$ شهريًا تضيف نطاقًا مجانيًا لسنة وإزالة شارة زينيا. راجع صفحة الأسعار للتفاصيل.',
+    q: 'كم تكلفة بينون؟',
+    a: 'البداية مجانية: الباقة المجانية تتيح توليد قالبين ونشرهما على اسمك.beynoun.com دون دفع. ثم خطة Starter بـ 14.99$ شهريًا لتوليد غير محدود ونطاق مخصّص وحجوزات وتحليلات، وخطة Pro بـ 24.99$ شهريًا تضيف نطاقًا مجانيًا لسنة وإزالة شارة بينون. راجع صفحة الأسعار للتفاصيل.',
   },
   {
     q: 'هل يمكنني الإلغاء في أي وقت؟',
@@ -58,16 +58,16 @@ export const AR_FAQS: QA[] = [
 
 export const EN_FAQS: QA[] = [
   {
-    q: 'What is Zenya?',
-    a: 'Zenya is the first Muslim company to build AI websites, made for the Arab market. You pick a template that matches your business type, write a short brief, and the AI writes the copy, chooses the design, and lays out the sections — giving you a professional, publish-ready site in minutes.',
+    q: 'What is Beynoun?',
+    a: 'Beynoun is the first Muslim company to build AI websites, made for the Arab market. You pick a template that matches your business type, write a short brief, and the AI writes the copy, chooses the design, and lays out the sections — giving you a professional, publish-ready site in minutes.',
   },
   {
-    q: 'How does Zenya work?',
+    q: 'How does Beynoun work?',
     a: 'Three steps: (1) choose one of eight templates by business type; (2) write a short brief or paste your product link; (3) the AI generates a full site — copy and design — that you can edit and publish right away.',
   },
   {
     q: 'Do I need coding or design experience?',
-    a: 'No. Zenya is built for business owners, not developers. There is no code to write and no designer to hire — everything happens from a simple brief, and you can edit the content with plain instructions afterward.',
+    a: 'No. Beynoun is built for business owners, not developers. There is no code to write and no designer to hire — everything happens from a simple brief, and you can edit the content with plain instructions afterward.',
   },
   {
     q: 'Which templates are available?',
@@ -79,7 +79,7 @@ export const EN_FAQS: QA[] = [
   },
   {
     q: 'What language is the site content in?',
-    a: 'Zenya is Arabic-first — generated content is in proper Arabic, the layout is right-to-left, and the fonts are designed for Arabic. It is Arabic by design, not a bolted-on translation.',
+    a: 'Beynoun is Arabic-first — generated content is in proper Arabic, the layout is right-to-left, and the fonts are designed for Arabic. It is Arabic by design, not a bolted-on translation.',
   },
   {
     q: 'Where are sites hosted, and what about privacy?',
@@ -87,15 +87,15 @@ export const EN_FAQS: QA[] = [
   },
   {
     q: 'Can I connect my own custom domain?',
-    a: 'Yes, on the Pro plan. Connect your own domain (like mystore.com) with automatic SSL and no Zenya badge. Pro also includes a free custom domain for a full year (standard domain), and 30% off any other domain.',
+    a: 'Yes, on the Pro plan. Connect your own domain (like mystore.com) with automatic SSL and no Beynoun badge. Pro also includes a free custom domain for a full year (standard domain), and 30% off any other domain.',
   },
   {
     q: 'Can I export to Shopify?',
-    a: 'Yes. The two e-commerce templates (Storefront and Collective) export as ready Shopify themes that run directly on your store, where Shopify handles cart, checkout, and products. The other templates are brochure sites that Zenya hosts.',
+    a: 'Yes. The two e-commerce templates (Storefront and Collective) export as ready Shopify themes that run directly on your store, where Shopify handles cart, checkout, and products. The other templates are brochure sites that Beynoun hosts.',
   },
   {
-    q: 'How much does Zenya cost?',
-    a: 'Starting is free. The Free plan gives you two AI-generated templates and publishing on yourname.beynoun.com, with no card needed. Then Starter is $14.99/month for unlimited generation, a custom domain, bookings and analytics, and Pro is $24.99/month adding a free domain for a year and no Zenya badge. See the pricing page for details.',
+    q: 'How much does Beynoun cost?',
+    a: 'Starting is free. The Free plan gives you two AI-generated templates and publishing on yourname.beynoun.com, with no card needed. Then Starter is $14.99/month for unlimited generation, a custom domain, bookings and analytics, and Pro is $24.99/month adding a free domain for a year and no Beynoun badge. See the pricing page for details.',
   },
   {
     q: 'Can I cancel anytime?',

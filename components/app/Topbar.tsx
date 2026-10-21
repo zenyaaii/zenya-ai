@@ -65,7 +65,7 @@ export default function Topbar({
     fetch('/api/reviews/new').then((r) => (r.ok ? r.json() : { sites: [] })).then((d) => setNews(d.sites || [])).catch(() => {})
   }, [user, pathname])
 
-  // And a site Zenya handed over to this account, until the owner answers it.
+  // And a site Beynoun handed over to this account, until the owner answers it.
   const [handover, setHandover] = useState<{ token: string; site: string; host: string; plan: string; sent_at?: string; done?: boolean } | null>(null)
   useEffect(() => {
     if (!user) return

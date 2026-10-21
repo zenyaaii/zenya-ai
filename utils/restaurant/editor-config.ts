@@ -171,7 +171,7 @@ export const RESTAURANT_EDITOR_CONFIG: EditorConfig = {
         { type: 'textarea', path: 'reservations.subheading', label: 'العنوان الفرعي', rows: 2 },
         { type: 'text',     path: 'reservations.cta_label',  label: 'نص الزر' },
         { type: 'textarea', path: 'reservations.note',       label: 'ملاحظة', rows: 2 },
-        { type: 'note', content: 'تتم الحجوزات عبر نظام الحجز الخاص بـ Zenya. نوع الحجز إما "form" (يرسل الضيوف طلب الحجز مباشرة إلى صندوق الوارد في لوحة التحكم) أو "phone" (الحجز بالاتصال الهاتفي كبديل للمواقع غير المشتركة في Pro). لا ندعم منصات الحجز الخارجية.' },
+        { type: 'note', content: 'تتم الحجوزات عبر نظام الحجز الخاص بـ Beynoun. نوع الحجز إما "form" (يرسل الضيوف طلب الحجز مباشرة إلى صندوق الوارد في لوحة التحكم) أو "phone" (الحجز بالاتصال الهاتفي كبديل للمواقع غير المشتركة في Pro). لا ندعم منصات الحجز الخارجية.' },
         { type: 'text', path: 'reservations.provider.type', label: 'نوع الحجز (form أو phone)' },
         { type: 'text', path: 'reservations.provider.number', label: 'رقم الهاتف (للحجز بالاتصال)' },
       ],

@@ -19,23 +19,23 @@ import { REVEAL_BOOT } from '@/components/zenya/chrome/reveal-boot'
 const SITE_URL = 'https://beynoun.com'
 
 const HOME_DESCRIPTION =
-  'اكتب نبذة قصيرة عن نشاطك، ويبني لك الذكاء الاصطناعي موقعًا عربيًا كاملًا خلال دقائق: مطاعم، متاجر، خدمات، عافية والمزيد. المعاينة مجانية.'
+  'اكتب نبذة قصيرة عن نشاطك، وتبني لك بينون موقعًا عربيًا كاملًا خلال دقائق: مطاعم، متاجر، خدمات، عافية والمزيد. المعاينة مجانية.'
 
 const baseMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
-    template: '%s · زينيا',
+    default: 'بينون: منشئ المواقع العربي لكل نشاط تجاري',
+    template: '%s · بينون',
   },
   // Shopify's pattern: say what the reader gets and how to start, in about
   // 150 characters so Google shows it whole instead of cutting it off. The
   // description has to be true: since 2026-10-05 the first two generations
   // are free too (the Free plan replaced the $0.50 Entry unlock).
   description: HOME_DESCRIPTION,
-  applicationName: 'زينيا',
-  generator: 'زينيا',
+  applicationName: 'بينون',
+  generator: 'بينون',
   keywords: [
-    'منشئ مواقع بالذكاء الاصطناعي',
+    'منشئ مواقع',
     'إنشاء موقع إلكتروني',
     'منشئ مواقع عربي',
     'منشئ مواقع للشركات الصغيرة',
@@ -45,7 +45,7 @@ const baseMetadata: Metadata = {
     'منشئ لوك بوك',
     'متجر شوبيفاي بمنتج واحد',
     'إنشاء موقع بدون برمجة',
-    'كاتب محتوى بالذكاء الاصطناعي',
+    'كاتب محتوى',
     'أطلق موقعك خلال دقائق',
     'موقع احترافي بالعربية',
     'إنشاء موقع مجاني',
@@ -54,12 +54,12 @@ const baseMetadata: Metadata = {
     'بناء موقع للتجارة الإلكترونية',
     'أنشئ موقعك في دقائق',
   ],
-  authors: [{ name: 'زينيا', url: SITE_URL }],
-  creator: 'زينيا',
-  publisher: 'زينيا',
+  authors: [{ name: 'بينون', url: SITE_URL }],
+  creator: 'بينون',
+  publisher: 'بينون',
   category: 'technology',
   ...share({
-    title: 'زينيا: منشئ المواقع العربي بالذكاء الاصطناعي لكل نشاط تجاري',
+    title: 'بينون: منشئ المواقع العربي لكل نشاط تجاري',
     description: HOME_DESCRIPTION,
   }),
   alternates: {
@@ -81,7 +81,7 @@ const baseMetadata: Metadata = {
 
 /**
  * The title template carries the brand wordmark, which differs by script: an
- * English page ending in "· زينيا" looks like a mistake in the browser tab.
+ * English page ending in "· بينون" looks like a mistake in the browser tab.
  * Everything else about the root metadata describes the Arabic marketing site
  * and is overridden per-page by the English section.
  */
@@ -90,12 +90,12 @@ export function generateMetadata(): Metadata {
   if (locale !== 'en') return baseMetadata
   return {
     ...baseMetadata,
-    title: { default: 'Zenya: The Arabic-First AI Website Builder', template: '%s · Zenya' },
+    title: { default: 'Beynoun: The Arabic-First Website Builder', template: '%s · Beynoun' },
   }
 }
 
-// JSON-LD: تُعرّف جوجل صراحةً بماهية زينيا — أوّل شركة إسلامية لإنشاء المواقع
-// بالذكاء الاصطناعي، ومنصّة عربية موجَّهة للسوق العربي.
+// JSON-LD: تُعرّف جوجل صراحةً بماهية بينون — أوّل شركة إسلامية لإنشاء المواقع
+//، ومنصّة عربية موجَّهة للسوق العربي.
 //
 // البنية هنا رسم بياني (@id) وليست ثلاث بطاقات منفصلة: المؤسسة عقدة واحدة
 // يشير إليها كلٌّ من التطبيق والموقع كـ publisher. هكذا تفهم جوجل أنها كيان
@@ -117,11 +117,11 @@ const structuredData = [
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': ORG_ID,
-    name: 'زينيا',
-    // النطق الإنجليزي للاسم. هذا ما يجعل جوجل تعرف أن "Zenya" و"Zenya AI"
+    name: 'بينون',
+    // النطق الإنجليزي للاسم. هذا ما يجعل جوجل تعرف أن "Beynoun" و"Beynoun"
     // — الاسم الذي ما زال مفهرسًا من الإصدار السابق — هما نفس الكيان الذي
-    // يُسمّى اليوم "زينيا"، فتُدمج الإشارتان بدل أن تتنافسا.
-    alternateName: ['Zenya', 'Zenya AI', 'زينيا للذكاء الاصطناعي', 'Zenya AI Website Builder'],
+    // يُسمّى اليوم "بينون"، فتُدمج الإشارتان بدل أن تتنافسا.
+    alternateName: ['Beynoun', 'Zenya', 'زينيا', 'Beynoun Website Builder'],
     url: SITE_URL,
     // Shopify names the company behind the brand; so does this. An eenmanszaak's
     // legal name is its trade name, so this is what the KvK register shows.
@@ -134,44 +134,44 @@ const structuredData = [
       url: LOGO_URL,
       width: 512,
       height: 512,
-      caption: 'زينيا',
+      caption: 'بينون',
     },
     image: `${SITE_URL}${SHARE_IMAGE.url}`,
     description:
-      'أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي، ومنصّة عربية لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
+      'أوّل شركة إسلامية لإنشاء المواقع، ومنصّة عربية لكل نشاط تجاري. 8 قوالب احترافية من المطاعم إلى متاجر شوبيفاي، جاهزة خلال دقائق.',
     // schema.org's purpose-built field for telling apart entities that share a
-    // name. "Zenya" is crowded — a Dutch healthcare-quality company, a Taiwanese
+    // name. "Beynoun" is crowded — a Dutch healthcare-quality company, a Taiwanese
     // network-equipment distributor, an investment firm — and the name is one
-    // letter from Xenia and Zenia. So this states what THIS Zenya is, in the
+    // letter from Xenia and Zenia. So this states what THIS Beynoun is, in the
     // terms a reader would use to tell it from the others: the language, the
     // market, the domain, and the fact that it builds sites for every kind of
     // business rather than one kind.
     disambiguatingDescription:
-      'زينيا (Zenya AI) منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي على النطاق beynoun.com. تُنشئ وتدير وتنشر مواقع كاملة لكل أنواع الأنشطة التجارية — مطاعم، علامات أزياء، تطبيقات، مراكز عافية، شركات خدمات، ومتاجر إلكترونية — وليست متجرًا إلكترونيًا ولا أداة لإنشاء متاجر المنتج الواحد فقط.',
+      'بينون (Beynoun) منصّة عربية لإنشاء المواقع على النطاق beynoun.com. تُنشئ وتدير وتنشر مواقع كاملة لكل أنواع الأنشطة التجارية — مطاعم، علامات أزياء، تطبيقات، مراكز عافية، شركات خدمات، ومتاجر إلكترونية — وليست متجرًا إلكترونيًا ولا أداة لإنشاء متاجر المنتج الواحد فقط.',
     slogan: 'اكتب نبذة، واحصل على موقع.',
     foundingDate: '2025',
     knowsLanguage: ['ar', 'en'],
     knowsAbout: [
-      'إنشاء المواقع بالذكاء الاصطناعي',
+      'إنشاء المواقع',
       'قوالب المواقع العربية',
       'التجارة الإلكترونية',
       'تحسين محركات البحث',
       'استضافة المواقع',
     ],
-    // Every business type Zenya builds for, as a machine-readable catalogue.
+    // Every business type Beynoun builds for, as a machine-readable catalogue.
     // The single strongest correction available for the category Google
     // currently has on file: an index entry still calls this a "One-Product
     // Store Builder", and a list of eight distinct verticals is a much harder
     // signal to misread than prose saying "for any business".
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: 'أنواع المواقع التي تبنيها زينيا',
+      name: 'أنواع المواقع التي تبنيها بينون',
       itemListElement: TEMPLATE_PAGES.map((t) => ({
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Service',
           name: t.name,
-          serviceType: 'إنشاء موقع إلكتروني بالذكاء الاصطناعي',
+          serviceType: 'إنشاء موقع إلكتروني',
           url: `${SITE_URL}/websites/${t.slug}`,
           provider: { '@id': ORG_ID },
           areaServed: 'الوطن العربي',
@@ -192,19 +192,19 @@ const structuredData = [
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     '@id': `${SITE_URL}/#software`,
-    name: 'زينيا',
-    alternateName: ['Zenya', 'Zenya AI'],
+    name: 'بينون',
+    alternateName: ['Beynoun', 'بينون'],
     operatingSystem: 'Web Browser',
     applicationCategory: 'BusinessApplication',
     applicationSubCategory: 'Website Builder',
     inLanguage: 'ar',
     publisher: { '@id': ORG_ID },
     description:
-      'منشئ مواقع بالذكاء الاصطناعي. اختر قالبًا، اكتب نبذة، واحصل على موقع متكامل بالنصوص والتصميم والصور — جاهز للنشر.',
+      'منشئ مواقع. اختر قالبًا، اكتب نبذة، واحصل على موقع متكامل بالنصوص والتصميم والصور — جاهز للنشر.',
     url: SITE_URL,
     screenshot: `${SITE_URL}${SHARE_IMAGE.url}`,
     featureList: [
-      'توليد نصوص الموقع بالعربية بالذكاء الاصطناعي',
+      'توليد نصوص الموقع بالعربية',
       '8 قوالب احترافية جاهزة',
       'محرّر مباشر بدون برمجة',
       'استضافة داخل الاتحاد الأوروبي مع شهادة SSL',
@@ -226,7 +226,7 @@ const structuredData = [
           billingDuration: 'P1M',
           unitText: 'MONTH',
         },
-        description: 'اشتراك شهري. توليد غير محدود بالذكاء الاصطناعي + تصدير شوبيفاي + ملف المشروع المضغوط.',
+        description: 'اشتراك شهري. توليد غير محدود + تصدير شوبيفاي + ملف المشروع المضغوط.',
       },
       {
         '@type': 'Offer',
@@ -241,25 +241,25 @@ const structuredData = [
           unitText: 'MONTH',
         },
         description:
-          'اشتراك شهري. تستضيف زينيا مواقعك، مع نطاق مخصّص وشهادة SSL وتحليلات. يشمل كل ما في باقة Starter.',
+          'اشتراك شهري. تستضيف بينون مواقعك، مع نطاق مخصّص وشهادة SSL وتحليلات. يشمل كل ما في باقة Starter.',
       },
       {
         '@type': 'Offer',
         name: 'الباقة المجانية',
         price: '0.00',
         priceCurrency: 'USD',
-        description: 'مجانًا: توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
+        description: 'مجانًا: توليد قالبين والنشر على نطاق فرعي.',
       },
     ],
-    // No aggregateRating: Zenya is early and we never publish invented ratings.
+    // No aggregateRating: Beynoun is early and we never publish invented ratings.
     // When real, approved reviews exist this can be populated from them.
   },
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': SITE_ID,
-    name: 'زينيا',
-    alternateName: ['Zenya', 'Zenya AI'],
+    name: 'بينون',
+    alternateName: ['Beynoun', 'بينون'],
     url: SITE_URL,
     inLanguage: 'ar',
     publisher: { '@id': ORG_ID },
@@ -279,8 +279,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const hdrs = headers()
   const pathname = hdrs.get('x-pathname') || ''
   const isShopifyRoute = pathname.startsWith('/shopify')
-  // Customer sites (slug.beynoun.com / custom domains) must NOT carry Zenya's
-  // own brand JSON-LD — that would tell Google their page is about Zenya.
+  // Customer sites (slug.beynoun.com / custom domains) must NOT carry Beynoun's
+  // own brand JSON-LD — that would tell Google their page is about Beynoun.
   // Middleware flags these requests; they inject their own correct schema.
   const isCustomerSite = hdrs.get('x-zenya-site') === '1' || pathname.startsWith('/s/')
   const shopifyApiKey = process.env.SHOPIFY_API_KEY || ''
@@ -339,7 +339,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           left to the reader. */}
       <body className="min-h-dvh bg-background text-foreground">
         <SmoothScroll />
-        {/* Presence heartbeat feeds the live-users globe — anyone on a Zenya
+        {/* Presence heartbeat feeds the live-users globe — anyone on a Beynoun
             surface counts. Customer sites report via /api/insight instead. */}
         {!isCustomerSite && <PresenceBeacon surface={pathname.startsWith('/dashboard') ? 'app' : 'marketing'} />}
         <LocaleProvider locale={locale}>
@@ -349,7 +349,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </LocaleProvider>
         {/* Customer sites draw their own notice in their own theme
             (components/site/SiteCookieBanner, from lib/public-site). This one
-            names Zenya and links Zenya's policies, so it stays on Zenya. */}
+            names Beynoun and links Beynoun's policies, so it stays on Beynoun. */}
         {!isCustomerSite && <CookieConsent />}
         <Analytics />
       </body>

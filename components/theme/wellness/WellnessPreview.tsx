@@ -119,7 +119,7 @@ export default function WellnessPreview({
   const setView = (v: WellnessView) => {
     if (onViewChange) onViewChange(v); else setInternalView(v)
   }
-  // Every "book" button leads to Zenya's own booking form, which opens the
+  // Every "book" button leads to Beynoun's own booking form, which opens the
   // contact page. Never to an outside booking site.
   const goBook = () => {
     setView('contact')

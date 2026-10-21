@@ -11,7 +11,7 @@
  * Locale resolution order (see resolveLocale in ./server):
  *   1. an explicit /en/* path        → 'en'  (the marketing English section)
  *   2. the zenya_locale cookie       → whatever the user picked
- *   3. default                       → 'ar'  (Zenya is Arabic-first)
+ *   3. default                       → 'ar'  (Beynoun is Arabic-first)
  *
  * There is deliberately no Accept-Language sniffing. An Arabic-first product
  * should not silently flip to English because someone's browser is American.

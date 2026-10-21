@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 /**
- * What every page of Zenya's own site tells search engines and link previews about itself.
+ * What every page of Beynoun's own site tells search engines and link previews about itself.
  *
  * Modelled on how shopify.com does it: every page carries its own title and
  * description into the share card (og:* and twitter:*), every page carries a
@@ -19,7 +19,7 @@ import type { Metadata } from 'next'
  */
 
 export const SITE_URL = 'https://beynoun.com'
-export const SITE_NAME = 'زينيا'
+export const SITE_NAME = 'بينون'
 
 /** 2400x1260 like Shopify's, so it stays sharp on high-density screens. The
  *  declared size is the 1.91:1 frame every network crops to. */
@@ -27,7 +27,7 @@ export const SHARE_IMAGE = {
   url: '/brand/share.jpg',
   width: 2400,
   height: 1260,
-  alt: 'زينيا: منشئ المواقع العربي بالذكاء الاصطناعي',
+  alt: 'بينون: منشئ المواقع العربي',
   type: 'image/jpeg',
 }
 

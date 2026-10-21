@@ -92,7 +92,7 @@ export default function FaqView() {
             أسئلة <span className="zx-h1-mark">وأجوبة.</span>
           </h1>
           <p className="zx-lede">
-            كل ما تحتاج معرفته عن زينيا. لم تجد سؤالك؟{" "}
+            كل ما تحتاج معرفته عن بينون. لم تجد سؤالك؟{" "}
             <Link href="/contact">تواصل معنا</Link>.
           </p>
           <div className="zx-acts">
@@ -131,7 +131,7 @@ export default function FaqView() {
             for: it bans two different labels for one intent, not the same
             label appearing where a long page needs it. */}
         <section className="zx-close" data-reveal>
-          <h2 className="zx-h2">جاهز لتجربة زينيا؟</h2>
+          <h2 className="zx-h2">جاهز لتجربة بينون؟</h2>
           <p className="zx-p">ابدأ مجانًا — بلا بطاقة ائتمان.</p>
           <div className="zx-acts">
             <SlideButton href="/login?mode=signup">ابدأ الإنشاء مجانًا</SlideButton>

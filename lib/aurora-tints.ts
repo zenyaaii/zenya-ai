@@ -104,7 +104,7 @@ export const auroraTints: Record<string, AuroraTint> = {
  * existing Linear × Lovable body::before gradient.
  */
 export const defaultTint: AuroraTint = {
-  label: 'زينيا',
+  label: 'بينون',
   accent: '#5e6ad2',
   // Purple/indigo dialled way down — only a whisper of colour remains on the
   // cream page (per request: keep just a very light touch, no purple wash).

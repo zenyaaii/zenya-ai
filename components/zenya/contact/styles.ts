@@ -180,7 +180,7 @@ export const CSS = `
 /* ---- the channels ------------------------------------------------------
    FIRST ON A PHONE, AND DELIBERATELY SO. Most people who open a contact page
    on a phone want the address, not the form: they are already holding a mail
-   client. So the three real ways to reach Zenya stand above the form rather
+   client. So the three real ways to reach Beynoun stand above the form rather
    than in a column beside it, where a phone would have pushed them below a
    nine-field card.
 

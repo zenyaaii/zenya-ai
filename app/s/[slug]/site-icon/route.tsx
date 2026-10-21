@@ -7,7 +7,7 @@ import { resolveSeo } from '@/lib/seo'
  * which middleware maps here. It is the logo the owner uploaded on the SEO
  * page, fitted into a square at the asked size. A site with no logo has no
  * icon: this answers 404 and the browser draws its own blank one. Never a
- * letter, never Zenya's mark.
+ * letter, never Beynoun's mark.
  *
  * `?s=` is the pixel size: 32 for the tab, 48 for /favicon.ico, 180 for the
  * iPhone home screen, 192 for Android and Google.

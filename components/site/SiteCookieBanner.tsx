@@ -4,9 +4,9 @@ import { useEffect, useState, type CSSProperties } from 'react'
 import { readableOn, type SitePalette } from '@/lib/site-palette'
 
 /**
- * The cookie notice on a site Zenya generates for a customer.
+ * The cookie notice on a site Beynoun generates for a customer.
  *
- * Zenya's own banner (components/CookieConsent) is about Zenya: its name, its
+ * Beynoun's own banner (components/CookieConsent) is about Beynoun: its name, its
  * policies, its colours. On a customer's site it read as a stranger's popup
  * over their design, so the root layout leaves it off customer sites and this
  * one is drawn instead, in the palette and fonts the site itself resolves
@@ -77,7 +77,7 @@ export default function SiteCookieBanner({ palette }: { palette: SitePalette }) 
       aria-describedby="site-cookie-desc"
       style={{
         position: 'fixed',
-        zIndex: 2147483001, // one above the Made with Zenya badge
+        zIndex: 2147483001, // one above the Made with Beynoun badge
         bottom: 16,
         // Physical left: the badge holds the bottom-right corner. On a phone
         // the box is full width and sits over the badge until it is closed.

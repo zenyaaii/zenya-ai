@@ -21,10 +21,10 @@ export async function GET(req: NextRequest) {
     // Session is automatically stored by shopify.auth.callback via the configured sessionStorage
     // (See lib/shopify.ts)
 
-    // Bind the shop to the Zenya user who ran the OAuth flow (their
+    // Bind the shop to the Beynoun user who ran the OAuth flow (their
     // Supabase cookies ride along on this browser redirect). This is
     // what authorizes /api/build/publish for the shop. Embedded-app
-    // installs without a Zenya session just skip the binding.
+    // installs without a Beynoun session just skip the binding.
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();

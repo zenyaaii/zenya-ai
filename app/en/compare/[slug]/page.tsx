@@ -26,7 +26,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return {
     title: c.title,
     description: c.metaDescription,
-    keywords: [`Zenya vs ${c.themLatin}`, `${c.themLatin} alternative`, 'Arabic website builder', 'AI website builder'],
+    keywords: [`Beynoun vs ${c.themLatin}`, `${c.themLatin} alternative`, 'Arabic website builder', 'AI website builder'],
     alternates: {
       canonical: enUrl,
       languages: { en: enUrl, ar: arUrl, 'x-default': arUrl },
@@ -58,7 +58,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/en` },
         { '@type': 'ListItem', position: 2, name: 'Compare', item: `${SITE}/en/compare` },
-        { '@type': 'ListItem', position: 3, name: `Zenya vs ${c.themLatin}`, item: enUrl },
+        { '@type': 'ListItem', position: 3, name: `Beynoun vs ${c.themLatin}`, item: enUrl },
       ],
     },
   ]
@@ -73,7 +73,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
           trail={[
             { label: 'Home', href: '/en' },
             { label: 'Compare', href: '/en/compare' },
-            { label: `Zenya vs ${c.themLatin}` },
+            { label: `Beynoun vs ${c.themLatin}` },
           ]}
         />
 
@@ -81,7 +81,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
           kicker="Honest comparison"
           title={
             <>
-              Zenya vs <span className="gradient-text">{c.themLatin}</span>
+              Beynoun vs <span className="gradient-text">{c.themLatin}</span>
             </>
           }
           intro={c.intro}
@@ -90,7 +90,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
         <CompareTable themName={c.themLatin} rows={c.rows} locale="en" />
         <ChooseBlocks themName={c.themLatin} chooseZenya={c.chooseZenya} chooseThem={c.chooseThem} locale="en" />
 
-        <FaqList title={`FAQ — Zenya vs ${c.themLatin}`} faqs={c.faqs} />
+        <FaqList title={`FAQ — Beynoun vs ${c.themLatin}`} faqs={c.faqs} />
 
         <section className="mt-16">
           <h2 className="mb-5 text-[20px] font-bold text-foreground">More comparisons</h2>
@@ -101,7 +101,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
                 href={`/en/compare/${o.slug}`}
                 className="group inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-4 py-2 text-[13px] font-medium text-muted transition-all hover:border-[rgba(94,106,210,0.30)] hover:text-foreground"
               >
-                Zenya vs {o.themLatin}
+                Beynoun vs {o.themLatin}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" strokeWidth={2.25} />
               </Link>
             ))}
@@ -109,7 +109,7 @@ export default function ComparePageEn({ params }: { params: { slug: string } }) 
         </section>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Pick a template, write a brief, and get a professional site in minutes. No card required."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

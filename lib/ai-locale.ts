@@ -1,7 +1,7 @@
 /**
  * Arabic-output contract for every AI generation route.
  *
- * Zenya is an Arabic-first product: every website it generates must ship in
+ * Beynoun is an Arabic-first product: every website it generates must ship in
  * Modern Standard Arabic (فصحى) and read as if written by a native Arab
  * copywriter — never translated-sounding. This single directive is appended to
  * the *system* prompt of each generate-* route so the contract lives in one

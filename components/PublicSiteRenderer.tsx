@@ -141,7 +141,7 @@ function UnsupportedTemplate({ businessType }: { businessType: string }) {
     >
       <div style={{ maxWidth: 480, textAlign: 'center' }}>
         <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>
-          This template isn’t hostable on Zenya
+          This template isn’t hostable on Beynoun
         </h1>
         <p style={{ color: '#6b6b6b', lineHeight: 1.55 }}>
           The <strong>{businessType}</strong> template runs on Shopify. Use

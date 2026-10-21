@@ -5,7 +5,7 @@ import { defaultTint, type AuroraTint } from '@/lib/aurora-tints'
 import { cn } from '@/lib/utils'
 
 type Props = {
-  /** Tint to use. Defaults to the global Zenya aurora. */
+  /** Tint to use. Defaults to the global Beynoun aurora. */
   tint?: AuroraTint
   /** Multiplier on orb opacity (0–1). Use 0.6 for quieter sections. */
   intensity?: number

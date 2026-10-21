@@ -1,5 +1,5 @@
 /**
- * Zenya icon registry
+ * Beynoun icon registry
  * ---------------------------------------------------------------------------
  * A large, business-aware icon library built on lucide-react (~1600 icons).
  *

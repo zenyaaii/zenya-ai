@@ -24,7 +24,7 @@ export default function Hero() {
           only its own flourishes on top: the cursor glow + the ghost wordmark. */}
       {/* Cursor-following glow — scoped to hero only, skipped on touch + reduced motion */}
       <CursorGlow size={520} color="rgba(94,106,210,0.22)" />
-      {/* Giant Arabic "زينيا" — a ghost in the background that lights up
+      {/* Giant Arabic "بينون" — a ghost in the background that lights up
           under the cursor. Sits above the grid (-z-5) but below the copy. */}
       <HeroWordmark />
 
@@ -48,7 +48,7 @@ export default function Hero() {
               }}
             >
               <Sparkles className="h-3.5 w-3.5" strokeWidth={2.25} />
-              أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي
+              أوّل شركة إسلامية لإنشاء المواقع
             </span>
           </motion.div>
 
@@ -65,7 +65,7 @@ export default function Hero() {
           >
             ابنِ وأدِر وأنشِر موقعك
             <br />
-            <span className="gradient-text">بالذكاء الاصطناعي</span>
+            <span className="gradient-text">في دقائق</span>
           </motion.h1>
 
           {/* Sub — one tight, benefit-led line */}
@@ -73,7 +73,7 @@ export default function Hero() {
             {...fade(0.12)}
             className="lead-ar mx-auto mt-6 max-w-xl text-[17px] text-muted"
           >
-            اختر قالبًا، اكتب نبذة قصيرة، ويبني لك الذكاء الاصطناعي موقعًا عربيًا
+            اختر قالبًا، اكتب نبذة قصيرة، وتبني لك بينون موقعًا عربيًا
             احترافيًا في دقائق — بجزءٍ بسيط من تكلفة الوكالة.
           </motion.p>
 

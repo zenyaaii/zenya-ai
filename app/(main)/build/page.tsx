@@ -218,7 +218,7 @@ export default function BuildPage() {
       })
       const j = await r.json()
       if (!r.ok || !Array.isArray(j?.names)) {
-        setAiNameError(j?.message || 'التسمية بالذكاء الاصطناعي غير متاحة حاليًا.')
+        setAiNameError(j?.message || 'اقتراح الأسماء غير متاح حاليًا.')
         return
       }
       setAiNames(j.names)
@@ -585,7 +585,7 @@ function UrlStep({
           <div className="min-w-0 flex-1">
             <h2 className="text-[16px] font-bold text-foreground">هل لديك متجر Shopify؟</h2>
             <p className="mt-1 text-[14.5px] leading-relaxed text-muted">
-              إن كان لديك متجر، فأسهل طريقة أن تربط زينيا به — سنثبّت القالب وننشئ المنتج
+              إن كان لديك متجر، فأسهل طريقة أن تربط بينون به — سنثبّت القالب وننشئ المنتج
               تلقائيًا بنقرة واحدة في نهاية الخطوات، دون أي رفع يدوي.
             </p>
 
@@ -615,7 +615,7 @@ function UrlStep({
                 </div>
                 <p className="mt-1 leading-relaxed text-muted">
                   الصق رابط المنتج بالأسفل وأكمل الخطوات. عند التوليد، اربط متجرك مرة واحدة
-                  وستتكفّل زينيا بالباقي: تثبيت القالب وإنشاء المنتج تلقائيًا — بلا تنزيل ولا رفع يدوي.
+                  وستتكفّل بينون بالباقي: تثبيت القالب وإنشاء المنتج تلقائيًا — بلا تنزيل ولا رفع يدوي.
                 </p>
                 <button
                   type="button"
@@ -856,7 +856,7 @@ function ProductStep(props: {
                 type="button"
                 onClick={onSuggestNames}
                 disabled={aiNaming}
-                title="اقترح أسماء بالذكاء الاصطناعي"
+                title="اقترح أسماء"
                 className="inline-flex items-center gap-1 rounded-lg border border-token bg-white px-3 py-2.5 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5 disabled:opacity-50"
               >
                 {aiNaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4 text-primary" />}
@@ -871,7 +871,7 @@ function ProductStep(props: {
             {aiNames && aiNames.length > 0 && (
               <div className="mt-3 rounded-xl border border-token bg-[#fafaf7] p-3">
                 <div className="flex items-center justify-between text-[14.5px] font-semibold uppercase tracking-[0.14em] text-muted">
-                  <span>اقتراحات الذكاء الاصطناعي · انقر للاستخدام</span>
+                  <span>اقتراحات · انقر للاستخدام</span>
                   <button
                     type="button"
                     onClick={onCloseAiPanel}
@@ -1407,7 +1407,7 @@ function HonestyGateModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="إشعار بمحتوى مولَّد بالذكاء الاصطناعي"
+      aria-label="إشعار بمحتوى مقترح تلقائيًا"
     >
       <div className="flex max-h-[85vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="border-b border-token bg-[rgba(217,119,6,0.05)] px-6 py-5">
@@ -1416,7 +1416,7 @@ function HonestyGateModal({
               <AlertCircle className="h-5 w-5 text-[#d97706]" />
             </div>
             <div>
-              <h2 className="text-[16px] font-bold text-foreground">تنبيه — أجزاء من هذا القالب من اختراع الذكاء الاصطناعي</h2>
+              <h2 className="text-[16px] font-bold text-foreground">تنبيه — أجزاء من هذا القالب مقترحة تلقائيًا</h2>
               <p className="mt-0.5 text-[14.5px] text-muted">
                 {high.length} يجب إصلاحها · {medium.length} للتحقق منها. أنت وحدك من يجعلها حقيقية قبل الإطلاق.
               </p>
@@ -1448,7 +1448,7 @@ function HonestyGateModal({
         <div className="border-t border-token bg-white px-6 py-4">
           <p className="mb-3 text-[14.5px] leading-relaxed text-muted">
             بالمتابعة، تُقرّ بأن أعداد المخزون وإشعارات المشترين واقتباسات الصحافة ونماذج التقييمات
-            وما شابهها في القالب المولَّد هي أمثلة مولَّدة بالذكاء الاصطناعي — وليست معلومات حقيقية —
+            وما شابهها في القالب المولَّد هي أمثلة مقترحة تلقائيًا — وليست معلومات حقيقية —
             وأن مسؤوليتك استبدالها أو التحقق منها قبل النشر.
           </p>
           <div className="flex items-center justify-between gap-3">
@@ -1508,7 +1508,7 @@ function ClaimsPanel({
           </div>
           <div>
             <div className="text-[14.5px] font-bold text-foreground">
-              فحص المصداقية — ما اخترعه الذكاء الاصطناعي
+              فحص المصداقية — ما اقترحه النظام تلقائيًا
             </div>
             <div className="mt-0.5 text-[14.5px] text-muted">
               {high.length} يجب إصلاحها · {medium.length} للتحقق منها قبل الإطلاق. أعداد المخزون وأسماء المشترين
@@ -1701,7 +1701,7 @@ function PublishPanel({
             <Upload className="h-4 w-4 text-primary" /> انشر مباشرةً إلى متجر Shopify الخاص بك
           </div>
           <div className="mt-1 text-[14.5px] text-muted">
-            اربط مرة واحدة وتُثبّت زينيا القالب <strong>وتنشئ المنتج</strong> من بيانات
+            اربط مرة واحدة وتُثبّت بينون القالب <strong>وتنشئ المنتج</strong> من بيانات
             AliExpress المستخرجة — وتُربط أزرار الشراء به تلقائيًا.
           </div>
 
@@ -1738,7 +1738,7 @@ function PublishPanel({
 
           {connState === 'waiting' && (
             <div className="mt-2 text-[14.5px] text-muted">
-              وافِق على تطبيق زينيا في التبويب الذي فُتح للتو — تلتقط هذه الشاشة الاتصال تلقائيًا.
+              وافِق على تطبيق بينون في التبويب الذي فُتح للتو — تلتقط هذه الشاشة الاتصال تلقائيًا.
             </div>
           )}
           {connError && (

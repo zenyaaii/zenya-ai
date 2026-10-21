@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic'
 /**
  * POST /api/presence — first-party "I'm here" heartbeat.
  *
- * The live-users globe needs to reflect ANYONE currently on a Zenya surface —
+ * The live-users globe needs to reflect ANYONE currently on a Beynoun surface —
  * the marketing site, the dashboard, a customer's own site — not just visitors
  * to generated customer sites (which is all /api/insight + site_views covers).
- * So every Zenya-owned page pings this a few times a minute; we record one row
+ * So every Beynoun-owned page pings this a few times a minute; we record one row
  * per anonymous visitor at COUNTRY level and nothing else.
  *
  * Privacy: visitor_key is a daily IP+UA hash (same scheme as analytics), the

@@ -90,7 +90,7 @@ const PLANS = [
     name: "مجانية",
     amount: "$0",
     per: "/بلا دفع",
-    sub: "ابنِ، أدِر، وانشر — جرّب زينيا مجانًا.",
+    sub: "ابنِ، أدِر، وانشر — جرّب بينون مجانًا.",
     cta: "ابدأ مجانًا",
     /* The arriving label says what the plan hands over, so the movement
        carries a second piece of information rather than repeating the first. */
@@ -98,7 +98,7 @@ const PLANS = [
     href: "/login?mode=signup",
     foot: "مجانًا — بلا بطاقة ولا اشتراك",
     features: [
-      "توليد قالبين (٢) بالذكاء الاصطناعي — مجانًا",
+      "توليد قالبين (٢) — مجانًا",
       "جميع القوالب الثمانية للمعاينة",
       "انشر موقعك على اسمك.beynoun.com",
       "كل أدوات التحرير والإدارة",
@@ -146,7 +146,7 @@ const PLANS = [
       "كل ما في خطة Starter، بالإضافة إلى:",
       "نطاق مخصّص مجاني لسنة — ‏.store، .site، .online، .shop",
       "خصم 30% على النطاقات الأغلى (.com وأمثالها)",
-      "إزالة شارة «صُنع بزينيا»",
+      "إزالة شارة «صُنع ببينون»",
       "إدارة كاملة لموقعك ونطاقك",
       "دعم أولوية قصوى",
     ],
@@ -466,7 +466,7 @@ export default function PricingView() {
             >
               {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
             </button>
-            <Link href="/" aria-label="زينيا" className="zp-phone-mark">
+            <Link href="/" aria-label="بينون" className="zp-phone-mark">
               {/* Pure black is permitted here: the style reserves #000 for
                   logo marks and graphic glyphs, nowhere else. */}
               <ZenyaMark className="zp-mark-svg-sm" />
@@ -512,7 +512,7 @@ export default function PricingView() {
               <Link
                 href="/"
                 className="zp-mark"
-                aria-label="زينيا"
+                aria-label="بينون"
                 onMouseEnter={() => setTrayOpen(false)}
               >
                 <ZenyaMark className="zp-mark-svg" />
@@ -621,23 +621,23 @@ export default function PricingView() {
       <div className="zp-compare-stage">
       <section className="zp-compare" aria-labelledby="zp-compare-h">
         <div className="zp-compare-head">
-          <h2 id="zp-compare-h" className="zp-h2">لماذا زينيا</h2>
+          <h2 id="zp-compare-h" className="zp-h2">لماذا بينون</h2>
           <p className="zp-h2-sub">نفس الموقع، وثلاث طرق لدفع ثمنه.</p>
         </div>
 
         {/* A real table, because this is a matrix and a screen reader should
-            hear it as one. The Zenya column is one standing surface through the
+            hear it as one. The Beynoun column is one standing surface through the
             whole thing rather than a hairline drawn under every row. */}
         <div className="zp-table-wrap">
           <table className="zp-table" role="table">
             <caption className="sr-only">
-              مقارنة زينيا بمنشئات الذكاء الاصطناعي العامة وبالوكالات
+              مقارنة بينون بمنشئات المواقع الآلية العامة وبالوكالات
             </caption>
             <thead>
               <tr>
                 <th scope="col" className="zp-th zp-th-feature">الميزة</th>
-                <th scope="col" className="zp-th zp-th-zenya">زينيا</th>
-                <th scope="col" className="zp-th">ذكاء اصطناعي آخر</th>
+                <th scope="col" className="zp-th zp-th-zenya">بينون</th>
+                <th scope="col" className="zp-th">منشئ آلي آخر</th>
                 <th scope="col" className="zp-th">وكالة</th>
               </tr>
             </thead>
@@ -647,8 +647,8 @@ export default function PricingView() {
                   <th scope="row" role="rowheader" className="zp-td zp-td-feature">{row.feature}</th>
                   {/* data-label is what the stacked layout prints in place of
                       the header row it has to hide on a phone. */}
-                  <td role="cell" className="zp-td zp-td-zenya" data-label="زينيا">{row.zenya}</td>
-                  <td role="cell" className="zp-td" data-label="ذكاء اصطناعي آخر">{row.other}</td>
+                  <td role="cell" className="zp-td zp-td-zenya" data-label="بينون">{row.zenya}</td>
+                  <td role="cell" className="zp-td" data-label="منشئ آلي آخر">{row.other}</td>
                   <td role="cell" className="zp-td" data-label="وكالة">{row.agency}</td>
                 </tr>
               ))}
@@ -1105,7 +1105,7 @@ const CSS = `
   color: #9a9aa6; text-align: center;
 }
 .zp-th-feature { text-align: start; }
-/* The Zenya column is one surface running the height of the table, which is
+/* The Beynoun column is one surface running the height of the table, which is
    what makes it an argument rather than a spec sheet. The rounding is on the
    header and the last row, so the column reads as a single standing object. */
 .zp-th-zenya {

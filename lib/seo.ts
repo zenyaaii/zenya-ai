@@ -1,5 +1,5 @@
 /**
- * Shared SEO logic for Zenya-hosted customer sites.
+ * Shared SEO logic for Beynoun-hosted customer sites.
  *
  * One resolver, used in three places so they never drift:
  *   1. app/s/[slug]/page.tsx  → generateMetadata (what Google actually reads)
@@ -30,7 +30,7 @@ export type SeoOverrides = {
   noindex?: boolean
   /** The owner's logo, uploaded from the SEO page. It is the site's tab icon
    *  and Google's site icon. No logo means no icon at all: never a letter,
-   *  never Zenya's mark. Must be a file in Zenya's upload bucket. */
+   *  never Beynoun's mark. Must be a file in Beynoun's upload bucket. */
   logo?: string
 }
 

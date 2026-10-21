@@ -16,7 +16,7 @@ export default function CheckoutPage() {
             {/* Header / Breadcrumbs */}
             <div className="max-w-xl mx-auto lg:mx-0 lg:ml-auto">
                 <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-slate-900 mb-4">متجر زينيا</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-4">متجر بينون</h1>
                     <div className="flex items-center text-xs space-x-2 text-slate-500">
                         <span className={step >= 1 ? "text-blue-600 font-medium" : ""}>السلة</span>
                         <span className="text-slate-300">/</span>
@@ -117,12 +117,12 @@ export default function CheckoutPage() {
                          <div className="relative">
                             <div className="w-16 h-16 border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200&auto=format&fit=crop" alt="مكنسة زينيا V2" className="w-full h-full object-cover" />
+                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200&auto=format&fit=crop" alt="مكنسة بينون V2" className="w-full h-full object-cover" />
                             </div>
                             <span className="absolute -top-2 -right-2 bg-slate-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">1</span>
                          </div>
                          <div className="flex-1">
-                            <h3 className="text-sm font-medium text-slate-900">مكنسة زينيا V2</h3>
+                            <h3 className="text-sm font-medium text-slate-900">مكنسة بينون V2</h3>
                             <p className="text-xs text-slate-500">أسود / Pro</p>
                          </div>
                          <div className="text-sm font-medium text-slate-900">49.99 ر.س</div>

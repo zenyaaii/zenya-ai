@@ -8,9 +8,9 @@ import { Breadcrumbs, CompareHero, CtaBand } from '@/components/marketing/Compar
 const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
-  title: 'Zenya vs Wix, Shopify, WordPress, Squarespace & Agencies',
+  title: 'Beynoun vs Wix, Shopify, WordPress, Squarespace & Agencies',
   description:
-    'How does Zenya compare to popular website builders and alternatives? Honest comparisons with Wix, Shopify, WordPress, Squarespace, and agencies — on Arabic/RTL support, AI content, price, and time to launch.',
+    'How does Beynoun compare to popular website builders and alternatives? Honest comparisons with Wix, Shopify, WordPress, Squarespace, and agencies — on Arabic/RTL support, AI content, price, and time to launch.',
   keywords: [
     'best Arabic website builder',
     'best AI website builder',
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
     languages: { en: `${SITE}/en/compare`, ar: `${SITE}/compare`, 'x-default': `${SITE}/compare` },
   },
   openGraph: {
-    title: 'Zenya vs the competition — honest comparisons',
-    description: 'Honest comparisons of Zenya with Wix, Shopify, WordPress, Squarespace, and agencies.',
+    title: 'Beynoun vs the competition — honest comparisons',
+    description: 'Honest comparisons of Beynoun with Wix, Shopify, WordPress, Squarespace, and agencies.',
     url: `${SITE}/en/compare`,
     type: 'website',
     locale: 'en_US',
@@ -45,11 +45,11 @@ export default function CompareHubEn() {
     {
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: 'Zenya vs the competition',
+      name: 'Beynoun vs the competition',
       itemListElement: COMPARISONS_EN.map((c, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        name: `Zenya vs ${c.themLatin}`,
+        name: `Beynoun vs ${c.themLatin}`,
         url: `${SITE}/en/compare/${c.slug}`,
       })),
     },
@@ -62,15 +62,15 @@ export default function CompareHubEn() {
         <Breadcrumbs trail={[{ label: 'Home', href: '/en' }, { label: 'Compare' }]} />
 
         <CompareHero
-          kicker="Zenya vs others"
+          kicker="Beynoun vs others"
           title={
             <>
-              Why do people choose <span className="gradient-text">Zenya</span>?
+              Why do people choose <span className="gradient-text">Beynoun</span>?
             </>
           }
           intro={[
-            'Most website builders are global and English-first: they give you tools, but you design and write everything yourself. Zenya is Arabic-first, and its AI writes your site and lays out its sections from a short brief — so you launch in minutes.',
-            'We compared Zenya honestly with the most popular alternatives. Each comparison explains the differences in detail and says clearly when the competitor is the better pick for you.',
+            'Most website builders are global and English-first: they give you tools, but you design and write everything yourself. Beynoun is Arabic-first, and its AI writes your site and lays out its sections from a short brief — so you launch in minutes.',
+            'We compared Beynoun honestly with the most popular alternatives. Each comparison explains the differences in detail and says clearly when the competitor is the better pick for you.',
           ]}
         />
 
@@ -82,7 +82,7 @@ export default function CompareHubEn() {
               className="group flex flex-col rounded-2xl border border-token bg-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.30)] hover:shadow-[0_16px_40px_-20px_rgba(28,28,28,0.25)]"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-[16px] font-bold text-foreground">Zenya vs {c.themLatin}</h2>
+                <h2 className="text-[16px] font-bold text-foreground">Beynoun vs {c.themLatin}</h2>
                 <ArrowRight className="h-4 w-4 flex-shrink-0 text-primary transition-transform group-hover:translate-x-1" strokeWidth={2.25} />
               </div>
               <p className="mt-2 text-[13.5px] leading-[1.8] text-muted">{c.summary}</p>
@@ -102,7 +102,7 @@ export default function CompareHubEn() {
         </section>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Pick a template, write a brief, and get a professional site in minutes. No card required."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

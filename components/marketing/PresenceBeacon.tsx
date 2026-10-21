@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 /**
  * PresenceBeacon — pings /api/presence a few times a minute so the live-users
- * globe knows this person is currently online. Mounted on every Zenya-owned
+ * globe knows this person is currently online. Mounted on every Beynoun-owned
  * surface (marketing + dashboard), NOT on customer sites (those already report
  * via the /api/insight beacon). Renders nothing.
  */

@@ -4,7 +4,7 @@
  * /demo/thread - a harness for choosing the scroll line.
  *
  * NOT a page of the site. It exists so the five ScrollThread variants can be
- * compared against real Zenya copy, in RTL, at real section heights, on the
+ * compared against real Beynoun copy, in RTL, at real section heights, on the
  * real domain. app/(main)/page.tsx is untouched and nothing here is wired into
  * `/`. Once a variant is chosen, the pick is `<ScrollThread />` dropped into
  * three sections of the real page and this route can be deleted.

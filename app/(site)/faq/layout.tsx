@@ -5,24 +5,24 @@ import { AR_FAQS } from '@/lib/faq-data'
 import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
-  title: 'أسئلة شائعة عن إنشاء موقع بالذكاء الاصطناعي',
+  title: 'أسئلة شائعة عن إنشاء موقع',
   description:
-    'إجابات واضحة عن زينيا: كيف تعمل، القوالب الثمانية، الأسعار، الاستضافة، ربط النطاق، والتصدير إلى شوبيفاي.',
+    'إجابات واضحة عن بينون: كيف تعمل، القوالب الثمانية، الأسعار، الاستضافة، ربط النطاق، والتصدير إلى شوبيفاي.',
   keywords: [
-    'أسئلة شائعة زينيا',
-    'كيف تعمل زينيا',
-    'منشئ مواقع بالذكاء الاصطناعي',
-    'أسعار زينيا',
-    'Zenya FAQ',
-    'AI website builder questions',
+    'أسئلة شائعة بينون',
+    'كيف تعمل بينون',
+    'منشئ مواقع',
+    'أسعار بينون',
+    'Beynoun FAQ',
+    'website builder questions',
   ],
   alternates: {
     canonical: '/faq',
     languages: hreflangAlternates('https://beynoun.com/faq', 'https://beynoun.com/en/faq'),
   },
   ...share({
-    title: 'الأسئلة الشائعة · زينيا',
-    description: 'إجابات واضحة عن زينيا: كيف تعمل، القوالب، الأسعار، الاستضافة، والتصدير.',
+    title: 'الأسئلة الشائعة · بينون',
+    description: 'إجابات واضحة عن بينون: كيف تعمل، القوالب، الأسعار، الاستضافة، والتصدير.',
     url: 'https://beynoun.com/faq',
   }),
 }

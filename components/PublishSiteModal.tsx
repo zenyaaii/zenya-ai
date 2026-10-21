@@ -144,7 +144,7 @@ export default function PublishSiteModal({
         }}
       >
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: '#1c1c1c' }}>
-          النشر على زينيا
+          النشر على بينون
         </h2>
         <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
           اختر اسمًا لموقعك. سيكون عنوانك الخاص:{' '}

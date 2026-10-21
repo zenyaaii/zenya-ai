@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/shopify/connection?shop=my-store.myshopify.com
  *
- * Is this shop connected to the signed-in Zenya user, with a live
+ * Is this shop connected to the signed-in Beynoun user, with a live
  * offline session? The build page polls this after sending the user
  * through OAuth in another tab.
  */

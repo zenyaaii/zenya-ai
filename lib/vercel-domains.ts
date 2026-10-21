@@ -4,7 +4,7 @@
  *
  * Env required (all set in Vercel production):
  *   VERCEL_API_TOKEN   — personal/team token with project + domain scope
- *   VERCEL_PROJECT_ID  — the prj_… id of the Zenya project
+ *   VERCEL_PROJECT_ID  — the prj_… id of the Beynoun project
  *   VERCEL_TEAM_ID     — the team_… id that owns the project (optional for
  *                        personal projects; required if the project lives
  *                        under a team like ours does)
@@ -235,7 +235,7 @@ export async function fetchDomainSummary(domain: string): Promise<DomainSummary>
       verified: false,
       misconfigured: true,
       required: dnsHintsFor(domain),
-      errorMessage: 'Domain not attached to the Zenya project.',
+      errorMessage: 'Domain not attached to the Beynoun project.',
     }
   }
 

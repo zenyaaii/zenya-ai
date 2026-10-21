@@ -1,5 +1,5 @@
 /**
- * Multi-page map for Zenya-hosted brochure sites.
+ * Multi-page map for Beynoun-hosted brochure sites.
  *
  * Every brochure template already renders several internal "views" (home, menu,
  * about, …) driven by a `view` prop — but historically on ONE URL. This maps

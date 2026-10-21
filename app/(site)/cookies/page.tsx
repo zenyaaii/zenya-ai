@@ -14,8 +14,8 @@ import Doc, { SECTIONS } from "@/components/zenya/legal/documents/cookies"
 import { COMPANY } from '@/lib/company'
 import { share } from '@/lib/site-share'
 
-// The root template appends "· زينيا", so the title is the page's own name
-// alone. It used to carry "— زينيا" too, and read "… — زينيا · زينيا".
+// The root template appends "· بينون", so the title is the page's own name
+// alone. It used to carry "— بينون" too, and read "… — بينون · بينون".
 const TITLE = 'سياسة ملفات تعريف الارتباط'
 const DESCRIPTION = `كيف ولماذا يستخدم ${COMPANY.PRODUCT_NAME} ملفات تعريف الارتباط والتقنيات المشابهة.`
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/cookies' },
-  ...share({ title: `${TITLE} · زينيا`, description: DESCRIPTION, url: 'https://beynoun.com/cookies' }),
+  ...share({ title: `${TITLE} · بينون`, description: DESCRIPTION, url: 'https://beynoun.com/cookies' }),
 }
 
 export default function Page() {

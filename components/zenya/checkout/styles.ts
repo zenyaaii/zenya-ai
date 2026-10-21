@@ -122,7 +122,7 @@ export const CSS = `
 .zk-inc li { display: flex; align-items: flex-start; gap: 0.5625rem; font-size: 14.5px; font-weight: 500; line-height: 1.8; color: var(--stone); min-width: 0; }
 .zk-inc svg { flex: 0 0 auto; margin-top: 0.3125rem; width: 14px; height: 14px; color: #15803d; }
 
-/* ---- the handoff: Stripe takes the card, Zenya never sees it ------------ */
+/* ---- the handoff: Stripe takes the card, Beynoun never sees it ------------ */
 .zk-hand { margin: clamp(1.25rem, 3vw, 1.625rem) 0 0; padding: clamp(1rem, 3vw, 1.25rem) 0 0; box-shadow: inset 0 1px 0 rgba(0,0,0,0.07); }
 .zk-hand-t { margin: 0 0 0.875rem; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone); }
 .zk-hand-t strong { color: var(--obsidian); font-weight: 700; }

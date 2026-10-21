@@ -30,7 +30,7 @@ function planCopy(plan: string): { head: string; body: string } {
     case 'entry':
       return {
         head: 'تم فتح التوليد',
-        body: 'معك الآن قالبان لبناء موقعك بالذكاء الاصطناعي. أعانك الله ورزقك التوفيق في مشروعك.',
+        body: 'معك الآن قالبان لبناء موقعك. أعانك الله ورزقك التوفيق في مشروعك.',
       }
     case 'starter':
       return { head: 'تم تفعيل Starter', body: 'توليد بلا حدود بين يديك الآن. أعانك الله على البناء.' }
@@ -227,10 +227,10 @@ export function EntryWelcomeBanner({ trialRemaining }: { trialRemaining: number 
           <div className="text-[11px] font-bold tracking-[0.14em]" style={{ color: GOLD }}>
             أعانك الله
           </div>
-          <p className="mt-0.5 text-[13.5px] font-semibold text-foreground">ابدأ رحلتك مع زينيا</p>
+          <p className="mt-0.5 text-[13.5px] font-semibold text-foreground">ابدأ رحلتك مع بينون</p>
           <p className="mt-0.5 text-[12.5px] leading-[1.55] text-muted">
             {trialRemaining > 0
-              ? `معك ${trialRemaining} ${trialRemaining === 2 ? 'قالبان' : 'قالب'} لتوليدهما بالذكاء الاصطناعي. المعاينة والتعديل غير محدودين ومجّانيان.`
+              ? `معك ${trialRemaining} ${trialRemaining === 2 ? 'قالبان' : 'قالب'} لتوليدهما. المعاينة والتعديل غير محدودين ومجّانيان.`
               : 'التعديل والمعاينة على مواقعك غير محدودين. للتوليد من جديد انتقل إلى Starter.'}
           </p>
         </div>

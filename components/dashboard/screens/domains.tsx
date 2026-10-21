@@ -27,7 +27,7 @@ export function DomainsScreen({
     <Page>
       <PageHead
         title="النطاقات"
-        sub="اربط نطاقك الخاص بموقعك، وتتكفّل زينيا بشهادة SSL والتجديد."
+        sub="اربط نطاقك الخاص بموقعك، وتتكفّل بينون بشهادة SSL والتجديد."
         icon={Globe}
         aside={
           <div className="relative">

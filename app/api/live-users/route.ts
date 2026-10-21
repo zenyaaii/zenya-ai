@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/live-users — public, anonymous.
  *
  * Powers the live-users globe on the marketing homepage. Reflects EVERYONE who
- * is currently online on a Zenya surface, from two real sources:
+ * is currently online on a Beynoun surface, from two real sources:
  *   - live_presence : heartbeat from the marketing site + dashboard (/api/presence)
  *   - site_views    : visitors on generated customer sites (/api/insight)
  *

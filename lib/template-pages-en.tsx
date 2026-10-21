@@ -34,7 +34,7 @@ const faqTime: QA = {
 }
 const faqDomain: QA = {
   q: 'Can I connect my own domain?',
-  a: 'Yes, on the Pro plan, with SSL and no Zenya badge, plus a free custom domain for a full year (standard domain). Hosting is inside the EU.',
+  a: 'Yes, on the Pro plan, with SSL and no Beynoun badge, plus a free custom domain for a full year (standard domain). Hosting is inside the EU.',
 }
 const faqPayments: QA = {
   q: 'How does payment work for the store?',
@@ -49,13 +49,13 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'restaurant website',
     accent: '#c8a96a',
     demoHref: '/demo/restaurant',
-    title: 'Create a Professional Restaurant Website with AI',
+    title: 'Create a Professional Restaurant Website',
     metaDescription:
       'Build a professional Arabic restaurant website in minutes: an elegant menu, dish photos, hours and location, and a reservation call to action — written by AI. Hosting and a custom domain included.',
     h1: <>A <span className="gradient-text">restaurant</span> website that whets your customers’ appetite.</>,
     intro: [
       'Your restaurant deserves a site as good as its dishes. Write a brief about your cuisine and atmosphere, and the AI generates an elegant Arabic site with a clear menu, appetizing sections, and a reservation call to action — ready to publish in minutes.',
-      'No designer and no copywriter needed. Zenya writes the descriptions, arranges the sections, and gets the right-to-left layout right, so you get a digital presence that builds trust and brings in reservations.',
+      'No designer and no copywriter needed. Beynoun writes the descriptions, arranges the sections, and gets the right-to-left layout right, so you get a digital presence that builds trust and brings in reservations.',
     ],
     includes: [
       'An elegant menu grouped by category',
@@ -81,7 +81,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'app landing page',
     accent: '#5e6ad2',
     demoHref: '/demo/atlas',
-    title: 'Create an App Landing Page with AI',
+    title: 'Create an App Landing Page',
     metaDescription:
       'A professional landing page for your app or software product in minutes: feature showcase, screenshots, pricing, and download calls to action — written by AI. Hosting and a domain included.',
     h1: <>A landing page for your <span className="gradient-text">app</span> that turns visitors into downloads.</>,
@@ -113,7 +113,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'fashion lookbook website',
     accent: '#1c1c1c',
     demoHref: '/demo/lookbook',
-    title: 'Create a Fashion & Lookbook Website with AI',
+    title: 'Create a Fashion & Lookbook Website',
     metaDescription:
       'A refined visual fashion or lookbook website in minutes: a collection gallery, magazine-style imagery, and a brand story — written by AI. Hosting and a custom domain included.',
     h1: <>A fashion <span className="gradient-text">lookbook</span> worthy of your brand.</>,
@@ -133,7 +133,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     keywords: ['fashion website', 'lookbook website', 'clothing brand website', 'fashion portfolio', 'fashion website builder'],
     faqs: [
       faqAi,
-      { q: 'Can I connect it to my store to sell?', a: 'Yes. You can link the shop buttons to your store, or use Zenya’s store template and export it to Shopify to handle checkout.' },
+      { q: 'Can I connect it to my store to sell?', a: 'Yes. You can link the shop buttons to your store, or use Beynoun’s store template and export it to Shopify to handle checkout.' },
       faqTime,
       faqDomain,
     ],
@@ -145,7 +145,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'multi-product online store',
     accent: '#10b981',
     demoHref: '/demo/collective',
-    title: 'Create a Multi-Product Online Store with AI',
+    title: 'Create a Multi-Product Online Store',
     metaDescription:
       'A professional multi-product online store in minutes: a collection and category showcase, product cards, and a brand story — written by AI, with export to Shopify for secure payments.',
     h1: <>An online <span className="gradient-text">store</span> that showcases your collection professionally.</>,
@@ -172,7 +172,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'brand story website',
     accent: '#1c1c1c',
     demoHref: '/demo/studio',
-    title: 'Create a Brand Story Website with AI',
+    title: 'Create a Brand Story Website',
     metaDescription:
       'An editorial website that tells your brand story in minutes: values, work, team, and contact — written by AI. EU hosting and a custom domain included.',
     h1: <>A site that tells your <span className="gradient-text">brand story.</span></>,
@@ -204,7 +204,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'services website',
     accent: '#f59e0b',
     demoHref: '/demo/services',
-    title: 'Create a Professional Services Website with AI',
+    title: 'Create a Professional Services Website',
     metaDescription:
       'A professional services website in minutes: a service list, packages and pricing, why-choose-us, and a booking call to action — written by AI. Hosting and a custom domain included.',
     h1: <>A <span className="gradient-text">services</span> website that brings you clients.</>,
@@ -236,7 +236,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'wellness center website',
     accent: '#14b8a6',
     demoHref: '/demo/wellness',
-    title: 'Create a Wellness & Spa Website with AI',
+    title: 'Create a Wellness & Spa Website',
     metaDescription:
       'A calm, trust-building website for a wellness center, spa, or yoga studio in minutes: sessions, schedule, instructors, and a booking call to action — written by AI. Hosting and a domain included.',
     h1: <>A <span className="gradient-text">wellness</span> website that radiates calm.</>,
@@ -268,7 +268,7 @@ export const TEMPLATE_PAGES_EN: TemplatePageEn[] = [
     name: 'one-product store',
     accent: '#6366f1',
     demoHref: '/demo',
-    title: 'Create a High-Converting One-Product Store with AI',
+    title: 'Create a High-Converting One-Product Store',
     metaDescription:
       'A focused, high-converting page for a single product in minutes: product benefits, images, reviews, and a strong call to buy — written by AI, with export to Shopify for payments.',
     h1: <>A <span className="gradient-text">one-product</span> store that sells hard.</>,

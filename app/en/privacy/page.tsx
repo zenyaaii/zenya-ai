@@ -6,13 +6,13 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description:
-    'How Zenya collects, uses, stores, and protects your personal data: legal bases under GDPR, subprocessors, retention periods, your rights, and how to exercise them.',
+    'How Beynoun collects, uses, stores, and protects your personal data: legal bases under GDPR, subprocessors, retention periods, your rights, and how to exercise them.',
   alternates: {
     canonical: `${SITE}/en/privacy`,
     languages: { en: `${SITE}/en/privacy`, ar: `${SITE}/privacy`, 'x-default': `${SITE}/privacy` },
   },
   openGraph: {
-    title: 'Zenya privacy policy',
+    title: 'Beynoun privacy policy',
     description: 'GDPR legal bases, subprocessors, retention, and your rights.',
     url: `${SITE}/en/privacy`,
     type: 'website',
@@ -30,9 +30,9 @@ export default function EnPrivacyPolicy() {
 
       <p>
         This privacy policy explains how <strong>{COMPANY.LEGAL_NAME}</strong>, trading as{' '}
-        <strong>Zenya AI</strong> (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;), collects, uses, stores,
+        <strong>Beynoun</strong> (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;), collects, uses, stores,
         and protects your personal data when you use <a href={COMPANY.WEBSITE_URL}>{COMPANY.WEBSITE_URL}</a>{' '}
-        and the Zenya AI service (the &quot;Service&quot;).
+        and the Beynoun service (the &quot;Service&quot;).
       </p>
 
       <p>

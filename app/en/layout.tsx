@@ -63,7 +63,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
     <div lang="en" dir="ltr" className="min-h-dvh">
       <header className="sticky top-0 z-50 border-b border-token bg-[rgba(247,244,237,0.85)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3.5">
-          <Link href="/en" aria-label="Zenya home" className="flex items-center">
+          <Link href="/en" aria-label="Beynoun home" className="flex items-center">
             <ZenyaMark className="h-6 text-foreground" />
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
@@ -94,7 +94,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
             <div className="md:col-span-5">
               <ZenyaMark className="h-6 text-foreground" />
               <p className="mt-3 max-w-sm text-[13.5px] leading-[1.7] text-muted">
-                Zenya is the first Muslim company building AI websites — Arabic-first by design. Pick a
+                Beynoun is the first Muslim company building AI websites — Arabic-first by design. Pick a
                 template, write a brief, and get a professional site in minutes.
               </p>
               <div className="mt-5">
@@ -123,7 +123,7 @@ export default function EnLayout({ children }: { children: ReactNode }) {
             ))}
           </div>
           <p className="mt-10 border-t border-token pt-6 text-[12.5px] text-muted">
-            © {new Date().getFullYear()} Zenya. Built in the EU.
+            © {new Date().getFullYear()} Beynoun. Built in the EU.
           </p>
         </div>
       </footer>

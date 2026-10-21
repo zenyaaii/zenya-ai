@@ -45,10 +45,10 @@ export default function ShopifyAffiliateCallout({
       >
         <div className="text-[14.5px] text-foreground">
           <strong>ألا تملك متجر Shopify بعد؟</strong>{' '}
-          <span className="text-muted">أنشئ واحدًا مجانًا، ثم ارفع قالب زينيا.</span>
+          <span className="text-muted">أنشئ واحدًا مجانًا، ثم ارفع قالب بينون.</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-[14.5px] text-muted sm:inline">رابط تابع · يدعم زينيا</span>
+          <span className="hidden text-[14.5px] text-muted sm:inline">رابط تابع · يدعم بينون</span>
           <a
             href={href}
             target="_blank"
@@ -92,16 +92,16 @@ export default function ShopifyAffiliateCallout({
             ألا تملك متجر Shopify بعد؟
           </h3>
           <p className="mt-1 text-[14.5px] text-muted leading-relaxed">
-            أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب زينيا
+            أنشئ تجربة مجانية خلال دقيقتين، ثم ارفع ملف قالب بينون
             من{' '}
             <strong>المتجر الإلكتروني ← القوالب ← إضافة ← رفع</strong>. يتولّى Shopify
-            السلّة والدفع والمدفوعات والمخزون — وتتولّى زينيا المظهر.
+            السلّة والدفع والمدفوعات والمخزون — وتتولّى بينون المظهر.
           </p>
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="text-[14.5px] text-muted">
-          رابط تابع — تتقاضى زينيا عمولة بسيطة، دون أي تكلفة إضافية عليك.
+          رابط تابع — تتقاضى بينون عمولة بسيطة، دون أي تكلفة إضافية عليك.
         </p>
         <a
           href={href}

@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
  * review-offer overlay) the moment it's dismissed.
  *
  * Writes are locked to a server-side allowlist of self-serve codes — a user
- * can only save a code Zenya actually hands out, never an arbitrary string.
+ * can only save a code Beynoun actually hands out, never an arbitrary string.
  */
 
 const REVIEW_CODE = REVIEW_REWARD_CODE

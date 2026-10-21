@@ -7,7 +7,7 @@ import { sendEmail, sitePublishedEmail } from '@/lib/email'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Templates we'll host on Zenya. E-commerce templates (Storefront/Collective)
+// Templates we'll host on Beynoun. E-commerce templates (Storefront/Collective)
 // have to ship to Shopify — they're not in this set.
 const HOSTABLE_TYPES = new Set([
   'restaurant', 'atlas', 'lookbook', 'wellness', 'studio', 'services',
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       {
         error: 'not_hostable',
         message:
-          'E-commerce templates (Storefront, Collective) deploy to Shopify, not Zenya hosting. Use the Shopify connect or ZIP download instead.',
+          'E-commerce templates (Storefront, Collective) deploy to Shopify, not Beynoun hosting. Use the Shopify connect or ZIP download instead.',
       },
       { status: 400 }
     )

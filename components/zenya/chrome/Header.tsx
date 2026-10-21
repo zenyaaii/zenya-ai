@@ -95,7 +95,7 @@ export default function Header({
             aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
             {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
           </button>
-          <Link href="/" aria-label="زينيا" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
+          <Link href="/" aria-label="بينون" className="zx-phone-mark"><ZenyaMark className="zx-mark-svg-sm" /></Link>
           <AccountControl className="zx-account zx-account-phone" />
         </div>
         <div className="zx-drawer" data-open={menuOpen ? "true" : undefined}
@@ -116,7 +116,7 @@ export default function Header({
       <div className="zx-pill">
         <div className="zx-bar">
           <span className="zx-side zx-side-start">
-            <Link href="/" className="zx-mark" aria-label="زينيا"><ZenyaMark className="zx-mark-svg" /></Link>
+            <Link href="/" className="zx-mark" aria-label="بينون"><ZenyaMark className="zx-mark-svg" /></Link>
           </span>
           <nav className="zx-nav">
             {nav.map((i) => (

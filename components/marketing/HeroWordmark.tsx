@@ -5,7 +5,7 @@ import { useReducedMotion } from 'framer-motion'
 import ZenyaMark from '@/components/ZenyaMark'
 
 /**
- * HeroWordmark — the giant زينيا logo mark set behind the hero copy.
+ * HeroWordmark — the giant بينون logo mark set behind the hero copy.
  *
  * Two stacked copies of the vector wordmark ({@link ZenyaMark}):
  *   • base   — a barely-there blue ghost, always present.

@@ -1,7 +1,7 @@
 /**
  * The ar ⇄ en route map for the marketing site.
  *
- * Zenya stays Arabic-first: Arabic lives at the root (`/pricing`) and English
+ * Beynoun stays Arabic-first: Arabic lives at the root (`/pricing`) and English
  * is the explicit alternate under `/en` (`/en/pricing`). There is no automatic
  * redirect on browser language, so an Arabic visitor never gets bounced out of
  * the primary site.

@@ -32,10 +32,10 @@ import { share } from '@/lib/site-share'
 export const metadata: Metadata = {
   title: 'تواصل معنا',
   description:
-    'تواصل مع فريق زينيا — الدعم، طلب قالب جديد، المبيعات، أو أي شيء آخر. نردّ خلال يوم عمل واحد.',
+    'تواصل مع فريق بينون — الدعم، طلب قالب جديد، المبيعات، أو أي شيء آخر. نردّ خلال يوم عمل واحد.',
   alternates: { canonical: '/contact' },
   ...share({
-    title: 'تواصل مع زينيا',
+    title: 'تواصل مع بينون',
     description: 'الدعم، طلب قالب، المبيعات. نردّ خلال يوم عمل واحد.',
     url: 'https://beynoun.com/contact',
   }),

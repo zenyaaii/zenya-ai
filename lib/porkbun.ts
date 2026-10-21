@@ -2,7 +2,7 @@
  * Typed wrapper around the Porkbun JSON API.
  *
  * Porkbun is our domain registration backend — users buy new domains
- * through Zenya, we mark up the wholesale price, attach the result to
+ * through Beynoun, we mark up the wholesale price, attach the result to
  * the user's Vercel project, and point DNS at Vercel automatically.
  *
  * Env required:
@@ -289,7 +289,7 @@ export type PorkbunRegisterArgs = {
   costCents: number
   /**
    * Force WHOIS privacy on/off. Omit to use the account default (enabled
-   * on Zenya's Porkbun account), which is what we want for end users.
+   * on Beynoun's Porkbun account), which is what we want for end users.
    */
   whoisPrivacy?: boolean
   /**
@@ -335,7 +335,7 @@ export type PorkbunRegisterResult = {
  * come back as a thrown PorkbunError. A soft failure (not enough funds)
  * on a dry run returns `wouldSucceed: false` instead of throwing.
  *
- * On a live success the domain is registered to Zenya's Porkbun account
+ * On a live success the domain is registered to Beynoun's Porkbun account
  * (we are registrant of record; the end user is a soft-tenant), with
  * account-default nameservers — we then point DNS at Vercel separately.
  */

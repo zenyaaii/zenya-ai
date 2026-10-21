@@ -5,13 +5,13 @@ const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
   title: 'Cancellation & Refund Policy',
-  description: 'How to cancel your Zenya subscription, your EU 14-day right of withdrawal, when refunds are issued on monthly renewals, and how to request one.',
+  description: 'How to cancel your Beynoun subscription, your EU 14-day right of withdrawal, when refunds are issued on monthly renewals, and how to request one.',
   alternates: {
     canonical: `${SITE}/en/refund`,
     languages: { en: `${SITE}/en/refund`, ar: `${SITE}/refund`, 'x-default': `${SITE}/refund` },
   },
   openGraph: {
-    title: 'Zenya cancellation and refund policy',
+    title: 'Beynoun cancellation and refund policy',
     description: 'Cancel anytime, the EU 14-day withdrawal right, and when refunds are issued.',
     url: `${SITE}/en/refund`,
     type: 'website',
@@ -26,7 +26,7 @@ export default function EnRefundPolicy() {
       <p className="text-sm text-muted">Last updated: <strong>{COMPANY.LAST_UPDATED}</strong></p>
 
       <p>
-        Zenya AI is sold as a <strong>monthly subscription</strong>: Starter at {usd(COMPANY.STARTER_PRICE_USD)} per month and Pro at{' '}
+        Beynoun is sold as a <strong>monthly subscription</strong>: Starter at {usd(COMPANY.STARTER_PRICE_USD)} per month and Pro at{' '}
         {usd(COMPANY.PRO_PRICE_USD)} per month. The subscription renews automatically each month until you cancel it. There is also
         a free plan giving you <strong>{COMPANY.FREE_GENERATIONS} generations</strong> to try, with no card
         required.
@@ -81,7 +81,7 @@ export default function EnRefundPolicy() {
 
       <h2>4. Previous one-time purchases</h2>
       <p>
-        Customers who bought Zenya AI as a one-time purchase before{' '}
+        Customers who bought Beynoun as a one-time purchase before{' '}
         <strong>{COMPANY.SUBSCRIPTION_SINCE}</strong> keep what they paid for. They are not automatically
         converted to a subscription and are not charged any recurring fee. The refund terms that applied at
         the time of their purchase continue to apply to them.

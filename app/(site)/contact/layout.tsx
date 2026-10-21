@@ -5,10 +5,10 @@ import { share } from '@/lib/site-share'
 export const metadata: Metadata = {
   title: 'تواصل معنا — الدعم والمبيعات والاقتراحات',
   description:
-    'تواصل مع فريق زينيا — أسئلة عن القوالب، أو الفوترة، أو الدعم، أو شارك تجربتك. نردّ بأسرع ما يمكن.',
+    'تواصل مع فريق بينون — أسئلة عن القوالب، أو الفوترة، أو الدعم، أو شارك تجربتك. نردّ بأسرع ما يمكن.',
   alternates: { canonical: '/contact' },
   ...share({
-    title: 'تواصل مع زينيا',
+    title: 'تواصل مع بينون',
     description: 'أسئلة عن القوالب أو الفوترة أو الدعم؟ راسلنا.',
     url: 'https://beynoun.com/contact',
   }),

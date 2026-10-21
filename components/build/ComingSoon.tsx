@@ -8,7 +8,7 @@ import {
 /**
  * The "big new version is coming" screen shown to everyone EXCEPT the admin
  * while the one-product Shopify builder is being rebuilt. It's deliberately
- * premium and marketing-forward — it should make Zenya feel like a serious
+ * premium and marketing-forward — it should make Beynoun feel like a serious
  * company shipping something worth waiting for, and route people to the 8
  * templates that DO work today. No fake countdowns or fabricated numbers.
  */
@@ -108,7 +108,7 @@ export default function ComingSoon({
 
           <div className="mt-7 flex items-center gap-2 border-t border-token pt-6 text-[14.5px] text-muted">
             <Check className="h-4 w-4 flex-shrink-0 text-[#15803d]" />
-            بينما ننهيه، يمكنك بناء أي من قوالب زينيا الثمانية الأخرى الآن — مطاعم، أزياء، خدمات، برمجيات وغيرها.
+            بينما ننهيه، يمكنك بناء أي من قوالب بينون الثمانية الأخرى الآن — مطاعم، أزياء، خدمات، برمجيات وغيرها.
           </div>
         </div>
       </motion.div>

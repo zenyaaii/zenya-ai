@@ -9,15 +9,15 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Answers about Zenya: how the AI builds your site, which templates exist, what it costs, where sites are hosted, custom domains, Shopify export, and cancelling.',
-  keywords: ['Zenya FAQ', 'AI website builder questions', 'Arabic website builder FAQ'],
+    'Answers about Beynoun: how the AI builds your site, which templates exist, what it costs, where sites are hosted, custom domains, Shopify export, and cancelling.',
+  keywords: ['Beynoun FAQ', 'AI website builder questions', 'Arabic website builder FAQ'],
   alternates: {
     canonical: `${SITE}/en/faq`,
     languages: { en: `${SITE}/en/faq`, ar: `${SITE}/faq`, 'x-default': `${SITE}/faq` },
   },
   openGraph: {
-    title: 'Zenya FAQ',
-    description: 'How Zenya works, what it costs, where it hosts, and how to leave if you want to.',
+    title: 'Beynoun FAQ',
+    description: 'How Beynoun works, what it costs, where it hosts, and how to leave if you want to.',
     url: `${SITE}/en/faq`,
     type: 'website',
     locale: 'en_US',
@@ -47,7 +47,7 @@ export default function EnFaq() {
             Questions, <span className="gradient-text">answered straight.</span>
           </h1>
           <p className="mt-6 text-[17px] leading-[1.9] text-muted">
-            What Zenya does, what it costs, where your site lives, and how to take it with you if you leave.
+            What Beynoun does, what it costs, where your site lives, and how to take it with you if you leave.
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default function EnFaq() {
         </div>
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Two free generations, no card. Pick a template, write a brief, and see what the AI builds."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

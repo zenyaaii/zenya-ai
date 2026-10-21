@@ -168,7 +168,7 @@ async function publishToOnlineStore(shop: string, accessToken: string, productGi
     const msg = String(e?.message || e)
     // Older installs granted only write_products. Say so plainly.
     if (/access denied|publications/i.test(msg)) {
-      return 'Zenya is missing permission to publish products (write_publications). Reconnect the store, or press Publish on the product in Shopify.'
+      return 'Beynoun is missing permission to publish products (write_publications). Reconnect the store, or press Publish on the product in Shopify.'
     }
     return msg.slice(0, 300)
   }

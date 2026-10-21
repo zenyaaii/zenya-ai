@@ -1,5 +1,5 @@
 /**
- * Slug rules for public Zenya-hosted sites at /s/{slug}.
+ * Slug rules for public Beynoun-hosted sites at /s/{slug}.
  *
  * Shape: lowercase alphanumeric + hyphens, 3-40 chars, must start and end
  * with [a-z0-9]. Enforced both at the DB CHECK constraint and here so we
@@ -12,7 +12,7 @@ const SLUG_SHAPE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
 
 /**
  * Reserved namespaces — anything that would collide with an existing route
- * or look like a Zenya/system page. First-match wins; not authorisation.
+ * or look like a Beynoun/system page. First-match wins; not authorisation.
  */
 const RESERVED = new Set([
   'about', 'account', 'admin', 'api', 'app', 'auth', 'billing', 'blog',

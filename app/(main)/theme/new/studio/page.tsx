@@ -275,7 +275,7 @@ export default function StudioWizardPage() {
           <Field label="بيان الرسالة" required wide>
             <Textarea value={form.mission} onChange={(e) => update('mission', e.target.value)} placeholder="مثلاً: نبني حجّةً ضد ثقافة الاستهلاك العابر — قطعةً يدويةً تلو الأخرى." />
           </Field>
-          <Field label="قصة المؤسّس" wide hint="سيكتب الذكاء الاصطناعي رسالةً مؤثّرة من هذا.">
+          <Field label="قصة المؤسّس" wide hint="ستكتب بينون رسالةً مؤثّرة من هذا.">
             <Textarea rows={4} value={form.founder_story} onChange={(e) => update('founder_story', e.target.value)} placeholder="كيف بدأت العلامة؟ ما المشكلة التي كنت تحلّها؟" />
           </Field>
         </Grid>
@@ -399,7 +399,7 @@ export default function StudioWizardPage() {
               { label: 'القيم', value: validValues.map((v) => v.title).join('، ') },
             ]}
           >
-            <Handoff title="جاهز لصياغة صفحة علامتك." body="يكتب الذكاء الاصطناعي بيانك ورسالة المؤسّس وقيمك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لصياغة صفحة علامتك." body="تكتب بينون بيانك ورسالة المؤسّس وقيمك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -417,7 +417,7 @@ export default function StudioWizardPage() {
       <WizardShell
         eyebrow="ستوديو · قالب قصة العلامة"
         title="ابنِ صفحة قصة علامتك."
-        sub="أخبرنا قصتك وتصوغ زينيا صفحة علامة تحريرية — واجهة بيان ورسالة المؤسّس وخط زمني وقيم وأسلوب عمل."
+        sub="أخبرنا قصتك وتصوغ بينون صفحة علامة تحريرية — واجهة بيان ورسالة المؤسّس وخط زمني وقيم وأسلوب عمل."
         steps={steps}
         step={step}
         onStep={setStep}

@@ -1,7 +1,7 @@
 /**
  * ISO 3166-1 alpha-2 → a single representative point on the globe + Arabic name.
  *
- * Zenya's analytics only stores a visitor's **country** (Vercel's
+ * Beynoun's analytics only stores a visitor's **country** (Vercel's
  * `x-vercel-ip-country`), never a precise city or coordinate — so the live-users
  * globe places one dot per active *country*, not per person. That is deliberate:
  * it is real (a country only lights up when it has real live/recent visitors) and
@@ -14,7 +14,7 @@
 export type Centroid = { lat: number; lng: number; ar: string }
 
 export const COUNTRY_CENTROIDS: Record<string, Centroid> = {
-  // ── Arab world / MENA (Zenya's core) ──
+  // ── Arab world / MENA (Beynoun's core) ──
   EG: { lat: 26.8, lng: 30.8, ar: 'مصر' },
   SA: { lat: 24.0, lng: 45.0, ar: 'السعودية' },
   AE: { lat: 24.3, lng: 54.3, ar: 'الإمارات' },

@@ -172,7 +172,7 @@ const initialForm = (): Form => ({
 })
 
 /**
- * Reservations always run through Zenya's own booking system. A phone-shaped
+ * Reservations always run through Beynoun's own booking system. A phone-shaped
  * value is the fallback call-to-reserve number; anything else is the form.
  */
 function detectBooking(raw: string): { type: RestaurantInput["reservations"]["provider_type"]; value?: string } {
@@ -540,7 +540,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
           <Field label="الحي">
             <Input value={form.neighborhood} onChange={(e) => update("neighborhood", e.target.value)} placeholder="الجميزة" />
           </Field>
-          <Block title="ما نوع المكان؟" optional hint="يساعد الذكاء الاصطناعي على كتابة نصوص تناسب أجواء مكانك. تخطَّ إن لم يناسبك شيء.">
+          <Block title="ما نوع المكان؟" optional hint="تساعد بينون على كتابة نصوص تناسب أجواء مكانك. تخطَّ إن لم يناسبك شيء.">
             <Chips options={RESTAURANT_TYPES} value={form.restaurant_type} onChange={(id) => update("restaurant_type", id as RestaurantTypeId | "")} />
           </Block>
         </Grid>
@@ -642,7 +642,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
                                 </button>
                               ) : <span aria-hidden />}
                             </div>
-                            <Input value={item.description} onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })} placeholder="وصف موجز (اختياري — سيصقله الذكاء الاصطناعي)" aria-label={"وصف الصنف " + (ii + 1)} />
+                            <Input value={item.description} onChange={(e) => updateItem(cat.id, item.id, { description: e.target.value })} placeholder="وصف موجز (اختياري — ستصقله بينون)" aria-label={"وصف الصنف " + (ii + 1)} />
                             <span className="zb-mi-state" data-ok={valid ? "true" : undefined}>
                               {valid ? "سيُحفَظ" : "يحتاج اسمًا وسعرًا ليُحفَظ"}
                             </span>
@@ -675,7 +675,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
     {
       id: "story",
       title: "قصتك",
-      sub: "ملخّص قصير. سيحوّله الذكاء الاصطناعي إلى نص تحريري.",
+      sub: "ملخّص قصير. ستحوّله بينون إلى نص تحريري.",
       complete: ok.story,
       note: "أخبرنا جملةً أو جملتين عن قصة المطعم.",
       body: (
@@ -690,7 +690,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
             <Input value={form.chef_title} onChange={(e) => update("chef_title", e.target.value)} placeholder="الشيف · المالك" />
           </Field>
           <Field label="نبذة عن الشيف" wide>
-            <Textarea value={form.chef_bio_brief} onChange={(e) => update("chef_bio_brief", e.target.value)} placeholder="التدريب والخلفية وما الذي أتى به إلى هنا — سيصقله الذكاء الاصطناعي." />
+            <Textarea value={form.chef_bio_brief} onChange={(e) => update("chef_bio_brief", e.target.value)} placeholder="التدريب والخلفية وما الذي أتى به إلى هنا — ستصقله بينون." />
           </Field>
         </Grid>
       ),
@@ -698,7 +698,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
     {
       id: "booking",
       title: "الحجوزات",
-      sub: "تصل الحجوزات مباشرةً إلى لوحة تحكّمك في زينيا — بلا منصّات خارجية.",
+      sub: "تصل الحجوزات مباشرةً إلى لوحة تحكّمك في بينون — بلا منصّات خارجية.",
       optional: true,
       complete: true,
       body: (
@@ -839,7 +839,7 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
       <WizardShell
         chrome={demo}
         eyebrow="موقع مطعم"
-        title={<>املأ ما تعرفه.<br />الذكاء الاصطناعي يكتب الباقي.</>}
+        title={<>املأ ما تعرفه.<br />بينون تكتب الباقي.</>}
         sub={`خطوات قصيرة، ولا واحدة منها طويلة. المطلوب ${required.length} فقط — وكل ما عداها اختياري.`}
         steps={steps}
         step={step}

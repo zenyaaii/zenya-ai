@@ -174,14 +174,14 @@ const DATASET_LABEL_AR: Record<Dataset, string> = {
 }
 
 /**
- * A short branded preamble so an exported file is unmistakably a Zenya report —
+ * A short branded preamble so an exported file is unmistakably a Beynoun report —
  * name, what it covers, the date range, and when it was generated — before the
  * raw data rows. Keeps the file identity ("تصميمنا") even as plain CSV.
  */
 function brandHeader(dataset: Dataset, siteName: string, from: Date, to: Date): string[][] {
   const d = (x: Date) => x.toISOString().slice(0, 10)
   return [
-    ['زينيا · beynoun.com'],
+    ['بينون · beynoun.com'],
     [`تقرير التحليلات — ${DATASET_LABEL_AR[dataset]}`],
     ['الموقع', siteName],
     ['النطاق الزمني', `${d(from)} ← ${d(to)}`],

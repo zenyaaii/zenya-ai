@@ -1,7 +1,7 @@
 /**
  * Google Search Console integration (server-only).
  *
- * Per-user OAuth: each Zenya user connects their own Google account (the one
+ * Per-user OAuth: each Beynoun user connects their own Google account (the one
  * that owns their Search Console property). We store the refresh token in the
  * RLS-locked `gsc_connections` table and use it to pull live search-performance
  * data (impressions, clicks, position, top queries) for their sites.
@@ -19,7 +19,7 @@ const WMX_BASE = 'https://www.googleapis.com/webmasters/v3'
 const SITEVERIFY_BASE = 'https://www.googleapis.com/siteVerification/v1'
 
 // Full `webmasters` (read + add site + submit sitemap) and `siteverification`
-// (prove ownership) let Zenya set the property up end-to-end for the owner.
+// (prove ownership) let Beynoun set the property up end-to-end for the owner.
 // openid+email → show which account is connected. NOTE: broadening the scopes
 // means already-connected users must re-consent once for the write features;
 // reads keep working on the old token until they do.

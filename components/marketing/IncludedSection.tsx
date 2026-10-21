@@ -18,7 +18,7 @@ import { Reveal, RevealGroup, RevealItem } from '@/components/marketing/Reveal'
  *
  * A grid of the platform's REAL, shipped capabilities (hosting, custom domain,
  * visual editor, analytics, Arabic RTL, Shopify export, SEO, AI copy). No
- * fabricated numbers or claims — every card maps to something Zenya actually
+ * fabricated numbers or claims — every card maps to something Beynoun actually
  * does. Adds professional depth to the home page before the final CTA.
  */
 
@@ -45,7 +45,7 @@ const FEATURES: Feature[] = [
   },
   {
     icon: Sparkles,
-    title: 'إعادة صياغة بالذكاء الاصطناعي',
+    title: 'إعادة صياغة',
     desc: 'لم يعجبك نصّ؟ أعد صياغته بنقرة واحدة داخل المحرّر حتى يناسب صوتك.',
     tint: '#f59e0b',
   },

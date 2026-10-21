@@ -9,17 +9,17 @@ import { FaqList, CtaBand } from '@/components/marketing/CompareParts'
 const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
-  title: { absolute: 'Zenya — The Arabic-First AI Website Builder' },
+  title: { absolute: 'Beynoun — The Arabic-First AI Website Builder' },
   description:
-    'Zenya is the first Muslim company to build AI websites — an Arabic-first AI website builder. Pick one of 8 business templates, write a short brief, and the AI writes the copy and designs a professional, publish-ready website in minutes. EU hosting, custom domain, and Shopify export included.',
+    'Beynoun is the first Muslim company to build AI websites — an Arabic-first AI website builder. Pick one of 8 business templates, write a short brief, and the AI writes the copy and designs a professional, publish-ready website in minutes. EU hosting, custom domain, and Shopify export included.',
   keywords: ['first Muslim AI website builder', 'Arabic website builder', 'AI website builder', 'Arabic AI website builder', 'RTL website builder', 'no-code website builder'],
   alternates: {
     canonical: `${SITE}/en`,
     languages: { en: `${SITE}/en`, ar: `${SITE}/`, 'x-default': `${SITE}/` },
   },
   openGraph: {
-    title: 'Zenya — The Arabic-first AI website builder',
-    description: 'Pick a template, write a brief, and get a professional Arabic website in minutes. AI writes the content; Zenya hosts it.',
+    title: 'Beynoun — The Arabic-first AI website builder',
+    description: 'Pick a template, write a brief, and get a professional Arabic website in minutes. AI writes the content; Beynoun hosts it.',
     url: `${SITE}/en`,
     type: 'website',
     locale: 'en_US',
@@ -38,10 +38,10 @@ export default function EnHome() {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     inLanguage: 'en',
-    name: 'Zenya — The Arabic-first AI website builder',
+    name: 'Beynoun — The Arabic-first AI website builder',
     url: `${SITE}/en`,
     description:
-      'Zenya is the first Muslim company to build AI websites, and an Arabic-first AI website builder: pick a template, write a brief, and get a professional site in minutes.',
+      'Beynoun is the first Muslim company to build AI websites, and an Arabic-first AI website builder: pick a template, write a brief, and get a professional site in minutes.',
   }
 
   return (
@@ -58,7 +58,7 @@ export default function EnHome() {
             The Arabic-first <span className="gradient-text">AI website builder.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-[17px] leading-[1.9] text-muted">
-            Pick one of 8 business templates, write a short brief, and Zenya’s AI writes the copy, chooses the design,
+            Pick one of 8 business templates, write a short brief, and Beynoun’s AI writes the copy, chooses the design,
             and lays out the sections — a professional, publish-ready website in minutes. Arabic and right-to-left are
             built in, not bolted on.
           </p>
@@ -97,7 +97,7 @@ export default function EnHome() {
           {[
             { href: '/en/features', title: 'Features', body: 'Hosting, domains, payments, AI content, analytics, and more.' },
             { href: '/en/websites', title: 'Website types', body: 'Restaurant, app, store, services, wellness, and more.' },
-            { href: '/en/compare', title: 'Compare', body: 'Zenya vs Wix, Shopify, WordPress, Squarespace, and agencies.' },
+            { href: '/en/compare', title: 'Compare', body: 'Beynoun vs Wix, Shopify, WordPress, Squarespace, and agencies.' },
           ].map((c) => (
             <Link key={c.href} href={c.href} className="group rounded-2xl border border-token bg-[var(--surface-2)] p-5 transition-all hover:-translate-y-0.5 hover:border-[rgba(94,106,210,0.30)]">
               <h3 className="flex items-center justify-between text-[15px] font-bold text-foreground">
@@ -121,7 +121,7 @@ export default function EnHome() {
         <FaqList title="Frequently asked questions" faqs={EN_FAQS} />
 
         <CtaBand
-          title="Try Zenya free"
+          title="Try Beynoun free"
           subtitle="Pick a template, write a brief, and get a professional site in minutes. No card required."
           primaryLabel="Start building free"
           secondaryLabel="See pricing"

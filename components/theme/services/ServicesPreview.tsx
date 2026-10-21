@@ -1536,7 +1536,7 @@ function Footer() {
 
 /**
  * A WhatsApp button that stays with the visitor once they scroll past the
- * first screen. Bottom left: the Made with Zenya badge holds bottom right, and
+ * first screen. Bottom left: the Made with Beynoun badge holds bottom right, and
  * the cookie box, which opens bottom left, sits above this until it is closed.
  */
 function WhatsAppFloat() {

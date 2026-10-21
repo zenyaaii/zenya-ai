@@ -241,7 +241,7 @@ function DashboardContent() {
     return (
       <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
         <AuroraBackground fixed intensity={0.85} />
-        <TitleBar title="Zenya AI" />
+        <TitleBar title="Beynoun" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -253,7 +253,7 @@ function DashboardContent() {
               <Sparkles className="h-5 w-5" strokeWidth={2.25} />
             </div>
             <h1 className="text-[26px] font-[590] tracking-[-0.6px] text-foreground">
-              مرحبًا بك في <span className="gradient-text">زينيا AI</span>
+              مرحبًا بك في <span className="gradient-text">بينون AI</span>
             </h1>
             <p className="mt-2 text-[13.5px] text-muted">
               {isSignUp ? 'أنشئ حسابًا لحفظ متاجرك.' : 'سجّل الدخول لبناء القوالب وتثبيتها في متجرك.'}
@@ -314,7 +314,7 @@ function DashboardContent() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       <AuroraBackground fixed intensity={0.55} />
-      <TitleBar title="Zenya AI" />
+      <TitleBar title="Beynoun" />
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-6 md:py-8">
         {/* Sidebar */}
@@ -419,7 +419,7 @@ function OverviewView({
         <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 100% at 100% 0%, rgba(99,102,241,0.14), transparent 60%)' }} />
         <div className="relative max-w-xl">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-token bg-white/70 px-3 py-1 text-[11.5px] font-medium text-muted">
-            <Sparkles className="h-3 w-3 text-[#6366f1]" strokeWidth={2.25} /> مُنشئ المتاجر بالذكاء الاصطناعي
+            <Sparkles className="h-3 w-3 text-[#6366f1]" strokeWidth={2.25} /> مُنشئ المتاجر
           </div>
           <h2 className="text-[28px] font-[590] leading-[1.1] tracking-[-1px] text-foreground sm:text-[34px]">
             {oneProductLive ? (
@@ -430,7 +430,7 @@ function OverviewView({
           </h2>
           <p className="mt-3 text-[14.5px] leading-[1.6] text-muted">
             {oneProductLive
-              ? 'الصق رابط منتج — تكتب زينيا النصوص، وتستورد مراجعات حقيقية، وتصمّم الصفحة، وتثبّت القالب والمنتج مباشرةً في متجرك.'
+              ? 'الصق رابط منتج — تكتب بينون النصوص، وتستورد مراجعات حقيقية، وتصمّم الصفحة، وتثبّت القالب والمنتج مباشرةً في متجرك.'
               : 'نُعيد بناء منشئ متجر المنتج الواحد من الصفر — أسرع، وأسهل، وبقوالب أعلى تحويلًا. نضع اللمسات الأخيرة الآن.'}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -493,7 +493,7 @@ function TemplatesView({ queryString, templates }: { queryString: string; templa
             <div>
               <h3 className="text-[15px] font-[590] tracking-[-0.3px] text-foreground">تحتاج نوعًا مختلفًا من المواقع؟</h3>
               <p className="mt-0.5 max-w-md text-[13px] leading-[1.55] text-muted">
-                مطاعم، وبرمجيات كخدمة، وأزياء، وخدمات وغيرها — ابنِها على موقع زينيا. لا تُثبَّت هنا إلا قوالب متاجر التجارة الإلكترونية.
+                مطاعم، وبرمجيات كخدمة، وأزياء، وخدمات وغيرها — ابنِها على موقع بينون. لا تُثبَّت هنا إلا قوالب متاجر التجارة الإلكترونية.
               </p>
             </div>
           </div>
@@ -606,7 +606,7 @@ function StoresView({
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
       <SectionHeader
         title="متاجري"
-        subtitle="كل ما أنشأته باستخدام زينيا."
+        subtitle="كل ما أنشأته باستخدام بينون."
         action={
           oneProductLive ? (
             <Link href={`/shopify/new${queryString}`} className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-[13px] font-semibold text-white shadow-soft-md transition hover:scale-[1.02]">
@@ -667,7 +667,7 @@ function StoresView({
 function AccountView({ email, storeName, shop, onSignOut }: { email: string; storeName: string; shop: string | null; onSignOut: () => void }) {
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      <SectionHeader title="الحساب" subtitle="حساب زينيا الخاص بك والمتجر المرتبط." />
+      <SectionHeader title="الحساب" subtitle="حساب بينون الخاص بك والمتجر المرتبط." />
       <div className="space-y-4">
         <div className="rounded-2xl border border-token bg-white/80 p-6 shadow-soft-md backdrop-blur-md">
           <div className="flex items-center gap-4">
@@ -677,7 +677,7 @@ function AccountView({ email, storeName, shop, onSignOut }: { email: string; sto
             <div className="min-w-0">
               <p className="truncate text-[17px] font-[590] tracking-[-0.3px] text-foreground">{email}</p>
               <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-muted">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> حساب زينيا
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> حساب بينون
               </p>
             </div>
           </div>

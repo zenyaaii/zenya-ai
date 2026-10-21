@@ -73,7 +73,7 @@ export const restaurantInputSchema = z.object({
     chef_bio_brief: z.string().max(500).optional()
   }),
   reservations: z.object({
-    // Reservations run through Zenya's own booking system: `form` (the default,
+    // Reservations run through Beynoun's own booking system: `form` (the default,
     // captured into the owner's dashboard inbox) or `phone` (a call-to-reserve
     // fallback). External platforms are intentionally not accepted.
     provider_type: z.enum(['phone', 'form']),

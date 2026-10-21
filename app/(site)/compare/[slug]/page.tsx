@@ -15,7 +15,7 @@
  *     header and 4.03:1 in the choose blocks, against a 4.5 floor. Both take
  *     the accent's reading step here, #4f5ab8, which measures 5.48:1 and
  *     5.77:1.
- *   · A Zenya win is marked with a #27a644 check in a tinted disc. Green
+ *   · A Beynoun win is marked with a #27a644 check in a tinted disc. Green
  *     reports a state; an opinion about a feature is not one.
  *   · The table header cells are 12.5px and 13.5px (10.63px and 11.47px
  *     rendered) and the body cells 13px.
@@ -57,11 +57,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     title: c.title,
     description: c.metaDescription,
     keywords: [
-      `زينيا مقابل ${c.them}`,
-      `Zenya vs ${c.themLatin}`,
+      `بينون مقابل ${c.them}`,
+      `Beynoun vs ${c.themLatin}`,
       `${c.them} بديل`,
       `أفضل من ${c.them}`,
-      'منشئ مواقع بالذكاء الاصطناعي',
+      'منشئ مواقع',
       'منشئ مواقع عربي',
     ],
     alternates: {
@@ -88,13 +88,13 @@ export default function ComparisonPage({ params }: { params: { slug: string } })
         trail={[
           { label: "الرئيسية", href: "/" },
           { label: "المقارنات", href: "/compare" },
-          { label: `زينيا مقابل ${c.them}` },
+          { label: `بينون مقابل ${c.them}` },
         ]}
       />
 
       <Hero
         eyebrow="مقارنة صريحة"
-        title={<>زينيا مقابل</>}
+        title={<>بينون مقابل</>}
         mark={c.them}
         intro={c.intro}
         actions={<Link href="/login?mode=signup" className="zx-act-1">ابدأ الإنشاء مجانًا</Link>}
@@ -105,14 +105,14 @@ export default function ComparisonPage({ params }: { params: { slug: string } })
         <ChooseBlocks themName={c.them} chooseZenya={c.chooseZenya} chooseThem={c.chooseThem} />
       </section>
 
-      <FaqList title={`أسئلة شائعة — زينيا مقابل ${c.them}`} faqs={c.faqs} />
+      <FaqList title={`أسئلة شائعة — بينون مقابل ${c.them}`} faqs={c.faqs} />
 
       <section className="zx-faq" data-reveal>
         <h2 className="zx-h2">مقارنات أخرى</h2>
         <div className="zx-pills">
           {others.map((o) => (
             <Link key={o.slug} href={`/compare/${o.slug}`} className="zx-pill-link">
-              {`زينيا مقابل ${o.them}`}
+              {`بينون مقابل ${o.them}`}
               <ArrowLeft size={15} strokeWidth={2.25} aria-hidden />
             </Link>
           ))}

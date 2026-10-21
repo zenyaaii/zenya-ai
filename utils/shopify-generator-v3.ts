@@ -4,7 +4,7 @@ import type { NovaThemeContent, NovaThemeColors } from './shopify-generator-v2'
 function normalize(contentInput: Partial<NovaThemeContent>): NovaThemeContent {
   return {
     brand: {
-      name: contentInput.brand?.name || 'Zenya Store',
+      name: contentInput.brand?.name || 'Beynoun Store',
       tagline: contentInput.brand?.tagline || 'Premium products, clear storytelling, and conversion-first design.'
     },
     hero: {
@@ -1250,8 +1250,8 @@ export function generateShopifyThemeV3OneProduct(
   zip.folder('config')?.file('settings_schema.json', JSON.stringify([
     {
       name: 'theme_info',
-      theme_name: 'Zenya V3 Premium',
-      theme_author: 'Zenya AI',
+      theme_name: 'Beynoun V3 Premium',
+      theme_author: 'Beynoun',
       theme_version: '3.0.0',
       theme_documentation_url: 'https://shopify.dev/docs/storefronts/themes/architecture',
       theme_support_url: 'https://beynoun.com'
@@ -1308,9 +1308,9 @@ export function generateShopifyThemeV3OneProduct(
   ], null, 2))
 
   zip.folder('config')?.file('settings_data.json', JSON.stringify({
-    current: 'Zenya V3 Premium',
+    current: 'Beynoun V3 Premium',
     presets: {
-      'Zenya V3 Premium': {
+      'Beynoun V3 Premium': {
         design_direction: 'modern-minimal',
         color_primary: themeColors.primary,
         color_accent: themeColors.accent,

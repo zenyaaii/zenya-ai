@@ -3,7 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { publicSiteUrl } from '@/lib/portal-urls'
 
 /**
- * Site handovers: the notice that tells a customer the site Zenya built for
+ * Site handovers: the notice that tells a customer the site Beynoun built for
  * them, its address and their plan are now in their own account, with a
  * yes / no receipt. Rows live in public.site_handovers and are written only
  * through the service role.

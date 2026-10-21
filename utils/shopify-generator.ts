@@ -118,9 +118,9 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
   const settingsSchema = [
     {
       "name": "theme_info",
-      "theme_name": "Zenya Theme",
+      "theme_name": "Beynoun Theme",
       "theme_version": "1.0.0",
-      "theme_author": "Zenya AI",
+      "theme_author": "Beynoun",
       "theme_documentation_url": "https://zenya.ai",
       "theme_support_url": "https://zenya.ai"
     },
@@ -172,9 +172,9 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
   zip.folder('config')?.file('settings_schema.json', JSON.stringify(settingsSchema, null, 2))
   
   const settingsData = {
-    "current": "Zenya Theme",
+    "current": "Beynoun Theme",
     "presets": {
-      "Zenya Theme": {
+      "Beynoun Theme": {
         "primary_color": colors.primary,
         "secondary_color": colors.secondary,
         "motion_enabled": true,
@@ -229,7 +229,7 @@ export function prepareThemeZip(name: string, content: ThemeContent, colors: { p
       { type: "color", id: "announcement_bg", label: "Bar Background", default: "#000000" },
       { type: "color", id: "announcement_text_color", label: "Bar Text", default: "#ffffff" }
     ],
-    presets: [{ name: "Zenya Header" }]
+    presets: [{ name: "Beynoun Header" }]
   }
   const headerLiquid = `
 <div x-data="{ mobileMenuOpen: false, searchOpen: false, searchQuery: '', searchResults: [], loading: false, performSearch() { if (this.searchQuery.length < 2) { this.searchResults = []; return; } this.loading = true; fetch(\`/search/suggest.json?q=\${this.searchQuery}&resources[type]=product&resources[limit]=5\`).then(r => r.json()).then(data => { this.searchResults = data.resources.results.products || []; }).catch(e => console.error(e)).finally(() => this.loading = false); } }">
@@ -426,7 +426,7 @@ ${JSON.stringify(headerSchema, null, 2)}
       { type: "color", id: "bg_color", label: "Background", default: "#0f172a" },
       { type: "color", id: "text_color", label: "Text", default: "#ffffff" },
       { type: "textarea", id: "tagline", label: "Tagline", default: "Premium quality products designed for your lifestyle. We stand behind everything we sell with our industry-leading guarantee." },
-      { type: "text", id: "copyright", label: "Copyright Text", default: "© 2024 Zenya. All rights reserved." },
+      { type: "text", id: "copyright", label: "Copyright Text", default: "© 2024 Beynoun. All rights reserved." },
       { type: "link_list", id: "menu_1", label: "First Menu", default: "footer" },
       { type: "link_list", id: "menu_2", label: "Second Menu", default: "main-menu" },
       { type: "header", content: "Social Media" },
@@ -434,7 +434,7 @@ ${JSON.stringify(headerSchema, null, 2)}
       { type: "url", id: "instagram_url", label: "Instagram URL" },
       { type: "url", id: "twitter_url", label: "Twitter URL" }
     ],
-    presets: [{ name: "Zenya Footer" }]
+    presets: [{ name: "Beynoun Footer" }]
   }
   const footerLiquid = `
 <footer class="py-12 border-t border-slate-800" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
@@ -639,7 +639,7 @@ ${JSON.stringify(footerSchema, null, 2)}
       { type: "text", id: "reassurance_2", label: "Reassurance Line 2", default: content.cart_drawer?.reassurance_lines?.[1] || "Fast support" },
       { type: "text", id: "reassurance_3", label: "Reassurance Line 3", default: content.cart_drawer?.reassurance_lines?.[2] || "Tracked delivery" }
     ],
-    presets: [{ name: "Zenya Cart Drawer" }]
+    presets: [{ name: "Beynoun Cart Drawer" }]
   }
   
   const cartDrawerLiquid = `
@@ -953,7 +953,7 @@ ${JSON.stringify(cartDrawerSchema, null, 2)}
       { type: "checkbox", id: "show_social_proof", label: "Show Badge", default: true },
       { type: "textarea", id: "social_proof_text", label: "Badge Text", default: "Trusted by 10k+ happy customers" }
     ],
-    presets: [{ name: "Zenya Hero" }]
+    presets: [{ name: "Beynoun Hero" }]
   }
   const heroLiquid = `
 <div class="relative overflow-hidden bg-white py-20 lg:py-28">
@@ -1022,7 +1022,7 @@ ${JSON.stringify(heroSchema, null, 2)}
       { type: "text", id: "bullet_3", label: "Bullet 3", default: "Secure checkout" },
       { type: "text", id: "support_line", label: "Support Line", default: "Need help? We respond fast." },
     ],
-    presets: [{ name: "Zenya Featured Product" }],
+    presets: [{ name: "Beynoun Featured Product" }],
   }
 
   const featuredProductLiquid = `
@@ -1127,7 +1127,7 @@ ${JSON.stringify(featuredProductSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya Features",
+        name: "Beynoun Features",
         blocks: content.features.map(f => ({
           type: "feature",
           settings: {
@@ -1195,7 +1195,7 @@ ${JSON.stringify(featuresSchema, null, 2)}
       { type: "image_picker", id: "image", label: "Image" },
       { type: "text", id: "external_image_url", label: "External Image URL (Fallback)" }
     ],
-    presets: [{ name: "Zenya Problem/Solution" }]
+    presets: [{ name: "Beynoun Problem/Solution" }]
   }
   const problemSolutionLiquid = `
 <div class="relative overflow-hidden bg-white py-24">
@@ -1261,7 +1261,7 @@ ${JSON.stringify(problemSolutionSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya Testimonials",
+        name: "Beynoun Testimonials",
         blocks: content.testimonials.map(t => ({
           type: "testimonial",
           settings: {
@@ -1336,7 +1336,7 @@ ${JSON.stringify(testimonialsSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya FAQ",
+        name: "Beynoun FAQ",
         blocks: content.faq.map(f => ({
           type: "faq",
           settings: {
@@ -1394,7 +1394,7 @@ ${JSON.stringify(faqSchema, null, 2)}
       { type: "text", id: "title", label: "Title", default: content.guarantee.title },
       { type: "textarea", id: "text", label: "Text", default: content.guarantee.text }
     ],
-    presets: [{ name: "Zenya Guarantee" }]
+    presets: [{ name: "Beynoun Guarantee" }]
   }
   const guaranteeLiquid = `
 <div class="relative overflow-hidden py-24 text-center" style="background-color: {{ section.settings.bg_color }};">
@@ -1597,7 +1597,7 @@ ${JSON.stringify(guaranteeSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Trust Badges" }]
+    presets: [{ name: "Beynoun Trust Badges" }]
   }
   const trustBadgesLiquid = `
 <div class="relative overflow-hidden py-10" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
@@ -1654,7 +1654,7 @@ ${JSON.stringify(trustBadgesSchema, null, 2)}
       { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" },
       { type: "color", id: "primary_color", label: "Primary Color", default: "#000000" }
     ],
-    presets: [{ name: "Zenya Upsell" }]
+    presets: [{ name: "Beynoun Upsell" }]
   }
 
   const upsellLiquid = `
@@ -1733,7 +1733,7 @@ ${JSON.stringify(upsellSchema, null, 2)}
       { type: "color", id: "bg_color", label: "Background Color", default: "#ffffff" },
       { type: "color", id: "primary_color", label: "Primary Color", default: "#000000" }
     ],
-    presets: [{ name: "Zenya Volume Bundles" }]
+    presets: [{ name: "Beynoun Volume Bundles" }]
   }
   
   const volumeBundlesLiquid = `
@@ -1922,7 +1922,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
     ],
     "presets": [
       {
-        "name": "Zenya Product"
+        "name": "Beynoun Product"
       }
     ]
   }
@@ -2526,7 +2526,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
   ],
   "presets": [
     {
-      "name": "Zenya Product"
+      "name": "Beynoun Product"
     }
   ]
 }
@@ -2636,7 +2636,7 @@ ${JSON.stringify(volumeBundlesSchema, null, 2)}
     settings: [
       { type: "range", id: "products_per_page", label: "Products per page", min: 8, max: 24, default: 12 }
     ],
-    presets: [{ name: "Zenya Collection Main" }]
+    presets: [{ name: "Beynoun Collection Main" }]
   }
 
   const mainCollectionLiquid = `
@@ -2756,7 +2756,7 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
       { type: "text", id: "empty_headline", label: "Empty Cart Headline", default: content.cart_page?.empty_headline || "Your cart is empty" },
       { type: "text", id: "empty_subheadline", label: "Empty Cart Subheadline", default: content.cart_page?.empty_subheadline || "Looks like you haven't added anything yet." }
     ],
-    presets: [{ name: "Zenya Cart Main" }]
+    presets: [{ name: "Beynoun Cart Main" }]
   }
   
   const mainCartLiquid = `
@@ -3509,7 +3509,7 @@ ${JSON.stringify(mainPasswordSchema, null, 2)}
       { type: "textarea", id: "text", label: "Text", default: "Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store." },
       { type: "select", id: "align", label: "Alignment", options: [{value: "left", label: "Left"}, {value: "center", label: "Center"}], default: "center" }
     ],
-    presets: [{ name: "Zenya Rich Text" }]
+    presets: [{ name: "Beynoun Rich Text" }]
   }
   const richTextLiquid = `
 <div class="py-16 bg-white">
@@ -3537,7 +3537,7 @@ ${JSON.stringify(richTextSchema, null, 2)}
       { type: "url", id: "cta_url", label: "Button Link" },
       { type: "select", id: "layout", label: "Image Position", options: [{value: "left", label: "Left"}, {value: "right", label: "Right"}], default: "left" }
     ],
-    presets: [{ name: "Zenya Image with Text" }]
+    presets: [{ name: "Beynoun Image with Text" }]
   }
   const imageTextLiquid = `
 <div class="py-20 bg-slate-50">
@@ -3583,7 +3583,7 @@ ${JSON.stringify(imageTextSchema, null, 2)}
       { type: "text", id: "button_label", label: "Button Label", default: "Subscribe" },
       { type: "text", id: "email_placeholder", label: "Email Placeholder", default: "Email address" }
     ],
-    presets: [{ name: "Zenya Newsletter" }]
+    presets: [{ name: "Beynoun Newsletter" }]
   }
   const newsletterLiquid = `
 <div class="relative overflow-hidden py-24 text-center bg-slate-900 text-white">
@@ -3626,7 +3626,7 @@ ${JSON.stringify(newsletterSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Logo List" }]
+    presets: [{ name: "Beynoun Logo List" }]
   }
   const logoListLiquid = `
 <div class="py-12 border-y border-slate-100 bg-white">
@@ -3669,7 +3669,7 @@ ${JSON.stringify(logoListSchema, null, 2)}
       { type: "collection", id: "collection", label: "Collection" },
       { type: "range", id: "limit", label: "Products to Show", min: 4, max: 12, step: 4, default: 4 }
     ],
-    presets: [{ name: "Zenya Featured Collection" }]
+    presets: [{ name: "Beynoun Featured Collection" }]
   }
   const featuredCollectionLiquid = `
 <div class="py-20 bg-white">
@@ -3729,7 +3729,7 @@ ${JSON.stringify(featuredCollectionSchema, null, 2)}
       { type: "image_picker", id: "cover", label: "Cover Image" },
       { type: "video_url", id: "video_url", label: "Video URL", accept: ["youtube", "vimeo"], default: "https://www.youtube.com/watch?v=_9VUPq3SxOc" }
     ],
-    presets: [{ name: "Zenya Video" }]
+    presets: [{ name: "Beynoun Video" }]
   }
   const videoLiquid = `
 <div class="py-24 bg-slate-900 text-white">
@@ -3769,7 +3769,7 @@ ${JSON.stringify(videoSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Collection List" }]
+    presets: [{ name: "Beynoun Collection List" }]
   }
   const collectionListLiquid = `
 <div class="py-20 bg-slate-50">
@@ -3822,7 +3822,7 @@ ${JSON.stringify(collectionListSchema, null, 2)}
       { type: "text", id: "title", label: "Heading", default: "Get in Touch" },
       { type: "textarea", id: "text", label: "Text", default: "Have a question? We're here to help." }
     ],
-    presets: [{ name: "Zenya Contact Form" }]
+    presets: [{ name: "Beynoun Contact Form" }]
   }
   const contactFormLiquid = `
 <div class="py-24 bg-white">
@@ -3888,7 +3888,7 @@ ${JSON.stringify(contactFormSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya How It Works",
+        name: "Beynoun How It Works",
         blocks: [
           { type: "step", settings: { title: "Place Your Order", text: "Select your preferred options." } },
           { type: "step", settings: { title: "We Ship Fast", text: "Ships within 24 hours." } },
@@ -3940,7 +3940,7 @@ ${JSON.stringify(howItWorksSchema, null, 2)}
       { type: "text", id: "cta_text", label: "Button Text", default: "Get Yours Today" },
       { type: "url", id: "cta_link", label: "Button Link" }
     ],
-    presets: [{ name: "Zenya Visual Showcase" }]
+    presets: [{ name: "Beynoun Visual Showcase" }]
   }
 
   const visualShowcaseLiquid = `
@@ -3997,14 +3997,14 @@ ${JSON.stringify(visualShowcaseSchema, null, 2)}
         name: "Slide",
         settings: [
           { type: "image_picker", id: "image", label: "Image" },
-          { type: "text", id: "heading", label: "Heading", default: "Welcome to Zenya" },
+          { type: "text", id: "heading", label: "Heading", default: "Welcome to Beynoun" },
           { type: "text", id: "subheading", label: "Subheading", default: "The best products for your lifestyle." },
           { type: "text", id: "cta_text", label: "Button Label", default: "Shop Now" },
           { type: "url", id: "cta_url", label: "Button Link" }
         ]
       }
     ],
-    presets: [{ name: "Zenya Slideshow" }]
+    presets: [{ name: "Beynoun Slideshow" }]
   }
   const slideshowLiquid = `
 <div x-data="{ active: 0, count: {{ section.blocks.size }}, timer: null }" 
@@ -4082,7 +4082,7 @@ ${JSON.stringify(slideshowSchema, null, 2)}
       }
     ],
     presets: [{
-      name: "Zenya Scrolling Text",
+      name: "Beynoun Scrolling Text",
       blocks: [
         { type: "text_block", settings: { text: "Free Shipping" } },
         { type: "text_block", settings: { text: "Sale Now On" } },
@@ -4141,7 +4141,7 @@ ${JSON.stringify(scrollingTextSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Multi-Column" }]
+    presets: [{ name: "Beynoun Multi-Column" }]
   }
   const multiColumnLiquid = `
 <div class="py-20 bg-white">
@@ -4185,7 +4185,7 @@ ${JSON.stringify(multiColumnSchema, null, 2)}
       { type: "image_picker", id: "image_before", label: "Before Image" },
       { type: "image_picker", id: "image_after", label: "After Image" }
     ],
-    presets: [{ name: "Zenya Before/After" }]
+    presets: [{ name: "Beynoun Before/After" }]
   }
   const beforeAfterLiquid = `
 <div class="py-24 bg-slate-50" x-data="{ slider: 50 }">
@@ -4258,7 +4258,7 @@ ${JSON.stringify(beforeAfterSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya Stats",
+        name: "Beynoun Stats",
         blocks: [
           { type: "stat", settings: { value: "10k+", label: "Themes Generated" } },
           { type: "stat", settings: { value: "2.5s", label: "Avg. Load Time" } },
@@ -4305,7 +4305,7 @@ ${JSON.stringify(statsSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya Logo Cloud",
+        name: "Beynoun Logo Cloud",
         blocks: [
           { type: "logo" },
           { type: "logo" },
@@ -4346,7 +4346,7 @@ ${JSON.stringify(logosSchema, null, 2)}
       { type: "blog", id: "blog", label: "Blog Source" },
       { type: "range", id: "limit", label: "Posts to Show", min: 3, max: 9, step: 3, default: 3 }
     ],
-    presets: [{ name: "Zenya Blog Posts" }]
+    presets: [{ name: "Beynoun Blog Posts" }]
   }
   const blogPostsLiquid = `
 <div class="py-20 bg-white">
@@ -4402,7 +4402,7 @@ ${JSON.stringify(blogPostsSchema, null, 2)}
       { type: "text", id: "address", label: "Address", default: "123 Main St, New York, NY 10001" },
       { type: "text", id: "map_api_key", label: "Google Maps API Key (Optional)", info: "Leave blank to use iframe embed" }
     ],
-    presets: [{ name: "Zenya Map" }]
+    presets: [{ name: "Beynoun Map" }]
   }
   const mapLiquid = `
 <div class="py-0 bg-slate-100 relative h-96">
@@ -4428,7 +4428,7 @@ ${JSON.stringify(mapSchema, null, 2)}
       { type: "liquid", id: "custom_liquid", label: "Custom Liquid", info: "Add app snippets or other code to create advanced customizations." },
       { type: "checkbox", id: "full_width", label: "Full Width", default: false }
     ],
-    presets: [{ name: "Zenya Custom Liquid" }]
+    presets: [{ name: "Beynoun Custom Liquid" }]
   }
   const customLiquidLiquid = `
 <div class="{% unless section.settings.full_width %}container mx-auto px-6{% endunless %} py-12">
@@ -4449,7 +4449,7 @@ ${JSON.stringify(customLiquidSchema, null, 2)}
       { type: "color", id: "bg_color", label: "Background", default: "#dc2626" },
       { type: "color", id: "text_color", label: "Text Color", default: "#ffffff" }
     ],
-    presets: [{ name: "Zenya Countdown Banner" }]
+    presets: [{ name: "Beynoun Countdown Banner" }]
   }
   const countdownBannerLiquid = `
 <div class="py-12 text-center" style="background: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};"
@@ -4518,7 +4518,7 @@ ${JSON.stringify(countdownBannerSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Shoppable Image" }]
+    presets: [{ name: "Beynoun Shoppable Image" }]
   }
   const shoppableImageLiquid = `
 <div class="relative w-full aspect-[4/3] md:aspect-[21/9] bg-slate-100 overflow-hidden group">
@@ -4586,7 +4586,7 @@ ${JSON.stringify(shoppableImageSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Accordion" }]
+    presets: [{ name: "Beynoun Accordion" }]
   }
   const accordionLiquid = `
 <div class="py-20 bg-slate-50">
@@ -4634,7 +4634,7 @@ ${JSON.stringify(accordionSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Tabs" }]
+    presets: [{ name: "Beynoun Tabs" }]
   }
   const tabsLiquid = `
 <div class="py-20 bg-white" x-data="{ activeTab: 0 }">
@@ -4682,7 +4682,7 @@ ${JSON.stringify(tabsSchema, null, 2)}
       { type: "text", id: "cta_text", label: "Button Label", default: "Watch More" },
       { type: "url", id: "cta_url", label: "Button Link" }
     ],
-    presets: [{ name: "Zenya Video Hero" }]
+    presets: [{ name: "Beynoun Video Hero" }]
   }
   const videoHeroLiquid = `
 <div class="relative h-screen w-full overflow-hidden bg-black">
@@ -4724,7 +4724,7 @@ ${JSON.stringify(videoHeroSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Timeline" }]
+    presets: [{ name: "Beynoun Timeline" }]
   }
   const timelineLiquid = `
 <div class="py-24 bg-white">
@@ -4769,7 +4769,7 @@ ${JSON.stringify(timelineSchema, null, 2)}
     blocks: [
       { type: "@app" }
     ],
-    presets: [{ name: "Zenya Product" }]
+    presets: [{ name: "Beynoun Product" }]
   }
 
   const productLiquid = `
@@ -5478,7 +5478,7 @@ ${JSON.stringify(productSchema, null, 2)}
     ],
     presets: [
       {
-        name: "Zenya Comparison",
+        name: "Beynoun Comparison",
         blocks: [
           { type: "row", settings: { feature: "Premium Quality Materials" } },
           { type: "row", settings: { feature: "24/7 Customer Support" } },
@@ -5777,7 +5777,7 @@ ${JSON.stringify(comparisonSchema, null, 2)}
   const notFoundSchema = {
     name: "404 Page",
     settings: [],
-    presets: [{ name: "Zenya 404" }]
+    presets: [{ name: "Beynoun 404" }]
   }
   const notFoundLiquid = `
 <div class="py-32 bg-slate-50 text-center min-h-[60vh] flex flex-col items-center justify-center">
@@ -5810,7 +5810,7 @@ ${JSON.stringify(notFoundSchema, null, 2)}
   const searchSchema = {
     name: "Search Page",
     settings: [],
-    presets: [{ name: "Zenya Search" }]
+    presets: [{ name: "Beynoun Search" }]
   }
   const searchLiquid = `
 <div class="py-20 bg-slate-50 min-h-[60vh]">
@@ -5876,7 +5876,7 @@ ${JSON.stringify(searchSchema, null, 2)}
   const pageSchema = {
     name: "Page",
     settings: [],
-    presets: [{ name: "Zenya Page" }]
+    presets: [{ name: "Beynoun Page" }]
   }
   const pageLiquid = `
 <div class="py-20 bg-white min-h-[50vh]">
@@ -5905,7 +5905,7 @@ ${JSON.stringify(pageSchema, null, 2)}
   const blogSchema = {
     name: "Blog",
     settings: [],
-    presets: [{ name: "Zenya Blog" }]
+    presets: [{ name: "Beynoun Blog" }]
   }
   const blogLiquid = `
 {% paginate blog.articles by 12 %}
@@ -5963,7 +5963,7 @@ ${JSON.stringify(blogSchema, null, 2)}
   const articleSchema = {
     name: "Article",
     settings: [],
-    presets: [{ name: "Zenya Article" }]
+    presets: [{ name: "Beynoun Article" }]
   }
   const articleLiquid = `
 <article class="py-20 bg-white min-h-[60vh]">
@@ -6019,7 +6019,7 @@ ${JSON.stringify(articleSchema, null, 2)}
     "settings": [
       { "type": "text", "id": "title", "label": "Heading", "default": "All Collections" }
     ],
-    "presets": [{ "name": "Zenya Collections List" }]
+    "presets": [{ "name": "Beynoun Collections List" }]
   }
   const listCollectionsLiquid = `
 <div class="py-20 bg-slate-50 min-h-[60vh]">
@@ -6440,9 +6440,9 @@ export function prepareThemeZipFromZero(name: string, content: ThemeContent, col
   const settingsSchema = [
     {
       "name": "theme_info",
-      "theme_name": "Zenya Nova",
+      "theme_name": "Beynoun Nova",
       "theme_version": "2.0.0",
-      "theme_author": "Zenya AI",
+      "theme_author": "Beynoun",
       "theme_documentation_url": "https://zenya.ai",
       "theme_support_url": "https://zenya.ai"
     },
@@ -6474,9 +6474,9 @@ export function prepareThemeZipFromZero(name: string, content: ThemeContent, col
   zip.folder('config')?.file('settings_schema.json', JSON.stringify(settingsSchema, null, 2))
 
   const settingsData = {
-    "current": "Zenya Nova",
+    "current": "Beynoun Nova",
     "presets": {
-      "Zenya Nova": {
+      "Beynoun Nova": {
         "brand_name": safeShopName,
         "primary_color": colors.primary,
         "secondary_color": colors.secondary,
@@ -6595,7 +6595,7 @@ export function prepareThemeZipFromZero(name: string, content: ThemeContent, col
       { type: "text", id: "cta_label", label: "CTA Label", default: content.hero.cta },
       { type: "url", id: "cta_link", label: "CTA Link" }
     ],
-    presets: [{ name: "Zenya Nova Header" }]
+    presets: [{ name: "Beynoun Nova Header" }]
   }
 
   const novaHeaderLiquid = `
@@ -6659,7 +6659,7 @@ ${JSON.stringify(novaHeaderSchema, null, 2)}
       { type: "link_list", id: "menu_2", label: "Menu 2", default: "main-menu" },
       { type: "text", id: "copyright", label: "Copyright", default: `© ${new Date().getFullYear()} ${safeShopName}. All rights reserved.` }
     ],
-    presets: [{ name: "Zenya Nova Footer" }]
+    presets: [{ name: "Beynoun Nova Footer" }]
   }
 
   const novaFooterLiquid = `
@@ -6721,7 +6721,7 @@ ${JSON.stringify(novaFooterSchema, null, 2)}
       { type: "checkbox", id: "enable_bg_motion", label: "Enable Background Motion", default: true },
       { type: "textarea", id: "badge_text", label: "Badge Text", default: "Trusted by 10k+ customers" }
     ],
-    presets: [{ name: "Zenya Nova Hero" }]
+    presets: [{ name: "Beynoun Nova Hero" }]
   }
 
   const novaHeroLiquid = `
@@ -6813,7 +6813,7 @@ ${JSON.stringify(novaHeroSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Nova Benefits" }]
+    presets: [{ name: "Beynoun Nova Benefits" }]
   }
 
   const novaBenefitsLiquid = `
@@ -6877,7 +6877,7 @@ ${JSON.stringify(novaBenefitsSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Nova Social Proof" }]
+    presets: [{ name: "Beynoun Nova Social Proof" }]
   }
 
   const novaProofLiquid = `
@@ -6937,7 +6937,7 @@ ${JSON.stringify(novaProofSchema, null, 2)}
         ]
       }
     ],
-    presets: [{ name: "Zenya Nova FAQ" }]
+    presets: [{ name: "Beynoun Nova FAQ" }]
   }
 
   const novaFaqLiquid = `
@@ -6985,7 +6985,7 @@ ${JSON.stringify(novaFaqSchema, null, 2)}
       { type: "textarea", id: "text", label: "Text", default: content.guarantee?.text || "Try it risk-free. If you don’t love it, we’ll refund you." },
       { type: "text", id: "icon", label: "Icon", default: "🛡️" }
     ],
-    presets: [{ name: "Zenya Nova Guarantee" }]
+    presets: [{ name: "Beynoun Nova Guarantee" }]
   }
 
   const novaGuaranteeLiquid = `
@@ -7012,7 +7012,7 @@ ${JSON.stringify(novaGuaranteeSchema, null, 2)}
       { type: "text", id: "placeholder", label: "Email Placeholder", default: "Enter your email" },
       { type: "text", id: "button_text", label: "Button Text", default: "Subscribe" }
     ],
-    presets: [{ name: "Zenya Nova Newsletter" }]
+    presets: [{ name: "Beynoun Nova Newsletter" }]
   }
 
   const novaNewsletterLiquid = `
@@ -7047,7 +7047,7 @@ ${JSON.stringify(novaNewsletterSchema, null, 2)}
       { type: "checkbox", id: "show_trust", label: "Show Trust Row", default: true },
       { type: "text", id: "trust_text", label: "Trust Text", default: "Secure checkout • Fast shipping • Easy returns" }
     ],
-    presets: [{ name: "Zenya Nova Product" }]
+    presets: [{ name: "Beynoun Nova Product" }]
   }
 
   const mainProductLiquid = `
@@ -7112,7 +7112,7 @@ ${JSON.stringify(mainProductSchema, null, 2)}
   const mainCartSchema = {
     name: "Main Cart",
     settings: [],
-    presets: [{ name: "Zenya Nova Cart" }]
+    presets: [{ name: "Beynoun Nova Cart" }]
   }
 
   const mainCartLiquid = `
@@ -7177,7 +7177,7 @@ ${JSON.stringify(mainCartSchema, null, 2)}
   const mainCollectionSchema = {
     name: "Main Collection",
     settings: [],
-    presets: [{ name: "Zenya Nova Collection" }]
+    presets: [{ name: "Beynoun Nova Collection" }]
   }
 
   const mainCollectionLiquid = `
@@ -7221,7 +7221,7 @@ ${JSON.stringify(mainCollectionSchema, null, 2)}
   `
   zip.folder('sections')?.file('main-collection.liquid', mainCollectionLiquid)
 
-  const mainPageSchema = { name: "Main Page", settings: [], presets: [{ name: "Zenya Nova Page" }] }
+  const mainPageSchema = { name: "Main Page", settings: [], presets: [{ name: "Beynoun Nova Page" }] }
   const mainPageLiquid = `
 <section class="bg-white">
   <div class="container mx-auto px-6 py-14 max-w-3xl">
@@ -7235,7 +7235,7 @@ ${JSON.stringify(mainPageSchema, null, 2)}
   `
   zip.folder('sections')?.file('main-page.liquid', mainPageLiquid)
 
-  const main404Schema = { name: "Main 404", settings: [], presets: [{ name: "Zenya Nova 404" }] }
+  const main404Schema = { name: "Main 404", settings: [], presets: [{ name: "Beynoun Nova 404" }] }
   const main404Liquid = `
 <section class="bg-white">
   <div class="container mx-auto px-6 py-20 text-center">
@@ -7253,7 +7253,7 @@ ${JSON.stringify(main404Schema, null, 2)}
   `
   zip.folder('sections')?.file('main-404.liquid', main404Liquid)
 
-  const mainSearchSchema = { name: "Main Search", settings: [], presets: [{ name: "Zenya Nova Search" }] }
+  const mainSearchSchema = { name: "Main Search", settings: [], presets: [{ name: "Beynoun Nova Search" }] }
   const mainSearchLiquid = `
 {% paginate search.results by 24 %}
 <section class="bg-white">

@@ -92,7 +92,7 @@ export default function TemplateLandingPageEn({ params }: { params: { slug: stri
               <span className="h-2 w-2 rounded-full" style={{ background: '#86efac' }} />
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={themePreview(t.key)} alt={`Zenya ${t.name} example`} className="h-auto w-full object-cover" loading="eager" />
+            <img src={themePreview(t.key)} alt={`Beynoun ${t.name} example`} className="h-auto w-full object-cover" loading="eager" />
           </div>
         </div>
 

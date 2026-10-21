@@ -18,11 +18,11 @@ const SITE = 'https://beynoun.com'
 export const metadata: Metadata = {
   title: `الأسعار — باقة مجانية، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
   description:
-    `ابدأ مجانًا بقالبين بالذكاء الاصطناعي، ثم Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
+    `ابدأ مجانًا بقالبين، ثم Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
   keywords: [
     'أسعار منشئ المواقع',
     'كم تكلفة إنشاء موقع',
-    'اشتراك منشئ مواقع بالذكاء الاصطناعي',
+    'اشتراك منشئ مواقع',
     'أرخص طريقة لعمل موقع',
     'تكلفة تصميم موقع إلكتروني',
     'استضافة موقع بالعربية',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     languages: hreflangAlternates(`${SITE}/pricing`, `${SITE}/en/pricing`),
   },
   ...share({
-    title: `أسعار زينيا — من باقة مجانية إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
+    title: `أسعار بينون — من باقة مجانية إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description:
       'ثلاث خطط واضحة: باقة مجانية للبداية، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
     url: `${SITE}/pricing`,
@@ -57,10 +57,10 @@ const PRICING_FAQ_SCHEMA = {
 const PRICING_OFFER_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Product',
-  name: 'زينيا — منشئ المواقع بالذكاء الاصطناعي',
+  name: 'بينون — منشئ المواقع',
   description:
-    'منصّة عربية لإنشاء المواقع بالذكاء الاصطناعي: 8 قوالب احترافية، توليد المحتوى بالعربية، نشر واستضافة ونطاق مخصّص.',
-  brand: { '@type': 'Brand', name: 'زينيا' },
+    'منصّة عربية لإنشاء المواقع: 8 قوالب احترافية، توليد المحتوى بالعربية، نشر واستضافة ونطاق مخصّص.',
+  brand: { '@type': 'Brand', name: 'بينون' },
   url: `${SITE}/pricing`,
   offers: [
     {
@@ -70,7 +70,7 @@ const PRICING_OFFER_SCHEMA = {
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
-      description: 'مجانًا: توليد قالبين بالذكاء الاصطناعي والنشر على نطاق فرعي.',
+      description: 'مجانًا: توليد قالبين والنشر على نطاق فرعي.',
     },
     {
       '@type': 'Offer',
@@ -88,7 +88,7 @@ const PRICING_OFFER_SCHEMA = {
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
-      description: 'كل ما في Starter، مع نطاق مخصّص مجاني لسنة وإزالة شارة زينيا.',
+      description: 'كل ما في Starter، مع نطاق مخصّص مجاني لسنة وإزالة شارة بينون.',
     },
   ],
 }

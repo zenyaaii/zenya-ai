@@ -208,8 +208,8 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     ? `${page!.label} — ${siteName}. ${seo.description}`.slice(0, 160)
     : seo.description
 
-  // The site is the owner's. The root layout describes Zenya's own site and
-  // a page inherits whatever it does not set, so every field that names Zenya
+  // The site is the owner's. The root layout describes Beynoun's own site and
+  // a page inherits whatever it does not set, so every field that names Beynoun
   // there (app name, author, publisher, generator, category, the tab icon) is
   // set again here to the business, or cleared.
   return {
@@ -221,7 +221,7 @@ export function buildSiteMetadata(theme: PublicTheme, page?: SitePage | null): M
     generator: null,
     category: null,
     // The tab icon is the owner's uploaded logo, or nothing. Empty lists still
-    // drop the root layout's app/icon.png and apple-icon.png (Zenya's mark);
+    // drop the root layout's app/icon.png and apple-icon.png (Beynoun's mark);
     // the root favicon.ico link Next always adds goes to the same logo, or
     // 404s, on customer hosts (middleware siteIconRewrite).
     icons: seo.logo

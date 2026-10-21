@@ -78,11 +78,11 @@ export function CompareTable({ themName, rows }: { themName: string; rows: Compa
   return (
     <div className="zx-tw">
       <table role="table">
-        <caption className="zx-a11y">{`مقارنة زينيا مقابل ${themName}`}</caption>
+        <caption className="zx-a11y">{`مقارنة بينون مقابل ${themName}`}</caption>
         <thead role="rowgroup">
           <tr role="row">
             <th role="columnheader" scope="col">البند</th>
-            <th role="columnheader" scope="col" className="zx-th-us">زينيا</th>
+            <th role="columnheader" scope="col" className="zx-th-us">بينون</th>
             <th role="columnheader" scope="col">{themName}</th>
           </tr>
         </thead>
@@ -90,7 +90,7 @@ export function CompareTable({ themName, rows }: { themName: string; rows: Compa
           {rows.map((r, i) => (
             <tr role="row" key={i}>
               <th role="rowheader" scope="row">{r.label}</th>
-              <td role="cell" data-label="زينيا" className="zx-td-us">
+              <td role="cell" data-label="بينون" className="zx-td-us">
                 {r.zenyaWins ? (
                   <span className="zx-win">
                     <span className="zx-win-dot" aria-hidden />
@@ -116,7 +116,7 @@ export function ChooseBlocks({
   return (
     <div className="zx-choose">
       <section className="zx-choose-card zx-choose-us">
-        <h3 className="zx-choose-h">متى تختار زينيا</h3>
+        <h3 className="zx-choose-h">متى تختار بينون</h3>
         <p className="zx-choose-p">{chooseZenya}</p>
       </section>
       <section className="zx-choose-card">
@@ -155,7 +155,7 @@ export function FaqList({ title, faqs }: { title: string; faqs: QA[] }) {
  */
 export function CtaBand({
   eyebrow,
-  title = "جرّب زينيا مجانًا الآن",
+  title = "جرّب بينون مجانًا الآن",
   subtitle = "اختر قالبًا، اكتب نبذة، واحصل على موقع عربي احترافي خلال دقائق. بلا بطاقة.",
   primaryLabel = "ابدأ الإنشاء مجانًا",
   primaryHref = "/login?mode=signup",

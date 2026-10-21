@@ -21,7 +21,7 @@ export const maxDuration = 60
  * immediately (the buy box falls back to collections.all.products.first).
  *
  * Authorization is two-layered: the Supabase session identifies the
- * Zenya user, and shopify_connections proves THIS user ran the OAuth
+ * Beynoun user, and shopify_connections proves THIS user ran the OAuth
  * install for the shop — knowing a shop domain is never enough.
  */
 export async function POST(req: NextRequest) {
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (!embedded) {
-    // Standalone path requires a Zenya account + an explicit shop.
+    // Standalone path requires a Beynoun account + an explicit shop.
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: 'not_connected',
-          message: 'This store is not connected to your Zenya account yet.',
+          message: 'This store is not connected to your Beynoun account yet.',
           authUrl: `/api/shopify/auth?shop=${encodeURIComponent(shop)}&returnTo=${encodeURIComponent('/build/connected')}`,
         },
         { status: 403 },
@@ -197,7 +197,7 @@ export async function POST(req: NextRequest) {
     console.error('publish: theme push failed:', e)
 
     // Shopify locked themeCreate behind a per-app exemption in 2024. Until
-    // Zenya's exemption request is approved, `write_themes` alone can't
+    // Beynoun's exemption request is approved, `write_themes` alone can't
     // install a new theme. Fall back gracefully: the product is already
     // created; return a 200 with `needsManualInstall` so the client can
     // hand the merchant a one-click ZIP download + upload instructions.

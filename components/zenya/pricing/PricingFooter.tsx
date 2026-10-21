@@ -82,11 +82,11 @@ export default function PricingFooter() {
         <div className="zf-body">
         <div className="zf-cols">
           <div className="zf-brand">
-            <Link href="/" aria-label="زينيا" className="zf-mark">
+            <Link href="/" aria-label="بينون" className="zf-mark">
               <ZenyaMark className="zf-mark-svg" />
             </Link>
             <p className="zf-claim">
-              أوّل شركة إسلامية لإنشاء المواقع بالذكاء الاصطناعي. اكتب نبذة عن
+              أوّل شركة إسلامية لإنشاء المواقع. اكتب نبذة عن
               نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
             </p>
             {/* The deck's footer carries this and it belongs here too: the
@@ -130,7 +130,7 @@ export default function PricingFooter() {
             ))}
           </div>
           <p className="zf-legal">
-            © {year} زينيا. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
+            © {year} بينون. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
           </p>
         </div>
         </div>
