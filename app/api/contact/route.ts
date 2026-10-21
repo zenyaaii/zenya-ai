@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 import { REVIEW_REWARD_CODE } from '@/lib/review-reward'
+import { LEGACY_FROM, isUnverifiedDomainError } from '@/lib/email'
 
 const schema = z.object({
   name: z.string().max(120).optional(),
@@ -154,20 +155,28 @@ export async function POST(req: NextRequest) {
       .join('\n')
 
     try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${key}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: FROM,
-          to: [INBOX],
-          reply_to: email,
-          subject: `[${label}] ${name || email}`,
-          text,
-        }),
-      })
+      const send = (from: string) =>
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${key}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from,
+            to: [INBOX],
+            reply_to: email,
+            subject: `[${label}] ${name || email}`,
+            text,
+          }),
+        })
+
+      let res = await send(FROM)
+      // Until beynoun.com passes Resend's DNS check, send from the old domain.
+      if (!res.ok && FROM !== LEGACY_FROM) {
+        const first = await res.clone().text().catch(() => '')
+        if (isUnverifiedDomainError(first)) res = await send(LEGACY_FROM)
+      }
 
       if (res.ok) {
         await admin

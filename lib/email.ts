@@ -20,6 +20,16 @@ import { COMPANY } from './company'
 
 const DEFAULT_FROM = 'Beynoun <noreply@beynoun.com>'
 
+/** The old sender, verified in Resend long before beynoun.com. Used once, as a
+ *  retry, when Resend says the new domain is not verified yet, so no email is
+ *  lost while the domain waits for its DNS check. */
+export const LEGACY_FROM = 'Beynoun <noreply@zenyaai.co>'
+
+/** Resend's answer when the sending domain has not passed its DNS check. */
+export function isUnverifiedDomainError(message?: string | null): boolean {
+  return /not verified|verify (?:a|your) domain/i.test(message || '')
+}
+
 /** Format a minor-unit amount (cents) with a sensible currency symbol.
  *  Amount stays LTR even inside an RTL email so "€9.99" never flips. */
 function fmtMoney(cents: number, currency: string): string {
@@ -80,7 +90,11 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
     }
     if (args.text) payload.text = args.text
     if (args.html) payload.html = args.html
-    const r = await c.emails.send(payload)
+    let r = await c.emails.send(payload)
+    if (r.error && isUnverifiedDomainError(r.error.message) && payload.from !== LEGACY_FROM) {
+      console.warn('[email] sender domain not verified, retrying from', LEGACY_FROM)
+      r = await c.emails.send({ ...payload, from: LEGACY_FROM })
+    }
     if (r.error) {
       console.error('[email] resend returned error:', r.error)
       return { ok: false, error: r.error.message || 'resend_error' }
