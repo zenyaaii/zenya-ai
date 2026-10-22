@@ -251,7 +251,7 @@ export default function AccountsAuthForm({ initialMode = 'signin' }: { initialMo
           transition={{ delay: 0.1 }}
           className="zn-mark"
         >
-          <ZenyaMark className="h-6" />
+          <ZenyaMark variant="long" className="h-6" />
         </motion.div>
 
         <AnimatePresence mode="wait">

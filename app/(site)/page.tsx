@@ -318,7 +318,7 @@ const RING = "0 0 0 1px rgba(0,0,0,0.08), 0 0 0 4px rgba(250,250,250,0.55)"
 /* How wide the wide bar sits at rest, and how far it reaches for each tray.
    A definite closed width is what makes the sideways growth animatable at
    all: `width: auto` gives the transition nothing to move between. */
-const PILL_REST = "380px"
+const PILL_REST = "396px"
 const PILL_THEMES = "min(94vw, 720px)"
 const PILL_ACCOUNT = "min(94vw, 470px)"
 
@@ -4447,7 +4447,7 @@ export default function Page() {
                     onFocus={() => setPanel(item.panel ?? null)}
                     aria-expanded={item.panel ? panel === item.panel : undefined}
                     aria-controls={item.panel ? "pill-tray" : undefined}
-                    className="inline-flex min-h-[38px] items-center justify-center rounded-full px-3 py-2 text-[14.5px] leading-none transition-colors duration-150 hover:text-[#171717]"
+                    className="inline-flex min-h-[38px] items-center justify-center rounded-full px-3 py-2 text-[14.5px] leading-none whitespace-nowrap transition-colors duration-150 hover:text-[#171717]"
                     style={{ color: panel === item.panel ? OBSIDIAN : STONE }}
                   >
                     {item.label}

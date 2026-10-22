@@ -491,7 +491,7 @@ export default function AccessView({
           <span className="za-sig" aria-hidden><ZenyaMark className="za-sig-svg" /></span>
         <section className="za-card" aria-labelledby="za-h1">
           <Link href="/" className="za-card-mark" aria-label="بينون">
-            <ZenyaMark className="za-card-mark-svg" />
+            <ZenyaMark variant="long" className="za-card-mark-svg" />
           </Link>
 
           {/* THE SWITCH. The real pages change mode through small links under
