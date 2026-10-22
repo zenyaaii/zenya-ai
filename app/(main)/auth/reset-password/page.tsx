@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
       <div className="zs-card">
         <div className="zs-top">
           <Link href="/" className="zs-mark" aria-label="بينون">
-            <ZenyaMark className="h-6" />
+            <ZenyaMark variant="long" className="h-6" />
           </Link>
           <h1 className="zs-h1">تعيين كلمة مرور جديدة</h1>
           <p className="zs-sub">اختر كلمة مرور قوية لم تستخدمها من قبل.</p>

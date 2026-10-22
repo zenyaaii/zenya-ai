@@ -68,7 +68,7 @@ export default function AccountsChooserPage() {
     <div className="zn-card">
       <div className="zn-top">
         <div className="zn-mark">
-          <ZenyaMark className="h-6" />
+          <ZenyaMark variant="long" className="h-6" />
         </div>
         <h1 className="zn-h1">{t.accounts.chooseAccount}</h1>
         <p className="zn-sub">{t.accounts.continueToDashboard}</p>
