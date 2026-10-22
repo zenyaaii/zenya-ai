@@ -825,7 +825,7 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
   return (
     <section data-section="booking_cta" className="relative overflow-hidden px-8 py-28">
       <div className="absolute inset-0 z-0">
-        <img src={content.booking_cta.image} alt="احجز" className="h-full w-full object-cover" />
+        <img src={content.booking_cta.image} alt={bookVerb(content)} className="h-full w-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
       </div>
       <div className="relative z-10 mx-auto max-w-3xl text-center">
@@ -987,7 +987,7 @@ function FooterSection({ content, isDark, onBook }: { content: WellnessContent; 
             <button type="button" onClick={onBook}
               className="mt-4 inline-block rounded-full px-5 py-2.5 text-xs font-bold uppercase"
               style={{ background: 'var(--wl-accent)', color: '#1a1a1a' }}>
-              احجز الآن
+              {bookVerb(content)} الآن
             </button>
           </div>
         </div>
@@ -1013,6 +1013,16 @@ function reviewPlatform(url?: string): string {
 }
 
 /** A wa.me link from a full link or a bare number. Empty when there is no number. */
+/**
+ * "احجز" or "احجزي". A site for women already says "احجزي" in its own booking
+ * labels; the buttons the template writes itself follow that, so one page
+ * does not speak to the visitor both ways.
+ */
+function bookVerb(content: WellnessContent): string {
+  const labels = [content.hero?.cta_primary, content.booking_cta?.cta_label, content.booking_cta?.heading].join(' ')
+  return labels.includes('احجزي') ? 'احجزي' : 'احجز'
+}
+
 function whatsappHref(v?: string): string {
   const raw = (v || '').trim()
   if (!raw) return ''
@@ -1060,7 +1070,7 @@ function WhatsAppBookButton({ content, onDark = false }: { content: WellnessCont
         : { borderColor: 'var(--wl-border)', color: 'var(--wl-text)', background: 'var(--wl-surface)' }}
     >
       <WaGlyph className="h-5 w-5" />
-      احجز على واتساب
+      {bookVerb(content)} على واتساب
     </motion.a>
   )
 }
