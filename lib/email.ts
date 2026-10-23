@@ -114,17 +114,15 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
    a hairline border and no shadow, obsidian #171717 type, an obsidian pill
    button, and the site's light (the شفق palette) glowing behind the wordmark.
 
-   The glow is the header cell's own colour: a plain bgcolor every client
-   paints, with a linear-gradient on top for the clients that draw one
-   (Outlook desktop keeps the plain colour). Only the wordmark is a picture,
-   /brand/email-logo.png, because Gmail drops SVG and web fonts; with images
-   blocked its alt text is set in the wordmark's size and colour, so the
-   header still reads «بينون». Arabic / RTL throughout. */
+   The glow and the wordmark are one picture, /brand/email-header.png, because
+   mail clients cannot be trusted with blur, oklch or SVG: Outlook drops
+   gradients and Gmail drops SVG. With images off, the cell's own background
+   and the alt text stand in for it. Arabic / RTL throughout. */
 
 /** Where a reader writes back. Every send sets it as Reply-To too. */
 export const SUPPORT_EMAIL = COMPANY.SUPPORT_EMAIL
 
-const HEADER_IMG = 'https://beynoun.com/brand/email-logo.png'
+const HEADER_IMG = 'https://beynoun.com/brand/email-header.png'
 const FONT = `'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif`
 
 /** Shared chrome so every transactional email matches the auth templates. */
@@ -144,8 +142,8 @@ function emailShell(opts: {
 <body style="margin:0;padding:0;font-family:${FONT};background:#fafafa;color:#171717;direction:rtl;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;"><tr><td align="center">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
-    <tr><td bgcolor="#f4e3f0" style="padding:28px 40px;background-color:#f4e3f0;background-image:linear-gradient(100deg,#ffd9bf 0%,#f6c9e2 45%,#d3d9ff 100%);text-align:right;">
-      <img src="${HEADER_IMG}" alt="بينون" width="155" height="28" style="display:inline-block;border:0;height:28px;width:auto;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;font-size:28px;line-height:28px;font-weight:800;color:#171717;" />
+    <tr><td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
+      <img src="${HEADER_IMG}" alt="بينون" width="560" height="84" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
     </td></tr>
     <tr><td style="padding:20px 40px 8px;text-align:right;font-family:${FONT};">
       <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">${eyebrow}</p>
