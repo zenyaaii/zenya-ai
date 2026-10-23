@@ -34,7 +34,7 @@ export const SHARE_IMAGE = {
 /** The square logo Google shows in the company panel and next to results. */
 export const LOGO_URL = `${SITE_URL}/brand/logo-square.png`
 
-export const X_HANDLE = '@zenyaaico'
+export const X_HANDLE = '@beynounn'
 
 type ShareInput = {
   title: string

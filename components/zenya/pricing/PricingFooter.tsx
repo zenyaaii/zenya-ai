@@ -22,7 +22,7 @@ import Link from "next/link"
 import SlideButton from "@/components/ui/SlideButton"
 import ZenyaMark from "@/components/ZenyaMark"
 import { COMPANY } from "@/lib/company"
-import { TikTokIcon, InstagramIcon, XIcon } from "../home/FooterSection"
+import { SOCIALS } from "../home/FooterSection"
 
 const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string }> }> = [
   {
@@ -55,11 +55,6 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
   },
 ]
 
-const SOCIALS = [
-  { label: "TikTok", href: "https://www.tiktok.com/@zenyaai.co", Icon: TikTokIcon },
-  { label: "Instagram", href: "https://www.instagram.com/zenyaai.co", Icon: InstagramIcon },
-  { label: "X", href: "https://x.com/zenyaaico", Icon: XIcon },
-]
 
 export default function PricingFooter() {
   const year = new Date().getFullYear()

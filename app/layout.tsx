@@ -107,9 +107,11 @@ const SITE_ID = `${SITE_URL}/#website`
 // حسابات حقيقية فقط. sameAs هو أقوى إشارة تربط اسم العلامة بكيانٍ واحد لدى
 // جوجل، ويجب أن تطابق الروابط الظاهرة في التذييل (components/zenya/home/FooterSection.tsx).
 const SOCIAL_PROFILES = [
-  'https://www.tiktok.com/@zenyaai.co',
-  'https://www.instagram.com/zenyaai.co',
-  'https://x.com/zenyaaico',
+  'https://www.tiktok.com/@beynounn',
+  'https://www.instagram.com/beynoun',
+  'https://x.com/beynounn',
+  'https://www.facebook.com/beynoun',
+  'https://www.threads.com/@beynoun',
 ]
 
 const structuredData = [
