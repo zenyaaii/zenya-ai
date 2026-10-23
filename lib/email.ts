@@ -143,7 +143,7 @@ function emailShell(opts: {
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;"><tr><td align="center">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
     <tr><td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
-      <img src="${HEADER_IMG}" alt="بينون" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
+      <img src="${HEADER_IMG}" alt="بينون" width="560" height="84" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
     </td></tr>
     <tr><td style="padding:20px 40px 8px;text-align:right;font-family:${FONT};">
       <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">${eyebrow}</p>
