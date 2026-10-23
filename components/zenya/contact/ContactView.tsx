@@ -63,7 +63,7 @@ import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import { COMPANY } from "@/lib/company"
 import PricingFooter from "../pricing/PricingFooter"
-import { TikTokIcon, InstagramIcon, XIcon } from "../home/FooterSection"
+import { SOCIALS } from "../home/FooterSection"
 import { CSS } from "./styles"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
@@ -162,11 +162,6 @@ const validateEmail = (v: string) => z.string().email().safeParse(v).success
 /** The heading on the receipt, verbatim from the live success panel. */
 const DONE_H = "تمّ استلام رسالتك."
 
-const SOCIALS = [
-  { label: "TikTok", href: "https://www.tiktok.com/@zenyaai.co", Icon: TikTokIcon },
-  { label: "Instagram", href: "https://www.instagram.com/zenyaai.co", Icon: InstagramIcon },
-  { label: "X", href: "https://x.com/zenyaaico", Icon: XIcon },
-]
 
 export default function ContactView({
   initialTopic = "support",
@@ -576,7 +571,7 @@ export default function ContactView({
                 على المنصّات
               </p>
               <p className="zc-note-b">
-                نحن على ثلاث منصّات فقط، والحسابات الثلاثة هي الوحيدة الرسمية.
+                نحن على خمس منصّات فقط، وهذه الحسابات الخمسة هي الوحيدة الرسمية.
                 أي حساب آخر باسم بينون ليس منّا.
               </p>
               <div className="zc-soc">
