@@ -15,6 +15,9 @@
  * carrying a dead animation flag. So this is the same footer's content in a
  * plain block that a scrolling page can end on.
  *
+ * The homepage's last screen renders this same component with `bare`, which
+ * drops the cap, because that screen is already the obsidian ground.
+ *
  * The claim is the one claim the site makes, and it is quoted exactly.
  */
 
@@ -56,10 +59,10 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
 ]
 
 
-export default function PricingFooter() {
+export default function PricingFooter({ bare = false }: { bare?: boolean } = {}) {
   const year = new Date().getFullYear()
   return (
-    <footer className="zf" data-reveal>
+    <footer className={bare ? "zf zf-bare" : "zf"} data-reveal={bare ? undefined : true}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       {/* The mark lives INSIDE the cap, as the deck does it: large, paper
           coloured, at a whisper of opacity, so the card below rises in front
@@ -177,6 +180,11 @@ const CSS = `
   background: var(--onyx, #131316);
   overflow: hidden;
 }
+/* BARE: the homepage's last screen is already the obsidian ground, so the
+   footer stands on it without a cap of its own. Everything inside is the
+   same footer. */
+.zf.zf-bare { margin: 0; padding: 0; border-radius: 0; background: transparent; overflow: visible; }
+
 /* THE MARK IS IN FLOW, NOT BEHIND THE CARD. It was absolutely positioned and
    overlapping, which is what made this read as cramped: the logo sat ON the
    footer instead of above it and there was no air anywhere. The deck's own
