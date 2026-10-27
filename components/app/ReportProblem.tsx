@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { CheckCircle2, LifeBuoy, X } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
+import { dashFont } from './dash-font'
 
 /**
  * "Something wrong? Tell us" — a small way out at the foot of the rail.
@@ -99,8 +100,8 @@ export function ReportProblem({
             type="button"
             onFocus={() => setHover(true)}
             onBlur={() => setHover(false)}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#5e6ad2] transition-transform hover:scale-105"
-            style={{ boxShadow: '0 0 0 1px rgba(17,17,17,0.08), 0 1px 2px rgba(17,17,17,0.06)' }}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#5e6ad2] transition-transform hover:scale-105"
+            style={{ boxShadow: '0 0 0 1px rgb(var(--ink-rgb) / 0.08), 0 1px 2px rgb(var(--ink-rgb) / 0.06)' }}
             aria-label="واجهت مشكلة؟ أخبرنا"
           >
             <LifeBuoy className="h-4 w-4" strokeWidth={2} />
@@ -112,7 +113,7 @@ export function ReportProblem({
           aria-hidden
         >
           عندك مشكلة؟ أخبرنا
-          <span className="absolute top-1/2 -translate-y-1/2 border-[5px] border-transparent" style={{ insetInlineStart: -9, borderInlineEndColor: '#171717' }} />
+          <span className="absolute top-1/2 -translate-y-1/2 border-[5px] border-transparent" style={{ insetInlineStart: -9, borderInlineEndColor: 'var(--obsidian, #171717)' }} />
         </span>
       </div>
 
@@ -120,11 +121,11 @@ export function ReportProblem({
         <Dialog.Overlay className="fixed inset-0 z-[80] bg-[rgba(17,17,20,0.38)] backdrop-blur-[2px]" />
         <Dialog.Content
           dir="rtl"
-          className="zy-tokens fixed left-1/2 top-1/2 z-[81] w-[calc(100vw-32px)] max-w-[460px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] bg-white"
-          style={{ boxShadow: '0 24px 70px rgba(17,17,17,0.24), 0 0 0 1px rgba(17,17,17,0.06)' }}
+          className={`zy-tokens zy-dash ${dashFont.variable} fixed left-1/2 top-1/2 z-[81] w-[calc(100vw-32px)] max-w-[460px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] bg-white`}
+          style={{ boxShadow: 'var(--shadow-pop)' }}
         >
-          <div className="flex items-start gap-3 px-5 pb-4 pt-5" style={{ background: 'linear-gradient(#f5f6fd, #ffffff)' }}>
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#5e6ad2]" style={{ boxShadow: '0 0 0 1px rgba(94,106,210,0.18)' }}>
+          <div className="flex items-start gap-3 px-5 pb-4 pt-5" style={{ background: 'var(--surface-2)' }}>
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#5e6ad2]" style={{ boxShadow: '0 0 0 1px rgb(var(--acc-rgb) / 0.18)' }}>
               <LifeBuoy className="h-5 w-5" strokeWidth={2} />
             </span>
             <div className="min-w-0 flex-1">
@@ -158,8 +159,8 @@ export function ReportProblem({
                       aria-pressed={kind === k.key}
                       className="min-h-[34px] rounded-full px-3 text-[13.5px] font-bold transition-colors"
                       style={kind === k.key
-                        ? { background: '#171717', color: '#fff' }
-                        : { background: '#f4f4f6', color: '#3a3a40', boxShadow: 'inset 0 0 0 1px rgba(17,17,17,0.06)' }}
+                        ? { background: 'var(--obsidian)', color: 'var(--ground)' }
+                        : { background: 'var(--surface-2)', color: 'var(--ink-2, #3a3a40)', boxShadow: 'inset 0 0 0 1px rgb(var(--ink-rgb) / 0.06)' }}
                     >
                       {k.label}
                     </button>
@@ -182,7 +183,7 @@ export function ReportProblem({
                 <span className="text-[12.5px] font-medium text-[#8a8a92]">نرسل معها اسم الصفحة التي كنت فيها، لنفهم المشكلة أسرع.</span>
               </label>
               {state === 'failed' && (
-                <p role="alert" className="rounded-xl px-3 py-2 text-[13.5px] font-bold" style={{ background: '#fdecea', color: '#c0362c' }}>لم تُرسل. تأكد من اتصالك وحاول مرة أخرى.</p>
+                <p role="alert" className="rounded-xl px-3 py-2 text-[13.5px] font-bold" style={{ background: 'var(--error-fill)', color: 'var(--error)' }}>لم تُرسل. تأكد من اتصالك وحاول مرة أخرى.</p>
               )}
               <div className="flex items-center gap-2">
                 <button type="submit" disabled={!ready} className="zy-btn min-w-[110px] justify-center disabled:opacity-50">

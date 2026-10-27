@@ -428,13 +428,13 @@ export function InsightsPanel({ d }: { d: AnalyticsPayload }) {
       <div className="grid gap-4 sm:grid-cols-2">
         {d.insights.map((ins, i) => {
           const Icon = ins.tone === 'good' ? CircleCheck : ins.tone === 'warn' ? TriangleAlert : Info
-          const color = ins.tone === 'good' ? '#15803d' : ins.tone === 'warn' ? '#b45309' : '#5e6ad2'
+          const color = ins.tone === 'good' ? 'var(--success)' : ins.tone === 'warn' ? 'var(--warning)' : 'var(--violet)'
           return (
             <Panel key={i} className="p-4">
               <div className="flex items-start gap-3">
                 <div
                   className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
-                  style={{ background: `${color}1a` }}
+                  style={{ background: `color-mix(in srgb, ${color} 10%, transparent)` }}
                 >
                   <Icon className="h-3.5 w-3.5" strokeWidth={2} style={{ color }} />
                 </div>

@@ -1,0 +1,89 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
+
+/**
+ * Light or dark for the dashboard.
+ *
+ * The choice lives on <html> as two classes: dash-on while a dashboard is
+ * mounted (so the page behind it, and its overscroll, take the cream) and
+ * dash-dk for dark. On <html> rather than on the shell because the menus,
+ * the bell and the search palette portal out of the shell, and they have to
+ * turn with it. Both classes come off when the shell unmounts, so a wizard
+ * opened from the dashboard is not left dark.
+ *
+ * No saved choice means "follow the device". Picking one saves it.
+ */
+
+const KEY = 'beynoun-dash-theme'
+
+function saved(): 'light' | 'dark' | null {
+  try {
+    const v = localStorage.getItem(KEY)
+    return v === 'light' || v === 'dark' ? v : null
+  } catch {
+    return null
+  }
+}
+
+const systemDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches
+
+function paint(dark: boolean) {
+  const r = document.documentElement
+  r.classList.add('dash-on')
+  r.classList.toggle('dash-dk', dark)
+}
+
+export function useDashTheme() {
+  const [dark, setDark] = useState(false)
+
+  useEffect(() => {
+    const first = saved()
+    const d = first ? first === 'dark' : systemDark()
+    paint(d)
+    setDark(d)
+
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const follow = () => {
+      if (saved()) return
+      paint(mq.matches)
+      setDark(mq.matches)
+    }
+    mq.addEventListener('change', follow)
+    return () => {
+      mq.removeEventListener('change', follow)
+      document.documentElement.classList.remove('dash-on', 'dash-dk')
+    }
+  }, [])
+
+  /** Flip the theme. `from` is the control that was pressed: the new colours
+   *  spread out from its centre in a soft circle. */
+  const toggle = useCallback((from?: HTMLElement | null) => {
+    const next = !document.documentElement.classList.contains('dash-dk')
+    try { localStorage.setItem(KEY, next ? 'dark' : 'light') } catch {}
+    setDark(next)
+
+    const r = document.documentElement
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }
+    if (reduce) { paint(next); return }
+    if (!doc.startViewTransition) {
+      r.classList.add('zf-ease')
+      paint(next)
+      window.setTimeout(() => r.classList.remove('zf-ease'), 600)
+      return
+    }
+    const box = from?.getBoundingClientRect()
+    const x = box ? box.left + box.width / 2 : window.innerWidth / 2
+    const y = box ? box.top + box.height / 2 : 0
+    const far = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
+    r.style.setProperty('--zf-x', `${x}px`)
+    r.style.setProperty('--zf-y', `${y}px`)
+    r.style.setProperty('--zf-max', `${far + 160}px`)
+    r.dataset.zfTt = ''
+    const t = doc.startViewTransition(() => paint(next))
+    t.finished.finally(() => { delete r.dataset.zfTt })
+  }, [])
+
+  return { dark, toggle }
+}

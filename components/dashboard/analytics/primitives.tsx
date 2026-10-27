@@ -155,7 +155,7 @@ export function Sparkline({ values }: { values: number[] }) {
     .join(' ')
   return (
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="mt-2.5 block h-5 w-full" aria-hidden>
-      <path d={d} fill="none" stroke="#5e6ad2" strokeWidth="1.5" strokeLinecap="round"
+      <path d={d} fill="none" stroke="var(--violet)" strokeWidth="1.5" strokeLinecap="round"
         strokeLinejoin="round" vectorEffect="non-scaling-stroke" opacity={0.55} />
     </svg>
   )
@@ -187,7 +187,7 @@ export function BarList({
             {/* The bar is a background wash, not a separate row — keeps long
                 Arabic labels readable instead of squeezing them into a column. */}
             <div
-              className="absolute inset-y-0 start-0 bg-[rgba(94,106,210,0.08)] transition-[width] duration-500"
+              className="absolute inset-y-0 start-0 bg-[rgb(var(--acc-rgb)/0.09)] transition-[width] duration-500"
               style={{ width: `${(v / max) * 100}%` }}
               aria-hidden
             />
@@ -195,9 +195,9 @@ export function BarList({
               <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium text-foreground">
                 {renderName ? renderName(r) : r.name}
               </span>
-              <span className="shrink-0 whitespace-nowrap text-[14.5px] tabular-nums text-foreground">
+              <span className="inline-flex shrink-0 items-baseline gap-2 whitespace-nowrap text-[14.5px] tabular-nums text-foreground">
                 {v.toLocaleString('ar')}
-                <span className="ms-1.5 text-[14.5px] text-muted">
+                <span className="text-[14.5px] text-muted">
                   {Math.round((v / total) * 100)}%
                 </span>
               </span>
