@@ -26,6 +26,7 @@
  */
 
 import { PRODUCT_TOKENS_CSS } from './tokens'
+import { DASH_THEME_CSS } from './dash-theme'
 
 export const DASHBOARD_CSS = `
 /* ======================================================================
@@ -75,134 +76,13 @@ ${PRODUCT_TOKENS_CSS}
   pointer-events: none;
 }
 
-/* ---- the two panels ------------------------------------------------
-   The shell stops being an edge-to-edge frame and becomes two objects on
-   paper: a rail and a work surface, each on the ring token, with the
-   ground showing between and around them.
-
-   DESKTOP ONLY. Phones and tablets keep the shell exactly as it was, for
-   the reason AppShell records: a root that is h-screen overflow-hidden
-   cannot be panned after a pinch-zoom, so a zoomed-in reader cannot reach
-   the content. That behaviour is deliberate and is not touched here.
--------------------------------------------------------------------- */
-@media (min-width: 1024px) {
-  .zy-pane {
-    border-radius: var(--r-panel);
-    background: #ffffff;
-    box-shadow: var(--ring-1), var(--ring-2);
-    /* The work surface scrolls inside itself, so it has to clip its own
-       corners or the content squares them off again. */
-    overflow: hidden;
-  }
-}
-
 /* ---- the chrome face ------------------------------------------------
-   Tajawal carries content; Plex carries furniture. --font-chrome is set on
-   the shell by next/font (see AppShell). The fallback keeps the rail on
-   Tajawal rather than on a system face if the variable is ever missing. */
-.zy-rail-mark, .zy-rail-label, .zy-rail-row, .zy-rail-foot,
-.zy-top, .zy-menu, .zy-pill {
+   --font-chrome is set by DASH_THEME_CSS on the shell and on its portals.
+   The fallback keeps the furniture on Tajawal if the variable is missing. */
+.zy-menu, .zy-pill {
   font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
 }
 
-/* ---- the rail ------------------------------------------------------ */
-.zy-rail-mark { display: flex; align-items: center; height: 56px; padding-inline: 1.125rem; }
-.zy-rail-group { padding-inline: 0.625rem; }
-/* ── THE TWO FLOORS, IN RENDERED PIXELS ──────────────────────────────────
-   ZoomLock writes zoom: 0.85 from the root layout, so 14.5px CSS reaches the
-   eye at 12.33 and 38px CSS reaches the finger at 32.3 — the 12px type floor
-   and the 32px coarse-pointer floor this project holds.
-
-   scripts/theme-check.cjs measured this surface at 224 type failures and 20
-   tap failures across five widths: the stat eyebrow was 10.5px CSS, which is
-   8.92px on the glass, and the rail's rows stood 30.2px. Dense is a spacing
-   decision, not a licence to print text nobody can read, so the sizes below
-   sit on the floor and the density is kept by the padding instead.
-
-   The uppercase + letter-spacing on the two label styles also went. The
-   labels are Arabic: text-transform: uppercase is a dead declaration on the
-   script, and 0.12-0.14em pulls connected letterforms apart. */
-.zy-rail-label {
-  padding: 0 0.625rem 0.5rem;
-  font-size: 14.5px; font-weight: 700; line-height: 1.5;
-  color: var(--stone-2);
-}
-/* A nav row is a control, so it takes the control radius and the field's
-   quiet hover. The CURRENT row is the one place the accent appears in the
-   rail, because "you are here" is the single thing an accent on a chrome
-   surface is genuinely for. */
-.zy-rail-row {
-  position: relative;
-  display: flex; align-items: center; gap: 0.625rem;
-  border-radius: var(--r-control);
-  min-height: 38px;
-  padding: 0.4375rem 0.625rem;
-  font-size: 14.5px; font-weight: 500; line-height: 1.5;
-  letter-spacing: 0;
-  color: var(--stone);
-  transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out);
-}
-.zy-rail-row:hover { color: var(--obsidian); background: rgba(17,17,17,0.045); }
-/* --violet on the row's own tint measured 3.98:1, under the 4.5 a label is
-   owed. --violet-ink is the accent's text weight and clears it; the tint and
-   the rule at the edge still carry "you are here". */
-.zy-rail-row[data-on] {
-  /* --primary-600, not --violet-ink: the ink token is declared by CHROME_CSS
-     on .zx-root and would resolve to nothing here. --primary-600 is the same
-     #4f5ab8 and is in the product token layer this surface reads. */
-  color: var(--primary-600);
-  font-weight: 700;
-  background: var(--violet-fill);
-}
-/* The marker is a bar on the row's inline-start edge, drawn on the row's own
-   radius. It says which row is current at a glance down the rail, which a
-   tint alone does not - a tinted row and a hovered row look alike in
-   peripheral vision. inset-inline-start so it follows dir; a physical left
-   would sit on the wrong edge of an Arabic rail. */
-.zy-rail-row[data-on]::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px; height: 18px;
-  border-radius: 999px;
-  background: var(--violet);
-}
-.zy-rail-foot {
-  padding: 0.875rem 1.125rem;
-  font-size: 14.5px; font-weight: 500; line-height: 1.7;
-  color: var(--stone-2);
-}
-/* Same reason as .zy-link: this measured 15px. It is the only link in the
-   rail and it sits at the very bottom edge, which is the hardest place on a
-   phone to hit accurately. */
-.zy-rail-foot a {
-  display: inline-flex; align-items: center;
-  /* 32px CSS renders 27.2 — under the floor it was written for. 38 renders
-     32.3, which is the number the rest of this stylesheet uses. */
-  min-height: 38px;
-  color: inherit;
-  transition: color 180ms var(--ease-out);
-}
-.zy-rail-foot a:hover { color: var(--violet); }
-
-/* ---- the topbar ---------------------------------------------------- */
-.zy-top {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; flex-shrink: 0;
-  padding-inline: 1rem;
-  background: #ffffff;
-  /* A hairline, not the old warm #f0ede6 line. It separates the chrome from
-     the work surface and does nothing else. */
-  box-shadow: 0 1px 0 rgba(17,17,17,0.07);
-}
-.zy-top-title {
-  margin: 0;
-  font-size: 14.5px; font-weight: 700; line-height: 1.5;
-  letter-spacing: 0;
-  color: var(--obsidian);
-}
 /* A quiet square control: the hamburger, the bell, the eye.
    NO display HERE, DELIBERATELY. Block A is unlayered, so a display in a
    skin class outranks a Tailwind utility - and this class is worn by the
@@ -226,7 +106,7 @@ ${PRODUCT_TOKENS_CSS}
   color: var(--stone);
   transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
 }
-.zy-icon-btn:hover { color: var(--obsidian); background: rgba(17,17,17,0.055); }
+.zy-icon-btn:hover { color: var(--obsidian); background: rgb(var(--ink-rgb) / 0.055); }
 .zy-icon-btn:focus-visible { outline: 2px solid var(--violet); outline-offset: 1px; }
 
 /* The account control. Obsidian-on-white at rest with a hairline, so the one
@@ -237,16 +117,16 @@ ${PRODUCT_TOKENS_CSS}
   border-radius: 999px;
   padding: 0.25rem 0.625rem 0.25rem 0.25rem;
   padding-inline: 0.25rem 0.625rem;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.10);
+  background: var(--card);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10);
   transition: box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
 }
-.zy-top-acct:hover { background: #fcfcfd; box-shadow: 0 0 0 1px rgba(17,17,17,0.18); }
+.zy-top-acct:hover { background: var(--surface-2); box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.18); }
 .zy-top-acct[data-state="open"] { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
 .zy-top-av {
   display: flex; align-items: center; justify-content: center;
   width: 30px; height: 30px; border-radius: 999px;
-  background: var(--violet); color: #fff;
+  background: var(--violet); color: var(--on-acc);
   font-size: 14.5px; font-weight: 700; line-height: 1;
 }
 .zy-top-name { font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--obsidian); }
@@ -259,23 +139,23 @@ ${PRODUCT_TOKENS_CSS}
   padding: 0 0.875rem;
   font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
-  color: #fff; background: var(--violet);
-  box-shadow: 0 0 0 1px rgba(94,106,210,0.60), 0 0 0 4px rgba(94,106,210,0);
+  color: var(--on-acc); background: var(--violet);
+  box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.60), 0 0 0 4px rgb(var(--acc-rgb) / 0);
   transition: box-shadow 240ms var(--ease-out), background-color 200ms var(--ease-out);
 }
 /* It grows a halo rather than scaling. A control that changes size on hover
    nudges everything beside it, which on a chrome bar is the whole row. */
-.zy-top-cta:hover { background: #5462cb; box-shadow: 0 0 0 1px rgba(94,106,210,0.70), 0 0 0 4px var(--violet-ring); }
+.zy-top-cta:hover { background: var(--primary-600); box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.70), 0 0 0 4px var(--violet-ring); }
 .zy-top-cta:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
 
 /* ---- the menu ------------------------------------------------------ */
 .zy-menu {
   border-radius: var(--r-card);
-  background: #ffffff;
+  background: var(--card);
   padding: 0.375rem;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.10), 0 0 0 4px rgba(250,250,250,0.60);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10), 0 0 0 4px color-mix(in srgb, var(--ground) 60%, transparent);
 }
-.zy-menu-head { padding: 0.5rem 0.625rem 0.625rem; border-bottom: 1px solid rgba(17,17,17,0.07); margin-bottom: 0.375rem; }
+.zy-menu-head { padding: 0.5rem 0.625rem 0.625rem; border-bottom: 1px solid rgb(var(--ink-rgb) / 0.07); margin-bottom: 0.375rem; }
 .zy-menu-row {
   display: flex; align-items: center; gap: 0.5rem; width: 100%;
   border: 0; background: transparent; cursor: pointer; font: inherit;
@@ -286,7 +166,7 @@ ${PRODUCT_TOKENS_CSS}
   outline: none;
   transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
-.zy-menu-row[data-highlighted] { background: rgba(17,17,17,0.05); color: var(--obsidian); }
+.zy-menu-row[data-highlighted] { background: rgb(var(--ink-rgb) / 0.05); color: var(--obsidian); }
 .zy-menu-row[data-tone="danger"] { color: var(--error); }
 .zy-menu-row[data-tone="danger"][data-highlighted] { background: var(--error-fill); color: var(--error); }
 
@@ -348,7 +228,7 @@ ${PRODUCT_TOKENS_CSS}
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.875rem;
   border-radius: var(--r-card);
   padding: 0.875rem 1rem;
-  background: #ffffff;
+  background: var(--card);
   box-shadow: var(--ring-1), var(--ring-2);
   /* The tone lives on an inline-start rule rather than a full tinted box:
      a page can carry two banners at once, and two tinted boxes shout. */
@@ -376,12 +256,12 @@ ${PRODUCT_TOKENS_CSS}
   /* 12.5px renders 10.63. This is the primary action on the whole surface. */
   font-size: 14.5px; font-weight: 700; line-height: 1.5;
   letter-spacing: 0;
-  color: #ffffff; background: var(--violet);
+  color: var(--on-acc); background: var(--violet);
   text-decoration: none;
-  box-shadow: 0 0 0 1px rgba(94,106,210,0.60), 0 0 0 4px rgba(94,106,210,0);
+  box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.60), 0 0 0 4px rgb(var(--acc-rgb) / 0);
   transition: box-shadow 240ms var(--ease-out), background-color 200ms var(--ease-out);
 }
-.zy-btn:hover { background: #5462cb; box-shadow: 0 0 0 1px rgba(94,106,210,0.70), 0 0 0 4px var(--violet-ring); }
+.zy-btn:hover { background: var(--primary-600); box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.70), 0 0 0 4px var(--violet-ring); }
 .zy-btn:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
 /* The quiet sibling: same shape, no fill. For "open", "preview", "cancel". */
 .zy-btn-q {
@@ -394,10 +274,10 @@ ${PRODUCT_TOKENS_CSS}
   letter-spacing: 0;
   color: var(--obsidian); background: var(--field);
   text-decoration: none;
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.08);
   transition: box-shadow 200ms var(--ease-out), color 200ms var(--ease-out);
 }
-.zy-btn-q:hover { color: var(--violet); box-shadow: 0 0 0 1px rgba(94,106,210,0.45); }
+.zy-btn-q:hover { color: var(--violet); box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.45); }
 /* A text link that is an action rather than prose. */
 .zy-link {
   display: inline-flex; align-items: center; gap: 0.25rem;
@@ -426,7 +306,7 @@ ${PRODUCT_TOKENS_CSS}
    Violet as PROGRESS, which is the accent doing work rather than
    decorating - the same job it has on /demo/access's password rule. It
    turns to the danger token only when the thing it measures has run out. */
-.zy-meter { height: 5px; border-radius: 999px; background: rgba(17,17,17,0.07); overflow: hidden; }
+.zy-meter { height: 5px; border-radius: 999px; background: rgb(var(--ink-rgb) / 0.07); overflow: hidden; }
 .zy-meter-fill { height: 100%; border-radius: 999px; background: var(--violet); transition: width 480ms var(--ease-out); }
 .zy-meter[data-spent] .zy-meter-fill { background: var(--error); }
 
@@ -454,15 +334,15 @@ ${PRODUCT_TOKENS_CSS}
   border-radius: var(--r-card);
   padding: 2rem 1.5rem;
   text-align: center;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.10), 0 0 0 4px rgba(250,250,250,0.55);
+  background: var(--card);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10), 0 0 0 4px color-mix(in srgb, var(--ground) 55%, transparent);
 }
 .zy-empty-ico {
   display: inline-flex; align-items: center; justify-content: center;
   width: 44px; height: 44px; margin-bottom: 0.875rem;
   border-radius: var(--r-control);
   color: var(--violet); background: var(--violet-fill);
-  box-shadow: 0 0 0 1px rgba(94,106,210,0.20);
+  box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.20);
 }
 
 /* ---- the sparkline --------------------------------------------------
@@ -471,8 +351,8 @@ ${PRODUCT_TOKENS_CSS}
    is annotating. At 0.55 it is still unmistakably the accent and it reads
    as the number's shadow rather than as its own headline. The day with no
    views keeps a grey stub so the axis stays legible. */
-.zy-spark-b { width: 100%; border-radius: 2px 2px 0 0; background: rgba(94,106,210,0.55); }
-.zy-spark-b[data-zero] { background: rgba(17,17,17,0.07); }
+.zy-spark-b { width: 100%; border-radius: 2px 2px 0 0; background: rgb(var(--acc-rgb) / 0.55); }
+.zy-spark-b[data-zero] { background: rgb(var(--ink-rgb) / 0.07); }
 
 /* ---- the segmented control ------------------------------------------
    The range picker, the metric picker, the tab bar. Everywhere the reader
@@ -502,7 +382,7 @@ ${PRODUCT_TOKENS_CSS}
   padding: 3px;
   border-radius: 999px;
   background: var(--field);
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.08);
   font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
   /* The row scrolls rather than wrapping when the viewport cannot hold it.
      A wrapped segmented control reads as two controls, and the indicator
@@ -519,7 +399,7 @@ ${PRODUCT_TOKENS_CSS}
   left: 0;
   border-radius: 999px;
   background: var(--violet);
-  box-shadow: 0 0 0 3px rgba(94,106,210,0.14);
+  box-shadow: 0 0 0 3px rgb(var(--acc-rgb) / 0.14);
   transition: transform 400ms var(--ease-out), width 400ms var(--ease-out);
   will-change: transform, width;
 }
@@ -540,7 +420,7 @@ ${PRODUCT_TOKENS_CSS}
   transition: color 260ms var(--ease-out);
 }
 .zy-seg-b:hover { color: var(--obsidian); }
-.zy-seg-b[data-on] { color: #ffffff; }
+.zy-seg-b[data-on] { color: var(--on-acc); }
 .zy-seg-b:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 
 /* ---- the underline tab bar ------------------------------------------
@@ -552,7 +432,7 @@ ${PRODUCT_TOKENS_CSS}
   overflow-x: auto;
   scrollbar-width: none;
   font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
-  box-shadow: inset 0 -1px 0 rgba(17,17,17,0.08);
+  box-shadow: inset 0 -1px 0 rgb(var(--ink-rgb) / 0.08);
 }
 .zy-tabs::-webkit-scrollbar { display: none; }
 .zy-tab {
@@ -614,7 +494,7 @@ ${PRODUCT_TOKENS_CSS}
    at any chart width. It is a transform, so it composites - no layout, no
    repaint of the paths underneath. */
 .zy-chart-wipe {
-  fill: #fff;
+  fill: var(--card);
   transform-box: fill-box;
   transform-origin: left center;
   animation: zy-wipe 820ms var(--ease-out) both;
@@ -635,8 +515,8 @@ ${PRODUCT_TOKENS_CSS}
   min-width: 132px;
   border-radius: var(--r-control);
   padding: 0.5rem 0.625rem;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.10), 0 0 0 4px rgba(250,250,250,0.60);
+  background: var(--card);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10), 0 0 0 4px color-mix(in srgb, var(--ground) 60%, transparent);
   font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
 }
 .zy-chart-tip-d { font-size: 11px; font-weight: 500; line-height: 1.5; color: var(--stone-2); }
@@ -647,7 +527,7 @@ ${PRODUCT_TOKENS_CSS}
 .zy-chart-tip-l { display: inline-flex; align-items: center; gap: 0.3125rem; font-size: 11px; font-weight: 500; color: var(--stone); }
 .zy-chart-tip-p { margin-top: 0.125rem; display: flex; align-items: center; gap: 0.3125rem; font-size: 11px; font-weight: 500; line-height: 1.6; color: var(--stone); font-variant-numeric: tabular-nums; }
 .zy-chart-key { display: inline-block; width: 10px; height: 2px; border-radius: 2px; background: var(--violet); }
-.zy-chart-key[data-prev] { background: rgba(17,17,17,0.34); }
+.zy-chart-key[data-prev] { background: rgb(var(--ink-rgb) / 0.34); }
 
 /* ---- the two-state toggle -------------------------------------------
    "Compare", "no bots". Not a segmented control: there is no row of
@@ -664,15 +544,15 @@ ${PRODUCT_TOKENS_CSS}
   white-space: nowrap;
   color: var(--stone);
   background: var(--field);
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.08);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.08);
   font-family: var(--font-chrome), Tajawal, system-ui, sans-serif;
   transition: color 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
 }
-.zy-toggle:hover { color: var(--obsidian); box-shadow: 0 0 0 1px rgba(17,17,17,0.18); }
+.zy-toggle:hover { color: var(--obsidian); box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.18); }
 .zy-toggle[data-on] {
   color: var(--violet);
   background: var(--violet-fill);
-  box-shadow: 0 0 0 1px rgba(94,106,210,0.35);
+  box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.35);
 }
 .zy-toggle:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 
@@ -709,13 +589,13 @@ ${PRODUCT_TOKENS_CSS}
   text-align: start;
   border-radius: var(--r-card);
   padding: 1rem;
-  background: #ffffff;
+  background: var(--card);
   box-shadow: var(--ring-1), var(--ring-2);
   transition: box-shadow 220ms var(--ease-out);
 }
 @media (min-width: 640px) { .zy-stat { padding: 1.125rem 1.25rem; } }
 .zy-stat[data-static] { cursor: default; }
-.zy-stat:not([data-static]):hover { box-shadow: 0 0 0 1px rgba(94,106,210,0.40), 0 0 0 4px rgba(94,106,210,0.10); }
+.zy-stat:not([data-static]):hover { box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.40), 0 0 0 4px rgb(var(--acc-rgb) / 0.10); }
 .zy-stat[data-on] { box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring); }
 .zy-stat:focus-visible { outline: 2px solid var(--violet); outline-offset: 3px; }
 .zy-stat-chip {
@@ -724,7 +604,7 @@ ${PRODUCT_TOKENS_CSS}
   width: 28px; height: 28px;
   border-radius: var(--r-control);
   color: var(--stone-2);
-  background: rgba(17,17,17,0.05);
+  background: rgb(var(--ink-rgb) / 0.05);
   transition: color 220ms var(--ease-out), background-color 220ms var(--ease-out);
 }
 .zy-stat[data-on] .zy-stat-chip { color: var(--violet); background: var(--violet-fill); }
@@ -759,70 +639,6 @@ ${PRODUCT_TOKENS_CSS}
   border: 0;
 }
 
-/* ---- the mobile drawer ----------------------------------------------
-   THE RAIL IS lg:flex, SO BELOW 1024px THERE IS NO NAV AT ALL UNLESS
-   SOMETHING ELSE CARRIES IT. On the product that something is Sidebar's own
-   drawer; a surface that renders the rail itself has to bring one too, or a
-   phone reader is locked on whatever view loaded first. Measured on the
-   candidate before this existed: zero reachable nav rows at 390px.
-
-   The panel slides from the INLINE-START edge, which is the right in Arabic
-   and the left in English. translateX is physical and does not follow dir,
-   so the closed position is set per-direction rather than with one
-   percentage - the trap the house style records.
-------------------------------------------------------------------------- */
-.zy-scrim {
-  position: fixed; inset: 0; z-index: 60;
-  background: rgba(17,17,17,0.42);
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
-  opacity: 0;
-  transition: opacity 260ms var(--ease-out);
-}
-.zy-scrim[data-open] { opacity: 1; }
-.zy-drawer {
-  position: fixed; z-index: 61;
-  inset-block: 0; inset-inline-start: 0;
-  width: min(282px, 86vw);
-  display: flex; flex-direction: column;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.10);
-  transition: transform 320ms var(--ease-out);
-  /* Closed: pushed off the START edge. LTR start is the left, so it goes
-     negative; RTL start is the right, so it goes positive. */
-  transform: translateX(-100%);
-}
-[dir="rtl"] .zy-drawer { transform: translateX(100%); }
-.zy-drawer[data-open] { transform: translateX(0); }
-[dir="rtl"] .zy-drawer[data-open] { transform: translateX(0); }
-.zy-drawer-head {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; padding-inline: 1.125rem 0.625rem;
-  flex-shrink: 0;
-  box-shadow: inset 0 -1px 0 rgba(17,17,17,0.07);
-}
-@media (min-width: 1024px) { .zy-scrim, .zy-drawer { display: none; } }
-@media (prefers-reduced-motion: reduce) {
-  .zy-scrim, .zy-drawer { transition: none; }
-}
-
-/* ---- mobile chrome --------------------------------------------------
-   The bar is the only chrome a phone gets, so it has to hold the page
-   title, the way back to the nav, and the primary action without any of
-   them shrinking to an unlabelled circle. 44px is the hit-target floor;
-   at 390px the CTA keeps its icon and drops its label, which is the one
-   place a bare glyph is acceptable because the icon is a plus. */
-@media (max-width: 1023px) {
-  .zy-top { padding-inline: 0.75rem; gap: 0.5rem; }
-  .zy-top-title { font-size: 15px; }
-  .zy-icon-btn { width: 38px; height: 38px; }
-  .zy-top-cta { padding: 0.5rem 0.75rem; min-height: 38px; }
-  .zy-top-acct { padding-inline: 0.25rem 0.5rem; min-height: 38px; }
-}
-@media (max-width: 400px) {
-  .zy-top { padding-inline: 0.625rem; }
-  .zy-top-cta { padding: 0.5rem 0.625rem; }
-}
-
 /* ---- the switch -----------------------------------------------------
    A binary preference. The knob MOVES between the two ends rather than the
    track being redrawn, for the same reason the segmented indicator does.
@@ -835,7 +651,7 @@ ${PRODUCT_TOKENS_CSS}
   width: 40px; height: 24px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: rgba(17,17,17,0.14);
+  background: rgb(var(--ink-rgb) / 0.14);
   transition: background-color 240ms var(--ease-out);
 }
 .zy-switch[data-on] { background: var(--violet); }
@@ -845,7 +661,7 @@ ${PRODUCT_TOKENS_CSS}
   width: 20px; height: 20px;
   border-radius: 999px;
   background: #ffffff;
-  box-shadow: 0 1px 2px rgba(17,17,17,0.20);
+  box-shadow: 0 1px 2px rgb(var(--ink-rgb) / 0.20);
   transition: transform 240ms var(--ease-out);
 }
 /* Physical transform, so the two directions get their own sign. */
@@ -866,8 +682,8 @@ ${PRODUCT_TOKENS_CSS}
 .zy-pill[data-tone="ok"]      { color: var(--success); background: var(--success-fill); box-shadow: 0 0 0 1px var(--success-ring); }
 .zy-pill[data-tone="warn"]    { color: var(--warning); background: var(--warning-fill); box-shadow: 0 0 0 1px var(--warning-ring); }
 .zy-pill[data-tone="bad"]     { color: var(--error);   background: var(--error-fill);   box-shadow: 0 0 0 1px var(--error-ring); }
-.zy-pill[data-tone="accent"]  { color: var(--violet);  background: var(--violet-fill);  box-shadow: 0 0 0 1px rgba(94,106,210,0.22); }
-.zy-pill[data-tone="quiet"]   { color: var(--stone);   background: rgba(17,17,17,0.05); box-shadow: 0 0 0 1px rgba(17,17,17,0.08); }
+.zy-pill[data-tone="accent"]  { color: var(--violet);  background: var(--violet-fill);  box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.22); }
+.zy-pill[data-tone="quiet"]   { color: var(--stone);   background: rgb(var(--ink-rgb) / 0.05); box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.08); }
 
 
 
@@ -929,31 +745,31 @@ ${PRODUCT_TOKENS_CSS}
    pages and a dozen components that were never going to be edited by hand.
    The excluded types are controls that are not text boxes - a checkbox
    styled as a field is a bug, and accent-color already handles them. */
-.zy-app input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="button"]),
-.zy-app textarea,
-.zy-app select {
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+:is(.zy-app, .zy-dash) textarea,
+:is(.zy-app, .zy-dash) select {
   border: 0;
   border-radius: var(--r-control);
   color: var(--obsidian);
   background: var(--field);
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.10);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10);
   letter-spacing: 0;
   transition: box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
 }
-.zy-app input::placeholder,
-.zy-app textarea::placeholder { color: var(--ghost); }
-.zy-app input:not([type="checkbox"]):not([type="radio"]):hover,
-.zy-app textarea:hover,
-.zy-app select:hover { box-shadow: 0 0 0 1px rgba(17,17,17,0.18); }
-.zy-app input:not([type="checkbox"]):not([type="radio"]):focus,
-.zy-app textarea:focus,
-.zy-app select:focus {
+:is(.zy-app, .zy-dash) input::placeholder,
+:is(.zy-app, .zy-dash) textarea::placeholder { color: var(--ghost); }
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):hover,
+:is(.zy-app, .zy-dash) textarea:hover,
+:is(.zy-app, .zy-dash) select:hover { box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.18); }
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):focus,
+:is(.zy-app, .zy-dash) textarea:focus,
+:is(.zy-app, .zy-dash) select:focus {
   outline: none;
-  background: #ffffff;
+  background: var(--card);
   box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring);
 }
-.zy-app input[type="checkbox"],
-.zy-app input[type="radio"] { accent-color: var(--violet); }
+:is(.zy-app, .zy-dash) input[type="checkbox"],
+:is(.zy-app, .zy-dash) input[type="radio"] { accent-color: var(--violet); }
 
 /* ---- 4. THE VIOLET CORNER BRACKET -----------------------------------
    The mark from the candidate set: a hairline on two OPPOSITE corners,
@@ -1025,7 +841,7 @@ ${PRODUCT_TOKENS_CSS}
      than just its two corners. Measured against the alternative of tinting
      the card fill: a violet wash makes twenty cards look selected, a violet
      ring makes one card look pointed at. */
-  .zy-app .zy-card:hover { box-shadow: 0 0 0 1px rgba(94,106,210,0.40), 0 0 0 4px rgba(94,106,210,0.10); }
+  .zy-app .zy-card:hover { box-shadow: 0 0 0 1px rgb(var(--acc-rgb) / 0.40), 0 0 0 4px rgb(var(--acc-rgb) / 0.10); }
 }
 .zy-app .zy-card:focus-within::before,
 .zy-app .zy-card:focus-within::after { opacity: 1; width: 30px; height: 30px; }
@@ -1044,9 +860,9 @@ ${PRODUCT_TOKENS_CSS}
    card is the one object floating over a dimmed page, so it is the one place
    in this file with a real drop shadow under its hairline ring. */
 .zy-tour-card {
-  background: #fff;
+  background: var(--card);
   border-radius: var(--r-card);
-  box-shadow: 0 0 0 1px rgba(17,17,17,0.10), 0 24px 48px -16px rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10), 0 24px 48px -16px rgba(0,0,0,0.35);
 }
 .zy-tour-card .zy-h3 { font-size: 17px; }
 .zy-tour-body { margin: 0; font-size: 15px; line-height: 1.75; color: var(--stone); }
@@ -1055,15 +871,15 @@ ${PRODUCT_TOKENS_CSS}
    the whole screen around it. */
 .zy-tour-hole {
   border-radius: 14px;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 6px rgba(94,106,210,0.55), 0 0 0 9999px rgba(19,19,22,0.62);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 6px rgb(var(--acc-rgb) / 0.55), 0 0 0 9999px rgba(19,19,22,0.62);
   transition: top 320ms var(--ease-out), left 320ms var(--ease-out), width 320ms var(--ease-out), height 320ms var(--ease-out);
 }
 .zy-tour-dot {
   width: 6px; height: 6px; border-radius: 999px;
-  background: rgba(17,17,17,0.14);
+  background: rgb(var(--ink-rgb) / 0.14);
   transition: width 240ms var(--ease-out), background-color 240ms var(--ease-out);
 }
-.zy-tour-dot[data-done] { background: rgba(94,106,210,0.45); }
+.zy-tour-dot[data-done] { background: rgb(var(--acc-rgb) / 0.45); }
 .zy-tour-dot[data-on] { width: 18px; background: var(--violet); }
 /* Soft motion: under "less motion" the hole jumps and only the card fades. */
 @media (prefers-reduced-motion: reduce) {
@@ -1084,4 +900,8 @@ ${PRODUCT_TOKENS_CSS}
      chart for exactly the readers who cannot afford one. */
   .zy-chart-wipe { animation: none !important; transform: scaleX(1) !important; }
 }
+
+/* The Beynoun palette, light and dark, the dashboard frame and the
+   hardcoded-colour remaps. Last, so it re-points everything above. */
+${DASH_THEME_CSS}
 `

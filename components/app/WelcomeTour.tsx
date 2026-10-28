@@ -10,14 +10,15 @@
  * account menu can replay it (REPLAY_EVENT).
  *
  * TARGETS ARE FOUND BY NAME, NOT POSITION. Each step looks for
- * `[data-tour="<slug>"]` — the sidebar rows (Sidebar.tsx) and the top bar's
- * "new site" button (Topbar.tsx). A control that moves or is restyled is still
+ * `[data-tour="<slug>"]` — the rail, dock and sheet rows and the "new site"
+ * button, all drawn by frame/DashFrame.tsx. A control that moves or is restyled is still
  * found. A step whose target is gone (a page removed, a row renamed without
  * its slug) is skipped rather than shown pointing at nothing.
  *
- * THE PHONE. Below lg the rail is a drawer, and it is rendered twice (desktop
- * aside + drawer), so the tour opens the drawer for rail steps through
- * `setDrawer` and picks whichever copy is actually on screen. The old tour
+ * THE PHONE. Below lg the rail is gone: four pages sit in the dock and the
+ * rest in the "More" sheet. A rail step whose page is in the dock points at
+ * the dock; any other opens the sheet through `setDrawer`. findTarget picks
+ * whichever copy is actually on screen. The old tour
  * measured the hidden copy, got a zero rect and fell back to a card in the
  * middle of an undimmed page.
  *
@@ -129,10 +130,12 @@ export default function WelcomeTour({ setDrawer }: { setDrawer: (open: boolean) 
   const step = TOUR[index]
   const phone = view.w < RAIL_MIN
 
-  // Rail steps on a phone need the drawer open; everything else needs it shut.
+  // Rail steps on a phone need the "More" sheet open, unless the page sits in
+  // the dock, which is on screen already; everything else needs it shut.
   useEffect(() => {
     if (stage !== 'tour') return
-    setDrawer(phone && step.inRail)
+    const inDock = !!document.querySelector(`.zf-dock [data-tour="${step.slug}"]`)
+    setDrawer(phone && step.inRail && !inDock)
   }, [stage, index, phone]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Measure the current target and keep it in sync on resize / scroll. The
@@ -149,6 +152,8 @@ export default function WelcomeTour({ setDrawer }: { setDrawer: (open: boolean) 
       return !!r
     }
     measure()
+    // The sheet slides up over ~420ms; measure once more when it has landed.
+    const settle = window.setTimeout(measure, 480)
     raf = requestAnimationFrame(() => requestAnimationFrame(() => {
       if (measure()) return
       skip = window.setTimeout(() => {
@@ -163,6 +168,7 @@ export default function WelcomeTour({ setDrawer }: { setDrawer: (open: boolean) 
     return () => {
       cancelAnimationFrame(raf)
       window.clearTimeout(skip)
+      window.clearTimeout(settle)
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }

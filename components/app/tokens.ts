@@ -146,6 +146,15 @@ export const PRODUCT_TOKENS_CSS = `
   --r-control: 10px;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Channel forms of the ink and the accent, for the tints the dashboard
+     stylesheet draws with rgb(var(--ink-rgb) / 0.07). The dashboard theme
+     re-points them for its cream and dark palettes; here they are the same
+     #111 and violet the tints always were. --on-acc is the text that sits
+     on a filled accent. */
+  --ink-rgb: 17 17 17;
+  --acc-rgb: 94 106 210;
+  --on-acc: #ffffff;
 }
 
 `

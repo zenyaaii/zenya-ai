@@ -172,7 +172,7 @@ export default function TrendChart({
         {showPrev && (
           <span className="flex items-center gap-1.5 text-[14.5px] font-medium text-[#56565a]">
             <svg width="18" height="6" aria-hidden className="shrink-0">
-              <line x1="0" y1="3" x2="18" y2="3" stroke="rgba(17,17,17,0.34)" strokeWidth="1.5" strokeDasharray="4 3" />
+              <line x1="0" y1="3" x2="18" y2="3" stroke="rgb(var(--ink-rgb) / 0.34)" strokeWidth="1.5" strokeDasharray="4 3" />
             </svg>
             {compareLabel}
           </span>
@@ -201,8 +201,8 @@ export default function TrendChart({
         >
           <defs>
             <linearGradient id="zy-area" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#5e6ad2" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="#5e6ad2" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--violet)" stopOpacity="0.16" />
+              <stop offset="100%" stopColor="var(--violet)" stopOpacity="0" />
             </linearGradient>
             <clipPath id={`zy-reveal-${revealKey.replace(/[^a-z0-9]/gi, '')}`}>
               <rect
@@ -220,7 +220,7 @@ export default function TrendChart({
               <g key={g}>
                 <line
                   x1={plotL} x2={plotR} y1={gy} y2={gy}
-                  stroke="rgba(17,17,17,0.07)" strokeWidth="1" shapeRendering="crispEdges"
+                  stroke="rgb(var(--ink-rgb) / 0.07)" strokeWidth="1" shapeRendering="crispEdges"
                 />
                 <text
                   x={plotR + 8} y={gy} dominantBaseline="middle" textAnchor="start"
@@ -239,7 +239,7 @@ export default function TrendChart({
               <path
                 d={linePath(prevValues)}
                 fill="none"
-                stroke="rgba(17,17,17,0.26)"
+                stroke="rgb(var(--ink-rgb) / 0.26)"
                 strokeWidth="1.5"
                 strokeDasharray="4 3"
                 strokeLinejoin="round"
@@ -249,14 +249,14 @@ export default function TrendChart({
               <path
                 d={line}
                 fill="none"
-                stroke="#5e6ad2"
+                stroke="var(--violet)"
                 strokeWidth="2"
                 strokeLinejoin="round"
                 strokeLinecap="round"
               />
             )}
             {/* A single-point range still deserves a visible mark. */}
-            {n === 1 && <circle cx={x(0)} cy={y(values[0])} r="4" fill="#5e6ad2" stroke="#fff" strokeWidth="2" />}
+            {n === 1 && <circle cx={x(0)} cy={y(values[0])} r="4" fill="var(--violet)" stroke="var(--card)" strokeWidth="2" />}
           </g>
 
           {/* ── the readout. Translated rather than re-placed, so it glides
@@ -265,11 +265,11 @@ export default function TrendChart({
             <g className="zy-chart-cursor" style={{ transform: `translateX(${x(hover)}px)` }}>
               <line
                 x1={0} x2={0} y1={PAD_T - 8} y2={H - PAD_B}
-                stroke="rgba(94,106,210,0.38)" strokeWidth="1"
+                stroke="rgb(var(--acc-rgb) / 0.38)" strokeWidth="1"
               />
               <circle
                 cx={0} cy={y(values[hover] ?? 0)} r="4.5"
-                fill="#5e6ad2" stroke="#fff" strokeWidth="2"
+                fill="var(--violet)" stroke="var(--card)" strokeWidth="2"
                 style={{ transition: 'cy 220ms cubic-bezier(0.22,1,0.36,1)' }}
               />
             </g>
