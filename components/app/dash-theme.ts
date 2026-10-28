@@ -477,17 +477,17 @@ html.dash-dk .zf-row[aria-current="page"] { box-shadow: 0 0 0 1px rgb(var(--ink-
 .zf-pal-empty { padding: 22px 12px; text-align: center; font-size: 15px; color: var(--stone-2); }
 
 /* ---- the theme switch -----------------------------------------------------
-   The new colours spread out from the button in a soft circle: a radial
-   mask with a 160px feathered edge, grown by animating a registered length.
+   A curtain: the new colours come down from the top with a soft, feathered
+   edge (a linear mask grown by animating a registered percentage).
    Without view transitions the colours ease instead of jumping. */
-@property --zf-r { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --zf-p { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 html[data-zf-tt]::view-transition-new(root) {
-  -webkit-mask: radial-gradient(circle at var(--zf-x) var(--zf-y), #000 calc(var(--zf-r) - 160px), transparent var(--zf-r));
-  mask: radial-gradient(circle at var(--zf-x) var(--zf-y), #000 calc(var(--zf-r) - 160px), transparent var(--zf-r));
-  animation: zfGrow 950ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  -webkit-mask: linear-gradient(to bottom, #000 calc(var(--zf-p) - 35%), transparent var(--zf-p));
+  mask: linear-gradient(to bottom, #000 calc(var(--zf-p) - 35%), transparent var(--zf-p));
+  animation: zfCurtain 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
 }
-@keyframes zfGrow { from { --zf-r: 0px; } to { --zf-r: var(--zf-max); } }
+@keyframes zfCurtain { from { --zf-p: 0%; } to { --zf-p: 135%; } }
 html.zf-ease, html.zf-ease * {
   transition: background-color 500ms ease, color 500ms ease, border-color 500ms ease, box-shadow 500ms ease, fill 500ms ease, stroke 500ms ease !important;
 }

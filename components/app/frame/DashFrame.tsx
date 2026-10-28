@@ -95,7 +95,6 @@ export default function DashFrame({
   const { dark, toggle } = useDashTheme()
   const [palOpen, setPalOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const themeBtn = useRef<HTMLButtonElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -180,10 +179,9 @@ export default function DashFrame({
               ? <Link href={newSite.href} className="zy-top-cta lg:!hidden" data-tour="new-site" aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></Link>
               : <button type="button" className="zy-top-cta lg:!hidden" onClick={newSite.onSelect} aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></button>}
             <button
-              ref={themeBtn}
               type="button"
               className="zy-icon-btn zf-theme inline-flex"
-              onClick={() => toggle(themeBtn.current)}
+              onClick={toggle}
               aria-label={dark ? t.nav.lightMode : t.nav.darkMode}
               aria-pressed={dark}
             >
@@ -254,7 +252,7 @@ export default function DashFrame({
         <CommandPalette
           items={all}
           dark={dark}
-          onToggleTheme={() => toggle(null)}
+          onToggleTheme={toggle}
           newSite={newSite}
           onClose={() => setPalOpen(false)}
         />

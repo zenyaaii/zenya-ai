@@ -56,9 +56,8 @@ export function useDashTheme() {
     }
   }, [])
 
-  /** Flip the theme. `from` is the control that was pressed: the new colours
-   *  spread out from its centre in a soft circle. */
-  const toggle = useCallback((from?: HTMLElement | null) => {
+  /** Flip the theme. The new colours come down from the top like a curtain. */
+  const toggle = useCallback(() => {
     const next = !document.documentElement.classList.contains('dash-dk')
     try { localStorage.setItem(KEY, next ? 'dark' : 'light') } catch {}
     setDark(next)
@@ -73,13 +72,6 @@ export function useDashTheme() {
       window.setTimeout(() => r.classList.remove('zf-ease'), 600)
       return
     }
-    const box = from?.getBoundingClientRect()
-    const x = box ? box.left + box.width / 2 : window.innerWidth / 2
-    const y = box ? box.top + box.height / 2 : 0
-    const far = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
-    r.style.setProperty('--zf-x', `${x}px`)
-    r.style.setProperty('--zf-y', `${y}px`)
-    r.style.setProperty('--zf-max', `${far + 160}px`)
     r.dataset.zfTt = ''
     const t = doc.startViewTransition(() => paint(next))
     t.finished.finally(() => { delete r.dataset.zfTt })
