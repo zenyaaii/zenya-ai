@@ -151,7 +151,7 @@ export default function DashFrame({
       {/* ── the rail, laptop ── */}
       <aside className="zf-side" aria-label={t.nav.pages}>
         {home}
-        <nav className="zf-scroll">
+        <nav className="zf-scroll" data-tour="nav">
           <NavList groups={groups} />
         </nav>
         <div className="zf-foot">
@@ -168,7 +168,7 @@ export default function DashFrame({
           {home}
           <h1 className="zf-title">{title}</h1>
           <div className="zf-tools">
-            <button type="button" className="zf-search" onClick={() => setPalOpen(true)} aria-label={t.nav.searchHint}>
+            <button type="button" className="zf-search" data-tour="search" onClick={() => setPalOpen(true)} aria-label={t.nav.searchHint}>
               <Search strokeWidth={2} aria-hidden />
               <span className="zf-search-t">{t.nav.searchHint}</span>
               <kbd>⌘K</kbd>
@@ -181,6 +181,7 @@ export default function DashFrame({
             <button
               type="button"
               className="zy-icon-btn zf-theme inline-flex"
+              data-tour="theme"
               onClick={toggle}
               aria-label={dark ? t.nav.lightMode : t.nav.darkMode}
               aria-pressed={dark}
@@ -195,7 +196,7 @@ export default function DashFrame({
       </div>
 
       {/* ── the dock, phone and tablet ── */}
-      <nav className="zf-dock" aria-label={t.nav.pages}>
+      <nav className="zf-dock" aria-label={t.nav.pages} data-tour="nav">
         {docked.map((it) => {
           const Icon = it.icon
           const inner = (<><Icon strokeWidth={it.active ? 2.2 : 1.9} aria-hidden /><span>{it.label}</span></>)

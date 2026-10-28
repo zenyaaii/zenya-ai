@@ -110,6 +110,7 @@ export default function TopTools({
       <DropdownMenu.Trigger asChild>
         <button
           className="zy-top-acct"
+              data-tour="account"
           aria-label={t.nav.accountMenu}
         >
           <div className="zy-top-av">{initial}</div>

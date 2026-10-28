@@ -35,7 +35,7 @@ export function NotificationsBell({ items, label = 'الإشعارات' }: { ite
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
-        <button type="button" className="zy-icon-btn relative inline-flex" aria-label={count ? `${label}: ${count} جديد` : label}>
+        <button type="button" className="zy-icon-btn relative inline-flex" data-tour="bell" aria-label={count ? `${label}: ${count} جديد` : label}>
           <Bell className="h-[19px] w-[19px]" strokeWidth={2} />
           {count > 0 && (
             <span className="absolute -top-0.5 inline-flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#d6453d] px-1 text-[11px] font-black leading-none text-white" style={{ insetInlineEnd: -2 }}>
