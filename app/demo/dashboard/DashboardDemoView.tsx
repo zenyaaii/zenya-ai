@@ -36,7 +36,7 @@ import { NotificationsBell } from '@/components/app/NotificationsBell'
 import DashFrame from '@/components/app/frame/DashFrame'
 import { PAGE_ROUTE, buildNav, type PageKey } from '@/components/app/frame/nav'
 import { useT } from '@/components/i18n/LocaleProvider'
-import DashIntro, { type IntroVariant } from '@/components/app/intro/DashIntro'
+import DashIntro from '@/components/app/intro/DashIntro'
 import {
   AnalyticsView, BillingView, BookingsView, DomainsView, GalleryView,
   HomeView, ReviewsView, SeoView, SettingsView, SitesView,
@@ -60,8 +60,6 @@ function viewFromLocation(): ViewKey {
   return VIEWS.includes(v as ViewKey) ? (v as ViewKey) : 'home'
 }
 
-const INTRO: Record<string, IntroVariant> = { a: 'story', b: 'steps', c: 'card' }
-
 export default function DashboardDemoView() {
   const [view, setView] = useState<ViewKey>('home')
   const t = useT()
@@ -70,8 +68,8 @@ export default function DashboardDemoView() {
   const [range, setRange] = useState('30d')
   const [bookingFilter, setBookingFilter] = useState('all')
   const [siteFilter, setSiteFilter] = useState('all')
-  /** ?intro=a|b|c shows one of the three intro samples. */
-  const [intro, setIntro] = useState<IntroVariant | null>(null)
+  /** ?intro opens the dashboard tour, so it can be seen without an account. */
+  const [intro, setIntro] = useState(false)
   const fakeSend = () => new Promise<void>((r) => setTimeout(r, 700))
 
   /* Read the address on mount. Deliberately in an effect rather than in the
@@ -80,8 +78,7 @@ export default function DashboardDemoView() {
   useEffect(() => {
     const v = viewFromLocation()
     if (v !== 'home') setView(v)
-    const i = new URLSearchParams(window.location.search).get('intro')
-    if (i && i in INTRO) setIntro(INTRO[i])
+    if (new URLSearchParams(window.location.search).has('intro')) setIntro(true)
   }, [])
 
   const go = useCallback((v: string) => {
@@ -141,7 +138,7 @@ export default function DashboardDemoView() {
         </p>
       </main>
       </DashFrame>
-      {intro && <DashIntro key={intro} variant={intro} onClose={() => setIntro(null)} setMore={setDrawer} />}
+      {intro && <DashIntro startOpen setMore={setDrawer} />}
     </div>
   )
 }

@@ -26,7 +26,7 @@ export type FrameItem = {
   href?: string
   onSelect?: () => void
   active?: boolean
-  /** Slug the welcome tour points at. */
+  /** Slug the dashboard tour (intro/DashIntro) points at. */
   tour?: string
   /** One of the four the phone dock shows. */
   dock?: boolean
@@ -47,7 +47,7 @@ type Props = {
   tools: ReactNode
   /** Under the nav: the problem report. */
   foot?: ReactNode
-  /** The "More" sheet's open state, lifted so the welcome tour can open it. */
+  /** The "More" sheet's open state, lifted so the dashboard tour can open it. */
   moreOpen: boolean
   setMoreOpen: (open: boolean) => void
   dir?: 'rtl' | 'ltr'
@@ -157,7 +157,7 @@ export default function DashFrame({
         <div className="zf-foot">
           {newSite.href
             ? <Link href={newSite.href} className="zf-new" data-tour="new-site">{newSiteBody}</Link>
-            : <button type="button" className="zf-new" onClick={newSite.onSelect}>{newSiteBody}</button>}
+            : <button type="button" className="zf-new" data-tour="new-site" onClick={newSite.onSelect}>{newSiteBody}</button>}
           {foot}
           <a className="zf-back" href="https://beynoun.com/?home=1">{t.nav.backToSite}</a>
         </div>
@@ -177,7 +177,7 @@ export default function DashFrame({
                 action rides in the bar as an ink circle. */}
             {newSite.href
               ? <Link href={newSite.href} className="zy-top-cta lg:!hidden" data-tour="new-site" aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></Link>
-              : <button type="button" className="zy-top-cta lg:!hidden" onClick={newSite.onSelect} aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></button>}
+              : <button type="button" className="zy-top-cta lg:!hidden" data-tour="new-site" onClick={newSite.onSelect} aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></button>}
             <button
               type="button"
               className="zy-icon-btn zf-theme inline-flex"

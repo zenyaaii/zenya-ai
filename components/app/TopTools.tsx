@@ -13,7 +13,7 @@ import LanguageSwitcher from '@/components/marketing/LanguageSwitcher'
 import { useDashboardPath } from './useDashboardPath'
 import { NotificationsBell, type BellItem } from './NotificationsBell'
 import { whenLabel } from '@/components/dashboard/screens/reviews'
-import { REPLAY_EVENT } from './WelcomeTour'
+import { INTRO_REPLAY_EVENT } from './intro/DashIntro'
 import { siteUrl } from '@/lib/portal-urls'
 
 const DROPDOWN_EASE = [0.22, 1, 0.36, 1] as const
@@ -171,12 +171,12 @@ export default function TopTools({
                     type="button"
                     onClick={() => {
                       setMenuOpen(false)
-                      window.dispatchEvent(new Event(REPLAY_EVENT))
+                      window.dispatchEvent(new Event(INTRO_REPLAY_EVENT))
                     }}
                     className="zy-menu-row"
                   >
                     <Compass className="h-3.5 w-3.5" strokeWidth={2} />
-                    {t.tour.replay}
+                    {t.intro.replay}
                   </button>
                 </DropdownMenu.Item>
 

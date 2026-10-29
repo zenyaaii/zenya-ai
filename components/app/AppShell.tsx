@@ -6,10 +6,10 @@ import { createClient } from '@/utils/supabase/client'
 import { useT } from '@/components/i18n/LocaleProvider'
 import TopTools from './TopTools'
 import { ReportProblem } from './ReportProblem'
-import WelcomeTour from './WelcomeTour'
 import { DASHBOARD_CSS } from './dashboard-style'
 import { dashFont } from './dash-font'
 import DashFrame from './frame/DashFrame'
+import DashIntro from './intro/DashIntro'
 import { PAGE_ROUTE, buildNav, pageFor } from './frame/nav'
 import { useDashboardPath } from './useDashboardPath'
 
@@ -85,9 +85,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <main>{children}</main>
       </DashFrame>
 
-      {/* First-visit tour. It sits on the shell, not a page, because it points
-          at the shell's own controls and has to open the phone sheet. */}
-      <WelcomeTour setDrawer={setMoreOpen} />
+      {/* The dashboard tour, once per account. It sits on the shell, not a
+          page, because it points at the shell's own controls and has to open
+          the phone sheet. */}
+      <DashIntro setMore={setMoreOpen} persist />
     </div>
   )
 }

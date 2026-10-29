@@ -506,15 +506,14 @@ html.zf-ease, html.zf-ease * {
   margin-inline: auto; max-width: 440px; padding: 28px 24px 22px; border-radius: 22px;
   background: var(--card); box-shadow: var(--shadow-pop); animation: ziRise 380ms cubic-bezier(0.2,0.8,0.2,1) both;
 }
-.zi-x { position: absolute; inset-inline-end: 12px; top: 12px; }
+.zi-x { position: absolute; inset-inline-end: 12px; top: 12px; width: 40px; height: 40px; border-radius: 999px; }
+.zi-pause { flex: none; width: 36px; height: 36px; border-radius: 999px; }
 .zi-badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px;
   background: rgb(var(--acc-rgb) / 0.1); color: var(--violet); font-size: 14px; font-weight: 600;
 }
 .zi-title { margin-top: 14px; font-family: var(--font-head); font-size: 30px; line-height: 1.25; font-weight: 700; }
 .zi-lead { margin-top: 8px; font-size: 18px; line-height: 1.75; color: var(--stone); }
-.zi-points { margin-top: 16px; display: grid; gap: 10px; }
-.zi-points li { display: flex; align-items: center; gap: 12px; font-size: 17.5px; line-height: 1.6; animation: ziRise 420ms cubic-bezier(0.2,0.8,0.2,1) both; }
 .zi-pt-ico {
   flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
   background: rgb(var(--ink-rgb) / 0.06); color: var(--obsidian);
@@ -531,7 +530,6 @@ html.zf-ease, html.zf-ease * {
 .zi-btn-q:hover { background: rgb(var(--ink-rgb) / 0.06); }
 .zi-btn:focus-visible, .zi-btn-q:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
 .zi-sm { min-height: 38px; padding-inline: 14px; font-size: 15.5px; }
-.zi-dim { color: var(--stone); font-weight: 500; }
 .zi-dim-on { opacity: 0.7; font-weight: 500; }
 .zi-tip {
   z-index: 103; padding: 16px 16px 12px; border-radius: 18px; background: var(--card); box-shadow: var(--shadow-pop);
@@ -564,6 +562,6 @@ html.zf-ease, html.zf-ease * {
   .zf-sheet, .zf-scrim, .zf-row, .zf-dock-b { transition: none; }
   .zf-pal { animation: none; }
   .zi-hole, .zi-cur, .zi-prog i { transition: none; }
-  .zi-modal, .zi-tip, .zi-points li, .zi-scrim { animation: ziFade 200ms ease both; }
+  .zi-modal, .zi-tip, .zi-scrim { animation: ziFade 200ms ease both; }
 }
 `
