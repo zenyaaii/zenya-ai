@@ -14,9 +14,8 @@
  * the owner's account.
  */
 
-import { ArrowUpDown, Eye, MousePointerClick, Percent } from 'lucide-react'
-import { Tile } from '@/components/dashboard/analytics/primitives'
 import { Act, type Action } from './kit'
+import { fmt } from './traffic'
 
 export type GscTotals = { clicks: number; impressions: number; ctr: number; position: number }
 export type GscQuery = { query: string; clicks: number; impressions: number; ctr: number; position: number }
@@ -137,8 +136,8 @@ export type GscNumbersProps = {
 }
 
 /**
- * Google search as its own section of Analytics, drawn like the traffic tiles
- * above it: four figures in a row, then the words people searched. It is per
+ * Google search as its own card on Analytics, in the board's look: four
+ * figures in a row, then the words people searched, as bars. It is per
  * site, because a Search Console property is one site.
  */
 export function GscNumbers({
@@ -147,16 +146,11 @@ export function GscNumbers({
   if (status === 'off') return null
 
   const picker = status !== 'disconnected' && sites.length > 1 && (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {sites.map((s) => {
-        const on = s.id === selectedId
-        return onSelect ? (
-          <button key={s.id} type="button" onClick={() => onSelect(s.id)} aria-pressed={on}
-            className="zy-pill cursor-pointer" data-tone={on ? 'accent' : 'quiet'}>{s.name}</button>
-        ) : (
-          <span key={s.id} className="zy-pill" data-tone={on ? 'accent' : 'quiet'}>{s.name}</span>
-        )
-      })}
+    <div className="zb-sites" role="group" aria-label="الموقع">
+      {sites.map((s) => (
+        <button key={s.id} type="button" aria-pressed={s.id === selectedId} disabled={!onSelect}
+          onClick={() => onSelect?.(s.id)}>{s.name}</button>
+      ))}
     </div>
   )
 
@@ -169,54 +163,53 @@ export function GscNumbers({
       error: 'تعذّر جلب الأرقام من جوجل الآن. أعد تحميل الصفحة بعد لحظات.',
     }[status]
     body = (
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl zy-card p-4 sm:p-5">
-        <p className="zy-sub max-w-[60ch]">{text}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="zb-small max-w-[60ch]">{text}</p>
         {(status === 'disconnected' || status === 'missing') && (
-          <Act action={toSeo} className="zy-btn shrink-0">{status === 'disconnected' ? 'اربط من صفحة السيو' : 'أضِفه من صفحة السيو'}</Act>
+          <Act action={toSeo} className="zb-btn zb-btn-ink">{status === 'disconnected' ? 'اربط من صفحة السيو' : 'أضِفه من صفحة السيو'}</Act>
         )}
       </div>
     )
   } else if (status === 'loading') {
-    body = (
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="h-[104px] animate-pulse rounded-2xl zy-card" />)}
-      </div>
-    )
+    body = <div className="zb-figs">{[0, 1, 2, 3].map((i) => <div key={i} className="animate-pulse" style={{ height: 92 }} />)}</div>
   } else {
     const t = totals ?? { clicks: 0, impressions: 0, ctr: 0, position: 0 }
     const max = Math.max(1, ...queries.map((q) => q.impressions))
+    const figs: Array<[string, string, string]> = [
+      ['مرات الظهور', fmt(t.impressions), 'في نتائج جوجل'],
+      ['النقرات', fmt(t.clicks), 'دخلوا موقعك من البحث'],
+      ['نسبة النقر', t.impressions ? `${(t.ctr * 100).toFixed(1)}%` : '—', 'نقرات من كل ظهور'],
+      ['الترتيب', t.position ? t.position.toFixed(1) : '—', 'متوسط · الأقل أفضل'],
+    ]
     body = (
       <>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <Tile label="مرات الظهور" value={t.impressions.toLocaleString('ar')} icon={Eye} sub="في نتائج جوجل" />
-          <Tile label="النقرات" value={t.clicks.toLocaleString('ar')} icon={MousePointerClick} sub="دخلوا موقعك من البحث" />
-          <Tile label="نسبة النقر" value={t.impressions ? `${(t.ctr * 100).toFixed(1)}%` : '—'} icon={Percent} sub="نقرات من كل ظهور" />
-          <Tile label="الترتيب" value={t.position ? t.position.toFixed(1) : '—'} icon={ArrowUpDown} sub="متوسط · الأقل أفضل" />
+        <div className="zb-figs">
+          {figs.map(([label, value, sub]) => (
+            <div key={label}>
+              <span>{label}</span>
+              <b className="zb-num">{value}</b>
+              <small>{sub}</small>
+            </div>
+          ))}
         </div>
         {t.impressions === 0 ? (
-          <p className="zy-sub mt-4 rounded-2xl zy-card p-4 sm:p-5">
+          <p className="zb-small mt-4">
             جوجل لم يسجّل ظهورًا لهذا الموقع بعد. الفهرسة تأخذ عادةً من أيام إلى أسبوعين بعد النشر.
           </p>
         ) : queries.length > 0 && (
-          <div className="mt-4 min-w-0 overflow-hidden rounded-2xl zy-card">
-            <div className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
-              <h3 className="zy-h3">الكلمات التي وجدوك بها</h3>
-              <span className="shrink-0 text-[14.5px] font-medium text-[#66666e]">ظهور · نقرات</span>
+          <div className="mt-5">
+            <div className="zb-card-h" style={{ marginBottom: 8 }}>
+              <h3 className="zb-h2" style={{ fontSize: 17 }}>الكلمات التي وجدوك بها</h3>
+              <span className="zb-small">ظهور · نقرات</span>
             </div>
-            <ul className="divide-y divide-[color:var(--border)]">
-              {queries.slice(0, 8).map((q) => (
-                <li key={q.query} className="relative px-4 py-2.5">
-                  <div className="absolute inset-y-0 start-0 bg-[rgba(94,106,210,0.08)]" style={{ width: `${(q.impressions / max) * 100}%` }} aria-hidden />
-                  <div className="relative flex items-baseline justify-between gap-3">
-                    <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium text-foreground">{q.query}</span>
-                    <span className="shrink-0 whitespace-nowrap text-[14.5px] tabular-nums text-foreground">
-                      {q.impressions.toLocaleString('ar')}
-                      <span className="ms-1.5 text-muted">· {q.clicks.toLocaleString('ar')}</span>
-                    </span>
-                  </div>
-                </li>
+            <div className="zb-bars" data-tone="blue">
+              {queries.slice(0, 8).map((q, k) => (
+                <div key={q.query} style={{ ['--w' as string]: `${((q.impressions / max) * 100).toFixed(1)}%`, ['--k' as string]: k }}>
+                  <span dir="auto">{q.query}</span>
+                  <b className="zb-num">{fmt(q.impressions)}<small>· {fmt(q.clicks)}</small></b>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </>
@@ -224,15 +217,15 @@ export function GscNumbers({
   }
 
   return (
-    <section className="mt-8 pt-6" style={{ boxShadow: 'inset 0 1px 0 rgba(17,17,17,0.08)' }}>
+    <article className="zb-card zb-rv mt-4" style={{ ['--i' as string]: 8 }}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="min-w-0">
-          <h2 className="zy-h2 flex items-center gap-2">{G}<span>بحث جوجل</span></h2>
-          <p className="zy-sub mt-1">آخر 28 يومًا · أرقام حقيقية من Google Search Console</p>
+          <h2 className="zb-h2 flex items-center gap-2">{G}<span>بحث جوجل</span></h2>
+          <p className="zb-small">آخر 28 يومًا · أرقام حقيقية من Google Search Console</p>
         </div>
         {picker}
       </div>
       {body}
-    </section>
+    </article>
   )
 }

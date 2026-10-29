@@ -1,18 +1,21 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { BarChart3, Eye, LogOut, MousePointerClick, Timer, Users } from 'lucide-react'
-import { Segmented } from '@/components/app/Segmented'
-import TrendChart from '@/components/dashboard/analytics/TrendChart'
-import { BarList, Delta, Tile } from '@/components/dashboard/analytics/primitives'
-import type { Row, SeriesPoint } from '@/components/dashboard/analytics/types'
+import { useMemo, type ReactNode } from 'react'
+import { Timer } from 'lucide-react'
+import { Spark } from '@/components/dashboard/analytics/AreaChart'
+import type { Row } from '@/components/dashboard/analytics/types'
 import { Page, PageHead } from './kit'
+import {
+  DayNav, METRIC_LABEL, Seg, TrafficChart, agoName, deltaTxt, fmt, weekly,
+  type TMetric, type TRange, type TrafficData,
+} from './traffic'
 
-export type MetricKey = 'views' | 'visitors' | 'sessions' | 'events'
-export type RangeKey = '24h' | '7d' | '30d' | '90d' | '12mo'
+export type MetricKey = TMetric
+/** The analytics page reaches a year back; the home card stops at 90 days. */
+export type RangeKey = TRange | '12mo'
 
 export const RANGE_LABEL: Record<RangeKey, string> = {
-  '24h': '24 ساعة', '7d': '7 أيام', '30d': '30 يومًا', '90d': '90 يومًا', '12mo': 'سنة',
+  day: 'يوم', '7d': '7 أيام', '30d': '30 يومًا', '90d': '90 يومًا', '12mo': 'سنة',
 }
 
 export type AnalyticsScreenProps = {
@@ -20,10 +23,10 @@ export type AnalyticsScreenProps = {
   setMetric: (m: MetricKey) => void
   range: RangeKey
   setRange: (r: RangeKey) => void
-  totals: Record<MetricKey, number>
-  deltas: Record<MetricKey, number | null>
-  series: SeriesPoint[]
-  prevSeries: SeriesPoint[]
+  /** Days before today, when the range is one day. */
+  back: number
+  setBack: (b: number) => void
+  traffic: TrafficData | null
   channels: Row[]
   pages: Row[]
   avgDuration: string
@@ -32,75 +35,126 @@ export type AnalyticsScreenProps = {
   searchConsole?: ReactNode
 }
 
+const TILES: Array<{ m: MetricKey; sub: string }> = [
+  { m: 'visitors', sub: 'أشخاص مختلفون' },
+  { m: 'sessions', sub: 'زيارات منفصلة' },
+  { m: 'views', sub: 'صفحات مفتوحة' },
+  { m: 'events', sub: 'واتساب · هاتف · حجز' },
+]
+
+/** The page's own words for a few paths; anything else shows as written. */
+const PAGE_NAME: Record<string, string> = { '/': 'الصفحة الرئيسية' }
+
 export function AnalyticsScreen({
-  metric, setMetric, range, setRange, totals, deltas, series, prevSeries, channels, pages,
+  metric, setMetric, range, setRange, back, setBack, traffic: raw, channels, pages,
   avgDuration, avgDurationDelta, searchConsole,
 }: AnalyticsScreenProps) {
+  const day = range === 'day'
+  // A year reads as weeks; totals and deltas are the year's either way.
+  const traffic = useMemo(() => (raw && range === '12mo' ? weekly(raw) : raw), [raw, range])
+  const period = day ? (back === 0 ? 'اليوم حتى الآن' : agoName(back)) : `آخر ${RANGE_LABEL[range]}`
+  const pickDay = (b: number) => { setBack(b); setRange('day') }
   return (
     <Page>
       <PageHead
         title="التحليلات"
-        sub="كل ما يحدث على مواقعك المنشورة — الزوّار، ومن أين أتوا، وماذا فعلوا."
-        icon={BarChart3}
+        sub="كل ما يحدث على مواقعك المنشورة: من زارها، ومن أين أتى، وماذا فعل."
       />
-      <div className="mb-5 flex flex-wrap items-center gap-2">
-        <Segmented
-          label="اختر المدة"
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Seg
+          label="المدة"
+          items={(Object.keys(RANGE_LABEL) as RangeKey[]).map((k) => [k, RANGE_LABEL[k]] as [RangeKey, string])}
           value={range}
-          onChange={setRange}
-          items={(Object.keys(RANGE_LABEL) as RangeKey[]).map((k) => ({ key: k, label: RANGE_LABEL[k] }))}
+          onChange={(r) => { if (r === 'day') setBack(0); setRange(r) }}
         />
       </div>
+      {day && <div className="-mt-2 mb-4"><DayNav back={back} onBack={setBack} /></div>}
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <Tile label="الزوّار" value={totals.visitors.toLocaleString('ar')} icon={Users}
-          delta={deltas.visitors} sub="أشخاص مختلفون" spark={series.map((s) => s.visitors)}
-          active={metric === 'visitors'} onClick={() => setMetric('visitors')} />
-        <Tile label="الجلسات" value={totals.sessions.toLocaleString('ar')} icon={LogOut}
-          delta={deltas.sessions} sub="زيارات منفصلة"
-          active={metric === 'sessions'} onClick={() => setMetric('sessions')} />
-        <Tile label="المشاهدات" value={totals.views.toLocaleString('ar')} icon={Eye}
-          delta={deltas.views} sub="صفحات مفتوحة"
-          active={metric === 'views'} onClick={() => setMetric('views')} />
-        <Tile label="التواصل" value={totals.events.toLocaleString('ar')} icon={MousePointerClick}
-          delta={deltas.events} sub="واتساب · هاتف · حجز"
-          active={metric === 'events'} onClick={() => setMetric('events')} />
+      <section className="zb-tiles" aria-label="الأرقام">
+        {TILES.map(({ m, sub }, i) => {
+          const x = traffic?.deltas[m] ?? null
+          return (
+            <button
+              key={m}
+              type="button"
+              className="zb-stat zb-rv"
+              style={{ ['--i' as string]: i }}
+              aria-pressed={metric === m}
+              onClick={() => setMetric(m)}
+            >
+              <span className="zb-stat-top">
+                <span>{METRIC_LABEL[m]}</span>
+                <span className="zb-delta" data-dn={x != null && x < 0 ? '' : undefined}>{deltaTxt(x)}</span>
+              </span>
+              <span className="zb-stat-row">
+                <span className="zb-stat-v">{traffic ? fmt(traffic.totals[m]) : '—'}</span>
+                {traffic && <Spark values={traffic.values[m]} />}
+              </span>
+              <small>{sub}</small>
+            </button>
+          )
+        })}
       </section>
 
-      <div className="mt-5">
-        <TrendChart
-          series={series} prevSeries={prevSeries}
-          metric={metric} onMetricChange={setMetric}
-          showPrev compareLabel="المدة السابقة"
-        />
+      <article className="zb-card zb-rv mt-4" style={{ ['--i' as string]: 4 }}>
+        <div className="zb-card-h" style={{ marginBottom: 0 }}>
+          <div className="min-w-0">
+            <h2 className="zb-h2">{METRIC_LABEL[metric]}</h2>
+            <div className="zb-small">{period}</div>
+          </div>
+        </div>
+        {traffic ? (
+          <TrafficChart data={traffic} metric={metric} range={day ? 'day' : '30d'} back={back} onPickDay={pickDay} />
+        ) : (
+          <div className="zb-chart" aria-hidden="true" />
+        )}
+      </article>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <article className="zb-card zb-rv" style={{ ['--i' as string]: 5 }}>
+          <div className="zb-card-h">
+            <h2 className="zb-h2">من أين يأتون</h2>
+            <span className="zb-small">{period}</span>
+          </div>
+          <Bars rows={channels} />
+        </article>
+        <article className="zb-card zb-rv" style={{ ['--i' as string]: 6 }}>
+          <div className="zb-card-h">
+            <h2 className="zb-h2">أهم الصفحات</h2>
+            <span className="zb-small">{period}</span>
+          </div>
+          <Bars rows={pages.map((p) => ({ ...p, name: PAGE_NAME[p.name] || p.name }))} tone="blue" />
+        </article>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-2">
-        <div className="min-w-0 overflow-hidden rounded-2xl zy-card">
-          <div className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
-            <h3 className="zy-h3">من أين يأتون</h3>
-            <span className="shrink-0 text-[14.5px] font-medium text-[#66666e]">آخر {RANGE_LABEL[range]}</span>
-          </div>
-          <BarList rows={channels} max={5} />
+      <article className="zb-card zb-rv mt-4 flex flex-wrap items-center gap-x-6 gap-y-2" style={{ ['--i' as string]: 7 }}>
+        <span className="zb-tile"><Timer strokeWidth={2} /></span>
+        <div className="min-w-0">
+          <div className="zb-small">متوسط مدة الزيارة</div>
+          <div className="zb-h2 zb-num">{avgDuration}</div>
         </div>
-        <div className="min-w-0 overflow-hidden rounded-2xl zy-card">
-          <div className="flex items-baseline justify-between gap-3 px-4 pb-1 pt-4">
-            <h3 className="zy-h3">أهم الصفحات</h3>
-            <span className="shrink-0 text-[14.5px] font-medium text-[#66666e]">{Math.min(pages.length, 5)} صفحات</span>
-          </div>
-          <BarList rows={pages} max={5} />
-        </div>
-      </div>
-
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl zy-card p-4 sm:p-5">
-        <div className="flex min-w-0 items-center gap-2">
-          <Timer className="h-4 w-4 shrink-0 text-[#66666e]" strokeWidth={2} />
-          <span className="zy-sub">متوسط المدة {avgDuration}</span>
-        </div>
-        <Delta value={avgDurationDelta} />
-      </div>
+        <span className="zb-delta" data-dn={avgDurationDelta != null && avgDurationDelta < 0 ? '' : undefined}>{deltaTxt(avgDurationDelta)}</span>
+        <span className="zb-small">زيارات الروبوتات لا تُحسب في هذه الأرقام.</span>
+      </article>
 
       {searchConsole}
     </Page>
+  )
+}
+
+function Bars({ rows, tone }: { rows: Row[]; tone?: 'blue' }) {
+  const top = rows.slice(0, 5)
+  if (!top.length) return <div className="zb-empty">لا زيارات في هذه المدة بعد.</div>
+  const max = Math.max(...top.map((r) => r.views), 1)
+  const total = rows.reduce((a, r) => a + r.views, 0) || 1
+  return (
+    <div className="zb-bars" data-tone={tone}>
+      {top.map((r, k) => (
+        <div key={r.name} style={{ ['--w' as string]: `${((r.views / max) * 100).toFixed(1)}%`, ['--k' as string]: k }}>
+          <span dir="auto">{r.name}</span>
+          <b className="zb-num">{fmt(r.views)}<small>{Math.round((r.views / total) * 100)}%</small></b>
+        </div>
+      ))}
+    </div>
   )
 }

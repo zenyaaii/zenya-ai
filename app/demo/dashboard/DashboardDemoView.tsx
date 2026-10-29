@@ -37,6 +37,7 @@ import DashFrame from '@/components/app/frame/DashFrame'
 import { PAGE_ROUTE, buildNav, type PageKey } from '@/components/app/frame/nav'
 import { useT } from '@/components/i18n/LocaleProvider'
 import DashIntro from '@/components/app/intro/DashIntro'
+import type { MetricKey, RangeKey } from '@/components/dashboard/screens/analytics'
 import {
   AnalyticsView, BillingView, BookingsView, DomainsView, GalleryView,
   HomeView, ReviewsView, SeoView, SettingsView, SitesView,
@@ -64,8 +65,8 @@ export default function DashboardDemoView() {
   const [view, setView] = useState<ViewKey>('home')
   const t = useT()
   const [drawer, setDrawer] = useState(false)
-  const [metric, setMetric] = useState<'views' | 'visitors' | 'sessions' | 'events'>('views')
-  const [range, setRange] = useState('30d')
+  const [metric, setMetric] = useState<MetricKey>('visitors')
+  const [range, setRange] = useState<RangeKey>('30d')
   const [bookingFilter, setBookingFilter] = useState('all')
   const [siteFilter, setSiteFilter] = useState('all')
   /** ?intro opens the dashboard tour, so it can be seen without an account. */

@@ -91,6 +91,8 @@ html .zy-app, html .zy-dash {
   --success-ring: rgb(31 110 68 / 0.22);
   --warning-ring: rgb(138 90 6 / 0.22);
   --error-ring: rgb(176 46 37 / 0.22);
+  --blue: #2B6CA8;
+  --blue-fill: rgb(43 108 168 / 0.12);
 
   --ring-1: 0 0 0 1px rgb(22 18 13 / 0.08);
   --ring-2: 0 18px 40px -30px rgb(22 18 13 / 0.30);
@@ -168,6 +170,8 @@ html.dash-dk .zy-app, html.dash-dk .zy-dash {
   --success-ring: rgb(76 179 122 / 0.30);
   --warning-ring: rgb(224 164 58 / 0.30);
   --error-ring: rgb(227 106 95 / 0.30);
+  --blue: #6FA8DD;
+  --blue-fill: rgb(111 168 221 / 0.15);
 
   --ring-1: 0 0 0 1px rgb(244 239 230 / 0.08);
   --ring-2: 0 18px 40px -28px rgb(0 0 0 / 0.80);
