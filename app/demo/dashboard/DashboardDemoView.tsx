@@ -36,6 +36,7 @@ import { NotificationsBell } from '@/components/app/NotificationsBell'
 import DashFrame from '@/components/app/frame/DashFrame'
 import { PAGE_ROUTE, buildNav, type PageKey } from '@/components/app/frame/nav'
 import { useT } from '@/components/i18n/LocaleProvider'
+import DashIntro from '@/components/app/intro/DashIntro'
 import {
   AnalyticsView, BillingView, BookingsView, DomainsView, GalleryView,
   HomeView, ReviewsView, SeoView, SettingsView, SitesView,
@@ -67,6 +68,8 @@ export default function DashboardDemoView() {
   const [range, setRange] = useState('30d')
   const [bookingFilter, setBookingFilter] = useState('all')
   const [siteFilter, setSiteFilter] = useState('all')
+  /** ?intro opens the dashboard tour, so it can be seen without an account. */
+  const [intro, setIntro] = useState(false)
   const fakeSend = () => new Promise<void>((r) => setTimeout(r, 700))
 
   /* Read the address on mount. Deliberately in an effect rather than in the
@@ -75,6 +78,7 @@ export default function DashboardDemoView() {
   useEffect(() => {
     const v = viewFromLocation()
     if (v !== 'home') setView(v)
+    if (new URLSearchParams(window.location.search).has('intro')) setIntro(true)
   }, [])
 
   const go = useCallback((v: string) => {
@@ -106,7 +110,7 @@ export default function DashboardDemoView() {
         tools={
           <>
             <NotificationsBell items={[{ id: 'r1', title: 'تقييمان جديدان من Google', site: 'واحة العافية', when: 'اليوم 9:12 ص', onOpen: () => go('reviews') }]} />
-            <span className="zy-top-acct" role="presentation"><span className="zy-top-av">ن</span></span>
+            <span className="zy-top-acct" role="presentation" data-tour="account"><span className="zy-top-av">ن</span></span>
           </>
         }
         foot={<ReportProblem email="nadia@example.com" onSend={fakeSend} />}
@@ -134,6 +138,7 @@ export default function DashboardDemoView() {
         </p>
       </main>
       </DashFrame>
+      {intro && <DashIntro startOpen setMore={setDrawer} />}
     </div>
   )
 }

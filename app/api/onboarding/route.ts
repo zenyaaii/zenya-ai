@@ -5,15 +5,24 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 /**
- * Per-user onboarding state — the welcome tour "seen" flag and the launch-plan
- * checklist ticks. These used to live in localStorage, which reset on every new
- * device; now they ride on the profile row so they follow the owner everywhere.
+ * Per-user onboarding state — the "seen" flags of the first-visit tour and of
+ * the dashboard tour, and the launch-plan checklist ticks. These used to live
+ * in localStorage, which reset on every new device; now they ride on the
+ * profile row so they follow the owner everywhere.
  *
- * GET   → { welcomeSeen, launchPlan }
- * PATCH → accepts { welcomeSeen?, launchPlan? } and persists whatever is sent.
+ * GET   → { welcomeSeen, introSeen, launchPlan }
+ * PATCH → accepts { welcomeSeen?, introSeen?, launchPlan? } and persists
+ *         whatever is sent.
+ *
+ * introSeen (the 2026-10 dashboard tour, intro/DashIntro) has no column of its
+ * own: it is a reserved key inside launch_plan. The launch plan is written
+ * whole by the checklist, which never sees that key, so a launchPlan write
+ * carries the stored one over and GET leaves it out of launchPlan.
  */
 
 type LaunchPlan = Record<string, boolean>
+
+const INTRO_KEY = '_intro_v2'
 
 function sanitizePlan(input: unknown): LaunchPlan {
   if (!input || typeof input !== 'object') return {}
@@ -35,9 +44,11 @@ export async function GET() {
     .eq('id', user.id)
     .maybeSingle()
 
+  const { [INTRO_KEY]: introSeen, ...launchPlan } = sanitizePlan(data?.launch_plan)
   return NextResponse.json({
     welcomeSeen: !!data?.welcome_tour_seen,
-    launchPlan: sanitizePlan(data?.launch_plan),
+    introSeen: !!introSeen,
+    launchPlan,
   })
 }
 
@@ -55,7 +66,20 @@ export async function PATCH(req: NextRequest) {
 
   const patch: Record<string, unknown> = {}
   if (typeof body?.welcomeSeen === 'boolean') patch.welcome_tour_seen = body.welcomeSeen
-  if (body?.launchPlan !== undefined) patch.launch_plan = sanitizePlan(body.launchPlan)
+
+  const introSent = typeof body?.introSeen === 'boolean'
+  if (body?.launchPlan !== undefined || introSent) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('launch_plan')
+      .eq('id', user.id)
+      .maybeSingle()
+    const stored = sanitizePlan(data?.launch_plan)
+    const plan = body?.launchPlan !== undefined ? sanitizePlan(body.launchPlan) : stored
+    delete plan[INTRO_KEY]
+    const intro = introSent ? body.introSeen : !!stored[INTRO_KEY]
+    patch.launch_plan = intro ? { ...plan, [INTRO_KEY]: true } : plan
+  }
 
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: 'nothing_to_update' }, { status: 400 })

@@ -492,8 +492,76 @@ html.zf-ease, html.zf-ease * {
   transition: background-color 500ms ease, color 500ms ease, border-color 500ms ease, box-shadow 500ms ease, fill 500ms ease, stroke 500ms ease !important;
 }
 
+/* ── Intro (DashIntro). It sits over everything, sheet and search included. */
+.zi-root { position: relative; z-index: 100; font-family: var(--font-chrome); color: var(--obsidian); }
+.zi-scrim { position: fixed; inset: 0; z-index: 100; background: rgb(15 13 10 / 0.5); animation: ziFade 260ms ease both; }
+.zi-catch { position: fixed; inset: 0; z-index: 101; }
+.zi-hole {
+  position: fixed; z-index: 100; border-radius: 14px; pointer-events: none;
+  box-shadow: 0 0 0 2px var(--violet), 0 0 0 9999px rgb(15 13 10 / 0.5);
+  transition: top 520ms cubic-bezier(0.4,0,0.2,1), left 520ms cubic-bezier(0.4,0,0.2,1), width 520ms cubic-bezier(0.4,0,0.2,1), height 520ms cubic-bezier(0.4,0,0.2,1);
+}
+.zi-modal {
+  position: fixed; z-index: 102; inset-inline: 16px; top: 50%; transform: translateY(-50%);
+  margin-inline: auto; max-width: 440px; padding: 28px 24px 22px; border-radius: 22px;
+  background: var(--card); box-shadow: var(--shadow-pop); animation: ziRise 380ms cubic-bezier(0.2,0.8,0.2,1) both;
+}
+.zi-x { position: absolute; inset-inline-end: 12px; top: 12px; width: 40px; height: 40px; border-radius: 999px; }
+.zi-pause { flex: none; width: 36px; height: 36px; border-radius: 999px; }
+.zi-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px;
+  background: rgb(var(--acc-rgb) / 0.1); color: var(--violet); font-size: 14px; font-weight: 600;
+}
+.zi-title { margin-top: 14px; font-family: var(--font-head); font-size: 30px; line-height: 1.25; font-weight: 700; }
+.zi-lead { margin-top: 8px; font-size: 18px; line-height: 1.75; color: var(--stone); }
+.zi-pt-ico {
+  flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+  background: rgb(var(--ink-rgb) / 0.06); color: var(--obsidian);
+}
+.zi-actions { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.zi-btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border-radius: 999px;
+  background: var(--obsidian); color: var(--card); font-size: 17px; font-weight: 600;
+}
+.zi-btn-q {
+  display: inline-flex; align-items: center; min-height: 46px; padding: 0 16px; border-radius: 999px;
+  color: var(--obsidian); font-size: 17px; font-weight: 600;
+}
+.zi-btn-q:hover { background: rgb(var(--ink-rgb) / 0.06); }
+.zi-btn:focus-visible, .zi-btn-q:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.zi-sm { min-height: 38px; padding-inline: 14px; font-size: 15.5px; }
+.zi-dim-on { opacity: 0.7; font-weight: 500; }
+.zi-tip {
+  z-index: 103; padding: 16px 16px 12px; border-radius: 18px; background: var(--card); box-shadow: var(--shadow-pop);
+  animation: ziRise 340ms cubic-bezier(0.2,0.8,0.2,1) both;
+}
+.zi-step-t { flex: 1; min-width: 0; font-family: var(--font-head); font-size: 20px; font-weight: 700; line-height: 1.35; }
+.zi-count { flex: none; font-size: 13.5px; color: var(--stone); font-variant-numeric: tabular-nums; }
+.zi-step-b { margin-top: 8px; font-size: 16.5px; line-height: 1.75; color: var(--stone); }
+.zi-foot { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.zi-prog { flex: 1; height: 4px; border-radius: 4px; background: rgb(var(--ink-rgb) / 0.1); overflow: hidden; }
+.zi-prog i { display: block; height: 100%; background: var(--violet); transform-origin: right; transition: transform 120ms linear; }
+[dir="ltr"] .zi-prog i { transform-origin: left; }
+.zi-dots { display: flex; gap: 5px; }
+.zi-dots i { width: 6px; height: 6px; border-radius: 6px; background: rgb(var(--ink-rgb) / 0.16); transition: width 240ms ease, background 240ms ease; }
+.zi-dots i[data-done] { background: rgb(var(--ink-rgb) / 0.4); }
+.zi-dots i[data-on] { width: 18px; background: var(--violet); }
+.zi-cur {
+  position: fixed; left: 0; top: 0; z-index: 104; pointer-events: none;
+  transition: transform 1000ms cubic-bezier(0.45,0,0.2,1);
+}
+.zi-cur svg { position: absolute; left: -4px; top: -2px; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.25)); }
+.zi-tap { position: absolute; left: -14px; top: -14px; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--violet); opacity: 0; animation: ziTap 620ms ease-out; }
+@keyframes ziFade { from { opacity: 0; } }
+@keyframes ziRise { from { opacity: 0; transform: translateY(10px); } }
+.zi-modal { animation-name: ziRiseC; }
+@keyframes ziRiseC { from { opacity: 0; transform: translateY(calc(-50% + 12px)); } }
+@keyframes ziTap { 0% { opacity: 0.9; transform: scale(0.4); } 100% { opacity: 0; transform: scale(1.6); } }
+
 @media (prefers-reduced-motion: reduce) {
   .zf-sheet, .zf-scrim, .zf-row, .zf-dock-b { transition: none; }
   .zf-pal { animation: none; }
+  .zi-hole, .zi-cur, .zi-prog i { transition: none; }
+  .zi-modal, .zi-tip, .zi-scrim { animation: ziFade 200ms ease both; }
 }
 `

@@ -26,7 +26,7 @@ export type FrameItem = {
   href?: string
   onSelect?: () => void
   active?: boolean
-  /** Slug the welcome tour points at. */
+  /** Slug the dashboard tour (intro/DashIntro) points at. */
   tour?: string
   /** One of the four the phone dock shows. */
   dock?: boolean
@@ -47,7 +47,7 @@ type Props = {
   tools: ReactNode
   /** Under the nav: the problem report. */
   foot?: ReactNode
-  /** The "More" sheet's open state, lifted so the welcome tour can open it. */
+  /** The "More" sheet's open state, lifted so the dashboard tour can open it. */
   moreOpen: boolean
   setMoreOpen: (open: boolean) => void
   dir?: 'rtl' | 'ltr'
@@ -151,13 +151,13 @@ export default function DashFrame({
       {/* ── the rail, laptop ── */}
       <aside className="zf-side" aria-label={t.nav.pages}>
         {home}
-        <nav className="zf-scroll">
+        <nav className="zf-scroll" data-tour="nav">
           <NavList groups={groups} />
         </nav>
         <div className="zf-foot">
           {newSite.href
             ? <Link href={newSite.href} className="zf-new" data-tour="new-site">{newSiteBody}</Link>
-            : <button type="button" className="zf-new" onClick={newSite.onSelect}>{newSiteBody}</button>}
+            : <button type="button" className="zf-new" data-tour="new-site" onClick={newSite.onSelect}>{newSiteBody}</button>}
           {foot}
           <a className="zf-back" href="https://beynoun.com/?home=1">{t.nav.backToSite}</a>
         </div>
@@ -168,7 +168,7 @@ export default function DashFrame({
           {home}
           <h1 className="zf-title">{title}</h1>
           <div className="zf-tools">
-            <button type="button" className="zf-search" onClick={() => setPalOpen(true)} aria-label={t.nav.searchHint}>
+            <button type="button" className="zf-search" data-tour="search" onClick={() => setPalOpen(true)} aria-label={t.nav.searchHint}>
               <Search strokeWidth={2} aria-hidden />
               <span className="zf-search-t">{t.nav.searchHint}</span>
               <kbd>⌘K</kbd>
@@ -177,10 +177,11 @@ export default function DashFrame({
                 action rides in the bar as an ink circle. */}
             {newSite.href
               ? <Link href={newSite.href} className="zy-top-cta lg:!hidden" data-tour="new-site" aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></Link>
-              : <button type="button" className="zy-top-cta lg:!hidden" onClick={newSite.onSelect} aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></button>}
+              : <button type="button" className="zy-top-cta lg:!hidden" data-tour="new-site" onClick={newSite.onSelect} aria-label={t.nav.newSite}><Plus className="h-[18px] w-[18px]" strokeWidth={2.4} /></button>}
             <button
               type="button"
               className="zy-icon-btn zf-theme inline-flex"
+              data-tour="theme"
               onClick={toggle}
               aria-label={dark ? t.nav.lightMode : t.nav.darkMode}
               aria-pressed={dark}
@@ -195,7 +196,7 @@ export default function DashFrame({
       </div>
 
       {/* ── the dock, phone and tablet ── */}
-      <nav className="zf-dock" aria-label={t.nav.pages}>
+      <nav className="zf-dock" aria-label={t.nav.pages} data-tour="nav">
         {docked.map((it) => {
           const Icon = it.icon
           const inner = (<><Icon strokeWidth={it.active ? 2.2 : 1.9} aria-hidden /><span>{it.label}</span></>)
