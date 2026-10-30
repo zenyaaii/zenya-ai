@@ -30,6 +30,7 @@ import {
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, AlertTriangle, Info, XCircle, X } from 'lucide-react'
+import { dashFont } from '@/components/app/dash-font'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -98,6 +99,15 @@ const TOAST_TINT: Record<ToastType, { fg: string; bg: string; ring: string }> = 
   info:    { fg: '#5e6ad2', bg: 'rgba(94,106,210,0.10)', ring: 'rgba(94,106,210,0.30)' },
 }
 
+/* On a dashboard page the layer takes the dashboard palette, so it follows
+   the cream and the dark theme instead of staying white. */
+const DASH_TINT: Record<ToastType, { fg: string; bg: string }> = {
+  success: { fg: 'var(--success)', bg: 'var(--success-fill)' },
+  error:   { fg: 'var(--error)',   bg: 'var(--error-fill)' },
+  warning: { fg: 'var(--warning)', bg: 'var(--warning-fill)' },
+  info:    { fg: 'var(--violet)',  bg: 'var(--violet-fill)' },
+}
+
 export function NotifyProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [confirmState, setConfirmState] = useState<ConfirmOptions | null>(null)
@@ -137,6 +147,9 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
   // hydration mismatch between the server (no portal) and first client render.
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+  // Read on every render: the layer re-renders whenever it shows something.
+  const dash = mounted && document.documentElement.classList.contains('dash-on')
+  const scope = dash ? `zy-tokens zy-dash ${dashFont.variable} ` : ''
 
   // Escape cancels the confirm dialog, matching native confirm() behaviour.
   useEffect(() => {
@@ -155,11 +168,11 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
       {mounted && createPortal(
         <>
           {/* ── Toasts ─────────────────────────────────────────────────── */}
-          <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[120] flex flex-col items-center gap-2 px-4 print:hidden">
+          <div className={`${scope}pointer-events-none fixed inset-x-0 bottom-4 z-[120] flex flex-col items-center gap-2 px-4 print:hidden`}>
             <AnimatePresence initial={false}>
               {toasts.map((t) => {
                 const Icon = TOAST_ICON[t.type]
-                const tint = TOAST_TINT[t.type]
+                const tint = dash ? DASH_TINT[t.type] : TOAST_TINT[t.type]
                 return (
                   <motion.div
                     key={t.id}
@@ -169,7 +182,9 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                     exit={{ opacity: 0, y: 10, scale: 0.96 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                     className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-token bg-white/95 px-4 py-3"
-                    style={{ boxShadow: '0 12px 32px -12px rgba(28,28,28,0.28), 0 0 0 1px rgba(28,28,28,0.04)' }}
+                    style={dash
+                      ? { background: 'var(--card)', boxShadow: 'var(--shadow-pop)' }
+                      : { boxShadow: '0 12px 32px -12px rgba(28,28,28,0.28), 0 0 0 1px rgba(28,28,28,0.04)' }}
                     dir="rtl"
                   >
                     <span
@@ -189,6 +204,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                       onClick={() => removeToast(t.id)}
                       aria-label="إغلاق"
                       className="-me-1 -mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md text-muted/60 transition hover:bg-black/5 hover:text-foreground"
+                      style={dash ? { color: 'var(--stone-2)' } : undefined}
                     >
                       <X className="h-3.5 w-3.5" strokeWidth={2.25} />
                     </button>
@@ -202,7 +218,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
           <AnimatePresence>
             {confirmState && (
               <motion.div
-                className="fixed inset-0 z-[130] flex items-center justify-center p-4 print:hidden"
+                className={`${scope}fixed inset-0 z-[130] flex items-center justify-center p-4 print:hidden`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -223,15 +239,15 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                   exit={{ opacity: 0, y: 10, scale: 0.97 }}
                   transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                   className="relative w-full max-w-md rounded-2xl bg-white p-6 text-start"
-                  style={{ boxShadow: '0 24px 70px -20px rgba(28,28,28,0.40), 0 0 0 1px rgba(28,28,28,0.06)' }}
+                  style={{ boxShadow: dash ? 'var(--shadow-pop)' : '0 24px 70px -20px rgba(28,28,28,0.40), 0 0 0 1px rgba(28,28,28,0.06)' }}
                 >
                   <div className="flex items-start gap-3.5">
                     <span
                       className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full"
                       style={
                         confirmState.tone === 'danger'
-                          ? { background: 'rgba(220,38,38,0.08)', color: '#b91c1c' }
-                          : { background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' }
+                          ? (dash ? { background: 'var(--error-fill)', color: 'var(--error)' } : { background: 'rgba(220,38,38,0.08)', color: '#b91c1c' })
+                          : (dash ? { background: 'var(--violet-fill)', color: 'var(--violet)' } : { background: 'rgba(94,106,210,0.10)', color: '#5e6ad2' })
                       }
                     >
                       {confirmState.tone === 'danger'
@@ -257,7 +273,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                         checked={checked}
                         onChange={(e) => setChecked(e.target.checked)}
                         className="mt-0.5 h-4 w-4 flex-shrink-0"
-                        style={{ accentColor: '#5e6ad2' }}
+                        style={{ accentColor: dash ? 'var(--violet)' : '#5e6ad2' }}
                       />
                       <span>{confirmState.checkbox.label}</span>
                     </label>
@@ -277,9 +293,11 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                       onClick={() => settle(true)}
                       className="rounded-lg px-4 py-2 text-[14.5px] font-semibold text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
                       style={
-                        confirmState.tone === 'danger'
-                          ? { background: '#dc2626', boxShadow: '0 8px 20px -8px rgba(220,38,38,0.55)' }
-                          : { background: '#5e6ad2', boxShadow: '0 8px 20px -8px rgba(94,106,210,0.55)' }
+                        dash
+                          ? { background: confirmState.tone === 'danger' ? 'var(--error)' : 'var(--obsidian)', color: 'var(--ground)' }
+                          : confirmState.tone === 'danger'
+                            ? { background: '#dc2626', boxShadow: '0 8px 20px -8px rgba(220,38,38,0.55)' }
+                            : { background: '#5e6ad2', boxShadow: '0 8px 20px -8px rgba(94,106,210,0.55)' }
                       }
                     >
                       {confirmState.confirmText || 'تأكيد'}

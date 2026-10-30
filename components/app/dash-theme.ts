@@ -45,7 +45,7 @@ export const DASH_THEME_CSS = `
    "html " in front on purpose: the cookie banner, mounted in the root layout,
    injects the product token block again AFTER this stylesheet, and at equal
    specificity the later one wins. One element more keeps this one on top. */
-html .zy-app, html .zy-dash {
+html .zy-app, html .zy-dash, html.dash-on .zy-cookie {
   --ground: #F4EFE6;
   --background: #F4EFE6;
   --ground-2: #EFE9DE;
@@ -124,7 +124,7 @@ html .zy-app, html .zy-dash {
 }
 
 /* ---- the palette, dark ----------------------------------------------- */
-html.dash-dk .zy-app, html.dash-dk .zy-dash {
+html.dash-dk .zy-app, html.dash-dk .zy-dash, html.dash-dk .zy-cookie {
   --ground: #0F0D0A;
   --background: #0F0D0A;
   --ground-2: #13110E;
@@ -191,6 +191,13 @@ html.dash-dk .zy-app, html.dash-dk .zy-dash {
 html.dash-on, html.dash-on body { background: #F4EFE6; }
 html.dash-on.dash-dk, html.dash-on.dash-dk body { background: #0F0D0A; color-scheme: dark; }
 
+/* The cookie banner sits in the root layout, inside no shell. On a
+   dashboard page it takes the dashboard palette (the selectors above), and
+   its white card and violet button follow it here. */
+html.dash-on .zy-cookie { background: var(--card); box-shadow: var(--shadow-pop); }
+html.dash-on .zy-cookie [class~="bg-primary"] { color: var(--ground); background: var(--obsidian); }
+html.dash-on .zy-cookie [class~="bg-background"] { background: var(--surface-2); }
+
 /* ---- the faces --------------------------------------------------------- */
 .zy-app, .zy-dash {
   font-family: var(--font-chrome);
@@ -208,43 +215,47 @@ html.dash-on.dash-dk, html.dash-on.dash-dk body { background: #0F0D0A; color-sch
    light-only restyle: text-[#171717], bg-white and friends. Until each
    screen is rebuilt they are mapped onto the tokens here, so the cream and
    the dark palette both reach them. Attribute selectors, so the class
-   names need no escaping and the rule (two parts) outranks the utility. */
-:is(.zy-app, .zy-dash) [class~="text-[#171717]"] { color: var(--obsidian); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#56565a]"], [class~="text-[#3a3a40]"]) { color: var(--stone); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#66666e]"], [class~="text-[#8a8a92]"], [class~="text-[#8f8f8f]"]) { color: var(--stone-2); }
-:is(.zy-app, .zy-dash) [class~="text-[#5e6ad2]"] { color: var(--violet); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#15803d]"], [class~="text-[#1f8a4c]"]) { color: var(--success); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#d6453d]"], [class~="text-[#c0362c]"], [class~="text-[#b91c1c]"]) { color: var(--error); }
-:is(.zy-app, .zy-dash) [class~="text-[#b45309]"] { color: var(--warning); }
-:is(.zy-app, .zy-dash) [class~="text-[#b9c0ff]"] { color: var(--acc); }
-:is(.zy-app, .zy-dash) :is([class~="text-[rgba(17,17,17,0.18)]"], [class~="text-[rgba(17,17,17,0.17)]"]) { color: rgb(var(--ink-rgb) / 0.2); }
-html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; }
+   names need no escaping and the rule (two parts) outranks the utility.
+   The scope element itself is matched too: a popover or dialog portalled
+   out of the shell carries zy-dash and its own bg-white on one element,
+   and a descendant-only rule left it white in dark mode. */
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#171717]"] { color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#56565a]"], [class~="text-[#3a3a40]"]) { color: var(--stone); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#66666e]"], [class~="text-[#8a8a92]"], [class~="text-[#8f8f8f]"]) { color: var(--stone-2); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#5e6ad2]"] { color: var(--violet); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#15803d]"], [class~="text-[#1f8a4c]"]) { color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#d6453d]"], [class~="text-[#c0362c]"], [class~="text-[#b91c1c]"]) { color: var(--error); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#b45309]"] { color: var(--warning); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#b9c0ff]"] { color: var(--acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[rgba(17,17,17,0.18)]"], [class~="text-[rgba(17,17,17,0.17)]"]) { color: rgb(var(--ink-rgb) / 0.2); }
+html.dash-dk :is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#1a0dab]"] { color: #8AB4F8; }
 
-:is(.zy-app, .zy-dash) [class~="bg-white"] { background-color: var(--card); }
-:is(.zy-app, .zy-dash) [class~="bg-white/85"] { background-color: color-mix(in srgb, var(--card) 85%, transparent); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[#f4f4f6]"], [class~="bg-[#fafaf7]"], [class~="bg-[#fafafa]"]) { background-color: var(--surface-2); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(28,28,28,0.04)]"] { background-color: rgb(var(--ink-rgb) / 0.04); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(28,28,28,0.06)]"], [class~="bg-[rgba(17,17,17,0.05)]"], [class~="bg-black/5"], [class~="bg-black/[0.05]"], [class~="bg-black/[0.04]"]) { background-color: rgb(var(--ink-rgb) / 0.06); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(28,28,28,0.18)]"] { background-color: rgb(var(--ink-rgb) / 0.18); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(94,106,210,0.10)]"], [class~="bg-[rgba(94,106,210,0.08)]"]) { background-color: var(--violet-fill); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(21,128,61,0.10)]"], [class~="bg-[#e8f5ec]"]) { background-color: var(--success-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(217,119,6,0.10)]"] { background-color: var(--warning-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[#fdecea]"] { background-color: var(--error-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[#15803d]"] { background-color: var(--success); }
-:is(.zy-app, .zy-dash) [class~="bg-[#d6453d]"] { background-color: var(--acc); }
-:is(.zy-app, .zy-dash) [class~="bg-[#171717]"] { background-color: var(--obsidian); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[#171717]"], [class~="bg-[#15803d]"])[class~="text-white"] { color: var(--ground); }
-:is(.zy-app, .zy-dash) [class~="border-[#15803d]"] { border-color: var(--success); }
-:is(.zy-app, .zy-dash) [class~="border-[#d4d4d8]"] { border-color: var(--border-strong); }
-:is(.zy-app, .zy-dash) :is([class~="border-[rgba(17,17,17,0.07)]"], [class~="border-black/5"]) { border-color: rgb(var(--ink-rgb) / 0.08); }
-:is(.zy-app, .zy-dash) [class~="border-[rgba(17,17,17,0.14)]"] { border-color: rgb(var(--ink-rgb) / 0.14); }
-:is(.zy-app, .zy-dash) [class~="border-[rgba(28,28,28,0.25)]"] { border-color: rgb(var(--ink-rgb) / 0.25); }
-:is(.zy-app, .zy-dash) :is([class~="divide-[rgba(17,17,17,0.07)]"], [class~="divide-[rgba(17,17,17,0.06)]"]) > * + * { border-color: rgb(var(--ink-rgb) / 0.08); }
-:is(.zy-app, .zy-dash) [class~="ring-[#171717]"] { --tw-ring-color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-white"] { background-color: var(--card); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-white/85"] { background-color: color-mix(in srgb, var(--card) 85%, transparent); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[#f4f4f6]"], [class~="bg-[#fafaf7]"], [class~="bg-[#fafafa]"]) { background-color: var(--surface-2); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(28,28,28,0.04)]"] { background-color: rgb(var(--ink-rgb) / 0.04); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(28,28,28,0.06)]"], [class~="bg-[rgba(17,17,17,0.05)]"], [class~="bg-black/5"], [class~="bg-black/[0.05]"], [class~="bg-black/[0.04]"]) { background-color: rgb(var(--ink-rgb) / 0.06); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(28,28,28,0.18)]"] { background-color: rgb(var(--ink-rgb) / 0.18); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(94,106,210,0.10)]"], [class~="bg-[rgba(94,106,210,0.08)]"]) { background-color: var(--violet-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(21,128,61,0.10)]"], [class~="bg-[#e8f5ec]"]) { background-color: var(--success-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(217,119,6,0.10)]"] { background-color: var(--warning-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#fdecea]"] { background-color: var(--error-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#15803d]"] { background-color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#d6453d]"] { background-color: var(--acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#171717]"] { background-color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[#171717]"], [class~="bg-[#15803d]"])[class~="text-white"] { color: var(--ground); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#d6453d]"][class~="text-white"] { color: var(--on-acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[#15803d]"] { border-color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[#d4d4d8]"] { border-color: var(--border-strong); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="border-[rgba(17,17,17,0.07)]"], [class~="border-black/5"]) { border-color: rgb(var(--ink-rgb) / 0.08); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[rgba(17,17,17,0.14)]"] { border-color: rgb(var(--ink-rgb) / 0.14); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[rgba(28,28,28,0.25)]"] { border-color: rgb(var(--ink-rgb) / 0.25); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="divide-[rgba(17,17,17,0.07)]"], [class~="divide-[rgba(17,17,17,0.06)]"]) > * + * { border-color: rgb(var(--ink-rgb) / 0.08); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="ring-[#171717]"] { --tw-ring-color: var(--obsidian); }
 @media (hover: hover) {
-  :is(.zy-app, .zy-dash) :is([class~="hover:bg-[#f4f4f6]"], [class~="hover:bg-black/5"], [class~="hover:bg-black/[0.04]"]):hover { background-color: rgb(var(--ink-rgb) / 0.06); }
+  :is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="hover:bg-[#f4f4f6]"], [class~="hover:bg-black/5"], [class~="hover:bg-black/[0.04]"]):hover { background-color: rgb(var(--ink-rgb) / 0.06); }
 }
-:is(.zy-app, .zy-dash) [class~="focus-visible:bg-[#f4f4f6]"]:focus-visible { background-color: rgb(var(--ink-rgb) / 0.06); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="focus-visible:bg-[#f4f4f6]"]:focus-visible { background-color: rgb(var(--ink-rgb) / 0.06); }
 
 /* The chrome controls take the ink, not the accent: one filled ink pill
    is the primary action, the accent is kept for "you are here". */

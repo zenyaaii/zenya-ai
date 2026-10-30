@@ -87,7 +87,7 @@ export function SettingsScreen({
           <div className="rounded-2xl zy-card p-4 sm:p-5">
             <h3 className="zy-h3">منطقة الخطر</h3>
             <p className="zy-sub mt-1.5">حذف الحساب يزيل كل مواقعك ولا يمكن التراجع عنه.</p>
-            <Act action={deleteAccount} className="zy-btn-q mt-3.5" style={{ color: '#b91c1c' }}>
+            <Act action={deleteAccount} className="zy-btn-q mt-3.5" style={{ color: 'var(--error)' }}>
               <Trash2 className="h-3 w-3" strokeWidth={2.25} />احذف الحساب
             </Act>
           </div>
