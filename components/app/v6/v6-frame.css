@@ -1,0 +1,67 @@
+/*
+ * The owner's changes on top of the v6 design (v6.css is the design's own
+ * stylesheet and is not edited by hand). Kept small on purpose: anything
+ * else here is a drift from the design.
+ *
+ * 1. The side menu is the dark floating panel (his pick B, 2026-10-30), in
+ *    light mode too. Ink on the cream page, a shade lifted in dark mode.
+ * 2. The faces: the design names Thmanyah, then Amiri and Markazi Text,
+ *    which the dashboard loads through next/font (dash-font.ts).
+ * 3. The older screens, not yet in v6 markup, bring their own gutters.
+ * 4. Not a change of look: the design's `body{overflow-x:hidden}` lands on
+ *    the .v6 div here, and on a div it makes a scroll box that unsticks the
+ *    top bar. `clip` cuts the same overflow without making one.
+ */
+
+/* ---- 4. the sticky top bar -------------------------------------------- */
+.v6 { overflow-x: visible; overflow-x: clip; }
+
+/* ---- 2. faces --------------------------------------------------------- */
+.v6 { --f-head: var(--font-head); --f-ui: var(--font-chrome); }
+
+/* ---- 1. the dark side menu --------------------------------------------- */
+.v6 { --side: 280px; }
+.v6 .side {
+  inset-block: 14px;
+  inset-inline-start: 14px;
+  width: calc(var(--side) - 28px);
+  padding: 20px 12px 14px;
+  border-radius: 28px;
+  background: #16120D;
+  color: rgb(244 239 230 / 0.66);
+  box-shadow: 0 24px 48px -24px rgb(22 18 13 / 0.55);
+}
+html.dash-dk .v6 .side {
+  background: #221E19;
+  box-shadow: 0 0 0 1px rgb(244 239 230 / 0.08), 0 24px 48px -24px rgb(0 0 0 / 0.8);
+}
+.v6 .side .logo { color: #F4EFE6; }
+.v6 .side .sw {
+  color: #F4EFE6;
+  background: rgb(244 239 230 / 0.06);
+  box-shadow: 0 0 0 1px rgb(244 239 230 / 0.08);
+}
+@media (hover: hover) { .v6 .side .sw:hover { box-shadow: 0 0 0 1px rgb(244 239 230 / 0.18); } }
+.v6 .side .sw .thumb { background: rgb(244 239 230 / 0.10); color: rgb(244 239 230 / 0.6); }
+.v6 .side .sw small, .v6 .side .sw .chev { color: rgb(244 239 230 / 0.56); }
+.v6 .side .nav-label { color: rgb(244 239 230 / 0.45); }
+.v6 .side .nav a, .v6 .side .nav button { color: rgb(244 239 230 / 0.66); }
+.v6 .side .nav a svg.i, .v6 .side .nav button svg.i { color: currentColor; }
+@media (hover: hover) { .v6 .side .nav a:hover, .v6 .side .nav button:hover { color: #F4EFE6; } }
+.v6 .side .nav [aria-current="page"] { color: #16120D; }
+.v6 .side .nav [aria-current="page"] svg.i { color: var(--acc); }
+.v6 .side .nav .ind { background: #F4EFE6; box-shadow: none; }
+.v6 .side .nav .count.cq { background: rgb(244 239 230 / 0.12); color: rgb(244 239 230 / 0.82); }
+.v6 .side .nav [aria-current="page"] .count.cq { background: #E6DED0; color: #3B342C; }
+.v6 .side .btn.k { background: #F4EFE6; color: #16120D; }
+@media (hover: hover) { .v6 .side .btn.k:hover { background: #fff; } }
+.v6 .side-foot .back { color: rgb(244 239 230 / 0.56); }
+@media (hover: hover) { .v6 .side-foot .back:hover { color: #F4EFE6; } }
+.v6 .side :focus-visible { outline-color: #F4EFE6; }
+/* The nav rows are buttons in the demo (they switch a view): same as links. */
+.v6 .nav button { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; height: 44px; padding: 0 12px; border-radius: 14px; font-size: 14.5px; font-weight: 600; text-align: start; transition: color .25s; }
+.v6 .nav button svg.i { width: 19px; height: 19px; }
+.v6 .dock button[aria-current="page"] { color: #16120D; }
+
+/* ---- 3. older screens ------------------------------------------------------ */
+.v6 .page.legacy { margin-inline: calc(var(--gut) * -1); }

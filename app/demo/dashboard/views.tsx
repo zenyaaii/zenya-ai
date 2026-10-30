@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * The demo dashboard's nine views.
+ * The demo dashboard's older views. Home and Analytics are the v6 pages
+ * themselves (DashboardDemoView).
  *
  * These are not drawings of the dashboard any more - they ARE the dashboard.
  * Each view renders the real screen from components/dashboard/screens, the
@@ -10,83 +11,19 @@
  * switch views or do nothing: this page signs nobody in.
  */
 
-import { HomeScreen, type StartStep } from '@/components/dashboard/screens/home'
 import { SitesScreen, type SiteFilter } from '@/components/dashboard/screens/sites'
 import { GalleryScreen } from '@/components/dashboard/screens/gallery'
-import { AnalyticsScreen, type MetricKey, type RangeKey } from '@/components/dashboard/screens/analytics'
 import { BookingsScreen, type BookingData } from '@/components/dashboard/screens/bookings'
 import { SeoScreen } from '@/components/dashboard/screens/seo'
-import { GscConnect, GscNumbers } from '@/components/dashboard/screens/search-console'
+import { GscConnect } from '@/components/dashboard/screens/search-console'
 import { DomainsScreen } from '@/components/dashboard/screens/domains'
 import { BillingScreen } from '@/components/dashboard/screens/billing'
 import { SettingsScreen } from '@/components/dashboard/screens/settings'
 import { ReviewsScreen, type ReviewRow, type ReviewSource } from '@/components/dashboard/screens/reviews'
-import { useMemo, useState } from 'react'
-import { TrafficCard, type TMetric, type TRange } from '@/components/dashboard/screens/traffic'
+import { useState } from 'react'
 import {
-  ASSETS, BOOKINGS, CHANNELS, DOMAINS, GSC_EMAIL, GSC_QUERIES, GSC_TOTALS, HOME_TODAY, INVOICES, PAGES, PLAN_INCLUDES,
-  SEO_SITE, SITES, demoTraffic,
+  ASSETS, BOOKINGS, DOMAINS, GSC_EMAIL, INVOICES, PLAN_INCLUDES, SEO_SITE, SITES,
 } from './data'
-
-export function HomeView({ go }: { go: (v: string) => void }) {
-  const to = (v: string) => ({ onClick: () => go(v) })
-  const [siteId, setSiteId] = useState('s1')
-  const [metric, setMetric] = useState<TMetric>('views')
-  const [range, setRange] = useState<TRange>('30d')
-  const [back, setBack] = useState(0)
-  const traffic = useMemo(() => demoTraffic(range, back), [range, back])
-  const yesterday = useMemo(() => demoTraffic('day', 1).totals.visitors, [])
-  const s = SITES.find((x) => x.id === siteId) || SITES[0]
-  const kind = KIND_COVER[s.kind]
-  // «ابدأ من هنا» on the sample account: ticks live for this visit only.
-  const [ticks, setTicks] = useState<Record<string, boolean>>({})
-  const onStart = (step: StartStep) => setTicks((x) => ({ ...x, [step]: true }))
-  return (
-    <HomeScreen
-      name="نادية"
-      sites={SITES.map((x) => ({ id: x.id, name: x.name }))}
-      onSite={setSiteId}
-      site={{
-        id: s.id, name: s.name, live: s.live, host: s.host, url: s.host ? `https://${s.host}` : null,
-        updated: s.updated, kind: s.kind,
-        image: kind && kind !== 'collective' ? `/theme-previews/phone/${kind}.webp` : null,
-        edit: {}, open: {},
-      }}
-      newBookings={s.id === 's1' ? 2 : 0}
-      yesterdayVisitors={s.live ? yesterday : null}
-      traffic={
-        <TrafficCard
-          data={traffic}
-          metric={metric} onMetric={setMetric}
-          range={range} onRange={setRange}
-          back={back} onBack={setBack}
-        />
-      }
-      today={s.id === 's1' ? HOME_TODAY : { list: [], tomorrow: [], week: 0 }}
-      widgets={{
-        domain: s.id === 's1' ? { host: 'almadina.ae', state: 'live' } : null,
-        google: s.id === 's1' ? { clicks: GSC_TOTALS.clicks, position: 1.2, query: 'مطعم المدينة' } : 'connect',
-        reviews: s.id === 's1' ? { rating: 4.7, count: 128, fresh: 1 } : 'add',
-      }}
-      start={ticks.hide ? null : {
-        edited: !!ticks.edit,
-        domain: s.id === 's1' ? 'live' : null,
-        shared: !!ticks.share,
-      }}
-      onStart={onStart}
-      launch={[
-        { label: 'أنشئ موقعك', done: true },
-        { label: 'خصّص محتواك', done: true },
-        { label: 'انشر موقعك', done: s.live },
-        { label: 'اربط نطاقك', done: false },
-      ]}
-      links={{
-        bookings: to('bookings'), analytics: to('analytics'), gallery: to('gallery'), seo: to('seo'),
-        domains: to('domains'), reviews: to('reviews'), newSite: to('sites'), publish: to('sites'),
-      }}
-    />
-  )
-}
 
 /* The fixture sites carry a label, not a template id. */
 const KIND_COVER: Record<string, string> = {
@@ -109,39 +46,6 @@ export function SitesView({ filter, setFilter }: { filter: string; setFilter: (f
 
 export function GalleryView() {
   return <GalleryScreen assets={ASSETS} usedLabel="3.1 م.ب مستخدمة" />
-}
-
-export function AnalyticsView({
-  metric, setMetric, range, setRange,
-}: {
-  metric: MetricKey; setMetric: (m: MetricKey) => void
-  range: RangeKey; setRange: (r: RangeKey) => void
-}) {
-  const [back, setBack] = useState(0)
-  const traffic = useMemo(() => demoTraffic(range, back), [range, back])
-  // The sample lists are a month's worth; a shorter window shows a share.
-  const k = range === 'day' ? 0.03 : range === '7d' ? 0.24 : range === '30d' ? 1 : range === '90d' ? 2.9 : 11.6
-  const scale = (rows: typeof CHANNELS) => rows.map((r) => ({ ...r, views: Math.max(1, Math.round(r.views * k)) }))
-  return (
-    <AnalyticsScreen
-      metric={metric} setMetric={setMetric}
-      range={range} setRange={setRange}
-      back={back} setBack={setBack}
-      traffic={traffic}
-      channels={scale(CHANNELS)} pages={scale(PAGES)}
-      avgDuration="1 د 36 ث" avgDurationDelta={range === 'day' ? null : 8.1}
-      searchConsole={
-        <GscNumbers
-          status="ok"
-          sites={SITES.filter((s) => s.live).map((s) => ({ id: s.id, name: s.name }))}
-          selectedId="s1"
-          totals={GSC_TOTALS}
-          queries={GSC_QUERIES}
-          toSeo={{}}
-        />
-      }
-    />
-  )
 }
 
 export function BookingsView({ filter, setFilter }: { filter: string; setFilter: (f: string) => void }) {

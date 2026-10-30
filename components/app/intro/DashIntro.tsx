@@ -24,7 +24,7 @@ import { dashFont } from '../dash-font'
  * plays it again (INTRO_REPLAY_EVENT).
  *
  * TARGETS ARE FOUND BY NAME. Each stop looks for [data-tour="…"], which
- * DashFrame and the top-bar tools carry, and uses whichever copy is on screen
+ * the frame (v6/Frame) and the top-bar tools carry, and uses whichever copy is on screen
  * (the nav is the rail on a laptop and the dock on a phone). A stop whose
  * target is missing still shows its caption, in the middle.
  *
@@ -65,8 +65,8 @@ const TOTAL = STOPS.reduce((s, x) => s + (x.act ? DWELL.act : DWELL.plain), 0)
 const PAD = 6
 const GUT = 16
 const CARD_W = 330
-/** Below this the rail is the dock (DashFrame's lg breakpoint). */
-const RAIL_MIN = 1024
+/** Below this the rail is the dock (the v6 frame's 1100px breakpoint). */
+const RAIL_MIN = 1100
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -85,7 +85,7 @@ function findTarget(key: string): HTMLElement | null {
 function reveal(key: string, smooth: boolean): boolean {
   const el = Array.from(document.querySelectorAll<HTMLElement>(`[data-tour="${key}"]`)).find((e) => {
     const r = e.getBoundingClientRect()
-    return r.width > 0 && r.height > 0 && !e.closest('.zf-top, .zf-side, .zf-dock')
+    return r.width > 0 && r.height > 0 && !e.closest('header.top, .side, .dock')
   })
   if (!el) return false
   const r = el.getBoundingClientRect()
@@ -107,8 +107,11 @@ function typeInto(input: HTMLInputElement, text: string) {
   input.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
+/** Closes search if it is open. The palette is always in the page, closed,
+ *  and its Escape bubbles to the tour's own Escape (which ends the tour and
+ *  closes search again), so only an open one is sent it. */
 const closeSearch = () =>
-  document.querySelector('.zf-pal input')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  document.querySelector('.pal.on input')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 
 export default function DashIntro({
   setMore, persist = false, startOpen = false,
@@ -138,6 +141,8 @@ export default function DashIntro({
   const pausedRef = useRef(false)
   /** Bumped to stop a running tour: each run checks it is still the latest. */
   const run = useRef(0)
+  /** Night mode flipped by hand on a phone, to undo if the tour stops between flips. */
+  const flipped = useRef(false)
   const [manual, setManual] = useState(false)
 
   const phone = view.w < RAIL_MIN
@@ -184,6 +189,14 @@ export default function DashIntro({
     }
   }, [persist, startOpen])
 
+  // While the welcome or the tour is up the page says so on <html>, so the
+  // cookie strip (which sits where the tour points) steps aside until it ends.
+  useEffect(() => {
+    const on = stage === 'welcome' || stage === 'tour'
+    document.documentElement.toggleAttribute('data-intro', on)
+    return () => document.documentElement.removeAttribute('data-intro')
+  }, [stage])
+
   const markSeen = useCallback(() => {
     if (!persist) return
     try { window.localStorage.setItem(LS_KEY, '1') } catch {}
@@ -222,6 +235,7 @@ export default function DashIntro({
     setLive(false)
     setCursor(null)
     closeSearch()
+    if (flipped.current) { document.documentElement.classList.toggle('dash-dk'); flipped.current = false }
     markSeen()
   }, [markSeen, setMore])
 
@@ -269,7 +283,16 @@ export default function DashIntro({
         setLive(false)
         await sleep(60)
         if (reveal(s.key, true) && !(await wait(700))) return
-        const el = findTarget(s.key)
+        const own = findTarget(s.key)
+        // A phone has no theme button in the bar (the v6 design keeps it in
+        // the account menu under 520px): point at the account button and
+        // flip the page itself, twice, so the owner still sees night mode.
+        const el = own || (s.act === 'theme' ? findTarget('account') : null)
+        const flip = () => {
+          if (own) return own.click()
+          document.documentElement.classList.toggle('dash-dk')
+          flipped.current = !flipped.current
+        }
         if (el) {
           setCursor((c) => ({ ...centre(el), tap: c?.tap ?? 0 }))
           if (!(await wait(1100))) return
@@ -279,7 +302,7 @@ export default function DashIntro({
             setLive(true)
             el.click()
             if (!(await wait(500))) return
-            const input = document.querySelector<HTMLInputElement>('.zf-pal input')
+            const input = document.querySelector<HTMLInputElement>('.pal input')
             const word = dir === 'rtl' ? 'حجز' : 'book'
             for (let k = 1; input && k <= word.length; k++) {
               typeInto(input, word.slice(0, k))
@@ -291,10 +314,10 @@ export default function DashIntro({
           } else if (s.act === 'theme') {
             tap()
             setLive(true)
-            el.click()
+            flip()
             if (!(await wait(2200))) return
             tap()
-            el.click()
+            flip()
             if (!(await wait(1300))) return
             // Two flips leave the colours as they were; put back "follow the
             // device" too, if that was the owner's setting.
@@ -304,7 +327,7 @@ export default function DashIntro({
             } catch {}
             setLive(false)
           } else if (s.act === 'more' && window.innerWidth < RAIL_MIN) {
-            const more = document.querySelector<HTMLElement>('.zf-dock [data-tour="more"]')
+            const more = document.querySelector<HTMLElement>('.dock [data-tour="more"]')
             if (more) {
               if (!(await wait(900))) return
               setCursor((c) => ({ ...centre(more), tap: (c?.tap ?? 0) + 1 }))

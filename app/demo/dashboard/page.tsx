@@ -30,6 +30,7 @@
  * the product and holds no one's data should not turn up in a search.
  */
 
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import DashboardDemoView from './DashboardDemoView'
 
@@ -39,5 +40,11 @@ export const metadata: Metadata = {
 }
 
 export default function DemoDashboardPage() {
-  return <DashboardDemoView />
+  // The analytics page follows ?tab= (useSearchParams), which a static page
+  // has to hold in a Suspense boundary.
+  return (
+    <Suspense>
+      <DashboardDemoView />
+    </Suspense>
+  )
 }
