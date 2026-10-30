@@ -208,3 +208,99 @@ export const HOME_TODAY = {
   ],
   week: 6,
 }
+
+/* ── analytics: the API's own answers, from the sample traffic ──────────── */
+
+/* The v6 analytics page reads /api/analytics, /api/analytics/day,
+   /api/analytics/realtime and /api/gsc/*. The demo answers those same paths
+   here, in the same shapes, so the page it shows is the page an owner gets. */
+
+const CHANNEL_KEYS = ['search', 'direct', 'social', 'referral', 'email']
+const PAGE_TIME: Record<string, [number, number]> = {
+  '/': [27_000, 79], '/menu': [64_000, 88], '/reservations': [44_000, 65], '/about': [10_000, 79], '/contact': [36_000, 50],
+}
+const COUNTRIES = [['AE', 1210], ['SA', 640], ['EG', 310], ['KW', 120], ['JO', 64]] as const
+const DEVICES = [['Mobile', 78], ['Desktop', 19], ['Tablet', 3]] as const
+const BROWSERS = [['Safari', 2410], ['Chrome', 2050], ['Instagram', 540], ['Other', 260]] as const
+const CONTACTS = [['booking_click', 14], ['whatsapp_click', 12], ['map_click', 8], ['phone_click', 5], ['social_click', 1]] as const
+
+const noonBack = (iso: string) => {
+  const d = new Date(iso)
+  d.setHours(12, 0, 0, 0)
+  const now = new Date()
+  now.setHours(12, 0, 0, 0)
+  return Math.max(0, Math.round((now.getTime() - d.getTime()) / 86_400_000))
+}
+const ymdOf = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+/** /api/analytics for the sample site: a range, or one day (range=custom). */
+function demoRange(q: Record<string, string>) {
+  const r = q.range
+  const back = r === 'custom' && q.from ? noonBack(q.from) : 0
+  const t = r === 'custom' ? demoTraffic('day', back) : demoTraffic((r === '12mo' ? '12mo' : r) as TRange | '12mo', 0)
+  const base = demoTraffic('30d', 0).totals.views
+  const k = t.totals.views / base
+  const sc = (n: number) => Math.max(0, Math.round(n * k))
+  const series = r === 'custom'
+    ? []
+    : t.dates.map((date, i) => ({ date, views: t.values.views[i], sessions: t.values.sessions[i], visitors: t.values.visitors[i], events: t.values.events[i] }))
+  const prev_series = r === 'custom'
+    ? []
+    : t.dates.map((date, i) => ({ date, views: t.prev.views[i], sessions: t.prev.sessions[i], visitors: t.prev.visitors[i], events: t.prev.events[i] }))
+  const totals = { ...t.totals, bounce_rate: 0.41, avg_duration_ms: 108_000, conversion_rate: t.totals.visitors ? t.totals.events / t.totals.visitors : 0 }
+  const contacts = CONTACTS.map(([event_type, n]) => ({ event_type, events: sc(n * 6), sessions: sc(n * 5) }))
+  return {
+    totals,
+    previous: totals,
+    delta: { ...t.deltas, bounce_rate: null, avg_duration_ms: r === 'custom' ? null : 6, conversion_rate: null },
+    series,
+    prev_series,
+    pages: PAGES.map((p) => ({ path: p.name, views: sc(p.views), visitors: sc(p.visitors), avg_engaged_ms: PAGE_TIME[p.name]?.[0] ?? null, avg_scroll_pct: PAGE_TIME[p.name]?.[1] ?? null })),
+    channels: CHANNELS.map((c, i) => ({ ...c, key: CHANNEL_KEYS[i], views: sc(c.views), visitors: sc(c.visitors), sessions: sc(c.sessions) })),
+    countries: COUNTRIES.map(([name, v]) => ({ name, views: sc(v * 2), sessions: sc(v * 1.4), visitors: sc(v) })),
+    devices: DEVICES.map(([name, v]) => ({ name, views: sc(v * 60), sessions: sc(v * 40), visitors: sc(v * 30) })),
+    browsers: BROWSERS.map(([name, v]) => ({ name, views: sc(v), sessions: sc(v * 0.6), visitors: sc(v * 0.42) })),
+    conversions: { total: contacts.reduce((a, c) => a + c.events, 0), rate: 0, by_type: contacts, by_path: [] },
+  }
+}
+
+/** /api/analytics/day: the day's 24 hours, today only as far as now. */
+function demoDay(q: Record<string, string>) {
+  const [y, m, d] = (q.date || ymdOf(new Date())).split('-').map(Number)
+  const back = noonBack(new Date(y, m - 1, d, 12).toISOString())
+  const t = demoTraffic('day', back)
+  const pad = (a: number[]) => [...a, ...Array(24 - a.length).fill(0)]
+  return {
+    date: q.date, prev_date: '', tz: q.tz, upto: t.values.views.length, partial: back === 0,
+    hours: { views: pad(t.values.views), visitors: pad(t.values.visitors), sessions: pad(t.values.sessions), events: pad(t.values.events) },
+    prev_hours: t.prev, totals: t.totals, prev_totals: t.totals, delta: t.deltas,
+  }
+}
+
+const LIVE_PATHS = ['/', '/menu', '/reservations', '/contact']
+const LIVE_SRC = ['direct', 'search', 'social', 'direct']
+const LIVE_CC = ['AE', 'AE', 'SA', 'EG']
+
+/** The sample site answering the analytics page's calls. */
+export async function demoAnalyticsGet(path: string, q: Record<string, string>): Promise<unknown> {
+  await new Promise((r) => setTimeout(r, 120))
+  if (path === '/api/analytics') return demoRange(q)
+  if (path === '/api/analytics/day') return demoDay(q)
+  if (path === '/api/analytics/realtime') {
+    const now = Date.now()
+    const tick = Math.floor(now / 10_000)
+    return {
+      active: 2 + (tick % 4),
+      recent: Array.from({ length: 6 }, (_, i) => {
+        const n = tick - i
+        return {
+          id: n, at: new Date(now - i * 97_000).toISOString(), path: LIVE_PATHS[n % 4], country: LIVE_CC[(n * 5) % 4],
+          device: n % 5 === 0 ? 'Desktop' : 'Mobile', channel: LIVE_SRC[(n * 3) % 4], source: null, is_bot: false,
+        }
+      }),
+    }
+  }
+  if (path === '/api/gsc/status') return { configured: true, connected: true, email: GSC_EMAIL }
+  if (path === '/api/gsc/performance') return { connected: true, totals: GSC_TOTALS, queries: GSC_QUERIES }
+  throw new Error('not in the demo')
+}

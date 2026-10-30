@@ -198,6 +198,42 @@ html.dash-on .zy-cookie { background: var(--card); box-shadow: var(--shadow-pop)
 html.dash-on .zy-cookie [class~="bg-primary"] { color: var(--ground); background: var(--obsidian); }
 html.dash-on .zy-cookie [class~="bg-background"] { background: var(--surface-2); }
 
+/* Option ج (picked 2026-10-30): on a dashboard page the banner is a slim ink
+   strip sitting on the phone's dock, the dock's own colour, so the dock stays
+   reachable; on a laptop it is the same strip in the corner the side menu
+   leaves free. The gear opens the full card ([data-open]) in the same place.
+   Opaque, not blurred like the dock: a backdrop-filter thins Arabic text.
+   z 45: over the dock (40) and the bar (30), under a popover (50) and a sheet (60). */
+html.dash-on .zy-cookie { --ck-lift: calc(66px + 12px + 10px + env(safe-area-inset-bottom, 0px)); z-index: 45; }
+html.dash-on .zy-cookie[data-strip] {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: var(--ck-lift);
+  width: min(calc(100vw - 24px), 440px); margin: 0; padding: 6px; padding-inline-start: 16px;
+  border-radius: 22px; background: #16120D; color: #F4EFE6;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 18px 40px -16px rgb(0 0 0 / 0.55);
+}
+html.dash-on.dash-dk .zy-cookie[data-strip] { background: #24201A; }
+html.dash-on .zy-cookie[data-open] { bottom: var(--ck-lift); max-height: calc(100dvh - var(--ck-lift) - 80px); overflow: auto; border: 0; border-radius: 22px; }
+/* A 440px card: the choices stack under the text at every width. */
+html.dash-on .zy-cookie[data-open] > div { flex-direction: column; align-items: stretch; }
+html.dash-on .zy-cookie[data-open] > div > div:last-child { width: 100%; }
+@media (min-width: 1100px) {
+  html.dash-on .zy-cookie[data-strip] { left: auto; transform: none; inset-inline-end: 24px; bottom: 24px; }
+  html.dash-on .zy-cookie[data-open] { inset-inline: auto 24px; bottom: 24px; width: 440px; max-width: none; margin: 0; max-height: calc(100dvh - 104px); }
+}
+/* The tour points at the dock and the corners; the strip waits until it ends. */
+html[data-intro] .zy-cookie { display: none !important; }
+.zy-cookie .ck-c { display: flex; align-items: center; gap: 6px; min-height: 44px; }
+.zy-cookie .ck-c-t { flex: 1; min-width: 0; font-size: 15px; line-height: 1.4; color: rgb(244 239 230 / 0.8); }
+.zy-cookie .ck-c-t a { color: #F4EFE6; text-decoration: underline; text-underline-offset: 3px; }
+.zy-cookie .ck-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px;
+  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.zy-cookie .ck-yes { background: #F4EFE6; color: #16120D; }
+.zy-cookie .ck-no { background: rgb(244 239 230 / 0.12); color: #F4EFE6; }
+.zy-cookie .ck-gear { width: 40px; padding: 0; background: transparent; color: rgb(244 239 230 / 0.8); }
+.zy-cookie .ck-gear svg { width: 20px; height: 20px; }
+@media (hover: hover) { .zy-cookie .ck-gear:hover { color: #F4EFE6; } }
+.zy-cookie .ck-btn:focus-visible { outline: 2px solid #E2532A; outline-offset: 2px; }
+
 /* ---- the faces --------------------------------------------------------- */
 .zy-app, .zy-dash {
   font-family: var(--font-chrome);

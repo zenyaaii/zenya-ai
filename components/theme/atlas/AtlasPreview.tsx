@@ -239,6 +239,7 @@ function AtlasNav({ content, colors, font, view, setView }: { content: AtlasCont
   const go = (v: AtlasView) => { setView(v); setMenuOpen(false) }
   return (
     <div
+      data-section="brand"
       className="sticky top-0 z-50 border-b backdrop-blur-xl"
       style={{
         background: `${colors.background}cc`,

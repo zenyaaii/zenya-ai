@@ -16,11 +16,16 @@ const TOKENS = [
   { key: 'border',     label: 'الحدود' },
 ]
 
+const plural = (n: number, one: string, two: string, few: string, many: string) =>
+  n === 0 ? `لا ${many}` : n === 1 ? one : n === 2 ? two : n <= 10 ? `${n} ${few}` : `${n} ${many}`
+
 export const SERVICES_EDITOR_CONFIG: EditorConfig = {
   contentKey:      'services',
   themeName:       'خدمات',
   defaultPresetId: 'cobalt',
   brandNamePath:   'brand.name',
+  phonePath:       'footer.phone',
+  pinned:          ['footer'],
   colorPresets:    SERVICE_PRESETS,
   colorTokens:     TOKENS,
 
@@ -34,7 +39,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
 
   panels: [
     {
-      id: 'brand', label: 'النشاط التجاري', icon: Sparkles,
+      id: 'brand', label: 'النشاط التجاري', icon: Sparkles, ic: 'brand',
+      desc: 'الاسم والشعار والمجال',
+      summary: (c) => String(c?.brand?.name || ''),
       fields: [
         { type: 'text', path: 'brand.name',       label: 'اسم النشاط' },
         {
@@ -58,14 +65,19 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'hero', label: 'الواجهة', icon: Sparkles, page: 'home',
+      id: 'hero', label: 'الواجهة', icon: Sparkles, ic: 'sparkle', page: 'home',
+      desc: 'أول ما يراه الزائر',
+      summary: (c) => String(c?.hero?.headline || '').replace(/\n/g, ' '),
       fields: [
-        { type: 'text',     path: 'hero.eyebrow',       label: 'عنوان صغير' },
-        { type: 'textarea', path: 'hero.headline',      label: 'العنوان', rows: 2 },
-        { type: 'textarea', path: 'hero.subheadline',   label: 'العنوان الفرعي', rows: 3 },
-        { type: 'text',     path: 'hero.primary_cta',   label: 'الزر الرئيسي' },
-        { type: 'text',     path: 'hero.secondary_cta', label: 'الزر الثاني' },
-        { type: 'image',    path: 'hero.image',         label: 'صورة الواجهة' },
+        { type: 'group', label: 'النصوص' },
+        { type: 'text',     path: 'hero.eyebrow',       label: 'سطر صغير فوق العنوان', max: 45, suggest: true },
+        { type: 'textarea', path: 'hero.headline',      label: 'العنوان الكبير', rows: 2, max: 50, suggest: true },
+        { type: 'textarea', path: 'hero.subheadline',   label: 'النص تحت العنوان', rows: 3, max: 180, suggest: true },
+        { type: 'group', label: 'الأزرار' },
+        { type: 'text',     path: 'hero.primary_cta',   label: 'الزر الأول', max: 22 },
+        { type: 'text',     path: 'hero.secondary_cta', label: 'الزر الثاني', max: 22 },
+        { type: 'group', label: 'الصورة والأرقام' },
+        { type: 'image',    path: 'hero.image',         label: 'صورة الخلفية' },
         {
           type: 'array', path: 'hero.stats',
           label: 'الأرقام', itemLabel: 'رقم', itemTitle: 'label',
@@ -78,13 +90,17 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'trust_bar', label: 'شريط الثقة', icon: Star, page: 'home',
+      id: 'trust_bar', label: 'شريط الثقة', icon: Star, ic: 'shield', page: 'home',
+      desc: 'سطر قصير تحت الواجهة',
+      summary: (c) => plural((c?.trust_bar?.items || []).length, 'عنصر واحد', 'عنصران', 'عناصر', 'عنصرًا'),
       fields: [
         { type: 'strings', path: 'trust_bar.items', label: 'عناصر الثقة', addLabel: 'إضافة عنصر' },
       ],
     },
     {
-      id: 'services', label: 'الخدمات', icon: Wrench, pages: ['home', 'services'],
+      id: 'services', label: 'الخدمات', icon: Wrench, ic: 'wand', pages: ['home', 'services'],
+      desc: 'ما تقدّمه لعملائك',
+      summary: (c) => plural((c?.services?.items || []).length, 'خدمة واحدة', 'خدمتان', 'خدمات', 'خدمة'),
       fields: [
         { type: 'textarea', path: 'services.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'services.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -94,7 +110,7 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
           makeItem: () => ({ name: 'خدمة جديدة', description: '', price_from: '', badge: '' }),
           itemFields: [
             { type: 'text',     path: 'name',        label: 'الاسم' },
-            { type: 'textarea', path: 'description', label: 'الوصف', rows: 3 },
+            { type: 'textarea', path: 'description', label: 'الوصف', rows: 3, max: 140, suggest: true },
             { type: 'text',     path: 'price_from',  label: 'السعر يبدأ من' },
             { type: 'text',     path: 'badge',       label: 'شارة (اختياري)' },
           ],
@@ -102,11 +118,13 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'story', label: 'قصتنا', icon: Quote, page: 'about',
+      id: 'story', label: 'قصتنا', icon: Quote, ic: 'text', page: 'about',
+      desc: 'من أنتم وكيف تعملون',
+      summary: (c) => String(c?.story?.heading || ''),
       fields: [
         { type: 'text',     path: 'story.eyebrow',     label: 'عنوان صغير' },
         { type: 'textarea', path: 'story.heading',     label: 'العنوان', rows: 2 },
-        { type: 'textarea', path: 'story.body',        label: 'النص', rows: 5 },
+        { type: 'textarea', path: 'story.body',        label: 'النص', rows: 5, max: 420, suggest: true },
         { type: 'text',     path: 'story.owner_name',  label: 'اسم المالك' },
         { type: 'text',     path: 'story.owner_title', label: 'صفة المالك' },
         { type: 'textarea', path: 'story.quote',       label: 'الاقتباس', rows: 2 },
@@ -114,7 +132,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'proof', label: 'لماذا نحن', icon: Award, pages: ['home', 'about'],
+      id: 'proof', label: 'لماذا نحن', icon: Award, ic: 'shield', pages: ['home', 'about'],
+      desc: 'نقاط قوتك',
+      summary: (c) => plural((c?.proof?.items || []).length, 'نقطة واحدة', 'نقطتان', 'نقاط', 'نقطة'),
       fields: [
         { type: 'textarea', path: 'proof.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'proof.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -130,7 +150,8 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'before_after', label: 'قبل / بعد', icon: ImageIcon, page: 'services',
+      id: 'before_after', label: 'قبل / بعد', icon: ImageIcon, ic: 'gallery', page: 'services',
+      desc: 'صورتان تقارنان العمل',
       fields: [
         { type: 'textarea', path: 'before_after.heading',      label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'before_after.subheading',   label: 'العنوان الفرعي', rows: 2 },
@@ -142,7 +163,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'process', label: 'طريقة العمل', icon: Workflow, pages: ['home', 'process'],
+      id: 'process', label: 'طريقة العمل', icon: Workflow, ic: 'layers', pages: ['home', 'process'],
+      desc: 'خطوات العمل',
+      summary: (c) => plural((c?.process?.steps || []).length, 'خطوة واحدة', 'خطوتان', 'خطوات', 'خطوة'),
       fields: [
         { type: 'textarea', path: 'process.heading',    label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'process.subheading', label: 'العنوان الفرعي', rows: 2 },
@@ -158,7 +181,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'areas', label: 'مناطق الخدمة', icon: MapPin, page: 'contact',
+      id: 'areas', label: 'مناطق الخدمة', icon: MapPin, ic: 'map', page: 'contact',
+      desc: 'أين تقدّم خدماتك',
+      summary: (c) => plural((c?.areas?.areas_served || []).length, 'منطقة واحدة', 'منطقتان', 'مناطق', 'منطقة'),
       fields: [
         { type: 'textarea', path: 'areas.heading',       label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'areas.subheading',    label: 'العنوان الفرعي', rows: 2 },
@@ -168,7 +193,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'offer', label: 'طلب عرض السعر', icon: Sparkles, pages: ['home', 'contact'],
+      id: 'offer', label: 'طلب عرض السعر', icon: Sparkles, ic: 'sparkle', pages: ['home', 'contact'],
+      desc: 'دعوة لطلب عرض سعر',
+      summary: (c) => String(c?.offer?.heading || '').replace(/\n/g, ' '),
       fields: [
         { type: 'text',     path: 'offer.badge',      label: 'شارة' },
         { type: 'textarea', path: 'offer.heading',    label: 'العنوان', rows: 2 },
@@ -178,12 +205,14 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'testimonials', label: 'آراء العملاء', icon: Star, pages: ['home', 'about'],
+      id: 'testimonials', label: 'آراء العملاء', icon: Star, ic: 'star', pages: ['home', 'about'],
+      desc: 'التقييم والآراء',
+      summary: (c) => `${(+c?.testimonials?.average_rating || 0).toFixed(1)} · ${plural((c?.testimonials?.items || []).length, 'رأي واحد', 'رأيان', 'آراء', 'رأيًا')}`,
       fields: [
         { type: 'reviews', path: 'testimonials.items' },
         { type: 'textarea', path: 'testimonials.heading',        label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'testimonials.subheading',     label: 'العنوان الفرعي', rows: 2 },
-        { type: 'number',   path: 'testimonials.average_rating', label: 'متوسط التقييم', min: 0, max: 5, step: 0.1 },
+        { type: 'rating',   path: 'testimonials.average_rating', label: 'متوسط التقييم' },
         { type: 'text',     path: 'testimonials.review_count',   label: 'عدد التقييمات' },
         {
           type: 'array', path: 'testimonials.items',
@@ -193,13 +222,15 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
             { type: 'text',     path: 'name',   label: 'الاسم' },
             { type: 'textarea', path: 'text',   label: 'الاقتباس', rows: 3 },
             { type: 'text',     path: 'source', label: 'المصدر (اختياري)' },
-            { type: 'number',   path: 'rating', label: 'التقييم', min: 1, max: 5 },
+            { type: 'stars',    path: 'rating', label: 'تقييمه' },
           ],
         },
       ],
     },
     {
-      id: 'gallery', label: 'المعرض', icon: ImageIcon, page: 'services',
+      id: 'gallery', label: 'المعرض', icon: ImageIcon, ic: 'gallery', page: 'services',
+      desc: 'صور أعمالك',
+      summary: (c) => plural((c?.gallery?.images || []).length, 'صورة واحدة', 'صورتان', 'صور', 'صورة'),
       fields: [
         { type: 'text', path: 'gallery.heading', label: 'العنوان' },
         {
@@ -214,7 +245,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'faq', label: 'الأسئلة الشائعة', icon: HelpCircle, pages: ['process', 'contact'],
+      id: 'faq', label: 'الأسئلة الشائعة', icon: HelpCircle, ic: 'faq', pages: ['process', 'contact'],
+      desc: 'أسئلة قبل الطلب',
+      summary: (c) => plural((c?.faq?.items || []).length, 'سؤال واحد', 'سؤالان', 'أسئلة', 'سؤالًا'),
       fields: [
         { type: 'text', path: 'faq.heading', label: 'العنوان' },
         {
@@ -229,7 +262,9 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'final_cta', label: 'الدعوة الختامية', icon: Sparkles, pages: ['services', 'about', 'process'],
+      id: 'final_cta', label: 'الدعوة الختامية', icon: Sparkles, ic: 'send', pages: ['services', 'about', 'process'],
+      desc: 'الدعوة في آخر الصفحة',
+      summary: (c) => String(c?.final_cta?.heading || '').replace(/\n/g, ' '),
       fields: [
         { type: 'textarea', path: 'final_cta.heading',        label: 'العنوان', rows: 2 },
         { type: 'textarea', path: 'final_cta.subheading',     label: 'العنوان الفرعي', rows: 2 },
@@ -240,7 +275,8 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
   ],
   globalPanels: [
     {
-      id: 'links', label: 'واتساب والتواصل الاجتماعي', icon: MessageCircle,
+      id: 'links', label: 'واتساب والتواصل الاجتماعي', icon: MessageCircle, ic: 'at',
+      desc: 'في أسفل كل صفحة',
       fields: [
         { type: 'note', content: 'كل رابط فارغ لا يظهر في الموقع. اكتب الرابط كاملًا أو اسم الحساب فقط.' },
         { type: 'text', path: 'links.whatsapp',         label: 'رقم واتساب (بمفتاح الدولة)', placeholder: '+966 55 555 0187' },
@@ -254,12 +290,14 @@ export const SERVICES_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'footer', label: 'تذييل الصفحة', icon: Phone,
+      id: 'footer', label: 'تذييل الصفحة', icon: Phone, ic: 'foot',
+      desc: 'في أسفل كل صفحة',
+      summary: (c) => String(c?.footer?.tagline || ''),
       fields: [
         { type: 'text', path: 'footer.tagline', label: 'الشعار النصي' },
         { type: 'text', path: 'footer.legal',   label: 'النص القانوني' },
-        { type: 'text', path: 'footer.phone',   label: 'الهاتف' },
-        { type: 'text', path: 'footer.email',   label: 'البريد الإلكتروني' },
+        { type: 'tel',   path: 'footer.phone',   label: 'الهاتف' },
+        { type: 'email', path: 'footer.email',   label: 'البريد الإلكتروني' },
         { type: 'text', path: 'footer.address', label: 'العنوان البريدي' },
       ],
     },

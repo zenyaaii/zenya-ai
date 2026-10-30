@@ -208,6 +208,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
   const go = (v: WellnessView) => { setView(v); setMenuOpen(false) }
   return (
     <nav
+      data-section="brand"
       className="sticky top-0 z-50 px-8 py-4 backdrop-blur-xl"
       style={{
         background: isDark ? 'rgba(14,14,14,0.92)' : 'rgba(255,255,255,0.88)',
@@ -1117,7 +1118,7 @@ function LocationSection({ content, isDark }: { content: WellnessContent; isDark
     </div>
   )
   return (
-    <section data-section="location" className="px-6 py-20 sm:px-8" style={{ background: 'var(--wl-surface)' }}>
+    <section data-section="links" className="px-6 py-20 sm:px-8" style={{ background: 'var(--wl-surface)' }}>
       <motion.div {...revealAnim(rm)} className="mx-auto max-w-5xl">
         <div className="grid items-stretch gap-8 lg:grid-cols-[1fr_1.4fr]">
           {details}

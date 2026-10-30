@@ -285,6 +285,7 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
 
   return (
     <div
+      data-section="brand_global"
       className="hidden md:block border-b text-[0.72rem]"
       style={{ borderColor: 'var(--rb-border)', background: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.02)' }}
     >
@@ -329,6 +330,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
   const go = (v: RestaurantView) => { setView(v); setMenuOpen(false) }
   return (
     <motion.div
+      data-section="brand_global"
       className="sticky top-0 z-30 backdrop-blur-md border-b"
       style={{
         background: isDark ? 'rgba(10,10,12,0.78)' : 'rgba(255,255,255,0.85)',
@@ -1297,7 +1299,7 @@ function normaliseWhatsapp(v: string): string {
 
 function Footer({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   return (
-    <footer className="pt-20 pb-10 border-t" style={{ borderColor: 'var(--rb-border)' }}>
+    <footer data-section="footer" className="pt-20 pb-10 border-t" style={{ borderColor: 'var(--rb-border)' }}>
       <Container>
         <div className="grid md:grid-cols-3 gap-10 mb-16">
           <div>

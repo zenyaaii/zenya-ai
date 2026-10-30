@@ -3,29 +3,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { publicSiteHost, publicSiteUrl } from '@/lib/portal-urls'
+import { publicSiteUrl } from '@/lib/portal-urls'
 import { bookingAccess } from '@/lib/booking-entitlement'
 import { hasReviews, readReviews } from '@/lib/reviews-bank'
-import { HomeScreen, type HomeBooking, type HomeScreenProps, type HomeWidgets, type StartStep } from '@/components/dashboard/screens/home'
+import V6Home, { type HomeMetric, type StartStep, type V6Booking, type V6HomeProps } from '@/components/app/v6/Home'
+import { MONTHS } from '@/components/app/v6/ui'
+import { heroImage, hostOf, useSite } from '@/components/app/v6/site'
 import {
-  TrafficCard, dateAgo, trafficFromDay, trafficFromRange, ymd,
-  type TMetric, type TRange, type TrafficData,
+  dateAgo, trafficFromDay, trafficFromRange, ymd,
+  type TRange, type TrafficData,
 } from '@/components/dashboard/screens/traffic'
-import { relTime } from '@/components/dashboard/screens/kit'
-import { businessTypeOf, editUrlFor, templateLabel, type ThemeRow } from '@/components/dashboard/site-kinds'
+import { businessTypeOf, editUrlFor, templateLabel } from '@/components/dashboard/site-kinds'
 import { useDashboardPath } from '@/components/app/useDashboardPath'
 
 /**
- * The dashboard home on the owner's real account.
+ * The dashboard home on the owner's real account, drawn as the v6 design's
+ * home (components/app/v6/Home).
  *
- * Loads in three waves so the page is never blank for long: the account and
- * its sites first (greeting, site card, launch plan), then the chosen site's
- * traffic, bookings and domain, then Google, which is slow and optional.
- * Every number comes from the account; what it does not have yet is offered
- * as a next step instead (see HomeScreen).
+ * The site is the one the frame's switcher shows (v6/site). Loads in waves so
+ * the page is never blank for long: the account first (greeting, launch
+ * plan), then the site's traffic, bookings and domain, then Google, which is
+ * slow and optional. Every number comes from the account; what it does not
+ * have yet is offered as a next step instead.
  */
 
-type Domain = { domain: string; theme_id: string | null; status: string; is_primary?: boolean | null }
 type BookingRow = {
   id: number; name: string; party_size: number | null; preferred_date: string | null
   preferred_time: string | null; status: string; message: string | null
@@ -35,20 +36,6 @@ const tz = () => {
   try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC' } catch { return 'UTC' }
 }
 
-/** The site the home is about: the latest published one, else the latest. */
-function pickSite(themes: ThemeRow[]): string {
-  const by = (t: ThemeRow) => new Date(t.updated_at || t.created_at).getTime()
-  const sorted = [...themes].sort((a, b) => by(b) - by(a))
-  return (sorted.find((t) => t.is_published && t.slug) || sorted[0])?.id || ''
-}
-
-function heroImage(content: any): string | null {
-  const h = content && typeof content === 'object' ? content.hero : null
-  const img = h?.image
-  const url = typeof img === 'string' ? img : typeof img?.url === 'string' ? img.url : null
-  return url && /^(https?:)?\/\//.test(url) ? url : url && url.startsWith('/') ? url : null
-}
-
 /** Arabic letters people type interchangeably, folded, for matching a query to a name. */
 const fold = (s: string) =>
   s.toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ْـ]/g, '').replace(/\s+/g, ' ').trim()
@@ -56,47 +43,46 @@ const fold = (s: string) =>
 export default function DashboardHomePage() {
   const router = useRouter()
   const { linkTo } = useDashboardPath()
-  const [base, setBase] = useState<{
-    name: string; themes: ThemeRow[]; domains: Domain[]; entitled: boolean; launchPlan: Record<string, boolean>
-  } | null>(null)
-  const [siteId, setSiteId] = useState('')
-  const [metric, setMetric] = useState<TMetric>('views')
+  const account = useSite()
+  const siteId = account?.siteId || ''
+  const [base, setBase] = useState<{ name: string; entitled: boolean; launchPlan: Record<string, boolean> } | null>(null)
+  const [metric, setMetric] = useState<HomeMetric>('views')
   const [range, setRange] = useState<TRange>('30d')
   const [back, setBack] = useState(0)
   const [traffic, setTraffic] = useState<TrafficData | null>(null)
-  const [yesterday, setYesterday] = useState<number | null>(null)
+  const [week, setWeek] = useState<number | null>(null)
   const [bookings, setBookings] = useState<{ rows: BookingRow[]; fresh: number } | null>(null)
-  const [google, setGoogle] = useState<HomeWidgets['google']>(null)
+  const [google, setGoogle] = useState<V6HomeProps['google']>(null)
 
-  // ---- wave 1: the account and its sites ----------------------------------
+  // ---- wave 1: the account ---------------------------------------------------
   useEffect(() => {
     const supabase = createClient()
     let cancelled = false
     ;(async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login?next=/dashboard'); return }
-      const [{ data: profile }, themesRes, domainsRes, onboarding] = await Promise.all([
+      const [{ data: profile }, onboarding] = await Promise.all([
         supabase.from('profiles').select('plan, has_hosting, bookings_trial_started_at, full_name').eq('id', user.id).maybeSingle(),
-        fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] })),
-        fetch('/api/domains').then((r) => (r.ok ? r.json() : { domains: [] })).catch(() => ({ domains: [] })),
         fetch('/api/onboarding', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
       ])
       if (cancelled) return
-      const themes: ThemeRow[] = themesRes?.themes || []
       const fullName = (profile as any)?.full_name || user.user_metadata?.full_name || ''
       setBase({
         name: fullName.split(' ')[0] || (user.email ? user.email.split('@')[0] : ''),
-        themes,
-        domains: domainsRes?.domains || [],
         entitled: bookingAccess(profile as any).entitled,
         launchPlan: (onboarding?.launchPlan || {}) as Record<string, boolean>,
       })
-      setSiteId((cur) => cur || pickSite(themes))
     })()
     return () => { cancelled = true }
   }, [router])
 
-  const theme = base?.themes.find((t) => t.id === siteId) || null
+  const themes = account?.themes || null
+  const domains = useMemo(() => account?.domains || [], [account?.domains])
+
+  // A new site in the switcher starts its numbers fresh.
+  useEffect(() => { setTraffic(null); setWeek(null); setBookings(null); setGoogle(null) }, [siteId])
+
+  const theme = themes?.find((t) => t.id === siteId) || null
   const live = !!(theme?.is_published && theme.slug)
 
   // ---- wave 2: traffic for the chosen site and range ----------------------
@@ -114,14 +100,14 @@ export default function DashboardHomePage() {
     return () => { cancelled = true }
   }, [theme?.id, live, range, back]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // The greeting's "visited yesterday": distinct people on the owner's own yesterday.
+  // The greeting: distinct people over the last 7 days.
   useEffect(() => {
     if (!theme || !live) return
     let cancelled = false
-    const q = new URLSearchParams({ tz: tz(), site: theme.id, date: ymd(dateAgo(1)) })
-    fetch(`/api/analytics/day?${q}`, { cache: 'no-store' })
+    const q = new URLSearchParams({ tz: tz(), site: theme.id, range: '7d' })
+    fetch(`/api/analytics?${q}`, { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => { if (!cancelled && j?.totals) setYesterday(j.totals.visitors) })
+      .then((j) => { if (!cancelled && j?.totals) setWeek(Number(j.totals.visitors) || 0) })
       .catch(() => {})
     return () => { cancelled = true }
   }, [theme?.id, live]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -181,13 +167,6 @@ export default function DashboardHomePage() {
     return () => { cancelled = true }
   }, [theme?.id, live]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onSite = useCallback((id: string) => {
-    setSiteId(id)
-    setTraffic(null)
-    setYesterday(null)
-    setBookings(null)
-  }, [])
-
   // «ابدأ من هنا»: a step the owner took (or hiding the card) is a key in the
   // launch plan, so it follows them to every device.
   const onStart = useCallback((step: StartStep) => {
@@ -203,20 +182,20 @@ export default function DashboardHomePage() {
     }).catch(() => {})
   }, [base])
 
-  const props = useMemo<HomeScreenProps | null>(() => {
-    if (!base) return null
+  const props = useMemo<V6HomeProps | null>(() => {
+    if (!base || !themes) return null
     const t = theme
     const bt = t ? businessTypeOf(t) : ''
     const dom = t
-      ? base.domains
+      ? domains
         .filter((d) => d.theme_id === t.id && d.status !== 'removed')
         .sort((a, b) => Number(b.status === 'live') - Number(a.status === 'live') || Number(!!b.is_primary) - Number(!!a.is_primary))[0]
       : undefined
-    const ownHost = dom && dom.status === 'live' ? dom.domain : null
-    const host = t?.slug ? ownHost || publicSiteHost(t.slug) : null
-    const url = live && t?.slug ? (ownHost ? `https://${ownHost}` : publicSiteUrl(t.slug)) : null
+    const host = t ? hostOf(t, domains) : null
+    const url = live && host ? `https://${host}` : live && t?.slug ? publicSiteUrl(t.slug) : null
+    const when = t ? new Date(t.updated_at || t.created_at) : null
 
-    let reviews: HomeWidgets['reviews'] = null
+    let reviews: V6HomeProps['reviews'] = null
     if (t && hasReviews(bt)) {
       const v = readReviews(bt, t.content)
       reviews = v.google && v.google.rating
@@ -224,12 +203,12 @@ export default function DashboardHomePage() {
         : 'add'
     }
 
-    const toBooking = (b: BookingRow): HomeBooking => ({
+    const toBooking = (b: BookingRow): V6Booking => ({
       id: String(b.id),
       time: (b.preferred_time || '').slice(0, 5) || '—',
       name: b.name,
       people: b.party_size,
-      status: b.status === 'confirmed' ? 'confirmed' : b.status === 'done' ? 'done' : 'new',
+      status: b.status === 'confirmed' ? 'ok' : b.status === 'done' ? 'done' : 'new',
       hasNote: !!(b.message && b.message.trim()),
     })
     const byTime = (a: BookingRow, b: BookingRow) => (a.preferred_time || '').localeCompare(b.preferred_time || '')
@@ -242,10 +221,10 @@ export default function DashboardHomePage() {
         }
       : null
 
-    const published = base.themes.some((x) => x.is_published && x.slug)
+    const published = themes.some((x) => x.is_published && x.slug)
+    const reviewsHref = linkTo(t ? `/dashboard/reviews?site=${t.id}` : '/dashboard/reviews')
     return {
       name: base.name,
-      sites: base.themes.map((x) => ({ id: x.id, name: x.product_name || 'موقع بلا اسم' })),
       site: t
         ? {
             id: t.id,
@@ -253,30 +232,23 @@ export default function DashboardHomePage() {
             live,
             host,
             url,
-            updated: relTime(t.updated_at || t.created_at),
+            updated: when ? `${when.getDate()} ${MONTHS[when.getMonth()]}` : '',
             kind: templateLabel(bt),
-            image: heroImage(t.content),
+            cover: heroImage(t.content),
             edit: { href: editUrlFor(t.id, bt) },
-            open: { href: url || `/preview/${t.id}`, external: true },
+            preview: { href: url || `/preview/${t.id}`, external: true },
           }
         : null,
-      onSite,
       newBookings: base.entitled && live ? (bookings ? bookings.fresh : null) : null,
-      yesterdayVisitors: live ? yesterday : null,
-      traffic: (
-        <TrafficCard
-          data={traffic}
-          metric={metric} onMetric={setMetric}
-          range={range} onRange={setRange}
-          back={back} onBack={setBack}
-        />
-      ),
+      visitors7: live ? week : null,
+      traffic,
+      metric, onMetric: setMetric,
+      range, onRange: setRange,
+      day: back, onDay: setBack,
       today,
-      widgets: {
-        domain: dom ? { host: dom.domain, state: dom.status === 'live' ? 'live' : 'pending' } : null,
-        google,
-        reviews,
-      },
+      domain: dom ? { host: dom.domain, own: true, live: dom.status === 'live' } : null,
+      google,
+      reviews,
       start: base.launchPlan.startHidden ? null : {
         edited: !!base.launchPlan.edit,
         domain: dom ? (dom.status === 'live' ? 'live' : 'pending') : null,
@@ -284,23 +256,24 @@ export default function DashboardHomePage() {
       },
       onStart,
       launch: [
-        { label: 'أنشئ موقعك', done: base.themes.length > 0 },
+        { label: 'أنشئ موقعك', done: themes.length > 0 },
         { label: 'خصّص محتواك', done: !!base.launchPlan.edit },
         { label: 'انشر موقعك', done: published },
-        { label: 'اربط نطاقك', done: base.domains.some((d) => d.status === 'live') },
+        { label: 'اربط نطاقك', done: domains.some((d) => d.status === 'live') },
       ],
       links: {
         bookings: { href: linkTo('/dashboard/bookings') },
-        analytics: { href: linkTo('/dashboard/analytics') },
+        analyticsDay1: { href: linkTo('/dashboard/analytics?range=day&back=1') },
+        analyticsSearch: { href: linkTo('/dashboard/analytics?tab=search') },
         gallery: { href: linkTo('/dashboard/gallery') },
         seo: { href: linkTo('/dashboard/seo') },
         domains: { href: linkTo('/dashboard/domains') },
-        reviews: { href: linkTo(t ? `/dashboard/reviews?site=${t.id}` : '/dashboard/reviews') },
+        reviews: { href: reviewsHref },
         newSite: { href: '/theme/new' },
         publish: { href: linkTo('/dashboard/sites') },
       },
     }
-  }, [base, theme, live, bookings, yesterday, traffic, metric, range, back, google, onSite, linkTo, onStart])
+  }, [base, themes, domains, theme, live, bookings, week, traffic, metric, range, back, google, linkTo, onStart])
 
-  return props ? <HomeScreen {...props} /> : null
+  return props ? <V6Home {...props} /> : null
 }

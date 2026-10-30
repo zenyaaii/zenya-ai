@@ -100,6 +100,7 @@ function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: 
 
   return (
     <div
+      data-section="brand"
       className="sticky top-0 left-0 right-0 z-50 backdrop-blur-md"
       style={{ fontFamily: bodyFont, background: `${colors.background}e8`, borderBottom: `1px solid ${colors.border}` }}
     >

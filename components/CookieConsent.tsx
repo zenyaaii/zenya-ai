@@ -6,6 +6,10 @@ import { PRODUCT_TOKENS_CSS } from '@/components/app/tokens'
 
 const STORAGE_KEY = 'zenya_consent'
 const STORAGE_VERSION = '1'
+/** The same answer as a cookie on .beynoun.com, so the site and the dashboard
+ *  (dashboard.beynoun.com, another origin with its own localStorage) ask once. */
+const COOKIE = 'beynoun_consent'
+const SHARED_DOMAIN = 'beynoun.com'
 
 type Consent = {
   v: string
@@ -16,23 +20,46 @@ type Consent = {
   ts: number
 }
 
-function readConsent(): Consent | null {
-  if (typeof window === 'undefined') return null
+function parse(raw: string | null | undefined): Consent | null {
+  if (!raw) return null
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
     const parsed = JSON.parse(raw) as Consent
-    if (parsed.v !== STORAGE_VERSION) return null
-    return parsed
+    return parsed.v === STORAGE_VERSION ? parsed : null
   } catch {
     return null
   }
 }
 
+function readCookie(): string | null {
+  const m = document.cookie.match(new RegExp(`(?:^|; )${COOKIE}=([^;]*)`))
+  return m ? decodeURIComponent(m[1]) : null
+}
+
+function writeCookie(value: string) {
+  const host = window.location.hostname
+  const shared = host === SHARED_DOMAIN || host.endsWith('.' + SHARED_DOMAIN)
+  document.cookie = `${COOKIE}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax${shared ? `; domain=.${SHARED_DOMAIN}` : ''}${window.location.protocol === 'https:' ? '; Secure' : ''}`
+}
+
+function readConsent(): Consent | null {
+  if (typeof window === 'undefined') return null
+  let local: Consent | null = null
+  try { local = parse(localStorage.getItem(STORAGE_KEY)) } catch {}
+  const shared = parse(readCookie())
+  // The newer answer wins, wherever it was given.
+  const c = local && shared ? (shared.ts > local.ts ? shared : local) : local || shared
+  if (c && c !== local) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(c)) } catch {}
+  }
+  return c
+}
+
 function writeConsent(c: Omit<Consent, 'v' | 'necessary' | 'ts'>) {
   if (typeof window === 'undefined') return
   const next: Consent = { v: STORAGE_VERSION, necessary: true, ts: Date.now(), ...c }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  const raw = JSON.stringify(next)
+  try { localStorage.setItem(STORAGE_KEY, raw) } catch {}
+  writeCookie(raw)
   // Notify listeners (analytics loader) of the new state.
   window.dispatchEvent(new CustomEvent('zenya:consent-change', { detail: next }))
 }
@@ -43,6 +70,17 @@ export default function CookieConsent() {
   const [functional, setFunctional] = useState(true)
   const [analytics, setAnalytics] = useState(false)
   const [marketing, setMarketing] = useState(false)
+  /** On the dashboard (html.dash-on) the banner is a slim strip on the dock. */
+  const [dash, setDash] = useState(false)
+
+  useEffect(() => {
+    const h = document.documentElement
+    const read = () => setDash(h.classList.contains('dash-on'))
+    read()
+    const mo = new MutationObserver(read)
+    mo.observe(h, { attributes: true, attributeFilter: ['class'] })
+    return () => mo.disconnect()
+  }, [])
 
   useEffect(() => {
     // Show the banner only if no recorded consent yet.
@@ -69,6 +107,27 @@ export default function CookieConsent() {
   function saveChoices() {
     writeConsent({ functional, analytics, marketing })
     setVisible(false)
+  }
+
+  if (dash && !showDetails) {
+    return (
+      <>
+        <style dangerouslySetInnerHTML={{ __html: PRODUCT_TOKENS_CSS }} />
+        {/* The dashboard's strip: one line, accept, reject, and the gear that
+            opens the full choices in the same place. Its look is in
+            components/app/dash-theme.ts (html.dash-on .zy-cookie). */}
+        <div role="dialog" aria-label="ملفات تعريف الارتباط" aria-describedby="cookie-consent-desc" className="zy-tokens zy-cookie" data-strip="">
+          <div className="ck-c">
+            <span className="ck-c-t" id="cookie-consent-desc">نستخدم <Link href="/cookies">ملفات الارتباط</Link></span>
+            <button type="button" className="ck-btn ck-yes" onClick={acceptAll}>قبول</button>
+            <button type="button" className="ck-btn ck-no" onClick={rejectAll}>رفض</button>
+            <button type="button" className="ck-btn ck-gear" aria-label="إدارة التفضيلات" onClick={() => setShowDetails(true)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4" /><line x1="10" x2="3" y1="4" y2="4" /><line x1="21" x2="12" y1="12" y2="12" /><line x1="8" x2="3" y1="12" y2="12" /><line x1="21" x2="16" y1="20" y2="20" /><line x1="12" x2="3" y1="20" y2="20" /><line x1="14" x2="14" y1="2" y2="6" /><line x1="8" x2="8" y1="10" y2="14" /><line x1="16" x2="16" y1="18" y2="22" /></svg>
+            </button>
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (
@@ -103,6 +162,7 @@ export default function CookieConsent() {
          and a 25-blur drop shadow under a panel that is already separated
          from the page by being fixed to the bottom of it was never doing
          work. */
+      data-open={dash ? '' : undefined}
       className="zy-tokens zy-cookie fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:bottom-6 sm:inset-x-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">

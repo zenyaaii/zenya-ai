@@ -55,7 +55,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'mission', label: 'رسالتنا', icon: Sparkles, page: 'home',
+      id: 'mission', label: 'رسالتنا', icon: Sparkles, pages: ['home', 'about'],
       fields: [
         { type: 'textarea', path: 'mission.statement',   label: 'العبارة الرئيسية', rows: 3 },
         { type: 'textarea', path: 'mission.elaboration', label: 'التفاصيل', rows: 5 },
@@ -107,7 +107,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'process', label: 'طريقة العمل', icon: Award, page: 'process',
+      id: 'process', label: 'طريقة العمل', icon: Award, pages: ['home', 'process'],
       fields: [
         { type: 'text',     path: 'process.eyebrow', label: 'عنوان صغير' },
         { type: 'textarea', path: 'process.heading', label: 'العنوان', rows: 2 },
@@ -143,7 +143,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'press', label: 'في الإعلام', icon: Newspaper, page: 'home',
+      id: 'press', label: 'في الإعلام', icon: Newspaper, pages: ['home', 'about'],
       fields: [
         { type: 'text', path: 'press.heading', label: 'العنوان' },
         {
@@ -159,7 +159,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'community', label: 'المجتمع', icon: Users, page: 'contact',
+      id: 'community', label: 'المجتمع', icon: Users, pages: ['home', 'contact'],
       fields: [
         { type: 'text',     path: 'community.eyebrow',    label: 'عنوان صغير' },
         { type: 'textarea', path: 'community.heading',    label: 'العنوان', rows: 2 },
@@ -197,7 +197,7 @@ export const STUDIO_EDITOR_CONFIG: EditorConfig = {
       ],
     },
     {
-      id: 'cta', label: 'الدعوة الختامية', icon: Sparkles, page: 'contact',
+      id: 'cta', label: 'الدعوة الختامية', icon: Sparkles, pages: ['home', 'contact'],
       fields: [
         { type: 'text',     path: 'cta.eyebrow',       label: 'عنوان صغير' },
         { type: 'textarea', path: 'cta.heading',       label: 'العنوان', rows: 2 },

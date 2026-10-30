@@ -1,15 +1,13 @@
-import {
-  BarChart3, CalendarCheck, CreditCard, Folder, Globe, Home, Image as ImageIcon,
-  MessageSquareQuote, Search, Settings,
-} from 'lucide-react'
 import type { Messages } from '@/lib/i18n/messages'
-import type { FrameGroup, FrameItem } from './DashFrame'
+import type { FramePage } from '@/components/app/v6/Frame'
+import type { IconName } from '@/components/app/v6/sprite'
 
 /**
- * The dashboard's pages, in the order the rail lists them. One list for the
- * real shell and the demo, so the two cannot drift.
+ * The dashboard's pages, in the order the v6 design's side menu lists them.
+ * One list for the real shell and the demo, so the two cannot drift. The
+ * phone dock carries home, bookings, analytics and sites (v6/Frame); the
+ * rest live under "More".
  *
- * `dock` marks the four the phone dock carries; the rest live under "More".
  * `keywords` are extra words the search palette matches, in both languages,
  * so "حجز" finds Bookings and "domain" finds النطاقات whatever the locale.
  */
@@ -30,23 +28,23 @@ export const PAGE_ROUTE: Record<PageKey, string> = {
   settings: '/dashboard/settings',
 }
 
-type Spec = Omit<FrameItem, 'label' | 'href' | 'onSelect' | 'active'> & { key: PageKey; label: (t: Messages) => string }
+type Spec = { key: PageKey; label: (t: Messages) => string; icon: IconName; group: 'w' | 'a'; tour?: string; keywords: string }
 
-const WORK: Spec[] = [
-  { key: 'home',      label: (t) => t.nav.home,      icon: Home,          tour: 'home',      dock: true, keywords: 'home رئيسية بداية' },
-  { key: 'sites',     label: (t) => t.nav.sites,     icon: Folder,        tour: 'sites',     dock: true, keywords: 'sites موقع مواقع تعديل محرر' },
-  { key: 'gallery',   label: (t) => t.nav.gallery,   icon: ImageIcon,                                    keywords: 'gallery photos صور صورة معرض' },
-  { key: 'analytics', label: (t) => t.nav.analytics, icon: BarChart3,     tour: 'analytics', dock: true, keywords: 'analytics visitors زوار زيارات احصاءات إحصاءات' },
-  { key: 'bookings',  label: (t) => t.nav.bookings,  icon: CalendarCheck, tour: 'bookings',  dock: true, keywords: 'bookings حجز حجوزات مواعيد' },
-  { key: 'reviews',   label: (t) => t.nav.reviews,   icon: MessageSquareQuote, tour: 'reviews',          keywords: 'reviews google تقييم تقييمات آراء' },
-  { key: 'seo',       label: (t) => t.nav.seo,       icon: Search,        tour: 'seo',                   keywords: 'seo google بحث جوجل ظهور' },
-  { key: 'domains',   label: (t) => t.nav.domains,   icon: Globe,         tour: 'domains',               keywords: 'domain domains نطاق دومين عنوان' },
+const PAGES: Spec[] = [
+  { key: 'home',      label: (t) => t.nav.home,      icon: 'home',     group: 'w', tour: 'home',      keywords: 'home رئيسية بداية' },
+  { key: 'sites',     label: (t) => t.nav.sites,     icon: 'sites',    group: 'w', tour: 'sites',     keywords: 'sites موقع مواقع تعديل محرر' },
+  { key: 'gallery',   label: (t) => t.nav.gallery,   icon: 'gallery',  group: 'w',                    keywords: 'gallery photos صور صورة معرض' },
+  { key: 'analytics', label: (t) => t.nav.analytics, icon: 'chart',    group: 'w', tour: 'analytics', keywords: 'analytics visitors زوار زيارات احصاءات إحصاءات' },
+  { key: 'bookings',  label: (t) => t.nav.bookings,  icon: 'cal',      group: 'w', tour: 'bookings',  keywords: 'bookings حجز حجوزات مواعيد' },
+  { key: 'reviews',   label: (t) => t.nav.reviews,   icon: 'reviews',  group: 'w', tour: 'reviews',   keywords: 'reviews google تقييم تقييمات آراء' },
+  { key: 'seo',       label: (t) => t.nav.seo,       icon: 'search',   group: 'w', tour: 'seo',       keywords: 'seo google بحث جوجل ظهور' },
+  { key: 'domains',   label: (t) => t.nav.domains,   icon: 'globe',    group: 'w', tour: 'domains',   keywords: 'domain domains نطاق دومين عنوان' },
+  { key: 'billing',   label: (t) => t.nav.billing,   icon: 'card',     group: 'a',                    keywords: 'billing plan باقة اشتراك دفع فاتورة' },
+  { key: 'settings',  label: (t) => t.nav.settings,  icon: 'settings', group: 'a',                    keywords: 'settings account حساب كلمة المرور لغة' },
 ]
 
-const ACCOUNT: Spec[] = [
-  { key: 'billing',  label: (t) => t.nav.billing,  icon: CreditCard, keywords: 'billing plan باقة اشتراك دفع فاتورة' },
-  { key: 'settings', label: (t) => t.nav.settings, icon: Settings,   keywords: 'settings account حساب كلمة المرور لغة' },
-]
+/** The badges on the menu: new bookings in the accent, new reviews quiet. */
+export type NavCounts = { bookings?: number; reviews?: number }
 
 /** Which page a route belongs to: /dashboard/sites/abc is Sites. */
 export function pageFor(pathname: string): PageKey | null {
@@ -57,14 +55,22 @@ export function pageFor(pathname: string): PageKey | null {
   return null
 }
 
-export function buildNav(
+export function buildPages(
   t: Messages,
   current: PageKey | null,
   link: (k: PageKey) => { href?: string; onSelect?: () => void },
-): FrameGroup[] {
-  const make = (s: Spec): FrameItem => ({ ...s, label: s.label(t), active: s.key === current, ...link(s.key) })
-  return [
-    { label: t.nav.workspace, items: WORK.map(make) },
-    { label: t.nav.account, items: ACCOUNT.map(make) },
-  ]
+  counts: NavCounts = {},
+): FramePage[] {
+  return PAGES.map((s) => ({
+    key: s.key,
+    label: s.label(t),
+    icon: s.icon,
+    group: s.group,
+    tour: s.tour,
+    keywords: s.keywords,
+    active: s.key === current,
+    ...link(s.key),
+    ...(s.key === 'bookings' ? { count: counts.bookings, countTone: 'acc' as const } : {}),
+    ...(s.key === 'reviews' ? { count: counts.reviews, countTone: 'quiet' as const } : {}),
+  }))
 }

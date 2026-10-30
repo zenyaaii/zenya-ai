@@ -1,33 +1,23 @@
 'use client'
 
 /**
- * The editor candidate's view: the real ThemeEditor, fed from memory.
+ * The editor candidate's view: the real editor, fed from memory.
  *
- * WHAT IS REAL. ThemeEditor, MobileEditor, every panel and field, the preview
- * iframe, the selection overlay, autosave, undo/redo and the save indicator
- * are the components the six live edit routes mount, unchanged in behaviour.
- * The config, the Preview and the content are each theme's own
+ * WHAT IS REAL. The editor (components/editor/v6), every panel and field,
+ * the live site in its frame, the selection, the draft, undo and redo and
+ * the publish dialog are what the six live edit routes mount. The config,
+ * the Preview and the content are each theme's own
  * (utils/<type>/editor-config.ts, components/theme/<type>, and the mock
  * content the /demo/<type> previews already render).
  *
- * WHAT IS NOT. The store. It keeps the wrapper content in a closure and
- * resolves a save after a short wait, so the status runs its real
- * saving -> saved -> idle cycle. There is no fetch, no Supabase client and no
- * row: reload the page and every edit is gone, and the page says so in the
- * notice, which the editor places under its bar on a desktop and at the top
- * of the section list on a tablet or phone.
- *
- * AND THE TWO THINGS THAT CALL A SERVICE ON THEIR OWN STOP AT A DOOR. With a
- * store, ThemeEditor marks the editor offline (components/editor/env.ts): the
- * AI rewrite panel opens but says it runs only in the real editor, and the
- * gallery opens but reads, uploads and deletes nothing. No commercial fact is
- * claimed about either — no credits, no limits, no plan.
+ * WHAT IS NOT. The store. It keeps the wrapper content in a closure, so
+ * reloading the page loses every edit, and the editor says so when it opens.
+ * With a store the editor fetches nothing: an uploaded picture stays in the
+ * browser and «اقترح صياغة» is not offered.
  */
 
 import { useMemo, type ComponentType } from 'react'
-import Link from 'next/link'
-import { useT } from '@/components/i18n/LocaleProvider'
-import ThemeEditor, { type EditorStore, type PreviewProps } from '@/components/editor/ThemeEditor'
+import Editor, { type EditorStore, type PreviewProps } from '@/components/editor/v6/Editor'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import AtlasPreview from '@/components/theme/atlas/AtlasPreview'
 import LookbookPreview from '@/components/theme/lookbook/LookbookPreview'
@@ -76,51 +66,32 @@ function memoryStore(contentKey: string, content: unknown): EditorStore {
   }
 }
 
-function DemoNotice({ type }: { type: DemoType }) {
-  const t = useT()
-  const names: Record<DemoType, string> = {
-    restaurant: t.editor.demoTypeRestaurant,
-    atlas: t.editor.demoTypeAtlas,
-    lookbook: t.editor.demoTypeLookbook,
-    services: t.editor.demoTypeServices,
-    studio: t.editor.demoTypeStudio,
-    wellness: t.editor.demoTypeWellness,
-  }
-  return (
-    <div className="ze-demo" role="note">
-      {/* Always on screen, in every layout, under the bar: a reader must not
-          have to open anything to learn that nothing is kept. A phone gets
-          the one-line version so the preview keeps its height. */}
-      <span className="ze-demo-t">
-        <strong>{t.editor.demoNoticeLead}</strong>{' '}
-        <span className="ze-demo-long">{t.editor.demoNotice}</span>
-        <span className="ze-demo-short">{t.editor.demoNoticeShort}</span>
-      </span>
-      <nav className="ze-demo-types" aria-label={t.editor.demoTemplate}>
-        <span>{t.editor.demoTemplate}</span>
-        {DEMO_TYPES.map((k) => (
-          <Link key={k} href={'/demo/editor?type=' + k} aria-current={k === type ? 'page' : undefined}>
-            {names[k]}
-          </Link>
-        ))}
-      </nav>
-    </div>
-  )
+const NAMES: Record<DemoType, string> = {
+  restaurant: 'موقع مطعم',
+  atlas: 'صفحة هبوط لتطبيق',
+  lookbook: 'موقع أزياء ولوك بوك',
+  services: 'موقع خدمات',
+  studio: 'موقع علامة تجارية وقصة',
+  wellness: 'موقع مركز عافية',
 }
 
 export default function EditorDemoView({ type }: { type: DemoType }) {
   const theme = THEMES[type]
   const store = useMemo(() => memoryStore(theme.config.contentKey, theme.content), [theme])
+  const demo = useMemo(() => ({
+    note: 'نسخة تجريبية: لا يُحفظ شيء، وتضيع تعديلاتك عند إعادة تحميل الصفحة.',
+    types: DEMO_TYPES.map((k) => ({ href: '/demo/editor?type=' + k, label: NAMES[k], current: k === type })),
+  }), [type])
   return (
-    <ThemeEditor
+    <Editor
       key={type}
       themeId={'demo-' + type}
       config={theme.config}
       Preview={theme.Preview}
-      backHref="/demo/templates"
-      exitHref="/demo/templates"
+      backHref="/demo/dashboard"
+      exitHref="/demo/dashboard"
       store={store}
-      notice={<DemoNotice type={type} />}
+      demo={demo}
     />
   )
 }
