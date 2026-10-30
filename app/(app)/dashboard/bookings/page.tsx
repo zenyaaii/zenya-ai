@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { bookingAccess } from '@/lib/booking-entitlement'
+import { HOSTABLE_TYPES } from '@/components/dashboard/site-kinds'
 import BookingsClient, { type BookingRow, type SiteMap } from './BookingsClient'
 
 export const dynamic = 'force-dynamic'
@@ -30,12 +31,16 @@ export default async function BookingsPage() {
   // Owner's sites — for mapping a booking to a readable site name.
   const { data: themes } = await supabase
     .from('themes')
-    .select('id, product_name, slug')
+    .select('id, product_name, slug, template_type, is_published')
     .eq('user_id', user.id)
 
   const sites: SiteMap = {}
   for (const t of themes || []) {
-    sites[t.id] = t.product_name || t.slug || 'موقع بلا اسم'
+    sites[t.id] = {
+      name: t.product_name || t.slug || 'موقع بلا اسم',
+      bookable: HOSTABLE_TYPES.has(t.template_type || ''),
+      live: !!(t.is_published && t.slug),
+    }
   }
 
   // RLS scopes this to the owner's themes automatically.

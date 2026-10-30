@@ -1541,7 +1541,7 @@ function Footer() {
  * the cookie box, which opens bottom left, sits above this until it is closed.
  */
 function WhatsAppFloat() {
-  const { wa } = usePage()
+  const { wa, content } = usePage()
   const rm = !!useReducedMotion()
   const [show, setShow] = useState(false)
   useEffect(() => {
@@ -1550,7 +1550,8 @@ function WhatsAppFloat() {
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
   }, [])
-  if (!wa) return null
+  // Turned off from the dashboard's «زر واتساب» (lib/site-switches).
+  if (!wa || (content as any).hide_wa_float) return null
   return (
     <AnimatePresence>
       {show ? (

@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
-import { ReviewsScreen, type ReviewDraft } from '@/components/dashboard/screens/reviews'
-import { EmptyHint, relTime } from '@/components/dashboard/screens/kit'
 import { businessTypeOf, type ThemeRow } from '@/components/dashboard/site-kinds'
 import {
-  deleteReview, hasReviews, markSeen, mergeGoogle, moveReview, readReviews, saveReview, toggleReview,
+  deleteReview, hasReviews, markSeen, mergeGoogleCounted, moveReview, readReviews, saveReview, toggleReview,
 } from '@/lib/reviews-bank'
+import V6Reviews from '@/components/app/v6/pages/Reviews'
+import { ago } from '@/components/app/v6/pages/kit'
+import { useSite } from '@/components/app/v6/site'
 
 /** What /api/reviews/google says when it cannot help, in the owner's words. */
 const FETCH_ERRORS: Record<string, string> = {
@@ -27,25 +28,19 @@ const FETCH_ERRORS: Record<string, string> = {
  */
 export default function ReviewsPage() {
   const router = useRouter()
+  const ctx = useSite()
   const [themes, setThemes] = useState<ThemeRow[] | null>(null)
   const [siteId, setSiteId] = useState('')
-  const [draftLink, setDraftLink] = useState('')
-  const [fetching, setFetching] = useState(false)
-  const [error, setError] = useState('')
-  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
-  /** The content from just before the last delete, so one tap can bring it back. */
-  const [undo, setUndo] = useState<{ name: string; before: any } | null>(null)
-  const undoTimer = useRef<ReturnType<typeof setTimeout>>()
 
   const load = useCallback(async () => {
     const { data: { user } } = await createClient().auth.getUser()
     if (!user) { router.push('/login?next=/dashboard/reviews'); return }
-    const res = await fetch('/api/themes').then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] }))
+    const res = await fetch('/api/themes', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { themes: [] })).catch(() => ({ themes: [] }))
     const list: ThemeRow[] = (res?.themes || []).filter((t: ThemeRow) => hasReviews(businessTypeOf(t)))
     setThemes(list)
-    const wanted = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('site') : null
+    const wanted = new URLSearchParams(window.location.search).get('site') || ctx?.siteId
     setSiteId((cur) => cur || (list.find((t) => t.id === wanted) || list[0])?.id || '')
-  }, [router])
+  }, [router]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load() }, [load])
 
@@ -63,101 +58,74 @@ export default function ReviewsPage() {
   useEffect(() => {
     if (!theme || seenFor.current === theme.id) return
     seenFor.current = theme.id
-    const keys = new Set((view?.rows || []).filter((r) => r.isNew).map((r) => r.name + '|' + r.text))
-    setFresh(keys)
+    setFresh(new Set((view?.rows || []).filter((r) => r.isNew).map((r) => r.name + '|' + r.text)))
     const cleared = markSeen(bt, theme.content)
     if (cleared) {
       setThemes((ts) => ts && ts.map((t) => (t.id === theme.id ? { ...t, content: cleared } : t)))
       fetch(`/api/themes/${theme.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: cleared }),
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: cleared }),
       }).catch(() => {})
     }
   }, [theme, bt, view])
 
-  /** Apply a change locally at once, then save it. A failed save puts it back. */
-  async function commit(next: any) {
-    if (!theme) return
+  /** Apply a change at once, then save it. A failed save puts it back. */
+  const commit = useCallback(async (next: any): Promise<boolean> => {
+    if (!theme) return false
     const before = theme.content
     setThemes((ts) => ts && ts.map((t) => (t.id === theme.id ? { ...t, content: next } : t)))
-    setSaveState('saving')
-    setError('')
     const res = await fetch(`/api/themes/${theme.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: next }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: next }),
     }).catch(() => null)
     if (!res || !res.ok) {
       setThemes((ts) => ts && ts.map((t) => (t.id === theme.id ? { ...t, content: before } : t)))
-      setSaveState('idle')
-      setError('لم يُحفظ التغيير. تأكد من اتصالك وحاول مرة أخرى.')
-      return
+      return false
     }
-    setSaveState('saved')
-  }
-
-  async function fetchGoogle() {
-    if (!theme || fetching) return
-    const link = (view?.google?.link || draftLink).trim()
-    if (!link) { setError('ألصق رابط نشاطك على خرائط Google أولًا.'); return }
-    setFetching(true)
-    setError('')
-    try {
-      const res = await fetch('/api/reviews/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: link, name: theme.content?.brand?.name || theme.product_name || '' }),
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) { setError(FETCH_ERRORS[data?.error] || 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.'); return }
-      const merged = mergeGoogle(bt, theme.content, data.place?.url || link, data)
-      // Just fetched, so the owner is looking at them now: badge them for this visit, not the next.
-      const added = readReviews(bt, merged).rows.filter((r) => r.isNew).map((r) => r.name + '|' + r.text)
-      setFresh((f) => new Set([...f, ...added]))
-      await commit(markSeen(bt, merged) || merged)
-    } finally {
-      setFetching(false)
-    }
-  }
-
-  function remove(id: string) {
-    if (!theme) return
-    const row = view?.rows.find((r) => r.id === id)
-    const before = theme.content
-    commit(deleteReview(bt, before, id))
-    setUndo({ name: row?.name || '', before })
-    clearTimeout(undoTimer.current)
-    undoTimer.current = setTimeout(() => setUndo(null), 6000)
-  }
+    return true
+  }, [theme])
 
   if (!themes) return null
 
-  const sites = themes.map((t) => ({ id: t.id, name: t.product_name || 'موقع بلا اسم' }))
   const g = view?.google
-
   return (
-    <ReviewsScreen
-      sites={sites}
+    <V6Reviews
+      sites={themes.map((t) => ({ id: t.id, name: t.product_name || 'موقع بلا اسم' }))}
       siteId={siteId}
-      setSiteId={(id) => { setSiteId(id); setError(''); setSaveState('idle'); setDraftLink(''); setUndo(null) }}
-      source={g ? { link: g.link, rating: g.rating, count: g.count, fetched: g.fetched_at ? relTime(g.fetched_at) : undefined } : null}
-      draftLink={draftLink}
-      setDraftLink={setDraftLink}
-      fetching={fetching}
-      onFetch={{ onClick: fetchGoogle, disabled: fetching }}
-      error={error}
-      saveState={saveState}
+      onSite={(id) => { setSiteId(id); if (ctx && ctx.themes?.some((t) => t.id === id)) ctx.setSiteId(id) }}
+      source={g ? { link: g.link, rating: g.rating, count: g.count, fetched: g.fetched_at ? ago(g.fetched_at) : '' } : null}
       heading={view?.heading || ''}
-      reviews={(view?.rows || []).map((r) => ({ ...r, isNew: fresh.has(r.name + '|' + r.text) }))}
-      onToggle={(id) => theme && commit(toggleReview(bt, theme.content, id))}
-      onSave={(id, v: ReviewDraft) => theme && commit(saveReview(bt, theme.content, id, v))}
-      onDelete={remove}
-      onMove={(id, to) => theme && commit(moveReview(bt, theme.content, id, to))}
-      undo={undo && { name: undo.name, onUndo: () => { commit(undo.before); setUndo(null) } }}
-      empty={themes.length === 0 ? (
-        <EmptyHint>لا يوجد عندك موقع فيه قسم تقييمات بعد. أنشئ موقعًا وسيظهر هنا.</EmptyHint>
-      ) : undefined}
+      reviews={(view?.rows || []).map((r) => ({
+        id: r.id, name: r.name, rating: r.rating, text: r.text, origin: r.origin, shown: r.shown,
+        at: r.origin === 'manual' ? 'أضفته أنت' : r.at ? ago(r.at) : r.when || '',
+        isNew: fresh.has(r.name + '|' + r.text),
+      }))}
+      fetchGoogle={async (link) => {
+        if (!theme) return { error: 'اختر موقعًا أولًا.', added: 0 }
+        try {
+          const res = await fetch('/api/reviews/google', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: link, name: theme.content?.brand?.name || theme.product_name || '' }),
+          })
+          const data = await res.json().catch(() => ({}))
+          if (!res.ok) return { error: FETCH_ERRORS[data?.error] || 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.', added: 0 }
+          const { content, added } = mergeGoogleCounted(bt, theme.content, data.place?.url || link, data)
+          // Just fetched, so the owner is looking at them now: badge them for this visit, not the next.
+          const arrived = readReviews(bt, content).rows.filter((r) => r.isNew).map((r) => r.name + '|' + r.text)
+          setFresh((f) => new Set([...f, ...arrived]))
+          const ok = await commit(markSeen(bt, content) || content)
+          return ok ? { error: null, added } : { error: 'لم يُحفظ التغيير. تأكد من اتصالك وحاول مرة أخرى.', added: 0 }
+        } catch {
+          return { error: 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.', added: 0 }
+        }
+      }}
+      toggle={(id) => (theme ? commit(toggleReview(bt, theme.content, id)) : Promise.resolve(false))}
+      save={(id, v) => (theme ? commit(saveReview(bt, theme.content, id, v)) : Promise.resolve(false))}
+      move={(id, to) => (theme ? commit(moveReview(bt, theme.content, id, to)) : Promise.resolve(false))}
+      remove={async (id) => {
+        if (!theme) return null
+        const before = theme.content
+        if (!(await commit(deleteReview(bt, before, id)))) return null
+        return () => { commit(before) }
+      }}
     />
   )
 }

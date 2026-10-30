@@ -34,14 +34,18 @@ function paint(dark: boolean) {
   r.classList.toggle('dash-dk', dark)
 }
 
+export type DashMode = 'light' | 'dark' | 'auto'
+
 export function useDashTheme() {
   const [dark, setDark] = useState(false)
+  const [mode, setModeState] = useState<DashMode>('auto')
 
   useEffect(() => {
     const first = saved()
     const d = first ? first === 'dark' : systemDark()
     paint(d)
     setDark(d)
+    setModeState(first || 'auto')
 
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const follow = () => {
@@ -60,22 +64,35 @@ export function useDashTheme() {
   const toggle = useCallback(() => {
     const next = !document.documentElement.classList.contains('dash-dk')
     try { localStorage.setItem(KEY, next ? 'dark' : 'light') } catch {}
+    setModeState(next ? 'dark' : 'light')
     setDark(next)
-
-    const r = document.documentElement
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }
-    if (reduce) { paint(next); return }
-    if (!doc.startViewTransition) {
-      r.classList.add('zf-ease')
-      paint(next)
-      window.setTimeout(() => r.classList.remove('zf-ease'), 600)
-      return
-    }
-    r.dataset.zfTt = ''
-    const t = doc.startViewTransition(() => paint(next))
-    t.finished.finally(() => { delete r.dataset.zfTt })
+    curtain(next)
   }, [])
 
-  return { dark, toggle }
+  /** Light, dark, or follow the device (the settings page's three tiles). */
+  const setMode = useCallback((m: DashMode) => {
+    try { if (m === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, m) } catch {}
+    setModeState(m)
+    const next = m === 'auto' ? systemDark() : m === 'dark'
+    if (next !== document.documentElement.classList.contains('dash-dk')) { setDark(next); curtain(next) }
+  }, [])
+
+  return { dark, toggle, mode, setMode }
+}
+
+/** Paint the new theme; the new colours come down from the top like a curtain. */
+function curtain(next: boolean) {
+  const r = document.documentElement
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }
+  if (reduce) { paint(next); return }
+  if (!doc.startViewTransition) {
+    r.classList.add('zf-ease')
+    paint(next)
+    window.setTimeout(() => r.classList.remove('zf-ease'), 600)
+    return
+  }
+  r.dataset.zfTt = ''
+  const t = doc.startViewTransition(() => paint(next))
+  t.finished.finally(() => { delete r.dataset.zfTt })
 }

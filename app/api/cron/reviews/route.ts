@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { hasReviews, mergeGoogleCounted } from '@/lib/reviews-bank'
 import { googleUrl, lookupGoogleReviews } from '@/lib/google-reviews'
+import { reviewReceivedEmail, sendEmail } from '@/lib/email'
+import { readPrefs } from '@/lib/notification-prefs'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -40,7 +42,7 @@ export async function GET(req: NextRequest) {
   const db = adminDb()
   const { data: rows, error } = await db
     .from('themes')
-    .select('id, template_type, content')
+    .select('id, user_id, product_name, template_type, content')
     .not('content->review_bank->google', 'is', null)
     .limit(1000)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -59,6 +61,7 @@ export async function GET(req: NextRequest) {
       if (upErr) throw new Error(upErr.message)
       updated++
       added += out.added
+      if (out.added > 0) await tellOwner(db, row as any, out.added)
     } catch (e) {
       failed++
       console.error('[cron/reviews]', row.id, e instanceof Error ? e.message : e)
@@ -66,4 +69,22 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json({ checked_at: new Date().toISOString(), checked, updated, added, failed })
+}
+
+/** The «تقييم جديد» mail, for an owner who left it on in settings. Never fails the run. */
+async function tellOwner(db: ReturnType<typeof adminDb>, row: { user_id: string; product_name: string | null }, count: number) {
+  try {
+    const { data } = await db.auth.admin.getUserById(row.user_id)
+    const u = data?.user
+    if (!u?.email || !readPrefs(u.user_metadata?.notification_prefs).review) return
+    const meta = (u.user_metadata || {}) as any
+    const tmpl = reviewReceivedEmail({
+      firstName: meta.full_name?.split?.(' ')?.[0] || meta.name || null,
+      siteName: row.product_name || 'موقعك',
+      count,
+    })
+    await sendEmail({ to: u.email, subject: tmpl.subject, text: tmpl.text, html: tmpl.html, tags: [{ name: 'type', value: 'review_received' }] })
+  } catch (e) {
+    console.error('[cron/reviews] mail', e instanceof Error ? e.message : e)
+  }
 }
