@@ -2,8 +2,8 @@
 
 /**
  * The candidate dashboard's shell. See page.tsx for why this route exists and
- * what is real in it; views.tsx holds the older surfaces and data.ts the
- * fixtures.
+ * what is real in it; views.tsx hands the v6 pages their sample data and
+ * data.ts holds the fixtures.
  *
  * TEN SURFACES, ONE PAGE. The side menu switches the view rather than
  * navigating, so the whole dashboard can be read here without an account.
@@ -79,8 +79,6 @@ export default function DashboardDemoView() {
   const [view, setView] = useState<ViewKey>('home')
   const t = useT()
   const [more, setMore] = useState(false)
-  const [bookingFilter, setBookingFilter] = useState('all')
-  const [siteFilter, setSiteFilter] = useState('all')
   const [siteId, setSiteId] = useState('s1')
   /** ?intro opens the dashboard tour, so it can be seen without an account. */
   const [intro, setIntro] = useState(false)
@@ -116,7 +114,6 @@ export default function DashboardDemoView() {
     [siteId],
   )
   const pages = buildPages(t, view, (k) => ({ onSelect: () => go(k) }), { bookings: siteId === 's1' ? 2 : 0, reviews: siteId === 's3' ? 2 : 0 })
-  const v6Page = view === 'home' || view === 'analytics'
 
   return (
     <div dir="rtl" className={`zy-app ${dashFont.variable}`}>
@@ -147,17 +144,17 @@ export default function DashboardDemoView() {
           help={{ email: 'nadia@almadina.co', onSend: () => new Promise<void>((r) => setTimeout(r, 700)) }}
           moreOpen={more}
           setMoreOpen={setMore}
-          legacy={!v6Page}
+          legacy={false}
           pageKey={view}
         >
           {view === 'home' && <HomeView siteId={siteId} go={go} />}
           {view === 'analytics' && <V6Analytics get={demoAnalyticsGet as AnalyticsGet} demo nav={go} />}
-          {view === 'sites' && <SitesView filter={siteFilter} setFilter={setSiteFilter} />}
+          {view === 'sites' && <SitesView siteId={siteId} setSiteId={setSiteId} go={go} />}
           {view === 'gallery' && <GalleryView />}
-          {view === 'bookings' && <BookingsView filter={bookingFilter} setFilter={setBookingFilter} />}
-          {view === 'reviews' && <ReviewsView />}
-          {view === 'seo' && <SeoView />}
-          {view === 'domains' && <DomainsView />}
+          {view === 'bookings' && <BookingsView go={go} />}
+          {view === 'reviews' && <ReviewsView siteId={siteId} setSiteId={setSiteId} />}
+          {view === 'seo' && <SeoView siteId={siteId} setSiteId={setSiteId} go={go} />}
+          {view === 'domains' && <DomainsView siteId={siteId} />}
           {view === 'billing' && <BillingView />}
           {view === 'settings' && <SettingsView />}
 

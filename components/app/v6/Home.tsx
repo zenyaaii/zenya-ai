@@ -19,7 +19,8 @@ import {
   greet, people, rangeLabel, reduceMotion, useV6,
 } from './ui'
 
-export type Act = { href?: string; onSelect?: () => void; external?: boolean }
+/** doc: a full page load (an API route that redirects, like Google's sign-in). */
+export type Act = { href?: string; onSelect?: () => void; external?: boolean; doc?: boolean }
 
 export type V6Booking = {
   id: string
@@ -93,6 +94,7 @@ const weekWord = (n: number) => (n === 1 ? 'حجز' : n === 2 ? 'حجزان' : n
 /** A link, a button or an outside address, with the design's classes. */
 export function A({ to, className, children, ...rest }: { to?: Act; className?: string; children: ReactNode } & Record<string, unknown>) {
   if (to?.href && to.external) return <a href={to.href} target="_blank" rel="noopener noreferrer" className={className} onClick={to.onSelect} {...rest}>{children}</a>
+  if (to?.href && to.doc) return <a href={to.href} className={className} onClick={to.onSelect} {...rest}>{children}</a>
   if (to?.href) return <Link href={to.href} className={className} onClick={to.onSelect} {...rest}>{children}</Link>
   return <button type="button" className={className} onClick={to?.onSelect} {...rest}>{children}</button>
 }

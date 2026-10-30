@@ -79,6 +79,9 @@ export type V6Api = {
   openPal: () => void
   dark: boolean
   toggleTheme: () => void
+  /** The saved choice: light, dark, or follow the device. */
+  mode: 'light' | 'dark' | 'auto'
+  setMode: (m: 'light' | 'dark' | 'auto') => void
 }
 export const V6Ctx = createContext<V6Api | null>(null)
 export function useV6(): V6Api {

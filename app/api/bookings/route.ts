@@ -4,6 +4,7 @@ import {
 } from '@/lib/analytics-server'
 import { isBotUA, normalizePath } from '@/lib/analytics-core'
 import { bookingAccess } from '@/lib/booking-entitlement'
+import { bookingsPaused } from '@/lib/site-switches'
 
 import { bookingReceivedEmail, sendEmail } from '@/lib/email'
 import { readPrefs } from '@/lib/notification-prefs'
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     // ---- owner entitlement -------------------------------------------------
     const { data: t } = await a
       .from('themes')
-      .select('user_id, product_name')
+      .select('user_id, product_name, content')
       .eq('id', theme.id)
       .maybeSingle()
     if (!t?.user_id) return json({ ok: false, error: 'unavailable' }, 404)
@@ -98,6 +99,8 @@ export async function POST(req: NextRequest) {
 
     // ---- validate the submission ------------------------------------------
     const type = TYPES.has(String(body.type)) ? String(body.type) : 'contact'
+    // The owner paused bookings from the dashboard; a plain message still goes through.
+    if (type !== 'contact' && bookingsPaused(t.content)) return json({ ok: false, error: 'unavailable' }, 403)
     const name = str(body.name, 120)
     const phone = str(body.phone, 40)
     const email = emailStr(body.email)

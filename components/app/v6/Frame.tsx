@@ -105,7 +105,7 @@ export default function Frame({
   pages, title, home, newSite, sites, siteId, onSite, go, tools, help,
   moreOpen, setMoreOpen, legacy, dir, pageKey, children,
 }: Props) {
-  const { dark, toggle } = useDashTheme()
+  const { dark, toggle, mode, setMode } = useDashTheme()
   const root = useRef<HTMLDivElement>(null)
 
   /* ---- sheet ------------------------------------------------------------ */
@@ -217,8 +217,8 @@ export default function Frame({
   const api: V6Api = useMemo(() => ({
     openSheet, closeSheet, openPop, closePop: () => closePop(), toast,
     openPal: () => { closePop(true); setPalOn(true) },
-    dark, toggleTheme: toggle,
-  }), [openSheet, closeSheet, openPop, closePop, toast, dark, toggle])
+    dark, toggleTheme: toggle, mode, setMode,
+  }), [openSheet, closeSheet, openPop, closePop, toast, dark, toggle, mode, setMode])
 
   /* ---- keys: ⌘K, Escape ------------------------------------------------- */
   useEffect(() => {

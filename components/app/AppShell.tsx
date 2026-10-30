@@ -102,9 +102,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const title = pathname.startsWith('/dashboard/admin')
     ? t.nav.admin
     : pages.find((p) => p.active)?.label || t.nav.dashboard
-  // Home and Analytics are drawn in the v6 design's own markup; the other
-  // screens are older and bring their own gutters.
-  const v6Page = current === 'home' || current === 'analytics'
+  // Every page in the menu is drawn in the v6 design's own markup; only the
+  // admin screen is older and brings its own gutters.
+  const v6Page = current !== null
 
   return (
     <div className={`zy-app ${dashFont.variable}`}>

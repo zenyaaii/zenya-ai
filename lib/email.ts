@@ -664,6 +664,52 @@ export function bookingReceivedEmail(args: {
 }
 
 /**
+ * Sent to a site owner when the daily Google check (app/api/cron/reviews)
+ * brings in reviews they have not seen, unless they switched «تقييم جديد»
+ * off in dashboard settings. The reviews arrive hidden; the owner chooses
+ * which ones the site shows.
+ */
+export function reviewReceivedEmail(args: {
+  firstName?: string | null
+  siteName: string
+  count: number
+  manageUrl?: string
+}): { subject: string; text: string; html: string } {
+  const manageUrl = args.manageUrl || 'https://dashboard.beynoun.com/reviews'
+  const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
+  const what = args.count === 1 ? 'تقييم جديد' : args.count === 2 ? 'تقييمان جديدان' : `${args.count} تقييمات جديدة`
+  const subject = `${what} على Google — ${args.siteName}`
+
+  const text = [
+    greeting,
+    '',
+    `كتب أحد زبائنك على Google عن «${args.siteName}». وصلك ${what}، وهو مخفي في موقعك حتى تختار إظهاره.`,
+    '',
+    `التقييمات: ${manageUrl}`,
+    '',
+    '— بينون',
+  ].join('\n')
+
+  const bodyHtml = `
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
+      وصلك <strong style="color:#171717;">${what}</strong> على Google عن «${esc(args.siteName)}». يبقى مخفيًا في موقعك حتى تختار إظهاره من صفحة التقييمات.
+    </p>`
+
+  const html = emailShell({
+    title: subject,
+    eyebrow: 'تقييم جديد',
+    heading: what,
+    bodyHtml,
+    ctaHref: manageUrl,
+    ctaLabel: 'افتح التقييمات',
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن إشعار «تقييم جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
+  })
+
+  return { subject, text, html }
+}
+
+/**
  * Sent once, mid-trial (~day 7), to a free user who still has free
  * generations left but hasn't converted. A gentle "you've still got room —
  * come finish what you started" nudge, not a hard sell.

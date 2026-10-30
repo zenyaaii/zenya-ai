@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { resolveSeo, readSeoOverrides } from '@/lib/seo'
 import { publicSiteHost } from '@/lib/portal-urls'
+import { suggestSlugFrom } from '@/lib/slug'
 import SeoClient, { type SeoSite } from './SeoClient'
 
 export const dynamic = 'force-dynamic'
@@ -31,20 +32,18 @@ export default async function SeoPage() {
   const sites: SeoSite[] = (themes || [])
     .filter(isSeoEligible)
     .map((t: any) => {
-      const resolved = resolveSeo(t)
+      // The automatic text: what the site would say with no overrides at all.
+      const content = t.content && typeof t.content === 'object' ? t.content : {}
+      const auto = resolveSeo({ ...t, content: { ...content, seo: {} } })
       const slug = (t.slug || '').toLowerCase()
       return {
         id: t.id,
         productName: t.product_name || slug || 'موقع بلا اسم',
         isPublished: !!t.is_published,
         host: slug ? publicSiteHost(slug) : null,
+        hostHint: publicSiteHost(slug || suggestSlugFrom(t.product_name || '') || 'name'),
         overrides: readSeoOverrides(t),
-        resolved: {
-          title: resolved.title,
-          description: resolved.description,
-          keywords: resolved.keywords,
-          ogImage: resolved.ogImage || null,
-        },
+        auto: { title: auto.title, description: auto.description, keywords: auto.keywords },
       }
     })
 

@@ -8,6 +8,9 @@ import SiteCookieBanner from '@/components/site/SiteCookieBanner'
 import { resolveSitePalette } from '@/lib/site-palette'
 import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
+import { bookingsPaused, reviewsHidden, switchesOf, waFloatOn, waHref, waNumber } from '@/lib/site-switches'
+import { withoutReviews } from '@/lib/reviews-bank'
+import SiteWhatsApp from '@/components/site/SiteWhatsApp'
 import { sectionStylesToCss } from '@/utils/theme-editor-types'
 import { resolveSeo, buildJsonLd } from '@/lib/seo'
 import { publicSiteUrl } from '@/lib/portal-urls'
@@ -271,7 +274,12 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
   const typographyPreset = (typeof c === 'object' && (c as any).typography_preset) || undefined
   const colorOverrides = (typeof c === 'object' && (c as any).color_overrides) || undefined
   const sectionStyles = (typeof c === 'object' && (c as any).section_styles) || undefined
-  const templateContent = (typeof c === 'object' && (c as any)[businessType]) || c
+  const stored = (typeof c === 'object' && (c as any)[businessType]) || c
+  // «قسم التقييمات» off in the dashboard: the section is left out.
+  const shown = reviewsHidden(c) ? withoutReviews(businessType, stored) : stored
+  const templateContent = businessType === 'services' && switchesOf(c).wa_float === false ? { ...shown, hide_wa_float: true } : shown
+  // The services template draws its own floating button and reads the switch itself.
+  const wa = businessType !== 'services' && waFloatOn(businessType, c) ? waHref(waNumber(businessType, c) || '') : null
   const cookiePalette = resolveSitePalette(businessType, presetId, colorOverrides, typographyPreset)
 
   const seo = resolveSeo({
@@ -303,7 +311,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
           dangerouslySetInnerHTML={{ __html: sectionStylesToCss(sectionStyles) }}
         />
       )}
-      <BookingProvider slug={theme.slug} enabled={theme.bookings_enabled}>
+      <BookingProvider slug={theme.slug} enabled={theme.bookings_enabled && !bookingsPaused(c)}>
         <PublicSiteRenderer
           businessType={businessType}
           content={templateContent}
@@ -317,6 +325,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
         />
       </BookingProvider>
       <MadeWithZenya hide={theme.owner_has_hosting} />
+      {wa && <SiteWhatsApp href={wa} />}
       <SiteBeacon slug={theme.slug} />
       {cookiePalette && <SiteCookieBanner palette={cookiePalette} />}
     </>

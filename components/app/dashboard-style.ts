@@ -745,10 +745,12 @@ ${PRODUCT_TOKENS_CSS}
    Type selectors rather than a class, because the fields live across ten
    pages and a dozen components that were never going to be edited by hand.
    The excluded types are controls that are not text boxes - a checkbox
-   styled as a field is a bug, and accent-color already handles them. */
-:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="button"]),
-:is(.zy-app, .zy-dash) textarea,
-:is(.zy-app, .zy-dash) select {
+   styled as a field is a bug, and accent-color already handles them.
+   The v6 pages draw their own fields (.inp, .kw, .inp-affix), so inside .v6
+   this reaches only the older screens in .legacy. */
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not([type="submit"]):not([type="button"]):where(:not(.v6 *), .legacy *),
+:is(.zy-app, .zy-dash) textarea:where(:not(.v6 *), .legacy *),
+:is(.zy-app, .zy-dash) select:where(:not(.v6 *), .legacy *) {
   border: 0;
   border-radius: var(--r-control);
   color: var(--obsidian);
@@ -757,14 +759,14 @@ ${PRODUCT_TOKENS_CSS}
   letter-spacing: 0;
   transition: box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
 }
-:is(.zy-app, .zy-dash) input::placeholder,
-:is(.zy-app, .zy-dash) textarea::placeholder { color: var(--ghost); }
-:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):hover,
-:is(.zy-app, .zy-dash) textarea:hover,
-:is(.zy-app, .zy-dash) select:hover { box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.18); }
-:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):focus,
-:is(.zy-app, .zy-dash) textarea:focus,
-:is(.zy-app, .zy-dash) select:focus {
+:is(.zy-app, .zy-dash) input:where(:not(.v6 *), .legacy *)::placeholder,
+:is(.zy-app, .zy-dash) textarea:where(:not(.v6 *), .legacy *)::placeholder { color: var(--ghost); }
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):where(:not(.v6 *), .legacy *):hover,
+:is(.zy-app, .zy-dash) textarea:where(:not(.v6 *), .legacy *):hover,
+:is(.zy-app, .zy-dash) select:where(:not(.v6 *), .legacy *):hover { box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.18); }
+:is(.zy-app, .zy-dash) input:not([type="checkbox"]):not([type="radio"]):where(:not(.v6 *), .legacy *):focus,
+:is(.zy-app, .zy-dash) textarea:where(:not(.v6 *), .legacy *):focus,
+:is(.zy-app, .zy-dash) select:where(:not(.v6 *), .legacy *):focus {
   outline: none;
   background: var(--card);
   box-shadow: 0 0 0 1px var(--violet), 0 0 0 4px var(--violet-ring);

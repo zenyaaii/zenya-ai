@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { useNotify } from '@/components/ui/Notify'
-import { BillingScreen, type BillingScreenProps, type InvoiceData } from '@/components/dashboard/screens/billing'
-import { longDate } from '@/components/dashboard/screens/kit'
 import { PLAN_BILLING, SUBSCRIBED, asPlan } from '@/components/dashboard/plans'
+import V6Billing, { V6_PLANS as PLANS, type V6BillingProps } from '@/components/app/v6/pages/Billing'
+import { dateAr } from '@/components/app/v6/pages/kit'
+import { useV6 } from '@/components/app/v6/ui'
 
 type StripeInvoice = {
   number: string
@@ -16,11 +16,11 @@ type StripeInvoice = {
   pdf: string | null
 }
 
-const INVOICE_STATUS: Record<StripeInvoice['status'], { label: string; tone: InvoiceData['tone'] }> = {
-  paid: { label: 'مدفوعة', tone: 'ok' },
-  open: { label: 'مستحقة', tone: 'warn' },
-  uncollectible: { label: 'متعثّرة', tone: 'bad' },
-  void: { label: 'ملغاة', tone: 'quiet' },
+const INVOICE_STATUS: Record<StripeInvoice['status'], [string, string]> = {
+  paid: ['مدفوعة', 'ok'],
+  open: ['مستحقة', 'warn'],
+  uncollectible: ['متعثّرة', 'bad'],
+  void: ['ملغاة', ''],
 }
 
 function money(cents: number, currency: string): string {
@@ -28,19 +28,25 @@ function money(cents: number, currency: string): string {
   return currency.toLowerCase() === 'usd' ? `${v}$` : `${v} ${currency.toUpperCase()}`
 }
 
-/** Billing: the demo's billing screen, on the owner's real plan, card and invoices. */
+/** «24.99$ / شهريًا» → ['24.99$', 'شهريًا'] */
+const priceParts = (s: string): [string, string | null] => {
+  const [a, b] = s.split(' / ')
+  return [a, b || null]
+}
+
+/** Billing: the v6 design's billing page, on the owner's real plan, card and invoices. */
 export default function BillingPage() {
-  const { toast } = useNotify()
-  const [props, setProps] = useState<BillingScreenProps | null>(null)
+  const { toast } = useV6()
+  const [props, setProps] = useState<V6BillingProps | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
     async function openPortal() {
-      const r = await fetch('/api/account/portal', { method: 'POST' })
-      const j = await r.json().catch(() => ({}))
-      if (r.ok && j.url) window.location.href = j.url
-      else toast({ type: 'error', message: 'تعذّر فتح بوابة الاشتراك' })
+      const r = await fetch('/api/account/portal', { method: 'POST' }).catch(() => null)
+      const j = r ? await r.json().catch(() => ({})) : {}
+      if (r?.ok && j.url) window.location.href = j.url
+      else toast('تعذّر فتح بوابة الاشتراك', { ok: false })
     }
 
     ;(async () => {
@@ -58,30 +64,44 @@ export default function BillingPage() {
       const subscribed = SUBSCRIBED.includes(plan)
       const periodEnd = (profile as any)?.hosting_current_period_end
       const card = billing?.card
+      const invoices = (billing?.invoices || []) as StripeInvoice[]
+      const [price, per] = priceParts(spec.price)
+      const hasCustomer = !!card || invoices.length > 0
+      const holder = String(user.user_metadata?.full_name || user.user_metadata?.name || '').toUpperCase()
 
       setProps({
-        planLabel: spec.label,
-        price: spec.price,
-        renews: subscribed && periodEnd ? `يتجدّد ${longDate(periodEnd)}` : null,
-        includes: spec.includes,
-        manage: subscribed ? { onClick: openPortal } : { href: '/pricing' },
-        manageLabel: subscribed ? 'إدارة الاشتراك' : 'طالع الخطط',
-        card: card
-          ? { label: `•••• ${card.last4}`, expires: `تنتهي ${String(card.exp_month).padStart(2, '0')}/${String(card.exp_year).slice(-2)}` }
-          : null,
-        updateCard: { onClick: openPortal },
-        invoices: ((billing?.invoices || []) as StripeInvoice[]).map((inv) => ({
+        current: {
+          label: plan === 'pro' ? 'Pro نشط' : plan === 'starter' ? 'Starter نشط' : spec.label,
+          price,
+          per,
+          on: subscribed && periodEnd ? dateAr(periodEnd) : null,
+          renews: subscribed && periodEnd ? `يتجدّد تلقائيًا في ${dateAr(periodEnd)}` : subscribed ? 'يتجدّد تلقائيًا كل شهر' : plan === 'free' || plan === 'entry' ? 'مجانية، بلا دفع' : 'بلا تجديد شهري',
+          inc: PLANS.find((x) => x.id === (plan === 'free' ? 'entry' : plan))?.inc || spec.includes,
+          paid: plan !== 'free' && plan !== 'entry',
+          id: plan === 'free' || plan === 'entry' ? 'entry' : plan === 'starter' || plan === 'pro' ? plan : null,
+        },
+        card: card ? {
+          brand: String(card.brand || 'card'),
+          last4: String(card.last4),
+          exp: `${String(card.exp_month).padStart(2, '0')}/${String(card.exp_year).slice(-2)}`,
+          holder,
+        } : null,
+        invoices: invoices.map((inv) => ({
           id: inv.number,
-          date: longDate(inv.created),
+          date: dateAr(inv.created),
           amount: money(inv.amount, inv.currency),
-          status: INVOICE_STATUS[inv.status]?.label || inv.status,
-          tone: INVOICE_STATUS[inv.status]?.tone || 'quiet',
-          download: inv.pdf ? { href: inv.pdf, external: true } : undefined,
+          status: INVOICE_STATUS[inv.status]?.[0] || inv.status,
+          tone: INVOICE_STATUS[inv.status]?.[1] || '',
+          pdf: inv.pdf,
         })),
+        plans: PLANS,
+        portal: subscribed || hasCustomer ? openPortal : null,
+        // A subscription changes in Stripe's portal; without one, checkout starts it.
+        choose: (id) => (subscribed ? { onSelect: openPortal } : id === 'entry' ? { href: '/pricing' } : { href: `/checkout?plan=${id}` }),
       })
     })()
     return () => { cancelled = true }
   }, [toast])
 
-  return props ? <BillingScreen {...props} /> : null
+  return props ? <V6Billing {...props} /> : null
 }

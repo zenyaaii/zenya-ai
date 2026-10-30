@@ -92,6 +92,22 @@ function num(v: unknown): number | null {
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
+/**
+ * The template's own content with its reviews section left out, for a site
+ * whose owner switched the section off on the dashboard. Takes the bare
+ * template content, as the renderer gets it.
+ */
+export function withoutReviews(bt: string, inner: any): any {
+  const a = ADAPTERS[bt]
+  if (!a || !inner || typeof inner !== 'object') return inner
+  const c = JSON.parse(JSON.stringify(inner))
+  a.set(c, [])
+  // The restaurant reads hidden_sections; wellness draws the section for a reviews link alone.
+  if (bt === 'restaurant') c.hidden_sections = [...(c.hidden_sections || []).filter((x: string) => x !== 'reviews'), 'reviews']
+  if (c.links?.reviews_url) c.links = { ...c.links, reviews_url: undefined }
+  return c
+}
+
 /** Templates whose sites have a reviews section. */
 export function hasReviews(businessType: string): boolean {
   return businessType in ADAPTERS
