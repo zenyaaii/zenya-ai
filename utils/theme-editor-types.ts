@@ -9,15 +9,62 @@ import type { LucideIcon } from 'lucide-react'
  * Field definitions                                                      *
  * ────────────────────────────────────────────────────────────────────── */
 
+/**
+ * What the v6 editor (components/editor/v6) reads beside a field's kind. All
+ * optional: a field without them still edits, it just says less.
+ *   hint    the line under the field
+ *   max     a character count shown beside the label (and a check when `cut`)
+ *   min     too short is a suggestion in the site check
+ *   need    empty is a note in the site check — true, or the words to show
+ *   tip     empty is a suggestion in the site check (the words to show)
+ *   cut     longer than max is a note in the site check (Google cuts it)
+ *   suggest the field offers «اقترح صياغة»
+ *   when    the field shows only while this holds
+ */
+export type FieldNeed = boolean | { t: string | ((n: number) => string); d?: string }
+export type FieldMeta = {
+  hint?: string
+  max?: number
+  min?: number
+  need?: FieldNeed
+  tip?: { t: string; d?: string }
+  cut?: boolean
+  suggest?: boolean
+  when?: (content: any) => boolean
+}
+
+export type SocialNet = 'instagram' | 'whatsapp' | 'tiktok' | 'facebook' | 'youtube' | 'website' | 'snapchat' | 'x'
+
 export type EditorFieldDef =
-  | { type: 'text';      path: string; label: string; placeholder?: string }
-  | { type: 'textarea';  path: string; label: string; rows?: number; placeholder?: string }
-  | { type: 'image';     path: string; label: string; hint?: string }
-  | { type: 'number';    path: string; label: string; min?: number; max?: number; step?: number }
-  | { type: 'note';      content: string }
+  | ({ type: 'text';      path: string; label: string; placeholder?: string } & FieldMeta)
+  /** `multi` keeps line breaks (a headline set on two lines). */
+  | ({ type: 'textarea';  path: string; label: string; rows?: number; placeholder?: string; multi?: boolean } & FieldMeta)
+  /** `optional` offers «إزالة»; `round` draws a portrait circle. */
+  | ({ type: 'image';     path: string; label: string; optional?: boolean; round?: boolean } & FieldMeta)
+  | ({ type: 'number';    path: string; label: string; min?: number; max?: number; step?: number } & Omit<FieldMeta, 'min' | 'max'>)
+  | { type: 'note';      content: string; tone?: 'info' | 'link'; go?: string }
+  /** A small heading between a section's fields. */
+  | { type: 'group';     label: string }
+  /** A price: the owner types the number, the currency the site already uses is added. */
+  | ({ type: 'price';    path: string; label: string } & FieldMeta)
+  /** Free text with a row of ready answers under it. */
+  | ({ type: 'badge';    path: string; label: string; options: string[] } & FieldMeta)
+  | ({ type: 'tel';      path: string; label: string; placeholder?: string; placeholderFrom?: string } & FieldMeta)
+  | ({ type: 'email';    path: string; label: string } & FieldMeta)
+  | ({ type: 'url';      path: string; label: string; placeholder?: string } & FieldMeta)
+  /** A handle, a number or a link; it is stored as the link it opens. */
+  | ({ type: 'social';   path: string; label: string; net: SocialNet; placeholder?: string } & FieldMeta)
+  | { type: 'stars';     path: string; label: string }
+  /** 0–5 in tenths, with − and + beside it. */
+  | { type: 'rating';    path: string; label: string; hint?: string }
+  /** The week: one row a day, open or closed, from and to. */
+  | { type: 'hours';     path: string }
+  /** How the site reads in Google, drawn from seoTitle/seoDescription paths. */
+  | { type: 'snippet';   title: string; description: string; name: string }
   /** One of a few fixed values, shown as a row of chips. An unset value shows `fallback` as chosen.
-   *  `when` hides the field while it has nothing to choose between. */
-  | { type: 'choice';    path: string; label: string; options: { value: string; label: string }[]; fallback: string; hint?: string; when?: (content: any) => boolean }
+   *  `when` hides the field while it has nothing to choose between. `hints` is
+   *  the line under it for each value. */
+  | { type: 'choice';    path: string; label: string; options: { value: string; label: string }[]; fallback: string; hint?: string; hints?: Record<string, string>; when?: (content: any) => boolean }
   /** On or off. Unset reads as `fallback`. */
   | { type: 'toggle';    path: string; label: string; fallback: boolean; hint?: string }
   /** The owner's logo from the dashboard SEO page, shown with a link there to add or change it. */
@@ -41,12 +88,32 @@ export type EditorFieldDef =
       itemTitle?: string               // dot path to title field inside item
       itemFields: EditorFieldDef[]
       makeItem: () => any              // factory for a fresh item
+      /** The add button's object form, when it differs («أضف طبقًا»). */
+      itemAcc?: string
+      /** The second line of a row: a field of the item. */
+      itemSub?: string
+      /** The row's picture: an image field of the item. */
+      itemThumb?: string
+      /** The second line counts this list inside the item instead. */
+      itemCount?: { path: string; one: string; two: string; few: string; many: string }
+      /** The site shows only the first N. */
+      show?: number
     }
 
 export type EditorPanel = {
   id: string                           // selection key
   label: string
   icon?: LucideIcon
+  /** The v6 editor's icon (a name in components/editor/v6/sprite.ts). */
+  ic?: string
+  /** The row's second line when the section has nothing better to say. */
+  desc?: string
+  /** The row's second line, from the content. */
+  summary?: (content: any) => string
+  /** The owner can hide it from visitors (content.hidden_sections). */
+  hideable?: boolean
+  /** The section has nothing in it, so the site leaves it out. */
+  empty?: (content: any) => boolean
   /** Optional page id for themes whose preview supports view switching. */
   page?: string
   /** Some sections render on more than one page (e.g. a philosophy block shown
@@ -75,6 +142,8 @@ export type EditorPage = {
   id: string                           // matches Preview's view ids
   label: string
   icon: LucideIcon
+  /** The v6 editor's icon (a name in components/editor/v6/sprite.ts). */
+  ic?: string
 }
 
 export type EditorConfig = {
@@ -102,6 +171,13 @@ export type EditorConfig = {
   defaultPresetId: string
   /** Default brand name on save fallback. */
   brandNamePath?: string
+  /** What one colour token does, under its name in the design tab. */
+  colorHints?: Record<string, string>
+  /** Global panels pinned under the page's sections («في كل الصفحات»).
+   *  The rest are only in the «الموقع» tab. Default: the first global panel. */
+  pinned?: string[]
+  /** The phone number a local WhatsApp number borrows its country code from. */
+  phonePath?: string
 }
 
 /* ────────────────────────────────────────────────────────────────────── *

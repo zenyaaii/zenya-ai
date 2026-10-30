@@ -501,6 +501,7 @@ function Header() {
 
   return (
     <header
+      data-section="brand"
       className="sticky top-0 z-40 border-b transition-shadow duration-300"
       style={{
         background: isDark ? 'rgba(9,12,18,0.9)' : 'color-mix(in srgb, var(--sv-bg) 90%, transparent)',

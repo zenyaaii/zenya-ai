@@ -160,6 +160,7 @@ export default function StudioPreview({
 
       {/* ── NAV ──────────────────────────────────────────────────────────────── */}
       <header
+        data-section="brand"
         className="sticky top-0 z-50 flex h-16 items-center justify-between px-8 md:px-12"
         style={{
           background: `${colors.background}f0`,
