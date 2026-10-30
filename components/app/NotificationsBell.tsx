@@ -1,13 +1,14 @@
 'use client'
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { Bell, MapPin, PackageCheck } from 'lucide-react'
+import { Bell, MapPin, PackageCheck, Sparkles } from 'lucide-react'
 import { dashFont } from './dash-font'
 
 /**
- * The bell in the top bar. It carries two kinds of news: new Google reviews
- * that the daily check found for one of the owner's sites, and a site Beynoun
- * handed over to this account, which asks yes or no.
+ * The bell in the top bar. It carries three kinds of news: new Google reviews
+ * that the daily check found for one of the owner's sites, a site Beynoun
+ * handed over to this account, which asks yes or no, and a notice from Beynoun
+ * with a link (public.user_notices).
  */
 export type BellItem = {
   id: string
@@ -18,6 +19,10 @@ export type BellItem = {
   /** "اليوم 9:00 ص" */
   when: string
   href?: string
+  /** Open href in a new tab (a notice's link usually leaves the dashboard). */
+  external?: boolean
+  /** 'notice' is a message from Beynoun; anything else is a review. */
+  kind?: 'notice'
   onOpen?: () => void
   /** A handover: the question and its two answers, shown in the item itself. */
   handover?: {
@@ -58,13 +63,19 @@ export function NotificationsBell({ items, label = 'الإشعارات' }: { ite
             <HandoverItem key={it.id} it={it} />
           ) : (
             <DropdownMenu.Item key={it.id} asChild onSelect={it.onOpen}>
-              <a href={it.href || '#'} className="flex items-start gap-3 rounded-xl p-2 outline-none hover:bg-[#f4f4f6] focus-visible:bg-[#f4f4f6]">
-                <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fdecea]">
-                  <MapPin className="h-4 w-4 text-[#d6453d]" strokeWidth={2.25} />
-                </span>
+              <a href={it.href || '#'} {...(it.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="flex items-start gap-3 rounded-xl p-2 outline-none hover:bg-[#f4f4f6] focus-visible:bg-[#f4f4f6]">
+                {it.kind === 'notice' ? (
+                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#f4f4f6]">
+                    <Sparkles className="h-4 w-4 text-[#171717]" strokeWidth={2.25} />
+                  </span>
+                ) : (
+                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fdecea]">
+                    <MapPin className="h-4 w-4 text-[#d6453d]" strokeWidth={2.25} />
+                  </span>
+                )}
                 <span className="min-w-0 flex-1">
                   <span className="block text-[14px] font-bold text-[#171717]">{it.title}</span>
-                  <span className="block truncate text-[13px] font-medium text-[#66666e]">{it.site} · {it.when}</span>
+                  <span className={`block text-[13px] font-medium text-[#66666e] ${it.kind === 'notice' ? '' : 'truncate'}`}>{it.site} · {it.when}</span>
                 </span>
               </a>
             </DropdownMenu.Item>
