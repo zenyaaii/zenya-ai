@@ -48,6 +48,13 @@ export default function TopTools({
     fetch('/api/handover').then((r) => (r.ok ? r.json() : null)).then((d) => setHandover(d?.handover || null)).catch(() => {})
   }, [user, pathname])
 
+  // And notices from Beynoun with a link, until the owner opens them.
+  const [notices, setNotices] = useState<{ id: string; title: string; body: string | null; href: string | null; created_at: string }[]>([])
+  useEffect(() => {
+    if (!user) return
+    fetch('/api/notices').then((r) => (r.ok ? r.json() : { notices: [] })).then((d) => setNotices(d.notices || [])).catch(() => {})
+  }, [user, pathname])
+
   async function answerYes() {
     if (!handover) return
     const r = await fetch(`/api/handover/${encodeURIComponent(handover.token)}`, {
@@ -72,7 +79,21 @@ export default function TopTools({
     },
   }] : []
 
-  const bellItems: BellItem[] = [...handoverItems, ...news.map((s) => ({
+  const noticeItems: BellItem[] = notices.map((n) => ({
+    id: `notice-${n.id}`,
+    title: n.title,
+    site: n.body || 'من فريق بينون',
+    when: whenLabel(n.created_at, ''),
+    href: n.href || undefined,
+    external: true,
+    kind: 'notice',
+    onOpen: () => {
+      fetch(`/api/notices/${encodeURIComponent(n.id)}`, { method: 'POST' }).catch(() => {})
+      setNotices((all) => all.filter((x) => x.id !== n.id))
+    },
+  }))
+
+  const bellItems: BellItem[] = [...handoverItems, ...noticeItems, ...news.map((s) => ({
     id: s.id,
     title: s.count === 1 ? 'تقييم جديد من Google' : s.count === 2 ? 'تقييمان جديدان من Google' : `${s.count} تقييمات جديدة من Google`,
     site: s.name,
