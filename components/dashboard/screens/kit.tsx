@@ -32,24 +32,29 @@ export type Action = {
 }
 
 export function Act({
-  action, className, children, title, style,
+  action, className, children, title, style, tour,
 }: {
   action?: Action
   className: string
   children: ReactNode
   title?: string
   style?: CSSProperties
+  /** A stop of the dashboard tour (intro/DashIntro) points here. */
+  tour?: string
 }) {
+  // With an href, onClick is a side effect of following the link (a tick on
+  // the home's first steps), not a replacement for it.
+  const own = { className, title, style, 'data-tour': tour }
   if (action?.href) {
     if (action.document) {
-      return <a href={action.href} className={className} title={title} style={style}>{children}</a>
+      return <a href={action.href} onClick={action.onClick} {...own}>{children}</a>
     }
     return action.external ? (
-      <a href={action.href} target="_blank" rel="noreferrer" className={className} title={title} style={style}>
+      <a href={action.href} target="_blank" rel="noreferrer" onClick={action.onClick} {...own}>
         {children}
       </a>
     ) : (
-      <Link href={action.href} className={className} title={title} style={style}>
+      <Link href={action.href} onClick={action.onClick} {...own}>
         {children}
       </Link>
     )
@@ -60,15 +65,14 @@ export function Act({
         type="button"
         onClick={action.onClick}
         disabled={action.disabled}
+        {...own}
         className={className + ' disabled:opacity-60'}
-        title={title}
-        style={style}
       >
         {children}
       </button>
     )
   }
-  return <span className={className} role="presentation" title={title} style={style}>{children}</span>
+  return <span role="presentation" {...own}>{children}</span>
 }
 
 /**

@@ -52,6 +52,17 @@ export type HomeWidgets = {
   reviews?: { rating: number; count: number; fresh: number } | 'add' | null
 }
 
+/** «ابدأ من هنا»: the first three things to do once a site is published. */
+export type HomeStart = {
+  /** The owner has opened the editor from the dashboard home. */
+  edited: boolean
+  domain: 'live' | 'pending' | null
+  /** The owner has shared or copied the site's address from the home. */
+  shared: boolean
+}
+
+export type StartStep = 'edit' | 'share' | 'hide'
+
 export type HomeScreenProps = {
   name: string
   /** Every site of the owner, for the picker (shown only with two or more). */
@@ -67,6 +78,10 @@ export type HomeScreenProps = {
   today: { list: HomeBooking[]; tomorrow: HomeBooking[]; week: number } | null
   widgets: HomeWidgets
   launch: Array<{ label: string; done: boolean }>
+  /** Null hides the card (the owner hid it). It also hides itself once every step is done. */
+  start?: HomeStart | null
+  /** The owner took a step (or hid the card): the page records it. */
+  onStart?: (step: StartStep) => void
   links: {
     bookings?: Action
     analytics?: Action
@@ -162,16 +177,17 @@ function Hello({ name, site, newBookings, yesterdayVisitors, links, now }: HomeS
 
 /* ── a published site ──────────────────────────────────────────────────── */
 
-function LiveHome({ site, traffic, today, widgets, links, now }: HomeScreenProps & { site: HomeSite; now: Date | null }) {
+function LiveHome({ site, traffic, today, widgets, links, now, start, onStart }: HomeScreenProps & { site: HomeSite; now: Date | null }) {
   return (
     <>
+      {start && <Start start={start} site={site} links={links} onStart={onStart} />}
       <div className="zb-grid">
         <article className="zb-card zb-g-stats zb-rv" style={{ ['--i' as string]: 3 }} aria-label="الزيارات">
           {traffic}
         </article>
         <Today today={today} links={links} now={now} />
-        <SiteCard site={site} />
-        <Quick site={site} links={links} />
+        <SiteCard site={site} onStart={onStart} />
+        <Quick site={site} links={links} onStart={onStart} />
       </div>
       <div className="zb-widgets mt-4">
         <DomainWidget domain={widgets.domain} action={links.domains} />
@@ -277,15 +293,77 @@ function useCopy() {
   }
 }
 
-function SiteCard({ site }: { site: HomeSite }) {
+/** The phone's share sheet where there is one, else a copy of the address. */
+function useShare(site: HomeSite, onShared?: () => void) {
   const { done, copy } = useCopy()
   const share = async () => {
     if (!site.url) return
     if (typeof navigator !== 'undefined' && navigator.share) {
-      try { await navigator.share({ title: site.name, url: site.url }); return } catch { return }
+      try { await navigator.share({ title: site.name, url: site.url }); onShared?.() } catch { /* closed the sheet */ }
+      return
     }
-    copy(site.url)
+    await copy(site.url)
+    onShared?.()
   }
+  return { done, share }
+}
+
+/** Opening the editor from home ticks «عدّل موقعك». */
+const tickEdit = (edit: Action | undefined, onStart?: (s: StartStep) => void): Action | undefined =>
+  edit && onStart ? { ...edit, onClick: () => { edit.onClick?.(); onStart('edit') } } : edit
+
+function Start({ start, site, links, onStart }: { start: HomeStart; site: HomeSite; links: HomeScreenProps['links']; onStart?: (s: StartStep) => void }) {
+  const { done: copied, share } = useShare(site, () => onStart?.('share'))
+  const steps: Array<{ key: string; done: boolean; title: string; sub: string; act: ReactNode }> = [
+    {
+      key: 'edit', done: start.edited, title: 'عدّل موقعك',
+      sub: start.edited ? 'فتحت المحرّر.' : 'غيّر الصور والنصوص والأسعار لتناسب نشاطك.',
+      act: <Act action={tickEdit(site.edit, onStart)} className="zb-btn"><Pencil strokeWidth={2} />عدّل</Act>,
+    },
+    {
+      key: 'domain', done: start.domain === 'live', title: 'اربط نطاقك',
+      sub: start.domain === 'live' ? 'نطاقك متصل.' : start.domain === 'pending' ? 'نطاقك يُربط الآن، وقد يأخذ ذلك بعض الوقت.' : 'اسم خاص لموقعك، مثل myrestaurant.com.',
+      act: start.domain === 'pending'
+        ? <span className="zb-pill" data-tone="warn">قيد الربط</span>
+        : <Act action={links.domains} className="zb-btn"><Globe strokeWidth={2} />اربط</Act>,
+    },
+    {
+      key: 'share', done: start.shared, title: 'شارك رابطك',
+      sub: start.shared ? 'شاركت رابط موقعك.' : 'أرسله لزبائنك على واتساب، وضعه في حساباتك.',
+      act: site.url ? (
+        <button type="button" className="zb-btn" onClick={share} aria-live="polite">
+          {copied ? <><Check strokeWidth={2.4} />نُسخ الرابط</> : <><Share2 strokeWidth={2} />شارك</>}
+        </button>
+      ) : null,
+    },
+  ]
+  const n = steps.filter((x) => x.done).length
+  if (n === steps.length) return null
+  const next = steps.findIndex((x) => !x.done)
+  return (
+    <article className="zb-card zb-rv mb-4" style={{ ['--i' as string]: 3 }} aria-labelledby="zb-start-h">
+      <div className="zb-card-h">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <h2 className="zb-h2" id="zb-start-h">ابدأ من هنا</h2>
+          <span className="zb-pill" data-tone="warn"><span className="zb-num">{n}</span> من <span className="zb-num">{steps.length}</span></span>
+        </div>
+        {onStart && <button type="button" className="zb-link" onClick={() => onStart('hide')}>أخفِ</button>}
+      </div>
+      <ol className="zb-start">
+        {steps.map((x, i) => (
+          <li key={x.key} data-done={x.done ? '' : undefined} data-on={i === next ? '' : undefined}>
+            <i>{x.done ? <Check strokeWidth={3} /> : <span className="zb-num">{i + 1}</span>}</i>
+            <span className="zb-start-t"><b>{x.title}</b><span>{x.sub}</span></span>
+            {!x.done && x.act}
+          </li>
+        ))}
+      </ol>
+    </article>
+  )
+}
+
+function SiteCard({ site, onStart }: { site: HomeSite; onStart?: (s: StartStep) => void }) {
+  const { done, share } = useShare(site, () => onStart?.('share'))
   return (
     <article className="zb-card zb-g-site zb-rv" style={{ ['--i' as string]: 5 }}>
       <div className="zb-sitecard">
@@ -295,7 +373,7 @@ function SiteCard({ site }: { site: HomeSite }) {
           {site.host && <span className="zb-addr">{site.host}</span>}
           <span className="zb-small">آخر تعديل {site.updated}</span>
           <div className="zb-btns">
-            <Act action={site.edit} className="zb-btn zb-btn-ink"><Pencil strokeWidth={2} />عدّل الموقع</Act>
+            <Act action={tickEdit(site.edit, onStart)} className="zb-btn zb-btn-ink" tour="edit-site"><Pencil strokeWidth={2} />عدّل الموقع</Act>
             {site.url && (
               <button type="button" className="zb-btn" onClick={share} aria-live="polite">
                 {done ? <><Check strokeWidth={2.4} />نُسخ الرابط</> : <><Share2 strokeWidth={2} />شارك</>}
@@ -309,7 +387,7 @@ function SiteCard({ site }: { site: HomeSite }) {
   )
 }
 
-function Quick({ site, links }: { site: HomeSite; links: HomeScreenProps['links'] }) {
+function Quick({ site, links, onStart }: { site: HomeSite; links: HomeScreenProps['links']; onStart?: (s: StartStep) => void }) {
   const { done, copy } = useCopy()
   return (
     <article className="zb-card zb-g-quick zb-rv" style={{ ['--i' as string]: 6 }}>
@@ -317,7 +395,7 @@ function Quick({ site, links }: { site: HomeSite; links: HomeScreenProps['links'
       <div className="zb-qgrid">
         <Act action={links.gallery} className="zb-q"><span className="zb-tile"><Upload strokeWidth={2} /></span><b>ارفع صورة</b></Act>
         {site.url && (
-          <button type="button" className="zb-q" onClick={() => copy(site.url!)} aria-live="polite">
+          <button type="button" className="zb-q" onClick={() => { copy(site.url!); onStart?.('share') }} aria-live="polite">
             <span className="zb-tile">{done ? <Check strokeWidth={2.4} /> : <Copy strokeWidth={2} />}</span>
             <b>{done ? 'نُسخ الرابط' : 'انسخ رابط الموقع'}</b>
           </button>
@@ -416,7 +494,7 @@ function ReviewsWidget({ reviews, action }: { reviews: Exclude<HomeWidgets['revi
 
 /* ── a site not published yet ─────────────────────────────────────────── */
 
-function DraftHome({ site, launch, links }: HomeScreenProps & { site: HomeSite }) {
+function DraftHome({ site, launch, links, onStart }: HomeScreenProps & { site: HomeSite }) {
   const done = launch.filter((x) => x.done).length
   const next = launch.findIndex((x) => !x.done)
   const frac = launch.length ? done / launch.length : 0
@@ -445,7 +523,7 @@ function DraftHome({ site, launch, links }: HomeScreenProps & { site: HomeSite }
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
           <Act action={links.publish} className="zb-btn zb-btn-acc"><Globe strokeWidth={2} />انشر الموقع</Act>
-          <Act action={site.edit} className="zb-btn"><Pencil strokeWidth={2} />أكمل التعديل</Act>
+          <Act action={tickEdit(site.edit, onStart)} className="zb-btn"><Pencil strokeWidth={2} />أكمل التعديل</Act>
         </div>
       </article>
       <article className="zb-card zb-g-day zb-rv" style={{ ['--i' as string]: 4 }}>
@@ -463,7 +541,7 @@ function DraftHome({ site, launch, links }: HomeScreenProps & { site: HomeSite }
             <h3>{site.name}</h3>
             <span className="zb-small">{site.kind} · آخر تعديل {site.updated}</span>
             <div className="zb-btns">
-              <Act action={site.edit} className="zb-btn zb-btn-ink"><Pencil strokeWidth={2} />عدّل</Act>
+              <Act action={tickEdit(site.edit, onStart)} className="zb-btn zb-btn-ink" tour="edit-site"><Pencil strokeWidth={2} />عدّل</Act>
               <Act action={site.open} className="zb-btn"><Eye strokeWidth={2} />معاينة</Act>
             </div>
           </div>

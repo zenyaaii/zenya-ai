@@ -328,6 +328,25 @@ html.dash-dk .zy-app .zb-seg-ind { background: var(--surface-3); }
 .zy-app .zb-steps [data-done] i { background: var(--success); color: var(--card); }
 .zy-app .zb-steps [data-on] { color: var(--obsidian); font-weight: 700; }
 .zy-app .zb-steps [data-on] i { background: var(--obsidian); color: var(--card); }
+/* «ابدأ من هنا»: the first three steps, side by side on a laptop, stacked on a phone. */
+.zy-app .zb-start { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .zy-app .zb-start { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.zy-app .zb-start li { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 14px; border-radius: 16px; background: var(--surface-2); }
+.zy-app .zb-start i {
+  width: 26px; height: 26px; border-radius: 999px; flex: none; display: grid; place-items: center;
+  font-style: normal; font-size: 13px; font-weight: 800; background: var(--card); color: var(--stone);
+}
+.zy-app .zb-start i svg { width: 14px; height: 14px; }
+.zy-app .zb-start [data-on] i { background: var(--obsidian); color: var(--card); }
+.zy-app .zb-start [data-done] i { background: var(--success); color: var(--card); }
+.zy-app .zb-start-t { flex: 1; min-width: 0; }
+.zy-app .zb-start-t b { display: block; font-size: 15.5px; font-weight: 700; line-height: 1.4; color: var(--obsidian); }
+.zy-app .zb-start-t span { display: block; font-size: 13.5px; line-height: 1.55; color: var(--stone); }
+.zy-app .zb-start [data-done] .zb-start-t b { color: var(--stone); }
+.zy-app .zb-start .zb-btn, .zy-app .zb-start .zb-pill { flex: none; }
+/* The row is surface-2 already: the button sits on the card, and the next step's is ink. */
+.zy-app .zb-start .zb-btn { background: var(--card); }
+.zy-app .zb-start [data-on] .zb-btn { background: var(--obsidian); color: var(--card); }
 .zy-app .zb-rows { display: flex; flex-direction: column; }
 .zy-app .zb-rows > div { display: flex; align-items: center; gap: 14px; padding: 12px 0; }
 .zy-app .zb-rows > div + div { border-top: 1px solid var(--border-muted); }

@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client'
 import { publicSiteHost, publicSiteUrl } from '@/lib/portal-urls'
 import { bookingAccess } from '@/lib/booking-entitlement'
 import { hasReviews, readReviews } from '@/lib/reviews-bank'
-import { HomeScreen, type HomeBooking, type HomeScreenProps, type HomeWidgets } from '@/components/dashboard/screens/home'
+import { HomeScreen, type HomeBooking, type HomeScreenProps, type HomeWidgets, type StartStep } from '@/components/dashboard/screens/home'
 import {
   TrafficCard, dateAgo, trafficFromDay, trafficFromRange, ymd,
   type TMetric, type TRange, type TrafficData,
@@ -188,6 +188,21 @@ export default function DashboardHomePage() {
     setBookings(null)
   }, [])
 
+  // «ابدأ من هنا»: a step the owner took (or hiding the card) is a key in the
+  // launch plan, so it follows them to every device.
+  const onStart = useCallback((step: StartStep) => {
+    const key = step === 'hide' ? 'startHidden' : step
+    if (!base || base.launchPlan[key]) return
+    const launchPlan = { ...base.launchPlan, [key]: true }
+    setBase({ ...base, launchPlan })
+    fetch('/api/onboarding', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ launchPlan }),
+      keepalive: true,
+    }).catch(() => {})
+  }, [base])
+
   const props = useMemo<HomeScreenProps | null>(() => {
     if (!base) return null
     const t = theme
@@ -262,6 +277,12 @@ export default function DashboardHomePage() {
         google,
         reviews,
       },
+      start: base.launchPlan.startHidden ? null : {
+        edited: !!base.launchPlan.edit,
+        domain: dom ? (dom.status === 'live' ? 'live' : 'pending') : null,
+        shared: !!base.launchPlan.share,
+      },
+      onStart,
       launch: [
         { label: 'أنشئ موقعك', done: base.themes.length > 0 },
         { label: 'خصّص محتواك', done: !!base.launchPlan.edit },
@@ -279,7 +300,7 @@ export default function DashboardHomePage() {
         publish: { href: linkTo('/dashboard/sites') },
       },
     }
-  }, [base, theme, live, bookings, yesterday, traffic, metric, range, back, google, onSite, linkTo])
+  }, [base, theme, live, bookings, yesterday, traffic, metric, range, back, google, onSite, linkTo, onStart])
 
   return props ? <HomeScreen {...props} /> : null
 }

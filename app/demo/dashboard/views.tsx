@@ -10,7 +10,7 @@
  * switch views or do nothing: this page signs nobody in.
  */
 
-import { HomeScreen } from '@/components/dashboard/screens/home'
+import { HomeScreen, type StartStep } from '@/components/dashboard/screens/home'
 import { SitesScreen, type SiteFilter } from '@/components/dashboard/screens/sites'
 import { GalleryScreen } from '@/components/dashboard/screens/gallery'
 import { AnalyticsScreen, type MetricKey, type RangeKey } from '@/components/dashboard/screens/analytics'
@@ -38,6 +38,9 @@ export function HomeView({ go }: { go: (v: string) => void }) {
   const yesterday = useMemo(() => demoTraffic('day', 1).totals.visitors, [])
   const s = SITES.find((x) => x.id === siteId) || SITES[0]
   const kind = KIND_COVER[s.kind]
+  // «ابدأ من هنا» on the sample account: ticks live for this visit only.
+  const [ticks, setTicks] = useState<Record<string, boolean>>({})
+  const onStart = (step: StartStep) => setTicks((x) => ({ ...x, [step]: true }))
   return (
     <HomeScreen
       name="نادية"
@@ -65,6 +68,12 @@ export function HomeView({ go }: { go: (v: string) => void }) {
         google: s.id === 's1' ? { clicks: GSC_TOTALS.clicks, position: 1.2, query: 'مطعم المدينة' } : 'connect',
         reviews: s.id === 's1' ? { rating: 4.7, count: 128, fresh: 1 } : 'add',
       }}
+      start={ticks.hide ? null : {
+        edited: !!ticks.edit,
+        domain: s.id === 's1' ? 'live' : null,
+        shared: !!ticks.share,
+      }}
+      onStart={onStart}
       launch={[
         { label: 'أنشئ موقعك', done: true },
         { label: 'خصّص محتواك', done: true },
