@@ -115,7 +115,7 @@ html .zy-app, html .zy-dash {
   --font-head: "Thm Display", var(--font-amiri), "Amiri", serif;
   --font-chrome: "Thm Text", var(--font-markazi), "Markazi Text", Tajawal, serif;
 
-  --side: 248px;
+  --side: 280px;
   --top: 64px;
   --dock: 64px;
   --gut: 16px;
@@ -264,8 +264,9 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 
 /* ======================================================================
    THE FRAME
-   Laptop (1024+): a fixed side rail on the inline-start edge, the page
-   beside it. Phone and tablet: a sticky top bar and a floating dock at the
+   Laptop (1024+): a dark panel floating on the inline-start edge, round
+   cornered and inset from the window, the page beside it. It stays ink in
+   both themes, the way the phone dock does. Phone and tablet: a sticky top bar and a floating dock at the
    bottom with the four most-used pages and "More", which opens a sheet
    holding the full list. The document scrolls in both, so pinch-zoom pans.
    Layers: header 30 · dock and rail 40 · popover 50 · scrim 60 · sheet 61 ·
@@ -276,22 +277,36 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 
 /* ---- the rail -------------------------------------------------------- */
 .zf-side {
+  --rail-bg: #16120D;
+  --rail-fg: rgb(244 239 230 / 0.66);
+  --rail-fg-hi: #F4EFE6;
+  --rail-soft: rgb(244 239 230 / 0.08);
+  --rail-on: #F4EFE6;
+  --rail-on-fg: #16120D;
   position: fixed; z-index: 40;
-  inset-block: 0; inset-inline-start: 0;
-  width: var(--side);
+  inset-block: 14px; inset-inline-start: 14px;
+  width: calc(var(--side) - 28px);
   display: none; flex-direction: column;
-  padding: 18px 14px 14px;
-  background: var(--ground-2);
-  box-shadow: inset -1px 0 0 rgb(var(--ink-rgb) / 0.08);
+  padding: 20px 12px 14px;
+  border-radius: 28px;
+  color: var(--rail-fg);
+  background: var(--rail-bg);
+  box-shadow: 0 24px 48px -24px rgb(22 18 13 / 0.55);
 }
-[dir="rtl"] .zf-side { box-shadow: inset 1px 0 0 rgb(var(--ink-rgb) / 0.08); }
+/* On the dark ground the panel lifts by a shade and a hairline. */
+html.dash-dk .zf-side {
+  --rail-bg: #221E19;
+  box-shadow: 0 0 0 1px rgb(244 239 230 / 0.08), 0 24px 48px -24px rgb(0 0 0 / 0.8);
+}
 @media (min-width: 1024px) { .zf-side { display: flex; } }
 
 .zf-logo { display: flex; align-items: center; height: 40px; padding-inline: 10px; color: var(--obsidian); }
+.zf-side .zf-logo { color: var(--rail-fg-hi); }
 .zf-logo svg { height: 22px; width: auto; }
 .zf-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 8px -6px 0; padding: 0 6px; scrollbar-width: none; }
 .zf-scroll::-webkit-scrollbar { display: none; }
 .zf-label { padding: 18px 12px 6px; font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--stone-2); }
+.zf-side .zf-label { color: rgb(244 239 230 / 0.52); }
 .zf-nav { display: flex; flex-direction: column; gap: 2px; }
 .zf-row {
   position: relative;
@@ -315,6 +330,14 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 }
 html.dash-dk .zf-row[aria-current="page"] { box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10); }
 .zf-row[aria-current="page"] svg { color: var(--acc); }
+/* The rail's rows: cream on ink, and "you are here" is a cream pill. */
+.zf-side .zf-row { color: var(--rail-fg); }
+.zf-side .zf-row svg { color: currentColor; }
+.zf-side .zf-row[aria-current="page"] { color: var(--rail-on-fg); background: var(--rail-on); box-shadow: none; }
+.zf-side .zf-row[aria-current="page"] svg { color: var(--acc); }
+@media (hover: hover) {
+  .zf-side .zf-row:not([aria-current="page"]):hover { color: var(--rail-fg-hi); background: var(--rail-soft); }
+}
 .zf-row:focus-visible, .zf-dock-b:focus-visible, .zf-search:focus-visible, .zf-back:focus-visible {
   outline: 2px solid var(--violet); outline-offset: 2px;
 }
@@ -336,7 +359,14 @@ html.dash-dk .zf-row[aria-current="page"] { box-shadow: 0 0 0 1px rgb(var(--ink-
   font-size: 14.5px; font-weight: 500; color: var(--stone-2);
 }
 @media (hover: hover) { .zf-back:hover { color: var(--obsidian); } }
-.zf-foot .zy-report { padding-inline: 4px; }
+.zf-side .zf-new { color: var(--rail-on-fg); background: var(--rail-on); }
+.zf-side .zf-back { color: rgb(244 239 230 / 0.56); }
+@media (hover: hover) {
+  .zf-side .zf-new:hover { background: #fff; }
+  .zf-side .zf-back:hover { color: var(--rail-fg-hi); }
+}
+/* The report bubble is ink, like the rail it sits on: flip it to cream. */
+.zf-side [class~="bg-[#171717]"] { --obsidian: #F4EFE6; --ground: #16120D; }
 
 /* ---- the page column --------------------------------------------------- */
 .zf-main { min-width: 0; padding-bottom: calc(var(--dock) + 40px + env(safe-area-inset-bottom)); }
