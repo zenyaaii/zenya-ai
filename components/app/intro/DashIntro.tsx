@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Bell, CircleUser, LayoutGrid, Moon, Pause, Play, Plus, Search, Sparkles, X, type LucideIcon,
+  Bell, CalendarCheck, CircleUser, LayoutGrid, Moon, Pause, Pencil, Play, Plus, Search, Sparkles, X, type LucideIcon,
 } from 'lucide-react'
 import { useLocale, useT } from '@/components/i18n/LocaleProvider'
 import type { Messages } from '@/lib/i18n/messages'
@@ -50,6 +50,8 @@ const STOPS: Stop[] = [
   { key: 'nav', icon: LayoutGrid, act: 'more',
     title: (t, p) => (p ? t.intro.navTitlePhone : t.intro.navTitle),
     body: (t, p) => (p ? t.intro.navBodyPhone : t.intro.navBody) },
+  { key: 'edit-site', icon: Pencil, title: (t) => t.intro.editTitle, body: (t) => t.intro.editBody },
+  { key: 'bookings', icon: CalendarCheck, title: (t) => t.intro.bookingsTitle, body: (t) => t.intro.bookingsBody },
   { key: 'search', icon: Search, act: 'search', title: (t) => t.intro.searchTitle, body: (t) => t.intro.searchBody },
   { key: 'theme', icon: Moon, act: 'theme', title: (t) => t.intro.themeTitle, body: (t) => t.intro.themeBody },
   { key: 'new-site', icon: Plus, title: (t) => t.intro.newSiteTitle, body: (t) => t.intro.newSiteBody },
@@ -74,6 +76,23 @@ function findTarget(key: string): HTMLElement | null {
     const r = el.getBoundingClientRect()
     return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight
   }) || null
+}
+
+/**
+ * Bring a target in the page (not the frame) on screen: the site card's edit
+ * button sits below the fold on a phone. Returns whether it scrolled.
+ */
+function reveal(key: string, smooth: boolean): boolean {
+  const el = Array.from(document.querySelectorAll<HTMLElement>(`[data-tour="${key}"]`)).find((e) => {
+    const r = e.getBoundingClientRect()
+    return r.width > 0 && r.height > 0 && !e.closest('.zf-top, .zf-side, .zf-dock')
+  })
+  if (!el) return false
+  const r = el.getBoundingClientRect()
+  // Clear of the sticky bar at the top and the dock at the bottom.
+  if (r.top >= 76 && r.bottom <= window.innerHeight - 100) return false
+  el.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' })
+  return true
 }
 
 const centre = (el: Element) => {
@@ -183,6 +202,8 @@ export default function DashIntro({
 
   useLayoutEffect(() => {
     if (stage !== 'tour') return
+    // Step by step (reduced motion), the page jumps to a target below the fold.
+    if (manual && stop) reveal(stop.key, false)
     measure()
     // The sheet slides for ~420ms; measure again once it has landed.
     const settle = window.setTimeout(measure, 480)
@@ -193,7 +214,7 @@ export default function DashIntro({
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [stage, index, live, measure])
+  }, [stage, index, live, measure, manual, stop])
 
   const end = useCallback(() => {
     run.current++
@@ -247,6 +268,7 @@ export default function DashIntro({
         setIndex(i)
         setLive(false)
         await sleep(60)
+        if (reveal(s.key, true) && !(await wait(700))) return
         const el = findTarget(s.key)
         if (el) {
           setCursor((c) => ({ ...centre(el), tap: c?.tap ?? 0 }))

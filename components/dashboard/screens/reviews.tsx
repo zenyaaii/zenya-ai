@@ -76,21 +76,26 @@ export type ReviewsScreenProps = {
 
 /* ── small parts ────────────────────────────────────────────────────────── */
 
-const AVATAR_TINTS = ['#e9e7fb', '#e3f1ea', '#fbeee2', '#e6eef9', '#f6e6ee', '#eef0e2']
+/* One hue per reviewer. The circle and the letter are mixed with the card
+   and the ink, so they turn pale on cream and deep on the dark ground. */
 const AVATAR_INKS  = ['#4b53a8', '#23714a', '#9a5a1c', '#2f5d98', '#98385f', '#5d6420']
 
 function tintFor(name: string) {
   let h = 0
   for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0
-  return h % AVATAR_TINTS.length
+  return h % AVATAR_INKS.length
 }
 
 function Avatar({ name, size = 40 }: { name: string; size?: number }) {
-  const i = tintFor(name)
+  const ink = AVATAR_INKS[tintFor(name)]
   return (
     <span
       className="inline-flex shrink-0 items-center justify-center rounded-full font-black"
-      style={{ width: size, height: size, background: AVATAR_TINTS[i], color: AVATAR_INKS[i], fontSize: size * 0.4 }}
+      style={{
+        width: size, height: size, fontSize: size * 0.4,
+        background: `color-mix(in srgb, ${ink} 16%, var(--card))`,
+        color: `color-mix(in srgb, ${ink} 62%, var(--obsidian))`,
+      }}
       aria-hidden
     >
       {name.trim().charAt(0).toUpperCase() || '؟'}
@@ -150,7 +155,7 @@ export function whenLabel(at?: string, fallback?: string, now = new Date()): str
 }
 
 function NewTag() {
-  return <span className="rounded-full px-2 py-px text-[12px] font-black" style={{ background: '#fdecea', color: '#c0362c' }}>جديد</span>
+  return <span className="rounded-full px-2 py-px text-[12px] font-black" style={{ background: 'var(--error-fill)', color: 'var(--error)' }}>جديد</span>
 }
 
 /** The add / edit form for a review the owner types. */

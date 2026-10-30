@@ -27,6 +27,7 @@
 
 import { PRODUCT_TOKENS_CSS } from './tokens'
 import { DASH_THEME_CSS } from './dash-theme'
+import { BOARD_CSS } from '@/components/dashboard/screens/board-style'
 
 export const DASHBOARD_CSS = `
 /* ======================================================================
@@ -868,6 +869,9 @@ ${PRODUCT_TOKENS_CSS}
      chart for exactly the readers who cannot afford one. */
   .zy-chart-wipe { animation: none !important; transform: scaleX(1) !important; }
 }
+
+/* The cards of the home and analytics screens (board-style.ts). */
+${BOARD_CSS}
 
 /* The Beynoun palette, light and dark, the dashboard frame and the
    hardcoded-colour remaps. Last, so it re-points everything above. */

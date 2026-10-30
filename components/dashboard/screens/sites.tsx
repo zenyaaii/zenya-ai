@@ -70,7 +70,7 @@ export function SitesScreen({
               )}
               <span className="absolute top-3" style={{ insetInlineStart: '0.75rem' }}>
                 {/* Solid white over a picture, so the state reads on any cover. */}
-                <span className="zy-pill" data-tone={s.live ? 'ok' : 'warn'} style={s.cover ? { background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.18)' } : undefined}>{s.live ? 'مباشر' : 'مسوّدة'}</span>
+                <span className="zy-pill" data-tone={s.live ? 'ok' : 'warn'} style={s.cover ? { background: 'var(--card)', boxShadow: '0 1px 3px rgba(0,0,0,0.18)' } : undefined}>{s.live ? 'مباشر' : 'مسوّدة'}</span>
               </span>
             </div>
             <div className="flex min-w-0 flex-1 flex-col p-4">

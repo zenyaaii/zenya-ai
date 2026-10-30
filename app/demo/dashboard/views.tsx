@@ -10,7 +10,7 @@
  * switch views or do nothing: this page signs nobody in.
  */
 
-import { HomeScreen } from '@/components/dashboard/screens/home'
+import { HomeScreen, type StartStep } from '@/components/dashboard/screens/home'
 import { SitesScreen, type SiteFilter } from '@/components/dashboard/screens/sites'
 import { GalleryScreen } from '@/components/dashboard/screens/gallery'
 import { AnalyticsScreen, type MetricKey, type RangeKey } from '@/components/dashboard/screens/analytics'
@@ -21,35 +21,69 @@ import { DomainsScreen } from '@/components/dashboard/screens/domains'
 import { BillingScreen } from '@/components/dashboard/screens/billing'
 import { SettingsScreen } from '@/components/dashboard/screens/settings'
 import { ReviewsScreen, type ReviewRow, type ReviewSource } from '@/components/dashboard/screens/reviews'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { TrafficCard, type TMetric, type TRange } from '@/components/dashboard/screens/traffic'
 import {
-  ASSETS, BOOKINGS, CHANNELS, DOMAINS, GSC_EMAIL, GSC_QUERIES, GSC_TOTALS, INVOICES, PAGES, PLAN_INCLUDES,
-  PREV_SERIES, SERIES, SEO_SITE, SITES, TOTALS,
+  ASSETS, BOOKINGS, CHANNELS, DOMAINS, GSC_EMAIL, GSC_QUERIES, GSC_TOTALS, HOME_TODAY, INVOICES, PAGES, PLAN_INCLUDES,
+  SEO_SITE, SITES, demoTraffic,
 } from './data'
 
 export function HomeView({ go }: { go: (v: string) => void }) {
   const to = (v: string) => ({ onClick: () => go(v) })
+  const [siteId, setSiteId] = useState('s1')
+  const [metric, setMetric] = useState<TMetric>('views')
+  const [range, setRange] = useState<TRange>('30d')
+  const [back, setBack] = useState(0)
+  const traffic = useMemo(() => demoTraffic(range, back), [range, back])
+  const yesterday = useMemo(() => demoTraffic('day', 1).totals.visitors, [])
+  const s = SITES.find((x) => x.id === siteId) || SITES[0]
+  const kind = KIND_COVER[s.kind]
+  // «ابدأ من هنا» on the sample account: ticks live for this visit only.
+  const [ticks, setTicks] = useState<Record<string, boolean>>({})
+  const onStart = (step: StartStep) => setTicks((x) => ({ ...x, [step]: true }))
   return (
     <HomeScreen
       name="نادية"
-      planLabel="Pro"
-      planTone="ok"
-      email="nadia@almadina.co"
-      stats={{
-        sites: SITES.length,
-        live: SITES.filter((s) => s.live).length,
-        views: SITES.reduce((a, s) => a + s.views, 0),
-        bookings: BOOKINGS.length,
+      sites={SITES.map((x) => ({ id: x.id, name: x.name }))}
+      onSite={setSiteId}
+      site={{
+        id: s.id, name: s.name, live: s.live, host: s.host, url: s.host ? `https://${s.host}` : null,
+        updated: s.updated, kind: s.kind,
+        image: kind && kind !== 'collective' ? `/theme-previews/phone/${kind}.webp` : null,
+        edit: {}, open: {},
       }}
-      recent={SITES.map((s) => ({ id: s.id, name: s.name, host: s.host, live: s.live }))}
-      allSites={to('sites')}
-      quick={{ newSite: to('sites'), domains: to('domains'), gallery: to('gallery'), analytics: to('analytics') }}
+      newBookings={s.id === 's1' ? 2 : 0}
+      yesterdayVisitors={s.live ? yesterday : null}
+      traffic={
+        <TrafficCard
+          data={traffic}
+          metric={metric} onMetric={setMetric}
+          range={range} onRange={setRange}
+          back={back} onBack={setBack}
+        />
+      }
+      today={s.id === 's1' ? HOME_TODAY : { list: [], tomorrow: [], week: 0 }}
+      widgets={{
+        domain: s.id === 's1' ? { host: 'almadina.ae', state: 'live' } : null,
+        google: s.id === 's1' ? { clicks: GSC_TOTALS.clicks, position: 1.2, query: 'مطعم المدينة' } : 'connect',
+        reviews: s.id === 's1' ? { rating: 4.7, count: 128, fresh: 1 } : 'add',
+      }}
+      start={ticks.hide ? null : {
+        edited: !!ticks.edit,
+        domain: s.id === 's1' ? 'live' : null,
+        shared: !!ticks.share,
+      }}
+      onStart={onStart}
       launch={[
         { label: 'أنشئ موقعك', done: true },
         { label: 'خصّص محتواك', done: true },
-        { label: 'انشُر موقعك', done: true },
+        { label: 'انشر موقعك', done: s.live },
         { label: 'اربط نطاقك', done: false },
       ]}
+      links={{
+        bookings: to('bookings'), analytics: to('analytics'), gallery: to('gallery'), seo: to('seo'),
+        domains: to('domains'), reviews: to('reviews'), newSite: to('sites'), publish: to('sites'),
+      }}
     />
   )
 }
@@ -81,17 +115,21 @@ export function AnalyticsView({
   metric, setMetric, range, setRange,
 }: {
   metric: MetricKey; setMetric: (m: MetricKey) => void
-  range: string; setRange: (r: string) => void
+  range: RangeKey; setRange: (r: RangeKey) => void
 }) {
+  const [back, setBack] = useState(0)
+  const traffic = useMemo(() => demoTraffic(range, back), [range, back])
+  // The sample lists are a month's worth; a shorter window shows a share.
+  const k = range === 'day' ? 0.03 : range === '7d' ? 0.24 : range === '30d' ? 1 : range === '90d' ? 2.9 : 11.6
+  const scale = (rows: typeof CHANNELS) => rows.map((r) => ({ ...r, views: Math.max(1, Math.round(r.views * k)) }))
   return (
     <AnalyticsScreen
       metric={metric} setMetric={setMetric}
-      range={range as RangeKey} setRange={setRange}
-      totals={TOTALS}
-      deltas={{ visitors: 16.3, sessions: 19.8, views: 24.7, events: 31.2 }}
-      series={SERIES} prevSeries={PREV_SERIES}
-      channels={CHANNELS} pages={PAGES}
-      avgDuration="1 د 36 ث" avgDurationDelta={8.1}
+      range={range} setRange={setRange}
+      back={back} setBack={setBack}
+      traffic={traffic}
+      channels={scale(CHANNELS)} pages={scale(PAGES)}
+      avgDuration="1 د 36 ث" avgDurationDelta={range === 'day' ? null : 8.1}
       searchConsole={
         <GscNumbers
           status="ok"
@@ -189,7 +227,7 @@ const SAMPLE_REVIEWS: ReviewRow[] = [
   { id: 'n2', name: 'Dana K.', rating: 4, origin: 'google', at: todayAt(20, 40, 1), isNew: true, shown: false, text: 'خدمة ممتازة والموظفات محترفات. تمنيت لو المواعيد المسائية أكثر.' },
   { id: 'g1', name: 'Noura A.', rating: 5, origin: 'google', when: 'قبل أسبوع', shown: true, text: 'أفضل مركز جربته في الرياض. الأخصائية فاهمة شغلها وتسمع لك قبل ما تبدأ.' },
   { id: 'g2', name: 'منى الشهري', rating: 5, origin: 'google', when: 'قبل شهر', shown: true, text: 'نظافة وراحة وأسعار معقولة. رجعت له ثلاث مرات.' },
-  { id: 'g3', name: 'Lama', rating: 3, origin: 'google', when: 'قبل شهرين', shown: false, text: 'الخدمة حلوة لكن انتظرت ٢٠ دقيقة بعد موعدي.' },
+  { id: 'g3', name: 'Lama', rating: 3, origin: 'google', when: 'قبل شهرين', shown: false, text: 'الخدمة حلوة لكن انتظرت 20 دقيقة بعد موعدي.' },
   { id: 'g4', name: 'هيفاء', rating: 5, origin: 'google', when: 'قبل 3 أشهر', shown: true, text: 'جلسة الحجامة كانت مريحة جدًا والموظفات لطيفات.' },
   { id: 'm1', name: 'سارة القحطاني', rating: 5, origin: 'manual', shown: true, text: 'جلسة المساج كانت ممتازة، والمكان هادئ ونظيف. أنصح فيه بقوة.' },
   { id: 'm2', name: 'ريم', rating: 4, origin: 'manual', shown: false, text: 'التعامل راقي والمواعيد مضبوطة، بس المواقف قليلة.' },

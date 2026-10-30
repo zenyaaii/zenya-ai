@@ -45,7 +45,7 @@ export const DASH_THEME_CSS = `
    "html " in front on purpose: the cookie banner, mounted in the root layout,
    injects the product token block again AFTER this stylesheet, and at equal
    specificity the later one wins. One element more keeps this one on top. */
-html .zy-app, html .zy-dash {
+html .zy-app, html .zy-dash, html.dash-on .zy-cookie {
   --ground: #F4EFE6;
   --background: #F4EFE6;
   --ground-2: #EFE9DE;
@@ -91,6 +91,8 @@ html .zy-app, html .zy-dash {
   --success-ring: rgb(31 110 68 / 0.22);
   --warning-ring: rgb(138 90 6 / 0.22);
   --error-ring: rgb(176 46 37 / 0.22);
+  --blue: #2B6CA8;
+  --blue-fill: rgb(43 108 168 / 0.12);
 
   --ring-1: 0 0 0 1px rgb(22 18 13 / 0.08);
   --ring-2: 0 18px 40px -30px rgb(22 18 13 / 0.30);
@@ -113,7 +115,7 @@ html .zy-app, html .zy-dash {
   --font-head: "Thm Display", var(--font-amiri), "Amiri", serif;
   --font-chrome: "Thm Text", var(--font-markazi), "Markazi Text", Tajawal, serif;
 
-  --side: 248px;
+  --side: 280px;
   --top: 64px;
   --dock: 64px;
   --gut: 16px;
@@ -122,7 +124,7 @@ html .zy-app, html .zy-dash {
 }
 
 /* ---- the palette, dark ----------------------------------------------- */
-html.dash-dk .zy-app, html.dash-dk .zy-dash {
+html.dash-dk .zy-app, html.dash-dk .zy-dash, html.dash-dk .zy-cookie {
   --ground: #0F0D0A;
   --background: #0F0D0A;
   --ground-2: #13110E;
@@ -168,6 +170,8 @@ html.dash-dk .zy-app, html.dash-dk .zy-dash {
   --success-ring: rgb(76 179 122 / 0.30);
   --warning-ring: rgb(224 164 58 / 0.30);
   --error-ring: rgb(227 106 95 / 0.30);
+  --blue: #6FA8DD;
+  --blue-fill: rgb(111 168 221 / 0.15);
 
   --ring-1: 0 0 0 1px rgb(244 239 230 / 0.08);
   --ring-2: 0 18px 40px -28px rgb(0 0 0 / 0.80);
@@ -187,6 +191,13 @@ html.dash-dk .zy-app, html.dash-dk .zy-dash {
 html.dash-on, html.dash-on body { background: #F4EFE6; }
 html.dash-on.dash-dk, html.dash-on.dash-dk body { background: #0F0D0A; color-scheme: dark; }
 
+/* The cookie banner sits in the root layout, inside no shell. On a
+   dashboard page it takes the dashboard palette (the selectors above), and
+   its white card and violet button follow it here. */
+html.dash-on .zy-cookie { background: var(--card); box-shadow: var(--shadow-pop); }
+html.dash-on .zy-cookie [class~="bg-primary"] { color: var(--ground); background: var(--obsidian); }
+html.dash-on .zy-cookie [class~="bg-background"] { background: var(--surface-2); }
+
 /* ---- the faces --------------------------------------------------------- */
 .zy-app, .zy-dash {
   font-family: var(--font-chrome);
@@ -204,43 +215,47 @@ html.dash-on.dash-dk, html.dash-on.dash-dk body { background: #0F0D0A; color-sch
    light-only restyle: text-[#171717], bg-white and friends. Until each
    screen is rebuilt they are mapped onto the tokens here, so the cream and
    the dark palette both reach them. Attribute selectors, so the class
-   names need no escaping and the rule (two parts) outranks the utility. */
-:is(.zy-app, .zy-dash) [class~="text-[#171717]"] { color: var(--obsidian); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#56565a]"], [class~="text-[#3a3a40]"]) { color: var(--stone); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#66666e]"], [class~="text-[#8a8a92]"], [class~="text-[#8f8f8f]"]) { color: var(--stone-2); }
-:is(.zy-app, .zy-dash) [class~="text-[#5e6ad2]"] { color: var(--violet); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#15803d]"], [class~="text-[#1f8a4c]"]) { color: var(--success); }
-:is(.zy-app, .zy-dash) :is([class~="text-[#d6453d]"], [class~="text-[#c0362c]"], [class~="text-[#b91c1c]"]) { color: var(--error); }
-:is(.zy-app, .zy-dash) [class~="text-[#b45309]"] { color: var(--warning); }
-:is(.zy-app, .zy-dash) [class~="text-[#b9c0ff]"] { color: var(--acc); }
-:is(.zy-app, .zy-dash) :is([class~="text-[rgba(17,17,17,0.18)]"], [class~="text-[rgba(17,17,17,0.17)]"]) { color: rgb(var(--ink-rgb) / 0.2); }
-html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; }
+   names need no escaping and the rule (two parts) outranks the utility.
+   The scope element itself is matched too: a popover or dialog portalled
+   out of the shell carries zy-dash and its own bg-white on one element,
+   and a descendant-only rule left it white in dark mode. */
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#171717]"] { color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#56565a]"], [class~="text-[#3a3a40]"]) { color: var(--stone); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#66666e]"], [class~="text-[#8a8a92]"], [class~="text-[#8f8f8f]"]) { color: var(--stone-2); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#5e6ad2]"] { color: var(--violet); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#15803d]"], [class~="text-[#1f8a4c]"]) { color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[#d6453d]"], [class~="text-[#c0362c]"], [class~="text-[#b91c1c]"]) { color: var(--error); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#b45309]"] { color: var(--warning); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#b9c0ff]"] { color: var(--acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="text-[rgba(17,17,17,0.18)]"], [class~="text-[rgba(17,17,17,0.17)]"]) { color: rgb(var(--ink-rgb) / 0.2); }
+html.dash-dk :is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="text-[#1a0dab]"] { color: #8AB4F8; }
 
-:is(.zy-app, .zy-dash) [class~="bg-white"] { background-color: var(--card); }
-:is(.zy-app, .zy-dash) [class~="bg-white/85"] { background-color: color-mix(in srgb, var(--card) 85%, transparent); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[#f4f4f6]"], [class~="bg-[#fafaf7]"], [class~="bg-[#fafafa]"]) { background-color: var(--surface-2); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(28,28,28,0.04)]"] { background-color: rgb(var(--ink-rgb) / 0.04); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(28,28,28,0.06)]"], [class~="bg-[rgba(17,17,17,0.05)]"], [class~="bg-black/5"], [class~="bg-black/[0.05]"], [class~="bg-black/[0.04]"]) { background-color: rgb(var(--ink-rgb) / 0.06); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(28,28,28,0.18)]"] { background-color: rgb(var(--ink-rgb) / 0.18); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(94,106,210,0.10)]"], [class~="bg-[rgba(94,106,210,0.08)]"]) { background-color: var(--violet-fill); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[rgba(21,128,61,0.10)]"], [class~="bg-[#e8f5ec]"]) { background-color: var(--success-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[rgba(217,119,6,0.10)]"] { background-color: var(--warning-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[#fdecea]"] { background-color: var(--error-fill); }
-:is(.zy-app, .zy-dash) [class~="bg-[#15803d]"] { background-color: var(--success); }
-:is(.zy-app, .zy-dash) [class~="bg-[#d6453d]"] { background-color: var(--acc); }
-:is(.zy-app, .zy-dash) [class~="bg-[#171717]"] { background-color: var(--obsidian); }
-:is(.zy-app, .zy-dash) :is([class~="bg-[#171717]"], [class~="bg-[#15803d]"])[class~="text-white"] { color: var(--ground); }
-:is(.zy-app, .zy-dash) [class~="border-[#15803d]"] { border-color: var(--success); }
-:is(.zy-app, .zy-dash) [class~="border-[#d4d4d8]"] { border-color: var(--border-strong); }
-:is(.zy-app, .zy-dash) :is([class~="border-[rgba(17,17,17,0.07)]"], [class~="border-black/5"]) { border-color: rgb(var(--ink-rgb) / 0.08); }
-:is(.zy-app, .zy-dash) [class~="border-[rgba(17,17,17,0.14)]"] { border-color: rgb(var(--ink-rgb) / 0.14); }
-:is(.zy-app, .zy-dash) [class~="border-[rgba(28,28,28,0.25)]"] { border-color: rgb(var(--ink-rgb) / 0.25); }
-:is(.zy-app, .zy-dash) :is([class~="divide-[rgba(17,17,17,0.07)]"], [class~="divide-[rgba(17,17,17,0.06)]"]) > * + * { border-color: rgb(var(--ink-rgb) / 0.08); }
-:is(.zy-app, .zy-dash) [class~="ring-[#171717]"] { --tw-ring-color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-white"] { background-color: var(--card); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-white/85"] { background-color: color-mix(in srgb, var(--card) 85%, transparent); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[#f4f4f6]"], [class~="bg-[#fafaf7]"], [class~="bg-[#fafafa]"]) { background-color: var(--surface-2); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(28,28,28,0.04)]"] { background-color: rgb(var(--ink-rgb) / 0.04); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(28,28,28,0.06)]"], [class~="bg-[rgba(17,17,17,0.05)]"], [class~="bg-black/5"], [class~="bg-black/[0.05]"], [class~="bg-black/[0.04]"]) { background-color: rgb(var(--ink-rgb) / 0.06); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(28,28,28,0.18)]"] { background-color: rgb(var(--ink-rgb) / 0.18); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(94,106,210,0.10)]"], [class~="bg-[rgba(94,106,210,0.08)]"]) { background-color: var(--violet-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[rgba(21,128,61,0.10)]"], [class~="bg-[#e8f5ec]"]) { background-color: var(--success-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[rgba(217,119,6,0.10)]"] { background-color: var(--warning-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#fdecea]"] { background-color: var(--error-fill); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#15803d]"] { background-color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#d6453d]"] { background-color: var(--acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#171717]"] { background-color: var(--obsidian); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="bg-[#171717]"], [class~="bg-[#15803d]"])[class~="text-white"] { color: var(--ground); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="bg-[#d6453d]"][class~="text-white"] { color: var(--on-acc); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[#15803d]"] { border-color: var(--success); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[#d4d4d8]"] { border-color: var(--border-strong); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="border-[rgba(17,17,17,0.07)]"], [class~="border-black/5"]) { border-color: rgb(var(--ink-rgb) / 0.08); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[rgba(17,17,17,0.14)]"] { border-color: rgb(var(--ink-rgb) / 0.14); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="border-[rgba(28,28,28,0.25)]"] { border-color: rgb(var(--ink-rgb) / 0.25); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="divide-[rgba(17,17,17,0.07)]"], [class~="divide-[rgba(17,17,17,0.06)]"]) > * + * { border-color: rgb(var(--ink-rgb) / 0.08); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="ring-[#171717]"] { --tw-ring-color: var(--obsidian); }
 @media (hover: hover) {
-  :is(.zy-app, .zy-dash) :is([class~="hover:bg-[#f4f4f6]"], [class~="hover:bg-black/5"], [class~="hover:bg-black/[0.04]"]):hover { background-color: rgb(var(--ink-rgb) / 0.06); }
+  :is(.zy-app, .zy-dash, .zy-app *, .zy-dash *):is([class~="hover:bg-[#f4f4f6]"], [class~="hover:bg-black/5"], [class~="hover:bg-black/[0.04]"]):hover { background-color: rgb(var(--ink-rgb) / 0.06); }
 }
-:is(.zy-app, .zy-dash) [class~="focus-visible:bg-[#f4f4f6]"]:focus-visible { background-color: rgb(var(--ink-rgb) / 0.06); }
+:is(.zy-app, .zy-dash, .zy-app *, .zy-dash *)[class~="focus-visible:bg-[#f4f4f6]"]:focus-visible { background-color: rgb(var(--ink-rgb) / 0.06); }
 
 /* The chrome controls take the ink, not the accent: one filled ink pill
    is the primary action, the accent is kept for "you are here". */
@@ -260,8 +275,9 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 
 /* ======================================================================
    THE FRAME
-   Laptop (1024+): a fixed side rail on the inline-start edge, the page
-   beside it. Phone and tablet: a sticky top bar and a floating dock at the
+   Laptop (1024+): a dark panel floating on the inline-start edge, round
+   cornered and inset from the window, the page beside it. It stays ink in
+   both themes, the way the phone dock does. Phone and tablet: a sticky top bar and a floating dock at the
    bottom with the four most-used pages and "More", which opens a sheet
    holding the full list. The document scrolls in both, so pinch-zoom pans.
    Layers: header 30 · dock and rail 40 · popover 50 · scrim 60 · sheet 61 ·
@@ -272,22 +288,36 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 
 /* ---- the rail -------------------------------------------------------- */
 .zf-side {
+  --rail-bg: #16120D;
+  --rail-fg: rgb(244 239 230 / 0.66);
+  --rail-fg-hi: #F4EFE6;
+  --rail-soft: rgb(244 239 230 / 0.08);
+  --rail-on: #F4EFE6;
+  --rail-on-fg: #16120D;
   position: fixed; z-index: 40;
-  inset-block: 0; inset-inline-start: 0;
-  width: var(--side);
+  inset-block: 14px; inset-inline-start: 14px;
+  width: calc(var(--side) - 28px);
   display: none; flex-direction: column;
-  padding: 18px 14px 14px;
-  background: var(--ground-2);
-  box-shadow: inset -1px 0 0 rgb(var(--ink-rgb) / 0.08);
+  padding: 20px 12px 14px;
+  border-radius: 28px;
+  color: var(--rail-fg);
+  background: var(--rail-bg);
+  box-shadow: 0 24px 48px -24px rgb(22 18 13 / 0.55);
 }
-[dir="rtl"] .zf-side { box-shadow: inset 1px 0 0 rgb(var(--ink-rgb) / 0.08); }
+/* On the dark ground the panel lifts by a shade and a hairline. */
+html.dash-dk .zf-side {
+  --rail-bg: #221E19;
+  box-shadow: 0 0 0 1px rgb(244 239 230 / 0.08), 0 24px 48px -24px rgb(0 0 0 / 0.8);
+}
 @media (min-width: 1024px) { .zf-side { display: flex; } }
 
 .zf-logo { display: flex; align-items: center; height: 40px; padding-inline: 10px; color: var(--obsidian); }
+.zf-side .zf-logo { color: var(--rail-fg-hi); }
 .zf-logo svg { height: 22px; width: auto; }
 .zf-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 8px -6px 0; padding: 0 6px; scrollbar-width: none; }
 .zf-scroll::-webkit-scrollbar { display: none; }
 .zf-label { padding: 18px 12px 6px; font-size: 13px; font-weight: 700; line-height: 1.4; color: var(--stone-2); }
+.zf-side .zf-label { color: rgb(244 239 230 / 0.52); }
 .zf-nav { display: flex; flex-direction: column; gap: 2px; }
 .zf-row {
   position: relative;
@@ -311,6 +341,14 @@ html.dash-dk :is(.zy-app, .zy-dash) [class~="text-[#1a0dab]"] { color: #8AB4F8; 
 }
 html.dash-dk .zf-row[aria-current="page"] { box-shadow: 0 0 0 1px rgb(var(--ink-rgb) / 0.10); }
 .zf-row[aria-current="page"] svg { color: var(--acc); }
+/* The rail's rows: cream on ink, and "you are here" is a cream pill. */
+.zf-side .zf-row { color: var(--rail-fg); }
+.zf-side .zf-row svg { color: currentColor; }
+.zf-side .zf-row[aria-current="page"] { color: var(--rail-on-fg); background: var(--rail-on); box-shadow: none; }
+.zf-side .zf-row[aria-current="page"] svg { color: var(--acc); }
+@media (hover: hover) {
+  .zf-side .zf-row:not([aria-current="page"]):hover { color: var(--rail-fg-hi); background: var(--rail-soft); }
+}
 .zf-row:focus-visible, .zf-dock-b:focus-visible, .zf-search:focus-visible, .zf-back:focus-visible {
   outline: 2px solid var(--violet); outline-offset: 2px;
 }
@@ -332,7 +370,14 @@ html.dash-dk .zf-row[aria-current="page"] { box-shadow: 0 0 0 1px rgb(var(--ink-
   font-size: 14.5px; font-weight: 500; color: var(--stone-2);
 }
 @media (hover: hover) { .zf-back:hover { color: var(--obsidian); } }
-.zf-foot .zy-report { padding-inline: 4px; }
+.zf-side .zf-new { color: var(--rail-on-fg); background: var(--rail-on); }
+.zf-side .zf-back { color: rgb(244 239 230 / 0.56); }
+@media (hover: hover) {
+  .zf-side .zf-new:hover { background: #fff; }
+  .zf-side .zf-back:hover { color: var(--rail-fg-hi); }
+}
+/* The report bubble is ink, like the rail it sits on: flip it to cream. */
+.zf-side [class~="bg-[#171717]"] { --obsidian: #F4EFE6; --ground: #16120D; }
 
 /* ---- the page column --------------------------------------------------- */
 .zf-main { min-width: 0; padding-bottom: calc(var(--dock) + 40px + env(safe-area-inset-bottom)); }

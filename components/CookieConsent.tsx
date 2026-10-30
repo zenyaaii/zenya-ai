@@ -103,7 +103,7 @@ export default function CookieConsent() {
          and a 25-blur drop shadow under a panel that is already separated
          from the page by being fixed to the bottom of it was never doing
          work. */
-      className="zy-tokens fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:bottom-6 sm:inset-x-6"
+      className="zy-tokens zy-cookie fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:bottom-6 sm:inset-x-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex-1">

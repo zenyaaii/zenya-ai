@@ -134,3 +134,18 @@ export type TabKey =
   | 'search'
   | 'realtime'
   | 'insights'
+
+/** /api/analytics/day — one day by hour, next to the same day a week earlier. */
+export type DayPayload = {
+  date: string
+  prev_date: string
+  tz: string
+  /** Hours that have happened: 24 for a past day, the current hour + 1 today. */
+  upto: number
+  hours: Record<'views' | 'visitors' | 'sessions' | 'events', number[]>
+  prev_hours: Record<'views' | 'visitors' | 'sessions' | 'events', number[]>
+  totals: Record<'views' | 'visitors' | 'sessions' | 'events', number>
+  prev_totals: Record<'views' | 'visitors' | 'sessions' | 'events', number>
+  delta: Record<'views' | 'visitors' | 'sessions' | 'events', number | null>
+  partial: boolean
+}
