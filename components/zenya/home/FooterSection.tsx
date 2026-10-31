@@ -1,9 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import ZenyaMark from "@/components/ZenyaMark"
+import PricingFooter from "../pricing/PricingFooter"
 import { useFit } from "./runner"
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -27,6 +25,13 @@ import { useFit } from "./runner"
    there is a light in the band to explain it. ادر has one. This screen has
    none, and inventing one to buy a paper ground would be adding colour to the
    page for the sake of a transition.
+
+   ── IT IS THE SAME FOOTER EVERY OTHER PAGE ENDS ON. This screen used to
+   carry its own copy: a white pill for the call to action, a grey address,
+   ringed icons, two columns of lists on a phone. The owner read that as a
+   different footer, which it was. It now renders PricingFooter in its bare
+   form (no cap of its own, since this panel is already the obsidian ground)
+   and scales it to fit the screen, so a change to that footer lands here too.
 
    ── NOTHING HERE IS INVENTED. Every route was checked against the app tree,
    the address is the one the product already answers on, the company line is
@@ -77,39 +82,6 @@ export function ThreadsIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-/* The columns. Every href was checked against the app tree; nothing here
-   points at a page that has not been built. */
-const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string }> }> = [
-  {
-    head: "المنتج",
-    links: [
-      { href: "/templates", label: "تصفّح القوالب" },
-      { href: "/features", label: "الميزات" },
-      { href: "/templates/restaurant", label: "موقع مطعم" },
-      { href: "/pricing", label: "الأسعار" },
-      { href: "/compare", label: "المقارنات" },
-    ],
-  },
-  {
-    head: "الشركة",
-    links: [
-      { href: "/about", label: "من نحن" },
-      { href: "/faq", label: "الأسئلة الشائعة" },
-      { href: "/contact", label: "تواصل معنا" },
-    ],
-  },
-  {
-    head: "قانوني",
-    links: [
-      { href: "/privacy", label: "الخصوصية" },
-      { href: "/terms", label: "الشروط" },
-      { href: "/cookies", label: "ملفات الارتباط" },
-      { href: "/refund", label: "الاسترجاع" },
-      { href: "/subprocessors", label: "المعالِجون الفرعيون" },
-    ],
-  },
-]
-
 /* Beynoun's accounts. The contact page and the pricing footer use this same
    list, and app/layout.tsx repeats the URLs in sameAs, so change them together. */
 export const SOCIALS = [
@@ -120,121 +92,23 @@ export const SOCIALS = [
   { label: "Threads", href: "https://www.threads.com/@beynoun", Icon: ThreadsIcon },
 ]
 
-export default function FooterSection({
-  active,
-  uiClass,
-}: {
-  active: boolean
-  uiClass: string
-}) {
+export default function FooterSection({ uiClass }: { uiClass: string }) {
   const stageRef = useRef<HTMLDivElement | null>(null)
   const fitRef = useRef<HTMLDivElement | null>(null)
 
-  /* The same fit pass the other three sections use: the card is laid out at
-     its natural size, measured, and scaled by whatever ratio makes it sit
-     inside the screen. Four columns and a bottom bar is the tallest thing on
-     this deck on a phone, and nothing on this page is ever cut. */
+  /* The same fit pass the other three sections use: the footer is laid out
+     at its natural size, measured, and scaled by whatever ratio makes it sit
+     inside the screen. On a phone that is about 0.58, which is the trade the
+     owner chose over letting this one screen scroll. */
   useFit(stageRef, fitRef, [])
-
-  /* Formatted at render rather than at module load: the Node build here ships
-     a small ICU and answers with a different digit than a browser with a full
-     one, which is the trap section three already records. */
-  const year = new Date().getFullYear()
 
   return (
     <div className={`${uiClass} zn-close`} dir="rtl" ref={stageRef}>
       <div className="zn-closebox">
         <div className="zn-fit" ref={fitRef}>
-          {/* data-run carries the ARRIVAL, so at rest there is no attribute at
-              all and the card is already in its finished state. A browser that
-              never runs the animation still reads a complete footer. */}
-          <div className="zn5-stack" data-run={active || undefined}>
-          {/* The signature. Every other screen on this deck stands a display
-              word behind its object; this one has no fourth word, so what
-              stands behind it is the name. It says nothing and argues nothing
-              — which is the only thing this screen is entitled to do — and it
-              is the real footer's own device, where the mark is stretched
-              across the foot of the page. Without it the card floats in the
-              middle of an empty screen and reads as a card rather than as the
-              end of something. */}
-          <div className="zn5-sig" aria-hidden style={{ "--d": 0 } as React.CSSProperties}>
-            <ZenyaMark />
-          </div>
-
-          <footer className="zn5-card">
-            {/* The light on the card, which is the one thing the reference
-                composition and this page's own dark sections already agree on:
-                a surface on a dark ground is lit from above. Painted as a wash
-                on its own layer rather than into the background, so the card
-                keeps the hairline material ادر settled on. */}
-            <span className="zn5-sheen" aria-hidden />
-
-            <div className="zn5-body">
-              <div className="zn5-cols">
-                <div className="zn5-brand" style={{ "--d": 1 } as React.CSSProperties}>
-                  <Link href="/?home=1" aria-label="بينون" className="zn5-mark">
-                    <ZenyaMark className="h-[22px]" />
-                  </Link>
-
-                  {/* The page's ONE claim, not a second one written for the
-                      foot of it. Nothing else on this page argues, and the
-                      footer is not the place to start. */}
-                  <p className="zn5-claim">
-                    أوّل شركة إسلامية لإنشاء المواقع. اكتب نبذة عن
-                    نشاطك، واحصل على موقع مباشر بعنوانه الخاص.
-                  </p>
-
-                  {/* /templates, not /build: /build is the admin-only Shopify
-                      builder, and starting means picking a template. */}
-                  <Link href="/templates" className="zn5-cta">
-                    <span>ابدأ الإنشاء</span>
-                    <ArrowLeft className="ic" strokeWidth={1.6} aria-hidden />
-                  </Link>
-
-                  <a className="zn5-mail" href="mailto:team@beynoun.com" dir="ltr">
-                    team@beynoun.com
-                  </a>
-                </div>
-
-                {COLUMNS.map((col, i) => (
-                  <div key={col.head} className="zn5-col" style={{ "--d": i + 2 } as React.CSSProperties}>
-                    {/* No tracking on the heading. The reference letter-spaces
-                        its uppercase labels; Arabic has no upper case and its
-                        letters connect, so tracking a heading here pulls the
-                        joins apart — the hero's own rule, arriving at a
-                        twelve-pixel label. */}
-                    <h3>{col.head}</h3>
-                    <ul>
-                      {col.links.map((l) => (
-                        <li key={l.href}>
-                          <Link href={l.href}>{l.label}</Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              <div className="zn5-bottom" style={{ "--d": 5 } as React.CSSProperties}>
-                <div className="zn5-social">
-                  {SOCIALS.map(({ label, href, Icon }) => (
-                    <a
-                      key={label}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                    >
-                      <Icon />
-                    </a>
-                  ))}
-                </div>
-                <p className="zn5-legal">
-                  © {year} بينون. تُدار كمؤسسة فردية هولندية. جميع الحقوق محفوظة.
-                </p>
-              </div>
-            </div>
-          </footer>
+          {/* The measured child. useFit reads the first element inside .zn-fit. */}
+          <div>
+            <PricingFooter bare />
           </div>
         </div>
       </div>
