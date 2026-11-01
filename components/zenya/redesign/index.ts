@@ -8,8 +8,11 @@ import * as s7 from './s7'
 import * as s8 from './s8'
 import * as s9 from './s9'
 import * as s10 from './s10'
+import * as s11 from './s11'
 
-export const STYLES: Record<string, { Home: () => JSX.Element; Pricing: () => JSX.Element }> = {
+type Style = { Home: () => JSX.Element; Pricing: () => JSX.Element; Templates?: () => JSX.Element; Contact?: () => JSX.Element }
+
+export const STYLES: Record<string, Style> = {
   '1': s1,
   '2': s2,
   '3': s3,
@@ -20,4 +23,6 @@ export const STYLES: Record<string, { Home: () => JSX.Element; Pricing: () => JS
   '8': s8,
   '9': s9,
   '10': s10,
+  '11': { Home: s11.Home, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage },
+  '11b': { Home: s11.HomeB, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage },
 }

@@ -6,7 +6,7 @@
 import { Root, Header, Vid, Stars, FooterLinks, Contact, Socials, Mark, Check, Plus } from './base'
 import { HERO, REVIEWS, REVIEWS_NOTE, DASH_D, DASH_M, EDIT_D, EDIT_M, DASH_FEATURES, EDIT_STEPS, TEMPLATES, phoneShot, FAQS, PRICING_FAQS, PRICING_HEAD, PLANS, FOOTER } from './data'
 
-const CSS = `
+export const CSS = `
 .s1{--glass:rgba(26,23,19,.55);--glass-line:rgba(244,239,230,.12);--glow:rgba(226,83,42,.55)}
 .s1[data-mode="light"]{--glass:rgba(255,253,249,.6);--glass-line:rgba(22,18,13,.1);--glow:rgba(226,83,42,.35)}
 .s1 .glass{background:var(--glass);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2)}

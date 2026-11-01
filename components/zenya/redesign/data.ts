@@ -14,6 +14,7 @@
 import { COMPANY } from '@/lib/company'
 import { AR_FAQS } from '@/lib/faq-data'
 import { FAQS as PRICING_FAQS_SRC } from '@/lib/pricing-faqs'
+import { REVIEW_REWARD_PCT } from '@/lib/review-reward'
 
 export const CLAIM = 'أول منصة عربية بالكامل'
 
@@ -152,4 +153,97 @@ export const SECTIONS = {
   faq: 'أسئلة شائعة',
   gen: 'من سطرين إلى موقع كامل',
   genLead: 'تكتب ما تعرفه عن نشاطك بكلماتك. بينون تبني الباقي.',
+}
+
+/* Third set (2026-11-01): style 1, chosen, with the sections Anas asked for
+   and the parts of the live pricing, templates and contact pages it still
+   lacked. Everything below is copied from those live views. */
+
+/** The larger template previews (what /api/theme-preview resolves to). */
+const BIG_WEBP = ['lookbook', 'restaurant', 'services', 'studio', 'wellness']
+export const bigShot = (id: string) => `/theme-previews/${id}.${BIG_WEBP.includes(id) ? 'webp' : 'png'}`
+
+/* components/zenya/templates/TemplatesView.tsx (TEMPLATES), in its order. */
+export const TEMPLATE_META = [
+  { id: 'one_product', label: 'متجر', name: 'متجر بمنتج واحد', tag: 'متجر · منتج واحد', sections: 24, presets: 3, page: '/templates/one-product-store', demo: '/templates/one-product-store/demo', build: '/build', soon: true },
+  { id: 'restaurant', label: 'مطعم', name: 'موقع مطعم', tag: 'مطعم · قائمة · حجوزات', sections: 13, presets: 4, page: '/templates/restaurant', demo: '/templates/restaurant/demo', build: '/theme/new/restaurant' },
+  { id: 'atlas', label: 'تطبيق', name: 'صفحة هبوط لتطبيق', tag: 'تطبيق · برمجيات · B2B', sections: 12, presets: 4, page: '/templates/app-landing-page', demo: '/templates/app-landing-page/demo', build: '/theme/new/atlas' },
+  { id: 'lookbook', label: 'أزياء', name: 'موقع أزياء ولوك بوك', tag: 'أزياء · ملابس · علامة', sections: 11, presets: 4, page: '/templates/fashion-lookbook', demo: '/templates/fashion-lookbook/demo', build: '/theme/new/lookbook' },
+  { id: 'collective', label: 'تشكيلة', name: 'متجر بمنتجات متعددة', tag: 'كتالوج · منتجات متعددة', sections: 10, presets: 4, page: '/templates/online-store', demo: '/templates/online-store/demo', build: '/theme/new/collective' },
+  { id: 'studio', label: 'ستوديو', name: 'موقع علامة تجارية وقصة', tag: 'قصة علامة · تحرير', sections: 12, presets: 4, page: '/templates/brand-story', demo: '/templates/brand-story/demo', build: '/theme/new/studio' },
+  { id: 'services', label: 'خدمات', name: 'موقع خدمات', tag: 'خدمات محلية · حِرف', sections: 13, presets: 4, page: '/templates/services', demo: '/templates/services/demo', build: '/theme/new/services' },
+  { id: 'wellness', label: 'عافية', name: 'موقع مركز عافية', tag: 'سبا · يوغا · عافية', sections: 12, presets: 3, page: '/templates/wellness', demo: '/templates/wellness/demo', build: '/theme/new/wellness' },
+] as const
+export const TEMPLATES_HEAD = { l1: 'ثمانية قوالب.', l2: 'كلّها جاهزة للنشر.', sub: 'كل قالب موقع كامل بالعربية. تختار واحدًا، وتكتب نبذة عن نشاطك، وتكتب بينون الباقي. المعاينة مجانية.' }
+export const TEMPLATE_TOTALS = {
+  templates: TEMPLATE_META.length,
+  sections: TEMPLATE_META.reduce((n, t) => n + t.sections, 0),
+  presets: TEMPLATE_META.reduce((n, t) => n + t.presets, 0),
+}
+/* What is true of all eight (TemplatesView FLOOR). */
+export const FLOOR = [
+  { head: 'نصوص عربية جاهزة', body: 'تكتب نبذة قصيرة عن نشاطك، وتولّد بينون عناوين الموقع وأوصافه ودعواته بالعربية.' },
+  { head: 'عربي من اليمين', body: 'كل قالب مبني للعربية أصلًا: الاتجاه والخطوط والتباعد، ومتجاوب مع الجوال.' },
+  { head: 'ابدأ مجانًا', body: 'تصفّح القوالب الثمانية كاملة، وولّد أول قالبين دون أن تدفع شيئًا.' },
+  { head: 'استضافة ونطاق', body: 'استضافة داخل الاتحاد الأوروبي مع شهادة SSL، ونطاقك الخاص على الخطط المدفوعة.' },
+] as const
+
+/* PricingView COMPARE, verbatim. */
+const usdT = (n: number) => n.toFixed(2) + '$'
+export const COMPARE = [
+  { feature: 'السعر', zenya: ['مجانًا', usdT(COMPANY.STARTER_PRICE_USD), usdT(COMPANY.PRO_PRICE_USD)].join(' / '), other: '+29$ شهريًا', agency: '+2,000$' },
+  { feature: 'وقت الإعداد', zenya: 'أقل من 60 ثانية', other: 'دقائق', agency: 'أسابيع' },
+  { feature: 'القوالب', zenya: '8 قوالب', other: '1-2', agency: 'مخصّص' },
+  { feature: 'النشر مشمول', zenya: 'من الباقة المجانية', other: 'في معظمها', agency: 'تتولّاها بنفسك' },
+  { feature: 'نطاق مخصّص', zenya: 'من خطة Starter', other: 'في معظمها', agency: 'نعم' },
+  { feature: 'تصدير شوبيفاي', zenya: 'من خطة Starter', other: 'نادر', agency: 'مخصّص' },
+  { feature: 'الارتباط بالمنصّة', zenya: 'لا يوجد', other: 'مرتفع', agency: 'لا يوجد' },
+] as const
+
+/* CodeStack CARDS: one code you type, two discounts applied at checkout. */
+export const DISCOUNTS = {
+  head: 'ما الذي يخفّض الحساب',
+  sub: 'خصم واحد تُدخِله بنفسك، واثنان يُطبَّقان عند الدفع دون أن تفعل شيئًا.',
+  foot: 'عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.',
+  cards: [
+    { id: 'free-domain', kind: 'auto', chip: 'يُطبَّق تلقائيًا', figure: 'نطاق مجاني', figureSub: 'لسنة كاملة', body: 'مع خطة Pro، على الامتدادات الاقتصادية. يُخصم عند الشراء دون أي كود.' },
+    { id: 'review', kind: 'code', chip: 'كود تُدخِله بنفسك', figure: REVIEW_REWARD_PCT + '%', figureSub: 'على أول شهر', body: 'شاركنا رأيك الصادق عن بينون. الكود لك مهما كان رأيك، ودقيقة واحدة تكفي.', cta: { label: 'قيّمنا واحصل عليه', href: '/review' } },
+    { id: 'other-domains', kind: 'auto', chip: 'يُطبَّق تلقائيًا', figure: '30%', figureSub: 'على بقية النطاقات', body: 'مع خطة Pro، على أي نطاق آخر تشتريه بعد المجاني. يُخصم عند الشراء.' },
+  ],
+} as const
+export const WHY = { head: 'لماذا بينون', sub: 'نفس الموقع، وثلاث طرق لدفع ثمنه.', cols: ['بينون', 'منشئ آلي آخر', 'وكالة'] }
+
+/* ContactView: its topics, promises, and the register it prints. */
+export const CONTACT = {
+  eyebrow: 'تواصل معنا',
+  h1a: 'أخبِرنا بما', h1b: 'تبنيه',
+  lede: 'الدعم، أو طلبات القوالب، أو المبيعات، أو حتى مجرّد تحية. راسِلنا مباشرةً، أو اكتب لنا من هنا واختر موضوعك.',
+  promise: 'نردّ خلال يوم عمل واحد، ولمشتركي Pro الأولوية.',
+  chNote: 'البريد والهاتف يصلان إلى المالك مباشرةً. لا يوجد مركز اتصال ولا نظام تذاكر، وما يصل يُقرأ كما كُتب.',
+  topics: [
+    { id: 'support', label: 'الدعم', done: 'شكرًا لك. سنردّ خلال يوم عمل واحد، وغالبًا أسرع. تحقّق من مجلد البريد العشوائي إن لم تجد ردًّا.' },
+    { id: 'request', label: 'طلب قالب', done: 'تمّ استلام طلبك. نراجع طلبات القوالب كل يوم اثنين ونرفع الفئات الأكثر طلبًا إلى أعلى خارطة الطريق. سنراسلك عند إطلاق قالبك.' },
+    { id: 'review', label: 'مشاركة تجربة', done: '' },
+    { id: 'sales', label: 'المبيعات', done: 'شكرًا لك. سيتواصل معك أحد أعضاء الفريق خلال يوم عمل واحد لمناقشة احتياجاتك.' },
+    { id: 'other', label: 'شيء آخر', done: 'شكرًا لك، تمّ استلام رسالتك. سنردّ عليك قريبًا.' },
+  ],
+  reviewHand: 'التقييم يُكتب حيث تُختار النجوم أولًا، في قناة التقييم.',
+  placeholders: {
+    request: 'أي نوع من قوالب الأعمال سيساعد عملك؟ كن محدّدًا: «قالب صالون حلاقة» أفضل من «قالب خدمات».',
+    sales: 'ما حجم نشاطك، وما الذي تحتاجه من بينون؟',
+    other: 'أخبرنا قليلًا عمّا تحتاجه.',
+  },
+  maxMessage: 8000,
+  ownerSite: 'https://musannef.com', ownerLabel: 'musannef.com',
+  register: [
+    ['الاسم القانوني', COMPANY.LEGAL_NAME],
+    ['الشكل القانوني', COMPANY.ENTITY_TYPE],
+    ['رقم الغرفة التجارية (KvK)', COMPANY.KVK_NUMBER],
+    ['الرقم الضريبي (BTW)', COMPANY.VAT_NUMBER],
+    ['الدولة', COMPANY.COUNTRY],
+  ] as Array<[string, string]>,
+  registerNote: `بينون منتج تملكه وتشغّله ${COMPANY.LEGAL_NAME}. العنوان المسجَّل كامل متاح في السجل العام للغرفة التجارية الهولندية برقم KvK أعلاه، أو بطلب خطّي على البريد نفسه.`,
+  socialNote: 'نحن على خمس منصّات فقط، وهذه الحسابات الخمسة هي الوحيدة الرسمية. أي حساب آخر باسم بينون ليس منّا.',
+  footNote: `تصلنا رسالتك على ${COMPANY.SUPPORT_EMAIL} ونردّ من العنوان نفسه. إن كان الأمر عاجلًا، فالبريد والهاتف في الأعلى يصلان إلينا مباشرةً.`,
+  site: 'beynoun.com',
 }

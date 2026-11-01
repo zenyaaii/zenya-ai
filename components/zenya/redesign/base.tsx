@@ -8,6 +8,7 @@
  * That keeps the sample identical whether it is opened from the dev server or
  * exported to a static page for review.
  */
+import { MARK_VB, MARK_BODY, MARK_DOTS } from './mark'
 import type { ReactNode } from 'react'
 import ZenyaMark from '@/components/ZenyaMark'
 import { Moon, Sun, Menu, X, Star, Check, Plus, ArrowUpLeft } from 'lucide-react'
@@ -271,11 +272,11 @@ export function Stars({ n = 5 }: { n?: number }) {
   )
 }
 
-export function Header({ className = '' }: { className?: string }) {
+export function Header({ className = '', dots = false }: { className?: string; dots?: boolean }) {
   return (
     <header className={'h ' + className}>
       <div className="wrap h-in">
-        <a className="h-logo" href="/" aria-label="بينون"><Mark /></a>
+        <a className="h-logo" href="/" aria-label="بينون">{dots ? <MarkDots /> : <Mark />}</a>
         <nav className="h-nav" aria-label="الصفحات">
           {NAV.map((n) => <a key={n.href} href={n.href}>{n.label}</a>)}
         </nav>
@@ -379,5 +380,15 @@ export function Root({ id, mode, css, children }: { id: string; mode: 'light' | 
       {children}
       <script dangerouslySetInnerHTML={{ __html: RUNTIME }} />
     </div>
+  )
+}
+
+/** The wordmark with orange dots (logo pack, 2026-10-24). */
+export function MarkDots({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox={MARK_VB} role="img" aria-label="بينون" className={'mk ' + className} preserveAspectRatio="xMidYMid meet">
+      <path fillRule="evenodd" d={MARK_BODY} fill="currentColor" />
+      <path d={MARK_DOTS} fill="var(--dot,#E2532A)" />
+    </svg>
   )
 }
