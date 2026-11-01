@@ -10,7 +10,10 @@ import * as s9 from './s9'
 import * as s10 from './s10'
 import * as s11 from './s11'
 
-type Style = { Home: () => JSX.Element; Pricing: () => JSX.Element; Templates?: () => JSX.Element; Contact?: () => JSX.Element }
+type Style = {
+  Home: () => JSX.Element; Pricing: () => JSX.Element; Templates?: () => JSX.Element; Contact?: () => JSX.Element
+  Login?: (p: { mode?: 'signin' | 'signup' | 'forgot' }) => JSX.Element; Accounts?: () => JSX.Element
+}
 
 export const STYLES: Record<string, Style> = {
   '1': s1,
@@ -23,6 +26,6 @@ export const STYLES: Record<string, Style> = {
   '8': s8,
   '9': s9,
   '10': s10,
-  '11': { Home: s11.Home, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage },
-  '11b': { Home: s11.HomeB, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage },
+  '11': { Home: s11.Home, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage, Login: s11.Login, Accounts: s11.Accounts },
+  '11b': { Home: s11.HomeB, Pricing: s11.Pricing, Templates: s11.Templates, Contact: s11.ContactPage, Login: s11.Login, Accounts: s11.Accounts },
 }
