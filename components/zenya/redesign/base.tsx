@@ -8,7 +8,7 @@
  * That keeps the sample identical whether it is opened from the dev server or
  * exported to a static page for review.
  */
-import { MARK_VB, MARK_BODY, MARK_DOTS } from './mark'
+import { MARK_VB_FATHA, MARK_BODY, MARK_DOTS, MARK_FATHA } from './mark'
 import type { ReactNode } from 'react'
 import ZenyaMark from '@/components/ZenyaMark'
 import { Moon, Sun, Menu, X, Star, Check, Plus, ArrowUpLeft } from 'lucide-react'
@@ -383,12 +383,13 @@ export function Root({ id, mode, css, children }: { id: string; mode: 'light' | 
   )
 }
 
-/** The wordmark with orange dots (logo pack, 2026-10-24). */
+/** The wordmark with orange dots (logo pack, 2026-10-24) and the icon's fatha over the ب. */
 export function MarkDots({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox={MARK_VB} role="img" aria-label="بينون" className={'mk ' + className} preserveAspectRatio="xMidYMid meet">
+    <svg viewBox={MARK_VB_FATHA} role="img" aria-label="بينون" className={'mk ' + className} preserveAspectRatio="xMidYMid meet">
       <path fillRule="evenodd" d={MARK_BODY} fill="currentColor" />
       <path d={MARK_DOTS} fill="var(--dot,#E2532A)" />
+      <path d={MARK_FATHA} fill="var(--dot,#E2532A)" />
     </svg>
   )
 }

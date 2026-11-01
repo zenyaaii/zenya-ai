@@ -34,6 +34,12 @@ const READY = [...TEMPLATE_META.filter((t) => !('soon' in t && t.soon)), ...TEMP
 
 const CSS = `
 .s11 .mk{display:block}
+.rd.s11 .h-logo svg{height:24px}
+.rd.s11 .s1-fbrand>a svg{height:31px}
+.s11 .s1-fmark{height:clamp(100px,20vw,272px)}
+.s11 .s1-fmark svg{transform:translateY(52%)}
+.s11 .s1-fmark.vis svg{transform:translateY(6%)}
+.rd.shot.s11 .s1-fmark svg{transform:translateY(6%)!important}
 .s11 .h-in{transition:background-color .45s,border-color .45s}
 .s11-sec{position:relative;padding-block:88px}
 @media (min-width:900px){.s11-sec{padding-block:120px}}
@@ -232,7 +238,7 @@ const CSS = `
 .s11-tbl tbody tr:last-child>*{border-bottom:0}
 .s11-tbl .z{background:color-mix(in srgb,var(--acc) 11%,transparent);color:var(--ink);font-weight:600}
 .s11-tbl thead .z{border-radius:18px 18px 0 0;color:var(--ink)}
-.s11-tbl thead .z .mk{height:20px;width:auto}
+.s11-tbl thead .z .mk{height:24px;width:auto}
 .s11-tbl tbody tr:last-child .z{border-radius:0 0 18px 18px}
 .s11-tbl td.z svg{display:inline-block;vertical-align:-3px;width:18px;height:18px;margin-inline-end:8px;color:var(--acc)}
 .s11-tbl td:not(.z){color:var(--mut)}
