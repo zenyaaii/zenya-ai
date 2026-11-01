@@ -51,6 +51,8 @@ const CSS = `
 .s11 .s1-fmark.vis svg{transform:translateY(6%)}
 .rd.shot.s11 .s1-fmark svg{transform:translateY(6%)!important}
 .s11 .h-in{transition:background-color .45s,border-color .45s}
+/* the phone menu opens OVER the page, as a frosted sheet under the pill: the header never grows, so no dark strip pushes the hero down */
+.rd.s11 .h-drawer{position:absolute;top:100%;inset-inline:0;margin-inline:auto}
 .s11-sec{position:relative;padding-block:88px}
 @media (min-width:900px){.s11-sec{padding-block:120px}}
 .s11 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -286,7 +288,6 @@ const CSS = `
   .s11-tbl thead .z .mk{height:20px}
   .s11-swipe{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:12px;font-size:14.5px;color:var(--mut)}
   .s11-swipe svg{width:15px;height:15px}
-}
 }
 
 /* templates page */
@@ -529,7 +530,9 @@ textarea.s11-in{min-height:150px;resize:vertical;line-height:1.7}
 .rd .s11-row.out{color:#D6452A}
 .s11-row svg{width:17px;height:17px}
 .s11-portal[data-view="choose"] [data-view-only="login"],.s11-portal[data-view="login"] [data-view-only="choose"]{display:none}
-@media (max-width:520px){.s11-door{border-radius:24px}.s11-dwrap{padding-top:96px}}
+/* the sign-in page starts under the header too, so its light reaches the top edge */
+.rd.s11 .h+.s11-dwrap{margin-top:-66px;padding-top:calc(66px + clamp(110px,16vw,150px))}
+@media (max-width:520px){.s11-door{border-radius:24px}.s11-dwrap{padding-top:96px}.rd.s11 .h+.s11-dwrap{padding-top:calc(66px + 96px)}}
 
 @media (prefers-reduced-motion:reduce){.s11-block h3,.s11-block p,.s11-block .n{translate:none}.rd.js .s11-q[data-r]{transform:none}}
 @media (prefers-reduced-motion:reduce){.s11-band{clip-path:none}.s11-dc{transition:none}}
