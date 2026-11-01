@@ -1,32 +1,15 @@
 /**
- * Sign in, sign up, and the password reset — one page, three modes on ?mode=.
+ * Sign in, sign up, and the password reset: one page, three modes on ?mode=.
  *
- * DESIGN READ: one object on bare paper. A door is one object, so the
- * composition is a single card centred on flat #fafafa with nothing else on
- * it — no split, no marketing column, no ambient wash. The obsidian footer
- * cap is the only other weight, and it is there so the header's inversion
- * mechanic has a dark ground to cross.
- * Dials: DESIGN_VARIANCE 5, MOTION_INTENSITY 4, VISUAL_DENSITY 3.
- *
- * WHERE THE VIOLET GOES. The accent carries meaning rather than decorating:
- * the focused field's ring, the chosen tab, the password rule filling as you
- * meet it, the required star, and the primary action. Type stays obsidian,
- * muted type stays #56565a, and nothing else is tinted.
- *
- * THE ACCOUNT CHOOSER IS SHARED WITH THE PORTAL. Both this page and
- * components/accounts/AccountsAuthForm remember addresses under
- * "zenya_accounts", so an account used here is waiting at
- * accounts.beynoun.com and the other way round. No password is ever stored;
- * the chooser prefills the address and focuses the password field.
- *
- * WHAT IT CALLS. supabase.auth.signInWithPassword, signUp and
- * resetPasswordForEmail — the same three the page carried before the restyle,
- * with the same validation in the same order and the same duplicate-signup
- * detection, which is the one case Supabase deliberately does not report as
- * an error.
+ * In the «ليل» style since 2026-11-01. The card is Login in
+ * components/zenya/redesign/s11.tsx and the Supabase calls are in
+ * S11AuthBridge next to it: the same checks, strings and calls the previous
+ * view (components/zenya/access/AccessView.tsx, kept) made. ?next= is read
+ * here on the server and only a same-site path is honoured.
  */
 
-import AccessView from '@/components/zenya/access/AccessView'
+import { dashFont } from '@/components/app/dash-font'
+import { Login } from '@/components/zenya/redesign/s11'
 
 type Mode = 'signin' | 'signup' | 'forgot'
 
@@ -60,5 +43,5 @@ export default function LoginPage({
   const asked = searchParams?.mode
   const initialMode: Mode =
     asked === 'signup' || asked === 'forgot' || asked === 'signin' ? asked : 'signin'
-  return <AccessView initialMode={initialMode} next={safeNext(searchParams?.next)} />
+  return <div className={dashFont.variable}><Login mode={initialMode} next={safeNext(searchParams?.next)} /></div>
 }

@@ -8,6 +8,7 @@
  * That keeps the sample identical whether it is opened from the dev server or
  * exported to a static page for review.
  */
+import ScriptRevive from './ScriptRevive'
 import { MARK_VB_FATHA, MARK_BODY, MARK_DOTS, MARK_FATHA } from './mark'
 import type { ReactNode } from 'react'
 import ZenyaMark from '@/components/ZenyaMark'
@@ -379,6 +380,7 @@ export function Root({ id, mode, css, children }: { id: string; mode: 'light' | 
       <style dangerouslySetInnerHTML={{ __html: FONTS_CSS + BASE_CSS + css }} />
       {children}
       <script dangerouslySetInnerHTML={{ __html: RUNTIME }} />
+      <ScriptRevive />
     </div>
   )
 }

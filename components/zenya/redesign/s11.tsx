@@ -20,6 +20,8 @@ import {
   Eye, UserPlus, LogOut, MailCheck,
 } from 'lucide-react'
 import { Root, Header, Vid, Stars, FooterLinks, Contact, Socials, MarkDots, Check, Plus, Laptop, Phone, Browser } from './base'
+import S11AuthBridge from './S11AuthBridge'
+import S11Session from './S11Session'
 import { CSS as S1_CSS } from './s1'
 import {
   HERO, REVIEWS, REVIEWS_NOTE, DASH_D, DASH_M, EDIT_D, EDIT_M, DASH_FEATURES, EDIT_STEPS, TEMPLATES, phoneShot, wideShot,
@@ -520,6 +522,7 @@ textarea.s11-in{min-height:150px;resize:vertical;line-height:1.7}
 .s11-consent input{flex:none;margin-top:5px;width:17px;height:17px;accent-color:#E2532A}
 .s11-consent a,.rd .s11-link{color:var(--acc-ink);border-bottom:1px solid currentColor;font-weight:600}
 .rd .s11-dgo{width:100%;justify-content:center;height:52px}
+.rd .s11-send:disabled,.rd [aria-busy="true"] .s11-send{opacity:.6;cursor:progress}
 .s11-dalt{display:grid;gap:6px;justify-items:center;font-size:15.5px;color:var(--mut);text-align:center}
 .rd .s11-quiet{color:var(--mut);font-size:15.5px}
 .s11-dsent{display:none;gap:12px;justify-items:center;text-align:center;padding-block:6px}
@@ -576,8 +579,14 @@ if(m==='forgot'){if(!re.test(a))x='يرجى إدخال بريد إلكتروني
 else if(m==='signin'){if(!a||!p)x='يرجى تعبئة جميع الحقول.';else if(!re.test(a))x='صيغة البريد الإلكتروني غير صحيحة. تحقّق منها.'}
 else{if(!n)x='يرجى إدخال اسمك الكامل.';else if(!re.test(a))x='يرجى إدخال بريد إلكتروني صالح.';else if(p.length<6)x='يجب ألّا تقلّ كلمة المرور عن 6 أحرف.';else if(!tm.checked)x='يرجى الموافقة على شروط الخدمة وسياسة الخصوصية للمتابعة.'}
 if(x){err.textContent=x;return}
-if(m==='signin'){err.textContent='في هذه المسودة لا يتم الدخول فعلًا. بعد النشر يفتح هذا الزر لوحة التحكم.';return}
-d.querySelector('[data-o=title]').textContent=m==='signup'?'تم إنشاء الحساب':T.heads.forgot;d.querySelector('[data-o=msg]').textContent=T.done[m];d.querySelector('[data-o=hint]').textContent=T.hint[m];d.querySelector('[data-o=mail]').textContent=a;d.classList.add('sent')});
+if(d.getAttribute('aria-busy')==='true')return;
+var run=window.__beynounAuth;if(!run){err.textContent='لحظة، الصفحة ما زالت تُحمَّل. حاول مرة أخرى.';return}
+function idle(){d.removeAttribute('aria-busy');go.disabled=false}
+d.setAttribute('aria-busy','true');go.disabled=true;
+run(m,{email:a,password:p,name:n}).then(function(r){r=r||{};if(r.left)return;idle();
+if(r.error){err.textContent=r.error;return}
+d.querySelector('[data-o=title]').textContent=m==='signup'?'تم إنشاء الحساب':T.heads.forgot;d.querySelector('[data-o=msg]').textContent=T.done[m];d.querySelector('[data-o=hint]').textContent=T.hint[m];d.querySelector('[data-o=mail]').textContent=a;d.classList.add('sent')},
+function(){idle();err.textContent='حدث خطأ ما. حاول مرة أخرى.'})});
 set(d.getAttribute('data-am'))});
 [].forEach.call(root.querySelectorAll('[data-portal]'),function(p){p.addEventListener('click',function(e){var b=e.target.closest('[data-view-go]');if(b){e.preventDefault();p.setAttribute('data-view',b.getAttribute('data-view-go'))}})})})()`
 
@@ -592,19 +601,23 @@ const ONBAND = `(function(){var root=document.currentScript.parentElement,b=root
 function build(){if(io)io.disconnect();var r=h.getBoundingClientRect();io=new IntersectionObserver(function(es){es.forEach(function(e){root.classList.toggle('onband',e.isIntersecting)})},{rootMargin:-Math.round(r.top+r.height/2)+'px 0px '+-Math.round(innerHeight-r.top-r.height/2-1)+'px 0px',threshold:0});io.observe(b)}
 build();addEventListener('resize',build)})()`
 
-/* the contact form, for the sample: no request leaves the page */
+/* the contact form: the same checks and the same POST as components/zenya/contact/ContactView.tsx */
 const FORM = `(function(){var f=document.currentScript.parentElement.querySelector('[data-contact]');if(!f)return;
-var ts=[].slice.call(f.querySelectorAll('[data-topic-id]')),ta=f.querySelector('textarea'),em=f.querySelector('input[type=email]'),err=f.querySelector('.s11-err'),cnt=f.querySelector('[data-count]'),ph=JSON.parse(f.getAttribute('data-ph')),dn=JSON.parse(f.getAttribute('data-done')),cur='support';
+var ts=[].slice.call(f.querySelectorAll('[data-topic-id]')),ta=f.querySelector('textarea'),em=f.querySelector('input[type=email]'),nm=f.querySelector('#s11-n'),err=f.querySelector('.s11-err'),cnt=f.querySelector('[data-count]'),btn=f.querySelector('button[type=submit]'),ph=JSON.parse(f.getAttribute('data-ph')),dn=JSON.parse(f.getAttribute('data-done')),cur='support',busy=false;
 function pick(id){cur=id;f.setAttribute('data-topic',id);ts.forEach(function(t){t.setAttribute('aria-checked',String(t.getAttribute('data-topic-id')===id))});ta.placeholder=ph[id]||ph.other}
 ts.forEach(function(t){t.addEventListener('click',function(){pick(t.getAttribute('data-topic-id'))})});
 ta.addEventListener('input',function(){cnt.textContent=ta.value.length+' / 8000'});
-f.querySelector('form').addEventListener('submit',function(e){e.preventDefault();var m=ta.value.trim(),a=em.value.trim();
+f.querySelector('form').addEventListener('submit',function(e){e.preventDefault();if(busy)return;var m=ta.value.trim(),a=em.value.trim(),n=nm?nm.value.trim():'';
   if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(a)){err.textContent='يرجى إدخال بريد إلكتروني صالح.';em.focus();return}
   if(m.length<5){err.textContent='يرجى كتابة رسالتك، خمسة أحرف على الأقل.';ta.focus();return}
-  err.textContent='';f.querySelector('[data-o=topic]').textContent=ts.filter(function(t){return t.getAttribute('aria-checked')==='true'})[0].textContent.trim();
-  f.querySelector('[data-o=mail]').textContent=a;f.querySelector('[data-o=msg]').textContent=m;f.querySelector('[data-o=done]').textContent=dn[cur]||'';f.classList.add('sent')});
+  if(cur==='review'){err.textContent='يرجى اختيار عدد النجوم لتقييم تجربتك.';return}
+  err.textContent='';busy=true;btn.disabled=true;
+  fetch('/api/contact',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:n,email:a,topic:cur,message:m})}).then(function(r){if(!r.ok)throw 0;
+    f.querySelector('[data-o=topic]').textContent=ts.filter(function(t){return t.getAttribute('aria-checked')==='true'})[0].textContent.trim();
+    f.querySelector('[data-o=mail]').textContent=a;f.querySelector('[data-o=msg]').textContent=m;f.querySelector('[data-o=done]').textContent=dn[cur]||'';f.classList.add('sent')})
+  .catch(function(){err.textContent=f.getAttribute('data-fail')}).then(function(){busy=false;btn.disabled=false})});
 f.querySelector('.s11-again').addEventListener('click',function(){f.classList.remove('sent');ta.value='';cnt.textContent='0 / 8000'});
-pick('support')})()`
+pick(f.getAttribute('data-topic')||'support')})()`
 
 function Faq({ list = FAQS }: { list?: ReadonlyArray<{ q: string; a: string }> }) {
   return (
@@ -703,7 +716,7 @@ function Page({ hero }: { hero: 'a' | 'b' }) {
   const row = [...REVIEWS, ...REVIEWS]
   return (
     <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
-      <Header dots />
+      <Header dots /><S11Session />
       {hero === 'a' ? <HeroA /> : <HeroB />}
 
       {/* Hidden at Anas's request (11-01): no approved reviews yet. Flip SHOW_REVIEWS when there are. */}
@@ -824,7 +837,7 @@ export function Pricing() {
   const pos = (id: string) => (id === 'review' ? 1 : id === 'free-domain' ? 0 : 2)
   return (
     <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
-      <Header dots />
+      <Header dots /><S11Session />
       <section className="s1-pr">
         <Sky />
         <div className="s1-prword" aria-hidden>الأسعار</div>
@@ -942,7 +955,7 @@ function Tile({ t, lead }: { t: (typeof TEMPLATE_META)[number]; lead?: boolean }
 export function Templates() {
   return (
     <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
-      <Header dots />
+      <Header dots /><S11Session />
       <section className="s11-ph">
         <Sky />
         <div className="wrap s11-phg">
@@ -996,12 +1009,12 @@ export function Templates() {
   )
 }
 
-export function ContactPage() {
+export function ContactPage({ initialTopic = 'support' }: { initialTopic?: 'support' | 'request' | 'sales' | 'review' | 'other' } = {}) {
   const ph = { support: CONTACT.placeholders.other, request: CONTACT.placeholders.request, sales: CONTACT.placeholders.sales, review: CONTACT.placeholders.other, other: CONTACT.placeholders.other }
   const done = Object.fromEntries(CONTACT.topics.map((t) => [t.id, t.done]))
   return (
     <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
-      <Header dots />
+      <Header dots /><S11Session />
       <section className="s11-ph">
         <Sky />
         <div className="wrap s11-say">
@@ -1022,16 +1035,16 @@ export function ContactPage() {
                 <a className="s11-chr glass" href="https://beynoun.com"><span className="ic"><Globe aria-hidden /></span><span className="t"><small>الموقع</small><b className="ltr">{CONTACT.site}</b></span><Arrow aria-hidden /></a>
               </div>
               <p className="s11-note">{CONTACT.chNote}</p>
-              <div className="s11-form glass" data-contact data-topic="support" data-ph={JSON.stringify(ph)} data-done={JSON.stringify(done)}>
+              <div className="s11-form glass" data-contact data-topic={initialTopic} data-ph={JSON.stringify(ph)} data-done={JSON.stringify(done)} data-fail={'تعذّر الإرسال — يُرجى مراسلتنا مباشرةً على ' + FOOTER.email + '.'}>
                 <p className="q" id="s11-q">ما موضوع رسالتك؟</p>
                 <div className="s11-topics" role="radiogroup" aria-labelledby="s11-q">
                   {CONTACT.topics.map((t, i) => {
                     const I = TOPIC_ICONS[i]
-                    return <button key={t.id} type="button" role="radio" className="s11-topic" data-topic-id={t.id} aria-checked={i === 0}><I aria-hidden />{t.label}</button>
+                    return <button key={t.id} type="button" role="radio" className="s11-topic" data-topic-id={t.id} aria-checked={t.id === initialTopic}><I aria-hidden />{t.label}</button>
                   })}
                 </div>
                 <div className="s11-hand"><MessageSquareQuote size={16} aria-hidden /><p>{CONTACT.reviewHand} <a href="/review">قناة التقييم</a></p></div>
-                <form className="s11-fm" noValidate>
+                <form className="s11-fm" method="post" noValidate>
                   <div className="s11-pair">
                     <div className="s11-f"><label htmlFor="s11-n">الاسم<small>اختياري</small></label><input id="s11-n" className="s11-in" type="text" autoComplete="name" maxLength={120} placeholder="كما تحبّ أن نناديك" /></div>
                     <div className="s11-f"><label htmlFor="s11-e">البريد الإلكتروني</label><input id="s11-e" className="s11-in ltr" type="email" dir="ltr" autoComplete="email" placeholder="name@company.com" /></div>
@@ -1106,7 +1119,7 @@ function Door({ variant, mode, mark }: { variant: 'site' | 'portal'; mode: Acces
         <h1 className="s11-dh" id={'s11-dh-' + variant} data-h>{T.heads[mode]}</h1>
         <p className="s11-ds" data-s>{T.subs[mode]}</p>
       </div>
-      <form className="s11-dform" noValidate>
+      <form className="s11-dform" method="post" noValidate>
         <div className="s11-f" data-only="signup">
           <label htmlFor={'dn-' + variant}><span>الاسم الكامل <span className="req">*</span></span></label>
           <input id={'dn-' + variant} name="name" className="s11-in" type="text" autoComplete="name" placeholder="محمد النجار" />
@@ -1142,7 +1155,6 @@ function Door({ variant, mode, mark }: { variant: 'site' | 'portal'; mode: Acces
         <p data-o="msg" />
         <p className="to">أُرسل إلى: <b data-o="mail" /></p>
         <p data-o="hint" />
-        <p className="demo">في هذه المسودة لا يُرسَل شيء.</p>
         <button type="button" className="s11-link" data-go="signin">العودة إلى النموذج</button>
       </div>
     </section>
@@ -1150,10 +1162,11 @@ function Door({ variant, mode, mark }: { variant: 'site' | 'portal'; mode: Acces
 }
 
 /** /login, /login?mode=signup and the reset, in the «ليل» style. Same texts, same rules, same order as the live page. */
-export function Login({ mode = 'signin' }: { mode?: AccessMode }) {
+export function Login({ mode = 'signin', next = '/dashboard' }: { mode?: AccessMode; next?: string }) {
   return (
     <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
-      <Header dots />
+      <S11AuthBridge next={next} />
+      <Header dots /><S11Session />
       <section className="s11-dwrap">
         <Sky />
         <div className="wrap">
