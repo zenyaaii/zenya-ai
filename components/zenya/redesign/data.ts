@@ -130,3 +130,26 @@ export const FOOTER = {
   ],
   year: 2026,
 }
+
+/* Second set (2026-11-01). The statement is what the generators do: they
+   write the copy, pick photos from the trade's photo pack, order the
+   sections and publish. The brief is an example, marked as one, written to
+   match the restaurant template's own sample (دار نور, 24 seats). */
+export const STATEMENT = 'اكتب سطرين عن نشاطك. بينون تكتب النصوص، وتختار الصور، وترتّب الأقسام، وتنشر موقعك على عنوانه الخاص.'
+export const BRIEF = {
+  label: 'مثال',
+  text: 'مطعم صغير اسمه دار نور. أربعة وعشرون مقعدًا، وقائمة تتغير مع المواسم. نريد موقعًا يستقبل الحجوزات.',
+  shot: 'restaurant',
+}
+export const SECTIONS = {
+  reviews: 'ماذا يقول من جرّب بينون',
+  dash: 'لوحة تحكم واحدة لكل شيء',
+  dashLead: 'الحجوزات، والزوار، والتقييمات، وظهورك في جوجل. كلها في مكان واحد.',
+  edit: 'عدّل موقعك كما تكتب رسالة',
+  editLead: 'اضغط على أي نص في موقعك واكتب. غيّر الألوان والخطوط، ثم انشر بضغطة.',
+  tpl: 'قالب لكل نشاط',
+  tplLead: 'ثمانية قوالب جاهزة. اختر قالب نشاطك، وبينون تكتب المحتوى وترتّب الأقسام.',
+  faq: 'أسئلة شائعة',
+  gen: 'من سطرين إلى موقع كامل',
+  genLead: 'تكتب ما تعرفه عن نشاطك بكلماتك. بينون تبني الباقي.',
+}

@@ -120,6 +120,30 @@ export const BASE_CSS = `
 .rd .only-d{display:none}
 @media (min-width:768px){.rd .only-d{display:block}.rd .only-m{display:none}}
 
+/* device frames (second set) */
+.rd .dv-lap{position:relative;width:100%}
+.rd .dv-lid{position:relative;border-radius:clamp(10px,1.5vw,20px) clamp(10px,1.5vw,20px) 4px 4px;background:#0E0D0B;padding:clamp(5px,.85vw,12px) clamp(5px,.85vw,12px) clamp(7px,1.1vw,15px);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 0 0 1px rgba(0,0,0,.35),0 50px 90px -50px rgba(22,18,13,.6)}
+.rd .dv-lid::before{content:"";position:absolute;top:clamp(2px,.33vw,5px);left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#2B2824}
+.rd .dv-scr{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:3px;background:#000}
+.rd .dv-scr video,.rd .dv-scr img{width:100%;height:100%;object-fit:cover}
+.rd .dv-scr::after{content:"";position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,255,255,.07),rgba(255,255,255,0) 38%);pointer-events:none}
+.rd .dv-base{position:relative;height:clamp(9px,1.25vw,17px);margin-inline:-6.5%;border-radius:0 0 50% 50%/0 0 100% 100%;
+  background:linear-gradient(#E4E0D9,#B9B3A9 55%,#8D877C);box-shadow:0 22px 40px -22px rgba(22,18,13,.55)}
+.rd .dv-base::before{content:"";position:absolute;top:0;left:50%;width:15%;height:42%;translate:-50% 0;border-radius:0 0 10px 10px;background:linear-gradient(#A8A297,#C9C4BB)}
+.rd[data-mode="dark"] .dv-base{background:linear-gradient(#4A4640,#2E2B27 55%,#1C1A17)}
+.rd[data-mode="dark"] .dv-base::before{background:linear-gradient(#1E1C19,#36322D)}
+.rd .dv-ph{position:relative;border-radius:15%/7%;padding:2.8%;background:#0E0D0B;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.13),0 0 0 1px rgba(0,0,0,.3),0 40px 70px -36px rgba(22,18,13,.6)}
+.rd .dv-ph::after{content:"";position:absolute;top:22%;right:-1.4%;width:1.4%;height:9%;border-radius:0 3px 3px 0;background:#1C1A17}
+.rd .dv-ph-scr{position:relative;aspect-ratio:390/844;overflow:hidden;border-radius:12.4%/5.8%;background:#000}
+.rd .dv-ph-scr video,.rd .dv-ph-scr img{width:100%;height:100%;object-fit:cover;object-position:top}
+.rd .dv-win{position:relative;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 0 0 1px var(--line2),0 40px 80px -40px rgba(22,18,13,.45)}
+.rd .dv-bar{display:flex;align-items:center;gap:6px;height:34px;padding-inline:14px;border-bottom:1px solid var(--line);background:var(--card2)}
+.rd .dv-bar i{width:9px;height:9px;border-radius:50%;background:var(--line2)}
+.rd .dv-bar span{margin-inline:auto;font-size:12px;line-height:1;padding:5px 14px;border-radius:999px;background:var(--card);color:var(--mut);direction:ltr}
+.rd .dv-win .dv-scr{border-radius:0}
+
 /* faq */
 .rd details summary{list-style:none;cursor:pointer}
 .rd details summary::-webkit-details-marker{display:none}
@@ -159,7 +183,7 @@ function pair(el,attr){var a=el.getAttribute(attr);return a?a.split(',').map(Num
 /* feature tabs: buttons [data-tab] carry data-d / data-m segments */
 $$('[data-tabs]').forEach(function(box){
   var tabs=$$('[data-tab]',box),vids=$$('video',box),panels=$$('[data-panel]',box),cur=0;
-  function pick(i,user){cur=i;tabs.forEach(function(t,j){t.setAttribute('aria-selected',String(j===i));t.style.setProperty('--p','0')});
+  function pick(i,user){cur=i;box.style.setProperty('--ix',String(i));tabs.forEach(function(t,j){t.setAttribute('aria-selected',String(j===i));t.style.setProperty('--p','0')});
     panels.forEach(function(p,j){p.hidden=j!==i});
     vids.forEach(function(v){var s=pair(tabs[i],'data-'+kind(v));if(s)seg(v,s[0],s[1])});box._user=box._user||user}
   vids.forEach(function(v){v._onend=function(){if(!shown(v)||box._user)return false;pick((cur+1)%tabs.length);return true};
@@ -197,6 +221,42 @@ $$('[data-spot]').forEach(function(el){var raf=0;el.addEventListener('pointermov
 /* rails: prev / next */
 $$('[data-rail]').forEach(function(box){var rail=box.querySelector('[data-track]');if(!rail)return;var step=function(d){var c=rail.firstElementChild;var w=c?c.getBoundingClientRect().width+16:300;rail.scrollBy({left:d*w,behavior:RM?'auto':'smooth'})};
   $$('[data-next]',box).forEach(function(b){b.addEventListener('click',function(){step(-1)})});$$('[data-prev]',box).forEach(function(b){b.addEventListener('click',function(){step(1)})})});
+function play(v){if(RM||!shown(v))return;var p=v.play();if(p&&p.catch)p.catch(function(){})}
+/* chapters: a pinned box whose scroll progress picks one [data-chap] */
+$$('[data-steps]').forEach(function(box){var ch=$$('[data-chap]',box),vids=$$('video',box);box._n=ch.length;
+  box._onstep=function(i){ch.forEach(function(c,j){c.classList.toggle('on',j===i);c.classList.toggle('done',j<i)});box.setAttribute('data-at',String(i));box.style.setProperty('--at',String(i));
+    vids.forEach(function(v){var s=pair(ch[i],'data-'+kind(v));if(s&&s[0]!==v._a){seg(v,s[0],s[1]);play(v)}})};
+  box._i=0;box._onstep(0);
+  ch.forEach(function(c,j){c.addEventListener('click',function(){var r=box.getBoundingClientRect(),d=r.height-innerHeight;if(d>0)scrollTo({top:scrollY+r.top+d*(j+.5)/ch.length,behavior:RM?'auto':'smooth'})})});
+});
+/* scroll progress: [data-p] gets --p from 0 to 1. "pin" = across a tall
+   sticky box, "enter" = while its top climbs the screen, else = in view */
+var PS=$$('[data-p]'),act=[];
+function upd(el){var r=el.getBoundingClientRect(),H=innerHeight,m=el.getAttribute('data-p'),p;
+  if(m==='pin'){var d=r.height-H;p=d>0?-r.top/d:(r.top<0?1:0)}else if(m==='enter'){p=(H-r.top)/(H*.85)}else if(m==='rise'){p=(H-r.top)/(H*.7)}else if(m==='end'){p=(H-r.top)/Math.min(r.height,H*.9)}else{p=(H-r.top)/(H+r.height)}
+  p=p<0?0:p>1?1:p;if(el._p!==undefined&&Math.abs(el._p-p)<.0004)return;el._p=p;el.style.setProperty('--p',p.toFixed(4));
+  if(el._n){var i=Math.min(el._n-1,Math.floor(p*el._n));if(i!==el._i){el._i=i;el._onstep(i)}}}
+var pio=new IntersectionObserver(function(es){es.forEach(function(e){var k=act.indexOf(e.target);if(e.isIntersecting){if(k<0)act.push(e.target)}else{if(k>=0)act.splice(k,1);upd(e.target)}})},{rootMargin:'25% 0px 25% 0px'});
+PS.forEach(function(el){pio.observe(el);upd(el)});
+var tk=0;function frame(){tk=0;act.forEach(upd);root.classList.toggle('scrolled',scrollY>8)}
+addEventListener('scroll',function(){if(!tk)tk=requestAnimationFrame(frame)},{passive:true});
+addEventListener('resize',function(){if(!tk)tk=requestAnimationFrame(frame)});frame();
+/* coverflow: each [data-fi] learns how far it sits from the rail's centre */
+$$('[data-flow]').forEach(function(rail){var items=$$('[data-fi]',rail),t=0;
+  function f(){t=0;var r=rail.getBoundingClientRect(),c=r.left+r.width/2;items.forEach(function(it){var b=it.getBoundingClientRect(),d=(b.left+b.width/2-c)/(b.width||1);d=d<-3?-3:d>3?3:d;it.style.setProperty('--d',d.toFixed(3));it.style.setProperty('--ad',Math.abs(d).toFixed(3));it.classList.toggle('mid',Math.abs(d)<.5)})}
+  rail.addEventListener('scroll',function(){if(!t)t=requestAnimationFrame(f)},{passive:true});addEventListener('resize',f);
+  items.forEach(function(it){it.addEventListener('click',function(e){if(!it.classList.contains('mid')){e.preventDefault();var b=it.getBoundingClientRect(),r=rail.getBoundingClientRect();rail.scrollBy({left:(b.left+b.width/2)-(r.left+r.width/2),behavior:RM?'auto':'smooth'})}})});
+  var mid=rail.getAttribute('data-flow');if(mid&&items[+mid]){var b=items[+mid].getBoundingClientRect(),r=rail.getBoundingClientRect();rail.scrollLeft+=(b.left+b.width/2)-(r.left+r.width/2)}f();
+});
+/* depth: [data-tilt] gets --tx / --ty in -1..1 from the mouse */
+$$('[data-tilt]').forEach(function(el){var raf=0;el.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse'||RM)return;cancelAnimationFrame(raf);raf=requestAnimationFrame(function(){var r=el.getBoundingClientRect();el.style.setProperty('--tx',((e.clientX-r.left)/r.width*2-1).toFixed(3));el.style.setProperty('--ty',((e.clientY-r.top)/r.height*2-1).toFixed(3))})});
+  el.addEventListener('pointerleave',function(){el.style.setProperty('--tx','0');el.style.setProperty('--ty','0')})});
+/* a brief that types itself, then the site it becomes: [data-gen] > [data-type] */
+$$('[data-gen]').forEach(function(box){var el=box.querySelector('[data-type]');if(!el)return;var txt=el.getAttribute('data-type'),i=0,run=false,tm;
+  function reset(){i=0;el.textContent='';box.classList.remove('typed','built')}
+  function step(){if(!run)return;if(i<=txt.length){el.textContent=txt.slice(0,i);i++;tm=setTimeout(step,i<4?160:28+Math.random()*34)}else{box.classList.add('typed');tm=setTimeout(function(){box.classList.add('built');tm=setTimeout(function(){reset();step()},9000)},1500)}}
+  new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting&&!run){run=true;if(RM){el.textContent=txt;box.classList.add('typed','built')}else{reset();step()}}else if(!e.isIntersecting&&run){run=false;clearTimeout(tm)}})},{threshold:.35}).observe(box);
+});
 })();`
 
 export function Mark({ className, long }: { className?: string; long?: boolean }) {
@@ -284,6 +344,32 @@ export function Socials({ className = '' }: { className?: string }) {
       {FOOTER.socials.map(([label, href]) => <li key={label}><a href={href} target="_blank" rel="noopener noreferrer">{label}</a></li>)}
     </ul>
   )
+}
+
+/** Device frames for the second set: real bezels, so a recording reads as a
+ *  product and not as a picture of one. */
+export function Laptop({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={'dv-lap ' + className}><div className="dv-lid"><div className="dv-scr">{children}</div></div><div className="dv-base" aria-hidden /></div>
+}
+export function Phone({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={'dv-ph ' + className}><div className="dv-ph-scr">{children}</div></div>
+}
+export function Browser({ children, className = '', url = 'beynoun.com' }: { children: ReactNode; className?: string; url?: string }) {
+  return <div className={'dv-win ' + className}><div className="dv-bar" aria-hidden><i /><i /><i /><span>{url}</span></div><div className="dv-scr">{children}</div></div>
+}
+
+/** One span per word, each knowing its place (--w) and the count (--n). */
+export function Words({ text, className = '' }: { text: string; className?: string }) {
+  const ws = text.split(' ')
+  return <span className={className} style={{ ['--n' as string]: ws.length }}>{ws.map((w, i) => <span key={i} className="w" style={{ ['--w' as string]: i }}>{w}{i < ws.length - 1 ? ' ' : ''}</span>)}</span>
+}
+
+/** "$14.99" set as a price: a small raised currency, the whole number, a
+ *  smaller decimal. Left to right inside the RTL page. */
+export function Amount({ v, className = '' }: { v: string; className?: string }) {
+  const m = /^\$(\d+)(\.\d+)?$/.exec(v)
+  if (!m) return <span className={'amt-v ltr ' + className}>{v}</span>
+  return <span className={'amt-v ltr ' + className}><span className="cur">$</span>{m[1]}{m[2] ? <span className="dec">{m[2]}</span> : null}</span>
 }
 
 export function Root({ id, mode, css, children }: { id: string; mode: 'light' | 'dark'; css: string; children: ReactNode }) {
