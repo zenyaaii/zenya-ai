@@ -206,7 +206,7 @@ $$('[data-scrolly]').forEach(function(box){
   var blocks=$$('[data-block]',box),vids=$$('video',box);
   var zone=matchMedia('(min-width:900px)').matches?box.getAttribute('data-zone-d'):box.getAttribute('data-zone-m');
   var o=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;var b=e.target;
-    blocks.forEach(function(x){x.classList.toggle('on',x===b)});
+    var at=blocks.indexOf(b);blocks.forEach(function(x,j){x.classList.toggle('on',j===at);x.classList.toggle('done',j<at)});
     vids.forEach(function(v){var s=pair(b,'data-'+kind(v));if(s&&s[0]!==v._a){seg(v,s[0],s[1]);if(!RM){var p=v.play();if(p&&p.catch)p.catch(function(){})}}})})},{rootMargin:zone||'-48% 0px -48% 0px'});
   blocks.forEach(function(b){o.observe(b)});
 });

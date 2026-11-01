@@ -76,6 +76,12 @@ const CSS = `
 .s11-htxt .lead{max-width:34ch;font-size:clamp(18px,1.7vw,21px)}
 .s11-ctas{display:flex;flex-wrap:wrap;gap:10px}
 .s11-stack{position:relative;height:clamp(420px,44vw,600px)}
+/* the big wordmark behind the devices, as in hero b but larger; the hero clips it sideways only, so the light below still fades out */
+.s11-hero{overflow-x:clip}
+.s11-ghost{position:absolute;left:50%;top:calc(50% + 33px);width:min(calc(100vw - 16px),1560px);transform:translate(-50%,-50%);color:var(--ink);opacity:.07;z-index:0;pointer-events:none;display:flex;justify-content:center}
+.s11-ghost svg{width:100%;height:auto}
+.rd[data-mode="light"] .s11-ghost{opacity:.08}
+.s11-ghost.m{display:none}
 .s11-ly{position:absolute;transition:transform 1s var(--out)}
 .s11-ly.a{inset-inline-end:0;top:4%;width:88%;transform:translate(calc(var(--tx,0) * 10px),calc(var(--ty,0) * 8px))}
 .s11-ly.b{inset-inline-start:2%;bottom:0;width:31%;transform:translate(calc(var(--tx,0) * 26px),calc(var(--ty,0) * 20px))}
@@ -88,6 +94,8 @@ const CSS = `
 @keyframes s11float{50%{transform:translateY(-10px)}}
 @media (max-width:999px){
   .s11-stack{height:auto;display:grid;justify-items:start;padding-inline-start:6%}
+  .s11-ghost.d{display:none}
+  .s11-ghost.m{display:flex;width:calc(100vw - 12px);top:clamp(70px,20vw,120px);transform:translate(-50%,-50%);opacity:.09}
   .s11-ly{transform:none}
   .s11-ly.a{display:none}
   .s11-ly.b{position:relative;inset:auto;width:min(236px,60vw)}
@@ -100,7 +108,16 @@ const CSS = `
 
 /* dashboard: the scroll story, inside a band that opens from a slit */
 .s11-bandsec{position:relative;padding-block:clamp(16px,3vw,40px)}
-.s11-band{position:relative;margin-inline:clamp(8px,1.4vw,20px);border-radius:36px;padding-block:clamp(72px,9vw,124px);background:var(--bg);color:var(--ink);
+.s11-bglow{position:absolute;inset:-12% 0;overflow:hidden;pointer-events:none;z-index:0;
+  -webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+.s11-bglow i{position:absolute;border-radius:50%;filter:blur(70px)}
+.s11-bglow .g1{width:70vmax;height:70vmax;top:0;inset-inline-start:-20vmax;background:radial-gradient(closest-side,rgba(226,83,42,.95),rgba(226,83,42,0));animation:s1a 28s var(--out) infinite alternate}
+.s11-bglow .g2{width:62vmax;height:62vmax;bottom:0;inset-inline-end:-18vmax;background:radial-gradient(closest-side,rgba(242,161,92,.75),rgba(242,161,92,0));animation:s1b 34s ease-in-out infinite alternate}
+.s11-bglow .g3{width:46vmax;height:46vmax;top:38%;left:50%;margin-left:-23vmax;background:radial-gradient(closest-side,rgba(226,83,42,.45),rgba(226,83,42,0));animation:s1a 40s ease-in-out infinite alternate-reverse}
+.rd[data-mode="light"] .s11-bglow i{opacity:.55}
+.rd[data-mode="light"] .s11-band{--band-a:86%}
+.s11-band{position:relative;z-index:1;margin-inline:clamp(8px,1.4vw,20px);border-radius:36px;padding-block:clamp(72px,9vw,124px);color:var(--ink);
+  background:color-mix(in srgb,var(--bg) var(--band-a,82%),transparent);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);
   box-shadow:0 0 0 1px var(--line);
   clip-path:inset(0 calc((1 - var(--p,1)) * 38%) 0 calc((1 - var(--p,1)) * 38%) round calc(36px + (1 - var(--p,1)) * 200px))}
 .rd[data-mode="dark"].onband .h,.rd[data-mode="dark"] .s11-band{--bg:#F4EFE6;--bg2:#EFE9DE;--card:#FFFDF9;--card2:#F1EBE1;--card3:#E6DED0;--ink:#16120D;--ink2:#3B342C;--mut:#5F574D;--mut2:#8A8074;--line:rgba(22,18,13,.09);--line2:rgba(22,18,13,.16);--acc-ink:#B23A17;--glass:rgba(255,253,249,.6);--glass-line:rgba(22,18,13,.1);color-scheme:light}
@@ -114,6 +131,7 @@ const CSS = `
 .s11-media{position:sticky;top:72px;z-index:2;align-self:start;padding-block:6px 0;background:var(--bg)}
 .s11-media::after{content:"";position:absolute;inset-inline:0;top:100%;height:44px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
 @media (min-width:900px){.s11-media{top:calc(50svh - 230px);order:2;background:none}.s11-media::after{display:none}}
+@media (max-width:899px){.s11-media{background:none}.s11-media::after{display:none}.s11-block.done{opacity:0;transition-duration:.35s}}
 .s11-dev{position:relative;isolation:isolate;padding-bottom:6%}
 .s11-dev .dv-lap{width:94%;margin-inline-start:auto}
 .s11-mini{position:absolute;inset-inline-start:0;bottom:0;width:21%}
@@ -535,7 +553,7 @@ textarea.s11-in{min-height:150px;resize:vertical;line-height:1.7}
 @media (max-width:520px){.s11-door{border-radius:24px}.s11-dwrap{padding-top:96px}.rd.s11 .h+.s11-dwrap{padding-top:calc(66px + 96px)}}
 
 @media (prefers-reduced-motion:reduce){.s11-block h3,.s11-block p,.s11-block .n{translate:none}.rd.js .s11-q[data-r]{transform:none}}
-@media (prefers-reduced-motion:reduce){.s11-band{clip-path:none}.s11-dc{transition:none}}
+@media (prefers-reduced-motion:reduce){.s11-band{clip-path:none}.s11-dc{transition:none}.s11-bglow i{animation:none}}
 .rd.shot .s11-band{clip-path:none}
 `
 
@@ -638,6 +656,7 @@ function HeroA() {
   return (
     <section className="s11-hero">
       <Sky />
+      <div className="s11-ghost d" aria-hidden><MarkDots /></div>
       <div className="wrap s11-hg">
         <div className="s11-htxt">
           <p className="s1-claim s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{HERO.claim}</p>
@@ -649,6 +668,7 @@ function HeroA() {
           </div>
         </div>
         <div className="s11-stack s11-fade" data-tilt style={{ ['--d' as string]: '.85s' }}>
+          <div className="s11-ghost m" aria-hidden><MarkDots /></div>
           <div className="s11-ly a"><Laptop><Vid v={DASH_D} kind="d" className="only-d" label="جولة في لوحة تحكم بينون" /></Laptop></div>
           <div className="s11-ly c"><div className="s11-chip glass"><img src={wideShot('restaurant')} alt="قالب موقع مطعم" /><p>موقع مطعم<span>قالب</span></p></div></div>
           <div className="s11-ly b"><Phone><Vid v={DASH_M} kind="m" label="لوحة تحكم بينون على الهاتف" /></Phone></div>
@@ -712,6 +732,7 @@ function Page({ hero }: { hero: 'a' | 'b' }) {
       </section>}
 
       <section className="s11-bandsec">
+        <div className="s11-bglow" aria-hidden><i className="g1" /><i className="g2" /><i className="g3" /></div>
         <div className="s11-band" data-p="enter">
           <div className="wrap">
             <div className="s11-bhd" data-r>
