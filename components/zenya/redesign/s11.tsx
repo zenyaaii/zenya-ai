@@ -16,7 +16,7 @@
 import { Fragment } from 'react'
 import {
   Home as HomeIc, BarChart3, CalendarDays, Star as StarIc, Search, Mail, Phone as PhoneIc, Globe, Clock,
-  Building2, LifeBuoy, Sparkles, MessageSquareQuote, Briefcase, MessageCircle, ArrowUpLeft as Arrow,
+  Building2, LifeBuoy, Sparkles, MessageSquareQuote, Briefcase, MessageCircle, ArrowUpLeft as Arrow, Quote,
 } from 'lucide-react'
 import { Root, Header, Vid, Stars, FooterLinks, Contact, Socials, MarkDots, Check, Plus, Laptop, Phone, Browser } from './base'
 import { CSS as S1_CSS } from './s1'
@@ -34,6 +34,15 @@ const READY = [...TEMPLATE_META.filter((t) => !('soon' in t && t.soon)), ...TEMP
 
 const CSS = `
 .s11 .mk{display:block}
+/* the claim and the contact eyebrow: words only, no pill behind them (Anas 11-01) */
+.s11 .s1-claim{padding:0;gap:9px;font-size:16.5px;background:none;border:0}
+/* devices carry no shadow or glow behind them, in either mode (Anas 11-01) */
+.rd.s11 .dv-lid{box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 0 0 1px rgba(0,0,0,.35)}
+.rd.s11 .dv-base{box-shadow:none}
+.rd.s11 .dv-ph{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.13),0 0 0 1px rgba(0,0,0,.3)}
+.rd.s11 .dv-win{box-shadow:0 0 0 1px var(--line2)}
+/* a phone's own media overlay (play button, bar) never shows over the demos */
+.s11 video::-webkit-media-controls,.s11 video::-webkit-media-controls-start-playback-button,.s11 video::-webkit-media-controls-overlay-play-button{display:none!important;-webkit-appearance:none}
 .rd.s11 .h-logo svg{height:24px}
 .rd.s11 .s1-fbrand>a svg{height:31px}
 .s11 .s1-fmark{height:clamp(100px,20vw,272px)}
@@ -64,14 +73,12 @@ const CSS = `
 .s11-htxt .lead{max-width:34ch;font-size:clamp(18px,1.7vw,21px)}
 .s11-ctas{display:flex;flex-wrap:wrap;gap:10px}
 .s11-stack{position:relative;height:clamp(420px,44vw,600px)}
-.s11-stack::before{content:"";position:absolute;inset:12% 6% 0;background:radial-gradient(closest-side,var(--glow),transparent);filter:blur(50px);opacity:.55;pointer-events:none}
 .s11-ly{position:absolute;transition:transform 1s var(--out)}
 .s11-ly.a{inset-inline-end:0;top:4%;width:88%;transform:translate(calc(var(--tx,0) * 10px),calc(var(--ty,0) * 8px))}
 .s11-ly.b{inset-inline-start:2%;bottom:0;width:31%;transform:translate(calc(var(--tx,0) * 26px),calc(var(--ty,0) * 20px))}
 .s11-ly.c{inset-inline-end:3%;bottom:7%;width:34%;transform:translate(calc(var(--tx,0) * 18px),calc(var(--ty,0) * 14px))}
-.s11-ly.a .dv-lap{filter:drop-shadow(0 40px 50px rgba(0,0,0,.45))}
-.s11-ly.b .dv-ph{animation:s11float 8s ease-in-out infinite -2s;box-shadow:0 40px 60px -24px rgba(0,0,0,.6)}
-.s11-chip{border-radius:18px;padding:6px;animation:s11float 7s ease-in-out infinite;box-shadow:0 30px 50px -24px rgba(0,0,0,.5)}
+.s11-ly.b .dv-ph{animation:s11float 8s ease-in-out infinite -2s}
+.s11-chip{border-radius:18px;padding:6px;animation:s11float 7s ease-in-out infinite}
 .s11-chip img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:13px}
 .s11-chip p{padding:8px 10px 4px;font-size:14.5px;display:flex;justify-content:space-between;gap:8px}
 .s11-chip p span{color:var(--mut)}
@@ -105,9 +112,8 @@ const CSS = `
 .s11-media::after{content:"";position:absolute;inset-inline:0;top:100%;height:44px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
 @media (min-width:900px){.s11-media{top:calc(50svh - 230px);order:2;background:none}.s11-media::after{display:none}}
 .s11-dev{position:relative;isolation:isolate;padding-bottom:6%}
-.s11-dev::before{content:"";position:absolute;inset:6% 4% 0;border-radius:40px;background:radial-gradient(closest-side,rgba(226,83,42,.28),transparent);filter:blur(40px);z-index:-1}
 .s11-dev .dv-lap{width:94%;margin-inline-start:auto}
-.s11-mini{position:absolute;inset-inline-start:0;bottom:0;width:21%;filter:drop-shadow(0 24px 30px rgba(0,0,0,.35))}
+.s11-mini{position:absolute;inset-inline-start:0;bottom:0;width:21%}
 .s11-devm{display:grid;justify-items:center}
 .s11-devm .dv-ph{width:min(168px,42vw)}
 .s11-cap{display:none}
@@ -122,14 +128,24 @@ const CSS = `
 .s11-block h3 svg{flex:none;width:38px;height:38px;padding:9px;border-radius:12px;background:var(--card);box-shadow:0 0 0 1px var(--line2);color:var(--ink2);transition:background-color .5s,color .5s,box-shadow .5s}
 .s11-block.on h3 svg{background:var(--acc);color:#FFFBF7;box-shadow:0 10px 24px -10px rgba(226,83,42,.8)}
 .s11-block p{color:var(--mut);max-width:38ch;font-size:18px}
+.s11-block h3,.s11-block p,.s11-block .n{translate:0 26px;transition:translate .9s var(--out)}
+.s11-block.on h3,.s11-block.on .n{translate:0 0}
+.s11-block.on p{translate:0 0;transition-delay:.08s}
+@media (max-width:899px){
+  .s11-devm .dv-ph{width:min(150px,38vw)}
+  .s11-block{min-height:40svh;gap:2px 12px;padding-block:18px}
+  .s11-block h3{font-size:23px;gap:10px}
+  .s11-block h3 svg{width:32px;height:32px;padding:7px;border-radius:10px}
+  .s11-block p{font-size:15.5px;max-width:34ch}
+  .s11-block .n{font-size:13px;padding-top:6px}
+}
 .s11-block::before{content:"";position:absolute;inset-inline-start:-18px;top:50%;width:2px;height:0;border-radius:2px;background:var(--acc);translate:0 -50%;transition:height .6s var(--out)}
 .s11-block.on::before{height:38%}
 @media (max-width:899px){.s11-block::before{display:none}}
 
 /* editor: style 10's window with the steps floating around it */
 .s11-ew{position:relative;isolation:isolate;max-width:980px;margin-inline:auto}
-.s11-ew::before{content:"";position:absolute;inset:10% 8% -2%;background:radial-gradient(closest-side,var(--glow),transparent);filter:blur(50px);opacity:.6;z-index:-1}
-.s11-ew .dv-win{box-shadow:0 0 0 1px var(--glass-line),0 50px 90px -40px rgba(0,0,0,.6)}
+.rd .s11-ew .dv-win{box-shadow:0 0 0 1px var(--glass-line)}
 .s11-ew .dv-bar{background:var(--card2)}
 .s11-ew .dv-ph{width:min(250px,64vw);margin-inline:auto}
 .s11-chips{list-style:none}
@@ -137,7 +153,7 @@ const CSS = `
 .s11-chip2 i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-head);font-weight:700;background:var(--card3);color:var(--mut);transition:background-color .4s,color .4s}
 .s11-chip2 b{font-family:var(--f-head);font-size:20px;font-weight:700}
 .s11-chip2 span{font-size:15px;color:var(--mut)}
-.s11-chip2.on{border-color:color-mix(in srgb,var(--acc) 70%,transparent);box-shadow:0 0 0 1px var(--acc),0 18px 40px -18px var(--glow)}
+.s11-chip2.on{border-color:color-mix(in srgb,var(--acc) 70%,transparent);box-shadow:0 0 0 1px var(--acc)}
 .s11-chip2.on i{background:var(--acc);color:#FFFBF7}
 .s11-chip2.done i{background:var(--ink);color:var(--bg)}
 @media (min-width:960px){
@@ -275,7 +291,7 @@ const CSS = `
 .s11-shot{position:relative;border-radius:19px;overflow:hidden;aspect-ratio:16/10;background:var(--card2)}
 .s11-shot>img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform 1.2s var(--out)}
 @media (hover:hover){.s11-tile:hover .s11-shot>img{transform:scale(1.03)}}
-.s11-shot .ph{position:absolute;inset-inline-end:5%;bottom:-10%;width:17%;border-radius:14px;padding:3px;background:#0E0D0B;box-shadow:0 20px 30px -10px rgba(0,0,0,.6);transition:translate .8s var(--out)}
+.s11-shot .ph{position:absolute;inset-inline-end:5%;bottom:-10%;width:17%;border-radius:14px;padding:3px;background:#0E0D0B;transition:translate .8s var(--out)}
 .s11-tile.big .s11-shot .ph{width:14%}
 .s11-shot .ph img{border-radius:11px;aspect-ratio:480/1039;object-fit:cover;object-position:top;width:100%}
 @media (hover:hover){.s11-tile:hover .s11-shot .ph{translate:0 -8%}}
@@ -388,6 +404,49 @@ textarea.s11-in{min-height:150px;resize:vertical;line-height:1.7}
 .s11-cfoot{text-align:center;color:var(--mut);font-size:15.5px;margin-top:28px}
 
 @media (max-width:767px){.s11-band{clip-path:inset(0 calc((1 - var(--p,1)) * 22%) 0 calc((1 - var(--p,1)) * 22%) round calc(28px + (1 - var(--p,1)) * 56px))}}
+/* reviews: same two drifting rows, cleaner cards (Anas 11-01) */
+.s11 .s1-row{gap:16px}
+.rd.s11 .s1-revnote{margin:28px auto 0;width:fit-content;max-width:min(560px,100%);text-align:center}
+.s11-rv{width:min(80vw,330px);border-radius:22px;padding:18px 18px 14px;display:grid;grid-template-rows:auto 1fr auto;gap:12px;
+  background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 82%,var(--bg)));border:1px solid var(--line2);box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  transition:transform .5s var(--out),border-color .4s}
+.rd.s11[data-mode="light"] .s11-rv{box-shadow:inset 0 1px 0 #fff}
+@media (hover:hover){.s11-rv:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--acc) 50%,var(--line2))}}
+.s11-rv .top{display:flex;align-items:center;justify-content:space-between}
+.s11-rv .q{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc)}
+.s11-rv .q svg{width:17px;height:17px;fill:currentColor;stroke:none}
+.s11-rv .stars svg{width:14px;height:14px}
+.s11-rv blockquote{margin:0;font-family:var(--f-head);font-size:23px;line-height:1.45;color:var(--ink);text-wrap:pretty;align-self:center}
+@media (max-width:640px){.s11-rv{width:min(78vw,300px);padding:16px 16px 12px}.s11-rv blockquote{font-size:20px}.s11-rv .q{width:32px;height:32px}}
+.s11-rv figcaption{display:flex;align-items:center;gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.s11-rv .av{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:16px;text-transform:uppercase;color:#FFFBF7;background:linear-gradient(140deg,#E2532A,#F2A15C)}
+.s11-rv .who{display:grid;min-width:0;line-height:1.3}
+.s11-rv .who b{font-size:16px;font-weight:600;color:var(--ink)}
+.s11-rv .who small{font-size:13.5px;color:var(--mut)}
+.s11-rv .tag{margin-inline-start:auto;flex:none;font-size:12.5px;line-height:1;color:var(--acc-ink);background:var(--acc-soft);border-radius:999px;padding:6px 10px;white-space:nowrap}
+
+/* faq: frosted boxes over two slow lights, flying in one after another (Anas 11-01) */
+.s11-faqw{position:relative;isolation:isolate;max-width:760px;margin-inline:auto}
+.s11-forbs{position:absolute;inset:-8% -14%;z-index:-1;pointer-events:none}
+.s11-forbs i{position:absolute;border-radius:50%;filter:blur(50px);animation:s1c 20s ease-in-out infinite alternate}
+.s11-forbs .o1{width:min(60vw,420px);aspect-ratio:1;right:4%;top:6%;background:radial-gradient(closest-side,#E2532A,rgba(226,83,42,0));opacity:.38}
+.s11-forbs .o2{width:min(52vw,360px);aspect-ratio:1;left:2%;bottom:4%;background:radial-gradient(closest-side,#F2A15C,rgba(242,161,92,0));opacity:.32;animation-duration:26s;animation-direction:alternate-reverse}
+.rd.s11[data-mode="light"] .s11-forbs .o1{opacity:.55}
+.rd.s11[data-mode="light"] .s11-forbs .o2{opacity:.5}
+.rd .s11-q{border-radius:20px;padding:0 20px;background:color-mix(in srgb,var(--card) 40%,transparent);border:1px solid var(--glass-line);
+  -webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
+.rd.s11[data-mode="light"] .s11-q{background:rgba(255,253,249,.42);border-color:rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+.rd.js .s11-q[data-r]{transform:translateY(44px) scale(.96);transition:opacity .9s var(--out),transform 1.1s cubic-bezier(.2,.9,.25,1.08);transition-delay:calc(var(--i,0)*110ms)}
+.rd.js .s11-q[data-r].in{transform:none}
+@media (max-width:640px){
+  .s11 .s1-faq{gap:8px}
+  .rd .s11-q{border-radius:16px;padding:0 16px}
+  .s11 .s1-faq summary{font-size:16.5px;padding:15px 0;gap:12px}
+  .s11 .s1-faq summary svg{width:19px;height:19px}
+  .s11 .s1-faq details p{font-size:15.5px;padding-bottom:16px}
+}
+
+@media (prefers-reduced-motion:reduce){.s11-block h3,.s11-block p,.s11-block .n{translate:none}.rd.js .s11-q[data-r]{transform:none}}
 @media (prefers-reduced-motion:reduce){.s11-band{clip-path:none}.s11-dc{transition:none}}
 .rd.shot .s11-band{clip-path:none}
 `
@@ -413,13 +472,16 @@ pick('support')})()`
 
 function Faq({ list = FAQS }: { list?: ReadonlyArray<{ q: string; a: string }> }) {
   return (
-    <div className="s1-faq">
-      {list.map((f, i) => (
-        <details key={f.q} className="glass" data-r style={{ ['--i' as string]: i % 3 }}>
-          <summary>{f.q}<Plus size={22} strokeWidth={1.6} /></summary>
-          <p>{f.a}</p>
-        </details>
-      ))}
+    <div className="s11-faqw">
+      <div className="s11-forbs" aria-hidden><i className="o1" /><i className="o2" /></div>
+      <div className="s1-faq">
+        {list.map((f, i) => (
+          <details key={f.q} className="s11-q" data-r style={{ ['--i' as string]: Math.min(i, 6) }}>
+            <summary>{f.q}<Plus size={22} strokeWidth={1.6} /></summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
     </div>
   )
 }
@@ -460,7 +522,7 @@ function HeroA() {
       <Sky />
       <div className="wrap s11-hg">
         <div className="s11-htxt">
-          <p className="s1-claim glass s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{HERO.claim}</p>
+          <p className="s1-claim s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{HERO.claim}</p>
           <h1 className="head s11-h1">{HERO.words.map((w, i) => <span key={w} style={{ ['--i' as string]: i }}>{w}{i < 2 ? '،' : '.'}</span>)}</h1>
           <p className="lead s11-fade">{HERO.sub}</p>
           <div className="s11-ctas s11-fade" style={{ ['--d' as string]: '.7s' }}>
@@ -484,7 +546,7 @@ function HeroB() {
       <Sky />
       <div className="s1-ghost" aria-hidden><MarkDots /></div>
       <div className="wrap s1-hero-in">
-        <p className="s1-claim glass s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{HERO.claim}</p>
+        <p className="s1-claim s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{HERO.claim}</p>
         <h1 className="head s11-h1 s11-h1b">{HERO.words.map((w, i) => <span key={w} style={{ ['--i' as string]: i }}>{w}.</span>)}</h1>
         <p className="lead s11-fade">{HERO.sub}</p>
         <div className="s11-ctas s11-fade" style={{ ['--d' as string]: '.7s', justifyContent: 'center' }}>
@@ -511,10 +573,14 @@ function Page({ hero }: { hero: 'a' | 'b' }) {
           {[0, 1].map((r) => (
             <div key={r} className={'s1-row' + (r ? ' rev' : '')}>
               {[...row, ...row].map((rv, i) => (
-                <figure key={i} className="s1-rv glass" aria-hidden={i >= REVIEWS.length || r === 1 ? true : undefined}>
-                  <Stars n={rv.rating} />
-                  <blockquote>«{rv.body}»</blockquote>
-                  <figcaption><span>{rv.name}</span><span className="tag">بانتظار موافقتك</span></figcaption>
+                <figure key={i} className="s11-rv" aria-hidden={i >= REVIEWS.length || r === 1 ? true : undefined}>
+                  <div className="top"><span className="q"><Quote aria-hidden /></span><Stars n={rv.rating} /></div>
+                  <blockquote>{rv.body}</blockquote>
+                  <figcaption>
+                    <span className="av" aria-hidden>{rv.name.slice(0, 1)}</span>
+                    <span className="who"><b>{rv.name}</b><small>تقييم {rv.rating} من 5</small></span>
+                    <span className="tag">بانتظار موافقتك</span>
+                  </figcaption>
                 </figure>
               ))}
             </div>
@@ -792,7 +858,7 @@ export function ContactPage() {
       <section className="s11-ph">
         <Sky />
         <div className="wrap s11-say">
-          <p className="s1-claim glass s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{CONTACT.eyebrow}</p>
+          <p className="s1-claim s11-fade" style={{ ['--d' as string]: '.05s' }}><b aria-hidden />{CONTACT.eyebrow}</p>
           <h1 className="head s11-ch1 s11-fade" style={{ ['--d' as string]: '.15s' }}>{CONTACT.h1a} <em>{CONTACT.h1b}</em>.</h1>
           <p className="lead s11-fade" style={{ ['--d' as string]: '.28s', maxWidth: '44ch' }}>{CONTACT.lede}</p>
           <p className="s11-promise s11-fade" style={{ ['--d' as string]: '.4s' }}><Clock aria-hidden />{CONTACT.promise}</p>
