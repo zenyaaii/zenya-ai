@@ -1,4 +1,4 @@
-import { AUTH_CSS } from '../../auth/styles'
+import { AUTH_LAYL_CSS } from '../../auth/styles'
 import { handoverSiteName, handoverSiteUrl, isHandoverToken, serviceClient } from '@/lib/handover'
 import HandoverAnswer from './HandoverAnswer'
 
@@ -31,7 +31,7 @@ export default async function HandoverPage({
 
   return (
     <main className="zs-wrap">
-      <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: AUTH_LAYL_CSS }} />
       <div className="zs-card">
         {site ? (
           <HandoverAnswer token={token} site={site} initial={searchParams.a === 'no' ? 'no' : 'yes'} />

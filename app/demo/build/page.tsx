@@ -10,12 +10,14 @@
 
 import type { Metadata } from "next"
 import RestaurantWizard from "@/components/zenya/build/wizards/RestaurantWizard"
+import { LaylProduct } from "@/components/zenya/redesign/layl"
 
 export const metadata: Metadata = {
   title: "ابنِ موقع مطعم",
   robots: { index: false, follow: false },
 }
 
+/** In the «ليل» product frame, the same one the builder wears at /theme/new/restaurant. */
 export default function DemoBuildPage() {
-  return <RestaurantWizard demo />
+  return <LaylProduct><RestaurantWizard demo /></LaylProduct>
 }

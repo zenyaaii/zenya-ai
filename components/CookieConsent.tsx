@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PRODUCT_TOKENS_CSS } from '@/components/app/tokens'
+import { dashFont } from '@/components/app/dash-font'
 
 const STORAGE_KEY = 'zenya_consent'
 const STORAGE_VERSION = '1'
@@ -72,6 +73,18 @@ export default function CookieConsent() {
   const [marketing, setMarketing] = useState(false)
   /** On the dashboard (html.dash-on) the banner is a slim strip on the dock. */
   const [dash, setDash] = useState(false)
+  /** On a «ليل» page the panel follows the page's own light/dark switch. */
+  const [mode, setMode] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    const rd = document.querySelector('.rd')
+    if (!rd) return
+    const read = () => setMode(rd.getAttribute('data-mode') === 'light' ? 'light' : 'dark')
+    read()
+    const mo = new MutationObserver(read)
+    mo.observe(rd, { attributes: true, attributeFilter: ['data-mode'] })
+    return () => mo.disconnect()
+  }, [visible])
 
   useEffect(() => {
     const h = document.documentElement
@@ -132,70 +145,46 @@ export default function CookieConsent() {
 
   return (
     <>
-      {/* The declarations the class above needs. On the dashboard AppShell
-          already injects them; on every other page nothing does, so the
-          banner carries its own copy rather than depending on a shell it is
-          not inside. */}
-      <style dangerouslySetInnerHTML={{ __html: PRODUCT_TOKENS_CSS }} />
+      {/* «ليل», since 2026-11-02: the night card, paper type, the paprika
+          action and pill buttons, the site's own faces. The colours are
+          written out here rather than read from the page's tokens, because
+          this banner is mounted in the ROOT layout, outside every page's
+          root, and must read the same on a page that has no tokens at all.
+
+          Still NO backdrop-blur. A backdrop-filter puts the panel on its own
+          compositor layer, and text on a composited layer loses subpixel
+          antialiasing, which on Arabic thins the stems and takes the i'jam
+          dots with it. This is the first Arabic a first-time visitor reads.
+          The card is opaque instead. */}
+      <style dangerouslySetInnerHTML={{ __html: LAYL_COOKIE_CSS }} />
     <div
       role="dialog"
       aria-labelledby="cookie-consent-title"
       aria-describedby="cookie-consent-desc"
-      /* NO backdrop-blur, and no bg-white/95 behind it.
-         A backdrop-filter puts this panel on its own compositor layer, and
-         text on a composited layer loses subpixel antialiasing - which on
-         Arabic thins the stems by about half a pixel and takes the i'jam dots
-         with it. This banner is the first Arabic a first-time visitor reads,
-         so it is the last place that should happen. An opaque ground costs
-         nothing here: the panel is 5rem tall over whatever it covers, and
-         nobody is reading the page through it. */
-      /* zy-tokens, because this banner is mounted in the ROOT layout and so
-         sits outside .zx-root and .zy-app both. Every colour in it comes
-         through border-token, bg-background and text-foreground, and outside
-         a scope those resolved to the :root definitions — the old marketing
-         cream and the #e5e2d9 border. The banner is on every page of the
-         site, so it was the one object still painting the retired palette
-         over a restyled page. .zy-tokens exists for exactly this: the
-         declarations with none of the shell's layout.
-
-         shadow-2xl also goes. The house rule is elevation by hairline ring,
-         and a 25-blur drop shadow under a panel that is already separated
-         from the page by being fixed to the bottom of it was never doing
-         work. */
-      data-open={dash ? '' : undefined}
-      className="zy-tokens zy-cookie fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-3xl rounded-2xl border border-token bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_0_0_4px_rgba(250,250,250,0.55)] sm:bottom-6 sm:inset-x-6"
+      data-mode={mode}
+      className={'ck-ly ' + dashFont.variable}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex-1">
-          <h2
-            id="cookie-consent-title"
-            className="text-[15px] font-semibold text-foreground"
-          >
+      <div className="ck-ly-in">
+        <div className="ck-ly-copy">
+          <h2 id="cookie-consent-title" className="ck-ly-h">
             ملفات تعريف الارتباط في بينون
           </h2>
-          <p
-            id="cookie-consent-desc"
-            className="mt-1.5 text-[14.5px] leading-[1.6] text-muted"
-          >
+          <p id="cookie-consent-desc" className="ck-ly-p">
             نستخدم ملفات تعريف ارتباط ضرورية تمامًا لإبقائك مسجَّل الدخول. وبموافقتك
             نودّ أيضًا استخدام ملفات وظيفية وتحليلية لتحسين المنتج. اقرأ المزيد في{' '}
-            <Link href="/cookies" className="underline hover:text-foreground">
-              سياسة ملفات تعريف الارتباط
-            </Link>{' '}
+            <Link href="/cookies">سياسة ملفات تعريف الارتباط</Link>{' '}
             و{' '}
-            <Link href="/privacy" className="underline hover:text-foreground">
-              سياسة الخصوصية
-            </Link>
+            <Link href="/privacy">سياسة الخصوصية</Link>
             .
           </p>
 
           {showDetails && (
-            <div className="mt-4 space-y-2.5 rounded-lg border border-token bg-background p-3.5 text-[13px]">
-              <div className="flex items-start gap-3">
-                <input type="checkbox" checked disabled className="mt-0.5 h-4 w-4" />
+            <div className="ck-ly-opts">
+              <div className="ck-ly-opt">
+                <input type="checkbox" checked disabled />
                 <div>
-                  <div className="font-medium text-foreground">ضرورية تمامًا</div>
-                  <div className="text-muted">لازمة لتسجيل الدخول والدفع والأمان. مفعّلة دائمًا.</div>
+                  <div className="ck-ly-ot">ضرورية تمامًا</div>
+                  <div className="ck-ly-od">لازمة لتسجيل الدخول والدفع والأمان. مفعّلة دائمًا.</div>
                 </div>
               </div>
               <Toggle
@@ -220,31 +209,19 @@ export default function CookieConsent() {
           )}
         </div>
 
-        <div className="flex flex-shrink-0 flex-col gap-2 sm:w-44">
-          <button
-            onClick={acceptAll}
-            className="inline-flex min-h-[38px] items-center justify-center rounded-md bg-primary px-4 py-2.5 text-[14.5px] font-semibold text-white transition-opacity hover:opacity-90"
-          >
+        <div className="ck-ly-acts">
+          <button type="button" onClick={acceptAll} className="ck-ly-b ck-ly-yes">
             قبول الكل
           </button>
-          <button
-            onClick={rejectAll}
-            className="inline-flex min-h-[38px] items-center justify-center rounded-md border border-token bg-background px-4 py-2.5 text-[14.5px] font-medium text-foreground transition-colors hover:bg-black/5"
-          >
+          <button type="button" onClick={rejectAll} className="ck-ly-b">
             رفض غير الأساسي
           </button>
           {showDetails ? (
-            <button
-              onClick={saveChoices}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-md border border-token bg-background px-4 py-2.5 text-[14.5px] font-medium text-foreground transition-colors hover:bg-black/5"
-            >
+            <button type="button" onClick={saveChoices} className="ck-ly-b">
               حفظ اختياراتي
             </button>
           ) : (
-            <button
-              onClick={() => setShowDetails(true)}
-              className="inline-flex min-h-[38px] items-center text-[14.5px] text-muted underline hover:text-foreground"
-            >
+            <button type="button" onClick={() => setShowDetails(true)} className="ck-ly-more">
               إدارة التفضيلات
             </button>
           )}
@@ -254,6 +231,49 @@ export default function CookieConsent() {
     </>
   )
 }
+
+/* The «ليل» palette (components/zenya/redesign/base.tsx): night card #1A1713 on
+   #0F0D0A, paper type #F4EFE6, stone #A39A8D; on a light page the paper card
+   #FFFDF9, ink #16120D, stone #5F574D. Paprika #E2532A carries the one action,
+   with #FFFBF7 on it as on the site's own buttons. */
+const LAYL_COOKIE_CSS = `
+.ck-ly{--c:#1A1713;--c2:#24201A;--i:#F4EFE6;--m:#A39A8D;--l:rgba(244,239,230,.16);--a:#E2532A;--ai:#F07A52;
+  position:fixed;inset-inline:12px;bottom:12px;z-index:100;margin-inline:auto;max-width:46rem;
+  background:var(--c);color:var(--i);border:1px solid var(--l);border-radius:24px;padding:20px;
+  box-shadow:0 1px 2px rgba(0,0,0,.3),0 24px 60px -20px rgba(0,0,0,.65);
+  font-family:"Thm Text",var(--font-markazi),"Markazi Text",serif;font-size:17px;line-height:1.65;color-scheme:dark;
+  -webkit-font-smoothing:antialiased;animation:ckly-in .7s cubic-bezier(.22,1,.36,1) both}
+.ck-ly[data-mode="light"]{--c:#FFFDF9;--c2:#F1EBE1;--i:#16120D;--m:#5F574D;--l:rgba(22,18,13,.14);--ai:#B23A17;color-scheme:light;
+  box-shadow:0 1px 2px rgba(22,18,13,.06),0 24px 60px -24px rgba(22,18,13,.3)}
+@keyframes ckly-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ck-ly{animation:ckly-fade .4s both}@keyframes ckly-fade{from{opacity:0}to{opacity:1}}}
+.ck-ly *,.ck-ly *::before,.ck-ly *::after{box-sizing:border-box}
+.ck-ly-in{display:flex;flex-direction:column;gap:16px}
+.ck-ly-copy{flex:1;min-width:0}
+.ck-ly-h{margin:0;font-family:"Thm Display",var(--font-amiri),"Amiri",serif;font-weight:700;font-size:21px;line-height:1.35}
+.ck-ly-p{margin:6px 0 0;color:var(--m);font-size:16px}
+.ck-ly a{color:var(--ai);text-decoration:none;border-bottom:1px solid currentColor}
+.ck-ly-opts{margin-top:14px;display:grid;gap:10px;padding:14px;border-radius:18px;background:var(--c2);border:1px solid var(--l);font-size:15.5px;line-height:1.55}
+.ck-ly-opt,.ck-ly-tg{display:flex;align-items:flex-start;gap:12px}
+.ck-ly-tg{cursor:pointer}
+.ck-ly-opts input{margin-top:4px;width:18px;height:18px;flex:none;accent-color:var(--a)}
+.ck-ly-ot{font-weight:600}
+.ck-ly-od{color:var(--m)}
+.ck-ly-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ck-ly-b{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:999px;
+  font:inherit;font-size:16px;font-weight:600;cursor:pointer;color:var(--i);background:transparent;border:1px solid var(--l);transition:border-color .3s,background-color .3s,opacity .3s}
+.ck-ly-yes{background:var(--a);border-color:var(--a);color:#FFFBF7}
+@media (hover:hover){.ck-ly-b:hover{border-color:var(--a)}.ck-ly-yes:hover{opacity:.9}.ck-ly-more:hover{color:var(--i)}}
+.ck-ly-more{min-height:44px;padding:0 8px;font:inherit;font-size:16px;color:var(--m);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.ck-ly :focus-visible{outline:2px solid var(--a);outline-offset:3px}
+@media (max-width:520px){.ck-ly-acts .ck-ly-b{flex:1 1 auto}}
+@media (min-width:768px){.ck-ly{inset-inline:24px;bottom:24px;padding:22px 24px}.ck-ly-in{flex-direction:row;align-items:flex-start;gap:24px}
+  .ck-ly-acts{flex-direction:column;align-items:stretch;flex:none;width:12rem}}
+/* The dashboard has no «ليل» root: its own switch (html.dash-dk) picks the card, and the
+   full choices open above its dock, as the strip's gear always did. */
+html.dash-on:not(.dash-dk) .ck-ly{--c:#FFFDF9;--c2:#F1EBE1;--i:#16120D;--m:#5F574D;--l:rgba(22,18,13,.14);--ai:#B23A17;color-scheme:light}
+html.dash-on .ck-ly{z-index:45;bottom:calc(66px + 22px + env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 66px - 22px - 80px);overflow:auto}
+`
 
 function Toggle({
   label,
@@ -267,16 +287,15 @@ function Toggle({
   onChange: (v: boolean) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-start gap-3">
+    <label className="ck-ly-tg">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="mt-0.5 h-4 w-4 accent-primary"
       />
       <div>
-        <div className="font-medium text-foreground">{label}</div>
-        <div className="text-muted">{desc}</div>
+        <div className="ck-ly-ot">{label}</div>
+        <div className="ck-ly-od">{desc}</div>
       </div>
     </label>
   )

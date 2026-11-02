@@ -72,25 +72,33 @@ laid out in two halves and the split is load-bearing:
 `/account` redirects, the auth callbacks, the Shopify one-product builder at
 `/build`, and the seven generator wizards under `/theme/new`.
 
-It is on the house style too now. Its layout mounts
-`components/zenya/chrome/ProductShell`, which is the tokens and the header pill
-and deliberately **no** marketing footer — a generator flow is a form with
-somewhere to go next, not a page read to the bottom. `ProductShell` roots a
-`<div>`, not a `<main>`, because every page under `(main)` renders its own.
+It is on «ليل» too (2026-11-02). Its layout mounts `LaylProduct` from
+`components/zenya/redesign/layl.tsx`: the site's night frame (header pill, the
+light) and deliberately **no** footer — a generator flow is a form with
+somewhere to go next, not a page read to the bottom. It roots a `<div>`, not a
+`<main>`, because every page under `(main)` renders its own. `/build` opens on
+the paper side (light mode) because the Shopify builder paints white panels in
+its own classes. `components/zenya/chrome/ProductShell` is the previous frame,
+left in the tree.
+
+**«ليل» is the design of every Beynoun page now** — the public site
+(`app/(site)`, via `LaylShell`/`LaylFrame`), the product (`LaylProduct`), the
+accounts portal (`Portal` in `components/zenya/redesign/s11.tsx`), the 404
+(`app/not-found.tsx`) and the cookie banner. A page's old stylesheet is not
+rewritten: `laylify()` (`components/zenya/redesign/laylify.ts`, pure, safe in
+client components) moves it onto the night's tokens and type at render. It
+only works inside a «ليل» root (`.rd`).
 
 The old `components/Navbar` and `components/Footer` are **gone**; nothing
-imports them. A page moving between the groups swaps `ProductShell` for `Shell`
-or the reverse — `Shell` adds the obsidian footer cap and the reveal observer,
-which is what separates a public page from a product one.
+imports them.
 
-**One token layer feeds all of it.** `components/app/tokens.ts` exports
+**One token layer feeds the product.** `components/app/tokens.ts` exports
 `PRODUCT_TOKENS_CSS`, scoped to `.zy-app, .zy-tokens, .zx-root`, and it is what
 `--background`, `--surface`, `--card`, `--muted`, `--border`, the status triad
-and the elevation rings resolve to on every product surface. The dashboard
-stylesheet composes it; so does `ProductShell`; so does the cookie banner, which
-is mounted in the root layout and is inside no shell at all. If a surface is
-painting the old cream, it is outside those three selectors — add `.zy-tokens`,
-do not write a fourth copy of the palette.
+and the elevation rings resolve to on the dashboard. Inside a «ليل» root,
+`LAYL_PRODUCT_CSS` re-points those same names at the night's palette, so a
+product page's `bg-background` or `text-muted` follows the theme button. Do not
+write another copy of the palette.
 
 **Metadata lives in the route, not the view.** Every promoted page kept its
 original `layout.tsx` — title, description, canonical, hreflang and JSON-LD —

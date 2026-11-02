@@ -22,6 +22,7 @@ import {
 import { Root, Header, Vid, Stars, FooterLinks, Contact, Socials, MarkDots, Check, Plus, Laptop, Phone, Browser } from './base'
 import S11AuthBridge from './S11AuthBridge'
 import S11Session from './S11Session'
+import S11PortalBridge from './S11PortalBridge'
 import { CSS as S1_CSS } from './s1'
 import {
   HERO, REVIEWS, REVIEWS_NOTE, DASH_D, DASH_M, EDIT_D, EDIT_M, DASH_FEATURES, EDIT_STEPS, TEMPLATES, phoneShot, wideShot,
@@ -551,6 +552,17 @@ textarea.s11-in{min-height:150px;resize:vertical;line-height:1.7}
 .rd .s11-row.out{color:#D6452A}
 .s11-row svg{width:17px;height:17px}
 .s11-portal[data-view="choose"] [data-view-only="login"],.s11-portal[data-view="login"] [data-view-only="choose"]{display:none}
+.s11-picks,.s11-saved-list{display:grid;gap:10px}
+.s11-saved-list:empty{display:none}
+.s11-av{overflow:hidden;flex:none}
+.s11-av img{width:100%;height:100%;object-fit:cover}
+.s11-saved{position:relative;display:grid}
+.rd .s11-saved .s11-acc-pick{width:100%;text-align:start;padding:12px 14px;padding-inline-end:56px;font:inherit;color:inherit;cursor:pointer;background:color-mix(in srgb,var(--card) 70%,transparent);border:1px solid var(--line2);border-radius:18px}
+@media (hover:hover){.rd .s11-saved .s11-acc-pick:hover{border-color:var(--acc)}}
+.rd .s11-forget{position:absolute;inset-inline-end:8px;top:50%;translate:0 -50%;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:22px;line-height:1;color:var(--mut);background:none;border:0;cursor:pointer;transition:background-color .3s,color .3s}
+@media (hover:hover){.rd .s11-forget:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,transparent)}}
+.rd .s11-row:disabled{opacity:.6;cursor:progress}
+.s11-dnote[hidden]{display:none}
 /* the sign-in page starts under the header too, so its light reaches the top edge */
 .rd.s11 .h+.s11-dwrap{margin-top:-66px;padding-top:calc(66px + clamp(110px,16vw,150px))}
 @media (max-width:520px){.s11-door{border-radius:24px}.s11-dwrap{padding-top:96px}.rd.s11 .h+.s11-dwrap{padding-top:calc(66px + 96px)}}
@@ -1210,6 +1222,91 @@ export function Accounts() {
         </div>
       </section>
       <script dangerouslySetInnerHTML={{ __html: ACCESS }} />
+    </Root>
+  )
+}
+
+/* ---- accounts.beynoun.com, live ---- */
+export type PortalUser = { name: string; email: string; avatar?: string }
+
+/* The addresses this device signed in with before (localStorage zenya_accounts, written by the
+   sign-in on both doors) become rows on the chooser before the page paints. A row fills the
+   address and puts the cursor in the password; the × forgets it. Rows are built with
+   textContent, never markup, because the names in that list were typed by whoever used the
+   device. With nothing to choose from, the chooser is never shown and the door has no way back. */
+const PORTAL = `(function(){var root=document.currentScript.parentElement,p=root.querySelector('[data-portal]');if(!p)return;
+var list=p.querySelector('[data-picks]'),door=p.querySelector('[data-access]'),back=p.querySelector('[data-back]'),live=(p.getAttribute('data-live')||'').toLowerCase(),
+em=door.querySelector('[name=email]'),pw=door.querySelector('[name=password]'),saved=[];
+function read(){try{var a=JSON.parse(localStorage.getItem('zenya_accounts')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}}
+saved=read().filter(function(a){return a&&typeof a.email==='string'&&a.email.toLowerCase()!==live}).slice(0,4);
+function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}
+saved.forEach(function(a){var row=el('div','s11-saved'),b=el('button','s11-acc-pick');b.type='button';b.setAttribute('data-pick',a.email);
+var av=el('span','s11-av',((a.name||a.email).trim().charAt(0)||'?').toUpperCase());av.setAttribute('aria-hidden','true');
+var id=el('span','id');id.appendChild(el('b',null,(a.name||'').trim()||a.email.split('@')[0]));id.appendChild(el('small',null,a.email));
+b.appendChild(av);b.appendChild(id);var x=el('button','s11-forget','×');x.type='button';x.setAttribute('aria-label','إزالة هذا الحساب من القائمة');x.setAttribute('data-forget',a.email);
+row.appendChild(b);row.appendChild(x);list.appendChild(row)});
+function any(){return !!live||!!list.querySelector('[data-pick]')}
+back.hidden=!any();
+if(!live&&saved.length&&door.getAttribute('data-am')==='signin')p.setAttribute('data-view','choose');
+if(!em.value){try{em.value=localStorage.getItem('zenya_last_email')||''}catch(e){}}
+function signin(){if(door.getAttribute('data-am')!=='signin'){var t=door.querySelector('[role=tab][data-go=signin]');if(t)t.click()}}
+p.addEventListener('click',function(e){var k=e.target.closest('[data-pick]');
+if(k){e.preventDefault();signin();em.value=k.getAttribute('data-pick');pw.value='';p.setAttribute('data-view','login');setTimeout(function(){pw.focus()},60);return}
+var f=e.target.closest('[data-forget]');
+if(f){e.preventDefault();var m=f.getAttribute('data-forget').toLowerCase();try{localStorage.setItem('zenya_accounts',JSON.stringify(read().filter(function(a){return a&&a.email&&a.email.toLowerCase()!==m})))}catch(_){}
+f.parentElement.parentElement.removeChild(f.parentElement);if(!any()){back.hidden=true;p.setAttribute('data-view','login')}return}
+if(e.target.closest('[data-another]')){signin();em.value='';pw.value=''}})})()`
+
+/**
+ * accounts.beynoun.com: the chooser, the sign-in and the sign-up, in the «ليل» style of the
+ * sample at /demo/styles/11/accounts. The signed-in account comes from the server; the bridge
+ * does the sign-in and sign-out. `dash` is where «continue» goes: dashboard.beynoun.com on our
+ * hosts, /dashboard on a preview.
+ */
+export function Portal({ mode = 'signin', user, dash }: { mode?: AccessMode; user: PortalUser | null; dash: string }) {
+  const view = mode === 'signin' && user ? 'choose' : 'login'
+  const initial = user ? ((user.name || user.email).trim().charAt(0) || '؟').toUpperCase() : ''
+  return (
+    <Root id="s1 s11" mode="dark" css={S1_CSS + CSS}>
+      <S11AuthBridge portal />
+      <S11PortalBridge />
+      <main className="s11-dwrap portal">
+        <Sky />
+        <div className="wrap s11-portal" data-portal data-view={view} data-live={user?.email || ''}>
+          <div className="s11-door glass s11-fade" data-view-only="choose" style={{ ['--d' as string]: '.1s' }}>
+            <MarkDots />
+            <div className="s11-dhd">
+              <h1 className="s11-dh">اختر حسابك</h1>
+              <p className="s11-ds">تابع إلى لوحة التحكم بالحساب الذي تريده.</p>
+            </div>
+            <div className="s11-picks">
+              {user ? (
+                <a className="s11-acc-pick" href={dash}>
+                  <span className="s11-av" aria-hidden>
+                    {user.avatar ? <img src={user.avatar} alt="" referrerPolicy="no-referrer" /> : initial}
+                  </span>
+                  <span className="id"><b>{user.name}</b><small>{user.email}</small></span>
+                  <Arrow aria-hidden />
+                </a>
+              ) : null}
+              {/* The saved rows are added by PORTAL before React hydrates. An element whose
+                  children come from dangerouslySetInnerHTML is one React does not compare,
+                  so rows put there do not break hydration. */}
+              <div className="s11-saved-list" data-picks dangerouslySetInnerHTML={{ __html: '' }} />
+            </div>
+            <div className="s11-rows">
+              <button type="button" className="s11-row" data-view-go="login" data-another><UserPlus aria-hidden />الدخول بحساب آخر</button>
+              {user ? <button type="button" className="s11-row out" data-signout><LogOut aria-hidden /><span data-l>تسجيل الخروج</span></button> : null}
+            </div>
+          </div>
+          <div data-view-only="login">
+            <Door variant="portal" mode={mode} mark />
+            <p className="s11-dnote" data-back><button type="button" className="s11-link" data-view-go="choose">العودة إلى الحسابات المحفوظة</button></p>
+          </div>
+        </div>
+      </main>
+      <script dangerouslySetInnerHTML={{ __html: ACCESS }} />
+      <script dangerouslySetInnerHTML={{ __html: PORTAL }} />
     </Root>
   )
 }

@@ -31,6 +31,7 @@ import ZenyaMark from "@/components/ZenyaMark"
 import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
 import PricingFooter from "@/components/zenya/pricing/PricingFooter"
+import { laylify } from "@/components/zenya/redesign/laylify"
 
 const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
 const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
@@ -117,7 +118,7 @@ export default function WizardShell({
 
   return (
     <main className={"zb-root " + tajawal.className} dir="rtl" ref={rootRef} data-chrome={chrome ? "true" : undefined}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: chrome ? CSS : LAYL_CSS }} />
 
       {chrome ? <DemoHeader rootRef={rootRef} /> : null}
 
@@ -959,3 +960,10 @@ textarea.zb-in { resize: vertical; min-height: 96px; }
   .zb-sum { grid-template-columns: minmax(0,1fr); }
 }
 `
+
+/* «ليل», since 2026-11-02: inside the product the wizard stands in the night
+   frame (LaylProduct, components/zenya/redesign/layl.tsx), and this sheet is
+   moved onto its palette and type by laylify() rather than edited. The
+   public demo with `chrome` still draws its own header and footer on the old
+   ground, so it keeps the sheet as written. */
+const LAYL_CSS = laylify(CSS)
