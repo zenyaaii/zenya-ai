@@ -43,7 +43,7 @@ import {
   Sparkles, Languages, LayoutTemplate, Server, Globe, CreditCard,
   PencilRuler, BarChart3, Search, Gauge,
 } from "lucide-react"
-import Shell from "@/components/zenya/chrome/Shell"
+import LaylShell from "@/components/zenya/redesign/layl"
 import { Breadcrumbs, Hero, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import type { QA } from "@/lib/faq-data"
 import { CSS } from "@/components/zenya/features/styles"
@@ -102,7 +102,7 @@ const FEATURE_FAQS: QA[] = [
 
 export default function FeaturesPage() {
   return (
-    <Shell css={CSS}>
+    <LaylShell word="مزايا" css={CSS}>
       <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "الميزات" }]} />
 
       {/* THE HEADLINE IS THE LIVE HEADLINE, em-dash and all: "كل شيء لإطلاق
@@ -143,6 +143,6 @@ export default function FeaturesPage() {
 
       <FaqList title="أسئلة شائعة عن الميزات" faqs={FEATURE_FAQS} />
       <CtaBand />
-    </Shell>
+    </LaylShell>
   )
 }

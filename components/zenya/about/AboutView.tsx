@@ -27,17 +27,14 @@
 
 import { useEffect, useRef } from "react"
 import Link from "next/link"
-import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import SlideButton from "@/components/ui/SlideButton"
 import { COMPANY } from "@/lib/company"
-import Header, { useOnDark } from "@/components/zenya/chrome/Header"
-import { CHROME_CSS } from "@/components/zenya/chrome/tokens"
+import { LaylFrame, laylify } from "@/components/zenya/redesign/layl"
 import { MARKETING_CSS } from "@/components/zenya/chrome/marketing"
-import PricingFooter from "../pricing/PricingFooter"
 import { CSS } from "./styles"
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
-const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
+/* The «ليل» frame sets the faces (redesign/layl.tsx); Plex is no longer loaded here. */
+const plex = { className: "" }
 
 /** The live page's four differentiators, titles and descriptions unchanged.
  *  What is gone is the per-item `color`, which painted three hues across a
@@ -73,7 +70,6 @@ const REAL = "/about"
 
 export default function AboutView() {
   const rootRef = useRef<HTMLElement | null>(null)
-  const { headRef, onDark } = useOnDark(rootRef)
 
   /* Arrival. The hidden half lives under .zy-js so a browser that never runs
      the script reads a finished page rather than an invisible one. */
@@ -98,9 +94,8 @@ export default function AboutView() {
   }, [])
 
   return (
-    <main className={"zx-root " + tajawal.className} dir="rtl" ref={rootRef}>
-      <style dangerouslySetInnerHTML={{ __html: CHROME_CSS + MARKETING_CSS + CSS }} />
-      <Header headRef={headRef} onDark={onDark} uiClass={plex.className} />
+    <LaylFrame css={laylify(MARKETING_CSS + CSS)} word="قصتنا">
+    <main className="zx-root ly-main" dir="rtl" ref={rootRef}>
 
       <div className="zx-wrap">
         {/* 1. THE OPENING. Four text elements, which is the cap: eyebrow,
@@ -242,7 +237,7 @@ export default function AboutView() {
         </p>
       </div>
 
-      <PricingFooter />
     </main>
+    </LaylFrame>
   )
 }

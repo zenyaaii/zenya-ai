@@ -26,17 +26,14 @@
 import { useEffect, useRef } from "react"
 import Link from "next/link"
 import { ChevronDown } from "lucide-react"
-import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import SlideButton from "@/components/ui/SlideButton"
 import { AR_FAQS, EN_FAQS, type QA } from "@/lib/faq-data"
-import Header, { useOnDark } from "@/components/zenya/chrome/Header"
-import { CHROME_CSS } from "@/components/zenya/chrome/tokens"
+import { LaylFrame, laylify } from "@/components/zenya/redesign/layl"
 import { MARKETING_CSS } from "@/components/zenya/chrome/marketing"
-import PricingFooter from "../pricing/PricingFooter"
 import { CSS } from "./styles"
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
-const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
+/* The «ليل» frame sets the faces (redesign/layl.tsx); Plex is no longer loaded here. */
+const plex = { className: "" }
 
 const REAL = "/faq"
 
@@ -55,7 +52,6 @@ function Question({ item, id }: { item: QA; id: string }) {
 
 export default function FaqView() {
   const rootRef = useRef<HTMLElement | null>(null)
-  const { headRef, onDark } = useOnDark(rootRef)
 
   useEffect(() => {
     const root = rootRef.current
@@ -78,9 +74,8 @@ export default function FaqView() {
   }, [])
 
   return (
-    <main className={"zx-root " + tajawal.className} dir="rtl" ref={rootRef}>
-      <style dangerouslySetInnerHTML={{ __html: CHROME_CSS + MARKETING_CSS + CSS }} />
-      <Header headRef={headRef} onDark={onDark} uiClass={plex.className} />
+    <LaylFrame css={laylify(MARKETING_CSS + CSS)} word="أسئلة">
+    <main className="zx-root ly-main" dir="rtl" ref={rootRef}>
 
       <div className="zx-wrap">
         <section className="zx-open" data-reveal>
@@ -144,7 +139,7 @@ export default function FaqView() {
         </p>
       </div>
 
-      <PricingFooter />
     </main>
+    </LaylFrame>
   )
 }

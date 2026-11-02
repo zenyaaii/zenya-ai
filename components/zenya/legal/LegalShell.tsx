@@ -34,16 +34,13 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ChevronDown, Menu, X } from "lucide-react"
-import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
-import ZenyaMark from "@/components/ZenyaMark"
-import AccountControl from "@/components/zenya/chrome/AccountControl"
+import { ChevronDown } from "lucide-react"
 import { COMPANY } from "@/lib/company"
-import PricingFooter from "../pricing/PricingFooter"
+import { LaylFrame, laylify } from "@/components/zenya/redesign/layl"
 import { CSS } from "./styles"
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
-const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
+/* The «ليل» frame sets the faces (redesign/layl.tsx); Plex is no longer loaded here. */
+const plex = { className: "" }
 
 /* The candidate set links inside the candidate set, in the set's own order. */
 const NAV: Array<{ href: string; label: string }> = [
@@ -78,12 +75,9 @@ export default function LegalShell({
   sections: readonly Section[]
   children: React.ReactNode
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [onDark, setOnDark] = useState(false)
   const [here, setHere] = useState<string | null>(null)
 
   const rootRef = useRef<HTMLElement | null>(null)
-  const headRef = useRef<HTMLElement | null>(null)
 
   const doc = DOCS.find((d) => d.slug === slug) ?? DOCS[0]
 
@@ -107,39 +101,6 @@ export default function LegalShell({
     )
     targets.forEach((el) => io.observe(el))
     return () => io.disconnect()
-  }, [])
-
-  /* The header takes the ground it is standing on. Same mechanic as the
-     seven sibling pages: the band is the strip the pill occupies. The root
-     ZoomLock writes CSS zoom, so a rect and a rootMargin are already in the
-     same space; do not divide either by the zoom. It watches ".zf", which is
-     the footer cap's real class. */
-  useEffect(() => {
-    const head = headRef.current
-    const root = rootRef.current
-    if (!head || !root) return
-    let io: IntersectionObserver | null = null
-    const live = new Set<Element>()
-    const darks = Array.from(root.querySelectorAll<HTMLElement>(".zf"))
-    const build = () => {
-      io?.disconnect()
-      live.clear()
-      const pill = Array.from(head.querySelectorAll<HTMLElement>(".zl-pill, .zl-phone-pill"))
-        .find((el) => el.getBoundingClientRect().height > 0)
-      if (!pill) return
-      const r = pill.getBoundingClientRect()
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => (e.isIntersecting ? live.add(e.target) : live.delete(e.target)))
-          setOnDark(live.size > 0)
-        },
-        { rootMargin: -r.top + "px 0px " + -(window.innerHeight - r.bottom) + "px 0px", threshold: 0 },
-      )
-      darks.forEach((el) => io!.observe(el))
-    }
-    build()
-    window.addEventListener("resize", build)
-    return () => { io?.disconnect(); window.removeEventListener("resize", build) }
   }, [])
 
   /* WHICH CLAUSE THE READER IS IN.
@@ -186,50 +147,9 @@ export default function LegalShell({
   }, [sections])
 
   return (
-    <main className={"zl-root " + tajawal.className} dir="rtl" ref={rootRef}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <LaylFrame css={laylify(CSS)}>
+    <main className="zl-root ly-main" dir="rtl" ref={rootRef}>
 
-      <header ref={headRef} className={"zl-head " + plex.className} data-dark={onDark ? "true" : undefined}>
-        <div className="zl-phone-pill" style={{ minWidth: menuOpen ? "min(86vw, 268px)" : "184px" }}>
-          <div className="zl-phone-bar">
-            <button type="button" className="zl-round" aria-expanded={menuOpen} aria-controls="zl-phone-menu"
-              aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
-              {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
-            </button>
-            <Link href="/" aria-label="بينون" className="zl-phone-mark"><ZenyaMark className="zl-mark-svg-sm" /></Link>
-            <AccountControl className="zl-account zl-account-phone" />
-          </div>
-          <div className="zl-drawer" data-open={menuOpen ? "true" : undefined}
-            style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
-            <div className="zl-drawer-clip">
-              <nav id="zl-phone-menu" className="zl-phone-menu">
-                {NAV.map((i) => (
-                  <Link key={i.href} href={i.href} className="zl-tray-row" onClick={() => setMenuOpen(false)}>
-                    {i.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          </div>
-        </div>
-
-        <div className="zl-pill">
-          <div className="zl-bar">
-            <span className="zl-side zl-side-start">
-              <Link href="/" className="zl-mark" aria-label="بينون"><ZenyaMark className="zl-mark-svg" /></Link>
-            </span>
-            <nav className="zl-nav">
-              {NAV.map((i) => (
-                <Link key={i.href} href={i.href} className="zl-nav-item">{i.label}</Link>
-              ))}
-            </nav>
-            <span className="zl-side zl-side-end">
-              <span className="zl-sep" aria-hidden />
-              <AccountControl className="zl-account" />
-            </span>
-          </div>
-        </div>
-      </header>
 
       <div className="zl-wrap">
         <section className="zl-open" data-reveal>
@@ -294,8 +214,8 @@ export default function LegalShell({
         </p>
       </div>
 
-      <PricingFooter />
     </main>
+    </LaylFrame>
   )
 }
 
