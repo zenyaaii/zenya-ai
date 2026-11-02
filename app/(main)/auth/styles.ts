@@ -1,3 +1,5 @@
+import { laylify } from '@/components/zenya/redesign/laylify'
+
 /**
  * The house style for the two auth surfaces under (main): the reset-password
  * card and the auth-code error.
@@ -187,3 +189,7 @@ export const AUTH_CSS = `
   .zs-input, .zs-eye, .zs-submit { transition: none; }
 }
 `
+
+/** The same sheet on the «ليل» palette and type, for the night frame these
+ *  cards stand in since 2026-11-02 (LaylProduct in components/zenya/redesign/layl.tsx). */
+export const AUTH_LAYL_CSS = laylify(AUTH_CSS)

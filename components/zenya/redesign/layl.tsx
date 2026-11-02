@@ -30,94 +30,15 @@ import { dashFont } from '@/components/app/dash-font'
 import { MARKETING_CSS } from '../chrome/marketing'
 import { PARTS_CSS } from '../chrome/parts-css'
 
-/* ---- laylify ------------------------------------------------------------ */
+import { laylify } from './laylify'
 
-const SCALE = 1.16
-
-function alpha(a: string) { return parseFloat(a) }
-
-/** The old palette, mapped onto the «ليل» tokens. Both modes follow, because
- *  every value lands on a variable the theme button already switches. */
-function recolour(css: string): string {
-  return css
-    .replace(/rgba\(\s*(?:0\s*,\s*0\s*,\s*0|17\s*,\s*17\s*,\s*17)\s*,\s*([0-9.]+)\s*\)/g, (_, a) => (alpha(a) < 0.1 ? 'var(--line)' : 'var(--line2)'))
-    .replace(/rgba\(\s*(?:250\s*,\s*250\s*,\s*250|255\s*,\s*255\s*,\s*255)\s*,\s*([0-9.]+)\s*\)/g, (_, a) => `color-mix(in srgb,var(--bg) ${Math.round(alpha(a) * 100)}%,transparent)`)
-    .replace(/rgba\(\s*(?:94\s*,\s*106\s*,\s*210|113\s*,\s*112\s*,\s*255|99\s*,\s*102\s*,\s*241|52\s*,\s*60\s*,\s*150)\s*,/g, 'rgba(226,83,42,')
-    .replace(/rgba\(\s*21\s*,\s*128\s*,\s*61\s*,/g, 'rgba(76,179,122,')
-    .replace(/rgba\(\s*180\s*,\s*83\s*,\s*9\s*,/g, 'rgba(232,162,90,')
-    .replace(/#(?:5e6ad2|7170ff|6366f1|5a66cf|4e5ac0)\b/gi, 'var(--acc)')
-    .replace(/#(?:4f5ab8|97a0ee)\b/gi, 'var(--acc-ink)')
-    .replace(/#(?:15803d|27a644)\b/gi, 'var(--ok)')
-    .replace(/#b45309\b/gi, 'var(--warn)')
-    .replace(/(background(?:-color)?\s*:\s*)#(?:fff|ffffff)\b/gi, '$1var(--card)')
-    .replace(/#fafafa\b/gi, 'var(--bg)')
-    .replace(/#(?:171717|111111|000000|000)\b/gi, 'var(--ink)')
-    .replace(/#(?:f4f4f6|f2f2f5|f7f4ed)\b/gi, 'var(--card2)')
-    .replace(/#(?:56565a|66666e|6b6b73|666666|666)\b/gi, 'var(--mut)')
-    .replace(/#(?:a8a8b2|7c7c88)\b/gi, 'var(--mut2)')
-    .replace(/#(?:131316|1c1c1c|191920|2a2a31)\b/gi, 'var(--bg2)')
-}
-
-/** Markazi and Thmanyah set smaller than Tajawal at the same size. */
-function resize(css: string): string {
-  return css.replace(/(font-size\s*:\s*)([^;}]+)/g, (_, k: string, v: string) =>
-    k + v.replace(/([0-9.]+)(px|rem)\b/g, (_m, n: string, u: string) => String(+(parseFloat(n) * SCALE).toFixed(2)) + u))
-}
-
-function splitTop(prelude: string): string[] {
-  const out: string[] = []
-  let depth = 0, from = 0
-  for (let i = 0; i < prelude.length; i++) {
-    const c = prelude[i]
-    if (c === '(') depth++
-    else if (c === ')') depth--
-    else if (c === ',' && depth === 0) { out.push(prelude.slice(from, i)); from = i + 1 }
-  }
-  out.push(prelude.slice(from))
-  return out
-}
-
-function raise(prelude: string): string {
-  return splitTop(prelude).map((sel) => {
-    const s = sel.trim()
-    if (!s || /^(html|:root|body)\b/.test(s)) return s
-    if (s.startsWith(':where(.zy-js)')) return s.replace(/^:where\(\.zy-js\)\s*/, ':where(.zy-js) .rd ')
-    return '.rd ' + s
-  }).join(', ')
-}
-
-/** Every selector one class stronger (.rd), so `.rd h2 { margin: 0 }` in the
- *  frame's reset no longer beats a page's `.zx-h2 { margin: … }`. */
-function scope(css: string): string {
-  let out = ''
-  let i = 0
-  const n = css.length
-  while (i < n) {
-    const open = css.indexOf('{', i)
-    if (open < 0) { out += css.slice(i); break }
-    let depth = 1
-    let j = open + 1
-    while (j < n && depth) { const c = css[j]; if (c === '{') depth++; else if (c === '}') depth--; j++ }
-    const prelude = css.slice(i, open)
-    const body = css.slice(open + 1, j - 1)
-    const p = prelude.trim()
-    if (p.startsWith('@media') || p.startsWith('@supports')) out += prelude + '{' + scope(body) + '}'
-    else if (p.startsWith('@')) out += prelude + '{' + body + '}'
-    else out += raise(prelude) + '{' + body + '}'
-    i = j
-  }
-  return out
-}
-
-export function laylify(css: string): string {
-  return scope(resize(recolour(css.replace(/\/\*[\s\S]*?\*\//g, ''))))
-}
+export { laylify }
 
 /* ---- what a palette swap cannot do --------------------------------------- */
 
 export const LAYL_CSS = `
-.rd.ly{position:relative;--warn:#E8A25A}
-.rd.ly[data-mode="light"]{--warn:#9A5208}
+.rd.ly{position:relative;--warn:#E8A25A;--bad:#F2795E}
+.rd.ly[data-mode="light"]{--warn:#9A5208;--bad:#B42318}
 .ly-top{position:absolute;inset:0 0 auto;height:min(100svh,920px);pointer-events:none;z-index:0}
 .ly-word{position:absolute;inset-inline:0;top:84px;text-align:center;font-family:var(--f-head);font-weight:800;font-size:clamp(92px,22vw,300px);line-height:1;color:var(--ink);opacity:.06;white-space:nowrap}
 .rd[data-mode="light"] .ly-word{opacity:.07}
@@ -237,5 +158,72 @@ export default function LaylShell({ children, css = '', word }: { children: Reac
         <div className="zx-wrap">{children}</div>
       </main>
     </LaylFrame>
+  )
+}
+
+/* ---- the product: the wizards, /build, the auth cards -------------------- */
+
+/* The product token block (components/app/tokens.ts) re-pointed at the night,
+   so tailwind's bg-background / text-muted / border-token and every var() the
+   product pages read land on the «ليل» palette in both modes. */
+export const LAYL_PRODUCT_CSS = `
+.rd.lyp .ly-prod{position:relative;z-index:1;min-height:calc(100svh - 70px);font-family:var(--f-ui);font-size:18px;line-height:1.7;color:var(--ink);letter-spacing:0;
+  --ground:var(--bg);--obsidian:var(--ink);--violet:var(--acc);--onyx:var(--bg2);--field:var(--card2);--stone:var(--mut);--stone-2:var(--mut);--ghost:var(--mut2);
+  --background:var(--bg);--surface:var(--card);--surface-2:var(--card2);--elevated:var(--card);--card:inherit;--foreground:var(--ink);--muted:var(--mut);--subtle:var(--mut2);
+  --border:var(--line2);--border-muted:var(--line);--border-strong:var(--line2);
+  --success:var(--ok);--warning:var(--warn);--error:var(--bad);
+  --success-fill:color-mix(in srgb,var(--ok) 8%,transparent);--warning-fill:color-mix(in srgb,var(--warn) 12%,transparent);--error-fill:color-mix(in srgb,var(--bad) 10%,transparent);
+  --success-ring:color-mix(in srgb,var(--ok) 30%,transparent);--warning-ring:color-mix(in srgb,var(--warn) 30%,transparent);--error-ring:color-mix(in srgb,var(--bad) 30%,transparent);
+  --primary:var(--acc);--primary-600:var(--acc-ink);--primary-500:var(--acc);--primary-400:var(--acc);
+  --violet-fill:var(--acc-soft);--violet-ring:color-mix(in srgb,var(--acc) 22%,transparent);--violet-ink:var(--acc-ink);--violet-lift:var(--acc-ink);
+  --ring-1:0 0 0 1px var(--line2);--ring-2:0 0 0 0 transparent;--shadow-sm:0 0 0 1px var(--line2);
+  --shadow-lg:0 0 0 1px var(--line2),var(--shadow);--shadow-xl:0 0 0 1px var(--line2),var(--shadow);
+  --ease-out:var(--out);--r-panel:28px;--r-card:22px;--r-control:16px;--on-acc:#FFFBF7}
+.rd.lyp .ly-prod [class*="__className"]{font-family:inherit}
+.rd.lyp .ly-prod :is(h1,h2,h3){font-family:var(--f-head);font-weight:700;letter-spacing:0}
+.rd.lyp .ly-prod :where(a,button,summary,input,textarea,select):focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.rd.lyp .ly-prod :where(input,textarea,select){color:var(--ink)}
+.rd.lyp .ly-prod ::placeholder{color:var(--mut2)}
+
+/* the wizard: its own token block, re-pointed; the night shows through */
+.rd.lyp .zb-root,.rd.ly .zb-root{--ground:var(--bg);--card:inherit;--obsidian:var(--ink);--stone:var(--mut);--stone-2:var(--mut);--violet:var(--acc);--violet-lift:var(--acc-ink);--onyx:var(--bg2);
+  --ease-out:var(--out);--r-panel:28px;--r-card:22px;--r-control:16px;background:none;font-family:var(--f-ui)}
+.rd .zb-root::before{display:none}
+.rd .zb-root :is(.zb-h1,.zb-h2,.zb-meter-n,.zb-sum-row dd){font-family:var(--f-head);font-weight:700}
+.rd .zb-root .zb-h1{font-size:clamp(38px,5.4vw,64px);line-height:1.15;text-wrap:balance}
+.rd .zb-root .zb-eyebrow,.rd .zb-root .zb-count{display:inline-flex;align-items:center;gap:10px;color:var(--ink2);font-weight:500}
+.rd .zb-root .zb-eyebrow::before,.rd .zb-root .zb-count::before{content:"";width:8px;height:8px;border-radius:1px;transform:rotate(45deg);background:var(--acc)}
+.rd .zb-root :is(.zb-card,.zb-meter){background:var(--glass);border:1px solid var(--glass-line);box-shadow:none;-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2)}
+.rd .zb-root .zb-in{background:var(--card2);box-shadow:0 0 0 1px var(--line2)}
+.rd .zb-root .zb-in:focus{background:var(--card)}
+.rd .zb-root :is(.zb-chip[data-on],.zb-step[data-on] .zb-step-n,.zb-preset-on){color:#FFFBF7}
+.rd .zb-root :is(.zb-next,.zb-back){border-radius:999px}
+.rd .zb-root .zb-handoff{background:var(--card2);border:1px solid var(--line2)}
+.rd.lyp .ly-prod .sb,.rd .zb-root .sb{border-radius:999px;font-size:17px;padding:.3rem 1.5rem;box-shadow:none}
+.rd.lyp .ly-prod .sb[data-variant="violet"],.rd .zb-root .sb[data-variant="violet"]{background:var(--acc);color:#FFFBF7}
+.rd.lyp .ly-prod .sb:is([data-variant="key"],[data-variant="onyx"]){background:var(--ink);color:var(--bg)}
+.rd.lyp .ly-prod .sb[data-variant="quiet"]{color:var(--ink2);background:transparent;box-shadow:inset 0 0 0 1px var(--line2)}
+@media (prefers-reduced-transparency:reduce){.rd .zb-root :is(.zb-card,.zb-meter){background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* the auth cards (app/(main)/auth/styles.ts) */
+.rd .zs-card{background:var(--glass);border:1px solid var(--glass-line);box-shadow:none;-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);border-radius:28px}
+.rd .zs-mark{color:var(--ink)}
+`
+
+/**
+ * The «ليل» page for the product under app/(main): the generator wizards, the
+ * Shopify builder, the reset-password and auth-error cards, the hand-over.
+ * The header pill and the light, and no footer: a generator flow is a form
+ * with somewhere to go next (the reason ProductShell, kept, gave). Each page
+ * still renders its own <main>, so this roots a <div> inside the frame.
+ */
+export function LaylProduct({ children, mode = 'dark' }: { children: ReactNode; mode?: 'dark' | 'light' }) {
+  return (
+    <Root id={'s1 s11 ly lyp ' + dashFont.variable} mode={mode} css={S1_CSS + S11_CSS + LAYL_CSS + LAYL_PRODUCT_CSS}>
+      <Header dots /><S11Session />
+      <div className="ly-top" aria-hidden><Sky /></div>
+      <div className="zx-root ly-prod" dir="rtl">{children}</div>
+      <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
+    </Root>
   )
 }

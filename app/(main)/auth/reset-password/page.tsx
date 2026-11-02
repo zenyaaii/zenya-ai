@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-import ZenyaMark from '@/components/ZenyaMark'
-import { AUTH_CSS } from '../styles'
+import { MARK_BODY, MARK_DOTS, MARK_FATHA, MARK_VB_FATHA } from '@/components/zenya/redesign/mark'
+import { AUTH_LAYL_CSS } from '../styles'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -61,12 +61,17 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="zs-wrap">
-      <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: AUTH_LAYL_CSS }} />
 
       <div className="zs-card">
         <div className="zs-top">
           <Link href="/" className="zs-mark" aria-label="بينون">
-            <ZenyaMark variant="long" className="h-6" />
+            {/* The «ليل» wordmark: the fatha over the ب, the dots and fatha in paprika. */}
+            <svg viewBox={MARK_VB_FATHA} role="img" aria-label="بينون" style={{ height: 30, width: 'auto' }}>
+              <path fillRule="evenodd" d={MARK_BODY} fill="currentColor" />
+              <path d={MARK_DOTS} fill="#E2532A" />
+              <path d={MARK_FATHA} fill="#E2532A" />
+            </svg>
           </Link>
           <h1 className="zs-h1">تعيين كلمة مرور جديدة</h1>
           <p className="zs-sub">اختر كلمة مرور قوية لم تستخدمها من قبل.</p>

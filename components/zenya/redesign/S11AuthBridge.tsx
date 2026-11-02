@@ -19,6 +19,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import { authErrorMessage } from "@/lib/auth-errors"
+import { dashboardUrl } from "@/lib/portal-urls"
 
 type Mode = "signin" | "signup" | "forgot"
 type Fields = { email: string; password: string; name: string }
@@ -60,11 +61,25 @@ declare global {
   }
 }
 
-export default function S11AuthBridge({ next = "/dashboard" }: { next?: string }) {
+/**
+ * `portal` is accounts.beynoun.com. There the way on is the dashboard host,
+ * which is another origin, so it is a full navigation rather than a router
+ * push, and the sign-up link carries the same absolute address the portal's
+ * previous card (components/accounts/AccountsAuthForm.tsx, kept) sent.
+ */
+export default function S11AuthBridge({ next = "/dashboard", portal = false }: { next?: string; portal?: boolean }) {
   const router = useRouter()
 
   useEffect(() => {
     const supabase = createClient()
+    const leave = () => {
+      if (portal) {
+        window.location.href = dashboardUrl()
+        return
+      }
+      router.push(next)
+      router.refresh()
+    }
     window.__beynounAuth = async (mode, { email, password, name }) => {
       try {
         if (mode === "forgot") {
@@ -80,8 +95,7 @@ export default function S11AuthBridge({ next = "/dashboard" }: { next?: string }
           if (error) throw error
           remember(email, (data.user?.user_metadata?.full_name as string) || undefined)
           try { localStorage.setItem("zenya_email", email) } catch {}
-          router.push(next)
-          router.refresh()
+          leave()
           return { left: true }
         }
 
@@ -89,7 +103,9 @@ export default function S11AuthBridge({ next = "/dashboard" }: { next?: string }
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}`,
+            emailRedirectTo: portal
+              ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(dashboardUrl())}`
+              : `${window.location.origin}/auth/callback?next=${next}`,
             data: {
               full_name: name.trim(),
               consent_terms_v: "1",
@@ -106,8 +122,7 @@ export default function S11AuthBridge({ next = "/dashboard" }: { next?: string }
         remember(email, name)
         if (data.session) {
           try { localStorage.setItem("zenya_email", email) } catch {}
-          router.push(next)
-          router.refresh()
+          leave()
           return { left: true }
         }
         return { sent: true }
@@ -117,7 +132,7 @@ export default function S11AuthBridge({ next = "/dashboard" }: { next?: string }
       }
     }
     return () => { delete window.__beynounAuth }
-  }, [router, next])
+  }, [router, next, portal])
 
   return null
 }

@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
-import ProductShell from '@/components/zenya/chrome/ProductShell'
+import { headers } from 'next/headers'
+import { LaylProduct } from '@/components/zenya/redesign/layl'
 
 /**
  * What is left in this group, and why it is chromed this way.
@@ -27,6 +28,18 @@ import ProductShell from '@/components/zenya/chrome/ProductShell'
  * permanent floating object was a third piece of chrome earning nothing. It
  * was doubly wrong here, where it floated over a wizard's primary action.
  */
+/*
+ * «ليل», since 2026-11-02. LaylProduct (components/zenya/redesign/layl.tsx) is
+ * the site's night frame with the product's rule kept: the header pill and
+ * the light, no footer. ProductShell, which drew the old pill on #fafafa, is
+ * left in the tree.
+ *
+ * /build opens on the paper side of «ليل» rather than the night. The Shopify
+ * builder draws its panels white in its own classes, and on the night they
+ * would be white boxes in the dark; the theme button still switches it.
+ */
 export default function MainLayout({ children }: { children: ReactNode }) {
-  return <ProductShell>{children}</ProductShell>
+  const path = headers().get('x-pathname') || ''
+  const paper = path === '/build' || path.startsWith('/build/')
+  return <LaylProduct mode={paper ? 'light' : 'dark'}>{children}</LaylProduct>
 }

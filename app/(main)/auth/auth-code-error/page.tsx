@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { AUTH_CSS } from '../styles'
+import { AUTH_LAYL_CSS } from '../styles'
 
 export const metadata = { title: 'خطأ في المصادقة', robots: { index: false, follow: false } }
 
@@ -20,7 +20,7 @@ export const metadata = { title: 'خطأ في المصادقة', robots: { index
 export default function AuthCodeError() {
   return (
     <main className="zs-wrap">
-      <style dangerouslySetInnerHTML={{ __html: AUTH_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: AUTH_LAYL_CSS }} />
 
       <div className="zs-card">
         <div className="zs-top">

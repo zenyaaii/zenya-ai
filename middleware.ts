@@ -7,6 +7,8 @@ const APEX = ROOT_DOMAIN
 const WWW_HOST = `www.${ROOT_DOMAIN}`
 const ACCOUNTS_HOST = `accounts.${ROOT_DOMAIN}`
 const DEMO_HOST = `demo.${ROOT_DOMAIN}`
+/** account.beynoun.com, singular: the address people type for the portal. */
+const ACCOUNT_ALIAS_HOST = `account.${ROOT_DOMAIN}`
 
 // Both domains' app hosts. The old domain's are here because the paths it
 // still serves itself (the Shopify app, /auth) run the own-host branch below.
@@ -36,6 +38,10 @@ const ZENYAAI_CO_APP_SUBDOMAINS = new Set([
   'www',
   'dashboard',
   'accounts',
+  // The singular is what people type for the portal. Reserved so the wildcard
+  // does not take it for a customer site (it is a reserved slug in lib/slug.ts
+  // too, so no site can hold it) and handed to accounts.beynoun.com below.
+  'account',
   // Still reserved even though the host is retired. Without the entry the
   // wildcard below claims the name and demo.beynoun.com rewrites to /s/demo —
   // a customer site that does not exist — so an old link would 404 instead of
@@ -366,6 +372,13 @@ export async function middleware(request: NextRequest) {
   // owner's side without asking readers to clear their cache. The host is
   // being retired, not deleted, and keeping this reversible costs one
   // uncached round trip on a host that no link points at any more.
+  // ---- account.beynoun.com → accounts.beynoun.com ---------------------------
+  // Same path, same query. 307 for the reason the demo host below gives: it
+  // stays reversible without asking anyone to clear a cache.
+  if (host === ACCOUNT_ALIAS_HOST) {
+    return NextResponse.redirect(new URL(pathname + request.nextUrl.search, `https://${ACCOUNTS_HOST}`), 307)
+  }
+
   if (host === DEMO_HOST) {
     if (
       pathname.startsWith('/_next/') ||

@@ -836,8 +836,9 @@ export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
         </>
       ) : null}
 
+      {/* No `chrome` on the demo any more: /demo/build stands in the «ليل»
+          product frame like the real builder, which draws the header. */}
       <WizardShell
-        chrome={demo}
         eyebrow="موقع مطعم"
         title={<>املأ ما تعرفه.<br />بينون تكتب الباقي.</>}
         sub={`خطوات قصيرة، ولا واحدة منها طويلة. المطلوب ${required.length} فقط — وكل ما عداها اختياري.`}
