@@ -36,19 +36,16 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Check, Copy, Gift, Info, Menu, ShieldCheck, X } from "lucide-react"
+import { Check, Copy, Gift, Info, ShieldCheck } from "lucide-react"
 import Link from "next/link"
-import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google"
 import { z } from "zod"
-import ZenyaMark from "@/components/ZenyaMark"
-import AccountControl from "@/components/zenya/chrome/AccountControl"
 import SlideButton from "@/components/ui/SlideButton"
-import PricingFooter from "../pricing/PricingFooter"
+import { LaylFrame, laylify } from "@/components/zenya/redesign/layl"
 import { REVIEW_REWARD_CODE, REVIEW_REWARD_AR_SHORT, REVIEW_REWARD_PCT } from "@/lib/review-reward"
 import { CSS } from "./styles"
 
-const tajawal = Tajawal({ subsets: ["arabic"], weight: ["400", "500", "700", "900"], display: "swap" })
-const plex = IBM_Plex_Sans_Arabic({ subsets: ["arabic"], weight: ["400", "500"], display: "swap" })
+/* The «ليل» frame sets the faces (redesign/layl.tsx); Plex is no longer loaded here. */
+const plex = { className: "" }
 
 /* The candidate set links inside the candidate set, in the set's own order. */
 const NAV: Array<{ href: string; label: string }> = [
@@ -157,8 +154,6 @@ function Star({ className, filled, off }: { className?: string; filled?: boolean
 }
 
 export default function ReviewView() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [onDark, setOnDark] = useState(false)
 
   const [rating, setRating] = useState(0)
   const [hover, setHover] = useState(0)
@@ -175,7 +170,6 @@ export default function ReviewView() {
   const [handed, setHanded] = useState(false)
 
   const rootRef = useRef<HTMLElement | null>(null)
-  const headRef = useRef<HTMLElement | null>(null)
   const starsRef = useRef<HTMLDivElement | null>(null)
 
   /* Arrival. The hidden half lives under .zy-js so a browser that never runs
@@ -198,41 +192,6 @@ export default function ReviewView() {
     )
     targets.forEach((el) => io.observe(el))
     return () => io.disconnect()
-  }, [])
-
-  /* The header takes the ground it is standing on. Same mechanic as the five
-     sibling pages: the band is the strip the pill occupies, in CSS pixels.
-     The root ZoomLock writes CSS zoom, so a rect and a rootMargin are already
-     in the same space — do not divide by the zoom. It watches ".zf", which is
-     the footer cap's real class. */
-  useEffect(() => {
-    const head = headRef.current
-    const root = rootRef.current
-    if (!head || !root) return
-    let io: IntersectionObserver | null = null
-    const live = new Set<Element>()
-    const darks = Array.from(root.querySelectorAll<HTMLElement>(".zf"))
-    const build = () => {
-      io?.disconnect()
-      live.clear()
-      /* The first match in DOM order is whichever pill is hidden at this
-         width, and a hidden element has a zero rect. Filter by height. */
-      const pill = Array.from(head.querySelectorAll<HTMLElement>(".zr-pill, .zr-phone-pill"))
-        .find((el) => el.getBoundingClientRect().height > 0)
-      if (!pill) return
-      const r = pill.getBoundingClientRect()
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => (e.isIntersecting ? live.add(e.target) : live.delete(e.target)))
-          setOnDark(live.size > 0)
-        },
-        { rootMargin: -r.top + "px 0px " + -(window.innerHeight - r.bottom) + "px 0px", threshold: 0 },
-      )
-      darks.forEach((el) => io!.observe(el))
-    }
-    build()
-    window.addEventListener("resize", build)
-    return () => { io?.disconnect(); window.removeEventListener("resize", build) }
   }, [])
 
   /* The pop is a one-shot, so it has to be taken off again or the star never
@@ -326,48 +285,9 @@ export default function ReviewView() {
   const near = count > MAX_BODY - 400
 
   return (
-    <main className={"zr-root " + tajawal.className} dir="rtl" ref={rootRef}>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+    <LaylFrame css={laylify(CSS)} word="رأيك">
+    <main className="zr-root ly-main" dir="rtl" ref={rootRef}>
 
-      <header ref={headRef} className={"zr-head " + plex.className} data-dark={onDark ? "true" : undefined}>
-        <div className="zr-phone-pill" style={{ minWidth: menuOpen ? "min(86vw, 268px)" : "184px" }}>
-          <div className="zr-phone-bar">
-            <button type="button" className="zr-round" aria-expanded={menuOpen} aria-controls="zr-phone-menu"
-              aria-label={menuOpen ? "إغلاق القائمة" : "فتح القائمة"} onClick={() => setMenuOpen((v) => !v)}>
-              {menuOpen ? <X size={17} strokeWidth={1.5} /> : <Menu size={17} strokeWidth={1.5} />}
-            </button>
-            <Link href="/" aria-label="بينون" className="zr-phone-mark"><ZenyaMark className="zr-mark-svg-sm" /></Link>
-            <AccountControl className="zr-account zr-account-phone" />
-          </div>
-          <div className="zr-drawer" data-open={menuOpen ? "true" : undefined}
-            style={{ gridTemplateRows: menuOpen ? "1fr" : "0fr", visibility: menuOpen ? "visible" : "hidden" }}>
-            <div className="zr-drawer-clip">
-              <nav id="zr-phone-menu" className="zr-phone-menu">
-                {NAV.map((i) => (
-                  <Link key={i.href} href={i.href} className="zr-tray-row" onClick={() => setMenuOpen(false)}>{i.label}</Link>
-                ))}
-              </nav>
-            </div>
-          </div>
-        </div>
-
-        <div className="zr-pill">
-          <div className="zr-bar">
-            <span className="zr-side zr-side-start">
-              <Link href="/" className="zr-mark" aria-label="بينون"><ZenyaMark className="zr-mark-svg" /></Link>
-            </span>
-            <nav className="zr-nav">
-              {NAV.map((i) => (
-                <Link key={i.href} href={i.href} className="zr-nav-item">{i.label}</Link>
-              ))}
-            </nav>
-            <span className="zr-side zr-side-end">
-              <span className="zr-sep" aria-hidden />
-              <AccountControl className="zr-account" />
-            </span>
-          </div>
-        </div>
-      </header>
 
       <div className="zr-wrap">
         <section className="zr-open" data-reveal>
@@ -618,8 +538,8 @@ export default function ReviewView() {
         </p>
       </div>
 
-      <PricingFooter />
     </main>
+    </LaylFrame>
   )
 }
 

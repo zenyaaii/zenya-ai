@@ -47,7 +47,7 @@ import { ArrowLeft, CheckCircle2, Eye, Layers, ShieldCheck, Timer, TrendingUp } 
 import { TEMPLATE_PAGES, getTemplatePage } from "@/lib/template-pages"
 import { ARTICLES, type Article } from "@/lib/why-copy"
 import { themePreview } from "@/lib/theme-previews"
-import Shell from "@/components/zenya/chrome/Shell"
+import LaylShell from "@/components/zenya/redesign/layl"
 import { Breadcrumbs, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS as TEMPLATE_CSS } from "@/components/zenya/websites/styles"
 import { CSS as ARTICLE_CSS } from "@/components/zenya/why/styles"
@@ -95,7 +95,7 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
   const others = TEMPLATE_PAGES.filter((x) => x.slug !== t.slug)
 
   return (
-    <Shell css={CSS}>
+    <LaylShell css={CSS}>
       <Breadcrumbs
         trail={[
           { label: "الرئيسية", href: "/" },
@@ -215,7 +215,7 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
         secondaryLabel="شاهد نموذجًا حيًّا"
         secondaryHref={t.demoHref}
       />
-    </Shell>
+    </LaylShell>
   )
 }
 

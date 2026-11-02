@@ -43,7 +43,7 @@ import {
 } from "lucide-react"
 import type { PlanId } from "@/lib/checkout"
 import { COMPANY } from "@/lib/company"
-import Shell from "@/components/zenya/chrome/Shell"
+import LaylShell from "@/components/zenya/redesign/layl"
 import { CSS } from "./styles"
 
 /* -------------------------------------------------------------------------
@@ -212,7 +212,7 @@ export default function CheckoutView({
   }
 
   return (
-    <Shell css={CSS}>
+    <LaylShell word="الدفع" css={CSS}>
       <section className="zx-open zk-open" data-reveal>
         <p className="zx-eyebrow">
           <span className="zx-eyebrow-dot" aria-hidden />
@@ -280,7 +280,7 @@ export default function CheckoutView({
           <Link className="zx-link" href="/contact">راسِلنا أولًا</Link>.
         </p>
       </section>
-    </Shell>
+    </LaylShell>
   )
 }
 

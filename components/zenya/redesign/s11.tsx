@@ -635,11 +635,11 @@ function Faq({ list = FAQS }: { list?: ReadonlyArray<{ q: string; a: string }> }
   )
 }
 
-function Sky() {
+export function Sky() {
   return <div className="s1-sky s11-sky" aria-hidden><i className="b1" /><i className="b2" /><i className="b3" /></div>
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="s1-foot">
       <div className="s1-fmark" data-vis aria-hidden><MarkDots /></div>
@@ -1213,3 +1213,6 @@ export function Accounts() {
     </Root>
   )
 }
+
+/** The page's stylesheet, for the «ليل» frame the other public pages wear (layl.tsx). */
+export { CSS as S11_CSS }

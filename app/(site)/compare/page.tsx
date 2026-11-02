@@ -34,7 +34,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { COMPARISONS } from "@/lib/comparisons"
-import Shell from "@/components/zenya/chrome/Shell"
+import LaylShell from "@/components/zenya/redesign/layl"
 import { Breadcrumbs, Hero, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
 
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
 
 export default function CompareHubPage() {
   return (
-    <Shell css={CSS}>
+    <LaylShell word="مقارنة" css={CSS}>
       <Breadcrumbs trail={[{ label: "الرئيسية", href: "/" }, { label: "المقارنات" }]} />
 
       <Hero
@@ -115,6 +115,6 @@ export default function CompareHubPage() {
       </section>
 
       <CtaBand />
-    </Shell>
+    </LaylShell>
   )
 }

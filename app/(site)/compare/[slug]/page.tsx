@@ -38,7 +38,7 @@ import { hreflangAlternates } from "@/lib/i18n/config"
 import { notFound } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 import { COMPARISONS, getComparison } from "@/lib/comparisons"
-import Shell from "@/components/zenya/chrome/Shell"
+import LaylShell from "@/components/zenya/redesign/layl"
 import { Breadcrumbs, Hero, CompareTable, ChooseBlocks, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS } from "@/components/zenya/compare/styles"
 import { share } from '@/lib/site-share'
@@ -83,7 +83,7 @@ export default function ComparisonPage({ params }: { params: { slug: string } })
   const others = COMPARISONS.filter((x) => x.slug !== c.slug)
 
   return (
-    <Shell css={CSS}>
+    <LaylShell css={CSS}>
       <Breadcrumbs
         trail={[
           { label: "الرئيسية", href: "/" },
@@ -120,6 +120,6 @@ export default function ComparisonPage({ params }: { params: { slug: string } })
       </section>
 
       <CtaBand />
-    </Shell>
+    </LaylShell>
   )
 }
