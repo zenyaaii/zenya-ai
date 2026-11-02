@@ -109,20 +109,23 @@ export async function sendEmail(args: SendEmailArgs): Promise<SendEmailResult> {
 }
 
 /* ── Templates ───────────────────────────────────────────────────────── */
-/* Every template shares one frame, "paper and light", the email form of the
-   house style in docs/zenya-hero-style.md: a #fafafa page, a white sheet with
-   a hairline border and no shadow, obsidian #171717 type, an obsidian pill
-   button, and the site's light (the شفق palette) glowing behind the wordmark.
+/* Every template shares one frame, "layl" (night), the email form of the
+   site's Layl style: a near-black #0F0D0A page, a #1A1713 sheet with a hairline
+   border, paper #F4EFE6 type with Amiri headings, a paper pill button, and the
+   wordmark twice: small in the header, and big at the foot, rising out of the
+   paper cap that holds the footer lines. The fatha and the dots are paprika.
 
-   The glow and the wordmark are one picture, /brand/email-header.png, because
-   mail clients cannot be trusted with blur, oklch or SVG: Outlook drops
-   gradients and Gmail drops SVG. With images off, the cell's own background
-   and the alt text stand in for it. Arabic / RTL throughout. */
+   Both marks are pictures, /brand/email-header-night.jpg and
+   /brand/email-foot-night.png, because mail clients cannot be trusted with blur
+   or SVG: Outlook drops gradients, Gmail drops SVG and <link> fonts. With images
+   off, each cell's own background and the styled alt text «بينون» stand in.
+   Arabic / RTL throughout. */
 
 /** Where a reader writes back. Every send sets it as Reply-To too. */
 export const SUPPORT_EMAIL = COMPANY.SUPPORT_EMAIL
 
-const HEADER_IMG = 'https://beynoun.com/brand/email-header.png'
+const HEADER_IMG = 'https://beynoun.com/brand/email-header-night.jpg'
+const FOOT_IMG = 'https://beynoun.com/brand/email-foot-night.png'
 const FONT = `'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif`
 
 /** Shared chrome so every transactional email matches the auth templates. */
@@ -138,29 +141,19 @@ function emailShell(opts: {
   const { title, eyebrow, heading, bodyHtml, ctaHref, ctaLabel, footnoteHtml } = opts
   return `
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="light only"/><meta name="supported-color-schemes" content="light"/><title>${esc(title)}</title></head>
-<body style="margin:0;padding:0;font-family:${FONT};background:#fafafa;color:#171717;direction:rtl;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;"><tr><td align="center">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
-    <tr><td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
-      <img src="${HEADER_IMG}" alt="بينون" width="560" height="84" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
-    </td></tr>
-    <tr><td style="padding:20px 40px 8px;text-align:right;font-family:${FONT};">
-      <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">${eyebrow}</p>
-      <h1 style="margin:0 0 18px;font-size:26px;line-height:1.45;font-weight:700;color:#171717;">${heading}</h1>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="dark"/><meta name="supported-color-schemes" content="dark"/><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/><style>@media only screen and (max-width:600px){.bm-d{display:none!important}.bm-m{display:block!important;max-height:none!important;overflow:visible!important}.bm-cap{border-radius:12px 12px 0 0!important}.bm-lines{padding-left:24px!important;padding-right:24px!important}}</style><title>${esc(title)}</title></head>
+<body style="margin:0;padding:0;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;background:#0F0D0A;color:#F4EFE6;direction:rtl;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#0F0D0A" style="background:#0F0D0A;padding:32px 12px;direction:rtl;"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" bgcolor="#1A1713" style="max-width:560px;width:100%;background:#1A1713;border:1px solid #2E2922;border-radius:20px;overflow:hidden;">
+    <tr><td bgcolor="#16120D" style="padding:0;background:#16120D;line-height:0;font-size:0;"><img src="${HEADER_IMG}" alt="بينون" width="560" height="112" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:24px;line-height:112px;font-weight:700;color:#F4EFE6;text-align:right;"/></td></tr>
+    <tr><td style="padding:26px 40px 8px;text-align:right;font-family:${FONT};">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#A39A8D;"><span style="color:#E2532A;font-size:10px;">&#9670;</span>&nbsp;&nbsp;${eyebrow}</p>
+      <h1 style="margin:0 0 18px;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:30px;line-height:1.4;font-weight:700;color:#F4EFE6;">${heading}</h1>
       ${bodyHtml}
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px;"><tr>
-        <td style="border-radius:999px;background:#171717;">
-          <a href="${ctaHref}" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">${ctaLabel}</a>
-        </td>
-      </tr></table>
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr><td bgcolor="#F4EFE6" style="border-radius:999px;background:#F4EFE6;"><a href="${ctaHref}" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#16120D;text-decoration:none;border-radius:999px;">${ctaLabel}</a></td></tr></table>
       ${footnoteHtml ? `<div style="padding:0 0 28px;">${footnoteHtml}</div>` : ''}
     </td></tr>
+    <tr><td bgcolor="#1A1713" style="padding:0;line-height:0;font-size:0;"><img src="${FOOT_IMG}" alt="بينون" width="560" height="140" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:64px;line-height:140px;font-weight:700;color:#F4EFE6;text-align:center;"/></td></tr><tr><td class="bm-lines" bgcolor="#F4EFE6" style="background:#F4EFE6;padding:12px 40px 28px;text-align:right;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;"><p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#5F574D;">بينون، منشئ المواقع · <a href="https://beynoun.com" style="color:#16120D;text-decoration:none;">beynoun.com</a></p><p style="margin:0;font-size:12px;line-height:1.7;color:#8A8074;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#5F574D;">${SUPPORT_EMAIL}</a> · <a href="https://beynoun.com/privacy" style="color:#5F574D;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#5F574D;">الشروط</a></p></td></tr>
   </table>
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;"><tr><td style="padding:20px 40px 0;text-align:right;font-family:${FONT};">
-    <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">بينون، منشئ المواقع · <a href="https://beynoun.com" style="color:#171717;text-decoration:none;">beynoun.com</a></p>
-    <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: ردّ على هذه الرسالة، أو اكتب إلى <a href="mailto:${SUPPORT_EMAIL}" style="color:#8f8f8f;">${SUPPORT_EMAIL}</a> · <a href="https://beynoun.com/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#a3a3a3;">الشروط</a></p>
-  </td></tr></table>
+  
   </td></tr></table>
 </body></html>`.trim()
 }
@@ -197,14 +190,14 @@ export function domainPurchasedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
-      شكرًا لك! تم تسجيل نطاقك <strong style="color:#171717;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      شكرًا لك! تم تسجيل نطاقك <strong style="color:#F4EFE6;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">النطاق: <strong style="color:#171717;direction:ltr;display:inline-block;">${domain}</strong></p>
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المدة: <strong style="color:#171717;">${yearWord}</strong></p>
-        <p style="margin:0;font-size:13px;color:#8f8f8f;">ينتهي في: <strong style="color:#171717;">${expiry}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">النطاق: <strong style="color:#F4EFE6;direction:ltr;display:inline-block;">${domain}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">المدة: <strong style="color:#F4EFE6;">${yearWord}</strong></p>
+        <p style="margin:0;font-size:13px;color:#A39A8D;">ينتهي في: <strong style="color:#F4EFE6;">${expiry}</strong></p>
       </td></tr>
     </table>`
 
@@ -215,7 +208,7 @@ export function domainPurchasedEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'إدارة نطاقاتي',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">سنذكّرك قبل انتهاء النطاق بوقت كافٍ لتجدّده. تدير نطاقاتك في أي وقت من لوحة التحكم.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">سنذكّرك قبل انتهاء النطاق بوقت كافٍ لتجدّده. تدير نطاقاتك في أي وقت من لوحة التحكم.</p>`,
   })
 
   return { subject, text, html }
@@ -252,13 +245,13 @@ export function domainRefundEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
-      حاولنا تسجيل النطاق <strong style="color:#171717;direction:ltr;display:inline-block;">${domain}</strong>، لكن لم تكتمل العملية لدى جهة التسجيل — لذلك أعدنا إليك كامل المبلغ تلقائيًا. لم نأخذ منك شيئًا.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      حاولنا تسجيل النطاق <strong style="color:#F4EFE6;direction:ltr;display:inline-block;">${domain}</strong>، لكن لم تكتمل العملية لدى جهة التسجيل — لذلك أعدنا إليك كامل المبلغ تلقائيًا. لم نأخذ منك شيئًا.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المبلغ المُعاد: <strong style="color:#171717;">${amount}</strong></p>
-        <p style="margin:0;font-size:13px;color:#8f8f8f;">قد يستغرق ظهوره في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">المبلغ المُعاد: <strong style="color:#F4EFE6;">${amount}</strong></p>
+        <p style="margin:0;font-size:13px;color:#A39A8D;">قد يستغرق ظهوره في كشف حسابك من ٥ إلى ١٠ أيام عمل حسب البنك.</p>
       </td></tr>
     </table>`
 
@@ -269,7 +262,7 @@ export function domainRefundEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'جرّب نطاقًا آخر',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">نعتذر عن الإزعاج. إن تكرّر الأمر أو كانت لديك أي أسئلة، راسلنا وسنساعدك فورًا.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">نعتذر عن الإزعاج. إن تكرّر الأمر أو كانت لديك أي أسئلة، راسلنا وسنساعدك فورًا.</p>`,
   })
 
   return { subject, text, html }
@@ -303,12 +296,12 @@ export function announcementEmail(args?: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      جدّدنا <strong style="color:#171717;">بينون</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      جدّدنا <strong style="color:#F4EFE6;">بينون</strong> بالكامل — هوية جديدة، تصميم أوضح، ورسائل بريد أجمل تطابق موقعنا.
     </p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
-      والأهم: أضفنا زر <strong style="color:#171717;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      والأهم: أضفنا زر <strong style="color:#F4EFE6;">«جرّب مثالاً جاهزًا»</strong> في منشئ المواقع — ابدأ من مثال جاهز، عدّل الاسم والتفاصيل، وولّد موقعك في ثوانٍ بدل صفحة فارغة.
     </p>`
 
   const html = emailShell({
@@ -318,7 +311,7 @@ export function announcementEmail(args?: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'عُد إلى بينون',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن لديك حسابًا في بينون. لأي استفسار راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة لأن لديك حسابًا في بينون. لأي استفسار راسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -395,41 +388,41 @@ export function paymentReceiptEmail(args: {
   ].filter((l) => l !== null).join('\n')
 
   const summary = `
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 22px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
           <tr>
-            <td style="font-size:14px;color:#171717;text-align:right;padding:6px 0;">${itemName}</td>
-            <td style="font-size:14px;color:#171717;text-align:left;padding:6px 0;direction:ltr;white-space:nowrap;">${subtotal}</td>
+            <td style="font-size:14px;color:#F4EFE6;text-align:right;padding:6px 0;">${itemName}</td>
+            <td style="font-size:14px;color:#F4EFE6;text-align:left;padding:6px 0;direction:ltr;white-space:nowrap;">${subtotal}</td>
           </tr>
           ${taxCents > 0 ? `<tr>
-            <td style="font-size:13px;color:#8f8f8f;text-align:right;padding:8px 0;border-top:1px solid #ececec;">${taxLabel}</td>
-            <td style="font-size:13px;color:#8f8f8f;text-align:left;padding:8px 0;border-top:1px solid #ececec;direction:ltr;white-space:nowrap;">${tax}</td>
+            <td style="font-size:13px;color:#A39A8D;text-align:right;padding:8px 0;border-top:1px solid #2E2922;">${taxLabel}</td>
+            <td style="font-size:13px;color:#A39A8D;text-align:left;padding:8px 0;border-top:1px solid #2E2922;direction:ltr;white-space:nowrap;">${tax}</td>
           </tr>` : ''}
           <tr>
-            <td style="font-size:15px;font-weight:800;color:#171717;text-align:right;padding:12px 0 4px;border-top:2px solid #e3e3e3;">المبلغ المدفوع</td>
-            <td style="font-size:15px;font-weight:800;color:#171717;text-align:left;padding:12px 0 4px;border-top:2px solid #e3e3e3;direction:ltr;white-space:nowrap;">${total}</td>
+            <td style="font-size:15px;font-weight:800;color:#F4EFE6;text-align:right;padding:12px 0 4px;border-top:2px solid #3A342B;">المبلغ المدفوع</td>
+            <td style="font-size:15px;font-weight:800;color:#F4EFE6;text-align:left;padding:12px 0 4px;border-top:2px solid #3A342B;direction:ltr;white-space:nowrap;">${total}</td>
           </tr>
         </table>
       </td></tr>
     </table>`
 
   const bodyHtml = `
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">${intro}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">${intro}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 20px;">
       <tr>
         <td style="text-align:right;vertical-align:top;padding:0 0 8px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#8f8f8f;">المبلغ المدفوع</p>
-          <p style="margin:0;font-size:22px;font-weight:800;color:#171717;direction:ltr;text-align:right;">${total}</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#A39A8D;">المبلغ المدفوع</p>
+          <p style="margin:0;font-size:22px;font-weight:800;color:#F4EFE6;direction:ltr;text-align:right;">${total}</p>
         </td>
         <td style="text-align:left;vertical-align:top;padding:0 0 8px;">
-          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#8f8f8f;">التاريخ</p>
-          <p style="margin:0;font-size:14px;color:#171717;">${dateStr}</p>
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.04em;color:#A39A8D;">التاريخ</p>
+          <p style="margin:0;font-size:14px;color:#F4EFE6;">${dateStr}</p>
         </td>
       </tr>
     </table>
     ${summary}
-    <p style="margin:0;font-size:12px;color:#8f8f8f;">رقم الإيصال: <strong style="color:#555555;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
+    <p style="margin:0;font-size:12px;color:#A39A8D;">رقم الإيصال: <strong style="color:#CFC6B8;direction:ltr;display:inline-block;">${receiptNumber}</strong></p>`
 
   const html = emailShell({
     title: `إيصال الدفع من بينون`,
@@ -438,7 +431,7 @@ export function paymentReceiptEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'الذهاب إلى لوحة التحكم',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">${
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">${
       {
         onetime: 'هذا إيصال عن شرائك خطة بينون برو مدى الحياة.',
         hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
@@ -446,7 +439,7 @@ export function paymentReceiptEmail(args: {
         pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
         entry: 'هذا إيصال عن فتح التوليد (خطة Entry، دفعة واحدة).',
       }[plan]
-    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
+    } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -480,12 +473,12 @@ export function passwordChangedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#555555;">
-      هذا تأكيد بأن كلمة المرور لحسابك <strong style="color:#171717;direction:ltr;display:inline-block;">${email}</strong> قد تغيّرت للتو. إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.
+    <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      هذا تأكيد بأن كلمة المرور لحسابك <strong style="color:#F4EFE6;direction:ltr;display:inline-block;">${email}</strong> قد تغيّرت للتو. إن كنت أنت من قام بذلك، فلا حاجة لأي إجراء.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأمانك، لن نُرسل لك كلمة المرور أبدًا عبر البريد، ولن نطلبها منك.</p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">لأمانك، لن نُرسل لك كلمة المرور أبدًا عبر البريد، ولن نطلبها منك.</p>
       </td></tr>
     </table>`
 
@@ -496,7 +489,7 @@ export function passwordChangedEmail(args: {
     bodyHtml,
     ctaHref: secureUrl,
     ctaLabel: 'تأمين حسابي',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;"><strong style="color:#555555;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;"><strong style="color:#CFC6B8;">لم تقم بهذا التغيير؟</strong> أمّن حسابك فورًا بإعادة تعيين كلمة المرور من الزر أعلاه، وراسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -530,10 +523,10 @@ export function domainExpiringEmail(args: {
     title: subject,
     eyebrow: 'تذكير بالتجديد',
     heading: `نطاقك <span style="direction:ltr;unicode-bidi:isolate;">${domain}</span> ينتهي خلال ${dayWord}`,
-    bodyHtml: `<p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:#555555;">جدِّده الآن ليبقى موقعك ظاهرًا دون انقطاع. إن لم تجدِّده، يتوقف النطاق عن العمل، وقد يسجّله شخص آخر بعد فترة قصيرة.</p>`,
+    bodyHtml: `<p style="margin:0 0 22px;font-size:16px;line-height:1.85;color:#CFC6B8;">جدِّده الآن ليبقى موقعك ظاهرًا دون انقطاع. إن لم تجدِّده، يتوقف النطاق عن العمل، وقد يسجّله شخص آخر بعد فترة قصيرة.</p>`,
     ctaHref: renewUrl,
     ctaLabel: `جدِّد النطاق · $${retailUsd.toFixed(2)} للسنة`,
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن نطاقك يقترب من تاريخ انتهائه. تدير نطاقاتك من <a href="https://beynoun.com/dashboard/domains" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة لأن نطاقك يقترب من تاريخ انتهائه. تدير نطاقاتك من <a href="https://beynoun.com/dashboard/domains" style="color:#F4EFE6;text-decoration:none;">لوحة التحكم</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -571,12 +564,12 @@ export function welcomeEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      يسعدنا انضمامك إلى <strong style="color:#171717;">بينون</strong> — منشئ المواقع. حسابك جاهز، ولديك <strong style="color:#171717;">${genWord}</strong> لتبدأ بها فورًا.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      يسعدنا انضمامك إلى <strong style="color:#F4EFE6;">بينون</strong> — منشئ المواقع. حسابك جاهز، ولديك <strong style="color:#F4EFE6;">${genWord}</strong> لتبدأ بها فورًا.
     </p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
-      اكتب فكرتك، أو ابدأ من <strong style="color:#171717;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      اكتب فكرتك، أو ابدأ من <strong style="color:#F4EFE6;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
     </p>`
 
   const html = emailShell({
@@ -586,7 +579,7 @@ export function welcomeEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'ابدأ إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a> ويسعدنا أن نأخذ بيدك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تحتاج مساعدة في إطلاق أول موقع؟ راسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a> ويسعدنا أن نأخذ بيدك.</p>`,
   })
 
   return { subject, text, html }
@@ -641,14 +634,14 @@ export function bookingReceivedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      وصلك <strong style="color:#171717;">${esc(args.kind)}</strong> جديد على موقعك «${esc(args.siteName)}».
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      وصلك <strong style="color:#F4EFE6;">${esc(args.kind)}</strong> جديد على موقعك «${esc(args.siteName)}».
     </p>
     <table role="presentation" style="width:100%; border-collapse:collapse; margin:0 0 18px;">
-      ${facts.map(([k, v]) => `<tr><td style="padding:6px 0; font-size:15px; color:#8f8f8f; white-space:nowrap;">${k}</td><td style="padding:6px 12px 6px 0; font-size:15px; color:#171717; font-weight:700;">${esc(v)}</td></tr>`).join('')}
+      ${facts.map(([k, v]) => `<tr><td style="padding:6px 0; font-size:15px; color:#A39A8D; white-space:nowrap;">${k}</td><td style="padding:6px 12px 6px 0; font-size:15px; color:#F4EFE6; font-weight:700;">${esc(v)}</td></tr>`).join('')}
     </table>
-    ${args.message ? `<p style="margin:0 0 22px; padding:12px 14px; background:#f5f5f5; border-radius:10px; font-size:15px; line-height:1.8; color:#555555;">${esc(args.message)}</p>` : ''}`
+    ${args.message ? `<p style="margin:0 0 22px; padding:12px 14px; background:#24201A; border-radius:10px; font-size:15px; line-height:1.8; color:#CFC6B8;">${esc(args.message)}</p>` : ''}`
 
   const html = emailShell({
     title: subject,
@@ -657,7 +650,7 @@ export function bookingReceivedEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'افتح الحجوزات',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن إشعار «حجز جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة لأن إشعار «حجز جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
   })
 
   return { subject, text, html }
@@ -691,9 +684,9 @@ export function reviewReceivedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
-      وصلك <strong style="color:#171717;">${what}</strong> على Google عن «${esc(args.siteName)}». يبقى مخفيًا في موقعك حتى تختار إظهاره من صفحة التقييمات.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      وصلك <strong style="color:#F4EFE6;">${what}</strong> على Google عن «${esc(args.siteName)}». يبقى مخفيًا في موقعك حتى تختار إظهاره من صفحة التقييمات.
     </p>`
 
   const html = emailShell({
@@ -703,7 +696,7 @@ export function reviewReceivedEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'افتح التقييمات',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن إشعار «تقييم جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة لأن إشعار «تقييم جديد» مفعّل في إعدادات لوحة التحكم. يمكنك إيقافه من هناك.</p>`,
   })
 
   return { subject, text, html }
@@ -738,9 +731,9 @@ export function trialReminderEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#555555;">
-      حسابك في بينون جاهز، ولا يزال لديك <strong style="color:#171717;">${remWord}</strong> في الباقة المجانية. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      حسابك في بينون جاهز، ولا يزال لديك <strong style="color:#F4EFE6;">${remWord}</strong> في الباقة المجانية. لا تدع فكرتك تنتظر — اكتبها، أو ابدأ من مثال جاهز، وولّد موقعك الاحترافي في ثوانٍ.
     </p>`
 
   const html = emailShell({
@@ -750,7 +743,7 @@ export function trialReminderEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'أكمل إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة مرة واحدة فقط. مع خطة Starter أو Pro تولّد مواقع بلا حدود.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة مرة واحدة فقط. مع خطة Starter أو Pro تولّد مواقع بلا حدود.</p>`,
   })
 
   return { subject, text, html }
@@ -786,13 +779,13 @@ export function quotaReachedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">${greeting}</p>
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      لقد استخدمت <strong style="color:#171717;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! مع خطة Starter أو Pro تولّد مواقع <strong style="color:#171717;">بلا حدود</strong>، وتربط نطاقك الخاص، وتستقبل الحجوزات.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      لقد استخدمت <strong style="color:#F4EFE6;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! مع خطة Starter أو Pro تولّد مواقع <strong style="color:#F4EFE6;">بلا حدود</strong>، وتربط نطاقك الخاص، وتستقبل الحجوزات.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك التي أنشأتها تبقى محفوظة ومنشورة كما هي. لن تفقد أي شيء.</p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">مواقعك التي أنشأتها تبقى محفوظة ومنشورة كما هي. لن تفقد أي شيء.</p>
       </td></tr>
     </table>`
 
@@ -803,7 +796,7 @@ export function quotaReachedEmail(args: {
     bodyHtml,
     ctaHref: upgradeUrl,
     ctaLabel: 'طالع الخطط والترقية',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">لأي سؤال عن الخطط راسلنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a>.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">لأي سؤال عن الخطط راسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
 
   return { subject, text, html }
@@ -846,14 +839,14 @@ export function hostingExpiringEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px;font-size:16px;line-height:1.85;color:#555555;">${greeting}</p>
-    <p style="margin:0 0 20px;font-size:16px;line-height:1.85;color:#555555;">
-      اشتراكك في بينون ينتهي <strong style="color:#171717;">${when}</strong>. بعدها يرجع حسابك إلى الباقة المجانية.
+    <p style="margin:0 0 18px;font-size:16px;line-height:1.85;color:#CFC6B8;">${greeting}</p>
+    <p style="margin:0 0 20px;font-size:16px;line-height:1.85;color:#CFC6B8;">
+      اشتراكك في بينون ينتهي <strong style="color:#F4EFE6;">${when}</strong>. بعدها يرجع حسابك إلى الباقة المجانية.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">ينتهي في: <strong style="color:#171717;">${endStr}</strong></p>
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">مواقعك تبقى منشورة ومحفوظة. ما يتوقف: مزايا خطتك، وتعود شارة «صُنع ببينون» أسفل مواقعك.</p>
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">ينتهي في: <strong style="color:#F4EFE6;">${endStr}</strong></p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">مواقعك تبقى منشورة ومحفوظة. ما يتوقف: مزايا خطتك، وتعود شارة «صُنع ببينون» أسفل مواقعك.</p>
       </td></tr>
     </table>`
 
@@ -864,7 +857,7 @@ export function hostingExpiringEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'جدّد اشتراكك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">تصلك هذه الرسالة لأن اشتراكك أُلغي وسينتهي في آخر يوم مدفوع.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة لأن اشتراكك أُلغي وسينتهي في آخر يوم مدفوع.</p>`,
   })
 
   return { subject, text, html }
@@ -893,17 +886,17 @@ export function accountDeletedEmail(args: {
   ].join('\n')
 
   const bodyHtml = `
-    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#555555;">
-      تم حذف حسابك المرتبط بـ <strong style="color:#171717;">${args.email}</strong> نهائيًا وفق طلبك.
+    <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
+      تم حذف حسابك المرتبط بـ <strong style="color:#F4EFE6;">${args.email}</strong> نهائيًا وفق طلبك.
     </p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;background:#fafafa;border:1px solid #ececec;border-radius:12px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 8px;font-size:13px;color:#8f8f8f;">تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.</p>
-        <p style="margin:0;font-size:13px;color:#8f8f8f;">يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).</p>
+        <p style="margin:0 0 8px;font-size:13px;color:#A39A8D;">تم حذفه: ملفك الشخصي، قوالبك، وسجل الاستخلاص.</p>
+        <p style="margin:0;font-size:13px;color:#A39A8D;">يُحتفظ به: سجلات الدفع (متطلب قانوني لمدة ٧ سنوات).</p>
       </td></tr>
     </table>
-    <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#8f8f8f;">
-      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://beynoun.com/signup" style="color:#171717;text-decoration:none;">beynoun.com</a>.
+    <p style="margin:0 0 20px; font-size:14px; line-height:1.8; color:#A39A8D;">
+      إذا غيّرت رأيك يمكنك إنشاء حساب جديد في أي وقت من <a href="https://beynoun.com/signup" style="color:#F4EFE6;text-decoration:none;">beynoun.com</a>.
     </p>`
 
   const html = emailShell({
@@ -913,15 +906,15 @@ export function accountDeletedEmail(args: {
     bodyHtml,
     ctaHref: 'https://beynoun.com/signup',
     ctaLabel: 'إنشاء حساب جديد',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:team@beynoun.com" style="color:#171717;text-decoration:none;">team@beynoun.com</a> فورًا.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">إن لم تطلب هذا الحذف يرجى التواصل معنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a> فورًا.</p>`,
   })
 
   return { subject, text, html }
 }
 
-const P = 'margin:0 0 18px;font-size:16px;line-height:1.85;color:#555555;'
-const NOTE = 'margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;'
-const BOX = 'margin:0 0 26px;background:#fafafa;border:1px solid #ececec;border-radius:12px;'
+const P = 'margin:0 0 18px;font-size:16px;line-height:1.85;color:#CFC6B8;'
+const NOTE = 'margin:0;font-size:13px;line-height:1.8;color:#A39A8D;'
+const BOX = 'margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;'
 const hello = (firstName?: string | null) => (firstName ? `أهلًا ${firstName}،` : 'أهلًا بك،')
 
 function arDate(iso?: string | null): string {
@@ -966,12 +959,12 @@ export function paymentFailedEmail(args: {
 
   const bodyHtml = `
     <p style="${P}">${hello(args.firstName)}</p>
-    <p style="${P}">حاولنا تجديد اشتراكك لكن البطاقة <strong style="color:#171717;">رُفضت</strong>. حدّث بطاقتك قبل المحاولة القادمة حتى لا تتوقف مزايا خطتك.</p>
+    <p style="${P}">حاولنا تجديد اشتراكك لكن البطاقة <strong style="color:#F4EFE6;">رُفضت</strong>. حدّث بطاقتك قبل المحاولة القادمة حتى لا تتوقف مزايا خطتك.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">الخطة: <strong style="color:#171717;">${args.planLabel}</strong></p>
-        <p style="margin:0 0 6px;font-size:13px;color:#8f8f8f;">المبلغ: <strong style="color:#171717;direction:ltr;display:inline-block;">${amount}</strong></p>
-        ${next ? `<p style="margin:0;font-size:13px;color:#8f8f8f;">المحاولة القادمة: <strong style="color:#171717;">${next}</strong></p>` : ''}
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">الخطة: <strong style="color:#F4EFE6;">${args.planLabel}</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;color:#A39A8D;">المبلغ: <strong style="color:#F4EFE6;direction:ltr;display:inline-block;">${amount}</strong></p>
+        ${next ? `<p style="margin:0;font-size:13px;color:#A39A8D;">المحاولة القادمة: <strong style="color:#F4EFE6;">${next}</strong></p>` : ''}
       </td></tr>
     </table>`
 
@@ -1014,11 +1007,11 @@ export function subscriptionEndedEmail(args: {
 
   const bodyHtml = `
     <p style="${P}">${hello(args.firstName)}</p>
-    <p style="${P}">انتهى اشتراكك في <strong style="color:#171717;">${args.planLabel}</strong>، ورجع حسابك إلى الباقة المجانية.</p>
+    <p style="${P}">انتهى اشتراكك في <strong style="color:#F4EFE6;">${args.planLabel}</strong>، ورجع حسابك إلى الباقة المجانية.</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
       <tr><td style="padding:16px 18px;text-align:right;">
-        <p style="margin:0 0 6px;font-size:13px;line-height:1.8;color:#8f8f8f;">باقٍ كما هو: <strong style="color:#171717;">مواقعك ومحتواها، منشورة ومحفوظة.</strong></p>
-        <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">توقف: <strong style="color:#171717;">مزايا خطتك، مثل التوليد بلا حدود.</strong></p>
+        <p style="margin:0 0 6px;font-size:13px;line-height:1.8;color:#A39A8D;">باقٍ كما هو: <strong style="color:#F4EFE6;">مواقعك ومحتواها، منشورة ومحفوظة.</strong></p>
+        <p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">توقف: <strong style="color:#F4EFE6;">مزايا خطتك، مثل التوليد بلا حدود.</strong></p>
       </td></tr>
     </table>`
 
@@ -1066,10 +1059,10 @@ export function sitePublishedEmail(args: {
 
   const bodyHtml = `
     <p style="${P}">${hello(args.firstName)}</p>
-    <p style="${P}">موقع <strong style="color:#171717;">«${name}»</strong> منشور الآن، ويستطيع أي شخص فتحه من هذا الرابط:</p>
+    <p style="${P}">موقع <strong style="color:#F4EFE6;">«${name}»</strong> منشور الآن، ويستطيع أي شخص فتحه من هذا الرابط:</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
       <tr><td style="padding:18px;text-align:center;">
-        <a href="${args.siteUrl}" style="font-size:17px;font-weight:700;color:#171717;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${host}</a>
+        <a href="${args.siteUrl}" style="font-size:17px;font-weight:700;color:#F4EFE6;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${host}</a>
       </td></tr>
     </table>
     <p style="${P}">أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط Google.</p>`
@@ -1081,7 +1074,7 @@ export function sitePublishedEmail(args: {
     bodyHtml,
     ctaHref: args.siteUrl,
     ctaLabel: 'افتح موقعك',
-    footnoteHtml: `<p style="${NOTE}">تعدّل موقعك وتتابع زياراته من <a href="${manageUrl}" style="color:#171717;text-decoration:none;">لوحة التحكم</a>. التعديلات تظهر خلال دقيقة.</p>`,
+    footnoteHtml: `<p style="${NOTE}">تعدّل موقعك وتتابع زياراته من <a href="${manageUrl}" style="color:#F4EFE6;text-decoration:none;">لوحة التحكم</a>. التعديلات تظهر خلال دقيقة.</p>`,
   })
 
   return { subject, text, html }
@@ -1115,7 +1108,7 @@ export function domainLiveEmail(args: {
     <p style="${P}">نطاقك يعمل الآن، وموقعك يفتح عليه بأمان (https):</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="${BOX}">
       <tr><td style="padding:18px;text-align:center;">
-        <a href="${url}" style="font-size:17px;font-weight:700;color:#171717;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${args.domain}</a>
+        <a href="${url}" style="font-size:17px;font-weight:700;color:#F4EFE6;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${args.domain}</a>
       </td></tr>
     </table>
     <p style="${P}">حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.</p>`
@@ -1127,7 +1120,7 @@ export function domainLiveEmail(args: {
     bodyHtml,
     ctaHref: url,
     ctaLabel: 'افتح موقعك',
-    footnoteHtml: `<p style="${NOTE}">تدير نطاقاتك من <a href="${manageUrl}" style="color:#171717;text-decoration:none;">لوحة التحكم</a>.</p>`,
+    footnoteHtml: `<p style="${NOTE}">تدير نطاقاتك من <a href="${manageUrl}" style="color:#F4EFE6;text-decoration:none;">لوحة التحكم</a>.</p>`,
   })
 
   return { subject, text, html }

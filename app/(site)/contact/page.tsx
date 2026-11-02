@@ -1,5 +1,6 @@
 /**
- * The contact page.
+ * The contact page, in the «ليل» style since 2026-11-01 (ContactPage in
+ * components/zenya/redesign/s11.tsx; the previous ContactView is kept).
  *
  * Five topics, one intake. The form validates with the rules
  * app/api/contact/route.ts enforces — a real address, a message of at least
@@ -26,7 +27,8 @@
  */
 
 import type { Metadata } from 'next'
-import ContactView from '@/components/zenya/contact/ContactView'
+import { dashFont } from '@/components/app/dash-font'
+import { ContactPage as ContactView } from '@/components/zenya/redesign/s11'
 import { share } from '@/lib/site-share'
 
 export const metadata: Metadata = {
@@ -67,5 +69,5 @@ export default function ContactPage({
     asked === 'request' || asked === 'sales' || asked === 'review' || asked === 'other'
       ? asked
       : 'support'
-  return <ContactView initialTopic={initialTopic} />
+  return <div className={dashFont.variable}><ContactView initialTopic={initialTopic} /></div>
 }

@@ -1,59 +1,29 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light only" />
-    <meta name="supported-color-schemes" content="light only" />
-    <title>دعوة للانضمام إلى بينون</title>
-  </head>
-  <body style="margin:0;padding:0;background:#fafafa;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;color:#171717;direction:rtl;">
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fafafa;padding:32px 12px;direction:rtl;">
-      <tr>
-        <td align="center">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #e6e6e6;border-radius:18px;overflow:hidden;">
-            <tr>
-              <td bgcolor="#f4eef6" style="padding:0;background:#f4eef6;line-height:0;font-size:0;">
-                <img src="https://beynoun.com/brand/email-header.png" alt="بينون" width="560" height="84" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-size:20px;line-height:84px;font-weight:700;color:#171717;text-align:right;" />
-              </td>
-            </tr>
+  <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="color-scheme" content="dark"/><meta name="supported-color-schemes" content="dark"/><link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;700&amp;display=swap" rel="stylesheet"/><style>@media only screen and (max-width:600px){.bm-d{display:none!important}.bm-m{display:block!important;max-height:none!important;overflow:visible!important}.bm-cap{border-radius:12px 12px 0 0!important}.bm-lines{padding-left:24px!important;padding-right:24px!important}}</style><title>دعوة للانضمام إلى بينون</title></head>
+  <body style="margin:0;padding:0;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;background:#0F0D0A;color:#F4EFE6;direction:rtl;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#0F0D0A" style="background:#0F0D0A;padding:32px 12px;direction:rtl;"><tr><td align="center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" bgcolor="#1A1713" style="max-width:560px;width:100%;background:#1A1713;border:1px solid #2E2922;border-radius:20px;overflow:hidden;">
+            <tr><td bgcolor="#16120D" style="padding:0;background:#16120D;line-height:0;font-size:0;"><img src="https://beynoun.com/brand/email-header-night.jpg" alt="بينون" width="560" height="112" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:24px;line-height:112px;font-weight:700;color:#F4EFE6;text-align:right;"/></td></tr>
 
             <tr>
-              <td style="padding:20px 40px 8px;text-align:right;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;">
-                <p style="margin:0 0 10px;font-size:13px;font-weight:500;color:#666666;">دعوة</p>
-                <h1 style="margin:0 0 16px;font-size:26px;line-height:1.45;font-weight:700;color:#171717;">
+              <td style="padding:26px 40px 8px;text-align:right;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;">
+                <p style="margin:0 0 12px;font-size:13px;font-weight:600;color:#A39A8D;"><span style="color:#E2532A;font-size:10px;">&#9670;</span>&nbsp;&nbsp;دعوة</p>
+                <h1 style="margin:0 0 16px;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:30px;line-height:1.4;font-weight:700;color:#F4EFE6;">
                   أنت مدعوّ إلى بينون
                 </h1>
-                <p style="margin:0 0 26px;font-size:16px;line-height:1.85;color:#555555;">
+                <p style="margin:0 0 26px;font-size:16px;line-height:1.85;color:#CFC6B8;">
                   تمت دعوتك للانضمام إلى بينون — الأداة التي تحوّل فكرتك إلى موقع احترافي خلال دقائق. اقبل الدعوة لإنشاء حسابك.
                 </p>
 
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;">
-                  <tr>
-                    <td style="border-radius:999px;background:#171717;">
-                      <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite&next=/dashboard" style="display:inline-block;padding:13px 30px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">
-                        قبول الدعوة
-                      </a>
-                    </td>
-                  </tr>
-                </table>
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 30px;"><tr><td bgcolor="#F4EFE6" style="border-radius:999px;background:#F4EFE6;"><a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite&next=/dashboard" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#16120D;text-decoration:none;border-radius:999px;">قبول الدعوة</a></td></tr></table>
 
                 <div style="padding:0 0 28px;">
-                  <p style="margin:0;font-size:13px;line-height:1.8;color:#8f8f8f;">
-                    أُرسلت هذه الدعوة إلى <strong style="color:#555555;">{{ .Email }}</strong>. إن لم تكن تتوقّعها، يمكنك تجاهل هذه الرسالة بأمان.
+                  <p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">
+                    أُرسلت هذه الدعوة إلى <strong style="color:#CFC6B8;">{{ .Email }}</strong>. إن لم تكن تتوقّعها، يمكنك تجاهل هذه الرسالة بأمان.
                   </p>
                 </div>
               </td>
             </tr>
-          </table>
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;width:100%;">
-            <tr>
-              <td style="padding:20px 40px 0;text-align:right;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;">
-                <p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#8f8f8f;">بينون، منشئ المواقع · <a href="https://beynoun.com" style="color:#171717;text-decoration:none;">beynoun.com</a></p>
-                <p style="margin:0;font-size:12px;line-height:1.7;color:#a3a3a3;">للسؤال أو المساعدة: اكتب إلى <a href="mailto:team@beynoun.com" style="color:#8f8f8f;">team@beynoun.com</a> · <a href="https://beynoun.com/privacy" style="color:#a3a3a3;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#a3a3a3;">الشروط</a></p>
-              </td>
-            </tr>
-          </table>
+          <tr><td bgcolor="#1A1713" style="padding:0;line-height:0;font-size:0;"><img src="https://beynoun.com/brand/email-foot-night.png" alt="بينون" width="560" height="140" style="display:block;width:100%;max-width:560px;height:auto;border:0;font-family:'Amiri','Noto Naskh Arabic','Geeza Pro','Traditional Arabic',serif;font-size:64px;line-height:140px;font-weight:700;color:#F4EFE6;text-align:center;"/></td></tr><tr><td class="bm-lines" bgcolor="#F4EFE6" style="background:#F4EFE6;padding:12px 40px 28px;text-align:right;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;"><p style="margin:0 0 6px;font-size:12px;line-height:1.7;color:#5F574D;">بينون، منشئ المواقع · <a href="https://beynoun.com" style="color:#16120D;text-decoration:none;">beynoun.com</a></p><p style="margin:0;font-size:12px;line-height:1.7;color:#8A8074;">للسؤال أو المساعدة: اكتب إلى <a href="mailto:team@beynoun.com" style="color:#5F574D;">team@beynoun.com</a> · <a href="https://beynoun.com/privacy" style="color:#5F574D;">الخصوصية</a> · <a href="https://beynoun.com/terms" style="color:#5F574D;">الشروط</a></p></td></tr></table>
         </td>
       </tr>
     </table>
