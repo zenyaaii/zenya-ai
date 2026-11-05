@@ -5,6 +5,7 @@ create table if not exists public.leads (
   id text primary key,
   name text not null,
   kind text,
+  country text,
   city text,
   area text,
   address text,
@@ -14,6 +15,7 @@ create table if not exists public.leads (
   wa text,                 -- WhatsApp number, digits only, with country code
   maps text,
   template text,
+  social text,             -- Facebook/Instagram link when they have one
   site text,               -- the site we built for them
   status text not null default 'new',  -- new | sent | replied | client | later | noans | no
   sent_at timestamptz,
