@@ -159,7 +159,9 @@ export const CSS = `
 .s1 .fl a:hover{color:var(--ink)}
 .s1-fbase{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:center;border-top:1px solid var(--line);margin-top:40px;padding-top:20px;font-size:14px;color:var(--mut)}
 .s1 .fs{display:flex;flex-wrap:wrap;gap:6px}
-.s1 .fs a{display:inline-flex;height:34px;align-items:center;padding:0 12px;border-radius:999px;border:1px solid var(--line2);font-size:14px}
+.s1 .fs a{display:inline-flex;width:40px;height:40px;align-items:center;justify-content:center;border-radius:999px;color:var(--mut);transition:color .2s}
+.s1 .fs a svg{width:19px;height:19px}
+.s1 .fs a:hover,.s1 .fs a:focus-visible{color:var(--ink)}
 
 /* pricing, after the Forma picture */
 .s1-pr{position:relative;min-height:100svh;margin-top:-66px;padding-top:120px;padding-bottom:80px;isolation:isolate}
