@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { serviceClient } from '@/lib/handover'
+import { ingestWhatsApp } from '@/lib/whatsapp'
 
 /**
  * One webhook for everything Meta sends: WhatsApp, Instagram, Messenger,
@@ -52,6 +53,14 @@ export async function POST(req: NextRequest) {
   if (rows.length) {
     const { error } = await serviceClient().from('meta_events').insert(rows)
     if (error) console.error('[meta webhook] insert failed', error.message)
+  }
+  // WhatsApp messages and delivery receipts also go into wa_messages, which
+  // the admin inbox reads. A failure here must not lose the raw event above.
+  if (body?.object === 'whatsapp_business_account') {
+    for (const entry of body.entry ?? []) for (const ch of entry.changes ?? []) {
+      if (ch.field !== 'messages') continue
+      try { await ingestWhatsApp(ch.value) } catch (e: any) { console.error('[meta webhook] wa ingest', e?.message) }
+    }
   }
   // Always 200 so Meta does not retry and disable the hook.
   return NextResponse.json({ ok: true })
