@@ -77,6 +77,12 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/dashboard/admin/leads"
+            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-foreground transition hover:bg-black/5"
+          >
+            استوديو العملاء
+          </Link>
+          <Link
             href="/dashboard/analytics"
             className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-muted transition hover:bg-black/5"
           >
