@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
+import AdminDashboard from '../AdminDashboard'
 
 /**
  * استوديو العملاء — the founder's leads + WhatsApp inbox (layout B, "today").
@@ -47,7 +47,7 @@ const when = (iso: string) => {
     : d.toLocaleDateString('ar', { day: 'numeric', month: 'short' })
 }
 
-type Tab = 'today' | 'leads' | 'inbox'
+type Tab = 'today' | 'leads' | 'inbox' | 'stats'
 
 export default function LeadStudio() {
   const [leads, setLeads] = useState<Lead[] | null>(null)
@@ -90,6 +90,18 @@ export default function LeadStudio() {
     if (!r.ok) { say(j.error || 'لم تُرسل'); return }
     say('أُرسلت ✓'); load()
   }
+  const [building, setBuilding] = useState<Set<string>>(new Set())
+  async function build(l: Lead) {
+    setBuilding((b) => new Set(b).add(l.id)); say(`أعمل موقع «${l.name}»… (دقيقة تقريباً)`)
+    try {
+      const r = await fetch('/api/admin/leads/build', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id }) })
+      const j = await r.json().catch(() => ({}))
+      if (!r.ok) { say(j.error || 'تعذّر البناء'); return }
+      setLeads((ls) => ls?.map((x) => (x.id === l.id ? j.lead : x)) ?? null)
+      setOpen((o) => (o?.id === l.id ? j.lead : o))
+      say(`جاهز ✓ ${j.url.replace('https://', '')}`)
+    } finally { setBuilding((b) => { const n = new Set(b); n.delete(l.id); return n }) }
+  }
   function openChat(wa: string) { setChat(wa); setTab('inbox') }
 
   const counts = leads ? [
@@ -103,7 +115,7 @@ export default function LeadStudio() {
     <div className="ls" dir="rtl">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <nav className="nav" role="tablist">
-        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox]] as const).map(([id, t, ic]) => (
+        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox], ['stats', 'التحليلات', I.stats]] as const).map(([id, t, ic]) => (
           <button key={id} role="tab" aria-selected={tab === id} onClick={() => { setTab(id); if (id !== 'inbox') setChat(null) }}>
             <svg viewBox="0 0 24 24" aria-hidden>{ic}</svg><span>{t}</span>
             {id === 'inbox' && unread.length > 0 && <b className="n num">{unread.length}</b>}
@@ -116,10 +128,9 @@ export default function LeadStudio() {
           <h1>استوديو <i>العملاء</i></h1>
           <span className="sp" />
           <span className="pill">الإرسال بيدك فقط</span>
-          <Link href="/dashboard/admin" className="btn sm ghost">الإدارة</Link>
         </header>
 
-        {err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
+        {tab === 'stats' ? <AdminDashboard /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
           <>
             {tab === 'today' && (
               <>
@@ -141,8 +152,8 @@ export default function LeadStudio() {
                     {of('ready').length === 0 && <div className="empty">لا شيء جاهز للإرسال</div>}
                     {of('ready').slice(0, 8).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm wa" onClick={() => sendGift(l)}>أرسل</button>} />)}
                   </Task>
-                  <Task tone="blue" n={of('nosite').length} t="عملاء بلا موقع" why="اعمل لهم موقعاً، ثم ضع رابطه هنا">
-                    {of('nosite').slice(0, 6).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm" onClick={() => setOpen(l)}>افتح</button>} />)}
+                  <Task tone="blue" n={of('nosite').length} t="عملاء بلا موقع" why="«اعمل الموقع» يبنيه وينشره ويضع رابطه هنا">
+                    {of('nosite').slice(0, 6).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>} />)}
                     {of('nosite').length > 6 && <button className="more" onClick={() => setTab('leads')}>كل العملاء ({of('nosite').length})</button>}
                   </Task>
                 </div>
@@ -156,7 +167,7 @@ export default function LeadStudio() {
         )}
       </div>
 
-      {open && <Sheet lead={open} onClose={() => setOpen(null)} patch={patch} sendGift={sendGift} openChat={(wa) => { setOpen(null); openChat(wa) }} />}
+      {open && <Sheet lead={open} onClose={() => setOpen(null)} patch={patch} sendGift={sendGift} build={build} building={building.has(open.id)} openChat={(wa) => { setOpen(null); openChat(wa) }} />}
       <div className={'toast' + (toast ? ' show' : '')} role="status">{toast}</div>
     </div>
   )
@@ -215,9 +226,9 @@ function Leads({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => void }) 
   )
 }
 
-function Sheet({ lead: l, onClose, patch, sendGift, openChat }: {
+function Sheet({ lead: l, onClose, patch, sendGift, openChat, build, building }: {
   lead: Lead; onClose: () => void; patch: (id: string, b: Partial<Lead>) => void
-  sendGift: (l: Lead) => void; openChat: (wa: string) => void
+  sendGift: (l: Lead) => void; openChat: (wa: string) => void; build: (l: Lead) => void; building: boolean
 }) {
   const [site, setSite] = useState(l.site ?? '')
   const [notes, setNotes] = useState(l.notes ?? '')
@@ -240,6 +251,7 @@ function Sheet({ lead: l, onClose, patch, sendGift, openChat }: {
             <button className="btn sm" onClick={() => patch(l.id, { site })} disabled={site === (l.site ?? '')}>احفظ</button></div>
         </label>
         <div className="row">
+          {!l.site && <button className="btn" disabled={building} onClick={() => build(l)}>{building ? 'يُبنى… (دقيقة تقريباً)' : 'اعمل الموقع'}</button>}
           {l.site && (s === 'ready' || s === 'nosite') && <button className="btn wa" onClick={() => sendGift(l)}>أرسل رسالتك + الرابط</button>}
           {l.wa && <button className="btn" onClick={() => openChat(l.wa!)}>المحادثة</button>}
           {l.site && <a className="btn ghost" href={l.site} target="_blank" rel="noreferrer">الموقع</a>}
@@ -344,6 +356,7 @@ const I = {
   today: <path d="M4 5h16v15H4z M4 9h16 M9 3v4 M15 3v4" />,
   leads: <path d="M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M3 20c0-3.5 3-6 6-6s6 2.5 6 6 M16 4.5a3.5 3.5 0 0 1 0 7 M18 14c2 .7 3.5 2.8 3.5 6" />,
   inbox: <path d="M4 5h16v11H9l-5 4z" />,
+  stats: <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" />,
 }
 
 const CSS = `
