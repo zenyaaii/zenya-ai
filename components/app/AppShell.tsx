@@ -97,6 +97,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
     )
   }
 
+  // The founder's admin area is a workspace of its own: no customer menu,
+  // no site switcher, no tour. Only the product tokens and fonts.
+  if (pathname.startsWith('/dashboard/admin')) {
+    return (
+      <div className={`zy-app ${dashFont.variable}`} style={{ minHeight: '100vh', background: 'var(--background)' }}>
+        <style dangerouslySetInnerHTML={{ __html: DASHBOARD_CSS }} />
+        {children}
+      </div>
+    )
+  }
+
   const current = pageFor(pathname)
   const pages = buildPages(t, current, (k) => ({ href: linkTo(PAGE_ROUTE[k]) }), counts)
   const title = pathname.startsWith('/dashboard/admin')

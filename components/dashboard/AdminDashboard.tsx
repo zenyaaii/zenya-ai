@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Cpu, DollarSign, RefreshCw, Repeat, Users } from 'lucide-react'
+import { Cpu, DollarSign, RefreshCw, Repeat, Users } from 'lucide-react'
 import {
   BarList, Panel, PanelWithTitle, Section, SkeletonTile, Tile, rise,
 } from './analytics/primitives'
@@ -62,33 +61,20 @@ export default function AdminDashboard() {
   const usd = (cents: number) => '$' + (cents / 100).toLocaleString(undefined, { maximumFractionDigits: 2 })
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-7xl py-2">
       <motion.header
         {...rise}
         className="flex flex-wrap items-end justify-between gap-3 border-b border-token pb-5"
       >
         <div>
           <h1 className="text-[22px] font-bold text-foreground sm:text-[24px]">
-            الإدارة · الأعمال
+            التحليلات
           </h1>
           <p className="mt-1 text-[14.5px] text-muted">
             مسار التحويل والإيرادات واقتصاديات الوحدة على مستوى المنصة · عرض المؤسس.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href="/dashboard/admin/leads"
-            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-foreground transition hover:bg-black/5"
-          >
-            استوديو العملاء
-          </Link>
-          <Link
-            href="/dashboard/analytics"
-            className="inline-flex items-center gap-1.5 rounded-md zy-card px-3 py-1.5 text-[14.5px] font-medium text-muted transition hover:bg-black/5"
-          >
-            تحليلات مواقعي
-            <ArrowRight className="h-3 w-3 rtl-flip" />
-          </Link>
           <button
             onClick={() => load(true)}
             disabled={refreshing}
