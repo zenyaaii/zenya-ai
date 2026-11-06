@@ -91,16 +91,38 @@ export default function LeadStudio() {
     say('أُرسلت ✓'); load()
   }
   const [building, setBuilding] = useState<Set<string>>(new Set())
-  async function build(l: Lead) {
-    setBuilding((b) => new Set(b).add(l.id)); say(`أعمل موقع «${l.name}»… (دقيقة تقريباً)`)
+  async function build(l: Lead, quiet = false): Promise<boolean> {
+    setBuilding((b) => new Set(b).add(l.id)); if (!quiet) say(`أعمل موقع «${l.name}»… (دقيقة تقريباً)`)
     try {
       const r = await fetch('/api/admin/leads/build', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id }) })
       const j = await r.json().catch(() => ({}))
-      if (!r.ok) { say(j.error || 'تعذّر البناء'); return }
+      if (!r.ok) { if (!quiet) say(j.error || 'تعذّر البناء'); return false }
       setLeads((ls) => ls?.map((x) => (x.id === l.id ? j.lead : x)) ?? null)
       setOpen((o) => (o?.id === l.id ? j.lead : o))
-      say(`جاهز ✓ ${j.url.replace('https://', '')}`)
-    } finally { setBuilding((b) => { const n = new Set(b); n.delete(l.id); return n }) }
+      if (!quiet) say(`جاهز ✓ ${j.url.replace('https://', '')}`)
+      return true
+    } catch { if (!quiet) say('تعذّر البناء'); return false }
+    finally { setBuilding((b) => { const n = new Set(b); n.delete(l.id); return n }) }
+  }
+  // «اعمل الكل»: every lead without a site, three at a time, until done or stopped.
+  const [bulk, setBulk] = useState<{ done: number; failed: number; total: number } | null>(null)
+  const stopRef = useRef(false)
+  async function buildAll(list: Lead[]) {
+    if (!list.length || bulk) return
+    if (!confirm(`اعمل ${list.length} موقعاً الآن؟ كل موقع يأخذ دقيقة تقريباً، وتبني الصفحة 3 مواقع معاً. اترك الصفحة مفتوحة.`)) return
+    stopRef.current = false
+    const queue = [...list]; let done = 0, failed = 0
+    setBulk({ done, failed, total: list.length })
+    const worker = async () => {
+      while (queue.length && !stopRef.current) {
+        const ok = await build(queue.shift()!, true)
+        ok ? done++ : failed++
+        setBulk({ done, failed, total: list.length })
+      }
+    }
+    await Promise.all([worker(), worker(), worker()])
+    setBulk(null)
+    say(`انتهى: ${done} موقع جاهز${failed ? ` · ${failed} لم ينجح` : ''}`)
   }
   function openChat(wa: string) { setChat(wa); setTab('inbox') }
 
@@ -130,6 +152,13 @@ export default function LeadStudio() {
           <span className="pill">الإرسال بيدك فقط</span>
         </header>
 
+        {bulk && (
+          <div className="bulk">
+            <span>أعمل المواقع… <b className="num">{bulk.done + bulk.failed}</b> من <b className="num">{bulk.total}</b>{bulk.failed > 0 && <> · لم ينجح <b className="num">{bulk.failed}</b></>}</span>
+            <div className="bar"><i style={{ width: `${((bulk.done + bulk.failed) / bulk.total) * 100}%` }} /></div>
+            <button className="btn sm ghost" onClick={() => { stopRef.current = true }}>أوقف</button>
+          </div>
+        )}
         {tab === 'stats' ? <AdminDashboard /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
           <>
             {tab === 'today' && (
@@ -150,16 +179,17 @@ export default function LeadStudio() {
                   </Task>
                   <Task tone="acc" n={of('ready').length} t="مواقع جاهزة لم تُرسل" why="أرسل الرابط برسالتك الثابتة">
                     {of('ready').length === 0 && <div className="empty">لا شيء جاهز للإرسال</div>}
-                    {of('ready').slice(0, 8).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm wa" onClick={() => sendGift(l)}>أرسل</button>} />)}
+                    {of('ready').map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm wa" onClick={() => sendGift(l)}>أرسل</button>} />)}
                   </Task>
                   <Task tone="blue" n={of('nosite').length} t="عملاء بلا موقع" why="«اعمل الموقع» يبنيه وينشره ويضع رابطه هنا">
+                    {of('nosite').length > 0 && <button className="btn all" disabled={!!bulk} onClick={() => buildAll(of('nosite'))}>اعمل كل المواقع ({of('nosite').length})</button>}
                     {of('nosite').slice(0, 6).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>} />)}
                     {of('nosite').length > 6 && <button className="more" onClick={() => setTab('leads')}>كل العملاء ({of('nosite').length})</button>}
                   </Task>
                 </div>
               </>
             )}
-            {tab === 'leads' && <Leads leads={leads} onOpen={setOpen} />}
+            {tab === 'leads' && <Leads leads={leads} onOpen={setOpen} build={build} building={building} sendGift={sendGift} buildAll={buildAll} busy={!!bulk} />}
             {tab === 'inbox' && (
               <Inbox threads={threads} byId={byId} byWa={byWa} chat={chat} setChat={setChat} onSent={load} say={say} onLead={setOpen} />
             )}
@@ -191,7 +221,10 @@ function Item({ name, meta, btn, onOpen }: { name: string; meta?: string; btn: R
   )
 }
 
-function Leads({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => void }) {
+function Leads({ leads, onOpen, build, building, sendGift, buildAll, busy }: {
+  leads: Lead[]; onOpen: (l: Lead) => void; build: (l: Lead) => void; building: Set<string>
+  sendGift: (l: Lead) => void; buildAll: (l: Lead[]) => void; busy: boolean
+}) {
   const [q, setQ] = useState('')
   const [st, setSt] = useState<'all' | Stage>('all')
   const [cc, setCc] = useState('all')
@@ -209,15 +242,26 @@ function Leads({ leads, onOpen }: { leads: Lead[]; onOpen: (l: Lead) => void }) 
         <button aria-pressed={cc === 'all'} onClick={() => setCc('all')}>كل الدول</button>
         {countries.map((c) => <button key={c} aria-pressed={cc === c} onClick={() => setCc(c)}>{COUNTRY[c] ?? c}</button>)}
       </div>
+      {list.some((l) => !l.site) && (
+        <button className="btn all" disabled={busy} onClick={() => buildAll(list.filter((l) => !l.site))}>
+          اعمل مواقع المعروضين بلا موقع ({list.filter((l) => !l.site).length})
+        </button>
+      )}
       <div className="llist">
         {list.slice(0, 300).map((l) => {
-          const s = STAGES.find((x) => x.id === stageOf(l))!
+          const st = stageOf(l)
+          const s = STAGES.find((x) => x.id === st)!
           return (
-            <button key={l.id} className="lrow" onClick={() => onOpen(l)}>
+            <div key={l.id} className="lrow" role="button" tabIndex={0} onClick={() => onOpen(l)} onKeyDown={(e) => { if (e.key === 'Enter') onOpen(l) }}>
               <span style={{ minWidth: 0 }}><span className="nm">{l.name}</span>
                 <span className="mt">{l.kind} · {place(l)} · ★ <span className="num">{l.rating ?? '–'}</span> (<span className="num">{l.reviews ?? 0}</span>)</span></span>
-              <span className={'tag t-' + s.tone}>{s.t}</span>
-            </button>
+              <span className="acts" onClick={(e) => e.stopPropagation()}>
+                {st === 'nosite' && !l.site && <button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>}
+                {st === 'ready' && <button className="btn sm wa" onClick={() => sendGift(l)}>أرسل</button>}
+                {l.site && <a className="btn sm ghost" href={l.site} target="_blank" rel="noreferrer">الموقع</a>}
+                <span className={'tag t-' + s.tone}>{s.t}</span>
+              </span>
+            </div>
           )
         })}
         {list.length === 0 && <div className="empty">لا نتائج</div>}
@@ -405,7 +449,12 @@ const CSS = `
 .ls .chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;white-space:nowrap}
 .ls .chips button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .ls .llist{display:grid;gap:6px}
-.ls .lrow{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;text-align:right}
+.ls .lrow{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;text-align:right;cursor:pointer}
+.ls .lrow .acts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ls .btn.all{width:100%;margin:2px 0 10px}
+.ls .bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:12px;font-size:13.5px}
+.ls .bulk .bar{flex:1;min-width:120px;height:6px;border-radius:9px;background:var(--line);overflow:hidden}
+.ls .bulk .bar i{display:block;height:100%;background:var(--success, #2e7d4f)}
 .ls .lrow .nm,.ls .irow .nm,.ls .chead .nm{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ls .lrow .mt,.ls .chead .mt{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ls .tag{font-size:11.5px;border-radius:999px;padding:2px 9px;font-weight:600;background:var(--c-bg);color:var(--c);white-space:nowrap}
