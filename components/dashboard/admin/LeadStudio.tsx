@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminDashboard from '../AdminDashboard'
+import Notes from './Notes'
 
 /**
  * استوديو العملاء — the founder's leads + WhatsApp inbox (layout B, "today").
@@ -47,7 +48,7 @@ const when = (iso: string) => {
     : d.toLocaleDateString('ar', { day: 'numeric', month: 'short' })
 }
 
-type Tab = 'today' | 'leads' | 'inbox' | 'stats'
+type Tab = 'today' | 'leads' | 'inbox' | 'stats' | 'notes'
 
 export default function LeadStudio() {
   const [leads, setLeads] = useState<Lead[] | null>(null)
@@ -137,7 +138,7 @@ export default function LeadStudio() {
     <div className="ls" dir="rtl">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <nav className="nav" role="tablist">
-        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox], ['stats', 'التحليلات', I.stats]] as const).map(([id, t, ic]) => (
+        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox], ['stats', 'التحليلات', I.stats], ['notes', 'الملاحظات', I.notes]] as const).map(([id, t, ic]) => (
           <button key={id} role="tab" aria-selected={tab === id} onClick={() => { setTab(id); if (id !== 'inbox') setChat(null) }}>
             <svg viewBox="0 0 24 24" aria-hidden>{ic}</svg><span>{t}</span>
             {id === 'inbox' && unread.length > 0 && <b className="n num">{unread.length}</b>}
@@ -159,7 +160,7 @@ export default function LeadStudio() {
             <button className="btn sm ghost" onClick={() => { stopRef.current = true }}>أوقف</button>
           </div>
         )}
-        {tab === 'stats' ? <AdminDashboard /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
+        {tab === 'stats' ? <AdminDashboard /> : tab === 'notes' ? <Notes say={say} /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
           <>
             {tab === 'today' && (
               <>
@@ -400,6 +401,7 @@ const I = {
   today: <path d="M4 5h16v15H4z M4 9h16 M9 3v4 M15 3v4" />,
   leads: <path d="M9 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z M3 20c0-3.5 3-6 6-6s6 2.5 6 6 M16 4.5a3.5 3.5 0 0 1 0 7 M18 14c2 .7 3.5 2.8 3.5 6" />,
   inbox: <path d="M4 5h16v11H9l-5 4z" />,
+  notes: <path d="M6 3h9l4 4v14H6z M15 3v4h4 M9 12h7 M9 16h5" />,
   stats: <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" />,
 }
 
