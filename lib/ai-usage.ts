@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 /* ────────────────────────────────────────────────────────────────────── *
  * AI token-usage logging.                                                 *
  *                                                                         *
- * Every OpenAI call in the app (content + theme generation, AI rewrite,   *
+ * Every AI call in the app    (content + theme generation, AI rewrite,   *
  * name suggestions) records its token usage into `public.ai_usage` via    *
  * `logAiUsage`. One row per call. We log with the service role so it works *
  * from routes that aren't auth-gated; `getUserIdSafe` best-effort attaches *
@@ -37,7 +37,7 @@ export type AiUsageCtx = {
 }
 
 /**
- * Record one OpenAI call's token usage. Best-effort + non-throwing.
+ * Record one AI call's token usage. Best-effort + non-throwing.
  * Pass the `usage` object straight off the completion (`completion.usage`).
  */
 export async function logAiUsage(ctx: AiUsageCtx, usage: OpenAiUsage): Promise<void> {

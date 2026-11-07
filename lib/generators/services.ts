@@ -1,6 +1,6 @@
 // Shared by app/api/generate-services/route.ts (the wizard) and the admin lead builder.
 // Moved out of the route unchanged so both run the same prompt and merge.
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
@@ -12,7 +12,7 @@ import { pickServicePhotos, resolveServiceNiche, unsplash } from '@/utils/servic
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 
-export const TIMEOUT_MS = 45_000
+export const TIMEOUT_MS = 110_000
 
 // For a trade no pack matches: hand tools on a workbench, and a wall of tools.
 // Neither shows a person, so neither claims to be this business's team.
@@ -449,9 +449,9 @@ export const TEMPERATURE = 0.7
 
 /** The route's OpenAI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: ServiceInput): Promise<ServiceContent> {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) throw new Error('no_openai_key')
-  const openai = new OpenAI({ apiKey })
+  const openai = new AiClient({ apiKey })
   const response = await withTimeout(
     openai.chat.completions.create({
       model: AI_MODEL,

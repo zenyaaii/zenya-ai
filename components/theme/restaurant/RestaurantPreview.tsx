@@ -22,6 +22,7 @@ import {
 import BookingForm from '@/components/site/BookingForm'
 import { useBookingContext } from '@/components/site/BookingContext'
 import { shownDishPhoto } from '@/lib/dish-photos'
+import GoogleWall from './GoogleWall'
 
 export type RestaurantView = 'home' | 'menu' | 'gallery' | 'visit' | 'about' | 'reviews'
 
@@ -83,9 +84,13 @@ export default function RestaurantPreview({
   className,
   view: controlledView,
   onViewChange,
+  colorOverrides: colorOverridesProp,
 }: Props) {
   const preset = getRestaurantPreset(presetId)
-  const colorOverrides = content.color_overrides
+  // The editor and the live site keep overrides beside the template content
+  // (content.color_overrides on the wrapper) and pass them in as a prop; older
+  // callers put them inside. Either way they apply.
+  const colorOverrides = content.color_overrides ?? (colorOverridesProp as RestaurantContent['color_overrides'])
   // Typography preset is independent of color preset. If the user hasn't
   // picked one we keep using the color preset's heading/body fonts so
   // legacy sites don't visually shift.
@@ -160,6 +165,7 @@ export default function RestaurantPreview({
               <>
                 {!hidden.has('hero') && <Hero content={content} isDark={isDark} />}
                 {!hidden.has('signature_dishes') && <SignatureDishes content={content} isDark={isDark} />}
+                {!hidden.has('reviews') && content.google_wall?.photos?.length ? <GoogleWall wall={content.google_wall} variant="a" rating={content.reviews?.overall_rating} count={content.reviews?.review_count} brand={content.brand.name} /> : null}
                 {!hidden.has('press') && <Press content={content} isDark={isDark} />}
                 {!hidden.has('newsletter') && <Newsletter content={content} isDark={isDark} />}
               </>
@@ -176,6 +182,7 @@ export default function RestaurantPreview({
             {view === 'reviews' && (
               <>
                 {!hidden.has('reviews') && <Reviews content={content} isDark={isDark} />}
+                {!hidden.has('reviews') && content.google_wall?.photos?.length ? <GoogleWall wall={content.google_wall} variant="b" rating={content.reviews?.overall_rating} count={content.reviews?.review_count} brand={content.brand.name} /> : null}
                 {!hidden.has('faq') && <FAQ content={content} isDark={isDark} />}
               </>
             )}
@@ -299,10 +306,12 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
           <a href={`tel:${content.hours_location.phone}`} className="inline-flex min-h-[44px] -my-[13px] items-center hover:opacity-80 transition">
             {content.hours_location.phone}
           </a>
+          {content.hours_location.email ? (<>
           <span>·</span>
           <a href={`mailto:${content.hours_location.email}`} className="inline-flex min-h-[44px] -my-[13px] items-center hover:opacity-80 transition">
             {content.hours_location.email}
           </a>
+          </>) : null}
         </div>
       </Container>
     </div>
@@ -603,7 +612,7 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
           <Divider />
         </Reveal>
         <motion.div
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          className={`grid grid-cols-2 ${content.signature_dishes.length === 3 ? 'lg:grid-cols-3 max-w-5xl mx-auto' : 'lg:grid-cols-4'} gap-x-3 gap-y-8 md:gap-8`}
           variants={staggerParent}
           initial="hidden"
           whileInView="show"
@@ -637,7 +646,7 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
                 </p>
               </div>
               <h3
-                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.35rem' }}
+                style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: 'clamp(1.05rem, 2.6vw, 1.35rem)' }}
                 className="mb-2"
               >
                 {dish.name}
@@ -783,7 +792,7 @@ function Menu({ content, isDark }: { content: RestaurantContent; isDark: boolean
 
 function Gallery({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
   const { staggerParent, staggerChild, viewport } = useMotionKit()
-  const imgs = content.gallery.images.slice(0, 6)
+  const imgs = content.gallery.images.slice(0, 7)
   return (
     <section id="gallery" data-section="gallery" className="py-24 md:py-32" style={{ background: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.025)' }}>
       <Container>
@@ -804,12 +813,16 @@ function Gallery({ content, isDark }: { content: RestaurantContent; isDark: bool
           viewport={viewport}
         >
           {imgs.map((img, i) => {
-            const tall = i === 0 || i === 4
+            // Tall tiles only where the count leaves no hole: phone (2 cols)
+            // needs an odd count with one tall; laptop (3 cols) 7 with two.
+            const n = imgs.length
+            const tallPhone = i === 0 && n % 2 === 1
+            const tallDesk = (i === 0 || i === 4) && n === 7
             return (
               <motion.div
                 key={i}
                 variants={staggerChild}
-                className={`group relative overflow-hidden ${tall ? 'row-span-2 aspect-[3/4] md:aspect-auto' : 'aspect-[4/3]'}`}
+                className={`group relative overflow-hidden aspect-[4/3] ${tallPhone ? 'row-span-2 aspect-auto' : ''} ${tallDesk ? 'md:row-span-2 md:aspect-auto' : tallPhone ? 'md:row-span-1 md:aspect-[4/3]' : ''}`}
               >
                 <img
                   src={img.url}
@@ -854,6 +867,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
                   {content.hours_location.phone}
                 </a>
               </div>
+              {content.hours_location.email ? (
               <div>
                 <p className="text-[0.72rem] uppercase mb-1" style={{ color: 'var(--rb-accent)' }}>
                   البريد الإلكتروني
@@ -862,6 +876,7 @@ function HoursLocation({ content, isDark }: { content: RestaurantContent; isDark
                   {content.hours_location.email}
                 </a>
               </div>
+              ) : null}
             </div>
 
             {content.hours_location.map_link && (
@@ -973,7 +988,7 @@ function Reservations({ content, isDark }: { content: RestaurantContent; isDark:
             {subheading}
           </p>
           {enabled ? (
-            <div id="reservations-form" className="mx-auto mt-2 max-w-lg text-start">
+            <div id="reservations-form" className="mx-auto mt-2 max-w-xl text-start p-6 md:p-10" style={{ background: 'color-mix(in srgb, var(--rb-surface) 85%, transparent)', border: '1px solid var(--rb-border)', boxShadow: isDark ? '0 30px 80px -40px rgba(0,0,0,.6)' : '0 30px 80px -50px rgba(0,0,0,.25)' }}>
               <BookingForm type="reservation" palette={restaurantPalette(isDark)} />
             </div>
           ) : fallbackPhone ? (
@@ -1048,7 +1063,7 @@ function Reviews({ content, isDark }: { content: RestaurantContent; isDark: bool
           whileInView="show"
           viewport={viewport}
         >
-          {r.testimonials.slice(0, 4).map((t, i) => (
+          {r.testimonials.slice(0, 6).map((t, i) => (
             <motion.div
               key={i}
               variants={staggerChild}
@@ -1372,9 +1387,11 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
                   )}
                 </>
               )}
+              {content.hours_location.email ? (
               <a href={`mailto:${content.hours_location.email}`} className="flex min-h-[44px] items-center hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
                 راسلنا
               </a>
+              ) : null}
             </div>
           </div>
         </div>

@@ -211,6 +211,12 @@ export type RestaurantContent = {
    * Any missing key falls back to the preset's value.
    */
   color_overrides?: Partial<RestaurantColors>
+  /**
+   * Google photos + Google reviews, moving (the build system fills it from the
+   * place's own Google data). Drawn as two drifting rows on the home page and
+   * as falling columns on the reviews page. Absent → not drawn.
+   */
+  google_wall?: { photos: string[]; reviews: { name: string; rating: number; text: string; when?: string }[] }
 
   /**
    * Per-section text-size + alignment overrides. Keyed by section panel id

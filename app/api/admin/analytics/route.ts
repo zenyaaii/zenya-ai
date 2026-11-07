@@ -13,9 +13,11 @@ function admin() {
   )
 }
 
-// gpt-4o-mini list price (USD per 1M tokens). Used to estimate AI spend.
-const PRICE_IN_PER_M = 0.15
-const PRICE_OUT_PER_M = 0.60
+// Main AI model list price (USD per 1M tokens), used to estimate AI spend.
+// Most tokens go to site generation on the main model; the small model's
+// calls are cheaper, so this errs on the high side.
+const PRICE_IN_PER_M = 2
+const PRICE_OUT_PER_M = 10
 const aiCost = (promptTok: number, completionTok: number) =>
   (promptTok / 1_000_000) * PRICE_IN_PER_M + (completionTok / 1_000_000) * PRICE_OUT_PER_M
 

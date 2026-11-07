@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AI_MODEL_FAST } from '@/lib/ai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { createClient } from '@/utils/supabase/server'
 import { logAiUsage } from '@/lib/ai-usage'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const MODEL = process.env.OPENAI_NAME_MODEL || 'gpt-4o-mini'
+const MODEL = AI_MODEL_FAST
 const TIMEOUT_MS = 14_000
 
 /**
@@ -43,15 +44,15 @@ export async function POST(req: NextRequest) {
     : []
   const vibe = ['bold', 'premium', 'dark', 'warm'].includes(body?.vibe) ? body.vibe : null
 
-  const key = process.env.OPENAI_API_KEY
+  const key = aiKey()
   if (!key) {
     return NextResponse.json(
-      { error: 'no_api_key', message: 'OPENAI_API_KEY is not set on the server.' },
+      { error: 'no_api_key', message: 'ANTHROPIC_API_KEY is not set on the server.' },
       { status: 500 }
     )
   }
 
-  const openai = new OpenAI({ apiKey: key })
+  const openai = new AiClient({ apiKey: key })
 
   const sys = [
     'You name dropshipping products for Arabic one-product Shopify stores. The brand serves Arab customers, so every name must be in Arabic.',

@@ -40,85 +40,90 @@ function saveChoice(accepted: boolean) {
 
 export default function SiteCookieBanner({ palette }: { palette: SitePalette }) {
   const [visible, setVisible] = useState(false)
+  const [shown, setShown] = useState(false)
 
   useEffect(() => {
-    if (!hasChoice()) setVisible(true)
+    if (hasChoice()) return
+    setVisible(true)
+    // Slides up once, a moment after the page settles, so it never lands on the first paint.
+    const t = setTimeout(() => setShown(true), 600)
+    return () => clearTimeout(t)
   }, [])
 
   if (!visible) return null
 
   const choose = (accepted: boolean) => {
     saveChoice(accepted)
-    setVisible(false)
+    setShown(false)
+    setTimeout(() => setVisible(false), 280)
   }
 
   const p = palette
   const ink = readableOn(p.surface, [p.text])
   const soft = readableOn(p.surface, [p.muted, p.text])
   const btnInk = readableOn(p.button, [p.primary, p.text, p.background])
-  // Square-cornered templates (restaurant) get a square-cornered box too.
-  const radius = p.buttonRadius >= 999 ? 14 : 4
 
   const btn: CSSProperties = {
-    minHeight: 44,
-    padding: '0 18px',
-    borderRadius: p.buttonRadius,
+    minHeight: 40,
+    borderRadius: 999,
     fontFamily: p.bodyFont,
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: 600,
     cursor: 'pointer',
     whiteSpace: 'nowrap',
+    border: 0,
   }
 
+  // A floating glass pill, centred above the bottom edge (and the phone's home
+  // bar), in the site's own colours. One line on a laptop; on a phone the
+  // second half of the sentence drops so it stays one short line.
   return (
     <div
       role="dialog"
-      aria-labelledby="site-cookie-title"
+      aria-label="ملفات تعريف الارتباط"
       aria-describedby="site-cookie-desc"
       style={{
         position: 'fixed',
         zIndex: 2147483001, // one above the Made with Beynoun badge
-        bottom: 16,
-        // Physical left: the badge holds the bottom-right corner. On a phone
-        // the box is full width and sits over the badge until it is closed.
-        left: 16,
-        width: 'min(340px, calc(100vw - 32px))',
+        left: '50%',
+        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+        transform: `translate(-50%, ${shown ? '0' : '24px'})`,
+        opacity: shown ? 1 : 0,
+        transition: 'transform .45s cubic-bezier(.22,1,.36,1), opacity .35s',
+        width: 'max-content',
+        maxWidth: 'calc(100vw - 24px)',
         boxSizing: 'border-box',
-        padding: 16,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: 6,
+        paddingInlineStart: 18,
         direction: 'rtl',
         fontFamily: p.bodyFont,
         color: ink,
-        background: p.surface,
-        borderRadius: radius,
-        border: `1px solid ${p.border}`,
-        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        borderRadius: 999,
+        background: `color-mix(in srgb, ${p.surface} 82%, transparent)`,
+        backdropFilter: 'blur(18px) saturate(1.3)',
+        WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+        border: `1px solid color-mix(in srgb, ${p.button} 35%, transparent)`,
+        boxShadow: '0 18px 50px -12px rgba(0,0,0,.45)',
       }}
     >
-      <div
-        id="site-cookie-title"
-        style={{ fontFamily: p.headingFont, fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}
-      >
-        ملفات تعريف الارتباط
-      </div>
-      <p id="site-cookie-desc" style={{ margin: '6px 0 0', fontSize: 14, lineHeight: 1.7, color: soft }}>
-        نستخدم ما يلزم لعمل الموقع فقط، وإحصاءات زيارات لا تكشف هويتك.
-      </p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
-        <button
-          type="button"
-          onClick={() => choose(true)}
-          style={{ ...btn, background: p.button, color: btnInk, border: `1px solid ${p.button}` }}
-        >
-          موافق
-        </button>
-        <button
-          type="button"
-          onClick={() => choose(false)}
-          style={{ ...btn, background: 'transparent', color: ink, border: `1px solid ${p.border}` }}
-        >
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ flex: '0 0 auto', color: p.button }}>
+        <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5zm-3.5 9a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm3 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM7 6.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+      </svg>
+      <span id="site-cookie-desc" style={{ fontSize: 13.5, lineHeight: 1.5, minWidth: 0 }}>
+        نستخدم ملفات ضرورية فقط <span className="zy-ck-more" style={{ color: soft }}>لعمل الموقع وإحصاءات لا تكشف هويتك.</span>
+      </span>
+      <div style={{ display: 'flex', gap: 4, flex: '0 0 auto' }}>
+        <button type="button" onClick={() => choose(false)} style={{ ...btn, padding: '0 14px', background: 'transparent', color: soft }}>
           رفض
         </button>
+        <button type="button" onClick={() => choose(true)} style={{ ...btn, padding: '0 20px', background: p.button, color: btnInk }}>
+          موافق
+        </button>
       </div>
+      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } }`}</style>
     </div>
   )
 }

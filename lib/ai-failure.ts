@@ -16,12 +16,12 @@ export function aiFailed(label: string, err?: unknown) {
 }
 
 /**
- * No OPENAI_API_KEY. In production that is an outage, not a reason to hand
+ * No ANTHROPIC_API_KEY. In production that is an outage, not a reason to hand
  * out demo content. Locally the routes keep their demo fill so the wizards
  * can be clicked through without a key, so this returns null there.
  */
 export function aiUnavailable() {
   if (process.env.NODE_ENV !== 'production') return null
-  console.error('[generate] OPENAI_API_KEY is not set')
+  console.error('[generate] ANTHROPIC_API_KEY is not set')
   return NextResponse.json({ error: 'ai_unavailable' }, { status: 503 })
 }

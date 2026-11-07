@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
@@ -10,6 +10,9 @@ import type { WellnessContent } from '@/utils/wellness/types'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
 import { pickWellnessPhotos, resolveWellnessNiche, unsplash } from '@/utils/wellness/niches'
 import { withTimeout, parseJsonSafe, buildPrompt, mergeIntoContent, buildFallbackContent, TIMEOUT_MS, SYSTEM_PROMPT } from '@/lib/generators/wellness'
+
+// The AI writes the whole site in one answer; give it time.
+export const maxDuration = 120
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -28,7 +31,7 @@ export async function POST(req: NextRequest) {
   }
 
   const input = parsed.data
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) {
     const off = aiUnavailable()
     if (off) return off
@@ -36,7 +39,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const openai = new OpenAI({ apiKey })
+    const openai = new AiClient({ apiKey })
     const response = await withTimeout(
       openai.chat.completions.create({
         model: AI_MODEL,
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
     let aiJson: any = {}
     try { aiJson = parseJsonSafe(raw) } catch (e) { return aiFailed('generate-wellness', e) }
 
-    return NextResponse.json({ content: mergeIntoContent(input, aiJson), _meta: { source: 'openai', model: AI_MODEL } })
+    return NextResponse.json({ content: mergeIntoContent(input, aiJson), _meta: { source: 'claude', model: AI_MODEL } })
   } catch (error: any) {
     return aiFailed('generate-wellness', error)
   }

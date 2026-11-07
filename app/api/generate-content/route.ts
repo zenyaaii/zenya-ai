@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { generateContentSchema } from '@/utils/validators'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
@@ -745,7 +745,7 @@ export async function POST(req: NextRequest) {
   function buildFinalResponse(payload: any, metaOverrides?: Record<string, any>) {
     const meta = {
       _meta: {
-        source: metaOverrides?.source || 'openai',
+        source: metaOverrides?.source || 'claude',
         analysis_used: !!metaOverrides?.analysis_used,
         facts_weak: factsWeak,
         facts_score: score,
@@ -785,13 +785,13 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return buildFallbackResponse('missing_openai_api_key')
+  if (!aiKey()) {
+    return buildFallbackResponse('missing_ai_api_key')
   }
 
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    const openai = new AiClient({
+      apiKey: aiKey(),
       timeout: Math.max(20_000, Math.min(55_000, timeLeft())),
     })
     const nonce = `${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -819,12 +819,12 @@ export async function POST(req: NextRequest) {
       )
       await logAiUsage({ operation: 'generate-content:analysis', userId: usageUserId, model }, resp.usage)
       const content = resp.choices[0]?.message?.content
-      if (!content) throw new Error('No content from OpenAI')
+      if (!content) throw new Error('No content from the AI')
       const finish = resp.choices[0]?.finish_reason
       try {
         return parseModelJson(content)
       } catch (e: any) {
-        if (finish === 'length') throw new Error('openai_json_truncated')
+        if (finish === 'length') throw new Error('ai_json_truncated')
         throw e
       }
     }
@@ -1209,7 +1209,7 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
     await logAiUsage({ operation: 'generate-content', userId: usageUserId, model: AI_MODEL }, resp?.usage)
     
     const content = resp.choices[0]?.message?.content
-    if (!content) throw new Error('No content from OpenAI')
+    if (!content) throw new Error('No content from the AI')
     const finish = resp.choices[0]?.finish_reason
     let parsed: any
     try {
@@ -1264,10 +1264,10 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
       }
     }
     const normalized = normalizeGeneratedContent(name, parsed, productAnalysis)
-    return buildFinalResponse(normalized, { source: 'openai', analysis_used: !!productAnalysis })
+    return buildFinalResponse(normalized, { source: 'claude', analysis_used: !!productAnalysis })
   } catch (error: any) {
     const message = typeof error?.message === 'string' ? error.message : String(error)
-    console.error('OpenAI Error:', message)
+    console.error('AI Error:', message)
     return buildFallbackResponse(message)
   }
 }

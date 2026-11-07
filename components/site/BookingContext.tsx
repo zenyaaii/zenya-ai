@@ -31,13 +31,16 @@ const Ctx = createContext<BookingCtx>(DEFAULT)
 export function BookingProvider({
   slug,
   enabled,
+  preview = false,
   children,
 }: {
   slug: string
   enabled: boolean
+  /** A template demo: the form is drawn as on a live site, but a submit is not sent. */
+  preview?: boolean
   children: ReactNode
 }) {
-  return <Ctx.Provider value={{ slug, enabled, preview: false }}>{children}</Ctx.Provider>
+  return <Ctx.Provider value={{ slug, enabled, preview }}>{children}</Ctx.Provider>
 }
 
 export function useBookingContext(): BookingCtx {

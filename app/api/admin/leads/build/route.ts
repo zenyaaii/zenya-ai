@@ -5,9 +5,10 @@ import { serviceClient } from '@/lib/handover'
 import { BuildError, buildLeadSite } from '@/lib/lead-build'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 120
+// Restaurants run the full build (photos, menu, colours, AI visitor): allow the plan's ceiling.
+export const maxDuration = 300
 
-const STEP_AR: Record<string, string> = { google: 'جلب بيانات Google', facts: 'قراءة البيانات', copy: 'كتابة النصوص', publish: 'النشر' }
+const STEP_AR: Record<string, string> = { google: 'جلب بيانات Google', facts: 'قراءة البيانات', copy: 'كتابة النصوص', publish: 'النشر', review: 'مراجعة الزائر الآلي' }
 
 /** «اعمل الموقع»: builds and publishes one lead's site under the admin's account. */
 export async function POST(req: NextRequest) {
@@ -25,6 +26,8 @@ export async function POST(req: NextRequest) {
   } catch (e: any) {
     const step = e instanceof BuildError ? e.step : 'copy'
     console.error('[lead-build]', id, step, e?.message)
+    // Built but held back: the reasons are the message, so the admin sees them.
+    if (step === 'review') return NextResponse.json({ error: String(e.message).slice(0, 400), held: true }, { status: 422 })
     return NextResponse.json({ error: `تعذّر البناء عند: ${STEP_AR[step] ?? step}`, detail: String(e?.message ?? '').slice(0, 200) }, { status: 502 })
   }
 }

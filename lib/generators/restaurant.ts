@@ -1,6 +1,6 @@
 // Shared by app/api/generate-restaurant/route.ts (the wizard) and the admin lead builder.
 // Moved out of the route unchanged so both run the same prompt and merge.
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
@@ -12,7 +12,7 @@ import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 
-export const TIMEOUT_MS = 45_000
+export const TIMEOUT_MS = 110_000
 
 const FALLBACK_HERO_IMAGES = [
   'https://images.unsplash.com/photo-1669310097451-826ff0e66b9a?auto=format&fit=crop&w=2000&q=80',
@@ -188,7 +188,7 @@ Requirements:
 - menu_descriptions: write descriptions ONLY for items that currently have none. Cap at the 24 most prominent such items — do NOT list every item on a large menu (items you skip keep a sensible default). Never repeat items that already have a description.
 ${NO_REVIEWS_RULE}
 - Never name a newspaper, magazine, guide, award, star or ranking the brief does not give. The press list is the owner's own, shown as given.
-- faq: 0–6 items. Ask only questions the brief can answer (location, how to book, what is on the menu) and answer only from the brief. Return fewer items rather than guess.
+- faq: 0–8 items (aim for 6–8 when the brief carries the facts). Ask only questions the brief can answer (location, how to book, what is on the menu) and answer only from the brief. Return fewer items rather than guess.
 - Never state a price, deposit, cancellation policy, dress code, age rule, parking or valet, private room, seat count, opening year, farm or supplier, dietary claim (halal, organic, vegan, gluten-free), award, rating, chef credential, seasonal or tasting menu, delivery or catering that the brief does not give. This applies to every field.
 - Use the restaurant's name ("${input.brand.name}") sparingly (max twice across all copy)`
 }
@@ -249,7 +249,12 @@ export function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantCon
       if (picked.length === 4) break
     }
   }
-  const sigSource = picked.length > 0 ? picked : flatItems.slice(0, 4).map((item) => ({ item, aiDesc: '' }))
+  // Dishes the owner (or the place's own photos) gave a picture of come first:
+  // a signature dish is shown by its photo, so a real one beats a blank tile.
+  const withPhoto = flatItems.filter((it) => it.image)
+  const sigSource = withPhoto.length >= 2
+    ? withPhoto.slice(0, 4).map((item) => ({ item, aiDesc: picked.find((p) => p.item === item)?.aiDesc || '' }))
+    : picked.length > 0 ? picked : flatItems.slice(0, 4).map((item) => ({ item, aiDesc: '' }))
   const signature_dishes = sigSource.map(({ item, aiDesc }, i) => ({
     name: item.name,
     description: item.description || aiDesc,
@@ -276,7 +281,9 @@ export function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantCon
   // Gallery — user-provided first, fall back to defaults
   const galleryUrls = (input.visuals.gallery_image_urls || []).slice(0, 8)
   const galleryImages =
-    galleryUrls.length >= 6
+    // Three or more of the place's own photos: only theirs. Topping a real
+    // gallery up with stock would pass a stranger's room off as theirs.
+    galleryUrls.length >= 3
       ? galleryUrls.map((u) => ({ url: u }))
       : [...galleryUrls.map((u) => ({ url: u })), ...FALLBACK_GALLERY.slice(0, 6 - galleryUrls.length).map((u) => ({ url: u }))]
 
@@ -383,7 +390,7 @@ export function mergeIntoContent(input: RestaurantInput, ai: any): RestaurantCon
       // another restaurant's deposit, dress code and parking.
       items: Array.isArray(ai?.faq)
         ? ai.faq
-            .slice(0, 6)
+            .slice(0, 8)
             .map((f: any) => ({ q: String(f?.q || '').trim(), a: String(f?.a || '').trim() }))
             .filter((f: { q: string; a: string }) => f.q && f.a)
         : []
@@ -419,9 +426,9 @@ export const TEMPERATURE = 0.65
 
 /** The route's OpenAI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: RestaurantInput): Promise<RestaurantContent> {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) throw new Error('no_openai_key')
-  const openai = new OpenAI({ apiKey })
+  const openai = new AiClient({ apiKey })
   const response = await withTimeout(
     openai.chat.completions.create({
       model: AI_MODEL,
