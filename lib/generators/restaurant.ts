@@ -1,6 +1,6 @@
 // Shared by app/api/generate-restaurant/route.ts (the wizard) and the admin lead builder.
 // Moved out of the route unchanged so both run the same prompt and merge.
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
@@ -12,7 +12,7 @@ import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
 
-export const TIMEOUT_MS = 45_000
+export const TIMEOUT_MS = 110_000
 
 const FALLBACK_HERO_IMAGES = [
   'https://images.unsplash.com/photo-1669310097451-826ff0e66b9a?auto=format&fit=crop&w=2000&q=80',
@@ -426,9 +426,9 @@ export const TEMPERATURE = 0.65
 
 /** The route's OpenAI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: RestaurantInput): Promise<RestaurantContent> {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) throw new Error('no_openai_key')
-  const openai = new OpenAI({ apiKey })
+  const openai = new AiClient({ apiKey })
   const response = await withTimeout(
     openai.chat.completions.create({
       model: AI_MODEL,

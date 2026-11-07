@@ -1,4 +1,5 @@
-import OpenAI from 'openai'
+import { AI_MODEL } from '@/lib/ai'
+import { AiClient, type ContentPart } from '@/lib/ai-client'
 import { logAiUsage } from '@/lib/ai-usage'
 
 /**
@@ -7,9 +8,9 @@ import { logAiUsage } from '@/lib/ai-usage'
  * photo found among the place's own pictures). One call per image, merged.
  */
 
-// gpt-4o reads dense menus best and this key has access. Per-image calls keep
-// each response small, so latency stays low without a fallback model.
-export const MODEL = 'gpt-4o'
+// The main model reads dense Arabic menus well. Per-image calls keep each
+// response small, so latency stays low without a fallback model.
+export const MODEL = AI_MODEL
 // Per-call budget. Each image/half is one page-slice, so this is plenty and
 // keeps any single call from running long.
 const PER_CALL_TIMEOUT_MS = 55_000
@@ -164,12 +165,12 @@ Return STRICT JSON only, no prose, no markdown:
 
 /** One vision call for a single image/half. Returns [] on any failure. */
 export async function analyzeOne(
-  openai: OpenAI,
+  openai: AiClient,
   image: string,
   cuisine: string | undefined,
   userId: string | null
 ): Promise<{ categories: Category[]; ok: boolean; error?: string }> {
-  const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
+  const userContent: ContentPart[] = [
     {
       type: 'text',
       text:

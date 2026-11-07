@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
@@ -10,10 +10,13 @@ import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 
+// The AI writes the whole site in one answer; give it time.
+export const maxDuration = 120
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const TIMEOUT_MS = 45_000
+const TIMEOUT_MS = 110_000
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -373,7 +376,7 @@ export async function POST(req: NextRequest) {
     }
     const input = parseResult.data
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = aiKey()
     if (!apiKey) {
       const off = aiUnavailable()
       if (off) return off
@@ -381,7 +384,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
-    const openai = new OpenAI({ apiKey })
+    const openai = new AiClient({ apiKey })
 
     const completion = await withTimeout(
       openai.chat.completions.create({
@@ -402,7 +405,7 @@ export async function POST(req: NextRequest) {
         ]
       }),
       TIMEOUT_MS,
-      'openai_atlas'
+      'ai_atlas'
     )
 
     await logAiUsage({ operation: 'generate-atlas', userId: await getUserIdSafe(), model: AI_MODEL }, completion.usage)

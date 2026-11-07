@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { createClient } from '@/utils/supabase/server'
 import { MODEL, MAX_IMAGES, MAX_IMAGE_CHARS, analyzeOne, mergeResults, type Category } from '@/lib/menu-ocr'
 
@@ -64,7 +64,7 @@ let demoRead: Promise<{ categories: Category[]; ok: boolean; error?: string }[]>
  * are always on the CDN) and put it through the same single vision call the
  * wizard would. Runs at most once per server instance.
  */
-async function readDemoSample(openai: OpenAI, origin: string, cookie: string | null) {
+async function readDemoSample(openai: AiClient, origin: string, cookie: string | null) {
   // A protected preview deployment answers an anonymous fetch with its login
   // page, not the photo. The visitor's own cookie carries their preview
   // access, so it goes along; production has no protection and ignores it.
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) {
     return NextResponse.json(
       { categories: [], error: 'no_api_key', message: 'قراءة القائمة غير متاحة حاليًا. يمكنك إدخال الأصناف يدويًا.' },
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     typeof body?.cuisine === 'string' && body.cuisine.trim() ? body.cuisine.trim().slice(0, 60) : undefined
 
   try {
-    const openai = new OpenAI({ apiKey })
+    const openai = new AiClient({ apiKey })
 
     let results
     if (demo) {
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       categories,
       _meta: {
-        source: demo ? 'openai:demo-sample' : 'openai',
+        source: demo ? 'claude:demo-sample' : 'claude',
         model: MODEL,
         images: demo ? 1 : images.length,
         categories: categories.length,

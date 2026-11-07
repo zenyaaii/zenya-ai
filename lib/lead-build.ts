@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { AI_MODEL } from '@/lib/ai'
 import { logAiUsage } from '@/lib/ai-usage'
 import { validateSlug } from '@/lib/slug'
@@ -83,9 +83,9 @@ const pickReviews = (g: Google, n = 3) => g.reviews.filter((r) => r.stars >= 4 &
 
 // ── AI: the owner's side of the wizard, from facts only ───────────────────
 async function askJson(prompt: string, system: string, temperature = 0.4): Promise<any> {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) throw new BuildError('facts', 'OPENAI_API_KEY missing')
-  const res = await new OpenAI({ apiKey }).chat.completions.create({
+  const apiKey = aiKey()
+  if (!apiKey) throw new BuildError('facts', 'ANTHROPIC_API_KEY missing')
+  const res = await new AiClient({ apiKey }).chat.completions.create({
     model: AI_MODEL, temperature, response_format: { type: 'json_object' },
     messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
   })

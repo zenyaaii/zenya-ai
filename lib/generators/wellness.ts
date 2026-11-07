@@ -1,6 +1,6 @@
 // Shared by app/api/generate-wellness/route.ts (the wizard) and the admin lead builder.
 // Moved out of the route unchanged so both run the same prompt and merge.
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
@@ -12,7 +12,7 @@ import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
 import { pickWellnessPhotos, resolveWellnessNiche, unsplash } from '@/utils/wellness/niches'
 
 
-export const TIMEOUT_MS = 45_000
+export const TIMEOUT_MS = 110_000
 
 export function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -396,9 +396,9 @@ export const TEMPERATURE = 0.72
 
 /** The route's OpenAI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: WellnessInput): Promise<WellnessContent> {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) throw new Error('no_openai_key')
-  const openai = new OpenAI({ apiKey })
+  const openai = new AiClient({ apiKey })
   const response = await withTimeout(
     openai.chat.completions.create({
       model: AI_MODEL,

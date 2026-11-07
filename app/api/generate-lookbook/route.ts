@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
@@ -10,10 +10,13 @@ import { lookbookInputSchema, type LookbookInput } from '@/utils/lookbook/input'
 import type { LookbookContent } from '@/utils/lookbook/types'
 import { LOOKBOOK_MOCK_CONTENT } from '@/utils/lookbook/mock-content'
 
+// The AI writes the whole site in one answer; give it time.
+export const maxDuration = 120
+
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const TIMEOUT_MS = 45_000
+const TIMEOUT_MS = 110_000
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -259,14 +262,14 @@ export async function POST(req: NextRequest) {
     }
     const input = parseResult.data
 
-    const apiKey = process.env.OPENAI_API_KEY
+    const apiKey = aiKey()
     if (!apiKey) {
       const off = aiUnavailable()
       if (off) return off
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
-    const openai = new OpenAI({ apiKey })
+    const openai = new AiClient({ apiKey })
 
     const completion = await withTimeout(
       openai.chat.completions.create({
@@ -279,7 +282,7 @@ export async function POST(req: NextRequest) {
         ]
       }),
       TIMEOUT_MS,
-      'openai_lookbook'
+      'ai_lookbook'
     )
 
     await logAiUsage({ operation: 'generate-lookbook', userId: await getUserIdSafe(), model: AI_MODEL }, completion.usage)

@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import sharp from 'sharp'
 import { AI_MODEL } from '@/lib/ai'
 import { logAiUsage } from '@/lib/ai-usage'
@@ -52,9 +52,9 @@ export type BuildFile = {
 }
 
 const openai = () => {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) throw new Error('OPENAI_API_KEY missing')
-  return new OpenAI({ apiKey })
+  const apiKey = aiKey()
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY missing')
+  return new AiClient({ apiKey })
 }
 
 async function vision(prompt: string, images: Buffer[], op: string, maxTokens = 3000): Promise<any> {

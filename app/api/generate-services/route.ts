@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { AiClient, aiKey } from '@/lib/ai-client'
 import { ARABIC_OUTPUT_DIRECTIVE } from '@/lib/ai-locale'
 import { AI_MODEL, AI_MAX_TOKENS } from '@/lib/ai'
 import { aiFailed, aiUnavailable } from '@/lib/ai-failure'
@@ -10,6 +10,9 @@ import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
 import { pickServicePhotos, resolveServiceNiche, unsplash } from '@/utils/services/niches'
 import { NO_REVIEWS_RULE, cleanOwnerReviews, countOf, dropRatingClaims, ratingBrief, starsOf, unlessRatingClaim } from '@/lib/owner-reviews'
 import { withTimeout, parseJsonSafe, buildPrompt, mergeIntoContent, buildFallbackContent, TIMEOUT_MS, SYSTEM_PROMPT } from '@/lib/generators/services'
+
+// The AI writes the whole site in one answer; give it time.
+export const maxDuration = 120
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -31,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const input = parsed.data
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = aiKey()
   if (!apiKey) {
     const off = aiUnavailable()
     if (off) return off
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const openai = new OpenAI({ apiKey })
+    const openai = new AiClient({ apiKey })
     const prompt = buildPrompt(input)
 
     const response = await withTimeout(
@@ -78,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       content: mergeIntoContent(input, aiJson),
-      _meta: { source: 'openai', model: AI_MODEL }
+      _meta: { source: 'claude', model: AI_MODEL }
     })
   } catch (error: any) {
     return aiFailed('generate-services', error)
