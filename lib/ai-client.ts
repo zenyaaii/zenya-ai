@@ -71,6 +71,7 @@ function toBlocks(content: string | ContentPart[]): string | Anthropic.ContentBl
 function modelOptions(model: string): Pick<Anthropic.MessageCreateParamsNonStreaming, 'thinking' | 'output_config'> {
   if (/haiku/i.test(model)) return { thinking: { type: 'disabled' }, output_config: { effort: 'medium' } }
   if (/sonnet-5-5/i.test(model)) return { thinking: { type: 'between_tools' }, output_config: { effort: 'medium' } }
+  if (/opus/i.test(model)) return { thinking: { type: 'adaptive' }, output_config: { effort: 'medium' } }
   return {}
 }
 
