@@ -10,6 +10,7 @@ import { RESTAURANT_TYPE_VALUES } from '@/utils/restaurant/input'
 import * as Wellness from '@/lib/generators/wellness'
 import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
+import { prepare, factsBlock, menuWithPhotos, visit, type Prepared } from '@/lib/restaurant-build'
 
 /**
  * «اعمل الموقع» for one lead, server side: Google facts → the owner's side of
@@ -18,13 +19,16 @@ import * as Restaurant from '@/lib/generators/restaurant'
  *
  * Ported from the Lead Studio artifact (gen/entry.ts), with restaurants added.
  * Rules carried over: no invented prices, years, staff or credentials; only
- * real Google reviews; the template's own niche photos, never Google's.
+ * real Google reviews. Wellness and services use the template's own niche
+ * photos. Restaurants run lib/restaurant-build: the place's own photos (judged,
+ * copied to our storage, never hot-linked), its menu, its colours, and an AI
+ * visitor that holds back any site it would not book from.
  */
 
 type Lead = {
   id: string; name: string; kind: string | null; country: string | null; city: string | null; area: string | null
   address: string | null; rating: number | null; reviews: number | null; phone: string | null; wa: string | null
-  maps: string | null; template: string | null
+  maps: string | null; template: string | null; social?: string | null
 }
 type GReview = { stars: number; text: string; who: string; when: string }
 type GPeriod = { open?: { day: number; hour: number; minute: number }; close?: { day: number; hour: number; minute: number } }
@@ -51,7 +55,7 @@ const strs = (v: unknown, min: number, max: number, n: number) =>
   (Array.isArray(v) ? v : []).map((x) => str(x, max)).filter((x) => x.length >= min).slice(0, n)
 const clean = (s: string | null) => String(s ?? '').replace(/[‪-‮]/g, '').replace(/^محافظة\s+/, '').trim()
 
-export type BuildStep = 'google' | 'facts' | 'copy' | 'publish'
+export type BuildStep = 'google' | 'facts' | 'copy' | 'publish' | 'review'
 export class BuildError extends Error { constructor(public step: BuildStep, msg: string) { super(msg) } }
 
 // ── Google ────────────────────────────────────────────────────────────────
@@ -74,8 +78,8 @@ async function googleOf(placeId: string): Promise<Google> {
     })),
   }
 }
-/** Up to 3 real reviews, word for word: 4–5 stars, text that fits the wizard. */
-const pickReviews = (g: Google) => g.reviews.filter((r) => r.stars >= 4 && r.text.length >= 2 && r.text.length <= 600 && r.who).slice(0, 3)
+/** Real reviews, word for word: 4–5 stars, text that fits the wizard. Restaurants show all Google gives (5). */
+const pickReviews = (g: Google, n = 3) => g.reviews.filter((r) => r.stars >= 4 && r.text.length >= 2 && r.text.length <= 600 && r.who).slice(0, n)
 
 // ── AI: the owner's side of the wizard, from facts only ───────────────────
 async function askJson(prompt: string, system: string, temperature = 0.4): Promise<any> {
@@ -89,7 +93,7 @@ async function askJson(prompt: string, system: string, temperature = 0.4): Promi
   return JSON.parse(res.choices?.[0]?.message?.content || '{}')
 }
 
-function factsPrompt(lead: Lead, kind: Tpl, g: Google): string {
+function factsPrompt(lead: Lead, kind: Tpl, g: Google, prep?: Prepared): string {
   const common = `You fill in the Beynoun website wizard for a small business in ${COUNTRY_EN[lead.country ?? ''] ?? 'the Arab world'}, the way its owner would, using ONLY the facts below (Google Maps data). Write every value in Modern Standard Arabic unless told otherwise.
 
 FACTS
@@ -101,7 +105,7 @@ Google rating: ${lead.rating} from ${lead.reviews} reviews
 Hours: ${g.hoursText.join(' / ') || 'N/A'}
 Google reviews (verbatim, the only reviews there are):
 ${g.reviews.map((r, i) => `${i + 1}. [${r.stars}★] ${r.text.replace(/\s+/g, ' ')}`).join('\n') || 'none'}
-
+${prep ? factsBlock(prep) : ''}
 HARD RULES
 - No invented facts. No prices, durations, discounts, years, founding dates, staff or owner names, emails, certifications, awards, client counts, guarantees or response times. If the facts do not say it, leave it out.
 - A service, treatment or dish may be listed only when it is what any business of this kind plainly offers, or a review names it.
@@ -133,7 +137,8 @@ Reply with ONLY this JSON:
   "restaurant_type": "one of: ${RESTAURANT_TYPE_VALUES.join(', ')}",
   "menu": [{ "category": "short Arabic section name", "items": ["dish name, 2-6 words"] }],
   "story_brief": "2-3 sentences, 40-600 chars: where it is, the hours, and what reviewers say (attributed to reviewers)" }
-menu: 2 to 4 sections, 3 to 6 dishes each.`
+menu: 2 to 4 sections, 3 to 6 dishes each.${prep?.menu.length ? ' (A printed menu was read from a photo and will be used as is; still return a short menu.)' : ''}
+story_brief: also say what kind of evening or visit this is, in the place's own words when its Instagram or Facebook gives them (e.g. live music, breakfast, family place, heritage house). Only what the facts say.`
 }
 
 // ── wizard inputs ─────────────────────────────────────────────────────────
@@ -162,12 +167,12 @@ function restaurantHours(g: Google) {
 }
 const hoursLine = (g: Google) => g.hoursText.length ? g.hoursText.join(' · ').slice(0, 300) : undefined
 
-function buildInput(lead: Lead, kind: Tpl, f: any, g: Google) {
+function buildInput(lead: Lead, kind: Tpl, f: any, g: Google, prep?: Prepared) {
   const phone = str(lead.phone, 40) || `+${lead.wa}`
   const mapUrl = /^https?:\/\//.test(lead.maps || '') ? lead.maps! : undefined
   const name = str(f?.brand_name, 80) || str(lead.name.replace(/\([^)]*\)/g, ''), 80)
   const city = clean(lead.city) || clean(lead.area) || 'المدينة'
-  const reviews = pickReviews(g).map((r) => ({
+  const reviews = pickReviews(g, kind === 'restaurant' ? 5 : 3).map((r) => ({
     name: r.who.slice(0, 80), text: r.text.slice(0, 600), rating: Math.min(5, Math.max(1, r.stars || 5)),
     origin: 'google' as const, when: r.when ? r.when.slice(0, 60) : undefined,
   }))
@@ -213,22 +218,35 @@ function buildInput(lead: Lead, kind: Tpl, f: any, g: Google) {
     } }
   }
   const type = (RESTAURANT_TYPE_VALUES as readonly string[]).includes(f?.restaurant_type) ? f.restaurant_type : 'other'
-  const categories = (Array.isArray(f?.menu) ? f.menu : []).map((c: any) => ({
+  const aiMenu = (Array.isArray(f?.menu) ? f.menu : []).map((c: any) => ({
     name: str(c?.category, 40),
     // No price is known, so none is shown: the owner adds prices in the editor.
     items: strs(c?.items, 2, 80, 6).map((n) => ({ name: n, price: '' })),
   })).filter((c: any) => c.name.length >= 2 && c.items.length).slice(0, 4)
+  const categories = prep ? menuWithPhotos(prep, aiMenu) : aiMenu
   if (!categories.length) throw new BuildError('facts', 'no menu')
   const brief = str(f?.story_brief, 800)
   if (brief.length < 20) throw new BuildError('facts', 'brief too short')
-  const preset = type === 'cafe' || type === 'coffee_takeaway' || type === 'bakery' || type === 'dessert' ? 'coastal' : 'trattoria'
+  // The place's own colours decide night (onyx) or day (trattoria); without
+  // the build system the old type-based choice stands.
+  const preset = prep ? (prep.mood === 'dark' ? 'onyx' : 'trattoria')
+    : type === 'cafe' || type === 'coffee_takeaway' || type === 'bakery' || type === 'dessert' ? 'coastal' : 'trattoria'
   const p = RESTAURANT_PRESETS.find((x) => x.id === preset) || RESTAURANT_PRESETS[0]
-  return { preset, colors: [p.colors.primary, p.colors.accent] as const, input: {
+  const colors = prep ? [prep.colors.primary, prep.colors.accent] as const : [p.colors.primary, p.colors.accent] as const
+  const u = (j?: { id: string }) => (j ? prep?.urls.get(j.id) : undefined)
+  const visuals = prep ? {
+    hero_image_url: u(prep.picks.hero),
+    accent_image_url: u(prep.picks.story),
+    gallery_image_urls: prep.picks.gallery.map(u).filter(Boolean) as string[],
+  } : {}
+  const email = prep?.social.facebook?.email && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(prep.social.facebook.email) ? prep.social.facebook.email : ''
+  return { preset, colors, input: {
     brand: { name, cuisine: str(f?.cuisine, 60) || lead.kind || 'مطعم', city: city.slice(0, 60), neighborhood: clean(lead.area).slice(0, 60) || undefined, restaurant_type: type },
-    location: { address: (lead.address || city).slice(0, 200), phone, email: '', map_link: mapUrl, hours: restaurantHours(g) },
+    location: { address: (lead.address || city).slice(0, 200), phone, email, map_link: mapUrl, hours: restaurantHours(g) },
     menu: { categories }, story: { brief },
-    reservations: { provider_type: 'phone', provider_value: phone },
-    visuals: {}, social_proof: proof, style_preset: preset,
+    // The site's own booking form: every request lands in the owner's inbox.
+    reservations: { provider_type: prep ? 'form' : 'phone', provider_value: phone },
+    visuals, social_proof: proof, style_preset: preset,
   } }
 }
 
@@ -245,10 +263,15 @@ async function freeSlug(base: string): Promise<string> {
 
 export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url: string; themeId: string }> {
   const kind = templateOf(lead)
-  const g = await googleOf(lead.id)
-  const facts = await askJson(factsPrompt(lead, kind, g), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
+  // Restaurants run the full build system (lib/restaurant-build); the other
+  // templates keep the Google-only path until they get theirs.
+  const prep = kind === 'restaurant'
+    ? await prepare(lead.id, lead.social ?? null).catch((e) => { throw new BuildError('google', e?.message || 'collect failed') })
+    : undefined
+  const g: Google = prep ? prep.place : await googleOf(lead.id)
+  const facts = await askJson(factsPrompt(lead, kind, g, prep), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
     .catch((e) => { throw e instanceof BuildError ? e : new BuildError('facts', e?.message || 'facts failed') })
-  const { input, colors, preset } = buildInput(lead, kind, facts, g)
+  const { input, colors, preset } = buildInput(lead, kind, facts, g, prep)
 
   let content: any
   try {
@@ -258,17 +281,35 @@ export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url:
   } catch (e: any) { throw new BuildError('copy', e?.message || 'copy failed') }
   if (kind === 'wellness') { content.team.members = []; content.treatments?.items?.forEach((t: any) => { if (!t.badge) delete t.badge }) }
   if (kind === 'services') content.services?.items?.forEach((s: any) => { if (!s.badge) delete s.badge; if (!s.price_from) delete s.price_from })
-  if (/googleusercontent|ggpht|lh[0-9]\.google/.test(JSON.stringify(content))) throw new BuildError('copy', 'a Google photo got in')
+  if (/googleusercontent|ggpht|lh[0-9]\.google|places\.googleapis|cdninstagram|fbcdn/.test(JSON.stringify(content))) throw new BuildError('copy', 'an outside photo link got in')
+
+  let publish = true
+  let wrapper: Record<string, unknown> = {}
+  if (prep) {
+    const wallReviews = pickReviews(g, 5).map((r) => ({ name: r.who.slice(0, 60), rating: Math.min(5, Math.max(1, r.stars || 5)), text: r.text.slice(0, 600), when: r.when.slice(0, 40) }))
+    const wallPhotos = prep.picks.wall.map((j) => prep.urls.get(j.id)).filter(Boolean) as string[]
+    if (wallPhotos.length >= 4) content.google_wall = { photos: wallPhotos, reviews: wallReviews }
+    content.color_overrides = prep.colors
+    const score = await visit(content, (input as any).brand.city, prep.file)
+    publish = score >= 8
+    prep.file.published = publish
+    wrapper = { color_overrides: prep.colors, build_file: prep.file }
+  }
 
   const slug = await freeSlug(String(facts?.slug || ''))
   const url = `https://${slug}.beynoun.com`
   const { data, error } = await serviceClient().from('themes').insert({
     user_id: ownerId, template_type: kind, product_name: (input as any).brand.name,
     primary_color: colors[0], secondary_color: colors[1], images: [],
-    content: JSON.parse(JSON.stringify({ business_type: kind, style_preset: preset, [kind]: content, input })),
-    slug, is_published: true, status: 'published', published_url: url, published_at: new Date().toISOString(),
+    content: JSON.parse(JSON.stringify({ business_type: kind, style_preset: preset, [kind]: content, input, ...wrapper })),
+    slug, is_published: publish, status: publish ? 'published' : 'ready',
+    published_url: publish ? url : null, published_at: publish ? new Date().toISOString() : null,
   }).select('id').single()
   if (error || !data) throw new BuildError('publish', error?.message || 'insert failed')
+  if (!publish) {
+    const last = prep?.file.visitor[prep.file.visitor.length - 1]
+    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: /preview/restaurant/${data.id}`)
+  }
   await serviceClient().from('leads').update({ site: url, updated_at: new Date().toISOString() }).eq('id', lead.id)
   return { url, themeId: data.id }
 }
