@@ -394,13 +394,13 @@ export function buildFallbackContent(input: WellnessInput): WellnessContent {
 export const SYSTEM_PROMPT = 'You are a senior copywriter who writes websites for small wellness and beauty businesses in the Arab world: massage centers, salons, clinics, studios. Your copy sounds like a real person who knows the trade, specific and warm, never generic or flowery. Always return strict JSON only.\n\n' + ARABIC_OUTPUT_DIRECTIVE
 export const TEMPERATURE = 0.72
 
-/** The route's OpenAI step, for server callers that already hold a valid input. */
+/** The route's AI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: WellnessInput): Promise<WellnessContent> {
   const apiKey = aiKey()
-  if (!apiKey) throw new Error('no_openai_key')
-  const openai = new AiClient({ apiKey })
+  if (!apiKey) throw new Error('no_ai_key')
+  const aiClient = new AiClient({ apiKey })
   const response = await withTimeout(
-    openai.chat.completions.create({
+    aiClient.chat.completions.create({
       model: AI_MODEL,
       temperature: TEMPERATURE,
       max_tokens: AI_MAX_TOKENS,

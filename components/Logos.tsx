@@ -12,7 +12,7 @@ import { RING_BRANDS, BrandMark, type Brand } from '@/components/marketing/Brand
  * "works with" ring, so the page never repeats the motif.
  *
  * Every bubble carries a REAL brand mark (see BrandMarks): the tools Beynoun is
- * built on (Shopify, OpenAI, Stripe, Next.js, Supabase, Vercel) mixed with the
+ * built on (Shopify, Anthropic, Stripe, Next.js, Supabase, Vercel) mixed with the
  * platforms a generated site connects to (Instagram, WhatsApp, TikTok, Google,
  * YouTube, Facebook). Marks render as calm dark silhouettes — recognisable and
  * authentic, never a loud rainbow — so the bubble stays the hero, exactly like

@@ -51,7 +51,7 @@ export const maxDuration = 300
  *     route is worth exactly one call per instance however hard it is        *
  *     hammered.                                                              *
  *                                                                           *
- * What the demo shows is therefore a real GPT-4o read of a real photograph,  *
+ * What the demo shows is therefore a real AI read of a real photograph,  *
  * made by this route. A signed-in caller never touches any of this.          *
  * ────────────────────────────────────────────────────────────────────── */
 const DEMO_SAMPLE = '/demo/menu-sample.jpg'
@@ -64,7 +64,7 @@ let demoRead: Promise<{ categories: Category[]; ok: boolean; error?: string }[]>
  * are always on the CDN) and put it through the same single vision call the
  * wizard would. Runs at most once per server instance.
  */
-async function readDemoSample(openai: AiClient, origin: string, cookie: string | null) {
+async function readDemoSample(aiClient: AiClient, origin: string, cookie: string | null) {
   // A protected preview deployment answers an anonymous fetch with its login
   // page, not the photo. The visitor's own cookie carries their preview
   // access, so it goes along; production has no protection and ignores it.
@@ -76,7 +76,7 @@ async function readDemoSample(openai: AiClient, origin: string, cookie: string |
   const type = res.headers.get('content-type') || ''
   if (!type.startsWith('image/')) throw new Error(`demo_sample_not_image:${type}`)
   const image = `data:image/jpeg;base64,${Buffer.from(await res.arrayBuffer()).toString('base64')}`
-  return Promise.all([analyzeOne(openai, image, DEMO_CUISINE, null)])
+  return Promise.all([analyzeOne(aiClient, image, DEMO_CUISINE, null)])
 }
 
 export async function POST(req: NextRequest) {
@@ -125,13 +125,13 @@ export async function POST(req: NextRequest) {
     typeof body?.cuisine === 'string' && body.cuisine.trim() ? body.cuisine.trim().slice(0, 60) : undefined
 
   try {
-    const openai = new AiClient({ apiKey })
+    const aiClient = new AiClient({ apiKey })
 
     let results
     if (demo) {
       // The bundled sample, read once per server instance and then shared.
       if (!demoRead) {
-        demoRead = readDemoSample(openai, req.nextUrl.origin, req.headers.get('cookie'))
+        demoRead = readDemoSample(aiClient, req.nextUrl.origin, req.headers.get('cookie'))
           .catch((e) => { demoRead = null; throw e })
       }
       results = await demoRead
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
       if (!results.some((r) => r.ok)) demoRead = null
     } else {
       // Fire every image concurrently; a slow/failed slice doesn't sink the rest.
-      results = await Promise.all(images.map((img) => analyzeOne(openai, img, cuisine, user!.id)))
+      results = await Promise.all(images.map((img) => analyzeOne(aiClient, img, cuisine, user!.id)))
     }
 
     const categories = mergeResults(results.map((r) => r.categories))

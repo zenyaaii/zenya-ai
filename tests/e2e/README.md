@@ -27,7 +27,7 @@ tests/e2e/
 
 ```bash
 npm run test:e2e:public     # safe, no keys needed
-npm run test:e2e:authed     # dashboard + generators (uses OpenAI for 1 test)
+npm run test:e2e:authed     # dashboard + generators (uses the AI for 1 test)
 npm run test:e2e            # everything (money specs skip unless test keys set)
 npm run test:e2e:report     # open the last HTML report
 ```

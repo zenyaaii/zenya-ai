@@ -424,13 +424,13 @@ export function buildFallbackContent(input: RestaurantInput): RestaurantContent 
 export const SYSTEM_PROMPT = 'You are a senior restaurant copywriter and food critic. You write quiet, sensory, editorial copy for fine-dining and elevated-casual restaurants. You always return strict JSON in the exact shape requested.\n\n' + ARABIC_OUTPUT_DIRECTIVE
 export const TEMPERATURE = 0.65
 
-/** The route's OpenAI step, for server callers that already hold a valid input. */
+/** The route's AI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: RestaurantInput): Promise<RestaurantContent> {
   const apiKey = aiKey()
-  if (!apiKey) throw new Error('no_openai_key')
-  const openai = new AiClient({ apiKey })
+  if (!apiKey) throw new Error('no_ai_key')
+  const aiClient = new AiClient({ apiKey })
   const response = await withTimeout(
-    openai.chat.completions.create({
+    aiClient.chat.completions.create({
       model: AI_MODEL,
       temperature: TEMPERATURE,
       max_tokens: AI_MAX_TOKENS,

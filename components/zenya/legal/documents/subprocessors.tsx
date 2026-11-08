@@ -38,12 +38,12 @@ const SUBPROCESSORS = [
     url: 'https://stripe.com/privacy',
   },
   {
-    name: 'OpenAI',
-    role: 'توليد محتوى القوالب عبر النماذج اللغوية الكبيرة',
-    data: 'وصف النشاط التجاري الذي تُرسله (دون إرفاق أي معرّفات حساب)',
+    name: 'Anthropic (Claude)',
+    role: 'توليد محتوى المواقع وقراءة صور القوائم عبر النماذج اللغوية الكبيرة',
+    data: 'وصف النشاط التجاري الذي تُرسله والصور التي ترفعها للتحليل (دون إرفاق أي معرّفات حساب)',
     location: 'الولايات المتحدة',
-    safeguard: 'بيانات الواجهة لا تُستخدم للتدريب (وفق شروط واجهة OpenAI) + بنود تعاقدية قياسية',
-    url: 'https://openai.com/policies/privacy-policy',
+    safeguard: 'بيانات الواجهة لا تُستخدم للتدريب (وفق الشروط التجارية لـ Anthropic) + بنود تعاقدية قياسية',
+    url: 'https://www.anthropic.com/legal/privacy',
   },
   {
     name: 'ScraperAPI',

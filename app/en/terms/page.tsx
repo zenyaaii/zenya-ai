@@ -115,7 +115,7 @@ export default function EnTermsOfService() {
 
       <h2>9. Third-party services</h2>
       <p>
-        The Service integrates with OpenAI, Stripe, Supabase, Vercel, ScraperAPI, and optionally Shopify.
+        The Service integrates with Anthropic, Stripe, Supabase, Vercel, ScraperAPI, and optionally Shopify.
         Your use of those integrations is governed by their own terms. We are not responsible for their
         availability, content, or conduct. If you connect a Shopify store, you also agree to the Shopify App
         Store and Partner Program agreements.
@@ -135,7 +135,7 @@ export default function EnTermsOfService() {
       <p>
         We aim for high availability but do not guarantee uninterrupted service. We may carry out
         maintenance, update features, or suspend the Service for security reasons. We are not liable for
-        downtime caused by third-party providers (Vercel, Supabase, Stripe, OpenAI, and others) or by force
+        downtime caused by third-party providers (Vercel, Supabase, Stripe, Anthropic, and others) or by force
         majeure events.
       </p>
 

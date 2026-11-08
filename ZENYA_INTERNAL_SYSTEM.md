@@ -47,7 +47,7 @@ The entry point is the **Business Type Picker** at `/theme/new` (`app/(main)/the
 
 1. Paste a product URL.
 2. `/api/scrape` extracts product data (title, images, prices, highlights, specs, JSON-LD).
-3. `/api/generate-content` writes a large conversion-copy object via OpenAI.
+3. `/api/generate-content` writes a large conversion-copy object via Claude (Anthropic).
 4. Content + colors + images saved to Supabase `themes`.
 5. Preview rendered by React (`FullScreenPreview` / `ThemePreview`).
 6. **Export**: `generateShopifyTheme()` → `generateShopifyThemeV3OneProduct()` builds a Shopify OS 2.0 theme ZIP with JSZip (`ThemeActions` → download).
@@ -59,7 +59,7 @@ Every one of the 7 types follows the **same shape**:
 
 1. A multi-section **form wizard** collects a structured brief (e.g. restaurant: menu, hours, story, reservations, visuals).
 2. The wizard `POST`s the brief to `/api/generate-{type}`.
-3. The route validates with a zod schema, calls **OpenAI (`gpt-4o-mini`, JSON mode)**, and **merges AI output over a mock fallback** into a strongly-typed content object. On any error / missing key, it returns the mock fallback so generation never hard-fails.
+3. The route validates with a zod schema, calls **Claude (Anthropic, `lib/ai-client.ts`, JSON answers)**, and **merges AI output over a mock fallback** into a strongly-typed content object. On any error / missing key, it returns the mock fallback so generation never hard-fails.
 4. The wizard saves to the shared `themes` table with a **`content.business_type`** discriminator (plus `content.style_preset`, the typed content under `content.{type}`, and the raw `content.input`).
 5. Redirect to `/preview/{type}/[id]`, which loads the row, checks `business_type`, and renders the type's `*Preview` React component with the chosen style preset.
 
@@ -114,9 +114,9 @@ All under `app/api` (Next.js route handlers). Acts as the orchestration layer.
 
 **Generation**
 - `POST /api/scrape` — one-product scraper: tries Shopify `.js` endpoint → direct fetch → ScraperAPI fallback; parses JSON-LD + regex for prices/images; AliExpress/Shopify image cleanup; logs to `scrape_history`.
-- `POST /api/generate-content` — one-product AI copy. Time-budgeted (~70s) two-step pipeline: analysis (`gpt-4o-mini`) → content (`gpt-4o-mini`, JSON mode) → model JSON-repair → rich procedural fallback. Heavy normalization (`normalizeGeneratedContent`).
+- `POST /api/generate-content` — one-product AI copy. Time-budgeted (~70s) two-step pipeline: analysis → content (Claude, JSON answers) → model JSON-repair → rich procedural fallback. Heavy normalization (`normalizeGeneratedContent`).
 - `POST /api/generate-name` — short premium product name.
-- `POST /api/generate-{restaurant|wellness|atlas|lookbook|collective|studio|services}` — per-type AI generation; all use **`gpt-4o-mini`**, JSON mode, zod-validated input, mock-merge fallback.
+- `POST /api/generate-{restaurant|wellness|atlas|lookbook|collective|studio|services}` — per-type AI generation; all use **Claude** (model in `lib/ai.ts`), JSON answers, zod-validated input, mock-merge fallback.
 
 **Persistence**
 - `POST /api/themes` — auth check, free-plan limit (≥3 themes blocks non-subscribers), insert into `themes`. Used by **all 8 types**.
@@ -168,7 +168,7 @@ There are **two** distinct preview mechanisms:
 
 ## 9. External Services
 
-- **OpenAI** — all copy generation, every business type, model `gpt-4o-mini` (JSON mode). Plus one-product naming.
+- **Anthropic (Claude)** — all copy generation, menu and photo reading, every business type (models in `lib/ai.ts`, key `ANTHROPIC_API_KEY`). Plus one-product naming.
 - **Supabase** — auth, theme storage, subscriptions, history.
 - **Prisma + Postgres** — Shopify session storage only.
 - **ScraperAPI** — fallback scraping for one-product when direct fetch is blocked.
@@ -197,5 +197,5 @@ The repo is mid-expansion. Things to keep in mind before editing:
 
 - **Zenya = 8 AI generators behind one wizard.**
 - **One-Product** = URL → scrape → AI copy → **downloadable Shopify theme** (v3 ZIP) + Shopify publish.
-- **7 business types** (Restaurant, Wellness, SaaS/Atlas, Fashion/Lookbook, Catalog/Collective, Brand Story/Studio, Local Services) = **form → AI copy (gpt-4o-mini) → hosted React preview** on the Zenya domain. No ZIP, no Shopify.
+- **7 business types** (Restaurant, Wellness, SaaS/Atlas, Fashion/Lookbook, Catalog/Collective, Brand Story/Studio, Local Services) = **form → AI copy (Claude) → hosted React preview** on the Zenya domain. No ZIP, no Shopify.
 - Everything persists in the Supabase **`themes`** table, discriminated by **`content.business_type`**.

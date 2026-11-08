@@ -78,7 +78,7 @@ export const COMPANY = {
   SUBSCRIPTION_SINCE: '2026-07-02',
 
   // Maintenance
-  LAST_UPDATED: '2026-08-17',
+  LAST_UPDATED: '2026-11-08',
 } as const
 
 export const formatAddress = () => {

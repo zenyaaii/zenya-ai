@@ -11,6 +11,7 @@ import * as Wellness from '@/lib/generators/wellness'
 import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, type Prepared } from '@/lib/restaurant-build'
+import { COMPANY } from '@/lib/company'
 
 /**
  * «اعمل الموقع» for one lead, server side: Google facts → the owner's side of
@@ -261,13 +262,32 @@ async function freeSlug(base: string): Promise<string> {
   throw new BuildError('publish', 'no free slug')
 }
 
-export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url: string; themeId: string }> {
+/**
+ * `rebuild`: the lead already has a site (often already sent to the owner).
+ * The new build replaces that site's content at the SAME address, so the link
+ * the owner holds keeps working. A restaurant rebuild the AI visitor holds
+ * back (< 8/10) never replaces anything: the old site stays live and the new
+ * one is kept unpublished for review.
+ */
+export async function buildLeadSite(lead: Lead & { status?: string | null; site?: string | null }, ownerId: string, opts: { rebuild?: boolean } = {}): Promise<{ url: string; themeId: string; replaced?: boolean }> {
   const kind = templateOf(lead)
+  let old: { id: string; slug: string; content: any } | null = null
+  if (opts.rebuild) {
+    if (lead.status === 'client') throw new BuildError('publish', 'صار عميلاً: موقعه عنده الآن، لا نعيد بناءه')
+    const slug = /^https?:\/\/([a-z0-9-]+)\.beynoun\.com/i.exec(lead.site || '')?.[1]
+    const { data } = slug ? await serviceClient().from('themes').select('id, slug, content').eq('slug', slug).maybeSingle() : { data: null }
+    if (!data) throw new BuildError('publish', 'لم أجد الموقع القديم لهذا الرابط')
+    old = data
+  }
   // Restaurants run the full build system (lib/restaurant-build); the other
   // templates keep the Google-only path until they get theirs.
   const prep = kind === 'restaurant'
-    ? await prepare(lead.id, lead.social ?? null).catch((e) => { throw new BuildError('google', e?.message || 'collect failed') })
+    ? await prepare(lead.id, lead.social ?? null, { placeId: lead.id, name: lead.name, city: lead.city, area: lead.area, address: lead.address, phone: lead.phone })
+      .catch((e) => { throw new BuildError('google', e?.message || 'collect failed') })
     : undefined
+  // An account the search found is saved on the lead, so the admin sees it and the next build starts from it.
+  const foundLink = prep && !lead.social ? (prep.social.instagram ? `https://www.instagram.com/${prep.social.instagram.handle}/` : prep.social.facebook?.url) : undefined
+  if (foundLink) await serviceClient().from('leads').update({ social: foundLink }).eq('id', lead.id)
   const g: Google = prep ? prep.place : await googleOf(lead.id)
   const facts = await askJson(factsPrompt(lead, kind, g, prep), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
     .catch((e) => { throw e instanceof BuildError ? e : new BuildError('facts', e?.message || 'facts failed') })
@@ -296,6 +316,20 @@ export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url:
     wrapper = { color_overrides: prep.colors, build_file: prep.file }
   }
 
+  if (old && publish) {
+    // Same address, new content: the owner's link now opens the rebuilt site.
+    const url = `https://${old.slug}.beynoun.com`
+    const { error } = await serviceClient().from('themes').update({
+      template_type: kind, product_name: (input as any).brand.name,
+      primary_color: colors[0], secondary_color: colors[1],
+      // Settings the site gathered since (switches, SEO, domain…) are kept; the built parts are replaced.
+      content: JSON.parse(JSON.stringify({ ...(old.content || {}), business_type: kind, style_preset: preset, [kind]: content, input, ...wrapper })),
+      is_published: true, status: 'published', published_url: url, published_at: new Date().toISOString(),
+    }).eq('id', old.id)
+    if (error) throw new BuildError('publish', error.message)
+    return { url, themeId: old.id, replaced: true }
+  }
+
   const slug = await freeSlug(String(facts?.slug || ''))
   const url = `https://${slug}.beynoun.com`
   const { data, error } = await serviceClient().from('themes').insert({
@@ -308,7 +342,7 @@ export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url:
   if (error || !data) throw new BuildError('publish', error?.message || 'insert failed')
   if (!publish) {
     const last = prep?.file.visitor[prep.file.visitor.length - 1]
-    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: /preview/restaurant/${data.id}`)
+    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر${old ? ' (الموقع القديم باقٍ كما هو)' : ''}: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: ${COMPANY.APP_URL}/preview/restaurant/${data.id}`)
   }
   await serviceClient().from('leads').update({ site: url, updated_at: new Date().toISOString() }).eq('id', lead.id)
   return { url, themeId: data.id }

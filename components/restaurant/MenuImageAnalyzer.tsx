@@ -8,7 +8,7 @@ import { Camera, X, Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
  *
  * The owner snaps 1–3 photos of their printed menu (front/back/pages OK). We
  * prepare each on the client and post them to /api/analyze-menu, which reads
- * them with GPT-4o vision and returns the extracted categories. The wizard
+ * them with Claude vision and returns the extracted categories. The wizard
  * pre-fills its normal category/item fields, which the owner reviews + edits.
  *
  * Real restaurant menus are often WIDE tri-folds with 3–4 dense columns. If we

@@ -168,8 +168,9 @@ export default function EnPrivacyPolicy() {
         <li><strong>Vercel</strong> (United States, with EU edge) — hosting and CDN.</li>
         <li><strong>Stripe</strong> (United States, with an EU subsidiary) — payment processing.</li>
         <li>
-          <strong>OpenAI</strong> (United States) — AI generation of template content (your business
-          description is sent; your data is <em>not</em> used to train models, per their API terms).
+          <strong>Anthropic (Claude)</strong> (United States) — AI generation of site content and reading of
+          menu photos (your business description and uploaded photos are sent; your data is <em>not</em> used
+          to train models, per their commercial terms).
         </li>
         <li><strong>ScraperAPI</strong> (United States) — product page scraping (the URL you submitted is sent).</li>
         <li><strong>Shopify</strong> (Canada) — only if you connect a store.</li>
@@ -242,10 +243,10 @@ export default function EnPrivacyPolicy() {
 
       <h2>10. AI processing</h2>
       <p>
-        When you request a generated template, we send your business description and any related text to the
-        OpenAI API. Under the OpenAI API data usage policy, this data is{' '}
-        <strong>not used to train models</strong> and is retained for up to 30 days for abuse prevention
-        only. We do not send your name, your email address, or any account identifiers to OpenAI.
+        When you request a generated site, we send your business description and any related text or photos to
+        the Anthropic API (Claude models). Under the Anthropic commercial terms, this data is{' '}
+        <strong>not used to train models</strong> and is retained for a limited period for abuse prevention
+        only. We do not send your name, your email address, or any account identifiers to Anthropic.
       </p>
 
       <h2>11. Changes to this policy</h2>

@@ -790,7 +790,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const openai = new AiClient({
+    const aiClient = new AiClient({
       apiKey: aiKey(),
       timeout: Math.max(20_000, Math.min(55_000, timeLeft())),
     })
@@ -805,7 +805,7 @@ export async function POST(req: NextRequest) {
       const maxWait = Math.max(8_000, Math.min(ANALYSIS_TIMEOUT_MS, timeLeft() - 5_000))
       if (maxWait <= 0) throw new Error('route_budget_exceeded_before_analysis')
       const resp = await withTimeout(
-        openai.chat.completions.create({
+        aiClient.chat.completions.create({
           model,
           temperature: typeof opts?.temperature === 'number' ? opts.temperature : 0.5,
           presence_penalty: 0.2,
@@ -1152,7 +1152,7 @@ Return JSON only with this shape:
       const maxWait = Math.max(10_000, Math.min(CONTENT_TIMEOUT_MS, timeLeft() - 5_000))
       if (maxWait <= 0) throw new Error('route_budget_exceeded_before_content')
       return withTimeout(
-        openai.chat.completions.create({
+        aiClient.chat.completions.create({
           model,
           temperature: typeof opts?.temperature === 'number' ? opts.temperature : 0.75,
           presence_penalty: 0.35,
@@ -1220,7 +1220,7 @@ ${ARABIC_OUTPUT_DIRECTIVE}`
       async function repairJsonWithModel(input: string) {
         const maxWait = Math.max(5_000, Math.min(REPAIR_TIMEOUT_MS, timeLeft() - 3_000))
         if (maxWait <= 0) throw new Error('route_budget_exceeded_before_repair')
-        const repair = await withTimeout(openai.chat.completions.create({
+        const repair = await withTimeout(aiClient.chat.completions.create({
           model: AI_MODEL,
           temperature: 0,
           max_tokens: AI_MAX_TOKENS,

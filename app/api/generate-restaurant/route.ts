@@ -48,11 +48,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const openai = new AiClient({ apiKey })
+    const aiClient = new AiClient({ apiKey })
     const prompt = buildPrompt(input)
 
     const resp = await withTimeout(
-      openai.chat.completions.create({
+      aiClient.chat.completions.create({
         model: AI_MODEL,
         temperature: 0.65,
         max_tokens: AI_MAX_TOKENS,

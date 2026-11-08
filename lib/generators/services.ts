@@ -447,13 +447,13 @@ export function buildFallbackContent(input: ServiceInput): ServiceContent {
 export const SYSTEM_PROMPT = 'You are a senior website copywriter for premium local service companies. You write clean, conversion-focused, design-aware copy and always return strict JSON only.\n\n' + ARABIC_OUTPUT_DIRECTIVE
 export const TEMPERATURE = 0.7
 
-/** The route's OpenAI step, for server callers that already hold a valid input. */
+/** The route's AI step, for server callers that already hold a valid input. */
 export async function generateCopy(input: ServiceInput): Promise<ServiceContent> {
   const apiKey = aiKey()
-  if (!apiKey) throw new Error('no_openai_key')
-  const openai = new AiClient({ apiKey })
+  if (!apiKey) throw new Error('no_ai_key')
+  const aiClient = new AiClient({ apiKey })
   const response = await withTimeout(
-    openai.chat.completions.create({
+    aiClient.chat.completions.create({
       model: AI_MODEL,
       temperature: TEMPERATURE,
       max_tokens: AI_MAX_TOKENS,

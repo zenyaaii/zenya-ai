@@ -165,7 +165,7 @@ Return STRICT JSON only, no prose, no markdown:
 
 /** One vision call for a single image/half. Returns [] on any failure. */
 export async function analyzeOne(
-  openai: AiClient,
+  aiClient: AiClient,
   image: string,
   cuisine: string | undefined,
   userId: string | null
@@ -183,7 +183,7 @@ export async function analyzeOne(
 
   try {
     const resp = await withTimeout(
-      openai.chat.completions.create({
+      aiClient.chat.completions.create({
         model: MODEL,
         temperature: 0.1,
         max_tokens: PER_CALL_MAX_TOKENS,

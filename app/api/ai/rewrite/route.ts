@@ -196,7 +196,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const openai = new AiClient({ apiKey: key })
+  const aiClient = new AiClient({ apiKey: key })
   const userPrompt = buildUserPrompt({
     themeName, businessType, brand, voiceSample, panelLabel,
     fieldLabel, current, multiline, mode, instruction, variants,
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
   try {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS)
-    const completion = await openai.chat.completions.create({
+    const completion = await aiClient.chat.completions.create({
       model: MODEL,
       response_format: { type: 'json_object' },
       temperature: mode === 'professional' ? 0.6 : 0.82,
