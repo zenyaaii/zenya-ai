@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { anthropicOutage, noteDown, noteUp, OutageError } from '@/lib/service-health'
 
 /**
  * The one door every AI call in the app goes through. Claude, behind the
@@ -91,13 +92,22 @@ export class AiClient {
         const messages: Anthropic.MessageParam[] = p.messages
           .filter((m) => m.role !== 'system')
           .map((m) => ({ role: m.role as 'user' | 'assistant', content: toBlocks(m.content) }))
-        const res = await this.client.messages.create({
-          model: p.model,
-          max_tokens: p.max_tokens ?? 4000,
-          ...(system.length ? { system: system.join('\n\n') } : {}),
-          messages,
-          ...modelOptions(p.model),
-        }, opts)
+        let res: Anthropic.Message
+        try {
+          res = await this.client.messages.create({
+            model: p.model,
+            max_tokens: p.max_tokens ?? 4000,
+            ...(system.length ? { system: system.join('\n\n') } : {}),
+            messages,
+            ...modelOptions(p.model),
+          }, opts)
+        } catch (e) {
+          // No credit, a spend limit or a bad key: the admin dashboard says so, and the caller learns which.
+          const o = anthropicOutage(e)
+          if (o) { await noteDown(o); throw new OutageError(o) }
+          throw e
+        }
+        void noteUp('anthropic')
         if (res.stop_reason === 'refusal') throw new Error('AI refused the request')
         let text = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join('')
         if (json) text = onlyJson(text)

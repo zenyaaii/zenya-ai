@@ -11,7 +11,7 @@ import * as Wellness from '@/lib/generators/wellness'
 import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, type Prepared } from '@/lib/restaurant-build'
-import { COMPANY } from '@/lib/company'
+import { downSince, googleOutage, missingKey, noteDown, noteUp, OutageError, type Outage } from '@/lib/service-health'
 
 /**
  * «اعمل الموقع» for one lead, server side: Google facts → the owner's side of
@@ -23,7 +23,7 @@ import { COMPANY } from '@/lib/company'
  * real Google reviews. Wellness and services use the template's own niche
  * photos. Restaurants run lib/restaurant-build: the place's own photos (judged,
  * copied to our storage, never hot-linked), its menu, its colours, and an AI
- * visitor that holds back any site it would not book from.
+ * visitor that scores the site and says what is wrong with it.
  */
 
 type Lead = {
@@ -56,19 +56,24 @@ const strs = (v: unknown, min: number, max: number, n: number) =>
   (Array.isArray(v) ? v : []).map((x) => str(x, max)).filter((x) => x.length >= min).slice(0, n)
 const clean = (s: string | null) => String(s ?? '').replace(/[‪-‮]/g, '').replace(/^محافظة\s+/, '').trim()
 
-export type BuildStep = 'google' | 'facts' | 'copy' | 'publish' | 'review'
+export type BuildStep = 'google' | 'facts' | 'copy' | 'publish'
 export class BuildError extends Error { constructor(public step: BuildStep, msg: string) { super(msg) } }
 
 // ── Google ────────────────────────────────────────────────────────────────
 async function googleOf(placeId: string): Promise<Google> {
   const key = process.env.GOOGLE_PLACES_API_KEY || process.env.google_places_api_key
-  if (!key) throw new BuildError('google', 'GOOGLE_PLACES_API_KEY missing')
+  if (!key) { const o = missingKey('google'); await noteDown(o); throw new OutageError(o) }
   const r = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=ar`, {
     headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': 'reviews,regularOpeningHours,primaryTypeDisplayName' },
     cache: 'no-store',
   })
   const d: any = await r.json().catch(() => ({}))
-  if (!r.ok) throw new BuildError('google', d?.error?.message || `Google ${r.status}`)
+  if (!r.ok) {
+    const o = googleOutage(r.status, String(d?.error?.message || d?.error?.status || ''))
+    if (o) { await noteDown(o); throw new OutageError(o) }
+    throw new BuildError('google', d?.error?.message || `Google ${r.status}`)
+  }
+  void noteUp('google')
   return {
     type: d.primaryTypeDisplayName?.text,
     hoursText: d.regularOpeningHours?.weekdayDescriptions ?? [],
@@ -251,6 +256,26 @@ function buildInput(lead: Lead, kind: Tpl, f: any, g: Google, prep?: Prepared) {
   } }
 }
 
+// ── the build report ──────────────────────────────────────────────────────
+/**
+ * What the admin reads about a build, saved on the lead (`leads.build`): the
+ * AI visitor's score and its reasons, what was missing, and which outside
+ * service stopped during the build. A low score no longer holds a site back
+ * (Anas, 2026-11-08): it is published and the report says why it scored low.
+ */
+export type BuildReport = {
+  at: string
+  kind: string
+  url: string
+  score: number | null            // the AI visitor's last score (restaurants); null when not scored
+  rounds: number[]                // the score of each round, first to last
+  why: string[]                   // the visitor's problems, from the last round
+  missing: string[]               // what the build could not find (no menu photo, no social account…)
+  social: { instagram?: string; facebook?: string; found?: string } | null
+  photos: { google: number; used: number } | null
+  outages: Outage[]               // a paid service that stopped while this site was built
+}
+
 // ── slug + publish ────────────────────────────────────────────────────────
 async function freeSlug(base: string): Promise<string> {
   let b = base.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24)
@@ -265,12 +290,15 @@ async function freeSlug(base: string): Promise<string> {
 /**
  * `rebuild`: the lead already has a site (often already sent to the owner).
  * The new build replaces that site's content at the SAME address, so the link
- * the owner holds keeps working. A restaurant rebuild the AI visitor holds
- * back (< 8/10) never replaces anything: the old site stays live and the new
- * one is kept unpublished for review.
+ * the owner holds keeps working.
+ *
+ * Every build is published, whatever the AI visitor scores: the score and its
+ * reasons go in the build report for the admin to read. The one thing that
+ * stops a build is a paid service that stopped (no credit, a bad key).
  */
-export async function buildLeadSite(lead: Lead & { status?: string | null; site?: string | null }, ownerId: string, opts: { rebuild?: boolean } = {}): Promise<{ url: string; themeId: string; replaced?: boolean }> {
+export async function buildLeadSite(lead: Lead & { status?: string | null; site?: string | null }, ownerId: string, opts: { rebuild?: boolean } = {}): Promise<{ url: string; themeId: string; replaced?: boolean; report: BuildReport }> {
   const kind = templateOf(lead)
+  const started = Date.now()
   let old: { id: string; slug: string; content: any } | null = null
   if (opts.rebuild) {
     if (lead.status === 'client') throw new BuildError('publish', 'صار عميلاً: موقعه عنده الآن، لا نعيد بناءه')
@@ -283,14 +311,14 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
   // templates keep the Google-only path until they get theirs.
   const prep = kind === 'restaurant'
     ? await prepare(lead.id, lead.social ?? null, { placeId: lead.id, name: lead.name, city: lead.city, area: lead.area, address: lead.address, phone: lead.phone })
-      .catch((e) => { throw new BuildError('google', e?.message || 'collect failed') })
+      .catch((e) => { throw e instanceof OutageError ? e : new BuildError('google', e?.message || 'collect failed') })
     : undefined
   // An account the search found is saved on the lead, so the admin sees it and the next build starts from it.
   const foundLink = prep && !lead.social ? (prep.social.instagram ? `https://www.instagram.com/${prep.social.instagram.handle}/` : prep.social.facebook?.url) : undefined
   if (foundLink) await serviceClient().from('leads').update({ social: foundLink }).eq('id', lead.id)
   const g: Google = prep ? prep.place : await googleOf(lead.id)
   const facts = await askJson(factsPrompt(lead, kind, g, prep), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
-    .catch((e) => { throw e instanceof BuildError ? e : new BuildError('facts', e?.message || 'facts failed') })
+    .catch((e) => { throw e instanceof BuildError || e instanceof OutageError ? e : new BuildError('facts', e?.message || 'facts failed') })
   const { input, colors, preset } = buildInput(lead, kind, facts, g, prep)
 
   let content: any
@@ -298,25 +326,43 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
     content = kind === 'wellness' ? await Wellness.generateCopy(input as any)
       : kind === 'services' ? await Services.generateCopy(input as any)
       : await Restaurant.generateCopy(input as any)
-  } catch (e: any) { throw new BuildError('copy', e?.message || 'copy failed') }
+  } catch (e: any) { throw e instanceof OutageError ? e : new BuildError('copy', e?.message || 'copy failed') }
   if (kind === 'wellness') { content.team.members = []; content.treatments?.items?.forEach((t: any) => { if (!t.badge) delete t.badge }) }
   if (kind === 'services') content.services?.items?.forEach((s: any) => { if (!s.badge) delete s.badge; if (!s.price_from) delete s.price_from })
   if (/googleusercontent|ggpht|lh[0-9]\.google|places\.googleapis|cdninstagram|fbcdn/.test(JSON.stringify(content))) throw new BuildError('copy', 'an outside photo link got in')
 
-  let publish = true
   let wrapper: Record<string, unknown> = {}
   if (prep) {
     const wallReviews = pickReviews(g, 5).map((r) => ({ name: r.who.slice(0, 60), rating: Math.min(5, Math.max(1, r.stars || 5)), text: r.text.slice(0, 600), when: r.when.slice(0, 40) }))
     const wallPhotos = prep.picks.wall.map((j) => prep.urls.get(j.id)).filter(Boolean) as string[]
     if (wallPhotos.length >= 4) content.google_wall = { photos: wallPhotos, reviews: wallReviews }
     content.color_overrides = prep.colors
-    const score = await visit(content, (input as any).brand.city, prep.file)
-    publish = score >= 8
-    prep.file.published = publish
+    await visit(content, (input as any).brand.city, prep.file)
+    prep.file.published = true
     wrapper = { color_overrides: prep.colors, build_file: prep.file }
   }
 
-  if (old && publish) {
+  // Claude stopped half way (no credit, a spend limit): what was built is not
+  // worth publishing, and the dashboard already says which service to fix.
+  const ai = downSince(started).find((o) => o.service === 'anthropic')
+  if (ai) throw new OutageError(ai)
+
+  const report = (url: string): BuildReport => {
+    const v = prep?.file.visitor ?? []
+    const last = v[v.length - 1]
+    return {
+      at: new Date().toISOString(), kind, url,
+      score: last?.score ?? null, rounds: v.map((x) => x.score), why: last?.notes ?? [],
+      missing: prep?.file.missing ?? [],
+      social: prep ? { instagram: prep.file.sources.instagram, facebook: prep.file.sources.facebook, found: prep.file.sources.found_by_search } : null,
+      photos: prep ? { google: prep.file.sources.google.photos, used: prep.file.photos.filter((x) => x.used).length } : null,
+      outages: downSince(started),
+    }
+  }
+  // Saved on its own: if the column is missing, the site and its link still save.
+  const saveReport = async (r: BuildReport) => { try { await serviceClient().from('leads').update({ build: r }).eq('id', lead.id) } catch { /* noop */ } }
+
+  if (old) {
     // Same address, new content: the owner's link now opens the rebuilt site.
     const url = `https://${old.slug}.beynoun.com`
     const { error } = await serviceClient().from('themes').update({
@@ -327,7 +373,8 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
       is_published: true, status: 'published', published_url: url, published_at: new Date().toISOString(),
     }).eq('id', old.id)
     if (error) throw new BuildError('publish', error.message)
-    return { url, themeId: old.id, replaced: true }
+    const r = report(url); await saveReport(r)
+    return { url, themeId: old.id, replaced: true, report: r }
   }
 
   const slug = await freeSlug(String(facts?.slug || ''))
@@ -336,14 +383,10 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
     user_id: ownerId, template_type: kind, product_name: (input as any).brand.name,
     primary_color: colors[0], secondary_color: colors[1], images: [],
     content: JSON.parse(JSON.stringify({ business_type: kind, style_preset: preset, [kind]: content, input, ...wrapper })),
-    slug, is_published: publish, status: publish ? 'published' : 'ready',
-    published_url: publish ? url : null, published_at: publish ? new Date().toISOString() : null,
+    slug, is_published: true, status: 'published', published_url: url, published_at: new Date().toISOString(),
   }).select('id').single()
   if (error || !data) throw new BuildError('publish', error?.message || 'insert failed')
-  if (!publish) {
-    const last = prep?.file.visitor[prep.file.visitor.length - 1]
-    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر${old ? ' (الموقع القديم باقٍ كما هو)' : ''}: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: ${COMPANY.APP_URL}/preview/restaurant/${data.id}`)
-  }
   await serviceClient().from('leads').update({ site: url, updated_at: new Date().toISOString() }).eq('id', lead.id)
-  return { url, themeId: data.id }
+  const r = report(url); await saveReport(r)
+  return { url, themeId: data.id, report: r }
 }

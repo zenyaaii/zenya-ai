@@ -17,7 +17,24 @@ type Lead = {
   id: string; name: string; kind: string | null; country: string | null; city: string | null; area: string | null
   address: string | null; rating: number | null; reviews: number | null; phone: string | null; wa: string | null
   maps: string | null; social: string | null; site: string | null; status: string; sent_at: string | null; notes: string | null
+  build?: Report | null
 }
+/** lib/lead-build.ts BuildReport: what the last build of this lead found and scored. */
+type Report = {
+  at: string; kind: string; url: string; score: number | null; rounds: number[]; why: string[]; missing: string[]
+  social: { instagram?: string; facebook?: string; found?: string } | null
+  photos: { google: number; used: number } | null
+  outages: Outage[]
+}
+type Outage = { service: 'anthropic' | 'apify' | 'google'; reason: string; fix: string; at?: string }
+const SERVICE: Record<Outage['service'], { t: string; href: string; stops: string }> = {
+  anthropic: { t: 'Anthropic (Claude)', href: 'https://platform.claude.com/settings/billing', stops: 'كل البناء متوقف حتى تصلحه' },
+  apify: { t: 'Apify', href: 'https://console.apify.com/billing', stops: 'المواقع تُبنى، لكن بلا صور إنستغرام وفيسبوك' },
+  google: { t: 'Google Places', href: 'https://console.cloud.google.com/billing', stops: 'كل البناء متوقف حتى تصلحه' },
+}
+/** The AI visitor's score as a tag: 8+ good, 6–7 fair, 5 and under weak. */
+const scoreTone = (n: number) => (n >= 8 ? 'ok' : n >= 6 ? 'warn' : 'err')
+const low = (l: Lead) => typeof l.build?.score === 'number' && l.build.score < 8
 type Thread = { wa: string; lead_id: string | null; unread: number; lastIn: string | null; last: { direction: string; body: string; at: string } }
 type Msg = { id: number; direction: 'in' | 'out'; kind: string; body: string; status: string | null; error: string | null; at: string }
 
@@ -52,6 +69,7 @@ type Tab = 'today' | 'leads' | 'inbox' | 'stats' | 'notes'
 
 export default function LeadStudio() {
   const [leads, setLeads] = useState<Lead[] | null>(null)
+  const [outages, setOutages] = useState<Outage[]>([])
   const [threads, setThreads] = useState<Thread[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('today')
@@ -66,7 +84,8 @@ export default function LeadStudio() {
       fetch('/api/admin/wa/threads', { cache: 'no-store' }),
     ])
     if (!a.ok) { setErr(a.status === 403 ? 'للإدارة فقط.' : `تعذّر التحميل (${a.status})`); return }
-    setLeads((await a.json()).leads ?? [])
+    const j = await a.json()
+    setLeads(j.leads ?? []); setOutages(j.outages ?? [])
     if (b.ok) setThreads((await b.json()).threads ?? [])
     setErr(null)
   }, [])
@@ -99,10 +118,18 @@ export default function LeadStudio() {
     try {
       const r = await fetch('/api/admin/leads/build', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id, rebuild }) })
       const j = await r.json().catch(() => ({}))
+      if (j.outage) {
+        // A paid service stopped: the rest of a bulk run would fail the same way.
+        if (j.outage.service !== 'apify') stopRef.current = true
+        setOutages((os) => [...os.filter((o) => o.service !== j.outage.service), j.outage])
+        say(`توقف البناء: ${j.outage.reason}`); return false
+      }
       if (!r.ok) { if (!quiet) say(j.error || 'تعذّر البناء'); return false }
       setLeads((ls) => ls?.map((x) => (x.id === l.id ? j.lead : x)) ?? null)
       setOpen((o) => (o?.id === l.id ? j.lead : o))
-      if (!quiet) say(`${j.replaced ? 'أُعيد بناؤه على نفس الرابط' : 'جاهز'} ✓ ${j.url.replace('https://', '')}`)
+      if (j.report?.outages?.length) setOutages((os) => [...os.filter((o) => !j.report.outages.some((n: Outage) => n.service === o.service)), ...j.report.outages])
+      const sc = j.report?.score
+      if (!quiet) say(`${j.replaced ? 'أُعيد بناؤه على نفس الرابط' : 'نُشر'} ✓${typeof sc === 'number' ? ` · ${sc}/10${sc < 8 && j.report.why?.[0] ? ` — ${j.report.why[0]}` : ''}` : ''}`)
       return true
     } catch { if (!quiet) say('تعذّر البناء'); return false }
     finally { setBuilding((b) => { const n = new Set(b); n.delete(l.id); return n }) }
@@ -113,7 +140,7 @@ export default function LeadStudio() {
   async function buildAll(list: Lead[], rebuild = false) {
     if (!list.length || bulk) return
     if (!confirm(rebuild
-      ? `أعد بناء ${list.length} موقعاً بالنظام الجديد على نفس روابطها؟ الموقع الجديد يحلّ محل القديم فقط إذا كان جيداً. اترك الصفحة مفتوحة.`
+      ? `أعد بناء ${list.length} موقعاً بالنظام الجديد على نفس روابطها؟ كل موقع يُنشر، ودرجته وأسبابها تظهر هنا. اترك الصفحة مفتوحة.`
       : `اعمل ${list.length} موقعاً الآن؟ كل موقع يأخذ دقيقة تقريباً، وتبني الصفحة 3 مواقع معاً. اترك الصفحة مفتوحة.`)) return
     stopRef.current = false
     const queue = [...list]; let done = 0, failed = 0
@@ -127,7 +154,7 @@ export default function LeadStudio() {
     }
     await Promise.all([worker(), worker(), worker()])
     setBulk(null)
-    say(`انتهى: ${done} موقع جاهز${failed ? ` · ${failed} لم ينجح` : ''}`)
+    say(stopRef.current && failed ? 'توقف البناء: خدمة مدفوعة متوقفة، انظر التنبيه في «اليوم»' : `انتهى: ${done} موقع منشور${failed ? ` · ${failed} لم ينجح` : ''}`)
   }
   function openChat(wa: string) { setChat(wa); setTab('inbox') }
 
@@ -175,6 +202,7 @@ export default function LeadStudio() {
                   ))}
                 </div>
                 <div className="today">
+                  {outages.length > 0 && <div className="wide"><Outages list={outages} /></div>}
                   <Task tone="ok" n={unread.length} t="ردود تنتظرك" why="العميل كتب وينتظر ردّك">
                     {unread.length === 0 && <div className="empty">لا ردود جديدة</div>}
                     {unread.map((t) => {
@@ -191,8 +219,16 @@ export default function LeadStudio() {
                     {of('nosite').slice(0, 6).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>} />)}
                     {of('nosite').length > 6 && <button className="more" onClick={() => setTab('leads')}>كل العملاء ({of('nosite').length})</button>}
                   </Task>
+                  {(leads.filter(low).length > 0) && (
+                    <Task tone="warn" n={leads.filter(low).length} t="مواقع درجتها أقل من 8" why="نُشرت كما هي. افتح العميل لترى ما ينقص موقعه">
+                      {leads.filter(low).sort((a, b) => a.build!.score! - b.build!.score!).slice(0, 8).map((l) => (
+                        <Item key={l.id} name={l.name} meta={l.build!.why[0] ?? l.build!.missing[0]} onOpen={() => setOpen(l)}
+                          btn={<span className={'tag num t-' + scoreTone(l.build!.score!)}>{l.build!.score}/10</span>} />
+                      ))}
+                    </Task>
+                  )}
                   {rebuildable.length > 0 && (
-                    <Task tone="blue" n={rebuildable.length} t="أعد بناء المواقع بالنظام الجديد" why="«أعد البناء» يبنيها بالنظام الجديد على نفس الرابط، ويبقي القديم إن لم يكن الجديد أفضل">
+                    <Task tone="blue" n={rebuildable.length} t="أعد بناء المواقع بالنظام الجديد" why="«أعد البناء» يبنيها بالنظام الجديد على نفس الرابط، ويكتب درجة كل موقع وأسبابها">
                       <button className="btn all" disabled={!!bulk} onClick={() => buildAll(rebuildable, true)}>أعد بناء كل المواقع ({rebuildable.length})</button>
                     </Task>
                   )}
@@ -218,6 +254,46 @@ function Task({ tone, n, t, why, children }: { tone: string; n: number; t: strin
     <section className={'task t-' + tone}>
       <div className="hd"><span className="ic num">{n}</span><span className="t">{t}<span className="why">{why}</span></span></div>
       <div className="items">{children}</div>
+    </section>
+  )
+}
+/** A paid service that stopped, said in plain words, with where to fix it. Shown at the top of «اليوم» (Anas picked B, 2026-11-08). */
+function Outages({ list }: { list: Outage[] }) {
+  return (
+    <div className="outs" role="alert">
+      {list.map((o) => (
+        <div key={o.service} className="out">
+          <span className="dot" aria-hidden />
+          <span className="tx"><b>{o.reason}</b>
+            <span className="st">{SERVICE[o.service].stops}</span>
+            <span className="fx">{o.fix}</span></span>
+          <a className="btn sm" href={SERVICE[o.service].href} target="_blank" rel="noreferrer">افتح {SERVICE[o.service].t}</a>
+        </div>
+      ))}
+    </div>
+  )
+}
+/** The last build of a lead: score, the visitor's reasons, what was missing, where the photos came from. */
+function BuildReport({ r }: { r: Report }) {
+  const sc = r.score
+  return (
+    <section className="rep">
+      <div className="rhd">
+        {typeof sc === 'number'
+          ? <span className={'big num t-' + scoreTone(sc)}>{sc}<small>/10</small></span>
+          : <span className="big t-mute">—</span>}
+        <span className="rt"><b>تقرير البناء</b>
+          <span className="mt">{typeof sc === 'number' ? (r.rounds.length > 1 ? `الزائر الآلي قيّمه ${r.rounds.length} مرات: ${r.rounds.join(' ← ')}` : 'تقييم الزائر الآلي') : 'هذا القالب بلا تقييم بعد'} · {when(r.at)}</span></span>
+      </div>
+      {r.why.length > 0 && <><div className="lbl">ما لم يعجب الزائر</div><ul className="why">{r.why.map((w, i) => <li key={i}>{w}</li>)}</ul></>}
+      {r.missing.length > 0 && <><div className="lbl">ما لم نجده</div><ul className="why miss">{r.missing.map((w, i) => <li key={i}>{w}</li>)}</ul></>}
+      {(r.social || r.photos) && (
+        <dl className="kv">
+          {r.photos && <><dt>الصور</dt><dd className="num">{r.photos.used} صور في الموقع · {r.photos.google} من Google</dd></>}
+          {r.social && <><dt>التواصل</dt><dd className="ltr">{[r.social.instagram && '@' + r.social.instagram, r.social.facebook?.replace(/^https?:\/\/(www\.)?/, '')].filter(Boolean).join(' · ') || <span dir="rtl">لم نجد حساباً</span>}</dd></>}
+        </dl>
+      )}
+      {r.outages.length > 0 && <div className="note">أثناء البناء: {r.outages.map((o) => o.reason).join('، ')}</div>}
     </section>
   )
 }
@@ -269,6 +345,7 @@ function Leads({ leads, onOpen, build, building, sendGift, buildAll, busy }: {
                 {st === 'nosite' && !l.site && <button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>}
                 {st === 'ready' && <button className="btn sm wa" onClick={() => sendGift(l)}>أرسل</button>}
                 {l.site && <a className="btn sm ghost" href={l.site} target="_blank" rel="noreferrer">الموقع</a>}
+                {typeof l.build?.score === 'number' && <span className={'tag num t-' + scoreTone(l.build.score)} title="درجة الزائر الآلي">{l.build.score}/10</span>}
                 <span className={'tag t-' + s.tone}>{s.t}</span>
               </span>
             </div>
@@ -300,6 +377,7 @@ function Sheet({ lead: l, onClose, patch, sendGift, openChat, build, building }:
           {l.maps && <><dt>الخريطة</dt><dd><a href={l.maps} target="_blank" rel="noreferrer">افتح في Google</a></dd></>}
           {l.social && <><dt>تواصل</dt><dd><a href={l.social} target="_blank" rel="noreferrer" className="ltr">{l.social.replace(/^https?:\/\/(www\.)?/, '').slice(0, 40)}</a></dd></>}
         </dl>
+        {l.build && <BuildReport r={l.build} />}
         <label className="fld">رابط الموقع الذي صنعناه
           <div className="row"><input className="ltr" value={site} placeholder="https://….beynoun.com" onChange={(e) => setSite(e.target.value)} />
             <button className="btn sm" onClick={() => patch(l.id, { site })} disabled={site === (l.site ?? '')}>احفظ</button></div>
@@ -528,6 +606,24 @@ const CSS = `
 .ls .row{display:flex;gap:6px;align-items:center}
 .ls .row.wrap{flex-wrap:wrap}
 .ls .lbl{font-size:12.5px;color:var(--muted)}
+.ls .outs{display:grid;gap:6px;margin-bottom:12px}
+.ls .out{display:flex;align-items:center;gap:10px;background:var(--err-bg);border:1px solid var(--err);border-radius:12px;padding:10px 12px}
+.ls .out .dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex:none}
+.ls .out .tx{flex:1;min-width:0;display:grid;gap:1px}
+.ls .out b{color:var(--err);font-size:14px}
+.ls .out .st{font-size:12.5px;font-weight:600}
+.ls .out .fx{font-size:12px;color:var(--muted)}
+.ls .today .wide{grid-column:1/-1}
+.ls .today .wide .outs{margin:0}
+@media (max-width:640px){.ls .out{display:grid;grid-template-columns:8px minmax(0,1fr);align-items:start;gap:4px 10px}.ls .out .dot{margin-top:8px}.ls .out .btn{grid-column:1/-1;width:100%;margin-top:6px}}
+.ls .rep{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:var(--sunk)}
+.ls .rhd{display:flex;align-items:center;gap:10px}
+.ls .rhd .big{min-width:62px;height:50px;border-radius:11px;display:flex;align-items:baseline;justify-content:center;padding-top:9px;direction:ltr;flex:none;font-size:24px;font-weight:700;background:var(--c-bg);color:var(--c)}
+.ls .rhd .big small{font-size:12px;font-weight:600;opacity:.8}
+.ls .rhd .rt{display:grid;min-width:0}
+.ls .rhd .mt{font-size:12px;color:var(--muted)}
+.ls .why{margin:0;padding-inline-start:18px;display:grid;gap:3px;font-size:13px}
+.ls .why.miss{color:var(--muted)}
 .ls .toast{position:fixed;inset-inline:16px;bottom:96px;margin:0 auto;max-width:320px;background:var(--ink);color:var(--surface);padding:8px 12px;border-radius:10px;text-align:center;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
 .ls .toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){.ls .toast{transition:none}}

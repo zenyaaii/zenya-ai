@@ -6,12 +6,16 @@ export const dynamic = 'force-dynamic'
 
 const STATUSES = ['new', 'sent', 'replied', 'client', 'later', 'noans', 'no']
 
-/** GET: every lead. Admin only. */
+/** GET: every lead, plus the paid services that are down right now. Admin only. */
 export async function GET() {
   const deny = await requireAdmin(); if (deny) return deny
-  const { data, error } = await serviceClient().from('leads').select('*').order('created_at').order('id')
+  const db = serviceClient()
+  const [{ data, error }, alerts] = await Promise.all([
+    db.from('leads').select('*').order('created_at').order('id'),
+    db.from('service_alerts').select('service, reason, fix, at').eq('status', 'down'),
+  ])
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ leads: data })
+  return NextResponse.json({ leads: data, outages: alerts.data ?? [] })
 }
 
 /** PATCH { id, status?, site?, notes? }. Admin only. */

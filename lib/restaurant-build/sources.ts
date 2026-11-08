@@ -12,6 +12,8 @@
  * slow source never sinks the build.
  */
 
+import { apifyOutage, googleOutage, missingKey, noteDown, noteUp, OutageError } from '@/lib/service-health'
+
 export type RawPhoto = {
   id: string                 // g0…g9, i0…, f0…
   src: 'google' | 'instagram' | 'facebook'
@@ -61,13 +63,18 @@ const ATTR: [string, string][] = [
 
 export async function placeOf(placeId: string): Promise<Place> {
   const key = placesKey()
-  if (!key) throw new Error('GOOGLE_PLACES_API_KEY missing')
+  if (!key) { const o = missingKey('google'); await noteDown(o); throw new OutageError(o) }
   const mask = ['reviews', 'regularOpeningHours', 'primaryTypeDisplayName', 'editorialSummary', 'photos', ...ATTR.map(([k]) => k)].join(',')
   const r = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=ar`, {
     headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': mask }, cache: 'no-store',
   })
   const d: any = await r.json().catch(() => ({}))
-  if (!r.ok) throw new Error(d?.error?.message || `Google ${r.status}`)
+  if (!r.ok) {
+    const o = googleOutage(r.status, String(d?.error?.message || d?.error?.status || ''))
+    if (o) { await noteDown(o); throw new OutageError(o) }
+    throw new Error(d?.error?.message || `Google ${r.status}`)
+  }
+  void noteUp('google')
   return {
     type: d.primaryTypeDisplayName?.text,
     summary: d.editorialSummary?.text,
@@ -104,11 +111,17 @@ export async function googlePhotos(place: Place): Promise<RawPhoto[]> {
 // ── social (Apify) ────────────────────────────────────────────────────────
 export async function apify(actor: string, input: unknown, ms: number): Promise<any[]> {
   const token = apifyToken()
-  if (!token) return []
+  if (!token) { await noteDown(missingKey('apify')); return [] }
   const run = fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?timeout=${Math.floor(ms / 1000)}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(input), cache: 'no-store',
-  }).then((r) => (r.ok ? r.json() : [])).then((x) => (Array.isArray(x) ? x : []))
+  }).then(async (r) => {
+    if (r.ok) { void noteUp('apify'); return r.json() }
+    // No credit or a bad token: say so on the dashboard. The build goes on without social data.
+    const o = apifyOutage(r.status, await r.text().catch(() => ''))
+    if (o) await noteDown(o)
+    return []
+  }).then((x) => (Array.isArray(x) ? x : []))
   return timed(run, ms + 5000, [])
 }
 
