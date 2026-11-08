@@ -51,14 +51,14 @@ export type BuildFile = {
   published: boolean
 }
 
-const openai = () => {
+const aiClient = () => {
   const apiKey = aiKey()
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY missing')
   return new AiClient({ apiKey })
 }
 
 async function vision(prompt: string, images: Buffer[], op: string, maxTokens = 3000): Promise<any> {
-  const res = await openai().chat.completions.create({
+  const res = await aiClient().chat.completions.create({
     model: AI_MODEL, temperature: 0.2, max_tokens: maxTokens, response_format: { type: 'json_object' },
     messages: [{ role: 'user', content: [
       { type: 'text', text: prompt },
@@ -100,7 +100,7 @@ export async function prepare(placeId: string, socialLink: string | null): Promi
   // 4a — the menu, read from the place's own menu photo.
   let menu: Category[] = []
   if (picks.menus.length) {
-    const client = openai()
+    const client = aiClient()
     const reads = await Promise.all(picks.menus.slice(0, 3).map((m) =>
       analyzeOne(client, `data:image/jpeg;base64,${m.jpeg.toString('base64')}`, undefined, null)))
     menu = mergeResults(reads.map((r) => r.categories))

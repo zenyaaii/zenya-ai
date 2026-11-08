@@ -21,7 +21,7 @@ function admin() {
   )
 }
 
-export type OpenAiUsage = {
+export type AiUsage = {
   prompt_tokens?: number
   completion_tokens?: number
   total_tokens?: number
@@ -40,7 +40,7 @@ export type AiUsageCtx = {
  * Record one AI call's token usage. Best-effort + non-throwing.
  * Pass the `usage` object straight off the completion (`completion.usage`).
  */
-export async function logAiUsage(ctx: AiUsageCtx, usage: OpenAiUsage): Promise<void> {
+export async function logAiUsage(ctx: AiUsageCtx, usage: AiUsage): Promise<void> {
   try {
     const prompt = usage?.prompt_tokens ?? 0
     const completion = usage?.completion_tokens ?? 0

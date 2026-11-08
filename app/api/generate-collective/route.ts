@@ -296,10 +296,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ content: mergeIntoContent(input, {}) })
     }
 
-    const openai = new AiClient({ apiKey })
+    const aiClient = new AiClient({ apiKey })
 
     const completion = await withTimeout(
-      openai.chat.completions.create({
+      aiClient.chat.completions.create({
         model: AI_MODEL,
         temperature: 0.78,
         max_tokens: AI_MAX_TOKENS,

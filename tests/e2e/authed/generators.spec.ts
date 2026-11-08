@@ -12,7 +12,7 @@ for (const endpoint of GENERATOR_ENDPOINTS) {
   })
 }
 
-// One real end-to-end generation, exercising the OpenAI path + merge logic.
+// One real end-to-end generation, exercising the AI path + merge logic.
 // Tagged @slow because it makes a live model call (~cents, up to ~45s).
 test('generator produces a complete, well-formed theme @slow', async ({ request }) => {
   test.setTimeout(90_000)

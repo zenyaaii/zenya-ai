@@ -16,9 +16,9 @@ import { logAiUsage, getUserIdSafe } from '@/lib/ai-usage';
  * the build succeeds and only this endpoint errors, which is the correct blast
  * radius.
  */
-let openaiClient: AiClient | null = null;
+let cachedClient: AiClient | null = null;
 function getAi(): AiClient {
-  return (openaiClient ??= new AiClient({ apiKey: aiKey() }));
+  return (cachedClient ??= new AiClient({ apiKey: aiKey() }));
 }
 
 export async function POST(req: Request) {

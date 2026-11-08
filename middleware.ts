@@ -108,7 +108,7 @@ function getZenyaCoSlug(host: string): string | null {
 }
 
 // ── Rate limiting ──────────────────────────────────────────────────────────
-// Expensive endpoints that call paid APIs (OpenAI / ScraperAPI). Without a
+// Expensive endpoints that call paid APIs (Anthropic / ScraperAPI). Without a
 // throttle, anyone can loop these and run up the bill. Enforced here at the
 // edge, before the route runs, keyed by client IP.
 const RATE_LIMITED_PREFIXES = [

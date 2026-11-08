@@ -50,12 +50,12 @@ const SUBPROCESSORS = [
     url: 'https://stripe.com/privacy',
   },
   {
-    name: 'OpenAI',
-    role: 'Generating template content via large language models',
-    data: 'The business description you submit (sent without any account identifiers attached)',
+    name: 'Anthropic (Claude)',
+    role: 'Generating site content and reading menu photos via large language models',
+    data: 'The business description you submit and any photos you upload for analysis (sent without any account identifiers attached)',
     location: 'United States',
-    safeguard: 'API data is not used for training (per the OpenAI API terms) plus standard contractual clauses',
-    url: 'https://openai.com/policies/privacy-policy',
+    safeguard: 'API data is not used for training (per the Anthropic commercial terms) plus standard contractual clauses',
+    url: 'https://www.anthropic.com/legal/privacy',
   },
   {
     name: 'ScraperAPI',
