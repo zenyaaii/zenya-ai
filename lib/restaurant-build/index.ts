@@ -6,6 +6,7 @@ import { serviceClient } from '@/lib/handover'
 import { analyzeOne, mergeResults, parseJsonSafe, type Category } from '@/lib/menu-ocr'
 import type { RestaurantColors, RestaurantContent } from '@/utils/restaurant/types'
 import { placeOf, googlePhotos, instagramOf, facebookOf, type Place, type Social } from './sources'
+import { findSocial, type Who, type Found } from './find-social'
 import { cleanPhotos, contactSheet, applyVerdicts, choose, JUDGE_PROMPT, type Judged, type Picks } from './photos'
 import { measure, snap, paletteOf } from './palette'
 
@@ -37,12 +38,14 @@ export type Prepared = {
   mood: 'dark' | 'light'
   menu: Category[]                   // read from a menu photo; [] when none
   file: BuildFile
+  /** Accounts the search found for a lead that had no link (to save on the lead). */
+  found: Found
 }
 
 export type BuildFile = {
   v: 1
   at: string
-  sources: { google: { photos: number; reviews: number }; instagram?: string; facebook?: string }
+  sources: { google: { photos: number; reviews: number }; instagram?: string; facebook?: string; found_by_search?: string }
   photos: { id: string; src: string; kind: string; quality: number; appetite: number; dish?: string; alt?: string; used?: string; rejected?: string; author?: string }[]
   colors: { identity: string[]; mood: 'dark' | 'light'; from: number[] }
   menu: { from: 'photo' | 'reviews'; items: number }
@@ -77,14 +80,24 @@ async function upload(placeId: string, j: Judged): Promise<string | null> {
   return sb.getPublicUrl(path).data.publicUrl
 }
 
-export async function prepare(placeId: string, socialLink: string | null): Promise<Prepared> {
+export async function prepare(placeId: string, socialLink: string | null, who?: Who): Promise<Prepared> {
   // 1 — collect, in parallel; social never blocks Google.
-  const place = await placeOf(placeId)
   const link = socialLink || ''
-  const [gPhotos, ig, fb] = await Promise.all([
-    googlePhotos(place),
-    /instagram\.com/i.test(link) ? instagramOf(link) : Promise.resolve({ photos: [] as any[] }),
-    /facebook\.com|fb\.com/i.test(link) ? facebookOf(link) : Promise.resolve({ photos: [] as any[] }),
+  let igLink = /instagram\.com/i.test(link) ? link : ''
+  let fbLink = /facebook\.com|fb\.com/i.test(link) ? link : ''
+  // 1b — no saved account for a network: search for the place's own (find-social.ts).
+  // The search takes the longest (~1 min): Google's details and photos load meanwhile.
+  const placeP = placeOf(placeId)
+  const [place, gPhotos, found] = await Promise.all([
+    placeP,
+    placeP.then(googlePhotos),
+    who && (!igLink || !fbLink) ? findSocial(who) : Promise.resolve({} as Found),
+  ])
+  if (!igLink && found.instagram) igLink = `https://www.instagram.com/${found.instagram}/`
+  if (!fbLink && found.facebook) fbLink = found.facebook
+  const [ig, fb] = await Promise.all([
+    igLink ? instagramOf(igLink) : Promise.resolve({ photos: [] as any[] }),
+    fbLink ? facebookOf(fbLink) : Promise.resolve({ photos: [] as any[] }),
   ])
   const social: Social = { instagram: (ig as any).data, facebook: (fb as any).data }
 
@@ -138,13 +151,13 @@ export async function prepare(placeId: string, socialLink: string | null): Promi
   const roleOf = (id: string) => [picks.hero?.id === id && 'hero', picks.story?.id === id && 'story', picks.dishes.some((d) => d.id === id) && 'dish', picks.gallery.some((d) => d.id === id) && 'gallery', picks.wall.some((d) => d.id === id) && 'wall'].filter(Boolean).join('+') || undefined
   const file: BuildFile = {
     v: 1, at: new Date().toISOString(),
-    sources: { google: { photos: gPhotos.length, reviews: place.reviews.length }, instagram: social.instagram?.handle, facebook: social.facebook?.url },
+    sources: { google: { photos: gPhotos.length, reviews: place.reviews.length }, instagram: social.instagram?.handle, facebook: social.facebook?.url, found_by_search: found.why },
     photos: judged.map((j) => ({ id: j.id, src: j.src, kind: j.v.kind, quality: j.v.quality, appetite: j.v.appetite, dish: j.v.dish || undefined, alt: j.v.alt || undefined, used: roleOf(j.id), rejected: j.why, author: j.author })),
     colors: { identity: identity.map((c) => '#' + c.map((x) => Math.round(x).toString(16).padStart(2, '0')).join('')), mood, from },
     menu: { from: menu.length ? 'photo' : 'reviews', items: menu.reduce((n, c) => n + c.items.length, 0) },
     missing, visitor: [], published: false,
   }
-  return { place, social, picks, judged, urls, colors, mood, menu, file }
+  return { place, social, picks, judged, urls, colors, mood, menu, file, found }
 }
 
 /** The extra facts block for the copy prompt: what the place says about itself. */

@@ -75,6 +75,8 @@ export default function LeadStudio() {
   const byId = useMemo(() => new Map((leads ?? []).map((l) => [l.id, l])), [leads])
   const byWa = useMemo(() => new Map((leads ?? []).map((l) => [l.wa ?? '', l])), [leads])
   const of = (s: Stage) => (leads ?? []).filter((l) => stageOf(l) === s)
+  // Sites to rebuild with the newest build system: every lead site except a customer's own.
+  const rebuildable = (leads ?? []).filter((l) => l.site && l.status !== 'client')
   const unread = threads.filter((t) => t.unread > 0)
 
   async function patch(id: string, body: Partial<Lead>) {
@@ -92,15 +94,15 @@ export default function LeadStudio() {
     say('أُرسلت ✓'); load()
   }
   const [building, setBuilding] = useState<Set<string>>(new Set())
-  async function build(l: Lead, quiet = false): Promise<boolean> {
-    setBuilding((b) => new Set(b).add(l.id)); if (!quiet) say(`أعمل موقع «${l.name}»… (دقيقة تقريباً)`)
+  async function build(l: Lead, quiet = false, rebuild = false): Promise<boolean> {
+    setBuilding((b) => new Set(b).add(l.id)); if (!quiet) say(`${rebuild ? 'أعيد بناء' : 'أعمل'} موقع «${l.name}»… (دقيقتان تقريباً)`)
     try {
-      const r = await fetch('/api/admin/leads/build', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id }) })
+      const r = await fetch('/api/admin/leads/build', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: l.id, rebuild }) })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) { if (!quiet) say(j.error || 'تعذّر البناء'); return false }
       setLeads((ls) => ls?.map((x) => (x.id === l.id ? j.lead : x)) ?? null)
       setOpen((o) => (o?.id === l.id ? j.lead : o))
-      if (!quiet) say(`جاهز ✓ ${j.url.replace('https://', '')}`)
+      if (!quiet) say(`${j.replaced ? 'أُعيد بناؤه على نفس الرابط' : 'جاهز'} ✓ ${j.url.replace('https://', '')}`)
       return true
     } catch { if (!quiet) say('تعذّر البناء'); return false }
     finally { setBuilding((b) => { const n = new Set(b); n.delete(l.id); return n }) }
@@ -108,15 +110,17 @@ export default function LeadStudio() {
   // «اعمل الكل»: every lead without a site, three at a time, until done or stopped.
   const [bulk, setBulk] = useState<{ done: number; failed: number; total: number } | null>(null)
   const stopRef = useRef(false)
-  async function buildAll(list: Lead[]) {
+  async function buildAll(list: Lead[], rebuild = false) {
     if (!list.length || bulk) return
-    if (!confirm(`اعمل ${list.length} موقعاً الآن؟ كل موقع يأخذ دقيقة تقريباً، وتبني الصفحة 3 مواقع معاً. اترك الصفحة مفتوحة.`)) return
+    if (!confirm(rebuild
+      ? `أعد بناء ${list.length} موقعاً بالنظام الجديد على نفس روابطها؟ الموقع الجديد يحلّ محل القديم فقط إذا كان جيداً. اترك الصفحة مفتوحة.`
+      : `اعمل ${list.length} موقعاً الآن؟ كل موقع يأخذ دقيقة تقريباً، وتبني الصفحة 3 مواقع معاً. اترك الصفحة مفتوحة.`)) return
     stopRef.current = false
     const queue = [...list]; let done = 0, failed = 0
     setBulk({ done, failed, total: list.length })
     const worker = async () => {
       while (queue.length && !stopRef.current) {
-        const ok = await build(queue.shift()!, true)
+        const ok = await build(queue.shift()!, true, rebuild)
         ok ? done++ : failed++
         setBulk({ done, failed, total: list.length })
       }
@@ -187,6 +191,11 @@ export default function LeadStudio() {
                     {of('nosite').slice(0, 6).map((l) => <Item key={l.id} name={l.name} meta={place(l)} onOpen={() => setOpen(l)} btn={<button className="btn sm" disabled={building.has(l.id)} onClick={() => build(l)}>{building.has(l.id) ? 'يُبنى…' : 'اعمل الموقع'}</button>} />)}
                     {of('nosite').length > 6 && <button className="more" onClick={() => setTab('leads')}>كل العملاء ({of('nosite').length})</button>}
                   </Task>
+                  {rebuildable.length > 0 && (
+                    <Task tone="blue" n={rebuildable.length} t="أعد بناء المواقع بالنظام الجديد" why="«أعد البناء» يبنيها بالنظام الجديد على نفس الرابط، ويبقي القديم إن لم يكن الجديد أفضل">
+                      <button className="btn all" disabled={!!bulk} onClick={() => buildAll(rebuildable, true)}>أعد بناء كل المواقع ({rebuildable.length})</button>
+                    </Task>
+                  )}
                 </div>
               </>
             )}
@@ -273,7 +282,7 @@ function Leads({ leads, onOpen, build, building, sendGift, buildAll, busy }: {
 
 function Sheet({ lead: l, onClose, patch, sendGift, openChat, build, building }: {
   lead: Lead; onClose: () => void; patch: (id: string, b: Partial<Lead>) => void
-  sendGift: (l: Lead) => void; openChat: (wa: string) => void; build: (l: Lead) => void; building: boolean
+  sendGift: (l: Lead) => void; openChat: (wa: string) => void; build: (l: Lead, quiet?: boolean, rebuild?: boolean) => void; building: boolean
 }) {
   const [site, setSite] = useState(l.site ?? '')
   const [notes, setNotes] = useState(l.notes ?? '')
@@ -297,6 +306,7 @@ function Sheet({ lead: l, onClose, patch, sendGift, openChat, build, building }:
         </label>
         <div className="row">
           {!l.site && <button className="btn" disabled={building} onClick={() => build(l)}>{building ? 'يُبنى… (دقيقة تقريباً)' : 'اعمل الموقع'}</button>}
+          {l.site && l.status !== 'client' && <button className="btn" disabled={building} onClick={() => build(l, false, true)}>{building ? 'يُعاد بناؤه…' : 'أعد البناء'}</button>}
           {l.site && (s === 'ready' || s === 'nosite') && <button className="btn wa" onClick={() => sendGift(l)}>أرسل رسالتك + الرابط</button>}
           {l.wa && <button className="btn" onClick={() => openChat(l.wa!)}>المحادثة</button>}
           {l.site && <a className="btn ghost" href={l.site} target="_blank" rel="noreferrer">الموقع</a>}

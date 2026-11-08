@@ -13,14 +13,14 @@ const STEP_AR: Record<string, string> = { google: 'جلب بيانات Google', 
 /** «اعمل الموقع»: builds and publishes one lead's site under the admin's account. */
 export async function POST(req: NextRequest) {
   const denied = await requireAdmin(); if (denied) return denied
-  const { id } = await req.json().catch(() => ({} as any))
+  const { id, rebuild } = await req.json().catch(() => ({} as any))
   if (!id) return NextResponse.json({ error: 'id مطلوب' }, { status: 400 })
   const { data: { user } } = await createClient().auth.getUser()
   const { data: lead } = await serviceClient().from('leads').select('*').eq('id', id).maybeSingle()
   if (!lead) return NextResponse.json({ error: 'العميل غير موجود' }, { status: 404 })
-  if (lead.site) return NextResponse.json({ error: 'له موقع بالفعل', site: lead.site }, { status: 409 })
+  if (lead.site && !rebuild) return NextResponse.json({ error: 'له موقع بالفعل', site: lead.site }, { status: 409 })
   try {
-    const out = await buildLeadSite(lead, user!.id)
+    const out = await buildLeadSite(lead, user!.id, { rebuild: !!rebuild && !!lead.site })
     const { data: fresh } = await serviceClient().from('leads').select('*').eq('id', id).single()
     return NextResponse.json({ ...out, lead: fresh })
   } catch (e: any) {

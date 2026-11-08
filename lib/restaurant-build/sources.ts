@@ -102,7 +102,7 @@ export async function googlePhotos(place: Place): Promise<RawPhoto[]> {
 }
 
 // ── social (Apify) ────────────────────────────────────────────────────────
-async function apify(actor: string, input: unknown, ms: number): Promise<any[]> {
+export async function apify(actor: string, input: unknown, ms: number): Promise<any[]> {
   const token = apifyToken()
   if (!token) return []
   const run = fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?timeout=${Math.floor(ms / 1000)}`, {
