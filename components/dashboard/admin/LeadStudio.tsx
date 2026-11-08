@@ -493,7 +493,7 @@ const I = {
   stats: <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" />,
 }
 
-const CSS = `
+export const CSS = `
 .ls{--ink:var(--foreground);--line:var(--border);--sunk:var(--background);--acc:#E2532A;--wa:var(--success);--wa-bg:var(--success-fill);
   --blue:#2c63a8;--blue-bg:rgba(44,99,168,.10);--warn:var(--warning);--warn-bg:var(--warning-fill);--err:var(--error);--err-bg:var(--error-fill);
   display:grid;grid-template-columns:minmax(0,1fr);max-width:1180px;margin:0 auto;padding:14px 16px 110px;color:var(--ink);font-size:14px;line-height:1.55}
