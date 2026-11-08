@@ -131,8 +131,13 @@ export function choose(js: Judged[], aiHero: number): Picks {
   const scene = good.filter((j) => ['food', 'drink', 'interior', 'exterior'].includes(j.v.kind))
   const byScore = (a: Judged, b: Judged) => score(b) - score(a)
   const aiPick = good.find((j) => j.v.n === aiHero && wide(j) && j.v.kind !== 'logo' && j.v.kind !== 'menu')
+  // A wide, professional photo is best. Without one, the place's own best
+  // photo still beats a stock picture: a stranger's luxury dining room over a
+  // shawarma shop tells the visitor a lie (the AI visitor scored that 5/10).
+  // The hero is cropped to fit, so a sharp, appetising square photo works too.
   const hero = aiPick && score(aiPick) >= 6.5 ? aiPick
     : [...scene].filter(wide).sort(byScore).find((j) => score(j) >= 6.5)
+    ?? [...scene].filter((j) => j.v.quality >= 6).sort(byScore).find((j) => score(j) >= 6.5)
   const used = new Set<string>(hero ? [hero.id] : [])
   const dishes = scene.filter((j) => (j.v.kind === 'food' || j.v.kind === 'drink') && j.v.dish && j.v.appetite >= 6 && !used.has(j.id))
     .sort((a, b) => b.v.appetite - a.v.appetite)
@@ -142,8 +147,15 @@ export function choose(js: Judged[], aiHero: number): Picks {
   const story = scene.filter((j) => (j.v.kind === 'interior' || j.v.kind === 'exterior') && !used.has(j.id)).sort(byScore)[0]
   if (story) used.add(story.id)
   const room = (j: Judged) => (j.v.kind === 'interior' || j.v.kind === 'exterior' ? 1 : 0)
-  const gallery = scene.filter((j) => !used.has(j.id) && score(j) >= 5.5)
+  let gallery = scene.filter((j) => !used.has(j.id) && score(j) >= 5.5)
     .sort((a, b) => room(b) - room(a) || byScore(a, b)).slice(0, 7)
+  // Under three, the template tops the gallery up with stock rooms that are
+  // not this place. Fill it from the place's own photos first, the dish
+  // photos included: showing a real dish twice is better than a fake room.
+  if (gallery.length < 3) {
+    const more = scene.filter((j) => j.id !== hero?.id && !gallery.includes(j) && score(j) >= 4.5).sort(byScore)
+    gallery = [...gallery, ...more].slice(0, Math.max(3, gallery.length))
+  }
   // The wall sits on the home page under the dishes: their photos go last.
   const isDish = (j: Judged) => dishes.some((d) => d.id === j.id)
   const wall = scene.filter((j) => j.id !== hero?.id).sort((a, b) => Number(isDish(a)) - Number(isDish(b)) || byScore(a, b)).slice(0, 12)

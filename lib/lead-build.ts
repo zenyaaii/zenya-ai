@@ -11,6 +11,7 @@ import * as Wellness from '@/lib/generators/wellness'
 import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, type Prepared } from '@/lib/restaurant-build'
+import { COMPANY } from '@/lib/company'
 
 /**
  * «اعمل الموقع» for one lead, server side: Google facts → the owner's side of
@@ -308,7 +309,7 @@ export async function buildLeadSite(lead: Lead, ownerId: string): Promise<{ url:
   if (error || !data) throw new BuildError('publish', error?.message || 'insert failed')
   if (!publish) {
     const last = prep?.file.visitor[prep.file.visitor.length - 1]
-    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: /preview/restaurant/${data.id}`)
+    throw new BuildError('review', `الزائر الآلي أعطاه ${last?.score ?? '؟'}/10 فلم يُنشر: ${(last?.notes ?? []).join('، ').slice(0, 220)} · المعاينة: ${COMPANY.APP_URL}/preview/restaurant/${data.id}`)
   }
   await serviceClient().from('leads').update({ site: url, updated_at: new Date().toISOString() }).eq('id', lead.id)
   return { url, themeId: data.id }
