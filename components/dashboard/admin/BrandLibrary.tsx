@@ -23,17 +23,26 @@ const day = (iso: string) => new Date(iso).toLocaleDateString('ar', { day: 'nume
 const size = (n?: number) => !n ? '' : n > 1e6 ? `${(n / 1e6).toFixed(1)} م.ب` : `${Math.max(1, Math.round(n / 1e3))} ك.ب`
 const ext = (n: string) => (n.split('.').pop() || '').toUpperCase()
 
-export default function BrandLibrary({ initial, layout = 'shelf' }: { initial?: BrandItem[]; layout?: 'shelf' | 'timeline' }) {
+const WHO = ['أنس', 'ياسين']
+const api = (body: unknown) => fetch('/api/admin/brand', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  .then(async (r) => ({ ok: r.ok, j: await r.json().catch(() => ({})) }))
+
+export default function BrandLibrary({ initial, layout = 'timeline', say }: { initial?: BrandItem[]; layout?: 'shelf' | 'timeline'; say?: (m: string) => void }) {
   const [items, setItems] = useState<BrandItem[] | null>(initial ?? null)
   const [err, setErr] = useState<string | null>(null)
   const [cat, setCat] = useState('all')
-  useEffect(() => {
-    if (initial) return
-    fetch('/api/admin/brand', { cache: 'no-store' }).then(async (r) => {
-      const j = await r.json().catch(() => ({}))
-      if (!r.ok) setErr(j.error || 'تعذّر التحميل'); else setItems(j.items)
-    })
-  }, [initial])
+  const [adding, setAdding] = useState(false)
+  const load = () => fetch('/api/admin/brand', { cache: 'no-store' }).then(async (r) => {
+    const j = await r.json().catch(() => ({}))
+    if (!r.ok) setErr(j.error || 'تعذّر التحميل'); else { setItems(j.items); setErr(null) }
+  })
+  useEffect(() => { if (!initial) load() }, [initial]) // eslint-disable-line react-hooks/exhaustive-deps
+  async function remove(i: BrandItem) {
+    if (!confirm(`حذف «${i.title}» وملفاته؟`)) return
+    const r = await fetch('/api/admin/brand?id=' + encodeURIComponent(i.id), { method: 'DELETE' })
+    if (!r.ok) return say?.('تعذّر الحذف')
+    setItems((x) => (x ?? []).filter((y) => y.id !== i.id))
+  }
   const shown = useMemo(() => (items ?? []).filter((i) => cat === 'all' || i.category === cat)
     .sort((a, b) => b.approved_at.localeCompare(a.approved_at)), [items, cat])
 
@@ -48,7 +57,7 @@ export default function BrandLibrary({ initial, layout = 'shelf' }: { initial?: 
       <div className="bd">
         <div className="hd"><b>{i.title}</b><span className="ok">موافَق عليه</span></div>
         {i.note && <p className="nt2">{i.note}</p>}
-        <p className="mt">{day(i.approved_at)}{i.approved_by ? ` · ${i.approved_by}` : ''}</p>
+        <p className="mt">{day(i.approved_at)}{i.approved_by ? ` · ${i.approved_by}` : ''}{!initial && <button className="del" onClick={() => remove(i)}>حذف</button>}</p>
         <div className="files">
           {i.files.map((f) => (
             <a key={f.url} className="file" href={f.url} download={f.name}>
@@ -64,7 +73,9 @@ export default function BrandLibrary({ initial, layout = 'shelf' }: { initial?: 
   return (
     <div className={`bl ${layout}`}>
       <style dangerouslySetInnerHTML={{ __html: BL_CSS }} />
-      <p className="lead">كل تصميم وافقتم عليه يُحفظ هنا مع ملفاته. اضغط على الملف لتنزيله مباشرة.</p>
+      <div className="bar2"><p className="lead">كل تصميم وافقتم عليه يُحفظ هنا مع ملفاته. اضغط على الملف لتنزيله مباشرة.</p>
+        {!initial && <button className="btn sm" onClick={() => setAdding((a) => !a)} aria-expanded={adding}>{adding ? 'إغلاق' : '+ أضف'}</button>}</div>
+      {adding && <AddForm onDone={() => { setAdding(false); load() }} say={say} />}
       <div className="chips" role="group" aria-label="القسم">
         <button className="btn sm" aria-pressed={cat === 'all'} onClick={() => setCat('all')}>الكل <span className="num">{items.length}</span></button>
         {CATS.filter(([c]) => count(c)).map(([c, t]) => (
@@ -88,7 +99,51 @@ export default function BrandLibrary({ initial, layout = 'shelf' }: { initial?: 
   )
 }
 
+function AddForm({ onDone, say }: { onDone: () => void; say?: (m: string) => void }) {
+  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState(CATS[0][0])
+  const [note, setNote] = useState('')
+  const [who, setWho] = useState(WHO[0])
+  const [files, setFiles] = useState<File[]>([])
+  const [busy, setBusy] = useState<string | null>(null)
+  async function save() {
+    if (!title.trim() || !files.length) return say?.('اكتب عنوانًا واختر ملفًا')
+    setBusy('أجهّز الرفع…')
+    const sign = await api({ action: 'sign', files: files.map((f) => ({ name: f.name })) })
+    if (!sign.ok) { setBusy(null); return say?.(sign.j.error || 'تعذّر الرفع') }
+    const done: { name: string; path: string; size: number; type: string }[] = []
+    for (let k = 0; k < files.length; k++) {
+      const f = files[k], u = sign.j.uploads[k]
+      setBusy(`أرفع ${k + 1} من ${files.length}…`)
+      const r = await fetch(u.signedUrl, { method: 'PUT', headers: { 'Content-Type': f.type || 'application/octet-stream', 'x-upsert': 'false' }, body: f })
+      if (!r.ok) { setBusy(null); return say?.(`تعذّر رفع ${f.name}`) }
+      done.push({ name: f.name, path: u.path, size: f.size, type: f.type })
+    }
+    const c = await api({ action: 'create', title, category, note, approved_by: who, files: done })
+    setBusy(null)
+    if (!c.ok) return say?.(c.j.error || 'تعذّر الحفظ')
+    say?.('أُضيف إلى الهوية'); onDone()
+  }
+  return (
+    <div className="add">
+      <input placeholder="العنوان، مثل: لون الشتاء" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <div className="row">
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>{CATS.map(([c, t]) => <option key={c} value={c}>{t}</option>)}</select>
+        <select value={who} onChange={(e) => setWho(e.target.value)}>{WHO.map((w) => <option key={w}>{w}</option>)}</select>
+      </div>
+      <textarea rows={2} placeholder="ملاحظة قصيرة (اختياري)" value={note} onChange={(e) => setNote(e.target.value)} />
+      <input type="file" multiple onChange={(e) => setFiles([...(e.target.files ?? [])])} />
+      <button className="btn" disabled={!!busy} onClick={save}>{busy ?? 'احفظ في الهوية'}</button>
+    </div>
+  )
+}
+
 const BL_CSS = `
+.bl .bar2{display:flex;align-items:center;gap:10px}.bl .bar2 .lead{flex:1}
+.bl .add{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+.bl .add .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bl .add input,.bl .add select,.bl .add textarea{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:var(--sunk);color:inherit;min-width:0;width:100%}
+.bl .del{border:0;background:none;color:var(--muted);font-size:11.5px;margin-inline-start:10px;padding:0;text-decoration:underline}
 .bl{display:grid;gap:14px}
 .bl .lead{margin:0;color:var(--muted);font-size:13px}
 .bl .chips{display:flex;flex-wrap:wrap;gap:6px}
