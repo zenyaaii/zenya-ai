@@ -1,5 +1,6 @@
 "use client"
 
+import KindPicker from '@/components/zenya/build/KindPicker'
 import { useEffect, useState } from 'react'
 import { ratingOf } from '@/lib/rating'
 import { generateErrorText } from '@/lib/generate-error'
@@ -156,7 +157,37 @@ const TREATMENT_CATEGORIES = ['تدليك', 'عناية بالوجه', 'يوغا
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
+/**
+ * /theme/new/wellness opens with «مشروعك أيّ واحد؟». A gym or a beauty
+ * centre is built by the services template's kind pages (people by name,
+ * plans with terms, booking), so those picks go there; a spa stays here.
+ */
 export default function WellnessWizardPage() {
+  const router = useRouter()
+  const [kind, setKind] = useState<string | null | undefined>(undefined)
+  useEffect(() => {
+    const k = new URLSearchParams(window.location.search).get('kind')
+    if (k === 'gym' || k === 'beauty') { router.replace('/theme/new/services?kind=' + k); return }
+    setKind(k)
+  }, [router])
+  const choose = (id: string) => {
+    if (id === 'gym' || id === 'beauty') { router.push('/theme/new/services?kind=' + id); return }
+    const u = new URL(window.location.href)
+    u.searchParams.set('kind', id)
+    window.history.replaceState(null, '', u.toString())
+    setKind(id)
+    window.scrollTo({ top: 0 })
+  }
+  if (kind === undefined) return null
+  return (
+    <>
+      <WellnessWizard key={kind || 'none'} niche={kind === 'spa' ? 'spa' : undefined} />
+      {kind ? null : <KindPicker group="wellness" onPick={choose} />}
+    </>
+  )
+}
+
+function WellnessWizard({ niche: startNiche }: { niche?: string }) {
   const router = useRouter()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
@@ -176,6 +207,8 @@ export default function WellnessWizardPage() {
     createClient().auth.getUser().then(() => { if (!cancelled) setAuthReady(true) })
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => { if (startNiche) pickNiche(startNiche) }, [startNiche]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Picking a niche fills what the owner has not touched yet: the type line,
   // the colour style and the starter sessions. Anything they typed stays.

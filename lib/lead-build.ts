@@ -391,7 +391,7 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
   }
   // Barbers run the same build system as restaurants, with the barber's eye
   // and the barber page of the services template (Anas, 2026-11-10).
-  const nk = kindOfLead(lead)
+  const nk = kind === 'restaurant' ? null : kindOfLead(lead)
   if (nk) return buildBarberLead(lead, nk, ownerId, old, started)
   // Restaurants run the full build system (lib/restaurant-build); the other
   // templates keep the Google-only path until they get theirs.

@@ -204,12 +204,18 @@ function clearDraft(userId: string) {
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
-export default function RestaurantWizard({ demo = false }: { demo?: boolean }) {
+export default function RestaurantWizard({ demo = false, kind }: { demo?: boolean; kind?: string }) {
   const router = useRouter()
   const { confirm, toast } = useNotify()
   const [authReady, setAuthReady] = useState(demo)
   const [userId, setUserId] = useState<string | null>(null)
-  const [form, setForm] = useState<Form>(initialForm)
+  const [form, setForm] = useState<Form>(() => {
+    const f = initialForm()
+    // The kind picked in the sheet after «ابنِ» starts the place's type.
+    if (kind === 'cafe') return { ...f, restaurant_type: 'cafe', cuisine: 'قهوة ومشروبات' }
+    if (kind === 'sweets') return { ...f, restaurant_type: 'dessert', cuisine: 'حلويات ومعجنات' }
+    return f
+  })
   const [visibleByCat, setVisibleByCat] = useState<Record<string, number>>({})
   const [restoredDraft, setRestoredDraft] = useState(false)
   const [loading, setLoading] = useState(false)
