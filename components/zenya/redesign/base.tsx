@@ -60,7 +60,8 @@ export const BASE_CSS = `
 .rd img,.rd video{display:block;max-width:100%}
 .rd h1,.rd h2,.rd h3,.rd p,.rd ul,.rd ol,.rd figure,.rd blockquote{margin:0;padding:0}
 .rd ul,.rd ol{list-style:none}
-.rd button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+/* zero specificity: a reset, so any class on a button (bg-*, text-*, p-*) wins over it */
+:where(.rd) :where(button){font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .rd :focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:8px}
 .rd .wrap{width:100%;max-width:var(--max);margin-inline:auto;padding-inline:var(--gut)}
 .rd .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

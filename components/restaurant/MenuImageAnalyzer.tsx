@@ -320,7 +320,7 @@ export default function MenuImageAnalyzer({
       role="dialog"
       aria-modal
       aria-labelledby="menu-choice-h"
-      className="w-full max-w-[420px] rounded-2xl bg-white p-5 shadow-[0_24px_60px_-20px_rgba(17,17,17,0.35)] ring-1 ring-black/5"
+      className="w-full max-w-[420px] rounded-2xl bg-[color:var(--surface,#fff)] p-5 text-[color:var(--foreground,#171717)] shadow-[0_24px_60px_-20px_rgba(17,17,17,0.35)] ring-1 ring-black/5"
     >
       <p id="menu-choice-h" className="text-[15.5px] font-bold text-foreground">قرأنا الأصناف من صورتك ({pendingItems})</p>
       <p className="mt-1 text-[14.5px] leading-[1.6] text-muted">
@@ -330,7 +330,7 @@ export default function MenuImageAnalyzer({
         <button
           type="button"
           onClick={() => choose('replace')}
-          className="min-h-[44px] rounded-full bg-foreground px-4 text-[14.5px] font-bold text-white transition hover:opacity-90"
+          className="min-h-[44px] rounded-full bg-foreground px-4 text-[14.5px] font-bold text-[color:var(--background,#fff)] transition hover:opacity-90"
         >
           استبدال القائمة الحالية
         </button>
@@ -427,7 +427,7 @@ export default function MenuImageAnalyzer({
             type="button"
             onClick={analyze}
             disabled={busy}
-            className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-[14.5px] font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-[14.5px] font-bold text-[color:var(--background,#fff)] shadow-sm transition hover:opacity-90 disabled:opacity-60"
           >
             {analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
             {analyzing
