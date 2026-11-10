@@ -181,7 +181,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.96 }}
                     transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                    className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-token bg-white/95 px-4 py-3"
+                    className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border border-token bg-[color:var(--surface,#fff)] px-4 py-3"
                     style={dash
                       ? { background: 'var(--card)', boxShadow: 'var(--shadow-pop)' }
                       : { boxShadow: '0 12px 32px -12px rgba(28,28,28,0.28), 0 0 0 1px rgba(28,28,28,0.04)' }}
@@ -238,7 +238,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.97 }}
                   transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full max-w-md rounded-2xl bg-white p-6 text-start"
+                  className="relative w-full max-w-md rounded-2xl bg-[color:var(--surface,#fff)] p-6 text-start"
                   style={{ boxShadow: dash ? 'var(--shadow-pop)' : '0 24px 70px -20px rgba(28,28,28,0.40), 0 0 0 1px rgba(28,28,28,0.06)' }}
                 >
                   <div className="flex items-start gap-3.5">
@@ -283,7 +283,7 @@ export function NotifyProvider({ children }: { children: ReactNode }) {
                     <button
                       type="button"
                       onClick={() => settle(false)}
-                      className="rounded-lg border border-token bg-white px-4 py-2 text-[14.5px] font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground"
+                      className="rounded-lg border border-token bg-[color:var(--surface,#fff)] px-4 py-2 text-[14.5px] font-medium text-muted transition-colors hover:bg-black/5 hover:text-foreground"
                     >
                       {confirmState.cancelText || 'إلغاء'}
                     </button>

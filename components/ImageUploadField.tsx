@@ -49,12 +49,12 @@ export default function ImageUploadField({
       const r = await fetch('/api/upload', { method: 'POST', body: fd })
       const j = await r.json()
       if (!r.ok || !j.url) {
-        setError(j?.message || j?.error || 'Upload failed.')
+        setError(j?.message || j?.error || 'تعذّر الرفع.')
         return
       }
       onChange(j.url)
     } catch (e: any) {
-      setError(e?.message || 'Network error.')
+      setError(e?.message || 'تعذّر الاتصال.')
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -82,7 +82,7 @@ export default function ImageUploadField({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value}
-            alt={label || 'Uploaded image'}
+            alt={label || 'صورة مرفوعة'}
             className={`${aspectClass || 'h-auto w-full'} object-cover`}
             style={aspect === 'auto' ? { maxHeight: 240 } : undefined}
           />
@@ -90,16 +90,16 @@ export default function ImageUploadField({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="rounded-md bg-white/95 px-2 py-1 text-[14.5px] font-semibold text-foreground hover:bg-white"
+              className="rounded-md bg-white/95 px-2 py-1 text-[14.5px] font-semibold text-[#171717] hover:bg-white"
             >
-              Replace
+              استبدال
             </button>
             <button
               type="button"
               onClick={() => onChange('')}
               className="rounded-md bg-white/95 px-2 py-1 text-[14.5px] font-semibold text-[#b91c1c] hover:bg-white"
             >
-              Remove
+              حذف
             </button>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function ImageUploadField({
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
                 <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
               </svg>
-              <span className="text-[14.5px] font-medium">Uploading…</span>
+              <span className="text-[14.5px] font-medium">جارٍ الرفع…</span>
             </>
           ) : (
             <>
@@ -128,7 +128,7 @@ export default function ImageUploadField({
                 <Upload className="h-4 w-4" strokeWidth={1.75} />
               )}
               <span className="text-[14.5px] font-medium">
-                {aspect === 'thumb' ? 'Image' : 'Upload image'}
+                {aspect === 'thumb' ? 'صورة' : 'ارفع صورة'}
               </span>
             </>
           )}

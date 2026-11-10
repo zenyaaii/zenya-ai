@@ -99,7 +99,7 @@ export default function ComingSoon({
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-1.5 rounded-full border border-token bg-white px-5 py-3 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
+                className="inline-flex items-center gap-1.5 rounded-full border border-token bg-[color:var(--surface,#fff)] px-5 py-3 text-[14.5px] font-semibold text-foreground transition hover:bg-black/5"
               >
                 <ArrowLeft className="h-4 w-4 rtl-flip" /> رجوع
               </button>

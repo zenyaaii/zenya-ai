@@ -340,11 +340,13 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           <Block>
             <div className="zb-list">
               {f.services.map((s) => (
-                <div key={s.id} style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto', gap: 8, alignItems: 'center' }} className="bw-svc">
+                <div key={s.id} className="bw-svc">
                   <Toggle on={s.on} onChange={(v) => patch<Svc>('services', s.id, { on: v })}><span className="sr-only">{s.name}</span></Toggle>
                   <Input value={s.name} onChange={(e) => patch<Svc>('services', s.id, { name: e.target.value, on: true })} placeholder="اسم الخدمة" aria-label="اسم الخدمة" />
-                  <Input value={s.price} inputMode="decimal" onChange={(e) => patch<Svc>('services', s.id, { price: e.target.value, on: true })} placeholder="السعر" aria-label={`سعر ${s.name}`} disabled={!s.on} />
-                  <Input value={s.duration} onChange={(e) => patch<Svc>('services', s.id, { duration: e.target.value })} placeholder="المدة" aria-label={`مدة ${s.name}`} disabled={!s.on} />
+                  <div className="bw-pd">
+                    <Input value={s.price} inputMode="decimal" onChange={(e) => patch<Svc>('services', s.id, { price: e.target.value, on: true })} placeholder="السعر" aria-label={`سعر ${s.name}`} disabled={!s.on} />
+                    <Input value={s.duration} onChange={(e) => patch<Svc>('services', s.id, { duration: e.target.value })} placeholder="المدة" aria-label={`مدة ${s.name}`} disabled={!s.on} />
+                  </div>
                   <button type="button" className="zb-icon" aria-label={`حذف ${s.name || 'الخدمة'}`} onClick={() => drop('services', s.id)}>×</button>
                 </div>
               ))}
@@ -515,7 +517,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
         final={{ label: loading ? 'نبني موقعك…' : 'ابنِ موقع الصالون', slide: 'هيا بنا', onClick: build, busy: loading }}
       />
       <GenerationOverlay open={loading} />
-      <style>{`.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto!important}.bw-svc>input:nth-of-type(2),.bw-svc>input:nth-of-type(3){grid-column:2/3}}`}</style>
+      <style dangerouslySetInnerHTML={{ __html: '.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }

@@ -565,7 +565,7 @@ export default function AccountSettings() {
                     type="button"
                     onClick={() => copyCode(c.code)}
                     aria-label={`نسخ ${c.code}`}
-                    className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[color:var(--border)] bg-white px-3 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-[#f0ede6]"
+                    className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-[color:var(--border)] bg-[color:var(--surface,#fff)] px-3 py-2 text-[14.5px] font-semibold text-foreground transition hover:bg-[#f0ede6]"
                   >
                     {copiedCode === c.code ? (
                       <>
@@ -659,7 +659,7 @@ export default function AccountSettings() {
                 </button>
                 <button
                   onClick={() => { setShowDelete(false); setConfirmText('') }}
-                  className="rounded-xl border border-[color:var(--border)] bg-white px-4 py-2.5 text-[14.5px] font-medium text-foreground transition hover:bg-[#f0ede6]"
+                  className="rounded-xl border border-[color:var(--border)] bg-[color:var(--surface,#fff)] px-4 py-2.5 text-[14.5px] font-medium text-foreground transition hover:bg-[#f0ede6]"
                 >
                   إلغاء
                 </button>
