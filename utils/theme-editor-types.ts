@@ -59,6 +59,8 @@ export type EditorFieldDef =
   | { type: 'rating';    path: string; label: string; hint?: string }
   /** The week: one row a day, open or closed, from and to. */
   | { type: 'hours';     path: string }
+  /** The week with one or more periods a day: [{ day: 0 (Sat)…6, closed?, periods: [{ open, close }] }]. */
+  | { type: 'periods';   path: string }
   /** How the site reads in Google, drawn from seoTitle/seoDescription paths. */
   | { type: 'snippet';   title: string; description: string; name: string }
   /** One of a few fixed values, shown as a row of chips. An unset value shows `fallback` as chosen.

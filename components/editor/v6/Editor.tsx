@@ -167,6 +167,9 @@ export default function Editor(props: {
   exitHref?: string
   store?: EditorStore
   demo?: EditorDemo
+  /** A template whose kinds edit different sections (services: barber,
+   *  gym…) picks its config from the loaded content. */
+  configFor?: (content: any) => EditorConfig
 }) {
   useDashTheme()
   return (
@@ -179,7 +182,9 @@ export default function Editor(props: {
   )
 }
 
-function Workbench({ themeId, config, Preview, backHref, exitHref, store, demo }: Parameters<typeof Editor>[0]) {
+function Workbench({ themeId, config: baseConfig, configFor, Preview, backHref, exitHref, store, demo }: Parameters<typeof Editor>[0]) {
+  const [kindOf, setKindOf] = useState<any>(null)
+  const config = useMemo(() => (configFor && kindOf ? configFor(kindOf) : baseConfig), [configFor, kindOf, baseConfig])
   const router = useRouter()
   const ov = useOverlay()
   const offline = !!store
@@ -247,8 +252,10 @@ function Workbench({ themeId, config, Preview, backHref, exitHref, store, demo }
       }
       if (off) return
       if (!c?.[config.contentKey]) { setError(`هذا الموقع ليس من قالب «${config.themeName}».`); return }
-      const p = docOf(c, config)
-      const restored = isOnline && draft && draft[config.contentKey] ? docOf(mergeKeys(c, draft), config) : null
+      if (configFor) setKindOf(c)
+      const cfg = configFor ? configFor(c) : config
+      const p = docOf(c, cfg)
+      const restored = isOnline && draft && draft[config.contentKey] ? docOf(mergeKeys(c, draft), cfg) : null
       const d = restored || p
       pubR.current = p; setPub(p)
       applyDoc(d)
