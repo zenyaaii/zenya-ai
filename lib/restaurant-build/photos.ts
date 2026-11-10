@@ -18,6 +18,7 @@ export type Verdict = {
   people: 'none' | 'far' | 'faces' | 'women'
   tattoo: boolean
   text: boolean            // a poster, price card or graphic over the photo
+  cgi: boolean             // a 3D render, AI image or stock illustration, not a photo of this place
   dish: string             // Arabic dish name, only when plainly recognisable
   alt: string              // short Arabic description
 }
@@ -68,25 +69,47 @@ export async function contactSheet(pics: Pic[]): Promise<Buffer> {
     .composite(tiles.flat()).jpeg({ quality: 80 }).toBuffer()
 }
 
-export const JUDGE_PROMPT = `You are a first-time visitor deciding whether to go to this restaurant, looking at the photos it would show on its website. The sheet shows numbered photos (yellow number, top-left of each).
+export type Niche = 'restaurant' | 'barber'
+
+const PLACE: Record<Niche, { what: string; want: string; work: string; workEg: string; hero: string; dish: string }> = {
+  restaurant: {
+    what: 'restaurant', want: 'want to go and eat here', work: 'food | drink', workEg: '',
+    hero: 'makes you want to go', dish: 'for food/drink only, the dish in short Arabic (e.g. "مشاوي مشكلة", "كنافة") when you can plainly recognise it; otherwise "".',
+  },
+  barber: {
+    what: "men's barbershop", want: 'want to get my haircut here', work: 'food (= a finished haircut, fade or beard, seen close) | drink (= tools, products or a station close up)',
+    workEg: ' A haircut result is kind "food".',
+    hero: 'shows the shop itself (chairs, mirrors, the room or the front), makes you want to sit in that chair',
+    dish: 'for "food" (a haircut) only, the style in short Arabic (e.g. "تدريج", "لحية مرتبة") when plain; otherwise "".',
+  },
+}
+
+/** The visitor's eye on a contact sheet of the place's photos, for one kind of place. */
+export function judgePrompt(niche: Niche = 'restaurant'): string {
+  const p = PLACE[niche]
+  return `You are a first-time visitor deciding whether to go to this ${p.what}, looking at the photos it would show on its website. The sheet shows numbered photos (yellow number, top-left of each).
 
 For EVERY number return one entry:
-- kind: food | drink | interior | exterior | logo | menu | people | other. "menu" = a printed menu or price board you could read. "logo" = the brand mark, sign or profile badge.
+- kind: ${niche === 'restaurant' ? 'food | drink' : p.work} | interior | exterior | logo | menu | people | other. "menu" = a printed menu or price board you could read. "logo" = the brand mark, sign or profile badge.${p.workEg}
 - quality 1-10: does it look professional? light, sharpness, framing, no clutter. A phone snapshot in bad light is 3-4; a clean, bright, well-framed shot is 8+.
-- appetite 1-10: as a visitor, does this photo make me want to go and eat here?
+- appetite 1-10: as a visitor, does this photo make me ${p.want}?
 - people: "none"; "far" (small figures or backs, no recognisable face); "faces" (a recognisable face of a guest or staff); "women" (any woman or girl visible, at any size, with or without hijab).
 - tattoo: true if any tattoo is visible.
 - text: true if the photo is a poster, ad, price card, collage or has graphics/text laid over it (a real menu photo is kind "menu", text false).
-- dish: for food/drink only, the dish in short Arabic (e.g. "مشاوي مشكلة", "كنافة") when you can plainly recognise it; otherwise "".
+- cgi: true if it is NOT a real photograph of this place: a 3D render, an AI-generated or stock-looking image, an illustration, a too-perfect showroom that does not match the other photos.
+- dish: ${p.dish}
 - alt: 3-8 Arabic words describing the photo.
 
 Also return:
-- hero: the number of the single best photo for the big header image of the home page: wide, atmospheric, professional, no text, no recognisable faces, makes you want to go. 0 if none is good enough.
-- identity: up to 3 hex colours that are THIS place's own colours as seen in its logo, sign, walls, furniture or uniforms (not the colour of the food). The first is the main one.
+- hero: the number of the single best photo for the big header image of the home page: a real photograph (never cgi), wide, atmospheric, professional, no text, no recognisable faces, ${p.hero}. 0 if none is good enough.
+- identity: up to 3 hex colours that are THIS place's own colours as seen in its logo, sign, walls, furniture or uniforms${niche === 'restaurant' ? ' (not the colour of the food)' : ''}. The first is the main one.
 - identity_from: the photo numbers you took them from.
-- mood: "dark" if the place feels like a night, warm-lit, luxurious or heritage room; "light" if it feels like a bright café, daytime, fresh or casual place.
+- mood: "dark" if the place feels like a night, warm-lit, luxurious or heritage room; "light" if it feels bright, daytime, fresh or casual.
 
-Return strict JSON: { "photos": [ { "n": 1, "kind": "", "quality": 0, "appetite": 0, "people": "none", "tattoo": false, "text": false, "dish": "", "alt": "" } ], "hero": 0, "identity": ["#000000"], "identity_from": [1], "mood": "dark" }`
+Return strict JSON: { "photos": [ { "n": 1, "kind": "", "quality": 0, "appetite": 0, "people": "none", "tattoo": false, "text": false, "cgi": false, "dish": "", "alt": "" } ], "hero": 0, "identity": ["#000000"], "identity_from": [1], "mood": "dark" }`
+}
+
+export const JUDGE_PROMPT = judgePrompt('restaurant')
 
 const KINDS: Kind[] = ['food', 'drink', 'interior', 'exterior', 'logo', 'menu', 'people', 'other']
 const n10 = (x: unknown) => Math.max(1, Math.min(10, Math.round(Number(x) || 1)))
@@ -101,11 +124,11 @@ export function applyVerdicts(pics: Pic[], ai: any): Judged[] {
       kind: KINDS.includes(a.kind) ? a.kind : 'other',
       quality: n10(a.quality), appetite: n10(a.appetite),
       people: ['none', 'far', 'faces', 'women'].includes(a.people) ? a.people : 'faces',
-      tattoo: a.tattoo === true, text: a.text === true,
+      tattoo: a.tattoo === true, text: a.text === true, cgi: a.cgi === true,
       dish: String(a.dish || '').trim().slice(0, 40), alt: String(a.alt || '').trim().slice(0, 80),
     }
     if (p.logoHint && v.kind !== 'logo' && v.kind !== 'exterior') v.kind = 'logo'
-    const why = v.people === 'women' ? 'امرأة في الصورة' : v.people === 'faces' ? 'وجه زائر واضح' : v.tattoo ? 'وشم'
+    const why = v.cgi ? 'ليست صورة حقيقية للمكان (ثلاثية الأبعاد أو مولّدة)' : v.people === 'women' ? 'امرأة في الصورة' : v.people === 'faces' ? 'وجه زائر واضح' : v.tattoo ? 'وشم'
       : v.text && v.kind !== 'menu' ? 'نص أو إعلان فوق الصورة' : v.kind === 'people' || v.kind === 'other' ? 'ليست صورة مكان أو طعام'
       : v.kind !== 'menu' && v.kind !== 'logo' && v.quality < 5 ? 'جودة ضعيفة' : undefined
     return { ...p, v, ok: !why, why }

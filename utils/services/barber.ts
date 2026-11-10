@@ -146,14 +146,18 @@ function mentions(text: string, name: string): boolean {
 export function quoteFor(name: string, reviews: { name: string; text: string; rating: number }[]): { quote: string; by: string; count: number } | null {
   const hits = reviews.filter((r) => r.rating >= 4 && mentions(r.text, name))
   if (!hits.length) return null
-  const r = hits[0]
-  const parts = r.text.split(/(?<=[.!؟?،,])\s+|\n+/).map((s) => s.trim()).filter(Boolean)
-  let quote = parts.find((p) => mentions(p, name)) || r.text
-  if (quote.length < 40 && parts.length > 1) {
-    const i = parts.indexOf(quote)
-    quote = [quote, parts[i + 1]].filter(Boolean).join(' ')
+  const pick = (r: (typeof hits)[number]) => {
+    const parts = r.text.split(/(?<=[.!؟?،,])\s+|\n+/).map((s) => s.trim()).filter(Boolean)
+    let q = parts.find((p) => mentions(p, name)) || r.text
+    const i = parts.indexOf(q)
+    if (q.length < 50 && i >= 0 && parts[i + 1]) q = [q, parts[i + 1]].join(' ')
+    if (q.length < 50 && i > 0) q = [parts[i - 1], q].join(' ')
+    if (q.length > 170) q = q.slice(0, 165).replace(/\s+\S*$/, '') + '…'
+    return q
   }
-  if (quote.length > 170) quote = quote.slice(0, 165).replace(/\s+\S*$/, '') + '…'
+  // The most telling quote: one that says what he did, not only thanks.
+  const ranked = hits.map((r) => ({ r, q: pick(r) })).sort((a, b) => Math.abs(a.q.length - 110) - Math.abs(b.q.length - 110))
+  const { r, q: quote } = ranked[0]
   return { quote, by: r.name, count: hits.length }
 }
 

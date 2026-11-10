@@ -5,9 +5,10 @@ import { logAiUsage } from '@/lib/ai-usage'
 import { serviceClient } from '@/lib/handover'
 import { analyzeOne, mergeResults, parseJsonSafe, type Category } from '@/lib/menu-ocr'
 import type { RestaurantColors, RestaurantContent } from '@/utils/restaurant/types'
+import type { ServiceContent } from '@/utils/services/types'
 import { placeOf, googlePhotos, instagramOf, facebookOf, type Place, type Social } from './sources'
 import { findSocial, type Who, type Found } from './find-social'
-import { cleanPhotos, contactSheet, applyVerdicts, choose, JUDGE_PROMPT, type Judged, type Picks } from './photos'
+import { cleanPhotos, contactSheet, applyVerdicts, choose, judgePrompt, type Judged, type Picks, type Niche } from './photos'
 import { measure, snap, paletteOf } from './palette'
 
 /**
@@ -80,7 +81,7 @@ async function upload(placeId: string, j: Judged): Promise<string | null> {
   return sb.getPublicUrl(path).data.publicUrl
 }
 
-export async function prepare(placeId: string, socialLink: string | null, who?: Who): Promise<Prepared> {
+export async function prepare(placeId: string, socialLink: string | null, who?: Who, niche: Niche = 'restaurant'): Promise<Prepared> {
   // 1 — collect, in parallel; social never blocks Google.
   const link = socialLink || ''
   let igLink = /instagram\.com/i.test(link) ? link : ''
@@ -105,7 +106,7 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
   const pics = await cleanPhotos([...gPhotos, ...(ig.photos || []), ...(fb.photos || [])])
   let ai: any = {}
   if (pics.length) {
-    ai = await vision(JUDGE_PROMPT, [await contactSheet(pics)], 'lead-build-photos').catch(() => ({}))
+    ai = await vision(judgePrompt(niche), [await contactSheet(pics)], `lead-build-photos${niche === 'restaurant' ? '' : '-' + niche}`).catch(() => ({}))
   }
   const judged = applyVerdicts(pics, ai)
   const picks = choose(judged, Number(ai?.hero) || 0)
@@ -143,8 +144,8 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
 
   const missing: string[] = []
   if (!picks.hero) missing.push('لا توجد صورة احترافية واسعة للواجهة: استُخدمت صورة القالب')
-  if (picks.dishes.length < 2) missing.push('صور أطباق واضحة قليلة')
-  if (!menu.length) missing.push('لم نجد صورة قائمة مقروءة: القائمة من التقييمات بلا أسعار')
+  if (niche === 'restaurant' && picks.dishes.length < 2) missing.push('صور أطباق واضحة قليلة')
+  if (!menu.length) missing.push(niche === 'restaurant' ? 'لم نجد صورة قائمة مقروءة: القائمة من التقييمات بلا أسعار' : 'لم نجد لوحة أسعار مقروءة: الأسعار يضيفها صاحب المكان')
   if (!social.instagram && !social.facebook) missing.push('لا حساب تواصل مقروء')
   if (!identity.length) missing.push('لم نتعرّف على ألوان المكان: ألوان افتراضية')
 
@@ -267,6 +268,77 @@ export async function visit(content: RestaurantContent, city: string, file: Buil
     }
     const h = String(r.headline || '').trim()
     if (h && h.length <= 80 && h !== content.hero.headline) { content.hero.headline = h; changed = true }
+    if (!changed) break
+  }
+  return score
+}
+
+// ── 8b: the AI visitor for a barber (and, next, every services kind) ──────
+const VISIT_BARBER = (c: ServiceContent, city: string) => `You are a man in ${city} who just opened this barbershop's new website on your phone, deciding whether to book a haircut there this week. The image shows, in order: the big header photo (H), the side photo (S) and the shop photos (G1…). The text is below.
+
+Header: «${c.hero.headline}» — ${c.hero.subheadline}
+Barbers: ${(c.team?.members || []).map((m) => `${m.name}${m.quote ? ' (a customer: «' + m.quote + '»)' : ''}`).join('؛ ') || 'none named'}
+Services: ${c.services.items.map((s) => s.name + (s.price_from ? ' ' + s.price_from : '')).join('، ')}
+Prices shown: ${c.services.items.some((s) => s.price_from) ? 'yes' : 'no, an ask-on-WhatsApp button instead'}
+Hours: ${(c.hours || []).length ? 'yes, per day, with open-now' : 'no'}
+Google rating: ${c.google?.rating ?? 'none'} from ${c.google?.count ?? 0}; reviews shown: ${c.testimonials.items.length}; FAQ answered: ${c.faq.items.length}
+
+Score 1-10: does it look professional and real, and does it make you want to book? Be strict: 8 means you would book.
+List the concrete problems (Arabic, short). Then the fixes, using ONLY:
+- "drop": photo labels to remove (e.g. ["G3","S"]) — blurry, dark, ugly, off-putting or not a barbershop
+- "hero_from_gallery": a gallery label (e.g. "G2") that would be a better header photo than H, or ""
+Never add facts that are not in the text above.
+
+Return strict JSON: { "score": 0, "problems": [""], "drop": [], "hero_from_gallery": "" }`
+
+async function sheetOf(items: [string, string][]): Promise<Buffer | null> {
+  const bufs = await Promise.all(items.map(async ([label, url]) => {
+    try {
+      const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) return null
+      const img = await sharp(Buffer.from(await r.arrayBuffer())).resize(292, 292, { fit: 'cover' }).toBuffer()
+      const tag = Buffer.from(`<svg width="54" height="30"><rect width="54" height="30" rx="4" fill="#ffd400"/><text x="27" y="22" font-size="19" font-family="Arial" font-weight="700" text-anchor="middle" fill="#000">${label}</text></svg>`)
+      return { img, tag }
+    } catch { return null }
+  }))
+  const ok = bufs.filter(Boolean) as { img: Buffer; tag: Buffer }[]
+  if (!ok.length) return null
+  const cols = 5, rows = Math.ceil(ok.length / cols)
+  return sharp({ create: { width: cols * 300, height: rows * 300, channels: 3, background: '#111' } })
+    .composite(ok.flatMap((b, i) => [
+      { input: b.img, left: (i % cols) * 300 + 4, top: Math.floor(i / cols) * 300 + 4 },
+      { input: b.tag, left: (i % cols) * 300 + 8, top: Math.floor(i / cols) * 300 + 8 },
+    ])).jpeg({ quality: 78 }).toBuffer()
+}
+
+/** Scores a barber site, fixes its photos in place (at most twice), returns the last score. */
+export async function visitBarber(content: ServiceContent, city: string, file: BuildFile): Promise<number> {
+  let score = 0
+  for (let round = 1; round <= 3; round++) {
+    const items: [string, string][] = [
+      ...(content.hero.image ? [['H', content.hero.image] as [string, string]] : []),
+      ...(content.story.image ? [['S', content.story.image] as [string, string]] : []),
+      ...content.gallery.images.map((g, i) => [`G${i + 1}`, g.url] as [string, string]).filter(([, u]) => u !== content.hero.image && u !== content.story.image),
+    ]
+    const sheet = await sheetOf(items)
+    const r = await vision(VISIT_BARBER(content, city), sheet ? [sheet] : [], 'lead-build-visitor-barber', 900).catch(() => null)
+    if (!r) break
+    score = Math.max(1, Math.min(10, Math.round(Number(r.score) || 1)))
+    file.visitor.push({ round, score, notes: (Array.isArray(r.problems) ? r.problems : []).map((x: any) => String(x).slice(0, 160)).slice(0, 6) })
+    if (score >= 8 || round === 3) break
+    let changed = false
+    const drop = new Set<string>((Array.isArray(r.drop) ? r.drop : []).map(String))
+    const g = /^G(\d+)$/.exec(String(r.hero_from_gallery || ''))
+    if (g && content.gallery.images[+g[1] - 1]) {
+      const [img] = content.gallery.images.splice(+g[1] - 1, 1)
+      if (content.hero.image && !content.gallery.images.some((x) => x.url === content.hero.image)) content.gallery.images.push({ url: content.hero.image, alt: '' })
+      content.hero.image = img.url; content.gallery.images.unshift(img); changed = true
+    }
+    if (drop.size) {
+      const before = content.gallery.images.length
+      content.gallery.images = content.gallery.images.filter((_, i) => !drop.has(`G${i + 1}`))
+      if (drop.has('S') && content.story.image) { content.story.image = undefined; changed = true }
+      changed = changed || before !== content.gallery.images.length
+    }
     if (!changed) break
   }
   return score
