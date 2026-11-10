@@ -20,6 +20,36 @@ export type ServiceItem = {
   description: string
   price_from?: string
   badge?: string
+  /** How long it takes, as the owner wrote it ("30 د"). */
+  duration?: string
+}
+
+/**
+ * Which kind of services business this is. Unset is the general services
+ * site; a kind draws its own page inside the same template (BarberView for
+ * 'barber'), so the editor, publishing and the dashboard stay one path.
+ */
+export type ServiceNicheKind = 'barber'
+
+/** One person the customers can ask for by name. */
+export type ServiceTeamMember = {
+  name: string
+  /** "صاحب الصالون", "حلاق"… */
+  role?: string
+  /** Uploaded by the owner. Never a stock face. */
+  photo?: string
+  /** What they are known for, as short chips ("تدريج", "لحية"). */
+  tags?: string[]
+  /** A customer's words about them, quoted from a Google review. */
+  quote?: string
+  quote_by?: string
+}
+
+/** One weekday, Saturday = 0 … Friday = 6. Times are 24h "HH:MM". */
+export type ServiceHoursDay = {
+  day: number
+  closed?: boolean
+  periods: { open: string; close: string }[]
 }
 
 export type ServiceProofItem = {
@@ -56,6 +86,7 @@ export type ServiceGalleryImage = {
 }
 
 export type ServiceContent = {
+  niche?: ServiceNicheKind
   brand: {
     name: string
     category: string
@@ -68,6 +99,12 @@ export type ServiceContent = {
     name_display?: ServiceNameDisplay
     /** false hides the mark beside the name. Unset means shown. */
     show_logo?: boolean
+    /** The name in Latin letters, when the shop has one ("Hamuda Barber"). */
+    latin?: string
+    /** The neighbourhood, shown beside the city ("تلاع العلي"). */
+    area?: string
+    /** Who it is for: "رجال" or "رجال وأطفال". */
+    audience?: string
   }
   hero: {
     eyebrow: string
@@ -170,9 +207,25 @@ export type ServiceContent = {
     /** The owner's public reviews page. The dashboard's Reviews page reads it. */
     reviews_url?: string
     whatsapp?: string
+    /** Any other page the owner gave us (a booking app, a portfolio, a menu). */
+    extra?: { label: string; url: string }[]
   }
   /** Social profiles: full links, or a handle the template turns into one. */
   social_links?: ServiceSocialLinks
+  /** The people, by name (barber, gym, clinic kinds). */
+  team?: { heading?: string; members: ServiceTeamMember[] }
+  /** Opening hours per weekday. Absent: the site shows none. */
+  hours?: ServiceHoursDay[]
+  /** How customers come in. */
+  booking?: {
+    mode?: 'appointment' | 'walkin' | 'both'
+    /** Typical wait, in the owner's words. */
+    wait?: string
+    /** When it is busiest, in the owner's words. */
+    busy?: string
+  }
+  /** Rating and count straight from Google, with the place's own link. */
+  google?: { rating?: number; count?: number; maps_url?: string; place_id?: string }
 }
 
 export type ServiceSocialLinks = {
