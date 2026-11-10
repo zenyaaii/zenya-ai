@@ -29,7 +29,7 @@ export type ServiceItem = {
  * site; a kind draws its own page inside the same template (BarberView for
  * 'barber'), so the editor, publishing and the dashboard stay one path.
  */
-export type ServiceNicheKind = 'barber'
+export type ServiceNicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
 
 /** One person the customers can ask for by name. */
 export type ServiceTeamMember = {
@@ -224,6 +224,8 @@ export type ServiceContent = {
     /** When it is busiest, in the owner's words. */
     busy?: string
   }
+  /** Terms the owner stated: a gym's freeze/cancel rules, a garage's warranty. */
+  terms?: { label: string; text: string }[]
   /** Rating and count straight from Google, with the place's own link. */
   google?: { rating?: number; count?: number; maps_url?: string; place_id?: string }
 }

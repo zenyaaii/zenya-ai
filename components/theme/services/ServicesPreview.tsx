@@ -13,7 +13,8 @@ import { getServicePreset } from '@/utils/services/presets'
 import { splitBrandName } from '@/utils/services/brand-name'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
-import BarberView from './BarberView'
+import NicheView from './NicheView'
+import { isNicheKind } from '@/utils/services/kinds'
 import { useBookingContext } from '@/components/site/BookingContext'
 import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/marketing/BrandMarks'
 
@@ -112,7 +113,7 @@ export default function ServicesPreview({
   logo,
 }: Props) {
   // A kind of services business draws its own page inside this template.
-  if (content?.niche === 'barber') return <BarberView content={content} colors={colorOverrides} logo={logo?.trim() || undefined} />
+  if (isNicheKind(content?.niche)) return <NicheView content={content} colors={colorOverrides} logo={logo?.trim() || undefined} />
   return <GeneralServices content={content} presetId={presetId} className={className} colorOverrides={colorOverrides} typographyPreset={typographyPreset} view={controlledView} onViewChange={onViewChange} logo={logo} />
 }
 

@@ -6,6 +6,7 @@ import { serviceClient } from '@/lib/handover'
 import { analyzeOne, mergeResults, parseJsonSafe, type Category } from '@/lib/menu-ocr'
 import type { RestaurantColors, RestaurantContent } from '@/utils/restaurant/types'
 import type { ServiceContent } from '@/utils/services/types'
+import { KIND, type NicheKind } from '@/utils/services/kinds'
 import { placeOf, googlePhotos, instagramOf, facebookOf, type Place, type Social } from './sources'
 import { findSocial, type Who, type Found } from './find-social'
 import { cleanPhotos, contactSheet, applyVerdicts, choose, judgePrompt, type Judged, type Picks, type Niche } from './photos'
@@ -274,18 +275,19 @@ export async function visit(content: RestaurantContent, city: string, file: Buil
 }
 
 // ── 8b: the AI visitor for a barber (and, next, every services kind) ──────
-const VISIT_BARBER = (c: ServiceContent, city: string) => `You are a man in ${city} who just opened this barbershop's new website on your phone, deciding whether to book a haircut there this week. The image shows, in order: the big header photo (H), the side photo (S) and the shop photos (G1…). The text is below.
+const VISIT_BARBER = (c: ServiceContent, city: string, nk: NicheKind) => `You are ${KIND[nk].visitor.who} in ${city} who just opened this ${KIND[nk].visitor.place}'s new website on your phone, deciding whether to ${KIND[nk].visitor.want}. The image shows, in order: the big header photo (H), the side photo (S) and the shop photos (G1…). The text is below.
 
 Header: «${c.hero.headline}» — ${c.hero.subheadline}
-Barbers: ${(c.team?.members || []).map((m) => `${m.name}${m.quote ? ' (a customer: «' + m.quote + '»)' : ''}`).join('؛ ') || 'none named'}
+Staff: ${(c.team?.members || []).map((m) => `${m.name}${m.quote ? ' (a customer: «' + m.quote + '»)' : ''}`).join('؛ ') || 'none named'}
 Services: ${c.services.items.map((s) => s.name + (s.price_from ? ' ' + s.price_from : '')).join('، ')}
 Prices shown: ${c.services.items.some((s) => s.price_from) ? 'yes' : 'no, an ask-on-WhatsApp button instead'}
 Hours: ${(c.hours || []).length ? 'yes, per day, with open-now' : 'no'}
+Terms stated: ${(c.terms || []).map((t) => t.label + ': ' + t.text).join('؛ ') || 'none'}
 Google rating: ${c.google?.rating ?? 'none'} from ${c.google?.count ?? 0}; reviews shown: ${c.testimonials.items.length}; FAQ answered: ${c.faq.items.length}
 
 Score 1-10: does it look professional and real, and does it make you want to book? Be strict: 8 means you would book.
 List the concrete problems (Arabic, short). Then the fixes, using ONLY:
-- "drop": photo labels to remove (e.g. ["G3","S"]) — blurry, dark, ugly, off-putting or not a barbershop
+- "drop": photo labels to remove (e.g. ["G3","S"]) — blurry, dark, ugly, off-putting or not this kind of place
 - "hero_from_gallery": a gallery label (e.g. "G2") that would be a better header photo than H, or ""
 Never add facts that are not in the text above.
 
@@ -311,7 +313,7 @@ async function sheetOf(items: [string, string][]): Promise<Buffer | null> {
 }
 
 /** Scores a barber site, fixes its photos in place (at most twice), returns the last score. */
-export async function visitBarber(content: ServiceContent, city: string, file: BuildFile): Promise<number> {
+export async function visitBarber(content: ServiceContent, city: string, file: BuildFile, nk: NicheKind = 'barber'): Promise<number> {
   let score = 0
   for (let round = 1; round <= 3; round++) {
     const items: [string, string][] = [
@@ -320,7 +322,7 @@ export async function visitBarber(content: ServiceContent, city: string, file: B
       ...content.gallery.images.map((g, i) => [`G${i + 1}`, g.url] as [string, string]).filter(([, u]) => u !== content.hero.image && u !== content.story.image),
     ]
     const sheet = await sheetOf(items)
-    const r = await vision(VISIT_BARBER(content, city), sheet ? [sheet] : [], 'lead-build-visitor-barber', 900).catch(() => null)
+    const r = await vision(VISIT_BARBER(content, city, nk), sheet ? [sheet] : [], `lead-build-visitor-${nk}`, 900).catch(() => null)
     if (!r) break
     score = Math.max(1, Math.min(10, Math.round(Number(r.score) || 1)))
     file.visitor.push({ round, score, notes: (Array.isArray(r.problems) ? r.problems : []).map((x: any) => String(x).slice(0, 160)).slice(0, 6) })

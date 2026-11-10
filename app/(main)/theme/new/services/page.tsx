@@ -14,7 +14,8 @@ import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { generateErrorText } from '@/lib/generate-error'
 import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
-import BarberWizard from '@/components/zenya/build/BarberWizard'
+import NicheWizard from '@/components/zenya/build/NicheWizard'
+import { isNicheKind } from '@/utils/services/kinds'
 import KindPicker from '@/components/zenya/build/KindPicker'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
@@ -159,7 +160,7 @@ const INITIAL_FORM: Form = {
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
 /** What the general wizard's category starts as, for a kind picked in the sheet. */
-const KIND_CATEGORY: Record<string, string> = { car: 'ورشة سيارات', clinic: 'عيادة', photo: 'استوديو تصوير' }
+const KIND_CATEGORY: Record<string, string> = {}
 
 /**
  * /theme/new/services. The owner arrives here from a template's «ابنِ», so
@@ -192,7 +193,7 @@ export default function ServicesWizardPage() {
   if (kind === undefined || !authed) {
     return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium opacity-70">جارٍ التحميل…</div>
   }
-  if (kind === 'barber') return <BarberWizard onBack={() => choose(null)} />
+  if (isNicheKind(kind)) return <NicheWizard key={kind} kind={kind} onBack={() => choose(null)} />
   return (
     <>
       <GeneralServicesWizard key={kind || 'none'} category={kind ? KIND_CATEGORY[kind] : undefined} />

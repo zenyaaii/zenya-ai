@@ -10,6 +10,7 @@ import WizardShell, {
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
 import { DAYS_AR, barberInputSchema, buildBarberContent, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
+import { KIND, type KindText, type NicheKind } from '@/utils/services/kinds'
 import type { ServiceHoursDay } from '@/utils/services/types'
 
 /**
@@ -36,35 +37,6 @@ type Svc = { id: string; on: boolean; name: string; price: string; duration: str
 type Faq = { id: string; q: string; a: string; own?: boolean }
 type Link = { id: string; label: string; url: string }
 
-const TAGS = ['قص كلاسيكي', 'تدريج', 'لحية', 'أطفال', 'عرسان', 'بروتين', 'صبغة', 'تنظيف بشرة']
-
-const SERVICES: Omit<Svc, 'id'>[] = [
-  { on: true, name: 'قص شعر', price: '', duration: '30 د' },
-  { on: true, name: 'تحديد اللحية', price: '', duration: '15 د' },
-  { on: true, name: 'شعر ولحية', price: '', duration: '45 د' },
-  { on: false, name: 'حلاقة أطفال', price: '', duration: '20 د' },
-  { on: false, name: 'تنظيف بشرة', price: '', duration: '30 د' },
-  { on: false, name: 'بروتين للشعر', price: '', duration: '90 د' },
-  { on: false, name: 'صبغة شعر أو لحية', price: '', duration: '40 د' },
-  { on: false, name: 'تجهيز عريس', price: '', duration: '' },
-]
-
-const FAQS = [
-  'هل أحتاج موعدًا، أم أحضر مباشرة؟',
-  'كم أنتظر عادة؟',
-  'هل السعر المكتوب هو ما أدفعه؟',
-  'هل تحلقون للأطفال؟',
-  'هل يوجد موقف سيارات قريب؟',
-  'هل تقبلون الدفع بالبطاقة؟',
-]
-
-/** Three looks, each tuned on the approved sample. The build measures the shop's own colours later (lead builder). */
-const LOOKS = [
-  { id: 'brass', name: 'نحاسي ليلي', colors: { background: '#0d0c0a', surface: '#151310', text: '#f2ede3', muted: '#958d80', accent: '#c4a35a', primary: '#c4a35a', border: '#2a2722' } },
-  { id: 'oxblood', name: 'أحمر عتيق', colors: { background: '#100b0a', surface: '#1a1210', text: '#f3ebe6', muted: '#a1918a', accent: '#b8483a', primary: '#b8483a', border: '#2e2220' } },
-  { id: 'paper', name: 'ورقي فاتح', colors: { background: '#f3efe7', surface: '#e9e3d8', text: '#1b1712', muted: '#6c6458', accent: '#1b1712', primary: '#1b1712', border: '#d8d0c2' } },
-] as const
-
 type Form = {
   name: string; latin: string; city: string; area: string; address: string; audience: string
   phone: string; whatsapp: string; email: string; maps_url: string; instagram: string; no_instagram: boolean
@@ -75,30 +47,39 @@ type Form = {
   hours: ServiceHoursDay[]; hours_touched: boolean
   google_photos: string[]; hidden: string[]; hero: string; uploads: string[]
   faq: Faq[]
-  look: (typeof LOOKS)[number]['id']
+  terms: { label: string; text: string }[]
+  look: string
 }
 
 const WEEK: ServiceHoursDay[] = DAYS_AR.map((_, day) => ({ day, closed: false, periods: [{ open: '10:00', close: '22:00' }] }))
 
-const INITIAL: Form = {
-  name: '', latin: '', city: '', area: '', address: '', audience: 'رجال',
-  phone: '', whatsapp: '', email: '', maps_url: '', instagram: '', no_instagram: false,
-  links: [], logo: '',
-  barbers: [{ id: nid(), name: '', role: 'صاحب الصالون', photo: '', tags: [] }],
-  services: SERVICES.map((s) => ({ ...s, id: nid() })), currency: '',
-  mode: 'both', wait: '', busy: '',
-  hours: WEEK, hours_touched: false,
-  google_photos: [], hidden: [], hero: '', uploads: [],
-  faq: FAQS.map((q) => ({ id: nid(), q, a: '' })),
-  look: 'brass',
+function initial(k: KindText): Form {
+  return {
+    name: '', latin: '', city: '', area: '', address: '', audience: k.audiences?.[0] || '',
+    phone: '', whatsapp: '', email: '', maps_url: '', instagram: '', no_instagram: false,
+    links: [], logo: '',
+    barbers: [{ id: nid(), name: '', role: k.ownerRole, photo: '', tags: [] }],
+    services: k.defaults.map((s) => ({ ...s, price: '', id: nid() })), currency: '',
+    mode: 'both', wait: '', busy: '',
+    hours: WEEK, hours_touched: false,
+    google_photos: [], hidden: [], hero: '', uploads: [],
+    faq: k.faqs.map((q) => ({ id: nid(), q, a: '' })),
+    terms: (k.terms || []).map((t) => ({ label: t.label, text: '' })),
+    look: k.looks[0].id,
+  }
 }
 
 const intl = (v: string) => /^(\+|00)\d[\d\s-]{6,}$/.test(v.trim())
 
-export default function BarberWizard({ onBack }: { onBack?: () => void }) {
+export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheKind; onBack?: () => void }) {
+  const k = KIND[kind]
+  const bare = k.place.replace(/^ال/, '')
+  const mine = bare.replace(/ة$/, 'ت') + 'ك'
+  const addOne = /ة$/.test(k.role) ? k.role : k.role + 'ًا'
+  const LOOKS = k.looks
   const router = useRouter()
   const { toast } = useNotify()
-  const [f, setF] = useState<Form>(INITIAL)
+  const [f, setF] = useState<Form>(() => initial(k))
   const [step, setStep] = useState(0)
   const [g, setG] = useState<(BarberGoogle & { photos?: string[]; name?: string }) | null>(null)
   const [gState, setGState] = useState<'idle' | 'busy' | 'ok' | 'fail'>('idle')
@@ -125,7 +106,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
       if (!res.ok) {
         setGState('fail')
         setGMsg(j?.error === 'not_google_link' ? 'هذا ليس رابط خرائط جوجل. انسخه من زر «مشاركة» في الخرائط.'
-          : j?.error === 'not_found' ? 'لم نجد المكان من هذا الرابط. جرّب رابط «مشاركة» من صفحة الصالون.'
+          : j?.error === 'not_found' ? `لم نجد المكان من هذا الرابط. جرّب رابط «مشاركة» من صفحة ${k.place} في الخرائط.`
           : j?.error === 'too_many' ? 'محاولات كثيرة. انتظر قليلًا ثم أعد.'
           : 'تعذّر الوصول إلى جوجل الآن. يمكنك المتابعة، ونعيد المحاولة عند البناء.')
         return
@@ -170,6 +151,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
     const hero = photos.includes(f.hero) ? f.hero : photos[0]
     const rest = photos.filter((u) => u !== hero)
     return {
+      kind,
       name: f.name.trim(), latin: f.latin.trim() || undefined, city: f.city.trim(), area: f.area.trim() || undefined,
       address: f.address.trim() || undefined, audience: f.audience || undefined, phone: f.phone.trim(),
       whatsapp: f.whatsapp.trim() || (intl(f.phone) ? f.phone.trim() : undefined), email: f.email.trim() || undefined,
@@ -181,6 +163,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
       booking: { mode: f.mode, wait: f.wait.trim() || undefined, busy: f.busy.trim() || undefined },
       hours: f.hours.map((d) => ({ ...d, periods: d.closed ? [] : d.periods.filter((p) => p.open && p.close) })),
       photos: { hero, side: rest[0], gallery: rest.slice(1) },
+      terms: f.terms.filter((t) => t.text.trim()).map((t) => ({ label: t.label, text: t.text.trim() })),
       faq: f.faq.filter((q) => q.q.trim() && q.a.trim()).map((q) => ({ q: q.q.trim(), a: q.a.trim() })),
       logo: f.logo || undefined,
     }
@@ -209,14 +192,14 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           primaryColor: look.colors.accent,
           secondaryColor: look.colors.background,
           content: {
-            business_type: 'services', niche: 'barber', style_preset: 'graphite',
+            business_type: 'services', niche: kind, style_preset: 'graphite',
             color_overrides: look.colors, services: content, input: parsed.data, google: g ? { place_id: g.place_id, rating: g.rating, count: g.count } : undefined,
             ...(parsed.data.logo ? { seo: { logo: parsed.data.logo } } : {}),
           },
         }),
       })
       const j = await res.json().catch(() => ({}))
-      if (res.status === 401) { router.push('/login?mode=signup&next=/theme/new/services?kind=barber'); return }
+      if (res.status === 401) { router.push('/login?mode=signup&next=/theme/new/services?kind=' + kind); return }
       if (res.status === 402) { toast({ type: 'warning', message: 'لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' }); router.push('/pricing'); return }
       if (!res.ok || !j?.id) throw new Error(j?.error || 'فشل الحفظ')
       router.push(`/preview/services/${j.id}?created=1`)
@@ -232,11 +215,11 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
 
   const steps: WizardStep[] = [
     {
-      id: 'basics', title: 'الصالون وروابطه', sub: 'من رابط خرائط جوجل نجلب التقييمات والصور والأوقات. ومن إنستغرام نقرأ صور صالونك.',
+      id: 'basics', title: `${k.place} وروابطه`, sub: `من رابط خرائط جوجل نجلب التقييمات والصور والأوقات. ومن إنستغرام نقرأ صور ${mine}.`,
       complete: ok.basics, note: 'الاسم، المدينة، الهاتف، رابط الخرائط، وإنستغرام مطلوبة.',
       body: (
         <Grid>
-          <Field label="رابط الصالون على خرائط جوجل" required wide hint="افتح صالونك في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط.">
+          <Field label={`رابط ${k.place} على خرائط جوجل`} required wide hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط.`}>
             <div style={{ display: 'flex', gap: 8 }}>
               <Input dir="ltr" value={f.maps_url} onChange={(e) => { up('maps_url', e.target.value); setGState('idle') }} onBlur={() => gState === 'idle' && f.maps_url.trim().length > 8 && fetchGoogle()} placeholder="https://maps.app.goo.gl/…" />
               <button type="button" className="zb-chip" onClick={fetchGoogle} disabled={gState === 'busy' || f.maps_url.trim().length < 9} style={{ flex: '0 0 auto' }}>
@@ -245,11 +228,11 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
             </div>
           </Field>
           {gMsg ? <Block><Notice tone={gState === 'fail' ? 'bad' : 'accent'}>{gMsg}</Notice></Block> : null}
-          <Field label="اسم الصالون" required>
-            <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder="صالون حمودة للرجال" />
+          <Field label={`اسم ${k.place}`} required>
+            <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
           </Field>
           <Field label="الاسم بالإنجليزية" hint="إن كان على اللافتة.">
-            <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="Hamuda Barber" />
+            <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="Name on the sign" />
           </Field>
           <Field label="المدينة" required>
             <Input value={f.city} onChange={(e) => up('city', e.target.value)} placeholder="عمّان" />
@@ -266,15 +249,17 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           <Field label="واتساب" hint="بمفتاح الدولة، مثل ‎+962. يصل إليه طلب الحجز وسؤال السعر.">
             <Input dir="ltr" inputMode="tel" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+962 79 752 7688" />
           </Field>
-          <Field label="إنستغرام" required={!f.no_instagram} wide hint={f.no_instagram ? 'لا بأس. نبني من صور جوجل وصورك.' : 'نقرأ منه صور صالونك وأعمالك.'}>
+          <Field label="إنستغرام" required={!f.no_instagram} wide hint={f.no_instagram ? 'لا بأس. نبني من صور جوجل وصورك.' : `نقرأ منه صور ${mine} وأعمالك.`}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Input dir="ltr" value={f.instagram} disabled={f.no_instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@hamuda.barber" style={{ flex: '1 1 220px' }} />
+              <Input dir="ltr" value={f.instagram} disabled={f.no_instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@yourname" style={{ flex: '1 1 220px' }} />
               <Toggle on={f.no_instagram} onChange={(v) => up('no_instagram', v)}>ليس عندي حساب</Toggle>
             </div>
           </Field>
-          <Block title="لمن الصالون؟">
-            <Chips options={[{ id: 'رجال', label: 'رجال' }, { id: 'رجال وأطفال', label: 'رجال وأطفال' }]} value={f.audience} onChange={(v) => up('audience', v || 'رجال')} allowNone={false} />
-          </Block>
+          {k.audiences?.length ? (
+            <Block title={`لمن ${k.place}؟`}>
+              <Chips options={k.audiences.map((a) => ({ id: a, label: a }))} value={f.audience} onChange={(v) => up('audience', v || k.audiences![0])} allowNone={false} />
+            </Block>
+          ) : null}
           <Block title="روابط أخرى" optional hint="أي صفحة لك: تيك توك، سناب، تطبيق حجز، موقع قديم، تصميم تحبه.">
             <div className="zb-list">
               {f.links.map((l) => (
@@ -288,19 +273,19 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
             </div>
             <AddButton onClick={() => up('links', [...f.links, { id: nid(), label: '', url: '' }])}>أضف رابطًا</AddButton>
           </Block>
-          <Block title="الشعار" optional hint="إن كان لصالونك شعار. بدونه يظهر الاسم وحده.">
+          <Block title="الشعار" optional hint={`إن كان لـ${mine} شعار. بدونه يظهر الاسم وحده.`}>
             <Uploads cols={4}><ImageUploadField value={f.logo} onChange={(u) => up('logo', u)} aspect="square" label="الشعار" /></Uploads>
           </Block>
         </Grid>
       ),
     },
     {
-      id: 'barbers', title: 'الحلاقون', sub: 'الزبون يطلب الحلاق بالاسم. أضف كل حلاق، وصورته إن أردت. بدون صورة يظهر اسمه بخط كبير، ولا نضع وجهًا غريبًا مكانه.',
+      id: 'barbers', title: k.team, sub: `الزبون يطلب ${k.one} بالاسم. أضف كل واحد، وصورته إن أردت. بدون صورة يظهر الاسم بخط كبير، ولا نضع وجهًا غريبًا مكانه.`,
       complete: barbers.length > 0, optional: true,
       body: (
         <Grid>
           {reviewSnips.length ? (
-            <Block title="من تقييماتك على جوجل" hint="الأسماء التي يذكرها زبائنك. سنضع كلام الزبون تحت اسم الحلاق.">
+            <Block title="من تقييماتك على جوجل" hint={`الأسماء التي يذكرها زبائنك. سنضع كلام الزبون تحت اسم ${k.one}.`}>
               <ul style={{ display: 'grid', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}>
                 {reviewSnips.map((r, i) => <li key={i} style={{ fontSize: 14.5, opacity: 0.85 }}>«{r.text.length > 160 ? r.text.slice(0, 157) + '…' : r.text}» · {r.name}</li>)}
               </ul>
@@ -309,17 +294,17 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           <Block>
             <div className="zb-list">
               {f.barbers.map((b, i) => (
-                <Card key={b.id} title={b.name || `الحلاق ${i + 1}`} onRemove={f.barbers.length > 1 ? () => drop('barbers', b.id) : undefined} removeLabel="حذف الحلاق">
+                <Card key={b.id} title={b.name || `${k.one} ${i + 1}`} onRemove={f.barbers.length > 1 ? () => drop('barbers', b.id) : undefined} removeLabel="حذف">
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,120px) minmax(0,1fr)', gap: 14, alignItems: 'start' }}>
-                    <ImageUploadField value={b.photo} onChange={(u) => patch<Barber>('barbers', b.id, { photo: u })} aspect="square" label="صورته" />
+                    <ImageUploadField value={b.photo} onChange={(u) => patch<Barber>('barbers', b.id, { photo: u })} aspect="square" label="الصورة" />
                     <Grid>
-                      <Field label="الاسم"><Input value={b.name} onChange={(e) => patch<Barber>('barbers', b.id, { name: e.target.value })} placeholder="عمار" /></Field>
-                      <Field label="صفته"><Input value={b.role} onChange={(e) => patch<Barber>('barbers', b.id, { role: e.target.value })} placeholder="حلاق" /></Field>
+                      <Field label="الاسم"><Input value={b.name} onChange={(e) => patch<Barber>('barbers', b.id, { name: e.target.value })} placeholder="الاسم الأول" /></Field>
+                      <Field label="صفته"><Input value={b.role} onChange={(e) => patch<Barber>('barbers', b.id, { role: e.target.value })} placeholder={k.role} /></Field>
                     </Grid>
                   </div>
                   <p className="zb-lab" style={{ margin: '12px 0 6px' }}>بماذا يشتهر؟</p>
                   <div className="zb-chips">
-                    {TAGS.map((t) => {
+                    {k.tags.map((t) => {
                       const on = b.tags.includes(t)
                       return <button key={t} type="button" className="zb-chip" data-on={on ? 'true' : undefined} aria-pressed={on} onClick={() => patch<Barber>('barbers', b.id, { tags: on ? b.tags.filter((x) => x !== t) : [...b.tags, t].slice(0, 6) })}>{t}</button>
                     })}
@@ -327,13 +312,13 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
                 </Card>
               ))}
             </div>
-            <AddButton onClick={() => up('barbers', [...f.barbers, { id: nid(), name: '', role: 'حلاق', photo: '', tags: [] }])}>أضف حلاقًا</AddButton>
+            <AddButton onClick={() => up('barbers', [...f.barbers, { id: nid(), name: '', role: k.role, photo: '', tags: [] }])}>أضف {addOne}</AddButton>
           </Block>
         </Grid>
       ),
     },
     {
-      id: 'services', title: 'الخدمات والأسعار', sub: 'اختر ما تقدّمه، وأضف ما ليس في القائمة. السعر اختياري: بدونه يسألك الزبون على واتساب.',
+      id: 'services', title: `${k.services} والأسعار`, sub: `اختر ما تقدّمه، وأضف ما ليس في القائمة. السعر اختياري: بدونه يسألك الزبون على واتساب.${k.priceHint ? ' اكتب ' + k.priceHint + '.' : ''}`,
       complete: ok.services, note: 'اختر خدمة واحدة على الأقل.',
       body: (
         <Grid>
@@ -356,6 +341,17 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           <Field label="العملة" hint="تُكتب بعد كل سعر.">
             <Input value={f.currency} onChange={(e) => up('currency', e.target.value)} placeholder="د.أ" />
           </Field>
+          {f.terms.length ? (
+            <Block title="الشروط" optional hint="ما يسأل عنه الزبون قبل أن يدفع. الفارغ لا يظهر.">
+              <Grid>
+                {f.terms.map((t, i) => (
+                  <Field key={t.label} label={t.label}>
+                    <Input value={t.text} onChange={(e) => setF((p) => ({ ...p, terms: p.terms.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) }))} placeholder={k.terms?.[i]?.placeholder} />
+                  </Field>
+                ))}
+              </Grid>
+            </Block>
+          ) : null}
         </Grid>
       ),
     },
@@ -393,7 +389,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
       ),
     },
     {
-      id: 'photos', title: 'صور الصالون', sub: 'هذه صورك على جوجل. أخفِ ما لا تريده، واختر صورة الواجهة، وأضف صورًا من عندك.',
+      id: 'photos', title: `صور ${k.place}`, sub: 'هذه صورك على جوجل. أخفِ ما لا تريده، واختر صورة الواجهة، وأضف صورًا من عندك.',
       complete: photos.length > 0, optional: true,
       body: (
         <Grid>
@@ -416,7 +412,7 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
               </div>
             </Block>
           ) : (
-            <Block><Notice>{gState === 'ok' ? 'لم نجد صورًا لصالونك على جوجل. أضف صورك هنا.' : 'ضع رابط خرائط جوجل في الخطوة الأولى لنجلب صورك، أو أضفها هنا.'}</Notice></Block>
+            <Block><Notice>{gState === 'ok' ? `لم نجد صورًا لـ${mine} على جوجل. أضف صورك هنا.` : 'ضع رابط خرائط جوجل في الخطوة الأولى لنجلب صورك، أو أضفها هنا.'}</Notice></Block>
           )}
           <Block title="صور من عندك" optional hint="الكراسي، الواجهة، قصّات من شغلكم. صور حقيقية فقط.">
             <Uploads cols={4}>
@@ -471,21 +467,21 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
           </Block>
           <Review
             facts={[
-              { label: 'الحلاقون', value: barbers.length },
+              { label: k.team, value: barbers.length },
               { label: 'الخدمات', value: `${services.length}${priced ? ` · ${priced} بسعر` : ''}` },
               { label: 'تقييمات جوجل', value: g?.reviews?.length || 0 },
               { label: 'الصور', value: photos.length },
             ]}
             recap={[
-              { label: 'الصالون', value: [f.name, f.area, f.city].filter(Boolean).join('، ') },
+              { label: bare, value: [f.name, f.area, f.city].filter(Boolean).join('، ') },
               { label: 'الهاتف', value: f.phone },
               { label: 'إنستغرام', value: f.no_instagram ? 'لا يوجد' : f.instagram },
-              { label: 'الحلاقون', value: barbers.map((b) => b.name).join('، ') },
+              { label: k.team, value: barbers.map((b) => b.name).join('، ') },
               { label: 'الخدمات', value: services.map((s) => s.name + (s.price ? ` (${s.price}${f.currency ? ' ' + f.currency : ''})` : '')).join('، ') },
               { label: 'أسئلة مُجابة', value: filledFaq ? String(filledFaq) : '' },
             ]}
           >
-            <Handoff title="جاهز لبناء موقع الصالون." body="نبنيه من إجاباتك وتقييماتك على جوجل، بلا كلام مخترع. ثم تعدّل أي شيء من المحرر." />
+            <Handoff title={`جاهز لبناء موقع ${k.place}.`} body="نبنيه من إجاباتك وتقييماتك على جوجل، بلا كلام مخترع. ثم تعدّل أي شيء من المحرر." />
           </Review>
         </Grid>
       ),
@@ -505,16 +501,16 @@ export default function BarberWizard({ onBack }: { onBack?: () => void }) {
   return (
     <>
       <WizardShell
-        eyebrow="قالب الخدمات · صالون حلاقة"
-        title="ابنِ موقع صالونك."
-        sub={<>سبع خطوات قصيرة. نبني الموقع من إجاباتك وما يقوله زبائنك على جوجل. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>ليس صالون حلاقة؟</button> : null}</>}
+        eyebrow={`قالب الخدمات · ${k.label}`}
+        title={`ابنِ موقع ${mine}.`}
+        sub={<>سبع خطوات قصيرة. نبني الموقع من إجاباتك وما يقوله زبائنك على جوجل. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>ليس {k.label}؟</button> : null}</>}
         steps={steps}
         step={step}
         onStep={setStep}
         progress={{ pct }}
         scrollKey={errorKey || undefined}
         notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
-        final={{ label: loading ? 'نبني موقعك…' : 'ابنِ موقع الصالون', slide: 'هيا بنا', onClick: build, busy: loading }}
+        final={{ label: loading ? 'نبني موقعك…' : `ابنِ موقع ${k.place}`, slide: 'هيا بنا', onClick: build, busy: loading }}
       />
       <GenerationOverlay open={loading} />
       <style dangerouslySetInnerHTML={{ __html: '.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />

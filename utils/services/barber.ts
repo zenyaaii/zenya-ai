@@ -14,6 +14,7 @@
 
 import { z } from 'zod'
 import type { ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
+import { KIND, NICHE_KINDS, type NicheKind } from './kinds'
 
 /** Saturday first: the week as it is read across the Gulf and the Levant. */
 export const DAYS_AR = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'] as const
@@ -22,6 +23,7 @@ const hhmm = z.string().regex(/^\d{1,2}:\d{2}$/)
 const url = z.string().trim().max(800)
 
 export const barberInputSchema = z.object({
+  kind: z.enum(NICHE_KINDS as [NicheKind, ...NicheKind[]]).default('barber'),
   name: z.string().trim().min(2).max(80),
   latin: z.string().trim().max(60).optional(),
   city: z.string().trim().min(2).max(60),
@@ -70,6 +72,8 @@ export const barberInputSchema = z.object({
     gallery: z.array(url).max(12).optional().default([]),
   }).default({ gallery: [] }),
   faq: z.array(z.object({ q: z.string().trim().min(4).max(140), a: z.string().trim().max(500) })).max(16).optional().default([]),
+  /** Stated terms: a gym's freeze and cancel rules, a garage's warranty. */
+  terms: z.array(z.object({ label: z.string().trim().max(40), text: z.string().trim().max(200) })).max(8).optional().default([]),
   logo: url.optional(),
 })
 
@@ -161,7 +165,7 @@ export function quoteFor(name: string, reviews: { name: string; text: string; ra
   return { quote, by: r.name, count: hits.length }
 }
 
-const DEFAULT_FAQ_ORDER = ['موعد', 'انتظر', 'السعر']
+const DEFAULT_FAQ_ORDER = ['موعد', 'تجميد', 'إلغاء', 'يؤلم', 'التأمين', 'ضمان', 'انتظر', 'السعر']
 
 /**
  * The whole site content from the wizard's answers and Google's facts.
@@ -180,12 +184,11 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
       quote_by: q?.by,
     }
   })
-  const short = input.name.replace(/^(صالون|محل|حلاق(?:ة)?|باربر)\s+/, '').replace(/\s+(للرجال|رجالي|للحلاقة)$/, '').trim() || input.name
+  const k = KIND[input.kind]
+  const short = input.name.replace(k.prefix, '').replace(k.suffix, '').trim() || input.name
   const named = members.filter((m) => m.quote).map((m) => m.name)
   const where = [input.area, input.city].filter(Boolean).join('، ')
-  const lede = named.length >= 2
-    ? `صالون ${input.audience === 'رجال وأطفال' ? 'للرجال والأطفال' : 'رجالي'} في ${input.area || input.city}. زبائننا يطلبون ${named.slice(0, 3).join(' و')} بالاسم.`
-    : `صالون ${input.audience === 'رجال وأطفال' ? 'للرجال والأطفال' : 'رجالي'} في ${where}.`
+  const lede = k.lede({ named, area: named.length >= 2 ? (input.area || input.city) : where, audience: input.audience })
   const hours = input.hours.length ? input.hours : hoursFromGoogle(g.periods || [])
   const cur = input.currency?.trim() || ''
   const instagram = input.instagram?.trim() || undefined
@@ -197,10 +200,10 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
   const gallery = [input.photos.hero, input.photos.side, ...(input.photos.gallery || [])].filter((u, i, all): u is string => !!u && all.indexOf(u) === i)
 
   return {
-    niche: 'barber',
+    niche: input.kind,
     brand: {
       name: input.name,
-      category: 'صالون حلاقة',
+      category: k.label,
       city: input.city,
       region: input.area,
       area: input.area,
@@ -213,14 +216,14 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
       eyebrow: [input.latin, input.city].filter(Boolean).join(' · '),
       headline: short,
       subheadline: lede,
-      primary_cta: input.booking.mode === 'walkin' ? 'تعال مباشرة' : 'احجز موعدك',
-      secondary_cta: 'الخدمات والأسعار',
+      primary_cta: input.booking.mode === 'walkin' ? 'تعال مباشرة' : k.cta,
+      secondary_cta: `${k.services} والأسعار`,
       image: input.photos.hero || '',
       stats: [],
     },
     trust_bar: { items: [] },
     services: {
-      heading: 'الخدمات',
+      heading: k.services,
       subheading: input.services.some((s) => s.price) ? 'السعر المكتوب هو ما تدفعه.' : '',
       items: input.services.map((s) => ({
         name: s.name,
@@ -243,12 +246,12 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
       items: reviews.map((r) => ({ name: r.name, text: r.text, rating: r.rating, origin: 'google' as const, when: r.when, source: 'Google' })),
     },
     faq: { heading: 'قبل أن تأتي', items: faq },
-    final_cta: { heading: 'احجز موعدك', subheading: '', cta_label: 'احجز موعدك', secondary_text: '' },
-    gallery: { heading: 'الصالون', images: gallery.map((u) => ({ url: u, alt: '' })) },
+    final_cta: { heading: k.cta, subheading: '', cta_label: k.cta, secondary_text: '' },
+    gallery: { heading: k.place, images: gallery.map((u) => ({ url: u, alt: '' })) },
     footer: { tagline: lede, legal: '', phone: input.phone, email: input.email || '', address: input.address || where },
     seo: {
-      title: `${input.name} | حلاق في ${input.area || input.city}`,
-      description: `${lede} احجز موعدك عند الحلاق الذي تريده، وشاهد الأسعار والأوقات والموقع.`.slice(0, 160),
+      title: `${input.name} | ${k.seo} في ${input.area || input.city}`,
+      description: `${lede} ${k.cta}، وشاهد ${k.services} والأسعار والأوقات والموقع.`.slice(0, 160),
     },
     links: {
       whatsapp: input.whatsapp || undefined,
@@ -256,9 +259,15 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
       extra: input.links.filter((l) => l.url).length ? input.links.filter((l) => l.url) : undefined,
     },
     social_links: instagram ? { instagram } : undefined,
-    team: { heading: 'الحلاقون', members },
+    team: { heading: k.team, members },
+    terms: input.terms.filter((t) => t.text.trim()).length ? input.terms.filter((t) => t.text.trim()) : undefined,
     hours,
     booking: { mode: input.booking.mode, wait: input.booking.wait || undefined, busy: input.booking.busy || undefined },
     google: { rating: g.rating ?? undefined, count: g.count ?? undefined, maps_url: g.maps_url || input.maps_url, place_id: g.place_id },
   }
 }
+
+/** Every kind builds the same way; the barber was first. */
+export const nicheInputSchema = barberInputSchema
+export type NicheInput = BarberInput
+export const buildNicheContent = buildBarberContent

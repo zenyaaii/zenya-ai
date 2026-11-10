@@ -12,6 +12,7 @@ import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, visitBarber, type Prepared } from '@/lib/restaurant-build'
 import { barberInputSchema, buildBarberContent } from '@/utils/services/barber'
+import { KIND, kindOfLead, type NicheKind } from '@/utils/services/kinds'
 import { downSince, googleOutage, missingKey, noteDown, noteUp, OutageError, type Outage } from '@/lib/service-health'
 
 /**
@@ -280,12 +281,13 @@ export type BuildReport = {
 // ── barber: the services template's barber kind ───────────────────────────
 /** A barber lead, whatever template the lead list gave it (they came in as "Wellness"). */
 export function isBarber(lead: Pick<Lead, 'kind' | 'name'>): boolean {
-  return /حلاق|باربر|barber/i.test(`${lead.kind ?? ''} ${lead.name}`)
+  return kindOfLead(lead) === 'barber'
 }
 const CURRENCY: Record<string, string> = { JO: 'د.أ', SA: 'ر.س', AE: 'د.إ', KW: 'د.ك', QA: 'ر.ق', BH: 'د.ب', OM: 'ر.ع', EG: 'ج.م', IQ: 'د.ع', LB: 'ل.ل', MA: 'د.م', TN: 'د.ت', DZ: 'د.ج', LY: 'د.ل', SY: 'ل.س' }
 
-function barberFactsPrompt(lead: Lead, g: Google, prep?: Prepared): string {
-  return `You read the facts of a men's barbershop in ${COUNTRY_EN[lead.country ?? ''] ?? 'the Arab world'} and fill in its website wizard, the way its owner would. Use ONLY the facts below.
+function barberFactsPrompt(lead: Lead, g: Google, prep: Prepared | undefined, nk: NicheKind): string {
+  const k = KIND[nk]
+  return `You read the facts of a ${k.visitor.place} in ${COUNTRY_EN[lead.country ?? ''] ?? 'the Arab world'} and fill in its website wizard, the way its owner would. Use ONLY the facts below.
 
 FACTS
 Name on Google: ${lead.name}
@@ -296,16 +298,17 @@ ${prep ? factsBlock(prep) : ''}
 RULES
 - brand_name: the shop's name as on Google, minus anything in brackets or after a dash. Keep its script. At most 5 words.
 - latin: the shop's name in Latin letters ONLY if the facts write it so (Google name, Instagram handle or bio), e.g. "Hamuda Barber"; else "".
-- barbers: the people reviewers name as the one who cut their hair or as the owner (e.g. "حلقت عند عمار", "تسلم ايد معاذ", "صاحب الصالون حمودة"). Arabic script, one or two words each, as written. role: "صاحب الصالون" when a review says he is the owner, else "حلاق". Never a reviewer's own name, never a guessed name. [] when none.
-- services: what a review, the price board or the Instagram names, plus the plain basics every barber offers (قص شعر، تحديد اللحية). 2-6 words each. price: ONLY when the price board or a review states it, digits only; else "".
-- audience: "رجال وأطفال" only when a review or the facts mention children; else "رجال".
+- barbers: the staff reviewers name as the person who served them or as the owner (e.g. "حلقت عند عمار", "تسلم ايد معاذ", "الكابتن فيصل", "د. سامي"). Arabic script, one or two words each, as written (keep "د." for a doctor). role: "${k.ownerRole}" when a review says so, else "${k.role}". Never a reviewer's own name, never a guessed name. [] when none.
+- services: what a review, the price board or the Instagram names, plus the plain basics every ${k.visitor.place} offers (${k.defaults.filter((d) => d.on).map((d) => d.name).join('، ')}). 2-6 words each. price: ONLY when the price board or a review states it, digits only; else "".
+- audience: ${k.audiences ? `one of ${k.audiences.map((a) => `"${a}"`).join(', ')}, from the facts; else "${k.audiences[0]}".` : '"".'}
 - slug: the brand name in Latin letters for a web address: lowercase a-z and 0-9 only, 3 to 24 characters.
 
 Reply with ONLY this JSON:
 { "slug": "", "brand_name": "", "latin": "", "audience": "رجال", "barbers": [{ "name": "", "role": "حلاق" }], "services": [{ "name": "", "price": "" }] }`
 }
 
-function barberInput(lead: Lead, f: any, prep?: Prepared) {
+function barberInput(lead: Lead, f: any, prep: Prepared | undefined, nk: NicheKind) {
+  const k = KIND[nk]
   const url = (j?: { id: string }) => (j ? prep?.urls.get(j.id) : undefined)
   const hero = url(prep?.picks.hero)
   const side = url(prep?.picks.story)
@@ -319,20 +322,21 @@ function barberInput(lead: Lead, f: any, prep?: Prepared) {
   const phone = String(lead.phone || '').trim()
   const wa = String(lead.wa || '').trim()
   return {
+    kind: nk, terms: [],
     name: str(f?.brand_name, 80) || lead.name,
     latin: /^[A-Za-z0-9 &'.-]{2,40}$/.test(String(f?.latin || '').trim()) ? String(f.latin).trim() : undefined,
     city: clean(lead.city) || 'المدينة',
     area: clean(lead.area) || undefined,
     address: lead.address ? clean(lead.address).slice(0, 200) : undefined,
-    audience: f?.audience === 'رجال وأطفال' ? 'رجال وأطفال' : 'رجال',
+    audience: k.audiences?.includes(f?.audience) ? f.audience : k.audiences?.[0],
     phone: phone || wa || '0000',
     whatsapp: wa ? (/^\+|^00/.test(wa) ? wa : '+' + wa.replace(/\D/g, '')) : (/^\+|^00/.test(phone) ? phone : undefined),
     maps_url: lead.maps || `https://www.google.com/maps/place/?q=place_id:${lead.id}`,
     instagram: ig ? `@${ig}` : undefined,
     links: [],
-    barbers: (Array.isArray(f?.barbers) ? f.barbers : []).map((b: any) => ({ name: str(b?.name, 30), role: b?.role === 'صاحب الصالون' ? 'صاحب الصالون' : 'حلاق', tags: [] }))
-      .filter((b: any) => b.name.length >= 2 && b.name.split(' ').length <= 2).slice(0, 6),
-    services: svc.length ? svc.slice(0, 12).map((x: any) => ({ name: x.name, price: x.price || undefined })) : [{ name: 'قص شعر' }, { name: 'تحديد اللحية' }],
+    barbers: (Array.isArray(f?.barbers) ? f.barbers : []).map((b: any) => ({ name: str(b?.name, 30), role: b?.role === k.ownerRole ? k.ownerRole : k.role, tags: [] }))
+      .filter((b: any) => b.name.length >= 2 && b.name.replace(/^د\.\s*/, '').split(' ').length <= 2).slice(0, 6),
+    services: svc.length ? svc.slice(0, 12).map((x: any) => ({ name: x.name, price: x.price || undefined })) : k.defaults.filter((d) => d.on).map((d) => ({ name: d.name })),
     currency: CURRENCY[lead.country ?? ''] || undefined,
     booking: { mode: 'both' as const },
     hours: [],
@@ -341,17 +345,17 @@ function barberInput(lead: Lead, f: any, prep?: Prepared) {
   }
 }
 
-async function buildBarberSite(lead: Lead, prep: Prepared | undefined, g: Google): Promise<{ content: any; input: any; slug: string; colors: [string, string] }> {
-  const f = await askJson(barberFactsPrompt(lead, g, prep), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
+async function buildBarberSite(lead: Lead, prep: Prepared | undefined, g: Google, nk: NicheKind): Promise<{ content: any; input: any; slug: string; colors: [string, string] }> {
+  const f = await askJson(barberFactsPrompt(lead, g, prep, nk), 'You fill in website wizards from Google Maps facts only. Return strict JSON only.')
     .catch((e) => { throw e instanceof BuildError || e instanceof OutageError ? e : new BuildError('facts', e?.message || 'facts failed') })
-  const parsed = barberInputSchema.safeParse(barberInput(lead, f, prep))
+  const parsed = barberInputSchema.safeParse(barberInput(lead, f, prep, nk))
   if (!parsed.success) throw new BuildError('facts', 'barber input: ' + parsed.error.issues.map((i) => i.path.join('.')).join(', '))
   const content = buildBarberContent(parsed.data, {
     place_id: lead.id, maps_url: lead.maps || undefined, rating: lead.rating, count: lead.reviews,
     reviews: g.reviews.map((r) => ({ name: r.who, rating: r.stars, text: r.text, when: r.when })),
     periods: g.periods,
   })
-  return { content, input: parsed.data, slug: String(f?.slug || ''), colors: [prep?.colors.accent || '#c4a35a', prep?.colors.background || '#0d0c0a'] }
+  return { content, input: parsed.data, slug: String(f?.slug || ''), colors: [prep?.colors.accent || KIND[nk].looks[0].colors.accent, prep?.colors.background || KIND[nk].looks[0].colors.background] }
 }
 
 // ── slug + publish ────────────────────────────────────────────────────────
@@ -387,7 +391,8 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
   }
   // Barbers run the same build system as restaurants, with the barber's eye
   // and the barber page of the services template (Anas, 2026-11-10).
-  if (isBarber(lead)) return buildBarberLead(lead, ownerId, old, started)
+  const nk = kindOfLead(lead)
+  if (nk) return buildBarberLead(lead, nk, ownerId, old, started)
   // Restaurants run the full build system (lib/restaurant-build); the other
   // templates keep the Google-only path until they get theirs.
   const prep = kind === 'restaurant'
@@ -472,24 +477,24 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
   return { url, themeId: data.id, report: r }
 }
 
-async function buildBarberLead(lead: Lead, ownerId: string, old: { id: string; slug: string; content: any } | null, started: number) {
+async function buildBarberLead(lead: Lead, nk: NicheKind, ownerId: string, old: { id: string; slug: string; content: any } | null, started: number) {
   const kind = 'services' as const
   const who = { placeId: lead.id, name: lead.name, city: lead.city, area: lead.area, address: lead.address, phone: lead.phone }
-  const prep = await prepare(lead.id, lead.social ?? null, who, 'barber')
+  const prep = await prepare(lead.id, lead.social ?? null, who, nk)
     .catch((e) => { throw e instanceof OutageError ? e : new BuildError('google', e?.message || 'collect failed') })
   const foundLink = !lead.social ? (prep.social.instagram ? `https://www.instagram.com/${prep.social.instagram.handle}/` : prep.social.facebook?.url) : undefined
   if (foundLink) await serviceClient().from('leads').update({ social: foundLink }).eq('id', lead.id)
-  const { content, input, slug: wanted, colors } = await buildBarberSite(lead, prep, prep.place)
-  await visitBarber(content, input.city, prep.file)
+  const { content, input, slug: wanted, colors } = await buildBarberSite(lead, prep, prep.place, nk)
+  await visitBarber(content, input.city, prep.file, nk)
   prep.file.published = true
   const ai = downSince(started).find((o) => o.service === 'anthropic')
   if (ai) throw new OutageError(ai)
   // The barber page reads the shop's own colours; the near-black + brass of the approved sample when none were found.
-  const own = prep.file.colors.identity.length ? prep.colors : { background: '#0d0c0a', surface: '#151310', text: '#f2ede3', muted: '#958d80', accent: '#c4a35a', primary: '#c4a35a', border: '#2a2722' }
-  const wrapper = { niche: 'barber', color_overrides: own, build_file: prep.file }
+  const own = prep.file.colors.identity.length ? prep.colors : KIND[nk].looks[0].colors
+  const wrapper = { niche: nk, color_overrides: own, build_file: prep.file }
   const v = prep.file.visitor, last = v[v.length - 1]
   const report = (url: string): BuildReport => ({
-    at: new Date().toISOString(), kind: 'barber', url,
+    at: new Date().toISOString(), kind: nk, url,
     score: last?.score ?? null, rounds: v.map((x) => x.score), why: last?.notes ?? [], missing: prep.file.missing,
     social: { instagram: prep.file.sources.instagram, facebook: prep.file.sources.facebook, found: prep.file.sources.found_by_search },
     photos: { google: prep.file.sources.google.photos, used: prep.file.photos.filter((x) => x.used).length },

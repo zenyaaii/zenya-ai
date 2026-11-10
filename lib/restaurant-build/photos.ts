@@ -1,3 +1,4 @@
+import { KIND, type NicheKind } from '@/utils/services/kinds'
 import sharp from 'sharp'
 import type { RawPhoto } from './sources'
 
@@ -69,9 +70,10 @@ export async function contactSheet(pics: Pic[]): Promise<Buffer> {
     .composite(tiles.flat()).jpeg({ quality: 80 }).toBuffer()
 }
 
-export type Niche = 'restaurant' | 'barber'
 
-const PLACE: Record<Niche, { what: string; want: string; work: string; workEg: string; hero: string; dish: string }> = {
+export type Niche = 'restaurant' | NicheKind
+
+const PLACE: Partial<Record<Niche, { what: string; want: string; work: string; workEg: string; hero: string; dish: string }>> = {
   restaurant: {
     what: 'restaurant', want: 'want to go and eat here', work: 'food | drink', workEg: '',
     hero: 'makes you want to go', dish: 'for food/drink only, the dish in short Arabic (e.g. "مشاوي مشكلة", "كنافة") when you can plainly recognise it; otherwise "".',
@@ -86,7 +88,12 @@ const PLACE: Record<Niche, { what: string; want: string; work: string; workEg: s
 
 /** The visitor's eye on a contact sheet of the place's photos, for one kind of place. */
 export function judgePrompt(niche: Niche = 'restaurant'): string {
-  const p = PLACE[niche]
+  const k = niche === 'restaurant' ? null : KIND[niche]
+  const p = PLACE[niche] ?? {
+    what: k!.visitor.place, want: k!.visitor.want, work: 'food (= the finished work, seen close: a result, a treated car, a printed photo) | drink (= tools, equipment or products close up)',
+    workEg: ' A close-up of finished work is kind "food".', hero: 'shows the place itself (the room, the equipment or the front) and makes you want to go',
+    dish: 'for "food" (finished work) only, what it is in short Arabic when plain; otherwise "".',
+  }
   return `You are a first-time visitor deciding whether to go to this ${p.what}, looking at the photos it would show on its website. The sheet shows numbered photos (yellow number, top-left of each).
 
 For EVERY number return one entry:

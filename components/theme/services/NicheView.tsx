@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import type { ServiceContent, ServiceTeamMember } from '@/utils/services/types'
 import { DAYS_AR, openState, timeAr } from '@/utils/services/barber'
+import { KIND, isNicheKind } from '@/utils/services/kinds'
 import { useBookingContext } from '@/components/site/BookingContext'
 
 /**
@@ -42,7 +43,8 @@ function lum(hex?: string): number {
 }
 const onColor = (hex: string) => (lum(hex) > 0.36 ? '#15120c' : '#fffaf2')
 
-function palette(c?: Colors) {
+function palette(c?: Colors, fallback?: Colors) {
+  if (!c?.background || !c.accent) c = fallback
   if (!c?.background || !c.accent) return { ...DEFAULT, onAcc: onColor(DEFAULT.acc), dark: true }
   const dark = lum(c.background) < 0.2
   const ink = c.text || (dark ? DEFAULT.ink : '#1b1712')
@@ -91,8 +93,9 @@ function igHref(v?: string): string | null {
 
 const ar = (n: number) => n.toLocaleString('ar')
 
-export default function BarberView({ content, colors, logo }: { content: ServiceContent; colors?: Colors; logo?: string }) {
-  const p = useMemo(() => palette(colors), [colors])
+export default function NicheView({ content, colors, logo }: { content: ServiceContent; colors?: Colors; logo?: string }) {
+  const kind = isNicheKind(content.niche) ? content.niche : 'barber'
+  const p = useMemo(() => palette(colors, KIND[kind].looks[0].colors), [colors, kind])
   const { slug, enabled, preview } = useBookingContext()
   const canBook = enabled || preview
   const wa = waNumber(content)
@@ -107,6 +110,7 @@ export default function BarberView({ content, colors, logo }: { content: Service
     return () => window.removeEventListener('scroll', on)
   }, [])
 
+  const k = KIND[kind]
   const b = content.brand
   const members = (content.team?.members || []).filter((m) => m.name.trim())
   const services = content.services.items.filter((s) => s.name.trim())
@@ -127,7 +131,7 @@ export default function BarberView({ content, colors, logo }: { content: Service
   const walkin = content.booking?.mode === 'walkin'
   const tel = content.footer.phone ? telOf(content.footer.phone) : ''
 
-  const [pick, setPick] = useState('أي حلاق')
+  const [pick, setPick] = useState(k.any)
   const bookRef = useRef<HTMLElement>(null)
   const bookWith = (name: string) => { setPick(name); bookRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 
@@ -142,18 +146,18 @@ export default function BarberView({ content, colors, logo }: { content: Service
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Cormorant+SC:wght@500;600&display=swap" />
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
-      <header className={`bb-top${solid ? ' solid' : ''}${hero ? '' : ' plain'}`}>
+      <header className={`bb-top${solid ? ' solid' : ''}${hero ? ' onphoto' : ' plain'}`}>
         <a className="bb-mark" href="#bb-top">
           {logo && b.show_logo !== false ? <img src={logo} alt="" /> : null}
           <span><b>{short}</b>{b.latin ? <i>{b.latin}</i> : null}</span>
         </a>
         <nav>
-          {members.length ? <a href="#bb-crew">{content.team?.heading || 'الحلاقون'}</a> : null}
-          <a href="#bb-prices">الخدمات</a>
+          {members.length ? <a href="#bb-crew">{content.team?.heading || k.team}</a> : null}
+          <a href="#bb-prices">{k.services}</a>
           {reviews.length ? <a href="#bb-reviews">التقييمات</a> : null}
           <a href="#bb-visit">الموقع</a>
         </nav>
-        {walkin ? (wa ? <a className="bb-btn sm" href={waLink('مرحبًا')!} target="_blank" rel="noopener noreferrer">واتساب</a> : null) : <a className="bb-btn sm" href="#bb-book">احجز موعدك</a>}
+        {walkin ? (wa ? <a className="bb-btn sm" href={waLink('مرحبًا')!} target="_blank" rel="noopener noreferrer">واتساب</a> : null) : <a className="bb-btn sm" href="#bb-book">{k.cta}</a>}
       </header>
 
       <section id="bb-top" className={`bb-hero${hero ? '' : ' plain'}`}>
@@ -163,8 +167,8 @@ export default function BarberView({ content, colors, logo }: { content: Service
           <h1 className="bb-rise">{short}</h1>
           <p className="bb-lede bb-rise">{content.hero.subheadline || b.tagline}</p>
           <div className="bb-acts bb-rise">
-            {walkin ? null : <a className="bb-btn" href="#bb-book">احجز موعدك</a>}
-            <a className="bb-btn line" href="#bb-prices">{priced ? 'الخدمات والأسعار' : 'الخدمات'}</a>
+            {walkin ? null : <a className="bb-btn" href="#bb-book">{k.cta}</a>}
+            <a className="bb-btn line" href="#bb-prices">{priced ? `${k.services} والأسعار` : k.services}</a>
           </div>
           <div className="bb-facts bb-rise">
             {rating ? <div><b>{rating.toFixed(1)} <span className="bb-stars">★★★★★</span></b><span>{count ? `${ar(count)} تقييم على جوجل` : 'على جوجل'}</span></div> : null}
@@ -176,14 +180,14 @@ export default function BarberView({ content, colors, logo }: { content: Service
 
       {members.length ? (
         <section className="bb-sec" id="bb-crew"><div className="bb-w">
-          <div className="bb-head"><h2>{content.team?.heading || 'الحلاقون'}</h2>{members.some((m) => m.quote) ? <p>ما تقرؤه تحت كل اسم كتبه زبون على جوجل.</p> : null}</div>
-          <div className="bb-crew">{members.map((m) => <Barber key={m.name} m={m} book={walkin ? undefined : () => bookWith(m.name)} />)}</div>
+          <div className="bb-head"><h2>{content.team?.heading || k.team}</h2>{members.some((m) => m.quote) ? <p>ما تقرؤه تحت كل اسم كتبه زبون على جوجل.</p> : null}</div>
+          <div className="bb-crew">{members.map((m) => <Barber key={m.name} m={m} label={k.bookAt(m.name)} book={walkin ? undefined : () => bookWith(m.name)} />)}</div>
         </div></section>
       ) : null}
 
       <section className="bb-sec alt" id="bb-prices"><div className={`bb-w bb-board${side ? '' : ' one'}`}>
         <div>
-          <div className="bb-head"><h2>{content.services.heading || 'الخدمات'}</h2>{priced ? <p>السعر المكتوب هو ما تدفعه.</p> : null}</div>
+          <div className="bb-head"><h2>{content.services.heading || k.services}</h2>{priced ? <p>السعر المكتوب هو ما تدفعه.</p> : null}</div>
           <ul className="bb-list">
             {services.map((s) => (
               <li key={s.name}>
@@ -200,14 +204,17 @@ export default function BarberView({ content, colors, logo }: { content: Service
               <a className="bb-btn" href={waLink('مرحبًا، أريد أسعار الخدمات')!} target="_blank" rel="noopener noreferrer">{I.wa} اسأل عن الأسعار</a>
             </div>
           ) : null}
+          {content.terms?.length ? (
+            <dl className="bb-terms">{content.terms.map((t) => <div key={t.label}><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl>
+          ) : null}
         </div>
-        {side ? <div className="bb-side"><img src={side} alt={`صالون ${short}`} loading="lazy" /></div> : null}
+        {side ? <div className="bb-side"><img src={side} alt={`${k.place} ${short}`} loading="lazy" /></div> : null}
       </div></section>
 
       <section className="bb-sec" id="bb-book" ref={bookRef}><div className="bb-w bb-bk">
         <aside>
-          <h2>{walkin ? 'تعال مباشرة' : 'احجز موعدك'}</h2>
-          <p>{walkin ? 'نستقبلك بدون موعد، بالدور.' : 'اختر الخدمة والحلاق والوقت. يصل طلبك إلى الصالون، ويؤكّد لك الموعد على واتساب.'}</p>
+          <h2>{walkin ? 'تعال مباشرة' : k.cta}</h2>
+          <p>{walkin ? 'نستقبلك بدون موعد، بالدور.' : k.bookLine}</p>
           {content.booking?.wait ? <p className="bb-fine">الانتظار عادة: {content.booking.wait}</p> : null}
           {content.booking?.busy ? <p className="bb-fine">الأكثر زحمة: {content.booking.busy}</p> : null}
           {st?.text ? <p className="bb-fine">{st.open ? 'مفتوح الآن' : 'مغلق الآن'} · {st.text}</p> : null}
@@ -222,13 +229,13 @@ export default function BarberView({ content, colors, logo }: { content: Service
             </div>
           </div>
         ) : canBook ? (
-          <Booking services={services.map((s) => s.name)} barbers={members.map((m) => m.name)} pick={pick} setPick={setPick} slug={slug} preview={preview || !slug} />
+          <Booking k={k} services={services.map((s) => s.name)} barbers={members.map((m) => m.name)} pick={pick} setPick={setPick} slug={slug} preview={preview || !slug} />
         ) : (
           <div className="bb-ask">
             <h3>احجز على واتساب</h3>
-            <p>اكتب الخدمة والحلاق والوقت الذي يناسبك، ونؤكّد لك الموعد.</p>
+            <p>اكتب الخدمة و{k.one} والوقت الذي يناسبك، ونؤكّد لك الموعد.</p>
             <div className="bb-call">
-              {wa ? <a className="bb-btn" href={waLink(`مرحبًا، أريد حجز موعد${pick !== 'أي حلاق' ? ' عند ' + pick : ''}.`)!} target="_blank" rel="noopener noreferrer">{I.wa} احجز على واتساب</a> : null}
+              {wa ? <a className="bb-btn" href={waLink(`مرحبًا، أريد حجز موعد${pick !== k.any ? ' عند ' + pick : ''}.`)!} target="_blank" rel="noopener noreferrer">{I.wa} احجز على واتساب</a> : null}
               {tel ? <a className="bb-btn line" href={`tel:${tel}`}>{I.phone} اتصل</a> : null}
             </div>
           </div>
@@ -253,7 +260,7 @@ export default function BarberView({ content, colors, logo }: { content: Service
 
       {place.length >= 2 ? (
         <section className="bb-sec" id="bb-place"><div className="bb-w">
-          <div className="bb-head"><h2>{content.gallery.heading || 'الصالون'}</h2><p>صور المكان الحقيقية.</p></div>
+          <div className="bb-head"><h2>{content.gallery.heading || k.place}</h2><p>صور المكان الحقيقية.</p></div>
           <div className={`bb-mos n${Math.min(place.length, 5)}`}>{place.map((u, i) => <img key={u} src={u} alt={`${short} ${i + 1}`} loading="lazy" />)}</div>
         </div></section>
       ) : null}
@@ -306,7 +313,7 @@ export default function BarberView({ content, colors, logo }: { content: Service
       </footer>
 
       <nav className="bb-bar">
-        {walkin ? null : <a className="bb-btn" href="#bb-book">احجز موعدك</a>}
+        {walkin ? null : <a className="bb-btn" href="#bb-book">{k.cta}</a>}
         {wa ? <a className="bb-btn line" href={waLink('مرحبًا، أريد حجز موعد')!} target="_blank" rel="noopener noreferrer">{I.wa} واتساب</a> : null}
         {tel ? <a className="bb-btn line sq" href={`tel:${tel}`} aria-label="اتصال">{I.phone}</a> : null}
       </nav>
@@ -314,14 +321,14 @@ export default function BarberView({ content, colors, logo }: { content: Service
   )
 }
 
-function Barber({ m, book }: { m: ServiceTeamMember; book?: () => void }) {
+function Barber({ m, book, label }: { m: ServiceTeamMember; book?: () => void; label: string }) {
   return (
     <article className={`bb-pr${m.photo ? '' : ' ni'}`}>
       {m.photo ? <div className="bb-por"><img src={m.photo} alt={m.name} loading="lazy" /></div> : null}
       <h3>{m.name}{m.role ? <small>{m.role}</small> : null}</h3>
       {m.tags?.length ? <ul className="bb-tags">{m.tags.map((t) => <li key={t}>{t}</li>)}</ul> : null}
       {m.quote ? <blockquote>{m.quote}<cite>{m.quote_by ? `${m.quote_by} · ` : ''}تقييم على جوجل</cite></blockquote> : null}
-      {book ? <button type="button" className="bb-go" onClick={book}>احجز عند {m.name}</button> : null}
+      {book ? <button type="button" className="bb-go" onClick={book}>{label}</button> : null}
     </article>
   )
 }
@@ -339,7 +346,7 @@ function nextDays(n: number): { v: string; label: string }[] {
 
 const TIMES = [['11:00', '11 ص'], ['13:00', '1 م'], ['16:00', '4 م'], ['18:30', '6:30 م'], ['20:00', '8 م'], ['21:00', '9 م']] as const
 
-function Booking({ services, barbers, pick, setPick, slug, preview }: { services: string[]; barbers: string[]; pick: string; setPick: (v: string) => void; slug: string | null; preview: boolean }) {
+function Booking({ k, services, barbers, pick, setPick, slug, preview }: { k: (typeof KIND)[keyof typeof KIND]; services: string[]; barbers: string[]; pick: string; setPick: (v: string) => void; slug: string | null; preview: boolean }) {
   const [days, setDays] = useState<{ v: string; label: string }[]>([])
   useEffect(() => setDays(nextDays(6)), [])
   const [svc, setSvc] = useState(services[0] || '')
@@ -363,7 +370,7 @@ function Booking({ services, barbers, pick, setPick, slug, preview }: { services
         body: JSON.stringify({
           slug, type: 'appointment', name: name.trim(), phone: phone.trim(),
           date: days[day]?.v, time: TIMES[time][0],
-          message: [`الخدمة: ${svc}`, `الحلاق: ${pick}`].join(' · '),
+          message: [`الخدمة: ${svc}`, `${k.one}: ${pick}`].join(' · '),
           path: typeof window !== 'undefined' ? window.location.pathname : '/',
         }),
       })
@@ -377,7 +384,7 @@ function Booking({ services, barbers, pick, setPick, slug, preview }: { services
     return (
       <div className="bb-done" role="status">
         <b>وصل طلبك</b>
-        <span>{svc} · {pick} · {days[day]?.label} {TIMES[time][1]}. سيؤكّد الصالون الموعد على واتساب.</span>
+        <span>{svc} · {pick} · {days[day]?.label} {TIMES[time][1]}. سيؤكّد لك {k.place} الموعد على واتساب.</span>
         {preview ? <small>معاينة: لم يُرسل هذا الطلب.</small> : null}
       </div>
     )
@@ -390,8 +397,8 @@ function Booking({ services, barbers, pick, setPick, slug, preview }: { services
         </label>
       ) : null}
       {barbers.length ? (
-        <div className="bb-fl">الحلاق
-          <div className="bb-chips">{['أي حلاق', ...barbers].map((v) => <button key={v} type="button" className={pick === v ? 'on' : ''} aria-pressed={pick === v} onClick={() => setPick(v)}>{v}</button>)}</div>
+        <div className="bb-fl">{k.one}
+          <div className="bb-chips">{[k.any, ...barbers].map((v) => <button key={v} type="button" className={pick === v ? 'on' : ''} aria-pressed={pick === v} onClick={() => setPick(v)}>{v}</button>)}</div>
         </div>
       ) : null}
       <div className="bb-fl">اليوم
@@ -439,15 +446,19 @@ const CSS = `
 .bb-mark b{font-family:var(--disp);font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bb-mark i{font:500 12px var(--latin);font-style:normal;letter-spacing:.18em;color:var(--bb-acc);margin-top:4px;text-transform:uppercase}
 .bb-top nav{display:none;gap:26px;font-size:14px}
+.bb-top.onphoto:not(.solid) .bb-mark b,.bb-top.onphoto:not(.solid) nav a{color:#f2ede3}
+.bb-top.onphoto:not(.solid) .bb-mark i{color:rgba(242,237,227,.75)}
 .bb-top nav a{text-decoration:none;color:var(--bb-ink2)}
 .bb-top nav a:hover{color:var(--bb-acc)}
 @media(min-width:900px){.bb-top nav{display:flex}}
 .bb-hero{position:relative;min-height:clamp(600px,100svh,900px);display:grid;align-items:end;overflow:hidden}
-.bb-hero.plain{min-height:clamp(520px,80svh,760px);background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--bb-acc) 14%,transparent),transparent 60%),var(--bb-bg)}
+.bb-hero.plain{min-height:clamp(440px,64svh,640px);background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--bb-acc) 14%,transparent),transparent 60%),var(--bb-bg)}
 .bb-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
 .bb-hero:not(.plain)::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.6) 0%,rgba(10,9,8,0) 22%,rgba(10,9,8,.2) 50%,rgba(10,9,8,.94) 86%,rgba(10,9,8,1) 100%)}
 .bb-hero:not(.plain) .bb-w{color:#f2ede3}
 .bb-hero:not(.plain) h1{color:#f2ede3}
+.bb-hero:not(.plain) .bb-lat{color:rgba(242,237,227,.8)}
+.bb-hero:not(.plain) .bb-stars{color:#e8c46a}
 .bb-hero .bb-w{position:relative;z-index:1;width:100%;padding-bottom:clamp(28px,5vw,56px);display:grid;gap:22px}
 .bb-lat{justify-self:start;font:600 13px var(--latin);letter-spacing:.32em;color:var(--bb-acc);text-transform:uppercase}
 .bb-hero h1{font-size:clamp(48px,11vw,112px);line-height:1}
@@ -457,7 +468,7 @@ const CSS = `
 .bb-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));grid-auto-flow:column;border-top:1px solid color-mix(in srgb,currentColor 20%,transparent);margin-top:6px}
 .bb-facts div{padding:14px 0 0;display:grid;gap:2px;min-width:0}
 .bb-facts div+div{padding-inline-start:16px;border-inline-start:1px solid color-mix(in srgb,currentColor 14%,transparent)}
-.bb-facts b{font-family:var(--disp);font-size:clamp(20px,3vw,28px);font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bb-facts b{font-family:var(--disp);font-size:clamp(18px,3vw,28px);font-weight:600;display:flex;align-items:center;gap:6px;line-height:1.25}
 .bb-facts span{font-size:13px;opacity:.8}
 .bb-dot{width:8px;height:8px;border-radius:50%;background:#4cb37a;box-shadow:0 0 0 4px rgba(76,179,122,.2);flex:0 0 auto}
 .bb-dot.off{background:#d08a5a;box-shadow:0 0 0 4px rgba(208,138,90,.2)}
@@ -489,6 +500,10 @@ const CSS = `
 .bb-ask h3{font-size:22px}
 .bb-ask p{color:var(--bb-ink2);font-size:15px}
 .bb-side{aspect-ratio:4/5;overflow:hidden}
+.bb-terms{margin-top:22px;display:grid;gap:0;border-top:1px solid var(--bb-line)}
+.bb-terms div{display:grid;grid-template-columns:minmax(90px,auto) 1fr;gap:16px;padding:12px 0;border-bottom:1px solid var(--bb-line);font-size:15px}
+.bb-terms dt{color:var(--bb-acc);font-weight:600}
+.bb-terms dd{color:var(--bb-ink2);margin:0}
 .bb-side img{width:100%;height:100%;object-fit:cover}
 .bb-bk{display:grid;gap:clamp(24px,5vw,64px)}
 @media(min-width:900px){.bb-bk{grid-template-columns:1fr 1.2fr}}
@@ -545,7 +560,7 @@ a.bb-g:hover{color:var(--bb-acc)}
 .bb-foot{border-top:1px solid var(--bb-line);padding:40px var(--gut) 48px;display:grid;gap:6px;justify-items:center;text-align:center;color:var(--bb-mute);font-size:14px}
 .bb-foot .bb-mark>span{align-items:center}
 .bb-bar{position:fixed;inset:auto 0 0;z-index:20;display:flex;gap:8px;padding:10px var(--gut) calc(10px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--bb-bg) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--bb-line)}
-.bb-bar .bb-btn{flex:1;min-height:48px}
+.bb-bar .bb-btn{flex:1;min-height:48px;white-space:nowrap;padding:0 14px;font-size:15px}
 .bb-bar .sq{flex:0 0 48px;padding:0}
 @media(min-width:900px){.bb-bar{display:none}.bb{padding-bottom:0}}
 @media(max-width:899px){.bb-hero:not(.plain){min-height:calc(100svh - 70px)}}
