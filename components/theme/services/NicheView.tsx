@@ -454,10 +454,10 @@ const CSS = `
 .bb-hero{position:relative;min-height:clamp(600px,100svh,900px);display:grid;align-items:end;overflow:hidden}
 .bb-hero.plain{min-height:clamp(440px,64svh,640px);background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--bb-acc) 14%,transparent),transparent 60%),var(--bb-bg)}
 .bb-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
-.bb-hero:not(.plain)::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.6) 0%,rgba(10,9,8,0) 22%,rgba(10,9,8,.2) 50%,rgba(10,9,8,.94) 86%,rgba(10,9,8,1) 100%)}
+.bb-hero:not(.plain)::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,9,8,.6) 0%,rgba(10,9,8,0) 22%,rgba(10,9,8,.38) 48%,rgba(10,9,8,.94) 84%,rgba(10,9,8,1) 100%)}
 .bb-hero:not(.plain) .bb-w{color:#f2ede3}
 .bb-hero:not(.plain) h1{color:#f2ede3}
-.bb-hero:not(.plain) .bb-lat{color:rgba(242,237,227,.8)}
+.bb-hero:not(.plain) .bb-lat{color:rgba(242,237,227,.9);text-shadow:0 1px 10px rgba(0,0,0,.55)}
 .bb-hero:not(.plain) .bb-stars{color:#e8c46a}
 .bb-hero .bb-w{position:relative;z-index:1;width:100%;padding-bottom:clamp(28px,5vw,56px);display:grid;gap:22px}
 .bb-lat{justify-self:start;font:600 13px var(--latin);letter-spacing:.32em;color:var(--bb-acc);text-transform:uppercase}
