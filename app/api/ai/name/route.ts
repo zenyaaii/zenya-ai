@@ -110,8 +110,11 @@ export async function POST(req: NextRequest) {
 
     const namesIn = Array.isArray(parsed?.names) ? parsed.names : []
     const names: string[] = namesIn
-      .map((n: any) => String(n || '').trim())
-      .filter((n: string) => n.length > 0 && n.length <= 40)
+      .map((n: any) => String(n || '').replace(/[«»"'.,،؛:!?؟()\[\]-]/g, ' ').replace(/\s+/g, ' ').trim())
+      // The rule the prompt states, held in code: the small model broke it
+      // (2026-11-10). Arabic script only, one or two words, no duplicates.
+      .filter((n: string) => n.length > 0 && n.length <= 24 && n.split(' ').length <= 2 && !/[A-Za-z]/.test(n))
+      .filter((n: string, i: number, all: string[]) => all.indexOf(n) === i)
       .slice(0, 8)
 
     if (names.length === 0) {
