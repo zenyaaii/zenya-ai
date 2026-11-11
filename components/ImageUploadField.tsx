@@ -21,6 +21,7 @@ export default function ImageUploadField({
   aspect = 'wide',
   className = '',
   helper,
+  local = false,
 }: {
   value: string
   onChange: (url: string) => void
@@ -28,6 +29,8 @@ export default function ImageUploadField({
   aspect?: Aspect
   className?: string
   helper?: string
+  /** Public demos: keep the picture in the page (a resized data URL) instead of uploading it. */
+  local?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
@@ -44,6 +47,10 @@ export default function ImageUploadField({
     setError(null)
     setUploading(true)
     try {
+      if (local) {
+        onChange(await shrink(file))
+        return
+      }
       const fd = new FormData()
       fd.append('file', file)
       const r = await fetch('/api/upload', { method: 'POST', body: fd })
@@ -86,7 +93,7 @@ export default function ImageUploadField({
             className={`${aspectClass || 'h-auto w-full'} object-cover`}
             style={aspect === 'auto' ? { maxHeight: 240 } : undefined}
           />
-          <div className="absolute inset-0 flex items-end justify-end gap-2 bg-gradient-to-t from-black/55 to-transparent p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-end justify-end gap-2 bg-gradient-to-t from-black/55 to-transparent p-2 opacity-0 transition-opacity duration-150 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
@@ -145,4 +152,22 @@ export default function ImageUploadField({
       )}
     </div>
   )
+}
+
+/** A picture as a JPEG data URL, at most 1400px on its long side. */
+function shrink(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      const r = Math.min(1, 1400 / Math.max(img.width, img.height))
+      const c = document.createElement('canvas')
+      c.width = Math.round(img.width * r); c.height = Math.round(img.height * r)
+      c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height)
+      URL.revokeObjectURL(url)
+      resolve(c.toDataURL('image/jpeg', 0.82))
+    }
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('تعذّر قراءة الصورة.')) }
+    img.src = url
+  })
 }

@@ -36,6 +36,8 @@ export type Place = {
   /** Yes/no facts Google holds about the place, already in Arabic. */
   attributes: string[]
   photoRefs: { name: string; author?: string }[]
+  /** Only when asked for ({ contact: true }): Google bills these fields at a higher tier. */
+  contact?: { phone?: string; address?: string; city?: string; area?: string }
 }
 
 export type Social = {
@@ -61,10 +63,11 @@ const ATTR: [string, string][] = [
   ['delivery', 'فيه توصيل'], ['takeout', 'فيه طلبات خارجية (تيك أواي)'], ['dineIn', 'فيه جلوس داخل المطعم'],
 ]
 
-export async function placeOf(placeId: string): Promise<Place> {
+export async function placeOf(placeId: string, opts: { contact?: boolean } = {}): Promise<Place> {
   const key = placesKey()
   if (!key) { const o = missingKey('google'); await noteDown(o); throw new OutageError(o) }
-  const mask = ['reviews', 'regularOpeningHours', 'primaryTypeDisplayName', 'editorialSummary', 'photos', ...ATTR.map(([k]) => k)].join(',')
+  const mask = ['reviews', 'regularOpeningHours', 'primaryTypeDisplayName', 'editorialSummary', 'photos', ...ATTR.map(([k]) => k),
+    ...(opts.contact ? ['internationalPhoneNumber', 'shortFormattedAddress', 'addressComponents'] : [])].join(',')
   const r = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}?languageCode=ar`, {
     headers: { 'X-Goog-Api-Key': key, 'X-Goog-FieldMask': mask }, cache: 'no-store',
   })
@@ -86,6 +89,19 @@ export async function placeOf(placeId: string): Promise<Place> {
     })),
     attributes: ATTR.filter(([k]) => d[k] === true).map(([, ar]) => ar),
     photoRefs: (d.photos ?? []).slice(0, 10).map((p: any) => ({ name: p.name, author: p.authorAttributions?.[0]?.displayName })),
+    contact: opts.contact ? contactOf(d) : undefined,
+  }
+}
+
+/** The phone, the short address, and the city and district from Google's address parts. */
+function contactOf(d: any): NonNullable<Place['contact']> {
+  const parts: { longText?: string; types?: string[] }[] = d.addressComponents ?? []
+  const of = (...types: string[]) => parts.find((c) => types.some((t) => c.types?.includes(t)))?.longText
+  return {
+    phone: d.internationalPhoneNumber || undefined,
+    address: d.shortFormattedAddress || undefined,
+    city: of('locality', 'postal_town', 'administrative_area_level_2') || undefined,
+    area: of('sublocality_level_1', 'sublocality', 'neighborhood') || undefined,
   }
 }
 

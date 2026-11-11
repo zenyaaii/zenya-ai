@@ -16,6 +16,9 @@ import { z } from 'zod'
 import type { ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
 import { KIND, NICHE_KINDS, type NicheKind } from './kinds'
 
+/** Where /demo/barber-build leaves the site it built, for /demo/editor?type=barber to open. */
+export const DEMO_BUILT_KEY = 'beynoun:demo-niche-site'
+
 /** Saturday first: the week as it is read across the Gulf and the Levant. */
 export const DAYS_AR = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'] as const
 

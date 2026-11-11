@@ -1,7 +1,9 @@
 "use client"
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
+import { createPortal } from 'react-dom'
 import ImageUploadField from '@/components/ImageUploadField'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
@@ -9,9 +11,14 @@ import WizardShell, {
   AddButton, Block, Card, Chips, Field, Grid, Handoff, Input, Notice, Review, Textarea, Toggle, Uploads,
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
-import { DAYS_AR, barberInputSchema, buildBarberContent, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
+import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
 import { KIND, type KindText, type NicheKind } from '@/utils/services/kinds'
 import type { ServiceHoursDay } from '@/utils/services/types'
+
+// The real site component, loaded only when the owner opens the live preview.
+const ServicesPreview = dynamic(() => import('@/components/theme/services/ServicesPreview'), { ssr: false })
+
+type GoogleFound = BarberGoogle & { photos?: string[]; name?: string; contact?: { phone?: string; address?: string; city?: string; area?: string } }
 
 /**
  * The barber's questions: the seven steps Anas approved on 2026-11-10
@@ -71,7 +78,12 @@ function initial(k: KindText): Form {
 
 const intl = (v: string) => /^(\+|00)\d[\d\s-]{6,}$/.test(v.trim())
 
-export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheKind; onBack?: () => void }) {
+/**
+ * `demo`: the public try-it page (/demo/barber-build). Nobody is signed in,
+ * so pictures stay in the page and «ابنِ» saves nothing: it builds the same
+ * content with the same function and opens it in the demo editor.
+ */
+export default function NicheWizard({ kind = 'barber', onBack, demo = false }: { kind?: NicheKind; onBack?: () => void; demo?: boolean }) {
   const k = KIND[kind]
   const bare = k.place.replace(/^ال/, '')
   const mine = bare.replace(/ة$/, 'ت') + 'ك'
@@ -81,12 +93,14 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
   const { toast } = useNotify()
   const [f, setF] = useState<Form>(() => initial(k))
   const [step, setStep] = useState(0)
-  const [g, setG] = useState<(BarberGoogle & { photos?: string[]; name?: string }) | null>(null)
+  const [g, setG] = useState<GoogleFound | null>(null)
+  const [peek, setPeek] = useState(false)
   const [gState, setGState] = useState<'idle' | 'busy' | 'ok' | 'fail'>('idle')
   const [gMsg, setGMsg] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [errorKey, setErrorKey] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [skill, setSkill] = useState<Record<string, string>>({})
 
   const up = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }))
   const patch = <T extends { id: string }>(k: 'barbers' | 'services' | 'faq' | 'links', id: string, v: Partial<T>) =>
@@ -100,14 +114,15 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
     try {
       const res = await fetch('/api/niche/google', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: f.maps_url.trim(), name: f.name, city: f.city }),
+        body: JSON.stringify({ url: f.maps_url.trim(), name: f.name, city: f.city, demo }),
       })
       const j = await res.json().catch(() => ({}))
       if (!res.ok) {
         setGState('fail')
         setGMsg(j?.error === 'not_google_link' ? 'هذا ليس رابط خرائط جوجل. انسخه من زر «مشاركة» في الخرائط.'
-          : j?.error === 'not_found' ? `لم نجد المكان من هذا الرابط. جرّب رابط «مشاركة» من صفحة ${k.place} في الخرائط.`
+          : j?.error === 'not_found' ? `لم نجد المكان من هذا الرابط. جرّب رابط «مشاركة» من صفحة ${k.place} في الخرائط، أو اكتب اسم ${k.place} والمدينة تحت ثم اضغط «اجلب من جوجل».`
           : j?.error === 'too_many' ? 'محاولات كثيرة. انتظر قليلًا ثم أعد.'
+          : j?.error === 'sign_in' ? 'سجّل الدخول لنجلب بياناتك من جوجل.'
           : 'تعذّر الوصول إلى جوجل الآن. يمكنك المتابعة، ونعيد المحاولة عند البناء.')
         return
       }
@@ -116,7 +131,11 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
       setF((p) => ({
         ...p,
         name: p.name || j.name || '',
-        maps_url: j.maps_url || p.maps_url,
+        phone: p.phone || j.contact?.phone || '',
+        whatsapp: p.whatsapp || (j.contact?.phone && /^\+/.test(j.contact.phone) ? j.contact.phone : ''),
+        address: p.address || j.contact?.address || '',
+        city: p.city || j.contact?.city || '',
+        area: p.area || j.contact?.area || '',
         google_photos: j.photos || [],
         hero: p.hero || j.photos?.[0] || '',
         hours: !p.hours_touched && j.periods?.length ? hoursFromGoogle(j.periods) : p.hours,
@@ -126,8 +145,10 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
         j.reviews?.length ? `${j.reviews.length} تقييمات مكتوبة` : null,
         j.periods?.length ? 'أوقات الدوام' : null,
         j.photos?.length ? `${j.photos.length} صور` : null,
+        j.contact?.phone ? 'الهاتف' : null,
+        j.contact?.address ? 'العنوان' : null,
       ].filter(Boolean)
-      setGMsg(bits.length ? `وجدنا ${j.name ? '«' + j.name + '»' : 'المكان'}: ${bits.join(' · ')}.` : 'وجدنا المكان، لكن جوجل لا يحمل عنه تقييمات أو صورًا بعد.')
+      setGMsg(bits.length ? `جلبنا من جوجل: ${bits.join(' · ')}. راجعها تحت، وعدّل ما تشاء.` : 'وجدنا المكان، لكن جوجل لا يحمل عنه تقييمات أو صورًا بعد.')
     } catch {
       setGState('fail'); setGMsg('تعذّر الوصول إلى جوجل الآن. يمكنك المتابعة.')
     }
@@ -169,6 +190,34 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
     }
   }
 
+  /** The site as it stands now, for the live preview: blanks get a stand-in so it always draws. */
+  const draft = useMemo(() => {
+    if (!peek) return null
+    const p = payload()
+    const parsed = barberInputSchema.safeParse({
+      ...p,
+      name: p.name.length >= 2 ? p.name : `اسم ${k.place}`,
+      city: p.city.length >= 2 ? p.city : 'مدينتك',
+      phone: p.phone.length >= 4 ? p.phone : '0000',
+      maps_url: p.maps_url.length >= 8 ? p.maps_url : 'https://maps.google.com/',
+      services: p.services.length ? p.services : [{ name: k.defaults[0]?.name || 'خدمة' }],
+      faq: p.faq.filter((q) => q.q.length >= 4),
+    })
+    if (!parsed.success) return null
+    const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
+    return { content: buildBarberContent(parsed.data, g || {}), colors: look.colors }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peek, f, g])
+
+  useEffect(() => {
+    if (!peek) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setPeek(false) }
+    window.addEventListener('keydown', esc)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', esc) }
+  }, [peek])
+
   function fail(msg: string, at?: number) {
     setError(msg); setErrorKey((k) => k + 1)
     if (at != null) setStep(at)
@@ -184,6 +233,12 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
     try {
       const content = buildBarberContent(parsed.data, g || { maps_url: parsed.data.maps_url })
       const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
+      if (demo) {
+        const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: look.colors, services: content, input: parsed.data }
+        try { sessionStorage.setItem(DEMO_BUILT_KEY, JSON.stringify(site)) } catch { /* private mode: the editor opens the sample */ }
+        router.push('/demo/editor?type=' + kind + '&built=1')
+        return
+      }
       const res = await fetch('/api/themes', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -219,42 +274,60 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
       complete: ok.basics, note: 'الاسم، المدينة، الهاتف، رابط الخرائط، وإنستغرام مطلوبة.',
       body: (
         <Grid>
-          <Field label={`رابط ${k.place} على خرائط جوجل`} required wide hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط.`}>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Input dir="ltr" value={f.maps_url} onChange={(e) => { up('maps_url', e.target.value); setGState('idle') }} onBlur={() => gState === 'idle' && f.maps_url.trim().length > 8 && fetchGoogle()} placeholder="https://maps.app.goo.gl/…" />
-              <button type="button" className="zb-chip" onClick={fetchGoogle} disabled={gState === 'busy' || f.maps_url.trim().length < 9} style={{ flex: '0 0 auto' }}>
+          <Block title="ابدأ من جوجل" hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط. نجلب منه الاسم والهاتف والعنوان والأوقات والتقييمات والصور.`}>
+            <div className="bw-g">
+              <Input dir="ltr" aria-label={`رابط ${k.place} على خرائط جوجل`} value={f.maps_url} onChange={(e) => { up('maps_url', e.target.value); setGState('idle') }} onBlur={() => gState === 'idle' && f.maps_url.trim().length > 8 && fetchGoogle()} placeholder="https://maps.app.goo.gl/…" />
+              <button type="button" className="zb-chip bw-gbtn" onClick={fetchGoogle} disabled={gState === 'busy' || f.maps_url.trim().length < 9}>
                 {gState === 'busy' ? 'نجلب…' : gState === 'ok' ? 'أعد الجلب' : 'اجلب من جوجل'}
               </button>
             </div>
-          </Field>
-          {gMsg ? <Block><Notice tone={gState === 'fail' ? 'bad' : 'accent'}>{gMsg}</Notice></Block> : null}
-          <Field label={`اسم ${k.place}`} required>
-            <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
-          </Field>
-          <Field label="الاسم بالإنجليزية" hint="إن كان على اللافتة.">
-            <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="Name on the sign" />
-          </Field>
-          <Field label="المدينة" required>
-            <Input value={f.city} onChange={(e) => up('city', e.target.value)} placeholder="عمّان" />
-          </Field>
-          <Field label="الحي أو المنطقة">
-            <Input value={f.area} onChange={(e) => up('area', e.target.value)} placeholder="تلاع العلي" />
-          </Field>
-          <Field label="العنوان" wide>
-            <Input value={f.address} onChange={(e) => up('address', e.target.value)} placeholder="شارع عبدالله العزب، تلاع العلي" />
-          </Field>
-          <Field label="الهاتف" required>
-            <Input dir="ltr" inputMode="tel" value={f.phone} onChange={(e) => up('phone', e.target.value)} placeholder="+962 79 752 7688" />
-          </Field>
-          <Field label="واتساب" hint="بمفتاح الدولة، مثل ‎+962. يصل إليه طلب الحجز وسؤال السعر.">
-            <Input dir="ltr" inputMode="tel" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+962 79 752 7688" />
-          </Field>
-          <Field label="إنستغرام" required={!f.no_instagram} wide hint={f.no_instagram ? 'لا بأس. نبني من صور جوجل وصورك.' : `نقرأ منه صور ${mine} وأعمالك.`}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Input dir="ltr" value={f.instagram} disabled={f.no_instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@yourname" style={{ flex: '1 1 220px' }} />
-              <Toggle on={f.no_instagram} onChange={(v) => up('no_instagram', v)}>ليس عندي حساب</Toggle>
-            </div>
-          </Field>
+            {gState === 'ok' && g ? (
+              <div className="bw-found">
+                {g.photos?.[0] ? <img src={g.photos[0]} alt="" /> : <span className="bw-found-ph" aria-hidden>{(f.name || g.name || k.place).slice(0, 1)}</span>}
+                <div>
+                  <b>{g.name || f.name}</b>
+                  {g.rating ? <span className="bw-stars">★ {Number(g.rating).toFixed(1)} <small>· {Number(g.count || 0).toLocaleString('ar')} تقييم</small></span> : null}
+                  {g.contact?.address ? <small>{g.contact.address}</small> : null}
+                </div>
+              </div>
+            ) : null}
+            {gMsg ? <div style={{ marginTop: 10 }}><Notice tone={gState === 'fail' ? 'bad' : 'accent'}>{gMsg}</Notice></div> : null}
+          </Block>
+          <Block title={k.place}>
+            <Grid>
+              <Field label={`اسم ${k.place}`} required>
+                <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
+              </Field>
+              <Field label="الاسم بالإنجليزية" hint="إن كان على اللافتة.">
+                <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="Name on the sign" />
+              </Field>
+              <Field label="المدينة" required>
+                <Input value={f.city} onChange={(e) => up('city', e.target.value)} placeholder="عمّان" />
+              </Field>
+              <Field label="الحي أو المنطقة">
+                <Input value={f.area} onChange={(e) => up('area', e.target.value)} placeholder="تلاع العلي" />
+              </Field>
+              <Field label="العنوان" wide>
+                <Input value={f.address} onChange={(e) => up('address', e.target.value)} placeholder="شارع عبدالله العزب، تلاع العلي" />
+              </Field>
+            </Grid>
+          </Block>
+          <Block title="التواصل">
+            <Grid>
+              <Field label="الهاتف" required>
+                <Input dir="ltr" inputMode="tel" value={f.phone} onChange={(e) => up('phone', e.target.value)} placeholder="+962 79 752 7688" />
+              </Field>
+              <Field label="واتساب" hint="بمفتاح الدولة، مثل ‎+962. يصل إليه طلب الحجز وسؤال السعر.">
+                <Input dir="ltr" inputMode="tel" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+962 79 752 7688" />
+              </Field>
+              <Field label="إنستغرام" required={!f.no_instagram} wide hint={f.no_instagram ? 'لا بأس. نبني من صور جوجل وصورك.' : `نقرأ منه صور ${mine} وأعمالك.`}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <Input dir="ltr" value={f.instagram} disabled={f.no_instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@yourname" style={{ flex: '1 1 220px' }} />
+                  <Toggle on={f.no_instagram} onChange={(v) => up('no_instagram', v)}>ليس عندي حساب</Toggle>
+                </div>
+              </Field>
+            </Grid>
+          </Block>
           {k.audiences?.length ? (
             <Block title={`لمن ${k.place}؟`}>
               <Chips options={k.audiences.map((a) => ({ id: a, label: a }))} value={f.audience} onChange={(v) => up('audience', v || k.audiences![0])} allowNone={false} />
@@ -274,7 +347,7 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
             <AddButton onClick={() => up('links', [...f.links, { id: nid(), label: '', url: '' }])}>أضف رابطًا</AddButton>
           </Block>
           <Block title="الشعار" optional hint={`إن كان لـ${mine} شعار. بدونه يظهر الاسم وحده.`}>
-            <Uploads cols={4}><ImageUploadField value={f.logo} onChange={(u) => up('logo', u)} aspect="square" label="الشعار" /></Uploads>
+            <div className="bw-logo"><ImageUploadField local={demo} value={f.logo} onChange={(u) => up('logo', u)} aspect="square" /></div>
           </Block>
         </Grid>
       ),
@@ -296,7 +369,7 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
               {f.barbers.map((b, i) => (
                 <Card key={b.id} title={b.name || `${k.one} ${i + 1}`} onRemove={f.barbers.length > 1 ? () => drop('barbers', b.id) : undefined} removeLabel="حذف">
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,120px) minmax(0,1fr)', gap: 14, alignItems: 'start' }}>
-                    <ImageUploadField value={b.photo} onChange={(u) => patch<Barber>('barbers', b.id, { photo: u })} aspect="square" label="الصورة" />
+                    <ImageUploadField local={demo} value={b.photo} onChange={(u) => patch<Barber>('barbers', b.id, { photo: u })} aspect="square" label="الصورة" />
                     <Grid>
                       <Field label="الاسم"><Input value={b.name} onChange={(e) => patch<Barber>('barbers', b.id, { name: e.target.value })} placeholder="الاسم الأول" /></Field>
                       <Field label="صفته"><Input value={b.role} onChange={(e) => patch<Barber>('barbers', b.id, { role: e.target.value })} placeholder={k.role} /></Field>
@@ -304,11 +377,18 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
                   </div>
                   <p className="zb-lab" style={{ margin: '12px 0 6px' }}>بماذا يشتهر؟</p>
                   <div className="zb-chips">
-                    {k.tags.map((t) => {
+                    {[...k.tags, ...b.tags.filter((t) => !k.tags.includes(t))].map((t) => {
                       const on = b.tags.includes(t)
                       return <button key={t} type="button" className="zb-chip" data-on={on ? 'true' : undefined} aria-pressed={on} onClick={() => patch<Barber>('barbers', b.id, { tags: on ? b.tags.filter((x) => x !== t) : [...b.tags, t].slice(0, 6) })}>{t}</button>
                     })}
                   </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <Input value={skill[b.id] || ''} maxLength={24} placeholder="مهارة أخرى، مثل: قص بالمقص" aria-label={`مهارة أخرى لـ${b.name || k.one}`}
+                      onChange={(e) => setSkill((p) => ({ ...p, [b.id]: e.target.value }))}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(b) } }} />
+                    <button type="button" className="zb-chip" style={{ flex: '0 0 auto' }} disabled={!(skill[b.id] || '').trim() || b.tags.length >= 6} onClick={() => addSkill(b)}>أضف</button>
+                  </div>
+                  {b.tags.length >= 6 ? <p style={{ fontSize: 13.5, opacity: 0.7, margin: '6px 0 0' }}>ست مهارات كحد أقصى لكل {k.one}.</p> : null}
                 </Card>
               ))}
             </div>
@@ -417,7 +497,7 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
           <Block title="صور من عندك" optional hint="الكراسي، الواجهة، قصّات من شغلكم. صور حقيقية فقط.">
             <Uploads cols={4}>
               {[...f.uploads, ''].slice(0, 8).map((u, i) => (
-                <ImageUploadField key={i + ':' + u} value={u} aspect="square" label={`صورة ${i + 1}`}
+                <ImageUploadField local={demo} key={i + ':' + u} value={u} aspect="square" label={`صورة ${i + 1}`}
                   onChange={(nu) => up('uploads', nu ? (u ? f.uploads.map((x) => (x === u ? nu : x)) : [...f.uploads, nu]) : f.uploads.filter((x) => x !== u))} />
               ))}
             </Uploads>
@@ -481,13 +561,19 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
               { label: 'أسئلة مُجابة', value: filledFaq ? String(filledFaq) : '' },
             ]}
           >
-            <Handoff title={`جاهز لبناء موقع ${k.place}.`} body="نبنيه من إجاباتك وتقييماتك على جوجل، بلا كلام مخترع. ثم تعدّل أي شيء من المحرر." />
+            <Handoff title={`جاهز لبناء موقع ${k.place}.`} body={demo ? 'هذه تجربة: نبني الموقع من إجاباتك وتقييماتك على جوجل، ثم يفتح في المحرر لتجرّب التعديل. لا يُحفظ شيء.' : 'نبنيه من إجاباتك وتقييماتك على جوجل، بلا كلام مخترع. ثم تعدّل أي شيء من المحرر.'} />
           </Review>
         </Grid>
       ),
     },
   ]
 
+  function addSkill(b: Barber) {
+    const t = (skill[b.id] || '').trim().slice(0, 24)
+    if (!t || b.tags.includes(t) || b.tags.length >= 6) return
+    patch<Barber>('barbers', b.id, { tags: [...b.tags, t] })
+    setSkill((p) => ({ ...p, [b.id]: '' }))
+  }
   function setDay(i: number, v: Partial<ServiceHoursDay>) {
     setF((p) => ({ ...p, hours_touched: true, hours: p.hours.map((d, x) => (x === i ? { ...d, ...v } : d)) }))
   }
@@ -510,10 +596,24 @@ export default function NicheWizard({ kind = 'barber', onBack }: { kind?: NicheK
         progress={{ pct }}
         scrollKey={errorKey || undefined}
         notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
-        final={{ label: loading ? 'نبني موقعك…' : `ابنِ موقع ${k.place}`, slide: 'هيا بنا', onClick: build, busy: loading }}
+        final={{ label: loading ? 'نبني موقعك…' : demo ? 'ابنِ وافتح المحرر' : `ابنِ موقع ${k.place}`, slide: 'هيا بنا', onClick: build, busy: loading }}
       />
       <GenerationOverlay open={loading} />
-      <style dangerouslySetInnerHTML={{ __html: '.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <button type="button" className="bw-peek" onClick={() => setPeek(true)} aria-haspopup="dialog">
+        <span aria-hidden>◉</span> شاهد موقعك الآن
+      </button>
+      {peek ? createPortal(
+        <div className="bw-sheet" role="dialog" aria-modal="true" aria-label="معاينة موقعك">
+          <div className="bw-sheet-top">
+            <span>معاينة حيّة · تتغيّر مع كل إجابة</span>
+            <button type="button" onClick={() => setPeek(false)} autoFocus>رجوع إلى الأسئلة</button>
+          </div>
+          <div className="bw-sheet-site">
+            {draft ? <ServicesPreview content={draft.content as any} colorOverrides={draft.colors} logo={f.logo || undefined} /> : <p style={{ padding: 24 }}>أكمل الاسم والخدمات لنرسم موقعك.</p>}
+          </div>
+        </div>, document.body,
+      ) : null}
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }

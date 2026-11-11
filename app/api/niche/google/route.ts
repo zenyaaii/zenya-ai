@@ -20,43 +20,49 @@ export const maxDuration = 60
  * model is called. Photos are copied to our storage so a site never points
  * at Google.
  *
- * Signed-in only and throttled: each call costs Places API money.
+ * Signed in, or the public try-it wizard (/demo/barber-build) with
+ * `demo: true`: then it is throttled harder, by address, and its photos go to
+ * a demo folder. Each call costs Places API money.
  */
 
 const MAX_PER_HOUR = 10
+const DEMO_PER_HOUR = 4
 const hits = new Map<string, number[]>()
-function throttled(userId: string): boolean {
+function throttled(userId: string, max = MAX_PER_HOUR): boolean {
   const now = Date.now()
   const recent = (hits.get(userId) || []).filter((t) => now - t < 3_600_000)
-  if (recent.length >= MAX_PER_HOUR) { hits.set(userId, recent); return true }
+  if (recent.length >= max) { hits.set(userId, recent); return true }
   recent.push(now)
   hits.set(userId, recent)
   return false
 }
 
 export async function POST(req: NextRequest) {
-  const { data: { user } } = await createClient().auth.getUser()
-  if (!user) return NextResponse.json({ error: 'sign_in' }, { status: 401 })
+  let body: { url?: unknown; name?: unknown; city?: unknown; photos?: unknown; demo?: unknown }
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }) }
+
+  const { data: { user } } = await createClient().auth.getUser().catch(() => ({ data: { user: null } }))
+  const demo = !user && body.demo === true
+  if (!user && !demo) return NextResponse.json({ error: 'sign_in' }, { status: 401 })
+  const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown'
+  const who = user ? user.id : 'demo:' + ip
 
   const key = process.env.GOOGLE_PLACES_API_KEY || process.env.google_places_api_key
   if (!key) return NextResponse.json({ error: 'not_configured' }, { status: 503 })
-
-  let body: { url?: unknown; name?: unknown; city?: unknown; photos?: unknown }
-  try { body = await req.json() } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }) }
   const link = typeof body.url === 'string' ? googleUrl(body.url) : null
   const name = typeof body.name === 'string' ? body.name.trim().slice(0, 120) : ''
   const city = typeof body.city === 'string' ? body.city.trim().slice(0, 80) : ''
   if (!link) return NextResponse.json({ error: 'not_google_link' }, { status: 400 })
-  if (throttled(user.id)) return NextResponse.json({ error: 'too_many' }, { status: 429 })
+  if (throttled(who, demo ? DEMO_PER_HOUR : MAX_PER_HOUR)) return NextResponse.json({ error: 'too_many' }, { status: 429 })
 
   try {
     const found = await lookupGoogleReviews(key, { link, name, city })
-    const place = await placeOf(found.place.id).catch(() => null)
+    const place = await placeOf(found.place.id, { contact: true }).catch(() => null)
     let photos: string[] = []
-    if (place && body.photos !== false) {
+    if (place && body.photos !== false) try {
       const raw = await googlePhotos({ ...place, photoRefs: place.photoRefs.slice(0, 10) }).catch(() => [])
       const sb = serviceClient().storage.from('theme-uploads')
-      const dir = `owners/${user.id}/google/${found.place.id.replace(/[^A-Za-z0-9_-]/g, '')}`
+      const dir = `${user ? 'owners/' + user.id : 'demo'}/google/${found.place.id.replace(/[^A-Za-z0-9_-]/g, '')}`
       const up = await Promise.all(raw.map(async (r) => {
         try {
           const jpeg = await sharp(r.buf).rotate().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer()
@@ -69,6 +75,9 @@ export async function POST(req: NextRequest) {
         } catch { return null }
       }))
       photos = up.filter((u): u is string => !!u)
+    } catch (e) {
+      // No photos is not a failed lookup: the facts still reach the wizard.
+      console.error('[niche/google] photos', e instanceof Error ? e.message : e)
     }
     return NextResponse.json({
       place_id: found.place.id,
@@ -78,6 +87,7 @@ export async function POST(req: NextRequest) {
       count: found.place.count,
       reviews: found.reviews,
       periods: place?.periods || [],
+      contact: place?.contact,
       photos,
     })
   } catch (e) {

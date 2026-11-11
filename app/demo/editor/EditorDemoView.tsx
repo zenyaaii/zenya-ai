@@ -37,6 +37,10 @@ import { RESTAURANT_MOCK_CONTENT } from '@/utils/restaurant/mock-content'
 import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
 import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
+import { nicheEditorConfig } from '@/utils/services/niche-editor-config'
+import { barberDemoContent } from '@/utils/services/niche-demo'
+import { KIND } from '@/utils/services/kinds'
+import { DEMO_BUILT_KEY } from '@/utils/services/barber'
 import { DEMO_TYPES, type DemoType } from './types'
 
 type Theme = { config: EditorConfig; Preview: ComponentType<PreviewProps>; content: unknown }
@@ -50,13 +54,26 @@ const THEMES: Record<DemoType, Theme> = {
   services:   { config: SERVICES_EDITOR_CONFIG,   Preview: ServicesPreview as any,   content: SERVICE_MOCK_CONTENT },
   studio:     { config: STUDIO_EDITOR_CONFIG,     Preview: StudioPreview as any,     content: STUDIO_MOCK_CONTENT },
   wellness:   { config: WELLNESS_EDITOR_CONFIG,   Preview: WellnessPreview as any,   content: WELLNESS_MOCK_CONTENT },
+  // The barber kind of the services template: its own panels (barbers, prices
+  // and terms, hours with periods), opened on the site /demo/barber-build just
+  // built, or on the sample shop when there is none.
+  barber:     { config: nicheEditorConfig('barber'), Preview: ServicesPreview as any, content: barberDemoContent() },
 }
 
 /** A store that lives exactly as long as the page. */
-function memoryStore(contentKey: string, content: unknown): EditorStore {
+function memoryStore(contentKey: string, content: unknown, type: DemoType): EditorStore {
   let saved: any = { [contentKey]: structuredClone(content) }
+  if (type === 'barber') saved = { business_type: 'services', niche: 'barber', style_preset: 'graphite', color_overrides: KIND.barber.looks[0].colors, ...saved }
+  let first = true
   return {
-    load: async () => structuredClone(saved),
+    load: async () => {
+      // The wizard's demo leaves the site it built here; open that one, once.
+      if (first && type === 'barber' && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
+        try { const s = sessionStorage.getItem(DEMO_BUILT_KEY); if (s) saved = JSON.parse(s) } catch { /* keep the sample */ }
+      }
+      first = false
+      return structuredClone(saved)
+    },
     save: async (next) => {
       // Long enough for the indicator to be read in its saving state, short
       // enough that autosave never queues behind itself.
@@ -73,11 +90,12 @@ const NAMES: Record<DemoType, string> = {
   services: 'موقع خدمات',
   studio: 'موقع علامة تجارية وقصة',
   wellness: 'موقع مركز عافية',
+  barber: 'موقع صالون حلاقة',
 }
 
 export default function EditorDemoView({ type }: { type: DemoType }) {
   const theme = THEMES[type]
-  const store = useMemo(() => memoryStore(theme.config.contentKey, theme.content), [theme])
+  const store = useMemo(() => memoryStore(theme.config.contentKey, theme.content, type), [theme, type])
   const demo = useMemo(() => ({
     note: 'نسخة تجريبية: لا يُحفظ شيء، وتضيع تعديلاتك عند إعادة تحميل الصفحة.',
     types: DEMO_TYPES.map((k) => ({ href: '/demo/editor?type=' + k, label: NAMES[k], current: k === type })),
