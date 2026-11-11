@@ -95,9 +95,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const [step, setStep] = useState(0)
   const [g, setG] = useState<GoogleFound | null>(null)
   const [peek, setPeek] = useState(false)
-  // Two looks of the colour picker on the try page: ?pick=b shows the list.
-  const [pickStyle, setPickStyle] = useState<'a' | 'b'>('a')
-  useEffect(() => { if (demo && new URLSearchParams(window.location.search).get('pick') === 'b') setPickStyle('b') }, [demo])
   const [gState, setGState] = useState<'idle' | 'busy' | 'ok' | 'fail'>('idle')
   const [gMsg, setGMsg] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -538,32 +535,15 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       body: (
         <Grid>
           <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
-            {pickStyle === 'b' ? (
-              <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
-                {LOOKS.map((l) => (
-                  <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => up('look', l.id)} className="bw-lr">
-                    <span className="bw-lr-dots" aria-hidden>{[l.colors.background, l.colors.text, l.colors.accent].map((c, i) => <i key={i} style={{ background: c }} />)}</span>
-                    <b>{l.name}</b>
-                    <span className="bw-lr-tick" aria-hidden>{f.look === l.id ? '✓' : ''}</span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="bw-looks" role="radiogroup" aria-label="الألوان">
-                {LOOKS.map((l) => (
-                  <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => up('look', l.id)} className="bw-look">
-                    <span className="bw-mini" aria-hidden style={{ background: l.colors.background, color: l.colors.text, borderColor: l.colors.border }}>
-                      <span className="bw-mini-top"><i style={{ background: l.colors.text }} /><em style={{ background: l.colors.accent }} /></span>
-                      <span className="bw-mini-name">{(f.name || k.place).split(' ').slice(0, 2).join(' ')}</span>
-                      <span className="bw-mini-line" style={{ background: l.colors.muted }} />
-                      <span className="bw-mini-btn" style={{ background: l.colors.accent, color: l.colors.background }}>احجز</span>
-                      <span className="bw-mini-row">{[0, 1, 2].map((i) => <i key={i} style={{ background: l.colors.surface, borderColor: l.colors.border }} />)}</span>
-                    </span>
-                    <span className="bw-look-name"><b>{l.name}</b><span className="bw-look-tick" aria-hidden>{f.look === l.id ? '✓' : ''}</span></span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
+              {LOOKS.map((l) => (
+                <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => up('look', l.id)} className="bw-lr">
+                  <span className="bw-lr-dots" aria-hidden>{[l.colors.background, l.colors.text, l.colors.accent].map((c, i) => <i key={i} style={{ background: c }} />)}</span>
+                  <b>{l.name}</b>
+                  <span className="bw-lr-tick" aria-hidden>{f.look === l.id ? '✓' : ''}</span>
+                </button>
+              ))}
+            </div>
           </Block>
           <Review
             facts={[
@@ -633,7 +613,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           </div>
         </div>, document.body,
       ) : null}
-      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-looks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.bw-look{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:8px;padding:8px;border-radius:16px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05));transition:border-color .18s}.bw-look[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-look:focus-visible,.bw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.bw-mini{display:flex;flex-direction:column;gap:7px;aspect-ratio:16/11;padding:10px;border-radius:10px;border:1px solid;overflow:hidden}.bw-mini-top{display:flex;justify-content:space-between;align-items:center}.bw-mini-top i{width:28%;height:4px;border-radius:2px;opacity:.7}.bw-mini-top em{width:20%;height:9px;border-radius:99px}.bw-mini-name{font-weight:700;font-size:15px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px}.bw-mini-line{width:70%;height:4px;border-radius:2px;opacity:.6}.bw-mini-btn{align-self:flex-start;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px}.bw-mini-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:auto}.bw-mini-row i{height:100%;min-height:12px;border-radius:6px;border:1px solid}.bw-mini-row{flex:1 1 0;min-height:0;margin-top:4px}.bw-look-name{display:flex;justify-content:space-between;align-items:center;padding:0 4px 2px;font-size:14.5px}.bw-look-tick,.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}@media(max-width:520px){.bw-looks{gap:8px}.bw-look{padding:6px;border-radius:14px}.bw-mini{padding:7px;gap:5px;aspect-ratio:3/4}.bw-mini-name{font-size:13px}.bw-look-name{font-size:13.5px}}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }
