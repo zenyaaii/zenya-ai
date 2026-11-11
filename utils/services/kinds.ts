@@ -11,6 +11,15 @@
 
 export type NicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
 
+/**
+ * The kinds that ship. Anas kept the barber page and its questions
+ * (2026-11-11) and turned down the shared look for the others, so gym,
+ * beauty, clinic, car repair and photo studio stay on their templates' own
+ * wizards and lead builds until each gets a design of its own.
+ */
+export const LIVE_KINDS: readonly NicheKind[] = ['barber']
+export const isLiveKind = (k: unknown): k is NicheKind => LIVE_KINDS.includes(k as NicheKind)
+
 export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string } }
 
 const L = (id: string, name: string, background: string, surface: string, text: string, muted: string, accent: string, border: string): Look =>

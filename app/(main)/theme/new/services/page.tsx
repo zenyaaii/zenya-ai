@@ -15,7 +15,7 @@ import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { generateErrorText } from '@/lib/generate-error'
 import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
 import NicheWizard from '@/components/zenya/build/NicheWizard'
-import { isNicheKind } from '@/utils/services/kinds'
+import { isLiveKind } from '@/utils/services/kinds'
 import KindPicker from '@/components/zenya/build/KindPicker'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
@@ -193,7 +193,7 @@ export default function ServicesWizardPage() {
   if (kind === undefined || !authed) {
     return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium opacity-70">جارٍ التحميل…</div>
   }
-  if (isNicheKind(kind)) return <NicheWizard key={kind} kind={kind} onBack={() => choose(null)} />
+  if (isLiveKind(kind)) return <NicheWizard key={kind} kind={kind} onBack={() => choose(null)} />
   return (
     <>
       <GeneralServicesWizard key={kind || 'none'} category={kind ? KIND_CATEGORY[kind] : undefined} />

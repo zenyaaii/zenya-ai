@@ -167,11 +167,9 @@ export default function WellnessWizardPage() {
   const [kind, setKind] = useState<string | null | undefined>(undefined)
   useEffect(() => {
     const k = new URLSearchParams(window.location.search).get('kind')
-    if (k === 'gym' || k === 'beauty') { router.replace('/theme/new/services?kind=' + k); return }
     setKind(k)
   }, [router])
   const choose = (id: string) => {
-    if (id === 'gym' || id === 'beauty') { router.push('/theme/new/services?kind=' + id); return }
     const u = new URL(window.location.href)
     u.searchParams.set('kind', id)
     window.history.replaceState(null, '', u.toString())
@@ -181,7 +179,7 @@ export default function WellnessWizardPage() {
   if (kind === undefined) return null
   return (
     <>
-      <WellnessWizard key={kind || 'none'} niche={kind === 'spa' ? 'spa' : undefined} />
+      <WellnessWizard key={kind || 'none'} niche={kind === 'spa' || kind === 'gym' ? kind : undefined} />
       {kind ? null : <KindPicker group="wellness" onPick={choose} />}
     </>
   )

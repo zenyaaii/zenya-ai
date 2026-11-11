@@ -893,7 +893,7 @@ textarea.zb-in { resize: vertical; min-height: 96px; }
 .zb-back:disabled { opacity: 0.4; cursor: not-allowed; }
 /* Violet on every step, so the last step's action reads as the same gesture. */
 .zb-next { background: var(--violet); color: #fff; box-shadow: 0 1px 2px rgba(94,106,210,0.30); }
-.zb-next:hover { background: #5561c8; }
+.zb-next:hover { background: color-mix(in srgb, var(--violet) 88%, #000); }
 .zb-back:focus-visible, .zb-next:focus-visible, .zb-step:focus-visible, .zb-chip:focus-visible,
 .zb-preset:focus-visible, .zb-add:focus-visible, .zb-hclosed:focus-visible, .zb-icon:focus-visible, .zb-skip:focus-visible {
   outline: 2px solid var(--violet); outline-offset: 3px;

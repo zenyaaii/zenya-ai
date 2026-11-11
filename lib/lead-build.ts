@@ -12,7 +12,7 @@ import * as Services from '@/lib/generators/services'
 import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, visitBarber, type Prepared } from '@/lib/restaurant-build'
 import { barberInputSchema, buildBarberContent } from '@/utils/services/barber'
-import { KIND, kindOfLead, type NicheKind } from '@/utils/services/kinds'
+import { KIND, isLiveKind, kindOfLead, type NicheKind } from '@/utils/services/kinds'
 import { downSince, googleOutage, missingKey, noteDown, noteUp, OutageError, type Outage } from '@/lib/service-health'
 
 /**
@@ -392,7 +392,7 @@ export async function buildLeadSite(lead: Lead & { status?: string | null; site?
   // Barbers run the same build system as restaurants, with the barber's eye
   // and the barber page of the services template (Anas, 2026-11-10).
   const nk = kind === 'restaurant' ? null : kindOfLead(lead)
-  if (nk) return buildBarberLead(lead, nk, ownerId, old, started)
+  if (isLiveKind(nk)) return buildBarberLead(lead, nk, ownerId, old, started)
   // Restaurants run the full build system (lib/restaurant-build); the other
   // templates keep the Google-only path until they get theirs.
   const prep = kind === 'restaurant'
