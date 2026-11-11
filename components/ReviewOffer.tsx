@@ -65,7 +65,7 @@ export default function ReviewOffer() {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
-      className="mx-6 w-full max-w-sm overflow-hidden rounded-2xl border bg-white p-5 text-center"
+      className="mx-6 w-full max-w-sm overflow-hidden rounded-2xl border bg-[color:var(--surface,#fff)] p-5 text-center"
       style={{ borderColor: 'rgba(94,106,210,0.28)', boxShadow: '0 24px 60px -28px rgba(94,106,210,0.45)' }}
     >
       <span

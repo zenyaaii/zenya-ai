@@ -13,6 +13,8 @@ import { getServicePreset } from '@/utils/services/presets'
 import { splitBrandName } from '@/utils/services/brand-name'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingForm from '@/components/site/BookingForm'
+import NicheView from './NicheView'
+import { isNicheKind } from '@/utils/services/kinds'
 import { useBookingContext } from '@/components/site/BookingContext'
 import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/marketing/BrandMarks'
 
@@ -101,6 +103,21 @@ function isGreenish(hex: string): boolean {
 }
 
 export default function ServicesPreview({
+  content,
+  presetId = 'cobalt',
+  className,
+  colorOverrides,
+  typographyPreset,
+  view: controlledView,
+  onViewChange,
+  logo,
+}: Props) {
+  // A kind of services business draws its own page inside this template.
+  if (isNicheKind(content?.niche)) return <NicheView content={content} colors={colorOverrides} logo={logo?.trim() || undefined} />
+  return <GeneralServices content={content} presetId={presetId} className={className} colorOverrides={colorOverrides} typographyPreset={typographyPreset} view={controlledView} onViewChange={onViewChange} logo={logo} />
+}
+
+function GeneralServices({
   content,
   presetId = 'cobalt',
   className,

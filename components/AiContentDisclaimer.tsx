@@ -68,21 +68,21 @@ export default function AiContentDisclaimer({
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-        className="flex max-h-[88vh] w-full max-w-[480px] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(17,17,17,0.08),0_24px_60px_-20px_rgba(17,17,17,0.35)]"
+        className="flex max-h-[88vh] w-full max-w-[480px] flex-col overflow-hidden rounded-[24px] bg-[color:var(--surface,#fff)] shadow-[0_0_0_1px_rgba(17,17,17,0.08),0_24px_60px_-20px_rgba(17,17,17,0.35)]"
         dir="rtl"
       >
-        <div className="flex items-start gap-3 border-b border-[rgba(17,17,17,0.08)] px-6 py-5">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#171717] text-white"><Sparkles size={18} strokeWidth={2} aria-hidden /></span>
+        <div className="flex items-start gap-3 border-b border-[color:var(--border,rgba(17,17,17,0.1))] px-6 py-5">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[color:var(--foreground,#171717)] text-[color:var(--background,#fff)]"><Sparkles size={18} strokeWidth={2} aria-hidden /></span>
           <div>
-            <h2 id="ai-fill-title" className="text-[18px] font-extrabold leading-snug text-[#171717]">لم تضف هذه، فسنكتب لها أمثلة</h2>
-            <p className="mt-1 text-[14px] leading-relaxed text-[#56565a]">حتى يكتمل تصميم موقعك. ليست معلومات حقيقية، فاستبدلها بمعلوماتك قبل النشر.</p>
+            <h2 id="ai-fill-title" className="text-[18px] font-extrabold leading-snug text-[color:var(--foreground,#171717)]">لم تضف هذه، فسنكتب لها أمثلة</h2>
+            <p className="mt-1 text-[14px] leading-relaxed text-[color:var(--muted,#56565a)]">حتى يكتمل تصميم موقعك. ليست معلومات حقيقية، فاستبدلها بمعلوماتك قبل النشر.</p>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-3">
-          <ul className="divide-y divide-[rgba(17,17,17,0.07)]">
+          <ul className="divide-y divide-[color:var(--border,rgba(17,17,17,0.1))]">
             {list.map((k) => (
-              <li key={k} className="flex items-center gap-3 py-3 text-[14.5px] font-medium text-[#171717]">
+              <li key={k} className="flex items-center gap-3 py-3 text-[14.5px] font-medium text-[color:var(--foreground,#171717)]">
                 <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-[rgba(94,106,210,0.12)] text-[#5e6ad2]"><Sparkles size={11} strokeWidth={2.4} aria-hidden /></span>
                 {LABELS[k]}
               </li>
@@ -92,19 +92,19 @@ export default function AiContentDisclaimer({
             type="button"
             onClick={() => setMore((m) => !m)}
             aria-expanded={more}
-            className="mt-2 inline-flex items-center gap-1 rounded-md text-[13.5px] font-bold text-[#56565a] hover:text-[#171717] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]"
+            className="mt-2 inline-flex items-center gap-1 rounded-md text-[13.5px] font-bold text-[color:var(--muted,#56565a)] hover:text-[color:var(--foreground,#171717)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]"
           >
             المسؤولية
             <ChevronDown size={15} className={more ? 'rotate-180 transition' : 'transition'} aria-hidden />
           </button>
-          {more ? <p className="mt-2 rounded-xl bg-[#f4f4f6] p-3 text-[13px] leading-[1.8] text-[#56565a]">{LEGAL}</p> : null}
+          {more ? <p className="mt-2 rounded-xl bg-[color:var(--background,#fff)] p-3 text-[13px] leading-[1.8] text-[color:var(--muted,#56565a)]">{LEGAL}</p> : null}
         </div>
 
-        <div className="flex gap-2 border-t border-[rgba(17,17,17,0.08)] px-6 py-4">
-          <button type="button" onClick={onConfirm} className="min-h-[46px] flex-1 rounded-full bg-[#171717] px-6 text-[14.5px] font-bold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5e6ad2]">
+        <div className="flex gap-2 border-t border-[color:var(--border,rgba(17,17,17,0.1))] px-6 py-4">
+          <button type="button" onClick={onConfirm} className="min-h-[46px] flex-1 rounded-full bg-[color:var(--foreground,#171717)] px-6 text-[14.5px] font-bold text-[color:var(--background,#fff)] transition hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5e6ad2]">
             فهمت، أكمل التوليد
           </button>
-          <button type="button" onClick={onClose} className="min-h-[46px] rounded-full px-5 text-[14.5px] font-bold text-[#171717] shadow-[0_0_0_1px_rgba(17,17,17,0.12)] hover:bg-black/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]">
+          <button type="button" onClick={onClose} className="min-h-[46px] rounded-full px-5 text-[14.5px] font-bold text-[color:var(--foreground,#171717)] shadow-[0_0_0_1px_var(--border,rgba(17,17,17,0.12))] hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5e6ad2]">
             رجوع
           </button>
         </div>

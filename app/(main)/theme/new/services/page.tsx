@@ -14,6 +14,9 @@ import { useNotify } from '@/components/ui/Notify'
 import AiContentDisclaimer from '@/components/AiContentDisclaimer'
 import { generateErrorText } from '@/lib/generate-error'
 import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from '@/components/zenya/build/OwnerReviewsFields'
+import NicheWizard from '@/components/zenya/build/NicheWizard'
+import { isLiveKind } from '@/utils/services/kinds'
+import KindPicker from '@/components/zenya/build/KindPicker'
 import WizardShell, {
   AddButton, Block, Card, Field, Grid, Handoff, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
   type WizardStep,
@@ -156,11 +159,54 @@ const INITIAL_FORM: Form = {
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
+/** What the general wizard's category starts as, for a kind picked in the sheet. */
+const KIND_CATEGORY: Record<string, string> = {}
+
+/**
+ * /theme/new/services. The owner arrives here from a template's «ابنِ», so
+ * the kind sheet opens first (Anas, 2026-11-10): a barber goes straight to
+ * the barber's questions, every other kind to the general services wizard
+ * with its category already written. ?kind= keeps the choice on reload.
+ */
 export default function ServicesWizardPage() {
+  const router = useRouter()
+  const [kind, setKind] = useState<string | null | undefined>(undefined)
+  const [authed, setAuthed] = useState(false)
+  useEffect(() => {
+    const k = new URLSearchParams(window.location.search).get('kind')
+    setKind(k)
+    let cancelled = false
+    createClient().auth.getUser().then(({ data: { user } }) => {
+      if (cancelled) return
+      if (!user) { router.push('/login?mode=signup&next=' + encodeURIComponent('/theme/new/services' + (k ? '?kind=' + k : ''))); return }
+      setAuthed(true)
+    })
+    return () => { cancelled = true }
+  }, [router])
+  const choose = (id: string | null) => {
+    const u = new URL(window.location.href)
+    if (id) u.searchParams.set('kind', id); else u.searchParams.delete('kind')
+    window.history.replaceState(null, '', u.toString())
+    setKind(id)
+    window.scrollTo({ top: 0 })
+  }
+  if (kind === undefined || !authed) {
+    return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium opacity-70">جارٍ التحميل…</div>
+  }
+  if (isLiveKind(kind)) return <NicheWizard key={kind} kind={kind} onBack={() => choose(null)} />
+  return (
+    <>
+      <GeneralServicesWizard key={kind || 'none'} category={kind ? KIND_CATEGORY[kind] : undefined} />
+      {kind ? null : <KindPicker group="services" onPick={choose} />}
+    </>
+  )
+}
+
+function GeneralServicesWizard({ category }: { category?: string }) {
   const router = useRouter()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
-  const [form, setForm] = useState<Form>(INITIAL_FORM)
+  const [form, setForm] = useState<Form>(() => ({ ...INITIAL_FORM, category: category || '' }))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorKey, setErrorKey] = useState(0)

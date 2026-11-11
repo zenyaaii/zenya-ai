@@ -48,7 +48,9 @@ export async function POST(req: Request) {
     await logAiUsage({ operation: 'generate-name', userId: await getUserIdSafe(), model: AI_MODEL_FAST }, completion.usage);
 
     let generatedName = completion.choices[0]?.message?.content?.trim() || "منتج مميز";
-    generatedName = generatedName.replace(/^["']|["']$/g, ''); // strip quotes if any
+    generatedName = generatedName.replace(/^["'«]|["'»]$/g, ''); // strip quotes if any
+    // One or two words, always: the small model sometimes returns a phrase.
+    generatedName = generatedName.replace(/[.,،؛:!?؟]/g, ' ').replace(/\s+/g, ' ').trim().split(' ').slice(0, 2).join(' ') || "منتج مميز";
 
     return NextResponse.json({ name: generatedName });
   } catch (error) {

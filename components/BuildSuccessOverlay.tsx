@@ -73,7 +73,7 @@ export default function BuildSuccessOverlay({
               {editHref && (
                 <Link
                   href={editHref}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-token bg-white px-6 py-3 text-sm font-bold text-foreground transition hover:bg-black/5"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-token bg-[color:var(--surface,#fff)] px-6 py-3 text-sm font-bold text-foreground transition hover:bg-black/5"
                 >
                   <Pencil className="h-4 w-4" /> فتح المحرّر
                 </Link>

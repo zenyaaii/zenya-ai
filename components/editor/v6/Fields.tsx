@@ -84,6 +84,7 @@ function Field({ d, base }: { d: EditorFieldDef; base: string }) {
     case 'rating': return <RatingField label={d.label} hint={d.hint ?? 'من 5. يظهر بالنجوم فوق الآراء.'} path={path} val={val} min={0} max={5} step={0.1} />
     case 'number': return <RatingField label={d.label} hint={d.hint} path={path} val={val} min={d.min ?? 0} max={d.max ?? 9999} step={d.step ?? 1} />
     case 'hours': return <HoursField path={path} />
+    case 'periods': return <PeriodsField path={path} />
     case 'array':
     case 'strings':
       return <ListField d={d} path={path} />
@@ -331,6 +332,44 @@ function RatingField({ label, hint, path, val, min, max, step }: { label: string
 }
 
 /* ── the week ──────────────────────────────────────────────────────────── */
+const WEEK_AR = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة']
+
+/** The week with one or more periods a day (the services kinds: a gym open
+ *  5–12 and 4–11, a barber closed on Friday morning). Times are "HH:MM". */
+function PeriodsField({ path }: { path: string }) {
+  const ed = useEd()
+  const raw: any[] = gp(ed.doc.content, path) || []
+  const hs = WEEK_AR.map((_, day) => raw.find((h) => h?.day === day) || { day, closed: true, periods: [] })
+  const put = (day: number, nh: any, label: string) => ed.setC(path, hs.map((h) => (h.day === day ? nh : h)), { label, key: null })
+  const tm = (v: string) => (v === '24:00' ? '00:00' : v)
+  return (
+    <div className="fld" data-fk={path}>
+      <div className="hrs">
+        {hs.map((h) => (
+          <div key={h.day} className={'hrow' + (h.closed ? ' closed' : '')} style={{ flexWrap: 'wrap', paddingBlock: 6 }}>
+            <span className="day">{WEEK_AR[h.day]}</span>
+            <button type="button" className="switch" role="switch" aria-checked={!h.closed} aria-label={`${WEEK_AR[h.day]} مفتوح`}
+              onClick={() => put(h.day, h.closed ? { ...h, closed: false, periods: h.periods?.length ? h.periods : [{ open: '10:00', close: '22:00' }] } : { ...h, closed: true }, `${h.closed ? 'فتحت' : 'أغلقت'} يوم ${WEEK_AR[h.day]}`)} />
+            <span className="tm" style={{ flexDirection: 'column', alignItems: 'flex-end' }}>
+              {h.closed ? <span className="x">مغلق</span> : (h.periods || []).map((p: any, i: number) => (
+                <span key={i} style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                  <input type="time" aria-label={`يفتح ${WEEK_AR[h.day]}`} value={tm(p.open)} onChange={(e) => put(h.day, { ...h, periods: h.periods.map((q: any, j: number) => (j === i ? { ...q, open: e.target.value } : q)) }, `غيّرت مواعيد ${WEEK_AR[h.day]}`)} />
+                  <span className="dash">–</span>
+                  <input type="time" aria-label={`يغلق ${WEEK_AR[h.day]}`} value={tm(p.close)} onChange={(e) => put(h.day, { ...h, periods: h.periods.map((q: any, j: number) => (j === i ? { ...q, close: e.target.value === '00:00' ? '24:00' : e.target.value } : q)) }, `غيّرت مواعيد ${WEEK_AR[h.day]}`)} />
+                  {i > 0 ? <button type="button" className="btn sm line" aria-label="احذف الفترة" onClick={() => put(h.day, { ...h, periods: h.periods.filter((_: any, j: number) => j !== i) }, `حذفت فترة من ${WEEK_AR[h.day]}`)}>×</button> : null}
+                </span>
+              ))}
+              {!h.closed && (h.periods || []).length < 3 ? (
+                <button type="button" className="btn sm line" onClick={() => put(h.day, { ...h, periods: [...(h.periods || []), { open: '16:00', close: '22:00' }] }, `أضفت فترة إلى ${WEEK_AR[h.day]}`)}>+ فترة</button>
+              ) : null}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function HoursField({ path }: { path: string }) {
   const ed = useEd()
   const hs: any[] = gp(ed.doc.content, path) || []
