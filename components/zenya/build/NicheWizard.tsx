@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { createPortal } from 'react-dom'
@@ -11,7 +11,8 @@ import WizardShell, {
   AddButton, Block, Card, Chips, Field, Grid, Handoff, Input, Notice, Review, Textarea, Toggle, Uploads,
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
-import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
+import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, completeness, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
+import { countryOfPhone, exampleFor, faqExample, tipFor } from '@/utils/services/wizard-help'
 import { KIND, type KindText, type NicheKind } from '@/utils/services/kinds'
 import type { ServiceHoursDay } from '@/utils/services/types'
 
@@ -28,9 +29,15 @@ type GoogleFound = BarberGoogle & { photos?: string[]; name?: string; contact?: 
  * What is required and why:
  *  - the Google Maps link: it brings the rating, the five reviews, the hours
  *    and the photos, so the site starts from facts, not from blanks
- *  - Instagram, unless the owner says the shop has none: the lead builder
- *    reads it for photos and voice
- *  - one service and a phone number
+ *  - one service and a phone number (Google usually fills the phone)
+ *
+ * Social accounts are optional (spec 2026-11-12 §4.1). Instagram is read for
+ * its photos, which are offered, never placed: the owner taps the ones to use.
+ * Every question carries an example to take and, where the reviews showed
+ * one, a tip (utils/services/wizard-help.ts). The review step shows how
+ * complete the site is and what came from Google or Instagram, and the build
+ * records which questions were answered (content.meta) so the questions can
+ * be reordered by how often they are answered.
  *
  * Nothing here calls a model. The site is built from the answers and Google's
  * facts by buildBarberContent(), so a press of «ابنِ» costs nothing and two
@@ -46,7 +53,8 @@ type Link = { id: string; label: string; url: string }
 
 type Form = {
   name: string; latin: string; city: string; area: string; address: string; audience: string
-  phone: string; whatsapp: string; email: string; maps_url: string; instagram: string; no_instagram: boolean
+  phone: string; whatsapp: string; email: string; maps_url: string; instagram: string; tiktok: string; snapchat: string; facebook: string
+  ig_photos: string[]; ig_bio: string; extra: string; wish: string
   links: Link[]; logo: string
   barbers: Barber[]
   services: Svc[]; currency: string
@@ -63,7 +71,8 @@ const WEEK: ServiceHoursDay[] = DAYS_AR.map((_, day) => ({ day, closed: false, p
 function initial(k: KindText): Form {
   return {
     name: '', latin: '', city: '', area: '', address: '', audience: k.audiences?.[0] || '',
-    phone: '', whatsapp: '', email: '', maps_url: '', instagram: '', no_instagram: false,
+    phone: '', whatsapp: '', email: '', maps_url: '', instagram: '', tiktok: '', snapchat: '', facebook: '',
+    ig_photos: [], ig_bio: '', extra: '', wish: '',
     links: [], logo: '',
     barbers: [{ id: nid(), name: '', role: k.ownerRole, photo: '', tags: [] }],
     services: k.defaults.map((s) => ({ ...s, price: '', id: nid() })), currency: '',
@@ -101,6 +110,11 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const [errorKey, setErrorKey] = useState(0)
   const [loading, setLoading] = useState(false)
   const [skill, setSkill] = useState<Record<string, string>>({})
+  const [igState, setIgState] = useState<'idle' | 'busy' | 'ok' | 'fail'>('idle')
+  const [igMsg, setIgMsg] = useState('')
+  // How the owner moves through the questions: first visit and time spent per step.
+  const moves = useRef<{ step: string; at: number }[]>([])
+  const started = useRef(Date.now())
 
   const up = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }))
   const patch = <T extends { id: string }>(k: 'barbers' | 'services' | 'faq' | 'links', id: string, v: Partial<T>) =>
@@ -154,11 +168,40 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     }
   }
 
+  async function fetchInstagram() {
+    if (f.instagram.trim().length < 2 || igState === 'busy') return
+    setIgState('busy'); setIgMsg('')
+    try {
+      const res = await fetch('/api/niche/social', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ instagram: f.instagram.trim(), demo }) })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setIgState('fail')
+        setIgMsg(j?.error === 'not_found' ? 'لم نجد هذا الحساب. تأكد من الاسم، أو تابع بدونه.'
+          : j?.error === 'not_instagram' ? 'اكتب اسم الحساب مثل @yourname أو الصق رابطه.'
+          : j?.error === 'too_many' ? 'محاولات كثيرة. تابع، ونقرأ الحساب عند البناء.'
+          : 'تعذّر قراءة الحساب الآن. تابع، ونعيد المحاولة عند البناء.')
+        return
+      }
+      setIgState('ok')
+      setF((p) => ({ ...p, ig_photos: j.photos || [], ig_bio: j.bio || '' }))
+      setIgMsg(j.photos?.length ? `وجدنا ${j.photos.length} صور في حسابك. اختر منها في خطوة الصور.` : 'وجدنا الحساب، لكن بلا صور نستطيع استعمالها.')
+    } catch { setIgState('fail'); setIgMsg('تعذّر قراءة الحساب الآن. تابع بدونه.') }
+  }
+
+  useEffect(() => {
+    const id = steps[step]?.id
+    if (id && moves.current[moves.current.length - 1]?.step !== id) moves.current.push({ step: id, at: Date.now() - started.current })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
+  const country = countryOfPhone(f.phone || f.whatsapp)
+  const tip = (q: string) => { const t = tipFor(kind, q, country); return t ? <TipLine text={t} /> : null }
+
   const services = f.services.filter((s) => s.on && s.name.trim())
   const barbers = f.barbers.filter((b) => b.name.trim())
   const ok = {
     basics: f.name.trim().length >= 2 && f.city.trim().length >= 2 && f.phone.trim().length >= 4
-      && f.maps_url.trim().length > 8 && (f.no_instagram || f.instagram.trim().length > 1)
+      && f.maps_url.trim().length > 8
       && (!f.whatsapp.trim() || intl(f.whatsapp)),
     services: services.length > 0,
   }
@@ -176,8 +219,8 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       name: f.name.trim(), latin: f.latin.trim() || undefined, city: f.city.trim(), area: f.area.trim() || undefined,
       address: f.address.trim() || undefined, audience: f.audience || undefined, phone: f.phone.trim(),
       whatsapp: f.whatsapp.trim() || (intl(f.phone) ? f.phone.trim() : undefined), email: f.email.trim() || undefined,
-      maps_url: f.maps_url.trim(), instagram: f.no_instagram ? undefined : f.instagram.trim(),
-      links: f.links.filter((l) => l.url.trim()).map((l) => ({ label: l.label.trim(), url: /^https?:\/\//.test(l.url.trim()) ? l.url.trim() : 'https://' + l.url.trim() })),
+      maps_url: f.maps_url.trim(), instagram: f.instagram.trim() || undefined,
+      links: [...socialLinks(f), ...f.links.filter((l) => l.url.trim()).map((l) => ({ label: l.label.trim(), url: /^https?:\/\//.test(l.url.trim()) ? l.url.trim() : 'https://' + l.url.trim() }))].slice(0, 10),
       barbers: barbers.map((b) => ({ name: b.name.trim(), role: b.role.trim() || undefined, photo: b.photo || undefined, tags: b.tags })),
       services: services.map((s) => ({ name: s.name.trim(), price: s.price.trim() || undefined, duration: s.duration.trim() || undefined })),
       currency: f.currency.trim() || undefined,
@@ -187,6 +230,8 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       terms: f.terms.filter((t) => t.text.trim()).map((t) => ({ label: t.label, text: t.text.trim() })),
       faq: f.faq.filter((q) => q.q.trim() && q.a.trim()).map((q) => ({ q: q.q.trim(), a: q.a.trim() })),
       logo: f.logo || undefined,
+      extra: f.extra.trim() || undefined,
+      wish: f.wish.trim() || undefined,
     }
   }
 
@@ -225,7 +270,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
 
   async function build() {
     setError(null)
-    if (!ok.basics) return fail('أكمل الأساسيات: الاسم، المدينة، الهاتف، رابط خرائط جوجل، وإنستغرام (أو «ليس عندي حساب»). رقم واتساب يُكتب بمفتاح الدولة.', 0)
+    if (!ok.basics) return fail('أكمل الأساسيات: رابط خرائط جوجل، الاسم، المدينة، والهاتف. رقم واتساب يُكتب بمفتاح الدولة.', 0)
     if (!ok.services) return fail('اختر خدمة واحدة على الأقل.', 2)
     const parsed = barberInputSchema.safeParse(payload())
     if (!parsed.success) return fail('بعض الحقول غير صحيحة. راجع الأساسيات والخدمات.')
@@ -233,8 +278,9 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     try {
       const content = buildBarberContent(parsed.data, g || { maps_url: parsed.data.maps_url })
       const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
+      const meta = { answered: answeredMap(), completeness: done.pct, moves: moves.current, ms: Date.now() - started.current, country, version: 1 }
       if (demo) {
-        const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: look.colors, services: content, input: parsed.data }
+        const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: look.colors, services: content, input: parsed.data, meta }
         try { sessionStorage.setItem(DEMO_BUILT_KEY, JSON.stringify(site)) } catch { /* private mode: the editor opens the sample */ }
         router.push('/demo/editor?type=' + kind + '&built=1')
         return
@@ -248,7 +294,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           secondaryColor: look.colors.background,
           content: {
             business_type: 'services', niche: kind, style_preset: 'graphite',
-            color_overrides: look.colors, services: content, input: parsed.data, google: g ? { place_id: g.place_id, rating: g.rating, count: g.count } : undefined,
+            color_overrides: look.colors, services: content, input: parsed.data, meta, google: g ? { place_id: g.place_id, rating: g.rating, count: g.count } : undefined,
             ...(parsed.data.logo ? { seo: { logo: parsed.data.logo } } : {}),
           },
         }),
@@ -265,13 +311,48 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   }
 
   const reviewSnips = (g?.reviews || []).slice(0, 5)
+  const sources: { from: string; what: string }[] = []
+  if (gState === 'ok' && g) {
+    const bits = [
+      g.name ? 'الاسم' : '', g.contact?.phone ? 'الهاتف' : '', g.contact?.address ? 'العنوان' : '', g.periods?.length ? 'أوقات الدوام' : '',
+      g.reviews?.length ? `${g.reviews.length.toLocaleString('ar')} تقييمات بأسماء كاتبيها` : '',
+      f.google_photos.filter((u) => !f.hidden.includes(u)).length ? `${f.google_photos.filter((u) => !f.hidden.includes(u)).length.toLocaleString('ar')} صور` : '',
+    ].filter(Boolean)
+    if (bits.length) sources.push({ from: 'من جوجل', what: bits.join('، ') })
+  }
+  const igUsed = f.uploads.filter((u) => f.ig_photos.includes(u)).length
+  if (igUsed) sources.push({ from: 'من إنستغرام', what: `${igUsed.toLocaleString('ar')} صور اخترتها` })
   const filledFaq = f.faq.filter((q) => q.q.trim() && q.a.trim()).length
   const priced = services.filter((s) => s.price.trim()).length
+  const touchedServices = f.services.some((s) => s.price.trim() || !k.defaults.some((d) => d.name === s.name && d.on === s.on))
+  const photoCount = photos.length
+  const done = completeness(
+    { services: services.map((s) => ({ name: s.name, price: s.price || undefined })), barbers: barbers.map((b) => ({ name: b.name, tags: [] })),
+      booking: { mode: f.mode, wait: f.wait || undefined, busy: f.busy || undefined }, hours: f.hours_touched ? f.hours : [], faq: f.faq.filter((q) => q.a.trim()).map((q) => ({ q: q.q, a: q.a })), extra: f.extra },
+    g || {}, { photos: photoCount, suggestedOnly: !touchedServices },
+  )
+  function answeredMap(): Record<string, number> {
+    return {
+      maps: gState === 'ok' ? 1 : f.maps_url.trim() ? 0.5 : 0,
+      socials: [f.instagram, f.tiktok, f.snapchat, f.facebook].filter((x) => x.trim()).length,
+      barbers: barbers.length,
+      services_touched: touchedServices ? 1 : 0,
+      prices: priced,
+      wait: f.wait.trim() ? 1 : 0,
+      busy: f.busy.trim() ? 1 : 0,
+      hours_touched: f.hours_touched ? 1 : 0,
+      uploads: f.uploads.length,
+      faq: filledFaq,
+      extra: f.extra.trim() ? 1 : 0,
+      wish: f.wish.trim() ? 1 : 0,
+      logo: f.logo ? 1 : 0,
+    }
+  }
 
   const steps: WizardStep[] = [
     {
-      id: 'basics', title: `${k.place} وروابطه`, sub: `من رابط خرائط جوجل نجلب التقييمات والصور والأوقات. ومن إنستغرام نقرأ صور ${mine}.`,
-      complete: ok.basics, note: 'الاسم، المدينة، الهاتف، رابط الخرائط، وإنستغرام مطلوبة.',
+      id: 'basics', title: `${k.place} وروابطه`, sub: `أرسل لنا رابط ${mine} على خرائط جوجل، وحساباتك إن وُجدت. نقرأ منها التقييمات والصور والأوقات، فلا نسألك عنها.`,
+      complete: ok.basics, note: 'رابط خرائط جوجل، والاسم، والمدينة، والهاتف مطلوبة.',
       body: (
         <Grid>
           <Block title="ابدأ من جوجل" hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط. نجلب منه الاسم والهاتف والعنوان والأوقات والتقييمات والصور.`}>
@@ -293,7 +374,22 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
             ) : null}
             {gMsg ? <div style={{ marginTop: 10 }}><Notice tone={gState === 'fail' ? 'bad' : 'accent'}>{gMsg}</Notice></div> : null}
           </Block>
-          <Block title={k.place}>
+          <Block title="حساباتك" optional hint={`إن كان لـ${mine} حسابات. نقرأ منها الصور ونعرضها عليك لتختار.`}>
+            {tip('socials')}
+            <Grid>
+              <Field label="إنستغرام" hint={igState === 'busy' ? 'نقرأ الحساب…' : undefined}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Input dir="ltr" value={f.instagram} onChange={(e) => { up('instagram', e.target.value); setIgState('idle') }} onBlur={() => igState === 'idle' && fetchInstagram()} placeholder="@yourname" />
+                  <button type="button" className="zb-chip" style={{ flex: '0 0 auto' }} onClick={fetchInstagram} disabled={igState === 'busy' || f.instagram.trim().length < 2}>{igState === 'busy' ? 'نقرأ…' : igState === 'ok' ? 'أعد' : 'اقرأ صوري'}</button>
+                </div>
+              </Field>
+              <Field label="تيك توك"><Input dir="ltr" value={f.tiktok} onChange={(e) => up('tiktok', e.target.value)} placeholder="@yourname" /></Field>
+              <Field label="سناب شات"><Input dir="ltr" value={f.snapchat} onChange={(e) => up('snapchat', e.target.value)} placeholder="yourname" /></Field>
+              <Field label="فيسبوك"><Input dir="ltr" value={f.facebook} onChange={(e) => up('facebook', e.target.value)} placeholder="facebook.com/yourpage" /></Field>
+            </Grid>
+            {igMsg ? <div style={{ marginTop: 10 }}><Notice tone={igState === 'fail' ? 'bad' : 'accent'}>{igMsg}</Notice></div> : null}
+          </Block>
+          <Block title={`بيانات ${k.place}`} hint={gState === 'ok' ? 'جلبناها من جوجل. عدّل ما يلزم.' : 'تُملأ من جوجل عند جلب الرابط، أو اكتبها هنا.'}>
             <Grid>
               <Field label={`اسم ${k.place}`} required>
                 <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
@@ -310,21 +406,11 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
               <Field label="العنوان" wide>
                 <Input value={f.address} onChange={(e) => up('address', e.target.value)} placeholder="شارع عبدالله العزب، تلاع العلي" />
               </Field>
-            </Grid>
-          </Block>
-          <Block title="التواصل">
-            <Grid>
               <Field label="الهاتف" required>
                 <Input dir="ltr" inputMode="tel" value={f.phone} onChange={(e) => up('phone', e.target.value)} placeholder="+962 79 752 7688" />
               </Field>
               <Field label="واتساب" hint="بمفتاح الدولة، مثل ‎+962. يصل إليه طلب الحجز وسؤال السعر.">
                 <Input dir="ltr" inputMode="tel" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+962 79 752 7688" />
-              </Field>
-              <Field label="إنستغرام" required={!f.no_instagram} wide hint={f.no_instagram ? 'لا بأس. نبني من صور جوجل وصورك.' : `نقرأ منه صور ${mine} وأعمالك.`}>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <Input dir="ltr" value={f.instagram} disabled={f.no_instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@yourname" style={{ flex: '1 1 220px' }} />
-                  <Toggle on={f.no_instagram} onChange={(v) => up('no_instagram', v)}>ليس عندي حساب</Toggle>
-                </div>
               </Field>
             </Grid>
           </Block>
@@ -333,7 +419,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
               <Chips options={k.audiences.map((a) => ({ id: a, label: a }))} value={f.audience} onChange={(v) => up('audience', v || k.audiences![0])} allowNone={false} />
             </Block>
           ) : null}
-          <Block title="روابط أخرى" optional hint="أي صفحة لك: تيك توك، سناب، تطبيق حجز، موقع قديم، تصميم تحبه.">
+          <Block title="روابط أخرى" optional hint="أي صفحة لك: تطبيق حجز، موقع قديم، تصميم تحبه.">
             <div className="zb-list">
               {f.links.map((l) => (
                 <Card key={l.id} title={l.label || 'رابط'} onRemove={() => drop('links', l.id)} removeLabel="حذف الرابط">
@@ -357,6 +443,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       complete: barbers.length > 0, optional: true,
       body: (
         <Grid>
+          {tip('barbers')}
           {reviewSnips.length ? (
             <Block title="من تقييماتك على جوجل" hint={`الأسماء التي يذكرها زبائنك. سنضع كلام الزبون تحت اسم ${k.one}.`}>
               <ul style={{ display: 'grid', gap: 8, listStyle: 'none', padding: 0, margin: 0 }}>
@@ -402,6 +489,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       complete: ok.services, note: 'اختر خدمة واحدة على الأقل.',
       body: (
         <Grid>
+          {tip('services')}
           <Block>
             <div className="zb-list">
               {f.services.map((s) => (
@@ -444,8 +532,9 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
             <Chips allowNone={false} value={f.mode} onChange={(v) => up('mode', v as Form['mode'])}
               options={[{ id: 'both', label: 'بموعد وبدون موعد' }, { id: 'appointment', label: 'بموعد فقط' }, { id: 'walkin', label: 'بدون موعد، بالدور' }]} />
           </Block>
-          <Field label="كم ينتظر الزبون عادة؟"><Input value={f.wait} onChange={(e) => up('wait', e.target.value)} placeholder="10 إلى 20 دقيقة مساء الخميس" /></Field>
-          <Field label="متى تكون الزحمة؟"><Input value={f.busy} onChange={(e) => up('busy', e.target.value)} placeholder="الخميس والجمعة بعد المغرب" /></Field>
+          {tip('booking')}
+          <Field label="كم ينتظر الزبون عادة؟"><Input value={f.wait} onChange={(e) => up('wait', e.target.value)} placeholder="اكتب بكلامك" /><Example text={exampleFor(kind, 'wait')} on={!f.wait} onUse={(v) => up('wait', v)} /></Field>
+          <Field label="متى تكون الزحمة؟"><Input value={f.busy} onChange={(e) => up('busy', e.target.value)} placeholder="اكتب بكلامك" /><Example text={exampleFor(kind, 'busy')} on={!f.busy} onUse={(v) => up('busy', v)} /></Field>
           <Block title="أوقات الدوام" hint="لكل يوم فترة أو أكثر. «مغلق» يخفي اليوم من الحجز.">
             <div style={{ display: 'grid', gap: 10 }}>
               {f.hours.map((d, di) => (
@@ -473,6 +562,23 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       complete: photos.length > 0, optional: true,
       body: (
         <Grid>
+          {tip('photos')}
+          {f.ig_photos.length ? (
+            <Block title="من إنستغرام" hint="وجدناها في حسابك. اضغط الصورة التي تريدها في موقعك، ثم اختر منها صورة الواجهة.">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(110px,1fr))', gap: 8 }}>
+                {f.ig_photos.map((u) => {
+                  const on = f.uploads.includes(u)
+                  return (
+                    <button key={u} type="button" aria-pressed={on} onClick={() => up('uploads', on ? f.uploads.filter((x) => x !== u) : [...f.uploads, u].slice(0, 12))}
+                      style={{ position: 'relative', aspectRatio: '1', borderRadius: 10, overflow: 'hidden', outline: on ? '3px solid var(--violet,#E2532A)' : 'none', outlineOffset: 2 }}>
+                      <img src={u} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: on ? 1 : 0.8 }} />
+                      {on ? <span style={{ position: 'absolute', insetInlineStart: 6, top: 6, background: 'var(--violet,#E2532A)', color: '#fff', fontSize: 12, padding: '2px 8px', borderRadius: 99 }}>في موقعك</span> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            </Block>
+          ) : null}
           {f.google_photos.length ? (
             <Block title="من جوجل" hint="اضغط صورة لتجعلها صورة الواجهة. «إخفاء» يبعدها عن الموقع.">
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: 10 }}>
@@ -515,12 +621,13 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       complete: filledFaq > 0, optional: true,
       body: (
         <Grid>
+          {tip('faq')}
           <Block>
             <div className="zb-list">
               {f.faq.map((q) => (
                 <Card key={q.id} title={q.own ? (q.q || 'سؤالك') : q.q} onRemove={() => drop('faq', q.id)} removeLabel="حذف السؤال">
                   {q.own ? <Field label="السؤال" wide><Input value={q.q} onChange={(e) => patch<Faq>('faq', q.id, { q: e.target.value })} placeholder="هل عندكم عروض للطلاب؟" /></Field> : null}
-                  <Field label="الجواب" wide><Textarea rows={2} value={q.a} onChange={(e) => patch<Faq>('faq', q.id, { a: e.target.value })} placeholder="جوابك بكلامك" /></Field>
+                  <Field label="الجواب" wide><Textarea rows={2} value={q.a} onChange={(e) => patch<Faq>('faq', q.id, { a: e.target.value })} placeholder="جوابك بكلامك" /><Example text={faqExample(kind, q.q)} on={!q.a} onUse={(v) => patch<Faq>('faq', q.id, { a: v })} /></Field>
                 </Card>
               ))}
             </div>
@@ -534,6 +641,21 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       complete: ok.basics && ok.services, note: 'ينقص شيء مطلوب في خطوة سابقة.',
       body: (
         <Grid>
+          <Block title={`موقعك مكتمل ${done.pct.toLocaleString('ar')}٪`} hint={done.next ? `${done.next.label} ليرتفع إلى ${Math.min(100, done.pct + done.next.gain).toLocaleString('ar')}٪. الموقع يعمل ويبدو كاملًا الآن أيضًا، وتستطيع الإضافة لاحقًا من المحرر.` : 'كل شيء جاهز.'}>
+            <div className="bw-meter" role="meter" aria-valuemin={0} aria-valuemax={100} aria-valuenow={done.pct} aria-label="اكتمال الموقع"><i style={{ width: `${done.pct}%` }} /></div>
+          </Block>
+          {sources.length ? (
+            <Block title="ما أخذناه من حساباتك" hint="استعملناه في موقعك. عدّل أي شيء منه هنا أو من المحرر بعد البناء.">
+              <ul className="bw-src">{sources.map((x) => <li key={x.from}><b>{x.from}</b><span>{x.what}</span></li>)}</ul>
+            </Block>
+          ) : null}
+          <Block title="هل تريد أن تضيف شيئًا آخر؟" optional hint="اكتب بكلامك أي شيء يميّز محلك. نرتّبه ونضعه في المكان المناسب، ويبقى في المحرر لتعدّله.">
+            <Textarea rows={3} value={f.extra} onChange={(e) => up('extra', e.target.value)} placeholder="اكتب بكلامك" />
+            <Example text={exampleFor(kind, 'extra')} on={!f.extra} onUse={(v) => up('extra', v)} />
+          </Block>
+          <Block title="هل تتمنى أن نسألك عن شيء آخر؟" optional hint="لنا نحن، لا يظهر في موقعك. يساعدنا أن نحسّن هذه الأسئلة.">
+            <Textarea rows={2} value={f.wish} onChange={(e) => up('wish', e.target.value)} placeholder="اكتب بكلامك" />
+          </Block>
           <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
             <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
               {LOOKS.map((l) => (
@@ -555,7 +677,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
             recap={[
               { label: bare, value: [f.name, f.area, f.city].filter(Boolean).join('، ') },
               { label: 'الهاتف', value: f.phone },
-              { label: 'إنستغرام', value: f.no_instagram ? 'لا يوجد' : f.instagram },
+              { label: 'الحسابات', value: [f.instagram, f.tiktok, f.snapchat, f.facebook].filter((x) => x.trim()).join('، ') },
               { label: k.team, value: barbers.map((b) => b.name).join('، ') },
               { label: 'الخدمات', value: services.map((s) => s.name + (s.price ? ` (${s.price}${f.currency ? ' ' + f.currency : ''})` : '')).join('، ') },
               { label: 'أسئلة مُجابة', value: filledFaq ? String(filledFaq) : '' },
@@ -613,7 +735,28 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           </div>
         </div>, document.body,
       ) : null}
-      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
+}
+
+/** A tip from real reviews, under a question. */
+function TipLine({ text }: { text: string }) {
+  return <p className="bw-tip"><b aria-hidden>💡</b><span>{text}</span></p>
+}
+
+/** «مثال: …» under a field, with one tap to take it and then edit it. */
+function Example({ text, on, onUse }: { text?: string; on: boolean; onUse: (v: string) => void }) {
+  if (!text || !on) return null
+  return <span className="bw-ex"><span>مثال: {text}</span><button type="button" onClick={() => onUse(text)}>استعمل المثال</button></span>
+}
+
+/** TikTok, Snapchat and Facebook as the site's extra links. */
+function socialLinks(f: { tiktok: string; snapchat: string; facebook: string }): { label: string; url: string }[] {
+  const h = (v: string) => v.trim().replace(/^@/, '')
+  const out: { label: string; url: string }[] = []
+  if (f.tiktok.trim()) out.push({ label: 'تيك توك', url: /tiktok\.com/i.test(f.tiktok) ? (/^https?:/.test(f.tiktok.trim()) ? f.tiktok.trim() : 'https://' + f.tiktok.trim()) : `https://www.tiktok.com/@${h(f.tiktok)}` })
+  if (f.snapchat.trim()) out.push({ label: 'سناب شات', url: /snapchat\.com/i.test(f.snapchat) ? (/^https?:/.test(f.snapchat.trim()) ? f.snapchat.trim() : 'https://' + f.snapchat.trim()) : `https://www.snapchat.com/add/${h(f.snapchat)}` })
+  if (f.facebook.trim()) out.push({ label: 'فيسبوك', url: /^https?:/.test(f.facebook.trim()) ? f.facebook.trim() : /facebook\.com|fb\.com/i.test(f.facebook) ? 'https://' + f.facebook.trim() : `https://www.facebook.com/${h(f.facebook)}` })
+  return out
 }
