@@ -13,7 +13,7 @@
  */
 
 import { z } from 'zod'
-import type { ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
+import type { ContentSource, ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
 import { KIND, NICHE_KINDS, type NicheKind } from './kinds'
 
 /** Where /demo/barber-build leaves the site it built, for /demo/editor?type=barber to open. */
@@ -254,7 +254,7 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
     },
     faq: { heading: 'قبل أن تأتي', items: faq },
     final_cta: { heading: k.cta, subheading: '', cta_label: k.cta, secondary_text: '' },
-    gallery: { heading: k.place, images: gallery.map((u) => ({ url: u, alt: '' })) },
+    gallery: { heading: k.place, images: gallery.map((u) => ({ url: u, alt: '', source: sourceOfPhoto(u), from: SOURCE_AR[sourceOfPhoto(u)] })) },
     footer: { tagline: lede, legal: '', phone: input.phone, email: input.email || '', address: input.address || where },
     seo: {
       title: `${input.name} | ${k.seo} في ${input.area || input.city}`,
@@ -273,6 +273,12 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
     google: { rating: g.rating ?? undefined, count: g.count ?? undefined, maps_url: g.maps_url || input.maps_url, place_id: g.place_id },
   }
 }
+
+/** Our storage keeps Google and Instagram copies in their own folders; anything else the owner gave. */
+export function sourceOfPhoto(u: string): ContentSource {
+  return /\/google\//.test(u) ? 'google' : /\/instagram\//.test(u) ? 'instagram' : /\/facebook\//.test(u) ? 'facebook' : 'owner'
+}
+export const SOURCE_AR: Record<ContentSource, string> = { owner: 'منك', instagram: 'من إنستغرام', facebook: 'من فيسبوك', tiktok: 'من تيك توك', google: 'من جوجل', default: 'اقتراح منا' }
 
 /** Every kind builds the same way; the barber was first. */
 export const nicheInputSchema = barberInputSchema

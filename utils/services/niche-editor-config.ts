@@ -112,10 +112,11 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
         id: 'gallery', label: 'الصور', icon: ImageIcon, ic: 'gallery', desc: 'صور المكان الحقيقية',
         summary: (c) => `${(c?.gallery?.images || []).length} صور`,
         fields: [
+          { type: 'note', content: 'تحت كل صورة مصدرها: «من جوجل» أو «من إنستغرام» أخذناها من حساباتك، و«منك» ما رفعته. غيّر أي صورة أو احذفها.' },
           { type: 'image', path: 'story.image', label: 'الصورة بجانب الأسعار', optional: true },
           {
-            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt',
-            makeItem: () => ({ url: '', alt: '' }),
+            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt', itemSub: 'from',
+            makeItem: () => ({ url: '', alt: '', source: 'owner', from: 'منك' }),
             itemFields: [{ type: 'image', path: 'url', label: 'الصورة' }, { type: 'text', path: 'alt', label: 'وصفها' }],
           },
         ],

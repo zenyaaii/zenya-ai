@@ -83,7 +83,13 @@ export type ServiceFaqItem = {
 export type ServiceGalleryImage = {
   url: string
   alt?: string
+  /** Where the photo came from, shown to the owner in the editor (spec 2026-11-12 §7-ب2). */
+  source?: ContentSource
+  /** The same in the owner's words: «من جوجل». */
+  from?: string
 }
+
+export type ContentSource = 'owner' | 'instagram' | 'facebook' | 'tiktok' | 'google' | 'default'
 
 export type ServiceContent = {
   niche?: ServiceNicheKind
