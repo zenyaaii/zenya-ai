@@ -54,7 +54,7 @@ type Link = { id: string; label: string; url: string }
 type Form = {
   name: string; latin: string; city: string; area: string; address: string; audience: string
   phone: string; whatsapp: string; email: string; maps_url: string; instagram: string; tiktok: string; snapchat: string; facebook: string
-  ig_photos: string[]; ig_bio: string; extra: string; wish: string
+  ig_photos: string[]; ig_bio: string; extra: string
   links: Link[]; logo: string
   barbers: Barber[]
   services: Svc[]; currency: string
@@ -72,7 +72,7 @@ function initial(k: KindText): Form {
   return {
     name: '', latin: '', city: '', area: '', address: '', audience: k.audiences?.[0] || '',
     phone: '', whatsapp: '', email: '', maps_url: '', instagram: '', tiktok: '', snapchat: '', facebook: '',
-    ig_photos: [], ig_bio: '', extra: '', wish: '',
+    ig_photos: [], ig_bio: '', extra: '',
     links: [], logo: '',
     barbers: [{ id: nid(), name: '', role: k.ownerRole, photo: '', tags: [] }],
     services: k.defaults.map((s) => ({ ...s, price: '', id: nid() })), currency: '',
@@ -231,7 +231,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       faq: f.faq.filter((q) => q.q.trim() && q.a.trim()).map((q) => ({ q: q.q.trim(), a: q.a.trim() })),
       logo: f.logo || undefined,
       extra: f.extra.trim() || undefined,
-      wish: f.wish.trim() || undefined,
     }
   }
 
@@ -344,7 +343,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       uploads: f.uploads.length,
       faq: filledFaq,
       extra: f.extra.trim() ? 1 : 0,
-      wish: f.wish.trim() ? 1 : 0,
       logo: f.logo ? 1 : 0,
     }
   }
@@ -652,9 +650,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           <Block title="هل تريد أن تضيف شيئًا آخر؟" optional hint="اكتب بكلامك أي شيء يميّز محلك. نرتّبه ونضعه في المكان المناسب، ويبقى في المحرر لتعدّله.">
             <Textarea rows={3} value={f.extra} onChange={(e) => up('extra', e.target.value)} placeholder="اكتب بكلامك" />
             <Example text={exampleFor(kind, 'extra')} on={!f.extra} onUse={(v) => up('extra', v)} />
-          </Block>
-          <Block title="هل تتمنى أن نسألك عن شيء آخر؟" optional hint="لنا نحن، لا يظهر في موقعك. يساعدنا أن نحسّن هذه الأسئلة.">
-            <Textarea rows={2} value={f.wish} onChange={(e) => up('wish', e.target.value)} placeholder="اكتب بكلامك" />
           </Block>
           <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
             <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
