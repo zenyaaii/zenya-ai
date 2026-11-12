@@ -703,8 +703,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     setF((p) => ({ ...p, hours_touched: true, hours: p.hours.map((d, x) => (x === i ? { ...d, periods: d.periods.map((q, y) => (y === pi ? { ...q, ...v } : q)) } : d)) }))
   }
 
-  const required = [ok.basics, ok.services]
-  const pct = Math.round((steps.filter((s) => s.complete).length / steps.length) * 100)
 
   return (
     <>
@@ -715,7 +713,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
         steps={steps}
         step={step}
         onStep={setStep}
-        progress={{ pct }}
+        progress={{ pct: done.pct, label: 'اكتمال موقعك' }}
         scrollKey={errorKey || undefined}
         notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
         final={{ label: loading ? 'نبني موقعك…' : demo ? 'ابنِ وافتح المحرر' : `ابنِ موقع ${k.place}`, slide: 'هيا بنا', onClick: build, busy: loading }}
