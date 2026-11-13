@@ -25,7 +25,7 @@ import { useBookingContext } from '@/components/site/BookingContext'
  * section out rather than filling it with something invented.
  */
 
-export type Colors = { primary?: string; accent?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
+type Colors = { primary?: string; accent?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
 
 const DEFAULT = { bg: '#0d0c0a', bg2: '#151310', ink: '#f2ede3', ink2: '#cfc7b8', mute: '#958d80', line: '#2a2722', line2: '#3d3931', acc: '#c4a35a', acc2: '#dcc28a' }
 
@@ -43,7 +43,7 @@ function lum(hex?: string): number {
 }
 const onColor = (hex: string) => (lum(hex) > 0.36 ? '#15120c' : '#fffaf2')
 
-export function palette(c?: Colors, fallback?: Colors) {
+function palette(c?: Colors, fallback?: Colors) {
   if (!c?.background || !c.accent) c = fallback
   if (!c?.background || !c.accent) return { ...DEFAULT, onAcc: onColor(DEFAULT.acc), dark: true }
   const dark = lum(c.background) < 0.2
@@ -63,7 +63,7 @@ export function palette(c?: Colors, fallback?: Colors) {
   }
 }
 
-export function waNumber(content: ServiceContent): string | null {
+function waNumber(content: ServiceContent): string | null {
   for (const raw of [content.links?.whatsapp || '', content.footer.phone || '']) {
     const v = raw.trim()
     const m = /wa\.me\/(\d{8,})/.exec(v)
@@ -74,16 +74,16 @@ export function waNumber(content: ServiceContent): string | null {
   }
   return null
 }
-export const telOf = (p: string) => p.replace(/[^\d+]/g, '')
+const telOf = (p: string) => p.replace(/[^\d+]/g, '')
 
-export const I = {
+const I = {
   wa: <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z" /></svg>,
   phone: <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z" /></svg>,
   pin: <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" /></svg>,
   ig: <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 8.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4zM17.3 5.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM12 2c-2.7 0-3 0-4.1.1C4.4 2.2 2.2 4.4 2.1 7.9 2 9 2 9.3 2 12s0 3 .1 4.1c.1 3.5 2.3 5.7 5.8 5.8 1.1.1 1.4.1 4.1.1s3 0 4.1-.1c3.5-.1 5.7-2.3 5.8-5.8.1-1.1.1-1.4.1-4.1s0-3-.1-4.1c-.1-3.5-2.3-5.7-5.8-5.8C15 2 14.7 2 12 2zm0 1.8c2.7 0 3 0 4 .1 2.6.1 3.9 1.4 4 4 .1 1.1.1 1.4.1 4.1s0 3-.1 4c-.1 2.6-1.4 3.9-4 4-1.1.1-1.4.1-4 .1s-3 0-4-.1c-2.6-.1-3.9-1.4-4-4C3.8 15 3.8 14.7 3.8 12s0-3 .1-4c.1-2.6 1.4-3.9 4-4 1-.2 1.4-.2 4.1-.2z" /></svg>,
 }
 
-export function igHref(v?: string): string | null {
+function igHref(v?: string): string | null {
   const s = (v || '').trim()
   if (!s) return null
   if (/^https?:\/\//i.test(s)) return s
@@ -91,7 +91,7 @@ export function igHref(v?: string): string | null {
   return h ? `https://www.instagram.com/${h}/` : null
 }
 
-export const ar = (n: number) => n.toLocaleString('ar')
+const ar = (n: number) => n.toLocaleString('ar')
 
 export default function NicheView({ content, colors, logo }: { content: ServiceContent; colors?: Colors; logo?: string }) {
   const kind = isNicheKind(content.niche) ? content.niche : 'barber'
@@ -333,7 +333,7 @@ function Barber({ m, book, label }: { m: ServiceTeamMember; book?: () => void; l
   )
 }
 
-export function nextDays(n: number): { v: string; label: string }[] {
+function nextDays(n: number): { v: string; label: string }[] {
   const out: { v: string; label: string }[] = []
   const now = new Date()
   for (let i = 0; i < n; i++) {
@@ -346,7 +346,7 @@ export function nextDays(n: number): { v: string; label: string }[] {
 
 const TIMES = [['11:00', '11 ص'], ['13:00', '1 م'], ['16:00', '4 م'], ['18:30', '6:30 م'], ['20:00', '8 م'], ['21:00', '9 م']] as const
 
-export function Booking({ k, services, barbers, pick, setPick, slug, preview }: { k: (typeof KIND)[keyof typeof KIND]; services: string[]; barbers: string[]; pick: string; setPick: (v: string) => void; slug: string | null; preview: boolean }) {
+function Booking({ k, services, barbers, pick, setPick, slug, preview }: { k: (typeof KIND)[keyof typeof KIND]; services: string[]; barbers: string[]; pick: string; setPick: (v: string) => void; slug: string | null; preview: boolean }) {
   const [days, setDays] = useState<{ v: string; label: string }[]>([])
   useEffect(() => setDays(nextDays(6)), [])
   const [svc, setSvc] = useState(services[0] || '')
