@@ -20,10 +20,15 @@ export type CookieLook = {
   mark: 'cookie' | 'aperture'
 }
 
+// Anas picked option ج for every template (2026-11-13): the usual capsule in the
+// site's own colours. Each theme only carries its font over; the shape is the same.
+const PILL = { radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie' } as const
+
 export const NICHE_COOKIE: Record<string, CookieLook> = {
-  // Photo studio (PhotoFull). Anas picked option ج (2026-11-13): the usual capsule
-  // in the theme's own colours; only the theme's font is carried over.
-  photo: { font: '"Noto Sans Arabic", system-ui, sans-serif', radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie' },
+  barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif' },
+  gym: { ...PILL, font: '"Readex Pro", system-ui, sans-serif' }, // GymFull body face
+  car: { ...PILL, font: '"Rubik", system-ui, sans-serif' }, // CarFull body face
+  photo: { ...PILL, font: '"Noto Sans Arabic", system-ui, sans-serif' }, // PhotoFull body face
 }
 
 export const cookieLookOf = (niche?: string): CookieLook | undefined => (niche ? NICHE_COOKIE[niche] : undefined)
