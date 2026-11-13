@@ -24,12 +24,13 @@ export type CookieLook = {
 
 // Anas picked option ج for every template (2026-11-13): the usual capsule in the
 // site's own colours. Each theme only carries its font over; the shape is the same.
-const PILL = { radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie' } as const
+// Every full theme has a call bar along the bottom on a phone, so the pill sits above it.
+const PILL = { radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie', phoneLift: 84 } as const
 
 export const NICHE_COOKIE: Record<string, CookieLook> = {
-  barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif', phoneLift: 81 }, // above the barber's 69px phone bar
+  barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif' }, // body face
   gym: { ...PILL, font: '"Readex Pro", system-ui, sans-serif' }, // GymFull body face
-  car: { ...PILL, font: '"Rubik", system-ui, sans-serif', phoneLift: 84 }, // CarFull body face, above its 72px phone bar
+  car: { ...PILL, font: '"Rubik", system-ui, sans-serif' }, // CarFull body face
   photo: { ...PILL, font: '"Noto Sans Arabic", system-ui, sans-serif' }, // PhotoFull body face
   beauty: { ...PILL, font: '"Readex Pro", system-ui, sans-serif', mark: 'petal' }, // BeautyFull body face, its small petal
 }
