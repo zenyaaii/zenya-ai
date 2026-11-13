@@ -1,4 +1,4 @@
-import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, Camera, IdCard } from 'lucide-react'
+import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, Camera, IdCard, Gift, Flower2 } from 'lucide-react'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
@@ -59,6 +59,25 @@ const KIND_PAGES: Partial<Record<NicheKind, { pages: NonNullable<EditorConfig['p
       reviews: ['home', 'studio'],
       gallery: ['home', 'work'],
       faq: ['home', 'book'],
+    },
+  },
+  beauty: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'sessions', label: 'الجلسات', icon: Tag, ic: 'tag' },
+      { id: 'packages', label: 'الباقات', icon: Gift, ic: 'tag' },
+      { id: 'center', label: 'المركز', icon: Flower2, ic: 'store' },
+      { id: 'book', label: 'احجزي', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'sessions', 'packages', 'center'],
+      team: ['home', 'center'],
+      services: ['home', 'sessions'],
+      reviews: ['home'],
+      gallery: ['home', 'center'],
+      faq: ['home', 'book'],
+      booking: ['book'],
     },
   },
 }
@@ -159,9 +178,26 @@ function baseConfig(kind: NicheKind): EditorConfig {
         empty: (c: any) => !c?.niche_extra || !Object.values(c.niche_extra).some((v: any) => (Array.isArray(v) ? v.length : !!v)),
         fields: [
           { type: 'note', content: 'كل ما يبقى فارغًا هنا لا يظهر في الموقع.' },
+          ...(k.extras.privacy ? [{ type: 'text', path: 'niche_extra.privacy', label: 'لمن المكان، وكيف تحفظون الخصوصية', placeholder: k.extras.privacy.example }] : []),
           ...(k.extras.offers ? [{ type: 'strings', path: 'niche_extra.offers', label: `ماذا يقدّم ${k.place}`, addLabel: 'أضف' }] : []),
           ...(k.extras.facilities ? [{ type: 'strings', path: 'niche_extra.facilities', label: 'المرافق', addLabel: 'أضف مرفقًا' }] : []),
           ...(k.extras.story ? [{ type: 'textarea', path: 'niche_extra.story', label: k.extras.story.label, rows: 3, max: 400 }] : []),
+          ...(k.extras.features ? [{ type: 'strings', path: 'niche_extra.features', label: 'ما الذي يميزك (سطر لكل ميزة)', addLabel: 'أضف ميزة' }] : []),
+          ...(k.extras.packages ? [{
+            type: 'array', path: 'niche_extra.packages', label: 'الباقات', itemLabel: 'باقة', itemTitle: 'name', itemSub: 'price',
+            makeItem: () => ({ name: '', includes: [], duration: '', price: '' }),
+            itemFields: [
+              { type: 'text', path: 'name', label: 'اسم الباقة' },
+              { type: 'strings', path: 'includes', label: 'ما تشمله', addLabel: 'أضف جلسة' },
+              { type: 'text', path: 'duration', label: 'المدة' },
+              { type: 'text', path: 'price', label: 'السعر (مع العملة). فارغ = «اسألي عن السعر»' },
+            ],
+          }] : []),
+          ...(k.extras.blocks ? [{
+            type: 'array', path: 'niche_extra.blocks', label: 'قبل الجلسة (الضيافة، تنبيه صحي، التأخير)', itemLabel: 'ملاحظة', itemTitle: 'title', itemSub: 'text',
+            makeItem: () => ({ id: 'note', title: '', text: '' }),
+            itemFields: [{ type: 'text', path: 'title', label: 'العنوان' }, { type: 'textarea', path: 'text', label: 'النص', rows: 3 }],
+          }] : []),
           ...(k.extras.since ? [{ type: 'number', path: 'niche_extra.since', label: 'سنة الافتتاح', min: 1900, max: 2100 }] : []),
           ...(k.extras.steps ? [{
             type: 'array', path: 'niche_extra.steps', label: 'كيف يبدأ الزبون الجديد', itemLabel: 'خطوة', itemTitle: 'title', itemSub: 'text',
@@ -216,6 +252,7 @@ function baseConfig(kind: NicheKind): EditorConfig {
               { type: 'text', path: 'name', label: 'الاسم' },
               { type: 'text', path: 'price_from', label: 'السعر (مع العملة)' },
               { type: 'text', path: 'duration', label: 'المدة' },
+              ...(k.extras?.groups ? [{ type: 'text', path: 'group', label: 'القسم (مثل: شعر، أظافر، بشرة)' }] as EditorConfig['panels'][number]['fields'] : []),
               { type: 'text', path: 'description', label: 'ملاحظة قصيرة' },
             ],
           },

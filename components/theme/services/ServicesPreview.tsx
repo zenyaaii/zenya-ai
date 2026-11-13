@@ -23,6 +23,8 @@ import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/mar
 const FULL = {
   gym: lazy(() => import('./niche/GymFull')),
   photo: lazy(() => import('./niche/PhotoFull')),
+  // Beauty & spa «جلسات» (Anas, 2026-11-13).
+  beauty: lazy(() => import('./niche/BeautyFull')),
 } as const
 
 type Props = {

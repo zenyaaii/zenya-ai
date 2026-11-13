@@ -86,6 +86,14 @@ export const NICHE_PAGES: Record<string, SitePage[]> = {
     { view: 'studio',    slug: 'studio',    label: 'الاستوديو' },
     { view: 'book',      slug: 'book',      label: 'احجز جلستك' },
   ],
+  // components/theme/services/niche/BeautyFull.tsx
+  beauty: [
+    { view: 'home',      slug: '',          label: 'الرئيسية' },
+    { view: 'sessions',  slug: 'sessions',  label: 'الجلسات' },
+    { view: 'packages',  slug: 'packages',  label: 'الباقات' },
+    { view: 'center',    slug: 'center',    label: 'المركز' },
+    { view: 'book',      slug: 'book',      label: 'احجزي' },
+  ],
 }
 
 /** The services kind a site's content was built for ('gym', …), if any. */

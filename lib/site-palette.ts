@@ -30,6 +30,24 @@ export type SitePalette = {
   button: string
   /** Corner radius of that button, in px (999 = pill). */
   buttonRadius: number
+  /** A services kind with its own full theme draws the notice in that theme's own style. */
+  look?: 'beauty'
+  /** That theme's quiet second colour. */
+  accent2?: string
+}
+
+/**
+ * Services kinds with their own full theme (components/theme/services/niche):
+ * the theme's own fonts and default colours, which the services presets do not
+ * know. The site's colour_overrides still win.
+ */
+const NICHE_LOOK: Record<string, { look: SitePalette['look']; colors: Record<string, string>; heading_font: string; body_font: string }> = {
+  beauty: {
+    look: 'beauty',
+    colors: { primary: '#3d6652', accent: '#3d6652', accent2: '#b48a5e', background: '#f2f1ec', surface: '#e7e5dc', text: '#1b231f', muted: '#5f6a63', border: '#d9d6cb' },
+    heading_font: '"Alexandria", "Readex Pro", sans-serif',
+    body_font: '"Readex Pro", sans-serif',
+  },
 }
 
 /**
@@ -66,9 +84,18 @@ export function resolveSitePalette(
   presetId?: string,
   colorOverrides?: Record<string, string>,
   typographyPreset?: string,
+  niche?: string,
 ): SitePalette | null {
   const lookup = PRESET_LOOKUP[businessType]
   if (!lookup) return null
+  const own = businessType === 'services' && niche ? NICHE_LOOK[niche] : undefined
+  if (own) {
+    const c = { ...own.colors, ...(colorOverrides?.background && colorOverrides.accent ? colorOverrides : {}) }
+    return {
+      primary: c.primary || c.accent, accent: c.accent, background: c.background, surface: c.surface || c.background, text: c.text, muted: c.muted || c.text, border: c.border || c.muted,
+      headingFont: own.heading_font, bodyFont: own.body_font, button: c.accent, buttonRadius: 999, look: own.look, accent2: c.accent2 || c.accent,
+    }
+  }
   // Every getXPreset falls back to its first preset for an unknown id, and so
   // does each Preview's default, so '' lands where the template itself does.
   const preset = lookup(presetId || '')

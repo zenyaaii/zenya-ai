@@ -55,6 +55,8 @@ export const barberInputSchema = z.object({
       price: z.string().trim().max(20).optional(),
       duration: z.string().trim().max(20).optional(),
       note: z.string().trim().max(80).optional(),
+      /** Beauty: the tab a session sits under («شعر», «أظافر»). */
+      group: z.string().trim().max(30).optional(),
     }))
     .min(1)
     .max(24),
@@ -91,6 +93,14 @@ export const barberInputSchema = z.object({
     classes: z.array(z.object({ day: z.number().int().min(0).max(6), items: z.array(z.object({ time: hhmm, name: z.string().trim().min(1).max(40) })).max(12) })).max(7).optional(),
     perks: z.array(z.object({ plan: z.string().trim().min(1).max(60), items: z.array(z.string().trim().min(1).max(80)).max(10) })).max(24).optional(),
     steps: z.array(z.object({ title: z.string().trim().min(1).max(40), text: z.string().trim().max(160) })).max(5).optional(),
+    /** Beauty: who the place is for and how it keeps privacy. */
+    privacy: z.string().trim().max(80).optional(),
+    /** Beauty: «ما الذي يميزك؟» as short lines. */
+    features: z.array(z.string().trim().min(1).max(120)).max(6).optional(),
+    /** Beauty: sessions sold together. */
+    packages: z.array(z.object({ name: z.string().trim().min(1).max(60), includes: z.array(z.string().trim().min(1).max(60)).max(10), duration: z.string().trim().max(30).optional(), price: z.string().trim().max(30).optional() })).max(8).optional(),
+    /** Beauty: notes before a session (hospitality, health, lateness). */
+    blocks: z.array(z.object({ id: z.string().trim().max(30), title: z.string().trim().min(1).max(40), text: z.string().trim().max(300) })).max(6).optional(),
   }).optional(),
 })
 
@@ -225,6 +235,10 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
     classes: nx.classes?.filter((d) => d.items.length).length ? nx.classes.filter((d) => d.items.length) : undefined,
     perks: nx.perks?.filter((p) => p.items.length).length ? nx.perks.filter((p) => p.items.length) : undefined,
     steps: nx.steps?.length ? nx.steps : undefined,
+    privacy: nx.privacy || undefined,
+    features: nx.features?.length ? nx.features : undefined,
+    packages: nx.packages?.length ? nx.packages.map((p) => ({ ...p, price: p.price && cur && /^[\d.,٠-٩\s]+$/.test(p.price) ? `${p.price} ${cur}` : p.price || undefined })) : undefined,
+    blocks: nx.blocks?.filter((b) => b.text.trim()).length ? nx.blocks.filter((b) => b.text.trim()) : undefined,
   } : undefined
 
   return {
@@ -259,6 +273,7 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
         description: s.note || '',
         price_from: s.price ? `${s.price}${cur ? ' ' + cur : ''}` : undefined,
         duration: s.duration || undefined,
+        ...(s.group ? { group: s.group } : {}),
       })),
     },
     story: { eyebrow: '', heading: '', body: '', image: input.photos.side },

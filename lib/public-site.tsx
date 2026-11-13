@@ -8,6 +8,7 @@ import SiteCookieBanner from '@/components/site/SiteCookieBanner'
 import { cookieLookOf } from '@/components/site/cookie-looks'
 import { nicheOf } from '@/lib/site-pages'
 import { resolveSitePalette } from '@/lib/site-palette'
+import { nicheOf } from '@/lib/site-pages'
 import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
 import { bookingsPaused, reviewsHidden, switchesOf, waFloatOn, waHref, waNumber } from '@/lib/site-switches'
@@ -282,7 +283,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
   const templateContent = businessType === 'services' && switchesOf(c).wa_float === false ? { ...shown, hide_wa_float: true } : shown
   // The services template draws its own floating button and reads the switch itself.
   const wa = businessType !== 'services' && waFloatOn(businessType, c) ? waHref(waNumber(businessType, c) || '') : null
-  const cookiePalette = resolveSitePalette(businessType, presetId, colorOverrides, typographyPreset)
+  const cookiePalette = resolveSitePalette(businessType, presetId, colorOverrides, typographyPreset, nicheOf(c, businessType))
 
   const seo = resolveSeo({
     product_name: theme.product_name,

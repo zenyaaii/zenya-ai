@@ -76,6 +76,8 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
     border: 0,
   }
 
+  if (p.look === 'beauty') return <BeautyNotice p={p} shown={shown} choose={choose} />
+
   // A floating glass pill, centred above the bottom edge (and the phone's home
   // bar), in the site's own colours. One line on a laptop; on a phone the
   // second half of the sentence drops so it stays one short line.
@@ -134,6 +136,54 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
         </button>
       </div>
       <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } }`}</style>
+    </div>
+  )
+}
+
+/**
+ * Beauty & spa (Anas, 2026-11-13: the notice belongs to the theme). A calm,
+ * solid card in the theme's own paper, fonts and pill buttons, set in the
+ * reading corner on a laptop and across the bottom on a phone. It speaks of
+ * privacy first, as the theme does.
+ */
+function BeautyNotice({ p, shown, choose }: { p: SitePalette; shown: boolean; choose: (accepted: boolean) => void }) {
+  const ink = readableOn(p.background, [p.text])
+  const soft = readableOn(p.background, [p.muted, p.text])
+  const btnInk = readableOn(p.button, ['#ffffff', p.background, p.text])
+  const btn: CSSProperties = { minHeight: 44, borderRadius: 999, fontFamily: p.bodyFont, fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', padding: '0 20px', flex: '1 1 auto' }
+  return (
+    <div
+      role="dialog"
+      aria-label="ملفات تعريف الارتباط"
+      aria-describedby="site-cookie-desc"
+      className="zy-ck-beauty"
+      style={{
+        position: 'fixed', zIndex: 2147483001, direction: 'rtl', boxSizing: 'border-box',
+        insetInlineStart: 'max(16px, env(safe-area-inset-right, 0px))',
+        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+        width: 360, maxWidth: 'calc(100vw - 32px)',
+        display: 'grid', gap: 14, padding: 20,
+        fontFamily: p.bodyFont, color: ink, background: p.background,
+        borderRadius: 22, border: `1px solid ${p.border}`,
+        boxShadow: '0 24px 48px -24px rgba(0,0,0,.35)',
+        transform: `translateY(${shown ? '0' : '24px'})`, opacity: shown ? 1 : 0,
+        transition: 'transform .6s cubic-bezier(.2,.8,.2,1), opacity .45s',
+      }}
+    >
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+        <span aria-hidden="true" style={{ flex: '0 0 auto', width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', background: `color-mix(in srgb, ${p.accent} 14%, ${p.background})`, color: p.accent }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></svg>
+        </span>
+        <div style={{ display: 'grid', gap: 4, minWidth: 0 }}>
+          <b style={{ fontFamily: p.headingFont, fontWeight: 600, fontSize: 16, lineHeight: 1.4 }}>خصوصيتك محفوظة</b>
+          <span id="site-cookie-desc" style={{ fontSize: 13.5, lineHeight: 1.7, color: soft }}>نستخدم ملفات ضرورية فقط لعمل الموقع، وإحصاءات لا تكشف هويتك.</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button type="button" onClick={() => choose(true)} style={{ ...btn, border: 0, background: p.button, color: btnInk }}>موافقة</button>
+        <button type="button" onClick={() => choose(false)} style={{ ...btn, background: 'transparent', color: ink, border: `1px solid color-mix(in srgb, ${ink} 22%, transparent)` }}>رفض</button>
+      </div>
+      <style>{`.zy-ck-beauty button:focus-visible{outline:2px solid ${p.accent};outline-offset:2px}@media (max-width:520px){.zy-ck-beauty{inset-inline:12px!important;width:auto!important;max-width:none!important}}@media (prefers-reduced-motion:reduce){.zy-ck-beauty{transition:none!important}}`}</style>
     </div>
   )
 }

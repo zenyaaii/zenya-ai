@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * Beauty & spa «جلسات», the full theme. SAMPLE (2026-11-13), built on option B.
+ * Beauty & spa «جلسات», the full theme. Anas approved it on 2026-11-13, with
+ * the centre's own photo colours as the default look (lib/niche-photo-looks).
  *
  * Five pages: home, sessions, packages, the centre, book.
  * Made for a women's centre: privacy is said first and plainly, sessions
@@ -16,7 +17,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, Clock, Lock, Sparkles } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
-import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
@@ -33,7 +34,7 @@ function Hero({ n, content, x }: { n: N; content: ServiceContent; x: NicheExtra 
   const who = x.privacy || n.b.audience
   const second = n.rest[0]
   return (
-    <section className="y-hero">
+    <section className="y-hero" data-section="hero">
       <div className="n-w y-hero-in">
         <div className="y-hero-txt">
           {who ? <span className="y-priv"><Lock size={14} /> {who}</span> : null}
@@ -66,7 +67,7 @@ function Calm({ x }: { x: NicheExtra }) {
   const fac = x.facilities || []
   if (!x.privacy && fac.length < 2) return null
   return (
-    <section className="y-calm">
+    <section className="y-calm" data-section="about">
       <div className="n-w y-calm-in">
         {x.privacy ? <p data-r><Lock size={22} /> {x.privacy}</p> : null}
         {fac.length ? <ul>{fac.map((f, i) => <li key={f} data-r style={{ ['--d' as string]: i } as CSSProperties}><Icon of={f} size={17} />{f}</li>)}</ul> : null}
@@ -80,7 +81,7 @@ function Sessions({ n, x, limit }: { n: N; x: NicheExtra; limit?: number }) {
   const go = useGo()
   const groups = useMemo(() => {
     const m = new Map<string, N['services']>()
-    for (const s of n.services) { const g = x.groups?.[s.name] || 'الجلسات'; m.set(g, [...(m.get(g) || []), s]) }
+    for (const s of n.services) { const g = s.group?.trim() || x.groups?.[s.name] || 'الجلسات'; m.set(g, [...(m.get(g) || []), s]) }
     return Array.from(m.entries())
   }, [n.services, x.groups])
   const [tab, setTab] = useState(0)
@@ -130,7 +131,7 @@ function Packs({ n, packs }: { n: N; packs: Pack[] }) {
           {i === 0 && packs.length > 1 ? <span className="y-badge"><Sparkles size={13} /> الأكثر طلبًا</span> : null}
           <h3>{p.name}</h3>
           {p.duration ? <small><Clock size={14} /> {p.duration}</small> : null}
-          {p.includes.length ? <ul>{p.includes.map((t) => <li key={t}>{t}</li>)}</ul> : null}
+          {p.includes?.length ? <ul>{p.includes.filter(Boolean).map((t) => <li key={t}>{t}</li>)}</ul> : null}
           <footer>
             {p.price ? <b>{p.price}</b> : n.wa ? <a href={n.waLink(`مرحبًا، كم سعر ${p.name}؟`)!} target="_blank" rel="noopener noreferrer">اسألي عن السعر</a> : <span />}
             <button type="button" className="n-btn" onClick={() => go('book')}>احجزي</button>
@@ -183,24 +184,25 @@ function Arches({ n, urls }: { n: N; urls: string[] }) {
 
 /* ---------- the theme ---------- */
 
-export default function BeautyFull({ content, x = {}, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function BeautyFull({ content, x: given, colors, initial, view, onViewChange, logo }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void; logo?: string }) {
   const n = useNiche(content)
-  const packs: Pack[] = x.packages || []
-  const notes = (x.blocks || []).filter((b) => b.text.trim()).map((b) => ({ q: b.title, a: b.text }))
-  const features = x.features || []
+  const x = extraOf(content, given)
+  const packs: Pack[] = (x.packages || []).filter((p) => p && p.name?.trim())
+  const notes = (x.blocks || []).filter((b) => b && b.title?.trim() && b.text?.trim()).map((b) => ({ q: b.title, a: b.text }))
+  const features = (x.features || []).filter((f) => f && f.trim())
   const pics = n.photos
 
   const home = (
     <>
       <Hero n={n} content={content} x={x} />
       <Calm x={x} />
-      {n.services.length ? <section className="y-sec"><div className="n-w"><Head title="الجلسات" sub={n.priced ? 'المدة المكتوبة هي مدة الجلسة كاملة.' : undefined} more={n.services.length > 6 ? <GoLink to="sessions">كل الجلسات<ArrowLeft size={16} /></GoLink> : null} /><Sessions n={n} x={x} limit={6} /></div></section> : null}
-      {packs.length ? <section className="y-sec y-acc"><div className="n-w"><Head title="الباقات" sub="جلسات مجتمعة في زيارة واحدة." more={<GoLink to="packages" className="n-btn ghost y-on">كل الباقات<ArrowLeft size={16} /></GoLink>} /><Packs n={n} packs={packs} /></div></section> : null}
-      {features.length >= 2 ? <section className="y-sec"><div className="n-w"><Head title="لماذا نحن" /><Features list={features} /></div></section> : null}
-      {n.members.length ? <section className="y-sec y-alt"><div className="n-w"><Head title="الأخصائيات" sub="اطلبي أخصائيتك بالاسم عند الحجز." /><Specialists n={n} /></div></section> : null}
-      {n.reviews.length ? <section className="y-sec"><div className="n-w"><Head title="ماذا قالت زبوناتنا" /><Reviews n={n} max={5} /></div></section> : null}
-      {pics.length >= 3 ? <section className="y-sec y-alt"><div className="n-w"><Head title="من داخل المركز" more={<GoLink to="center">جولة في المركز<ArrowLeft size={16} /></GoLink>} /><Arches n={n} urls={pics} /></div></section> : null}
-      {n.faq.length || notes.length ? <section className="y-sec"><div className="n-w y-faqw"><Head title="قبل جلستك" /><Faq items={[...notes, ...n.faq].slice(0, 5)} /></div></section> : null}
+      {n.services.length ? <section className="y-sec" data-section="services"><div className="n-w"><Head title="الجلسات" sub={n.priced ? 'المدة المكتوبة هي مدة الجلسة كاملة.' : undefined} more={n.services.length > 6 ? <GoLink to="sessions">كل الجلسات<ArrowLeft size={16} /></GoLink> : null} /><Sessions n={n} x={x} limit={6} /></div></section> : null}
+      {packs.length ? <section className="y-sec y-acc" data-section="about"><div className="n-w"><Head title="الباقات" sub="جلسات مجتمعة في زيارة واحدة." more={<GoLink to="packages" className="n-btn ghost y-on">كل الباقات<ArrowLeft size={16} /></GoLink>} /><Packs n={n} packs={packs} /></div></section> : null}
+      {features.length >= 2 ? <section className="y-sec" data-section="about"><div className="n-w"><Head title="لماذا نحن" /><Features list={features} /></div></section> : null}
+      {n.members.length ? <section className="y-sec y-alt" data-section="team"><div className="n-w"><Head title="الأخصائيات" sub="اطلبي أخصائيتك بالاسم عند الحجز." /><Specialists n={n} /></div></section> : null}
+      {n.reviews.length ? <section className="y-sec" data-section="reviews"><div className="n-w"><Head title="ماذا قالت زبوناتنا" /><Reviews n={n} max={5} /></div></section> : null}
+      {pics.length >= 3 ? <section className="y-sec y-alt" data-section="gallery"><div className="n-w"><Head title="من داخل المركز" more={<GoLink to="center">جولة في المركز<ArrowLeft size={16} /></GoLink>} /><Arches n={n} urls={pics} /></div></section> : null}
+      {n.faq.length || notes.length ? <section className="y-sec" data-section="faq"><div className="n-w y-faqw"><Head title="قبل جلستك" /><Faq items={[...notes, ...n.faq].slice(0, 5)} /></div></section> : null}
     </>
   )
 
@@ -210,23 +212,23 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
       id: 'sessions', label: 'الجلسات', title: 'الجلسات والأسعار', lead: 'كل جلسة بمدتها وسعرها. اختاري النوع من الأعلى.',
       body: n.services.length ? (
         <>
-          <section className="y-sec y-tight"><div className="n-w"><Sessions n={n} x={x} /></div></section>
-          {features.length >= 2 ? <section className="y-sec y-alt"><div className="n-w"><Head title="وعدنا لك" /><Features list={features} /></div></section> : null}
+          <section className="y-sec y-tight" data-section="services"><div className="n-w"><Sessions n={n} x={x} /></div></section>
+          {features.length >= 2 ? <section className="y-sec y-alt" data-section="about"><div className="n-w"><Head title="وعدنا لك" /><Features list={features} /></div></section> : null}
         </>
       ) : null,
     },
     {
       id: 'packages', label: 'الباقات', title: 'الباقات', lead: 'زيارة واحدة، وجلسات مختارة معًا.',
-      body: packs.length ? <section className="y-sec y-tight"><div className="n-w"><Packs n={n} packs={packs} /></div></section> : null,
+      body: packs.length ? <section className="y-sec y-tight" data-section="about"><div className="n-w"><Packs n={n} packs={packs} /></div></section> : null,
     },
     {
       id: 'center', label: 'المركز', title: `جولة في ${n.short}`, lead: x.privacy ? `${x.privacy}.` : undefined, image: pics[1] || n.hero || undefined,
       body: pics.length >= 2 || (x.facilities || []).length || n.members.length ? (
         <>
           <Calm x={x} />
-          {pics.length >= 2 ? <section className="y-sec"><div className="n-w"><Head title="الصور" /><Arches n={n} urls={pics} /></div></section> : null}
-          {n.members.length ? <section className="y-sec y-alt"><div className="n-w"><Head title="الأخصائيات" /><Specialists n={n} /></div></section> : null}
-          {notes.length ? <section className="y-sec"><div className="n-w y-faqw"><Head title="قبل جلستك" /><Faq items={notes} /></div></section> : null}
+          {pics.length >= 2 ? <section className="y-sec" data-section="gallery"><div className="n-w"><Head title="الصور" /><Arches n={n} urls={pics} /></div></section> : null}
+          {n.members.length ? <section className="y-sec y-alt" data-section="team"><div className="n-w"><Head title="الأخصائيات" /><Specialists n={n} /></div></section> : null}
+          {notes.length ? <section className="y-sec" data-section="about"><div className="n-w y-faqw"><Head title="قبل جلستك" /><Faq items={notes} /></div></section> : null}
         </>
       ) : null,
     },
@@ -234,7 +236,7 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
       id: 'book', label: 'احجزي', title: 'احجزي جلستك', lead: 'اختاري الجلسة والوقت، ونؤكّد لك على واتساب.',
       body: (
         <>
-          <section className="y-sec y-tight"><div className="n-w y-bookw">
+          <section className="y-sec y-tight" data-section="booking"><div className="n-w y-bookw">
             <div className="y-card" data-r><Book n={n} options={[...packs.map((p) => p.name), ...n.services.map((s) => s.name)]} place="المركز" label="أرسلي الطلب" /></div>
             <aside className="y-side" data-r>
               {x.privacy ? <p className="y-note"><Lock size={16} /> {x.privacy}</p> : null}
@@ -243,7 +245,7 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
               {n.hours.length ? <Hours n={n} /> : null}
             </aside>
           </div></section>
-          {n.faq.length ? <section className="y-sec y-alt"><div className="n-w y-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
+          {n.faq.length ? <section className="y-sec y-alt" data-section="faq"><div className="n-w y-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
     },
@@ -251,7 +253,7 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
 
   return (
     <Shell
-      n={n} content={content} root="yf" pages={pages} initial={initial} view={view} onViewChange={onViewChange}
+      n={n} content={content} root="yf" pages={pages} initial={initial} view={view} onViewChange={onViewChange} logo={logo}
       style={{ ...vars(colors?.background && colors.accent ? colors : { ...LOOK, accent2: LOOK2 }, LOOK), ['--n-disp' as string]: '"Alexandria", sans-serif', ['--n-body' as string]: '"Readex Pro", sans-serif' } as CSSProperties}
       fonts="family=Alexandria:wght@300;400;600;700&family=Readex+Pro:wght@300;400;500;600"
       css={KIT_CSS + BLOCKS_CSS + CSS}

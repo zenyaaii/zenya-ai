@@ -20,7 +20,7 @@ export type NicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
 export const LIVE_KINDS: readonly NicheKind[] = ['barber']
 export const isLiveKind = (k: unknown): k is NicheKind => LIVE_KINDS.includes(k as NicheKind)
 
-export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string } }
+export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string; /** A quiet second colour (beauty: badges, numbers). */ accent2?: string } }
 
 const L = (id: string, name: string, background: string, surface: string, text: string, muted: string, accent: string, border: string): Look =>
   ({ id, name, colors: { background, surface, text, muted, accent, primary: accent, border } })
@@ -30,8 +30,11 @@ const OXBLOOD = L('oxblood', 'أحمر عتيق', '#100b0a', '#1a1210', '#f3ebe6
 const PAPER = L('paper', 'ورقي فاتح', '#f3efe7', '#e9e3d8', '#1b1712', '#6c6458', '#1b1712', '#d8d0c2')
 const IRON = L('iron', 'حديد وبرتقالي', '#0e0f10', '#17191b', '#f1f1ef', '#8f9396', '#e8622c', '#26292c')
 const CHALK = L('chalk', 'طباشيري', '#f2f2ef', '#e6e6e1', '#141414', '#5e5e5a', '#141414', '#d6d6d0')
-const ROSE = L('rose', 'وردي هادئ', '#f7f1ee', '#efe5e0', '#2a1d1b', '#7a6863', '#a8545e', '#e3d5cf')
-const PLUM = L('plum', 'برقوقي ليلي', '#120d10', '#1c1419', '#f4ecef', '#a3949b', '#c98a9a', '#2e2329')
+/** Beauty & spa (Anas, 2026-11-13): three blended sets, each with a quiet second colour. Photo sets come first when the owner's photos give them (lib/niche-photo-looks). */
+const L2 = (l: Look, accent2: string): Look => ({ ...l, colors: { ...l.colors, accent2 } })
+const SAGE = L2(L('sage', 'مريمية ورمل', '#f2f1ec', '#e7e5dc', '#1b231f', '#5f6a63', '#3d6652', '#d9d6cb'), '#b48a5e')
+const ROSE_CLAY = L2(L('rose-clay', 'وردي ترابي', '#f8f1ee', '#f0e3dd', '#2a1c1c', '#7a6562', '#94495a', '#e6d5ce'), '#c29a6b')
+const OUD = L2(L('oud', 'عود ولؤلؤ', '#15110f', '#1f1916', '#f2ebe3', '#a5998d', '#d6b98f', '#2e2621'), '#c08f86')
 const MINT = L('mint', 'أبيض طبي', '#f4f7f6', '#e8eeec', '#10201c', '#5a6b66', '#0f766e', '#d5e0dc')
 const NAVY = L('navy', 'كحلي هادئ', '#0c1219', '#131c26', '#eef2f6', '#8c99a7', '#5fa8d3', '#22303e')
 const AMBER = L('amber', 'كهرماني', '#0f0e0c', '#181613', '#f2efe9', '#938c80', '#e0a526', '#2a2722')
@@ -49,6 +52,8 @@ export type KindText = {
   id: NicheKind
   /** Three colour looks for the wizard; the first is the default. */
   looks: Look[]
+  /** Offer two sets taken from the owner's photos first, and default to them when found. */
+  photoLooks?: boolean
   /** The kind as the owner picks it. */
   label: string
   /** What the place is called in a sentence: «الصالون», «النادي». */
@@ -96,6 +101,16 @@ export type KindText = {
     classes?: { names: string[] }
     perks?: { example: string }
     steps?: { title: string; text: string }[]
+    /** Beauty: who the place is for. Chips, the first is the default. */
+    privacy?: { options: string[]; example: string }
+    /** Beauty: «ما الذي يميزك؟», one line each. */
+    features?: { examples: string[] }
+    /** Beauty: sessions sold together. */
+    packages?: { example: { name: string; includes: string[]; duration: string; price: string } }
+    /** Beauty: notes before a session, each a yes-with-text. */
+    blocks?: { id: string; title: string; example: string }[]
+    /** Beauty: tabs a session can sit under. */
+    groups?: string[]
   }
   /** For the AI visitor and the photo judge. */
   visitor: { who: string; want: string; place: string }
@@ -157,7 +172,8 @@ export const KIND: Record<NicheKind, KindText> = {
     match: /جيم|نادي|نادى|لياقة|كمال اجسام|كروس|gym|fitness|crossfit/i, seo: 'نادي رياضي',
   },
   beauty: {
-    looks: [ROSE, PLUM, PAPER],
+    looks: [SAGE, ROSE_CLAY, OUD],
+    photoLooks: true,
     id: 'beauty', label: 'مركز تجميل', place: 'المركز', team: 'فريقنا', one: 'الأخصائية', any: 'أي أخصائية', role: 'أخصائية', ownerRole: 'صاحبة المركز',
     bookAt: (n) => `احجزي عند ${n}`, services: 'الخدمات', cta: 'احجزي موعدك',
     bookLine: 'اختاري الخدمة والأخصائية والوقت. يصل طلبك إلى المركز، ويؤكّد لك الموعد على واتساب.',
