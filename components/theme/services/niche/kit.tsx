@@ -281,10 +281,10 @@ export const KIT_CSS = `
 .nv p{margin:0}
 .n-w{width:min(1180px,100% - 32px);margin-inline:auto}
 .n-row{display:flex;flex-wrap:wrap;gap:10px}
-.n-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:var(--n-r-btn,999px);background:var(--n-acc);color:var(--n-on);font:600 15px/1 var(--n-body);border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
+.nv .n-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:var(--n-r-btn,999px);background:var(--n-acc);color:var(--n-on);font:600 15px/1 var(--n-body);border:1px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
 .n-btn:hover{background:color-mix(in srgb,var(--n-acc) 86%,var(--n-ink))}
 .n-btn:active{transform:scale(.96)}
-.n-btn.ghost{background:transparent;color:var(--n-ink);border-color:var(--n-line)}
+.nv .n-btn.ghost{background:transparent;color:var(--n-ink);border-color:var(--n-line)}
 .n-btn.ghost:hover{background:var(--n-acc-soft);border-color:color-mix(in srgb,var(--n-acc) 40%,var(--n-line))}
 .n-btn.wide{width:100%}
 .n-btn:focus-visible,.n-chips button:focus-visible{outline:2px solid var(--n-acc);outline-offset:3px}

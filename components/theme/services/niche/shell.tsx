@@ -330,9 +330,9 @@ export const SHELL_CSS = `
 .s-nav button:hover,.s-nav button.on{color:var(--n-ink)}
 .s-nav button:hover::after,.s-nav button.on::after{transform:none}
 .s-nav button:focus-visible{outline:2px solid var(--n-acc)}
-.s-cta{min-height:46px}
+.sh .s-cta{min-height:46px}
 .s-burger{all:unset;cursor:pointer;display:none;width:46px;height:46px;place-items:center;border-radius:12px;border:1px solid var(--n-line);margin-inline-start:auto}
-@media (max-width:980px){.sh .s-nav,.sh .s-cta{display:none}.s-burger{display:grid}.s-hide-sm{display:none!important}}
+@media (max-width:980px){.sh .s-nav,.sh .s-head .s-cta{display:none}.s-burger{display:grid}.s-hide-sm{display:none!important}}
 .s-menu{position:fixed;inset:0;z-index:60;background:var(--s-menu-bg,var(--n-ink));color:var(--s-menu-ink,var(--n-bg));display:grid;grid-template-rows:auto 1fr auto;padding:14px 0 calc(22px + env(safe-area-inset-bottom));clip-path:circle(0 at calc(100% - 0px) 0);visibility:hidden;transition:clip-path .6s cubic-bezier(.7,0,.2,1),visibility 0s .6s}
 [dir=rtl] .s-menu{clip-path:circle(0 at 40px 50px)}
 .s-menu.open{clip-path:circle(150% at 40px 50px);visibility:visible;transition:clip-path .7s cubic-bezier(.7,0,.2,1),visibility 0s}
@@ -349,7 +349,7 @@ export const SHELL_CSS = `
 .s-menu.open .s-menu-foot{opacity:1}
 .s-menu-foot p{display:flex;align-items:center;gap:8px;font-size:14px;opacity:.75}
 .s-menu-foot .n-btn{flex:1}
-.s-menu-foot .n-btn.ghost{color:inherit;border-color:color-mix(in srgb,currentColor 25%,transparent)}
+.sh .s-menu-foot .n-btn.ghost{color:inherit;border-color:color-mix(in srgb,currentColor 25%,transparent)}
 .s-main{animation:s-in .55s cubic-bezier(.2,.8,.2,1) both}
 @keyframes s-in{from{opacity:0;transform:translateY(14px)}}
 ::view-transition-old(root){animation:s-out .25s ease both}
@@ -380,7 +380,7 @@ export const SHELL_CSS = `
 .s-close-in{display:grid;gap:18px;justify-items:start}
 .s-close h2{font-size:clamp(42px,7vw,110px);line-height:.95;font-weight:800;max-width:14ch}
 .s-close p{font-size:18px;opacity:.8;max-width:46ch}
-.s-close .n-btn.ghost{color:inherit;border-color:color-mix(in srgb,currentColor 30%,transparent)}
+.sh .s-close .n-btn.ghost{color:inherit;border-color:color-mix(in srgb,currentColor 30%,transparent)}
 .s-close .n-btn.ghost:hover{background:color-mix(in srgb,currentColor 10%,transparent)}
 .s-cols{display:grid;grid-template-columns:1.4fr 1fr 1.3fr 1.3fr;gap:40px;padding:64px 0 40px;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent)}
 .s-cols h3{font:600 13px var(--n-body);letter-spacing:.06em;opacity:.55;margin-bottom:14px}
@@ -402,6 +402,6 @@ export const SHELL_CSS = `
 .s-legal{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 0 26px;font-size:13px;opacity:.6;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent)}
 @media (max-width:980px){.s-cols{grid-template-columns:1fr 1fr;gap:32px 20px}.s-col-brand{grid-column:1/-1}}
 @media (max-width:560px){.s-cols{grid-template-columns:1fr}.s-ph{padding:48px 0 36px}.s-close{padding:76px 0}.s-next i{width:56px;height:56px}.sh{--s-head:64px}}
-.s-bar .n-btn.ghost{background:var(--n-bg)}
+.sh .s-bar .n-btn.ghost{background:var(--n-bg)}
 @media (prefers-reduced-motion:reduce){.s-menu,.s-menu.open{transition:none}.s-ph-img{animation:none}}
 `

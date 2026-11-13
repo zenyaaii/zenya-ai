@@ -323,7 +323,7 @@ const CSS = `
 .cf .s-ph:not(.img){background:repeating-linear-gradient(-45deg,transparent 0 22px,color-mix(in srgb,var(--n-acc) 5%,transparent) 22px 24px)}
 .cf .s-ph:not(.img)::before{content:"";position:absolute;inset:auto 0 0;height:6px;background:repeating-linear-gradient(-45deg,var(--n-acc) 0 14px,#111 14px 28px)}
 .cf .n-btn{font-weight:700}
-.c-big{min-height:56px;padding:0 26px;font-size:16px}
+.cf .c-big{min-height:56px;padding:0 26px;font-size:16px}
 .c-sec{padding:112px 0}
 .c-alt{background:var(--n-bg2)}
 .c-h2{font-size:clamp(36px,5vw,72px);font-weight:900;line-height:1}

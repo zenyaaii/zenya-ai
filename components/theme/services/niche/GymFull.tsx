@@ -455,7 +455,7 @@ const CSS = `
 .gf .s-ph:not(.img){background:radial-gradient(ellipse 60% 120% at 0% 0%,color-mix(in srgb,var(--n-acc) 22%,transparent),transparent 60%)}
 .gf .s-close h2{text-transform:uppercase}
 .gf .n-btn{font-weight:700;letter-spacing:.01em}
-.g-big{min-height:56px;padding:0 28px;font-size:16px}
+.gf .g-big{min-height:56px;padding:0 28px;font-size:16px}
 .g-sec{padding:120px 0}
 .g-alt{background:var(--n-bg2)}
 .g-mt{margin-top:72px}
@@ -469,9 +469,9 @@ const CSS = `
 @keyframes g-zoom{from{transform:scale(1.18)}}
 .g-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,var(--n-bg) 2%,color-mix(in srgb,var(--n-bg) 60%,transparent) 42%,color-mix(in srgb,var(--n-bg) 10%,transparent) 80%),linear-gradient(to left,color-mix(in srgb,var(--n-bg) 50%,transparent),transparent 60%)}
 .g-hero-in{position:relative;padding:60px 0 32px;display:grid;gap:26px}
-.g-hero-side{position:absolute;left:0;top:56px;writing-mode:vertical-rl;transform:rotate(180deg);font:700 13px var(--n-body);letter-spacing:.4em;text-transform:uppercase;color:var(--n-mute);animation:b-fade 1s .9s both}
-.g-hero h1{font-size:clamp(76px,15.5vw,236px);font-weight:800;line-height:.86;letter-spacing:-.025em;text-transform:uppercase}
-.g-line{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.06em}
+.g-hero-side{position:absolute;left:0;top:56px;writing-mode:vertical-rl;transform:rotate(180deg);font:700 13px var(--n-body);letter-spacing:.4em;color:var(--n-mute);animation:b-fade 1s .9s both}
+.g-hero h1{font-size:clamp(76px,15.5vw,236px);font-weight:800;line-height:.86;letter-spacing:-.025em}
+.g-line{display:block;overflow:hidden;padding-bottom:.24em;margin-bottom:-.2em}
 .g-line>span{display:block;animation:g-up 1s cubic-bezier(.2,.9,.1,1) both;animation-delay:calc(.15s + var(--i)*.12s)}
 .g-line:last-child>span{color:var(--n-acc)}
 @keyframes g-up{from{transform:translateY(108%) skewY(4deg)}}
@@ -491,7 +491,7 @@ const CSS = `
 /* ticker */
 .g-tick{background:var(--n-acc);color:var(--n-on);padding:18px 0;transform:rotate(-1.6deg) scale(1.03);margin:28px 0 0;overflow:hidden;box-shadow:0 20px 50px -30px var(--n-acc)}
 .g-tick-t{display:flex;width:max-content;animation:g-mq 40s linear infinite}
-.g-tick span{display:inline-flex;align-items:center;gap:14px;font:800 clamp(26px,3.4vw,40px) var(--n-disp);white-space:nowrap;padding-inline-end:44px;text-transform:uppercase}
+.g-tick span{display:inline-flex;align-items:center;gap:14px;font:800 clamp(26px,3.4vw,40px) var(--n-disp);white-space:nowrap;padding-inline-end:44px}
 @keyframes g-mq{to{transform:translateX(25%)}}
 
 /* manifesto */
@@ -511,7 +511,7 @@ const CSS = `
 .g-prog button{all:unset;cursor:pointer;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:22px;padding:26px 6px;position:relative;z-index:1;transition:padding .45s cubic-bezier(.2,.8,.2,1),color .3s}
 .g-prog small{font:600 13px var(--n-body);color:var(--n-mute);width:28px}
 .g-prog button>svg:first-of-type{color:var(--n-acc);flex:none}
-.g-prog b{font:800 clamp(34px,5.4vw,78px)/1 var(--n-disp);text-transform:uppercase;letter-spacing:-.01em}
+.g-prog b{font:800 clamp(34px,5.4vw,78px)/1 var(--n-disp);letter-spacing:-.01em}
 .g-prog-ar{margin-inline-start:auto;opacity:.3;transition:transform .45s cubic-bezier(.3,1.5,.5,1),opacity .3s}
 .gf .g-prog-th{display:none}
 .g-prog li:hover button{padding-inline-start:22px;color:var(--n-acc)}
