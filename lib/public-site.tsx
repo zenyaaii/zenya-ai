@@ -5,6 +5,8 @@ import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
 import SiteBeacon from '@/components/site/SiteBeacon'
 import SiteCookieBanner from '@/components/site/SiteCookieBanner'
+import { cookieLookOf } from '@/components/site/cookie-looks'
+import { nicheOf } from '@/lib/site-pages'
 import { resolveSitePalette } from '@/lib/site-palette'
 import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
@@ -327,7 +329,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
       <MadeWithZenya hide={theme.owner_has_hosting} />
       {wa && <SiteWhatsApp href={wa} />}
       <SiteBeacon slug={theme.slug} />
-      {cookiePalette && <SiteCookieBanner palette={cookiePalette} />}
+      {cookiePalette && <SiteCookieBanner palette={cookiePalette} look={businessType === 'services' ? cookieLookOf(nicheOf(c, businessType)) : undefined} />}
     </>
   )
 }

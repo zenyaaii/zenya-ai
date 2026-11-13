@@ -15,6 +15,11 @@ import type { NicheExtra } from './kit'
 export type LabKind = 'beauty' | 'car' | 'photo' | 'gym'
 export type Fill = 'full' | 'low' | 'none'
 const u = (id: string, w = 1400) => unsplash(id, w)
+const PHOTO_PACKS = [
+  { name: 'صور جواز وإقامة', includes: ['6 نسخ مطبوعة', 'نسخة رقمية على واتساب'], duration: '10 دقائق', price: '30 ر.ق' },
+  { name: 'تصوير منتجات', includes: ['3 زوايا لكل منتج', 'خلفية بيضاء أو ملونة', 'تعديل الإضاءة والألوان'], duration: 'للمنتج الواحد', price: '60 ر.ق' },
+  { name: 'تصوير قائمة مطعم', includes: ['حتى 25 طبقًا', 'تنسيق الأطباق', 'الصور الأصلية والمعدّلة'], duration: 'يوم واحد', price: '1,800 ر.ق' },
+]
 
 function base(kind: LabKind): { c: ServiceContent; x: NicheExtra } {
   const c = nicheDemoContent(kind)
@@ -102,6 +107,7 @@ function base(kind: LabKind): { c: ServiceContent; x: NicheExtra } {
     ]
     c.hero.subheadline = 'استوديو في الوكرة. نصوّر المنتجات والأطعمة والأماكن، والصور الرسمية في دقائق.'
     c.gallery.images = work.map(([id]) => ({ url: u(id, 1200) }))
+    c.services.items = PHOTO_PACKS.map((p) => ({ name: p.name, description: '', duration: p.duration, price_from: p.price }))
     c.testimonials.items.push({ name: 'مطعم ورق عنب', text: 'صوّر قائمتنا كاملة في يوم واحد، والصور رفعت طلبات التوصيل.', rating: 5, origin: 'google' })
     c.faq.items = [{ q: 'هل أستلم الصور الأصلية؟', a: 'نعم، على رابط تحميل مع الصور المعدّلة.' }, { q: 'هل تصوّرون خارج الاستوديو؟', a: 'نعم، في المطعم أو المحل أو المكتب، داخل الدوحة بلا رسوم مواصلات.' }]
     c.terms = []
@@ -110,11 +116,8 @@ function base(kind: LabKind): { c: ServiceContent; x: NicheExtra } {
       c, x: {
         offers: ['منتجات', 'طعام', 'أماكن', 'سيارات', 'صور رسمية'],
         work: work.map(([id, tag]) => ({ url: u(id, 1200), tag })),
-        packages: [
-          { name: 'صور جواز وإقامة', includes: ['6 نسخ مطبوعة', 'نسخة رقمية على واتساب'], duration: '10 دقائق', price: '30 ر.ق' },
-          { name: 'تصوير منتجات', includes: ['3 زوايا لكل منتج', 'خلفية بيضاء أو ملونة', 'تعديل الإضاءة والألوان'], duration: 'للمنتج الواحد', price: '60 ر.ق' },
-          { name: 'تصوير قائمة مطعم', includes: ['حتى 25 طبقًا', 'تنسيق الأطباق', 'الصور الأصلية والمعدّلة'], duration: 'يوم واحد', price: '1,800 ر.ق' },
-        ],
+        // Same shape a built site carries: prices in services, what each includes in perks.
+        perks: PHOTO_PACKS.map((p) => ({ plan: p.name, items: p.includes })),
         delivery: [{ what: 'الصور الرسمية', when: 'فورًا' }, { what: 'المنتجات', when: 'خلال 3 أيام' }, { what: 'القوائم والأماكن', when: 'خلال 7 أيام' }],
         specs: [{ label: 'تأشيرة شنغن', text: '3.5 × 4.5 سم، خلفية فاتحة' }, { label: 'جواز السفر', text: '4 × 6 سم، خلفية بيضاء' }, { label: 'الهوية', text: '3 × 4 سم، خلفية بيضاء' }],
         blocks: [{ id: 'edits', title: 'التعديل', text: 'تعديلان مجانًا لكل صورة.' }, { id: 'outcall', title: 'خارج الاستوديو', text: 'نصوّر عندك داخل الدوحة، والمواصلات مجانية.' }],

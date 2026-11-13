@@ -22,6 +22,7 @@ import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/mar
 // Loaded on demand so other services sites don't carry it.
 const FULL = {
   gym: lazy(() => import('./niche/GymFull')),
+  photo: lazy(() => import('./niche/PhotoFull')),
 } as const
 
 type Props = {

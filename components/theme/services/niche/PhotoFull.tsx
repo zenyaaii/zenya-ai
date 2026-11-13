@@ -17,11 +17,12 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { flushSync } from 'react-dom'
 import { ArrowLeft, Clock, Focus, Images } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
-import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, perksOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, Faq, Head, Icon, Lightbox, MapCard, Reviews, ScrollWords } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
-const LOOK = { background: '#0c0c0d', surface: '#151517', text: '#f1f0ee', muted: '#8e8c88', accent: '#f1f0ee', border: '#262628' }
+// Default: the day colours from a studio's own photos (Anas, 2026-11-13); a built site passes its own.
+const LOOK = { background: '#f7f6f5', surface: '#ffffff', text: '#261f1c', muted: '#6f5b52', accent: '#627140', border: '#e8e3e0' }
 
 type Work = { url: string; tag: string }
 type Pack = { name: string; includes: string[]; duration?: string; price?: string }
@@ -45,7 +46,7 @@ function Viewfinder({ n, content, work }: { n: N; content: ServiceContent; work:
     return () => clearInterval(t)
   }, [pics.length])
   return (
-    <section className="p-hero">
+    <section className="p-hero" data-section="hero">
       <div className="n-w p-hero-top">
         <h1><span>{n.short}</span>{n.b.latin ? <small dir="ltr">{n.b.latin}</small> : null}</h1>
         <div className="p-hero-side">
@@ -133,7 +134,7 @@ function PriceList({ n, packs }: { n: N; packs: Pack[] }) {
             <small>{String(i + 1).padStart(2, '0')}</small>
             <h3>{p.name}</h3>
             <i aria-hidden="true" />
-            {p.price ? <b>{p.price}</b> : n.wa ? <a href={n.waLink(`مرحبًا، كم سعر ${p.name}؟`)!} target="_blank" rel="noopener noreferrer">اسأل عن السعر</a> : <b className="ask">حسب الطلب</b>}
+            {p.price ? <b>{p.price}</b> : n.wa ? <a href={n.waLink(`مرحبًا، كم سعر ${p.name}؟`)!} target="_blank" rel="noopener noreferrer">اسأل عن السعر</a> : <b className="ask">اسأل عن السعر</b>}
           </div>
           <div className="p-list-sub">
             {p.includes.length ? <ul>{p.includes.map((t) => <li key={t}>{t}</li>)}</ul> : <span />}
@@ -191,11 +192,15 @@ function Notes({ list }: { list: { id: string; title: string; text: string }[] }
 
 /* ---------- the theme ---------- */
 
-export default function PhotoFull({ content, x = {}, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function PhotoFull({ content, x: given, colors, initial, view, onViewChange, logo }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void; logo?: string }) {
   const n = useNiche(content)
-  const work: Work[] = useMemo(() => (x.work?.length ? x.work : n.photos.map((url) => ({ url, tag: '' }))), [x.work, n.photos])
+  const x = extraOf(content, given)
+  const work: Work[] = useMemo(() => ((x.work || []).filter((w) => w?.url).length ? (x.work || []).filter((w) => w?.url).map((w) => ({ url: w.url, tag: (w.tag || '').trim() })) : n.photos.map((url) => ({ url, tag: '' }))), [x.work, n.photos])
   const [tag, setTag] = useState('')
-  const packs: Pack[] = x.packages?.length ? x.packages : n.services.map((s) => ({ name: s.name, includes: s.description ? [s.description] : [], duration: s.duration, price: s.price_from }))
+  // The price list is the owner's services; «ما تشمله» comes from niche_extra.perks by name.
+  const packs: Pack[] = n.services.length
+    ? n.services.map((s) => { const inc = perksOf(x, s.name); return { name: s.name, includes: inc.length ? inc : s.description ? [s.description] : [], duration: s.duration, price: s.price_from } })
+    : x.packages || []
   const notes = (x.blocks || []).filter((b) => b.text.trim())
   const specs = x.specs || []
   const owner = n.members[0]
@@ -204,13 +209,13 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
     <>
       <Viewfinder n={n} content={content} work={work} />
       <HomeKinds work={work} setTag={setTag} />
-      {work.length >= 4 ? <section className="p-sec"><div className="n-w"><Head title="مختارات من أعمالنا" more={<GoLink to="work">كل الأعمال<ArrowLeft size={16} /></GoLink>} /><Wall n={n} work={work} tag="" limit={6} /></div></section> : null}
-      {x.story ? <section className="p-sec p-alt"><div className="n-w"><ScrollWords text={x.story} className="p-man" /></div></section> : null}
-      {packs.length ? <section className="p-sec"><div className="n-w"><Head title="الأسعار" sub="السعر يشمل التعديل. لا رسوم بعد التصوير." more={packs.length > 3 ? <GoLink to="packages">كل الباقات<ArrowLeft size={16} /></GoLink> : null} /><PriceList n={n} packs={packs.slice(0, 3)} /></div></section> : null}
-      {x.delivery?.length ? <section className="p-sec p-alt"><div className="n-w"><Head title="متى تستلم صورك" /><Delivery list={x.delivery} /></div></section> : null}
-      {specs.length ? <section className="p-sec"><div className="n-w p-split"><div data-r><h2 className="p-h2">صور رسمية في دقائق</h2><p className="p-lead">جواز، هوية، تأشيرة. نعرف المقاس المطلوب لكل ورقة.</p><GoLink to="official">كل المقاسات<ArrowLeft size={16} /></GoLink></div><Sizes specs={specs.slice(0, 3)} /></div></section> : null}
-      {n.reviews.length ? <section className="p-sec p-alt"><div className="n-w"><Head title="قالوا عنا" /><Reviews n={n} max={5} /></div></section> : null}
-      {n.faq.length ? <section className="p-sec"><div className="n-w p-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
+      {work.length >= 4 ? <section className="p-sec" data-section="work"><div className="n-w"><Head title="مختارات من أعمالنا" more={<GoLink to="work">كل الأعمال<ArrowLeft size={16} /></GoLink>} /><Wall n={n} work={work} tag="" limit={6} /></div></section> : null}
+      {x.story ? <section className="p-sec p-alt" data-section="about"><div className="n-w"><ScrollWords text={x.story} className="p-man" /></div></section> : null}
+      {packs.length ? <section className="p-sec" data-section="services"><div className="n-w"><Head title="الأسعار" sub="السعر يشمل التعديل. لا رسوم بعد التصوير." more={packs.length > 3 ? <GoLink to="packages">كل الباقات<ArrowLeft size={16} /></GoLink> : null} /><PriceList n={n} packs={packs.slice(0, 3)} /></div></section> : null}
+      {x.delivery?.length ? <section className="p-sec p-alt" data-section="services"><div className="n-w"><Head title="متى تستلم صورك" /><Delivery list={x.delivery} /></div></section> : null}
+      {specs.length ? <section className="p-sec" data-section="services"><div className="n-w p-split"><div data-r><h2 className="p-h2">صور رسمية في دقائق</h2><p className="p-lead">جواز، هوية، تأشيرة. نعرف المقاس المطلوب لكل ورقة.</p><GoLink to="official">كل المقاسات<ArrowLeft size={16} /></GoLink></div><Sizes specs={specs.slice(0, 3)} /></div></section> : null}
+      {n.reviews.length ? <section className="p-sec p-alt" data-section="reviews"><div className="n-w"><Head title="قالوا عنا" /><Reviews n={n} max={5} /></div></section> : null}
+      {n.faq.length ? <section className="p-sec" data-section="faq"><div className="n-w p-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
     </>
   )
 
@@ -218,15 +223,15 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
     { id: 'home', label: 'الرئيسية', body: home },
     {
       id: 'work', label: 'الأعمال', title: 'الأعمال', lead: 'صور من جلساتنا. اختر النوع الذي تريده.',
-      body: work.length >= 2 ? <section className="p-sec p-tight"><div className="n-w"><Wall n={n} work={work} tag={tag} setTag={setTag} /></div></section> : null,
+      body: work.length >= 2 ? <section className="p-sec p-tight" data-section="work"><div className="n-w"><Wall n={n} work={work} tag={tag} setTag={setTag} /></div></section> : null,
     },
     {
       id: 'packages', label: 'الباقات', title: 'الباقات والأسعار', lead: 'كل باقة مكتوب ما فيها، ومتى تستلمها.',
       body: packs.length ? (
         <>
-          <section className="p-sec p-tight"><div className="n-w"><PriceList n={n} packs={packs} /></div></section>
-          {x.delivery?.length ? <section className="p-sec p-alt"><div className="n-w"><Head title="التسليم" /><Delivery list={x.delivery} /></div></section> : null}
-          {notes.length ? <section className="p-sec"><div className="n-w"><Head title="قبل أن تحجز" /><Notes list={notes} /></div></section> : null}
+          <section className="p-sec p-tight" data-section="services"><div className="n-w"><PriceList n={n} packs={packs} /></div></section>
+          {x.delivery?.length ? <section className="p-sec p-alt" data-section="services"><div className="n-w"><Head title="التسليم" /><Delivery list={x.delivery} /></div></section> : null}
+          {notes.length ? <section className="p-sec" data-section="services"><div className="n-w"><Head title="قبل أن تحجز" /><Notes list={notes} /></div></section> : null}
         </>
       ) : null,
     },
@@ -234,8 +239,8 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
       id: 'official', label: 'الصور الرسمية', title: 'الصور الرسمية', lead: 'تأتي، نصوّر، وتخرج بالصور مطبوعة. بلا موعد.',
       body: specs.length ? (
         <>
-          <section className="p-sec p-tight"><div className="n-w"><Sizes specs={specs} /></div></section>
-          {n.wa ? <section className="p-sec p-alt"><div className="n-w p-ask"><Focus size={30} /><h2 data-r>لا تعرف المقاس المطلوب؟</h2><p data-r>أرسل لنا اسم الجهة أو صورة الطلب، ونخبرك بالمقاس.</p><a className="n-btn p-big" href={n.waLink('مرحبًا، أحتاج صورة رسمية لـ ')!} target="_blank" rel="noopener noreferrer">{Brand.wa()} اسأل على واتساب</a></div></section> : null}
+          <section className="p-sec p-tight" data-section="services"><div className="n-w"><Sizes specs={specs} /></div></section>
+          {n.wa ? <section className="p-sec p-alt" data-section="links"><div className="n-w p-ask"><Focus size={30} /><h2 data-r>لا تعرف المقاس المطلوب؟</h2><p data-r>أرسل لنا اسم الجهة أو صورة الطلب، ونخبرك بالمقاس.</p><a className="n-btn p-big" href={n.waLink('مرحبًا، أحتاج صورة رسمية لـ ')!} target="_blank" rel="noopener noreferrer">{Brand.wa()} اسأل على واتساب</a></div></section> : null}
         </>
       ) : null,
     },
@@ -244,7 +249,7 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
       body: owner || n.reviews.length ? (
         <>
           {owner ? (
-            <section className="p-sec"><div className="n-w p-owner">
+            <section className="p-sec" data-section="team"><div className="n-w p-owner">
               <div className="p-owner-pic" data-r>{owner.photo ? <img src={owner.photo} alt={owner.name} /> : <span aria-hidden="true"><Images size={40} /></span>}</div>
               <div data-r>
                 <small>{owner.role || 'المصوّر'}</small>
@@ -254,8 +259,8 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
               </div>
             </div></section>
           ) : null}
-          {n.members.length > 1 ? <section className="p-sec p-alt"><div className="n-w"><Head title="الفريق" /><ul className="p-team">{n.members.slice(1).map((m) => <li key={m.name} data-r><b>{m.name}</b>{m.role ? <span>{m.role}</span> : null}</li>)}</ul></div></section> : null}
-          {n.reviews.length ? <section className="p-sec"><div className="n-w"><Head title="قالوا عنا" /><Reviews n={n} max={6} /></div></section> : null}
+          {n.members.length > 1 ? <section className="p-sec p-alt" data-section="team"><div className="n-w"><Head title="الفريق" /><ul className="p-team">{n.members.slice(1).map((m) => <li key={m.name} data-r><b>{m.name}</b>{m.role ? <span>{m.role}</span> : null}</li>)}</ul></div></section> : null}
+          {n.reviews.length ? <section className="p-sec" data-section="reviews"><div className="n-w"><Head title="قالوا عنا" /><Reviews n={n} max={6} /></div></section> : null}
         </>
       ) : null,
     },
@@ -263,7 +268,7 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
       id: 'book', label: 'احجز جلستك', title: 'احجز جلستك', lead: 'اختر الجلسة والوقت. نؤكّد لك على واتساب.',
       body: (
         <>
-          <section className="p-sec p-tight"><div className="n-w p-bookw">
+          <section className="p-sec p-tight" data-section="booking"><div className="n-w p-bookw">
             <div className="p-card" data-r><Book n={n} options={packs.map((p) => p.name)} place="الاستوديو" label="أرسل الطلب" /></div>
             <aside className="p-side" data-r>
               <MapCard n={n} address={content.footer.address} />
@@ -271,7 +276,7 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
               {n.hours.length ? <Hours n={n} /> : null}
             </aside>
           </div></section>
-          {n.faq.length ? <section className="p-sec p-alt"><div className="n-w p-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
+          {n.faq.length ? <section className="p-sec p-alt" data-section="faq"><div className="n-w p-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
     },
@@ -279,7 +284,7 @@ export default function PhotoFull({ content, x = {}, colors, initial, view, onVi
 
   return (
     <Shell
-      n={n} content={content} root="pf" pages={pages} initial={initial} view={view} onViewChange={onViewChange}
+      n={n} content={content} root="pf" pages={pages} initial={initial} view={view} onViewChange={onViewChange} logo={logo}
       style={{ ...vars(colors, LOOK), ['--n-disp' as string]: '"Noto Sans Arabic", sans-serif', ['--n-body' as string]: '"Noto Sans Arabic", sans-serif' } as CSSProperties}
       fonts="family=Noto+Sans+Arabic:wght@200;300;400;500;700;800"
       css={KIT_CSS + BLOCKS_CSS + CSS}
@@ -294,7 +299,7 @@ function HomeKinds({ work, setTag }: { work: Work[]; setTag: (t: string) => void
   const go = useGo()
   if (new Set(work.map((w) => w.tag).filter(Boolean)).size < 2) return null
   return (
-    <section className="p-sec p-alt"><div className="n-w">
+    <section className="p-sec p-alt" data-section="work"><div className="n-w">
       <Head title="ماذا نصوّر" />
       <Kinds work={work} onPick={(t) => { setTag(t); go('work') }} />
     </div></section>
@@ -302,7 +307,7 @@ function HomeKinds({ work, setTag }: { work: Work[]; setTag: (t: string) => void
 }
 
 const CSS = `
-.pf{--n-r-btn:999px;--n-r-in:10px;--n-r-card:8px;--s-strip-bg:var(--n-bg);--s-strip-ink:var(--n-mute);--s-foot-bg:#050506;--s-foot-ink:var(--n-ink);--s-menu-bg:#050506;--s-menu-ink:var(--n-ink)}
+.pf{--n-r-btn:999px;--n-r-in:10px;--n-r-card:8px;--s-strip-bg:var(--n-bg);--s-strip-ink:var(--n-mute);--s-foot-bg:color-mix(in srgb,var(--n-bg) 10%,#0a0a0a);--s-foot-ink:#efede8;--s-menu-bg:color-mix(in srgb,var(--n-bg) 10%,#0a0a0a);--s-menu-ink:#efede8}
 .pf .s-strip{border-bottom:1px solid var(--n-line)}
 .pf .s-head{background:color-mix(in srgb,var(--n-bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .pf .s-logo b{font-weight:300;font-size:24px;letter-spacing:.02em}
