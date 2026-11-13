@@ -82,6 +82,16 @@ export const barberInputSchema = z.object({
   extra: z.string().trim().max(1500).optional(),
   /** «هل تتمنى أن نسألك عن شيء آخر؟»: feedback for us, never on the site. */
   wish: z.string().trim().max(800).optional(),
+  /** The kind's own answers (KIND[k].extras → NicheExtra). */
+  niche_extra: z.object({
+    offers: z.array(z.string().trim().min(1).max(40)).max(16).optional(),
+    facilities: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
+    story: z.string().trim().max(400).optional(),
+    since: z.number().int().min(1900).max(2100).optional(),
+    classes: z.array(z.object({ day: z.number().int().min(0).max(6), items: z.array(z.object({ time: hhmm, name: z.string().trim().min(1).max(40) })).max(12) })).max(7).optional(),
+    perks: z.array(z.object({ plan: z.string().trim().min(1).max(60), items: z.array(z.string().trim().min(1).max(80)).max(10) })).max(24).optional(),
+    steps: z.array(z.object({ title: z.string().trim().min(1).max(40), text: z.string().trim().max(160) })).max(5).optional(),
+  }).optional(),
 })
 
 export type BarberInput = z.infer<typeof barberInputSchema>
@@ -206,8 +216,20 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
 
   const gallery = [input.photos.hero, input.photos.side, ...(input.photos.gallery || [])].filter((u, i, all): u is string => !!u && all.indexOf(u) === i)
 
+  const nx = input.niche_extra
+  const niche_extra = nx ? {
+    offers: nx.offers?.length ? nx.offers : undefined,
+    facilities: nx.facilities?.length ? nx.facilities : undefined,
+    story: nx.story || undefined,
+    since: nx.since,
+    classes: nx.classes?.filter((d) => d.items.length).length ? nx.classes.filter((d) => d.items.length) : undefined,
+    perks: nx.perks?.filter((p) => p.items.length).length ? nx.perks.filter((p) => p.items.length) : undefined,
+    steps: nx.steps?.length ? nx.steps : undefined,
+  } : undefined
+
   return {
     niche: input.kind,
+    ...(niche_extra && Object.values(niche_extra).some((v) => v !== undefined) ? { niche_extra } : {}),
     brand: {
       name: input.name,
       category: k.label,

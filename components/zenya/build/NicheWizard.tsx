@@ -8,7 +8,7 @@ import ImageUploadField from '@/components/ImageUploadField'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
 import WizardShell, {
-  AddButton, Block, Card, Chips, Field, Grid, Handoff, Input, Notice, Review, Textarea, Toggle, Uploads,
+  AddButton, Block, Card, Chips, Field, Grid, Handoff, Input, Notice, Review, Select, Textarea, Toggle, Uploads,
   type WizardStep,
 } from '@/components/zenya/build/WizardShell'
 import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, completeness, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
@@ -53,6 +53,10 @@ type Barber = { id: string; name: string; role: string; photo: string; tags: str
 type Svc = { id: string; on: boolean; name: string; price: string; duration: string }
 type Faq = { id: string; q: string; a: string; own?: boolean }
 type Link = { id: string; label: string; url: string }
+type Cls = { id: string; day: number; time: string; name: string }
+type Step = { id: string; title: string; text: string }
+/** The kind's own answers (KIND[k].extras); empty for kinds that ask none. */
+type Nx = { offers: string[]; facilities: string[]; story: string; since: string; classes: Cls[]; perks: Record<string, string>; steps: Step[] }
 
 type Form = {
   name: string; latin: string; city: string; area: string; address: string; audience: string
@@ -67,6 +71,7 @@ type Form = {
   faq: Faq[]
   terms: { label: string; text: string }[]
   look: string
+  nx: Nx
   /** The owner said what we read from his links is right. */
   checked: boolean
   /** What the owner says we read wrong, kept for us to fix the reader. */
@@ -90,6 +95,7 @@ function initial(k: KindText): Form {
     terms: (k.terms || []).map((t) => ({ label: t.label, text: '' })),
     look: k.looks[0].id,
     checked: false, scrape_issue: '',
+    nx: { offers: [], facilities: [], story: '', since: '', classes: [], perks: {}, steps: [] },
   }
 }
 
@@ -125,6 +131,10 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const started = useRef(Date.now())
 
   const up = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }))
+  const upx = <K extends keyof Nx>(key: K, v: Nx[K]) => setF((p) => ({ ...p, nx: { ...p.nx, [key]: v } }))
+  const flip = (key: 'offers' | 'facilities', v: string) => setF((p) => ({ ...p, nx: { ...p.nx, [key]: p.nx[key].includes(v) ? p.nx[key].filter((x) => x !== v) : [...p.nx[key], v] } }))
+  const X = k.extras
+  const [ownFac, setOwnFac] = useState('')
   const patch = <T extends { id: string }>(k: 'barbers' | 'services' | 'faq' | 'links', id: string, v: Partial<T>) =>
     setF((p) => ({ ...p, [k]: (p[k] as unknown as T[]).map((x) => (x.id === id ? { ...x, ...v } : x)) }))
   const drop = (k: 'barbers' | 'services' | 'faq' | 'links', id: string) =>
@@ -245,6 +255,25 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       faq: f.faq.filter((q) => q.q.trim() && q.a.trim()).map((q) => ({ q: q.q.trim(), a: q.a.trim() })),
       logo: f.logo || undefined,
       extra: f.extra.trim() || undefined,
+      niche_extra: X ? nicheExtra() : undefined,
+    }
+  }
+
+  function nicheExtra() {
+    const n = f.nx
+    const year = Number(n.since)
+    const days = [0, 1, 2, 3, 4, 5, 6].map((day) => ({
+      day, items: n.classes.filter((c) => c.day === day && c.name.trim() && /^\d{1,2}:\d{2}$/.test(c.time)).sort((a, b) => a.time.localeCompare(b.time)).map((c) => ({ time: c.time, name: c.name.trim() })),
+    })).filter((d) => d.items.length)
+    const perks = services.map((sv) => ({ plan: sv.name.trim(), items: (n.perks[sv.id] || '').split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 10) })).filter((x) => x.items.length)
+    return {
+      offers: n.offers.length ? n.offers : undefined,
+      facilities: n.facilities.length ? n.facilities : undefined,
+      story: n.story.trim() || undefined,
+      since: year >= 1900 && year <= new Date().getFullYear() ? year : undefined,
+      classes: days.length ? days : undefined,
+      perks: perks.length ? perks : undefined,
+      steps: n.steps.filter((x) => x.title.trim()).map((x) => ({ title: x.title.trim(), text: x.text.trim() })).slice(0, 5),
     }
   }
 
@@ -360,6 +389,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       faq: filledFaq,
       extra: f.extra.trim() ? 1 : 0,
       logo: f.logo ? 1 : 0,
+      ...(X ? { offers: f.nx.offers.length, facilities: f.nx.facilities.length, story: f.nx.story.trim() ? 1 : 0, since: f.nx.since ? 1 : 0, classes: f.nx.classes.length, perks: Object.values(f.nx.perks).filter((v) => v.trim()).length, steps: f.nx.steps.length } : {}),
     }
   }
 
@@ -496,6 +526,57 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
         </Grid>
       ),
     },
+    ...(X ? [{
+      id: 'about', title: `عن ${k.place}`, optional: true,
+      sub: `ما يميّز ${mine} عن غيره. كل ما تختاره هنا يظهر في الموقع، وما تتركه فارغًا لا يظهر.`,
+      complete: f.nx.offers.length > 0 || !!f.nx.story.trim(),
+      body: (
+        <Grid>
+          {X.offers ? (
+            <Block title={`ماذا يقدّم ${k.place}؟`} hint="اختر كل ما ينطبق.">
+              <div className="zb-chips">{X.offers.map((o) => <button key={o} type="button" className="zb-chip" data-on={f.nx.offers.includes(o) ? 'true' : undefined} aria-pressed={f.nx.offers.includes(o)} onClick={() => flip('offers', o)}>{o}</button>)}</div>
+            </Block>
+          ) : null}
+          {X.facilities ? (
+            <Block title="المرافق" optional hint="ما يجده المشترك عندك.">
+              <div className="zb-chips">{[...X.facilities, ...f.nx.facilities.filter((x) => !X.facilities!.includes(x))].map((o) => <button key={o} type="button" className="zb-chip" data-on={f.nx.facilities.includes(o) ? 'true' : undefined} aria-pressed={f.nx.facilities.includes(o)} onClick={() => flip('facilities', o)}>{o}</button>)}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <Input value={ownFac} onChange={(e) => setOwnFac(e.target.value)} placeholder="مرفق آخر" aria-label="مرفق آخر" onKeyDown={(e) => { if (e.key === 'Enter' && ownFac.trim()) { e.preventDefault(); flip('facilities', ownFac.trim()); setOwnFac('') } }} />
+                <button type="button" className="zb-chip" style={{ flex: '0 0 auto' }} disabled={!ownFac.trim()} onClick={() => { flip('facilities', ownFac.trim()); setOwnFac('') }}>أضف</button>
+              </div>
+            </Block>
+          ) : null}
+          {X.story ? (
+            <Field label={X.story.label} hint="بكلامك. نضعها في أول الموقع.">
+              <Textarea rows={3} value={f.nx.story} onChange={(e) => upx('story', e.target.value)} placeholder="اكتب بكلامك" />
+              <Example text={X.story.example} on={!f.nx.story} onUse={(v) => upx('story', v)} />
+              {f.ig_bio && !f.nx.story ? <div className="bw-ex"><span>نبذتك على إنستغرام: «{f.ig_bio.length > 90 ? f.ig_bio.slice(0, 87) + '…' : f.ig_bio}»</span><button type="button" onClick={() => upx('story', f.ig_bio.slice(0, 400))}>استعملها</button></div> : null}
+            </Field>
+          ) : null}
+          {X.since ? (
+            <Field label={`متى افتتحت ${k.place}؟`} hint="السنة فقط. نكتب «منذ …» في الموقع.">
+              <Input inputMode="numeric" dir="ltr" value={f.nx.since} onChange={(e) => upx('since', e.target.value.replace(/[^\d]/g, '').slice(0, 4))} placeholder="2018" style={{ maxWidth: 140 }} />
+            </Field>
+          ) : null}
+          {X.steps ? (
+            <Block title="كيف يبدأ المشترك الجديد؟" optional hint="خطوات قصيرة، بالترتيب.">
+              <div className="zb-list">
+                {f.nx.steps.map((st, i) => (
+                  <Card key={st.id} title={`الخطوة ${i + 1}`} onRemove={() => upx('steps', f.nx.steps.filter((x) => x.id !== st.id))} removeLabel="حذف الخطوة">
+                    <Grid>
+                      <Field label="العنوان"><Input value={st.title} onChange={(e) => upx('steps', f.nx.steps.map((x) => (x.id === st.id ? { ...x, title: e.target.value } : x)))} placeholder="زيارة وتجربة" /></Field>
+                      <Field label="السطر"><Input value={st.text} onChange={(e) => upx('steps', f.nx.steps.map((x) => (x.id === st.id ? { ...x, text: e.target.value } : x)))} placeholder="تعال وجرّب يومًا مجانًا." /></Field>
+                    </Grid>
+                  </Card>
+                ))}
+              </div>
+              {f.nx.steps.length < 5 ? <AddButton onClick={() => upx('steps', [...f.nx.steps, { id: nid(), title: '', text: '' }])}>أضف خطوة</AddButton> : null}
+              {!f.nx.steps.length ? <div className="bw-ex"><span>مثال: {X.steps.map((x) => x.title).join('، ثم ')}.</span><button type="button" onClick={() => upx('steps', X.steps!.map((x) => ({ ...x, id: nid() })))}>استعمل المثال</button></div> : null}
+            </Block>
+          ) : null}
+        </Grid>
+      ),
+    }] as WizardStep[] : []),
     {
       id: 'barbers', title: k.team, sub: `الزبون يطلب ${k.one} بالاسم. أضف كل واحد، وصورته إن أردت. بدون صورة يظهر الاسم بخط كبير، ولا نضع وجهًا غريبًا مكانه.`,
       complete: barbers.length > 0, optional: true,
@@ -567,6 +648,18 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           <Field label="العملة" hint="تُكتب بعد كل سعر.">
             <Input value={f.currency} onChange={(e) => up('currency', e.target.value)} placeholder="د.أ" />
           </Field>
+          {X?.perks && services.length ? (
+            <Block title={`ماذا يشمل كل ${k.services === 'الاشتراكات' ? 'اشتراك' : 'خدمة'}؟`} optional hint="سطر لكل ميزة. الفارغ لا يظهر.">
+              <Grid>
+                {services.map((sv) => (
+                  <Field key={sv.id} label={sv.name}>
+                    <Textarea rows={2} value={f.nx.perks[sv.id] || ''} onChange={(e) => upx('perks', { ...f.nx.perks, [sv.id]: e.target.value })} placeholder="سطر لكل ميزة" />
+                    <Example text={X.perks!.example.replace(/\n/g, '، ')} on={!f.nx.perks[sv.id]} onUse={() => upx('perks', { ...f.nx.perks, [sv.id]: X.perks!.example })} />
+                  </Field>
+                ))}
+              </Grid>
+            </Block>
+          ) : null}
           {f.terms.length ? (
             <Block title="الشروط" optional hint="ما يسأل عنه الزبون قبل أن يدفع. الفارغ لا يظهر.">
               <Grid>
@@ -612,6 +705,22 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
               ))}
             </div>
           </Block>
+          {X?.classes ? (
+            <Block title="جدول الحصص" optional hint="الحصص الجماعية وأوقاتها. بدونها لا يظهر الجدول.">
+              <datalist id="bw-cls">{X.classes.names.map((n) => <option key={n} value={n} />)}</datalist>
+              <div className="zb-list">
+                {f.nx.classes.map((c) => (
+                  <div key={c.id} className="bw-cls">
+                    <Select value={String(c.day)} aria-label="اليوم" onChange={(e) => upx('classes', f.nx.classes.map((x) => (x.id === c.id ? { ...x, day: Number(e.target.value) } : x)))}>{DAYS_AR.map((d, i) => <option key={d} value={i}>{d}</option>)}</Select>
+                    <Input type="time" value={c.time} aria-label="الوقت" onChange={(e) => upx('classes', f.nx.classes.map((x) => (x.id === c.id ? { ...x, time: e.target.value } : x)))} />
+                    <Input list="bw-cls" value={c.name} aria-label="اسم الحصة" placeholder="اسم الحصة" onChange={(e) => upx('classes', f.nx.classes.map((x) => (x.id === c.id ? { ...x, name: e.target.value } : x)))} />
+                    <button type="button" className="zb-icon" aria-label="حذف الحصة" onClick={() => upx('classes', f.nx.classes.filter((x) => x.id !== c.id))}>×</button>
+                  </div>
+                ))}
+              </div>
+              <AddButton onClick={() => { const last = f.nx.classes[f.nx.classes.length - 1]; upx('classes', [...f.nx.classes, { id: nid(), day: last ? last.day : 0, time: '18:00', name: '' }]) }}>أضف حصة</AddButton>
+            </Block>
+          ) : null}
         </Grid>
       ),
     },
@@ -788,7 +897,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           </div>
         </div>, document.body,
       ) : null}
-      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.bw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.bw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-cls{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1.4fr) auto;gap:8px;align-items:center}@media(max-width:640px){.bw-cls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-cls>input:nth-of-type(2){grid-column:1/3;grid-row:2}}.bw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.bw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.bw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }

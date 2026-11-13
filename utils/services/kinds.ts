@@ -77,6 +77,19 @@ export type KindText = {
   terms?: { label: string; placeholder: string }[]
   /** Price unit hint in the wizard ("شهريًا" for a gym). */
   priceHint?: string
+  /**
+   * The kind's own questions (NicheExtra). Each key present adds that
+   * question; the lists are the chips offered, the owner can add his own.
+   */
+  extras?: {
+    offers?: string[]
+    facilities?: string[]
+    story?: { label: string; example: string }
+    since?: boolean
+    classes?: { names: string[] }
+    perks?: { example: string }
+    steps?: { title: string; text: string }[]
+  }
   /** For the AI visitor and the photo judge. */
   visitor: { who: string; want: string; place: string }
   /** Words in a lead's kind or name that mean this kind. */
@@ -120,6 +133,19 @@ export const KIND: Record<NicheKind, KindText> = {
     faqs: ['هل أستطيع تجميد الاشتراك؟', 'هل أستطيع إلغاء الاشتراك واسترجاع المبلغ؟', 'متى يكون النادي مزدحمًا؟', 'هل يوجد مدرب يتابعني وأنا مبتدئ؟', 'هل توجد خزائن ودُش؟', 'هل يوجد موقف سيارات؟'],
     terms: [{ label: 'التجميد', placeholder: 'حتى أسبوعين في الاشتراك الفصلي' }, { label: 'الإلغاء', placeholder: 'خلال 3 أيام من الدفع، بدون أسئلة' }, { label: 'رسوم التسجيل', placeholder: 'لا توجد' }],
     priceHint: 'السعر الكامل للاشتراك',
+    extras: {
+      offers: ['أجهزة حديد', 'كارديو', 'كروس فت', 'ملاكمة', 'فنون قتالية', 'يوغا', 'حصص جماعية', 'تدريب شخصي', 'برامج تغذية', 'تأهيل إصابات'],
+      facilities: ['غرف تبديل', 'دش', 'خزائن', 'ساونا', 'بخار', 'مسبح', 'موقف سيارات', 'مكيّف', 'مياه مجانية', 'قسم للسيدات بأوقات منفصلة'],
+      story: { label: 'احكِ عن ناديك في جملتين', example: 'نادٍ صغير في الملقا، كل مشترك فيه له برنامج ومدرب يعرفه بالاسم. افتتحناه لأن أغلب الأندية حولنا مزدحمة ولا أحد يتابع المبتدئ.' },
+      since: true,
+      classes: { names: ['كروس فت', 'ملاكمة', 'سبينينغ', 'يوغا', 'HIIT', 'دائري'] },
+      perks: { example: 'دخول كل الأجهزة\nجلسة قياس جسم شهرية\nبرنامج تمارين مكتوب' },
+      steps: [
+        { title: 'زيارة وتجربة', text: 'تعال وجرّب النادي يومًا مجانًا.' },
+        { title: 'قياس وبرنامج', text: 'يقيس المدرب وزنك ويكتب لك برنامجًا يناسب هدفك.' },
+        { title: 'متابعة', text: 'نراجع تقدّمك كل شهر ونعدّل البرنامج.' },
+      ],
+    },
     visitor: { who: 'a person', want: 'sign up at this gym this month', place: 'gym' },
     match: /جيم|نادي|نادى|لياقة|كمال اجسام|كروس|gym|fitness|crossfit/i, seo: 'نادي رياضي',
   },
