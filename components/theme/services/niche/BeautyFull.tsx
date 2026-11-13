@@ -265,7 +265,7 @@ const CSS = `
 .yf .s-head{background:color-mix(in srgb,var(--n-bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .yf .s-logo b{font-weight:600}
 .yf .s-ph h1,.yf .b-head h2,.yf .s-close h2,.yf .s-next b{font-weight:600;letter-spacing:-.02em}
-.yf .s-ph:not(.img){background:radial-gradient(ellipse 50% 90% at 100% 0%,color-mix(in srgb,var(--n-acc) 14%,transparent),transparent 70%)}
+.yf .s-ph:not(.img){background:var(--n-bg2)}
 .yf .s-menu-list button{font-weight:400}
 .yf .s-menu .n-btn{background:#eef1ec;color:#14211a}
 .yf .s-close .n-btn:not(.ghost){background:#eef1ec;color:#14211a}
@@ -317,7 +317,7 @@ const CSS = `
 .y-tabs{position:relative;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--n-bg2);width:max-content;max-width:100%;overflow-x:auto;scrollbar-width:none;margin-bottom:28px}
 .y-alt .y-tabs{background:var(--n-bg)}
 .y-tabs::-webkit-scrollbar{display:none}
-.y-tabs i{position:absolute;top:6px;bottom:6px;left:0;border-radius:999px;background:var(--n-acc);box-shadow:0 8px 20px -10px var(--n-acc);transition:transform .55s cubic-bezier(.3,1.3,.5,1),width .55s cubic-bezier(.3,1.3,.5,1)}
+.y-tabs i{position:absolute;top:6px;bottom:6px;left:0;border-radius:999px;background:var(--n-acc);transition:transform .55s cubic-bezier(.3,1.3,.5,1),width .55s cubic-bezier(.3,1.3,.5,1)}
 .y-tabs button{all:unset;cursor:pointer;position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:999px;font-weight:500;white-space:nowrap;transition:color .35s}
 .y-tabs button small{font-size:11px;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,currentColor 12%,transparent)}
 .y-tabs button.on{color:var(--n-on)}

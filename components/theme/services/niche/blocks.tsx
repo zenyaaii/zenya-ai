@@ -259,7 +259,7 @@ export const BLOCKS_CSS = `
 @media (max-width:860px){.b-rv{grid-template-columns:1fr}.b-rv-sum{position:static;grid-row:auto}.b-rv-big{grid-column:1}.b-rv-wall{grid-column:1;columns:1}}
 .b-map{position:relative;min-height:300px;border-radius:var(--n-r-card,14px);overflow:hidden;background:var(--n-bg2);color:var(--n-ink);border:1px solid var(--n-line);display:grid;align-content:end}
 .b-map-art{position:absolute;inset:0;width:100%;height:100%}
-.b-map-pin{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50% 50% 50% 0;rotate:-45deg;display:grid;place-items:center;background:var(--n-acc);color:var(--n-on);box-shadow:0 14px 30px -10px color-mix(in srgb,var(--n-acc) 70%,transparent);animation:b-drop 1s cubic-bezier(.3,1.6,.5,1) both}
+.b-map-pin{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50% 50% 50% 0;rotate:-45deg;display:grid;place-items:center;background:var(--n-acc);color:var(--n-on);box-shadow:0 10px 20px -12px rgba(0,0,0,.45);animation:b-drop 1s cubic-bezier(.3,1.6,.5,1) both}
 .b-map-pin svg{rotate:45deg}
 .b-map-pin::after{content:"";position:absolute;inset:-10px;border-radius:inherit;border:2px solid var(--n-acc);opacity:0;animation:b-ring 2.4s 1s infinite}
 @keyframes b-drop{from{transform:translate(-50%,-160%);opacity:0}}

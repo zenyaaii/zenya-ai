@@ -452,7 +452,7 @@ const CSS = `
 .gf .s-menu .n-btn{background:var(--n-on);color:var(--n-acc)}
 .gf .s-menu-list button.on{color:var(--n-on);text-decoration:underline;text-underline-offset:8px;text-decoration-thickness:3px}
 .gf .s-ph h1{text-transform:uppercase}
-.gf .s-ph:not(.img){background:radial-gradient(ellipse 60% 120% at 0% 0%,color-mix(in srgb,var(--n-acc) 22%,transparent),transparent 60%)}
+.gf .s-ph:not(.img){border-bottom:3px solid var(--n-acc)}
 .gf .s-close h2{text-transform:uppercase}
 .gf .n-btn{font-weight:700;letter-spacing:.01em}
 .gf .g-big{min-height:56px;padding:0 28px;font-size:16px}
@@ -489,7 +489,7 @@ const CSS = `
 @media (max-width:760px){.g-hero-side{display:none}.g-hero-row .n-row{width:100%}.g-hero-row .n-btn{flex:1}.g-hero-facts{gap:12px 26px}.g-next{margin-inline-start:0;width:100%;box-sizing:border-box}.g-next svg{margin-inline-start:auto}}
 
 /* ticker */
-.g-tick{background:var(--n-acc);color:var(--n-on);padding:18px 0;transform:rotate(-1.6deg) scale(1.03);margin:28px 0 0;overflow:hidden;box-shadow:0 20px 50px -30px var(--n-acc)}
+.g-tick{background:var(--n-acc);color:var(--n-on);padding:18px 0;transform:rotate(-1.6deg) scale(1.03);margin:28px 0 0;overflow:hidden}
 .g-tick-t{display:flex;width:max-content;animation:g-mq 40s linear infinite}
 .g-tick span{display:inline-flex;align-items:center;gap:14px;font:800 clamp(26px,3.4vw,40px) var(--n-disp);white-space:nowrap;padding-inline-end:44px}
 @keyframes g-mq{to{transform:translateX(25%)}}
@@ -524,12 +524,12 @@ const CSS = `
 .g-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:stretch}
 .g-plans.c1{grid-template-columns:minmax(0,520px)}.g-plans.c2{grid-template-columns:1fr 1fr}.g-plans.c4{grid-template-columns:repeat(4,1fr)}
 .g-plans article{--mx:50%;--my:0;position:relative;overflow:hidden;padding:30px 26px;border-radius:var(--n-r-card);background:var(--n-bg);border:1px solid var(--n-line);display:flex;flex-direction:column;gap:14px;transition:transform .45s cubic-bezier(.3,1.4,.5,1),border-color .3s}
-.g-plans article::before{content:"";position:absolute;inset:0;background:radial-gradient(360px circle at var(--mx) var(--my),color-mix(in srgb,var(--n-acc) 22%,transparent),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
+.g-plans article::before{content:"";position:absolute;inset:0;background:radial-gradient(320px circle at var(--mx) var(--my),color-mix(in srgb,var(--n-ink) 6%,transparent),transparent 60%);opacity:0;transition:opacity .4s;pointer-events:none}
 .g-plans article:hover::before{opacity:1}
 .g-plans article:hover{transform:translateY(-8px);border-color:color-mix(in srgb,var(--n-acc) 50%,var(--n-line))}
-.g-plans article.hot{background:var(--n-acc);color:var(--n-on);border-color:transparent;transform:translateY(-16px);box-shadow:0 40px 80px -40px var(--n-acc)}
+.g-plans article.hot{background:var(--n-acc);color:var(--n-on);border-color:transparent;transform:translateY(-16px)}
 .g-plans article.hot:hover{transform:translateY(-22px)}
-.g-plans article.hot::before{background:radial-gradient(360px circle at var(--mx) var(--my),rgba(255,255,255,.25),transparent 60%)}
+.g-plans article.hot::before{background:radial-gradient(320px circle at var(--mx) var(--my),rgba(255,255,255,.12),transparent 60%)}
 .g-plans article>*{position:relative}
 .g-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:4px;background:var(--n-on);color:var(--n-acc);font-size:12px;font-weight:700}
 .g-plans h3{font:700 24px var(--n-disp)}
