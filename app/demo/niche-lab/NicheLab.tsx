@@ -11,10 +11,11 @@ import PhotoB from '@/components/theme/services/niche/PhotoB'
 import GymA from '@/components/theme/services/niche/GymA'
 import GymB from '@/components/theme/services/niche/GymB'
 import GymFull from '@/components/theme/services/niche/GymFull'
+import CarFull from '@/components/theme/services/niche/CarFull'
 import { labContent, type Fill, type LabKind } from '@/components/theme/services/niche/lab-content'
 
 /** The heavy, many-page themes (2026-11-13). The short samples stay at &v=a / &v=b. */
-const FULL: Partial<Record<LabKind, typeof GymFull>> = { gym: GymFull }
+const FULL: Partial<Record<LabKind, typeof GymFull>> = { gym: GymFull, car: CarFull }
 const VIEWS = { beauty: [BeautyA, BeautyB], car: [CarA, CarB], photo: [PhotoA, PhotoB], gym: [GymA, GymB] } as const
 const NAMES: Record<LabKind, [string, string, string]> = {
   beauty: ['تجميل وسبا', 'أ: قائمة العناية', 'ب: جلسات'],

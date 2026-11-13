@@ -417,11 +417,15 @@ export default function GymFull({ content, x = {}, colors, initial, view, onView
           <section className="g-sec"><div className="n-w g-bookw">
             <div className="g-card" data-r><Book n={n} options={[...(n.services.length ? ['حصة تجربة'] : []), ...n.services.map((s) => s.name)]} place="النادي" label="احجز الحصة" /></div>
             <aside className="g-side" data-r>
+              <ol className="g-after">
+                <li><b>{ar(1)}</b><span>ترسل الطلب من هنا.</span></li>
+                <li><b>{ar(2)}</b><span>يؤكّد لك النادي الموعد على واتساب.</span></li>
+                <li><b>{ar(3)}</b><span>تأتي بملابس رياضة، والباقي علينا.</span></li>
+              </ol>
               <MapCard n={n} address={content.footer.address} />
               {n.st ? <p className="g-busy"><Clock size={16} /> {todayLine(n)}</p> : null}
             </aside>
           </div></section>
-          {n.hours.length ? <section className="g-sec g-alt"><div className="n-w g-two"><div data-r><h2 className="g-h2">الدوام</h2></div><div data-r><Hours n={n} /></div></div></section> : null}
           {n.faq.length ? <section className="g-sec"><div className="n-w g-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
@@ -467,7 +471,7 @@ const CSS = `
 .g-hero-in{position:relative;padding:60px 0 32px;display:grid;gap:26px}
 .g-hero-side{position:absolute;left:0;top:56px;writing-mode:vertical-rl;transform:rotate(180deg);font:700 13px var(--n-body);letter-spacing:.4em;text-transform:uppercase;color:var(--n-mute);animation:b-fade 1s .9s both}
 .g-hero h1{font-size:clamp(76px,15.5vw,236px);font-weight:800;line-height:.86;letter-spacing:-.025em;text-transform:uppercase}
-.g-line{display:block;overflow:hidden;padding-bottom:.04em}
+.g-line{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.06em}
 .g-line>span{display:block;animation:g-up 1s cubic-bezier(.2,.9,.1,1) both;animation-delay:calc(.15s + var(--i)*.12s)}
 .g-line:last-child>span{color:var(--n-acc)}
 @keyframes g-up{from{transform:translateY(108%) skewY(4deg)}}
@@ -540,7 +544,7 @@ const CSS = `
 .g-plans .n-btn{margin-top:auto}
 .g-plans .hot .n-btn{background:var(--n-on);color:var(--n-acc)}
 .g-plans .hot .n-btn.ghost{background:transparent;color:inherit;border-color:color-mix(in srgb,currentColor 35%,transparent)}
-@media (max-width:900px){.g-plans,.g-plans.c2,.g-plans.c4{grid-template-columns:1fr}.g-plans article.hot{order:-1;transform:none}.g-plans article.hot:hover{transform:none}}
+@media (max-width:900px){.g-plans,.g-plans.c2,.g-plans.c4{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-16px;padding:22px 16px 18px;scroll-padding-inline:16px}.g-plans.c1{grid-auto-columns:100%}.g-plans::-webkit-scrollbar{display:none}.g-plans article{scroll-snap-align:start}.g-plans article.hot{order:-1;transform:none}.g-plans article.hot:hover,.g-plans article:hover{transform:none}}
 
 /* today board */
 .g-today{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:start}
@@ -647,6 +651,9 @@ const CSS = `
 .g-card .n-chips button.on{background:var(--n-acc);border-color:var(--n-acc);color:var(--n-on)}
 .g-side{display:grid;gap:14px;position:sticky;top:calc(var(--s-head) + 20px)}
 .g-busy{display:flex;align-items:center;gap:8px;color:var(--n-ink2);font-size:15px;margin-top:12px}
+.g-after{list-style:none;margin:0 0 6px;padding:0;display:grid;gap:2px;counter-reset:a}
+.g-after li{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:8px;background:var(--n-bg2)}
+.g-after b{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--n-acc);color:var(--n-on);font:800 16px var(--n-disp)}
 .g-two{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px}
 .g-faqw{max-width:900px}
 @media (max-width:860px){.g-bookw,.g-two{grid-template-columns:1fr;gap:28px}.g-card{padding:20px}.g-side{position:static}}

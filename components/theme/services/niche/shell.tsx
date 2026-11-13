@@ -145,11 +145,22 @@ export function Shell(p: ShellProps) {
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    const els = Array.from(root.querySelectorAll<HTMLElement>('[data-r]:not(.in)'))
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('in')); return }
+    const seen = new WeakSet<Element>()
+    const fresh = () => Array.from(root.querySelectorAll<HTMLElement>('[data-r]:not(.in)')).filter((e) => !seen.has(e))
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+      const all = () => fresh().forEach((e) => e.classList.add('in'))
+      all()
+      const mo = new MutationObserver(all)
+      mo.observe(root, { childList: true, subtree: true })
+      return () => mo.disconnect()
+    }
     const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } }), { rootMargin: '0px 0px -6% 0px', threshold: 0.06 })
-    els.forEach((e) => io.observe(e))
-    return () => io.disconnect()
+    const watch = () => fresh().forEach((e) => { seen.add(e); io.observe(e) })
+    watch()
+    // Sections that fill in after mount (today's classes, a tab) are watched too.
+    const mo = new MutationObserver(watch)
+    mo.observe(root, { childList: true, subtree: true })
+    return () => { io.disconnect(); mo.disconnect() }
   }, [view])
 
   const nav = (id: string) => { setOpen(false); go(id) }
@@ -180,7 +191,7 @@ export function Shell(p: ShellProps) {
               <b>{n.short}</b>{n.b.latin ? <small dir="ltr">{n.b.latin}</small> : null}
             </button>
             <nav className="s-nav" aria-label="صفحات الموقع">
-              {inner.map((x) => <button key={x.id} type="button" className={x.id === view ? 'on' : ''} aria-current={x.id === view ? 'page' : undefined} onClick={() => nav(x.id)}>{x.label}</button>)}
+              {inner.filter((x) => x.id !== p.cta.page).map((x) => <button key={x.id} type="button" className={x.id === view ? 'on' : ''} aria-current={x.id === view ? 'page' : undefined} onClick={() => nav(x.id)}>{x.label}</button>)}
             </nav>
             <button type="button" className="n-btn s-cta" onClick={() => nav(p.cta.page)}>{p.cta.label}</button>
             <button type="button" className="s-burger" aria-label="القائمة" aria-expanded={open} onClick={() => setOpen(true)}><Menu size={24} /></button>
@@ -271,8 +282,8 @@ export function Shell(p: ShellProps) {
               </div>
             ) : null}
           </div>
-          <div className="s-word" aria-hidden="true"><span>{n.b.latin || n.short}</span></div>
-          <div className="n-w s-legal"><span>© {ar(year)} {n.b.name}</span>{n.where ? <span>{n.where}</span> : null}</div>
+          <div className="s-word" aria-hidden="true"><span style={{ ['--len' as string]: (n.b.latin || n.short).length } as CSSProperties}>{n.b.latin || n.short}</span></div>
+          <div className="n-w s-legal"><span>© {year.toLocaleString('ar', { useGrouping: false })} {n.b.name}</span>{n.where ? <span>{n.where}</span> : null}</div>
         </footer>
 
         <nav className="n-bar s-bar" aria-label="تواصل سريع">
@@ -321,7 +332,7 @@ export const SHELL_CSS = `
 .s-nav button:focus-visible{outline:2px solid var(--n-acc)}
 .s-cta{min-height:46px}
 .s-burger{all:unset;cursor:pointer;display:none;width:46px;height:46px;place-items:center;border-radius:12px;border:1px solid var(--n-line);margin-inline-start:auto}
-@media (max-width:980px){.s-nav,.s-cta{display:none}.s-burger{display:grid}.s-hide-sm{display:none!important}}
+@media (max-width:980px){.sh .s-nav,.sh .s-cta{display:none}.s-burger{display:grid}.s-hide-sm{display:none!important}}
 .s-menu{position:fixed;inset:0;z-index:60;background:var(--s-menu-bg,var(--n-ink));color:var(--s-menu-ink,var(--n-bg));display:grid;grid-template-rows:auto 1fr auto;padding:14px 0 calc(22px + env(safe-area-inset-bottom));clip-path:circle(0 at calc(100% - 0px) 0);visibility:hidden;transition:clip-path .6s cubic-bezier(.7,0,.2,1),visibility 0s .6s}
 [dir=rtl] .s-menu{clip-path:circle(0 at 40px 50px)}
 .s-menu.open{clip-path:circle(150% at 40px 50px);visibility:visible;transition:clip-path .7s cubic-bezier(.7,0,.2,1),visibility 0s}
@@ -387,7 +398,7 @@ export const SHELL_CSS = `
 .s-fhours li span:first-child{opacity:.6}
 .s-fhours li.today{color:var(--n-acc);font-weight:700}.s-fhours li.today span{opacity:1}
 .s-word{overflow:hidden;line-height:.8;padding-top:10px}
-.s-word span{display:block;white-space:nowrap;text-align:center;font:800 clamp(80px,17vw,280px)/.8 var(--n-disp);letter-spacing:-.03em;color:color-mix(in srgb,currentColor 9%,transparent);transform:translateY(12%)}
+.s-word span{display:block;white-space:nowrap;text-align:center;font:800 min(280px,17vw,calc(150vw / var(--len,8)))/.8 var(--n-disp);letter-spacing:-.03em;color:color-mix(in srgb,currentColor 9%,transparent);transform:translateY(12%)}
 .s-legal{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 0 26px;font-size:13px;opacity:.6;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent)}
 @media (max-width:980px){.s-cols{grid-template-columns:1fr 1fr;gap:32px 20px}.s-col-brand{grid-column:1/-1}}
 @media (max-width:560px){.s-cols{grid-template-columns:1fr}.s-ph{padding:48px 0 36px}.s-close{padding:76px 0}.s-next i{width:56px;height:56px}.sh{--s-head:64px}}
