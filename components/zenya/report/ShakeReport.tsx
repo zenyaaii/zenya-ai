@@ -3,8 +3,9 @@
 /**
  * Shake to report (Anas, 2026-11-12, option C «اسأل أولًا»).
  *
- * On a phone, three quick shakes take a picture of the screen at that moment
- * and drop a small pill from the top: «تريد أن تبلّغ عن مشكلة؟ نعم / لا». It
+ * On a phone, a light shake drops a small pill from the top at once, with a
+ * short buzz, and takes a picture of the screen behind it: «تريد أن تبلّغ عن
+ * مشكلة؟ نعم / لا». It
  * leaves by itself after six seconds, so a shake in a pocket costs nothing.
  * «نعم» opens a sheet with the picture attached: a line of text, a camera
  * photo instead if they want, and «أرسل». The report lands in /api/report and
@@ -142,32 +143,46 @@ export default function ShakeReport() {
     setTimeout(() => areaRef.current?.focus({ preventScroll: true }), 400)
   }, [])
 
-  const onShake = useCallback(async () => {
+  /* The pill comes at once, with a medium buzz (Android; iPhone browsers have
+     no vibration). The screenshot is taken behind it; «نعم» waits for it if
+     it is not ready yet. (Anas 2026-11-13: lighter shake, faster, a buzz.) */
+  const shotRef = useRef<Promise<string | null> | null>(null)
+  const onShake = useCallback(() => {
     if (phaseRef.current !== "idle") return
     phaseRef.current = "ask"
-    const shot = await captureScreen()
-    setAttach(shot ? { src: shot, kind: "screen" } : null)
+    try { navigator.vibrate?.(70) } catch { /* not supported */ }
+    setAttach(null)
     enter("ask")
+    shotRef.current = new Promise((r) => requestAnimationFrame(() => r(null))).then(captureScreen)
     if (askTimer.current) clearTimeout(askTimer.current)
-    askTimer.current = setTimeout(() => { if (phaseRef.current === "ask") { setAttach(null); leave() } }, 6000)
+    askTimer.current = setTimeout(() => { if (phaseRef.current === "ask") { shotRef.current = null; leave() } }, 6000)
   }, [leave])
+  const accept = async () => {
+    if (askTimer.current) clearTimeout(askTimer.current)
+    const shot = shotRef.current ? await shotRef.current : null
+    shotRef.current = null
+    openSheet(shot ? { src: shot, kind: "screen" } : null)
+  }
 
-  /* Three shakes inside 1.6 s: six changes of direction above 14 m/s². */
+  /* A light shake is enough: three jolts inside 1.2 s, where a jolt is the
+     phone's acceleration changing by more than 9 m/s² between two readings
+     (walking stays well under it). Then a 3 s rest, so one shake opens it once. */
   useEffect(() => {
-    let peaks: number[] = [], sign = 0
+    let jolts: number[] = [], last: { x: number; y: number; z: number } | null = null, rest = 0
     const onMotion = (e: DeviceMotionEvent) => {
       const a = e.accelerationIncludingGravity || e.acceleration
       if (!a) return
-      const x = a.x ?? 0, y = a.y ?? 0
-      const v = Math.abs(x) > Math.abs(y) ? x : y
-      if (Math.abs(v) < 14) return
-      const s = v > 0 ? 1 : -1
-      if (s === sign) return
-      sign = s
+      const cur = { x: a.x ?? 0, y: a.y ?? 0, z: a.z ?? 0 }
+      const prev = last
+      last = cur
+      if (!prev) return
+      const d = Math.abs(cur.x - prev.x) + Math.abs(cur.y - prev.y) + Math.abs(cur.z - prev.z)
       const now = Date.now()
-      peaks = peaks.filter((t) => now - t < 1600)
-      peaks.push(now)
-      if (peaks.length >= 6) { peaks = []; onShake() }
+      if (now < rest || d < 9) return
+      if (jolts.length && now - jolts[jolts.length - 1] < 90) return // one swing, not several readings of it
+      jolts = jolts.filter((t) => now - t < 1200)
+      jolts.push(now)
+      if (jolts.length >= 3) { jolts = []; rest = now + 3000; onShake() }
     }
     if (!top) return
     window.addEventListener("devicemotion", onMotion)
@@ -242,8 +257,8 @@ export default function ShakeReport() {
       {phase === "ask" ? (
         <div className="rp-ask" role="alert" data-on={shown ? "" : undefined}>
           <span>تريد أن تبلّغ عن مشكلة؟</span>
-          <button type="button" className="y" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); openSheet(attach) }}>نعم</button>
-          <button type="button" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); setAttach(null); leave() }}>لا</button>
+          <button type="button" className="y" onClick={accept}>نعم</button>
+          <button type="button" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); shotRef.current = null; leave() }}>لا</button>
         </div>
       ) : null}
 
