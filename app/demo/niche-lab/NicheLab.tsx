@@ -28,6 +28,15 @@ const NAMES: Record<LabKind, [string, string, string]> = {
 }
 
 /** Colour sets for the gym sample: the theme's own, a light one, and one as it would come from a gym's photos with a second colour. */
+/** Beauty (2026-11-13): three blended sets, and two drawn from the centre's own photos by lib/restaurant-build/palette (measure + paletteOf), no AI. */
+const BEAUTY_LOOKS: Record<string, Record<string, string>> = {
+  sage: { background: '#f2f1ec', surface: '#e7e5dc', text: '#1b231f', muted: '#5f6a63', accent: '#3d6652', border: '#d9d6cb', accent2: '#b48a5e' },
+  rose: { background: '#f8f1ee', surface: '#f0e3dd', text: '#2a1c1c', muted: '#7a6562', accent: '#94495a', border: '#e6d5ce', accent2: '#c29a6b' },
+  oud: { background: '#15110f', surface: '#1f1916', text: '#f2ebe3', muted: '#a5998d', accent: '#d6b98f', border: '#2e2621', accent2: '#c08f86' },
+  photo1: { background: '#f9f6f3', surface: '#ffffff', text: '#2e1f14', muted: '#6f5e52', accent: '#ac5518', border: 'rgba(46,31,20,0.14)', accent2: '#a15e60' },
+  photo2: { background: '#1c1008', surface: '#2c1c11', text: '#f0e5e6', muted: '#bc9fa0', accent: '#caa5a6', border: 'rgba(202,165,166,0.22)', accent2: '#e79155' },
+}
+
 const LOOKS: Record<string, Record<string, string>> = {
   day: { background: '#f3f3ef', surface: '#e8e8e2', text: '#121314', muted: '#5f6368', accent: '#1f45d6', border: '#d9d9d2', accent2: '#ff5b24' },
   photo: { background: '#111518', surface: '#192024', text: '#eef1ee', muted: '#8a9396', accent: '#c9f23a', border: '#263035', accent2: '#3fb6a8' },
@@ -52,7 +61,7 @@ export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: stri
   if (Full && v !== 'a' && v !== 'b') {
     return (
       <BookingProvider slug="" enabled preview>
-        <Full content={data.c} x={data.x} initial={p} colors={look ? (kind === 'photo' ? PHOTO_LOOKS[look] : undefined) ?? LOOKS[look] : undefined} />
+        <Full content={data.c} x={data.x} initial={p} colors={look ? (kind === 'photo' ? PHOTO_LOOKS[look] : kind === 'beauty' ? BEAUTY_LOOKS[look] : undefined) ?? LOOKS[look] : undefined} />
       </BookingProvider>
     )
   }

@@ -20,7 +20,9 @@ import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type Nic
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
-const LOOK = { background: '#f1f3ef', surface: '#e4e9e2', text: '#17211b', muted: '#5f6d65', accent: '#2f5d4a', border: '#d3dbd2' }
+/** Default look «مريمية ورمل»: sage with a sand second colour. */
+const LOOK = { background: '#f2f1ec', surface: '#e7e5dc', text: '#1b231f', muted: '#5f6a63', accent: '#3d6652', border: '#d9d6cb' }
+const LOOK2 = '#b48a5e'
 
 type Pack = { name: string; includes: string[]; duration?: string; price?: string }
 
@@ -152,7 +154,7 @@ function Features({ list }: { list: string[] }) {
 function Specialists({ n }: { n: N }) {
   if (!n.members.length) return null
   return (
-    <div className={`y-team c${Math.min(n.members.length, 3)}`}>
+    <div className={`y-team c${Math.min(n.members.length, 3)}${n.members.some((m) => m.photo) ? '' : ' nopic'}`}>
       {n.members.map((m, i) => (
         <article key={m.name} data-r style={{ ['--d' as string]: i } as CSSProperties}>
           <div className="y-team-pic">{m.photo ? <img src={m.photo} alt={m.name} loading="lazy" /> : <span aria-hidden="true">{m.name.slice(0, 1)}</span>}</div>
@@ -250,7 +252,7 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
   return (
     <Shell
       n={n} content={content} root="yf" pages={pages} initial={initial} view={view} onViewChange={onViewChange}
-      style={{ ...vars(colors, LOOK), ['--n-disp' as string]: '"Alexandria", sans-serif', ['--n-body' as string]: '"Readex Pro", sans-serif' } as CSSProperties}
+      style={{ ...vars(colors?.background && colors.accent ? colors : { ...LOOK, accent2: LOOK2 }, LOOK), ['--n-disp' as string]: '"Alexandria", sans-serif', ['--n-body' as string]: '"Readex Pro", sans-serif' } as CSSProperties}
       fonts="family=Alexandria:wght@300;400;600;700&family=Readex+Pro:wght@300;400;500;600"
       css={KIT_CSS + BLOCKS_CSS + CSS}
       cta={{ label: 'احجزي جلستك', page: 'book' }}
@@ -261,14 +263,14 @@ export default function BeautyFull({ content, x = {}, colors, initial, view, onV
 }
 
 const CSS = `
-.yf{--n-r-btn:999px;--n-r-in:14px;--n-r-card:22px;--s-strip-bg:var(--n-acc);--s-strip-ink:var(--n-on);--s-foot-bg:#14211a;--s-foot-ink:#eef1ec;--s-menu-bg:#14211a;--s-menu-ink:#eef1ec;--s-foot-acc:#9fd3b6}
+.yf{--n-r-btn:999px;--n-r-in:14px;--n-r-card:22px;--y-night:color-mix(in srgb,var(--n-acc) 16%,#0f0d0c);--y-pearl:#f3eee8;--s-strip-bg:var(--n-acc);--s-strip-ink:var(--n-on);--s-foot-bg:var(--y-night);--s-foot-ink:var(--y-pearl);--s-menu-bg:var(--y-night);--s-menu-ink:var(--y-pearl);--s-foot-acc:color-mix(in srgb,var(--n-acc2) 55%,#fff)}
 .yf .s-head{background:color-mix(in srgb,var(--n-bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .yf .s-logo b{font-weight:600}
 .yf .s-ph h1,.yf .b-head h2,.yf .s-close h2,.yf .s-next b{font-weight:600;letter-spacing:-.02em}
 .yf .s-ph:not(.img){background:var(--n-bg2)}
 .yf .s-menu-list button{font-weight:400}
-.yf .s-menu .n-btn{background:#eef1ec;color:#14211a}
-.yf .s-close .n-btn:not(.ghost){background:#eef1ec;color:#14211a}
+.yf .s-menu .n-btn{background:var(--y-pearl);color:var(--y-night)}
+.yf .s-close .n-btn:not(.ghost){background:var(--y-pearl);color:var(--y-night)}
 .yf .b-rv-big blockquote{font-weight:400}
 .yf .y-big{min-height:56px;padding:0 28px;font-size:16px}
 .y-sec{padding:112px 0}.y-tight{padding-top:56px}
@@ -285,7 +287,7 @@ const CSS = `
 .y-hero-in{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;min-height:calc(100svh - var(--s-strip) - var(--s-head) - 120px)}
 .y-hero-txt{display:grid;gap:22px;justify-items:start}
 .y-priv{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:var(--n-acc-soft);color:var(--n-acc);font-weight:600;font-size:14px;animation:y-in .8s .2s both}
-.y-hero h1{font-size:clamp(54px,7.4vw,112px);font-weight:700;line-height:1.02;letter-spacing:-.03em;animation:y-rise 1.1s cubic-bezier(.2,.8,.2,1) .3s both}
+.y-hero h1{font-size:clamp(54px,7.4vw,112px);font-weight:600;line-height:1.02;letter-spacing:-.03em;animation:y-rise 1.1s cubic-bezier(.2,.8,.2,1) .3s both}
 @keyframes y-rise{from{opacity:0;transform:translateY(40px);filter:blur(8px)}}
 @keyframes y-in{from{opacity:0;transform:translateY(14px)}}
 .y-hero-txt>p{font-size:clamp(17px,1.5vw,19px);color:var(--n-ink2);max-width:42ch;animation:y-in .9s .5s both}
@@ -300,18 +302,17 @@ const CSS = `
 .y-arch img{width:100%;height:100%;object-fit:cover;animation:y-kb 20s ease-out both}
 @keyframes y-kb{from{transform:scale(1.15)}}
 .y-arch.sm{inset:auto auto 6% 0;width:36%;height:42%;border:8px solid var(--n-bg);animation-delay:.6s;box-shadow:0 30px 60px -30px rgba(0,0,0,.35)}
-.y-ring{position:absolute;top:8%;left:6%;width:120px;height:120px;border-radius:50%;border:1px solid var(--n-acc);opacity:.5;animation:y-spin 24s linear infinite}
-.y-ring::after{content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--n-acc)}
-@keyframes y-spin{to{transform:rotate(360deg)}}
+.y-ring{position:absolute;top:8%;left:6%;width:120px;height:120px;border-radius:50%;border:1px solid var(--n-acc2);opacity:.6;animation:y-in 1.2s 1s both}
+.y-ring::after{content:"";position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--n-acc2)}
 @media (max-width:900px){.y-hero{padding:28px 0 56px}.y-hero-in{grid-template-columns:1fr;gap:32px;min-height:0}.y-hero-art{height:440px;order:-1}.y-arch{inset:0 0 0 12%}.y-arch.sm{width:42%;height:46%}.y-hero-txt .n-row{width:100%}.y-hero-txt .n-btn{flex:1}.y-ring{width:80px;height:80px}}
 
 /* calm band */
-.y-calm{background:var(--n-ink);color:var(--n-bg);padding:38px 0}
+.y-calm{background:var(--y-night);color:var(--y-pearl);padding:38px 0}
 .y-calm-in{display:flex;justify-content:space-between;align-items:center;gap:20px 40px;flex-wrap:wrap}
 .y-calm p{display:flex;align-items:center;gap:12px;font:600 clamp(20px,2.2vw,28px) var(--n-disp)}
-.y-calm p svg{color:color-mix(in srgb,var(--n-acc) 60%,var(--n-bg))}
+.y-calm p svg,.y-calm li svg{color:color-mix(in srgb,var(--n-acc2) 70%,#fff)}
 .y-calm ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-.y-calm li{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid color-mix(in srgb,var(--n-bg) 22%,transparent);font-size:14px}
+.y-calm li{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid color-mix(in srgb,var(--y-pearl) 22%,transparent);font-size:14px}
 
 /* sessions */
 .y-tabs{position:relative;display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--n-bg2);width:max-content;max-width:100%;overflow-x:auto;scrollbar-width:none;margin-bottom:28px}
@@ -344,12 +345,12 @@ const CSS = `
 .y-packs.c1{grid-template-columns:minmax(0,560px)}.y-packs.c2{grid-template-columns:1fr 1fr}
 .y-packs article{position:relative;display:flex;flex-direction:column;gap:14px;padding:32px 28px;border-radius:var(--n-r-card);background:var(--n-bg);color:var(--n-ink)}
 .y-packs article.lead{background:color-mix(in srgb,var(--n-bg) 92%,var(--n-acc))}
-.y-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--n-acc);color:var(--n-on);font-size:12px;font-weight:600}
+.y-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--n-acc2);color:var(--n-on2);font-size:12px;font-weight:600}
 .y-packs h3{font:600 clamp(26px,2.6vw,34px)/1.1 var(--n-disp)}
 .y-packs small{display:inline-flex;align-items:center;gap:6px;color:var(--n-mute);font-size:14px}
 .y-packs ul{list-style:none;margin:0;padding:16px 0 0;display:grid;gap:10px;border-top:1px dashed var(--n-line)}
 .y-packs li{display:flex;gap:10px;align-items:baseline;font-size:15px}
-.y-packs li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--n-acc);translate:0 -2px}
+.y-packs li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--n-acc2);translate:0 -2px}
 .y-packs footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:14px;padding-top:18px}
 .y-packs footer b{font:700 30px var(--n-disp)}
 .y-packs footer a{font-weight:600;color:var(--n-acc);border-bottom:1px solid currentColor}
@@ -360,7 +361,7 @@ const CSS = `
 .y-feat{list-style:none;margin:0;padding:0;display:grid}
 .y-feat li{display:grid;grid-template-columns:80px 1fr;gap:20px;align-items:baseline;padding:30px 0;border-top:1px solid var(--n-line)}
 .y-feat li:last-child{border-bottom:1px solid var(--n-line)}
-.y-feat span{font:300 54px/1 var(--n-disp);color:var(--n-acc)}
+.y-feat span{font:300 54px/1 var(--n-disp);color:var(--n-acc2)}
 .y-feat p{font:400 clamp(22px,2.8vw,38px)/1.35 var(--n-disp);max-width:30ch}
 @media (max-width:560px){.y-feat li{grid-template-columns:48px 1fr;gap:12px;padding:22px 0}.y-feat span{font-size:36px}}
 
@@ -378,6 +379,11 @@ const CSS = `
 .y-team li{padding:5px 12px;border-radius:999px;background:var(--n-bg);font-size:13px}
 .y-team blockquote{margin:8px 0 0;font-size:15px;color:var(--n-ink2);display:grid;gap:4px;max-width:32ch}
 .y-team cite{font-style:normal;font-size:12px;color:var(--n-mute)}
+.y-team.nopic{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.y-team.nopic article{padding:30px 22px 26px;border-radius:var(--n-r-card);background:var(--n-bg);border:1px solid var(--n-line)}
+.y-team.nopic .y-team-pic{width:96px;aspect-ratio:1;border-radius:50%;margin-bottom:6px;background:var(--n-acc-soft)}
+.y-team.nopic .y-team-pic span{font:400 46px/1 var(--n-disp)}
+.y-team.nopic article:hover .y-team-pic span{transform:none}
 @media (max-width:860px){.y-team,.y-team.c2{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}.y-team article{scroll-snap-align:start}.y-team-pic{aspect-ratio:1}}
 
 /* arches */
