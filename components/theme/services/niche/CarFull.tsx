@@ -16,11 +16,12 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, BadgeCheck, Car, Clock, FileCheck, Wrench } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
-import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews, ScrollWords } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
-const LOOK = { background: '#0f1113', surface: '#171a1d', text: '#eef0f2', muted: '#8d949a', accent: '#f5b700', border: '#272b2f' }
+/** The default look: graphite and a soft amber (the first of the car looks in utils/services/kinds.ts). */
+const LOOK = { background: '#121416', surface: '#1a1d20', text: '#eeece7', muted: '#97948d', accent: '#e2a33e', border: '#2a2d30' }
 
 type Block = { id: string; title: string; text: string }
 
@@ -29,7 +30,7 @@ type Block = { id: string; title: string; text: string }
 function Hero({ n, content, promises }: { n: N; content: ServiceContent; promises: Block[] }) {
   const go = useGo()
   return (
-    <section className="c-hero">
+    <section className="c-hero" data-section="hero">
       {n.hero ? <img className="c-hero-img" src={n.hero} alt={`داخل ${n.b.name}`} /> : null}
       <div className="n-w c-hero-in">
         <div className="c-hero-main">
@@ -68,7 +69,7 @@ function Makes({ brands }: { brands: string[] }) {
   if (brands.length < 3) return null
   const row = [...brands, ...brands, ...brands]
   return (
-    <div className="c-makes" aria-label="نعمل على">
+    <div className="c-makes" aria-label="نعمل على" data-section="about">
       <span className="c-makes-l">نعمل على</span>
       <div className="c-makes-v"><div className="c-makes-t">{row.map((b, i) => <span key={i} aria-hidden={i >= brands.length}>{b}</span>)}</div></div>
     </div>
@@ -191,9 +192,12 @@ function Perks({ list }: { list: string[] }) {
 
 /* ---------- the theme ---------- */
 
-export default function CarFull({ content, x = {}, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function CarFull({ content, x: given, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
   const n = useNiche(content)
-  const promises = (x.blocks || []).filter((b) => b.text.trim())
+  const x = extraOf(content, given)
+  // The owner's promises: his yes/no answers when the questions asked them, else the terms he wrote (warranty, price before work).
+  const blocks = (x.blocks || []).filter((b) => b.title?.trim() && b.text?.trim())
+  const promises: Block[] = blocks.length ? blocks : (content.terms || []).filter((t) => t.label?.trim() && t.text?.trim()).map((t) => ({ id: t.label, title: t.label, text: t.text }))
   const groups = useMemo(() => {
     const m = new Map<string, N['services']>()
     for (const s of n.services) { const g = x.groups?.[s.name] || 'خدماتنا'; m.set(g, [...(m.get(g) || []), s]) }
@@ -202,30 +206,33 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
   const [tab, setTab] = useState(0)
   const brands = x.brands || []
   const facilities = x.facilities || []
-  const terms = (content.terms || []).filter((t) => t.text.trim() && !promises.some((b) => b.title === t.label))
-  const steps = x.steps?.length ? x.steps : [
+  const terms = (content.terms || []).filter((t) => t.text?.trim() && !promises.some((b) => b.title === t.label))
+  // Steps say only what the owner said: his price and warranty lines, else plain words that promise nothing he did not.
+  const said = (id: string, label: RegExp) => promises.find((b) => b.id === id || label.test(b.title))?.text
+  const priceLine = said('price_first', /السعر/)
+  const steps = (x.steps || []).filter((st) => st.title?.trim()).length >= 2 ? x.steps!.filter((st) => st.title?.trim()) : [
     { title: 'تصل أو نستلم سيارتك', text: facilities.some((f) => /استلام/.test(f)) ? 'تأتي إلى الورشة، أو نأخذ السيارة من بيتك.' : 'تأتي إلى الورشة في موعدك.' },
-    { title: 'نفحص ونكتب السعر', text: promises.find((b) => b.id === 'price_first')?.text || 'نخبرك بما تحتاجه السيارة وسعره.' },
-    { title: 'نبدأ بعد موافقتك', text: 'لا نلمس شيئًا قبل أن توافق.' },
-    { title: 'تستلم سيارتك', text: promises.find((b) => b.id === 'warranty')?.text || 'جاهزة، ونشرح لك ما عملناه.' },
+    { title: priceLine ? 'نفحص ونكتب السعر' : 'نفحص السيارة', text: priceLine || 'نخبرك بما تحتاجه السيارة.' },
+    { title: 'نعمل على سيارتك', text: 'حسب ما اتفقنا عليه.' },
+    { title: 'تستلم سيارتك', text: said('warranty', /الضمان|ضمان/) || 'ونشرح لك ما عملناه.' },
   ]
   const pics = n.photos
 
   const svcHead = (
-    <Head title="الخدمات" sub={n.priced ? 'السعر يبدأ من الرقم المكتوب. نخبرك بالسعر النهائي قبل أن نبدأ.' : 'اسأل عن سعر سيارتك على واتساب، ونرد عليك بالسعر قبل أي عمل.'} more={n.services.length > 6 ? <GoLink to="services">كل الخدمات<ArrowLeft size={16} /></GoLink> : null} />
+    <Head title="الخدمات" sub={n.priced ? (priceLine ? `السعر يبدأ من الرقم المكتوب. ${priceLine}` : 'السعر يبدأ من الرقم المكتوب، والسعر النهائي حسب سيارتك.') : 'اسأل عن سعر سيارتك على واتساب.'} more={n.services.length > 6 ? <GoLink to="services">كل الخدمات<ArrowLeft size={16} /></GoLink> : null} />
   )
 
   const home = (
     <>
       <Hero n={n} content={content} promises={promises} />
       <Makes brands={brands} />
-      {x.story ? <section className="c-sec"><div className="n-w"><ScrollWords text={x.story} className="c-man" /></div></section> : null}
-      {n.services.length ? <section className="c-sec c-alt"><div className="n-w">{svcHead}<Tickets n={n} list={n.services.slice(0, 6)} /></div></section> : null}
-      {(x.sizes || []).length ? <section className="c-sec"><div className="n-w c-split"><div data-r><h2 className="c-h2">غسيل وتلميع</h2><p className="c-lead">اختر حجم سيارتك، وترى السعر فورًا.</p></div><Sizes x={x} /></div></section> : null}
-      <section className="c-sec c-alt"><div className="n-w"><Head title="كيف نعمل" more={promises.length ? <GoLink to="promise">ضماننا<ArrowLeft size={16} /></GoLink> : null} /><Route steps={steps} /></div></section>
-      {n.reviews.length ? <section className="c-sec"><div className="n-w"><Head title="ماذا يقول الزبائن" /><Reviews n={n} max={5} /></div></section> : null}
-      {facilities.length ? <section className="c-sec c-alt"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
-      {n.faq.length ? <section className="c-sec"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
+      {x.story ? <section className="c-sec" data-section="about"><div className="n-w"><ScrollWords text={x.story} className="c-man" /></div></section> : null}
+      {n.services.length ? <section className="c-sec c-alt" data-section="services"><div className="n-w">{svcHead}<Tickets n={n} list={n.services.slice(0, 6)} /></div></section> : null}
+      {(x.sizes || []).length ? <section className="c-sec" data-section="services"><div className="n-w c-split"><div data-r><h2 className="c-h2">غسيل وتلميع</h2><p className="c-lead">اختر حجم سيارتك، وترى السعر فورًا.</p></div><Sizes x={x} /></div></section> : null}
+      <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="كيف نعمل" more={promises.length ? <GoLink to="promise">ضماننا<ArrowLeft size={16} /></GoLink> : null} /><Route steps={steps} /></div></section>
+      {n.reviews.length ? <section className="c-sec" data-section="reviews"><div className="n-w"><Head title="ماذا يقول الزبائن" /><Reviews n={n} max={5} /></div></section> : null}
+      {facilities.length ? <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
+      {n.faq.length ? <section className="c-sec" data-section="faq"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
     </>
   )
 
@@ -236,7 +243,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'services', label: 'الخدمات', title: 'كل الخدمات', lead: brands.length ? `نعمل على ${brands.slice(0, 4).join(' و')} وغيرها.` : undefined,
       body: n.services.length ? (
         <>
-          <section className="c-sec"><div className="n-w">
+          <section className="c-sec" data-section="services"><div className="n-w">
             {groups.length > 1 ? (
               <div className="c-tabs" role="tablist" data-r>
                 {groups.map(([name, list], i) => <button key={name} type="button" role="tab" aria-selected={tab === i} className={tab === i ? 'on' : ''} onClick={() => setTab(i)}>{name}<small>{ar(list.length)}</small></button>)}
@@ -244,8 +251,8 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
             ) : null}
             {g ? <Tickets key={g[0]} n={n} list={g[1]} /> : null}
           </div></section>
-          {(x.sizes || []).length ? <section className="c-sec c-alt"><div className="n-w c-split"><div data-r><h2 className="c-h2">السعر حسب الحجم</h2><p className="c-lead">للغسيل والتلميع. الصيانة سعرها حسب السيارة.</p></div><Sizes x={x} /></div></section> : null}
-          {brands.length ? <section className="c-sec"><div className="n-w"><Head title="نعمل على" /><ul className="c-brands">{brands.map((b, i) => <li key={b} data-r style={{ ['--d' as string]: i % 8 } as CSSProperties}>{b}</li>)}</ul></div></section> : null}
+          {(x.sizes || []).length ? <section className="c-sec c-alt" data-section="services"><div className="n-w c-split"><div data-r><h2 className="c-h2">السعر حسب الحجم</h2><p className="c-lead">للغسيل والتلميع. الصيانة سعرها حسب السيارة.</p></div><Sizes x={x} /></div></section> : null}
+          {brands.length ? <section className="c-sec" data-section="about"><div className="n-w"><Head title="نعمل على" /><ul className="c-brands">{brands.map((b, i) => <li key={b} data-r style={{ ['--d' as string]: i % 8 } as CSSProperties}>{b}</li>)}</ul></div></section> : null}
         </>
       ) : null,
     },
@@ -253,7 +260,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'promise', label: 'ضماننا', title: 'ما نعدك به', lead: 'هذه وعودنا مكتوبة. اسألنا عنها في أي وقت.',
       body: promises.length ? (
         <>
-          <section className="c-sec"><div className="n-w">
+          <section className="c-sec" data-section="services"><div className="n-w">
             <ol className="c-vows">
               {promises.map((b, i) => (
                 <li key={b.id} data-r style={{ ['--d' as string]: i } as CSSProperties}>
@@ -265,8 +272,8 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
               ))}
             </ol>
           </div></section>
-          <section className="c-sec c-alt"><div className="n-w"><Head title="من الوصول إلى الاستلام" /><Route steps={steps} /></div></section>
-          {terms.length ? <section className="c-sec"><div className="n-w"><Head title="شروط مكتوبة" /><dl className="c-terms">{terms.map((t) => <div key={t.label} data-r><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl></div></section> : null}
+          <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="من الوصول إلى الاستلام" /><Route steps={steps} /></div></section>
+          {terms.length ? <section className="c-sec" data-section="services"><div className="n-w"><Head title="شروط مكتوبة" /><dl className="c-terms">{terms.map((t) => <div key={t.label} data-r><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl></div></section> : null}
         </>
       ) : null,
     },
@@ -274,17 +281,17 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'shop', label: 'الورشة', title: `داخل ${n.short}`, lead: x.story, image: pics[1] || undefined,
       body: n.members.length || pics.length >= 2 || facilities.length ? (
         <>
-          {n.members.length ? <section className="c-sec"><div className="n-w"><Head title="من سيعمل على سيارتك" /><Crew n={n} /></div></section> : null}
-          {pics.length >= 2 ? <section className="c-sec c-alt"><div className="n-w"><Head title="صور من الورشة" /><Shots n={n} urls={pics} /></div></section> : null}
-          {facilities.length ? <section className="c-sec"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
+          {n.members.length ? <section className="c-sec" data-section="team"><div className="n-w"><Head title="من سيعمل على سيارتك" /><Crew n={n} /></div></section> : null}
+          {pics.length >= 2 ? <section className="c-sec c-alt" data-section="gallery"><div className="n-w"><Head title="صور من الورشة" /><Shots n={n} urls={pics} /></div></section> : null}
+          {facilities.length ? <section className="c-sec" data-section="about"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
         </>
       ) : null,
     },
     {
-      id: 'book', label: 'احجز موعدًا', title: 'احجز موعدًا', lead: 'اختر الخدمة والوقت. نؤكّد لك على واتساب، ونرسل السعر قبل أن نبدأ.',
+      id: 'book', label: 'احجز موعدًا', title: 'احجز موعدًا', lead: 'اختر الخدمة والوقت، ونؤكّد لك الموعد على واتساب.',
       body: (
         <>
-          <section className="c-sec"><div className="n-w c-bookw">
+          <section className="c-sec" data-section="booking"><div className="n-w c-bookw">
             <div className="c-order" data-r>
               <div className="c-order-h"><b>طلب موعد</b><span>{n.b.name}</span></div>
               <Book n={n} options={n.services.map((s) => s.name)} place="الورشة" label="أرسل الطلب" />
@@ -295,7 +302,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
               {n.hours.length ? <Hours n={n} /> : null}
             </aside>
           </div></section>
-          {n.faq.length ? <section className="c-sec c-alt"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
+          {n.faq.length ? <section className="c-sec c-alt" data-section="faq"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
     },
@@ -315,31 +322,34 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
 }
 
 const CSS = `
-.cf{--n-r-btn:4px;--n-r-in:4px;--n-r-card:6px;--s-strip-bg:#000;--s-strip-ink:#d6d9dc;--s-foot-bg:#08090a;--s-foot-ink:var(--n-ink);--s-menu-bg:var(--n-acc);--s-menu-ink:#111}
+.cf{--n-r-btn:8px;--n-r-in:8px;--n-r-card:10px;--s-strip-bg:#0d0f11;--s-strip-ink:#d6d9dc;--s-foot-bg:#0d0f11;--s-foot-ink:#eef0f2;--s-foot-acc:var(--n-acc);--s-menu-bg:var(--n-acc);--s-menu-ink:var(--n-on)}
 .cf .s-head{background:color-mix(in srgb,var(--n-bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.cf .s-logo b{font-weight:900}
-.cf .s-menu .n-btn{background:#111;color:var(--n-acc)}
-.cf .s-menu .n-btn.ghost{background:transparent;color:#111;border-color:rgba(0,0,0,.3)}
-.cf .s-ph:not(.img){background:repeating-linear-gradient(-45deg,transparent 0 22px,color-mix(in srgb,var(--n-acc) 5%,transparent) 22px 24px)}
-.cf .s-ph:not(.img)::before{content:"";position:absolute;inset:auto 0 0;height:6px;background:repeating-linear-gradient(-45deg,var(--n-acc) 0 14px,#111 14px 28px)}
+.cf .s-logo b{font-weight:800}
+.cf .s-menu .n-btn{background:var(--n-on);color:var(--n-acc)}
+.cf .s-menu .n-btn.ghost{background:transparent;color:var(--n-on);border-color:color-mix(in srgb,var(--n-on) 30%,transparent)}
+.cf .s-ph:not(.img){background:var(--n-bg2)}
+.cf .s-ph:not(.img)::before{content:"";position:absolute;inset:auto 0 0;height:3px;background:var(--n-acc)}
 .cf .n-btn{font-weight:700}
 .cf .c-big{min-height:56px;padding:0 26px;font-size:16px}
 .c-sec{padding:112px 0}
 .c-alt{background:var(--n-bg2)}
-.c-h2{font-size:clamp(36px,5vw,72px);font-weight:900;line-height:1}
+.c-h2{font-size:clamp(34px,4.6vw,64px);font-weight:800;line-height:1.05}
 .c-lead{color:var(--n-ink2);margin-top:14px;font-size:17px;max-width:40ch}
 .c-no{font:700 12px/1 var(--n-body);letter-spacing:.08em;color:var(--n-acc);font-variant-numeric:tabular-nums}
 @media (max-width:760px){.c-sec{padding:72px 0}}
 
 /* hero */
-.c-hero{position:relative;min-height:calc(100svh - var(--s-strip) - var(--s-head));display:grid;align-content:end;overflow:hidden;isolation:isolate}
+/* The hero is always a dark photo band, on light looks too: the workshop photo stays a photo, the text stays white. */
+.c-hero{--n-bg:#0e1012;--n-bg2:#16191c;--n-ink:#f2f1ed;--n-ink2:#d2d0ca;--n-mute:#a19e97;--n-line:rgba(255,255,255,.16);background:var(--n-bg);color:var(--n-ink);position:relative;min-height:calc(100svh - var(--s-strip) - var(--s-head));display:grid;align-content:end;overflow:hidden;isolation:isolate}
+.c-hero .n-btn.ghost{color:var(--n-ink);border-color:var(--n-line)}
+.c-hero .c-no,.c-hero .c-ok{color:color-mix(in srgb,var(--n-acc) 55%,#fff)}
 .c-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;clip-path:inset(0 0 0 0);animation:c-wipe 1.3s cubic-bezier(.7,0,.2,1) both}
 @keyframes c-wipe{from{clip-path:inset(0 0 0 100%)}}
 .c-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,var(--n-bg) 6%,color-mix(in srgb,var(--n-bg) 70%,transparent) 45%,color-mix(in srgb,var(--n-bg) 25%,transparent)),linear-gradient(to left,color-mix(in srgb,var(--n-bg) 75%,transparent) 20%,transparent 70%)}
 .c-hero-in{display:grid;grid-template-columns:1.25fr .75fr;gap:48px;align-items:end;padding:64px 0 36px}
 .c-hero-main{display:grid;gap:22px;justify-items:start}
-.c-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:4px;background:var(--n-acc);color:#111;font-size:13px;font-weight:700;animation:c-in .6s .5s both}
-.c-hero h1{font-size:clamp(60px,9.5vw,148px);font-weight:900;line-height:1.02;letter-spacing:-.02em;overflow:hidden;padding-bottom:.08em}
+.c-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:color-mix(in srgb,var(--n-bg) 70%,transparent);border:1px solid var(--n-line);color:var(--n-ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:13px;font-weight:700;animation:c-in .6s .5s both}
+.c-hero h1{font-size:clamp(50px,8.4vw,128px);font-weight:800;line-height:1.02;letter-spacing:-.02em;overflow:hidden;padding-bottom:.08em}
 .c-hero h1 span{display:block;animation:c-up .9s cubic-bezier(.2,.9,.1,1) .35s both}
 @keyframes c-up{from{transform:translateY(105%)}}
 @keyframes c-in{from{opacity:0;transform:translateY(16px)}}
@@ -353,16 +363,16 @@ const CSS = `
 .c-ok{position:absolute;left:18px;top:18px;color:var(--n-acc)}
 .c-gauge{display:flex;gap:12px 48px;flex-wrap:wrap;padding:20px 0 30px;border-top:1px solid var(--n-line);animation:c-in .7s 1.1s both}
 .c-gauge span{display:grid;line-height:1.15}
-.c-gauge b{font:900 32px var(--n-disp);font-variant-numeric:tabular-nums}.c-gauge b.ok{color:#5bd68e}.c-gauge b.no{color:#ff8a73}
+.c-gauge b{font:800 30px var(--n-disp);font-variant-numeric:tabular-nums}.c-gauge b.ok{color:color-mix(in srgb,#2fb36a 82%,var(--n-ink))}.c-gauge b.no{color:color-mix(in srgb,#e2553f 85%,var(--n-ink))}
 .c-gauge small{font-size:13px;color:var(--n-mute)}
 @media (max-width:900px){.c-hero-in{grid-template-columns:1fr;gap:28px;padding-top:48px}.c-hero-main .n-row{width:100%}.c-hero-main .n-btn{flex:1}.c-stamps li{padding:14px 16px 14px 48px}.c-gauge{gap:12px 28px}}
 
 /* makes */
 .c-makes{display:flex;align-items:center;border-block:1px solid var(--n-line);background:var(--n-bg)}
-.c-makes-l{flex:none;padding:0 24px;height:64px;display:grid;place-items:center;background:var(--n-acc);color:#111;font-weight:800;font-size:14px}
+.c-makes-l{flex:none;padding:0 24px;height:64px;display:grid;place-items:center;background:var(--n-acc);color:var(--n-on);font-weight:700;font-size:14px}
 .c-makes-v{overflow:hidden;flex:1;mask-image:linear-gradient(to left,transparent,#000 8%,#000 92%,transparent)}
 .c-makes-t{display:flex;width:max-content;animation:c-mq 36s linear infinite}
-.c-makes-t span{font:800 26px var(--n-disp);padding:0 34px;color:var(--n-ink2);white-space:nowrap;border-inline-start:1px solid var(--n-line)}
+.c-makes-t span{font:700 24px var(--n-disp);padding:0 34px;color:var(--n-ink2);white-space:nowrap;border-inline-start:1px solid var(--n-line)}
 @keyframes c-mq{to{transform:translateX(33.333%)}}
 
 .c-man{font:800 clamp(28px,4.2vw,58px)/1.2 var(--n-disp);max-width:24ch}
@@ -381,7 +391,7 @@ const CSS = `
 .c-tix footer span{display:inline-flex;gap:6px;align-items:center;color:var(--n-mute)}
 .c-tix footer b{font-size:17px}.c-tix footer b.ask{font-size:14px;color:var(--n-mute)}
 .c-tix footer a{font-weight:700;color:var(--n-acc);border-bottom:1px solid currentColor}
-.c-tix-go{all:unset;cursor:pointer;position:absolute;top:18px;left:56px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--n-acc);color:#111;opacity:0;transform:scale(.6);transition:opacity .3s,transform .4s cubic-bezier(.3,1.5,.5,1)}
+.c-tix-go{all:unset;cursor:pointer;position:absolute;top:18px;left:56px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:var(--n-acc);color:var(--n-on);opacity:0;transform:scale(.6);transition:opacity .3s,transform .4s cubic-bezier(.3,1.5,.5,1)}
 .c-tix article:hover .c-tix-go,.c-tix-go:focus-visible{opacity:1;transform:none}
 @media (max-width:900px){.c-tix{grid-template-columns:1fr 1fr}}
 @media (max-width:560px){.c-tix{grid-template-columns:1fr;gap:8px}.c-tix article{padding:16px 18px;gap:8px}.c-tix h3{font-size:20px}.c-tix footer{padding-top:10px}.c-tix-go{opacity:1;transform:none;top:auto;bottom:62px;left:18px;display:none}}
@@ -395,13 +405,13 @@ const CSS = `
 .c-seg{position:relative;display:flex;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--n-ink) 7%,transparent)}
 .c-seg i{position:absolute;top:4px;bottom:4px;right:0;left:auto;border-radius:999px;background:var(--n-acc);transition:transform .45s cubic-bezier(.3,1.3,.5,1),width .45s cubic-bezier(.3,1.3,.5,1);left:0;right:auto}
 .c-seg button{all:unset;cursor:pointer;position:relative;z-index:1;padding:9px 18px;font-weight:700;font-size:14px;transition:color .3s;border-radius:999px}
-.c-seg button.on{color:#111}
+.c-seg button.on{color:var(--n-on)}
 .c-seg button:focus-visible{outline:2px solid var(--n-acc)}
 .c-size ul{list-style:none;margin:0;padding:0}
 .c-size li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px;border-bottom:1px solid var(--n-line);font-size:17px}
 .c-size li:last-child{border-bottom:0}
 .c-size li span{display:flex;gap:10px;align-items:center}.c-size li span svg{color:var(--n-mute)}
-.c-roll{font:900 26px var(--n-disp);font-variant-numeric:tabular-nums;animation:c-roll .45s cubic-bezier(.3,1.4,.5,1) both}
+.c-roll{font:800 26px var(--n-disp);font-variant-numeric:tabular-nums;animation:c-roll .45s cubic-bezier(.3,1.4,.5,1) both}
 @keyframes c-roll{from{opacity:0;transform:translateY(60%)}}
 @media (max-width:900px){.c-split{grid-template-columns:1fr;gap:24px}.c-seg{width:100%}.c-seg button{flex:1;text-align:center;padding:10px 6px}}
 
@@ -409,9 +419,9 @@ const CSS = `
 .c-route{--p:0;list-style:none;margin:0;padding:0;position:relative;display:grid;grid-template-columns:repeat(var(--k,4),1fr);gap:24px}
 .c-route{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
 .c-route::before,.c-route::after{content:"";position:absolute;top:27px;right:28px;left:28px;height:2px;background:var(--n-line)}
-.c-route::after{background:var(--n-acc);transform:scaleX(var(--p));transform-origin:right}
+.c-route::after{background:var(--n-acc2);transform:scaleX(var(--p));transform-origin:right}
 .c-route li{position:relative;display:grid;gap:18px;align-content:start}
-.c-route i{position:relative;z-index:1;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:900 22px var(--n-disp);font-style:normal;background:var(--n-bg2);border:2px solid var(--n-acc);color:var(--n-acc)}
+.c-route i{position:relative;z-index:1;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:800 22px var(--n-disp);font-style:normal;background:var(--n-bg2);border:2px solid var(--n-acc2);color:var(--n-acc2)}
 .c-alt .c-route i{background:var(--n-bg2)}
 .c-route h3{font:800 21px var(--n-disp);margin-bottom:6px}
 .c-route p{color:var(--n-ink2);font-size:15px}
@@ -422,11 +432,11 @@ const CSS = `
 .c-crew.c1{grid-template-columns:minmax(0,640px)}
 .c-crew.c3{grid-template-columns:repeat(3,1fr)}
 .c-crew article{display:grid;grid-template-columns:120px 1fr;gap:20px;padding:22px;border-radius:8px;background:var(--n-bg2);border:1px solid var(--n-line);align-items:start}
-.c-badge-id{aspect-ratio:3/4;border-radius:6px;overflow:hidden;background:repeating-linear-gradient(-45deg,var(--n-acc) 0 10px,#111 10px 20px);display:grid;place-items:center}
+.c-badge-id{aspect-ratio:3/4;border-radius:6px;overflow:hidden;background:var(--n-acc-soft);display:grid;place-items:center}
 .c-badge-id img{width:100%;height:100%;object-fit:cover}
-.c-badge-id span{width:70%;aspect-ratio:1;border-radius:50%;background:var(--n-bg);display:grid;place-items:center;font:900 44px var(--n-disp);color:var(--n-acc)}
+.c-badge-id span{width:70%;aspect-ratio:1;border-radius:50%;background:var(--n-bg);display:grid;place-items:center;font:800 44px var(--n-disp);color:var(--n-acc)}
 .c-crew small{font-size:12px;font-weight:700;color:var(--n-acc)}
-.c-crew h3{font:900 30px/1.1 var(--n-disp);margin:4px 0 10px}
+.c-crew h3{font:800 28px/1.15 var(--n-disp);margin:4px 0 10px}
 .c-crew ul{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .c-crew li{display:inline-flex;gap:6px;align-items:center;font-size:13px;padding:4px 10px;border-radius:4px;background:color-mix(in srgb,var(--n-ink) 7%,transparent)}
 .c-crew blockquote{margin:0;font-size:15px;color:var(--n-ink2);display:grid;gap:4px}
@@ -450,17 +460,17 @@ const CSS = `
 .c-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
 .c-tabs button{all:unset;cursor:pointer;display:inline-flex;gap:10px;align-items:center;padding:12px 20px;border-radius:4px;border:1px solid var(--n-line);font-weight:700;transition:background .25s,color .25s,border-color .25s}
 .c-tabs small{font-size:12px;padding:2px 8px;border-radius:3px;background:color-mix(in srgb,var(--n-ink) 10%,transparent)}
-.c-tabs button.on{background:var(--n-acc);color:#111;border-color:var(--n-acc)}.c-tabs button.on small{background:rgba(0,0,0,.15)}
+.c-tabs button.on{background:var(--n-acc);color:var(--n-on);border-color:var(--n-acc)}.c-tabs button.on small{background:color-mix(in srgb,var(--n-on) 15%,transparent)}
 .c-tabs button:focus-visible{outline:2px solid var(--n-acc);outline-offset:2px}
 .c-brands{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:1px;background:var(--n-line);border:1px solid var(--n-line);border-radius:6px;overflow:hidden}
 .c-brands li{background:var(--n-bg);padding:28px 16px;text-align:center;font:800 20px var(--n-disp);transition:background .25s,color .25s}
-.c-brands li:hover{background:var(--n-acc);color:#111}
+.c-brands li:hover{background:var(--n-acc-soft);color:var(--n-ink)}
 
 .c-vows{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
 .c-vows li{position:relative;padding:30px 28px;border-radius:6px;background:var(--n-bg2);border:1px solid var(--n-line);display:grid;gap:14px;align-content:start;overflow:hidden}
-.c-vows li::after{content:"";position:absolute;top:0;right:0;left:0;height:4px;background:repeating-linear-gradient(-45deg,var(--n-acc) 0 10px,#111 10px 20px)}
+.c-vows li::after{content:"";position:absolute;top:0;right:0;width:56px;height:3px;background:var(--n-acc)}
 .c-vows svg{color:var(--n-acc)}
-.c-vows h3{font:900 28px var(--n-disp)}
+.c-vows h3{font:800 26px var(--n-disp)}
 .c-vows p{color:var(--n-ink2);font-size:16px}
 .c-terms{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
 .c-terms div{padding:22px;border-radius:6px;border:1px solid var(--n-line);display:grid;gap:6px}
@@ -468,10 +478,10 @@ const CSS = `
 
 .c-bookw{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:start}
 .c-order{border-radius:8px;background:var(--n-bg2);border:1px solid var(--n-line);overflow:hidden}
-.c-order-h{display:flex;justify-content:space-between;align-items:center;padding:16px 26px;background:var(--n-acc);color:#111}
-.c-order-h b{font:900 18px var(--n-disp)}.c-order-h span{font-size:13px;font-weight:600}
+.c-order-h{display:flex;justify-content:space-between;align-items:center;padding:16px 26px;background:var(--n-acc);color:var(--n-on)}
+.c-order-h b{font:800 18px var(--n-disp)}.c-order-h span{font-size:13px;font-weight:600}
 .c-order .n-form,.c-order .n-ask,.c-order .n-done{padding:26px;margin:0}
-.c-order .n-chips button.on{background:var(--n-acc);border-color:var(--n-acc);color:#111}
+.c-order .n-chips button.on{background:var(--n-acc);border-color:var(--n-acc);color:var(--n-on)}
 .c-side{display:grid;gap:14px;position:sticky;top:calc(var(--s-head) + 20px)}
 .c-today{display:flex;gap:8px;align-items:center;font-weight:600}
 .c-faqw{max-width:900px}

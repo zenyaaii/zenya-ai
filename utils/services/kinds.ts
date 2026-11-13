@@ -34,8 +34,10 @@ const ROSE = L('rose', 'وردي هادئ', '#f7f1ee', '#efe5e0', '#2a1d1b', '#7
 const PLUM = L('plum', 'برقوقي ليلي', '#120d10', '#1c1419', '#f4ecef', '#a3949b', '#c98a9a', '#2e2329')
 const MINT = L('mint', 'أبيض طبي', '#f4f7f6', '#e8eeec', '#10201c', '#5a6b66', '#0f766e', '#d5e0dc')
 const NAVY = L('navy', 'كحلي هادئ', '#0c1219', '#131c26', '#eef2f6', '#8c99a7', '#5fa8d3', '#22303e')
-const AMBER = L('amber', 'كهرماني', '#0f0e0c', '#181613', '#f2efe9', '#938c80', '#e0a526', '#2a2722')
-const STEEL = L('steel', 'فولاذي فاتح', '#eff1f2', '#e2e5e7', '#14181b', '#5b6369', '#c0392b', '#d0d5d8')
+// Car looks Anas picked from (2026-11-13): three blended sets. The wizard puts the two measured from the shop's photos first.
+const AMBER = L('amber', 'غرافيت وكهرمان', '#121416', '#1a1d20', '#eeece7', '#97948d', '#e2a33e', '#2a2d30')
+const SERVICE = L('service', 'أبيض الخدمة', '#f3f4f2', '#e8eae7', '#15191c', '#5c6469', '#1f4f7a', '#d7dbd8')
+const SAND = L('sand', 'رملي وزيتوني', '#f2efe8', '#e7e2d8', '#1d1c18', '#6b665c', '#2f5a4c', '#dad4c8')
 const INK = L('ink', 'حبر أسود', '#0b0b0b', '#141414', '#f2f2f0', '#8f8f8b', '#f2f2f0', '#262626')
 // Photo studio (Anas picked «من صوره: نهاري» as the default, 2026-11-13). A built
 // studio gets these from its own photos (lib/restaurant-build, light mood); the
@@ -191,7 +193,7 @@ export const KIND: Record<NicheKind, KindText> = {
     match: /عيادة|عيادات|طبيب|دكتور|اسنان|أسنان|clinic|dental|doctor/i, seo: 'عيادة',
   },
   car: {
-    looks: [AMBER, STEEL, IRON],
+    looks: [AMBER, SERVICE, SAND],
     id: 'car', label: 'ورشة سيارات', place: 'الورشة', team: 'الفنيون', one: 'الفني', any: 'أي فني', role: 'فني', ownerRole: 'صاحب الورشة',
     bookAt: (n) => `اطلب ${n}`, services: 'الخدمات', cta: 'احجز موعد صيانة',
     bookLine: 'اختر الخدمة والوقت. يصل طلبك إلى الورشة، وترد عليك على واتساب.',

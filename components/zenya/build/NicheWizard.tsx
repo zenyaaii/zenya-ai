@@ -13,13 +13,13 @@ import WizardShell, {
 } from '@/components/zenya/build/WizardShell'
 import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, completeness, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
 import { countryOfPhone, exampleFor, faqExample, tipFor } from '@/utils/services/wizard-help'
-import { KIND, type KindText, type NicheKind } from '@/utils/services/kinds'
+import { KIND, type KindText, type Look, type NicheKind } from '@/utils/services/kinds'
 import type { ServiceHoursDay } from '@/utils/services/types'
 
 // The real site component, loaded only when the owner opens the live preview.
 const ServicesPreview = dynamic(() => import('@/components/theme/services/ServicesPreview'), { ssr: false })
 
-type GoogleFound = BarberGoogle & { photos?: string[]; name?: string; contact?: { phone?: string; address?: string; city?: string; area?: string } }
+type GoogleFound = BarberGoogle & { photos?: string[]; looks?: Look[] | null; name?: string; contact?: { phone?: string; address?: string; city?: string; area?: string } }
 
 /**
  * The barber's questions: the seven steps Anas approved on 2026-11-10

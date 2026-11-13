@@ -84,11 +84,12 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
       role="dialog"
       aria-label="ملفات تعريف الارتباط"
       aria-describedby="site-cookie-desc"
+      className="zy-ck"
       style={{
         position: 'fixed',
         zIndex: 2147483001, // one above the Made with Beynoun badge
         left: '50%',
-        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+        bottom: 'var(--zy-ck-bottom, calc(16px + env(safe-area-inset-bottom, 0px)))',
         transform: `translate(-50%, ${shown ? '0' : '24px'})`,
         opacity: shown ? 1 : 0,
         transition: 'transform .45s cubic-bezier(.22,1,.36,1), opacity .35s',
@@ -133,7 +134,7 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
           موافق
         </button>
       </div>
-      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } #site-cookie-desc{ white-space:nowrap; font-size:12.5px !important } .zy-ck-no{ padding:0 10px !important } }`}</style>
+      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } #site-cookie-desc{ white-space:nowrap; font-size:12.5px !important } .zy-ck-no{ padding:0 10px !important } }${look?.phoneLift ? `@media (max-width: 760px){ .zy-ck{ --zy-ck-bottom: calc(${look.phoneLift}px + env(safe-area-inset-bottom, 0px)) } }` : ''}`}</style>
     </div>
   )
 }

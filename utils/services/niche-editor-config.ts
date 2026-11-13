@@ -1,4 +1,4 @@
-import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, Camera, IdCard } from 'lucide-react'
+import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, ShieldCheck, Camera, IdCard } from 'lucide-react'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
@@ -39,6 +39,25 @@ const KIND_PAGES: Partial<Record<NicheKind, { pages: NonNullable<EditorConfig['p
       reviews: ['home'],
       gallery: ['club'],
       faq: ['home', 'book'],
+    },
+  },
+  car: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'services', label: 'الخدمات', icon: Wrench, ic: 'tag' },
+      { id: 'promise', label: 'ضماننا', icon: ShieldCheck, ic: 'star' },
+      { id: 'shop', label: 'الورشة', icon: Users, ic: 'store' },
+      { id: 'book', label: 'احجز موعدًا', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'services', 'promise', 'shop'],
+      services: ['home', 'services', 'promise'],
+      team: ['shop'],
+      reviews: ['home'],
+      gallery: ['shop'],
+      faq: ['home', 'book'],
+      booking: ['book'],
     },
   },
   photo: {

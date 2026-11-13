@@ -18,6 +18,8 @@ export type CookieLook = {
   shadow: string
   /** The small mark beside the sentence. */
   mark: 'cookie' | 'aperture'
+  /** On a phone, how far above the bottom it sits, in px, when the theme has its own bottom bar there. */
+  phoneLift?: number
 }
 
 // Anas picked option ج for every template (2026-11-13): the usual capsule in the
@@ -27,7 +29,7 @@ const PILL = { radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px
 export const NICHE_COOKIE: Record<string, CookieLook> = {
   barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif' },
   gym: { ...PILL, font: '"Readex Pro", system-ui, sans-serif' }, // GymFull body face
-  car: { ...PILL, font: '"Rubik", system-ui, sans-serif' }, // CarFull body face
+  car: { ...PILL, font: '"Rubik", system-ui, sans-serif', phoneLift: 84 }, // CarFull body face, above its 72px phone bar
   photo: { ...PILL, font: '"Noto Sans Arabic", system-ui, sans-serif' }, // PhotoFull body face
 }
 
