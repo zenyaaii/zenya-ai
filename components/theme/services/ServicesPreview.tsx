@@ -24,6 +24,8 @@ const FULL = {
   gym: lazy(() => import('./niche/GymFull')),
   car: lazy(() => import('./niche/CarFull')),
   photo: lazy(() => import('./niche/PhotoFull')),
+  // Beauty & spa «جلسات» (Anas, 2026-11-13).
+  beauty: lazy(() => import('./niche/BeautyFull')),
 } as const
 
 type Props = {

@@ -17,7 +17,7 @@ export type CookieLook = {
   flat: boolean
   shadow: string
   /** The small mark beside the sentence. */
-  mark: 'cookie' | 'aperture'
+  mark: 'cookie' | 'aperture' | 'petal'
   /** On a phone, how far above the bottom it sits, in px, when the theme has its own bottom bar there. */
   phoneLift?: number
 }
@@ -31,6 +31,7 @@ export const NICHE_COOKIE: Record<string, CookieLook> = {
   gym: { ...PILL, font: '"Readex Pro", system-ui, sans-serif' }, // GymFull body face
   car: { ...PILL, font: '"Rubik", system-ui, sans-serif', phoneLift: 84 }, // CarFull body face, above its 72px phone bar
   photo: { ...PILL, font: '"Noto Sans Arabic", system-ui, sans-serif' }, // PhotoFull body face
+  beauty: { ...PILL, font: '"Readex Pro", system-ui, sans-serif', mark: 'petal' }, // BeautyFull body face, its small petal
 }
 
 export const cookieLookOf = (niche?: string): CookieLook | undefined => (niche ? NICHE_COOKIE[niche] : undefined)

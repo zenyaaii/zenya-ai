@@ -48,15 +48,18 @@ type GoogleFound = BarberGoogle & { photos?: string[]; looks?: Look[] | null; na
  */
 
 const nid = () => Math.random().toString(36).slice(2, 9)
+const lines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean)
 
 type Barber = { id: string; name: string; role: string; photo: string; tags: string[] }
-type Svc = { id: string; on: boolean; name: string; price: string; duration: string }
+type Svc = { id: string; on: boolean; name: string; price: string; duration: string; group?: string }
 type Faq = { id: string; q: string; a: string; own?: boolean }
 type Link = { id: string; label: string; url: string }
 type Cls = { id: string; day: number; time: string; name: string }
 type Step = { id: string; title: string; text: string }
+type Pkg = { id: string; name: string; includes: string; duration: string; price: string }
+type Note = { id: string; title: string; text: string }
 /** The kind's own answers (KIND[k].extras); empty for kinds that ask none. */
-type Nx = { offers: string[]; facilities: string[]; story: string; since: string; classes: Cls[]; perks: Record<string, string>; steps: Step[] }
+type Nx = { offers: string[]; facilities: string[]; story: string; since: string; classes: Cls[]; perks: Record<string, string>; steps: Step[]; privacy: string; features: string; packages: Pkg[]; blocks: Note[] }
 
 type Form = {
   name: string; latin: string; city: string; area: string; address: string; audience: string
@@ -98,7 +101,7 @@ function initial(k: KindText): Form {
     look: k.looks[0].id,
     accent2: '',
     checked: false, scrape_issue: '',
-    nx: { offers: [], facilities: [], story: '', since: '', classes: [], perks: {}, steps: [] },
+    nx: { offers: [], facilities: [], story: '', since: '', classes: [], perks: {}, steps: [], privacy: '', features: '', packages: [], blocks: (k.extras?.blocks || []).map((b) => ({ id: b.id, title: b.title, text: '' })) },
   }
 }
 
@@ -281,7 +284,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       maps_url: f.maps_url.trim() || undefined, instagram: f.instagram.trim() || undefined,
       links: [...socialLinks(f), ...f.links.filter((l) => l.url.trim()).map((l) => ({ label: l.label.trim(), url: /^https?:\/\//.test(l.url.trim()) ? l.url.trim() : 'https://' + l.url.trim() }))].slice(0, 10),
       barbers: barbers.map((b) => ({ name: b.name.trim(), role: b.role.trim() || undefined, photo: b.photo || undefined, tags: b.tags })),
-      services: services.map((s) => ({ name: s.name.trim(), price: s.price.trim() || undefined, duration: s.duration.trim() || undefined })),
+      services: services.map((s) => ({ name: s.name.trim(), price: s.price.trim() || undefined, duration: s.duration.trim() || undefined, group: X?.groups && s.group?.trim() ? s.group.trim() : undefined })),
       currency: f.currency.trim() || undefined,
       booking: { mode: f.mode, wait: f.wait.trim() || undefined, busy: f.busy.trim() || undefined },
       hours: f.hours.map((d) => ({ ...d, periods: d.closed ? [] : d.periods.filter((p) => p.open && p.close) })),
@@ -309,6 +312,10 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       classes: days.length ? days : undefined,
       perks: perks.length ? perks : undefined,
       steps: n.steps.filter((x) => x.title.trim()).map((x) => ({ title: x.title.trim(), text: x.text.trim() })).slice(0, 5),
+      privacy: n.privacy.trim() || undefined,
+      features: lines(n.features).length ? lines(n.features).slice(0, 6) : undefined,
+      packages: n.packages.filter((x) => x.name.trim()).map((x) => ({ name: x.name.trim(), includes: lines(x.includes).slice(0, 10), duration: x.duration.trim() || undefined, price: x.price.trim() || undefined })).slice(0, 8),
+      blocks: n.blocks.filter((x) => x.title.trim() && x.text.trim()).map((x) => ({ id: x.id, title: x.title.trim(), text: x.text.trim() })).slice(0, 6),
     }
   }
 
@@ -423,7 +430,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       faq: filledFaq,
       extra: f.extra.trim() ? 1 : 0,
       logo: f.logo ? 1 : 0,
-      ...(X ? { offers: f.nx.offers.length, facilities: f.nx.facilities.length, story: f.nx.story.trim() ? 1 : 0, since: f.nx.since ? 1 : 0, classes: f.nx.classes.length, perks: Object.values(f.nx.perks).filter((v) => v.trim()).length, steps: f.nx.steps.length } : {}),
+      ...(X ? { offers: f.nx.offers.length, facilities: f.nx.facilities.length, story: f.nx.story.trim() ? 1 : 0, since: f.nx.since ? 1 : 0, classes: f.nx.classes.length, perks: Object.values(f.nx.perks).filter((v) => v.trim()).length, steps: f.nx.steps.length, privacy: f.nx.privacy.trim() ? 1 : 0, features: lines(f.nx.features).length, packages: f.nx.packages.filter((x) => x.name.trim()).length, blocks: f.nx.blocks.filter((x) => x.text.trim()).length, groups: f.services.filter((x) => x.on && x.group).length } : {}),
     }
   }
 
@@ -563,9 +570,15 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     ...(X ? [{
       id: 'about', title: `عن ${k.place}`, optional: true,
       sub: `ما يميّز ${mine} عن غيره. كل ما تختاره هنا يظهر في الموقع، وما تتركه فارغًا لا يظهر.`,
-      complete: f.nx.offers.length > 0 || !!f.nx.story.trim(),
+      complete: f.nx.offers.length > 0 || !!f.nx.story.trim() || !!f.nx.privacy.trim(),
       body: (
         <Grid>
+          {X.privacy ? (
+            <Block title={`لمن ${k.place}؟`} hint="أول ما تسأل عنه الزبونة. يظهر في أعلى الموقع.">
+              <div className="zb-chips">{X.privacy.options.map((o) => <button key={o} type="button" className="zb-chip" data-on={f.nx.privacy === o ? 'true' : undefined} aria-pressed={f.nx.privacy === o} onClick={() => upx('privacy', f.nx.privacy === o ? '' : o)}>{o}</button>)}</div>
+              <Input value={X.privacy.options.includes(f.nx.privacy) ? '' : f.nx.privacy} maxLength={80} onChange={(e) => upx('privacy', e.target.value)} placeholder="أو اكتبيها بكلامك" aria-label="لمن المكان، بكلامك" style={{ marginTop: 10 }} />
+            </Block>
+          ) : null}
           {X.offers ? (
             <Block title={`ماذا يقدّم ${k.place}؟`} hint="اختر كل ما ينطبق.">
               <div className="zb-chips">{X.offers.map((o) => <button key={o} type="button" className="zb-chip" data-on={f.nx.offers.includes(o) ? 'true' : undefined} aria-pressed={f.nx.offers.includes(o)} onClick={() => flip('offers', o)}>{o}</button>)}</div>
@@ -586,6 +599,27 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
               <Example text={X.story.example} on={!f.nx.story} onUse={(v) => upx('story', v)} />
               {f.ig_bio && !f.nx.story ? <div className="bw-ex"><span>نبذتك على إنستغرام: «{f.ig_bio.length > 90 ? f.ig_bio.slice(0, 87) + '…' : f.ig_bio}»</span><button type="button" onClick={() => upx('story', f.ig_bio.slice(0, 400))}>استعملها</button></div> : null}
             </Field>
+          ) : null}
+          {X.features ? (
+            <Field label="ما الذي يميز مركزك؟" hint="سطر لكل ميزة. يظهر تحت «لماذا نحن».">
+              <Textarea rows={4} value={f.nx.features} onChange={(e) => upx('features', e.target.value)} placeholder="سطر لكل ميزة" />
+              <Example text={X.features.examples.join('، ')} on={!f.nx.features} onUse={() => upx('features', X.features!.examples.join('\n'))} />
+            </Field>
+          ) : null}
+          {X.blocks ? (
+            <Block title="قبل الجلسة" optional hint="ما تحتاج الزبونة أن تعرفه قبل أن تأتي. الفارغ لا يظهر.">
+              <Grid>
+                {f.nx.blocks.map((b) => {
+                  const ex = X.blocks!.find((x) => x.id === b.id)?.example
+                  return (
+                    <Field key={b.id} label={b.title}>
+                      <Textarea rows={2} value={b.text} onChange={(e) => upx('blocks', f.nx.blocks.map((x) => (x.id === b.id ? { ...x, text: e.target.value } : x)))} placeholder="اكتبيها بكلامك" />
+                      {ex ? <Example text={ex} on={!b.text} onUse={(v) => upx('blocks', f.nx.blocks.map((x) => (x.id === b.id ? { ...x, text: v } : x)))} /> : null}
+                    </Field>
+                  )
+                })}
+              </Grid>
+            </Block>
           ) : null}
           {X.since ? (
             <Field label={`متى افتتحت ${k.place}؟`} hint="السنة فقط. نكتب «منذ …» في الموقع.">
@@ -669,9 +703,10 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
                 <div key={s.id} className="bw-svc">
                   <Toggle on={s.on} onChange={(v) => patch<Svc>('services', s.id, { on: v })}><span className="sr-only">{s.name}</span></Toggle>
                   <Input value={s.name} onChange={(e) => patch<Svc>('services', s.id, { name: e.target.value, on: true })} placeholder="اسم الخدمة" aria-label="اسم الخدمة" />
-                  <div className="bw-pd">
+                  <div className="bw-pd" style={X?.groups ? { gridTemplateColumns: '1fr 1fr 1.1fr' } : undefined}>
                     <Input value={s.price} inputMode="decimal" onChange={(e) => patch<Svc>('services', s.id, { price: e.target.value, on: true })} placeholder="السعر" aria-label={`سعر ${s.name}`} disabled={!s.on} />
                     <Input value={s.duration} onChange={(e) => patch<Svc>('services', s.id, { duration: e.target.value })} placeholder="المدة" aria-label={`مدة ${s.name}`} disabled={!s.on} />
+                    {X?.groups ? <Select value={s.group || ''} aria-label={`قسم ${s.name}`} disabled={!s.on} onChange={(e) => patch<Svc>('services', s.id, { group: e.target.value })}><option value="">القسم</option>{[...X.groups, ...(s.group && !X.groups.includes(s.group) ? [s.group] : [])].map((g) => <option key={g} value={g}>{g}</option>)}</Select> : null}
                   </div>
                   <button type="button" className="zb-icon" aria-label={`حذف ${s.name || 'الخدمة'}`} onClick={() => drop('services', s.id)}>×</button>
                 </div>
@@ -692,6 +727,29 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
                   </Field>
                 ))}
               </Grid>
+            </Block>
+          ) : null}
+          {X?.packages ? (
+            <Block title="الباقات" optional hint="جلسات تُباع معًا بسعر واحد. بدون سعر يظهر «اسألي عن السعر».">
+              <div className="zb-list">
+                {f.nx.packages.map((pk) => {
+                  const set = (v: Partial<Pkg>) => upx('packages', f.nx.packages.map((x) => (x.id === pk.id ? { ...x, ...v } : x)))
+                  return (
+                    <Card key={pk.id} title={pk.name || 'باقة'} onRemove={() => upx('packages', f.nx.packages.filter((x) => x.id !== pk.id))} removeLabel="حذف الباقة">
+                      <Grid>
+                        <Field label="اسم الباقة"><Input value={pk.name} onChange={(e) => set({ name: e.target.value })} placeholder={X.packages!.example.name} /></Field>
+                        <Field label="ما تشمله" hint="سطر لكل جلسة."><Textarea rows={3} value={pk.includes} onChange={(e) => set({ includes: e.target.value })} placeholder={X.packages!.example.includes.join('\n')} /></Field>
+                        <div className="bw-pd">
+                          <Input value={pk.duration} onChange={(e) => set({ duration: e.target.value })} placeholder="المدة" aria-label="مدة الباقة" />
+                          <Input value={pk.price} inputMode="decimal" onChange={(e) => set({ price: e.target.value })} placeholder="السعر" aria-label="سعر الباقة" />
+                        </div>
+                      </Grid>
+                    </Card>
+                  )
+                })}
+              </div>
+              {f.nx.packages.length < 8 ? <AddButton onClick={() => upx('packages', [...f.nx.packages, { id: nid(), name: '', includes: '', duration: '', price: '' }])}>أضف باقة</AddButton> : null}
+              {!f.nx.packages.length ? <div className="bw-ex"><span>مثال: {X.packages.example.name}: {X.packages.example.includes.join('، ')}.</span><button type="button" onClick={() => upx('packages', [{ id: nid(), ...X.packages!.example, includes: X.packages!.example.includes.join('\n') }])}>استعمل المثال</button></div> : null}
             </Block>
           ) : null}
           {f.terms.length ? (

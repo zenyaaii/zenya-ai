@@ -25,7 +25,7 @@ const lum = ([r, g, b]: RGB) => {
 }
 export const contrast = (a: RGB, b: RGB) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
 
-function toHsl([r, g, b]: RGB): [number, number, number] {
+export function toHsl([r, g, b]: RGB): [number, number, number] {
   r /= 255; g /= 255; b /= 255
   const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2
   if (max === min) return [0, 0, l]
@@ -38,7 +38,7 @@ function fromHsl(h: number, s: number, l: number): RGB {
   const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]
   return [(r + m) * 255, (g + m) * 255, (b + m) * 255]
 }
-const withL = (c: RGB, l: number, sMax = 1) => { const [h, s] = toHsl(c); return fromHsl(h, Math.min(s, sMax), l) }
+export const withL = (c: RGB, l: number, sMax = 1) => { const [h, s] = toHsl(c); return fromHsl(h, Math.min(s, sMax), l) }
 
 /** Measured colours: a few k-means centres per photo, with how much of it they cover. */
 export async function measure(buf: Buffer, k = 5): Promise<{ c: RGB; share: number }[]> {

@@ -22,6 +22,8 @@ export type ServiceItem = {
   badge?: string
   /** How long it takes, as the owner wrote it ("30 د"). */
   duration?: string
+  /** Beauty: the tab the session sits under («شعر», «أظافر»). */
+  group?: string
 }
 
 /**
