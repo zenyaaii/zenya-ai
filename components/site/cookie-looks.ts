@@ -25,8 +25,9 @@ export type CookieLook = {
 export const NICHE_COOKIE: Record<string, CookieLook> = {
   // Photo studio (PhotoFull): Noto Sans Arabic, printed-card corners, pill buttons,
   // a hairline frame and a lens aperture, like the theme's viewfinder.
-  // Car (CarFull): Rubik, 10px cards, 8px buttons, a solid card, and above the theme's 72px phone bar.
-  car: { font: '"Rubik", system-ui, sans-serif', radius: 12, buttonRadius: 8, flat: true, shadow: '0 12px 32px -14px rgba(0,0,0,.4)', mark: 'cookie', phoneLift: 84 },
+  // Car (CarFull): Anas picked option ج (2026-11-13): the usual capsule, in the theme's colours
+  // and its Rubik face, sitting above the theme's 72px phone bar.
+  car: { font: '"Rubik", system-ui, sans-serif', radius: 999, buttonRadius: 999, flat: false, shadow: '', mark: 'cookie', phoneLift: 84 },
   photo: { font: '"Noto Sans Arabic", system-ui, sans-serif', radius: 8, buttonRadius: 999, flat: true, shadow: '0 12px 32px -16px rgba(0,0,0,.35)', mark: 'aperture' },
 }
 
