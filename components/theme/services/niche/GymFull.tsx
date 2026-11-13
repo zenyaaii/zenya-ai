@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { ArrowLeft, Check, Clock, Flame, Minus, Users, CalendarDays } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
 import { DAYS_AR } from '@/utils/services/barber'
-import { KIT_CSS, Book, Hours, ar, extraOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, perksOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews, ScrollWords, priceNum, useSpotlight } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
@@ -106,7 +106,7 @@ function Ticker({ tags }: { tags: string[] }) {
 
 function Manifesto({ n, x, content }: { n: N; x: NicheExtra; content: ServiceContent }) {
   const text = x.story || content.story?.body || ''
-  const years = x.since ? new Date().getFullYear() - x.since : 0
+  const years = typeof x.since === 'number' ? new Date().getFullYear() - x.since : 0
   const stats = [
     n.rating ? { v: <CountUp to={n.rating} dec={1} />, l: 'تقييمنا على Google' } : null,
     n.count ? { v: <CountUp to={n.count} />, l: 'تقييم كتبه أعضاؤنا' } : null,
@@ -163,7 +163,7 @@ function Plans({ n, x, full }: { n: N; x: NicheExtra; full?: boolean }) {
     <div ref={spot} className={`g-plans c${Math.min(plans.length, 4)}`}>
       {plans.map((p, i) => {
         const pr = priceNum(p.price_from)
-        const perks = x.perks?.[p.name] || []
+        const perks = perksOf(x, p.name)
         return (
           <article key={p.name} className={i === mid ? 'hot' : ''} data-spot data-r style={{ ['--d' as string]: i } as CSSProperties}>
             {i === mid ? <span className="g-badge"><Flame size={14} /> {p.badge || 'الأكثر طلبًا'}</span> : null}
@@ -298,7 +298,7 @@ function Week({ x }: { x: NicheExtra }) {
 /** Membership side by side: what each one has. */
 function Compare({ n, x }: { n: N; x: NicheExtra }) {
   const plans = n.services
-  const perks = Array.from(new Set(plans.flatMap((p) => x.perks?.[p.name] || [])))
+  const perks = Array.from(new Set(plans.flatMap((p) => perksOf(x, p.name))))
   if (plans.length < 2 || perks.length < 2) return null
   return (
     <div className="g-cmp" data-r>
@@ -307,7 +307,7 @@ function Compare({ n, x }: { n: N; x: NicheExtra }) {
         <tbody>
           <tr><th scope="row">السعر</th>{plans.map((p) => <td key={p.name}><b>{p.price_from || 'اسأل'}</b></td>)}</tr>
           {plans.some((p) => p.duration) ? <tr><th scope="row">المدة</th>{plans.map((p) => <td key={p.name}>{p.duration || '·'}</td>)}</tr> : null}
-          {perks.map((k) => <tr key={k}><th scope="row">{k}</th>{plans.map((p) => <td key={p.name}>{(x.perks?.[p.name] || []).includes(k) ? <Check size={18} strokeWidth={2.6} className="y" aria-label="نعم" /> : <Minus size={16} className="no" aria-label="لا" />}</td>)}</tr>)}
+          {perks.map((k) => <tr key={k}><th scope="row">{k}</th>{plans.map((p) => <td key={p.name}>{(perksOf(x, p.name)).includes(k) ? <Check size={18} strokeWidth={2.6} className="y" aria-label="نعم" /> : <Minus size={16} className="no" aria-label="لا" />}</td>)}</tr>)}
         </tbody>
       </table>
     </div>

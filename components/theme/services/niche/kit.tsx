@@ -45,12 +45,12 @@ export type NicheExtra = {
   sizeNames?: string[]
   /** «احكِ عن مكانك في جملتين»: the owner's own words, shown as the opening statement. */
   story?: string
-  /** The year the place opened, for "years here". */
-  since?: number
+  /** The year the place opened, for "years here". The editor may hand it back as a string. */
+  since?: number | string
   /** How a new customer starts, in the owner's steps. */
   steps?: { title: string; text: string }[]
-  /** Service/plan name → what it includes. */
-  perks?: Record<string, string[]>
+  /** What each plan or service includes, matched to the plan by name. */
+  perks?: { plan: string; items: string[] }[]
 }
 
 export type Colors = { primary?: string; accent?: string; /** The owner's optional second colour. */ accent2?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
@@ -142,7 +142,22 @@ export type N = ReturnType<typeof useNiche>
 
 /** The niche answers a built site carries (content.niche_extra), or the ones passed in. */
 export function extraOf(content: ServiceContent, x?: NicheExtra): NicheExtra {
-  return x || (content as ServiceContent & { niche_extra?: NicheExtra }).niche_extra || {}
+  const raw = x || (content as ServiceContent & { niche_extra?: NicheExtra }).niche_extra || {}
+  // The editor can return numbers as strings ("3", "2019"); read them back as numbers.
+  const since = Number(raw.since)
+  return {
+    ...raw,
+    since: since > 1900 && since <= new Date().getFullYear() ? since : undefined,
+    classes: raw.classes
+      ?.map((c) => ({ day: Number(c.day), items: (c.items || []).filter((i) => i && (i.name || i.time)) }))
+      .filter((c) => Number.isInteger(c.day) && c.day >= 0 && c.day <= 6),
+    perks: Array.isArray(raw.perks) ? raw.perks.filter((p) => p && p.plan) : undefined,
+  }
+}
+
+/** What a plan includes, matched by its name. */
+export function perksOf(x: NicheExtra, plan: string): string[] {
+  return (x.perks?.find((p) => p.plan.trim() === plan.trim())?.items || []).filter(Boolean)
 }
 
 /** Adds .in to every [data-r] child once it scrolls into view. Reduced motion: shown at once. */
