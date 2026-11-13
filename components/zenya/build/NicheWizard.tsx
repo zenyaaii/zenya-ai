@@ -26,10 +26,13 @@ type GoogleFound = BarberGoogle & { photos?: string[]; name?: string; contact?: 
  * (sample «أسئلة الحلاق»). Reached from /theme/new/services after the owner
  * picks «صالون حلاقة» in the kind sheet.
  *
- * What is required and why:
- *  - the Google Maps link: it brings the rating, the five reviews, the hours
- *    and the photos, so the site starts from facts, not from blanks
- *  - one service and a phone number (Google usually fills the phone)
+ * Links first (Anas, 2026-11-13): the owner pastes his Maps link and his
+ * accounts, or skips. On «التالي» we read them, fill the questions, and show
+ * him what we found to correct and confirm. What he says we read wrong goes
+ * into content.meta.scrape_issue.
+ *
+ * Required: name, city, phone, one service. When links were read, his OK on
+ * what we found.
  *
  * Social accounts are optional (spec 2026-11-12 §4.1). Instagram is read for
  * its photos, which are offered, never placed: the owner taps the ones to use.
@@ -64,6 +67,10 @@ type Form = {
   faq: Faq[]
   terms: { label: string; text: string }[]
   look: string
+  /** The owner said what we read from his links is right. */
+  checked: boolean
+  /** What the owner says we read wrong, kept for us to fix the reader. */
+  scrape_issue: string
 }
 
 const WEEK: ServiceHoursDay[] = DAYS_AR.map((_, day) => ({ day, closed: false, periods: [{ open: '10:00', close: '22:00' }] }))
@@ -82,6 +89,7 @@ function initial(k: KindText): Form {
     faq: k.faqs.map((q) => ({ id: nid(), q, a: '' })),
     terms: (k.terms || []).map((t) => ({ label: t.label, text: '' })),
     look: k.looks[0].id,
+    checked: false, scrape_issue: '',
   }
 }
 
@@ -194,6 +202,13 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step])
 
+  useEffect(() => {
+    if (steps[step]?.id !== 'check') return
+    if (gState === 'idle' && f.maps_url.trim().length > 8) fetchGoogle()
+    if (igState === 'idle' && f.instagram.trim().length >= 2) fetchInstagram()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
   const country = countryOfPhone(f.phone || f.whatsapp)
   const tip = (q: string) => { const t = tipFor(kind, q, country); return t ? <TipLine text={t} /> : null }
 
@@ -201,7 +216,6 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const barbers = f.barbers.filter((b) => b.name.trim())
   const ok = {
     basics: f.name.trim().length >= 2 && f.city.trim().length >= 2 && f.phone.trim().length >= 4
-      && f.maps_url.trim().length > 8
       && (!f.whatsapp.trim() || intl(f.whatsapp)),
     services: services.length > 0,
   }
@@ -219,7 +233,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       name: f.name.trim(), latin: f.latin.trim() || undefined, city: f.city.trim(), area: f.area.trim() || undefined,
       address: f.address.trim() || undefined, audience: f.audience || undefined, phone: f.phone.trim(),
       whatsapp: f.whatsapp.trim() || (intl(f.phone) ? f.phone.trim() : undefined), email: f.email.trim() || undefined,
-      maps_url: f.maps_url.trim(), instagram: f.instagram.trim() || undefined,
+      maps_url: f.maps_url.trim() || undefined, instagram: f.instagram.trim() || undefined,
       links: [...socialLinks(f), ...f.links.filter((l) => l.url.trim()).map((l) => ({ label: l.label.trim(), url: /^https?:\/\//.test(l.url.trim()) ? l.url.trim() : 'https://' + l.url.trim() }))].slice(0, 10),
       barbers: barbers.map((b) => ({ name: b.name.trim(), role: b.role.trim() || undefined, photo: b.photo || undefined, tags: b.tags })),
       services: services.map((s) => ({ name: s.name.trim(), price: s.price.trim() || undefined, duration: s.duration.trim() || undefined })),
@@ -243,7 +257,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       name: p.name.length >= 2 ? p.name : `اسم ${k.place}`,
       city: p.city.length >= 2 ? p.city : 'مدينتك',
       phone: p.phone.length >= 4 ? p.phone : '0000',
-      maps_url: p.maps_url.length >= 8 ? p.maps_url : 'https://maps.google.com/',
+      
       services: p.services.length ? p.services : [{ name: k.defaults[0]?.name || 'خدمة' }],
       faq: p.faq.filter((q) => q.q.length >= 4),
     })
@@ -269,15 +283,17 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
 
   async function build() {
     setError(null)
-    if (!ok.basics) return fail('أكمل الأساسيات: رابط خرائط جوجل، الاسم، المدينة، والهاتف. رقم واتساب يُكتب بمفتاح الدولة.', 0)
-    if (!ok.services) return fail('اختر خدمة واحدة على الأقل.', 2)
+    const at = (id: string) => Math.max(0, steps.findIndex((x) => x.id === id))
+    if (!ok.basics) return fail('أكمل الأساسيات: الاسم، المدينة، والهاتف. رقم واتساب يُكتب بمفتاح الدولة.', at('check'))
+    if (found && !f.checked) return fail('راجع ما جلبناه من روابطك، ثم أكّد أنه صحيح.', at('check'))
+    if (!ok.services) return fail('اختر خدمة واحدة على الأقل.', at('services'))
     const parsed = barberInputSchema.safeParse(payload())
     if (!parsed.success) return fail('بعض الحقول غير صحيحة. راجع الأساسيات والخدمات.')
     setLoading(true)
     try {
       const content = buildBarberContent(parsed.data, g || { maps_url: parsed.data.maps_url })
       const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
-      const meta = { answered: answeredMap(), completeness: done.pct, moves: moves.current, ms: Date.now() - started.current, country, version: 1 }
+      const meta = { answered: answeredMap(), completeness: done.pct, moves: moves.current, ms: Date.now() - started.current, country, version: 2, links_read: { google: gState, instagram: igState }, checked: f.checked, scrape_issue: f.scrape_issue.trim() || undefined }
       if (demo) {
         const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: look.colors, services: content, input: parsed.data, meta }
         try { sessionStorage.setItem(DEMO_BUILT_KEY, JSON.stringify(site)) } catch { /* private mode: the editor opens the sample */ }
@@ -347,47 +363,94 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     }
   }
 
+  const readable = !!(f.maps_url.trim().length > 8 || f.instagram.trim().length >= 2)
+  const reading = gState === 'busy' || igState === 'busy'
+  const found = gState === 'ok' || igState === 'ok'
+  const readList: { what: string; from: string; where: string }[] = []
+  if (gState === 'ok' && g) {
+    const gp = f.google_photos.length
+    if (g.name) readList.push({ what: 'الاسم', from: 'من جوجل', where: 'تحت في «بيانات ' + k.place + '»' })
+    if (g.contact?.phone) readList.push({ what: 'الهاتف', from: 'من جوجل', where: g.contact.phone })
+    if (g.contact?.address) readList.push({ what: 'العنوان', from: 'من جوجل', where: g.contact.address })
+    if (g.periods?.length) readList.push({ what: 'أوقات الدوام', from: 'من جوجل', where: 'في خطوة الحجز والأوقات، عدّلها هناك' })
+    if (g.reviews?.length) readList.push({ what: `${g.reviews.length.toLocaleString('ar')} تقييمات بأسماء كاتبيها`, from: 'من جوجل', where: 'في قسم آراء الزبائن' })
+    if (gp) readList.push({ what: `${gp.toLocaleString('ar')} صور`, from: 'من جوجل', where: 'في خطوة الصور، احذف ما لا يناسبك' })
+  }
+  if (igState === 'ok') {
+    if (f.ig_photos.length) readList.push({ what: `${f.ig_photos.length.toLocaleString('ar')} صور`, from: 'من إنستغرام', where: 'في خطوة الصور، اختر منها ما تريد' })
+    if (f.ig_bio) readList.push({ what: 'نبذة الحساب', from: 'من إنستغرام', where: f.ig_bio.length > 120 ? f.ig_bio.slice(0, 117) + '…' : f.ig_bio })
+  }
+
   const steps: WizardStep[] = [
     {
-      id: 'basics', title: `${k.place} وروابطه`, sub: `أرسل لنا رابط ${mine} على خرائط جوجل، وحساباتك إن وُجدت. نقرأ منها التقييمات والصور والأوقات، فلا نسألك عنها.`,
-      complete: ok.basics, note: 'رابط خرائط جوجل، والاسم، والمدينة، والهاتف مطلوبة.',
+      id: 'links', title: 'روابطك أولًا', optional: true,
+      sub: `ألصق روابط ${mine}: خرائط جوجل، وحساباتك. نقرأها ونملأ الأسئلة عنك: الاسم والهاتف والعنوان والأوقات والتقييمات والصور. ليس عندك روابط؟ اضغط «تخطَّ» واكتبها بنفسك.`,
+      complete: true,
       body: (
         <Grid>
-          <Block title="ابدأ من جوجل" hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط. نجلب منه الاسم والهاتف والعنوان والأوقات والتقييمات والصور.`}>
-            <div className="bw-g">
-              <Input dir="ltr" aria-label={`رابط ${k.place} على خرائط جوجل`} value={f.maps_url} onChange={(e) => { up('maps_url', e.target.value); setGState('idle') }} onBlur={() => gState === 'idle' && f.maps_url.trim().length > 8 && fetchGoogle()} placeholder="https://maps.app.goo.gl/…" />
-              <button type="button" className="zb-chip bw-gbtn" onClick={fetchGoogle} disabled={gState === 'busy' || f.maps_url.trim().length < 9}>
-                {gState === 'busy' ? 'نجلب…' : gState === 'ok' ? 'أعد الجلب' : 'اجلب من جوجل'}
-              </button>
-            </div>
-            {gState === 'ok' && g ? (
-              <div className="bw-found">
-                {g.photos?.[0] ? <img src={g.photos[0]} alt="" /> : <span className="bw-found-ph" aria-hidden>{(f.name || g.name || k.place).slice(0, 1)}</span>}
-                <div>
-                  <b>{g.name || f.name}</b>
-                  {g.rating ? <span className="bw-stars">★ {Number(g.rating).toFixed(1)} <small>· {Number(g.count || 0).toLocaleString('ar')} تقييم</small></span> : null}
-                  {g.contact?.address ? <small>{g.contact.address}</small> : null}
-                </div>
-              </div>
-            ) : null}
-            {gMsg ? <div style={{ marginTop: 10 }}><Notice tone={gState === 'fail' ? 'bad' : 'accent'}>{gMsg}</Notice></div> : null}
+          <Block title="خرائط جوجل" optional hint={`افتح ${mine} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط. منه نأخذ أكثر شيء.`}>
+            <Input dir="ltr" aria-label={`رابط ${k.place} على خرائط جوجل`} value={f.maps_url} onChange={(e) => { up('maps_url', e.target.value); setGState('idle'); up('checked', false) }} placeholder="https://maps.app.goo.gl/…" />
           </Block>
-          <Block title="حساباتك" optional hint={`إن كان لـ${mine} حسابات. نقرأ منها الصور ونعرضها عليك لتختار.`}>
+          <Block title="حساباتك" optional hint={`إن كان لـ${mine} حسابات. نقرأ صور إنستغرام ونعرضها عليك لتختار منها.`}>
             {tip('socials')}
             <Grid>
-              <Field label="إنستغرام" hint={igState === 'busy' ? 'نقرأ الحساب…' : undefined}>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Input dir="ltr" value={f.instagram} onChange={(e) => { up('instagram', e.target.value); setIgState('idle') }} onBlur={() => igState === 'idle' && fetchInstagram()} placeholder="@yourname" />
-                  <button type="button" className="zb-chip" style={{ flex: '0 0 auto' }} onClick={fetchInstagram} disabled={igState === 'busy' || f.instagram.trim().length < 2}>{igState === 'busy' ? 'نقرأ…' : igState === 'ok' ? 'أعد' : 'اقرأ صوري'}</button>
-                </div>
-              </Field>
+              <Field label="إنستغرام"><Input dir="ltr" value={f.instagram} onChange={(e) => { up('instagram', e.target.value); setIgState('idle'); up('checked', false) }} placeholder="@yourname" /></Field>
               <Field label="تيك توك"><Input dir="ltr" value={f.tiktok} onChange={(e) => up('tiktok', e.target.value)} placeholder="@yourname" /></Field>
               <Field label="سناب شات"><Input dir="ltr" value={f.snapchat} onChange={(e) => up('snapchat', e.target.value)} placeholder="yourname" /></Field>
               <Field label="فيسبوك"><Input dir="ltr" value={f.facebook} onChange={(e) => up('facebook', e.target.value)} placeholder="facebook.com/yourpage" /></Field>
             </Grid>
-            {igMsg ? <div style={{ marginTop: 10 }}><Notice tone={igState === 'fail' ? 'bad' : 'accent'}>{igMsg}</Notice></div> : null}
           </Block>
-          <Block title={`بيانات ${k.place}`} hint={gState === 'ok' ? 'جلبناها من جوجل. عدّل ما يلزم.' : 'تُملأ من جوجل عند جلب الرابط، أو اكتبها هنا.'}>
+          <Block title="روابط أخرى" optional hint="أي صفحة لك: تطبيق حجز، موقع قديم، تصميم تحبه.">
+            <div className="zb-list">
+              {f.links.map((l) => (
+                <Card key={l.id} title={l.label || 'رابط'} onRemove={() => drop('links', l.id)} removeLabel="حذف الرابط">
+                  <Grid>
+                    <Field label="اسمه"><Input value={l.label} onChange={(e) => patch<Link>('links', l.id, { label: e.target.value })} placeholder="تطبيق الحجز" /></Field>
+                    <Field label="الرابط"><Input dir="ltr" value={l.url} onChange={(e) => patch<Link>('links', l.id, { url: e.target.value })} placeholder="https://…" /></Field>
+                  </Grid>
+                </Card>
+              ))}
+            </div>
+            <AddButton onClick={() => up('links', [...f.links, { id: nid(), label: '', url: '' }])}>أضف رابطًا</AddButton>
+          </Block>
+          {readable ? <Notice tone="accent">اضغط «التالي». نقرأ روابطك ونعرض عليك ما وجدناه لتراجعه.</Notice> : null}
+        </Grid>
+      ),
+    },
+    {
+      id: 'check', title: found ? 'راجع ما وجدناه' : `بيانات ${k.place}`,
+      sub: found ? 'هذا ما قرأناه من روابطك، وبه ملأنا الأسئلة. راجعه، وصحّح ما يلزم، ثم أكّد.' : reading ? 'نقرأ روابطك الآن…' : `اكتب بيانات ${k.place}. نضعها في الموقع كما هي.`,
+      complete: ok.basics && (!found || f.checked),
+      note: found && !f.checked ? 'أكّد أن ما جلبناه صحيح.' : 'الاسم، والمدينة، والهاتف مطلوبة.',
+      body: (
+        <Grid>
+          {reading ? <Notice tone="accent">{gState === 'busy' ? 'نقرأ خرائط جوجل… ' : ''}{igState === 'busy' ? 'نقرأ إنستغرام… ' : ''}يأخذ هذا ثواني.</Notice> : null}
+          {gMsg && gState === 'fail' ? <Notice tone="bad">{gMsg}</Notice> : null}
+          {igMsg && igState === 'fail' ? <Notice tone="bad">{igMsg}</Notice> : null}
+          {gState === 'fail' && f.maps_url.trim() ? <button type="button" className="zb-chip" onClick={fetchGoogle}>أعد قراءة رابط جوجل</button> : null}
+          {found ? (
+            <Block title="ما وجدناه">
+              {gState === 'ok' && g ? (
+                <div className="bw-found">
+                  {g.photos?.[0] ? <img src={g.photos[0]} alt="" /> : <span className="bw-found-ph" aria-hidden>{(f.name || g.name || k.place).slice(0, 1)}</span>}
+                  <div>
+                    <b>{g.name || f.name}</b>
+                    {g.rating ? <span className="bw-stars">★ {Number(g.rating).toFixed(1)} <small>· {Number(g.count || 0).toLocaleString('ar')} تقييم</small></span> : null}
+                    {g.contact?.address ? <small>{g.contact.address}</small> : null}
+                  </div>
+                </div>
+              ) : null}
+              <ul className="bw-src" style={{ marginTop: 12 }}>
+                {readList.map((s) => <li key={s.what}><b>{s.what} <small className="bw-from">{s.from}</small></b><span>{s.where}</span></li>)}
+              </ul>
+              {[...f.google_photos, ...f.ig_photos].length ? (
+                <div className="bw-strip" aria-label="صور وجدناها">
+                  {[...f.google_photos, ...f.ig_photos].slice(0, 10).map((u) => <img key={u} src={u} alt="" loading="lazy" />)}
+                </div>
+              ) : null}
+            </Block>
+          ) : null}
+          <Block title={`بيانات ${k.place}`} hint={gState === 'ok' ? 'جلبناها من جوجل. عدّل ما يلزم.' : undefined}>
             <Grid>
               <Field label={`اسم ${k.place}`} required>
                 <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
@@ -417,22 +480,19 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
               <Chips options={k.audiences.map((a) => ({ id: a, label: a }))} value={f.audience} onChange={(v) => up('audience', v || k.audiences![0])} allowNone={false} />
             </Block>
           ) : null}
-          <Block title="روابط أخرى" optional hint="أي صفحة لك: تطبيق حجز، موقع قديم، تصميم تحبه.">
-            <div className="zb-list">
-              {f.links.map((l) => (
-                <Card key={l.id} title={l.label || 'رابط'} onRemove={() => drop('links', l.id)} removeLabel="حذف الرابط">
-                  <Grid>
-                    <Field label="اسمه"><Input value={l.label} onChange={(e) => patch<Link>('links', l.id, { label: e.target.value })} placeholder="تيك توك" /></Field>
-                    <Field label="الرابط"><Input dir="ltr" value={l.url} onChange={(e) => patch<Link>('links', l.id, { url: e.target.value })} placeholder="https://…" /></Field>
-                  </Grid>
-                </Card>
-              ))}
-            </div>
-            <AddButton onClick={() => up('links', [...f.links, { id: nid(), label: '', url: '' }])}>أضف رابطًا</AddButton>
-          </Block>
           <Block title="الشعار" optional hint={`إن كان لـ${mine} شعار. بدونه يظهر الاسم وحده.`}>
             <div className="bw-logo"><ImageUploadField local={demo} value={f.logo} onChange={(u) => up('logo', u)} aspect="square" /></div>
           </Block>
+          {found ? (
+            <Block title="هل ما جلبناه صحيح؟">
+              <Toggle on={f.checked} onChange={(v) => up('checked', v)}>راجعت ما جلبناه، وهو صحيح</Toggle>
+              <div style={{ marginTop: 12 }}>
+                <Field label="في شيء خطأ فيما قرأناه؟" hint="اكتبه لنا. نصلحه في موقعك، ونحسّن طريقة القراءة.">
+                  <Textarea rows={3} value={f.scrape_issue} onChange={(e) => up('scrape_issue', e.target.value)} placeholder="مثال: الصور ليست لمحلي، أو الأوقات قديمة." />
+                </Field>
+              </div>
+            </Block>
+          ) : null}
         </Grid>
       ),
     },
@@ -704,7 +764,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       <WizardShell
         eyebrow={`قالب الخدمات · ${k.label}`}
         title={`ابنِ موقع ${mine}.`}
-        sub={<>سبع خطوات قصيرة. نبني الموقع من إجاباتك وما يقوله زبائنك على جوجل. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>ليس {k.label}؟</button> : null}</>}
+        sub={<>ابدأ بروابطك. نقرأها ونملأ الأسئلة عنك، وأنت تراجع وتؤكد. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>ليس {k.label}؟</button> : null}</>}
         steps={steps}
         step={step}
         onStep={setStep}
@@ -728,7 +788,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           </div>
         </div>, document.body,
       ) : null}
-      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.bw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.bw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }

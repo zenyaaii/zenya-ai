@@ -36,7 +36,7 @@ export const barberInputSchema = z.object({
   phone: z.string().trim().min(4).max(40),
   whatsapp: z.string().trim().max(60).optional(),
   email: z.string().trim().email().max(120).optional().or(z.literal('')),
-  maps_url: url.min(8),
+  maps_url: url.optional(),
   /** Empty only when the owner pressed «ليس عندي حساب». */
   instagram: z.string().trim().max(200).optional(),
   links: z.array(z.object({ label: z.string().trim().max(40), url })).max(10).optional().default([]),
