@@ -77,18 +77,19 @@ export function ScrollWords({ text, className = '' }: { text: string; className?
     const el = ref.current
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { el?.style.setProperty('--p', '1'); return }
     let raf = 0
+    const w = el.ownerDocument.defaultView || window
     const on = () => {
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(() => {
-        const r = el.getBoundingClientRect(), h = window.innerHeight
+        const r = el.getBoundingClientRect(), h = w.innerHeight
         const p = Math.min(1, Math.max(0, (h * 0.85 - r.top) / (r.height + h * 0.35)))
         el.style.setProperty('--p', p.toFixed(3))
       })
     }
     on()
-    window.addEventListener('scroll', on, { passive: true })
-    window.addEventListener('resize', on)
-    return () => { window.removeEventListener('scroll', on); window.removeEventListener('resize', on); cancelAnimationFrame(raf) }
+    w.addEventListener('scroll', on, { passive: true })
+    w.addEventListener('resize', on)
+    return () => { w.removeEventListener('scroll', on); w.removeEventListener('resize', on); cancelAnimationFrame(raf) }
   }, [])
   return (
     <p ref={ref} className={`b-sw ${className}`} style={{ ['--n' as string]: words.length } as CSSProperties}>

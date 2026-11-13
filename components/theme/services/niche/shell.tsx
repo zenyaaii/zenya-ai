@@ -67,8 +67,11 @@ export function todayLine(n: N): string {
   return `اليوم ${d.periods.map((p) => `${timeAr(p.open)} - ${timeAr(p.close)}`).join('، ')}`
 }
 
+/** The window the site is drawn in: the editor draws it inside a frame, so the page's own window is not the app's. */
+function winOf(el: Element | null): Window { return el?.ownerDocument?.defaultView || window }
+
 /** Sync the open page with ?p= when the site is not routed by the app. */
-function useView(pages: SPage[], initial?: string, view?: string, onViewChange?: (id: string) => void) {
+function useView(pages: SPage[], rootRef: { current: HTMLElement | null }, initial?: string, view?: string, onViewChange?: (id: string) => void) {
   const ids = pages.map((p) => p.id)
   const valid = (v?: string | null) => (v && ids.includes(v) ? v : 'home')
   const [own, setOwn] = useState(() => valid(initial))
@@ -76,6 +79,8 @@ function useView(pages: SPage[], initial?: string, view?: string, onViewChange?:
   useEffect(() => {
     if (onViewChange) return
     const on = () => setOwn(valid(new URLSearchParams(location.search).get('p')))
+    // A shared link (?p=plans) opens on that page; read after mount so the server HTML matches.
+    if (new URLSearchParams(location.search).get('p')) on()
     window.addEventListener('popstate', on)
     return () => window.removeEventListener('popstate', on)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,13 +95,20 @@ function useView(pages: SPage[], initial?: string, view?: string, onViewChange?:
         if (next === 'home') q.delete('p'); else q.set('p', next)
         history.pushState(null, '', `${location.pathname}${q.toString() ? `?${q}` : ''}`)
       }
-      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+      winOf(rootRef.current).scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
     }
-    const d = document as Document & { startViewTransition?: (cb: () => void) => unknown }
+    const d = (rootRef.current?.ownerDocument || document) as Document & { startViewTransition?: (cb: () => void) => unknown }
     if (d.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.startViewTransition(() => flushSync(swap))
     else swap()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onViewChange, ids.join()])
+  // A new page starts at its top, also when the app (or the editor) sets the page.
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    winOf(rootRef.current).scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cur])
   return [cur, go] as const
 }
 
@@ -119,26 +131,29 @@ export type ShellProps = {
   onViewChange?: (id: string) => void
   /** Short lines for the top strip (beside open now / rating). */
   strip?: string[]
+  /** The owner's uploaded logo; hidden when brand.show_logo is false. */
+  logo?: string
 }
 
 export function Shell(p: ShellProps) {
   const { n, content } = p
   const pages = p.pages.filter((x) => x.body !== null && x.body !== undefined && x.body !== false)
-  const [view, go] = useView(pages, p.initial, p.view, p.onViewChange)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [view, go] = useView(pages, rootRef, p.initial, p.view, p.onViewChange)
   const page = pages.find((x) => x.id === view) || pages[0]
   const inner = pages.filter((x) => x.id !== 'home')
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { const on = () => setScrolled(window.scrollY > 24); on(); window.addEventListener('scroll', on, { passive: true }); return () => window.removeEventListener('scroll', on) }, [])
+  useEffect(() => { const w = winOf(rootRef.current); const on = () => setScrolled(w.scrollY > 24); on(); w.addEventListener('scroll', on, { passive: true }); return () => w.removeEventListener('scroll', on) }, [])
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    const w = winOf(rootRef.current), body = w.document.body
+    const prev = body.style.overflow
+    body.style.overflow = 'hidden'
     const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    window.addEventListener('keydown', esc)
-    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', esc) }
+    w.addEventListener('keydown', esc)
+    return () => { body.style.overflow = prev; w.removeEventListener('keydown', esc) }
   }, [open])
 
   // Reveal: re-scan on every page change.
@@ -176,7 +191,7 @@ export function Shell(p: ShellProps) {
         <link rel="stylesheet" href={`https://fonts.googleapis.com/css2?${p.fonts}&display=swap`} />
         <style dangerouslySetInnerHTML={{ __html: SHELL_CSS + p.css }} />
 
-        <div className="s-strip">
+        <div className="s-strip" data-section="booking">
           <div className="n-w s-strip-in">
             {n.st ? <span className="s-live"><i className={n.st.open ? 'on' : ''} />{n.st.open ? 'مفتوح الآن' : 'مغلق الآن'}<em>{n.st.text}</em></span> : null}
             {n.rating ? <span className="s-hide-sm"><Star size={13} fill="currentColor" strokeWidth={0} /> {n.rating.toFixed(1)}{n.count ? ` · ${ar(n.count)} تقييم على Google` : ''}</span> : null}
@@ -187,8 +202,9 @@ export function Shell(p: ShellProps) {
 
         <header className={`s-head${scrolled ? ' solid' : ''}${view === 'home' ? ' home' : ''}`}>
           <div className="n-w s-head-in">
-            <button type="button" className="s-logo" onClick={() => nav('home')} aria-label={`${n.b.name}، الصفحة الرئيسية`}>
-              <b>{n.short}</b>{n.b.latin ? <small dir="ltr">{n.b.latin}</small> : null}
+            <button type="button" className="s-logo" data-section="brand" onClick={() => nav('home')} aria-label={`${n.b.name}، الصفحة الرئيسية`}>
+              {p.logo && n.b.show_logo !== false ? <img className="s-mark" src={p.logo} alt="" /> : null}
+              <span className="s-name"><b>{n.short}</b>{n.b.latin ? <small dir="ltr">{n.b.latin}</small> : null}</span>
             </button>
             <nav className="s-nav" aria-label="صفحات الموقع">
               {inner.filter((x) => x.id !== p.cta.page).map((x) => <button key={x.id} type="button" className={x.id === view ? 'on' : ''} aria-current={x.id === view ? 'page' : undefined} onClick={() => nav(x.id)}>{x.label}</button>)}
@@ -242,7 +258,7 @@ export function Shell(p: ShellProps) {
           ) : null}
         </main>
 
-        <footer className="s-foot">
+        <footer className="s-foot" data-section="footer">
           {p.close ? (
             <section className="s-close">
               {p.close.image ? <img src={p.close.image} alt="" loading="lazy" /> : null}
@@ -320,7 +336,9 @@ export const SHELL_CSS = `
 .s-head{position:sticky;top:0;z-index:30;transition:background-color .3s,box-shadow .3s,color .3s;background:var(--n-bg)}
 .s-head.solid{box-shadow:0 1px 0 var(--n-line),0 12px 30px -24px rgba(0,0,0,.5)}
 .s-head-in{display:flex;align-items:center;gap:28px;height:var(--s-head)}
-.s-logo{all:unset;cursor:pointer;display:grid;line-height:1.05}
+.s-logo{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.05}
+.s-name{display:grid}
+.nv .s-mark{width:40px;height:40px;object-fit:contain;border-radius:8px;flex:none}
 .s-logo b{font:800 22px var(--n-disp)}
 .s-logo small{font:600 10px/1.4 var(--n-body);letter-spacing:.18em;text-transform:uppercase;opacity:.6}
 .s-logo:focus-visible{outline:2px solid var(--n-acc);outline-offset:4px}

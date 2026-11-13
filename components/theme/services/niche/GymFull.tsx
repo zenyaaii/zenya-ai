@@ -65,7 +65,7 @@ function Hero({ n, content, x }: { n: N; content: ServiceContent; x: NicheExtra 
   const name = n.b.name.split(/\s+/).length <= 3 ? n.b.name : n.short
   const words = name.split(/\s+/)
   return (
-    <section className="g-hero">
+    <section className="g-hero" data-section="hero">
       {n.hero ? <img className="g-hero-img" src={n.hero} alt={`داخل ${n.b.name}`} /> : null}
       <div className="n-w g-hero-in">
         {n.b.latin ? <span className="g-hero-side" dir="ltr" aria-hidden="true">{n.b.latin}</span> : null}
@@ -98,7 +98,7 @@ function Ticker({ tags }: { tags: string[] }) {
   if (tags.length < 3) return null
   const row = [...tags, ...tags, ...tags, ...tags]
   return (
-    <div className="g-tick" aria-label="ماذا نتدرّب">
+    <div className="g-tick" aria-label="ماذا نتدرّب" data-section="about">
       <div className="g-tick-t">{row.map((t, i) => <span key={i} aria-hidden={i >= tags.length}><Icon of={t} size={26} strokeWidth={2.2} />{t}</span>)}</div>
     </div>
   )
@@ -115,7 +115,7 @@ function Manifesto({ n, x, content }: { n: N; x: NicheExtra; content: ServiceCon
   ].filter(Boolean) as { v: React.ReactNode; l: string }[]
   if (!text && stats.length < 2) return null
   return (
-    <section className="g-sec g-man"><div className="n-w">
+    <section className="g-sec g-man" data-section="about"><div className="n-w">
       {text ? <ScrollWords text={text} className="g-man-t" /> : null}
       {stats.length >= 2 ? <dl className={`g-stats c${stats.length}`}>{stats.map((s, i) => <div key={i} data-r style={{ ['--d' as string]: i } as CSSProperties}><dt>{s.l}</dt><dd>{s.v}</dd></div>)}</dl> : null}
     </div></section>
@@ -131,7 +131,7 @@ function Programs({ n, x }: { n: N; x: NicheExtra }) {
   const pics = n.photos
   if (list.length < 2) return null
   return (
-    <section className="g-sec"><div className="n-w">
+    <section className="g-sec" data-section="about"><div className="n-w">
       <Head title="ماذا نتدرّب" sub="اختر ما يناسب هدفك. الجدول فيه وقت كل حصة." more={(x.classes || []).length ? <GoLink to="timetable">جدول الحصص<ArrowLeft size={16} /></GoLink> : null} />
       <ol className="g-prog" onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setPos({ x: e.clientX - r.left, y: e.clientY - r.top }) }} onPointerLeave={() => setHover(null)}>
         {list.map((t, i) => (
@@ -189,7 +189,7 @@ function TodayBoard({ x }: { x: NicheExtra }) {
   const show = left ? t.list : (t.ahead?.items || []).map((c) => ({ ...c, s: 'later' as const }))
   const when = left || t.day === null ? (t.day !== null ? `اليوم، ${DAYS_AR[t.day]}` : 'اليوم') : t.ahead ? ((t.ahead.day - t.day + 7) % 7 === 1 ? `غدًا، ${DAYS_AR[t.ahead.day]}` : DAYS_AR[t.ahead.day]) : ''
   return (
-    <section className="g-sec g-alt"><div className="n-w g-today">
+    <section className="g-sec g-alt" data-section="about"><div className="n-w g-today">
       <div data-r>
         <span className="g-k"><CalendarDays size={16} /> {when}</span>
         <h2>{left ? 'اليوم في النادي' : 'الحصص القادمة'}</h2>
@@ -297,7 +297,8 @@ function Week({ x }: { x: NicheExtra }) {
 
 /** Membership side by side: what each one has. */
 function Compare({ n, x }: { n: N; x: NicheExtra }) {
-  const plans = n.services
+  // Only plans the owner described: a plan with no list would read as "includes nothing".
+  const plans = n.services.filter((p) => perksOf(x, p.name).length)
   const perks = Array.from(new Set(plans.flatMap((p) => perksOf(x, p.name))))
   if (plans.length < 2 || perks.length < 2) return null
   return (
@@ -325,7 +326,7 @@ function Steps({ steps }: { steps: { title: string; text: string }[] }) {
 
 /* ---------- the theme ---------- */
 
-export default function GymFull({ content, x: given, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function GymFull({ content, x: given, colors, initial, view, onViewChange, logo }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void; logo?: string }) {
   const n = useNiche(content)
   const x = extraOf(content, given)
   const tags = useMemo(() => Array.from(new Set([...(x.offers || []), ...n.members.flatMap((m) => m.tags || [])])), [x.offers, n.members])
@@ -343,21 +344,21 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
       <Manifesto n={n} x={x} content={content} />
       <Programs n={n} x={x} />
       {n.services.length ? (
-        <section className="g-sec g-alt"><div className="n-w">
+        <section className="g-sec g-alt" data-section="services"><div className="n-w">
           <Head title="الاشتراكات" sub={terms.length ? 'السعر مكتوب، والشروط واضحة قبل أن تدفع.' : undefined} more={<GoLink to="plans">قارن الاشتراكات<ArrowLeft size={16} /></GoLink>} />
           <Plans n={n} x={x} />
         </div></section>
       ) : null}
       <TodayBoard x={x} />
       {n.members.length ? (
-        <section className="g-sec"><div className="n-w">
+        <section className="g-sec" data-section="team"><div className="n-w">
           <Head title="المدربون" sub="تدرّب مع مدرب تعرفه بالاسم." more={n.members.length > 3 ? <GoLink to="coaches">كل المدربين<ArrowLeft size={16} /></GoLink> : null} />
           <Coaches n={n} limit={3} />
         </div></section>
       ) : null}
-      {n.reviews.length ? <section className="g-sec g-alt"><div className="n-w"><Head title="ماذا يقول الأعضاء" /><Reviews n={n} max={5} /></div></section> : null}
-      {facilities.length ? <section className="g-sec"><div className="n-w"><Head title="في النادي" more={<GoLink to="club">جولة في النادي<ArrowLeft size={16} /></GoLink>} /><Facilities list={facilities} /></div></section> : null}
-      {n.faq.length ? <section className="g-sec g-alt"><div className="n-w g-faqw"><Head title="أسئلة قبل أن تبدأ" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
+      {n.reviews.length ? <section className="g-sec g-alt" data-section="reviews"><div className="n-w"><Head title="ماذا يقول الأعضاء" /><Reviews n={n} max={5} /></div></section> : null}
+      {facilities.length ? <section className="g-sec" data-section="about"><div className="n-w"><Head title="في النادي" more={<GoLink to="club">جولة في النادي<ArrowLeft size={16} /></GoLink>} /><Facilities list={facilities} /></div></section> : null}
+      {n.faq.length ? <section className="g-sec g-alt" data-section="faq"><div className="n-w g-faqw"><Head title="أسئلة قبل أن تبدأ" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
     </>
   )
 
@@ -367,12 +368,12 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
       id: 'plans', label: 'الاشتراكات', title: 'الاشتراكات', lead: 'كل الأسعار هنا، بلا رسوم مخفية. اختر، واحجز أول حصة مجانًا.',
       body: n.services.length ? (
         <>
-          <section className="g-sec"><div className="n-w"><Plans n={n} x={x} full /></div></section>
-          <section className="g-sec g-alt"><div className="n-w">
+          <section className="g-sec" data-section="services"><div className="n-w"><Plans n={n} x={x} full /></div></section>
+          <section className="g-sec g-alt" data-section="services"><div className="n-w">
             <Compare n={n} x={x} />
             {terms.length ? <><Head title="الشروط بوضوح" className="g-mt" /><dl className="g-terms">{terms.map((t, i) => <div key={t.label} data-r style={{ ['--d' as string]: i } as CSSProperties}><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl></> : null}
           </div></section>
-          {steps.length >= 2 ? <section className="g-sec"><div className="n-w"><Head title="كيف تبدأ" /><Steps steps={steps} /></div></section> : null}
+          {steps.length >= 2 ? <section className="g-sec" data-section="about"><div className="n-w"><Head title="كيف تبدأ" /><Steps steps={steps} /></div></section> : null}
         </>
       ) : null,
     },
@@ -380,9 +381,9 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
       id: 'coaches', label: 'المدربون', title: 'المدربون', lead: 'اطلب مدربك بالاسم عند الحجز.',
       body: n.members.length ? (
         <>
-          <section className="g-sec"><div className="n-w"><Coaches n={n} /></div></section>
+          <section className="g-sec" data-section="team"><div className="n-w"><Coaches n={n} /></div></section>
           {n.wa ? (
-            <section className="g-sec g-alt"><div className="n-w g-ask">
+            <section className="g-sec g-alt" data-section="links"><div className="n-w g-ask">
               <Users size={34} />
               <h2 data-r>تريد مدربًا خاصًا؟</h2>
               <p data-r>اكتب لنا هدفك، ونقترح عليك المدرب المناسب.</p>
@@ -394,16 +395,16 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
     },
     {
       id: 'timetable', label: 'جدول الحصص', title: 'جدول الحصص', lead: busy ? `أكثر وقت زحمة: ${busy}. إن أردت صالة أهدأ، تعال قبله.` : 'كل الحصص مع مدرب. اختر اليوم، أو اعرض نوعًا واحدًا.',
-      body: classes.length ? <section className="g-sec"><div className="n-w"><Week x={x} /></div></section> : null,
+      body: classes.length ? <section className="g-sec" data-section="about"><div className="n-w"><Week x={x} /></div></section> : null,
     },
     {
       id: 'club', label: 'النادي', title: `جولة في ${n.short}`, lead: x.story || undefined, image: pics[1] || undefined,
       body: facilities.length || pics.length >= 2 ? (
         <>
-          {facilities.length ? <section className="g-sec"><div className="n-w"><Head title="ما تجده عندنا" /><Facilities list={facilities} /></div></section> : null}
-          {pics.length >= 2 ? <section className="g-sec g-alt"><div className="n-w"><Head title="من داخل النادي" /><Gallery n={n} urls={pics} /></div></section> : null}
+          {facilities.length ? <section className="g-sec" data-section="about"><div className="n-w"><Head title="ما تجده عندنا" /><Facilities list={facilities} /></div></section> : null}
+          {pics.length >= 2 ? <section className="g-sec g-alt" data-section="gallery"><div className="n-w"><Head title="من داخل النادي" /><Gallery n={n} urls={pics} /></div></section> : null}
           {n.hours.length ? (
-            <section className="g-sec"><div className="n-w g-two">
+            <section className="g-sec" data-section="booking"><div className="n-w g-two">
               <div data-r><h2 className="g-h2">الدوام</h2>{busy ? <p className="g-busy"><Clock size={16} /> أكثر وقت زحمة: {busy}</p> : null}</div>
               <div data-r><Hours n={n} /></div>
             </div></section>
@@ -415,7 +416,7 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
       id: 'book', label: 'احجز وزُرنا', title: 'احجز حصة تجربة', lead: 'اختر اليوم والوقت، ويؤكّد لك النادي على واتساب.',
       body: (
         <>
-          <section className="g-sec"><div className="n-w g-bookw">
+          <section className="g-sec" data-section="booking"><div className="n-w g-bookw">
             <div className="g-card" data-r><Book n={n} options={[...(n.services.length ? ['حصة تجربة'] : []), ...n.services.map((s) => s.name)]} place="النادي" label="احجز الحصة" /></div>
             <aside className="g-side" data-r>
               <ol className="g-after">
@@ -427,7 +428,7 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
               {n.st ? <p className="g-busy"><Clock size={16} /> {todayLine(n)}</p> : null}
             </aside>
           </div></section>
-          {n.faq.length ? <section className="g-sec"><div className="n-w g-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
+          {n.faq.length ? <section className="g-sec" data-section="faq"><div className="n-w g-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
     },
@@ -435,7 +436,7 @@ export default function GymFull({ content, x: given, colors, initial, view, onVi
 
   return (
     <Shell
-      n={n} content={content} root="gf" pages={pages} initial={initial} view={view} onViewChange={onViewChange}
+      n={n} content={content} root="gf" pages={pages} initial={initial} view={view} onViewChange={onViewChange} logo={logo}
       style={{ ...vars(colors, LOOK), ['--n-disp' as string]: '"Changa", sans-serif', ['--n-body' as string]: '"Readex Pro", sans-serif' } as CSSProperties}
       fonts="family=Changa:wght@500;700;800&family=Readex+Pro:wght@400;500;600"
       css={KIT_CSS + BLOCKS_CSS + CSS}

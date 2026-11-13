@@ -3,7 +3,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { publicSiteUrl } from '@/lib/portal-urls'
 import { siteBaseUrl } from '@/lib/public-site'
 import { extractImageUrls } from '@/lib/extract-image-urls'
-import { pagesFor } from '@/lib/site-pages'
+import { nicheOf, pagesFor } from '@/lib/site-pages'
 
 /**
  * Per-site sitemap, served at `slug.beynoun.com/sitemap.xml`.
@@ -39,6 +39,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   let published = false
   let images: string[] = []
   let businessType = ''
+  let niche: string | undefined
   try {
     const { data } = await admin()
       .from('themes')
@@ -52,6 +53,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
       businessType =
         (data.content && typeof data.content === 'object' && (data.content as any).business_type) ||
         data.template_type || ''
+      niche = nicheOf(data.content, businessType)
       // Google allows up to 1000 images per URL — list every real image the
       // site uses (deduped by extractImageUrls) so Google Images can index them.
       images = extractImageUrls((data as any).content, 1000)
@@ -66,7 +68,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
 
   // Home carries the image sitemap; every other real page gets its own <url>.
   // Non-brochure sites (storefront/collective) have no page map → home only.
-  const templatePages = pagesFor(businessType)
+  const templatePages = pagesFor(businessType, niche)
   const pages = !published
     ? []
     : templatePages.length > 0
