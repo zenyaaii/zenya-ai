@@ -51,8 +51,20 @@ export type WizardFinal =
   | { label: string; slide?: string; href: string }
   | { label: string; slide?: string; onClick: () => void; busy?: boolean }
 
+type How = "next" | "back" | "skip" | "jump"
+type WizEvent = { e: "view" | "leave" | "finish" | "wish"; step?: string; t?: string; i?: number; n?: number; how?: How | "exit"; ms?: number; note?: string }
+
+/** Best effort and invisible: a lost beacon is a lost data point, never an error. */
+function beacon(body: object) {
+  try {
+    const data = JSON.stringify(body)
+    if (navigator.sendBeacon) navigator.sendBeacon("/api/wizard-events", new Blob([data], { type: "text/plain" }))
+    else fetch("/api/wizard-events", { method: "POST", body: data, keepalive: true }).catch(() => {})
+  } catch { /* fine */ }
+}
+
 export default function WizardShell({
-  eyebrow, title, sub, ledeExtra, steps, step, onStep, progress, final, notice, scrollKey, chrome = false,
+  eyebrow, title, sub, ledeExtra, steps, step, onStep, progress, final, notice, scrollKey, chrome = false, wish = true,
 }: {
   eyebrow: string
   title: ReactNode
@@ -69,6 +81,9 @@ export default function WizardShell({
   scrollKey?: string | number
   /** Draw the header and footer: only the public demo, which has no shell. */
   chrome?: boolean
+  /** The last question on the last step: «هل تتمنى أن نسألك عن شيء آخر؟». A
+      wizard that asks it in its own fields passes false. */
+  wish?: boolean
 }) {
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]))
   const [skipped, setSkipped] = useState<Set<number>>(new Set())
@@ -78,7 +93,60 @@ export default function WizardShell({
   const spec = steps[Math.min(step, steps.length - 1)]
   const last = step === steps.length - 1
 
-  const go = (i: number) => {
+  /* MOVEMENT DATA (Anas, 2026-11-12). Each visit gets a random id; every step
+     seen, how it was left (next, back, skip, a jump on the rail, or closing the
+     page) and the time spent there go to /api/wizard-events. The admin «الزوار»
+     tab turns them into: who reached each step, time, skips, returns, and where
+     people stopped. No name, no phone, no address. */
+  const trk = useRef({ session: "", curId: "", cur: -1, since: 0, how: "jump" as How, finished: false })
+  const ctx = () => ({ session: trk.current.session, wizard: window.location.pathname, label: eyebrow })
+  const send = (events: WizEvent[]) => { if (events.length && trk.current.session) beacon({ ...ctx(), events }) }
+
+  useEffect(() => {
+    const t = trk.current
+    if (!t.session) {
+      t.session = (crypto as Crypto & { randomUUID?: () => string }).randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36)
+    }
+    if (t.cur === step) return
+    const now = Date.now(), n = steps.length, ev: WizEvent[] = []
+    if (t.cur >= 0) ev.push({ e: "leave", step: t.curId, i: t.cur, n, how: t.how, ms: now - t.since })
+    ev.push({ e: "view", step: steps[step]?.id, t: steps[step]?.title, i: step, n })
+    t.cur = step; t.curId = steps[step]?.id ?? ""; t.since = now; t.how = "jump"
+    send(ev)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
+  /* Closing or hiding the page: the step they were on is where they stopped,
+     unless they come back. Coming back restarts the step's clock. */
+  useEffect(() => {
+    const t = trk.current
+    const away = () => {
+      if (t.finished || t.cur < 0 || !t.since) return
+      send([{ e: "leave", step: t.curId, i: t.cur, n: steps.length, how: "exit", ms: Date.now() - t.since }])
+      t.since = 0
+    }
+    const onVis = () => { if (document.visibilityState === "hidden") away(); else if (!t.since) t.since = Date.now() }
+    window.addEventListener("pagehide", away)
+    document.addEventListener("visibilitychange", onVis)
+    return () => { window.removeEventListener("pagehide", away); document.removeEventListener("visibilitychange", onVis) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [steps.length])
+
+  const [wishText, setWishText] = useState("")
+  const finished = () => {
+    const t = trk.current
+    if (t.finished) return
+    t.finished = true
+    const ev: WizEvent[] = [
+      { e: "leave", step: t.curId, i: t.cur, n: steps.length, how: "next", ms: t.since ? Date.now() - t.since : undefined },
+      { e: "finish", step: t.curId, i: t.cur, n: steps.length },
+    ]
+    if (wishText.trim()) ev.push({ e: "wish", step: t.curId, i: t.cur, n: steps.length, note: wishText.trim().slice(0, 2000) })
+    send(ev)
+  }
+
+  const go = (i: number, how: How = "jump") => {
+    trk.current.how = how
     const n = Math.max(0, Math.min(steps.length - 1, i))
     setVisited((p) => new Set(p).add(n))
     onStep(n)
@@ -181,10 +249,20 @@ export default function WizardShell({
               <p className="zb-h2-sub">{spec.sub}</p>
             </div>
             <div className="zb-body">{spec.body}</div>
+            {last && wish ? (
+              <div className="zb-wish">
+                <label className="zb-f">
+                  <span className="zb-lab">هل تتمنى أن نسألك عن شيء آخر؟</span>
+                  <textarea rows={2} className="zb-in" value={wishText} maxLength={2000}
+                    onChange={(e) => setWishText(e.target.value)} placeholder="أو شيء تريد أن تضيفه. اكتب بكلامك" />
+                  <span className="zb-fhint">اختياري. نقرأ كل إجابة لنحسّن الأسئلة.</span>
+                </label>
+              </div>
+            ) : null}
           </div>
 
           <div className="zb-nav-bar">
-            <button type="button" className="zb-back" onClick={() => go(step - 1)} disabled={step === 0}>
+            <button type="button" className="zb-back" onClick={() => go(step - 1, "back")} disabled={step === 0}>
               <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
               السابق
             </button>
@@ -197,7 +275,7 @@ export default function WizardShell({
               <button
                 type="button"
                 className="zb-skip"
-                onClick={() => { setSkipped((p) => new Set(p).add(step)); go(step + 1) }}
+                onClick={() => { setSkipped((p) => new Set(p).add(step)); go(step + 1, "skip") }}
               >
                 <SkipForward size={15} strokeWidth={1.75} aria-hidden />
                 تخطَّ هذه الخطوة
@@ -205,7 +283,7 @@ export default function WizardShell({
             ) : null}
 
             {last ? (
-              <span className="zb-go">
+              <span className="zb-go" onClickCapture={finished}>
                 {"href" in final ? (
                   <SlideButton href={final.href} variant="violet" slide={final.slide ?? final.label}>
                     {final.label}
@@ -217,7 +295,7 @@ export default function WizardShell({
                 )}
               </span>
             ) : (
-              <button type="button" className="zb-next" onClick={() => go(step + 1)}>
+              <button type="button" className="zb-next" onClick={() => go(step + 1, "next")}>
                 التالي
                 <ArrowLeft size={16} strokeWidth={1.75} aria-hidden />
               </button>
@@ -738,6 +816,7 @@ const CSS = `
 .zb-h2-sub { margin: 0.625rem 0 0; max-width: 60ch; font-size: 14.5px; font-weight: 500; line-height: 1.85; color: var(--stone); }
 .zb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.125rem; }
 .zb-cell.wide { grid-column: 1 / -1; }
+.zb-wish { margin-top: clamp(1.5rem, 3vw, 2rem); padding-top: clamp(1.25rem, 2.5vw, 1.5rem); border-top: 1px solid rgba(0,0,0,0.08); }
 .zb-cell.wide + .zb-cell.wide, .zb-cell:not(.wide) + .zb-cell.wide { margin-top: 0.5rem; }
 
 /* ---- fields -------------------------------------------------------------- */
