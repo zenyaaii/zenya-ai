@@ -101,3 +101,29 @@ export function paletteOf(identity: RGB[], mood: 'dark' | 'light'): RestaurantCo
   const [r, g, b] = text
   return { primary: hex(withL(main, Math.min(toHsl(main)[2], 0.35))), accent: hex(acc), background: hex(bg), surface: hex(surface), text: hex(text), muted: hex(muted), border: `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},0.14)` }
 }
+
+const hueGap = (a: RGB, b: RGB) => { const d = Math.abs(toHsl(a)[0] - toHsl(b)[0]); return Math.min(d, 360 - d) }
+
+/**
+ * The identity colours from the pixels alone, for when no AI looked at the
+ * photos (the owner's wizard). Main is the colour that covers the most of the
+ * photos among those with some colour in them (else simply the most); accent
+ * is the boldest colour that covers a real part of a photo. Also returns the
+ * other bold colours, far enough in hue from the accent, as second-colour
+ * choices for the owner.
+ */
+export function identityFromPixels(measured: { c: RGB; share: number }[]): { identity: RGB[]; seconds: string[] } {
+  const real = measured.filter((m) => m.share >= 0.03)
+  if (!real.length) return { identity: [], seconds: [] }
+  const tinted = real.filter((m) => sat(m.c) > 0.12 && toHsl(m.c)[2] > 0.08 && toHsl(m.c)[2] < 0.92)
+  const main = [...(tinted.length ? tinted : real)].sort((a, b) => b.share - a.share)[0].c
+  const bold = [...tinted].sort((a, b) => sat(b.c) * Math.sqrt(b.share) - sat(a.c) * Math.sqrt(a.share))
+  const accent = bold[0]?.c ?? main
+  const seconds: RGB[] = []
+  for (const m of bold.slice(1).filter((x) => sat(x.c) > 0.25)) {
+    if (hueGap(m.c, accent) < 30 || seconds.some((s) => hueGap(s, m.c) < 30)) continue
+    seconds.push(m.c)
+    if (seconds.length === 3) break
+  }
+  return { identity: [main, accent], seconds: seconds.map((c) => hex(withL(c, Math.min(Math.max(toHsl(c)[2], 0.4), 0.6)))) }
+}

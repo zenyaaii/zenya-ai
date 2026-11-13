@@ -71,6 +71,8 @@ type Form = {
   faq: Faq[]
   terms: { label: string; text: string }[]
   look: string
+  /** An optional second colour (the theme's --acc2). '' = none. */
+  accent2: string
   nx: Nx
   /** The owner said what we read from his links is right. */
   checked: boolean
@@ -94,6 +96,7 @@ function initial(k: KindText): Form {
     faq: k.faqs.map((q) => ({ id: nid(), q, a: '' })),
     terms: (k.terms || []).map((t) => ({ label: t.label, text: '' })),
     look: k.looks[0].id,
+    accent2: '',
     checked: false, scrape_issue: '',
     nx: { offers: [], facilities: [], story: '', since: '', classes: [], perks: {}, steps: [] },
   }
@@ -111,7 +114,17 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const bare = k.place.replace(/^ال/, '')
   const mine = bare.replace(/ة$/, 'ت') + 'ك'
   const addOne = /ة$/.test(k.role) ? k.role : k.role + 'ًا'
-  const LOOKS = k.looks
+  type Pal = { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string }
+  const [own, setOwn] = useState<{ day: Pal; night: Pal; seconds: string[] } | null>(null)
+  const lookTouched = useRef(false)
+  // The owner's own colours lead the list once his photos are measured.
+  const LOOKS = useMemo(() => own
+    ? [{ id: 'own-night', name: `ألوان ${k.place.replace(/^ال/, '')}ك · ليلي`, colors: own.night }, { id: 'own-day', name: `ألوان ${k.place.replace(/^ال/, '')}ك · نهاري`, colors: own.day }, ...k.looks]
+    : k.looks, [own, k])
+  const lookColors = () => {
+    const l = LOOKS.find((x) => x.id === f.look) || LOOKS[0]
+    return f.accent2 ? { ...l.colors, accent2: f.accent2 } : l.colors
+  }
   const router = useRouter()
   const { toast } = useNotify()
   const [f, setF] = useState<Form>(() => initial(k))
@@ -235,6 +248,28 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     return all.filter((u, i) => all.indexOf(u) === i)
   }, [f.google_photos, f.hidden, f.uploads])
 
+  // Measure the owner's photos (the hero first) for his own colours. The pixels
+  // decide; no AI is called. A light first look means a day kind.
+  const measureKey = [photos.includes(f.hero) ? f.hero : '', ...photos].filter(Boolean).slice(0, 4).join('|')
+  useEffect(() => {
+    if (!measureKey) return
+    const ctl = new AbortController()
+    const t = setTimeout(() => {
+      fetch('/api/niche/colors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photos: measureKey.split('|') }), signal: ctl.signal })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (!j?.day || !j?.night) return
+          setOwn({ day: j.day, night: j.night, seconds: Array.isArray(j.seconds) ? j.seconds : [] })
+          if (!lookTouched.current) {
+            const light = (() => { const h = k.looks[0].colors.background.replace('#', ''); const n = parseInt(h, 16); return ((n >> 16) & 255) + ((n >> 8) & 255) + (n & 255) > 384 })()
+            setF((p) => ({ ...p, look: light ? 'own-day' : 'own-night' }))
+          }
+        })
+        .catch(() => { /* no own colours: the fixed looks stay */ })
+    }, 600)
+    return () => { clearTimeout(t); ctl.abort() }
+  }, [measureKey, k])
+
   function payload() {
     const hero = photos.includes(f.hero) ? f.hero : photos[0]
     const rest = photos.filter((u) => u !== hero)
@@ -291,8 +326,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       faq: p.faq.filter((q) => q.q.length >= 4),
     })
     if (!parsed.success) return null
-    const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
-    return { content: buildBarberContent(parsed.data, g || {}), colors: look.colors }
+    return { content: buildBarberContent(parsed.data, g || {}), colors: lookColors() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [peek, f, g])
 
@@ -321,10 +355,10 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     setLoading(true)
     try {
       const content = buildBarberContent(parsed.data, g || { maps_url: parsed.data.maps_url })
-      const look = LOOKS.find((l) => l.id === f.look) || LOOKS[0]
+      const colors = lookColors()
       const meta = { answered: answeredMap(), completeness: done.pct, moves: moves.current, ms: Date.now() - started.current, country, version: 2, links_read: { google: gState, instagram: igState }, checked: f.checked, scrape_issue: f.scrape_issue.trim() || undefined }
       if (demo) {
-        const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: look.colors, services: content, input: parsed.data, meta }
+        const site = { business_type: 'services', niche: kind, style_preset: 'graphite', color_overrides: colors, services: content, input: parsed.data, meta }
         try { sessionStorage.setItem(DEMO_BUILT_KEY, JSON.stringify(site)) } catch { /* private mode: the editor opens the sample */ }
         router.push('/demo/editor?type=' + kind + '&built=1')
         return
@@ -334,11 +368,11 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
         body: JSON.stringify({
           productName: parsed.data.name,
           images: content.gallery.images.map((i) => i.url),
-          primaryColor: look.colors.accent,
-          secondaryColor: look.colors.background,
+          primaryColor: colors.accent,
+          secondaryColor: colors.background,
           content: {
             business_type: 'services', niche: kind, style_preset: 'graphite',
-            color_overrides: look.colors, services: content, input: parsed.data, meta, google: g ? { place_id: g.place_id, rating: g.rating, count: g.count } : undefined,
+            color_overrides: colors, services: content, input: parsed.data, meta, google: g ? { place_id: g.place_id, rating: g.rating, count: g.count } : undefined,
             ...(parsed.data.logo ? { seo: { logo: parsed.data.logo } } : {}),
           },
         }),
@@ -823,12 +857,21 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
             <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
               {LOOKS.map((l) => (
-                <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => up('look', l.id)} className="bw-lr">
+                <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => { lookTouched.current = true; up('look', l.id) }} className="bw-lr">
                   <span className="bw-lr-dots" aria-hidden>{[l.colors.background, l.colors.text, l.colors.accent].map((c, i) => <i key={i} style={{ background: c }} />)}</span>
                   <b>{l.name}</b>
                   <span className="bw-lr-tick" aria-hidden>{f.look === l.id ? '✓' : ''}</span>
                 </button>
               ))}
+            </div>
+            {own ? <p className="bw-note">أوّل لونين أخذناهما من صورك.</p> : null}
+            <div className="bw-sec">
+              <b>لون ثانٍ <span className="bw-from">اختياري</span></b>
+              <div className="bw-sw" role="radiogroup" aria-label="لون ثانٍ">
+                {['', ...(own?.seconds || []), ...k.looks.map((l) => l.colors.accent)].filter((c, i, all) => all.indexOf(c) === i).slice(0, 6).map((c) => (
+                  <button key={c || 'none'} type="button" role="radio" aria-checked={f.accent2 === c} aria-label={c ? `لون ${c}` : 'بدون لون ثانٍ'} onClick={() => up('accent2', c)} className="bw-swb" style={c ? { background: c } : undefined}>{c ? '' : '—'}</button>
+                ))}
+              </div>
             </div>
           </Block>
           <Review
@@ -897,7 +940,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           </div>
         </div>, document.body,
       ) : null}
-      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-cls{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1.4fr) auto;gap:8px;align-items:center}@media(max-width:640px){.bw-cls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-cls>input:nth-of-type(2){grid-column:1/3;grid-row:2}}.bw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.bw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.bw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
+      <style dangerouslySetInnerHTML={{ __html: '.bw-g{display:flex;gap:8px}.bw-gbtn{flex:0 0 auto}.bw-found{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.bw-found img,.bw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.bw-found div{display:grid;gap:2px;min-width:0}.bw-found b{font-size:16.5px}.bw-found small{opacity:.75;font-size:14.5px}.bw-stars{color:#E8B04B;font-size:15px}.bw-logo{width:120px}.bw-cls{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1.4fr) auto;gap:8px;align-items:center}@media(max-width:640px){.bw-cls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-cls>input:nth-of-type(2){grid-column:1/3;grid-row:2}}.bw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.bw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.bw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.bw-tip{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--violet,#E2532A) 9%,transparent);border:1px solid color-mix(in srgb,var(--violet,#E2532A) 22%,transparent);font-size:14.5px;line-height:1.7}.bw-tip b{flex:0 0 auto}.bw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85}.bw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--violet,#E2532A);text-decoration:underline;text-underline-offset:3px}.bw-ex button:focus-visible{outline:2px solid var(--violet,#E2532A);outline-offset:2px}.bw-meter{height:10px;border-radius:99px;background:rgba(127,127,127,.18);overflow:hidden}.bw-meter i{display:block;height:100%;border-radius:99px;background:var(--violet,#E2532A);transition:width .4s}.bw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.bw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.bw-src b{font-size:14.5px}.bw-src span{font-size:14px;opacity:.8}.bw-note{font-size:13.5px;opacity:.75;margin:8px 0 0}.bw-sec{display:grid;gap:8px;margin-top:14px}.bw-sec b{font-size:14.5px}.bw-sw{display:flex;gap:10px;flex-wrap:wrap}.bw-swb{all:unset;cursor:pointer;box-sizing:border-box;width:40px;height:40px;border-radius:99px;display:grid;place-items:center;border:1px solid rgba(127,127,127,.35);font-weight:700}.bw-swb[aria-checked=true]{box-shadow:0 0 0 2px var(--card,#fff),0 0 0 4px var(--acc,#E2532A)}.bw-swb:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.bw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.bw-lrow{display:grid;gap:8px}.bw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.bw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.bw-lr-dots{display:flex}.bw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.bw-lr-dots i:first-child{margin-inline-start:0}.bw-peek{position:fixed;z-index:60;inset-inline-start:50%;transform:translateX(50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:inline-flex;gap:8px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#16130f;color:#f6f1ea;font:600 15px inherit;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer}[dir=ltr] .bw-peek{transform:translateX(-50%)}.bw-peek span{color:#E2532A}.bw-sheet{position:fixed;inset:0;z-index:2147483000;background:#0b0b0b;overflow:auto;overscroll-behavior:contain}.bw-sheet-top{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px max(14px,env(safe-area-inset-left,0px));background:#16130f;color:#f6f1ea;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.12)}.bw-sheet-top button{min-height:40px;padding:0 16px;border-radius:999px;border:0;background:#f6f1ea;color:#16130f;font-weight:700;cursor:pointer}.bw-sheet-site{position:relative}.zb-root{padding-bottom:72px}.bw-svc{display:grid;grid-template-columns:auto minmax(0,1.4fr) minmax(0,1.6fr) auto;gap:8px;align-items:center}.bw-pd{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bw-svc .zb-chip.zb-toggle{padding-inline:10px}@media(max-width:640px){.bw-svc{grid-template-columns:auto minmax(0,1fr) auto;row-gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line,rgba(127,127,127,.15))}.bw-pd{grid-column:2/3;grid-row:2}}' }} />
     </>
   )
 }
