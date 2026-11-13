@@ -2,7 +2,7 @@
 
 import { lazy, Suspense, type ComponentType } from 'react'
 import { useRouter } from 'next/navigation'
-import { slugForView } from '@/lib/site-pages'
+import { nicheOf, slugForView } from '@/lib/site-pages'
 
 // Lazy-load each preview so a /s/[slug] visit only pulls the bundle for the
 // template that's actually being shown. Big win for cold-cache page weight.
@@ -77,7 +77,7 @@ export default function PublicSiteRenderer({
   // view state and we don't touch the URL.
   const onViewChange = enableRouting
     ? (v: string) => {
-        const s = slugForView(businessType, v)
+        const s = slugForView(businessType, v, nicheOf(content))
         router.push(s ? `/${s}` : '/')
       }
     : undefined

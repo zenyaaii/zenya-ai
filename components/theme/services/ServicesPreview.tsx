@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import {
   Award, BadgeCheck, Bug, CalendarDays, Camera, Car, ChevronDown, ChevronLeft, CircleCheck, Clock, Droplets,
@@ -17,6 +17,12 @@ import NicheView from './NicheView'
 import { isNicheKind } from '@/utils/services/kinds'
 import { useBookingContext } from '@/components/site/BookingContext'
 import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/marketing/BrandMarks'
+
+// A kind with its own full multi-page theme (Anas approved the gym, 2026-11-13).
+// Loaded on demand so other services sites don't carry it.
+const FULL = {
+  gym: lazy(() => import('./niche/GymFull')),
+} as const
 
 type Props = {
   content: ServiceContent
@@ -113,6 +119,14 @@ export default function ServicesPreview({
   logo,
 }: Props) {
   // A kind of services business draws its own page inside this template.
+  const Full = content?.niche ? FULL[content.niche as keyof typeof FULL] : undefined
+  if (Full) {
+    return (
+      <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+        <Full content={content} colors={colorOverrides} logo={logo?.trim() || undefined} view={onViewChange ? controlledView || 'home' : undefined} onViewChange={onViewChange} />
+      </Suspense>
+    )
+  }
   if (isNicheKind(content?.niche)) return <NicheView content={content} colors={colorOverrides} logo={logo?.trim() || undefined} />
   return <GeneralServices content={content} presetId={presetId} className={className} colorOverrides={colorOverrides} typographyPreset={typographyPreset} view={controlledView} onViewChange={onViewChange} logo={logo} />
 }

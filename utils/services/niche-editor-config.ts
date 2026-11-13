@@ -1,4 +1,4 @@
-import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText } from 'lucide-react'
+import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell } from 'lucide-react'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
@@ -12,6 +12,44 @@ import { DAYS_AR } from './barber'
  * people's photos) are here too.
  */
 export function nicheEditorConfig(kind: NicheKind): EditorConfig {
+  return withPages(kind, baseConfig(kind))
+}
+
+/**
+ * A kind with its own multi-page theme lists its pages, and each section says
+ * which pages draw it, so a click on the site opens the right panel and the
+ * page menu shows what each page holds. Ids match lib/site-pages NICHE_PAGES.
+ * A panel left out of `on` is on every page (name, links, address, Google).
+ */
+const KIND_PAGES: Partial<Record<NicheKind, { pages: NonNullable<EditorConfig['pages']>; on: Record<string, string[]> }>> = {
+  gym: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'plans', label: 'الاشتراكات', icon: Tag, ic: 'tag' },
+      { id: 'coaches', label: 'المدربون', icon: Users, ic: 'users' },
+      { id: 'timetable', label: 'جدول الحصص', icon: CalendarClock, ic: 'cal' },
+      { id: 'club', label: 'النادي', icon: Dumbbell, ic: 'store' },
+      { id: 'book', label: 'احجز وزُرنا', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'plans', 'timetable', 'club'],
+      team: ['home', 'coaches'],
+      services: ['home', 'plans'],
+      reviews: ['home'],
+      gallery: ['club'],
+      faq: ['home', 'book'],
+    },
+  },
+}
+
+function withPages(kind: NicheKind, c: EditorConfig): EditorConfig {
+  const m = KIND_PAGES[kind]
+  if (!m) return c
+  return { ...c, pages: m.pages, panels: c.panels.map((p) => (m.on[p.id] ? { ...p, pages: m.on[p.id] } : p)) }
+}
+
+function baseConfig(kind: NicheKind): EditorConfig {
   const k = KIND[kind]
   return {
     ...SERVICES_EDITOR_CONFIG,
