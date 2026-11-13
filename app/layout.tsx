@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import SmoothScroll from '@/components/marketing/SmoothScroll'
 import PresenceBeacon from '@/components/marketing/PresenceBeacon'
 import CookieConsent from '@/components/CookieConsent'
+import ShakeReport from '@/components/zenya/report/ShakeReport'
 import { NotifyProvider } from '@/components/ui/Notify'
 import { resolveLocale } from '@/lib/i18n/server'
 import { dirFor } from '@/lib/i18n/config'
@@ -353,6 +354,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             (components/site/SiteCookieBanner, from lib/public-site). This one
             names Beynoun and links Beynoun's policies, so it stays on Beynoun. */}
         {!isCustomerSite && <CookieConsent />}
+        {/* Shake the phone (or the corner button) to report a problem: lands in the admin «الزوار» tab. */}
+        {!isCustomerSite && <ShakeReport />}
         <Analytics />
       </body>
     </html>

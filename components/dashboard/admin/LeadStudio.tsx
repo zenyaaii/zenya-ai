@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AdminDashboard from '../AdminDashboard'
 import Notes from './Notes'
 import BrandLibrary from './BrandLibrary'
+import Visitors from './Visitors'
 
 /**
  * استوديو العملاء — the founder's leads + WhatsApp inbox (layout B, "today").
@@ -66,7 +67,7 @@ const when = (iso: string) => {
     : d.toLocaleDateString('ar', { day: 'numeric', month: 'short' })
 }
 
-type Tab = 'today' | 'leads' | 'inbox' | 'stats' | 'notes' | 'brand'
+type Tab = 'today' | 'leads' | 'inbox' | 'stats' | 'notes' | 'brand' | 'visitors'
 
 export default function LeadStudio() {
   const [leads, setLeads] = useState<Lead[] | null>(null)
@@ -74,6 +75,12 @@ export default function LeadStudio() {
   const [threads, setThreads] = useState<Thread[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('today')
+  // New reports from visitors (shake / corner button), shown on the «الزوار» tab.
+  const [newReports, setNewReports] = useState(0)
+  useEffect(() => {
+    fetch('/api/admin/visitors?days=1', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (j) setNewReports(j.reports.filter((x: { status: string }) => x.status === 'new').length) }).catch(() => {})
+  }, [])
   const [open, setOpen] = useState<Lead | null>(null)     // lead sheet
   const [chat, setChat] = useState<string | null>(null)   // wa number of open chat
   const [toast, setToast] = useState<string | null>(null)
@@ -170,10 +177,11 @@ export default function LeadStudio() {
     <div className="ls" dir="rtl">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <nav className="nav" role="tablist">
-        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox], ['stats', 'التحليلات', I.stats], ['notes', 'الملاحظات', I.notes], ['brand', 'الهوية', I.brand]] as const).map(([id, t, ic]) => (
+        {([['today', 'اليوم', I.today], ['leads', 'العملاء', I.leads], ['inbox', 'الرسائل', I.inbox], ['stats', 'التحليلات', I.stats], ['notes', 'الملاحظات', I.notes], ['brand', 'الهوية', I.brand], ['visitors', 'الزوار', I.visitors]] as const).map(([id, t, ic]) => (
           <button key={id} role="tab" aria-selected={tab === id} onClick={() => { setTab(id); if (id !== 'inbox') setChat(null) }}>
             <svg viewBox="0 0 24 24" aria-hidden>{ic}</svg><span>{t}</span>
             {id === 'inbox' && unread.length > 0 && <b className="n num">{unread.length}</b>}
+            {id === 'visitors' && newReports > 0 && <b className="n num rp">{newReports}</b>}
           </button>
         ))}
       </nav>
@@ -192,7 +200,7 @@ export default function LeadStudio() {
             <button className="btn sm ghost" onClick={() => { stopRef.current = true }}>أوقف</button>
           </div>
         )}
-        {tab === 'stats' ? <AdminDashboard /> : tab === 'notes' ? <Notes say={say} /> : tab === 'brand' ? <BrandLibrary say={say} /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
+        {tab === 'stats' ? <AdminDashboard /> : tab === 'visitors' ? <Visitors say={say} onCount={setNewReports} /> : tab === 'notes' ? <Notes say={say} /> : tab === 'brand' ? <BrandLibrary say={say} /> : err ? <div className="note">{err}</div> : !leads ? <div className="note">جارٍ التحميل…</div> : (
           <>
             {tab === 'today' && (
               <>
@@ -493,6 +501,7 @@ const I = {
   brand: <path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z" />,
   notes: <path d="M6 3h9l4 4v14H6z M15 3v4h4 M9 12h7 M9 16h5" />,
   stats: <path d="M4 20V10 M10 20V4 M16 20v-7 M22 20H2" />,
+  visitors: <path d="M5 21V4 M5 4h11l-2 4 2 4H5" />,
 }
 
 export const CSS = `
@@ -555,6 +564,7 @@ export const CSS = `
 .ls .nav button[aria-selected="true"]{background:var(--background)}
 .ls .nav svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
 .ls .nav button[aria-selected="true"]{color:var(--acc);font-weight:700}
+.ls .nav .n.rp{background:var(--acc)}
 .ls .nav .n{position:static;background:var(--wa);color:#fff;border-radius:999px;font-size:10px;padding:0 5px}
 @media (min-width:900px){
   .ls{grid-template-columns:190px minmax(0,1fr);gap:20px;padding-bottom:30px}
@@ -569,7 +579,8 @@ export const CSS = `
   .ls .funnel{grid-template-columns:repeat(5,minmax(68px,1fr));overflow-x:auto;margin-inline:-16px;padding-inline:16px}
   .ls .fstep{padding:8px 9px}.ls .fstep .v{font-size:19px}.ls .fstep .l{font-size:11px}
   .ls .it .mt{display:none}
-  .ls .nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 2px;min-width:0}
+  .ls .nav{overflow-x:auto;scrollbar-width:none}
+  .ls .nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px;min-width:50px;flex:1 0 auto}
   .ls .nav button span{white-space:nowrap}
 }
 .ls .inbox{display:grid;grid-template-columns:300px minmax(0,1fr);background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:520px}

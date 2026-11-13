@@ -77,6 +77,19 @@ export type KindText = {
   terms?: { label: string; placeholder: string }[]
   /** Price unit hint in the wizard ("شهريًا" for a gym). */
   priceHint?: string
+  /**
+   * The kind's own questions (NicheExtra). Each key present adds that
+   * question; the lists are the chips offered, the owner can add his own.
+   */
+  extras?: {
+    offers?: string[]
+    facilities?: string[]
+    story?: { label: string; example: string }
+    since?: boolean
+    classes?: { names: string[] }
+    perks?: { example: string }
+    steps?: { title: string; text: string }[]
+  }
   /** For the AI visitor and the photo judge. */
   visitor: { who: string; want: string; place: string }
   /** Words in a lead's kind or name that mean this kind. */
@@ -100,7 +113,7 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'حلاقة أطفال', duration: '20 دقيقة', on: false }, { name: 'تنظيف بشرة', duration: '30 دقيقة', on: false }, { name: 'بروتين للشعر', duration: '90 دقيقة', on: false },
       { name: 'صبغة شعر أو لحية', duration: '40 دقيقة', on: false }, { name: 'تجهيز عريس', duration: '', on: false },
     ],
-    faqs: ['هل أحتاج موعدًا، أم أحضر مباشرة؟', 'كم أنتظر عادة؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل تحلقون للأطفال؟', 'هل يوجد موقف سيارات قريب؟', 'هل تقبلون الدفع بالبطاقة؟'],
+    faqs: ['هل أحتاج موعدًا، أم أحضر مباشرة؟', 'كم أنتظر عادة؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل تحلقون للأطفال؟', 'هل يوجد موقف سيارات قريب؟'],
     visitor: { who: 'a man', want: 'book a haircut there this week', place: "men's barbershop" },
     match: /حلاق|باربر|barber/i, seo: 'حلاق',
   },
@@ -120,6 +133,19 @@ export const KIND: Record<NicheKind, KindText> = {
     faqs: ['هل أستطيع تجميد الاشتراك؟', 'هل أستطيع إلغاء الاشتراك واسترجاع المبلغ؟', 'متى يكون النادي مزدحمًا؟', 'هل يوجد مدرب يتابعني وأنا مبتدئ؟', 'هل توجد خزائن ودُش؟', 'هل يوجد موقف سيارات؟'],
     terms: [{ label: 'التجميد', placeholder: 'حتى أسبوعين في الاشتراك الفصلي' }, { label: 'الإلغاء', placeholder: 'خلال 3 أيام من الدفع، بدون أسئلة' }, { label: 'رسوم التسجيل', placeholder: 'لا توجد' }],
     priceHint: 'السعر الكامل للاشتراك',
+    extras: {
+      offers: ['أجهزة حديد', 'كارديو', 'كروس فت', 'ملاكمة', 'فنون قتالية', 'يوغا', 'حصص جماعية', 'تدريب شخصي', 'برامج تغذية', 'تأهيل إصابات'],
+      facilities: ['غرف تبديل', 'دش', 'خزائن', 'ساونا', 'بخار', 'مسبح', 'موقف سيارات', 'مكيّف', 'مياه مجانية', 'قسم للسيدات بأوقات منفصلة'],
+      story: { label: 'احكِ عن ناديك في جملتين', example: 'نادٍ صغير في الملقا، كل مشترك فيه له برنامج ومدرب يعرفه بالاسم. افتتحناه لأن أغلب الأندية حولنا مزدحمة ولا أحد يتابع المبتدئ.' },
+      since: true,
+      classes: { names: ['كروس فت', 'ملاكمة', 'سبينينغ', 'يوغا', 'HIIT', 'دائري'] },
+      perks: { example: 'دخول كل الأجهزة\nجلسة قياس جسم شهرية\nبرنامج تمارين مكتوب' },
+      steps: [
+        { title: 'زيارة وتجربة', text: 'تعال وجرّب النادي يومًا مجانًا.' },
+        { title: 'قياس وبرنامج', text: 'يقيس المدرب وزنك ويكتب لك برنامجًا يناسب هدفك.' },
+        { title: 'متابعة', text: 'نراجع تقدّمك كل شهر ونعدّل البرنامج.' },
+      ],
+    },
     visitor: { who: 'a person', want: 'sign up at this gym this month', place: 'gym' },
     match: /جيم|نادي|نادى|لياقة|كمال اجسام|كروس|gym|fitness|crossfit/i, seo: 'نادي رياضي',
   },
@@ -153,7 +179,7 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'علاج عصب', duration: '', on: false }, { name: 'تبييض', duration: '60 دقيقة', on: false }, { name: 'تقويم', duration: '', on: false }, { name: 'زراعة', duration: '', on: false },
     ],
     faqs: ['هل يؤلم العلاج؟', 'هل تقبلون التأمين؟ وأيّ شركات؟', 'كم سعر الكشف؟', 'هل تعالجون الأطفال؟', 'كم موعدًا أحتاج؟', 'هل يوجد موقف سيارات؟'],
-    terms: [{ label: 'التأمين', placeholder: 'نقبل: …' }, { label: 'الدفع', placeholder: 'نقدًا وبالبطاقة، والتقسيط للتقويم' }],
+    terms: [{ label: 'التأمين', placeholder: 'نقبل: …' }],
     visitor: { who: 'a patient', want: 'book a visit there', place: 'clinic' },
     match: /عيادة|عيادات|طبيب|دكتور|اسنان|أسنان|clinic|dental|doctor/i, seo: 'عيادة',
   },
@@ -186,8 +212,8 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'جلسة تصوير شخصية', duration: '60 دقيقة', on: true }, { name: 'تصوير منتجات', duration: '', on: true }, { name: 'تصوير مناسبة', duration: '', on: true },
       { name: 'تصوير أطفال', duration: '45 دقيقة', on: false }, { name: 'صور جواز وهوية', duration: '10 دقيقة', on: false }, { name: 'فيديو', duration: '', on: false },
     ],
-    faqs: ['متى أستلم الصور؟', 'كم صورة معدّلة في الباقة؟', 'هل تصوّرون خارج الاستوديو؟', 'هل يوجد عربون للحجز؟', 'هل أستلم الصور الأصلية؟'],
-    terms: [{ label: 'التسليم', placeholder: 'خلال 7 أيام' }, { label: 'العربون', placeholder: '30% عند الحجز' }],
+    faqs: ['متى أستلم الصور؟', 'كم صورة معدّلة في الباقة؟', 'هل تصوّرون خارج الاستوديو؟', 'هل أستلم الصور الأصلية؟'],
+    terms: [{ label: 'التسليم', placeholder: 'خلال 7 أيام' }],
     visitor: { who: 'a customer', want: 'book a shoot there', place: 'photo studio' },
     match: /تصوير|استوديو|ستوديو|مصور|photo|studio/i, seo: 'استوديو تصوير',
   },

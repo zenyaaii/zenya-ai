@@ -83,10 +83,39 @@ export type ServiceFaqItem = {
 export type ServiceGalleryImage = {
   url: string
   alt?: string
+  /** Where the photo came from, shown to the owner in the editor (spec 2026-11-12 §7-ب2). */
+  source?: ContentSource
+  /** The same in the owner's words: «من جوجل». */
+  from?: string
+}
+
+export type ContentSource = 'owner' | 'instagram' | 'facebook' | 'tiktok' | 'google' | 'default'
+
+/**
+ * The kind-only facts a niche page can show (gym first): every field is
+ * optional, comes from the build questions, and is edited in the editor.
+ * A page hides the section of any field that is missing.
+ */
+export type NicheExtra = {
+  /** What the place offers («ماذا تقدّم؟»). */
+  offers?: string[]
+  facilities?: string[]
+  /** The owner's two sentences about the place. */
+  story?: string
+  /** The year it opened. */
+  since?: number
+  /** Classes per day; day 0 = Saturday, as in DAYS_AR. */
+  classes?: { day: number; items: { time: string; name: string }[] }[]
+  /** What each plan or service includes. */
+  perks?: { plan: string; items: string[] }[]
+  /** How a new customer starts. */
+  steps?: { title: string; text: string }[]
 }
 
 export type ServiceContent = {
   niche?: ServiceNicheKind
+  /** Kind-only facts (NicheExtra); absent for kinds that ask none. */
+  niche_extra?: NicheExtra
   brand: {
     name: string
     category: string

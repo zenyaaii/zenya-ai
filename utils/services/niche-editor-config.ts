@@ -2,6 +2,7 @@ import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpC
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
+import { DAYS_AR } from './barber'
 
 /**
  * The editor for a services kind page (barber, gym, beauty, clinic, car,
@@ -40,6 +41,37 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
           { type: 'image', path: 'hero.image', label: 'صورة الواجهة', optional: true, hint: 'صورة حقيقية للمكان. بدونها تظهر الواجهة بالاسم وحده.' },
         ],
       },
+      ...(k.extras ? [{
+        id: 'about', label: `عن ${k.place}`, icon: Sparkles, ic: 'sparkle', desc: `ما يقدّمه ${k.place}، مرافقه، وقصته`,
+        summary: (c: any) => (c?.niche_extra?.offers || []).join('، ') || String(c?.niche_extra?.story || ''),
+        empty: (c: any) => !c?.niche_extra || !Object.values(c.niche_extra).some((v: any) => (Array.isArray(v) ? v.length : !!v)),
+        fields: [
+          { type: 'note', content: 'كل ما يبقى فارغًا هنا لا يظهر في الموقع.' },
+          ...(k.extras.offers ? [{ type: 'strings', path: 'niche_extra.offers', label: `ماذا يقدّم ${k.place}`, addLabel: 'أضف' }] : []),
+          ...(k.extras.facilities ? [{ type: 'strings', path: 'niche_extra.facilities', label: 'المرافق', addLabel: 'أضف مرفقًا' }] : []),
+          ...(k.extras.story ? [{ type: 'textarea', path: 'niche_extra.story', label: k.extras.story.label, rows: 3, max: 400 }] : []),
+          ...(k.extras.since ? [{ type: 'number', path: 'niche_extra.since', label: 'سنة الافتتاح', min: 1900, max: 2100 }] : []),
+          ...(k.extras.steps ? [{
+            type: 'array', path: 'niche_extra.steps', label: 'كيف يبدأ الزبون الجديد', itemLabel: 'خطوة', itemTitle: 'title', itemSub: 'text',
+            makeItem: () => ({ title: '', text: '' }),
+            itemFields: [{ type: 'text', path: 'title', label: 'العنوان' }, { type: 'text', path: 'text', label: 'السطر' }],
+          }] : []),
+          ...(k.extras.perks ? [{
+            type: 'array', path: 'niche_extra.perks', label: `ماذا يشمل كل ${k.services === 'الاشتراكات' ? 'اشتراك' : 'خدمة'}`, itemLabel: k.services === 'الاشتراكات' ? 'اشتراك' : 'خدمة', itemTitle: 'plan',
+            makeItem: () => ({ plan: '', items: [] }),
+            itemFields: [{ type: 'text', path: 'plan', label: 'الاسم كما في قائمة الأسعار' }, { type: 'strings', path: 'items', label: 'ما يشمله', addLabel: 'أضف سطرًا' }],
+          }] : []),
+          ...(k.extras.classes ? [{
+            type: 'array', path: 'niche_extra.classes', label: 'جدول الحصص', itemLabel: 'يوم', itemTitle: 'day',
+            makeItem: () => ({ day: 0, items: [] }),
+            itemFields: [
+              { type: 'choice', path: 'day', label: 'اليوم', fallback: '0', options: DAYS_AR.map((d, i) => ({ value: String(i), label: d })) },
+              { type: 'array', path: 'items', label: 'حصص هذا اليوم', itemLabel: 'حصة', itemTitle: 'name', itemSub: 'time', makeItem: () => ({ time: '18:00', name: '' }),
+                itemFields: [{ type: 'text', path: 'time', label: 'الوقت (مثل 18:30)' }, { type: 'text', path: 'name', label: 'اسم الحصة' }] },
+            ],
+          }] : []),
+        ],
+      }] as EditorConfig['panels'] : []),
       {
         id: 'team', label: k.team, icon: Users, ic: 'users', desc: `${k.team} بالاسم`,
         summary: (c) => (c?.team?.members || []).map((m: any) => m.name).join('، '),
@@ -112,10 +144,11 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
         id: 'gallery', label: 'الصور', icon: ImageIcon, ic: 'gallery', desc: 'صور المكان الحقيقية',
         summary: (c) => `${(c?.gallery?.images || []).length} صور`,
         fields: [
+          { type: 'note', content: 'تحت كل صورة مصدرها: «من جوجل» أو «من إنستغرام» أخذناها من حساباتك، و«منك» ما رفعته. غيّر أي صورة أو احذفها.' },
           { type: 'image', path: 'story.image', label: 'الصورة بجانب الأسعار', optional: true },
           {
-            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt',
-            makeItem: () => ({ url: '', alt: '' }),
+            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt', itemSub: 'from',
+            makeItem: () => ({ url: '', alt: '', source: 'owner', from: 'منك' }),
             itemFields: [{ type: 'image', path: 'url', label: 'الصورة' }, { type: 'text', path: 'alt', label: 'وصفها' }],
           },
         ],

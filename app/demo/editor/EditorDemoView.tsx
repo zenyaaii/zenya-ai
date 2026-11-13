@@ -38,7 +38,7 @@ import { SERVICE_MOCK_CONTENT } from '@/utils/services/mock-content'
 import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
 import { nicheEditorConfig } from '@/utils/services/niche-editor-config'
-import { barberDemoContent } from '@/utils/services/niche-demo'
+import { barberDemoContent, nicheDemoContent } from '@/utils/services/niche-demo'
 import { KIND } from '@/utils/services/kinds'
 import { DEMO_BUILT_KEY } from '@/utils/services/barber'
 import { DEMO_TYPES, type DemoType } from './types'
@@ -58,17 +58,19 @@ const THEMES: Record<DemoType, Theme> = {
   // and terms, hours with periods), opened on the site /demo/barber-build just
   // built, or on the sample shop when there is none.
   barber:     { config: nicheEditorConfig('barber'), Preview: ServicesPreview as any, content: barberDemoContent() },
+  // The gym's questions (/demo/gym-build) open here; the gym page itself is still the shared kind page.
+  gym:        { config: nicheEditorConfig('gym'), Preview: ServicesPreview as any, content: nicheDemoContent('gym') },
 }
 
 /** A store that lives exactly as long as the page. */
 function memoryStore(contentKey: string, content: unknown, type: DemoType): EditorStore {
   let saved: any = { [contentKey]: structuredClone(content) }
-  if (type === 'barber') saved = { business_type: 'services', niche: 'barber', style_preset: 'graphite', color_overrides: KIND.barber.looks[0].colors, ...saved }
+  if (type === 'barber' || type === 'gym') saved = { business_type: 'services', niche: type, style_preset: 'graphite', color_overrides: KIND[type].looks[0].colors, ...saved }
   let first = true
   return {
     load: async () => {
       // The wizard's demo leaves the site it built here; open that one, once.
-      if (first && type === 'barber' && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
+      if (first && (type === 'barber' || type === 'gym') && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
         try { const s = sessionStorage.getItem(DEMO_BUILT_KEY); if (s) saved = JSON.parse(s) } catch { /* keep the sample */ }
       }
       first = false
@@ -91,6 +93,7 @@ const NAMES: Record<DemoType, string> = {
   studio: 'موقع علامة تجارية وقصة',
   wellness: 'موقع مركز عافية',
   barber: 'موقع صالون حلاقة',
+  gym: 'موقع نادٍ رياضي',
 }
 
 export default function EditorDemoView({ type }: { type: DemoType }) {

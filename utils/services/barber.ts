@@ -13,7 +13,7 @@
  */
 
 import { z } from 'zod'
-import type { ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
+import type { ContentSource, ServiceContent, ServiceHoursDay, ServiceTeamMember } from './types'
 import { KIND, NICHE_KINDS, type NicheKind } from './kinds'
 
 /** Where /demo/barber-build leaves the site it built, for /demo/editor?type=barber to open. */
@@ -36,7 +36,7 @@ export const barberInputSchema = z.object({
   phone: z.string().trim().min(4).max(40),
   whatsapp: z.string().trim().max(60).optional(),
   email: z.string().trim().email().max(120).optional().or(z.literal('')),
-  maps_url: url.min(8),
+  maps_url: url.optional(),
   /** Empty only when the owner pressed «ليس عندي حساب». */
   instagram: z.string().trim().max(200).optional(),
   links: z.array(z.object({ label: z.string().trim().max(40), url })).max(10).optional().default([]),
@@ -78,6 +78,20 @@ export const barberInputSchema = z.object({
   /** Stated terms: a gym's freeze and cancel rules, a garage's warranty. */
   terms: z.array(z.object({ label: z.string().trim().max(40), text: z.string().trim().max(200) })).max(8).optional().default([]),
   logo: url.optional(),
+  /** «هل تريد أن تضيف شيئًا؟» in the owner's words. Kept, not shown, until the organizer places it. */
+  extra: z.string().trim().max(1500).optional(),
+  /** «هل تتمنى أن نسألك عن شيء آخر؟»: feedback for us, never on the site. */
+  wish: z.string().trim().max(800).optional(),
+  /** The kind's own answers (KIND[k].extras → NicheExtra). */
+  niche_extra: z.object({
+    offers: z.array(z.string().trim().min(1).max(40)).max(16).optional(),
+    facilities: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
+    story: z.string().trim().max(400).optional(),
+    since: z.number().int().min(1900).max(2100).optional(),
+    classes: z.array(z.object({ day: z.number().int().min(0).max(6), items: z.array(z.object({ time: hhmm, name: z.string().trim().min(1).max(40) })).max(12) })).max(7).optional(),
+    perks: z.array(z.object({ plan: z.string().trim().min(1).max(60), items: z.array(z.string().trim().min(1).max(80)).max(10) })).max(24).optional(),
+    steps: z.array(z.object({ title: z.string().trim().min(1).max(40), text: z.string().trim().max(160) })).max(5).optional(),
+  }).optional(),
 })
 
 export type BarberInput = z.infer<typeof barberInputSchema>
@@ -202,8 +216,20 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
 
   const gallery = [input.photos.hero, input.photos.side, ...(input.photos.gallery || [])].filter((u, i, all): u is string => !!u && all.indexOf(u) === i)
 
+  const nx = input.niche_extra
+  const niche_extra = nx ? {
+    offers: nx.offers?.length ? nx.offers : undefined,
+    facilities: nx.facilities?.length ? nx.facilities : undefined,
+    story: nx.story || undefined,
+    since: nx.since,
+    classes: nx.classes?.filter((d) => d.items.length).length ? nx.classes.filter((d) => d.items.length) : undefined,
+    perks: nx.perks?.filter((p) => p.items.length).length ? nx.perks.filter((p) => p.items.length) : undefined,
+    steps: nx.steps?.length ? nx.steps : undefined,
+  } : undefined
+
   return {
     niche: input.kind,
+    ...(niche_extra && Object.values(niche_extra).some((v) => v !== undefined) ? { niche_extra } : {}),
     brand: {
       name: input.name,
       category: k.label,
@@ -250,7 +276,7 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
     },
     faq: { heading: 'قبل أن تأتي', items: faq },
     final_cta: { heading: k.cta, subheading: '', cta_label: k.cta, secondary_text: '' },
-    gallery: { heading: k.place, images: gallery.map((u) => ({ url: u, alt: '' })) },
+    gallery: { heading: k.place, images: gallery.map((u) => ({ url: u, alt: '', source: sourceOfPhoto(u), from: SOURCE_AR[sourceOfPhoto(u)] })) },
     footer: { tagline: lede, legal: '', phone: input.phone, email: input.email || '', address: input.address || where },
     seo: {
       title: `${input.name} | ${k.seo} في ${input.area || input.city}`,
@@ -270,7 +296,57 @@ export function buildBarberContent(input: BarberInput, g: BarberGoogle = {}): Se
   }
 }
 
+/** Our storage keeps Google and Instagram copies in their own folders; anything else the owner gave. */
+export function sourceOfPhoto(u: string): ContentSource {
+  return /\/google\//.test(u) ? 'google' : /\/instagram\//.test(u) ? 'instagram' : /\/facebook\//.test(u) ? 'facebook' : 'owner'
+}
+export const SOURCE_AR: Record<ContentSource, string> = { owner: 'منك', instagram: 'من إنستغرام', facebook: 'من فيسبوك', tiktok: 'من تيك توك', google: 'من جوجل', default: 'اقتراح منا' }
+
 /** Every kind builds the same way; the barber was first. */
 export const nicheInputSchema = barberInputSchema
 export type NicheInput = BarberInput
 export const buildNicheContent = buildBarberContent
+
+/**
+ * How complete the site is (the probability rule, spec 2026-11-12 §5-ج).
+ * Each part has a weight (they sum to 100) and a fill from 0 to 1, so the
+ * owner sees «موقعك مكتمل 65٪» and the one step that adds the most.
+ */
+export type Completeness = {
+  pct: number
+  parts: { id: string; label: string; weight: number; fill: number }[]
+  next?: { id: string; label: string; gain: number }
+}
+
+const PARTS: { id: string; weight: number; label: string; ask: string }[] = [
+  { id: 'services', weight: 20, label: 'الخدمات', ask: 'اختر خدماتك أو أضفها' },
+  { id: 'prices', weight: 15, label: 'الأسعار', ask: 'أضف أسعارك' },
+  { id: 'photos', weight: 20, label: 'الصور', ask: 'أضف صورًا حقيقية للمحل' },
+  { id: 'team', weight: 10, label: 'الفريق', ask: 'أضف أسماء الفريق' },
+  { id: 'reviews', weight: 10, label: 'التقييمات', ask: 'ضع رابط خرائط جوجل لنجلب تقييماتك' },
+  { id: 'booking', weight: 10, label: 'الحجز', ask: 'قل للزبون كم ينتظر ومتى الزحمة' },
+  { id: 'hours', weight: 5, label: 'الأوقات', ask: 'أضف أوقات الدوام' },
+  { id: 'faq', weight: 5, label: 'الأسئلة', ask: 'أجب عن أسئلة زبائنك' },
+  { id: 'extra', weight: 5, label: 'ما يميّزك', ask: 'اكتب ما يميّز محلك' },
+]
+
+export function completeness(input: Partial<BarberInput>, g: BarberGoogle = {}, o: { photos?: number; suggestedOnly?: boolean } = {}): Completeness {
+  const svc = input.services || []
+  const priced = svc.filter((s) => s.price).length
+  const photos = o.photos ?? [input.photos?.hero, input.photos?.side, ...(input.photos?.gallery || [])].filter(Boolean).length
+  const fill: Record<string, number> = {
+    services: !svc.length ? 0 : o.suggestedOnly ? 0.5 : Math.min(1, svc.length / 3),
+    prices: svc.length ? priced / svc.length : 0,
+    photos: Math.min(1, photos / 6),
+    team: (input.barbers || []).length ? 1 : 0,
+    reviews: Math.min(1, (g.reviews || []).length / 3),
+    booking: 0.4 + (input.booking?.wait ? 0.3 : 0) + (input.booking?.busy ? 0.3 : 0),
+    hours: (input.hours || []).length || (g.periods || []).length ? 1 : 0,
+    faq: Math.min(1, (input.faq || []).filter((f) => f.a).length / 3),
+    extra: (input.extra || '').length >= 20 ? 1 : 0,
+  }
+  const parts = PARTS.map((p) => ({ id: p.id, label: p.label, weight: p.weight, fill: fill[p.id] }))
+  const pct = Math.round(parts.reduce((a, p) => a + p.weight * p.fill, 0))
+  const gap = PARTS.map((p) => ({ id: p.id, label: p.ask, gain: Math.round(p.weight * (1 - fill[p.id])) })).sort((a, b) => b.gain - a.gain)[0]
+  return { pct, parts, next: gap && gap.gain > 0 ? gap : undefined }
+}
