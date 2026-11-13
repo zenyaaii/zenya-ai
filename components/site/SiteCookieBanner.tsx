@@ -126,14 +126,14 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
         نستخدم ملفات ضرورية فقط <span className="zy-ck-more" style={{ color: soft }}>لعمل الموقع وإحصاءات لا تكشف هويتك.</span>
       </span>
       <div style={{ display: 'flex', gap: 4, flex: '0 0 auto' }}>
-        <button type="button" onClick={() => choose(false)} style={{ ...btn, padding: '0 14px', background: 'transparent', color: soft }}>
+        <button type="button" className="zy-ck-no" onClick={() => choose(false)} style={{ ...btn, padding: '0 14px', background: 'transparent', color: soft }}>
           رفض
         </button>
         <button type="button" onClick={() => choose(true)} style={{ ...btn, padding: '0 20px', background: p.button, color: btnInk }}>
           موافق
         </button>
       </div>
-      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } }`}</style>
+      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } #site-cookie-desc{ white-space:nowrap; font-size:12.5px !important } .zy-ck-no{ padding:0 10px !important } }`}</style>
     </div>
   )
 }
