@@ -39,6 +39,13 @@ const AMBER = L('amber', 'غرافيت وكهرمان', '#121416', '#1a1d20', '#
 const SERVICE = L('service', 'أبيض الخدمة', '#f3f4f2', '#e8eae7', '#15191c', '#5c6469', '#1f4f7a', '#d7dbd8')
 const SAND = L('sand', 'رملي وزيتوني', '#f2efe8', '#e7e2d8', '#1d1c18', '#6b665c', '#2f5a4c', '#dad4c8')
 const INK = L('ink', 'حبر أسود', '#0b0b0b', '#141414', '#f2f2f0', '#8f8f8b', '#f2f2f0', '#262626')
+// Photo studio (Anas picked «من صوره: نهاري» as the default, 2026-11-13). A built
+// studio gets these from its own photos (lib/restaurant-build, light mood); the
+// values below are that result for a sample studio, used when none were found.
+const STUDIO_DAY = L('studio-day', 'من الصور: نهاري', '#f7f6f5', '#ffffff', '#261f1c', '#6f5b52', '#627140', '#e8e3e0')
+const DARKROOM = L('darkroom', 'الغرفة المظلمة', '#0e0d0c', '#181614', '#f0ece4', '#9a948a', '#d8b47a', '#2a2622')
+const PRINT = L('print', 'ورق الطباعة', '#f4f1ea', '#ebe6dc', '#1b1a17', '#6b665c', '#7c2d24', '#ddd7cb')
+const DAYLIGHT = L('daylight', 'ضوء النهار', '#e7e9e7', '#dde0dd', '#141617', '#5c6266', '#2f4b5c', '#cdd1ce')
 
 export type KindText = {
   id: NicheKind
@@ -203,7 +210,7 @@ export const KIND: Record<NicheKind, KindText> = {
     match: /ورشة|سيارات|سيارة|ميكانيك|صيانة سيارات|car|garage|auto/i, seo: 'ورشة سيارات',
   },
   photo: {
-    looks: [INK, PAPER, BRASS],
+    looks: [STUDIO_DAY, DARKROOM, PRINT, DAYLIGHT],
     id: 'photo', label: 'استوديو تصوير', place: 'الاستوديو', team: 'المصورون', one: 'المصور', any: 'أي مصور', role: 'مصور', ownerRole: 'صاحب الاستوديو',
     bookAt: (n) => `احجز مع ${n}`, services: 'الباقات', cta: 'احجز جلستك',
     bookLine: 'اختر الباقة والمصور والوقت. يصل طلبك إلى الاستوديو، ويؤكّد لك الموعد على واتساب.',

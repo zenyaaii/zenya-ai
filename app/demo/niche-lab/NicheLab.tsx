@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { BookingProvider } from '@/components/site/BookingContext'
-import SiteCookieBanner, { COOKIE_SKINS } from '@/components/site/SiteCookieBanner'
+import SiteCookieBanner from '@/components/site/SiteCookieBanner'
+import { NICHE_COOKIE } from '@/components/site/cookie-looks'
 import BeautyA from '@/components/theme/services/niche/BeautyA'
 import BeautyB from '@/components/theme/services/niche/BeautyB'
 import CarA from '@/components/theme/services/niche/CarA'
@@ -15,6 +16,7 @@ import GymFull from '@/components/theme/services/niche/GymFull'
 import CarFull from '@/components/theme/services/niche/CarFull'
 import PhotoFull from '@/components/theme/services/niche/PhotoFull'
 import BeautyFull from '@/components/theme/services/niche/BeautyFull'
+import { PHOTO_LOOKS } from '@/components/theme/services/niche/photo-looks'
 import { labContent, type Fill, type LabKind } from '@/components/theme/services/niche/lab-content'
 
 /** The heavy, many-page themes (2026-11-13). The short samples stay at &v=a / &v=b. */
@@ -93,11 +95,11 @@ export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: stri
   if (Full && v !== 'a' && v !== 'b') {
     return (
       <BookingProvider slug="" enabled preview>
-        <Full content={data.c} x={data.x} initial={p} colors={carLook ? carLook.colors : look ? LOOKS[look] : undefined} />
+        <Full content={data.c} x={data.x} initial={p} colors={carLook ? carLook.colors : look ? (kind === 'photo' ? PHOTO_LOOKS[look] : undefined) ?? LOOKS[look] : undefined} />
         {carLook ? <CarLooks at={carAt} set={setCarAt} /> : null}
         {carLook ? (
           // The site's cookie notice in the car cut, in the chosen colours (as lib/public-site draws it on a live car site).
-          <SiteCookieBanner key={carLook.id} skin={COOKIE_SKINS.car} palette={{ ...(carLook.colors as any), primary: carLook.colors.accent, headingFont: 'Rubik', bodyFont: 'Rubik', button: carLook.colors.accent, buttonRadius: 8 }} />
+          <SiteCookieBanner key={carLook.id} look={NICHE_COOKIE.car} palette={{ ...(carLook.colors as any), primary: carLook.colors.accent, headingFont: 'Rubik', bodyFont: 'Rubik', button: carLook.colors.accent, buttonRadius: 8 }} />
         ) : null}
       </BookingProvider>
     )

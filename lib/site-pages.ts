@@ -86,6 +86,14 @@ export const NICHE_PAGES: Record<string, SitePage[]> = {
     { view: 'shop',     slug: 'workshop', label: 'الورشة' },
     { view: 'book',     slug: 'book',     label: 'احجز موعدًا' },
   ],
+  photo: [
+    { view: 'home',      slug: '',          label: 'الرئيسية' },
+    { view: 'work',      slug: 'work',      label: 'الأعمال' },
+    { view: 'packages',  slug: 'packages',  label: 'الباقات' },
+    { view: 'official',  slug: 'official',  label: 'الصور الرسمية' },
+    { view: 'studio',    slug: 'studio',    label: 'الاستوديو' },
+    { view: 'book',      slug: 'book',      label: 'احجز جلستك' },
+  ],
 }
 
 /** The services kind a site's content was built for ('gym', …), if any. */

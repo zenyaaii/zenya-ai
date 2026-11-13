@@ -23,6 +23,7 @@ import { FACEBOOK, INSTAGRAM, TIKTOK, WHATSAPP, YOUTUBE } from '@/components/mar
 const FULL = {
   gym: lazy(() => import('./niche/GymFull')),
   car: lazy(() => import('./niche/CarFull')),
+  photo: lazy(() => import('./niche/PhotoFull')),
 } as const
 
 type Props = {
