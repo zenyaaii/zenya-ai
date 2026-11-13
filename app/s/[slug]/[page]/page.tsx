@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { lookupPublishedTheme, recordView, buildSiteMetadata, PublicSiteBody } from '@/lib/public-site'
-import { pageBySlug } from '@/lib/site-pages'
+import { nicheOf, pageBySlug } from '@/lib/site-pages'
 
 /**
  * A single content page of a customer site, e.g. slug.beynoun.com/menu.
@@ -19,7 +19,7 @@ function resolve(theme: Awaited<ReturnType<typeof lookupPublishedTheme>>, slug: 
   const businessType =
     (theme.content && typeof theme.content === 'object' && (theme.content as any).business_type) ||
     theme.template_type
-  const page = pageBySlug(businessType, slug)
+  const page = pageBySlug(businessType, slug, nicheOf(theme.content, businessType))
   // Unknown page, or the home page hitting this route by mistake → 404.
   if (!page || page.slug === '') return null
   return { theme, page }

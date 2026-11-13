@@ -285,7 +285,7 @@ export default function NicheView({ content, colors, logo }: { content: ServiceC
         ) : null}
         <div>
           <h2 className="bb-h3">{[b.area, b.city].filter(Boolean).join('، ')}</h2>
-          {content.footer.address ? <p className="bb-addr">{content.footer.address}</p> : null}
+          {content.footer.address && content.footer.address.trim() !== [b.area, b.city].filter(Boolean).join('، ') ? <p className="bb-addr">{content.footer.address}</p> : null}
           {hours.length ? (
             <table className="bb-hours"><tbody>
               {hours.map((d) => (

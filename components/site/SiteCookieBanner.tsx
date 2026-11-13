@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from 'react'
 import { readableOn, type SitePalette } from '@/lib/site-palette'
+import type { CookieLook } from './cookie-looks'
 
 /**
  * The cookie notice on a site Beynoun generates for a customer.
@@ -38,7 +39,7 @@ function saveChoice(accepted: boolean) {
   }
 }
 
-export default function SiteCookieBanner({ palette }: { palette: SitePalette }) {
+export default function SiteCookieBanner({ palette, look }: { palette: SitePalette; look?: CookieLook }) {
   const [visible, setVisible] = useState(false)
   const [shown, setShown] = useState(false)
 
@@ -63,10 +64,11 @@ export default function SiteCookieBanner({ palette }: { palette: SitePalette }) 
   const soft = readableOn(p.surface, [p.muted, p.text])
   const btnInk = readableOn(p.button, [p.primary, p.text, p.background])
 
+  const font = look?.font || p.bodyFont
   const btn: CSSProperties = {
     minHeight: 40,
-    borderRadius: 999,
-    fontFamily: p.bodyFont,
+    borderRadius: look?.buttonRadius ?? 999,
+    fontFamily: font,
     fontSize: 13.5,
     fontWeight: 600,
     cursor: 'pointer',
@@ -82,11 +84,12 @@ export default function SiteCookieBanner({ palette }: { palette: SitePalette }) 
       role="dialog"
       aria-label="ملفات تعريف الارتباط"
       aria-describedby="site-cookie-desc"
+      className="zy-ck"
       style={{
         position: 'fixed',
         zIndex: 2147483001, // one above the Made with Beynoun badge
         left: '50%',
-        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+        bottom: 'var(--zy-ck-bottom, calc(16px + env(safe-area-inset-bottom, 0px)))',
         transform: `translate(-50%, ${shown ? '0' : '24px'})`,
         opacity: shown ? 1 : 0,
         transition: 'transform .45s cubic-bezier(.22,1,.36,1), opacity .35s',
@@ -99,31 +102,43 @@ export default function SiteCookieBanner({ palette }: { palette: SitePalette }) 
         padding: 6,
         paddingInlineStart: 18,
         direction: 'rtl',
-        fontFamily: p.bodyFont,
+        fontFamily: font,
         color: ink,
-        borderRadius: 999,
-        background: `color-mix(in srgb, ${p.surface} 82%, transparent)`,
-        backdropFilter: 'blur(18px) saturate(1.3)',
-        WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
-        border: `1px solid color-mix(in srgb, ${p.button} 35%, transparent)`,
-        boxShadow: '0 18px 50px -12px rgba(0,0,0,.45)',
+        borderRadius: look?.radius ?? 999,
+        ...(look?.flat
+          ? { background: p.surface, border: `1px solid ${p.border}`, boxShadow: look.shadow }
+          : {
+              background: `color-mix(in srgb, ${p.surface} 82%, transparent)`,
+              backdropFilter: 'blur(18px) saturate(1.3)',
+              WebkitBackdropFilter: 'blur(18px) saturate(1.3)',
+              border: `1px solid color-mix(in srgb, ${p.button} 35%, transparent)`,
+              boxShadow: look?.shadow || '0 18px 50px -12px rgba(0,0,0,.45)',
+            }),
       }}
     >
-      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ flex: '0 0 auto', color: p.button }}>
+      {look?.mark === 'aperture' ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" style={{ flex: '0 0 auto', color: p.button }}>
+          <circle cx="12" cy="12" r="9.5" /><path d="M14.3 2.8 9.6 11M19.9 7.5h-9.4M18.6 16.6 13.9 8.5M9.7 21.2l4.7-8.2M4.1 16.5h9.4M5.4 7.4l4.7 8.1" />
+        </svg>
+      ) : look?.mark === 'petal' ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" style={{ flex: '0 0 auto', color: p.button }}>
+          <path d="M12 20c-3.6-2.2-5.5-5-5.5-8.2C6.5 8.4 9 5.6 12 4c3 1.6 5.5 4.4 5.5 7.8 0 3.2-1.9 6-5.5 8.2z" /><path d="M12 20V9.5" />
+        </svg>
+      ) : <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ flex: '0 0 auto', color: p.button }}>
         <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5zm-3.5 9a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm3 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM7 6.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-      </svg>
+      </svg>}
       <span id="site-cookie-desc" style={{ fontSize: 13.5, lineHeight: 1.5, minWidth: 0 }}>
         نستخدم ملفات ضرورية فقط <span className="zy-ck-more" style={{ color: soft }}>لعمل الموقع وإحصاءات لا تكشف هويتك.</span>
       </span>
       <div style={{ display: 'flex', gap: 4, flex: '0 0 auto' }}>
-        <button type="button" onClick={() => choose(false)} style={{ ...btn, padding: '0 14px', background: 'transparent', color: soft }}>
+        <button type="button" className="zy-ck-no" onClick={() => choose(false)} style={{ ...btn, padding: '0 14px', background: 'transparent', color: soft }}>
           رفض
         </button>
         <button type="button" onClick={() => choose(true)} style={{ ...btn, padding: '0 20px', background: p.button, color: btnInk }}>
           موافق
         </button>
       </div>
-      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } }`}</style>
+      <style>{`@media (max-width: 520px){ .zy-ck-more{ display:none } #site-cookie-desc{ white-space:nowrap; font-size:12.5px !important } .zy-ck-no{ padding:0 10px !important } }${look?.phoneLift ? `@media (max-width: 760px){ .zy-ck{ --zy-ck-bottom: calc(${look.phoneLift}px + env(safe-area-inset-bottom, 0px)) } }` : ''}`}</style>
     </div>
   )
 }

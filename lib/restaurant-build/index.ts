@@ -126,7 +126,8 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
   const sources = [...picks.logos, ...judged.filter((j) => from.includes(j.v.n))].filter((j, i, all) => all.indexOf(j) === i).slice(0, 4)
   const measured = (await Promise.all(sources.map((s) => measure(s.jpeg).catch(() => [])))).flat()
   const identity = snap((Array.isArray(ai?.identity) ? ai.identity : []).slice(0, 3), measured)
-  const mood: 'dark' | 'light' = ai?.mood === 'light' ? 'light' : 'dark'
+  // A photo studio's own colours are always read in the day mood (Anas, 2026-11-13).
+  const mood: 'dark' | 'light' = niche === 'photo' || ai?.mood === 'light' ? 'light' : 'dark'
   const colors = paletteOf(identity, mood)
 
   // Our copies of the photos the site uses (never a Google URL on a site).

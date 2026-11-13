@@ -25,7 +25,7 @@ const lum = ([r, g, b]: RGB) => {
 }
 export const contrast = (a: RGB, b: RGB) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
 
-function toHsl([r, g, b]: RGB): [number, number, number] {
+export function toHsl([r, g, b]: RGB): [number, number, number] {
   r /= 255; g /= 255; b /= 255
   const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2
   if (max === min) return [0, 0, l]
@@ -38,7 +38,7 @@ function fromHsl(h: number, s: number, l: number): RGB {
   const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x]
   return [(r + m) * 255, (g + m) * 255, (b + m) * 255]
 }
-const withL = (c: RGB, l: number, sMax = 1) => { const [h, s] = toHsl(c); return fromHsl(h, Math.min(s, sMax), l) }
+export const withL = (c: RGB, l: number, sMax = 1) => { const [h, s] = toHsl(c); return fromHsl(h, Math.min(s, sMax), l) }
 
 /** Measured colours: a few k-means centres per photo, with how much of it they cover. */
 export async function measure(buf: Buffer, k = 5): Promise<{ c: RGB; share: number }[]> {
@@ -100,4 +100,30 @@ export function paletteOf(identity: RGB[], mood: 'dark' | 'light'): RestaurantCo
   while ((contrast([255, 255, 255], acc) < 4.5 || contrast(acc, bg) < 4.5) && l > 0.12) { l -= 0.03; acc = withL(accent, l) }
   const [r, g, b] = text
   return { primary: hex(withL(main, Math.min(toHsl(main)[2], 0.35))), accent: hex(acc), background: hex(bg), surface: hex(surface), text: hex(text), muted: hex(muted), border: `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},0.14)` }
+}
+
+const hueGap = (a: RGB, b: RGB) => { const d = Math.abs(toHsl(a)[0] - toHsl(b)[0]); return Math.min(d, 360 - d) }
+
+/**
+ * The identity colours from the pixels alone, for when no AI looked at the
+ * photos (the owner's wizard). Main is the colour that covers the most of the
+ * photos among those with some colour in them (else simply the most); accent
+ * is the boldest colour that covers a real part of a photo. Also returns the
+ * other bold colours, far enough in hue from the accent, as second-colour
+ * choices for the owner.
+ */
+export function identityFromPixels(measured: { c: RGB; share: number }[]): { identity: RGB[]; seconds: string[] } {
+  const real = measured.filter((m) => m.share >= 0.03)
+  if (!real.length) return { identity: [], seconds: [] }
+  const tinted = real.filter((m) => sat(m.c) > 0.12 && toHsl(m.c)[2] > 0.08 && toHsl(m.c)[2] < 0.92)
+  const main = [...(tinted.length ? tinted : real)].sort((a, b) => b.share - a.share)[0].c
+  const bold = [...tinted].sort((a, b) => sat(b.c) * Math.sqrt(b.share) - sat(a.c) * Math.sqrt(a.share))
+  const accent = bold[0]?.c ?? main
+  const seconds: RGB[] = []
+  for (const m of bold.slice(1).filter((x) => sat(x.c) > 0.25)) {
+    if (hueGap(m.c, accent) < 30 || seconds.some((s) => hueGap(s, m.c) < 30)) continue
+    seconds.push(m.c)
+    if (seconds.length === 3) break
+  }
+  return { identity: [main, accent], seconds: seconds.map((c) => hex(withL(c, Math.min(Math.max(toHsl(c)[2], 0.4), 0.6)))) }
 }

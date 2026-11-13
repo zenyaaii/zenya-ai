@@ -4,7 +4,7 @@
  * so the server page can read the list: a value imported from a 'use client'
  * file arrives on the server as a client reference, not as the array.
  */
-export const DEMO_TYPES = ['restaurant', 'atlas', 'lookbook', 'services', 'studio', 'wellness', 'barber'] as const
+export const DEMO_TYPES = ['restaurant', 'atlas', 'lookbook', 'services', 'studio', 'wellness', 'barber', 'gym', 'beauty', 'car', 'photo'] as const
 
 export type DemoType = (typeof DEMO_TYPES)[number]
 

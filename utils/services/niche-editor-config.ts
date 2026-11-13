@@ -1,7 +1,8 @@
-import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText } from 'lucide-react'
+import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, ShieldCheck, Camera, IdCard, Gift, Flower2 } from 'lucide-react'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
+import { DAYS_AR } from './barber'
 
 /**
  * The editor for a services kind page (barber, gym, beauty, clinic, car,
@@ -11,6 +12,155 @@ import { KIND, isNicheKind, type NicheKind } from './kinds'
  * people's photos) are here too.
  */
 export function nicheEditorConfig(kind: NicheKind): EditorConfig {
+  return withPages(kind, baseConfig(kind))
+}
+
+/**
+ * A kind with its own multi-page theme lists its pages, and each section says
+ * which pages draw it, so a click on the site opens the right panel and the
+ * page menu shows what each page holds. Ids match lib/site-pages NICHE_PAGES.
+ * A panel left out of `on` is on every page (name, links, address, Google).
+ */
+const KIND_PAGES: Partial<Record<NicheKind, { pages: NonNullable<EditorConfig['pages']>; on: Record<string, string[]> }>> = {
+  gym: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'plans', label: 'الاشتراكات', icon: Tag, ic: 'tag' },
+      { id: 'coaches', label: 'المدربون', icon: Users, ic: 'users' },
+      { id: 'timetable', label: 'جدول الحصص', icon: CalendarClock, ic: 'cal' },
+      { id: 'club', label: 'النادي', icon: Dumbbell, ic: 'store' },
+      { id: 'book', label: 'احجز وزُرنا', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'plans', 'timetable', 'club'],
+      team: ['home', 'coaches'],
+      services: ['home', 'plans'],
+      reviews: ['home'],
+      gallery: ['club'],
+      faq: ['home', 'book'],
+    },
+  },
+  car: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'services', label: 'الخدمات', icon: Wrench, ic: 'tag' },
+      { id: 'promise', label: 'ضماننا', icon: ShieldCheck, ic: 'star' },
+      { id: 'shop', label: 'الورشة', icon: Users, ic: 'store' },
+      { id: 'book', label: 'احجز موعدًا', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'services', 'promise', 'shop'],
+      services: ['home', 'services', 'promise'],
+      team: ['shop'],
+      reviews: ['home'],
+      gallery: ['shop'],
+      faq: ['home', 'book'],
+      booking: ['book'],
+    },
+  },
+  photo: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'work', label: 'الأعمال', icon: Camera, ic: 'gallery' },
+      { id: 'packages', label: 'الباقات', icon: Tag, ic: 'tag' },
+      { id: 'official', label: 'الصور الرسمية', icon: IdCard, ic: 'tag' },
+      { id: 'studio', label: 'الاستوديو', icon: Users, ic: 'users' },
+      { id: 'book', label: 'احجز جلستك', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      work: ['home', 'work'],
+      about: ['home', 'studio'],
+      team: ['studio'],
+      services: ['home', 'packages', 'official'],
+      reviews: ['home', 'studio'],
+      gallery: ['home', 'work'],
+      faq: ['home', 'book'],
+    },
+  },
+  beauty: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'sessions', label: 'الجلسات', icon: Tag, ic: 'tag' },
+      { id: 'packages', label: 'الباقات', icon: Gift, ic: 'tag' },
+      { id: 'center', label: 'المركز', icon: Flower2, ic: 'store' },
+      { id: 'book', label: 'احجزي', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      about: ['home', 'sessions', 'packages', 'center'],
+      team: ['home', 'center'],
+      services: ['home', 'sessions'],
+      reviews: ['home'],
+      gallery: ['home', 'center'],
+      faq: ['home', 'book'],
+      booking: ['book'],
+    },
+  },
+}
+
+/**
+ * Photo studio: the parts only its theme draws (components/theme/services/niche/PhotoFull.tsx).
+ * Every one is optional; a part left empty is not drawn, and a page with nothing is dropped.
+ */
+const PHOTO_PANELS: any[] = [
+  {
+    id: 'work', label: 'الأعمال', icon: Camera, ic: 'gallery', desc: 'صور من جلساتك، ونوع كل جلسة',
+    summary: (c: any) => `${(c?.niche_extra?.work || []).filter((w: any) => w?.url).length} صورة`,
+    fields: [
+      { type: 'note', content: 'هذه صور أعمالك، لا صور المكان. اكتب نوع كل صورة (منتجات، أعراس، أطفال...) فتظهر في الموقع أزرار لكل نوع. بدونها نعرض صور المكان.' },
+      {
+        type: 'array', path: 'niche_extra.work', label: 'صور الأعمال', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'tag',
+        makeItem: () => ({ url: '', tag: '' }),
+        itemFields: [{ type: 'image', path: 'url', label: 'الصورة' }, { type: 'text', path: 'tag', label: 'نوع الجلسة', placeholder: 'منتجات' }],
+      },
+    ],
+  },
+  {
+    id: 'about', label: 'عن الاستوديو', icon: Sparkles, ic: 'sparkle', desc: 'قصتك في جملتين',
+    summary: (c: any) => String(c?.niche_extra?.story || ''),
+    fields: [
+      { type: 'textarea', path: 'niche_extra.story', label: 'احكِ عن الاستوديو في جملتين', rows: 3, max: 400 },
+      { type: 'number', path: 'niche_extra.since', label: 'سنة الافتتاح', min: 1900, max: 2100 },
+    ],
+  },
+]
+
+const PHOTO_PRICE_FIELDS: any[] = [
+  {
+    type: 'array', path: 'niche_extra.perks', label: 'ماذا تشمل كل باقة', itemLabel: 'باقة', itemTitle: 'plan',
+    makeItem: () => ({ plan: '', items: [] }),
+    itemFields: [{ type: 'text', path: 'plan', label: 'اسم الباقة كما في قائمة الأسعار' }, { type: 'strings', path: 'items', label: 'ما تشمله', addLabel: 'أضف سطرًا' }],
+  },
+  { type: 'group', label: 'التسليم' },
+  {
+    type: 'array', path: 'niche_extra.delivery', label: 'متى يستلم الزبون صوره', itemLabel: 'نوع', itemTitle: 'what', itemSub: 'when',
+    makeItem: () => ({ what: '', when: '' }),
+    itemFields: [{ type: 'text', path: 'what', label: 'ماذا', placeholder: 'الصور الرسمية' }, { type: 'text', path: 'when', label: 'متى', placeholder: 'فورًا' }],
+  },
+  { type: 'group', label: 'الصور الرسمية' },
+  {
+    type: 'array', path: 'niche_extra.specs', label: 'المقاسات التي تصوّرها', itemLabel: 'ورقة', itemTitle: 'label', itemSub: 'text',
+    makeItem: () => ({ label: '', text: '' }),
+    itemFields: [{ type: 'text', path: 'label', label: 'الورقة', placeholder: 'جواز السفر' }, { type: 'text', path: 'text', label: 'المقاس والخلفية', placeholder: '4 × 6 سم، خلفية بيضاء' }],
+  },
+  { type: 'group', label: 'قبل أن يحجز' },
+  {
+    type: 'array', path: 'niche_extra.blocks', label: 'ملاحظات للزبون', itemLabel: 'ملاحظة', itemTitle: 'title', itemSub: 'text',
+    makeItem: () => ({ id: `n${Date.now()}`, title: '', text: '' }),
+    itemFields: [{ type: 'text', path: 'title', label: 'العنوان', placeholder: 'التعديل' }, { type: 'text', path: 'text', label: 'النص', placeholder: 'تعديلان مجانًا لكل صورة' }],
+  },
+]
+
+function withPages(kind: NicheKind, c: EditorConfig): EditorConfig {
+  const m = KIND_PAGES[kind]
+  if (!m) return c
+  return { ...c, pages: m.pages, panels: c.panels.map((p) => (m.on[p.id] ? { ...p, pages: m.on[p.id] } : p)) }
+}
+
+function baseConfig(kind: NicheKind): EditorConfig {
   const k = KIND[kind]
   return {
     ...SERVICES_EDITOR_CONFIG,
@@ -40,6 +190,55 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
           { type: 'image', path: 'hero.image', label: 'صورة الواجهة', optional: true, hint: 'صورة حقيقية للمكان. بدونها تظهر الواجهة بالاسم وحده.' },
         ],
       },
+      ...(kind === 'photo' ? PHOTO_PANELS : []),
+      ...(k.extras ? [{
+        id: 'about', label: `عن ${k.place}`, icon: Sparkles, ic: 'sparkle', desc: `ما يقدّمه ${k.place}، مرافقه، وقصته`,
+        summary: (c: any) => (c?.niche_extra?.offers || []).join('، ') || String(c?.niche_extra?.story || ''),
+        empty: (c: any) => !c?.niche_extra || !Object.values(c.niche_extra).some((v: any) => (Array.isArray(v) ? v.length : !!v)),
+        fields: [
+          { type: 'note', content: 'كل ما يبقى فارغًا هنا لا يظهر في الموقع.' },
+          ...(k.extras.privacy ? [{ type: 'text', path: 'niche_extra.privacy', label: 'لمن المكان، وكيف تحفظون الخصوصية', placeholder: k.extras.privacy.example }] : []),
+          ...(k.extras.offers ? [{ type: 'strings', path: 'niche_extra.offers', label: `ماذا يقدّم ${k.place}`, addLabel: 'أضف' }] : []),
+          ...(k.extras.facilities ? [{ type: 'strings', path: 'niche_extra.facilities', label: 'المرافق', addLabel: 'أضف مرفقًا' }] : []),
+          ...(k.extras.story ? [{ type: 'textarea', path: 'niche_extra.story', label: k.extras.story.label, rows: 3, max: 400 }] : []),
+          ...(k.extras.features ? [{ type: 'strings', path: 'niche_extra.features', label: 'ما الذي يميزك (سطر لكل ميزة)', addLabel: 'أضف ميزة' }] : []),
+          ...(k.extras.packages ? [{
+            type: 'array', path: 'niche_extra.packages', label: 'الباقات', itemLabel: 'باقة', itemTitle: 'name', itemSub: 'price',
+            makeItem: () => ({ name: '', includes: [], duration: '', price: '' }),
+            itemFields: [
+              { type: 'text', path: 'name', label: 'اسم الباقة' },
+              { type: 'strings', path: 'includes', label: 'ما تشمله', addLabel: 'أضف جلسة' },
+              { type: 'text', path: 'duration', label: 'المدة' },
+              { type: 'text', path: 'price', label: 'السعر (مع العملة). فارغ = «اسألي عن السعر»' },
+            ],
+          }] : []),
+          ...(k.extras.blocks ? [{
+            type: 'array', path: 'niche_extra.blocks', label: 'قبل الجلسة (الضيافة، تنبيه صحي، التأخير)', itemLabel: 'ملاحظة', itemTitle: 'title', itemSub: 'text',
+            makeItem: () => ({ id: 'note', title: '', text: '' }),
+            itemFields: [{ type: 'text', path: 'title', label: 'العنوان' }, { type: 'textarea', path: 'text', label: 'النص', rows: 3 }],
+          }] : []),
+          ...(k.extras.since ? [{ type: 'number', path: 'niche_extra.since', label: 'سنة الافتتاح', min: 1900, max: 2100 }] : []),
+          ...(k.extras.steps ? [{
+            type: 'array', path: 'niche_extra.steps', label: 'كيف يبدأ الزبون الجديد', itemLabel: 'خطوة', itemTitle: 'title', itemSub: 'text',
+            makeItem: () => ({ title: '', text: '' }),
+            itemFields: [{ type: 'text', path: 'title', label: 'العنوان' }, { type: 'text', path: 'text', label: 'السطر' }],
+          }] : []),
+          ...(k.extras.perks ? [{
+            type: 'array', path: 'niche_extra.perks', label: `ماذا يشمل كل ${k.services === 'الاشتراكات' ? 'اشتراك' : 'خدمة'}`, itemLabel: k.services === 'الاشتراكات' ? 'اشتراك' : 'خدمة', itemTitle: 'plan',
+            makeItem: () => ({ plan: '', items: [] }),
+            itemFields: [{ type: 'text', path: 'plan', label: 'الاسم كما في قائمة الأسعار' }, { type: 'strings', path: 'items', label: 'ما يشمله', addLabel: 'أضف سطرًا' }],
+          }] : []),
+          ...(k.extras.classes ? [{
+            type: 'array', path: 'niche_extra.classes', label: 'جدول الحصص', itemLabel: 'يوم', itemTitle: 'day',
+            makeItem: () => ({ day: 0, items: [] }),
+            itemFields: [
+              { type: 'choice', path: 'day', label: 'اليوم', fallback: '0', options: DAYS_AR.map((d, i) => ({ value: String(i), label: d })) },
+              { type: 'array', path: 'items', label: 'حصص هذا اليوم', itemLabel: 'حصة', itemTitle: 'name', itemSub: 'time', makeItem: () => ({ time: '18:00', name: '' }),
+                itemFields: [{ type: 'text', path: 'time', label: 'الوقت (مثل 18:30)' }, { type: 'text', path: 'name', label: 'اسم الحصة' }] },
+            ],
+          }] : []),
+        ],
+      }] as EditorConfig['panels'] : []),
       {
         id: 'team', label: k.team, icon: Users, ic: 'users', desc: `${k.team} بالاسم`,
         summary: (c) => (c?.team?.members || []).map((m: any) => m.name).join('، '),
@@ -72,9 +271,11 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
               { type: 'text', path: 'name', label: 'الاسم' },
               { type: 'text', path: 'price_from', label: 'السعر (مع العملة)' },
               { type: 'text', path: 'duration', label: 'المدة' },
+              ...(k.extras?.groups ? [{ type: 'text', path: 'group', label: 'القسم (مثل: شعر، أظافر، بشرة)' }] as EditorConfig['panels'][number]['fields'] : []),
               { type: 'text', path: 'description', label: 'ملاحظة قصيرة' },
             ],
           },
+          ...(kind === 'photo' ? PHOTO_PRICE_FIELDS : []),
           { type: 'group', label: 'الشروط' },
           {
             type: 'array', path: 'terms', label: 'الشروط', itemLabel: 'شرط', itemTitle: 'label', itemSub: 'text',
@@ -112,10 +313,11 @@ export function nicheEditorConfig(kind: NicheKind): EditorConfig {
         id: 'gallery', label: 'الصور', icon: ImageIcon, ic: 'gallery', desc: 'صور المكان الحقيقية',
         summary: (c) => `${(c?.gallery?.images || []).length} صور`,
         fields: [
+          { type: 'note', content: 'تحت كل صورة مصدرها: «من جوجل» أو «من إنستغرام» أخذناها من حساباتك، و«منك» ما رفعته. غيّر أي صورة أو احذفها.' },
           { type: 'image', path: 'story.image', label: 'الصورة بجانب الأسعار', optional: true },
           {
-            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt',
-            makeItem: () => ({ url: '', alt: '' }),
+            type: 'array', path: 'gallery.images', label: 'صور المكان', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'alt', itemSub: 'from',
+            makeItem: () => ({ url: '', alt: '', source: 'owner', from: 'منك' }),
             itemFields: [{ type: 'image', path: 'url', label: 'الصورة' }, { type: 'text', path: 'alt', label: 'وصفها' }],
           },
         ],

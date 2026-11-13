@@ -17,10 +17,12 @@ export type NicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
  * beauty, clinic, car repair and photo studio stay on their templates' own
  * wizards and lead builds until each gets a design of its own.
  */
-export const LIVE_KINDS: readonly NicheKind[] = ['barber']
+// Beauty & spa joined on 2026-11-13: Anas approved its own theme (BeautyFull), photo colours as default.
+// Gym, car and photo joined on 2026-11-13 (Anas: «make them all work with the new system»). Clinic waits for its own design.
+export const LIVE_KINDS: readonly NicheKind[] = ['barber', 'gym', 'beauty', 'car', 'photo']
 export const isLiveKind = (k: unknown): k is NicheKind => LIVE_KINDS.includes(k as NicheKind)
 
-export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string } }
+export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string; /** A quiet second colour (beauty: badges, numbers). */ accent2?: string } }
 
 const L = (id: string, name: string, background: string, surface: string, text: string, muted: string, accent: string, border: string): Look =>
   ({ id, name, colors: { background, surface, text, muted, accent, primary: accent, border } })
@@ -30,18 +32,32 @@ const OXBLOOD = L('oxblood', 'أحمر عتيق', '#100b0a', '#1a1210', '#f3ebe6
 const PAPER = L('paper', 'ورقي فاتح', '#f3efe7', '#e9e3d8', '#1b1712', '#6c6458', '#1b1712', '#d8d0c2')
 const IRON = L('iron', 'حديد وبرتقالي', '#0e0f10', '#17191b', '#f1f1ef', '#8f9396', '#e8622c', '#26292c')
 const CHALK = L('chalk', 'طباشيري', '#f2f2ef', '#e6e6e1', '#141414', '#5e5e5a', '#141414', '#d6d6d0')
-const ROSE = L('rose', 'وردي هادئ', '#f7f1ee', '#efe5e0', '#2a1d1b', '#7a6863', '#a8545e', '#e3d5cf')
-const PLUM = L('plum', 'برقوقي ليلي', '#120d10', '#1c1419', '#f4ecef', '#a3949b', '#c98a9a', '#2e2329')
+/** Beauty & spa (Anas, 2026-11-13): three blended sets, each with a quiet second colour. Photo sets come first when the owner's photos give them (lib/niche-photo-looks). */
+const L2 = (l: Look, accent2: string): Look => ({ ...l, colors: { ...l.colors, accent2 } })
+const SAGE = L2(L('sage', 'مريمية ورمل', '#f2f1ec', '#e7e5dc', '#1b231f', '#5f6a63', '#3d6652', '#d9d6cb'), '#b48a5e')
+const ROSE_CLAY = L2(L('rose-clay', 'وردي ترابي', '#f8f1ee', '#f0e3dd', '#2a1c1c', '#7a6562', '#94495a', '#e6d5ce'), '#c29a6b')
+const OUD = L2(L('oud', 'عود ولؤلؤ', '#15110f', '#1f1916', '#f2ebe3', '#a5998d', '#d6b98f', '#2e2621'), '#c08f86')
 const MINT = L('mint', 'أبيض طبي', '#f4f7f6', '#e8eeec', '#10201c', '#5a6b66', '#0f766e', '#d5e0dc')
 const NAVY = L('navy', 'كحلي هادئ', '#0c1219', '#131c26', '#eef2f6', '#8c99a7', '#5fa8d3', '#22303e')
-const AMBER = L('amber', 'كهرماني', '#0f0e0c', '#181613', '#f2efe9', '#938c80', '#e0a526', '#2a2722')
-const STEEL = L('steel', 'فولاذي فاتح', '#eff1f2', '#e2e5e7', '#14181b', '#5b6369', '#c0392b', '#d0d5d8')
+// Car looks Anas picked from (2026-11-13): three blended sets. The wizard puts the two measured from the shop's photos first.
+const AMBER = L('amber', 'غرافيت وكهرمان', '#121416', '#1a1d20', '#eeece7', '#97948d', '#e2a33e', '#2a2d30')
+const SERVICE = L('service', 'أبيض الخدمة', '#f3f4f2', '#e8eae7', '#15191c', '#5c6469', '#1f4f7a', '#d7dbd8')
+const SAND = L('sand', 'رملي وزيتوني', '#f2efe8', '#e7e2d8', '#1d1c18', '#6b665c', '#2f5a4c', '#dad4c8')
 const INK = L('ink', 'حبر أسود', '#0b0b0b', '#141414', '#f2f2f0', '#8f8f8b', '#f2f2f0', '#262626')
+// Photo studio (Anas picked «من صوره: نهاري» as the default, 2026-11-13). A built
+// studio gets these from its own photos (lib/restaurant-build, light mood); the
+// values below are that result for a sample studio, used when none were found.
+const STUDIO_DAY = L('studio-day', 'من الصور: نهاري', '#f7f6f5', '#ffffff', '#261f1c', '#6f5b52', '#627140', '#e8e3e0')
+const DARKROOM = L('darkroom', 'الغرفة المظلمة', '#0e0d0c', '#181614', '#f0ece4', '#9a948a', '#d8b47a', '#2a2622')
+const PRINT = L('print', 'ورق الطباعة', '#f4f1ea', '#ebe6dc', '#1b1a17', '#6b665c', '#7c2d24', '#ddd7cb')
+const DAYLIGHT = L('daylight', 'ضوء النهار', '#e7e9e7', '#dde0dd', '#141617', '#5c6266', '#2f4b5c', '#cdd1ce')
 
 export type KindText = {
   id: NicheKind
   /** Three colour looks for the wizard; the first is the default. */
   looks: Look[]
+  /** Offer two sets taken from the owner's photos first, and default to them when found. */
+  photoLooks?: boolean
   /** The kind as the owner picks it. */
   label: string
   /** What the place is called in a sentence: «الصالون», «النادي». */
@@ -69,14 +85,37 @@ export type KindText = {
   audiences?: string[]
   /** Chips: what each person is known for. */
   tags: string[]
-  /** Starting service list: name, duration, on by default. */
-  defaults: { name: string; duration: string; on: boolean }[]
+  /** Starting service list: name, duration, on by default (beauty: and its tab). */
+  defaults: { name: string; duration: string; on: boolean; group?: string }[]
   /** Starting questions. */
   faqs: string[]
   /** Terms the owner can state (gym: freeze/cancel; car: warranty). */
   terms?: { label: string; placeholder: string }[]
   /** Price unit hint in the wizard ("شهريًا" for a gym). */
   priceHint?: string
+  /**
+   * The kind's own questions (NicheExtra). Each key present adds that
+   * question; the lists are the chips offered, the owner can add his own.
+   */
+  extras?: {
+    offers?: string[]
+    facilities?: string[]
+    story?: { label: string; example: string }
+    since?: boolean
+    classes?: { names: string[] }
+    perks?: { example: string }
+    steps?: { title: string; text: string }[]
+    /** Beauty: who the place is for. Chips, the first is the default. */
+    privacy?: { options: string[]; example: string }
+    /** Beauty: «ما الذي يميزك؟», one line each. */
+    features?: { examples: string[] }
+    /** Beauty: sessions sold together. */
+    packages?: { example: { name: string; includes: string[]; duration: string; price: string } }
+    /** Beauty: notes before a session, each a yes-with-text. */
+    blocks?: { id: string; title: string; example: string }[]
+    /** Beauty: tabs a session can sit under. */
+    groups?: string[]
+  }
   /** For the AI visitor and the photo judge. */
   visitor: { who: string; want: string; place: string }
   /** Words in a lead's kind or name that mean this kind. */
@@ -100,7 +139,7 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'حلاقة أطفال', duration: '20 دقيقة', on: false }, { name: 'تنظيف بشرة', duration: '30 دقيقة', on: false }, { name: 'بروتين للشعر', duration: '90 دقيقة', on: false },
       { name: 'صبغة شعر أو لحية', duration: '40 دقيقة', on: false }, { name: 'تجهيز عريس', duration: '', on: false },
     ],
-    faqs: ['هل أحتاج موعدًا، أم أحضر مباشرة؟', 'كم أنتظر عادة؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل تحلقون للأطفال؟', 'هل يوجد موقف سيارات قريب؟', 'هل تقبلون الدفع بالبطاقة؟'],
+    faqs: ['هل أحتاج موعدًا، أم أحضر مباشرة؟', 'كم أنتظر عادة؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل تحلقون للأطفال؟', 'هل يوجد موقف سيارات قريب؟'],
     visitor: { who: 'a man', want: 'book a haircut there this week', place: "men's barbershop" },
     match: /حلاق|باربر|barber/i, seo: 'حلاق',
   },
@@ -120,11 +159,25 @@ export const KIND: Record<NicheKind, KindText> = {
     faqs: ['هل أستطيع تجميد الاشتراك؟', 'هل أستطيع إلغاء الاشتراك واسترجاع المبلغ؟', 'متى يكون النادي مزدحمًا؟', 'هل يوجد مدرب يتابعني وأنا مبتدئ؟', 'هل توجد خزائن ودُش؟', 'هل يوجد موقف سيارات؟'],
     terms: [{ label: 'التجميد', placeholder: 'حتى أسبوعين في الاشتراك الفصلي' }, { label: 'الإلغاء', placeholder: 'خلال 3 أيام من الدفع، بدون أسئلة' }, { label: 'رسوم التسجيل', placeholder: 'لا توجد' }],
     priceHint: 'السعر الكامل للاشتراك',
+    extras: {
+      offers: ['أجهزة حديد', 'كارديو', 'كروس فت', 'ملاكمة', 'فنون قتالية', 'يوغا', 'حصص جماعية', 'تدريب شخصي', 'برامج تغذية', 'تأهيل إصابات'],
+      facilities: ['غرف تبديل', 'دش', 'خزائن', 'ساونا', 'بخار', 'مسبح', 'موقف سيارات', 'مكيّف', 'مياه مجانية', 'قسم للسيدات بأوقات منفصلة'],
+      story: { label: 'احكِ عن ناديك في جملتين', example: 'نادٍ صغير في الملقا، كل مشترك فيه له برنامج ومدرب يعرفه بالاسم. افتتحناه لأن أغلب الأندية حولنا مزدحمة ولا أحد يتابع المبتدئ.' },
+      since: true,
+      classes: { names: ['كروس فت', 'ملاكمة', 'سبينينغ', 'يوغا', 'HIIT', 'دائري'] },
+      perks: { example: 'دخول كل الأجهزة\nجلسة قياس جسم شهرية\nبرنامج تمارين مكتوب' },
+      steps: [
+        { title: 'زيارة وتجربة', text: 'تعال وجرّب النادي يومًا مجانًا.' },
+        { title: 'قياس وبرنامج', text: 'يقيس المدرب وزنك ويكتب لك برنامجًا يناسب هدفك.' },
+        { title: 'متابعة', text: 'نراجع تقدّمك كل شهر ونعدّل البرنامج.' },
+      ],
+    },
     visitor: { who: 'a person', want: 'sign up at this gym this month', place: 'gym' },
     match: /جيم|نادي|نادى|لياقة|كمال اجسام|كروس|gym|fitness|crossfit/i, seo: 'نادي رياضي',
   },
   beauty: {
-    looks: [ROSE, PLUM, PAPER],
+    looks: [SAGE, ROSE_CLAY, OUD],
+    photoLooks: true,
     id: 'beauty', label: 'مركز تجميل', place: 'المركز', team: 'فريقنا', one: 'الأخصائية', any: 'أي أخصائية', role: 'أخصائية', ownerRole: 'صاحبة المركز',
     bookAt: (n) => `احجزي عند ${n}`, services: 'الخدمات', cta: 'احجزي موعدك',
     bookLine: 'اختاري الخدمة والأخصائية والوقت. يصل طلبك إلى المركز، ويؤكّد لك الموعد على واتساب.',
@@ -132,10 +185,24 @@ export const KIND: Record<NicheKind, KindText> = {
     lede: ({ named, area }) => `مركز تجميل في ${area}.${named.length >= 2 ? ` زبوناتنا يطلبن ${named.slice(0, 3).join(' و')} بالاسم.` : ''}`,
     tags: ['شعر', 'صبغة', 'أظافر', 'بشرة', 'مكياج', 'عرائس', 'ليزر', 'حواجب'],
     defaults: [
-      { name: 'قص وتصفيف الشعر', duration: '45 دقيقة', on: true }, { name: 'صبغة', duration: '120 دقيقة', on: true }, { name: 'مناكير وباديكير', duration: '60 دقيقة', on: true },
-      { name: 'تنظيف بشرة', duration: '60 دقيقة', on: false }, { name: 'مكياج مناسبات', duration: '60 دقيقة', on: false }, { name: 'تجهيز عروس', duration: '', on: false },
-      { name: 'رسم الحواجب', duration: '20 دقيقة', on: false },
+      { name: 'قص وتصفيف الشعر', duration: '45 دقيقة', on: true, group: 'شعر' }, { name: 'صبغة', duration: '120 دقيقة', on: true, group: 'شعر' }, { name: 'مناكير وباديكير', duration: '60 دقيقة', on: true, group: 'أظافر' },
+      { name: 'تنظيف بشرة', duration: '60 دقيقة', on: false, group: 'بشرة' }, { name: 'مكياج مناسبات', duration: '60 دقيقة', on: false, group: 'مكياج' }, { name: 'تجهيز عروس', duration: '', on: false, group: 'مكياج' },
+      { name: 'رسم الحواجب', duration: '20 دقيقة', on: false, group: 'بشرة' }, { name: 'بروتين', duration: '150 دقيقة', on: false, group: 'شعر' },
+      { name: 'جل أظافر', duration: '75 دقيقة', on: false, group: 'أظافر' }, { name: 'مساج استرخاء', duration: '60 دقيقة', on: false, group: 'مساج وحمام' }, { name: 'حمام مغربي', duration: '90 دقيقة', on: false, group: 'مساج وحمام' },
     ],
+    extras: {
+      privacy: { options: ['للسيدات فقط، والمدخل خاص', 'للسيدات فقط', 'غرف خاصة لكل زبونة', 'للرجال والسيدات بأقسام منفصلة'], example: 'للسيدات فقط، والمدخل خاص' },
+      groups: ['شعر', 'أظافر', 'بشرة', 'مكياج', 'مساج وحمام', 'ليزر'],
+      facilities: ['غرف خاصة', 'مصلى', 'مواقف', 'واي فاي', 'ركن انتظار للمرافقات', 'جلسة أطفال', 'مكيّف'],
+      story: { label: 'احكي عن مركزك في جملتين', example: 'مركز صغير في السالمية، كل زبونة لها أخصائية تعرفها بالاسم. نشتغل بهدوء، وبالموعد، ولا نستعجل أي جلسة.' },
+      features: { examples: ['المدة المكتوبة هي مدة الجلسة كاملة.', 'كل أداة تُعقّم بعد كل زبونة.', 'منتجات أصلية، ونريك العلبة قبل البدء.', 'السعر المكتوب هو ما تدفعينه.'] },
+      packages: { example: { name: 'باقة العروس', includes: ['تسريحة ومكياج', 'مناكير وباديكير', 'حمام مغربي'], duration: '4 ساعات', price: '180' } },
+      blocks: [
+        { id: 'hospitality', title: 'الضيافة', example: 'قهوة عربية وتمر بعد كل جلسة.' },
+        { id: 'health', title: 'تنبيه صحي', example: 'إن كان عندك حساسية أو حمل أو سكري، أخبرينا قبل الجلسة.' },
+        { id: 'late', title: 'التأخير والإلغاء', example: 'نسمح بربع ساعة تأخير. بعدها نعيد جدولة الموعد.' },
+      ],
+    },
     faqs: ['هل أحتاج موعدًا؟', 'هل المنتجات المستخدمة أصلية؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل يوجد مكان خاص ومغلق للسيدات؟', 'هل تأتون إلى البيت؟', 'كم تدوم النتيجة؟'],
     visitor: { who: 'a woman', want: 'book an appointment there', place: 'beauty centre' },
     match: /تجميل|بيوتي|اظافر|أظافر|مكياج|beauty|nail|spa|سبا/i, seo: 'مركز تجميل',
@@ -153,12 +220,12 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'علاج عصب', duration: '', on: false }, { name: 'تبييض', duration: '60 دقيقة', on: false }, { name: 'تقويم', duration: '', on: false }, { name: 'زراعة', duration: '', on: false },
     ],
     faqs: ['هل يؤلم العلاج؟', 'هل تقبلون التأمين؟ وأيّ شركات؟', 'كم سعر الكشف؟', 'هل تعالجون الأطفال؟', 'كم موعدًا أحتاج؟', 'هل يوجد موقف سيارات؟'],
-    terms: [{ label: 'التأمين', placeholder: 'نقبل: …' }, { label: 'الدفع', placeholder: 'نقدًا وبالبطاقة، والتقسيط للتقويم' }],
+    terms: [{ label: 'التأمين', placeholder: 'نقبل: …' }],
     visitor: { who: 'a patient', want: 'book a visit there', place: 'clinic' },
     match: /عيادة|عيادات|طبيب|دكتور|اسنان|أسنان|clinic|dental|doctor/i, seo: 'عيادة',
   },
   car: {
-    looks: [AMBER, STEEL, IRON],
+    looks: [AMBER, SERVICE, SAND],
     id: 'car', label: 'ورشة سيارات', place: 'الورشة', team: 'الفنيون', one: 'الفني', any: 'أي فني', role: 'فني', ownerRole: 'صاحب الورشة',
     bookAt: (n) => `اطلب ${n}`, services: 'الخدمات', cta: 'احجز موعد صيانة',
     bookLine: 'اختر الخدمة والوقت. يصل طلبك إلى الورشة، وترد عليك على واتساب.',
@@ -175,7 +242,7 @@ export const KIND: Record<NicheKind, KindText> = {
     match: /ورشة|سيارات|سيارة|ميكانيك|صيانة سيارات|car|garage|auto/i, seo: 'ورشة سيارات',
   },
   photo: {
-    looks: [INK, PAPER, BRASS],
+    looks: [STUDIO_DAY, DARKROOM, PRINT, DAYLIGHT],
     id: 'photo', label: 'استوديو تصوير', place: 'الاستوديو', team: 'المصورون', one: 'المصور', any: 'أي مصور', role: 'مصور', ownerRole: 'صاحب الاستوديو',
     bookAt: (n) => `احجز مع ${n}`, services: 'الباقات', cta: 'احجز جلستك',
     bookLine: 'اختر الباقة والمصور والوقت. يصل طلبك إلى الاستوديو، ويؤكّد لك الموعد على واتساب.',
@@ -186,8 +253,8 @@ export const KIND: Record<NicheKind, KindText> = {
       { name: 'جلسة تصوير شخصية', duration: '60 دقيقة', on: true }, { name: 'تصوير منتجات', duration: '', on: true }, { name: 'تصوير مناسبة', duration: '', on: true },
       { name: 'تصوير أطفال', duration: '45 دقيقة', on: false }, { name: 'صور جواز وهوية', duration: '10 دقيقة', on: false }, { name: 'فيديو', duration: '', on: false },
     ],
-    faqs: ['متى أستلم الصور؟', 'كم صورة معدّلة في الباقة؟', 'هل تصوّرون خارج الاستوديو؟', 'هل يوجد عربون للحجز؟', 'هل أستلم الصور الأصلية؟'],
-    terms: [{ label: 'التسليم', placeholder: 'خلال 7 أيام' }, { label: 'العربون', placeholder: '30% عند الحجز' }],
+    faqs: ['متى أستلم الصور؟', 'كم صورة معدّلة في الباقة؟', 'هل تصوّرون خارج الاستوديو؟', 'هل أستلم الصور الأصلية؟'],
+    terms: [{ label: 'التسليم', placeholder: 'خلال 7 أيام' }],
     visitor: { who: 'a customer', want: 'book a shoot there', place: 'photo studio' },
     match: /تصوير|استوديو|ستوديو|مصور|photo|studio/i, seo: 'استوديو تصوير',
   },
