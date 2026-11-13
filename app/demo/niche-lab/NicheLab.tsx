@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { BookingProvider } from '@/components/site/BookingContext'
+import SiteCookieBanner, { COOKIE_SKINS } from '@/components/site/SiteCookieBanner'
 import BeautyA from '@/components/theme/services/niche/BeautyA'
 import BeautyB from '@/components/theme/services/niche/BeautyB'
 import CarA from '@/components/theme/services/niche/CarA'
@@ -94,6 +95,10 @@ export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: stri
       <BookingProvider slug="" enabled preview>
         <Full content={data.c} x={data.x} initial={p} colors={carLook ? carLook.colors : look ? LOOKS[look] : undefined} />
         {carLook ? <CarLooks at={carAt} set={setCarAt} /> : null}
+        {carLook ? (
+          // The site's cookie notice in the car cut, in the chosen colours (as lib/public-site draws it on a live car site).
+          <SiteCookieBanner key={carLook.id} skin={COOKIE_SKINS.car} palette={{ ...(carLook.colors as any), primary: carLook.colors.accent, headingFont: 'Rubik', bodyFont: 'Rubik', button: carLook.colors.accent, buttonRadius: 8 }} />
+        ) : null}
       </BookingProvider>
     )
   }

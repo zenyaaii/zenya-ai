@@ -16,7 +16,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, BadgeCheck, Car, Clock, FileCheck, Wrench } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
-import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews, ScrollWords } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
@@ -30,7 +30,7 @@ type Block = { id: string; title: string; text: string }
 function Hero({ n, content, promises }: { n: N; content: ServiceContent; promises: Block[] }) {
   const go = useGo()
   return (
-    <section className="c-hero">
+    <section className="c-hero" data-section="hero">
       {n.hero ? <img className="c-hero-img" src={n.hero} alt={`داخل ${n.b.name}`} /> : null}
       <div className="n-w c-hero-in">
         <div className="c-hero-main">
@@ -69,7 +69,7 @@ function Makes({ brands }: { brands: string[] }) {
   if (brands.length < 3) return null
   const row = [...brands, ...brands, ...brands]
   return (
-    <div className="c-makes" aria-label="نعمل على">
+    <div className="c-makes" aria-label="نعمل على" data-section="about">
       <span className="c-makes-l">نعمل على</span>
       <div className="c-makes-v"><div className="c-makes-t">{row.map((b, i) => <span key={i} aria-hidden={i >= brands.length}>{b}</span>)}</div></div>
     </div>
@@ -192,9 +192,12 @@ function Perks({ list }: { list: string[] }) {
 
 /* ---------- the theme ---------- */
 
-export default function CarFull({ content, x = {}, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function CarFull({ content, x: given, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
   const n = useNiche(content)
-  const promises = (x.blocks || []).filter((b) => b.text.trim())
+  const x = extraOf(content, given)
+  // The owner's promises: his yes/no answers when the questions asked them, else the terms he wrote (warranty, price before work).
+  const blocks = (x.blocks || []).filter((b) => b.title?.trim() && b.text?.trim())
+  const promises: Block[] = blocks.length ? blocks : (content.terms || []).filter((t) => t.label?.trim() && t.text?.trim()).map((t) => ({ id: t.label, title: t.label, text: t.text }))
   const groups = useMemo(() => {
     const m = new Map<string, N['services']>()
     for (const s of n.services) { const g = x.groups?.[s.name] || 'خدماتنا'; m.set(g, [...(m.get(g) || []), s]) }
@@ -203,30 +206,33 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
   const [tab, setTab] = useState(0)
   const brands = x.brands || []
   const facilities = x.facilities || []
-  const terms = (content.terms || []).filter((t) => t.text.trim() && !promises.some((b) => b.title === t.label))
-  const steps = x.steps?.length ? x.steps : [
+  const terms = (content.terms || []).filter((t) => t.text?.trim() && !promises.some((b) => b.title === t.label))
+  // Steps say only what the owner said: his price and warranty lines, else plain words that promise nothing he did not.
+  const said = (id: string, label: RegExp) => promises.find((b) => b.id === id || label.test(b.title))?.text
+  const priceLine = said('price_first', /السعر/)
+  const steps = (x.steps || []).filter((st) => st.title?.trim()).length >= 2 ? x.steps!.filter((st) => st.title?.trim()) : [
     { title: 'تصل أو نستلم سيارتك', text: facilities.some((f) => /استلام/.test(f)) ? 'تأتي إلى الورشة، أو نأخذ السيارة من بيتك.' : 'تأتي إلى الورشة في موعدك.' },
-    { title: 'نفحص ونكتب السعر', text: promises.find((b) => b.id === 'price_first')?.text || 'نخبرك بما تحتاجه السيارة وسعره.' },
-    { title: 'نبدأ بعد موافقتك', text: 'لا نلمس شيئًا قبل أن توافق.' },
-    { title: 'تستلم سيارتك', text: promises.find((b) => b.id === 'warranty')?.text || 'جاهزة، ونشرح لك ما عملناه.' },
+    { title: priceLine ? 'نفحص ونكتب السعر' : 'نفحص السيارة', text: priceLine || 'نخبرك بما تحتاجه السيارة.' },
+    { title: 'نعمل على سيارتك', text: 'حسب ما اتفقنا عليه.' },
+    { title: 'تستلم سيارتك', text: said('warranty', /الضمان|ضمان/) || 'ونشرح لك ما عملناه.' },
   ]
   const pics = n.photos
 
   const svcHead = (
-    <Head title="الخدمات" sub={n.priced ? 'السعر يبدأ من الرقم المكتوب. نخبرك بالسعر النهائي قبل أن نبدأ.' : 'اسأل عن سعر سيارتك على واتساب، ونرد عليك بالسعر قبل أي عمل.'} more={n.services.length > 6 ? <GoLink to="services">كل الخدمات<ArrowLeft size={16} /></GoLink> : null} />
+    <Head title="الخدمات" sub={n.priced ? (priceLine ? `السعر يبدأ من الرقم المكتوب. ${priceLine}` : 'السعر يبدأ من الرقم المكتوب، والسعر النهائي حسب سيارتك.') : 'اسأل عن سعر سيارتك على واتساب.'} more={n.services.length > 6 ? <GoLink to="services">كل الخدمات<ArrowLeft size={16} /></GoLink> : null} />
   )
 
   const home = (
     <>
       <Hero n={n} content={content} promises={promises} />
       <Makes brands={brands} />
-      {x.story ? <section className="c-sec"><div className="n-w"><ScrollWords text={x.story} className="c-man" /></div></section> : null}
-      {n.services.length ? <section className="c-sec c-alt"><div className="n-w">{svcHead}<Tickets n={n} list={n.services.slice(0, 6)} /></div></section> : null}
-      {(x.sizes || []).length ? <section className="c-sec"><div className="n-w c-split"><div data-r><h2 className="c-h2">غسيل وتلميع</h2><p className="c-lead">اختر حجم سيارتك، وترى السعر فورًا.</p></div><Sizes x={x} /></div></section> : null}
-      <section className="c-sec c-alt"><div className="n-w"><Head title="كيف نعمل" more={promises.length ? <GoLink to="promise">ضماننا<ArrowLeft size={16} /></GoLink> : null} /><Route steps={steps} /></div></section>
-      {n.reviews.length ? <section className="c-sec"><div className="n-w"><Head title="ماذا يقول الزبائن" /><Reviews n={n} max={5} /></div></section> : null}
-      {facilities.length ? <section className="c-sec c-alt"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
-      {n.faq.length ? <section className="c-sec"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
+      {x.story ? <section className="c-sec" data-section="about"><div className="n-w"><ScrollWords text={x.story} className="c-man" /></div></section> : null}
+      {n.services.length ? <section className="c-sec c-alt" data-section="services"><div className="n-w">{svcHead}<Tickets n={n} list={n.services.slice(0, 6)} /></div></section> : null}
+      {(x.sizes || []).length ? <section className="c-sec" data-section="services"><div className="n-w c-split"><div data-r><h2 className="c-h2">غسيل وتلميع</h2><p className="c-lead">اختر حجم سيارتك، وترى السعر فورًا.</p></div><Sizes x={x} /></div></section> : null}
+      <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="كيف نعمل" more={promises.length ? <GoLink to="promise">ضماننا<ArrowLeft size={16} /></GoLink> : null} /><Route steps={steps} /></div></section>
+      {n.reviews.length ? <section className="c-sec" data-section="reviews"><div className="n-w"><Head title="ماذا يقول الزبائن" /><Reviews n={n} max={5} /></div></section> : null}
+      {facilities.length ? <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
+      {n.faq.length ? <section className="c-sec" data-section="faq"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq.slice(0, 4)} /></div></section> : null}
     </>
   )
 
@@ -237,7 +243,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'services', label: 'الخدمات', title: 'كل الخدمات', lead: brands.length ? `نعمل على ${brands.slice(0, 4).join(' و')} وغيرها.` : undefined,
       body: n.services.length ? (
         <>
-          <section className="c-sec"><div className="n-w">
+          <section className="c-sec" data-section="services"><div className="n-w">
             {groups.length > 1 ? (
               <div className="c-tabs" role="tablist" data-r>
                 {groups.map(([name, list], i) => <button key={name} type="button" role="tab" aria-selected={tab === i} className={tab === i ? 'on' : ''} onClick={() => setTab(i)}>{name}<small>{ar(list.length)}</small></button>)}
@@ -245,8 +251,8 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
             ) : null}
             {g ? <Tickets key={g[0]} n={n} list={g[1]} /> : null}
           </div></section>
-          {(x.sizes || []).length ? <section className="c-sec c-alt"><div className="n-w c-split"><div data-r><h2 className="c-h2">السعر حسب الحجم</h2><p className="c-lead">للغسيل والتلميع. الصيانة سعرها حسب السيارة.</p></div><Sizes x={x} /></div></section> : null}
-          {brands.length ? <section className="c-sec"><div className="n-w"><Head title="نعمل على" /><ul className="c-brands">{brands.map((b, i) => <li key={b} data-r style={{ ['--d' as string]: i % 8 } as CSSProperties}>{b}</li>)}</ul></div></section> : null}
+          {(x.sizes || []).length ? <section className="c-sec c-alt" data-section="services"><div className="n-w c-split"><div data-r><h2 className="c-h2">السعر حسب الحجم</h2><p className="c-lead">للغسيل والتلميع. الصيانة سعرها حسب السيارة.</p></div><Sizes x={x} /></div></section> : null}
+          {brands.length ? <section className="c-sec" data-section="about"><div className="n-w"><Head title="نعمل على" /><ul className="c-brands">{brands.map((b, i) => <li key={b} data-r style={{ ['--d' as string]: i % 8 } as CSSProperties}>{b}</li>)}</ul></div></section> : null}
         </>
       ) : null,
     },
@@ -254,7 +260,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'promise', label: 'ضماننا', title: 'ما نعدك به', lead: 'هذه وعودنا مكتوبة. اسألنا عنها في أي وقت.',
       body: promises.length ? (
         <>
-          <section className="c-sec"><div className="n-w">
+          <section className="c-sec" data-section="services"><div className="n-w">
             <ol className="c-vows">
               {promises.map((b, i) => (
                 <li key={b.id} data-r style={{ ['--d' as string]: i } as CSSProperties}>
@@ -266,8 +272,8 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
               ))}
             </ol>
           </div></section>
-          <section className="c-sec c-alt"><div className="n-w"><Head title="من الوصول إلى الاستلام" /><Route steps={steps} /></div></section>
-          {terms.length ? <section className="c-sec"><div className="n-w"><Head title="شروط مكتوبة" /><dl className="c-terms">{terms.map((t) => <div key={t.label} data-r><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl></div></section> : null}
+          <section className="c-sec c-alt" data-section="about"><div className="n-w"><Head title="من الوصول إلى الاستلام" /><Route steps={steps} /></div></section>
+          {terms.length ? <section className="c-sec" data-section="services"><div className="n-w"><Head title="شروط مكتوبة" /><dl className="c-terms">{terms.map((t) => <div key={t.label} data-r><dt>{t.label}</dt><dd>{t.text}</dd></div>)}</dl></div></section> : null}
         </>
       ) : null,
     },
@@ -275,17 +281,17 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
       id: 'shop', label: 'الورشة', title: `داخل ${n.short}`, lead: x.story, image: pics[1] || undefined,
       body: n.members.length || pics.length >= 2 || facilities.length ? (
         <>
-          {n.members.length ? <section className="c-sec"><div className="n-w"><Head title="من سيعمل على سيارتك" /><Crew n={n} /></div></section> : null}
-          {pics.length >= 2 ? <section className="c-sec c-alt"><div className="n-w"><Head title="صور من الورشة" /><Shots n={n} urls={pics} /></div></section> : null}
-          {facilities.length ? <section className="c-sec"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
+          {n.members.length ? <section className="c-sec" data-section="team"><div className="n-w"><Head title="من سيعمل على سيارتك" /><Crew n={n} /></div></section> : null}
+          {pics.length >= 2 ? <section className="c-sec c-alt" data-section="gallery"><div className="n-w"><Head title="صور من الورشة" /><Shots n={n} urls={pics} /></div></section> : null}
+          {facilities.length ? <section className="c-sec" data-section="about"><div className="n-w"><Head title="وأنت تنتظر" /><Perks list={facilities} /></div></section> : null}
         </>
       ) : null,
     },
     {
-      id: 'book', label: 'احجز موعدًا', title: 'احجز موعدًا', lead: 'اختر الخدمة والوقت. نؤكّد لك على واتساب، ونرسل السعر قبل أن نبدأ.',
+      id: 'book', label: 'احجز موعدًا', title: 'احجز موعدًا', lead: 'اختر الخدمة والوقت، ونؤكّد لك الموعد على واتساب.',
       body: (
         <>
-          <section className="c-sec"><div className="n-w c-bookw">
+          <section className="c-sec" data-section="booking"><div className="n-w c-bookw">
             <div className="c-order" data-r>
               <div className="c-order-h"><b>طلب موعد</b><span>{n.b.name}</span></div>
               <Book n={n} options={n.services.map((s) => s.name)} place="الورشة" label="أرسل الطلب" />
@@ -296,7 +302,7 @@ export default function CarFull({ content, x = {}, colors, initial, view, onView
               {n.hours.length ? <Hours n={n} /> : null}
             </aside>
           </div></section>
-          {n.faq.length ? <section className="c-sec c-alt"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
+          {n.faq.length ? <section className="c-sec c-alt" data-section="faq"><div className="n-w c-faqw"><Head title="أسئلة" /><Faq items={n.faq} /></div></section> : null}
         </>
       ),
     },

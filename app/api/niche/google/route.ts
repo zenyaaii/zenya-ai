@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
+import { photoLooks, type PhotoLook } from '@/lib/build/photo-looks'
 import { createClient } from '@/utils/supabase/server'
 import { serviceClient } from '@/lib/handover'
 import { googleUrl, lookupGoogleReviews, LookupError } from '@/lib/google-reviews'
@@ -59,6 +60,8 @@ export async function POST(req: NextRequest) {
     const found = await lookupGoogleReviews(key, { link, name, city })
     const place = await placeOf(found.place.id, { contact: true }).catch(() => null)
     let photos: string[] = []
+    // Two colour looks from the place's own photos (night and day), or null when the photos are grey.
+    let looks: PhotoLook[] | null = null
     if (place && body.photos !== false) try {
       const raw = await googlePhotos({ ...place, photoRefs: place.photoRefs.slice(0, 10) }).catch(() => [])
       const sb = serviceClient().storage.from('theme-uploads')
@@ -75,6 +78,7 @@ export async function POST(req: NextRequest) {
         } catch { return null }
       }))
       photos = up.filter((u): u is string => !!u)
+      looks = await photoLooks(raw.map((r) => r.buf)).catch(() => null)
     } catch (e) {
       // No photos is not a failed lookup: the facts still reach the wizard.
       console.error('[niche/google] photos', e instanceof Error ? e.message : e)
@@ -89,6 +93,7 @@ export async function POST(req: NextRequest) {
       periods: place?.periods || [],
       contact: place?.contact,
       photos,
+      looks,
     })
   } catch (e) {
     if (e instanceof LookupError) return NextResponse.json({ error: 'not_found' }, { status: 404 })

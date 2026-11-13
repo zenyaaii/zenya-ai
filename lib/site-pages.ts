@@ -78,6 +78,14 @@ export const NICHE_PAGES: Record<string, SitePage[]> = {
     { view: 'club',      slug: 'club',      label: 'النادي' },
     { view: 'book',      slug: 'book',      label: 'احجز وزُرنا' },
   ],
+  // Car (Anas picked the colours from the workshop's photos, 2026-11-13). Ids match components/theme/services/niche/CarFull.tsx.
+  car: [
+    { view: 'home',     slug: '',         label: 'الرئيسية' },
+    { view: 'services', slug: 'services', label: 'الخدمات' },
+    { view: 'promise',  slug: 'promise',  label: 'ضماننا' },
+    { view: 'shop',     slug: 'workshop', label: 'الورشة' },
+    { view: 'book',     slug: 'book',     label: 'احجز موعدًا' },
+  ],
 }
 
 /** The services kind a site's content was built for ('gym', …), if any. */

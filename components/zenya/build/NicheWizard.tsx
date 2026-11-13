@@ -13,13 +13,13 @@ import WizardShell, {
 } from '@/components/zenya/build/WizardShell'
 import { DAYS_AR, DEMO_BUILT_KEY, barberInputSchema, buildBarberContent, completeness, hoursFromGoogle, type BarberGoogle } from '@/utils/services/barber'
 import { countryOfPhone, exampleFor, faqExample, tipFor } from '@/utils/services/wizard-help'
-import { KIND, type KindText, type NicheKind } from '@/utils/services/kinds'
+import { KIND, type KindText, type Look, type NicheKind } from '@/utils/services/kinds'
 import type { ServiceHoursDay } from '@/utils/services/types'
 
 // The real site component, loaded only when the owner opens the live preview.
 const ServicesPreview = dynamic(() => import('@/components/theme/services/ServicesPreview'), { ssr: false })
 
-type GoogleFound = BarberGoogle & { photos?: string[]; name?: string; contact?: { phone?: string; address?: string; city?: string; area?: string } }
+type GoogleFound = BarberGoogle & { photos?: string[]; looks?: Look[] | null; name?: string; contact?: { phone?: string; address?: string; city?: string; area?: string } }
 
 /**
  * The barber's questions: the seven steps Anas approved on 2026-11-10
@@ -71,6 +71,9 @@ type Form = {
   faq: Faq[]
   terms: { label: string; text: string }[]
   look: string
+  /** Car: the two looks measured from the shop's Google photos, offered first. */
+  photo_looks: Look[]
+  look_touched: boolean
   nx: Nx
   /** The owner said what we read from his links is right. */
   checked: boolean
@@ -93,7 +96,7 @@ function initial(k: KindText): Form {
     google_photos: [], hidden: [], hero: '', uploads: [],
     faq: k.faqs.map((q) => ({ id: nid(), q, a: '' })),
     terms: (k.terms || []).map((t) => ({ label: t.label, text: '' })),
-    look: k.looks[0].id,
+    look: k.looks[0].id, photo_looks: [], look_touched: false,
     checked: false, scrape_issue: '',
     nx: { offers: [], facilities: [], story: '', since: '', classes: [], perks: {}, steps: [] },
   }
@@ -111,10 +114,12 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   const bare = k.place.replace(/^ال/, '')
   const mine = bare.replace(/ة$/, 'ت') + 'ك'
   const addOne = /ة$/.test(k.role) ? k.role : k.role + 'ًا'
-  const LOOKS = k.looks
+  // Kinds that open on the shop's own photo colours (Anas, 2026-11-13: car). Grey photos give none: the kind's looks stay.
+  const PHOTO_FIRST = kind === 'car'
   const router = useRouter()
   const { toast } = useNotify()
   const [f, setF] = useState<Form>(() => initial(k))
+  const LOOKS = PHOTO_FIRST ? [...f.photo_looks, ...k.looks] : k.looks
   const [step, setStep] = useState(0)
   const [g, setG] = useState<GoogleFound | null>(null)
   const [peek, setPeek] = useState(false)
@@ -171,6 +176,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
         google_photos: j.photos || [],
         hero: p.hero || j.photos?.[0] || '',
         hours: !p.hours_touched && j.periods?.length ? hoursFromGoogle(j.periods) : p.hours,
+        ...(PHOTO_FIRST && j.looks?.length ? { photo_looks: j.looks, look: p.look_touched ? p.look : j.looks[0].id } : {}),
       }))
       const bits = [
         j.rating ? `${Number(j.rating).toFixed(1)} من ${Number(j.count || 0).toLocaleString('ar')} تقييم` : null,
@@ -823,7 +829,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
           <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
             <div className="bw-lrow" role="radiogroup" aria-label="الألوان">
               {LOOKS.map((l) => (
-                <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => up('look', l.id)} className="bw-lr">
+                <button key={l.id} type="button" role="radio" aria-checked={f.look === l.id} onClick={() => setF((p) => ({ ...p, look: l.id, look_touched: true }))} className="bw-lr">
                   <span className="bw-lr-dots" aria-hidden>{[l.colors.background, l.colors.text, l.colors.accent].map((c, i) => <i key={i} style={{ background: c }} />)}</span>
                   <b>{l.name}</b>
                   <span className="bw-lr-tick" aria-hidden>{f.look === l.id ? '✓' : ''}</span>

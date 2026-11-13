@@ -4,7 +4,8 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import PublicSiteRenderer from '@/components/PublicSiteRenderer'
 import MadeWithZenya from '@/components/MadeWithZenya'
 import SiteBeacon from '@/components/site/SiteBeacon'
-import SiteCookieBanner from '@/components/site/SiteCookieBanner'
+import SiteCookieBanner, { COOKIE_SKINS } from '@/components/site/SiteCookieBanner'
+import { nicheOf } from '@/lib/site-pages'
 import { resolveSitePalette } from '@/lib/site-palette'
 import { BookingProvider } from '@/components/site/BookingContext'
 import { bookingAccess } from '@/lib/booking-entitlement'
@@ -281,6 +282,8 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
   // The services template draws its own floating button and reads the switch itself.
   const wa = businessType !== 'services' && waFloatOn(businessType, c) ? waHref(waNumber(businessType, c) || '') : null
   const cookiePalette = resolveSitePalette(businessType, presetId, colorOverrides, typographyPreset)
+  // A services kind with its own full theme may give the notice its own cut (car first).
+  const cookieSkin = businessType === 'services' ? COOKIE_SKINS[nicheOf(c, businessType) || ''] : undefined
 
   const seo = resolveSeo({
     product_name: theme.product_name,
@@ -327,7 +330,7 @@ export function PublicSiteBody({ theme, view }: { theme: PublicTheme; view: stri
       <MadeWithZenya hide={theme.owner_has_hosting} />
       {wa && <SiteWhatsApp href={wa} />}
       <SiteBeacon slug={theme.slug} />
-      {cookiePalette && <SiteCookieBanner palette={cookiePalette} />}
+      {cookiePalette && <SiteCookieBanner palette={cookiePalette} skin={cookieSkin} />}
     </>
   )
 }
