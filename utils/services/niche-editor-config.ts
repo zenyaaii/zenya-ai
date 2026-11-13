@@ -1,4 +1,4 @@
-import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell } from 'lucide-react'
+import { Sparkles, Users, Wrench, CalendarClock, Star, Image as ImageIcon, HelpCircle, MapPin, MessageCircle, FileText, Home, Tag, Dumbbell, Camera, IdCard } from 'lucide-react'
 import type { EditorConfig } from '@/utils/theme-editor-types'
 import { SERVICES_EDITOR_CONFIG } from './editor-config'
 import { KIND, isNicheKind, type NicheKind } from './kinds'
@@ -41,7 +41,80 @@ const KIND_PAGES: Partial<Record<NicheKind, { pages: NonNullable<EditorConfig['p
       faq: ['home', 'book'],
     },
   },
+  photo: {
+    pages: [
+      { id: 'home', label: 'الرئيسية', icon: Home, ic: 'home' },
+      { id: 'work', label: 'الأعمال', icon: Camera, ic: 'gallery' },
+      { id: 'packages', label: 'الباقات', icon: Tag, ic: 'tag' },
+      { id: 'official', label: 'الصور الرسمية', icon: IdCard, ic: 'tag' },
+      { id: 'studio', label: 'الاستوديو', icon: Users, ic: 'users' },
+      { id: 'book', label: 'احجز جلستك', icon: MapPin, ic: 'pin' },
+    ],
+    on: {
+      hero: ['home'],
+      work: ['home', 'work'],
+      about: ['home', 'studio'],
+      team: ['studio'],
+      services: ['home', 'packages', 'official'],
+      reviews: ['home', 'studio'],
+      gallery: ['home', 'work'],
+      faq: ['home', 'book'],
+    },
+  },
 }
+
+/**
+ * Photo studio: the parts only its theme draws (components/theme/services/niche/PhotoFull.tsx).
+ * Every one is optional; a part left empty is not drawn, and a page with nothing is dropped.
+ */
+const PHOTO_PANELS: any[] = [
+  {
+    id: 'work', label: 'الأعمال', icon: Camera, ic: 'gallery', desc: 'صور من جلساتك، ونوع كل جلسة',
+    summary: (c: any) => `${(c?.niche_extra?.work || []).filter((w: any) => w?.url).length} صورة`,
+    fields: [
+      { type: 'note', content: 'هذه صور أعمالك، لا صور المكان. اكتب نوع كل صورة (منتجات، أعراس، أطفال...) فتظهر في الموقع أزرار لكل نوع. بدونها نعرض صور المكان.' },
+      {
+        type: 'array', path: 'niche_extra.work', label: 'صور الأعمال', itemLabel: 'صورة', itemThumb: 'url', itemTitle: 'tag',
+        makeItem: () => ({ url: '', tag: '' }),
+        itemFields: [{ type: 'image', path: 'url', label: 'الصورة' }, { type: 'text', path: 'tag', label: 'نوع الجلسة', placeholder: 'منتجات' }],
+      },
+    ],
+  },
+  {
+    id: 'about', label: 'عن الاستوديو', icon: Sparkles, ic: 'sparkle', desc: 'قصتك في جملتين',
+    summary: (c: any) => String(c?.niche_extra?.story || ''),
+    fields: [
+      { type: 'textarea', path: 'niche_extra.story', label: 'احكِ عن الاستوديو في جملتين', rows: 3, max: 400 },
+      { type: 'number', path: 'niche_extra.since', label: 'سنة الافتتاح', min: 1900, max: 2100 },
+    ],
+  },
+]
+
+const PHOTO_PRICE_FIELDS: any[] = [
+  {
+    type: 'array', path: 'niche_extra.perks', label: 'ماذا تشمل كل باقة', itemLabel: 'باقة', itemTitle: 'plan',
+    makeItem: () => ({ plan: '', items: [] }),
+    itemFields: [{ type: 'text', path: 'plan', label: 'اسم الباقة كما في قائمة الأسعار' }, { type: 'strings', path: 'items', label: 'ما تشمله', addLabel: 'أضف سطرًا' }],
+  },
+  { type: 'group', label: 'التسليم' },
+  {
+    type: 'array', path: 'niche_extra.delivery', label: 'متى يستلم الزبون صوره', itemLabel: 'نوع', itemTitle: 'what', itemSub: 'when',
+    makeItem: () => ({ what: '', when: '' }),
+    itemFields: [{ type: 'text', path: 'what', label: 'ماذا', placeholder: 'الصور الرسمية' }, { type: 'text', path: 'when', label: 'متى', placeholder: 'فورًا' }],
+  },
+  { type: 'group', label: 'الصور الرسمية' },
+  {
+    type: 'array', path: 'niche_extra.specs', label: 'المقاسات التي تصوّرها', itemLabel: 'ورقة', itemTitle: 'label', itemSub: 'text',
+    makeItem: () => ({ label: '', text: '' }),
+    itemFields: [{ type: 'text', path: 'label', label: 'الورقة', placeholder: 'جواز السفر' }, { type: 'text', path: 'text', label: 'المقاس والخلفية', placeholder: '4 × 6 سم، خلفية بيضاء' }],
+  },
+  { type: 'group', label: 'قبل أن يحجز' },
+  {
+    type: 'array', path: 'niche_extra.blocks', label: 'ملاحظات للزبون', itemLabel: 'ملاحظة', itemTitle: 'title', itemSub: 'text',
+    makeItem: () => ({ id: `n${Date.now()}`, title: '', text: '' }),
+    itemFields: [{ type: 'text', path: 'title', label: 'العنوان', placeholder: 'التعديل' }, { type: 'text', path: 'text', label: 'النص', placeholder: 'تعديلان مجانًا لكل صورة' }],
+  },
+]
 
 function withPages(kind: NicheKind, c: EditorConfig): EditorConfig {
   const m = KIND_PAGES[kind]
@@ -79,6 +152,7 @@ function baseConfig(kind: NicheKind): EditorConfig {
           { type: 'image', path: 'hero.image', label: 'صورة الواجهة', optional: true, hint: 'صورة حقيقية للمكان. بدونها تظهر الواجهة بالاسم وحده.' },
         ],
       },
+      ...(kind === 'photo' ? PHOTO_PANELS : []),
       ...(k.extras ? [{
         id: 'about', label: `عن ${k.place}`, icon: Sparkles, ic: 'sparkle', desc: `ما يقدّمه ${k.place}، مرافقه، وقصته`,
         summary: (c: any) => (c?.niche_extra?.offers || []).join('، ') || String(c?.niche_extra?.story || ''),
@@ -145,6 +219,7 @@ function baseConfig(kind: NicheKind): EditorConfig {
               { type: 'text', path: 'description', label: 'ملاحظة قصيرة' },
             ],
           },
+          ...(kind === 'photo' ? PHOTO_PRICE_FIELDS : []),
           { type: 'group', label: 'الشروط' },
           {
             type: 'array', path: 'terms', label: 'الشروط', itemLabel: 'شرط', itemTitle: 'label', itemSub: 'text',
