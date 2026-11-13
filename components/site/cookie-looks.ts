@@ -27,7 +27,7 @@ export type CookieLook = {
 const PILL = { radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie' } as const
 
 export const NICHE_COOKIE: Record<string, CookieLook> = {
-  barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif' },
+  barber: { ...PILL, font: '"IBM Plex Sans Arabic", system-ui, sans-serif', phoneLift: 81 }, // above the barber's 69px phone bar
   gym: { ...PILL, font: '"Readex Pro", system-ui, sans-serif' }, // GymFull body face
   car: { ...PILL, font: '"Rubik", system-ui, sans-serif', phoneLift: 84 }, // CarFull body face, above its 72px phone bar
   photo: { ...PILL, font: '"Noto Sans Arabic", system-ui, sans-serif' }, // PhotoFull body face

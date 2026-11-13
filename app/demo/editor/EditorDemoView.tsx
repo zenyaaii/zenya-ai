@@ -39,8 +39,9 @@ import { STUDIO_MOCK_CONTENT } from '@/utils/studio/mock-content'
 import { WELLNESS_MOCK_CONTENT } from '@/utils/wellness/mock-content'
 import { nicheEditorConfig } from '@/utils/services/niche-editor-config'
 import { barberDemoContent, nicheDemoContent } from '@/utils/services/niche-demo'
-import { KIND } from '@/utils/services/kinds'
+import { KIND, type NicheKind } from '@/utils/services/kinds'
 import { DEMO_BUILT_KEY } from '@/utils/services/barber'
+const NICHE_DEMO: string[] = ['barber', 'gym', 'beauty', 'car', 'photo']
 import { DEMO_TYPES, type DemoType } from './types'
 
 type Theme = { config: EditorConfig; Preview: ComponentType<PreviewProps>; content: unknown }
@@ -60,17 +61,20 @@ const THEMES: Record<DemoType, Theme> = {
   barber:     { config: nicheEditorConfig('barber'), Preview: ServicesPreview as any, content: barberDemoContent() },
   // The gym's questions (/demo/gym-build) open here; the gym page itself is still the shared kind page.
   gym:        { config: nicheEditorConfig('gym'), Preview: ServicesPreview as any, content: nicheDemoContent('gym') },
+  beauty:     { config: nicheEditorConfig('beauty'), Preview: ServicesPreview as any, content: nicheDemoContent('beauty') },
+  car:        { config: nicheEditorConfig('car'), Preview: ServicesPreview as any, content: nicheDemoContent('car') },
+  photo:      { config: nicheEditorConfig('photo'), Preview: ServicesPreview as any, content: nicheDemoContent('photo') },
 }
 
 /** A store that lives exactly as long as the page. */
 function memoryStore(contentKey: string, content: unknown, type: DemoType): EditorStore {
   let saved: any = { [contentKey]: structuredClone(content) }
-  if (type === 'barber' || type === 'gym') saved = { business_type: 'services', niche: type, style_preset: 'graphite', color_overrides: KIND[type].looks[0].colors, ...saved }
+  if (NICHE_DEMO.includes(type)) saved = { business_type: 'services', niche: type, style_preset: 'graphite', color_overrides: KIND[type as NicheKind].looks[0].colors, ...saved }
   let first = true
   return {
     load: async () => {
       // The wizard's demo leaves the site it built here; open that one, once.
-      if (first && (type === 'barber' || type === 'gym') && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
+      if (first && NICHE_DEMO.includes(type) && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
         try { const s = sessionStorage.getItem(DEMO_BUILT_KEY); if (s) saved = JSON.parse(s) } catch { /* keep the sample */ }
       }
       first = false
@@ -94,6 +98,9 @@ const NAMES: Record<DemoType, string> = {
   wellness: 'موقع مركز عافية',
   barber: 'موقع صالون حلاقة',
   gym: 'موقع نادٍ رياضي',
+  beauty: 'موقع مركز تجميل',
+  car: 'موقع ورشة سيارات',
+  photo: 'موقع استوديو تصوير',
 }
 
 export default function EditorDemoView({ type }: { type: DemoType }) {
