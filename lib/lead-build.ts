@@ -13,6 +13,7 @@ import * as Restaurant from '@/lib/generators/restaurant'
 import { prepare, factsBlock, menuWithPhotos, visit, visitBarber, type Prepared } from '@/lib/restaurant-build'
 import { barberInputSchema, buildBarberContent } from '@/utils/services/barber'
 import { KIND, isLiveKind, kindOfLead, type NicheKind } from '@/utils/services/kinds'
+import { looksFromIdentity } from '@/lib/niche-photo-looks'
 import { downSince, googleOutage, missingKey, noteDown, noteUp, OutageError, type Outage } from '@/lib/service-health'
 
 /**
@@ -490,7 +491,9 @@ async function buildBarberLead(lead: Lead, nk: NicheKind, ownerId: string, old: 
   const ai = downSince(started).find((o) => o.service === 'anthropic')
   if (ai) throw new OutageError(ai)
   // The barber page reads the shop's own colours; the near-black + brass of the approved sample when none were found.
-  const own = prep.file.colors.identity.length ? prep.colors : KIND[nk].looks[0].colors
+  // Beauty (Anas, 2026-11-13): the colours of the centre's own photos are the default, with their quiet second colour.
+  const photoLook = KIND[nk].photoLooks ? looksFromIdentity(prep.file.colors.identity).find((l) => l.id === (prep.file.colors.mood === 'dark' ? 'photo-dark' : 'photo-light')) : undefined
+  const own = photoLook ? photoLook.colors : prep.file.colors.identity.length ? prep.colors : KIND[nk].looks[0].colors
   const wrapper = { niche: nk, color_overrides: own, build_file: prep.file }
   const v = prep.file.visitor, last = v[v.length - 1]
   const report = (url: string): BuildReport => ({

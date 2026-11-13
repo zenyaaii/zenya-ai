@@ -17,7 +17,8 @@ export type NicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
  * beauty, clinic, car repair and photo studio stay on their templates' own
  * wizards and lead builds until each gets a design of its own.
  */
-export const LIVE_KINDS: readonly NicheKind[] = ['barber']
+// Beauty & spa joined on 2026-11-13: Anas approved its own theme (BeautyFull), photo colours as default.
+export const LIVE_KINDS: readonly NicheKind[] = ['barber', 'beauty']
 export const isLiveKind = (k: unknown): k is NicheKind => LIVE_KINDS.includes(k as NicheKind)
 
 export type Look = { id: string; name: string; colors: { background: string; surface: string; text: string; muted: string; accent: string; primary: string; border: string; /** A quiet second colour (beauty: badges, numbers). */ accent2?: string } }
@@ -81,8 +82,8 @@ export type KindText = {
   audiences?: string[]
   /** Chips: what each person is known for. */
   tags: string[]
-  /** Starting service list: name, duration, on by default. */
-  defaults: { name: string; duration: string; on: boolean }[]
+  /** Starting service list: name, duration, on by default (beauty: and its tab). */
+  defaults: { name: string; duration: string; on: boolean; group?: string }[]
   /** Starting questions. */
   faqs: string[]
   /** Terms the owner can state (gym: freeze/cancel; car: warranty). */
@@ -181,10 +182,24 @@ export const KIND: Record<NicheKind, KindText> = {
     lede: ({ named, area }) => `مركز تجميل في ${area}.${named.length >= 2 ? ` زبوناتنا يطلبن ${named.slice(0, 3).join(' و')} بالاسم.` : ''}`,
     tags: ['شعر', 'صبغة', 'أظافر', 'بشرة', 'مكياج', 'عرائس', 'ليزر', 'حواجب'],
     defaults: [
-      { name: 'قص وتصفيف الشعر', duration: '45 دقيقة', on: true }, { name: 'صبغة', duration: '120 دقيقة', on: true }, { name: 'مناكير وباديكير', duration: '60 دقيقة', on: true },
-      { name: 'تنظيف بشرة', duration: '60 دقيقة', on: false }, { name: 'مكياج مناسبات', duration: '60 دقيقة', on: false }, { name: 'تجهيز عروس', duration: '', on: false },
-      { name: 'رسم الحواجب', duration: '20 دقيقة', on: false },
+      { name: 'قص وتصفيف الشعر', duration: '45 دقيقة', on: true, group: 'شعر' }, { name: 'صبغة', duration: '120 دقيقة', on: true, group: 'شعر' }, { name: 'مناكير وباديكير', duration: '60 دقيقة', on: true, group: 'أظافر' },
+      { name: 'تنظيف بشرة', duration: '60 دقيقة', on: false, group: 'بشرة' }, { name: 'مكياج مناسبات', duration: '60 دقيقة', on: false, group: 'مكياج' }, { name: 'تجهيز عروس', duration: '', on: false, group: 'مكياج' },
+      { name: 'رسم الحواجب', duration: '20 دقيقة', on: false, group: 'بشرة' }, { name: 'بروتين', duration: '150 دقيقة', on: false, group: 'شعر' },
+      { name: 'جل أظافر', duration: '75 دقيقة', on: false, group: 'أظافر' }, { name: 'مساج استرخاء', duration: '60 دقيقة', on: false, group: 'مساج وحمام' }, { name: 'حمام مغربي', duration: '90 دقيقة', on: false, group: 'مساج وحمام' },
     ],
+    extras: {
+      privacy: { options: ['للسيدات فقط، والمدخل خاص', 'للسيدات فقط', 'غرف خاصة لكل زبونة', 'للرجال والسيدات بأقسام منفصلة'], example: 'للسيدات فقط، والمدخل خاص' },
+      groups: ['شعر', 'أظافر', 'بشرة', 'مكياج', 'مساج وحمام', 'ليزر'],
+      facilities: ['غرف خاصة', 'مصلى', 'مواقف', 'واي فاي', 'ركن انتظار للمرافقات', 'جلسة أطفال', 'مكيّف'],
+      story: { label: 'احكي عن مركزك في جملتين', example: 'مركز صغير في السالمية، كل زبونة لها أخصائية تعرفها بالاسم. نشتغل بهدوء، وبالموعد، ولا نستعجل أي جلسة.' },
+      features: { examples: ['المدة المكتوبة هي مدة الجلسة كاملة.', 'كل أداة تُعقّم بعد كل زبونة.', 'منتجات أصلية، ونريك العلبة قبل البدء.', 'السعر المكتوب هو ما تدفعينه.'] },
+      packages: { example: { name: 'باقة العروس', includes: ['تسريحة ومكياج', 'مناكير وباديكير', 'حمام مغربي'], duration: '4 ساعات', price: '180' } },
+      blocks: [
+        { id: 'hospitality', title: 'الضيافة', example: 'قهوة عربية وتمر بعد كل جلسة.' },
+        { id: 'health', title: 'تنبيه صحي', example: 'إن كان عندك حساسية أو حمل أو سكري، أخبرينا قبل الجلسة.' },
+        { id: 'late', title: 'التأخير والإلغاء', example: 'نسمح بربع ساعة تأخير. بعدها نعيد جدولة الموعد.' },
+      ],
+    },
     faqs: ['هل أحتاج موعدًا؟', 'هل المنتجات المستخدمة أصلية؟', 'هل السعر المكتوب هو ما أدفعه؟', 'هل يوجد مكان خاص ومغلق للسيدات؟', 'هل تأتون إلى البيت؟', 'كم تدوم النتيجة؟'],
     visitor: { who: 'a woman', want: 'book an appointment there', place: 'beauty centre' },
     match: /تجميل|بيوتي|اظافر|أظافر|مكياج|beauty|nail|spa|سبا/i, seo: 'مركز تجميل',

@@ -1,6 +1,7 @@
 "use client"
 
 import KindPicker from '@/components/zenya/build/KindPicker'
+import { isLiveKind } from '@/utils/services/kinds'
 import { useEffect, useState } from 'react'
 import { ratingOf } from '@/lib/rating'
 import { generateErrorText } from '@/lib/generate-error'
@@ -167,9 +168,14 @@ export default function WellnessWizardPage() {
   const [kind, setKind] = useState<string | null | undefined>(undefined)
   useEffect(() => {
     const k = new URLSearchParams(window.location.search).get('kind')
+    const nk = k === 'spa' ? 'beauty' : k
+    if (nk && isLiveKind(nk)) { router.replace('/theme/new/services?kind=' + nk); return }
     setKind(k)
   }, [router])
   const choose = (id: string) => {
+    // A beauty centre or a spa is built by its own questions and theme (Anas, 2026-11-13).
+    const nk = id === 'spa' ? 'beauty' : id
+    if (isLiveKind(nk)) { router.push('/theme/new/services?kind=' + nk); return }
     const u = new URL(window.location.href)
     u.searchParams.set('kind', id)
     window.history.replaceState(null, '', u.toString())
