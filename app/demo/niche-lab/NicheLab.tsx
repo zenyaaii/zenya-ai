@@ -14,6 +14,7 @@ import GymFull from '@/components/theme/services/niche/GymFull'
 import CarFull from '@/components/theme/services/niche/CarFull'
 import PhotoFull from '@/components/theme/services/niche/PhotoFull'
 import BeautyFull from '@/components/theme/services/niche/BeautyFull'
+import { PHOTO_LOOKS } from '@/components/theme/services/niche/photo-looks'
 import { labContent, type Fill, type LabKind } from '@/components/theme/services/niche/lab-content'
 
 /** The heavy, many-page themes (2026-11-13). The short samples stay at &v=a / &v=b. */
@@ -51,7 +52,7 @@ export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: stri
   if (Full && v !== 'a' && v !== 'b') {
     return (
       <BookingProvider slug="" enabled preview>
-        <Full content={data.c} x={data.x} initial={p} colors={look ? LOOKS[look] : undefined} />
+        <Full content={data.c} x={data.x} initial={p} colors={look ? (kind === 'photo' ? PHOTO_LOOKS[look] : undefined) ?? LOOKS[look] : undefined} />
       </BookingProvider>
     )
   }

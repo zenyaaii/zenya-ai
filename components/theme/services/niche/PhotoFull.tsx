@@ -302,7 +302,7 @@ function HomeKinds({ work, setTag }: { work: Work[]; setTag: (t: string) => void
 }
 
 const CSS = `
-.pf{--n-r-btn:999px;--n-r-in:10px;--n-r-card:8px;--s-strip-bg:var(--n-bg);--s-strip-ink:var(--n-mute);--s-foot-bg:#050506;--s-foot-ink:var(--n-ink);--s-menu-bg:#050506;--s-menu-ink:var(--n-ink)}
+.pf{--n-r-btn:999px;--n-r-in:10px;--n-r-card:8px;--s-strip-bg:var(--n-bg);--s-strip-ink:var(--n-mute);--s-foot-bg:color-mix(in srgb,var(--n-bg) 10%,#0a0a0a);--s-foot-ink:#efede8;--s-menu-bg:color-mix(in srgb,var(--n-bg) 10%,#0a0a0a);--s-menu-ink:#efede8}
 .pf .s-strip{border-bottom:1px solid var(--n-line)}
 .pf .s-head{background:color-mix(in srgb,var(--n-bg) 86%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .pf .s-logo b{font-weight:300;font-size:24px;letter-spacing:.02em}
