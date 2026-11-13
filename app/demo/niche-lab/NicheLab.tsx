@@ -26,7 +26,13 @@ const NAMES: Record<LabKind, [string, string, string]> = {
   gym: ['نادٍ رياضي', 'أ: الطاقة', 'ب: الجدول'],
 }
 
-export default function NicheLab({ k, v, fill, p }: { k?: string; v?: string; fill?: string; p?: string }) {
+/** Colour sets for the gym sample: the theme's own, a light one, and one as it would come from a gym's photos with a second colour. */
+const LOOKS: Record<string, Record<string, string>> = {
+  day: { background: '#f3f3ef', surface: '#e8e8e2', text: '#121314', muted: '#5f6368', accent: '#1f45d6', border: '#d9d9d2', accent2: '#ff5b24' },
+  photo: { background: '#111518', surface: '#192024', text: '#eef1ee', muted: '#8a9396', accent: '#c9f23a', border: '#263035', accent2: '#3fb6a8' },
+}
+
+export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: string; fill?: string; p?: string; look?: string }) {
   const kind = (k && k in VIEWS ? k : null) as LabKind | null
   const f: Fill = fill === 'low' || fill === 'none' ? fill : 'full'
   const data = useMemo(() => (kind ? labContent(kind, f) : null), [kind, f])
@@ -45,7 +51,7 @@ export default function NicheLab({ k, v, fill, p }: { k?: string; v?: string; fi
   if (Full && v !== 'a' && v !== 'b') {
     return (
       <BookingProvider slug="" enabled preview>
-        <Full content={data.c} x={data.x} initial={p} />
+        <Full content={data.c} x={data.x} initial={p} colors={look ? LOOKS[look] : undefined} />
       </BookingProvider>
     )
   }

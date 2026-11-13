@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { ArrowLeft, Check, Clock, Flame, Minus, Users, CalendarDays } from 'lucide-react'
 import type { ServiceContent } from '@/utils/services/types'
 import { DAYS_AR } from '@/utils/services/barber'
-import { KIT_CSS, Book, Hours, ar, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
+import { KIT_CSS, Book, Hours, ar, extraOf, useNiche, vars, type Colors, type N, type NicheExtra } from './kit'
 import { BLOCKS_CSS, CountUp, Faq, Head, Icon, Lightbox, MapCard, Reviews, ScrollWords, priceNum, useSpotlight } from './blocks'
 import { Brand, GoLink, Shell, todayLine, useGo, type SPage } from './shell'
 
@@ -325,8 +325,9 @@ function Steps({ steps }: { steps: { title: string; text: string }[] }) {
 
 /* ---------- the theme ---------- */
 
-export default function GymFull({ content, x = {}, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
+export default function GymFull({ content, x: given, colors, initial, view, onViewChange }: { content: ServiceContent; x?: NicheExtra; colors?: Colors; initial?: string; view?: string; onViewChange?: (id: string) => void }) {
   const n = useNiche(content)
+  const x = extraOf(content, given)
   const tags = useMemo(() => Array.from(new Set([...(x.offers || []), ...n.members.flatMap((m) => m.tags || [])])), [x.offers, n.members])
   const classes = (x.classes || []).filter((c) => c.items.length)
   const terms = (content.terms || []).filter((t) => t.text.trim())
@@ -446,7 +447,7 @@ export default function GymFull({ content, x = {}, colors, initial, view, onView
 }
 
 const CSS = `
-.gf{--n-r-btn:6px;--n-r-in:6px;--n-r-card:10px;--s-strip-bg:var(--n-acc);--s-strip-ink:var(--n-on);--s-foot-bg:#060707;--s-foot-ink:var(--n-ink);--s-menu-bg:var(--n-acc);--s-menu-ink:var(--n-on)}
+.gf{--n-r-btn:6px;--n-r-in:6px;--n-r-card:10px;--s-strip-bg:var(--n-acc);--s-strip-ink:var(--n-on);--s-foot-bg:#0b0c0d;--s-foot-ink:#f2f2ef;--s-foot-acc:var(--n-acc);--s-menu-bg:var(--n-acc);--s-menu-ink:var(--n-on)}
 .gf .s-head{background:color-mix(in srgb,var(--n-bg) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 .gf .s-logo b{text-transform:uppercase;letter-spacing:-.01em;font-size:24px}
 .gf .s-menu .n-btn{background:var(--n-on);color:var(--n-acc)}
@@ -501,7 +502,7 @@ const CSS = `
 .g-stats div{padding:26px 0 0;display:flex;flex-direction:column-reverse;gap:6px;border-inline-start:1px solid var(--n-line);padding-inline-start:22px}
 .g-stats div:first-child{border-inline-start:0;padding-inline-start:0}
 .g-stats dd{margin:0;font:800 clamp(56px,7vw,104px)/.9 var(--n-disp);letter-spacing:-.03em}
-.g-stats div:first-child dd{color:var(--n-acc)}
+.g-stats div:first-child dd{color:var(--n-acc2)}
 .g-stats dt{font-size:14px;color:var(--n-mute)}
 @media (max-width:760px){.g-stats,.g-stats.c3{grid-template-columns:1fr 1fr;row-gap:28px}.g-stats div:nth-child(3){border-inline-start:0;padding-inline-start:0}.g-stats.c3 div:nth-child(3){grid-column:1/-1}}
 
@@ -557,7 +558,7 @@ const CSS = `
 .g-board span{font-size:19px;font-weight:600;display:flex;align-items:center;gap:10px}.g-board span svg{color:var(--n-acc)}.g-board li.now span svg{color:inherit}
 .g-board em{font-style:normal;font-size:12px;font-weight:700;padding:5px 10px;border-radius:4px;border:1px solid var(--n-line);color:var(--n-mute)}
 .g-board li.done{opacity:.45}.g-board li.done span{text-decoration:line-through}
-.g-board li.now{background:var(--n-acc);color:var(--n-on)}.g-board li.now em{border-color:currentColor;color:inherit;animation:g-blink 1.4s infinite}
+.g-board li.now{background:var(--n-acc2);color:var(--n-on2)}.g-board li.now em{border-color:currentColor;color:inherit;animation:g-blink 1.4s infinite}
 .g-board li.next em{background:var(--n-ink);color:var(--n-bg);border-color:transparent}
 @keyframes g-blink{50%{opacity:.4}}
 @media (max-width:860px){.g-today{grid-template-columns:1fr;gap:32px}.g-board li{grid-template-columns:84px 1fr auto;padding:18px 16px}.g-board b{font-size:20px}.g-board span{font-size:16px}}
@@ -614,8 +615,8 @@ const CSS = `
 .g-grid{display:grid;grid-template-columns:repeat(var(--c),1fr);gap:10px}
 .g-col{display:grid;gap:8px;align-content:start}
 .g-col h3{font:700 18px var(--n-disp);padding:12px 14px;border-radius:6px;background:var(--n-bg2);display:flex;justify-content:space-between;align-items:center}
-.g-col.today h3{background:var(--n-acc);color:var(--n-on)}
-.g-col h3 em{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;background:var(--n-on);color:var(--n-acc)}
+.g-col.today h3{background:var(--n-acc2);color:var(--n-on2)}
+.g-col h3 em{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:3px;background:var(--n-on2);color:var(--n-acc2)}
 .g-slot{padding:16px 14px;border-radius:6px;border:1px solid var(--n-line);display:grid;gap:6px;transition:opacity .35s,transform .35s cubic-bezier(.3,1.5,.5,1),border-color .3s,background .3s}
 .g-slot b{font:800 22px var(--n-disp);font-variant-numeric:tabular-nums}
 .g-slot span{display:flex;gap:6px;align-items:center;font-size:15px;color:var(--n-ink2)}

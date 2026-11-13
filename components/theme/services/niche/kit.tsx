@@ -53,7 +53,7 @@ export type NicheExtra = {
   perks?: Record<string, string[]>
 }
 
-export type Colors = { primary?: string; accent?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
+export type Colors = { primary?: string; accent?: string; /** The owner's optional second colour. */ accent2?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
 
 function rgb(hex?: string): [number, number, number] | null {
   const m = /^#?([0-9a-f]{6})$/i.exec((hex || '').trim())
@@ -81,6 +81,8 @@ export function vars(c: Colors | undefined, def: Required<Pick<Colors, 'backgrou
     '--n-mute': x.muted || `color-mix(in srgb, ${ink} 55%, ${bg})`,
     '--n-line': x.border || `color-mix(in srgb, ${ink} 14%, ${bg})`,
     '--n-acc': acc,
+    '--n-acc2': c?.accent2 && x === c ? c.accent2 : acc,
+    '--n-on2': onColor(c?.accent2 && x === c ? c.accent2 : acc),
     '--n-acc-soft': `color-mix(in srgb, ${acc} 14%, ${bg})`,
     '--n-on': onColor(acc),
     colorScheme: lum(bg) < 0.2 ? 'dark' : 'light',
@@ -137,6 +139,11 @@ export function useNiche(content: ServiceContent) {
   }
 }
 export type N = ReturnType<typeof useNiche>
+
+/** The niche answers a built site carries (content.niche_extra), or the ones passed in. */
+export function extraOf(content: ServiceContent, x?: NicheExtra): NicheExtra {
+  return x || (content as ServiceContent & { niche_extra?: NicheExtra }).niche_extra || {}
+}
 
 /** Adds .in to every [data-r] child once it scrolls into view. Reduced motion: shown at once. */
 export function useReveal() {
