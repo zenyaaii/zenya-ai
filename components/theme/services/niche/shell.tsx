@@ -388,7 +388,7 @@ export const SHELL_CSS = `
 .s-cols li{display:flex;gap:9px;align-items:flex-start}
 .s-cols li svg{flex:none;margin-top:5px;opacity:.6}
 .s-cols button{all:unset;cursor:pointer;transition:color .2s}
-.s-cols button:hover,.s-cols a:hover{color:var(--n-acc)}
+.s-cols button:hover,.s-cols a:hover{color:var(--s-foot-acc,var(--n-acc))}
 .s-col-brand b{font:800 28px var(--n-disp);display:block;margin-bottom:8px}
 .s-col-brand p{opacity:.7;font-size:15px;max-width:30ch}
 .s-soc{display:flex;gap:8px;margin-top:18px}
@@ -396,7 +396,7 @@ export const SHELL_CSS = `
 .s-soc a:hover{background:var(--n-acc);color:var(--n-on);border-color:transparent;transform:translateY(-3px)}
 .s-fhours li{justify-content:space-between;font-size:14px}
 .s-fhours li span:first-child{opacity:.6}
-.s-fhours li.today{color:var(--n-acc);font-weight:700}.s-fhours li.today span{opacity:1}
+.s-fhours li.today{color:var(--s-foot-acc,var(--n-acc));font-weight:700}.s-fhours li.today span{opacity:1}
 .s-word{overflow:hidden;line-height:.8;padding-top:10px}
 .s-word span{display:block;white-space:nowrap;text-align:center;font:800 min(280px,17vw,calc(150vw / var(--len,8)))/.8 var(--n-disp);letter-spacing:-.03em;color:color-mix(in srgb,currentColor 9%,transparent);transform:translateY(12%)}
 .s-legal{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 0 26px;font-size:13px;opacity:.6;border-top:1px solid color-mix(in srgb,currentColor 14%,transparent)}

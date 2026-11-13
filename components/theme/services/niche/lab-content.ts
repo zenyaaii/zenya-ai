@@ -29,6 +29,10 @@ function base(kind: LabKind): { c: ServiceContent; x: NicheExtra } {
     c.hero.image = u('1772378452022-94ee7971fe80', 2000)
     c.gallery.images = [c.hero.image, u('1540555700478-4be289fbecef'), u('1775500835259-d3b3f6d6e2f2'), u('1706795033855-eee02f726868')].map((url) => ({ url }))
     c.hero.subheadline = 'مركز للسيدات في السالمية. شعر وأظافر وبشرة ومساج، في غرف خاصة.'
+    c.team!.members[0].quote = 'فنانة بالصبغة، طلع اللون مثل ما طلبت بالضبط.'; c.team!.members[0].quote_by = 'أم سارة'
+    c.team!.members[1].quote = 'شغلها بالأظافر نظيف ومرتب.'; c.team!.members[1].quote_by = 'دانة'
+    c.team!.members[2].quote = 'رسمت حواجبي بشكل طبيعي جدًا.'; c.team!.members[2].quote_by = 'شهد'
+    c.faq.items.push({ q: 'هل أستطيع اختيار الأخصائية؟', a: 'نعم، اكتبي اسمها عند الحجز.' }, { q: 'هل المنتجات أصلية؟', a: 'نعم، ونريك العلبة قبل أن نبدأ.' })
     return {
       c, x: {
         offers: ['شعر', 'أظافر', 'بشرة', 'مساج', 'حمام مغربي'],
