@@ -21,9 +21,9 @@ export type CookieLook = {
 }
 
 export const NICHE_COOKIE: Record<string, CookieLook> = {
-  // Photo studio (PhotoFull): Noto Sans Arabic, printed-card corners, pill buttons,
-  // a hairline frame and a lens aperture, like the theme's viewfinder.
-  photo: { font: '"Noto Sans Arabic", system-ui, sans-serif', radius: 8, buttonRadius: 999, flat: true, shadow: '0 12px 32px -16px rgba(0,0,0,.35)', mark: 'aperture' },
+  // Photo studio (PhotoFull). Anas picked option ج (2026-11-13): the usual capsule
+  // in the theme's own colours; only the theme's font is carried over.
+  photo: { font: '"Noto Sans Arabic", system-ui, sans-serif', radius: 999, buttonRadius: 999, flat: false, shadow: '0 18px 50px -12px rgba(0,0,0,.45)', mark: 'cookie' },
 }
 
 export const cookieLookOf = (niche?: string): CookieLook | undefined => (niche ? NICHE_COOKIE[niche] : undefined)
