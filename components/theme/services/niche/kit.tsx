@@ -43,6 +43,14 @@ export type NicheExtra = {
   /** Car wash: price by car size. */
   sizes?: { name: string; prices: string[] }[]
   sizeNames?: string[]
+  /** «احكِ عن مكانك في جملتين»: the owner's own words, shown as the opening statement. */
+  story?: string
+  /** The year the place opened, for "years here". */
+  since?: number
+  /** How a new customer starts, in the owner's steps. */
+  steps?: { title: string; text: string }[]
+  /** Service/plan name → what it includes. */
+  perks?: Record<string, string[]>
 }
 
 export type Colors = { primary?: string; accent?: string; background?: string; surface?: string; text?: string; muted?: string; border?: string }
