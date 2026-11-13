@@ -17,13 +17,16 @@ export type CookieLook = {
   flat: boolean
   shadow: string
   /** The small mark beside the sentence. */
-  mark: 'cookie' | 'aperture'
+  mark: 'cookie' | 'aperture' | 'petal'
 }
 
 export const NICHE_COOKIE: Record<string, CookieLook> = {
   // Photo studio (PhotoFull): Noto Sans Arabic, printed-card corners, pill buttons,
   // a hairline frame and a lens aperture, like the theme's viewfinder.
   photo: { font: '"Noto Sans Arabic", system-ui, sans-serif', radius: 8, buttonRadius: 999, flat: true, shadow: '0 12px 32px -16px rgba(0,0,0,.35)', mark: 'aperture' },
+  // Beauty & spa (BeautyFull): Readex Pro, the theme's soft rounded cards, pill
+  // buttons, a low warm shadow and a small petal, like the calm band's flower.
+  beauty: { font: '"Readex Pro", system-ui, sans-serif', radius: 22, buttonRadius: 999, flat: true, shadow: '0 14px 36px -18px rgba(40,30,20,.35)', mark: 'petal' },
 }
 
 export const cookieLookOf = (niche?: string): CookieLook | undefined => (niche ? NICHE_COOKIE[niche] : undefined)

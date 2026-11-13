@@ -119,6 +119,10 @@ export default function SiteCookieBanner({ palette, look }: { palette: SitePalet
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" style={{ flex: '0 0 auto', color: p.button }}>
           <circle cx="12" cy="12" r="9.5" /><path d="M14.3 2.8 9.6 11M19.9 7.5h-9.4M18.6 16.6 13.9 8.5M9.7 21.2l4.7-8.2M4.1 16.5h9.4M5.4 7.4l4.7 8.1" />
         </svg>
+      ) : look?.mark === 'petal' ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" style={{ flex: '0 0 auto', color: p.button }}>
+          <path d="M12 20c-3.6-2.2-5.5-5-5.5-8.2C6.5 8.4 9 5.6 12 4c3 1.6 5.5 4.4 5.5 7.8 0 3.2-1.9 6-5.5 8.2z" /><path d="M12 20V9.5" />
+        </svg>
       ) : <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ flex: '0 0 auto', color: p.button }}>
         <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5zm-3.5 9a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm3 5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4.5-3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM7 6.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
       </svg>}
