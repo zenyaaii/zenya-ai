@@ -52,13 +52,15 @@ import { Breadcrumbs, FaqList, CtaBand } from "@/components/zenya/chrome/Parts"
 import { CSS as TEMPLATE_CSS } from "@/components/zenya/websites/styles"
 import { CSS as ARTICLE_CSS } from "@/components/zenya/why/styles"
 import { share } from '@/lib/site-share'
+import { SOON_IDS } from "@/components/zenya/redesign/data"
+import NotifyMe from "@/components/zenya/chrome/NotifyMe"
 
 const SITE = 'https://beynoun.com'
 
 // The article stylesheet opens by shrinking .zx-h1 for its long question
 // headline. Here the h1 is the template's own short one, so that rule is cut
 // and only the article's own classes come along.
-const CSS = TEMPLATE_CSS + ARTICLE_CSS.replace(/\.zx-h1 \{[^}]*\}/, "")
+const CSS = TEMPLATE_CSS + ARTICLE_CSS.replace(/\.zx-h1 \{[^}]*\}/, "") + `.zx-soon{display:grid;gap:12px;margin-top:22px;padding:16px 18px;border-radius:18px;border:1px solid var(--line2,rgba(244,239,230,.16));max-width:520px}.zx-soon p{margin:0;font-size:16px;line-height:1.7}.zx-soon strong{color:var(--acc,#E2532A)}`
 
 export function generateStaticParams() {
   return TEMPLATE_PAGES.map((t) => ({ slug: t.slug }))
@@ -93,6 +95,8 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
   if (!t) notFound()
   const article = ARTICLES[t.key as Article["key"]]
   const others = TEMPLATE_PAGES.filter((x) => x.slug !== t.slug)
+  // Not yet on the new build system (Anas, 2026-11-14): no build button, a «نبّهني» instead.
+  const soon = SOON_IDS.includes(t.key)
 
   return (
     <LaylShell css={CSS}>
@@ -114,13 +118,20 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
           {t.intro.map((p, i) => (
             <p className="zx-lede" key={i}>{p}</p>
           ))}
-          <div className="zx-acts">
-            <Link href={t.buildHref} className="zx-act-1">ابدأ ببناء موقعك</Link>
-            <Link href={t.demoHref} className="zx-act-2">
-              <Eye size={16} strokeWidth={2} aria-hidden />
-              شاهد نموذجًا حيًّا
-            </Link>
-          </div>
+          {soon ? (
+            <div className="zx-soon">
+              <p><strong>قريبًا.</strong> نعيد بناء هذا القالب الآن. اترك بريدك ونخبرك حين يصبح جاهزًا.</p>
+              <NotifyMe template={t.key} name={t.name} />
+            </div>
+          ) : (
+            <div className="zx-acts">
+              <Link href={t.buildHref} className="zx-act-1">ابدأ ببناء موقعك</Link>
+              <Link href={t.demoHref} className="zx-act-2">
+                <Eye size={16} strokeWidth={2} aria-hidden />
+                شاهد نموذجًا حيًّا
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="zx-frame">
@@ -207,14 +218,14 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      <CtaBand
+      {soon ? null : <CtaBand
         title={`أنشئ ${t.name} خلال دقائق`}
         subtitle="اكتب نبذة قصيرة عن نشاطك، وتبني لك بينون موقعًا عربيًا احترافيًا. المعاينة مجانية."
         primaryLabel="ابدأ ببناء موقعك"
         primaryHref={t.buildHref}
         secondaryLabel="شاهد نموذجًا حيًّا"
         secondaryHref={t.demoHref}
-      />
+      />}
     </LaylShell>
   )
 }

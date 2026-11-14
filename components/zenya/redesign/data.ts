@@ -71,10 +71,10 @@ export const TEMPLATES = [
   { id: 'restaurant', name: 'موقع مطعم', tag: 'مطعم · قائمة · حجوزات', href: '/templates/restaurant' },
   { id: 'services', name: 'موقع خدمات', tag: 'خدمات محلية · حِرف', href: '/templates/services' },
   { id: 'wellness', name: 'موقع مركز عافية', tag: 'سبا · يوغا · عافية', href: '/templates/wellness' },
-  { id: 'lookbook', name: 'موقع أزياء ولوك بوك', tag: 'أزياء · ملابس · علامة', href: '/templates/fashion-lookbook' },
-  { id: 'atlas', name: 'صفحة هبوط لتطبيق', tag: 'تطبيق · برمجيات · B2B', href: '/templates/app-landing-page' },
-  { id: 'studio', name: 'موقع علامة تجارية وقصة', tag: 'قصة علامة · تحرير', href: '/templates/brand-story' },
-  { id: 'collective', name: 'متجر بمنتجات متعددة', tag: 'كتالوج · منتجات متعددة', href: '/templates/online-store' },
+  { id: 'lookbook', name: 'موقع أزياء ولوك بوك', tag: 'أزياء · ملابس · علامة', href: '/templates/fashion-lookbook' , soon: true },
+  { id: 'atlas', name: 'صفحة هبوط لتطبيق', tag: 'تطبيق · برمجيات · B2B', href: '/templates/app-landing-page' , soon: true },
+  { id: 'studio', name: 'موقع علامة تجارية وقصة', tag: 'قصة علامة · تحرير', href: '/templates/brand-story' , soon: true },
+  { id: 'collective', name: 'متجر بمنتجات متعددة', tag: 'كتالوج · منتجات متعددة', href: '/templates/online-store' , soon: true },
   { id: 'one_product', name: 'متجر بمنتج واحد', tag: 'متجر · منتج واحد', href: '/templates/one-product-store', soon: true },
 ] as const
 
@@ -96,13 +96,13 @@ export const PLANS = [
     id: 'entry', name: 'مجانية', amount: '$0', per: '/بلا دفع',
     sub: 'ابنِ، أدِر، وانشر — جرّب بينون مجانًا.', cta: 'ابدأ مجانًا', href: '/login?mode=signup',
     foot: 'مجانًا — بلا بطاقة ولا اشتراك',
-    features: ['توليد قالبين (٢) — مجانًا', 'جميع القوالب الثمانية للمعاينة', 'انشر موقعك على اسمك.beynoun.com', 'كل أدوات التحرير والإدارة', 'شهر تجربة للحجوزات وتحليلات الموقع', 'دعم المجتمع'],
+    features: ['توليد قالبين (٢) — مجانًا', 'جميع القوالب للمعاينة', 'انشر موقعك على اسمك.beynoun.com', 'كل أدوات التحرير والإدارة', 'شهر تجربة للحجوزات وتحليلات الموقع', 'دعم المجتمع'],
   },
   {
     id: 'starter', name: 'Starter', amount: usd(COMPANY.STARTER_PRICE_USD), per: '/شهريًا',
     sub: 'ابنِ، أدِر، وانشر — بلا حدود، على نطاقك الخاص.', cta: 'اشترك في Starter', href: '/checkout?plan=starter',
     badge: 'الأكثر شيوعًا', foot: 'ألغِ في أي وقت',
-    features: ['توليد غير محدود — يشمل تحديثات القوالب', 'جميع القوالب الثمانية الاحترافية', 'انشر على نطاقك الخاص', 'شهادة SSL تلقائية + CDN سريع', 'الحجوزات وتحليلات الموقع — كاملة', 'ملف ثيم شوبيفاي جاهز (المتجر + التشكيلة)', 'وصول مبكر للقوالب الجديدة', 'دعم ذو أولوية'],
+    features: ['توليد غير محدود — يشمل تحديثات القوالب', 'جميع القوالب الاحترافية', 'انشر على نطاقك الخاص', 'شهادة SSL تلقائية + CDN سريع', 'الحجوزات وتحليلات الموقع — كاملة', 'ملف ثيم شوبيفاي جاهز (المتجر + التشكيلة)', 'وصول مبكر للقوالب الجديدة', 'دعم ذو أولوية'],
   },
   {
     id: 'pro', name: 'Pro', amount: usd(COMPANY.PRO_PRICE_USD), per: '/شهريًا',
@@ -149,7 +149,7 @@ export const SECTIONS = {
   edit: 'عدّل موقعك كما تكتب رسالة',
   editLead: 'اضغط على أي نص في موقعك واكتب. غيّر الألوان والخطوط، ثم انشر بضغطة.',
   tpl: 'قالب لكل نشاط',
-  tplLead: 'ثمانية قوالب جاهزة. اختر قالب نشاطك، وبينون تكتب المحتوى وترتّب الأقسام.',
+  tplLead: 'قوالب جاهزة للمطاعم والخدمات ومراكز العافية، والمزيد قريبًا. اختر قالب نشاطك، وبينون تكتب المحتوى وترتّب الأقسام.',
   faq: 'أسئلة شائعة',
   gen: 'من سطرين إلى موقع كامل',
   genLead: 'تكتب ما تعرفه عن نشاطك بكلماتك. بينون تبني الباقي.',
@@ -167,24 +167,28 @@ export const bigShot = (id: string) => `/theme-previews/${id}.${BIG_WEBP.include
 export const TEMPLATE_META = [
   { id: 'one_product', label: 'متجر', name: 'متجر بمنتج واحد', tag: 'متجر · منتج واحد', sections: 24, presets: 3, page: '/templates/one-product-store', demo: '/templates/one-product-store/demo', build: '/build', soon: true },
   { id: 'restaurant', label: 'مطعم', name: 'موقع مطعم', tag: 'مطعم · قائمة · حجوزات', sections: 13, presets: 4, page: '/templates/restaurant', demo: '/templates/restaurant/demo', build: '/theme/new/restaurant' },
-  { id: 'atlas', label: 'تطبيق', name: 'صفحة هبوط لتطبيق', tag: 'تطبيق · برمجيات · B2B', sections: 12, presets: 4, page: '/templates/app-landing-page', demo: '/templates/app-landing-page/demo', build: '/theme/new/atlas' },
-  { id: 'lookbook', label: 'أزياء', name: 'موقع أزياء ولوك بوك', tag: 'أزياء · ملابس · علامة', sections: 11, presets: 4, page: '/templates/fashion-lookbook', demo: '/templates/fashion-lookbook/demo', build: '/theme/new/lookbook' },
-  { id: 'collective', label: 'تشكيلة', name: 'متجر بمنتجات متعددة', tag: 'كتالوج · منتجات متعددة', sections: 10, presets: 4, page: '/templates/online-store', demo: '/templates/online-store/demo', build: '/theme/new/collective' },
-  { id: 'studio', label: 'ستوديو', name: 'موقع علامة تجارية وقصة', tag: 'قصة علامة · تحرير', sections: 12, presets: 4, page: '/templates/brand-story', demo: '/templates/brand-story/demo', build: '/theme/new/studio' },
+  { id: 'atlas', label: 'تطبيق', name: 'صفحة هبوط لتطبيق', tag: 'تطبيق · برمجيات · B2B', sections: 12, presets: 4, page: '/templates/app-landing-page', demo: '/templates/app-landing-page/demo', build: '/theme/new/atlas' , soon: true },
+  { id: 'lookbook', label: 'أزياء', name: 'موقع أزياء ولوك بوك', tag: 'أزياء · ملابس · علامة', sections: 11, presets: 4, page: '/templates/fashion-lookbook', demo: '/templates/fashion-lookbook/demo', build: '/theme/new/lookbook' , soon: true },
+  { id: 'collective', label: 'تشكيلة', name: 'متجر بمنتجات متعددة', tag: 'كتالوج · منتجات متعددة', sections: 10, presets: 4, page: '/templates/online-store', demo: '/templates/online-store/demo', build: '/theme/new/collective' , soon: true },
+  { id: 'studio', label: 'ستوديو', name: 'موقع علامة تجارية وقصة', tag: 'قصة علامة · تحرير', sections: 12, presets: 4, page: '/templates/brand-story', demo: '/templates/brand-story/demo', build: '/theme/new/studio' , soon: true },
   { id: 'services', label: 'خدمات', name: 'موقع خدمات', tag: 'خدمات محلية · حِرف', sections: 13, presets: 4, page: '/templates/services', demo: '/templates/services/demo', build: '/theme/new/services' },
   { id: 'wellness', label: 'عافية', name: 'موقع مركز عافية', tag: 'سبا · يوغا · عافية', sections: 12, presets: 3, page: '/templates/wellness', demo: '/templates/wellness/demo', build: '/theme/new/wellness' },
 ] as const
-export const TEMPLATES_HEAD = { l1: 'ثمانية قوالب.', l2: 'كلّها جاهزة للنشر.', sub: 'كل قالب موقع كامل بالعربية. تختار واحدًا، وتكتب نبذة عن نشاطك، وتكتب بينون الباقي. المعاينة مجانية.' }
+/** Templates on the new build system (Anas, 2026-11-14). The rest are «قريبًا»
+    with a «نبّهني» button until they are rebuilt. */
+const READY_META = TEMPLATE_META.filter((t) => !('soon' in t && t.soon))
+export const SOON_IDS: string[] = TEMPLATE_META.filter((t) => 'soon' in t && t.soon).map((t) => t.id)
+export const TEMPLATES_HEAD = { l1: 'ثلاثة قوالب جاهزة.', l2: 'والباقي قريبًا.', sub: 'كل قالب موقع كامل بالعربية. تختار واحدًا، وتكتب نبذة عن نشاطك، وتكتب بينون الباقي. المعاينة مجانية.' }
 export const TEMPLATE_TOTALS = {
-  templates: TEMPLATE_META.length,
-  sections: TEMPLATE_META.reduce((n, t) => n + t.sections, 0),
-  presets: TEMPLATE_META.reduce((n, t) => n + t.presets, 0),
+  templates: READY_META.length,
+  sections: READY_META.reduce((n, t) => n + t.sections, 0),
+  presets: READY_META.reduce((n, t) => n + t.presets, 0),
 }
-/* What is true of all eight (TemplatesView FLOOR). */
+/* What is true of every template (TemplatesView FLOOR). */
 export const FLOOR = [
   { head: 'نصوص عربية جاهزة', body: 'تكتب نبذة قصيرة عن نشاطك، وتولّد بينون عناوين الموقع وأوصافه ودعواته بالعربية.' },
   { head: 'عربي من اليمين', body: 'كل قالب مبني للعربية أصلًا: الاتجاه والخطوط والتباعد، ومتجاوب مع الجوال.' },
-  { head: 'ابدأ مجانًا', body: 'تصفّح القوالب الثمانية كاملة، وولّد أول قالبين دون أن تدفع شيئًا.' },
+  { head: 'ابدأ مجانًا', body: 'تصفّح القوالب كاملة، وولّد أول قالبين دون أن تدفع شيئًا.' },
   { head: 'استضافة ونطاق', body: 'استضافة داخل الاتحاد الأوروبي مع شهادة SSL، ونطاقك الخاص على الخطط المدفوعة.' },
 ] as const
 
@@ -193,7 +197,7 @@ const usdT = (n: number) => n.toFixed(2) + '$'
 export const COMPARE = [
   { feature: 'السعر', zenya: ['مجانًا', usdT(COMPANY.STARTER_PRICE_USD), usdT(COMPANY.PRO_PRICE_USD)].join(' / '), other: '+29$ شهريًا', agency: '+2,000$' },
   { feature: 'وقت الإعداد', zenya: 'أقل من 60 ثانية', other: 'دقائق', agency: 'أسابيع' },
-  { feature: 'القوالب', zenya: '8 قوالب', other: '1-2', agency: 'مخصّص' },
+  { feature: 'القوالب', zenya: 'قالب لكل نشاط', other: '1-2', agency: 'مخصّص' },
   { feature: 'النشر مشمول', zenya: 'من الباقة المجانية', other: 'في معظمها', agency: 'تتولّاها بنفسك' },
   { feature: 'نطاق مخصّص', zenya: 'من خطة Starter', other: 'في معظمها', agency: 'نعم' },
   { feature: 'تصدير شوبيفاي', zenya: 'من خطة Starter', other: 'نادر', agency: 'مخصّص' },
