@@ -972,6 +972,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   return (
     <>
       <WizardShell
+        onExit={onBack}
         eyebrow={`قالب الخدمات · ${k.label}`}
         title={`ابنِ موقع ${mine}.`}
         sub={<>ابدأ بروابطك. نقرأها ونملأ الأسئلة عنك، وأنت تراجع وتؤكد. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>ليس {k.label}؟</button> : null}</>}

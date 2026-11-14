@@ -64,7 +64,7 @@ function beacon(body: object) {
 }
 
 export default function WizardShell({
-  eyebrow, title, sub, ledeExtra, steps, step, onStep, progress, final, notice, scrollKey, chrome = false, wish = true,
+  eyebrow, title, sub, ledeExtra, steps, step, onStep, progress, final, notice, scrollKey, chrome = false, wish = true, onExit,
 }: {
   eyebrow: string
   title: ReactNode
@@ -84,6 +84,11 @@ export default function WizardShell({
   /** The last question on the last step: «هل تتمنى أن نسألك عن شيء آخر؟». A
       wizard that asks it in its own fields passes false. */
   wish?: boolean
+  /** «رجوع» on the first step (Anas, 2026-11-14: an owner who came in by
+      mistake must have a way out). A wizard opened from «مشروعك أيّ واحد؟»
+      passes the picker back; without it the first step returns to the
+      templates. */
+  onExit?: () => void
 }) {
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]))
   const [skipped, setSkipped] = useState<Set<number>>(new Set())
@@ -150,6 +155,16 @@ export default function WizardShell({
     const n = Math.max(0, Math.min(steps.length - 1, i))
     setVisited((p) => new Set(p).add(n))
     onStep(n)
+  }
+
+  /* Leaving from the first step is a stop like closing the page, so it is
+     logged the same way before the owner goes. */
+  const exit = () => {
+    const t = trk.current
+    if (t.cur >= 0 && t.since) send([{ e: "leave", step: t.curId, i: t.cur, n: steps.length, how: "exit", ms: Date.now() - t.since }])
+    t.since = 0
+    if (onExit) onExit()
+    else window.location.assign("/templates")
   }
 
   /* A jump from outside (a validation error sending the owner back) counts as
@@ -262,10 +277,17 @@ export default function WizardShell({
           </div>
 
           <div className="zb-nav-bar">
-            <button type="button" className="zb-back" onClick={() => go(step - 1, "back")} disabled={step === 0}>
-              <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
-              السابق
-            </button>
+            {step === 0 ? (
+              <button type="button" className="zb-back" onClick={exit}>
+                <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
+                رجوع
+              </button>
+            ) : (
+              <button type="button" className="zb-back" onClick={() => go(step - 1, "back")}>
+                <ArrowRight size={16} strokeWidth={1.75} aria-hidden />
+                السابق
+              </button>
+            )}
 
             <p className="zb-nav-note" data-warn={spec.complete ? undefined : "true"}>{note}</p>
 
