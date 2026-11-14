@@ -196,13 +196,13 @@ export default function ServicesWizardPage() {
   if (isLiveKind(kind)) return <NicheWizard key={kind} kind={kind} onBack={() => choose(null)} />
   return (
     <>
-      <GeneralServicesWizard key={kind || 'none'} category={kind ? KIND_CATEGORY[kind] : undefined} />
+      <GeneralServicesWizard key={kind || 'none'} category={kind ? KIND_CATEGORY[kind] : undefined} onBack={kind ? () => choose(null) : undefined} />
       {kind ? null : <KindPicker group="services" onPick={choose} />}
     </>
   )
 }
 
-function GeneralServicesWizard({ category }: { category?: string }) {
+function GeneralServicesWizard({ category, onBack }: { category?: string; onBack?: () => void }) {
   const router = useRouter()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
@@ -643,6 +643,7 @@ function GeneralServicesWizard({ category }: { category?: string }) {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
+        onExit={onBack}
         eyebrow="قالب الخدمات المحلية · حِرَف"
         title="ابنِ موقع خدمات محلية عصريًا."
         sub="أخبرنا بأساسيات النشاط والخدمات التي تقدّمها ولماذا يثق بك العملاء. ستولّد بينون بنية الموقع الكاملة والنصوص والأقسام."

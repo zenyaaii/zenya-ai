@@ -172,7 +172,14 @@ export default function WellnessWizardPage() {
     if (nk && isLiveKind(nk)) { router.replace('/theme/new/services?kind=' + nk); return }
     setKind(k)
   }, [router])
-  const choose = (id: string) => {
+  const choose = (id: string | null) => {
+    if (!id) {
+      const u = new URL(window.location.href)
+      u.searchParams.delete('kind')
+      window.history.replaceState(null, '', u.toString())
+      setKind(null)
+      return
+    }
     // A beauty centre or a spa is built by its own questions and theme (Anas, 2026-11-13).
     const nk = id === 'spa' ? 'beauty' : id
     if (isLiveKind(nk)) { router.push('/theme/new/services?kind=' + nk); return }
@@ -185,13 +192,13 @@ export default function WellnessWizardPage() {
   if (kind === undefined) return null
   return (
     <>
-      <WellnessWizard key={kind || 'none'} niche={kind === 'spa' || kind === 'gym' ? kind : undefined} />
+      <WellnessWizard key={kind || 'none'} niche={kind === 'spa' || kind === 'gym' ? kind : undefined} onBack={kind ? () => choose(null) : undefined} />
       {kind ? null : <KindPicker group="wellness" onPick={choose} />}
     </>
   )
 }
 
-function WellnessWizard({ niche: startNiche }: { niche?: string }) {
+function WellnessWizard({ niche: startNiche, onBack }: { niche?: string; onBack?: () => void }) {
   const router = useRouter()
   const { toast } = useNotify()
   const [authReady, setAuthReady] = useState(false)
@@ -787,6 +794,7 @@ function WellnessWizard({ niche: startNiche }: { niche?: string }) {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
+        onExit={onBack}
         eyebrow="قالب استوديو العافية"
         title="ابنِ موقعًا لمركزك أو صالونك أو عيادتك."
         sub="اختر نوع نشاطك، وأخبرنا عن جلساتك وفريقك. تولّد بينون موقعًا كاملًا بصور وكلام يناسب نشاطك: واجهة رئيسية وقائمة جلسات والفريق والحجز."

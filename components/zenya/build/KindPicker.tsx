@@ -43,14 +43,30 @@ export const KINDS: Record<'services' | 'restaurant' | 'wellness', { template: s
   },
 }
 
-export default function KindPicker({ group, onPick }: { group: keyof typeof KINDS; onPick: (id: string) => void }) {
+/**
+ * A way out (Anas, 2026-11-14, option أ): an owner who opened this by mistake
+ * closes it with ✕, a tap on the dark around it, or Esc, and the line at the
+ * foot takes them back to the templates. Closing goes to the templates too
+ * unless the page passes its own `onClose`.
+ */
+export default function KindPicker({ group, onPick, onClose }: { group: keyof typeof KINDS; onPick: (id: string) => void; onClose?: () => void }) {
   const g = KINDS[group]
   const first = useRef<HTMLButtonElement>(null)
+  const close = useRef<() => void>(() => {})
+  close.current = onClose ?? (() => window.location.assign('/templates'))
   useEffect(() => { first.current?.focus({ preventScroll: true }) }, [])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close.current() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   return (
     <div className="kp" role="dialog" aria-modal="true" aria-labelledby="kp-q" dir="rtl">
-      <div className="kp-scrim" />
+      <div className="kp-scrim" onClick={() => close.current()} />
       <section className="kp-sheet">
+        <button type="button" className="kp-x" aria-label="إغلاق" onClick={() => close.current()}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
         <span className="kp-grab" aria-hidden />
         <div className="kp-head">
           <span className="kp-eye">ابنِ بقالب {g.template}</span>
@@ -64,6 +80,7 @@ export default function KindPicker({ group, onPick }: { group: keyof typeof KIND
             </button>
           ))}
         </div>
+        <p className="kp-foot">لست متأكدًا؟ <a href="/templates">ارجع إلى القوالب</a></p>
       </section>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
     </div>
@@ -75,9 +92,21 @@ const CSS = `
 .kp-scrim{position:absolute;inset:0;background:rgba(8,7,6,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:kp-fade .3s both}
 .kp-sheet{position:relative;width:100%;max-height:92vh;overflow:auto;background:var(--card,#1A1713);color:var(--ink,#F4EFE6);border:1px solid var(--line2,rgba(244,239,230,.16));border-radius:28px 28px 0 0;padding:22px max(18px,env(safe-area-inset-left,0px)) calc(26px + env(safe-area-inset-bottom,0px));display:grid;gap:18px;animation:kp-up .45s cubic-bezier(.2,.8,.2,1) both}
 @media(min-width:900px){.kp{align-items:center}.kp-sheet{width:min(860px,calc(100vw - 48px));border-radius:28px;padding:34px 36px;animation-name:kp-in}}
+.kp .kp-x{position:absolute;top:14px;left:14px;width:44px;height:44px;display:grid;place-items:center;border-radius:999px;background:var(--bg2,#24201A);color:inherit;border:1px solid var(--line,rgba(244,239,230,.08));cursor:pointer;transition:border-color .2s}
+.kp .kp-x:hover{border-color:var(--acc,#E2532A)}
+.kp .kp-x:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}
+@media(min-width:900px){.kp .kp-x{top:20px;left:20px}}
+.kp-foot{margin:0;text-align:center;color:var(--mut,#A39A8D);font-size:16px}
+.kp-foot a{color:var(--ink,#F4EFE6);text-decoration:underline;text-underline-offset:4px;font-weight:600}
 .kp-grab{width:44px;height:5px;border-radius:9px;background:var(--line2,rgba(244,239,230,.16));justify-self:center}
-@media(min-width:900px){.kp-grab{display:none}}
-.kp-head{display:grid;gap:4px}
+@media(min-width:900px){.kp .kp-x{position:absolute;top:14px;left:14px;width:44px;height:44px;display:grid;place-items:center;border-radius:999px;background:var(--bg2,#24201A);color:inherit;border:1px solid var(--line,rgba(244,239,230,.08));cursor:pointer;transition:border-color .2s}
+.kp .kp-x:hover{border-color:var(--acc,#E2532A)}
+.kp .kp-x:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}
+@media(min-width:900px){.kp .kp-x{top:20px;left:20px}}
+.kp-foot{margin:0;text-align:center;color:var(--mut,#A39A8D);font-size:16px}
+.kp-foot a{color:var(--ink,#F4EFE6);text-decoration:underline;text-underline-offset:4px;font-weight:600}
+.kp-grab{display:none}}
+.kp-head{display:grid;gap:4px;padding-inline-end:52px}
 .kp-eye{color:var(--acc,#E2532A);font-size:16px;font-weight:600}
 .kp-head h2{font-family:var(--f-head,inherit);font-weight:700;line-height:1.2;font-size:clamp(28px,4.4vw,42px);margin:0;color:inherit}
 .kp-head p{color:var(--mut,#A39A8D);font-size:17px;margin:0}

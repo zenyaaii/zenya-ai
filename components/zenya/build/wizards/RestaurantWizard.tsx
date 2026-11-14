@@ -8,14 +8,23 @@
  * signed in there, so it keeps no draft, reads the analyzer's bundled sample,
  * cannot upload, and its last step hands the reader to the real builder instead
  * of pretending to reach a generator it cannot call.
+ *
+ * LINKS FIRST (Anas, 2026-11-14), the order the other niches use: 1 the
+ * owner's links (Google Maps, Instagram) → 2 check what we read → 3 menu →
+ * 4 story and chef → 5 booking and hours → 6 photos → 7 reviews and press →
+ * 8 review with the colours (his own photo colours first). The site the
+ * generator draws is unchanged; every answer lands in the same input and
+ * stays editable in the editor, and the colours go to content.color_overrides.
  */
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { generateErrorText } from '@/lib/generate-error'
 import { ratingOf } from '@/lib/rating'
 import { useRouter } from "next/navigation"
 import { createClient } from "@/utils/supabase/client"
 import { RESTAURANT_PRESETS } from "@/utils/restaurant/presets"
+import type { RestaurantColors } from "@/utils/restaurant/types"
+import { hoursFromGoogle, type BarberGoogle } from "@/utils/services/barber"
 import type { RestaurantInput, RestaurantTypeId } from "@/utils/restaurant/input"
 import ImageUploadField from "@/components/ImageUploadField"
 import MenuImageAnalyzer, { type ExtractedCategory, type MenuApplyMode } from "@/components/restaurant/MenuImageAnalyzer"
@@ -25,7 +34,7 @@ import GenerationOverlay from "@/components/GenerationOverlay"
 import AiContentDisclaimer from "@/components/AiContentDisclaimer"
 import { useNotify } from "@/components/ui/Notify"
 import WizardShell, {
-  AddButton, Block, Card, Chips, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Textarea, Uploads,
+  AddButton, Block, Card, Chips, Field, Grid, Handoff, Hours, Input, Notice, Presets, Review, Textarea, Toggle, Uploads,
   type WizardStep,
 } from "../WizardShell"
 import OwnerReviewsFields, { reviewsPayload, reviewsUrlOf, validReviewsOf, type ReviewDraft, type ReviewsForm } from "../OwnerReviewsFields"
@@ -89,6 +98,17 @@ type Form = {
   reviews: ReviewDraft[]
   reviews_url: string
   style_preset: RestaurantInput["style_preset"]
+  /** Links first. */
+  instagram: string
+  ig_photos: string[]
+  /** Photos Google holds for the place, copied to our storage. */
+  google_photos: string[]
+  /** The owner said what we read from his links is right. */
+  checked: boolean
+  /** What he says we read wrong, kept so the reader can be fixed. */
+  scrape_issue: string
+  /** His own photo colours: '' = the preset's colours. */
+  own_look: "" | "night" | "day"
 }
 
 function newId() {
@@ -154,6 +174,7 @@ function buildSampleForm(): Form {
     ],
     reviews_url: "",
     style_preset: "onyx",
+    instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "",
   }
 }
 
@@ -169,7 +190,57 @@ const initialForm = (): Form => ({
   press_outlets: "",
   review_rating: "", review_count: "", reviews: [], reviews_url: "",
   style_preset: "onyx",
+  instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "",
 })
+
+/** "17:30" → "5:30 م", the way the restaurant's hours are written. */
+function to12(hm: string): string {
+  const [h0, m] = hm.split(":").map((x) => parseInt(x, 10))
+  const h = (h0 || 0) % 24
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${h12}:${String(m || 0).padStart(2, "0")} ${h < 12 ? "ص" : "م"}`
+}
+
+/** Google's weekly periods as the restaurant's seven days (Saturday first). */
+function restaurantHours(periods: NonNullable<BarberGoogle["periods"]>): Hour[] | null {
+  const days = hoursFromGoogle(periods)
+  if (!days.length) return null
+  return DEFAULT_HOURS.map((d, i) => {
+    const g = days[i]
+    if (!g || g.closed || !g.periods.length) return { ...d, open: "", close: "", closed: true }
+    return { ...d, open: to12(g.periods[0].open), close: to12(g.periods[g.periods.length - 1].close), closed: false }
+  })
+}
+
+type GoogleFound = BarberGoogle & { name?: string; photos?: string[]; contact?: { phone?: string; address?: string; city?: string; area?: string } }
+
+/** «مثال» lines per kind of place: one tap takes it, then the owner edits it. */
+const EXAMPLES: Record<"restaurant" | "cafe" | "sweets", { story: string; chef: string; note: string; press: string }> = {
+  restaurant: {
+    story: "افتتحنا المطعم عام 2015 في وسط المدينة. نطبخ أكل البيت كما تعلّمناه من أمهاتنا، ونشتري الخضار كل صباح من السوق.",
+    chef: "تعلّم الطبخ في مطعم والده، ثم عمل عشر سنوات في فنادق عمّان ودبي قبل أن يفتح مطبخه.",
+    note: "للمجموعات من 8 أشخاص فأكثر، احجز قبل يوم على الأقل.",
+    press: "دليل المطاعم المحلي 2024",
+  },
+  cafe: {
+    story: "بدأنا المقهى عام 2019 بآلة قهوة واحدة وطاولتين. نحمّص البن بأنفسنا كل أسبوع، والجلسة هادئة تناسب العمل والقراءة.",
+    chef: "باريستا منذ 2014، تدرّب على التحميص في إسطنبول، ويختار كل حبة بن بنفسه.",
+    note: "الجلسة الخارجية لا تُحجز، وهي لمن يأتي أولًا.",
+    press: "أفضل مقهى في الحي، تصويت الزبائن 2024",
+  },
+  sweets: {
+    story: "بدأنا من مطبخ البيت عام 2012، ثم فتحنا المحل. نصنع الحلويات كل يوم بالسمن البلدي، ونقبل طلبات الأعراس والمناسبات.",
+    chef: "معلّم حلويات منذ 25 سنة، تعلّم الصنعة في نابلس.",
+    note: "طلبات المناسبات قبل ثلاثة أيام على الأقل.",
+    press: "",
+  },
+}
+
+/** «مثال: …» under a field, with one tap to take it and then edit it. */
+function Example({ text, on, onUse }: { text?: string; on: boolean; onUse: (v: string) => void }) {
+  if (!text || !on) return null
+  return <span className="rw-ex"><span>مثال: {text}</span><button type="button" onClick={() => onUse(text)}>استعمل المثال</button></span>
+}
 
 /**
  * Reservations always run through Beynoun's own booking system. A phone-shaped
@@ -204,7 +275,7 @@ function clearDraft(userId: string) {
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
-export default function RestaurantWizard({ demo = false, kind }: { demo?: boolean; kind?: string }) {
+export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?: boolean; kind?: string; onBack?: () => void }) {
   const router = useRouter()
   const { confirm, toast } = useNotify()
   const [authReady, setAuthReady] = useState(demo)
@@ -224,6 +295,15 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
   const [error, setError] = useState<string | null>(null)
   const [errorKey, setErrorKey] = useState(0)
   const [step, setStep] = useState(0)
+  // Links first: what Google and Instagram gave us.
+  const [g, setG] = useState<GoogleFound | null>(null)
+  const [gState, setGState] = useState<"idle" | "busy" | "ok" | "fail">("idle")
+  const [gMsg, setGMsg] = useState("")
+  const [igState, setIgState] = useState<"idle" | "busy" | "ok" | "fail">("idle")
+  const [igMsg, setIgMsg] = useState("")
+  type Pal = RestaurantColors
+  const [own, setOwn] = useState<{ day: Pal; night: Pal } | null>(null)
+  const lookTouched = useRef(false)
 
   // ── Auth + draft restore (not on the public demo) ─────────────────────
   useEffect(() => {
@@ -334,6 +414,78 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
     })
   }
 
+  // ── Links first: read Google and Instagram, fill the questions ─────────
+  const place = kind === "cafe" ? "المقهى" : kind === "sweets" ? "المحل" : "المطعم"
+  // «مطعمك / مقهاك / محلك» and «ليس مطعمًا؟», written out: Arabic does not take a suffix by rule here.
+  const mine = kind === "cafe" ? "مقهاك" : kind === "sweets" ? "محلك" : "مطعمك"
+  const notThis = kind === "cafe" ? "ليس مقهى؟" : kind === "sweets" ? "ليس محل حلويات؟" : "ليس مطعمًا؟"
+  const ex = EXAMPLES[kind === "cafe" || kind === "sweets" ? kind : "restaurant"]
+
+  async function fetchGoogle() {
+    if (!form.map_link.trim()) return
+    setGState("busy"); setGMsg("")
+    try {
+      const res = await fetch("/api/niche/google", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: form.map_link.trim(), name: form.brand_name, city: form.city, demo }),
+      })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setGState("fail")
+        setGMsg(j?.error === "not_google_link" ? "هذا ليس رابط خرائط جوجل. انسخه من زر «مشاركة» في الخرائط."
+          : j?.error === "not_found" ? `لم نجد ${place} من هذا الرابط. جرّب رابط «مشاركة» من صفحته في الخرائط.`
+          : j?.error === "too_many" ? "محاولات كثيرة. انتظر قليلًا ثم أعد."
+          : j?.error === "sign_in" ? "سجّل الدخول لنجلب بياناتك من جوجل."
+          : "تعذّر الوصول إلى جوجل الآن. اكتب البيانات بنفسك وتابع.")
+        return
+      }
+      const found = j as GoogleFound
+      setG(found)
+      setGState("ok")
+      setForm((p) => {
+        const photos = found.photos || []
+        const hours = found.periods?.length ? restaurantHours(found.periods) : null
+        const fromGoogle: ReviewDraft[] = (found.reviews || []).map((r) => ({ id: newId(), name: r.name, text: r.text, rating: String(r.rating || 5), origin: "google", when: r.when }))
+        return {
+          ...p,
+          brand_name: p.brand_name || found.name || "",
+          phone: p.phone || found.contact?.phone || "",
+          address: p.address || found.contact?.address || "",
+          city: p.city || found.contact?.city || "",
+          neighborhood: p.neighborhood || found.contact?.area || "",
+          hours: hours || p.hours,
+          google_photos: photos,
+          hero_image_url: p.hero_image_url || photos[0] || "",
+          gallery_image_urls: p.gallery_image_urls.length ? p.gallery_image_urls : photos.slice(1, 7),
+          review_rating: p.review_rating || (found.rating ? Number(found.rating).toFixed(1) : ""),
+          review_count: p.review_count || (found.count ? String(found.count) : ""),
+          reviews: p.reviews.some((r) => r.origin === "google") ? p.reviews : [...p.reviews, ...fromGoogle],
+          reviews_url: p.reviews_url || found.maps_url || p.map_link,
+        }
+      })
+    } catch {
+      setGState("fail"); setGMsg("تعذّر الوصول إلى جوجل الآن. اكتب البيانات بنفسك وتابع.")
+    }
+  }
+
+  async function fetchInstagram() {
+    if (form.instagram.trim().length < 2 || igState === "busy") return
+    setIgState("busy"); setIgMsg("")
+    try {
+      const res = await fetch("/api/niche/social", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ instagram: form.instagram.trim(), demo }) })
+      const j = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setIgState("fail")
+        setIgMsg(j?.error === "not_found" ? "لم نجد هذا الحساب. تأكد من الاسم، أو تابع بدونه."
+          : j?.error === "not_instagram" ? "اكتب اسم الحساب مثل @yourname أو الصق رابطه."
+          : "تعذّر قراءة الحساب الآن. تابع بدونه.")
+        return
+      }
+      setIgState("ok")
+      setForm((p) => ({ ...p, ig_photos: Array.isArray(j.photos) ? j.photos : [] }))
+    } catch { setIgState("fail"); setIgMsg("تعذّر قراءة الحساب الآن. تابع بدونه.") }
+  }
+
   // ── Counts ────────────────────────────────────────────────────────────
   const counts = useMemo(() => {
     let total = 0
@@ -349,12 +501,49 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
   }, [form.categories])
 
   // ── Per-step completeness, from the same thresholds validate() uses ────
+  const found = gState === "ok" || (igState === "ok" && form.ig_photos.length > 0)
+  const reading = gState === "busy" || igState === "busy"
   const ok = {
     basics: form.brand_name.trim().length >= 2 && form.cuisine.trim().length >= 2 && form.city.trim().length >= 2,
     place: form.address.trim().length >= 4 && form.phone.trim().length >= 4 && EMAIL_RE.test(form.email.trim()),
     menu: counts.valid >= 1,
     story: form.story_brief.trim().length >= 10,
   }
+
+  // Every photo we found, Google first; the owner picks which ones show.
+  const foundPhotos = useMemo(() => {
+    const all = [...form.google_photos, ...form.ig_photos]
+    return all.filter((u, i) => all.indexOf(u) === i)
+  }, [form.google_photos, form.ig_photos])
+
+  // His own colours, measured from the photos he kept (hero first). The pixels
+  // decide; no AI is called. Same endpoint as the other niches.
+  const measureKey = [form.hero_image_url, ...form.gallery_image_urls].filter(Boolean).slice(0, 4).join("|")
+  useEffect(() => {
+    if (!measureKey) return
+    const ctl = new AbortController()
+    const t = setTimeout(() => {
+      fetch("/api/niche/colors", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ photos: measureKey.split("|") }), signal: ctl.signal })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (!j?.day || !j?.night) return
+          const pick = (x: any): Pal => ({ primary: x.primary, accent: x.accent, background: x.background, surface: x.surface, text: x.text, muted: x.muted, border: x.border })
+          setOwn({ day: pick(j.day), night: pick(j.night) })
+          if (!lookTouched.current) {
+            const bg = (RESTAURANT_PRESETS.find((p) => p.id === form.style_preset) || RESTAURANT_PRESETS[0]).colors.background.replace("#", "")
+            const n = parseInt(bg, 16)
+            const light = ((n >> 16) & 255) + ((n >> 8) & 255) + (n & 255) > 384
+            setForm((p) => ({ ...p, own_look: light ? "day" : "night" }))
+          }
+        })
+        .catch(() => { /* no own colours: the presets stay */ })
+    }, 600)
+    return () => { clearTimeout(t); ctl.abort() }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [measureKey])
+
+  const ownColors = own && form.own_look ? own[form.own_look] : null
+  const shownColors: Pal = ownColors || (RESTAURANT_PRESETS.find((p) => p.id === form.style_preset) || RESTAURANT_PRESETS[0]).colors
   const required = [
     form.brand_name.trim().length >= 2, form.cuisine.trim().length >= 2, form.city.trim().length >= 2,
     form.address.trim().length >= 4, form.phone.trim().length >= 4, EMAIL_RE.test(form.email.trim()),
@@ -363,6 +552,7 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
   const pct = Math.round((required.filter(Boolean).length / required.length) * 100)
 
   function validate(): string | null {
+    if (found && !form.checked) return "راجع ما جلبناه من روابطك وأكّد أنه صحيح."
     if (form.brand_name.trim().length < 2) return "يرجى إدخال اسم المطعم."
     if (form.cuisine.trim().length < 2) return "يرجى إدخال نوع المطبخ."
     if (form.city.trim().length < 2) return "يرجى إدخال المدينة."
@@ -483,9 +673,13 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
         body: JSON.stringify({
           productName: form.brand_name,
           images: payload.visuals.gallery_image_urls || [],
-          primaryColor: preset.colors.primary,
-          secondaryColor: preset.colors.accent,
-          content: { business_type: "restaurant", style_preset: form.style_preset, restaurant: genJson.content, input: payload },
+          primaryColor: (ownColors || preset.colors).primary,
+          secondaryColor: (ownColors || preset.colors).accent,
+          content: {
+            business_type: "restaurant", style_preset: form.style_preset, restaurant: genJson.content, input: payload,
+            ...(ownColors ? { color_overrides: ownColors } : {}),
+            meta: { links_first: true, instagram: form.instagram.trim() || undefined, checked: form.checked, scrape_issue: form.scrape_issue.trim() || undefined },
+          },
         }),
       })
       const saveJson = await saveRes.json()
@@ -525,72 +719,129 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
     [form.hero_image_url, form.chef_photo_url, form.accent_image_url].filter(Boolean).length +
     form.gallery_image_urls.length + form.signature_dish_image_urls.length
 
+  const readList: { what: string; from: string; where: string }[] = []
+  if (gState === "ok" && g) {
+    if (g.name) readList.push({ what: "الاسم", from: "من جوجل", where: g.name })
+    if (g.contact?.phone) readList.push({ what: "الهاتف", from: "من جوجل", where: g.contact.phone })
+    if (g.contact?.address) readList.push({ what: "العنوان", from: "من جوجل", where: g.contact.address })
+    if (g.periods?.length) readList.push({ what: "أوقات العمل", from: "من جوجل", where: "في خطوة «الحجز والأوقات»، عدّلها هناك" })
+    if (g.reviews?.length) readList.push({ what: `${g.reviews.length.toLocaleString("ar")} تقييمات بأسماء كاتبيها`, from: "من جوجل", where: "في خطوة «التقييمات والجوائز»" })
+    if (form.google_photos.length) readList.push({ what: `${form.google_photos.length.toLocaleString("ar")} صور`, from: "من جوجل", where: "في خطوة «الصور»، اختر منها ما تريد" })
+  }
+  if (igState === "ok" && form.ig_photos.length) readList.push({ what: `${form.ig_photos.length.toLocaleString("ar")} صور`, from: "من إنستغرام", where: "في خطوة «الصور»، اختر منها ما تريد" })
+
+  const inGallery = (u: string) => form.gallery_image_urls.includes(u)
+  function togglePhoto(u: string) {
+    setForm((p) => {
+      if (p.gallery_image_urls.includes(u)) return { ...p, gallery_image_urls: p.gallery_image_urls.filter((x) => x !== u), hero_image_url: p.hero_image_url === u ? "" : p.hero_image_url }
+      if (p.hero_image_url === u) return { ...p, hero_image_url: "" }
+      return { ...p, gallery_image_urls: [...p.gallery_image_urls, u].slice(0, 8) }
+    })
+  }
+  function makeHero(u: string) {
+    setForm((p) => ({ ...p, hero_image_url: u, gallery_image_urls: p.gallery_image_urls.filter((x) => x !== u) }))
+  }
+
   const steps: WizardStep[] = [
     {
-      id: "basics",
-      title: "الأساسيات",
-      sub: "من أنت وماذا تقدّم.",
-      complete: ok.basics,
-      note: "أدخل اسم المطعم والمطبخ والمدينة.",
+      id: "links",
+      title: "روابطك أولًا",
+      sub: `ألصق رابط ${place} على خرائط جوجل وحساب إنستغرام. نقرؤها ونملأ الأسئلة عنك: الاسم والهاتف والعنوان والأوقات والتقييمات والصور. ليس عندك روابط؟ اضغط «تخطَّ».`,
+      optional: true,
+      complete: true,
       body: (
         <Grid>
-          <Field label="اسم المطعم" required>
-            <Input value={form.brand_name} onChange={(e) => update("brand_name", e.target.value)} placeholder="دار نُور" />
-          </Field>
-          <Field label="المطبخ" required>
-            <Input value={form.cuisine} onChange={(e) => update("cuisine", e.target.value)} placeholder="مأكولات شامية عصرية" />
-          </Field>
-          <Field label="المدينة" required>
-            <Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="بيروت" />
-          </Field>
-          <Field label="الحي">
-            <Input value={form.neighborhood} onChange={(e) => update("neighborhood", e.target.value)} placeholder="الجميزة" />
-          </Field>
-          <Block title="ما نوع المكان؟" optional hint="تساعد بينون على كتابة نصوص تناسب أجواء مكانك. تخطَّ إن لم يناسبك شيء.">
-            <Chips options={RESTAURANT_TYPES} value={form.restaurant_type} onChange={(id) => update("restaurant_type", id as RestaurantTypeId | "")} />
+          <Block title="خرائط جوجل" optional hint={`افتح ${place} في خرائط جوجل، اضغط «مشاركة»، وانسخ الرابط. منه نأخذ أكثر شيء.`}>
+            <Input dir="ltr" aria-label={`رابط ${place} على خرائط جوجل`} value={form.map_link} onChange={(e) => { update("map_link", e.target.value); setGState("idle"); update("checked", false) }} placeholder="https://maps.app.goo.gl/…" />
           </Block>
+          <Block title="إنستغرام" optional hint="نقرأ صور الحساب ونعرضها عليك في خطوة الصور لتختار منها.">
+            <Input dir="ltr" aria-label="حساب إنستغرام" value={form.instagram} onChange={(e) => { update("instagram", e.target.value); setIgState("idle"); update("checked", false) }} placeholder="@yourname" />
+          </Block>
+          <Block title="القائمة" optional>
+            <p className="zb-note">عندك قائمة ورقية أو صورة لها؟ ارفعها في خطوة «القائمة» ونقرأ منها الأصناف والأسعار.</p>
+          </Block>
+          {form.map_link.trim().length > 8 || form.instagram.trim().length >= 2 ? <Notice>اضغط «التالي». نقرأ روابطك ونعرض عليك ما وجدناه لتراجعه.</Notice> : null}
         </Grid>
       ),
     },
     {
-      id: "style",
-      title: "النمط البصري",
-      sub: "اختر المظهر. يمكنك تغييره لاحقًا.",
-      complete: true,
-      body: (
-        <Presets presets={RESTAURANT_PRESETS} value={form.style_preset} onChange={(id) => update("style_preset", id as Form["style_preset"])} />
-      ),
-    },
-    {
-      id: "place",
-      title: "الموقع وساعات العمل",
-      sub: "أين يجدك الضيوف، ومتى تفتح.",
-      complete: ok.place,
-      note: "أدخل العنوان والهاتف وبريدًا إلكترونيًا صحيحًا.",
+      id: "check",
+      title: found ? "راجع ما وجدناه" : `بيانات ${place}`,
+      sub: found ? "هذا ما قرأناه من روابطك، وبه ملأنا الأسئلة. راجعه، وصحّح ما يلزم، ثم أكّد." : reading ? "نقرأ روابطك الآن…" : `اكتب بيانات ${place}. نضعها في الموقع كما هي.`,
+      complete: ok.basics && ok.place && (!found || form.checked),
+      note: found && !form.checked ? "أكّد أن ما جلبناه صحيح." : "الاسم والمطبخ والمدينة والعنوان والهاتف والبريد مطلوبة.",
       body: (
         <Grid>
-          <Field label="العنوان الكامل" required wide>
-            <Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="شارع غورو، الجميزة، بيروت" />
-          </Field>
-          <Field label="الهاتف" required>
-            <Input dir="ltr" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+961 1 555 0140" />
-          </Field>
-          <Field label="البريد الإلكتروني" required>
-            <Input type="email" dir="ltr" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="reservations@restaurant.com" />
-          </Field>
-          <Field label="رابط خرائط Google" wide>
-            <Input dir="ltr" value={form.map_link} onChange={(e) => update("map_link", e.target.value)} placeholder="https://maps.google.com/..." />
-          </Field>
-          <Block title="ساعات العمل">
-            <Hours hours={form.hours} onChange={(i, patch) => updateHour(i, patch as Partial<Hour>)} openPh="5:30 م" closePh="10:00 م" />
+          {reading ? <Notice>{gState === "busy" ? "نقرأ خرائط جوجل… " : ""}{igState === "busy" ? "نقرأ إنستغرام… " : ""}يأخذ هذا ثواني.</Notice> : null}
+          {gMsg && gState === "fail" ? <Notice tone="bad" action={form.map_link.trim() ? <button type="button" onClick={fetchGoogle}>أعد المحاولة</button> : undefined}>{gMsg}</Notice> : null}
+          {igMsg && igState === "fail" ? <Notice tone="bad">{igMsg}</Notice> : null}
+          {found ? (
+            <Block title="ما وجدناه">
+              {gState === "ok" && g ? (
+                <div className="rw-found">
+                  {g.photos?.[0] ? <img src={g.photos[0]} alt="" /> : <span className="rw-found-ph" aria-hidden>{(form.brand_name || g.name || place).slice(0, 1)}</span>}
+                  <div>
+                    <b>{g.name || form.brand_name}</b>
+                    {g.rating ? <span className="rw-stars">★ {Number(g.rating).toFixed(1)} <small>· {Number(g.count || 0).toLocaleString("ar")} تقييم</small></span> : null}
+                    {g.contact?.address ? <small>{g.contact.address}</small> : null}
+                  </div>
+                </div>
+              ) : null}
+              <ul className="rw-src">
+                {readList.map((x) => <li key={x.what + x.from}><b>{x.what} <small className="rw-from">{x.from}</small></b><span>{x.where}</span></li>)}
+              </ul>
+              {foundPhotos.length ? (
+                <div className="rw-strip" aria-label="صور وجدناها">
+                  {foundPhotos.slice(0, 10).map((u) => <img key={u} src={u} alt="" loading="lazy" />)}
+                </div>
+              ) : null}
+            </Block>
+          ) : null}
+          <Block title={`بيانات ${place}`} hint={gState === "ok" ? "جلبناها من جوجل. عدّل ما يلزم." : undefined}>
+            <Grid>
+              <Field label={`اسم ${place}`} required>
+                <Input value={form.brand_name} onChange={(e) => update("brand_name", e.target.value)} placeholder="دار نُور" />
+              </Field>
+              <Field label="المطبخ" required>
+                <Input value={form.cuisine} onChange={(e) => update("cuisine", e.target.value)} placeholder="مأكولات شامية عصرية" />
+              </Field>
+              <Field label="المدينة" required>
+                <Input value={form.city} onChange={(e) => update("city", e.target.value)} placeholder="بيروت" />
+              </Field>
+              <Field label="الحي">
+                <Input value={form.neighborhood} onChange={(e) => update("neighborhood", e.target.value)} placeholder="الجميزة" />
+              </Field>
+              <Field label="العنوان الكامل" required wide>
+                <Input value={form.address} onChange={(e) => update("address", e.target.value)} placeholder="شارع غورو، الجميزة، بيروت" />
+              </Field>
+              <Field label="الهاتف" required>
+                <Input dir="ltr" inputMode="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} placeholder="+961 1 555 0140" />
+              </Field>
+              <Field label="البريد الإلكتروني" required hint="تصلك عليه رسائل الحجز.">
+                <Input type="email" dir="ltr" value={form.email} onChange={(e) => update("email", e.target.value)} placeholder="reservations@restaurant.com" />
+              </Field>
+            </Grid>
           </Block>
+          <Block title="ما نوع المكان؟" optional hint="تساعدنا على كتابة نصوص تناسب أجواء مكانك.">
+            <Chips options={RESTAURANT_TYPES} value={form.restaurant_type} onChange={(id) => update("restaurant_type", id as RestaurantTypeId | "")} />
+          </Block>
+          {found ? (
+            <Block title="هل ما جلبناه صحيح؟">
+              <Toggle on={form.checked} onChange={(v) => update("checked", v)}>راجعت ما جلبناه، وهو صحيح</Toggle>
+              <div style={{ marginTop: 12 }}>
+                <Field label="في شيء خطأ فيما قرأناه؟" wide hint="اكتبه لنا. نصلحه في موقعك، ونحسّن طريقة القراءة.">
+                  <Textarea rows={3} value={form.scrape_issue} onChange={(e) => update("scrape_issue", e.target.value)} placeholder="مثال: الصور ليست لمطعمي، أو الأوقات قديمة." />
+                </Field>
+              </div>
+            </Block>
+          ) : null}
         </Grid>
       ),
     },
     {
       id: "menu",
       title: "القائمة",
-      sub: "حتى صنف واحد يكفي. أضف صورة لأي صنف — تظهر بجانب الاسم في موقعك المنشور.",
+      sub: "صوّر قائمتك الورقية فنقرؤها ونملأ الأصناف، أو اكتبها بنفسك. حتى صنف واحد يكفي، وكل صنف يبقى قابلًا للتعديل.",
       complete: ok.menu,
       note: "أضف صنفًا واحدًا على الأقل باسم وسعر.",
       body: (
@@ -680,14 +931,15 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
     },
     {
       id: "story",
-      title: "قصتك",
-      sub: "ملخّص قصير. ستحوّله بينون إلى نص تحريري.",
+      title: "قصتك والشيف",
+      sub: "جملتان أو ثلاث تكفي. نحوّلها إلى نص للموقع، وتبقى قابلة للتعديل.",
       complete: ok.story,
-      note: "أخبرنا جملةً أو جملتين عن قصة المطعم.",
+      note: `أخبرنا جملةً أو جملتين عن قصة ${place}.`,
       body: (
         <Grid>
-          <Field label="عن المطعم" required wide>
-            <Textarea rows={4} value={form.story_brief} onChange={(e) => update("story_brief", e.target.value)} placeholder="بضع جمل. متى افتتحت، وما الفلسفة، ومن أين تستورد، وما الذي يمنح القاعة طابعها الخاص؟" />
+          <Field label={`عن ${place}`} required wide>
+            <Textarea rows={4} value={form.story_brief} onChange={(e) => update("story_brief", e.target.value)} placeholder="متى افتتحت، وما الذي يميّز أكلك، ومن أين تشتري، وما أجواء المكان؟" />
+            <Example text={ex.story} on={!form.story_brief.trim()} onUse={(v) => update("story_brief", v)} />
           </Field>
           <Field label="اسم الشيف">
             <Input value={form.chef_name} onChange={(e) => update("chef_name", e.target.value)} placeholder="الشيف سامي خوري" />
@@ -696,24 +948,29 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
             <Input value={form.chef_title} onChange={(e) => update("chef_title", e.target.value)} placeholder="الشيف · المالك" />
           </Field>
           <Field label="نبذة عن الشيف" wide>
-            <Textarea value={form.chef_bio_brief} onChange={(e) => update("chef_bio_brief", e.target.value)} placeholder="التدريب والخلفية وما الذي أتى به إلى هنا — ستصقله بينون." />
+            <Textarea value={form.chef_bio_brief} onChange={(e) => update("chef_bio_brief", e.target.value)} placeholder="أين تعلّم، وما الذي أتى به إلى هنا." />
+            <Example text={ex.chef} on={!form.chef_bio_brief.trim()} onUse={(v) => update("chef_bio_brief", v)} />
           </Field>
         </Grid>
       ),
     },
     {
       id: "booking",
-      title: "الحجوزات",
-      sub: "تصل الحجوزات مباشرةً إلى لوحة تحكّمك في بينون — بلا منصّات خارجية.",
+      title: "الحجز والأوقات",
+      sub: `متى تفتح، وكيف يحجز الضيف. تصل الحجوزات إلى لوحة تحكّمك في بينون.${gState === "ok" && g?.periods?.length ? " جلبنا أوقاتك من جوجل؛ عدّلها كما تشاء." : ""}`,
       optional: true,
       complete: true,
       body: (
         <Grid>
-          <Field label="رقم هاتف للحجز (احتياطي، اختياري)" wide hint="يظهر كزر «اتصل للحجز» للزوّار على الباقة المجانية.">
+          <Block title="ساعات العمل">
+            <Hours hours={form.hours} onChange={(i, patch) => updateHour(i, patch as Partial<Hour>)} openPh="5:30 م" closePh="10:00 م" />
+          </Block>
+          <Field label="رقم هاتف للحجز (اختياري)" wide hint="يظهر كزر «اتصل للحجز» للزوّار على الباقة المجانية.">
             <Input dir="ltr" value={form.booking} onChange={(e) => update("booking", e.target.value)} placeholder="+961 1 555 0140" />
           </Field>
           <Field label="ملاحظة الحجز (اختياري)" wide>
-            <Textarea value={form.reservation_note} onChange={(e) => update("reservation_note", e.target.value)} placeholder="مثلاً: «للمناسبات الخاصة أو 8 أشخاص فأكثر، يُرجى المراسلة على events@...»" />
+            <Textarea value={form.reservation_note} onChange={(e) => update("reservation_note", e.target.value)} placeholder="شرط أو تنبيه للضيف قبل الحجز" />
+            <Example text={ex.note} on={!form.reservation_note.trim()} onUse={(v) => update("reservation_note", v)} />
           </Field>
         </Grid>
       ),
@@ -721,82 +978,123 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
     {
       id: "visuals",
       title: "الصور",
-      sub: "ارفع صورك الخاصة. أو تخطَّ — نحن نتكفّل بذلك.",
+      sub: foundPhotos.length ? "هذه صورك من جوجل وإنستغرام. اضغط الصورة لتضعها في موقعك أو تبعدها، واختر صورة الواجهة، وأضف صورًا من عندك." : "ارفع صورك. بدون صور نضع صورًا خالية من الحقوق تناسب مكانك، وتستبدلها متى شئت.",
       optional: true,
       complete: true,
-      body: demo ? (
+      body: (
         <Grid>
-          <Block hint="رفع الصور يحتاج حسابًا، ويتم داخل المنشئ الحقيقي: الصورة الرئيسية، وصورة الشيف، ومعرض حتى 8 صور، وصور الأطباق المميّزة حتى 4.">
-            <p className="zb-note">لا صور؟ لا تقلق. اترك أي خانة فارغة وسنملؤها بصور خالية من الحقوق تناسب نوع مطعمك.</p>
-          </Block>
-        </Grid>
-      ) : (
-        <Grid>
-          <Block>
-            <p className="zb-note">
-              لا صور؟ لا تقلق. اترك أي خانة فارغة وسنملؤها بصور جميلة خالية من الحقوق تناسب {typeLabel || "نوع مطعمك"}. يمكنك دائمًا العودة واستبدالها لاحقًا.
-            </p>
-            <ImageUploadField label="الصورة الرئيسية" value={form.hero_image_url} onChange={(url) => update("hero_image_url", url)} aspect="wide" helper="الصورة الكبيرة أعلى صفحتك." />
-            <Uploads cols={2}>
-              <ImageUploadField label="صورة الشيف" value={form.chef_photo_url} onChange={(url) => update("chef_photo_url", url)} aspect="square" />
-              <ImageUploadField label="صورة مرافقة للقصة" value={form.accent_image_url} onChange={(url) => update("accent_image_url", url)} aspect="square" helper="تظهر بجانب قصة الشيف." />
-            </Uploads>
-          </Block>
-          <Block title="المعرض (حتى 8)">
-            <Uploads>
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <ImageUploadField key={"g-" + i} value={form.gallery_image_urls[i] || ""} onChange={(url) => setListAt("gallery_image_urls", i, url)} aspect="square" />
-              ))}
-            </Uploads>
-          </Block>
-          <Block title="صور الأطباق المميّزة (حتى 4)">
-            <Uploads>
-              {[0, 1, 2, 3].map((i) => (
-                <ImageUploadField key={"s-" + i} value={form.signature_dish_image_urls[i] || ""} onChange={(url) => setListAt("signature_dish_image_urls", i, url)} aspect="square" />
-              ))}
-            </Uploads>
-          </Block>
+          {foundPhotos.length ? (
+            <Block title="صور وجدناها" hint="المحدّدة تظهر في موقعك. «الواجهة» هي الصورة الكبيرة أعلى الصفحة.">
+              <div className="rw-pick">
+                {foundPhotos.map((u) => {
+                  const hero = form.hero_image_url === u
+                  const on = hero || inGallery(u)
+                  return (
+                    <div key={u} className="rw-pick-i">
+                      <button type="button" aria-pressed={on} aria-label={on ? "أبعدها عن الموقع" : "ضعها في الموقع"} onClick={() => togglePhoto(u)} data-on={on ? "true" : undefined}>
+                        <img src={u} alt="" loading="lazy" />
+                        {hero ? <span>الواجهة</span> : on ? <span>في موقعك</span> : null}
+                      </button>
+                      {!hero ? <button type="button" className="rw-hero-btn" onClick={() => makeHero(u)}>اجعلها الواجهة</button> : <span className="rw-hero-btn" aria-hidden>✓ الواجهة</span>}
+                    </div>
+                  )
+                })}
+              </div>
+            </Block>
+          ) : null}
+          {demo ? (
+            <Block hint="رفع الصور يحتاج حسابًا، ويتم داخل المنشئ الحقيقي: الصورة الرئيسية، وصورة الشيف، ومعرض حتى 8 صور، وصور الأطباق المميّزة حتى 4.">
+              <p className="zb-note">لا صور؟ اترك أي خانة فارغة ونملؤها بصور خالية من الحقوق تناسب نوع مطعمك.</p>
+            </Block>
+          ) : (
+            <>
+              <Block title="صور من عندك" optional>
+                <p className="zb-note">
+                  اترك أي خانة فارغة ونملؤها بصور خالية من الحقوق تناسب {typeLabel || "نوع مكانك"}. تستطيع استبدالها لاحقًا من المحرر.
+                </p>
+                <ImageUploadField label="الصورة الرئيسية" value={form.hero_image_url} onChange={(url) => update("hero_image_url", url)} aspect="wide" helper="الصورة الكبيرة أعلى صفحتك." />
+                <Uploads cols={2}>
+                  <ImageUploadField label="صورة الشيف" value={form.chef_photo_url} onChange={(url) => update("chef_photo_url", url)} aspect="square" />
+                  <ImageUploadField label="صورة مرافقة للقصة" value={form.accent_image_url} onChange={(url) => update("accent_image_url", url)} aspect="square" helper="تظهر بجانب قصة الشيف." />
+                </Uploads>
+              </Block>
+              <Block title="المعرض (حتى 8)">
+                <Uploads>
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <ImageUploadField key={"g-" + i + ":" + (form.gallery_image_urls[i] || "")} value={form.gallery_image_urls[i] || ""} onChange={(url) => setListAt("gallery_image_urls", i, url)} aspect="square" />
+                  ))}
+                </Uploads>
+              </Block>
+              <Block title="صور الأطباق المميّزة (حتى 4)">
+                <Uploads>
+                  {[0, 1, 2, 3].map((i) => (
+                    <ImageUploadField key={"s-" + i} value={form.signature_dish_image_urls[i] || ""} onChange={(url) => setListAt("signature_dish_image_urls", i, url)} aspect="square" />
+                  ))}
+                </Uploads>
+              </Block>
+            </>
+          )}
         </Grid>
       ),
     },
     {
       id: "social",
-      title: "التقييمات",
-      sub: "تقييمات حقيقية من ضيوفك فقط. لا نكتب تقييمات من عندنا.",
+      title: "التقييمات والجوائز",
+      sub: g?.reviews?.length ? "جلبنا تقييماتك من جوجل. احذف ما لا تريده، وأضف ما تشاء. لا نكتب تقييمات من عندنا." : "تقييمات حقيقية من ضيوفك فقط. لا نكتب تقييمات من عندنا.",
       optional: true,
       complete: true,
       body: (
         <Grid>
           <OwnerReviewsFields form={form} patch={patchReviews} name={form.brand_name} city={form.city} detail={{ label: "الطبق (اختياري)", placeholder: "كبة نية" }} />
-        </Grid>
-      ),
-    },
-    {
-      id: "press",
-      title: "الصحافة والجوائز",
-      sub: "اختياري. واحدة في كل سطر.",
-      optional: true,
-      complete: true,
-      body: (
-        <Grid>
-          <Field label="الصحافة والجوائز" wide>
-            <Textarea rows={4} value={form.press_outlets} onChange={(e) => update("press_outlets", e.target.value)} placeholder={"النهار\nدليل ميشلان\nتايم آوت بيروت"} />
+          <Field label="الصحافة والجوائز" wide hint="اختياري. واحدة في كل سطر.">
+            <Textarea rows={3} value={form.press_outlets} onChange={(e) => update("press_outlets", e.target.value)} placeholder={"النهار\nدليل ميشلان"} />
+            <Example text={ex.press} on={!form.press_outlets.trim()} onUse={(v) => update("press_outlets", v)} />
           </Field>
         </Grid>
       ),
     },
     {
       id: "review",
-      title: "المراجعة",
-      sub: "كل ما ستبني عليه. راجعه قبل التوليد.",
-      complete: required.every(Boolean),
+      title: "المراجعة والألوان",
+      sub: "اختر الألوان، وراجع ما سنبني عليه.",
+      complete: required.every(Boolean) && (!found || form.checked),
       note: "ينقص شيء مطلوب في خطوة سابقة.",
       body: (
         <Grid>
+          <Block title="الألوان" hint="تستطيع تغييرها لاحقًا من المحرر.">
+            {own ? (
+              <div className="rw-lrow" role="radiogroup" aria-label={`ألوان ${place}`}>
+                {(["night", "day"] as const).map((id) => {
+                  const c = own[id]
+                  const on = form.own_look === id
+                  return (
+                    <button key={id} type="button" role="radio" aria-checked={on} className="rw-lr" onClick={() => { lookTouched.current = true; update("own_look", id) }}>
+                      <span className="rw-lr-dots" aria-hidden>{[c.background, c.text, c.accent].map((x, i) => <i key={i} style={{ background: x }} />)}</span>
+                      <b>ألوان {mine} · {id === "night" ? "ليلي" : "نهاري"}</b>
+                      <span className="rw-lr-tick" aria-hidden>{on ? "✓" : ""}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
+            {own ? <p className="zb-note" style={{ margin: "8px 0 14px" }}>أوّل لونين أخذناهما من صورك. أو اختر شكلًا جاهزًا:</p> : null}
+            <Presets presets={RESTAURANT_PRESETS} value={form.own_look ? "" : form.style_preset} onChange={(id) => { lookTouched.current = true; setForm((p) => ({ ...p, style_preset: id as Form["style_preset"], own_look: "" })) }} />
+          </Block>
+          <Block title="معاينة الألوان" hint="هكذا تبدو الألوان في موقعك. الموقع كاملًا يفتح بعد البناء.">
+            <div className="rw-live" style={{ background: shownColors.background, color: shownColors.text, borderColor: shownColors.border }}>
+              <span className="rw-live-eye" style={{ color: shownColors.accent }}>{form.cuisine || "مأكولات شامية"} · {form.city || "بيروت"}</span>
+              <b className="rw-live-h" style={{ fontFamily: (RESTAURANT_PRESETS.find((p) => p.id === form.style_preset) || RESTAURANT_PRESETS[0]).heading_font }}>{form.brand_name || "اسم مطعمك"}</b>
+              <div className="rw-live-card" style={{ background: shownColors.surface, borderColor: shownColors.border }}>
+                <span>{form.categories[0]?.items[0]?.name || "طبق اليوم"}</span>
+                <span style={{ color: shownColors.accent }}>{form.categories[0]?.items[0]?.price || "$24"}</span>
+              </div>
+              <span className="rw-live-btn" style={{ background: shownColors.accent, color: shownColors.background }}>احجز طاولة</span>
+            </div>
+          </Block>
           <Review
             facts={[
               { label: "الحقول المطلوبة", value: `${required.filter(Boolean).length} من ${required.length}` },
-              { label: "النمط", value: RESTAURANT_PRESETS.find((p) => p.id === form.style_preset)?.name ?? "—" },
+              { label: "الألوان", value: form.own_look ? `ألوان ${mine} · ${form.own_look === "night" ? "ليلي" : "نهاري"}` : RESTAURANT_PRESETS.find((p) => p.id === form.style_preset)?.name ?? "—" },
               { label: "نوع المكان", value: typeLabel ?? "—" },
               { label: "أصناف القائمة", value: counts.dropped ? `${counts.valid} (+${counts.dropped} ناقصة)` : counts.valid },
               { label: "أيام مفتوحة", value: `${form.hours.filter((h) => !h.closed).length} من 7` },
@@ -804,13 +1102,13 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
               { label: "التقييمات", value: validReviewsOf(form.reviews).length },
             ]}
             recap={[
-              { label: "اسم المطعم", value: form.brand_name },
+              { label: `اسم ${place}`, value: form.brand_name },
               { label: "المطبخ", value: form.cuisine },
               { label: "المدينة", value: [form.city, form.neighborhood].filter(Boolean).join("، ") },
               { label: "العنوان", value: form.address },
               { label: "الهاتف", value: form.phone },
               { label: "البريد الإلكتروني", value: form.email },
-              { label: "عن المطعم", value: form.story_brief },
+              { label: `عن ${place}`, value: form.story_brief },
               { label: "الشيف", value: [form.chef_name, form.chef_title].filter(Boolean).join(" · ") },
               { label: "الصحافة والجوائز", value: form.press_outlets },
             ]}
@@ -821,13 +1119,21 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
                 body="التوليد يحتاج حسابًا ويتم داخل المنشئ الحقيقي — نحو 20 إلى 40 ثانية، ثم تنتقل إلى معاينتك الحيّة."
               />
             ) : (
-              <Handoff title="جاهزون متى كنت مستعدًّا." body="يستغرق نحو 20 إلى 40 ثانية. سننقلك بعدها إلى معاينتك الحيّة." />
+              <Handoff title="جاهزون متى كنت مستعدًّا." body="يستغرق نحو 20 إلى 40 ثانية. سننقلك بعدها إلى معاينتك الحيّة، وكل شيء يبقى قابلًا للتعديل من المحرر." />
             )}
           </Review>
         </Grid>
       ),
     },
   ]
+
+  // Entering «راجع ما وجدناه» reads the links pasted on the first step.
+  useEffect(() => {
+    if (step !== 1) return
+    if (gState === "idle" && form.map_link.trim().length > 8) void fetchGoogle()
+    if (igState === "idle" && form.instagram.trim().length >= 2) void fetchInstagram()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
 
   if (!authReady) {
     return <div className="grid min-h-[60vh] place-items-center text-[14.5px] font-medium text-[#56565a]">جارٍ التحميل…</div>
@@ -845,9 +1151,10 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
       {/* No `chrome` on the demo any more: /demo/build stands in the «ليل»
           product frame like the real builder, which draws the header. */}
       <WizardShell
-        eyebrow="موقع مطعم"
-        title={<>املأ ما تعرفه.<br />بينون تكتب الباقي.</>}
-        sub={`خطوات قصيرة، ولا واحدة منها طويلة. المطلوب ${required.length} فقط — وكل ما عداها اختياري.`}
+        onExit={onBack}
+        eyebrow={`قالب المطعم${typeLabel ? " · " + typeLabel : ""}`}
+        title={<>ابدأ بروابطك.<br />بينون تكتب الباقي.</>}
+        sub={<>نقرأ روابطك ونملأ الأسئلة عنك، وأنت تراجع وتؤكد. {onBack ? <button type="button" onClick={onBack} style={{ textDecoration: "underline", textUnderlineOffset: 4 }}>{notThis}</button> : null}</>}
         steps={steps}
         step={step}
         onStep={setStep}
@@ -886,6 +1193,7 @@ export default function RestaurantWizard({ demo = false, kind }: { demo?: boolea
           <GenerationOverlay open={loading} />
         </>
       ) : null}
+      <style dangerouslySetInnerHTML={{ __html: RW_CSS }} />
     </>
   )
 }
@@ -898,3 +1206,5 @@ function TrashGlyph() {
     </svg>
   )
 }
+
+const RW_CSS = `.rw-found{display:flex;gap:12px;align-items:center;margin-bottom:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.rw-found img,.rw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.rw-found div{display:grid;gap:2px;min-width:0}.rw-found b{font-size:16.5px}.rw-found small{opacity:.75;font-size:14.5px}.rw-stars{color:#E8B04B;font-size:15px}.rw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.rw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.rw-src b{font-size:14.5px}.rw-src span{font-size:14px;opacity:.8}.rw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.rw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.rw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.rw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85;line-height:1.6}.rw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--acc,#E2532A);text-decoration:underline;text-underline-offset:3px}.rw-ex button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.rw-pick-i{display:grid;gap:6px}.rw-pick-i>button:first-child{all:unset;cursor:pointer;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;opacity:.55;transition:opacity .2s}.rw-pick-i>button[data-on=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick-i>button:first-child:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-pick-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-pick-i>button span{position:absolute;inset-inline-start:6px;top:6px;background:var(--acc,#E2532A);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}.rw-hero-btn{all:unset;cursor:pointer;font-size:13px;text-align:center;min-height:32px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line,rgba(127,127,127,.25))}span.rw-hero-btn{cursor:default;color:var(--acc,#E2532A);font-weight:700}.rw-lrow{display:grid;gap:8px}.rw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.rw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.rw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.rw-lr-dots{display:flex}.rw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.rw-lr-dots i:first-child{margin-inline-start:0}.rw-live{display:grid;gap:12px;padding:22px;border-radius:18px;border:1px solid;transition:background .3s,color .3s}.rw-live-eye{font-size:13.5px;font-weight:600}.rw-live-h{font-size:28px;line-height:1.2}.rw-live-card{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid;font-size:15px}.rw-live-btn{justify-self:start;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14.5px}`

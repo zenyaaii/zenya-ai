@@ -16,6 +16,7 @@ export default function RestaurantPreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<RestaurantContent | null>(null)
   const [presetId, setPresetId] = useState<string>('onyx')
+  const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [name, setName] = useState<string>('مطعم')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -57,6 +58,7 @@ export default function RestaurantPreviewPage() {
       }
       setContent(c.restaurant as RestaurantContent)
       setPresetId(c.style_preset || 'onyx')
+      setColorOverrides(c.color_overrides || undefined)
       setName(data.product_name || 'مطعم')
       setLoading(false)
     }
@@ -98,7 +100,7 @@ export default function RestaurantPreviewPage() {
           dangerouslySetInnerHTML={{ __html: sectionStylesToCss(content.section_styles) }}
         />
       )}
-      <RestaurantPreview content={content} presetId={presetId} />
+      <RestaurantPreview content={content} presetId={presetId} colorOverrides={colorOverrides} />
       <BuildSuccessOverlay
         open={celebrate}
         name={name}
