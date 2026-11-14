@@ -20,7 +20,6 @@ export const KINDS: Record<'services' | 'restaurant' | 'wellness', { template: s
     kinds: [
       { id: 'barber', name: 'صالون حلاقة', hint: 'الحلاقون، القصّات، المواعيد' },
       { id: 'car', name: 'ورشة سيارات', hint: 'الإصلاح، المدة، الضمان' },
-      { id: 'clinic', name: 'عيادة', hint: 'الطبيب، المواعيد، التأمين' },
       { id: 'photo', name: 'استوديو تصوير', hint: 'المعرض، الباقات' },
       { id: 'other', name: 'خدمة أخرى', hint: 'سباكة، تكييف، تنظيف، وغيرها' },
     ],

@@ -9,7 +9,7 @@
  * fears/FAQ, map + hours. A fact we do not have is left out, never invented.
  */
 
-export type NicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
+export type NicheKind = 'barber' | 'gym' | 'beauty' | 'car' | 'photo'
 
 /**
  * The kinds that ship. Anas kept the barber page and its questions
@@ -37,7 +37,6 @@ const L2 = (l: Look, accent2: string): Look => ({ ...l, colors: { ...l.colors, a
 const SAGE = L2(L('sage', 'مريمية ورمل', '#f2f1ec', '#e7e5dc', '#1b231f', '#5f6a63', '#3d6652', '#d9d6cb'), '#b48a5e')
 const ROSE_CLAY = L2(L('rose-clay', 'وردي ترابي', '#f8f1ee', '#f0e3dd', '#2a1c1c', '#7a6562', '#94495a', '#e6d5ce'), '#c29a6b')
 const OUD = L2(L('oud', 'عود ولؤلؤ', '#15110f', '#1f1916', '#f2ebe3', '#a5998d', '#d6b98f', '#2e2621'), '#c08f86')
-const MINT = L('mint', 'أبيض طبي', '#f4f7f6', '#e8eeec', '#10201c', '#5a6b66', '#0f766e', '#d5e0dc')
 const NAVY = L('navy', 'كحلي هادئ', '#0c1219', '#131c26', '#eef2f6', '#8c99a7', '#5fa8d3', '#22303e')
 // Car looks Anas picked from (2026-11-13): three blended sets. The wizard puts the two measured from the shop's photos first.
 const AMBER = L('amber', 'غرافيت وكهرمان', '#121416', '#1a1d20', '#eeece7', '#97948d', '#e2a33e', '#2a2d30')
@@ -207,23 +206,6 @@ export const KIND: Record<NicheKind, KindText> = {
     visitor: { who: 'a woman', want: 'book an appointment there', place: 'beauty centre' },
     match: /تجميل|بيوتي|اظافر|أظافر|مكياج|beauty|nail|spa|سبا/i, seo: 'مركز تجميل',
   },
-  clinic: {
-    looks: [MINT, NAVY, CHALK],
-    id: 'clinic', label: 'عيادة', place: 'العيادة', team: 'الأطباء', one: 'الطبيب', any: 'أي طبيب', role: 'طبيب', ownerRole: 'صاحب العيادة',
-    bookAt: (n) => `احجز عند ${n}`, services: 'العلاجات', cta: 'احجز موعدك',
-    bookLine: 'اختر العلاج والطبيب والوقت. يصل طلبك إلى العيادة، وتؤكّد لك الموعد على واتساب.',
-    prefix: /^(عيادة|عيادات|مركز)\s+/, suffix: /\s+(لطب الأسنان|للأسنان|الطبية|الطبي)$/,
-    lede: ({ named, area }) => `عيادة في ${area}.${named.length >= 1 ? ` مرضانا يذكرون ${named.slice(0, 3).join(' و')} بالاسم.` : ''}`,
-    tags: ['تقويم', 'زراعة', 'تجميل', 'أطفال', 'علاج عصب', 'تبييض', 'جراحة'],
-    defaults: [
-      { name: 'كشف واستشارة', duration: '20 دقيقة', on: true }, { name: 'تنظيف', duration: '30 دقيقة', on: true }, { name: 'حشوة', duration: '45 دقيقة', on: true },
-      { name: 'علاج عصب', duration: '', on: false }, { name: 'تبييض', duration: '60 دقيقة', on: false }, { name: 'تقويم', duration: '', on: false }, { name: 'زراعة', duration: '', on: false },
-    ],
-    faqs: ['هل يؤلم العلاج؟', 'هل تقبلون التأمين؟ وأيّ شركات؟', 'كم سعر الكشف؟', 'هل تعالجون الأطفال؟', 'كم موعدًا أحتاج؟', 'هل يوجد موقف سيارات؟'],
-    terms: [{ label: 'التأمين', placeholder: 'نقبل: …' }],
-    visitor: { who: 'a patient', want: 'book a visit there', place: 'clinic' },
-    match: /عيادة|عيادات|طبيب|دكتور|اسنان|أسنان|clinic|dental|doctor/i, seo: 'عيادة',
-  },
   car: {
     looks: [AMBER, SERVICE, SAND],
     id: 'car', label: 'ورشة سيارات', place: 'الورشة', team: 'الفنيون', one: 'الفني', any: 'أي فني', role: 'فني', ownerRole: 'صاحب الورشة',
@@ -263,12 +245,18 @@ export const KIND: Record<NicheKind, KindText> = {
 export const NICHE_KINDS = Object.keys(KIND) as NicheKind[]
 export const isNicheKind = (v: unknown): v is NicheKind => typeof v === 'string' && v in KIND
 
+const MEDICAL = /عيادة|عيادات|طبيب|دكتور|اسنان|أسنان|clinic|dental|doctor|medical/i
+
 /** The kind of a lead from its typed kind and name, or null for the general page. */
 export function kindOfLead(lead: { kind?: string | null; name?: string | null }): NicheKind | null {
   const k = `${lead.kind ?? ''}`
   const all = `${k} ${lead.name ?? ''}`
+  // No clinic template (Anas, 2026-11-14): a clinic, a doctor or a dentist
+  // gets the general page, never another kind's (a «عيادة تجميل» is not a
+  // beauty centre).
+  if (MEDICAL.test(all)) return null
   // The lead's own kind first: «صالون حلاقة» must not read as beauty because of «صالون».
-  for (const id of ['barber', 'gym', 'clinic', 'car', 'photo', 'beauty'] as NicheKind[]) if (KIND[id].match.test(k)) return id
-  for (const id of ['barber', 'gym', 'clinic', 'car', 'photo', 'beauty'] as NicheKind[]) if (KIND[id].match.test(all)) return id
+  for (const id of ['barber', 'gym', 'car', 'photo', 'beauty'] as NicheKind[]) if (KIND[id].match.test(k)) return id
+  for (const id of ['barber', 'gym', 'car', 'photo', 'beauty'] as NicheKind[]) if (KIND[id].match.test(all)) return id
   return null
 }

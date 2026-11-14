@@ -31,7 +31,7 @@ export type ServiceItem = {
  * site; a kind draws its own page inside the same template (BarberView for
  * 'barber'), so the editor, publishing and the dashboard stay one path.
  */
-export type ServiceNicheKind = 'barber' | 'gym' | 'beauty' | 'clinic' | 'car' | 'photo'
+export type ServiceNicheKind = 'barber' | 'gym' | 'beauty' | 'car' | 'photo'
 
 /** One person the customers can ask for by name. */
 export type ServiceTeamMember = {
@@ -243,7 +243,7 @@ export type ServiceContent = {
   }
   /** Social profiles: full links, or a handle the template turns into one. */
   social_links?: ServiceSocialLinks
-  /** The people, by name (barber, gym, clinic kinds). */
+  /** The people, by name (barber, gym, beauty, car, photo kinds). */
   team?: { heading?: string; members: ServiceTeamMember[] }
   /** Opening hours per weekday. Absent: the site shows none. */
   hours?: ServiceHoursDay[]
