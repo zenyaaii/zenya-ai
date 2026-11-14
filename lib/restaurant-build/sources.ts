@@ -148,7 +148,7 @@ export async function apify(actor: string, input: unknown, ms: number): Promise<
  * through Apify, and returns the image addresses only: they are read, never
  * stored on a site. [] when the place has no menu tab, or Apify is down.
  */
-export async function googleMenuPhotos(placeId: string, max = 40): Promise<string[]> {
+export async function googleMenuPhotos(placeId: string, max = 40): Promise<{ url: string; date?: string }[]> {
   if (!/^[A-Za-z0-9_-]{10,}$/.test(placeId)) return []
   const rows = await apify('solidcode~google-maps-photos-scraper', {
     placeUrls: [`https://www.google.com/maps/place/?q=place_id:${placeId}`],
@@ -157,11 +157,19 @@ export async function googleMenuPhotos(placeId: string, max = 40): Promise<strin
     imageSize: 'large',
   }, 120_000)
   const all: any[] = rows.flatMap((r: any) => (Array.isArray(r?.photos) ? r.photos : [r]))
-  const urls = all
-    .filter((x) => x && (!x.category || String(x.category).toLowerCase() === 'menu') && (!x.type || x.type === 'photo'))
-    .map((x) => String(x.imageUrl || x.photoUrl || x.url || ''))
-    .filter((u) => /^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht|gstatic)\.com\//i.test(u))
-  return Array.from(new Set(urls)).slice(0, max)
+  const seen = new Set<string>()
+  const out: { url: string; date?: string }[] = []
+  for (const x of all) {
+    if (!x || (x.category && String(x.category).toLowerCase() !== 'menu') || (x.type && x.type !== 'photo')) continue
+    // Google sizes its images in the address: ask for a size a dense page can be read at.
+    const url = String(x.imageUrl || x.photoUrl || x.url || '').replace(/=w\d+-h\d+(-k-no)?$/, '=w2048-h2048-k-no')
+    if (!/^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht|gstatic)\.com\//i.test(url) || seen.has(url)) continue
+    seen.add(url)
+    const d = String(x.uploadDate || x.uploadedAt || x.date || '')
+    out.push({ url, date: /^\d{4}-\d{2}/.test(d) ? d.slice(0, 10) : undefined })
+  }
+  // Newest first: a menu changes, and the latest prices are the ones to keep.
+  return out.sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, max)
 }
 
 /** Handles as people type them are often a little off (mamai__restaurant for mamai_restaurant). */
