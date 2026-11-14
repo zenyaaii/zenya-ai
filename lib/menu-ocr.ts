@@ -177,13 +177,16 @@ This photo was found on the restaurant's own pages, not uploaded by the owner, s
 - "poor": not a menu, mostly unreadable, a poster/ad with only one or two offers, or a screenshot of an app.
 Be strict: when unsure, it is "partial".`
 
+const HALF_NOTE = `
+This image is one of two overlapping halves of a single menu page. A line cut at the edge where the halves meet is read in full in the other half: do not count that cut against "legibility".`
+
 /** One vision call for a single image/half. Returns [] on any failure. */
 export async function analyzeOne(
   aiClient: AiClient,
   image: string,
   cuisine: string | undefined,
   userId: string | null,
-  opts: { judge?: boolean } = {}
+  opts: { judge?: boolean; half?: boolean } = {}
 ): Promise<{ categories: Category[]; ok: boolean; error?: string; legibility?: Legibility }> {
   const userContent: ContentPart[] = [
     {
@@ -192,7 +195,8 @@ export async function analyzeOne(
         `This is one photo (or half) of a restaurant menu` +
         (cuisine ? ` (cuisine: ${cuisine})` : '') +
         `. Transcribe every category and item you can read in it, following the rules exactly.` +
-        (opts.judge ? JUDGE_NOTE : ''),
+        (opts.judge ? JUDGE_NOTE : '') +
+        (opts.judge && opts.half ? HALF_NOTE : ''),
     },
     { type: 'image_url', image_url: { url: image, detail: 'high' } },
   ]

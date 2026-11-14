@@ -3,7 +3,7 @@ import { AiClient } from '@/lib/ai-client'
 import { AI_MODEL, AI_MODEL_FAST } from '@/lib/ai'
 import { logAiUsage } from '@/lib/ai-usage'
 import { analyzeOne, mergeResults, parseJsonSafe, withTimeout, type Category, type Legibility } from '@/lib/menu-ocr'
-import { cleanPhotos, contactSheet, applyVerdicts, choose, judgePrompt, type Judged } from './photos'
+import { cleanPhotos, contactSheet, applyVerdicts, choose, judgePrompt, hamming, type Pic } from './photos'
 import type { RawPhoto } from './sources'
 import { dishKey } from '@/lib/menu-match'
 
@@ -52,8 +52,11 @@ export type FoundMenu = {
   hero?: string
 }
 
-const MAX_MENU_PHOTOS = 3
+// Every page of the menu, not a sample: Anas pays for the reads (2026-11-14).
+const MAX_MENU_PHOTOS = 40
+const READ_AT_ONCE = 8
 const WIDE = 1.2
+const TALL = 1.7
 
 async function fetchImage(url: string): Promise<Buffer | null> {
   try {
@@ -64,16 +67,40 @@ async function fetchImage(url: string): Promise<Buffer | null> {
   } catch { return null }
 }
 
-/** A wide menu in two overlapping halves, so the text reaches the reader at a size it can read. */
-async function parts(j: Judged): Promise<string[]> {
+/**
+ * A wide menu in two overlapping halves (right first), a very tall one in two
+ * overlapping halves (top first), so the text reaches the reader at a size it
+ * can read.
+ */
+async function parts(j: Pic): Promise<string[]> {
   const url = (b: Buffer) => `data:image/jpeg;base64,${b.toString('base64')}`
-  if (j.w <= j.h * WIDE) return [url(j.jpeg)]
-  const half = Math.round(j.w * 0.56)
-  const [a, b] = await Promise.all([
-    sharp(j.jpeg).extract({ left: j.w - half, top: 0, width: half, height: j.h }).jpeg({ quality: 88 }).toBuffer(),
-    sharp(j.jpeg).extract({ left: 0, top: 0, width: half, height: j.h }).jpeg({ quality: 88 }).toBuffer(),
-  ])
-  return [url(a), url(b)]
+  if (j.w > j.h * WIDE) {
+    const half = Math.round(j.w * 0.56)
+    const [a, b] = await Promise.all([
+      sharp(j.jpeg).extract({ left: j.w - half, top: 0, width: half, height: j.h }).jpeg({ quality: 88 }).toBuffer(),
+      sharp(j.jpeg).extract({ left: 0, top: 0, width: half, height: j.h }).jpeg({ quality: 88 }).toBuffer(),
+    ])
+    return [url(a), url(b)]
+  }
+  if (j.h > j.w * TALL) {
+    const half = Math.round(j.h * 0.56)
+    const [a, b] = await Promise.all([
+      sharp(j.jpeg).extract({ left: 0, top: 0, width: j.w, height: half }).jpeg({ quality: 88 }).toBuffer(),
+      sharp(j.jpeg).extract({ left: 0, top: j.h - half, width: j.w, height: half }).jpeg({ quality: 88 }).toBuffer(),
+    ])
+    return [url(a), url(b)]
+  }
+  return [url(j.jpeg)]
+}
+
+/** Runs fn over items, at most n at a time, keeping the order. */
+async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length)
+  let next = 0
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (next < items.length) { const i = next++; out[i] = await fn(items[i]) }
+  }))
+  return out
 }
 
 const CAPTION_PROMPT = `You are given the captions a restaurant posted on its own Instagram. Some may list dishes with prices.
@@ -86,14 +113,21 @@ const priced = (t: string) => (t.match(/\d{1,4}(?:[.,]\d{1,2})?\s*(?:ج\.?م|ج�
 
 export async function findMenu(
   ai: AiClient,
-  opts: { photos: string[]; captions?: string[]; cuisine?: string; userId: string | null }
+  opts: { photos: string[]; menuTab?: string[]; captions?: string[]; cuisine?: string; userId: string | null }
 ): Promise<FoundMenu> {
-  // 1 — fetch and look, all at once on one sheet.
-  const raw = (await Promise.all(opts.photos.slice(0, 22).map(async (url, i) => {
-    const buf = await fetchImage(url)
-    return buf ? { id: `u${i}`, src: (/\/instagram\//.test(url) ? 'instagram' : 'google') as RawPhoto['src'], url, buf } : null
-  }))).filter(Boolean) as RawPhoto[]
-  const pics = await cleanPhotos(raw)
+  // 1 — fetch and look, all at once on one sheet. The Google «Menu» tab is
+  // fetched alongside: those photos ARE the menu, so they skip the sheet.
+  const [raw, tabRaw] = await Promise.all([
+    Promise.all(opts.photos.slice(0, 22).map(async (url, i) => {
+      const buf = await fetchImage(url)
+      return buf ? { id: `u${i}`, src: (/\/instagram\//.test(url) ? 'instagram' : 'google') as RawPhoto['src'], url, buf } : null
+    })),
+    pool((opts.menuTab || []).slice(0, MAX_MENU_PHOTOS), READ_AT_ONCE, async (url) => {
+      const buf = await fetchImage(url)
+      return buf ? { id: `m${url.length}${url.slice(-6)}`, src: 'google' as RawPhoto['src'], url, buf } : null
+    }),
+  ]).then(([a, b]) => [a.filter(Boolean) as RawPhoto[], b.filter(Boolean) as RawPhoto[]])
+  const [pics, tab] = await Promise.all([cleanPhotos(raw), cleanPhotos(tabRaw, MAX_MENU_PHOTOS)])
   let verdict: any = {}
   if (pics.length) {
     const sheet = await contactSheet(pics)
@@ -112,13 +146,17 @@ export async function findMenu(
   const judged = applyVerdicts(pics, verdict)
   const picks = choose(judged, Number(verdict?.hero) || 0)
 
-  // 2 — read every menu photo, and say how clear each one is.
-  const candidates = judged
+  // 2 — read EVERY menu photo, and say how clear each one is: the menu tab
+  // in Google's own order (the pages run in order there), then any menu photo
+  // among the links' photos that is not one of those pages again.
+  const linkMenus = judged
     .filter((j) => j.v.kind === 'menu' && !j.v.cgi && !j.v.tattoo && j.v.people !== 'women' && j.v.people !== 'faces')
     .sort((a, b) => b.v.quality - a.v.quality)
-    .slice(0, MAX_MENU_PHOTOS)
-  const read = await Promise.all(candidates.map(async (j): Promise<MenuPage | null> => {
-    const reads = await Promise.all((await parts(j)).map((p) => analyzeOne(ai, p, opts.cuisine, opts.userId, { judge: true })))
+  const candidates: Pic[] = [...tab]
+  for (const j of linkMenus) if (!candidates.some((c) => hamming(c.hash, j.hash) <= 8)) candidates.push(j)
+  const read = await pool(candidates.slice(0, MAX_MENU_PHOTOS), READ_AT_ONCE, async (j): Promise<MenuPage | null> => {
+    const ps = await parts(j)
+    const reads = await Promise.all(ps.map((p) => analyzeOne(ai, p, opts.cuisine, opts.userId, { judge: true, half: ps.length > 1 })))
     const categories = mergeResults(reads.map((r) => r.categories))
     const items = categories.flatMap((c) => c.items)
     const withPrice = items.filter((i) => /\d/.test(i.price)).length
@@ -130,11 +168,10 @@ export async function findMenu(
       : withPrice < Math.ceil(items.length * 0.6) ? 'أسعارها غير واضحة'
       : undefined
     return { url: j.url, clear: !why, why, categories }
-  }))
+  })
   const pages = read.filter(Boolean) as MenuPage[]
   // 3 — no menu photo at all: the captions, when they carry prices.
   let categories: Category[] = []
-  // 3 — no menu photo we could fully read: the captions, when they carry prices.
   const captions = (opts.captions || []).map((c) => String(c || '').trim()).filter(Boolean).slice(0, 12)
   if (!pages.length && captions.length && priced(captions.join('\n')) >= 3) {
     const res = await withTimeout(ai.chat.completions.create({
