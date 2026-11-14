@@ -1,0 +1,675 @@
+<title>غرفة أخبار بينون</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Tajawal:wght@500;800;900&display=swap">
+<style>
+/* Layout: a night desk. Sticky tab rail, one view at a time, cards only for posts and videos. */
+:root{
+  --bg:#0f1115; --surface:#171a21; --line:#262a33; --fg:#ecebe6; --muted:#9a9ca3;
+  --accent:#ff7a2f; --accent-soft:rgba(255,122,47,.12); --warn:#f2b84b; --good:#5fc28d;
+  --display:"Tajawal","IBM Plex Sans Arabic",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic","Tajawal",system-ui,sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f6f5f1; --surface:#ffffff; --line:#e3e1da; --fg:#16181d; --muted:#5f6168;
+  --accent:#d9561a; --accent-soft:rgba(217,86,26,.09); --warn:#a86b00; --good:#1f8a52; color-scheme:light}}
+:root[data-theme="light"]{
+  --bg:#f6f5f1; --surface:#ffffff; --line:#e3e1da; --fg:#16181d; --muted:#5f6168;
+  --accent:#d9561a; --accent-soft:rgba(217,86,26,.09); --warn:#a86b00; --good:#1f8a52; color-scheme:light}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.75;direction:rtl}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{padding-block:40px 20px}
+.brand{font-family:var(--display);font-weight:900;font-size:clamp(44px,9vw,88px);line-height:1;letter-spacing:0;margin:0}
+.brand span{color:var(--accent)}
+.lede{color:var(--muted);max-width:62ch;margin:14px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px;margin-top:14px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav a{flex:none;padding:14px 12px;color:var(--muted);text-decoration:none;font-weight:600;font-size:15px;border-bottom:2px solid transparent}
+nav a[aria-current="true"]{color:var(--fg);border-color:var(--accent)}
+nav a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{padding-block:32px 64px}
+h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1.2;margin:0 0 8px;text-wrap:balance}
+h3{font-family:var(--display);font-weight:800;font-size:22px;margin:40px 0 12px;text-wrap:balance}
+h4{font-family:var(--display);font-weight:800;font-size:19px;margin:6px 0 10px}
+p{margin:0 0 12px;max-width:68ch}
+.sub{color:var(--muted);margin-bottom:24px}
+a{color:var(--accent)}
+.line{font-family:var(--display);font-weight:900;font-size:clamp(30px,6vw,56px);line-height:1.15;margin:8px 0 18px;text-wrap:balance}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
+.pillar{border-top:2px solid var(--accent);padding-top:12px}
+.pillar b{font-family:var(--display);font-size:22px;display:block}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--display);font-weight:900;font-size:40px;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:14px}
+.table{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+th,td{padding:10px 14px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+tr:last-child td{border-bottom:0}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{display:flex;align-items:center;gap:10px}
+.bar i{display:block;height:8px;background:var(--accent);border-radius:4px}
+ul.plain{padding:0 20px 0 0;margin:0 0 12px}
+ul.plain li{margin-bottom:6px}
+.never{display:flex;flex-wrap:wrap;gap:8px}
+.never span{border:1px solid var(--line);border-radius:999px;padding:4px 12px;color:var(--muted);text-decoration:line-through;font-size:14px}
+.niche{border-bottom:1px solid var(--line);padding-block:14px}
+.niche h4{margin:0 0 6px}
+.niche p{margin:0 0 4px;font-size:15px}
+.k{color:var(--muted);font-weight:600}
+.law{counter-reset:l;list-style:none;padding:0;margin:0;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.law li{background:var(--accent-soft);border-radius:10px;padding:16px}
+.law b{display:block;font-family:var(--display);font-size:19px}
+.phase{display:grid;grid-template-columns:120px 1fr;gap:6px 18px;padding-block:12px;border-bottom:1px solid var(--line)}
+.phase .d{color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+.phase.go .d,.phase.go b{color:var(--good)}
+@media (max-width:520px){.phase{grid-template-columns:1fr}}
+.wk{border-bottom:1px solid var(--line);padding-bottom:8px}
+.posts,.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px}
+.post,.vid{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.post header,.vid header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.num{font-family:var(--display);font-weight:900;color:var(--accent);font-size:18px;font-variant-numeric:tabular-nums}
+.tag{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 10px}
+.flag{font-size:12.5px;color:var(--warn);border:1px solid currentColor;border-radius:999px;padding:1px 10px}
+.warn{color:var(--warn)}
+.headline{font-family:var(--display);font-weight:800;font-size:21px;line-height:1.35;margin:0}
+.post .body{color:var(--fg);font-size:15px;margin:0}
+.post .cta{color:var(--accent);font-weight:600;font-size:15px;margin:0;margin-top:auto}
+.copy{align-self:flex-start;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.copy:hover{color:var(--fg);border-color:var(--muted)}
+.vid ul{margin:0;padding:0 18px 0 0;font-size:15px}
+.vid li{margin-bottom:6px}
+.dec{display:grid;gap:12px}
+.dec div{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.dec .num{grid-row:span 2}
+.dec b{font-family:var(--display);font-size:18px}
+.dec p{margin:0;color:var(--muted);font-size:15px}
+.status{display:inline-block;font-size:12.5px;border-radius:999px;padding:1px 10px;margin-inline-start:6px}
+.s-ok{color:var(--good);border:1px solid currentColor}
+.s-block{color:var(--warn);border:1px solid currentColor}
+footer{color:var(--muted);font-size:13px;padding-block:24px 48px;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion:no-preference){section:not([hidden]){animation:in .25s ease-out}@keyframes in{from{opacity:.4}to{opacity:1}}}
+</style>
+
+<div class="wrap top">
+  <h1 class="brand">غرفة الأخبار<span>.</span></h1>
+  <p class="lede">كل ما جمعه وكيل المحتوى عن سوق مواقع المحلات الصغيرة في الشرق الأوسط، وماذا نقول، وخطة ديسمبر كاملة: ١٥ فيديو و٣٠ منشورًا جاهزة للنسخ.</p>
+  <div class="meta"><span>آخر تحديث: ١٠ نوفمبر ٢٠٢٦</span><span>٢٣ منافسًا · ٤٧١ منشورًا · ٢٦٣٦ تقييم جوجل · ٣٠ كلمة إعلانية في ٧ دول</span></div>
+</div>
+
+<nav aria-label="أقسام الصفحة"><div class="wrap">
+  <a href="#summary">الخلاصة</a>
+  <a href="#market">السوق</a>
+  <a href="#rivals">المنافسون</a>
+  <a href="#december">خطة ديسمبر</a>
+  <a href="#videos">الفيديوهات ١٥</a>
+  <a href="#posts">المنشورات ٣٠</a>
+  <a href="#agent">الوكيل</a>
+  <a href="#decisions">قراراتك</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="summary">
+  <h2>بينون في جملة</h2>
+  <p class="line">موقعك جاهز… قبل أن تطلبه.</p>
+  <p>كل منافس يقول «ابنِه بنفسك في ٥ دقائق». واحد فقط يقول «شوفه قبل ما تدفع». نحن نتقدم خطوة: نبنيه أولًا، ثم نرسله لصاحب المحل.</p>
+
+  <h3>العدو: الخوف، لا المنافس</h3>
+  <div class="grid3">
+    <div class="pillar"><b>«دفعت لمصمم واختفى»</b><span class="k">تقييمات شركات التصميم</span></div>
+    <div class="pillar"><b>«لوحة تحكم معقدة»</b><span class="k">تقييمات تطبيقات المتاجر</span></div>
+    <div class="pillar"><b>«مفاجأة في الفاتورة»</b><span class="k">كل الأنواع الـ١١</span></div>
+  </div>
+
+  <h3>ثلاثة محاور فقط</h3>
+  <div class="grid3">
+    <div class="pillar"><b>شفته؟</b>مواقع حقيقية بنيناها لمحلات حقيقية.</div>
+    <div class="pillar"><b>ليش زبونك راح؟</b>أخطاء صغيرة تخسّر المحل زبائن، من تقييمات حقيقية.</div>
+    <div class="pillar"><b>ناس مثلك</b>قصة صاحب محل، أو أنس نفسه.</div>
+  </div>
+
+  <h3>أرقام تختصر السوق</h3>
+  <div class="grid3">
+    <div class="stat"><b>٣٣٪</b><span>من أفضل صالونات الحلاقة بلا موقع</span></div>
+    <div class="stat"><b>٥ / ١٠</b><span>أعلى درجة تعاطف حققها أي منافس في منشوراته</span></div>
+    <div class="stat"><b>+٢٦٪</b><span>تفاعل إضافي حين يقول المنشور «اكتب كلمة في التعليقات»</span></div>
+    <div class="stat"><b>١٨٤ يومًا</b><span>عمر أطول إعلان في السوق: «بدون عمولة»</span></div>
+  </div>
+
+  <h3>ما لن نقوله أبدًا</h3>
+  <div class="never"><span>فخورين</span><span>أول منصة</span><span>حلول متكاملة</span><span>احترافي ومتجاوب</span><span>أسماء المنافسين</span><span>وعد لا نقدر عليه</span></div>
+</section>
+
+<section id="market" hidden>
+  <h2>أين الفرصة؟</h2>
+  <p class="sub">أفضل ٤٨ محلًا تقريبًا في كل نوع، في ٨ مدن عربية. هذه أفضل المحلات، ومع ذلك كثير منها بلا موقع.</p>
+  <div class="table"><table>
+    <thead><tr><th>النوع</th><th>بلا موقع</th></tr></thead>
+    <tbody>
+      <tr><td>استوديو تصوير</td><td><div class="bar"><i style="width:117px"></i><span class="n">٣٩٪</span></div></td></tr>
+      <tr><td>ورشة سيارات</td><td><div class="bar"><i style="width:111px"></i>٣٧٪</div></td></tr>
+      <tr><td>صالون حلاقة</td><td><div class="bar"><i style="width:99px"></i>٣٣٪</div></td></tr>
+      <tr><td>محل ملابس</td><td><div class="bar"><i style="width:87px"></i>٢٩٪</div></td></tr>
+      <tr><td>مركز تجميل</td><td><div class="bar"><i style="width:81px"></i>٢٧٪</div></td></tr>
+      <tr><td>عيادة جلدية</td><td><div class="bar"><i style="width:66px"></i>٢٢٪</div></td></tr>
+      <tr><td>حلويات</td><td><div class="bar"><i style="width:63px"></i>٢١٪</div></td></tr>
+      <tr><td>مقهى</td><td><div class="bar"><i style="width:54px"></i>١٨٪</div></td></tr>
+      <tr><td>مطعم</td><td><div class="bar"><i style="width:42px"></i>١٤٪</div></td></tr>
+      <tr><td>نادٍ رياضي</td><td><div class="bar"><i style="width:42px"></i>١٤٪</div></td></tr>
+      <tr><td>عيادة أسنان</td><td><div class="bar"><i style="width:24px"></i>٨٪</div></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>قانون واحد لكل الأنواع</h3>
+  <ol class="law">
+    <li><b>الاسم يبيع</b>المدح الأقوى في كل نوع يذكر شخصًا: حلاق، طبيب، مهندس، كابتن.</li>
+    <li><b>المفاجأة تغضب</b>أغلب الغضب من شيء لم يُذكر مسبقًا: سعر، كشفية، طريقة دفع، مدة تسليم.</li>
+    <li><b>الانتظار يقتل</b>الحلاق والأسنان والجلدية والتصوير. الحجز والمدة المعلنة أساس.</li>
+    <li><b>لكل نوع واجهته</b>طبق، جلسة، حلاق يعمل، طبيب، سيارة بعد الإصلاح، صينية حلى.</li>
+  </ol>
+
+  <h3>ماذا يمدح الزبون، وماذا يغضبه؟</h3>
+  <p class="sub">من ٢٦٣٦ تقييم جوجل حقيقي. الأرقام عدّ آلي تقريبي، والاقتباسات حرفية.</p>
+  <div class="niche"><h4>ورشة السيارات</h4><p><span class="k">يمدحون:</span> الأمانة، والمهندس باسمه («م. محمد»، «المهندس يوسف»).</p><p><span class="k">يغضبهم:</span> أسعار «فلكية» تختلف حسب الموظف، وقطع تتأخر بلا اتصال.</p></div>
+  <div class="niche"><h4>عيادة الأسنان</h4><p><span class="k">يمدحون:</span> الطبيب باسمه في ١٧١ من ٢٢١ تقييمًا، وزوال الخوف، والتعقيم.</p><p><span class="k">يغضبهم:</span> ساعة انتظار بعد الموعد، والشعور بالاستغلال.</p></div>
+  <div class="niche"><h4>مركز التجميل</h4><p><span class="k">يمدحون:</span> الطبيب بالاسم، والنتيجة، والمتابعة بعد الإجراء.</p><p><span class="k">يغضبهم:</span> سعر الكشفية المفاجئ، ووعد دفع بالتقسيط يُرفض عند الاستقبال.</p></div>
+  <div class="niche"><h4>العيادة الجلدية</h4><p><span class="k">يمدحون:</span> الطبيب بالاسم، والشرح.</p><p><span class="k">يغضبهم:</span> «كل شهر تدفع الاستشارة من جديد».</p></div>
+  <div class="niche"><h4>الحلويات</h4><p><span class="k">يمدحون:</span> الطعم والطزاجة، والسعر، والعراقة.</p><p><span class="k">يغضبهم:</span> طلبات المناسبات: «فشلتوني»، و«يوم كامل عشان يرد».</p></div>
+  <div class="niche"><h4>استوديو التصوير</h4><p><span class="k">يمدحون:</span> الاحتراف، والسرعة.</p><p><span class="k">يغضبهم:</span> تأخير تسليم الصور، ودفع إضافي للنسخة الرقمية.</p></div>
+  <div class="niche"><h4>محل الملابس</h4><p><span class="k">يمدحون:</span> السعر والتنوع، والمقاسات الكبيرة.</p><p><span class="k">يغضبهم:</span> تخفيضات وهمية، ولا غرفة قياس.</p></div>
+  <div class="niche"><h4>المطعم والمقهى والحلاق والنادي</h4><p><span class="k">يمدحون:</span> الشخص بالاسم في كل نوع: «الشيف»، «أبو فهد يعرف شغله»، «الكابتن».</p><p><span class="k">يغضبهم:</span> سعر مفاجئ، وانتظار بلا إخبار، و«المكان غير الصور»، وشروط إلغاء الاشتراك في النوادي.</p></div>
+</section>
+
+<section id="rivals" hidden>
+  <h2>المنافسون</h2>
+  <p class="sub">٢٣ حسابًا في إنستغرام، و٤٧١ منشورًا قيس كل واحد منها بمتوسط حسابه.</p>
+
+  <h3>المنشورات التي «انفجرت»</h3>
+  <div class="table"><table>
+    <thead><tr><th>× المتوسط</th><th>الحساب</th><th>المشاهدات</th><th>الكلام</th><th></th></tr></thead>
+    <tbody>
+      <tr><td class="n">×٨٣٦</td><td>دكان</td><td class="n">٣.٣ مليون</td><td>«لا تأجّل مشروعك أكتر… ونحنا منساعدك»</td><td><a href="https://www.instagram.com/p/DbBZTsgtyW7/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×٣٢٥</td><td>دكان</td><td class="n">١.٢ مليون</td><td>«وفّر إيجارات المحلات وابدأ اليوم أونلاين»</td><td><a href="https://www.instagram.com/p/DbT778NtaNI/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×١٦٦</td><td>منصتي</td><td class="n">٩٦٩ ألف</td><td>«الخبر انتشر 👀 وموقعك صار بدقايق»</td><td><a href="https://www.instagram.com/p/DfPl6QIx4lZ/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×١١٤</td><td>فودكس</td><td class="n">٢٢ ألف</td><td>«من أول كوب… وكل يد لها حكاية»</td><td><a href="https://www.instagram.com/p/Dd86tftDsIR/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×٨١</td><td>إيزي أوردرز</td><td class="n">١٦٣ ألف</td><td>«الدنيا اتغيرت والمتجر الإلكتروني طريقته اتطورت»</td><td><a href="https://www.instagram.com/p/DecEPFQKM3U/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×٦٩</td><td>زد</td><td class="n">٢١٩ ألف</td><td>«وأنت وش تخصصك ووظيفتك الحالية؟» (١٥٠ تعليقًا)</td><td><a href="https://www.instagram.com/p/DeoqHzitsG4/" target="_blank" rel="noopener">افتح</a></td></tr>
+      <tr><td class="n">×٦٢</td><td>منصتي</td><td class="n">١٨١ ألف</td><td>«تبي تشوف موقع شغلك قبل لا تدفع ولا فلس؟»</td><td><a href="https://www.instagram.com/p/DfSXf5GReRx/" target="_blank" rel="noopener">افتح</a></td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="margin-top:10px">مشاهدات دكان لحساب فيه ١٣ ألف متابع تكاد تكون إعلانًا ممولًا. لكنها تخبرنا أي رسالة اختاروا أن يدفعوا عليها.</p>
+
+  <h3>ماذا يرفع التفاعل فعلًا؟</h3>
+  <ul class="plain">
+    <li><strong>«اكتب كلمة في التعليقات»:</strong> +٢٦٪ فوق متوسط الحساب.</li>
+    <li><strong>أول سطر يخاطب القارئ</strong> («عندك… مشروعك… تبي…»): +١١٪.</li>
+    <li><strong>السؤال عن هوية القارئ</strong> ينجح («وش تخصصك؟»)، أما السؤال العام فلا يغيّر شيئًا.</li>
+    <li><strong>الريلز تجلب المشاهدات، والكاروسيل يجلب التفاعل</strong> عند المحتوى المفيد.</li>
+    <li>النشر الكثير لا يصنع تفاعلًا: حساب ينشر ١٣ مرة في الأسبوع، ومتوسط تفاعله ٢٦ فقط.</li>
+  </ul>
+
+  <h3>الإعلانات المدفوعة</h3>
+  <ul class="plain">
+    <li><strong>المنيو الإلكتروني صار مجانيًا في السعودية.</strong> لا نبيع بينون على أنه «منيو».</li>
+    <li><strong>«بدون عمولة» هي الزاوية الأطول عمرًا:</strong> إعلان مستمر منذ ١٨٤ يومًا.</li>
+    <li><strong>الوكالات تبدأ من ١٩٩٩ درهمًا.</strong> سعر بينون الشهري أقل بكثير، لكنه غير ظاهر في صفحتنا الرئيسية.</li>
+    <li>كل الوكالات تقول «احترافي، متجاوب، يظهر في جوجل». لا أحد يقول «جاهز قبل أن تطلبه».</li>
+  </ul>
+
+  <h3>ألم المستخدمين في تقييمات التطبيقات</h3>
+  <ul class="plain">
+    <li>منصة متاجر سعودية كبيرة: ٩٤ من آخر ١٥٠ تقييمًا بنجمة أو نجمتين. السبب: لوحة جديدة معقدة فُرضت عليهم، والبطء، والدعم.</li>
+    <li>منصة أخرى: المال، والتجديد التلقائي، والاسترداد.</li>
+    <li>أقرب منافس لنا يقول «شوف موقعك قبل ما تدفع». ومنافس للمطاعم صار يبيع «الذكاء الاصطناعي يصمم موقع مطعمك».</li>
+  </ul>
+
+  <h3>خريطة الحسابات</h3>
+  <div class="table"><table>
+    <thead><tr><th>الشركة</th><th>المجال</th><th>البلد</th><th>المتابعون</th><th>متوسط الإعجابات</th></tr></thead>
+    <tbody>
+      <tr><td><a href="https://www.instagram.com/wix/" target="_blank" rel="noopener">ويكس</a></td><td>مواقع</td><td>عالمي</td><td class="n">903,379</td><td class="n">340</td></tr>
+      <tr><td><a href="https://www.instagram.com/youcandotshop/" target="_blank" rel="noopener">يوكان</a></td><td>متاجر</td><td>المغرب</td><td class="n">113,411</td><td class="n">101</td></tr>
+      <tr><td><a href="https://www.instagram.com/zidappcom/" target="_blank" rel="noopener">زد</a></td><td>متاجر</td><td>السعودية</td><td class="n">90,299</td><td class="n">28</td></tr>
+      <tr><td><a href="https://www.instagram.com/fresha/" target="_blank" rel="noopener">فريشا</a></td><td>حجوزات صالونات</td><td>عالمي</td><td class="n">86,802</td><td class="n">137</td></tr>
+      <tr><td><a href="https://www.instagram.com/sallaapp/" target="_blank" rel="noopener">سلة</a></td><td>متاجر</td><td>السعودية</td><td class="n">76,932</td><td class="n">23</td></tr>
+      <tr><td><a href="https://www.instagram.com/taagercom/" target="_blank" rel="noopener">تاجر</a></td><td>تجارة إلكترونية</td><td>مصر/السعودية</td><td class="n">65,163</td><td class="n">13</td></tr>
+      <tr><td><a href="https://www.instagram.com/mnasati/" target="_blank" rel="noopener">منصتي</a></td><td>مواقع ومتاجر</td><td>الخليج</td><td class="n">54,417</td><td class="n">940</td></tr>
+      <tr><td><a href="https://www.instagram.com/expand.cart/" target="_blank" rel="noopener">اكسباند كارت</a></td><td>متاجر</td><td>مصر</td><td class="n">48,178</td><td class="n">2</td></tr>
+      <tr><td><a href="https://www.instagram.com/foodics/" target="_blank" rel="noopener">فودكس</a></td><td>نظام مطاعم</td><td>السعودية</td><td class="n">43,504</td><td class="n">19</td></tr>
+      <tr><td><a href="https://www.instagram.com/eatapp/" target="_blank" rel="noopener">إيت آب</a></td><td>حجوزات مطاعم</td><td>الإمارات</td><td class="n">13,733</td><td class="n">5</td></tr>
+      <tr><td><a href="https://www.instagram.com/zyda.eg/" target="_blank" rel="noopener">زيدا</a></td><td>طلبات مطاعم</td><td>مصر/الخليج</td><td class="n">13,320</td><td class="n">9</td></tr>
+      <tr><td><a href="https://www.instagram.com/dukkan.one/" target="_blank" rel="noopener">دكان</a></td><td>متاجر</td><td>المشرق</td><td class="n">12,913</td><td class="n">143</td></tr>
+      <tr><td><a href="https://www.instagram.com/sevenrooms/" target="_blank" rel="noopener">سفن رومز</a></td><td>حجوزات مطاعم</td><td>عالمي</td><td class="n">12,571</td><td class="n">677</td></tr>
+      <tr><td><a href="https://www.instagram.com/rewaatech/" target="_blank" rel="noopener">رواء</a></td><td>نقاط بيع</td><td>السعودية</td><td class="n">12,403</td><td class="n">4</td></tr>
+      <tr><td><a href="https://www.instagram.com/marncashier/" target="_blank" rel="noopener">مرن</a></td><td>نقاط بيع</td><td>السعودية</td><td class="n">11,944</td><td class="n">6</td></tr>
+      <tr><td><a href="https://www.instagram.com/easyordersltd/" target="_blank" rel="noopener">إيزي أوردرز</a></td><td>متاجر</td><td>مصر</td><td class="n">9,332</td><td class="n">12</td></tr>
+      <tr><td><a href="https://www.instagram.com/qoyod/" target="_blank" rel="noopener">قيود</a></td><td>محاسبة</td><td>السعودية</td><td class="n">8,598</td><td class="n">5</td></tr>
+      <tr><td><a href="https://www.instagram.com/wuilt_app/" target="_blank" rel="noopener">ويلت</a></td><td>مواقع ومتاجر</td><td>مصر</td><td class="n">7,393</td><td class="n">8</td></tr>
+      <tr><td><a href="https://www.instagram.com/matjrah_app/" target="_blank" rel="noopener">متجرة</a></td><td>متاجر</td><td>السعودية</td><td class="n">4,461</td><td class="n">2</td></tr>
+      <tr><td><a href="https://www.instagram.com/blinkcotechnologies/" target="_blank" rel="noopener">بلينك</a></td><td>نظام مطاعم</td><td>الخليج</td><td class="n">3,706</td><td class="n">59</td></tr>
+      <tr><td><a href="https://www.instagram.com/sapaadpos/" target="_blank" rel="noopener">سباد</a></td><td>نظام مطاعم</td><td>الإمارات</td><td class="n">2,879</td><td class="n">4</td></tr>
+      <tr><td><a href="https://www.instagram.com/deonde.app/" target="_blank" rel="noopener">ديوندي</a></td><td>طلبات مطاعم</td><td>الخليج</td><td class="n">1,379</td><td class="n">4</td></tr>
+      <tr><td><a href="https://www.instagram.com/zyda.sa/" target="_blank" rel="noopener">زيدا السعودية</a></td><td>طلبات مطاعم</td><td>السعودية</td><td class="n">283</td><td class="n">6</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="december" hidden>
+  <h2>خطة ديسمبر: بداية الاكتساح</h2>
+  <p class="sub">١٥ فيديو في الشهر، ومنشوران كل يوم. نبدأ بفيديو عام، ثم فيديو لكل نوع محل. وكل القوالب تنتهي من التعديل الجديد قبل ١ ديسمبر.</p>
+
+  <h3>قبل ديسمبر: القوالب</h3>
+  <div class="phase"><span class="d">١٠–١٦ نوفمبر</span><span>الحلاق: عينة، ثم اختيارك، ثم البناء.</span></div>
+  <div class="phase"><span class="d">١٧–٢٣ نوفمبر</span><span>الجيم، ثم الكافيه والحلويات.</span></div>
+  <div class="phase"><span class="d">٢٤–٢٧ نوفمبر</span><span>التجميل والعيادة والورشة والاستوديو، وفحص الزائر الذكي لكل الأنواع، وإصلاحات المطعم.</span></div>
+  <div class="phase"><span class="d">٢٨–٣٠ نوفمبر</span><span>إعادة بناء مواقع العملاء المحتملين بالقوالب الجديدة.</span></div>
+  <div class="phase go"><span class="d">١ ديسمبر</span><b>بداية الحملة.</b></div>
+
+  <h3>القالب المتوازن: ٨ أجزاء ثابتة لكل محل</h3>
+  <div class="table"><table>
+    <thead><tr><th>الجزء</th><th>سؤال الزائر</th><th>حلاق</th><th>جيم</th><th>عيادة</th></tr></thead>
+    <tbody>
+      <tr><td>الواجهة</td><td>هل هذا ما أبحث عنه؟</td><td>كرسي وقصّة حقيقية</td><td>الصالة وقت التمرين</td><td>وجه الطبيب</td></tr>
+      <tr><td>الشخص</td><td>من سيخدمني؟</td><td>الحلاقون بالاسم</td><td>المدربون</td><td>الطبيب ومؤهله</td></tr>
+      <tr><td>الخدمة والسعر</td><td>كم سأدفع؟</td><td>القصّات بالسعر والمدة</td><td>الاشتراكات والشروط</td><td>«السعر بعد الفحص»</td></tr>
+      <tr><td>الحجز</td><td>كم سأنتظر؟</td><td>دور أو موعد</td><td>حصة تجربة</td><td>موعد وتأمين</td></tr>
+      <tr><td>الدليل</td><td>هل غيري راضٍ؟</td><td colspan="3">٥ تقييمات من جوجل</td></tr>
+      <tr><td>الصور الحقيقية</td><td>هل المكان مثل الصور؟</td><td>قصّات المحل</td><td>الأجهزة</td><td>العيادة من الداخل</td></tr>
+      <tr><td>المخاوف</td><td>ما الذي قد يزعجني؟</td><td>زحمة الخميس؟</td><td>الإلغاء؟</td><td>هل يؤلم؟</td></tr>
+      <tr><td>الطريق والساعات</td><td>متى وأين؟</td><td>خريطة وساعات</td><td>ساعات الزحمة</td><td>المواقف</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>أسابيع ديسمبر</h3>
+  <div class="table"><table>
+    <thead><tr><th>الأسبوع</th><th>المحور</th><th>الفيديوهات</th><th>الجمهور</th></tr></thead>
+    <tbody>
+      <tr><td class="n">١–٧</td><td><strong>شفته؟</strong> موقعك جاهز قبل أن تطلبه</td><td>٤ عامة</td><td>كل أصحاب المحلات</td></tr>
+      <tr><td class="n">٨–١٤</td><td><strong>ليش زبونك راح؟</strong> الخوف والخسارة</td><td>عام + مطعم + كافيه + حلاق</td><td>المطاعم والحلاقون</td></tr>
+      <tr><td class="n">١٥–٢١</td><td><strong>ناس مثلك</strong> قصص حقيقية</td><td>جيم + تجميل + عيادة + ورشة</td><td>بقية الأنواع</td></tr>
+      <tr><td class="n">٢٢–٣١</td><td><strong>الحصاد</strong> ابدأ ٢٠٢٧ وموقعك جاهز</td><td>عام + تجميع + من وراء بينون</td><td>الجميع</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub" style="margin-top:12px">وقت النشر: بين ٨ و١٠ مساءً بتوقيت السعودية. من ٦٢ منشورًا في الشهر، ٣٠ مكتوبة كاملة هنا، والباقي إعادة صياغة لأقواها وردود على ما يحدث في الأسبوع.</p>
+</section>
+
+<section id="videos" hidden>
+  <h2>خمسة عشر فيديو</h2>
+  <p class="sub">كل فيديو بين ٢٠ و٤٥ ثانية، عمودي، بوجه إنسان حقيقي أو شاشة هاتف حقيقية. أول ثانيتين هما كل شيء.</p>
+  <div class="vids"><article class="vid"><header><span class="num">ف١</span><span class="tag">الأسبوع ١</span></header><h4>«شفته؟» (الفيديو الأم)</h4><ul><li><strong>الخطّاف (٠–٢ث):</strong> هاتف على طاولة محل. إشعار واتساب. صوت: «في أحد بنى لك موقع… وأنت ما طلبت».</li><li><strong>المشاهد:</strong> صاحب المحل يفتح الرابط → اسم محله، صوره، تقييماته من جوجل → يرفع رأسه مستغربًا.</li><li><strong>النص على الشاشة:</strong> «اسم محلك. تقييماتك. ساعاتك. جاهز.»</li><li><strong>الختام:</strong> «شفته قبل ما تدفع. بينون.»</li><li><strong>لماذا سينجح:</strong> المنافس الأقوى يقول «شاهد قبل أن تدفع» بكلام. نحن نُريه.</li></ul></article><article class="vid"><header><span class="num">ف٢</span><span class="tag">الأسبوع ١</span></header><h4>«كم يكلّف موقع؟ بالتفصيل»</h4><ul><li><strong>الخطّاف:</strong> «سألوني كم يكلّف موقع لمحل صغير… خلّيني أحسبها قدامك.»</li><li><strong>المشاهد:</strong> ورقة وقلم: مصمم (١٩٩٩+)، استضافة، دومين، تعديلات، «المصمم اختفى». ثم سطر واحد: «أو…» <span class="warn">⚠</span> السعر الشهري.</li><li><strong>لماذا سينجح:</strong> «كم تكلفة مشروع بالتفصيل» من أقوى صيغ تيك توك في التحليل.</li></ul></article><article class="vid"><header><span class="num">ف٣</span><span class="tag">الأسبوع ١</span></header><h4>«أكثر ٣ أشياء تُغضب زبونك»</h4><ul><li><strong>الخطّاف:</strong> «قرأنا ٢٦٠٠ تقييم جوجل لمحلات عربية. هذي أكثر ٣ أشياء تُغضب الزبون.»</li><li><strong>المحتوى:</strong> ١) سعر مفاجئ. ٢) انتظار بلا سبب. ٣) «الصور غير المحل».</li><li><strong>الختام:</strong> «الثلاثة يحلّها شيء واحد: الزبون يعرف قبل أن يأتي.»</li><li><strong>لماذا سينجح:</strong> رقم حقيقي + فائدة لصاحب المحل حتى لو لم يشترِ.</li></ul></article><article class="vid"><header><span class="num">ف٤</span><span class="tag">الأسبوع ١</span></header><h4>«لا تأجّل»</h4><ul><li><strong>الخطّاف:</strong> «كل يوم تقول: بعدين أسوي موقع.»</li><li><strong>المشاهد:</strong> تقويم تتساقط أوراقه. زبون يبحث في جوجل → يجد المحل المجاور → يذهب.</li><li><strong>الختام:</strong> «بعدين = زبون راح. موقعك يأخذ دقائق.»</li><li><strong>لماذا سينجح:</strong> صيغة «لا تأجّل» حققت أعلى مشاهدات في السوق (٣.٣ مليون).</li></ul></article><article class="vid"><header><span class="num">ف٥</span><span class="tag">الأسبوع ٢</span></header><h4>«ليش زبونك راح؟»</h4><ul><li><strong>الخطّاف:</strong> زبون أمام محلين متجاورين. يفتح جوجل. أحدهما له موقع.</li><li><strong>المحتوى:</strong> ٣ ثوان لكل سبب: لم يعرف السعر، لم يعرف الساعات، لم يرَ صورًا.</li><li><strong>الختام:</strong> «زبونك ما راح لأن غيرك أحسن. راح لأن غيرك أوضح.»</li></ul></article><article class="vid"><header><span class="num">ف٦</span><span class="tag">الأسبوع ٢</span></header><h4>المطعم: «المنيو في الصورة… والزبون ما يقدر يقرأها»</h4><ul><li><strong>الخطّاف:</strong> صورة منيو مصوّرة بالهاتف، مائلة، فيها انعكاس ضوء.</li><li><strong>المحتوى:</strong> الصورة نفسها تتحول إلى منيو واضح في الموقع: أقسام، أطباق، صور الأطباق.</li><li><strong>لماذا:</strong> هذه ميزة حقيقية عندنا اليوم (قراءة المنيو من صورة).</li></ul></article><article class="vid"><header><span class="num">ف٧</span><span class="tag">الأسبوع ٢</span></header><h4>المطعم: «عمولة التوصيل»</h4><ul><li><strong>الخطّاف:</strong> «كم تدفع عمولة على كل طلب؟»</li><li><strong>المحتوى:</strong> «طلب الزبون من موقعك = ما في أحد بينك وبينه.»</li><li><span class="warn">⚠</span> لا يُنشر إلا إذا كان الطلب المباشر من موقع بينون موجودًا فعلًا. «صفر عمولة» أقوى زاوية إعلانية في السوق، لكن لا نقولها إن لم تكن صحيحة.</li></ul></article><article class="vid"><header><span class="num">ف٨</span><span class="tag">الأسبوع ٢</span></header><h4>الكافيه: «الكافيه اللي ما له صور»</h4><ul><li><strong>الخطّاف:</strong> شخص يبحث «كافيه هادئ للدراسة».</li><li><strong>المحتوى:</strong> أول النتائج له صور الجلسات والأفياش والإضاءة. الكافيه الآخر بلا صور.</li><li><strong>الختام:</strong> «الجلسة تبيع قبل القهوة.»</li></ul></article><article class="vid"><header><span class="num">ف٩</span><span class="tag">الأسبوع ٢</span></header><h4>الحلاق: «اسمك يبيع»</h4><ul><li><strong>الخطّاف:</strong> «أكثر كلمة في تقييمات الحلاقين؟ اسم الحلاق.»</li><li><strong>المحتوى:</strong> اقتباسات تقييمات (دون أسماء محلات): «أبو … يعرف شغله». ثم موقع يعرض الحلاقين بالاسم وصورة قصّاتهم.</li><li><strong>الختام:</strong> «زبونك ما يدوّر على صالون. يدوّر على حلاقه.»</li></ul></article><article class="vid"><header><span class="num">ف١٠</span><span class="tag">الأسبوع ٣</span></header><h4>الجيم: «سؤال قبل الاشتراك»</h4><ul><li><strong>الخطّاف:</strong> «أول سؤال قبل ما يشترك أحد في جيمك: كيف ألغي؟»</li><li><strong>المحتوى:</strong> الغضب الأول في تقييمات الجيمات = الإلغاء والتجميد. الموقع يعرض الشروط بوضوح → ثقة.</li><li><strong>الختام:</strong> «اللي يوضّح الشروط… يكسب المشترك.»</li></ul></article><article class="vid"><header><span class="num">ف١١</span><span class="tag">الأسبوع ٣</span></header><h4>التجميل: «الصور اللي تبيع»</h4><ul><li><strong>الخطّاف:</strong> «زبونتك تشوف شغلك قبل ما تحجز.»</li><li><strong>المحتوى:</strong> معرض أعمال المركز (بلا وجوه، حسب قاعدتنا)، أسعار واضحة، حجز.</li><li><span class="warn">⚠</span> قاعدة الصور: لا وجوه نساء. نستعمل الأيدي، الأدوات، النتيجة على المنتج.</li></ul></article><article class="vid"><header><span class="num">ف١٢</span><span class="tag">الأسبوع ٣</span></header><h4>العيادة: «هل يؤلم؟»</h4><ul><li><strong>الخطّاف:</strong> «أكثر سؤال يخاف المريض يسأله.»</li><li><strong>المحتوى:</strong> موقع العيادة يجيب قبل أن يسأل: اسم الطبيب، مدة الجلسة، التأمين.</li><li><strong>الختام:</strong> «المريض الخائف يختار العيادة اللي طمأنته أولًا.»</li></ul></article><article class="vid"><header><span class="num">ف١٣</span><span class="tag">الأسبوع ٣</span></header><h4>الورشة: «كم يوم السيارة عندكم؟»</h4><ul><li><strong>الخطّاف:</strong> صاحب سيارة يتصل للمرة الرابعة: «خلصت؟»</li><li><strong>المحتوى:</strong> ٣٧٪ من أفضل الورش بلا موقع. الموقع يجيب: الخدمات، المدة، الضمان.</li><li><strong>الختام:</strong> «الزبون اللي يعرف… ما يتصل أربع مرات.»</li></ul></article><article class="vid"><header><span class="num">ف١٤</span><span class="tag">الأسبوع ٤</span></header><h4>«ابدأ ٢٠٢٧ وموقعك جاهز»</h4><ul><li><strong>الخطّاف:</strong> «قبل ما تكتب أهداف السنة الجديدة…»</li><li><strong>المحتوى:</strong> تجميع سريع لأفضل المواقع التي بنيناها في ديسمبر (بإذن أصحابها).</li></ul></article><article class="vid"><header><span class="num">ف١٥</span><span class="tag">الأسبوع ٤</span></header><h4>«من وراء بينون؟»</h4><ul><li><strong>الخطّاف:</strong> أنس (أو ياسين) أمام الكاميرا: «أنا اللي أرسلت لك الرابط.»</li><li><strong>المحتوى:</strong> لماذا بدأنا، ماذا رأينا في السوق، وعد واحد بسيط.</li><li><strong>لماذا:</strong> الشخص المسمّى يبيع في كل نيش. ونحن أيضًا نيش. لا أحد من المنافسين يُظهر وجه المؤسس.</li></ul></article></div>
+</section>
+
+<section id="posts" hidden>
+  <h2>ثلاثون منشورًا</h2>
+  <p class="sub">العنوان للصورة، ثم النص، ثم الدعوة. لا يذكر أي منشور منافسًا. ما عليه «يحتاج تأكيدك» فيه وعد أو رقم، فلا يُنشر قبل أن تؤكد أنه صحيح.</p>
+  <h3 class="wk">الأسبوع ١ — «شفته؟»</h3><div class="posts"><article class="post">
+<header><span class="num">١</span><span class="tag">افتتاح الحملة</span></header>
+<p class="headline">موقعك جاهز… قبل أن تطلبه.</p>
+<p class="body">نحن لا نسألك عن خطة ولا عن ميزانية. نأخذ اسم محلك من جوجل، وتقييمات زبائنك، وساعاتك، ونبني لك موقعًا. ثم نرسل لك الرابط. تراه أولًا، وتقرّر بعدها.</p>
+<p class="cta">اكتب «شفته» في التعليقات، ونرسل لك موقعك.</p>
+<button class="copy" type="button" data-copy="موقعك جاهز… قبل أن تطلبه.
+
+نحن لا نسألك عن خطة ولا عن ميزانية. نأخذ اسم محلك من جوجل، وتقييمات زبائنك، وساعاتك، ونبني لك موقعًا. ثم نرسل لك الرابط. تراه أولًا، وتقرّر بعدها.
+
+اكتب «شفته» في التعليقات، ونرسل لك موقعك.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢</span></header>
+<p class="headline">أول مرة تشوف شيئًا قبل أن تدفع ثمنه؟</p>
+<p class="body">في المطعم تتذوق. في محل الملابس تقيس. لكن في المواقع تدفع أولًا، ثم تنتظر، ثم تتمنى. قررنا أن نعكس الترتيب.</p>
+<p class="cta">شاهد موقعك أولًا. الرابط في البايو.</p>
+<button class="copy" type="button" data-copy="أول مرة تشوف شيئًا قبل أن تدفع ثمنه؟
+
+في المطعم تتذوق. في محل الملابس تقيس. لكن في المواقع تدفع أولًا، ثم تنتظر، ثم تتمنى. قررنا أن نعكس الترتيب.
+
+شاهد موقعك أولًا. الرابط في البايو.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٣</span></header>
+<p class="headline">«المصمم أخذ فلوسي واختفى»</p>
+<p class="body">هذه الجملة تتكرر في تقييمات شركات التصميم أكثر من أي جملة أخرى. ليست مشكلتك أنك وثقت. المشكلة أن الطريقة نفسها تطلب منك الثقة قبل أن ترى شيئًا.</p>
+<p class="cta">عندنا لا تدفع لشيء لم تره.</p>
+<button class="copy" type="button" data-copy="«المصمم أخذ فلوسي واختفى»
+
+هذه الجملة تتكرر في تقييمات شركات التصميم أكثر من أي جملة أخرى. ليست مشكلتك أنك وثقت. المشكلة أن الطريقة نفسها تطلب منك الثقة قبل أن ترى شيئًا.
+
+عندنا لا تدفع لشيء لم تره.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٤</span></header>
+<p class="headline">زبونك يبحث عنك الآن.</p>
+<p class="body">يكتب اسم محلك في جوجل. ماذا يجد؟ عنوانًا وصورتين ورقم هاتف لا يرد في وقت الذروة. وماذا يجد عند جارك؟ موقعًا فيه كل شيء.</p>
+<p class="cta">لا تخسر الزبون في البحث.</p>
+<button class="copy" type="button" data-copy="زبونك يبحث عنك الآن.
+
+يكتب اسم محلك في جوجل. ماذا يجد؟ عنوانًا وصورتين ورقم هاتف لا يرد في وقت الذروة. وماذا يجد عند جارك؟ موقعًا فيه كل شيء.
+
+لا تخسر الزبون في البحث.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٥</span></header>
+<p class="headline">٢٦٠٠ تقييم. ٣ أسباب للغضب.</p>
+<p class="body">قرأنا آلاف تقييمات جوجل لأفضل المحلات العربية. الغضب لا يأتي من الطعم ولا من الخدمة غالبًا. يأتي من المفاجأة: سعر لم يتوقعه، انتظار لم يُخبَر به، مكان غير الصور.</p>
+<p class="cta">الزبون الذي يعرف قبل أن يأتي… لا يغضب.</p>
+<button class="copy" type="button" data-copy="٢٦٠٠ تقييم. ٣ أسباب للغضب.
+
+قرأنا آلاف تقييمات جوجل لأفضل المحلات العربية. الغضب لا يأتي من الطعم ولا من الخدمة غالبًا. يأتي من المفاجأة: سعر لم يتوقعه، انتظار لم يُخبَر به، مكان غير الصور.
+
+الزبون الذي يعرف قبل أن يأتي… لا يغضب.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٦</span></header>
+<p class="headline">ما تحتاج تفهم في المواقع.</p>
+<p class="body">لا لوحة تحكم معقدة. لا مصطلحات. لا «دومين» و«استضافة» و«SSL». أنت تعرف محلك، ونحن نعرف المواقع.</p>
+<p class="cta">تحتاج تعديل؟ اكتبه لنا كما تكتب رسالة.</p>
+<button class="copy" type="button" data-copy="ما تحتاج تفهم في المواقع.
+
+لا لوحة تحكم معقدة. لا مصطلحات. لا «دومين» و«استضافة» و«SSL». أنت تعرف محلك، ونحن نعرف المواقع.
+
+تحتاج تعديل؟ اكتبه لنا كما تكتب رسالة.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٧</span></header>
+<p class="headline">أفضل المحلات… بلا موقع.</p>
+<p class="body">أخذنا أعلى المحلات تقييمًا في مدن عربية. ثلث صالونات الحلاقة بلا موقع. وأكثر من ثلث ورش السيارات. وتقريبًا أربعة من كل عشرة استوديوهات تصوير. ليس لأنهم لا يحتاجونه. لأن أحدًا لم يُسهّله عليهم.</p>
+<p class="cta">محلك ممتاز. خلّ زبونك يعرف.</p>
+<button class="copy" type="button" data-copy="أفضل المحلات… بلا موقع.
+
+أخذنا أعلى المحلات تقييمًا في مدن عربية. ثلث صالونات الحلاقة بلا موقع. وأكثر من ثلث ورش السيارات. وتقريبًا أربعة من كل عشرة استوديوهات تصوير. ليس لأنهم لا يحتاجونه. لأن أحدًا لم يُسهّله عليهم.
+
+محلك ممتاز. خلّ زبونك يعرف.">انسخ النص</button>
+</article></div><h3 class="wk">الأسبوع ٢ — «ليش زبونك راح؟»</h3><div class="posts"><article class="post">
+<header><span class="num">٨</span></header>
+<p class="headline">زبونك ما راح لأن غيرك أحسن. راح لأن غيرك أوضح.</p>
+<p class="body">لم يعرف سعرك. لم يعرف ساعاتك. لم يرَ مكانك. فاختار من أعطاه الجواب في ثوانٍ.</p>
+<p class="cta">كن الأوضح.</p>
+<button class="copy" type="button" data-copy="زبونك ما راح لأن غيرك أحسن. راح لأن غيرك أوضح.
+
+لم يعرف سعرك. لم يعرف ساعاتك. لم يرَ مكانك. فاختار من أعطاه الجواب في ثوانٍ.
+
+كن الأوضح.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٩</span></header>
+<p class="headline">«بعدين أسوي موقع»</p>
+<p class="body">«بعدين» كلمة مريحة. لكن كل يوم فيه زبون يبحث، ولا يجدك، فيذهب. «بعدين» عندها ثمن، حتى لو لم تره.</p>
+<p class="cta">موقعك يأخذ دقائق، لا أشهرًا.</p>
+<button class="copy" type="button" data-copy="«بعدين أسوي موقع»
+
+«بعدين» كلمة مريحة. لكن كل يوم فيه زبون يبحث، ولا يجدك، فيذهب. «بعدين» عندها ثمن، حتى لو لم تره.
+
+موقعك يأخذ دقائق، لا أشهرًا.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٠</span><span class="tag">مطعم</span></header>
+<p class="headline">المنيو في الصورة مائل… والزبون تعب.</p>
+<p class="body">صورة منيو بالهاتف، فيها انعكاس ضوء، والخط صغير. الزبون يقرّب ويبعّد ثم يغلق. نحوّل صورة منيوك إلى منيو واضح: أقسام، أطباق، صور.</p>
+<p class="cta">صوّر منيوك. الباقي علينا.</p>
+<button class="copy" type="button" data-copy="المنيو في الصورة مائل… والزبون تعب.
+
+صورة منيو بالهاتف، فيها انعكاس ضوء، والخط صغير. الزبون يقرّب ويبعّد ثم يغلق. نحوّل صورة منيوك إلى منيو واضح: أقسام، أطباق، صور.
+
+صوّر منيوك. الباقي علينا.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١١</span><span class="tag">مطعم</span></header>
+<p class="headline">ماذا يكتب زبونك عنك؟</p>
+<p class="body">في تقييمات المطاعم العربية، أكثر شيء يمدحه الناس ليس الطبق. هو شخص: «الشيف»، «أبو …»، «الأخ اللي استقبلنا». الناس تتذكر الوجوه.</p>
+<p class="cta">أظهر فريقك في موقعك.</p>
+<button class="copy" type="button" data-copy="ماذا يكتب زبونك عنك؟
+
+في تقييمات المطاعم العربية، أكثر شيء يمدحه الناس ليس الطبق. هو شخص: «الشيف»، «أبو …»، «الأخ اللي استقبلنا». الناس تتذكر الوجوه.
+
+أظهر فريقك في موقعك.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٢</span><span class="tag">كافيه</span></header>
+<p class="headline">الجلسة تبيع قبل القهوة.</p>
+<p class="body">من يبحث عن كافيه يسأل: هل هو هادئ؟ هل فيه أفياش؟ هل يصلح للدراسة أو للعائلة؟ الصورة تجيب قبل الكلام.</p>
+<p class="cta">خلّ زبونك يشوف جلستك.</p>
+<button class="copy" type="button" data-copy="الجلسة تبيع قبل القهوة.
+
+من يبحث عن كافيه يسأل: هل هو هادئ؟ هل فيه أفياش؟ هل يصلح للدراسة أو للعائلة؟ الصورة تجيب قبل الكلام.
+
+خلّ زبونك يشوف جلستك.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٣</span><span class="tag">حلاق</span></header>
+<p class="headline">زبونك ما يدوّر على صالون. يدوّر على حلاقه.</p>
+<p class="body">في تقييمات صالونات الحلاقة، الاسم يتكرر أكثر من أي شيء آخر. «فلان يعرف شغله». الحلاق الجيد سمعة تمشي.</p>
+<p class="cta">موقع يعرّف زبائنك بكل حلاق عندك.</p>
+<button class="copy" type="button" data-copy="زبونك ما يدوّر على صالون. يدوّر على حلاقه.
+
+في تقييمات صالونات الحلاقة، الاسم يتكرر أكثر من أي شيء آخر. «فلان يعرف شغله». الحلاق الجيد سمعة تمشي.
+
+موقع يعرّف زبائنك بكل حلاق عندك.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٤</span><span class="tag">حلاق</span></header>
+<p class="headline">«كم الانتظار؟»</p>
+<p class="body">أكثر سؤال يُطرح على الحلاق في الواتساب. وأكثر سبب لترك الصالون: انتظار طويل بلا إخبار. حين يعرف الزبون الوقت مسبقًا، ينتظر راضيًا.</p>
+<p class="cta">الموعد الواضح = زبون صبور.</p>
+<button class="copy" type="button" data-copy="«كم الانتظار؟»
+
+أكثر سؤال يُطرح على الحلاق في الواتساب. وأكثر سبب لترك الصالون: انتظار طويل بلا إخبار. حين يعرف الزبون الوقت مسبقًا، ينتظر راضيًا.
+
+الموعد الواضح = زبون صبور.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٥</span></header>
+<p class="headline">التقييم الحلو لا يكفي إذا لم يره أحد.</p>
+<p class="body">عندك ٤.٧ نجوم من مئات الزبائن. لكنها مدفونة في جوجل. موقعك يضعها في الواجهة، بكلمات زبائنك أنفسهم.</p>
+<p class="cta">كلام زبائنك أقوى من أي إعلان.</p>
+<button class="copy" type="button" data-copy="التقييم الحلو لا يكفي إذا لم يره أحد.
+
+عندك ٤.٧ نجوم من مئات الزبائن. لكنها مدفونة في جوجل. موقعك يضعها في الواجهة، بكلمات زبائنك أنفسهم.
+
+كلام زبائنك أقوى من أي إعلان.">انسخ النص</button>
+</article><article class="post has-warn">
+<header><span class="num">١٦</span><span class="flag">يحتاج تأكيدك</span></header>
+<p class="headline">كم يكلّف موقع لمحل صغير؟</p>
+<p class="body">مصمم. تعديلات. استضافة. دومين. وفي النهاية رسالة «الملف عند المصمم السابق». الحساب الحقيقي أكبر من الرقم الأول دائمًا.</p>
+<p class="cta"><span class="warn">⚠</span> عندنا سعر شهري واحد، واضح، وتراه قبل أن تبدأ.</p>
+<button class="copy" type="button" data-copy="كم يكلّف موقع لمحل صغير؟
+
+مصمم. تعديلات. استضافة. دومين. وفي النهاية رسالة «الملف عند المصمم السابق». الحساب الحقيقي أكبر من الرقم الأول دائمًا.
+
+⚠ عندنا سعر شهري واحد، واضح، وتراه قبل أن تبدأ.">انسخ النص</button>
+</article></div><h3 class="wk">الأسبوع ٣ — «ناس مثلك»</h3><div class="posts"><article class="post">
+<header><span class="num">١٧</span><span class="tag">جيم</span></header>
+<p class="headline">أول سؤال قبل الاشتراك: كيف ألغي؟</p>
+<p class="body">في تقييمات النوادي، الغضب الأكبر ليس الأجهزة ولا الزحمة. هو شروط الإلغاء والتجميد التي عُرفت متأخرًا. الجيم الذي يكتب شروطه بوضوح، يكسب ثقة قبل أول تمرين.</p>
+<p class="cta">وضّح شروطك. اكسب مشتركك.</p>
+<button class="copy" type="button" data-copy="أول سؤال قبل الاشتراك: كيف ألغي؟
+
+في تقييمات النوادي، الغضب الأكبر ليس الأجهزة ولا الزحمة. هو شروط الإلغاء والتجميد التي عُرفت متأخرًا. الجيم الذي يكتب شروطه بوضوح، يكسب ثقة قبل أول تمرين.
+
+وضّح شروطك. اكسب مشتركك.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٨</span><span class="tag">جيم</span></header>
+<p class="headline">«الكابتن» هو الجيم.</p>
+<p class="body">المشترك لا يتذكر نوع الأجهزة. يتذكر المدرب الذي صحّح حركته وشجّعه في يومه الأول. أظهر مدربيك بالاسم.</p>
+<p class="cta">الوجوه تبيع الاشتراكات.</p>
+<button class="copy" type="button" data-copy="«الكابتن» هو الجيم.
+
+المشترك لا يتذكر نوع الأجهزة. يتذكر المدرب الذي صحّح حركته وشجّعه في يومه الأول. أظهر مدربيك بالاسم.
+
+الوجوه تبيع الاشتراكات.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">١٩</span><span class="tag">تجميل</span></header>
+<p class="headline">زبونتك تشوف شغلك قبل أن تحجز.</p>
+<p class="body">معرض أعمالك هو أقوى إعلان عندك. أسعار واضحة، مدة كل خدمة، وحجز بضغطة. بلا اتصال، وبلا انتظار رد.</p>
+<p class="cta">خلّ شغلك يتكلم.</p>
+<button class="copy" type="button" data-copy="زبونتك تشوف شغلك قبل أن تحجز.
+
+معرض أعمالك هو أقوى إعلان عندك. أسعار واضحة، مدة كل خدمة، وحجز بضغطة. بلا اتصال، وبلا انتظار رد.
+
+خلّ شغلك يتكلم.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٠</span><span class="tag">عيادة</span></header>
+<p class="headline">«هل يؤلم؟»</p>
+<p class="body">هذا السؤال يمنع مرضى كثيرين من الحجز. موقع العيادة الذي يجيب عنه بهدوء، ويعرّف بالطبيب، ويوضح التأمين، يطمئن المريض قبل أن يصل.</p>
+<p class="cta">المريض الخائف يختار من طمأنه أولًا.</p>
+<button class="copy" type="button" data-copy="«هل يؤلم؟»
+
+هذا السؤال يمنع مرضى كثيرين من الحجز. موقع العيادة الذي يجيب عنه بهدوء، ويعرّف بالطبيب، ويوضح التأمين، يطمئن المريض قبل أن يصل.
+
+المريض الخائف يختار من طمأنه أولًا.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢١</span><span class="tag">ورشة</span></header>
+<p class="headline">«خلصت السيارة؟» — للمرة الرابعة.</p>
+<p class="body">صاحب السيارة لا يتصل لأنه مزعج. يتصل لأنه لا يعرف. موقع يقول المدة المتوقعة وضمان القطع يوفّر عليك عشرين مكالمة في اليوم.</p>
+<p class="cta">الزبون اللي يعرف… ما يتصل أربع مرات.</p>
+<button class="copy" type="button" data-copy="«خلصت السيارة؟» — للمرة الرابعة.
+
+صاحب السيارة لا يتصل لأنه مزعج. يتصل لأنه لا يعرف. موقع يقول المدة المتوقعة وضمان القطع يوفّر عليك عشرين مكالمة في اليوم.
+
+الزبون اللي يعرف… ما يتصل أربع مرات.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٢</span><span class="tag">استوديو تصوير</span></header>
+<p class="headline">أنت تصوّر الناس… ومن يصوّر شغلك؟</p>
+<p class="body">تقريبًا أربعة من كل عشرة استوديوهات تصوير مميزة بلا موقع. شغلك جميل في إنستغرام، لكنه يضيع بين المنشورات. الموقع يرتّبه في معرض واحد.</p>
+<p class="cta">معرضك الدائم.</p>
+<button class="copy" type="button" data-copy="أنت تصوّر الناس… ومن يصوّر شغلك؟
+
+تقريبًا أربعة من كل عشرة استوديوهات تصوير مميزة بلا موقع. شغلك جميل في إنستغرام، لكنه يضيع بين المنشورات. الموقع يرتّبه في معرض واحد.
+
+معرضك الدائم.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٣</span><span class="tag">حلويات</span></header>
+<p class="headline">الطلب الكبير يبدأ بسؤال: «تسوّون للمناسبات؟»</p>
+<p class="body">الأعراس والتخرج والمواليد. صاحب المناسبة يبحث قبل أسابيع. إذا لم يجد صورك وطريقة الطلب، طلب من غيرك.</p>
+<p class="cta">كن أول جواب لمناسبته.</p>
+<button class="copy" type="button" data-copy="الطلب الكبير يبدأ بسؤال: «تسوّون للمناسبات؟»
+
+الأعراس والتخرج والمواليد. صاحب المناسبة يبحث قبل أسابيع. إذا لم يجد صورك وطريقة الطلب، طلب من غيرك.
+
+كن أول جواب لمناسبته.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٤</span></header>
+<p class="headline">محلك له شخصية. موقعك لازم يشبهه.</p>
+<p class="body">موقع الحلاق غير موقع العيادة. وموقع الكافيه غير موقع الورشة. لهذا لكل نوع محل عندنا قالب يتكلم بلغته: الحلاق بالدور، الجيم بالاشتراك، العيادة بالموعد.</p>
+<p class="cta">اختر نوع محلك، ونبدأ.</p>
+<button class="copy" type="button" data-copy="محلك له شخصية. موقعك لازم يشبهه.
+
+موقع الحلاق غير موقع العيادة. وموقع الكافيه غير موقع الورشة. لهذا لكل نوع محل عندنا قالب يتكلم بلغته: الحلاق بالدور، الجيم بالاشتراك، العيادة بالموعد.
+
+اختر نوع محلك، ونبدأ.">انسخ النص</button>
+</article></div><h3 class="wk">الأسبوع ٤ — الحصاد ونهاية السنة</h3><div class="posts"><article class="post">
+<header><span class="num">٢٥</span></header>
+<p class="headline">سنة جديدة. نفس المحل الرائع. أخيرًا… موقع.</p>
+<p class="body">لا تكتبها في قائمة أهداف ٢٠٢٧. ابدأها الآن. نبنيها لك، وتراها، وتقرر.</p>
+<p class="cta">ابدأ السنة وموقعك جاهز.</p>
+<button class="copy" type="button" data-copy="سنة جديدة. نفس المحل الرائع. أخيرًا… موقع.
+
+لا تكتبها في قائمة أهداف ٢٠٢٧. ابدأها الآن. نبنيها لك، وتراها، وتقرر.
+
+ابدأ السنة وموقعك جاهز.">انسخ النص</button>
+</article><article class="post has-warn">
+<header><span class="num">٢٦</span><span class="flag">يحتاج تأكيدك</span></header>
+<p class="headline"><span class="warn">⚠</span> هذا الشهر بنينا [عدد] موقع.</p>
+<p class="body">لمطاعم وحلاقين ونوادٍ ومحلات في [عدد] دول. كل واحد منهم رأى موقعه قبل أن يقرر.</p>
+<p class="cta"><span class="warn">⚠</span> يُملأ بالرقم الحقيقي في آخر ديسمبر.</p>
+<button class="copy" type="button" data-copy="⚠ هذا الشهر بنينا [عدد] موقع.
+
+لمطاعم وحلاقين ونوادٍ ومحلات في [عدد] دول. كل واحد منهم رأى موقعه قبل أن يقرر.
+
+⚠ يُملأ بالرقم الحقيقي في آخر ديسمبر.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٧</span></header>
+<p class="headline">لا تحتاج أن تكون شركة كبيرة لتبدو محترفًا.</p>
+<p class="body">الزبون لا يقارن حجمك بحجم غيرك. يقارن الوضوح. محل صغير بموقع واضح يغلب محلًا كبيرًا بلا موقع.</p>
+<p class="cta">الوضوح هو الاحتراف.</p>
+<button class="copy" type="button" data-copy="لا تحتاج أن تكون شركة كبيرة لتبدو محترفًا.
+
+الزبون لا يقارن حجمك بحجم غيرك. يقارن الوضوح. محل صغير بموقع واضح يغلب محلًا كبيرًا بلا موقع.
+
+الوضوح هو الاحتراف.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٢٨</span></header>
+<p class="headline">أسئلة زبونك… قبل أن يسألها.</p>
+<p class="body">كم السعر؟ متى تفتحون؟ أين أنتم؟ هل يوجد موقف؟ كل سؤال يجيب عنه موقعك هو مكالمة لا تحتاج أن ترد عليها وأنت مشغول.</p>
+<p class="cta">موقعك يرد عنك.</p>
+<button class="copy" type="button" data-copy="أسئلة زبونك… قبل أن يسألها.
+
+كم السعر؟ متى تفتحون؟ أين أنتم؟ هل يوجد موقف؟ كل سؤال يجيب عنه موقعك هو مكالمة لا تحتاج أن ترد عليها وأنت مشغول.
+
+موقعك يرد عنك.">انسخ النص</button>
+</article><article class="post has-warn">
+<header><span class="num">٢٩</span><span class="flag">يحتاج تأكيدك</span></header>
+<p class="headline"><span class="warn">⚠</span> ما الذي نَعِد به؟</p>
+<p class="body">١) ترى موقعك قبل أن تدفع. ٢) تعديلاتك برسالة. ٣) لا أحد يختفي: فريقنا يرد عليك. <span class="warn">⚠</span> كل نقطة تُراجع قبل النشر.</p>
+<p class="cta">وعد قليل… نلتزم به.</p>
+<button class="copy" type="button" data-copy="⚠ ما الذي نَعِد به؟
+
+١) ترى موقعك قبل أن تدفع. ٢) تعديلاتك برسالة. ٣) لا أحد يختفي: فريقنا يرد عليك. ⚠ كل نقطة تُراجع قبل النشر.
+
+وعد قليل… نلتزم به.">انسخ النص</button>
+</article><article class="post">
+<header><span class="num">٣٠</span><span class="tag">يُنشر مع ف١٥</span></header>
+<p class="headline">أنا اللي أرسلت لك الرابط.</p>
+<p class="body">اسمي أنس. بدأنا بينون لأننا رأينا محلات ممتازة تخسر زبائن لسبب بسيط: لا أحد يجدها. فقررنا أن نبني لها مواقعها أولًا، ثم نسأل.</p>
+<p class="cta">إذا وصلك رابط منا… افتحه. هو لك.</p>
+<button class="copy" type="button" data-copy="أنا اللي أرسلت لك الرابط.
+
+اسمي أنس. بدأنا بينون لأننا رأينا محلات ممتازة تخسر زبائن لسبب بسيط: لا أحد يجدها. فقررنا أن نبني لها مواقعها أولًا، ثم نسأل.
+
+إذا وصلك رابط منا… افتحه. هو لك.">انسخ النص</button>
+</article></div>
+</section>
+
+<section id="agent" hidden>
+  <h2>الوكيل: ماذا يقرأ، ومن أين</h2>
+  <p class="sub">كل التحليل الأخير كتبته بنفسي، بلا مفتاح الـAPI. البيانات حقيقية.</p>
+  <div class="table"><table>
+    <thead><tr><th>ما يقرؤه</th><th>المصدر</th><th>الحالة</th></tr></thead>
+    <tbody>
+      <tr><td>منشورات المنافسين وأرقامها (حتى ٥٠ لكل حساب)</td><td>إنستغرام عبر Apify</td><td><span class="status s-block">متوقف حتى ٧ ديسمبر</span></td></tr>
+      <tr><td>التعليقات وكلمات الريلز</td><td>إنستغرام وتيك توك عبر Apify</td><td><span class="status s-block">متوقف حتى ٧ ديسمبر</span></td></tr>
+      <tr><td>الإعلانات المدفوعة النشطة</td><td>مكتبة إعلانات ميتا عبر Apify</td><td><span class="status s-block">متوقف حتى ٧ ديسمبر</span></td></tr>
+      <tr><td>تقييمات تطبيقات المنافسين</td><td>متجر آبل (مجاني)</td><td><span class="status s-ok">يعمل</span></td></tr>
+      <tr><td>تقييمات المحلات لكل نوع</td><td>Google Places</td><td><span class="status s-ok">يعمل</span></td></tr>
+      <tr><td>اتجاهات البحث</td><td>Google Trends عبر Apify</td><td><span class="status s-block">متوقف حتى ٧ ديسمبر</span></td></tr>
+      <tr><td>أخبار التمويل والسوق</td><td>Google News (فيه ضوضاء كثيرة)</td><td><span class="status s-ok">يعمل</span></td></tr>
+      <tr><td>مواقع المنافسين وسرعتها</td><td>زيارة مباشرة بمتصفح هاتف</td><td><span class="status s-ok">يعمل</span></td></tr>
+      <tr><td>ردود عملائنا المحتملين على واتساب</td><td>قاعدة بياناتنا</td><td><span class="status s-block">٩ رسائل، صفر ردود</span></td></tr>
+    </tbody>
+  </table></div>
+  <h3>القواعد</h3>
+  <ul class="plain">
+    <li>لا يستعمل الوكيل مفتاح Anthropic من نفسه أبدًا. التحليل أعمله أنا داخل المحادثة.</li>
+    <li>المنشورات تجيب عن الألم دون ذكر أي منافس.</li>
+    <li>لا وعد يُنشر قبل أن تؤكد أنه صحيح.</li>
+    <li>الفصحى المبسطة، جمل قصيرة.</li>
+  </ul>
+  <h3>الملفات الكاملة</h3>
+  <p>في مجلد المشروع <code>beynoun/content-engine/</code>: خريطة المنافسين، وتقرير التعاطف لـ٢٧٦ منشورًا، والتحليل الكامل للـ٢٣ منافسًا، وتقرير الوحدات السبع، وتحليل ×٢، وخطة ديسمبر.</p>
+</section>
+
+<section id="decisions" hidden>
+  <h2>ما ينتظر قرارك</h2>
+  <div class="dec">
+    <div><span class="num">١</span><b>اشحن رصيد Anthropic</b><p>فارغ الآن. بدونه لا يعمل زر «اعمل الموقع» ولا التجربة النهائية للقوالب. ٥ دولارات تكفي التجارب.</p></div>
+    <div><span class="num">٢</span><b>اشتراك Apify</b><p>الخطة المجانية تعود يوم ٧ ديسمبر. الوكيل والبحث عن حسابات المحلات يحتاجان اشتراكًا قبل ذلك.</p></div>
+    <div><span class="num">٣</span><b>أي الوعود صحيحة اليوم؟</b><p>السعر في الصفحة الرئيسية، والطلب بلا عمولة، والتعديل برسالة، و«لا أحد يختفي».</p></div>
+    <div><span class="num">٤</span><b>وجه من في فيديو «من وراء بينون؟»</b><p>أنت، أم ياسين، أم لا وجه.</p></div>
+    <div><span class="num">٥</span><b>من يصوّر، ومن يرد على التعليقات؟</b><p>النصوص جاهزة. التصوير بالهاتف يكفي. ومن يكتب «شفته» يحتاج ردًا يدويًا كل مساء.</p></div>
+    <div><span class="num">٦</span><b>إرسال ٣٠ إلى ٥٠ رسالة واتساب</b><p>حتى نسمع صوت عملائنا الحقيقيين، ثم أحلل ردودهم.</p></div>
+  </div>
+</section>
+
+</main>
+<footer><div class="wrap">بينون · وكيل المحتوى · بيانات حقيقية من Google وإنستغرام ومكتبة إعلانات ميتا ومتجر آبل، جُمعت في ٩ و١٠ نوفمبر ٢٠٢٦.</div></footer>
+
+<script>
+(function(){
+  var ids=["summary","market","rivals","december","videos","posts","agent","decisions"];
+  function show(){
+    var h=(location.hash||"").slice(1); if(ids.indexOf(h)<0) h="summary";
+    ids.forEach(function(id){document.getElementById(id).hidden=(id!==h)});
+    document.querySelectorAll("nav a").forEach(function(a){a.setAttribute("aria-current",a.getAttribute("href")==="#"+h?"true":"false")});
+  }
+  window.addEventListener("hashchange",function(){show();window.scrollTo(0,0)});
+  show();
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".copy"); if(!b) return;
+    var t=b.getAttribute("data-copy");
+    function done(){b.textContent="نُسخ";setTimeout(function(){b.textContent="انسخ النص"},1500)}
+    try{navigator.clipboard.writeText(t).then(done,function(){fallback()})}catch(_){fallback()}
+    function fallback(){var r=document.createRange();r.selectNodeContents(b.parentNode);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+  });
+})();
+</script>

@@ -1,0 +1,65 @@
+[
+ {
+  "site": "salla.com",
+  "load_ms": 2042,
+  "lcp_ms": 1550,
+  "kb": 414,
+  "headline": "salla.com"
+ },
+ {
+  "site": "zid.sa",
+  "load_ms": 4833,
+  "lcp_ms": 940,
+  "kb": 288,
+  "headline": "عفواً! حدث خطأ."
+ },
+ {
+  "site": "wuilt.com",
+  "load_ms": 1380,
+  "lcp_ms": 1088,
+  "kb": 230,
+  "headline": "أنشئ موقع أو متجر احترافي في 5 دقائق"
+ },
+ {
+  "site": "youcan.shop",
+  "load_ms": 3523,
+  "lcp_ms": 1704,
+  "kb": 596,
+  "headline": "ما تبيعه اليوم \nيمكن أن يصل إلى العالم"
+ },
+ {
+  "site": "mnasati.com",
+  "load_ms": 4076,
+  "lcp_ms": 1992,
+  "kb": 278,
+  "headline": ""
+ },
+ {
+  "site": "easy-orders.net",
+  "load_ms": 4724,
+  "lcp_ms": 4552,
+  "kb": 2177,
+  "headline": "أنشئ متجرك الإلكتروني بنفسك في أقل من 10 دقايق، بدون خبرة برمجية."
+ },
+ {
+  "site": "www.foodics.com",
+  "load_ms": 4254,
+  "lcp_ms": 3900,
+  "kb": 2231,
+  "headline": "Cloud-based POS & restaurant management system"
+ },
+ {
+  "site": "www.zyda.com",
+  "load_ms": 1482,
+  "lcp_ms": 1152,
+  "kb": 610,
+  "headline": "THE AI PLATFORM RESTAURANTS USE TO\nANSWER WHATSAPP IN SECONDS.\nTAKE MORE ORDERS.\nDESIGN THEIR WEBSITE.\nSHOW UP ON GOOGLE"
+ },
+ {
+  "site": "beynoun.com",
+  "load_ms": 3516,
+  "lcp_ms": 2564,
+  "kb": 859,
+  "headline": "ابنِ.\nأدِر.\nانشر."
+ }
+]
