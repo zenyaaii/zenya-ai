@@ -5,7 +5,7 @@ import { KIND, isNicheKind, type NicheKind } from './kinds'
 import { DAYS_AR } from './barber'
 
 /**
- * The editor for a services kind page (barber, gym, beauty, clinic, car,
+ * The editor for a services kind page (barber, gym, beauty, car,
  * photo). It edits the same sections the page draws, in the same order, so
  * «عدّل» on a section opens the fields of that section. The owner-filled
  * facts the build could not know (prices, durations, terms, answers, the
