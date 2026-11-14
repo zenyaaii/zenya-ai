@@ -14,9 +14,8 @@
  * Where there is a mouse there is nothing to shake, so a quiet «بلّغ عن مشكلة»
  * button sits in the bottom-left corner instead and opens the same sheet.
  *
- * iPhone lets a page feel motion only after a tap that asks for it, so iPhone
- * visitors see a one-time strip with «فعّل». It waits until the cookie banner
- * is answered, so the two never stack at the bottom of the screen.
+ * iPhone lets a page feel motion only after a tap that asks for it. That tap
+ * is the cookie banner's answer: pressing any of its buttons also asks iOS.
  *
  * Mounted in the root layout on every Beynoun surface; never on a customer's
  * own site. Self-contained night palette, so it reads the same over the light
@@ -29,6 +28,16 @@ type Phase = "idle" | "ask" | "sheet"
 type Attach = { src: string; kind: "screen" | "camera" } | null
 
 const SEEN = "beynoun_shake_ios"
+const GRANTED = "beynoun_motion_ok"
+
+/** iOS motion permission. Must run inside a tap, before any await. */
+function askMotion() {
+  const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
+  if (!DME?.requestPermission) return
+  DME.requestPermission().then((r) => {
+    if (r === "granted") try { localStorage.setItem(GRANTED, "1"); localStorage.setItem(SEEN, "1") } catch { /* fine */ }
+  }).catch(() => {})
+}
 
 /** The page as the visitor sees it: rendered, then cropped to the screen. */
 async function captureScreen(): Promise<string | null> {
@@ -189,22 +198,30 @@ export default function ShakeReport() {
     return () => window.removeEventListener("devicemotion", onMotion)
   }, [onShake, top])
 
-  /* iPhone: ask once, after the cookie banner is out of the way. */
+  /* iPhone needs the visitor's own tap before it shares motion. That tap is
+     the cookie banner's: any of its buttons (accept all, essentials, save)
+     asks iOS for motion too (Anas 2026-11-14, «اجعل التفعيل مع الكوكيز»).
+     After a yes, iOS still wants a tap on each new visit, so the first tap
+     anywhere renews it silently. Visitors who answered the banner before
+     this existed get the old one-time «فعّل» strip instead. */
   useEffect(() => {
     const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
     const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
     if (!top || !apple || !DME?.requestPermission || !matchMedia("(pointer:coarse)").matches) return
-    try { if (localStorage.getItem(SEEN)) return } catch { return }
-    const t = setInterval(() => { if (consentGiven()) { clearInterval(t); setTimeout(() => setIosAsk(true), 2500) } }, 1500)
-    return () => clearInterval(t)
+    const w = window as unknown as { __beynounMotionAsk?: () => void }
+    w.__beynounMotionAsk = askMotion
+    let granted = false, seen = false
+    try { granted = !!localStorage.getItem(GRANTED); seen = !!localStorage.getItem(SEEN) } catch { /* blocked */ }
+    let t: ReturnType<typeof setTimeout> | undefined
+    const renew = () => askMotion()
+    if (granted) window.addEventListener("touchend", renew, { once: true })
+    else if (!seen && consentGiven()) t = setTimeout(() => setIosAsk(true), 2500)
+    return () => { delete w.__beynounMotionAsk; window.removeEventListener("touchend", renew); if (t) clearTimeout(t) }
   }, [top])
   const iosDone = (allow: boolean) => {
     try { localStorage.setItem(SEEN, "1") } catch { /* fine */ }
     setIosAsk(false)
-    if (allow) {
-      const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
-      DME?.requestPermission?.().catch(() => {})
-    }
+    if (allow) askMotion()
   }
 
   const takeShot = async () => {
