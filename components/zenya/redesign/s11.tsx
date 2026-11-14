@@ -13,6 +13,7 @@
  * Plus the templates and contact pages, with every section the live ones
  * have. No section ends on a hard edge: the light fades out before it.
  */
+import NotifyMe from '@/components/zenya/chrome/NotifyMe'
 import { Fragment } from 'react'
 import {
   Home as HomeIc, BarChart3, CalendarDays, Star as StarIc, Search, Mail, Phone as PhoneIc, Globe, Clock,
@@ -953,7 +954,7 @@ function Tile({ t, lead }: { t: (typeof TEMPLATE_META)[number]; lead?: boolean }
       <div className="s11-tb">
         <p className="tag">{t.tag}</p>
         {soon ? <h3>{t.name}</h3> : <h3><a href={t.page}>{t.name}</a><Arrow aria-hidden /></h3>}
-        {soon ? null : (
+        {soon ? <div className="s11-tf"><NotifyMe template={t.id} name={t.name} /></div> : (
           <div className="s11-tf">
             <p className="s11-meta"><span>{t.sections} قسمًا</span><span aria-hidden>·</span><span>{t.presets} أنماط جاهزة</span></p>
             <span className="s11-acts"><a href={t.demo}>معاينة</a><a className="b" href={t.build}>ابنِ<span className="sr"> بقالب {t.label}</span></a></span>
