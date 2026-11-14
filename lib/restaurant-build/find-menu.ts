@@ -36,6 +36,8 @@ export type MenuPage = {
   clear: boolean
   /** Why it is not clear, in Arabic, for the owner. */
   why?: string
+  /** When it was put on Google (YYYY-MM-DD), so an old menu can be told from the current one. */
+  date?: string
   categories: Category[]
 }
 
@@ -113,7 +115,7 @@ const priced = (t: string) => (t.match(/\d{1,4}(?:[.,]\d{1,2})?\s*(?:ج\.?م|ج�
 
 export async function findMenu(
   ai: AiClient,
-  opts: { photos: string[]; menuTab?: string[]; captions?: string[]; cuisine?: string; userId: string | null }
+  opts: { photos: string[]; menuTab?: { url: string; date?: string }[]; captions?: string[]; cuisine?: string; userId: string | null }
 ): Promise<FoundMenu> {
   // 1 — fetch and look, all at once on one sheet. The Google «Menu» tab is
   // fetched alongside: those photos ARE the menu, so they skip the sheet.
@@ -122,7 +124,7 @@ export async function findMenu(
       const buf = await fetchImage(url)
       return buf ? { id: `u${i}`, src: (/\/instagram\//.test(url) ? 'instagram' : 'google') as RawPhoto['src'], url, buf } : null
     })),
-    pool((opts.menuTab || []).slice(0, MAX_MENU_PHOTOS), READ_AT_ONCE, async (url) => {
+    pool((opts.menuTab || []).slice(0, MAX_MENU_PHOTOS).map((x) => x.url), READ_AT_ONCE, async (url) => {
       const buf = await fetchImage(url)
       return buf ? { id: `m${url.length}${url.slice(-6)}`, src: 'google' as RawPhoto['src'], url, buf } : null
     }),
@@ -167,7 +169,7 @@ export async function findMenu(
       : legs.some((l) => l !== 'full') ? 'بعض الأسماء أو الأسعار غير واضحة أو مقطوعة'
       : withPrice < Math.ceil(items.length * 0.6) ? 'أسعارها غير واضحة'
       : undefined
-    return { url: j.url, clear: !why, why, categories }
+    return { url: j.url, clear: !why, why, categories, date: opts.menuTab?.find((x) => x.url === j.url)?.date }
   })
   const pages = read.filter(Boolean) as MenuPage[]
   // 3 — no menu photo at all: the captions, when they carry prices.
@@ -206,4 +208,93 @@ export async function findMenu(
     photos: judged.map((j) => ({ url: j.url, ok: j.ok, kind: j.v.kind, why: j.why })),
     hero: picks.hero?.url,
   }
+}
+
+const TIDY_PROMPT = `You are given ONE restaurant's menu, read off several overlapping photos of its printed menu (some may be older versions). The same section or dish therefore appears several times: in another language ("Hummus" vs "حمص"), in both ("Hummus / حمص"), in other capitals, another spelling, or with a small typo. Sections (s-ids) and dishes (i-ids) are listed newest photo first.
+
+Group the duplicates. Do NOT rewrite the menu; only say which ids are the same thing:
+- "sections": every group of s-ids that are the same section, with the name to show: the Arabic name if one of them is Arabic, else one of their names as written. Include every s-id exactly once (a section with no duplicate is a group of one).
+- "dishes": only groups of 2+ i-ids that are the SAME dish (same food, same size/kind), with the name to show: the Arabic name if one of them has Arabic, else one of their names as written. Different dishes that look alike ("Chicken" under Pizza and "Chicken" under Fatayer) are NOT the same dish.
+- If there are more than 12 section groups, put the smallest related ones together (leftover "Menu"/"القائمة" sections into the section their dishes belong to) so there are at most 12.
+
+Return strict JSON only: { "sections": [ { "name": "", "ids": ["s1"] } ], "dishes": [ { "name": "", "ids": ["i1", "i7"] } ] }`
+
+/**
+ * One clean menu from the pages the owner kept: the same dish read off three
+ * photos in two languages becomes one dish, at the newest price. The model
+ * only GROUPS what was read (ids in, ids out); the menu is rebuilt here, so a
+ * dish can never be dropped, invented or re-priced by the tidy-up.
+ */
+export async function tidyMenu(ai: AiClient, cats: Category[], userId: string | null): Promise<Category[]> {
+  type Row = { id: string; sec: string; item: Category['items'][number] }
+  const secs = cats.map((c, i) => ({ id: `s${i + 1}`, name: c.name, description: c.description }))
+  const rows: Row[] = cats.flatMap((c, i) => c.items.map((item) => ({ id: '', sec: `s${i + 1}`, item })))
+  rows.forEach((r, i) => { r.id = `i${i + 1}` })
+  const input = cats.map((c, ci) => `${secs[ci].id} ${c.name}\n` + rows.filter((r) => r.sec === secs[ci].id).map((r) => `  ${r.id} ${r.item.name} | ${r.item.price}`).join('\n')).join('\n')
+  const res = await withTimeout(ai.chat.completions.create({
+    model: AI_MODEL, max_tokens: 12000, response_format: { type: 'json_object' },
+    messages: [{ role: 'system', content: TIDY_PROMPT }, { role: 'user', content: input.slice(0, 80_000) }],
+  }), 150_000, 'menu_tidy')
+  await logAiUsage({ operation: 'menu-tidy', userId, model: AI_MODEL }, res.usage)
+  const ai_ = parseJsonSafe(res.choices?.[0]?.message?.content || '{}')
+
+  // Sections: each s-id to its group's name (an id the model skipped keeps its own).
+  const secName = new Map<string, string>()
+  for (const g of Array.isArray(ai_?.sections) ? ai_.sections : []) {
+    const ids: string[] = (Array.isArray(g?.ids) ? g.ids : []).map(String).filter((x: string) => secs.some((s) => s.id === x))
+    const name = String(g?.name || '').trim().slice(0, 40)
+    // The name shown must be one of the group's own names, or at least Arabic text the model chose among them.
+    const own = ids.map((x) => secs.find((s) => s.id === x)!.name)
+    let pick = own.find((n) => n === name) || (name.length >= 2 ? name : own[0])
+    // "MEZZE - COLD / مقبلات باردة" → the Arabic half.
+    if (/[\u0600-\u06FF]/.test(pick) && /[A-Za-z]/.test(pick) && /[/|]/.test(pick)) pick = pick.split(/[/|]/).map((x) => x.trim()).find((x) => /[\u0600-\u06FF]/.test(x)) || pick
+    for (const x of ids) if (!secName.has(x)) secName.set(x, pick)
+  }
+  // Dishes: each i-id to its group (first member = newest = the one kept).
+  const groupOf = new Map<string, { name: string; ids: string[] }>()
+  for (const g of Array.isArray(ai_?.dishes) ? ai_.dishes : []) {
+    const ids: string[] = (Array.isArray(g?.ids) ? g.ids : []).map(String).filter((x: string) => rows.some((r) => r.id === x) && !groupOf.has(x))
+    if (ids.length < 2) continue
+    const members = ids.map((x) => rows.find((r) => r.id === x)!)
+    const name = String(g?.name || '').trim()
+    // Only a name one of them carries (or a part of it, e.g. the Arabic half of "Hummus / حمص").
+    const shown = members.map((m) => m.item.name).find((n) => n === name)
+      || (members.some((m) => m.item.name.includes(name) && name.length >= 2) ? name : members[0].item.name)
+    const grp = { name: shown.slice(0, 80), ids: [...ids].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1))) }
+    for (const x of ids) groupOf.set(x, grp)
+  }
+
+  const out = new Map<string, { name: string; description: string; items: Category['items'] }>()
+  const done = new Set<string>()
+  for (const r of rows) {
+    if (done.has(r.id)) continue
+    const grp = groupOf.get(r.id)
+    const members = grp ? grp.ids.map((x) => rows.find((y) => y.id === x)!) : [r]
+    members.forEach((m) => done.add(m.id))
+    const first = members[0]
+    const sec = secName.get(first.sec) || secs.find((s) => s.id === first.sec)!.name
+    const entry = out.get(sec) || { name: sec, description: secs.find((s) => s.id === first.sec)!.description, items: [] }
+    out.set(sec, entry)
+    entry.items.push({
+      name: grp ? grp.name : first.item.name,
+      price: members.find((m) => m.item.price)?.item.price || '',
+      description: members.find((m) => m.item.description)?.item.description || '',
+      badge: members.find((m) => m.item.badge)?.item.badge || '',
+    })
+  }
+  // A last pass for exact repeats the grouping left.
+  const merged = mergeAll(Array.from(out.values()))
+  return merged.length ? merged : cats
+}
+
+/** mergeResults without its 12-section cap: the owner sees everything, and the step tells him if it is too long. */
+function mergeAll(cats: Category[]): Category[] {
+  const by = new Map<string, Category>()
+  for (const c of cats) {
+    const k = dishKey(c.name) || c.name
+    const e = by.get(k) || { name: c.name, description: c.description, items: [] }
+    by.set(k, e)
+    for (const i of c.items) if (!e.items.some((x) => dishKey(x.name) === dishKey(i.name) && dishKey(i.name))) e.items.push(i)
+  }
+  return Array.from(by.values())
 }

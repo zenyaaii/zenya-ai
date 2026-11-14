@@ -145,7 +145,7 @@ READING DENSE / ARABIC MENUS (important — most menus look like this):
 ABSOLUTE RULES:
 - Transcribe ONLY what you can actually read. Never invent, guess, or embellish a dish, a price, or a description. If the menu shows no descriptions, leave every description empty.
 - Preserve the menu's OWN language and the exact dish names as printed. Do NOT translate.
-- Keep prices as printed. Include the currency if shown (e.g. "45 ج.م", "$18"); otherwise just the number. No visible price → empty string, never a guess.
+- Keep prices as printed. Include the currency if shown (e.g. "45 ج.م", "$18"); otherwise just the number. No visible price → empty string, never a guess. A dish sold in several sizes gets them in one short price under 30 characters, the size names short ("9 / 14 / 20" or "صغير 9 / كبير 14").
 - Group items under the section headings the menu uses (المشروبات الساخنة / الحلويات اليمنية / Appetizers / etc.). Items with no heading go under one category named "القائمة" (or "Menu" if the menu is not in Arabic). Never name a category after the cuisine or the restaurant.
 - Only set "badge" if the menu itself marks an item (e.g. "جديد", "الأكثر طلبًا", "Chef's special"). Otherwise empty.
 - If the image is genuinely not a menu or is fully unreadable, return an empty categories array — but do not give up on a menu just because it is dense.
@@ -172,8 +172,8 @@ export type Legibility = 'full' | 'partial' | 'poor'
 const JUDGE_NOTE = `
 
 This photo was found on the restaurant's own pages, not uploaded by the owner, so also judge it. Add one more top-level key, "legibility":
-- "full": a real printed menu or price board, sharp, and you read EVERY dish name and EVERY price on it with certainty.
-- "partial": some names or prices are cut off at the edge, blurred, in glare, too small, or covered.
+- "full": a real printed menu or price board, and every dish that lies wholly inside the photo was read, name and price, with certainty. A neighbouring panel or page that is cut off at the photo's edge does not count against this: skip it, do not transcribe any item whose name or price is cut, and judge only what is wholly visible.
+- "partial": dishes wholly inside the photo are blurred, in glare, too small, or covered, so some of their names or prices are uncertain.
 - "poor": not a menu, mostly unreadable, a poster/ad with only one or two offers, or a screenshot of an app.
 Be strict: when unsure, it is "partial".`
 

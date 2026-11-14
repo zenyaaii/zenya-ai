@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
 
   const photos: string[] = (Array.isArray(body?.photos) ? body.photos : []).filter(ours)
   // The place's Google «Menu» tab, as /api/menu/photos listed it: Google's image host only.
-  const menuTab: string[] = (Array.isArray(body?.menu_tab) ? body.menu_tab : [])
-    .filter((u: unknown): u is string => typeof u === 'string' && /^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht)\.com\//i.test(u))
+  const menuTab: { url: string; date?: string }[] = (Array.isArray(body?.menu_tab) ? body.menu_tab : [])
+    .map((x: any) => (typeof x === 'string' ? { url: x } : { url: String(x?.url || ''), date: typeof x?.date === 'string' ? x.date.slice(0, 10) : undefined }))
+    .filter((x: { url: string }) => /^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht)\.com\//i.test(x.url))
     .slice(0, 40)
   const captions: string[] = (Array.isArray(body?.captions) ? body.captions : []).filter((c: unknown) => typeof c === 'string').slice(0, 12)
   const cuisine = typeof body?.cuisine === 'string' && body.cuisine.trim() ? body.cuisine.trim().slice(0, 60) : undefined
