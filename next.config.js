@@ -40,6 +40,13 @@ const ENGLISH_TO_ARABIC = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // The admin «البحوث» routes read content/research/ at runtime; ship it with them.
+    outputFileTracingIncludes: {
+      '/api/admin/research/file': ['./content/research/**/*'],
+      '/api/admin/research/zip': ['./content/research/**/*'],
+    },
+  },
   eslint: {
     // Build speed optimization for CI/Vercel; lint remains available via npm run lint
     ignoreDuringBuilds: true,
