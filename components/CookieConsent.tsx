@@ -58,6 +58,9 @@ function readConsent(): Consent | null {
 function writeConsent(c: Omit<Consent, 'v' | 'necessary' | 'ts'>) {
   if (typeof window === 'undefined') return
   const next: Consent = { v: STORAGE_VERSION, necessary: true, ts: Date.now(), ...c }
+  // Any answer counts as a tap for the shake-to-report: on iPhone it asks for
+  // motion here, inside the click (ShakeReport sets this hook; not on customer sites).
+  try { (window as unknown as { __beynounMotionAsk?: () => void }).__beynounMotionAsk?.() } catch {}
   const raw = JSON.stringify(next)
   try { localStorage.setItem(STORAGE_KEY, raw) } catch {}
   writeCookie(raw)

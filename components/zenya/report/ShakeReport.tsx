@@ -3,8 +3,9 @@
 /**
  * Shake to report (Anas, 2026-11-12, option C «اسأل أولًا»).
  *
- * On a phone, three quick shakes take a picture of the screen at that moment
- * and drop a small pill from the top: «تريد أن تبلّغ عن مشكلة؟ نعم / لا». It
+ * On a phone, a light shake drops a small pill from the top at once, with a
+ * short buzz, and takes a picture of the screen behind it: «تريد أن تبلّغ عن
+ * مشكلة؟ نعم / لا». It
  * leaves by itself after six seconds, so a shake in a pocket costs nothing.
  * «نعم» opens a sheet with the picture attached: a line of text, a camera
  * photo instead if they want, and «أرسل». The report lands in /api/report and
@@ -13,9 +14,8 @@
  * Where there is a mouse there is nothing to shake, so a quiet «بلّغ عن مشكلة»
  * button sits in the bottom-left corner instead and opens the same sheet.
  *
- * iPhone lets a page feel motion only after a tap that asks for it, so iPhone
- * visitors see a one-time strip with «فعّل». It waits until the cookie banner
- * is answered, so the two never stack at the bottom of the screen.
+ * iPhone lets a page feel motion only after a tap that asks for it. That tap
+ * is the cookie banner's answer: pressing any of its buttons also asks iOS.
  *
  * Mounted in the root layout on every Beynoun surface; never on a customer's
  * own site. Self-contained night palette, so it reads the same over the light
@@ -28,6 +28,16 @@ type Phase = "idle" | "ask" | "sheet"
 type Attach = { src: string; kind: "screen" | "camera" } | null
 
 const SEEN = "beynoun_shake_ios"
+const GRANTED = "beynoun_motion_ok"
+
+/** iOS motion permission. Must run inside a tap, before any await. */
+function askMotion() {
+  const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
+  if (!DME?.requestPermission) return
+  DME.requestPermission().then((r) => {
+    if (r === "granted") try { localStorage.setItem(GRANTED, "1"); localStorage.setItem(SEEN, "1") } catch { /* fine */ }
+  }).catch(() => {})
+}
 
 /** The page as the visitor sees it: rendered, then cropped to the screen. */
 async function captureScreen(): Promise<string | null> {
@@ -142,54 +152,76 @@ export default function ShakeReport() {
     setTimeout(() => areaRef.current?.focus({ preventScroll: true }), 400)
   }, [])
 
-  const onShake = useCallback(async () => {
+  /* The pill comes at once, with a medium buzz (Android; iPhone browsers have
+     no vibration). The screenshot is taken behind it; «نعم» waits for it if
+     it is not ready yet. (Anas 2026-11-13: lighter shake, faster, a buzz.) */
+  const shotRef = useRef<Promise<string | null> | null>(null)
+  const onShake = useCallback(() => {
     if (phaseRef.current !== "idle") return
     phaseRef.current = "ask"
-    const shot = await captureScreen()
-    setAttach(shot ? { src: shot, kind: "screen" } : null)
+    try { navigator.vibrate?.(70) } catch { /* not supported */ }
+    setAttach(null)
     enter("ask")
+    shotRef.current = new Promise((r) => requestAnimationFrame(() => r(null))).then(captureScreen)
     if (askTimer.current) clearTimeout(askTimer.current)
-    askTimer.current = setTimeout(() => { if (phaseRef.current === "ask") { setAttach(null); leave() } }, 6000)
+    askTimer.current = setTimeout(() => { if (phaseRef.current === "ask") { shotRef.current = null; leave() } }, 6000)
   }, [leave])
+  const accept = async () => {
+    if (askTimer.current) clearTimeout(askTimer.current)
+    const shot = shotRef.current ? await shotRef.current : null
+    shotRef.current = null
+    openSheet(shot ? { src: shot, kind: "screen" } : null)
+  }
 
-  /* Three shakes inside 1.6 s: six changes of direction above 14 m/s². */
+  /* A light shake is enough: three jolts inside 1.2 s, where a jolt is the
+     phone's acceleration changing by more than 9 m/s² between two readings
+     (walking stays well under it). Then a 3 s rest, so one shake opens it once. */
   useEffect(() => {
-    let peaks: number[] = [], sign = 0
+    let jolts: number[] = [], last: { x: number; y: number; z: number } | null = null, rest = 0
     const onMotion = (e: DeviceMotionEvent) => {
       const a = e.accelerationIncludingGravity || e.acceleration
       if (!a) return
-      const x = a.x ?? 0, y = a.y ?? 0
-      const v = Math.abs(x) > Math.abs(y) ? x : y
-      if (Math.abs(v) < 14) return
-      const s = v > 0 ? 1 : -1
-      if (s === sign) return
-      sign = s
+      const cur = { x: a.x ?? 0, y: a.y ?? 0, z: a.z ?? 0 }
+      const prev = last
+      last = cur
+      if (!prev) return
+      const d = Math.abs(cur.x - prev.x) + Math.abs(cur.y - prev.y) + Math.abs(cur.z - prev.z)
       const now = Date.now()
-      peaks = peaks.filter((t) => now - t < 1600)
-      peaks.push(now)
-      if (peaks.length >= 6) { peaks = []; onShake() }
+      if (now < rest || d < 9) return
+      if (jolts.length && now - jolts[jolts.length - 1] < 90) return // one swing, not several readings of it
+      jolts = jolts.filter((t) => now - t < 1200)
+      jolts.push(now)
+      if (jolts.length >= 3) { jolts = []; rest = now + 3000; onShake() }
     }
     if (!top) return
     window.addEventListener("devicemotion", onMotion)
     return () => window.removeEventListener("devicemotion", onMotion)
   }, [onShake, top])
 
-  /* iPhone: ask once, after the cookie banner is out of the way. */
+  /* iPhone needs the visitor's own tap before it shares motion. That tap is
+     the cookie banner's: any of its buttons (accept all, essentials, save)
+     asks iOS for motion too (Anas 2026-11-14, «اجعل التفعيل مع الكوكيز»).
+     After a yes, iOS still wants a tap on each new visit, so the first tap
+     anywhere renews it silently. Visitors who answered the banner before
+     this existed get the old one-time «فعّل» strip instead. */
   useEffect(() => {
     const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
     const apple = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
     if (!top || !apple || !DME?.requestPermission || !matchMedia("(pointer:coarse)").matches) return
-    try { if (localStorage.getItem(SEEN)) return } catch { return }
-    const t = setInterval(() => { if (consentGiven()) { clearInterval(t); setTimeout(() => setIosAsk(true), 2500) } }, 1500)
-    return () => clearInterval(t)
+    const w = window as unknown as { __beynounMotionAsk?: () => void }
+    w.__beynounMotionAsk = askMotion
+    let granted = false, seen = false
+    try { granted = !!localStorage.getItem(GRANTED); seen = !!localStorage.getItem(SEEN) } catch { /* blocked */ }
+    let t: ReturnType<typeof setTimeout> | undefined
+    const renew = () => askMotion()
+    if (granted) window.addEventListener("touchend", renew, { once: true })
+    else if (!seen && consentGiven()) t = setTimeout(() => setIosAsk(true), 2500)
+    return () => { delete w.__beynounMotionAsk; window.removeEventListener("touchend", renew); if (t) clearTimeout(t) }
   }, [top])
   const iosDone = (allow: boolean) => {
     try { localStorage.setItem(SEEN, "1") } catch { /* fine */ }
     setIosAsk(false)
-    if (allow) {
-      const DME = (window as unknown as { DeviceMotionEvent?: { requestPermission?: () => Promise<string> } }).DeviceMotionEvent
-      DME?.requestPermission?.().catch(() => {})
-    }
+    if (allow) askMotion()
   }
 
   const takeShot = async () => {
@@ -242,8 +274,8 @@ export default function ShakeReport() {
       {phase === "ask" ? (
         <div className="rp-ask" role="alert" data-on={shown ? "" : undefined}>
           <span>تريد أن تبلّغ عن مشكلة؟</span>
-          <button type="button" className="y" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); openSheet(attach) }}>نعم</button>
-          <button type="button" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); setAttach(null); leave() }}>لا</button>
+          <button type="button" className="y" onClick={accept}>نعم</button>
+          <button type="button" onClick={() => { if (askTimer.current) clearTimeout(askTimer.current); shotRef.current = null; leave() }}>لا</button>
         </div>
       ) : null}
 
