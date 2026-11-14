@@ -26,6 +26,8 @@ export type ExtractedItem = {
   price?: string
   description?: string
   badge?: string
+  /** A photo of this dish found among the place's own pictures (the menu finder). */
+  image_url?: string
 }
 export type ExtractedCategory = {
   name: string
@@ -69,7 +71,7 @@ function normKey(s: string): string {
  * richer copy (fills a missing price/description from a duplicate). This is
  * what lets overlapping halves reinforce each other instead of duplicating.
  */
-function mergeExtracted(lists: ExtractedCategory[]): ExtractedCategory[] {
+export function mergeExtracted(lists: ExtractedCategory[]): ExtractedCategory[] {
   const cats = new Map<
     string,
     { name: string; description?: string; items: Map<string, ExtractedItem> }

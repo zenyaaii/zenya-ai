@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
       handle: ig.data.handle,
       name: ig.data.name,
       bio: ig.data.bio,
+      captions: ig.data.captions,
       followers: ig.data.followers,
       photos: up.filter((u): u is string => !!u),
     })
