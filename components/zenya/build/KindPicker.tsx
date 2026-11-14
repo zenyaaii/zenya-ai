@@ -74,7 +74,7 @@ export default function KindPicker({ group, onPick, onClose }: { group: keyof ty
         </div>
         <div className="kp-grid">
           {g.kinds.map((k, i) => (
-            <button key={k.id} ref={i === 0 ? first : undefined} type="button" className={`kp-tile${k.id === 'other' ? ' wide' : ''}`} onClick={() => onPick(k.id)}>
+            <button key={k.id} ref={i === 0 ? first : undefined} type="button" className={`kp-tile${k.id === 'other' && g.kinds.length % 2 === 1 ? ' wide' : ''}`} onClick={() => onPick(k.id)}>
               <b>{k.name}</b><span>{k.hint}</span>
             </button>
           ))}
