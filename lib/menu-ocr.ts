@@ -163,20 +163,36 @@ Return STRICT JSON only, no prose, no markdown:
   ]
 }`
 
+/**
+ * How sure the read is, asked only when WE picked the photo (the menu found
+ * among the place's own pictures). An owner's upload is read as it is; a photo
+ * we found is used only when every name and price on it was read for certain.
+ */
+export type Legibility = 'full' | 'partial' | 'poor'
+const JUDGE_NOTE = `
+
+This photo was found on the restaurant's own pages, not uploaded by the owner, so also judge it. Add one more top-level key, "legibility":
+- "full": a real printed menu or price board, sharp, and you read EVERY dish name and EVERY price on it with certainty.
+- "partial": some names or prices are cut off at the edge, blurred, in glare, too small, or covered.
+- "poor": not a menu, mostly unreadable, a poster/ad with only one or two offers, or a screenshot of an app.
+Be strict: when unsure, it is "partial".`
+
 /** One vision call for a single image/half. Returns [] on any failure. */
 export async function analyzeOne(
   aiClient: AiClient,
   image: string,
   cuisine: string | undefined,
-  userId: string | null
-): Promise<{ categories: Category[]; ok: boolean; error?: string }> {
+  userId: string | null,
+  opts: { judge?: boolean } = {}
+): Promise<{ categories: Category[]; ok: boolean; error?: string; legibility?: Legibility }> {
   const userContent: ContentPart[] = [
     {
       type: 'text',
       text:
         `This is one photo (or half) of a restaurant menu` +
         (cuisine ? ` (cuisine: ${cuisine})` : '') +
-        `. Transcribe every category and item you can read in it, following the rules exactly.`,
+        `. Transcribe every category and item you can read in it, following the rules exactly.` +
+        (opts.judge ? JUDGE_NOTE : ''),
     },
     { type: 'image_url', image_url: { url: image, detail: 'high' } },
   ]
@@ -208,7 +224,11 @@ export async function analyzeOne(
       // Truncated/invalid JSON (e.g. hit the token cap on a very dense slice).
       return { categories: [], ok: false, error: `bad_json_${finish || 'unknown'}` }
     }
-    return { categories: sanitizeOne(ai), ok: true }
+    const leg = String(ai?.legibility || '').toLowerCase()
+    const legibility: Legibility | undefined = opts.judge
+      ? (leg === 'full' || leg === 'partial' || leg === 'poor' ? leg : 'poor')
+      : undefined
+    return { categories: sanitizeOne(ai), ok: true, legibility }
   } catch (e: any) {
     console.error('[/api/analyze-menu] image call failed:', e?.status || '', e?.message || e)
     return { categories: [], ok: false, error: String(e?.message || e) }

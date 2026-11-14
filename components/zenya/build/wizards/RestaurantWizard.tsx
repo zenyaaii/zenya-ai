@@ -27,7 +27,8 @@ import type { RestaurantColors } from "@/utils/restaurant/types"
 import { hoursFromGoogle, type BarberGoogle } from "@/utils/services/barber"
 import type { RestaurantInput, RestaurantTypeId } from "@/utils/restaurant/input"
 import ImageUploadField from "@/components/ImageUploadField"
-import MenuImageAnalyzer, { type ExtractedCategory, type MenuApplyMode } from "@/components/restaurant/MenuImageAnalyzer"
+import MenuImageAnalyzer, { mergeExtracted, type ExtractedCategory, type MenuApplyMode } from "@/components/restaurant/MenuImageAnalyzer"
+import { sameDish } from "@/lib/menu-match"
 import DevFillButton from "@/components/DevFillButton"
 import ExampleFillButton from "@/components/ExampleFillButton"
 import GenerationOverlay from "@/components/GenerationOverlay"
@@ -109,6 +110,10 @@ type Form = {
   scrape_issue: string
   /** His own photo colours: '' = the preset's colours. */
   own_look: "" | "night" | "day"
+  /** Instagram captions: a priced list there can be the menu. */
+  ig_captions: string[]
+  /** The sources the menu was already looked for in («قلب المنيو» runs once per set). */
+  menu_flip: string
 }
 
 function newId() {
@@ -174,7 +179,7 @@ function buildSampleForm(): Form {
     ],
     reviews_url: "",
     style_preset: "onyx",
-    instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "",
+    instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "",
   }
 }
 
@@ -190,7 +195,7 @@ const initialForm = (): Form => ({
   press_outlets: "",
   review_rating: "", review_count: "", reviews: [], reviews_url: "",
   style_preset: "onyx",
-  instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "",
+  instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "",
 })
 
 /** "17:30" → "5:30 م", the way the restaurant's hours are written. */
@@ -389,7 +394,8 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             description: (it.description || "").trim().slice(0, 220),
             price: (it.price || "").trim().slice(0, 30),
             badge: (it.badge || "").trim().slice(0, 20),
-            image_url: "",
+            // A dish photo the finder matched to this item (our storage only).
+            image_url: typeof it.image_url === "string" ? it.image_url : "",
           }))
           .filter((it) => it.name.length >= 1),
       }))
@@ -482,8 +488,106 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
         return
       }
       setIgState("ok")
-      setForm((p) => ({ ...p, ig_photos: Array.isArray(j.photos) ? j.photos : [] }))
+      setForm((p) => ({
+        ...p,
+        ig_photos: Array.isArray(j.photos) ? j.photos : [],
+        ig_captions: Array.isArray(j.captions) ? j.captions.filter((c: unknown) => typeof c === "string").slice(0, 12) : [],
+      }))
     } catch { setIgState("fail"); setIgMsg("تعذّر قراءة الحساب الآن. تابع بدونه.") }
+  }
+
+  // ── «جاري قلب المنيو»: the menu, found among the links' photos ──────────
+  // We find and read it, then SHOW him the photos first: is this your menu,
+  // is it clear? Only what he confirms fills the menu (Anas, 2026-11-14).
+  type Page = { url: string; clear: boolean; why?: string; categories: ExtractedCategory[] }
+  type Flip = {
+    state: "idle" | "busy" | "ask" | "pending" | "filled" | "none" | "declined" | "fail"
+    pages: Page[]
+    captions: ExtractedCategory[]
+    dishes: { url: string; dish: string }[]
+    picked: string[]
+    items: number
+    from?: "photos" | "captions" | "sample"
+    pending: ExtractedCategory[] | null
+  }
+  const NO_FLIP: Flip = { state: "idle", pages: [], captions: [], dishes: [], picked: [], items: 0, pending: null }
+  const [flip, setFlip] = useState<Flip>(NO_FLIP)
+  const [flipPhase, setFlipPhase] = useState(0)
+  const formRef = useRef(form)
+  formRef.current = form
+
+  const menuIsEmpty = (cats: Form["categories"]) =>
+    cats.every((c) => c.name.trim() === "" || (c.name.trim() === "القائمة" && c.items.every((i) => i.name.trim() === "" && i.price.trim() === "")))
+  const itemsIn = (c: ExtractedCategory[]) => c.reduce((n, x) => n + (Array.isArray(x.items) ? x.items.length : 0), 0)
+
+  async function flipMenu(key: string, photos: string[]) {
+    setFlip({ ...NO_FLIP, state: "busy" })
+    setFlipPhase(0)
+    try {
+      let j: any
+      if (demo) {
+        // The public page cannot buy vision calls: it reads the bundled sample menu.
+        const r = await fetch("/api/analyze-menu", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ demo: true, cuisine: formRef.current.cuisine || undefined }) })
+        const a = await r.json().catch(() => ({}))
+        const cats = Array.isArray(a?.categories) ? a.categories : []
+        j = { pages: cats.length ? [{ url: "/demo/menu-sample.jpg", clear: true, categories: cats }] : [], captions: [], dishes: [], photos: [] }
+      } else {
+        const r = await fetch("/api/menu/find", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ photos, captions: formRef.current.ig_captions, cuisine: formRef.current.cuisine || undefined }),
+        })
+        if (!r.ok) { setFlip({ ...NO_FLIP, state: "fail" }); return }
+        j = await r.json().catch(() => null)
+        if (!j) { setFlip({ ...NO_FLIP, state: "fail" }); return }
+      }
+      // The photos the visitor's eye turned down (a woman, a face, a tattoo, a
+      // 3D render, a poster) or that are the menu itself leave the photos we
+      // picked for the site on our own; the owner can still add them back.
+      const bad = new Set<string>((Array.isArray(j.photos) ? j.photos : []).filter((x: any) => x && (!x.ok || x.kind === "menu")).map((x: any) => String(x.url)))
+      setForm((p) => {
+        let gallery = p.gallery_image_urls.filter((u) => !bad.has(u))
+        let hero = p.hero_image_url
+        if (hero && bad.has(hero)) hero = typeof j.hero === "string" && !bad.has(j.hero) ? j.hero : gallery[0] || ""
+        gallery = gallery.filter((u) => u !== hero)
+        return { ...p, menu_flip: key, gallery_image_urls: gallery, hero_image_url: hero }
+      })
+      const pages: Page[] = (Array.isArray(j.pages) ? j.pages : []).filter((x: any) => x && typeof x.url === "string" && Array.isArray(x.categories))
+      const captions: ExtractedCategory[] = Array.isArray(j.captions) ? j.captions : []
+      const dishes = Array.isArray(j.dishes) ? j.dishes.filter((d: any) => d && typeof d.url === "string" && typeof d.dish === "string") : []
+      if (!pages.length && !captions.length) { setFlip({ ...NO_FLIP, state: "none" }); return }
+      setFlip({
+        ...NO_FLIP, state: "ask", pages, captions, dishes,
+        // The clear pages start ticked; an unclear one only when he ticks it.
+        picked: pages.filter((x) => x.clear).map((x) => x.url),
+        from: demo ? "sample" : pages.length ? "photos" : "captions",
+      })
+    } catch {
+      setFlip({ ...NO_FLIP, state: "fail" })
+    }
+  }
+
+  /** He said yes: the menu from the pages he kept, each dish beside its own photo. */
+  function fillFromFlip() {
+    const chosen = flip.from === "captions" ? flip.captions : mergeExtracted(flip.pages.filter((x) => flip.picked.includes(x.url)).flatMap((x) => x.categories))
+    const taken = new Set<string>()
+    const dressed = chosen.map((c) => ({
+      ...c,
+      items: c.items.map((it) => {
+        if (it.image_url) return it
+        const hit = flip.dishes.find((d) => !taken.has(d.url) && sameDish(d.dish, it.name))
+        if (!hit) return it
+        taken.add(hit.url)
+        return { ...it, image_url: hit.url }
+      }),
+    }))
+    if (!itemsIn(dressed)) return
+    if (menuIsEmpty(formRef.current.categories)) {
+      const n = applyExtractedMenu(dressed)
+      setFlip((f) => ({ ...f, state: "filled", items: n.items }))
+    } else {
+      // He already wrote his menu: ask before touching it.
+      setFlip((f) => ({ ...f, state: "pending", pending: dressed, items: itemsIn(dressed) }))
+    }
   }
 
   // ── Counts ────────────────────────────────────────────────────────────
@@ -758,7 +862,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             <Input dir="ltr" aria-label="حساب إنستغرام" value={form.instagram} onChange={(e) => { update("instagram", e.target.value); setIgState("idle"); update("checked", false) }} placeholder="@yourname" />
           </Block>
           <Block title="القائمة" optional>
-            <p className="zb-note">عندك قائمة ورقية أو صورة لها؟ ارفعها في خطوة «القائمة» ونقرأ منها الأصناف والأسعار.</p>
+            <p className="zb-note">نبحث عن قائمتك بين صورك على جوجل وإنستغرام، ونقرؤها ونملأ الأصناف والأسعار. ليست هناك؟ ارفع صورتها في خطوة «القائمة».</p>
           </Block>
           {form.map_link.trim().length > 8 || form.instagram.trim().length >= 2 ? <Notice>اضغط «التالي». نقرأ روابطك ونعرض عليك ما وجدناه لتراجعه.</Notice> : null}
         </Grid>
@@ -841,11 +945,89 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
     {
       id: "menu",
       title: "القائمة",
-      sub: "صوّر قائمتك الورقية فنقرؤها ونملأ الأصناف، أو اكتبها بنفسك. حتى صنف واحد يكفي، وكل صنف يبقى قابلًا للتعديل.",
+      sub: found
+        ? "نبحث عن قائمتك بين صور روابطك ونقرؤها لك. أو صوّرها أو اكتبها بنفسك. حتى صنف واحد يكفي، وكل صنف يبقى قابلًا للتعديل."
+        : "صوّر قائمتك الورقية فنقرؤها ونملأ الأصناف، أو اكتبها بنفسك. حتى صنف واحد يكفي، وكل صنف يبقى قابلًا للتعديل.",
       complete: ok.menu,
       note: "أضف صنفًا واحدًا على الأقل باسم وسعر.",
       body: (
         <Grid>
+          {flip.state === "busy" || (reading && !form.menu_flip) ? (
+            <div className="rw-flip" role="status" aria-live="polite">
+              <span className="rw-flip-book" aria-hidden><i /><i /><i /></span>
+              <div>
+                <b>جاري قلب المنيو…</b>
+                <small>{reading ? "نقرأ روابطك أولًا…" : FLIP_PHASES[flipPhase]}</small>
+              </div>
+            </div>
+          ) : flip.state === "ask" ? (
+            <div className="rw-ask" role="group" aria-label="تأكيد القائمة">
+              <b className="rw-ask-h">{flip.from === "captions" ? `وجدنا أسعارًا في منشوراتك على إنستغرام. هل هي قائمة ${mine}؟` : `هل هذه قائمة ${mine}؟ وهل هي واضحة؟`}</b>
+              <p className="rw-ask-p">
+                {flip.from === "sample"
+                  ? "على هذه الصفحة العامة نعرض قائمة نموذجية. في المنشئ الحقيقي نعرض عليك صور قائمتك أنت التي وجدناها في روابطك."
+                  : flip.from === "captions"
+                    ? `قرأنا منها أصنافًا بأسعارها (العدد: ${itemsIn(flip.captions).toLocaleString("ar")}). إن كانت قائمتك فاملأ منها، وإلا فارفع صورة قائمتك تحت.`
+                    : flip.pages.some((x) => x.clear)
+                      ? "وجدناها بين صورك. أبقِ الصور التي هي قائمتك فعلًا، ثم املأ منها. صورة غير واضحة؟ بدّلها بصورة أوضح ترفعها تحت."
+                      : "وجدناها بين صورك، لكنها غير واضحة كلها، فقد نخطئ في اسم أو سعر. الأفضل أن تبدلها بصورة أوضح ترفعها تحت."}
+              </p>
+              {flip.from !== "captions" ? (
+                <div className="rw-ask-g">
+                  {flip.pages.map((x, i) => {
+                    const on = flip.picked.includes(x.url)
+                    return (
+                      <div key={x.url} className="rw-ask-i">
+                        <button
+                          type="button"
+                          aria-pressed={on}
+                          aria-label={`صورة القائمة ${i + 1}${x.clear ? "، واضحة" : "، غير واضحة"}`}
+                          onClick={() => setFlip((f) => ({ ...f, picked: on ? f.picked.filter((u) => u !== x.url) : [...f.picked, x.url] }))}
+                        >
+                          <img src={x.url} alt="" />
+                          <span className="rw-ask-tick" aria-hidden>{on ? "✓" : ""}</span>
+                        </button>
+                        <span className="rw-ask-st" data-clear={x.clear ? "true" : undefined}>
+                          {x.clear ? `واضحة · الأصناف: ${itemsIn(x.categories).toLocaleString("ar")}` : `غير واضحة: ${x.why || "بعض النص غير مقروء"}`}
+                        </span>
+                        <a href={x.url} target="_blank" rel="noreferrer" className="rw-ask-zoom">كبّر الصورة</a>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : null}
+              <div className="rw-ask-acts">
+                <button type="button" className="rw-ask-yes" disabled={flip.from !== "captions" && !flip.picked.length} onClick={fillFromFlip}>نعم، املأ القائمة منها</button>
+                <button type="button" className="rw-ask-no" onClick={() => setFlip((f) => ({ ...f, state: "declined" }))}>لا، سأرفع صورًا أوضح</button>
+              </div>
+              {flip.from !== "captions" && flip.pages.some((x) => !x.clear && flip.picked.includes(x.url)) ? (
+                <small className="rw-ask-warn">اخترت صورة غير واضحة: راجع الأسماء والأسعار جيدًا بعد التعبئة.</small>
+              ) : null}
+            </div>
+          ) : flip.state === "pending" && flip.pending ? (
+            <Notice action={
+              <span className="rw-flip-acts">
+                <button type="button" onClick={() => { const n = applyExtractedMenu(flip.pending!, "append"); setFlip((f) => ({ ...f, state: "filled", pending: null, items: n.items })) }}>أضفها إلى قائمتك</button>
+                <button type="button" onClick={() => { const n = applyExtractedMenu(flip.pending!, "replace"); setFlip((f) => ({ ...f, state: "filled", pending: null, items: n.items })) }}>استبدل قائمتك بها</button>
+              </span>
+            }>
+              <strong>قرأنا قائمتك (الأصناف: {flip.items.toLocaleString("ar")}).</strong> عندك أصناف كتبتها، فلم نغيّرها. ماذا نفعل بما قرأناه؟
+            </Notice>
+          ) : flip.state === "filled" ? (
+            <Notice action={<button type="button" onClick={() => setFlip((f) => ({ ...f, state: "ask" }))}>اختر صورًا أخرى</button>}>
+              <strong>قلبنا المنيو.</strong> ملأنا الأصناف تحت (العدد: {flip.items.toLocaleString("ar")}). راجعها وعدّل ما يلزم.
+            </Notice>
+          ) : flip.state === "declined" ? (
+            <Notice action={flip.pages.length || flip.captions.length ? <button type="button" onClick={() => setFlip((f) => ({ ...f, state: "ask" }))}>اعرض ما وجدناه مرة أخرى</button> : undefined}>
+              ارفع صور قائمتك الأوضح هنا تحت فنقرؤها، أو اكتب الأصناف بنفسك.
+            </Notice>
+          ) : flip.state === "none" ? (
+            <Notice>لم نجد قائمتك بين صور روابطك. صوّرها وارفعها هنا فنقرؤها، أو اكتب الأصناف بنفسك.</Notice>
+          ) : flip.state === "fail" ? (
+            <Notice tone="bad" action={<button type="button" onClick={() => void flipMenu(flipKey(), foundPhotos.slice(0, 22))}>أعد المحاولة</button>}>
+              تعذّر قلب المنيو الآن. أعد المحاولة، أو ارفع صورة قائمتك، أو اكتب الأصناف.
+            </Notice>
+          ) : null}
           <Block>
             <div className="zb-analyzer">
               <MenuImageAnalyzer
@@ -1127,6 +1309,26 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
     },
   ]
 
+  // The first time he lands on «القائمة», flip through what the links gave us.
+  // Once per set of sources: new links, a new flip; the same ones, never twice.
+  function flipKey() {
+    return demo ? "demo" : [...foundPhotos.slice(0, 22), "c" + form.ig_captions.length].join("|")
+  }
+  useEffect(() => {
+    if (step !== 2 || flip.state === "busy" || reading) return
+    const photos = foundPhotos.slice(0, 22)
+    if (demo ? !found : !photos.length && !form.ig_captions.length) return
+    const key = flipKey()
+    if (form.menu_flip === key) return
+    void flipMenu(key, photos)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, reading, foundPhotos, form.ig_captions.length, form.menu_flip])
+  useEffect(() => {
+    if (flip.state !== "busy") return
+    const t = setInterval(() => setFlipPhase((n) => Math.min(n + 1, FLIP_PHASES.length - 1)), 3200)
+    return () => clearInterval(t)
+  }, [flip.state])
+
   // Entering «راجع ما وجدناه» reads the links pasted on the first step.
   useEffect(() => {
     if (step !== 1) return
@@ -1207,4 +1409,6 @@ function TrashGlyph() {
   )
 }
 
-const RW_CSS = `.rw-found{display:flex;gap:12px;align-items:center;margin-bottom:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.rw-found img,.rw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.rw-found div{display:grid;gap:2px;min-width:0}.rw-found b{font-size:16.5px}.rw-found small{opacity:.75;font-size:14.5px}.rw-stars{color:#E8B04B;font-size:15px}.rw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.rw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.rw-src b{font-size:14.5px}.rw-src span{font-size:14px;opacity:.8}.rw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.rw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.rw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.rw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85;line-height:1.6}.rw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--acc,#E2532A);text-decoration:underline;text-underline-offset:3px}.rw-ex button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.rw-pick-i{display:grid;gap:6px}.rw-pick-i>button:first-child{all:unset;cursor:pointer;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;opacity:.55;transition:opacity .2s}.rw-pick-i>button[data-on=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick-i>button:first-child:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-pick-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-pick-i>button span{position:absolute;inset-inline-start:6px;top:6px;background:var(--acc,#E2532A);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}.rw-hero-btn{all:unset;cursor:pointer;font-size:13px;text-align:center;min-height:32px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line,rgba(127,127,127,.25))}span.rw-hero-btn{cursor:default;color:var(--acc,#E2532A);font-weight:700}.rw-lrow{display:grid;gap:8px}.rw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.rw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.rw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.rw-lr-dots{display:flex}.rw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.rw-lr-dots i:first-child{margin-inline-start:0}.rw-live{display:grid;gap:12px;padding:22px;border-radius:18px;border:1px solid;transition:background .3s,color .3s}.rw-live-eye{font-size:13.5px;font-weight:600}.rw-live-h{font-size:28px;line-height:1.2}.rw-live-card{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid;font-size:15px}.rw-live-btn{justify-self:start;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14.5px}`
+const FLIP_PHASES = ["نبحث عن قائمتك بين صورك…", "نقرأ الأصناف والأسعار…", "نتأكد أن كل اسم وسعر مقروء…", "نرتّب الأقسام…"]
+
+const RW_CSS = `.rw-flip{display:flex;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid var(--line,rgba(127,127,127,.22));background:rgba(127,127,127,.06)}.rw-flip b{display:block;font-size:16.5px}.rw-flip small{display:block;font-size:14.5px;opacity:.78;margin-top:2px}.rw-flip-book{position:relative;width:40px;height:46px;flex:0 0 auto;perspective:160px}.rw-flip-book i{position:absolute;inset:0;border-radius:4px 8px 8px 4px;border:1.5px solid var(--acc,#E2532A);background:var(--card,#fff);transform-origin:100% 50%;animation:rw-page 2.4s cubic-bezier(.45,.05,.3,1) infinite}.rw-flip-book i:nth-child(2){animation-delay:.8s}.rw-flip-book i:nth-child(3){animation-delay:1.6s}.rw-flip-book i::before,.rw-flip-book i::after{content:"";position:absolute;inset-inline:7px;height:2px;border-radius:2px;background:var(--acc,#E2532A);opacity:.45;top:12px}.rw-flip-book i::after{top:22px;inset-inline-end:14px}@keyframes rw-page{0%,20%{transform:rotateY(0)}60%,100%{transform:rotateY(-170deg);opacity:0}}@media(prefers-reduced-motion:reduce){.rw-flip-book i{animation:none}.rw-flip-book i:nth-child(n+2){display:none}}.rw-flip-acts{display:flex;flex-wrap:wrap;gap:8px}.rw-ask{display:grid;gap:12px;padding:18px;border-radius:16px;border:1px solid var(--acc,#E2532A);background:rgba(127,127,127,.06)}.rw-ask-h{font-size:17px;line-height:1.5}.rw-ask-p{margin:0;font-size:14.5px;line-height:1.75;opacity:.85}.rw-ask-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:12px}@media(min-width:900px){.rw-ask-g{grid-template-columns:repeat(auto-fill,minmax(170px,220px))}}.rw-ask-i{display:grid;gap:6px;align-content:start}.rw-ask-i>button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;opacity:.5;outline:1px solid var(--line,rgba(127,127,127,.25));transition:opacity .2s}.rw-ask-i>button[aria-pressed=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-ask-i>button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-ask-tick{position:absolute;top:8px;inset-inline-start:8px;width:28px;height:28px;border-radius:99px;display:grid;place-items:center;font-weight:700;background:var(--acc,#E2532A);color:#fff;font-size:15px}.rw-ask-i>button[aria-pressed=false] .rw-ask-tick{background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 2px #fff}.rw-ask-st{font-size:13.5px;line-height:1.5;color:#c2410c}.rw-ask-st[data-clear]{color:inherit;opacity:.8}.rw-ask-zoom{font-size:13.5px;text-decoration:underline;text-underline-offset:3px;opacity:.8;min-height:32px;display:inline-flex;align-items:center}.rw-ask-acts{display:flex;flex-wrap:wrap;gap:10px}.rw-ask-acts button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 18px;border-radius:999px;font-weight:700;font-size:15px;display:inline-flex;align-items:center}.rw-ask-acts .rw-ask-yes{background:var(--acc,#E2532A);color:#fff}.rw-ask-acts .rw-ask-yes:disabled{opacity:.45;cursor:not-allowed}.rw-ask-acts .rw-ask-no{border:1px solid var(--line,rgba(127,127,127,.35))}.rw-ask-acts button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-warn{font-size:13.5px;color:#c2410c}.rw-found{display:flex;gap:12px;align-items:center;margin-bottom:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.rw-found img,.rw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.rw-found div{display:grid;gap:2px;min-width:0}.rw-found b{font-size:16.5px}.rw-found small{opacity:.75;font-size:14.5px}.rw-stars{color:#E8B04B;font-size:15px}.rw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.rw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.rw-src b{font-size:14.5px}.rw-src span{font-size:14px;opacity:.8}.rw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.rw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.rw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.rw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85;line-height:1.6}.rw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--acc,#E2532A);text-decoration:underline;text-underline-offset:3px}.rw-ex button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.rw-pick-i{display:grid;gap:6px}.rw-pick-i>button:first-child{all:unset;cursor:pointer;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;opacity:.55;transition:opacity .2s}.rw-pick-i>button[data-on=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick-i>button:first-child:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-pick-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-pick-i>button span{position:absolute;inset-inline-start:6px;top:6px;background:var(--acc,#E2532A);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}.rw-hero-btn{all:unset;cursor:pointer;font-size:13px;text-align:center;min-height:32px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line,rgba(127,127,127,.25))}span.rw-hero-btn{cursor:default;color:var(--acc,#E2532A);font-weight:700}.rw-lrow{display:grid;gap:8px}.rw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.rw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.rw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.rw-lr-dots{display:flex}.rw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.rw-lr-dots i:first-child{margin-inline-start:0}.rw-live{display:grid;gap:12px;padding:22px;border-radius:18px;border:1px solid;transition:background .3s,color .3s}.rw-live-eye{font-size:13.5px;font-weight:600}.rw-live-h{font-size:28px;line-height:1.2}.rw-live-card{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid;font-size:15px}.rw-live-btn{justify-self:start;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14.5px}`
