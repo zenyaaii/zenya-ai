@@ -34,10 +34,10 @@ async function dhash(buf: Buffer): Promise<bigint> {
   }
   return h
 }
-const hamming = (a: bigint, b: bigint) => { let x = a ^ b, n = 0; while (x) { n += Number(x & BigInt(1)); x >>= BigInt(1) } return n }
+export const hamming = (a: bigint, b: bigint) => { let x = a ^ b, n = 0; while (x) { n += Number(x & BigInt(1)); x >>= BigInt(1) } return n }
 
 /** Broken, tiny and duplicate photos out; everything else normalised to a JPEG ≤1600px. */
-export async function cleanPhotos(raw: RawPhoto[]): Promise<Pic[]> {
+export async function cleanPhotos(raw: RawPhoto[], max = 25): Promise<Pic[]> {
   const out: Pic[] = []
   for (const r of raw) {
     try {
@@ -51,7 +51,7 @@ export async function cleanPhotos(raw: RawPhoto[]): Promise<Pic[]> {
       out.push({ ...r, w, h, hash, jpeg })
     } catch { /* unreadable: dropped */ }
   }
-  return out.slice(0, 25)
+  return out.slice(0, max)
 }
 
 // ── contact sheet ─────────────────────────────────────────────────────────

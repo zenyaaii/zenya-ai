@@ -16,8 +16,8 @@ export const maxDuration = 300
  * among them, reads it, and answers in the wizard's own menu shape; see
  * lib/restaurant-build/find-menu.ts for the rules.
  *
- * Signed in only: it costs one look at a contact sheet plus up to three menu
- * reads. Only photos already copied to our own storage are fetched, so this
+ * Signed in only: it costs one look at a contact sheet plus one read per
+ * menu page (up to 40: the whole menu, Anas 2026-11-14). Only photos already copied to our own storage are fetched, so this
  * is never a door to fetch any address. The public demo reads its bundled
  * sample through /api/analyze-menu instead.
  */
@@ -49,16 +49,20 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'sign_in' }, { status: 401 })
 
   const photos: string[] = (Array.isArray(body?.photos) ? body.photos : []).filter(ours)
+  // The place's Google «Menu» tab, as /api/menu/photos listed it: Google's image host only.
+  const menuTab: string[] = (Array.isArray(body?.menu_tab) ? body.menu_tab : [])
+    .filter((u: unknown): u is string => typeof u === 'string' && /^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht)\.com\//i.test(u))
+    .slice(0, 40)
   const captions: string[] = (Array.isArray(body?.captions) ? body.captions : []).filter((c: unknown) => typeof c === 'string').slice(0, 12)
   const cuisine = typeof body?.cuisine === 'string' && body.cuisine.trim() ? body.cuisine.trim().slice(0, 60) : undefined
-  if (!photos.length && !captions.length) return NextResponse.json({ categories: [], from: 'none', used: [], skipped: [], photos: [] })
+  if (!photos.length && !menuTab.length && !captions.length) return NextResponse.json({ pages: [], captions: [], dishes: [], photos: [] })
 
   const apiKey = aiKey()
   if (!apiKey) return NextResponse.json({ error: 'no_api_key' }, { status: 503 })
   if (throttled(user.id)) return NextResponse.json({ error: 'too_many' }, { status: 429 })
 
   try {
-    const found = await findMenu(new AiClient({ apiKey }), { photos, captions, cuisine, userId: user.id })
+    const found = await findMenu(new AiClient({ apiKey }), { photos, menuTab, captions, cuisine, userId: user.id })
     return NextResponse.json(found)
   } catch (e) {
     console.error('[menu/find]', e instanceof Error ? e.message : e)

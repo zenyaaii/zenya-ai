@@ -141,6 +141,29 @@ export async function apify(actor: string, input: unknown, ms: number): Promise<
   return timed(run, ms + 5000, [])
 }
 
+/**
+ * The photos in the «Menu» tab of the place on Google Maps. The Places API
+ * gives 10 photos at most and has no menu tab, so a restaurant with 30 menu
+ * pages showed us one of them (Anas, 2026-11-14). This reads the tab itself,
+ * through Apify, and returns the image addresses only: they are read, never
+ * stored on a site. [] when the place has no menu tab, or Apify is down.
+ */
+export async function googleMenuPhotos(placeId: string, max = 40): Promise<string[]> {
+  if (!/^[A-Za-z0-9_-]{10,}$/.test(placeId)) return []
+  const rows = await apify('solidcode~google-maps-photos-scraper', {
+    placeUrls: [`https://www.google.com/maps/place/?q=place_id:${placeId}`],
+    photoCategories: ['menu'],
+    maxPhotosPerPlace: max,
+    imageSize: 'large',
+  }, 120_000)
+  const all: any[] = rows.flatMap((r: any) => (Array.isArray(r?.photos) ? r.photos : [r]))
+  const urls = all
+    .filter((x) => x && (!x.category || String(x.category).toLowerCase() === 'menu') && (!x.type || x.type === 'photo'))
+    .map((x) => String(x.imageUrl || x.photoUrl || x.url || ''))
+    .filter((u) => /^https:\/\/[a-z0-9.-]*(googleusercontent|ggpht|gstatic)\.com\//i.test(u))
+  return Array.from(new Set(urls)).slice(0, max)
+}
+
 /** Handles as people type them are often a little off (mamai__restaurant for mamai_restaurant). */
 export function instagramHandles(link: string): string[] {
   const m = /instagram\.com\/([A-Za-z0-9._]+)/i.exec(link || '')

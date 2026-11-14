@@ -114,6 +114,8 @@ type Form = {
   ig_captions: string[]
   /** The sources the menu was already looked for in («قلب المنيو» runs once per set). */
   menu_flip: string
+  /** Google's id for the place: its «Menu» tab on Maps holds every page of the menu. */
+  place_id: string
 }
 
 function newId() {
@@ -179,7 +181,7 @@ function buildSampleForm(): Form {
     ],
     reviews_url: "",
     style_preset: "onyx",
-    instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "",
+    instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "", place_id: "",
   }
 }
 
@@ -195,7 +197,7 @@ const initialForm = (): Form => ({
   press_outlets: "",
   review_rating: "", review_count: "", reviews: [], reviews_url: "",
   style_preset: "onyx",
-  instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "",
+  instagram: "", ig_photos: [], google_photos: [], checked: false, scrape_issue: "", own_look: "", ig_captions: [], menu_flip: "", place_id: "",
 })
 
 /** "17:30" → "5:30 م", the way the restaurant's hours are written. */
@@ -217,7 +219,7 @@ function restaurantHours(periods: NonNullable<BarberGoogle["periods"]>): Hour[] 
   })
 }
 
-type GoogleFound = BarberGoogle & { name?: string; photos?: string[]; contact?: { phone?: string; address?: string; city?: string; area?: string } }
+type GoogleFound = BarberGoogle & { place_id?: string; name?: string; photos?: string[]; contact?: { phone?: string; address?: string; city?: string; area?: string } }
 
 /** «مثال» lines per kind of place: one tap takes it, then the owner edits it. */
 const EXAMPLES: Record<"restaurant" | "cafe" | "sweets", { story: string; chef: string; note: string; press: string }> = {
@@ -467,6 +469,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
           review_count: p.review_count || (found.count ? String(found.count) : ""),
           reviews: p.reviews.some((r) => r.origin === "google") ? p.reviews : [...p.reviews, ...fromGoogle],
           reviews_url: p.reviews_url || found.maps_url || p.map_link,
+          place_id: found.place_id || "",
         }
       })
     } catch {
@@ -513,6 +516,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
   const NO_FLIP: Flip = { state: "idle", pages: [], captions: [], dishes: [], picked: [], items: 0, pending: null }
   const [flip, setFlip] = useState<Flip>(NO_FLIP)
   const [flipPhase, setFlipPhase] = useState(0)
+  const [flipCount, setFlipCount] = useState(0)
   const formRef = useRef(form)
   formRef.current = form
 
@@ -523,6 +527,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
   async function flipMenu(key: string, photos: string[]) {
     setFlip({ ...NO_FLIP, state: "busy" })
     setFlipPhase(0)
+    setFlipCount(0)
     try {
       let j: any
       if (demo) {
@@ -532,9 +537,18 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
         const cats = Array.isArray(a?.categories) ? a.categories : []
         j = { pages: cats.length ? [{ url: "/demo/menu-sample.jpg", clear: true, categories: cats }] : [], captions: [], dishes: [], photos: [] }
       } else {
+        // Every page in the place's Google «Menu» tab, then read them all.
+        let menuTab: string[] = []
+        const pid = formRef.current.place_id
+        if (pid) {
+          const t = await fetch("/api/menu/photos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ place_id: pid }) })
+            .then((x) => (x.ok ? x.json() : null)).catch(() => null)
+          menuTab = Array.isArray(t?.photos) ? t.photos.filter((u: unknown) => typeof u === "string") : []
+          setFlipCount(menuTab.length)
+        }
         const r = await fetch("/api/menu/find", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ photos, captions: formRef.current.ig_captions, cuisine: formRef.current.cuisine || undefined }),
+          body: JSON.stringify({ photos, menu_tab: menuTab, captions: formRef.current.ig_captions, cuisine: formRef.current.cuisine || undefined }),
         })
         if (!r.ok) { setFlip({ ...NO_FLIP, state: "fail" }); return }
         j = await r.json().catch(() => null)
@@ -957,7 +971,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
               <span className="rw-flip-book" aria-hidden><i /><i /><i /></span>
               <div>
                 <b>جاري قلب المنيو…</b>
-                <small>{reading ? "نقرأ روابطك أولًا…" : FLIP_PHASES[flipPhase]}</small>
+                <small>{reading ? "نقرأ روابطك أولًا…" : flipCount ? `وجدنا صفحات القائمة في جوجل (العدد: ${flipCount.toLocaleString("ar")}). نقرؤها كلها، وقد يأخذ هذا دقيقة…` : FLIP_PHASES[flipPhase]}</small>
               </div>
             </div>
           ) : flip.state === "ask" ? (
@@ -972,6 +986,14 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
                       ? "وجدناها بين صورك. أبقِ الصور التي هي قائمتك فعلًا، ثم املأ منها. صورة غير واضحة؟ بدّلها بصورة أوضح ترفعها تحت."
                       : "وجدناها بين صورك، لكنها غير واضحة كلها، فقد نخطئ في اسم أو سعر. الأفضل أن تبدلها بصورة أوضح ترفعها تحت."}
               </p>
+              {flip.from !== "captions" && flip.pages.length > 1 ? (
+                <div className="rw-ask-bar">
+                  <span>اخترت {flip.picked.length.toLocaleString("ar")} من {flip.pages.length.toLocaleString("ar")}</span>
+                  <button type="button" onClick={() => setFlip((f) => ({ ...f, picked: f.picked.length === f.pages.length ? [] : f.pages.map((x) => x.url) }))}>
+                    {flip.picked.length === flip.pages.length ? "ألغِ اختيار الكل" : "اختر الكل"}
+                  </button>
+                </div>
+              ) : null}
               {flip.from !== "captions" ? (
                 <div className="rw-ask-g">
                   {flip.pages.map((x, i) => {
@@ -997,7 +1019,9 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
                 </div>
               ) : null}
               <div className="rw-ask-acts">
-                <button type="button" className="rw-ask-yes" disabled={flip.from !== "captions" && !flip.picked.length} onClick={fillFromFlip}>نعم، املأ القائمة منها</button>
+                <button type="button" className="rw-ask-yes" disabled={flip.from !== "captions" && !flip.picked.length} onClick={fillFromFlip}>
+                  نعم، املأ القائمة منها{flip.from !== "captions" && flip.picked.length ? ` (الأصناف: ${itemsIn(mergeExtracted(flip.pages.filter((x) => flip.picked.includes(x.url)).flatMap((x) => x.categories))).toLocaleString("ar")})` : ""}
+                </button>
                 <button type="button" className="rw-ask-no" onClick={() => setFlip((f) => ({ ...f, state: "declined" }))}>لا، سأرفع صورًا أوضح</button>
               </div>
               {flip.from !== "captions" && flip.pages.some((x) => !x.clear && flip.picked.includes(x.url)) ? (
@@ -1312,12 +1336,12 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
   // The first time he lands on «القائمة», flip through what the links gave us.
   // Once per set of sources: new links, a new flip; the same ones, never twice.
   function flipKey() {
-    return demo ? "demo" : [...foundPhotos.slice(0, 22), "c" + form.ig_captions.length].join("|")
+    return demo ? "demo" : ["p" + form.place_id, ...foundPhotos.slice(0, 22), "c" + form.ig_captions.length].join("|")
   }
   useEffect(() => {
     if (step !== 2 || flip.state === "busy" || reading) return
     const photos = foundPhotos.slice(0, 22)
-    if (demo ? !found : !photos.length && !form.ig_captions.length) return
+    if (demo ? !found : !photos.length && !form.ig_captions.length && !form.place_id) return
     const key = flipKey()
     if (form.menu_flip === key) return
     void flipMenu(key, photos)
@@ -1411,4 +1435,4 @@ function TrashGlyph() {
 
 const FLIP_PHASES = ["نبحث عن قائمتك بين صورك…", "نقرأ الأصناف والأسعار…", "نتأكد أن كل اسم وسعر مقروء…", "نرتّب الأقسام…"]
 
-const RW_CSS = `.rw-flip{display:flex;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid var(--line,rgba(127,127,127,.22));background:rgba(127,127,127,.06)}.rw-flip b{display:block;font-size:16.5px}.rw-flip small{display:block;font-size:14.5px;opacity:.78;margin-top:2px}.rw-flip-book{position:relative;width:40px;height:46px;flex:0 0 auto;perspective:160px}.rw-flip-book i{position:absolute;inset:0;border-radius:4px 8px 8px 4px;border:1.5px solid var(--acc,#E2532A);background:var(--card,#fff);transform-origin:100% 50%;animation:rw-page 2.4s cubic-bezier(.45,.05,.3,1) infinite}.rw-flip-book i:nth-child(2){animation-delay:.8s}.rw-flip-book i:nth-child(3){animation-delay:1.6s}.rw-flip-book i::before,.rw-flip-book i::after{content:"";position:absolute;inset-inline:7px;height:2px;border-radius:2px;background:var(--acc,#E2532A);opacity:.45;top:12px}.rw-flip-book i::after{top:22px;inset-inline-end:14px}@keyframes rw-page{0%,20%{transform:rotateY(0)}60%,100%{transform:rotateY(-170deg);opacity:0}}@media(prefers-reduced-motion:reduce){.rw-flip-book i{animation:none}.rw-flip-book i:nth-child(n+2){display:none}}.rw-flip-acts{display:flex;flex-wrap:wrap;gap:8px}.rw-ask{display:grid;gap:12px;padding:18px;border-radius:16px;border:1px solid var(--acc,#E2532A);background:rgba(127,127,127,.06)}.rw-ask-h{font-size:17px;line-height:1.5}.rw-ask-p{margin:0;font-size:14.5px;line-height:1.75;opacity:.85}.rw-ask-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:12px}@media(min-width:900px){.rw-ask-g{grid-template-columns:repeat(auto-fill,minmax(170px,220px))}}.rw-ask-i{display:grid;gap:6px;align-content:start}.rw-ask-i>button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;opacity:.5;outline:1px solid var(--line,rgba(127,127,127,.25));transition:opacity .2s}.rw-ask-i>button[aria-pressed=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-ask-i>button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-ask-tick{position:absolute;top:8px;inset-inline-start:8px;width:28px;height:28px;border-radius:99px;display:grid;place-items:center;font-weight:700;background:var(--acc,#E2532A);color:#fff;font-size:15px}.rw-ask-i>button[aria-pressed=false] .rw-ask-tick{background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 2px #fff}.rw-ask-st{font-size:13.5px;line-height:1.5;color:#c2410c}.rw-ask-st[data-clear]{color:inherit;opacity:.8}.rw-ask-zoom{font-size:13.5px;text-decoration:underline;text-underline-offset:3px;opacity:.8;min-height:32px;display:inline-flex;align-items:center}.rw-ask-acts{display:flex;flex-wrap:wrap;gap:10px}.rw-ask-acts button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 18px;border-radius:999px;font-weight:700;font-size:15px;display:inline-flex;align-items:center}.rw-ask-acts .rw-ask-yes{background:var(--acc,#E2532A);color:#fff}.rw-ask-acts .rw-ask-yes:disabled{opacity:.45;cursor:not-allowed}.rw-ask-acts .rw-ask-no{border:1px solid var(--line,rgba(127,127,127,.35))}.rw-ask-acts button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-warn{font-size:13.5px;color:#c2410c}.rw-found{display:flex;gap:12px;align-items:center;margin-bottom:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.rw-found img,.rw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.rw-found div{display:grid;gap:2px;min-width:0}.rw-found b{font-size:16.5px}.rw-found small{opacity:.75;font-size:14.5px}.rw-stars{color:#E8B04B;font-size:15px}.rw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.rw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.rw-src b{font-size:14.5px}.rw-src span{font-size:14px;opacity:.8}.rw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.rw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.rw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.rw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85;line-height:1.6}.rw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--acc,#E2532A);text-decoration:underline;text-underline-offset:3px}.rw-ex button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.rw-pick-i{display:grid;gap:6px}.rw-pick-i>button:first-child{all:unset;cursor:pointer;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;opacity:.55;transition:opacity .2s}.rw-pick-i>button[data-on=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick-i>button:first-child:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-pick-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-pick-i>button span{position:absolute;inset-inline-start:6px;top:6px;background:var(--acc,#E2532A);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}.rw-hero-btn{all:unset;cursor:pointer;font-size:13px;text-align:center;min-height:32px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line,rgba(127,127,127,.25))}span.rw-hero-btn{cursor:default;color:var(--acc,#E2532A);font-weight:700}.rw-lrow{display:grid;gap:8px}.rw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.rw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.rw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.rw-lr-dots{display:flex}.rw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.rw-lr-dots i:first-child{margin-inline-start:0}.rw-live{display:grid;gap:12px;padding:22px;border-radius:18px;border:1px solid;transition:background .3s,color .3s}.rw-live-eye{font-size:13.5px;font-weight:600}.rw-live-h{font-size:28px;line-height:1.2}.rw-live-card{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid;font-size:15px}.rw-live-btn{justify-self:start;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14.5px}`
+const RW_CSS = `.rw-flip{display:flex;gap:16px;align-items:center;padding:16px 18px;border-radius:16px;border:1px solid var(--line,rgba(127,127,127,.22));background:rgba(127,127,127,.06)}.rw-flip b{display:block;font-size:16.5px}.rw-flip small{display:block;font-size:14.5px;opacity:.78;margin-top:2px}.rw-flip-book{position:relative;width:40px;height:46px;flex:0 0 auto;perspective:160px}.rw-flip-book i{position:absolute;inset:0;border-radius:4px 8px 8px 4px;border:1.5px solid var(--acc,#E2532A);background:var(--card,#fff);transform-origin:100% 50%;animation:rw-page 2.4s cubic-bezier(.45,.05,.3,1) infinite}.rw-flip-book i:nth-child(2){animation-delay:.8s}.rw-flip-book i:nth-child(3){animation-delay:1.6s}.rw-flip-book i::before,.rw-flip-book i::after{content:"";position:absolute;inset-inline:7px;height:2px;border-radius:2px;background:var(--acc,#E2532A);opacity:.45;top:12px}.rw-flip-book i::after{top:22px;inset-inline-end:14px}@keyframes rw-page{0%,20%{transform:rotateY(0)}60%,100%{transform:rotateY(-170deg);opacity:0}}@media(prefers-reduced-motion:reduce){.rw-flip-book i{animation:none}.rw-flip-book i:nth-child(n+2){display:none}}.rw-flip-acts{display:flex;flex-wrap:wrap;gap:8px}.rw-ask{display:grid;gap:12px;padding:18px;border-radius:16px;border:1px solid var(--acc,#E2532A);background:rgba(127,127,127,.06)}.rw-ask-h{font-size:17px;line-height:1.5}.rw-ask-p{margin:0;font-size:14.5px;line-height:1.75;opacity:.85}.rw-ask-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14.5px}.rw-ask-bar button{all:unset;cursor:pointer;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line,rgba(127,127,127,.35));font-weight:700;font-size:14px;display:inline-flex;align-items:center}.rw-ask-bar button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-ask-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;max-height:min(70vh,640px);overflow-y:auto;padding:4px}@media(min-width:900px){.rw-ask-g{grid-template-columns:repeat(auto-fill,minmax(170px,220px))}}.rw-ask-i{display:grid;gap:6px;align-content:start}.rw-ask-i>button{all:unset;box-sizing:border-box;cursor:pointer;position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;opacity:.5;outline:1px solid var(--line,rgba(127,127,127,.25));transition:opacity .2s}.rw-ask-i>button[aria-pressed=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-ask-i>button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-ask-tick{position:absolute;top:8px;inset-inline-start:8px;width:28px;height:28px;border-radius:99px;display:grid;place-items:center;font-weight:700;background:var(--acc,#E2532A);color:#fff;font-size:15px}.rw-ask-i>button[aria-pressed=false] .rw-ask-tick{background:rgba(0,0,0,.45);box-shadow:inset 0 0 0 2px #fff}.rw-ask-st{font-size:13.5px;line-height:1.5;color:#c2410c}.rw-ask-st[data-clear]{color:inherit;opacity:.8}.rw-ask-zoom{font-size:13.5px;text-decoration:underline;text-underline-offset:3px;opacity:.8;min-height:32px;display:inline-flex;align-items:center}.rw-ask-acts{display:flex;flex-wrap:wrap;gap:10px}.rw-ask-acts button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 18px;border-radius:999px;font-weight:700;font-size:15px;display:inline-flex;align-items:center}.rw-ask-acts .rw-ask-yes{background:var(--acc,#E2532A);color:#fff}.rw-ask-acts .rw-ask-yes:disabled{opacity:.45;cursor:not-allowed}.rw-ask-acts .rw-ask-no{border:1px solid var(--line,rgba(127,127,127,.35))}.rw-ask-acts button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-ask-warn{font-size:13.5px;color:#c2410c}.rw-found{display:flex;gap:12px;align-items:center;margin-bottom:12px;padding:10px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.2));background:rgba(127,127,127,.06)}.rw-found img,.rw-found-ph{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:0 0 auto;display:grid;place-items:center;font-size:26px;background:rgba(127,127,127,.15)}.rw-found div{display:grid;gap:2px;min-width:0}.rw-found b{font-size:16.5px}.rw-found small{opacity:.75;font-size:14.5px}.rw-stars{color:#E8B04B;font-size:15px}.rw-src{list-style:none;margin:0;padding:0;display:grid;gap:8px}.rw-src li{display:grid;gap:2px;padding:10px 14px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.22))}.rw-src b{font-size:14.5px}.rw-src span{font-size:14px;opacity:.8}.rw-from{font-weight:500;opacity:.7;font-size:12.5px;margin-inline-start:6px}.rw-strip{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}.rw-strip img{width:84px;height:84px;object-fit:cover;border-radius:10px;flex:0 0 auto}.rw-ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13.5px;opacity:.85;line-height:1.6}.rw-ex button{all:unset;cursor:pointer;font-weight:700;color:var(--acc,#E2532A);text-decoration:underline;text-underline-offset:3px}.rw-ex button:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.rw-pick-i{display:grid;gap:6px}.rw-pick-i>button:first-child{all:unset;cursor:pointer;position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;opacity:.55;transition:opacity .2s}.rw-pick-i>button[data-on=true]{opacity:1;outline:3px solid var(--acc,#E2532A);outline-offset:2px}.rw-pick-i>button:first-child:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-pick-i img{width:100%;height:100%;object-fit:cover;display:block}.rw-pick-i>button span{position:absolute;inset-inline-start:6px;top:6px;background:var(--acc,#E2532A);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}.rw-hero-btn{all:unset;cursor:pointer;font-size:13px;text-align:center;min-height:32px;display:grid;place-items:center;border-radius:99px;border:1px solid var(--line,rgba(127,127,127,.25))}span.rw-hero-btn{cursor:default;color:var(--acc,#E2532A);font-weight:700}.rw-lrow{display:grid;gap:8px}.rw-lr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;min-height:56px;padding:10px 16px;border-radius:14px;border:1px solid var(--line,rgba(127,127,127,.22));background:var(--card2,rgba(127,127,127,.05))}.rw-lr[aria-checked=true]{border-color:var(--acc,#E2532A);box-shadow:0 0 0 1px var(--acc,#E2532A)}.rw-lr:focus-visible{outline:2px solid var(--acc,#E2532A);outline-offset:3px}.rw-lr-tick{color:var(--acc,#E2532A);font-weight:700}.rw-lr-dots{display:flex}.rw-lr-dots i{width:26px;height:26px;border-radius:99px;border:2px solid var(--card,#fff);margin-inline-start:-8px;box-shadow:0 0 0 1px rgba(127,127,127,.25)}.rw-lr-dots i:first-child{margin-inline-start:0}.rw-live{display:grid;gap:12px;padding:22px;border-radius:18px;border:1px solid;transition:background .3s,color .3s}.rw-live-eye{font-size:13.5px;font-weight:600}.rw-live-h{font-size:28px;line-height:1.2}.rw-live-card{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid;font-size:15px}.rw-live-btn{justify-self:start;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14.5px}`
