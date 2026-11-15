@@ -6,6 +6,7 @@ import Notes from './Notes'
 import BrandLibrary from './BrandLibrary'
 import Visitors from './Visitors'
 import Posts from './Posts'
+import { useDashTheme } from '@/components/app/frame/useDashTheme'
 import Research from './Research'
 
 /**
@@ -77,6 +78,9 @@ export default function LeadStudio() {
   const [threads, setThreads] = useState<Thread[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('today')
+  // Light or dark: the customer dashboard's own switch, palette and saved
+  // choice (html.dash-dk, DASH_THEME_CSS). No saved choice follows the device.
+  const { dark, toggle } = useDashTheme()
   // New reports from visitors (shake / corner button), shown on the «الزوار» tab.
   const [newReports, setNewReports] = useState(0)
   useEffect(() => {
@@ -193,6 +197,11 @@ export default function LeadStudio() {
           <h1>استوديو <i>العملاء</i></h1>
           <span className="sp" />
           <span className="pill">الإرسال بيدك فقط</span>
+          <button className="btn sm ghost mode" onClick={toggle} aria-label={dark ? 'الوضع الفاتح' : 'الوضع الداكن'} title={dark ? 'الوضع الفاتح' : 'الوضع الداكن'}>
+            {dark
+              ? <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>}
+          </button>
         </header>
 
         {bulk && (
@@ -509,8 +518,8 @@ const I = {
 }
 
 export const CSS = `
-.ls{--ink:var(--foreground);--line:var(--border);--sunk:var(--background);--acc:#E2532A;--wa:var(--success);--wa-bg:var(--success-fill);
-  --blue:#2c63a8;--blue-bg:rgba(44,99,168,.10);--warn:var(--warning);--warn-bg:var(--warning-fill);--err:var(--error);--err-bg:var(--error-fill);
+.ls{--ink:var(--foreground);--line:var(--border);--sunk:var(--background);--wa:var(--success);--wa-bg:var(--success-fill);
+  --blue-bg:var(--blue-fill);--on-wa:#fff;--warn:var(--warning);--warn-bg:var(--warning-fill);--err:var(--error);--err-bg:var(--error-fill);
   display:grid;grid-template-columns:minmax(0,1fr);max-width:1180px;margin:0 auto;padding:14px 16px 110px;color:var(--ink);font-size:14px;line-height:1.55}
 .ls *{box-sizing:border-box}
 .ls button{font:inherit;color:inherit;cursor:pointer}
@@ -524,7 +533,10 @@ export const CSS = `
 .ls .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
 .ls .btn.sm{padding:5px 10px;font-size:12.5px}
 .ls .btn.ghost{background:transparent}
-.ls .btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.ls .btn.wa{background:var(--wa);border-color:var(--wa);color:var(--on-wa)}
+html.dash-dk .ls{--on-wa:#0F0D0A}
+.ls .mode{padding:5px 7px}
+.ls .mode svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
 .ls .btn[disabled]{opacity:.5;cursor:default}
 .ls .btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .ls .note,.ls .empty{font-size:12.5px;color:var(--muted);padding:8px 12px}
@@ -569,7 +581,7 @@ export const CSS = `
 .ls .nav svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
 .ls .nav button[aria-selected="true"]{color:var(--acc);font-weight:700}
 .ls .nav .n.rp{background:var(--acc)}
-.ls .nav .n{position:static;background:var(--wa);color:#fff;border-radius:999px;font-size:10px;padding:0 5px}
+.ls .nav .n{position:static;background:var(--wa);color:var(--on-wa);border-radius:999px;font-size:10px;padding:0 5px}
 @media (min-width:900px){
   .ls{grid-template-columns:190px minmax(0,1fr);gap:20px;padding-bottom:30px}
   .ls .nav{position:sticky;top:16px;flex-direction:column;justify-content:flex-start;gap:2px;border:0;background:none;padding:0;margin:0;align-self:start}
@@ -593,7 +605,7 @@ export const CSS = `
 .ls .irow[aria-current="true"]{background:var(--sunk)}
 .ls .irow .pv{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ls .irow .tm{font-size:11px;color:var(--muted);display:grid;justify-items:end;gap:3px}
-.ls .unread{background:var(--wa);color:#fff;border-radius:999px;font-size:10.5px;padding:0 6px}
+.ls .unread{background:var(--wa);color:var(--on-wa);border-radius:999px;font-size:10.5px;padding:0 6px}
 .ls .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--sunk);font-weight:700;flex:none}
 .ls .chat{display:grid;grid-template-rows:auto 1fr auto;min-width:0;max-height:70vh}
 .ls .chat > .empty{align-self:center;justify-self:center}
