@@ -17,7 +17,7 @@ import { share } from '@/lib/site-share'
 // The root template appends "· بينون", so the title is the page's own name
 // alone. It used to carry "— بينون" too, and read "… — بينون · بينون".
 const TITLE = 'سياسة الخصوصية'
-const DESCRIPTION = `كيف يجمع ${COMPANY.PRODUCT_NAME} بياناتك الشخصية ويستخدمها ويحميها. متوافق مع اللائحة العامة لحماية البيانات (GDPR).`
+const DESCRIPTION = `كيف يجمع ${COMPANY.PRODUCT_NAME} بياناتك الشخصية ويستخدمها ويحميها. متوافق مع اللائحة العامة لحماية البيانات.`
 
 export const metadata: Metadata = {
   title: TITLE,

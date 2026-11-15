@@ -50,7 +50,7 @@ export function SettingsScreen({
                 label="لغة اللوحة"
                 value={language}
                 onChange={(l) => onLanguage?.(l)}
-                items={[{ key: 'ar', label: 'العربية' }, { key: 'en', label: 'English' }]}
+                items={[{ key: 'ar', label: 'العربية' }, { key: 'en', label: 'الإنجليزية' }]}
               />
             </div>
           </div>

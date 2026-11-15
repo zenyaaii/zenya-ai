@@ -19,10 +19,10 @@ export function asPlan(v: unknown): Plan {
 export const PLAN_LABEL: Record<Plan, string> = {
   free: 'الباقة المجانية',
   entry: 'الباقة المجانية',
-  pro_onetime: 'برو · مدى الحياة',
-  pro_hosting: 'برو · استضافة',
-  starter: 'Starter',
-  pro: 'Pro',
+  pro_onetime: 'الاحترافية · مدى الحياة',
+  pro_hosting: 'الاحترافية · استضافة',
+  starter: 'الأساسية',
+  pro: 'الاحترافية',
   admin: 'مشرف',
 }
 
@@ -41,10 +41,10 @@ export const SUBSCRIBED: Plan[] = ['starter', 'pro', 'pro_hosting']
 
 export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes: string[] }> = {
   pro: {
-    label: 'Pro نشط · استضافة مشمولة',
+    label: 'الخطة الاحترافية نشطة · استضافة مشمولة',
     price: '24.99$ / شهريًا',
     includes: [
-      'كل ما في خطة Starter',
+      'كل ما في الخطة الأساسية',
       'نطاق مخصّص مجاني لسنة — ‏.store، .site، .online، .shop',
       'خصم 30% على النطاقات الأغلى (.com وأمثالها)',
       'إزالة شارة «صُنع ببينون»',
@@ -53,15 +53,15 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     ],
   },
   starter: {
-    label: 'Starter نشط',
+    label: 'الخطة الأساسية نشطة',
     price: '14.99$ / شهريًا',
     includes: [
       'توليد غير محدود — يشمل تحديثات القوالب',
       'جميع القوالب الثمانية الاحترافية',
       'انشر على نطاقك الخاص',
-      'شهادة SSL تلقائية + CDN سريع',
+      'شهادة أمان تلقائية + شبكة توزيع سريعة',
       'الحجوزات وتحليلات الموقع — كاملة',
-      'ملف ثيم شوبيفاي جاهز (المتجر + التشكيلة)',
+      'ملف قالب شوبيفاي جاهز (المتجر + التشكيلة)',
     ],
   },
   entry: {
@@ -80,17 +80,17 @@ export const PLAN_BILLING: Record<Plan, { label: string; price: string; includes
     price: '19.99$ / شهريًا',
     includes: [
       'توليد غير محدود',
-      'تصدير ثيم شوبيفاي جاهز',
+      'تصدير قالب شوبيفاي جاهز',
       'مباشر على الاسم.beynoun.com',
-      'نطاق مخصّص + SSL تلقائي',
+      'نطاق مخصّص + شهادة أمان تلقائية',
     ],
   },
   pro_onetime: {
-    label: 'برو · مدى الحياة (خطة سابقة)',
+    label: 'الاحترافية · مدى الحياة (خطة سابقة)',
     price: '9.99$ دُفعت مرة واحدة',
     includes: [
       'توليد غير محدود',
-      'تصدير ثيم شوبيفاي جاهز',
+      'تصدير قالب شوبيفاي جاهز',
       'ملفات المشاريع للقوالب غير الشوبيفاي',
     ],
   },

@@ -54,20 +54,20 @@ export default function ThemeActions({
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
         <div className="hidden md:block">
           <Link href="https://dashboard.beynoun.com" className="text-sm font-medium text-muted hover:text-foreground">
-            &larr; Back to Dashboard
+            العودة إلى لوحة التحكم &larr;
           </Link>
         </div>
         <div className="flex w-full items-center justify-end gap-3 md:w-auto">
           {!isPro && (
             <Link href="/pricing" className="hidden text-sm font-medium text-primary hover:underline sm:block">
-              Upgrade to Export
+              رقِّ خطتك لتنزيل القالب
             </Link>
           )}
           <button 
             onClick={handleDownload}
             className="flex-1 rounded-full bg-primary px-8 py-3 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 md:flex-none"
           >
-            {loading ? 'Processing...' : 'Download Theme'}
+            {loading ? 'جارٍ التجهيز…' : 'نزّل القالب'}
           </button>
         </div>
       </div>

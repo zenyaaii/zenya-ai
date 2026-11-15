@@ -27,7 +27,7 @@ export const KINDS: Record<'services' | 'restaurant' | 'wellness', { template: s
   restaurant: {
     template: 'المطعم',
     kinds: [
-      { id: 'restaurant', name: 'مطعم', hint: 'المنيو، الأطباق، الحجز' },
+      { id: 'restaurant', name: 'مطعم', hint: 'قائمة الطعام، الأطباق، الحجز' },
       { id: 'cafe', name: 'مقهى', hint: 'المشروبات، الجلسات' },
       { id: 'sweets', name: 'حلويات ومخبز', hint: 'المنتجات، طلبات المناسبات' },
     ],
@@ -37,7 +37,7 @@ export const KINDS: Record<'services' | 'restaurant' | 'wellness', { template: s
     kinds: [
       { id: 'gym', name: 'نادٍ رياضي', hint: 'الاشتراكات، المدربون' },
       { id: 'beauty', name: 'مركز تجميل', hint: 'الخدمات، الأعمال' },
-      { id: 'spa', name: 'سبا ومساج', hint: 'الجلسات، الهدوء' },
+      { id: 'spa', name: 'منتجع صحي وتدليك', hint: 'الجلسات، الهدوء' },
     ],
   },
 }

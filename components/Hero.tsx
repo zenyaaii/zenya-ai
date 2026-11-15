@@ -82,8 +82,8 @@ export default function Hero() {
             {...fade(0.16)}
             className="mt-3 text-[13.5px] text-subtle"
           >
-            <span className="font-latin" dir="ltr">{"\u200E" + usd(COMPANY.STARTER_PRICE_USD)}</span> شهريًا · Starter · أو{' '}
-            <span className="font-latin" dir="ltr">{usd(COMPANY.PRO_PRICE_USD)}</span> شهريًا · Pro مع استضافة كاملة
+            <span className="font-latin" dir="ltr">{"\u200E" + usd(COMPANY.STARTER_PRICE_USD)}</span> شهريًا · الخطة الأساسية · أو{' '}
+            <span className="font-latin" dir="ltr">{usd(COMPANY.PRO_PRICE_USD)}</span> شهريًا · الخطة الاحترافية مع استضافة كاملة
           </motion.p>
 
           {/* CTAs */}
@@ -115,8 +115,8 @@ export default function Hero() {
           <motion.div {...fade(0.3)} className="mt-12 flex flex-wrap items-center justify-center gap-x-5 gap-y-2.5">
             {[
               'جرّب مجانًا · بلا بطاقة',
-              'نطاق مجاني لسنة مع Pro',
-              'استضافة أوروبية · GDPR',
+              'نطاق مجاني لسنة مع الخطة الاحترافية',
+              'استضافة أوروبية · حماية البيانات',
             ].map((label) => (
               <span key={label} className="inline-flex items-center gap-1.5 text-[13px] text-muted">
                 <Check className="h-3.5 w-3.5 text-[#27a644]" strokeWidth={2.5} />

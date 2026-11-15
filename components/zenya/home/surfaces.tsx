@@ -501,13 +501,13 @@ export const analytics: SurfaceDef = {
           {f.site === "darnoor" ? "دار نُور" : "كل المواقع (1)"}<em />
         </span>
         <span className="zn3-tog" data-on="true">مقارنة</span>
-        <span className="zn3-tog"><Bot className="ic" /> بلا روبوتات</span>
+        <span className="zn3-tog"><Bot className="ic" /> بلا برامج آلية</span>
         <span className="zn3-out" data-t="export" data-open={f.exportOpen}>
           <Download className="ic" /> تصدير
           {f.exportOpen && (
             <span className="menu">
               {EXPORTS.map((x) => <b key={x}>{x}</b>)}
-              <i>ملف CSV يفتح مباشرة في Excel بالعربية.</i>
+              <i>ملف CSV يفتح مباشرة في إكسل بالعربية.</i>
             </span>
           )}
         </span>
@@ -556,12 +556,12 @@ export const analytics: SurfaceDef = {
           <h3>أداء البحث</h3>
           <div className="zn3-empty">
             <span className="disc"><Search className="ic" /></span>
-            <b>اربط حساب Google الخاص بك</b>
+            <b>اربط حساب جوجل الخاص بك</b>
             <p>
-              اربط Search Console لترى عدد مرات ظهور موقعك في نتائج جوجل، والنقرات،
+              اربط أداة جوجل لمشرفي المواقع لترى عدد مرات ظهور موقعك في نتائج جوجل، والنقرات،
               وأهم الكلمات التي وجدك بها الناس — بيانات حقيقية من جوجل مباشرة.
             </p>
-            <span className="cta">ربط Search Console</span>
+            <span className="cta">ربط أداة جوجل لمشرفي المواقع</span>
           </div>
         </div>
       ) : (
@@ -755,7 +755,7 @@ const AUTO_DESC = "مأكولات شامية عصرية في بيروت."
 
 export const seo: SurfaceDef = {
   id: "seo",
-  label: "SEO",
+  label: "الظهور في البحث",
   path: "/dashboard/seo",
   empty: { title: "", description: "", keywords: "", saved: false },
 
@@ -777,13 +777,13 @@ export const seo: SurfaceDef = {
 
             <SeoField
               t="seo-title" on={focus === "seo-title"}
-              label="عنوان الصفحة (Title)"
+              label="عنوان الصفحة"
               hint="ما يظهر كسطر أزرق كبير في نتيجة جوجل. ابدأ باسم النشاط."
               value={f.title} ph={AUTO_TITLE} max={SEO_TITLE_MAX}
             />
             <SeoField
               t="seo-desc" on={focus === "seo-desc"}
-              label="وصف ميتا (Description)"
+              label="وصف الصفحة"
               hint="السطر الرمادي تحت العنوان. اجعله دعوة واضحة ومحدّدة الموقع."
               value={f.description} ph={AUTO_DESC} max={SEO_DESC_MAX} area
             />

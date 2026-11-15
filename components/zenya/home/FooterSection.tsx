@@ -113,11 +113,11 @@ const COLUMNS: Array<{ head: string; links: Array<{ href: string; label: string 
 /* Beynoun's accounts. The contact page and the pricing footer use this same
    list, and app/layout.tsx repeats the URLs in sameAs, so change them together. */
 export const SOCIALS = [
-  { label: "TikTok", href: "https://www.tiktok.com/@beynounn", Icon: TikTokIcon },
-  { label: "Instagram", href: "https://www.instagram.com/beynoun", Icon: InstagramIcon },
-  { label: "X", href: "https://x.com/beynounn", Icon: XIcon },
-  { label: "Facebook", href: "https://www.facebook.com/beynoun", Icon: FacebookIcon },
-  { label: "Threads", href: "https://www.threads.com/@beynoun", Icon: ThreadsIcon },
+  { label: "تيك توك", href: "https://www.tiktok.com/@beynounn", Icon: TikTokIcon },
+  { label: "إنستغرام", href: "https://www.instagram.com/beynoun", Icon: InstagramIcon },
+  { label: "إكس", href: "https://x.com/beynounn", Icon: XIcon },
+  { label: "فيسبوك", href: "https://www.facebook.com/beynoun", Icon: FacebookIcon },
+  { label: "ثريدز", href: "https://www.threads.com/@beynoun", Icon: ThreadsIcon },
 ]
 
 export default function FooterSection({

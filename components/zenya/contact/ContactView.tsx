@@ -367,7 +367,7 @@ export default function ContactView({
           </p>
           <p className="zc-promise">
             <Clock size={14} strokeWidth={2.25} aria-hidden />
-            نردّ خلال يوم عمل واحد، ولمشتركي Pro الأولوية.
+            نردّ خلال يوم عمل واحد، ولمشتركي الخطة الاحترافية الأولوية.
           </p>
         </section>
 
@@ -550,9 +550,9 @@ export default function ContactView({
                 <dd><bdi dir="ltr">{COMPANY.LEGAL_NAME}</bdi></dd>
                 <dt>الشكل القانوني</dt>
                 <dd>{COMPANY.ENTITY_TYPE}</dd>
-                <dt>رقم الغرفة التجارية (KvK)</dt>
+                <dt>رقم الغرفة التجارية</dt>
                 <dd><bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi></dd>
-                <dt>الرقم الضريبي (BTW)</dt>
+                <dt>الرقم الضريبي</dt>
                 <dd className="zc-reg-pending">{COMPANY.VAT_NUMBER}</dd>
                 <dt>الدولة</dt>
                 <dd>{COMPANY.COUNTRY}</dd>
@@ -560,7 +560,7 @@ export default function ContactView({
 
               <p className="zc-note-b" style={{ marginTop: "1rem" }}>
                 بينون منتج تملكه وتشغّله {COMPANY.LEGAL_NAME}. العنوان المسجَّل كامل متاح في
-                السجل العام للغرفة التجارية الهولندية برقم KvK أعلاه، أو بطلب خطّي على البريد
+                السجل العام للغرفة التجارية الهولندية برقم السجل أعلاه، أو بطلب خطّي على البريد
                 نفسه.
               </p>
             </section>

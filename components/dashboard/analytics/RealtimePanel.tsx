@@ -161,7 +161,7 @@ export default function RealtimePanel({
                       {deviceLabelAr(v.device)}
                       {v.is_bot && (
                         <span className="rounded-full bg-[rgba(28,28,28,0.06)] px-1.5 py-0.5 text-[14.5px] text-muted">
-                          روبوت
+                          برنامج آلي
                         </span>
                       )}
                     </span>

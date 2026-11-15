@@ -23,7 +23,7 @@ import { labContent, type Fill, type LabKind } from '@/components/theme/services
 const FULL: Partial<Record<LabKind, typeof GymFull>> = { gym: GymFull, car: CarFull, photo: PhotoFull, beauty: BeautyFull }
 const VIEWS = { beauty: [BeautyA, BeautyB], car: [CarA, CarB], photo: [PhotoA, PhotoB], gym: [GymA, GymB] } as const
 const NAMES: Record<LabKind, [string, string, string]> = {
-  beauty: ['تجميل وسبا', 'أ: قائمة العناية', 'ب: جلسات'],
+  beauty: ['تجميل وعناية بالجسد', 'أ: قائمة العناية', 'ب: جلسات'],
   car: ['خدمات السيارات', 'أ: لوحة الورشة', 'ب: تقرير الفحص'],
   photo: ['استوديو تصوير', 'أ: المعرض أولًا', 'ب: الشريط'],
   gym: ['نادٍ رياضي', 'أ: الطاقة', 'ب: الجدول'],
@@ -53,7 +53,7 @@ const LOOKS: Record<string, Record<string, string>> = {
  */
 const CAR_PHOTO = 'https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=2000&q=80&auto=format&fit=crop'
 const CAR_LOOKS: { id: string; name: string; note: string; colors: Record<string, string>; hero?: string }[] = [
-  { id: 'amber', name: 'غرافيت وكهرمان', note: 'ليلي هادئ', colors: { background: '#121416', surface: '#1a1d20', text: '#eeece7', muted: '#97948d', accent: '#e2a33e', accent2: '#7fa0ad', border: '#2a2d30' } },
+  { id: 'amber', name: 'فحم وكهرمان', note: 'ليلي هادئ', colors: { background: '#121416', surface: '#1a1d20', text: '#eeece7', muted: '#97948d', accent: '#e2a33e', accent2: '#7fa0ad', border: '#2a2d30' } },
   { id: 'service', name: 'أبيض الخدمة', note: 'فاتح ونظيف', colors: { background: '#f3f4f2', surface: '#e8eae7', text: '#15191c', muted: '#5c6469', accent: '#1f4f7a', accent2: '#c97a22', border: '#d7dbd8' } },
   { id: 'sand', name: 'رملي وزيتوني', note: 'فاتح دافئ', colors: { background: '#f2efe8', surface: '#e7e2d8', text: '#1d1c18', muted: '#6b665c', accent: '#2f5a4c', accent2: '#b0682a', border: '#dad4c8' } },
   { id: 'photo-night', name: 'من صور الورشة: ليلي', note: 'من صورة المحل', hero: CAR_PHOTO, colors: { background: '#0f1315', surface: '#192124', text: '#e4ecf1', muted: '#9fb1bc', accent: '#6c98b1', border: '#25323a' } },
@@ -94,7 +94,7 @@ export default function NicheLab({ k, v, fill, p, look }: { k?: string; v?: stri
       <main dir="rtl" style={{ fontFamily: 'system-ui', padding: 24, maxWidth: 720, margin: '0 auto', lineHeight: 1.9 }}>
         <h1>عينة القوالب</h1>
         {(Object.keys(VIEWS) as LabKind[]).map((key) => (
-          <p key={key}><b>{NAMES[key][0]}:</b> {FULL[key] ? <a href={`?k=${key}`} style={{ marginInlineStart: 12 }}>الثيم الكامل</a> : null} {[0, 1].map((i) => <a key={i} href={`?k=${key}&v=${i ? 'b' : 'a'}`} style={{ marginInlineStart: 12 }}>{NAMES[key][i + 1]}</a>)}</p>
+          <p key={key}><b>{NAMES[key][0]}:</b> {FULL[key] ? <a href={`?k=${key}`} style={{ marginInlineStart: 12 }}>القالب الكامل</a> : null} {[0, 1].map((i) => <a key={i} href={`?k=${key}&v=${i ? 'b' : 'a'}`} style={{ marginInlineStart: 12 }}>{NAMES[key][i + 1]}</a>)}</p>
         ))}
         <p>أضف <code>&fill=low</code> أو <code>&fill=none</code> لترى الموقع حين يجيب صاحب المحل عن القليل أو لا شيء.</p>
       </main>

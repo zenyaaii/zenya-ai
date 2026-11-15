@@ -99,7 +99,7 @@ const INITIAL_FORM: Form = {
 
 const CATEGORY_SUGGESTIONS = [
   'المنزل والمعيشة', 'الأزياء والملابس', 'الجمال والعناية بالبشرة', 'العافية', 'المطبخ والطعام',
-  'الفن والمقتنيات', 'الإكسسوارات', 'الكتب والقرطاسية', 'الهواء الطلق والسفر', 'أساسيات التقنية',
+  'الفن والمقتنيات', 'المكمّلات', 'الكتب والقرطاسية', 'الهواء الطلق والسفر', 'أساسيات التقنية',
 ]
 
 export default function CollectiveWizardPage() {
@@ -381,7 +381,7 @@ export default function CollectiveWizardPage() {
               { label: 'التشكيلات', value: validCollections.map((c) => c.name).join('، ') },
             ]}
           >
-            <Handoff title="جاهز لتوليد متجرك." body="تكتب بينون النصوص وتبني التشكيلات وتنسّق كتالوجك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لتوليد متجرك." body="تكتب بينون النصوص وتبني التشكيلات وتنسّق دليل منتجاتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -397,9 +397,9 @@ export default function CollectiveWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
-        eyebrow="نُخبة · قالب الكتالوج"
+        eyebrow="نُخبة · قالب التشكيلة"
         title="ابنِ متجرًا منتقى متعدد العلامات."
-        sub="أخبرنا عن كتالوجك وتولّد بينون واجهة متجر متعددة العلامات — واجهة رئيسية وتشكيلات والأكثر مبيعًا وقصة العلامة."
+        sub="أخبرنا عن دليل منتجاتك وتولّد بينون واجهة متجر متعددة العلامات — واجهة رئيسية وتشكيلات والأكثر مبيعًا وقصة العلامة."
         ledeExtra={<div style={{ marginTop: '1.25rem' }}><ShopifyAffiliateCallout placement="theme_new_ecom_picker" variant="banner" /></div>}
         steps={steps}
         step={step}

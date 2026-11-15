@@ -101,7 +101,7 @@ const TEMPLATES: Template[] = [
   {
     id: 'lookbook',
     name: 'أزياء',
-    tagline: 'لوك بوك',
+    tagline: 'دفتر إطلالات',
     sections: 11,
     gradient: 'linear-gradient(135deg, #be123c 0%, #fb7185 100%)',
     image: themePreview('lookbook'),
@@ -111,7 +111,7 @@ const TEMPLATES: Template[] = [
   {
     id: 'wellness',
     name: 'عافية',
-    tagline: 'سبا · يوغا',
+    tagline: 'منتجع صحي · يوغا',
     sections: 12,
     gradient: 'linear-gradient(135deg, #15803d 0%, #86efac 100%)',
     image: themePreview('wellness'),

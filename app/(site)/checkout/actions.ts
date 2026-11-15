@@ -31,7 +31,7 @@ export async function startCheckout(
   if (!user) return { error: 'انتهت جلستك. يُرجى تسجيل الدخول ثم المحاولة مجددًا.' }
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    return { error: 'لم تُهيّأ المدفوعات بعد. مفتاح STRIPE_SECRET_KEY مفقود.' }
+    return { error: 'الدفع غير متاح مؤقتًا. حاول بعد قليل أو راسلنا على team@beynoun.com.' }
   }
 
   const h = headers()
@@ -45,11 +45,11 @@ export async function startCheckout(
       country,
       origin: getOrigin(),
     })
-    if (!session.url) return { error: 'لم تُرجِع Stripe رابط دفع.' }
+    if (!session.url) return { error: 'لم تُرجِع سترايب رابط دفع.' }
     return { url: session.url }
   } catch (e) {
     const message = e instanceof Error ? e.message : 'خطأ غير معروف'
-    return { error: `خطأ من Stripe: ${message}` }
+    return { error: `خطأ من سترايب: ${message}` }
   }
 }
 

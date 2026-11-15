@@ -99,7 +99,7 @@ export default async function CheckoutPage({
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    return <CheckoutError message="لم تُهيّأ المدفوعات بعد. مفتاح STRIPE_SECRET_KEY مفقود." />
+    return <CheckoutError message="الدفع غير متاح مؤقتًا. حاول بعد قليل أو راسلنا على team@beynoun.com." />
   }
 
   // Skip the whole screen if the account already has what this plan would give

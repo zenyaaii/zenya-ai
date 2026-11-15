@@ -56,7 +56,7 @@ export default function V6Seo(p: V6SeoProps) {
   if (!s) {
     return (
       <>
-        <PageHead title="السيو" sub="تحكّم في شكل موقعك داخل جوجل: العنوان، والوصف، والشعار." />
+        <PageHead title="الظهور في البحث" sub="تحكّم في شكل موقعك داخل جوجل: العنوان، والوصف، والشعار." />
         <div className="card rv" style={at(3)}><div className="empty"><Ic n="g" /><b>لا مواقع بعد</b><span>أنشئ موقعًا، ثم تحكّم هنا في شكله داخل جوجل.</span></div></div>
       </>
     )
@@ -146,7 +146,7 @@ function SeoBody({ p, s }: { p: V6SeoProps; s: V6SeoSite }) {
 
   return (
     <>
-      <PageHead title="السيو" sub="تحكّم في شكل موقعك داخل جوجل: العنوان، والوصف، والشعار." />
+      <PageHead title="الظهور في البحث" sub="تحكّم في شكل موقعك داخل جوجل: العنوان، والوصف، والشعار." />
       <div className="site-pills rv" style={at(2)} role="group" aria-label="اختر الموقع">
         {p.sites.map((x) => (
           <button key={x.id} type="button" className="press" aria-pressed={x.id === s.id} onClick={() => { if (x.id !== s.id) p.onSite(x.id) }}>
@@ -158,7 +158,7 @@ function SeoBody({ p, s }: { p: V6SeoProps; s: V6SeoSite }) {
       <div className="seo-layout">
         <section className="seo-prev stack rv" style={at(4)}>
           <div className="card">
-            <div className="card-h"><h2 className="t-h3">معاينة نتيجة جوجل</h2><Seg<'m' | 'd'> items={[['m', 'جوال'], ['d', 'كمبيوتر']]} value={view} onChange={setView} label="الجهاز" /></div>
+            <div className="card-h"><h2 className="t-h3">معاينة نتيجة جوجل</h2><Seg<'m' | 'd'> items={[['m', 'جوال'], ['d', 'حاسوب']]} value={view} onChange={setView} label="الجهاز" /></div>
             <div className="gprev" id="gPrev" ref={gp}>
               <div className="g-site">
                 <span className="fav">{logo ? <img src={logo} alt="" /> : <Ic n="globe" />}</span>
@@ -197,7 +197,7 @@ function SeoBody({ p, s }: { p: V6SeoProps; s: V6SeoSite }) {
                 <span className="hint">السطر الرمادي تحت العنوان. اجعله دعوة واضحة.</span>
               </div>
               <div className="field">
-                <span className="lab">كلمات يبحث بها زبائنك <span className="t-micro">اضغط Enter بعد كل كلمة</span></span>
+                <span className="lab">كلمات يبحث بها زبائنك <span className="t-micro">اضغط زر الإدخال بعد كل كلمة</span></span>
                 <div className="kw" id="kw" onClick={(e) => { if (e.target === e.currentTarget) kwRef.current?.focus() }}>
                   {kw.map((v) => (
                     <span key={v} className="tag"><span className="trunc">{v}</span><button type="button" aria-label={`احذف ${v}`} onClick={() => setKw(kw.filter((x) => x !== v))}><Ic n="x" /></button></span>
@@ -254,7 +254,7 @@ function Gsc({ g, name }: { g: GscCard; name: string }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 16px' }}>
         <span className={`tile ${tile}`}><Ic n="g" /></span>
         <div style={{ flex: '1 1 260px', minWidth: 0 }}>
-          <b style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>Google Search Console {pill}</b>
+          <b style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>أداة جوجل لمشرفي المواقع {pill}</b>
           {lines}
         </div>
         {act}
@@ -273,7 +273,7 @@ function Gsc({ g, name }: { g: GscCard; name: string }) {
         <A to={g.to} className="btn sm acc press"><Ic n="globe" />انشر</A>)
     case 'connect':
       return row('', <span className="pill">غير مربوط</span>,
-        <span className="t-small" style={{ display: 'block' }}>اربط حسابك في Google لترى كيف يظهر «{name}» في البحث.</span>,
+        <span className="t-small" style={{ display: 'block' }}>اربط حسابك في جوجل لترى كيف يظهر «{name}» في البحث.</span>,
         <A to={g.to} className="btn sm acc press"><Ic n="g" />اربطه</A>)
     case 'missing':
       return row('blue', <span className="pill warn">غير مُضاف</span>,

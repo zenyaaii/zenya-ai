@@ -147,7 +147,7 @@ export function Reviews({ n, max = 6, className = '' }: { n: N; max?: number; cl
       <div className="b-rv-sum" data-r>
         {n.rating ? <b><CountUp to={n.rating} dec={1} /></b> : null}
         {n.rating ? <span className="b-rv-stars">{Array.from({ length: 5 }, (_, i) => <Star key={i} size={18} fill="currentColor" strokeWidth={0} className={i < Math.round(n.rating!) ? '' : 'off'} />)}</span> : null}
-        {n.count ? <small>من {ar(n.count)} تقييم على Google</small> : null}
+        {n.count ? <small>من {ar(n.count)} تقييم على جوجل</small> : null}
         {n.mapsUrl ? <a href={n.mapsUrl} target="_blank" rel="noopener noreferrer" className="b-rv-link">اقرأ كل التقييمات<ChevronLeft size={16} /></a> : null}
       </div>
       <figure className="b-rv-big" data-r>

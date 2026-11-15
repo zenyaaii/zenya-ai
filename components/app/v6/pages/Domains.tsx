@@ -50,7 +50,7 @@ export type V6DomainsProps = {
 }
 
 const STATE: Record<DomainState, [string, string]> = {
-  live: ['متصل', 'ok'], pending_dns: ['بانتظار DNS', 'warn'], pending_ssl: ['جارٍ إصدار SSL', 'warn'], error: ['يحتاج إصلاحًا', 'bad'],
+  live: ['متصل', 'ok'], pending_dns: ['بانتظار سجلات النطاق', 'warn'], pending_ssl: ['جارٍ إصدار شهادة الأمان', 'warn'], error: ['يحتاج إصلاحًا', 'bad'],
 }
 const FREE_TLDS = ['store', 'site', 'online', 'shop']
 
@@ -156,11 +156,11 @@ export default function V6Domains(p: V6DomainsProps) {
               <span className={`tile ${tone === 'ok' ? 'ok' : tone === 'warn' ? 'warn' : ''}`}><Ic n={tone === 'ok' ? 'lock' : tone === 'warn' ? 'clock' : 'globe'} /></span>
               <div className="tx">
                 <b>{d.domain}</b>
-                <span>{d.site} · {d.free ? 'عنوان مجاني دائم' : d.state === 'error' ? (d.error || 'السجلات غير صحيحة') : waiting ? 'ننتظر سجلّات DNS' : 'يتجدّد ' + (d.renews || 'تلقائيًا')}</span>
+                <span>{d.site} · {d.free ? 'عنوان مجاني دائم' : d.state === 'error' ? (d.error || 'السجلات غير صحيحة') : waiting ? 'ننتظر سجلّات النطاق' : 'يتجدّد ' + (d.renews || 'تلقائيًا')}</span>
               </div>
               <div className="end">
                 <span className={`pill ${tone}`}>{label}</span>
-                {d.state === 'live' && <span className="pill ok"><Ic n="shield" />SSL</span>}
+                {d.state === 'live' && <span className="pill ok"><Ic n="shield" />اتصال آمن</span>}
                 {waiting
                   ? <button className="btn sm press" disabled={checking === d.id} onClick={() => check(d)}><Ic n="refresh" className={checking === d.id ? 'spin' : ''} />تحقّق الآن</button>
                   : <button className="btn sm line press" onClick={() => manage(d)}>إدارة</button>}
@@ -177,12 +177,12 @@ export default function V6Domains(p: V6DomainsProps) {
       </div>
       {p.isPro ? (
         <div className="banner info rv" style={{ ...at(6), marginTop: 16 }}>
-          <span className="tx">باقتك Pro تشمل نطاقًا مجانيًا لسنة كاملة، بنهاية <span className="ltr">.store</span> أو <span className="ltr">.site</span> أو <span className="ltr">.online</span> أو <span className="ltr">.shop</span></span>
+          <span className="tx">باقتك الاحترافية تشمل نطاقًا مجانيًا لسنة كاملة، بنهاية <span className="ltr">.store</span> أو <span className="ltr">.site</span> أو <span className="ltr">.online</span> أو <span className="ltr">.shop</span></span>
           {addBtn('btn sm press', 'اختر نطاقك', 'buy')}
         </div>
       ) : (
         <div className="banner info rv" style={{ ...at(6), marginTop: 16 }}>
-          <span className="tx">باقة Pro تشمل نطاقًا مجانيًا لسنة كاملة، بنهاية <span className="ltr">.store</span> أو <span className="ltr">.site</span> أو <span className="ltr">.online</span> أو <span className="ltr">.shop</span></span>
+          <span className="tx">الباقة الاحترافية تشمل نطاقًا مجانيًا لسنة كاملة، بنهاية <span className="ltr">.store</span> أو <span className="ltr">.site</span> أو <span className="ltr">.online</span> أو <span className="ltr">.shop</span></span>
           <A to={p.links.pricing} className="btn sm press">طالع الباقات</A>
         </div>
       )}
@@ -204,7 +204,7 @@ function ManageBody({ d, st }: { d: V6Domain; st: Store<{ recs: DnsRec[] | null 
       {d.free
         ? <p className="t-small" style={{ marginTop: 16 }}>هذا العنوان مجاني ودائم، ويبقى يعمل حتى بعد ربط نطاقك الخاص.</p>
         : <>
-          <h3 className="t-h3" style={{ marginTop: 20 }}>سجلات DNS</h3>
+          <h3 className="t-h3" style={{ marginTop: 20 }}>سجلات النطاق</h3>
           <p className="t-small">{d.state === 'live' ? 'هذه السجلات موجودة عند شركة النطاق. لا تحذفها.' : 'ضع هذه السجلات عند الشركة التي اشتريت منها النطاق.'}</p>
           {recs == null ? <p className="t-small" style={{ marginTop: 12 }}>نحمّل السجلات…</p> : recs.length ? <Dns recs={recs} /> : <p className="t-small" style={{ marginTop: 12 }}>لا سجلات مطلوبة الآن.</p>}
         </>}
@@ -256,7 +256,7 @@ function AddBody({ st, p }: { st: Store<AddState>; p: V6DomainsProps }) {
             <div id="dStep2" ref={step2}>
               {s.recs && <>
                 <h3 className="t-h3" style={{ marginTop: 20 }}>{s.recs.length === 2 ? 'ضع هذين السجلّين عند شركة النطاق' : 'ضع هذه السجلّات عند شركة النطاق'}</h3>
-                <p className="t-small">ادخل حسابك عند الشركة التي اشتريت منها <span className="ltr">{s.dom}</span>، وافتح إعدادات DNS.</p>
+                <p className="t-small">ادخل حسابك عند الشركة التي اشتريت منها <span className="ltr">{s.dom}</span>، وافتح إعدادات النطاق.</p>
                 <Dns recs={s.recs} />
               </>}
             </div>
@@ -279,7 +279,7 @@ function AddBody({ st, p }: { st: Store<AddState>; p: V6DomainsProps }) {
                     <b>{r.domain}</b>
                     <span className="end">
                       {free
-                        ? <span className="price" style={{ color: 'var(--ok)' }}>مجاني مع Pro</span>
+                        ? <span className="price" style={{ color: 'var(--ok)' }}>مجاني مع الخطة الاحترافية</span>
                         : r.price != null && <span className="price num" style={{ color: 'var(--ink)' }}>{r.price.toFixed(2)}$ / سنة</span>}
                       <button className="btn sm k press" disabled={s.busy} onClick={() => pick(r.domain)}>اختر</button>
                     </span>

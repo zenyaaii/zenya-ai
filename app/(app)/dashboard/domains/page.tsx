@@ -92,7 +92,7 @@ export default function DomainsPage() {
             return {
               error: j.error === 'domain_taken' ? 'هذا النطاق مربوط بموقع آخر في بينون.'
                 : j.error === 'invalid_domain' ? 'اكتب النطاق هكذا: example.com'
-                  : j.error === 'starter_required' ? 'ربط نطاقك الخاص يحتاج باقة Starter أو Pro.'
+                  : j.error === 'starter_required' ? 'ربط نطاقك الخاص يحتاج الباقة الأساسية أو الخطة الاحترافية.'
                     : 'تعذّر إضافة النطاق. حاول مرة أخرى.',
             }
           }

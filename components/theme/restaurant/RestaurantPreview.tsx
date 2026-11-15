@@ -1352,31 +1352,31 @@ function Footer({ content, isDark }: { content: RestaurantContent; isDark: boole
                   {content.social_links.instagram && (
                     <a href={content.social_links.instagram} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      Instagram
+                      إنستغرام
                     </a>
                   )}
                   {content.social_links.facebook && (
                     <a href={content.social_links.facebook} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      Facebook
+                      فيسبوك
                     </a>
                   )}
                   {content.social_links.tiktok && (
                     <a href={content.social_links.tiktok} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      TikTok
+                      تيك توك
                     </a>
                   )}
                   {content.social_links.youtube && (
                     <a href={content.social_links.youtube} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      YouTube
+                      يوتيوب
                     </a>
                   )}
                   {content.social_links.whatsapp && (
                     <a href={normaliseWhatsapp(content.social_links.whatsapp)} target="_blank" rel="noopener noreferrer"
                        className="block hover:opacity-80 transition" style={{ color: 'var(--rb-text)' }}>
-                      WhatsApp
+                      واتساب
                     </a>
                   )}
                   {content.social_links.website && (

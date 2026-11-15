@@ -37,10 +37,10 @@ const TEMPLATES = [
   { id: "restaurant",  label: "مطعم",   tag: "مطعم · قائمة · حجوزات",     href: "/theme/new/restaurant" },
   { id: "atlas",       label: "تطبيق",  tag: "تطبيق · برمجيات · B2B",     href: "/theme/new/atlas" },
   { id: "lookbook",    label: "أزياء",  tag: "أزياء · ملابس · علامة",     href: "/theme/new/lookbook" },
-  { id: "collective",  label: "تشكيلة", tag: "كتالوج · منتجات متعددة",    href: "/theme/new/collective" },
+  { id: "collective",  label: "تشكيلة", tag: "تشكيلة · منتجات متعددة",    href: "/theme/new/collective" },
   { id: "studio",      label: "ستوديو", tag: "قصة علامة · تحرير",         href: "/theme/new/studio" },
   { id: "services",    label: "خدمات",  tag: "خدمات محلية · حِرف",         href: "/theme/new/services" },
-  { id: "wellness",    label: "عافية",  tag: "سبا · يوغا · عافية",        href: "/theme/new/wellness" },
+  { id: "wellness",    label: "عافية",  tag: "منتجع صحي · يوغا · عافية",        href: "/theme/new/wellness" },
 ]
 
 /* The build word, cycling the hero's first column on the hero's own roll. */

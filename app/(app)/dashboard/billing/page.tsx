@@ -71,7 +71,7 @@ export default function BillingPage() {
 
       setProps({
         current: {
-          label: plan === 'pro' ? 'Pro نشط' : plan === 'starter' ? 'Starter نشط' : spec.label,
+          label: plan === 'pro' ? 'الخطة الاحترافية نشطة' : plan === 'starter' ? 'الخطة الأساسية نشطة' : spec.label,
           price,
           per,
           on: subscribed && periodEnd ? dateAr(periodEnd) : null,

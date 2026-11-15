@@ -19,7 +19,7 @@ export default function AtlasPreviewPage() {
   const [typographyPreset, setTypographyPreset] = useState<string | undefined>(undefined)
   const [colorOverrides, setColorOverrides] = useState<Record<string, string> | undefined>(undefined)
   const [sectionStyles, setSectionStyles] = useState<SectionStyles | undefined>(undefined)
-  const [name, setName] = useState<string>('تطبيق SaaS')
+  const [name, setName] = useState<string>('تطبيق برمجي')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [celebrate, setCelebrate] = useState(false)
@@ -49,7 +49,7 @@ export default function AtlasPreviewPage() {
 
       const stored = data.content as any
       if (stored?.business_type !== 'atlas' || !stored?.atlas) {
-        setError('هذا القالب ليس قالب Atlas.')
+        setError('هذا القالب ليس قالب أطلس.')
         setLoading(false)
         return
       }
@@ -59,7 +59,7 @@ export default function AtlasPreviewPage() {
       setTypographyPreset(stored.typography_preset || undefined)
       setColorOverrides(stored.color_overrides || undefined)
       setSectionStyles(stored.section_styles || undefined)
-      setName(data.product_name || 'تطبيق SaaS')
+      setName(data.product_name || 'تطبيق برمجي')
       setLoading(false)
     }
     load()

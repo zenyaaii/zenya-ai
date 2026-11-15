@@ -92,7 +92,7 @@ function memoryStore(contentKey: string, content: unknown, type: DemoType): Edit
 const NAMES: Record<DemoType, string> = {
   restaurant: 'موقع مطعم',
   atlas: 'صفحة هبوط لتطبيق',
-  lookbook: 'موقع أزياء ولوك بوك',
+  lookbook: 'موقع أزياء ودفتر إطلالات',
   services: 'موقع خدمات',
   studio: 'موقع علامة تجارية وقصة',
   wellness: 'موقع مركز عافية',

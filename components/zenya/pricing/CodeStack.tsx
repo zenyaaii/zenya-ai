@@ -68,10 +68,10 @@ const CARDS: Card[] = [
   {
     id: "review",
     kind: "code",
-    chip: "كود تُدخِله بنفسك",
+    chip: "رمز تُدخِله بنفسك",
     figure: REVIEW_REWARD_PCT + "%",
     figureSub: "على أول شهر",
-    body: "شاركنا رأيك الصادق عن بينون. الكود لك مهما كان رأيك، ودقيقة واحدة تكفي.",
+    body: "شاركنا رأيك الصادق عن بينون. الرمز لك مهما كان رأيك، ودقيقة واحدة تكفي.",
     cta: { label: "قيّمنا واحصل عليه", href: REVIEW_URL },
   },
   {
@@ -80,7 +80,7 @@ const CARDS: Card[] = [
     chip: "يُطبَّق تلقائيًا",
     figure: "نطاق مجاني",
     figureSub: "لسنة كاملة",
-    body: "مع خطة Pro، على الامتدادات الاقتصادية. يُخصم عند الشراء دون أي كود.",
+    body: "مع الخطة الاحترافية، على الامتدادات الاقتصادية. يُخصم عند الشراء دون إدخال أي رمز.",
   },
   {
     id: "other-domains",
@@ -88,7 +88,7 @@ const CARDS: Card[] = [
     chip: "يُطبَّق تلقائيًا",
     figure: "30%",
     figureSub: "على بقية النطاقات",
-    body: "مع خطة Pro، على أي نطاق آخر تشتريه بعد المجاني. يُخصم عند الشراء.",
+    body: "مع الخطة الاحترافية، على أي نطاق آخر تشتريه بعد المجاني. يُخصم عند الشراء.",
   },
 ]
 
@@ -218,25 +218,25 @@ export default function CodeStack() {
               </SlideButton>
             </span>
           ) : null}
-          {isCode && earned ? <p className="cs-earned-hint">هذا الكود لك بالفعل</p> : null}
+          {isCode && earned ? <p className="cs-earned-hint">هذا الرمز لك بالفعل</p> : null}
         </div>
 
         {/* Built only for the one card that actually has a code. */}
         {isCode ? (
           <div className="cs-face cs-back">
-            <span className="cs-chip" data-kind="code">كودك جاهز</span>
+            <span className="cs-chip" data-kind="code">رمزك جاهز</span>
             <button
               type="button"
               className="cs-code"
               onClick={copy}
               tabIndex={live && showBack ? undefined : -1}
-              aria-label={"نسخ كود الخصم " + REVIEW_CODE}
+              aria-label={"نسخ رمز الخصم " + REVIEW_CODE}
             >
               <span dir="ltr" className="cs-code-text">{REVIEW_CODE}</span>
               <span className="cs-code-hint">{copied ? "تم النسخ" : "انسخ"}</span>
             </button>
             <p className="cs-body">
-              أدخِله في خانة «Promotion code» عند الدفع. صالح لأول شهر وللعملاء الجدد.
+              أدخِله في خانة «إضافة رمز ترويجي» عند الدفع. صالح لأول شهر وللعملاء الجدد.
             </p>
           </div>
         ) : null}
@@ -333,7 +333,7 @@ export default function CodeStack() {
         {/* The line about where a code goes belongs beside the code, not
             orphaned between two sections as it was. */}
         <p className="cs-foot">
-          عندك كود خصم؟ أدخِله في خانة «Promotion code» عند الدفع.
+          عندك رمز خصم؟ أدخِله في خانة «إضافة رمز ترويجي» عند الدفع.
         </p>
       </div>
     </section>

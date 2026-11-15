@@ -67,14 +67,14 @@ function AnalyticsLocked() {
           انتهت فترة تجربة التحليلات
         </h1>
         <p className="mt-3 text-[14.5px] leading-[1.8] text-muted">
-          تحليلات موقعك متاحة في خطة Starter (14.99$ شهريًا) وما فوق. رقّ حسابك
+          تحليلات موقعك متاحة في الخطة الأساسية (14.99$ شهريًا) وما فوق. رقّ حسابك
           لمواصلة متابعة زوّار موقعك ومصادرهم وتحويلاتهم.
         </p>
         <Link
           href="/checkout?plan=starter"
           className="mt-6 inline-flex items-center justify-center zy-btn"
         >
-          الترقية إلى Starter
+          الترقية إلى الخطة الأساسية
         </Link>
       </div>
     </main>

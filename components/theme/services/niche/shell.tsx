@@ -194,7 +194,7 @@ export function Shell(p: ShellProps) {
         <div className="s-strip" data-section="booking">
           <div className="n-w s-strip-in">
             {n.st ? <span className="s-live"><i className={n.st.open ? 'on' : ''} />{n.st.open ? 'مفتوح الآن' : 'مغلق الآن'}<em>{n.st.text}</em></span> : null}
-            {n.rating ? <span className="s-hide-sm"><Star size={13} fill="currentColor" strokeWidth={0} /> {n.rating.toFixed(1)}{n.count ? ` · ${ar(n.count)} تقييم على Google` : ''}</span> : null}
+            {n.rating ? <span className="s-hide-sm"><Star size={13} fill="currentColor" strokeWidth={0} /> {n.rating.toFixed(1)}{n.count ? ` · ${ar(n.count)} تقييم على جوجل` : ''}</span> : null}
             {(p.strip || []).map((s) => <span key={s} className="s-hide-sm">{s}</span>)}
             {n.tel ? <a className="s-strip-tel" href={`tel:${n.tel}`} dir="ltr"><Phone size={13} /> {content.footer.phone}</a> : null}
           </div>

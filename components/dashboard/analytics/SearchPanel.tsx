@@ -69,7 +69,7 @@ export default function SearchPanel({
         <EmptyState
           icon={Search}
           title="لا مواقع منشورة"
-          body="بيانات البحث تأتي من Google Search Console، وتحتاج موقعًا منشورًا على رابط حقيقي أولًا."
+          body="بيانات البحث تأتي من أداة جوجل لمشرفي المواقع، وتحتاج موقعًا منشورًا على رابط حقيقي أولًا."
           cta={{ href: '/dashboard/sites', label: 'إدارة المواقع' }}
         />
       </Section>
@@ -85,8 +85,8 @@ export default function SearchPanel({
       <Section title="أداء البحث">
         <EmptyState
           icon={Search}
-          title="ربط Search Console غير مُفعّل"
-          body="هذه الميزة تحتاج إعداد Google OAuth على مستوى المنصة. تواصل معنا لتفعيلها لحسابك."
+          title="ربط أداة جوجل لمشرفي المواقع غير مُفعّل"
+          body="هذه الميزة تحتاج إعداد ربط جوجل على مستوى المنصة. تواصل معنا لتفعيلها لحسابك."
         />
       </Section>
     )
@@ -97,9 +97,9 @@ export default function SearchPanel({
       <Section title="أداء البحث">
         <EmptyState
           icon={Search}
-          title="اربط حساب Google الخاص بك"
-          body="اربط Search Console لترى عدد مرات ظهور موقعك في نتائج جوجل، والنقرات، وأهم الكلمات التي وجدك بها الناس — بيانات حقيقية من جوجل مباشرة."
-          cta={{ href: '/api/gsc/connect', label: 'ربط Search Console' }}
+          title="اربط حساب جوجل الخاص بك"
+          body="اربط أداة جوجل لمشرفي المواقع لترى عدد مرات ظهور موقعك في نتائج جوجل، والنقرات، وأهم الكلمات التي وجدك بها الناس — بيانات حقيقية من جوجل مباشرة."
+          cta={{ href: '/api/gsc/connect', label: 'ربط أداة جوجل لمشرفي المواقع' }}
         />
       </Section>
     )
@@ -122,10 +122,10 @@ export default function SearchPanel({
     return (
       <Section title="أداء البحث" action={siteSelector}>
         <Panel className="p-6">
-          <h3 className="text-[15px] font-semibold text-foreground">هذا الموقع غير مُضاف في Search Console</h3>
+          <h3 className="text-[15px] font-semibold text-foreground">هذا الموقع غير مُضاف في أداة جوجل لمشرفي المواقع</h3>
           <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted">
             حسابك مرتبط ({status.email})، لكن لم نجد هذا الموقع ضمن خصائصك. أضف العنوان التالي
-            كخاصية جديدة في Search Console:
+            كخاصية جديدة في أداة جوجل لمشرفي المواقع:
           </p>
           <code className="mt-3 block rounded-lg bg-black/[0.04] px-3 py-2 text-[14.5px] text-foreground" dir="ltr">
             {perf.expectedProperty}
@@ -135,7 +135,7 @@ export default function SearchPanel({
               href="/dashboard/seo"
               className="inline-flex items-center gap-1.5 zy-btn"
             >
-              الإعداد التلقائي بنقرة في صفحة السيو ←
+              الإعداد التلقائي بنقرة في صفحة الظهور في البحث ←
             </Link>
             <a
               href={`https://search.google.com/search-console/welcome?resource_id=${encodeURIComponent(perf.expectedProperty || '')}`}
@@ -174,7 +174,7 @@ export default function SearchPanel({
         {noData && (
           <Note>
             جوجل لم يسجّل أي ظهور لهذا الموقع بعد. الفهرسة تستغرق عادةً من بضعة أيام إلى أسبوعين
-            بعد النشر — هذه أرقام حقيقية من Search Console وليست تقديرات.
+            بعد النشر — هذه أرقام حقيقية من أداة جوجل لمشرفي المواقع وليست تقديرات.
           </Note>
         )}
       </Section>
@@ -187,7 +187,7 @@ export default function SearchPanel({
                 <Th>العبارة</Th>
                 <Th align="end">النقرات</Th>
                 <Th align="end">الظهور</Th>
-                <Th align="end">CTR</Th>
+                <Th align="end">نسبة النقر</Th>
                 <Th align="end">الترتيب</Th>
               </tr>
             </thead>
@@ -203,7 +203,7 @@ export default function SearchPanel({
               ))}
             </tbody>
           </TableWrap>
-          <Note>مصدر البيانات: Google Search Console · الحساب {status.email}</Note>
+          <Note>مصدر البيانات: أداة جوجل لمشرفي المواقع · الحساب {status.email}</Note>
         </Section>
       )}
     </>

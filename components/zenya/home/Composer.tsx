@@ -345,7 +345,7 @@ export default function Composer({
               }).catch(() => { /* clipboard refused; the CSS is on screen anyway */ })
             }}
           >
-            {copied ? "نُسخ" : "انسخ CSS"}
+            {copied ? "نُسخ" : "انسخ رمز التنسيق"}
           </button>
         </div>
         {/* The one that matters. It writes the placement to the file the page
@@ -361,7 +361,7 @@ export default function Composer({
           اسحب للتحريك · اسحب الزاوية للحجم · ⌘S للحفظ
           <br />
           {engaged
-            ? "الأسهم تضبط · Esc يعيدها للتنقل"
+            ? "الأسهم تضبط · زر الخروج يعيدها للتنقل"
             : "انقر داخل الأداة لتفعيل الأسهم — وإلا فهي للتنقل بين الشاشات"}
         </p>
       </div>

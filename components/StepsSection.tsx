@@ -11,7 +11,7 @@ const STEPS = [
     num: '01',
     icon: LayoutTemplate,
     title: 'اختر قالبك',
-    desc: 'ثمانية للاختيار — مطعم، أو لوك بوك، أو صفحة هبوط لتطبيق، أو قصة علامة، أو عافية، أو كتالوج، أو خدمات، أو متجر شوبيفاي بمنتج واحد.',
+    desc: 'ثمانية للاختيار — مطعم، أو دفتر إطلالات، أو صفحة هبوط لتطبيق، أو قصة علامة، أو عافية، أو تشكيلة، أو خدمات، أو متجر شوبيفاي بمنتج واحد.',
     color: '#5e6ad2',
   },
   {
@@ -25,7 +25,7 @@ const STEPS = [
     num: '03',
     icon: Rocket,
     title: 'انطلق فورًا',
-    desc: 'احصل على موقع معاينة مُستضاف يمكنك نشره اليوم — أو نزّل ملف ثيم شوبيفاي كاملًا. كل شيء قابل للتعديل.',
+    desc: 'احصل على موقع معاينة مُستضاف يمكنك نشره اليوم — أو نزّل ملف قالب شوبيفاي كاملًا. كل شيء قابل للتعديل.',
     color: '#27a644',
   },
 ] as const
@@ -113,7 +113,7 @@ export default function StepsSection() {
         {/* Subtle footnote about the two flows */}
         <Reveal delay={0.1} className="mx-auto mt-16 max-w-2xl">
           <p className="text-center text-[12.5px] text-muted">
-            يُصدَّر قالب <strong className="font-bold text-foreground">المتجر</strong> بمنتج واحد كملف ثيم
+            يُصدَّر قالب <strong className="font-bold text-foreground">المتجر</strong> بمنتج واحد كملف قالب
             شوبيفاي جاهز. أما القوالب السبعة الأخرى فتُنشَر كمواقع مباشرة مُستضافة على نطاق بينون.
           </p>
         </Reveal>

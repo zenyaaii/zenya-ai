@@ -38,7 +38,7 @@ export function SeoScreen({
   return (
     <Page>
       <PageHead
-        title="السيو"
+        title="الظهور في البحث"
         sub="تحكّم في شكل موقعك داخل جوجل — العنوان، الوصف، ومعاينة النتيجة الحيّة."
         icon={Search}
       />
@@ -105,9 +105,9 @@ export function SeoScreen({
                 <p className="zy-sub mt-1.5">اترك الحقل فارغًا لاستخدام النص التلقائي من محتوى موقعك.</p>
 
                 <div className="mt-4 space-y-4">
-                  <Field label="عنوان الصفحة (Title)" counter={`${title.length}/${titleMax}`} value={title} onChange={onTitle}
+                  <Field label="عنوان الصفحة" counter={`${title.length}/${titleMax}`} value={title} onChange={onTitle}
                     hint="ما يظهر كسطر أزرق كبير في نتيجة جوجل. ابدأ باسم النشاط." />
-                  <Field label="وصف مبنى (Description)" counter={`${description.length}/${descMax}`} value={description} onChange={onDescription} area
+                  <Field label="وصف مبنى" counter={`${description.length}/${descMax}`} value={description} onChange={onDescription} area
                     hint="السطر الرمادي تحت العنوان. اجعله دعوة واضحة ومحدّدة." />
                   <Field label="كلمات مفتاحية (اختياري)" value={keywords} onChange={onKeywords}
                     hint="افصل بينها بفاصلة." />

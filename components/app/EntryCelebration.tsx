@@ -33,9 +33,9 @@ function planCopy(plan: string): { head: string; body: string } {
         body: 'معك الآن قالبان لبناء موقعك. أعانك الله ورزقك التوفيق في مشروعك.',
       }
     case 'starter':
-      return { head: 'تم تفعيل Starter', body: 'توليد بلا حدود بين يديك الآن. أعانك الله على البناء.' }
+      return { head: 'تم تفعيل الخطة الأساسية', body: 'توليد بلا حدود بين يديك الآن. أعانك الله على البناء.' }
     case 'pro':
-      return { head: 'تم تفعيل Pro', body: 'التوليد والاستضافة مفتوحان بالكامل. رزقك الله التوفيق.' }
+      return { head: 'تم تفعيل الخطة الاحترافية', body: 'التوليد والاستضافة مفتوحان بالكامل. رزقك الله التوفيق.' }
     default:
       return { head: 'تم تفعيل خطتك', body: 'كل شيء جاهز للبدء. أعانك الله ووفقك.' }
   }
@@ -231,7 +231,7 @@ export function EntryWelcomeBanner({ trialRemaining }: { trialRemaining: number 
           <p className="mt-0.5 text-[12.5px] leading-[1.55] text-muted">
             {trialRemaining > 0
               ? `معك ${trialRemaining} ${trialRemaining === 2 ? 'قالبان' : 'قالب'} لتوليدهما. المعاينة والتعديل غير محدودين ومجّانيان.`
-              : 'التعديل والمعاينة على مواقعك غير محدودين. للتوليد من جديد انتقل إلى Starter.'}
+              : 'التعديل والمعاينة على مواقعك غير محدودين. للتوليد من جديد انتقل إلى الخطة الأساسية.'}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -267,7 +267,7 @@ export function EntrySpentBanner() {
       <div className="min-w-0 flex-1">
         <p className="text-[13.5px] font-semibold text-foreground">استخدمت قالبيك — رزقك الله التوفيق فيهما</p>
         <p className="mt-0.5 text-[12.5px] leading-[1.55] text-muted">
-          مواقعك محفوظة، والتعديل عليها يبقى مجّانيًا. للتوليد بلا حدود انتقل إلى Starter.
+          مواقعك محفوظة، والتعديل عليها يبقى مجّانيًا. للتوليد بلا حدود انتقل إلى الخطة الأساسية.
         </p>
       </div>
       <Link
@@ -275,7 +275,7 @@ export function EntrySpentBanner() {
         className="shrink-0 rounded-full px-4 py-2 text-[12.5px] font-semibold text-white transition hover:opacity-90"
         style={{ background: 'var(--primary, #5e6ad2)' }}
       >
-        {`الترقية إلى Starter · ${usdTrailing(COMPANY.STARTER_PRICE_USD)}`}
+        {`الترقية إلى الخطة الأساسية · ${usdTrailing(COMPANY.STARTER_PRICE_USD)}`}
       </Link>
     </div>
   )

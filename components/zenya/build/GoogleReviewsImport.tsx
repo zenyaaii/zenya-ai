@@ -6,10 +6,10 @@ export type GoogleFound = { name: string; rating: number; text: string; when: st
 export type GoogleResult = { place: { name: string; rating: number | null; count: number | null; url: string }; reviews: GoogleFound[] }
 
 const GOOGLE_ERRORS: Record<string, string> = {
-  not_configured: 'جلب التقييمات من Google غير مفعّل بعد. أضف تقييماتك بيدك تحت.',
+  not_configured: 'جلب التقييمات من جوجل غير مفعّل بعد. أضف تقييماتك بيدك تحت.',
   sign_in: 'سجّل دخولك أولًا حتى نجلب تقييماتك.',
-  not_google_link: 'هذا ليس رابطًا من Google. انسخ الرابط من خرائط Google.',
-  not_found: 'لم نجد نشاطك على Google. تأكد من الرابط.',
+  not_google_link: 'هذا ليس رابطًا من جوجل. انسخ الرابط من خرائط جوجل.',
+  not_found: 'لم نجد نشاطك على جوجل. تأكد من الرابط.',
   too_many: 'حاولت كثيرًا. جرّب بعد ساعة.',
 }
 
@@ -51,14 +51,14 @@ export default function GoogleReviewsImport({ url, name, city, onPlace, onImport
     const chosen = found.reviews.filter((_, i) => keep[i])
     onImport(found, chosen)
     setFound(null)
-    setDone(chosen.length ? 'أضفنا ' + chosen.length + ' تقييمات تحت. تقدر تعدّلها الآن أو من لوحة التحكم.' : 'أخذنا التقييم والعدد من Google.')
+    setDone(chosen.length ? 'أضفنا ' + chosen.length + ' تقييمات تحت. تقدر تعدّلها الآن أو من لوحة التحكم.' : 'أخذنا التقييم والعدد من جوجل.')
   }
 
   const count = keep.filter(Boolean).length
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
       <button type="button" className="zb-add" onClick={run} disabled={busy || (!url.trim() && !name.trim())}>
-        {busy ? 'نبحث على Google…' : 'اجلب تقييماتي من Google'}
+        {busy ? 'نبحث على جوجل…' : 'اجلب تقييماتي من جوجل'}
       </button>
       {error ? <p className="zb-note" role="alert" style={{ margin: 0, color: '#b45309', background: 'rgba(217,119,6,0.08)' }}>{error}</p> : null}
       {done ? <p className="zb-note" style={{ margin: 0 }}>{done}</p> : null}
@@ -70,7 +70,7 @@ export default function GoogleReviewsImport({ url, name, city, onPlace, onImport
             {found.place.count != null ? ' · ' + found.place.count + ' تقييم' : ''}
           </p>
           <p style={{ margin: 0, fontSize: 14, color: '#6b6b6b' }}>
-            {found.reviews.length ? 'هذه كل التقييمات التي تعطينا إياها Google (5 على الأكثر). أخذنا التقييم والعدد، واختر ما تريد عرضه.' : 'Google لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
+            {found.reviews.length ? 'هذه كل التقييمات التي تعطينا إياها جوجل (5 على الأكثر). أخذنا التقييم والعدد، واختر ما تريد عرضه.' : 'جوجل لم تعطنا نصوص تقييمات. سنأخذ التقييم والعدد فقط.'}
           </p>
           {found.reviews.map((r, i) => (
             <label key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.625rem', alignItems: 'start', padding: '0.625rem', borderRadius: 10, background: keep[i] ? 'rgba(94,106,210,0.06)' : 'transparent', cursor: 'pointer' }}>

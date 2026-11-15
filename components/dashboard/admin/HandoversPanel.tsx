@@ -92,7 +92,7 @@ export default function HandoversPanel() {
           </button>
         </div>
         <p className="mt-2 text-[14.5px] font-medium text-[#66666e]">
-          "جرّبه على حسابي" يضع الإشعار في جرسك أنت. "أرسل للعميل" يضعه في جرس صاحب الموقع. لا يُرسل أي إيميل.
+          "جرّبه على حسابي" يضع الإشعار في جرسك أنت. "أرسل للعميل" يضعه في جرس صاحب الموقع. لا يُرسل أي رسالة بريد.
         </p>
         {msg && (
           <p className="mt-2 text-[14.5px] font-bold" style={{ color: msg.tone === 'ok' ? '#15803d' : '#b91c1c' }}>{msg.text}</p>

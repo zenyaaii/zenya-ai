@@ -311,7 +311,7 @@ function Overview({ data, t, range, day, rl, metric, setMetric, onPick }: {
           <span><span className="t-small">متوسط مدة الزيارة</span><b style={{ display: 'block', fontSize: 18 }} className="num">{mmss(tot.avg_duration_ms)}</b></span>
         </span>
         {durDelta != null && <span className={`delta ${durDelta < 0 ? 'dn' : ''}`}>{deltaTxt(Math.round(durDelta))}</span>}
-        <span className="t-small" style={{ flex: '1 1 240px' }}>زيارات الروبوتات لا تُحسب في هذه الأرقام.</span>
+        <span className="t-small" style={{ flex: '1 1 240px' }}>زيارات البرامج الآلية لا تُحسب في هذه الأرقام.</span>
       </div>
     </Pane>
   )
@@ -330,7 +330,7 @@ function Sources({ data, rl }: { data: AnalyticsPayload; rl: string }) {
   const dev = (['Mobile', 'Desktop', 'Tablet'] as const).map((k, i) => {
     const row = data.devices.find((d) => d.name === k)
     const pct = devTotal ? Math.round(((row?.visitors || row?.views || 0) / devTotal) * 100) : 0
-    return { k, label: k === 'Desktop' ? 'كمبيوتر' : k === 'Tablet' ? 'تابلت' : deviceLabelAr(k), pct, color: ['var(--acc)', 'var(--ink2)', 'var(--mut2)'][i], icon: (['mobile', 'monitor', 'tablet'] as IconName[])[i] }
+    return { k, label: k === 'Desktop' ? 'حاسوب' : k === 'Tablet' ? 'جهاز لوحي' : deviceLabelAr(k), pct, color: ['var(--acc)', 'var(--ink2)', 'var(--mut2)'][i], icon: (['mobile', 'monitor', 'tablet'] as IconName[])[i] }
   })
   const browsers = data.browsers.slice(0, 5).map((b): [string, number] => [BROWSER_AR[b.name] || b.name, b.visitors || b.views])
   return (
@@ -339,7 +339,7 @@ function Sources({ data, rl }: { data: AnalyticsPayload; rl: string }) {
         <div className="card">
           <div className="card-h"><h2 className="t-h3">القنوات</h2><span className="side-note">{rl}</span></div>
           {ch.length ? <Bars rows={ch} /> : <Empty />}
-          <p className="t-small" style={{ marginTop: 14 }}>{top === 'search' ? 'أغلب زوارك يجدونك من بحث جوجل. صفحة السيو تساعدك على الظهور أكثر.' : 'صفحة السيو تساعدك على الظهور أكثر في بحث جوجل.'}</p>
+          <p className="t-small" style={{ marginTop: 14 }}>{top === 'search' ? 'أغلب زوارك يجدونك من بحث جوجل. صفحة الظهور في البحث تساعدك على الظهور أكثر.' : 'صفحة الظهور في البحث تساعدك على الظهور أكثر في بحث جوجل.'}</p>
         </div>
         <div className="card"><div className="card-h"><h2 className="t-h3">الدول</h2><span className="side-note">{rl}</span></div>{countries.length ? <Bars rows={countries} tone="blue" /> : <Empty />}</div>
         <div className="card">
@@ -457,25 +457,25 @@ function Search({ get, siteId, toSeo, demo }: { get: AnalyticsGet; siteId: strin
     return () => { cancelled = true }
   }, [siteId, get])
 
-  const seoLink = <A className="link" to={toSeo} style={{ display: 'inline-flex', minHeight: 0 }}>صفحة السيو</A>
-  if (g.s === 'loading') return <Pane><div className="card"><div className="empty"><Ic n="g" /><span>نقرأ أرقامك من Google…</span></div></div></Pane>
+  const seoLink = <A className="link" to={toSeo} style={{ display: 'inline-flex', minHeight: 0 }}>صفحة الظهور في البحث</A>
+  if (g.s === 'loading') return <Pane><div className="card"><div className="empty"><Ic n="g" /><span>نقرأ أرقامك من جوجل…</span></div></div></Pane>
   if (g.s !== 'ok') {
     const text = g.s === 'missing'
-      ? 'حسابك في Google مربوط، لكن هذا الموقع لم يُضف إليه بعد. أضفه من صفحة السيو بزر واحد.'
+      ? 'حسابك في جوجل مربوط، لكن هذا الموقع لم يُضف إليه بعد. أضفه من صفحة الظهور في البحث بزر واحد.'
       : g.s === 'error' || g.s === 'off'
-        ? 'تعذّر الوصول إلى Google الآن. حاول بعد قليل.'
-        : 'اربطه بحساب Google الخاص بك، وتظهر هنا مرات ظهور موقعك في جوجل، والنقرات، والكلمات التي وجدك الناس بها.'
+        ? 'تعذّر الوصول إلى جوجل الآن. حاول بعد قليل.'
+        : 'اربطه بحساب جوجل الخاص بك، وتظهر هنا مرات ظهور موقعك في جوجل، والنقرات، والكلمات التي وجدك الناس بها.'
     return (
       <Pane>
         <div className="card" style={{ textAlign: 'center', padding: '36px 20px' }}>
           <span className="tile blue" style={{ margin: '0 auto 14px' }}><Ic n="g" /></span>
-          <h2 className="t-h3">{g.s === 'missing' ? 'الموقع غير مضاف إلى Google Search Console' : 'Google Search Console غير مربوط بعد'}</h2>
+          <h2 className="t-h3">{g.s === 'missing' ? 'الموقع غير مضاف إلى أداة جوجل لمشرفي المواقع' : 'أداة جوجل لمشرفي المواقع غير مربوطة بعد'}</h2>
           <p className="t-small" style={{ maxWidth: 440, margin: '10px auto 18px' }}>{text}</p>
           {g.s === 'disconnected' && (demo
-            ? <button className="btn k press" onClick={() => toast('في لوحتك الحقيقية يفتح هذا الزر حساب Google لتربطه', { ok: false })}><Ic n="g" />اربط Google Search Console</button>
+            ? <button className="btn k press" onClick={() => toast('في لوحتك الحقيقية يفتح هذا الزر حساب جوجل لتربطه', { ok: false })}><Ic n="g" />اربط أداة جوجل لمشرفي المواقع</button>
             // A full-page visit: Google's sign-in cannot run inside a client navigation.
-            : <a className="btn k press" href={`/api/gsc/connect?site=${encodeURIComponent(siteId)}`}><Ic n="g" />اربط Google Search Console</a>)}
-          {g.s === 'missing' && <A className="btn k press" to={toSeo}><Ic n="g" />افتح صفحة السيو</A>}
+            : <a className="btn k press" href={`/api/gsc/connect?site=${encodeURIComponent(siteId)}`}><Ic n="g" />اربط أداة جوجل لمشرفي المواقع</a>)}
+          {g.s === 'missing' && <A className="btn k press" to={toSeo}><Ic n="g" />افتح صفحة الظهور في البحث</A>}
         </div>
         <p className="t-small" style={{ margin: '12px 4px 0' }}>لتحسين ظهورك افتح {seoLink}.</p>
       </Pane>
@@ -487,7 +487,7 @@ function Search({ get, siteId, toSeo, demo }: { get: AnalyticsGet; siteId: strin
       <div className="gsc-head">
         <div className="who">
           <span className="tile blue"><Ic n="g" /></span>
-          <span className="trunc"><b style={{ display: 'block' }}>Google Search Console</b>{g.email && <span className="t-small">مربوط بحساب <span className="ltr">{g.email}</span></span>}</span>
+          <span className="trunc"><b style={{ display: 'block' }}>أداة جوجل لمشرفي المواقع</b>{g.email && <span className="t-small">مربوط بحساب <span className="ltr">{g.email}</span></span>}</span>
         </div>
         <span className="pill ok"><Ic n="check" />متصل</span>
       </div>
@@ -514,7 +514,7 @@ function Search({ get, siteId, toSeo, demo }: { get: AnalyticsGet; siteId: strin
           </table>
         )}
       </div>
-      <p className="t-small" style={{ margin: '12px 4px 0' }}>أرقام حقيقية من Google تصل متأخرة يومين أو ثلاثة. لتحسين ظهورك افتح {seoLink}.</p>
+      <p className="t-small" style={{ margin: '12px 4px 0' }}>أرقام حقيقية من جوجل تصل متأخرة يومين أو ثلاثة. لتحسين ظهورك افتح {seoLink}.</p>
     </Pane>
   )
 }

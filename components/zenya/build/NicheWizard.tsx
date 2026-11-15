@@ -211,7 +211,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       if (!res.ok) {
         setIgState('fail')
         setIgMsg(j?.error === 'not_found' ? 'لم نجد هذا الحساب. تأكد من الاسم، أو تابع بدونه.'
-          : j?.error === 'not_instagram' ? 'اكتب اسم الحساب مثل @yourname أو الصق رابطه.'
+          : j?.error === 'not_instagram' ? 'اكتب اسم الحساب مثل @اسم_حسابك أو الصق رابطه.'
           : j?.error === 'too_many' ? 'محاولات كثيرة. تابع، ونقرأ الحساب عند البناء.'
           : 'تعذّر قراءة الحساب الآن. تابع، ونعيد المحاولة عند البناء.')
         return
@@ -527,7 +527,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
                 <Input value={f.name} onChange={(e) => up('name', e.target.value)} placeholder={k.label} />
               </Field>
               <Field label="الاسم بالإنجليزية" hint="إن كان على اللافتة.">
-                <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="Name on the sign" />
+                <Input dir="ltr" value={f.latin} onChange={(e) => up('latin', e.target.value)} placeholder="الاسم بالحروف اللاتينية كما على اللوحة" />
               </Field>
               <Field label="المدينة" required>
                 <Input value={f.city} onChange={(e) => up('city', e.target.value)} placeholder="عمّان" />

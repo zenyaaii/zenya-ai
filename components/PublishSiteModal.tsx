@@ -192,7 +192,7 @@ export default function PublishSiteModal({
             }}
           >
             🎁 موقعك المباشر مجاني خلال الشهر الأول! بعده، ستحتاج إلى{' '}
-            <strong>خطة Starter</strong> للإبقاء على موقعك.
+            <strong>الخطة الأساسية</strong> للإبقاء على موقعك.
           </div>
         )}
 
@@ -210,7 +210,7 @@ export default function PublishSiteModal({
             }}
           >
             احصل على موقعك المباشر على <strong>اسمك.beynoun.com</strong> مع{' '}
-            <strong>خطة Starter ({usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا)</strong>.{' '}
+            <strong>الخطة الأساسية ({usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا)</strong>.{' '}
             <a href="/pricing?upgrade=starter" style={{ color: '#5e6ad2', textDecoration: 'underline' }}>
               ابدأ الآن ←
             </a>

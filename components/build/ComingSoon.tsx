@@ -27,7 +27,7 @@ export default function ComingSoon({
   const features = [
     { icon: Zap, title: 'أسرع من أي وقت', body: 'من رابط المنتج إلى متجر مباشر خلال دقائق، بلا خطوات معقّدة.' },
     { icon: Palette, title: 'قوالب جديدة كليًا', body: 'تصاميم احترافية مصمّمة للبيع والتحويل — لا مجرد صفحة منتج.' },
-    { icon: ShoppingBag, title: 'تثبيت بنقرة واحدة', body: 'نُنشئ المنتج ونثبّت القالب في متجر Shopify تلقائيًا نيابةً عنك.' },
+    { icon: ShoppingBag, title: 'تثبيت بنقرة واحدة', body: 'نُنشئ المنتج ونثبّت القالب في متجر شوبيفاي تلقائيًا نيابةً عنك.' },
   ]
 
   return (
@@ -52,7 +52,7 @@ export default function ComingSoon({
           </div>
 
           <h1 className="mt-5 text-[30px] font-extrabold leading-[1.15] tracking-tight text-foreground sm:text-[40px]">
-            جيلٌ جديد من متاجر Shopify
+            جيلٌ جديد من متاجر شوبيفاي
             <br className="hidden sm:block" />
             <span className="text-primary"> قيد الصناعة.</span>
           </h1>

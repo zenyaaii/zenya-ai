@@ -16,8 +16,8 @@ type DomainRow = {
 }
 
 const STATUS_LABEL: Record<DomainRow['status'], { label: string; color: string; bg: string }> = {
-  pending_dns: { label: 'بانتظار DNS',     color: '#7a5f00', bg: 'rgba(217,119,6,0.10)' },
-  pending_ssl: { label: 'جارٍ إصدار SSL…',  color: '#5e6ad2', bg: 'rgba(94,106,210,0.10)' },
+  pending_dns: { label: 'بانتظار سجلات النطاق',     color: '#7a5f00', bg: 'rgba(217,119,6,0.10)' },
+  pending_ssl: { label: 'جارٍ إصدار شهادة الأمان…',  color: '#5e6ad2', bg: 'rgba(94,106,210,0.10)' },
   live:        { label: '🔒 منشور',         color: '#15803d', bg: 'rgba(22,163,74,0.10)' },
   error:       { label: 'خطأ',             color: '#b91c1c', bg: 'rgba(220,38,38,0.10)' },
   removed:     { label: 'مُزال',            color: '#6b6b6b', bg: 'rgba(0,0,0,0.05)' },

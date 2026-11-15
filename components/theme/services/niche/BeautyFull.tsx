@@ -45,7 +45,7 @@ function Hero({ n, content, x }: { n: N; content: ServiceContent; x: NicheExtra 
             {n.services.length ? <button type="button" className="n-btn ghost y-big" onClick={() => go('sessions')}>الجلسات والأسعار</button> : null}
           </div>
           <div className="y-facts">
-            {n.rating ? <span><b><CountUp to={n.rating} dec={1} /></b><small>{n.count ? `من ${ar(n.count)} تقييم` : 'على Google'}</small></span> : null}
+            {n.rating ? <span><b><CountUp to={n.rating} dec={1} /></b><small>{n.count ? `من ${ar(n.count)} تقييم` : 'على جوجل'}</small></span> : null}
             {n.st ? <span><b className={n.st.open ? 'on' : 'off'}>{n.st.open ? 'مفتوح الآن' : 'مغلق الآن'}</b><small>{n.st.text}</small></span> : null}
             {n.where ? <span><b>{n.b.area || n.b.city}</b><small>{n.b.area ? n.b.city : ''}</small></span> : null}
           </div>
@@ -162,7 +162,7 @@ function Specialists({ n }: { n: N }) {
           <h3>{m.name}</h3>
           {m.role ? <small>{m.role}</small> : null}
           {m.tags?.length ? <ul>{m.tags.map((t) => <li key={t}>{t}</li>)}</ul> : null}
-          {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على Google</cite> : null}</blockquote> : null}
+          {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على جوجل</cite> : null}</blockquote> : null}
         </article>
       ))}
     </div>

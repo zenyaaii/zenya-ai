@@ -58,7 +58,7 @@ export const REVIEW_REWARD_EN = `${REVIEW_REWARD_PCT}% off your first month`
 export const REVIEW_REWARD_META = {
   label: REVIEW_REWARD_AR,
   description:
-    'أدخِله في خانة «Promotion code» عند الاشتراك. صالح لأول شهر وللعملاء الجدد.',
+    'أدخِله في خانة «إضافة رمز ترويجي» عند الاشتراك. صالح لأول شهر وللعملاء الجدد.',
   kind: 'subscription',
   source: 'review',
 } as const

@@ -83,19 +83,19 @@ export default function OwnerReviewsFields({ form, patch, name, city, detail }: 
   // Cells, not a grid: the step wraps them in its Grid beside its own fields.
   return (
     <>
-      <Field label="رابط نشاطك على خرائط Google (أو Trustpilot أو Facebook)" wide hint="الصق رابط Google واضغط «اجلب تقييماتي»، أو أضف تقييماتك بيدك تحت.">
+      <Field label="رابط نشاطك على خرائط جوجل (أو ترست بايلوت أو فيسبوك)" wide hint="الصق رابط جوجل واضغط «اجلب تقييماتي»، أو أضف تقييماتك بيدك تحت.">
         <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => { const v = e.target.value; patch(() => ({ reviews_url: v })) }} placeholder="https://maps.app.goo.gl/..." />
       </Field>
       <Block>
         <GoogleReviewsImport url={form.reviews_url || ''} name={name} city={city} onPlace={placeGoogle} onImport={importGoogle} />
       </Block>
-      <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
+      <Field label="متوسط التقييم" hint="كما يظهر على جوجل، مثلًا 4.8">
         <Input value={form.review_rating || ''} onChange={(e) => { const v = e.target.value; patch(() => ({ review_rating: v })) }} placeholder="4.8" />
       </Field>
       <Field label="عدد التقييمات">
         <Input value={form.review_count || ''} onChange={(e) => { const v = e.target.value; patch(() => ({ review_count: v })) }} placeholder="120" />
       </Field>
-      <Block title="تقييمات تريد عرضها" hint={reviews.length === 0 ? 'انسخ تقييمات من Google والصقها هنا. تقدر تعدّلها لاحقًا من لوحة التحكم.' : undefined}>
+      <Block title="تقييمات تريد عرضها" hint={reviews.length === 0 ? 'انسخ تقييمات من جوجل والصقها هنا. تقدر تعدّلها لاحقًا من لوحة التحكم.' : undefined}>
         <div className="zb-list">
           {reviews.map((r, i) => (
             <Card key={r.id} title={'التقييم ' + (i + 1)} onRemove={() => remove(r.id)} removeLabel={'حذف التقييم ' + (i + 1)}>

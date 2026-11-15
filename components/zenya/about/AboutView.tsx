@@ -42,7 +42,7 @@ const plex = { className: "" }
 const PILLARS = [
   {
     title: "ثمانية قوالب لكل نشاط",
-    desc: "مطعم، لوك بوك أزياء، صفحة هبوط لتطبيق، قصة علامة تجارية، مركز عافية، خدمات، متجر بمنتجات متعددة، ومتجر بمنتج واحد. قالب لكل نوع نشاط — لا قالب واحد يحاول أن يناسب الجميع.",
+    desc: "مطعم، دفتر إطلالات للأزياء، صفحة هبوط لتطبيق، قصة علامة تجارية، مركز عافية، خدمات، متجر بمنتجات متعددة، ومتجر بمنتج واحد. قالب لكل نوع نشاط — لا قالب واحد يحاول أن يناسب الجميع.",
   },
   {
     title: "من الفكرة إلى موقع خلال دقائق",
@@ -53,8 +53,8 @@ const PILLARS = [
     desc: "بينون مبنية للسوق العربي — محتوى بلغة عربية سليمة، وتخطيط من اليمين إلى اليسار، وخطوط مصمّمة للعربية. ليست ترجمة لاحقة، بل تصميم عربيّ من الأساس.",
   },
   {
-    title: "استضافة أوروبية متوافقة مع GDPR",
-    desc: "تُستضاف مواقعك وبياناتك داخل الاتحاد الأوروبي، مع شهادة SSL تلقائية وحماية للخصوصية. أساس موثوق لعلامتك التجارية.",
+    title: "استضافة أوروبية متوافقة مع اللائحة العامة لحماية البيانات",
+    desc: "تُستضاف مواقعك وبياناتك داخل الاتحاد الأوروبي، مع شهادة أمان تلقائية وحماية للخصوصية. أساس موثوق لعلامتك التجارية.",
   },
 ] as const
 
@@ -63,7 +63,7 @@ const VALUES = [
   "الصدق قبل كل شيء — لا أرقام وهمية ولا تقييمات مُختلَقة. ما نعرضه حقيقي أو لا نعرضه.",
   "الجودة ليست رفاهية — كل قالب مبنيّ ليبدو احترافيًا ويبيع، لا مجرّد صفحة جميلة.",
   "في متناول الجميع — أدوات بمستوى الوكالات، بسعر يقدر عليه أي نشاط تجاري ناشئ.",
-  "خصوصيتك ملكك — استضافة وبيانات داخل الاتحاد الأوروبي، وامتثال كامل للـ GDPR.",
+  "خصوصيتك ملكك — استضافة وبيانات داخل الاتحاد الأوروبي، وامتثال كامل للائحة العامة لحماية البيانات.",
 ] as const
 
 const REAL = "/about"
@@ -182,56 +182,14 @@ export default function AboutView() {
             <p className="zx-p">
               بينون هي <strong>أوّل شركة إسلامية</strong> متخصّصة في بناء المواقع.
               تُشغّلها <strong>{COMPANY.LEGAL_NAME}</strong>، مؤسسة فردية مسجّلة في هولندا لدى الغرفة
-              التجارية الهولندية (KvK رقم <bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi>). هذا يعني بنية
+              التجارية الهولندية (رقم السجل <bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi>). هذا يعني بنية
               أوروبية موثوقة لاستضافة مواقعك وحماية بياناتك، مع التزام كامل بلوائح حماية البيانات
               الأوروبية.
             </p>
           </div>
         </section>
 
-        {/* 6. THE ENGLISH MIRROR. Crawlable LTR content the live page earns
-            traffic with, so it stays. Quieter, and opened by a hairline. */}
-        <section className="zx-mirror" dir="ltr" data-reveal>
-            <p className={"zx-eyebrow " + plex.className}>
-              <span className="zx-eyebrow-dot" aria-hidden />
-              About Beynoun (English)
-            </p>
-            <h2>We turn your idea into a professional website.</h2>
-            <p>
-              Beynoun is the <strong>first Muslim company</strong> to build websites — a
-              website builder made for the Arab market. We believe every business — no matter how
-              small — deserves a site that looks professional and earns customer trust, without
-              paying thousands to an agency or waiting weeks. You write a short brief; Beynoun
-              writes the copy, picks the design, and lays out the sections.
-            </p>
-            <p>
-              Instead of one generic template, Beynoun ships <strong>eight templates</strong> — one
-              per business type: restaurant, fashion lookbook, app landing page, brand story,
-              wellness center, services, multi-product store, and single-product storefront. Each
-              is built around what that business actually needs to convert visitors into
-              customers. Content is Arabic-first and right-to-left by design, and every site is
-              hosted in the EU with automatic SSL and full GDPR compliance.
-            </p>
-            <p>
-              Beynoun is the first Muslim company dedicated to building websites. It is operated
-              by <strong>{COMPANY.LEGAL_NAME}</strong>, a Dutch sole proprietorship registered
-              with the Netherlands Chamber of Commerce (KvK no.{" "}
-              <bdi dir="ltr">{COMPANY.KVK_NUMBER}</bdi>).
-            </p>
-            {/* The live mirror ends with these two, and an earlier draft of
-                this page dropped them along with the Arabic call to action it
-                had moved into the hero. Dropping a section is an edit, not a
-                restyle, so they are back. The label is the one the Arabic
-                half uses, translated as the live page translates it, which is
-                the skill's one-label-per-intent rule rather than a second
-                intent. */}
-            <div className="zx-acts zx-acts-en">
-              <SlideButton href="/login?mode=signup">Start building free</SlideButton>
-              <Link href="/pricing" className="zx-act-2">See pricing</Link>
-            </div>
-        </section>
-
-        <p className="zx-foot-note">
+                <p className="zx-foot-note">
           صفحة تصميم مُقترحة لـ <Link href={REAL} className="zx-link"><bdi dir="ltr">{REAL}</bdi></Link>.
           النص هو نص الصفحة الحيّة كما هو؛ ما تغيّر هو شكله وحده.
         </p>

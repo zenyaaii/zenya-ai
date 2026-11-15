@@ -255,7 +255,7 @@ export default function PhotoFull({ content, x: given, colors, initial, view, on
                 <small>{owner.role || 'المصوّر'}</small>
                 <h2 className="p-h2">{owner.name}</h2>
                 {owner.tags?.length ? <ul className="p-tags">{owner.tags.map((t) => <li key={t}>{t}</li>)}</ul> : null}
-                {owner.quote ? <blockquote>«{owner.quote}»{owner.quote_by ? <cite>{owner.quote_by}، على Google</cite> : null}</blockquote> : null}
+                {owner.quote ? <blockquote>«{owner.quote}»{owner.quote_by ? <cite>{owner.quote_by}، على جوجل</cite> : null}</blockquote> : null}
               </div>
             </div></section>
           ) : null}

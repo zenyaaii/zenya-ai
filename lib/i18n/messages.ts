@@ -22,7 +22,7 @@ const ar = {
     sites: 'المواقع',
     gallery: 'المعرض',
     analytics: 'التحليلات',
-    seo: 'السيو',
+    seo: 'الظهور في البحث',
     domains: 'النطاقات',
     bookings: 'الحجوزات',
     reviews: 'التقييمات',
@@ -63,7 +63,7 @@ const ar = {
     customize: 'خصّص محتواك',
     publish: 'انشُر موقعك',
     connectDomain: 'اربط نطاقك',
-    setupSeo: 'هيّئ السيو',
+    setupSeo: 'هيّئ الظهور في البحث',
     recheck: 'إعادة التحقق',
     recheckShort: 'إعادة',
     /** {step} is the step label. */
@@ -255,12 +255,12 @@ const ar = {
     /** The same notice, one line, for a phone. */
     demoNoticeShort: 'تعديلاتك لا تُحفظ في أي مكان.',
     /** Shown only when scripts are off: the editor cannot load without them. */
-    needsJs: 'المحرّر يحتاج إلى تفعيل JavaScript في المتصفح.',
+    needsJs: 'المحرّر يحتاج إلى تفعيل جافاسكربت في المتصفح.',
     demoTemplate: 'القالب',
     /** The six template names, as lib/template-pages.tsx names them. */
     demoTypeRestaurant: 'موقع مطعم',
     demoTypeAtlas: 'صفحة هبوط لتطبيق',
-    demoTypeLookbook: 'موقع أزياء ولوك بوك',
+    demoTypeLookbook: 'موقع أزياء ودفتر إطلالات',
     demoTypeServices: 'موقع خدمات',
     demoTypeStudio: 'موقع علامة تجارية وقصة',
     demoTypeWellness: 'موقع مركز عافية',

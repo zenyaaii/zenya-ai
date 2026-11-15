@@ -27,7 +27,7 @@ import { useEffect, useRef } from "react"
 import Link from "next/link"
 import { ChevronDown } from "lucide-react"
 import SlideButton from "@/components/ui/SlideButton"
-import { AR_FAQS, EN_FAQS, type QA } from "@/lib/faq-data"
+import { AR_FAQS, type QA } from "@/lib/faq-data"
 import { LaylFrame, laylify } from "@/components/zenya/redesign/layl"
 import { MARKETING_CSS } from "@/components/zenya/chrome/marketing"
 import { CSS } from "./styles"
@@ -102,23 +102,7 @@ export default function FaqView() {
           ))}
         </section>
 
-        {/* The English mirror. Crawlable LTR content the live page earns
-            traffic with, so it stays: same eleven questions, same mechanism,
-            a quieter scale and a hairline above it. */}
-        <section className="zx-mirror" dir="ltr" data-reveal>
-          <p className={"zx-eyebrow " + plex.className}>
-            <span className="zx-eyebrow-dot" aria-hidden />
-            FAQ (English)
-          </p>
-          <h2>Frequently asked questions</h2>
-          <div className="zx-qs">
-            {EN_FAQS.map((item, i) => (
-              <Question key={item.q} item={item} id={"en-" + i} />
-            ))}
-          </div>
-        </section>
-
-        {/* THE CLOSING BLOCK IS THE LIVE PAGE'S, RESTORED. An earlier draft
+                {/* THE CLOSING BLOCK IS THE LIVE PAGE'S, RESTORED. An earlier draft
             of this page moved the call to action into the hero and dropped
             this section with it, which deletes two runs of the product's own
             copy. Both are back. The action carries the same label as the

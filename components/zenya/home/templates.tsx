@@ -196,8 +196,8 @@ const R = {
   phone: "+961 1 555 0140",
   email: "reservations@darnoor.com",
   story: "بيت من القرن التاسع عشر، فتح مطعمًا عام ٢٠١٤. مطبخ شامي بمكوّنات من مزارع البقاع.",
-  chefName: "الشيف سامي خوري",
-  chefTitle: "الشيف · المالك",
+  chefName: "الطاهي سامي خوري",
+  chefTitle: "رئيس الطهاة · المالك",
   press: "النهار\nدليل ميشلان\nتايم آوت بيروت",
 }
 
@@ -297,8 +297,8 @@ export const restaurant: TemplateDef = {
             <Field label="عن المطعم" t="story" on={focus === "story"} value={f.story} area wide
               ph="بضع جمل. متى افتتحت، وما الفلسفة، ومن أين تستورد؟" />
             <div className="zn-row">
-              <Field label="اسم الشيف" t="chef_name" on={focus === "chef_name"} value={f.chef_name} ph="الشيف سامي خوري" />
-              <Field label="لقب الشيف" t="chef_title" on={focus === "chef_title"} value={f.chef_title} ph="الشيف · المالك" />
+              <Field label="اسم رئيس الطهاة" t="chef_name" on={focus === "chef_name"} value={f.chef_name} ph="الطاهي سامي خوري" />
+              <Field label="لقب رئيس الطهاة" t="chef_title" on={focus === "chef_title"} value={f.chef_title} ph="رئيس الطهاة · المالك" />
             </div>
           </>
         )
@@ -462,10 +462,10 @@ const S_SHOTS = [
    watching the list grow IS this template's centrepiece, the way the menu
    read is the restaurant's. */
 const S_SERVICES = [
-  { name: "تركيب مكيّفات سبليت", price: "يبدأ من 450 ﷼",
+  { name: "تركيب مكيّفات منفصلة", price: "يبدأ من 450 ﷼",
     desc: "تركيب كامل مع اختبار التشغيل وضمان سنة.", badge: "الأكثر طلبًا" },
   { name: "صيانة دورية وتنظيف", price: "يبدأ من 180 ﷼",
-    desc: "تنظيف الفلاتر والمواسير وفحص غاز التبريد.", badge: "" },
+    desc: "تنظيف المرشِّحات والمواسير وفحص غاز التبريد.", badge: "" },
   { name: "كشف تسرّب وإصلاح", price: "يبدأ من 250 ﷼",
     desc: "كشف بالأجهزة وإصلاح في الزيارة نفسها.", badge: "استجابة سريعة" },
 ]

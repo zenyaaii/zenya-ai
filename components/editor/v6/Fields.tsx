@@ -508,8 +508,8 @@ function LogoCard() {
   return (
     <div className="card-note">
       <div className="hd"><span className="logo-box"><Ic n="img" /></span><span>الشعار</span></div>
-      <p>ترفع شعارك مرة واحدة من صفحة «الظهور في Google» في لوحة التحكم، ويصبح أيقونة موقعك في المتصفح أيضًا.</p>
-      <button type="button" className="btn sm" onClick={() => ed.dash('seo', 'الظهور في Google')}>ارفع الشعار <Ic n="open" /></button>
+      <p>ترفع شعارك مرة واحدة من صفحة «الظهور في جوجل» في لوحة التحكم، ويصبح أيقونة موقعك في المتصفح أيضًا.</p>
+      <button type="button" className="btn sm" onClick={() => ed.dash('seo', 'الظهور في جوجل')}>ارفع الشعار <Ic n="open" /></button>
     </div>
   )
 }
@@ -520,7 +520,7 @@ function ReviewsCard({ path }: { path: string }) {
   return (
     <div className="card-note">
       <div className="hd"><Ic n="reviews" />تقييماتك</div>
-      <p>يظهر في موقعك {plural(n, 'رأي واحد', 'رأيان', 'آراء', 'رأيًا')}. تجلب آراء Google وتختار ما يظهر من صفحة «الآراء» في لوحة التحكم، وتعدّل نصوصها هنا.</p>
+      <p>يظهر في موقعك {plural(n, 'رأي واحد', 'رأيان', 'آراء', 'رأيًا')}. تجلب آراء جوجل وتختار ما يظهر من صفحة «الآراء» في لوحة التحكم، وتعدّل نصوصها هنا.</p>
       <button type="button" className="btn sm k" onClick={() => ed.dash('reviews', 'الآراء')}>افتح صفحة الآراء <Ic n="open" /></button>
     </div>
   )

@@ -245,10 +245,10 @@ export function DomainsView({ siteId }: { siteId: string }) {
 
 export function BillingView() {
   const { toast } = useV6()
-  const soon = () => toast('في اللوحة الحقيقية تفتح هنا بوابة Stripe', { ok: false })
+  const soon = () => toast('في اللوحة الحقيقية تفتح هنا بوابة سترايب', { ok: false })
   return (
     <V6Billing
-      current={{ label: 'Pro نشط', price: '24.99$', per: 'شهريًا', renews: 'يتجدّد تلقائيًا في 14 نوفمبر 2026', on: '14 نوفمبر 2026', inc: V6_PLANS[2].inc, paid: true, id: 'pro' }}
+      current={{ label: 'الخطة الاحترافية نشطة', price: '24.99$', per: 'شهريًا', renews: 'يتجدّد تلقائيًا في 14 نوفمبر 2026', on: '14 نوفمبر 2026', inc: V6_PLANS[2].inc, paid: true, id: 'pro' }}
       card={{ brand: 'visa', last4: '4242', exp: '08/28', holder: 'NADIA H.' }}
       invoices={INVOICES.map((i) => ({ id: i.id, date: i.date, amount: i.amount, status: i.status, tone: 'ok', pdf: null }))}
       plans={V6_PLANS}
@@ -270,7 +270,7 @@ export function SettingsView() {
       signOutOthers={async () => { await wait(300); return true }}
       notices={[
         { key: 'booking', label: 'حجز جديد', sub: 'بريد فور وصول كل حجز', on: true },
-        { key: 'review', label: 'تقييم جديد', sub: 'عندما يكتب أحد تقييمًا على Google', on: true },
+        { key: 'review', label: 'تقييم جديد', sub: 'عندما يكتب أحد تقييمًا على جوجل', on: true },
         { key: 'product', label: 'تحديثات بينون', sub: 'مزايا جديدة، مرة في الشهر', on: true },
         { key: 'offers', label: 'عروض وتخفيضات', sub: 'خصومات على الباقات والنطاقات', on: false },
       ]}

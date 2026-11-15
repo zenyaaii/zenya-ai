@@ -78,7 +78,7 @@ export default function CarA({ content, x = {}, colors }: { content: ServiceCont
       </div></section>
 
       {x.brands?.length ? (
-        <section className="ca-mq" aria-label="الماركات"><div className="ca-mq-t">{[...x.brands, ...x.brands, ...x.brands, ...x.brands].map((m, i) => <span key={i} aria-hidden={i >= x.brands!.length}>{m}</span>)}</div></section>
+        <section className="ca-mq" aria-label="العلامات"><div className="ca-mq-t">{[...x.brands, ...x.brands, ...x.brands, ...x.brands].map((m, i) => <span key={i} aria-hidden={i >= x.brands!.length}>{m}</span>)}</div></section>
       ) : null}
 
       <section id="svc" className="ca-sec"><div className="n-w">

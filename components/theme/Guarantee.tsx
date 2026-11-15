@@ -25,7 +25,7 @@ export default function Guarantee({
                 ✅ {guarantee.days}-Day Money Back Guarantee
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-6 py-3 text-slate-800 font-bold text-sm border border-slate-200 shadow-sm">
-                🔒 دفع آمن بشهادة SSL
+                🔒 دفع آمن بشهادة أمان
               </div>
             </div>
             

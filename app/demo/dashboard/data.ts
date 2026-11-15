@@ -46,7 +46,7 @@ export const SITES: DemoSite[] = [
   { id: 's1', name: 'مطعم المدينة', kind: 'مطعم',   host: 'al-madina.beynoun.com',   live: true,  views: 4821, updated: 'قبل يومين' },
   { id: 's2', name: 'أطلس ستوديو',  kind: 'تطبيق',  host: 'atlas-studio.beynoun.com', live: true,  views: 1264, updated: 'قبل 6 أيام' },
   { id: 's3', name: 'واحة العافية',  kind: 'عافية',  host: 'waha.beynoun.com',        live: true,  views: 738,  updated: 'قبل أسبوعين' },
-  { id: 's4', name: 'لوك بوك 26',   kind: 'أزياء',  host: null,                     live: false, views: 0,    updated: 'قبل شهر' },
+  { id: 's4', name: 'دفتر إطلالات 26',   kind: 'أزياء',  host: null,                     live: false, views: 0,    updated: 'قبل شهر' },
   { id: 's5', name: 'متجر الخيط',   kind: 'شوبيفاي', host: null,                    live: false, views: 0,    updated: 'قبل شهرين' },
 ]
 
@@ -77,8 +77,8 @@ export type DemoDomain = {
 export const DOMAINS: DemoDomain[] = [
   { domain: 'almadina.ae',      site: 'مطعم المدينة', status: 'متصل',         tone: 'ok',     ssl: true,  renews: '12 مارس 2027' },
   { domain: 'atlasstudio.app',  site: 'أطلس ستوديو',  status: 'متصل',         tone: 'ok',     ssl: true,  renews: '2 يونيو 2027' },
-  { domain: 'waha-wellness.co', site: 'واحة العافية',  status: 'بانتظار DNS',  tone: 'accent', ssl: false, renews: '—' },
-  { domain: 'lookbook26.com',   site: 'لوك بوك 26',   status: 'ينتهي قريبًا', tone: 'quiet',  ssl: true,  renews: '28 سبتمبر 2026' },
+  { domain: 'waha-wellness.co', site: 'واحة العافية',  status: 'بانتظار سجلات النطاق',  tone: 'accent', ssl: false, renews: '—' },
+  { domain: 'lookbook26.com',   site: 'دفتر إطلالات 26',   status: 'ينتهي قريبًا', tone: 'quiet',  ssl: true,  renews: '28 سبتمبر 2026' },
 ]
 
 /* ── gallery ─────────────────────────────────────────────────────────────── */
@@ -97,8 +97,8 @@ export const ASSETS: DemoAsset[] = [
   { id: 'a5', name: 'شعار أطلس.svg',      site: 'أطلس ستوديو',  size: '12 ك.ب',  tint: '#8f97bd' },
   { id: 'a6', name: 'غرفة العلاج.jpg',    site: 'واحة العافية',  size: '374 ك.ب', tint: '#a9bfae' },
   { id: 'a7', name: 'زيوت عطرية.jpg',     site: 'واحة العافية',  size: '221 ك.ب', tint: '#b7c7b4' },
-  { id: 'a8', name: 'إطلالة الخريف.jpg',  site: 'لوك بوك 26',   size: '598 ك.ب', tint: '#c3aeb2' },
-  { id: 'a9', name: 'تفاصيل القماش.jpg',  site: 'لوك بوك 26',   size: '333 ك.ب', tint: '#b8a6ad' },
+  { id: 'a8', name: 'إطلالة الخريف.jpg',  site: 'دفتر إطلالات 26',   size: '598 ك.ب', tint: '#c3aeb2' },
+  { id: 'a9', name: 'تفاصيل القماش.jpg',  site: 'دفتر إطلالات 26',   size: '333 ك.ب', tint: '#b8a6ad' },
 ]
 
 /* ── billing ─────────────────────────────────────────────────────────────── */
@@ -113,10 +113,10 @@ export const INVOICES = [
 export const PLAN_INCLUDES = [
   'توليد غير محدود',
   'استضافة مشمولة على beynoun.com',
-  'نطاق مخصّص + شهادة SSL تلقائية',
+  'نطاق مخصّص + شهادة أمان تلقائية',
   'الحجوزات وصندوق الطلبات',
-  'أدوات السيو ومعاينة نتيجة جوجل',
-  'تصدير ثيم شوبيفاي',
+  'أدوات الظهور في البحث ومعاينة نتيجة جوجل',
+  'تصدير قالب شوبيفاي',
 ]
 
 /* ── seo ─────────────────────────────────────────────────────────────────── */
@@ -139,7 +139,7 @@ export const GSC_QUERIES = [
   { query: 'مطعم شامي قريب مني', impressions: 912, clicks: 38, ctr: 0.042, position: 9.1 },
   { query: 'مطعم المدينة', impressions: 604, clicks: 61, ctr: 0.101, position: 1.4 },
   { query: 'حجز طاولة عشاء', impressions: 488, clicks: 11, ctr: 0.023, position: 17.8 },
-  { query: 'منيو مطعم المدينة', impressions: 371, clicks: 19, ctr: 0.051, position: 2.2 },
+  { query: 'قائمة طعام مطعم المدينة', impressions: 371, clicks: 19, ctr: 0.051, position: 2.2 },
   { query: 'أفضل شاورما في المدينة', impressions: 296, clicks: 6, ctr: 0.02, position: 21.4 },
   { query: 'مطاعم عائلية', impressions: 214, clicks: 4, ctr: 0.019, position: 24.9 },
   { query: 'فتوش وحمص', impressions: 163, clicks: 2, ctr: 0.012, position: 28.3 },

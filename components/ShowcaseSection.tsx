@@ -37,7 +37,7 @@ const TYPE_META: Record<
   },
   restaurant: {
     icon: Utensils,
-    pitch: 'قائمة رقمية، حجوزات فورية، وقصّة الشيف — تجربة تبدأ قبل الطاولة.',
+    pitch: 'قائمة رقمية، حجوزات فورية، وقصّة رئيس الطهاة — تجربة تبدأ قبل الطاولة.',
     article: '/why/restaurant',
   },
   atlas: {
@@ -47,7 +47,7 @@ const TYPE_META: Record<
   },
   lookbook: {
     icon: Shirt,
-    pitch: 'لوك بوك تحريري يرفع علامتك من «متجر» إلى «قصّة تُشترى».',
+    pitch: 'دفتر إطلالات تحريري يرفع علامتك من «متجر» إلى «قصّة تُشترى».',
     article: '/why/lookbook',
   },
   collective: {

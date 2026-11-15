@@ -55,14 +55,14 @@ function buildSampleForm(): Form {
       { id: uid(), title: 'مصدر صادق', description: 'كل مادة تعود إلى مشغل أو فرن أو مصنع باسمٍ معروف. لا سلاسل توريد غامضة.' },
       { id: uid(), title: 'صُنعت لتدوم بعدنا', description: 'نصمّم أشياء تُصلِحها بدل أن تستبدلها. ونبيع قطع الغيار إلى الأبد.' },
     ],
-    process_description: 'كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا. لا أرضية مصنع — بل فرن في الريف، ومشغل صغير، وأتيليه متواضع.',
+    process_description: 'كل قطعة تستغرق أسابيع. نزور كل مشغل، ونفحص كل دفعة، ونرفض كل ما ليس مثاليًا. لا أرضية مصنع — بل فرن في الريف، ومشغل صغير، ومرسم متواضع.',
     process_steps: 'التوريد، التصميم، الصنع، الفحص، التغليف، الشحن',
     team_size: '9 أشخاص موزّعون على ثلاث ورش',
     press_features: 'The New York Times, Wallpaper*, Monocle, Vogue Living, Cereal',
     milestones: [
       { id: uid(), year: '2017', event: 'إطلاق أول تشكيلة من شقة صغيرة' },
       { id: uid(), year: '2019', event: 'افتتاح ورشة الفرن' },
-      { id: uid(), year: '2022', event: 'ظهور ضمن قائمة Wallpaper للتصميم' },
+      { id: uid(), year: '2022', event: 'ظهور ضمن قائمة وولبيبر للتصميم' },
       { id: uid(), year: '2024', event: 'القطعة الأربعون ألفًا في بيتٍ ما' },
     ],
     customer_count: '+42,000 قطعة في البيوت',
@@ -352,7 +352,7 @@ export default function StudioWizardPage() {
       body: (
         <Grid>
           <Field label="ظهور في الصحافة" wide hint="مفصولة بفواصل.">
-            <Input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="The New York Times, Wallpaper*, Monocle" />
+            <Input value={form.press_features} onChange={(e) => update('press_features', e.target.value)} placeholder="الشرق الأوسط، سيدتي، مجلة هي" />
           </Field>
           <Field label="حجم الفريق">
             <Input value={form.team_size} onChange={(e) => update('team_size', e.target.value)} placeholder="مثلاً: 9 أشخاص" />

@@ -7,7 +7,7 @@
 import { Root, Header, Vid, Stars, FooterLinks, Contact, Socials, Mark, Check, Plus } from './base'
 import { HERO, REVIEWS, REVIEWS_NOTE, DASH_D, DASH_M, EDIT_D, EDIT_M, DASH_FEATURES, EDIT_STEPS, TEMPLATES, phoneShot, FAQS, PRICING_FAQS, PRICING_HEAD, PLANS, FOOTER } from './data'
 
-const NICHES = ['مطاعم', 'مقاهي', 'خدمات محلية', 'حِرف', 'مراكز عافية', 'سبا', 'أزياء', 'علامات تجارية', 'تطبيقات', 'متاجر']
+const NICHES = ['مطاعم', 'مقاهي', 'خدمات محلية', 'حِرف', 'مراكز عافية', 'منتجع صحي', 'أزياء', 'علامات تجارية', 'تطبيقات', 'متاجر']
 
 const CSS = `
 .s4 .h{background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}

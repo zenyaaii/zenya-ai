@@ -111,8 +111,8 @@ export default function V6Sites(p: V6SitesProps) {
             <a className="r" href={`https://wa.me/?text=${encodeURIComponent(`${s.name}\n${url}`)}`} target="_blank" rel="noopener noreferrer" onClick={() => closeSheet()}>
               <span className="tile ok"><Ic n="whatsapp" /></span><span className="tx"><b>أرسل على واتساب</b><span>يفتح واتساب برسالة جاهزة</span></span>
             </a>
-            <button className="r" onClick={async () => { closeSheet(); if (await saveQr(url, s.host || s.name)) toast('تم تجهيز رمز QR للتحميل'); else toast('تعذّر تجهيز رمز QR', { ok: false }) }}>
-              <span className="tile"><Ic n="more" /></span><span className="tx"><b>رمز QR للطاولات</b><span>اطبعه وضعه على الطاولة أو الباب</span></span>
+            <button className="r" onClick={async () => { closeSheet(); if (await saveQr(url, s.host || s.name)) toast('تم تجهيز رمز الاستجابة السريعة للتحميل'); else toast('تعذّر تجهيز رمز الاستجابة السريعة', { ok: false }) }}>
+              <span className="tile"><Ic n="more" /></span><span className="tx"><b>رمز الاستجابة السريعة للطاولات</b><span>اطبعه وضعه على الطاولة أو الباب</span></span>
             </button>
           </div>
         </>
@@ -220,7 +220,7 @@ export default function V6Sites(p: V6SitesProps) {
               <A to={x.edit} className="btn sm press"><Ic n="edit" />تعديل</A>
               <A to={x.preview} className="btn sm press"><Ic n="eye" />معاينة</A>
               {x.shopify
-                ? <A to={x.shopify} className="btn sm k press"><Ic n="download" />نزّل الثيم</A>
+                ? <A to={x.shopify} className="btn sm k press"><Ic n="download" />نزّل القالب</A>
                 : x.live
                   ? <button className="btn sm k press" onClick={() => share(x)}><Ic n="share" />شارك</button>
                   : publishBtn(x, 'btn sm acc press', 'انشر')}
@@ -262,9 +262,9 @@ export default function V6Sites(p: V6SitesProps) {
               )}
               {cur.shopify ? (
                 <div className="card">
-                  <div className="card-h"><h3 className="t-h3">ثيم شوبيفاي</h3><span className="pill">ملف</span></div>
-                  <p className="t-small">هذا الموقع ملف ثيم ترفعه إلى متجرك في شوبيفاي.</p>
-                  <A to={cur.shopify} className="btn k press" style={{ marginTop: 14 }}><Ic n="download" />نزّل الثيم</A>
+                  <div className="card-h"><h3 className="t-h3">قالب شوبيفاي</h3><span className="pill">ملف</span></div>
+                  <p className="t-small">هذا الموقع ملف قالب ترفعه إلى متجرك في شوبيفاي.</p>
+                  <A to={cur.shopify} className="btn k press" style={{ marginTop: 14 }}><Ic n="download" />نزّل القالب</A>
                 </div>
               ) : cur.live && cur.host ? (
                 <div className="card"><div className="rows">

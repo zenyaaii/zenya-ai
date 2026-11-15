@@ -78,7 +78,7 @@ export default function Visitors({ say, onCount }: { say: (m: string) => void; o
               <div className="mt">
                 <span className={'tag ' + (r.status === 'new' ? 't-acc' : 't-ok')}>{r.status === 'new' ? 'جديد' : 'تم الإصلاح'}</span>
                 <span>{when(r.at)}</span>
-                <span>{r.vw != null && r.vw < 760 ? 'هاتف' : 'كمبيوتر'}</span>
+                <span>{r.vw != null && r.vw < 760 ? 'هاتف' : 'حاسوب'}</span>
                 <span>{KIND[r.kind] ?? r.kind}</span>
                 {r.signedIn ? <span>مسجّل الدخول</span> : null}
               </div>

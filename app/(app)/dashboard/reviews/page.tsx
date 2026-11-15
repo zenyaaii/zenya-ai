@@ -13,10 +13,10 @@ import { useSite } from '@/components/app/v6/site'
 
 /** What /api/reviews/google says when it cannot help, in the owner's words. */
 const FETCH_ERRORS: Record<string, string> = {
-  not_configured: 'جلب التقييمات من Google غير مفعّل بعد. أضف تقييماتك بيدك.',
+  not_configured: 'جلب التقييمات من جوجل غير مفعّل بعد. أضف تقييماتك بيدك.',
   sign_in: 'انتهت جلستك. سجّل الدخول مرة أخرى.',
-  not_google_link: 'هذا ليس رابط خرائط Google. افتح نشاطك على خرائط Google واضغط «مشاركة» وانسخ الرابط.',
-  not_found: 'لم نجد نشاطك على Google من هذا الرابط. جرّب رابط «مشاركة» من خرائط Google.',
+  not_google_link: 'هذا ليس رابط خرائط جوجل. افتح نشاطك على خرائط جوجل واضغط «مشاركة» وانسخ الرابط.',
+  not_found: 'لم نجد نشاطك على جوجل من هذا الرابط. جرّب رابط «مشاركة» من خرائط جوجل.',
   too_many: 'حاولت كثيرًا خلال ساعة. جرّب بعد قليل.',
 }
 
@@ -106,7 +106,7 @@ export default function ReviewsPage() {
             body: JSON.stringify({ url: link, name: theme.content?.brand?.name || theme.product_name || '' }),
           })
           const data = await res.json().catch(() => ({}))
-          if (!res.ok) return { error: FETCH_ERRORS[data?.error] || 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.', added: 0 }
+          if (!res.ok) return { error: FETCH_ERRORS[data?.error] || 'تعذّر الوصول إلى جوجل الآن. جرّب بعد قليل.', added: 0 }
           const { content, added } = mergeGoogleCounted(bt, theme.content, data.place?.url || link, data)
           // Just fetched, so the owner is looking at them now: badge them for this visit, not the next.
           const arrived = readReviews(bt, content).rows.filter((r) => r.isNew).map((r) => r.name + '|' + r.text)
@@ -114,7 +114,7 @@ export default function ReviewsPage() {
           const ok = await commit(markSeen(bt, content) || content)
           return ok ? { error: null, added } : { error: 'لم يُحفظ التغيير. تأكد من اتصالك وحاول مرة أخرى.', added: 0 }
         } catch {
-          return { error: 'تعذّر الوصول إلى Google الآن. جرّب بعد قليل.', added: 0 }
+          return { error: 'تعذّر الوصول إلى جوجل الآن. جرّب بعد قليل.', added: 0 }
         }
       }}
       toggle={(id) => (theme ? commit(toggleReview(bt, theme.content, id)) : Promise.resolve(false))}

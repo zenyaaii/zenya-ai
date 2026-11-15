@@ -360,11 +360,11 @@ export default function AccountSettings() {
   // them to "الترقية إلى Pro". Same for legacy pro_onetime buyers.
   const planLabel =
     plan === 'admin'        ? 'مشرف' :
-    plan === 'pro'          ? 'Pro · نشط' :
-    plan === 'pro_hosting'  ? 'Pro + استضافة' :
-    plan === 'pro_onetime'  ? 'Pro · مدى الحياة' :
-    plan === 'starter'      ? 'Starter · نشط' :
-    isPro                   ? 'Pro' :
+    plan === 'pro'          ? 'الخطة الاحترافية · نشطة' :
+    plan === 'pro_hosting'  ? 'الخطة الاحترافية + استضافة' :
+    plan === 'pro_onetime'  ? 'الخطة الاحترافية · مدى الحياة' :
+    plan === 'starter'      ? 'الخطة الأساسية · نشطة' :
+    isPro                   ? 'الخطة الاحترافية' :
     'مجانية'
 
   const initial = newName?.trim()?.[0] || email?.[0] || '؟'
@@ -495,7 +495,7 @@ export default function AccountSettings() {
           icon={CreditCard}
           accent="#d97706"
           title="الخطة والفوترة"
-          subtitle={`اشتراك شهري — Starter ${usdTrailing(COMPANY.STARTER_PRICE_USD)} أو Pro ${usdTrailing(COMPANY.PRO_PRICE_USD)}. ألغِ في أي وقت.`}
+          subtitle={`اشتراك شهري — الخطة الأساسية ${usdTrailing(COMPANY.STARTER_PRICE_USD)} أو الخطة الاحترافية ${usdTrailing(COMPANY.PRO_PRICE_USD)}. ألغِ في أي وقت.`}
           action={
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--violet-fill)] px-3 py-1 text-[14.5px] font-bold text-[#5e6ad2]">
               {isPro && <Sparkles className="h-3 w-3" />}
@@ -524,8 +524,8 @@ export default function AccountSettings() {
         <Section
           icon={Gift}
           accent="#e11d48"
-          title="أكواد الخصم"
-          subtitle="أكوادك محفوظة هنا — انسخها واستخدمها عند الدفع في أي وقت"
+          title="رموز الخصم"
+          subtitle="رموزك محفوظة هنا — انسخها واستخدمها عند الدفع في أي وقت"
         >
           {!codesLoaded ? (
             <div className="space-y-2">
@@ -536,7 +536,7 @@ export default function AccountSettings() {
           ) : codes.length === 0 ? (
             <div className="rounded-xl border border-dashed border-[color:var(--border)] bg-[color:var(--field)] p-5 text-center">
               <p className="text-[14.5px] leading-relaxed text-muted">
-                لا أكواد بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على كود {REVIEW_REWARD_AR} —
+                لا رموز بعد. شاركنا رأيك أثناء إنشاء موقعك لتحصل على رمز {REVIEW_REWARD_AR} —
                 وسيظهر هنا تلقائيًا.
               </p>
             </div>
@@ -621,7 +621,7 @@ export default function AccountSettings() {
         </Section>
 
         {/* Data */}
-        <Section icon={Database} accent="#2563eb" title="بياناتك" subtitle="نزّل نسخة كاملة — وفق المادتين ١٥ و٢٠ من GDPR">
+        <Section icon={Database} accent="#2563eb" title="بياناتك" subtitle="نزّل نسخة كاملة — وفق المادتين ١٥ و٢٠ من اللائحة العامة لحماية البيانات">
           <p className="mb-4 text-[14.5px] leading-relaxed text-muted">
             يشمل التصدير ملفك الشخصي وقوالبك وسجلّ الاستخلاص ومشترياتك.
           </p>
@@ -634,7 +634,7 @@ export default function AccountSettings() {
         {/* Danger zone */}
         <Section icon={AlertTriangle} title="منطقة الخطر" tone="danger">
           <p className="mb-4 text-[14.5px] leading-relaxed text-muted">
-            احذف نهائيًا حسابك وقوالبك وسجلّ الاستخلاص. تُلغى فوترة Stripe تلقائيًا، ويُحتفظ
+            احذف نهائيًا حسابك وقوالبك وسجلّ الاستخلاص. تُلغى فوترة سترايب تلقائيًا، ويُحتفظ
             بسجلّات الفواتير المطلوبة ضريبيًا (٧ سنوات وفق القانون الهولندي).{' '}
             <strong className="text-red-700">لا يمكن التراجع.</strong> سنرسل لك بريد تأكيد بالحذف.
           </p>

@@ -294,7 +294,7 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
     <section data-section="hero" className="relative min-h-[90vh] overflow-hidden flex items-center">
       {/* Background image */}
       <div className="absolute inset-0 z-0">
-        <img src={content.hero.image} alt="Studio" className="h-full w-full object-cover" />
+        <img src={content.hero.image} alt="الاستوديو" className="h-full w-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'var(--wl-overlay)' }} />
         {/* Subtle grain */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\'/%3E%3C/svg%3E")' }} />
@@ -717,7 +717,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
             {imgs.slice(0, 4).map((img, i) => (
               <motion.div key={i} {...revealAnim(rm,i * 0.08)} className={`relative overflow-hidden rounded-2xl ${i === 0 ? 'col-span-2 row-span-2' : ''}`}
                 style={{ aspectRatio: i === 0 ? '4/3' : '1/1' }}>
-                <img src={img.url} alt={img.alt || `Studio ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
+                <img src={img.url} alt={img.alt || `الاستوديو ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
               </motion.div>
             ))}
           </div>
@@ -725,7 +725,7 @@ function SpaceSection({ content, isDark }: { content: WellnessContent; isDark: b
           <div className="grid gap-4 sm:grid-cols-2">
             {imgs.map((img, i) => (
               <motion.div key={i} {...revealAnim(rm,i * 0.1)} className="overflow-hidden rounded-2xl" style={{ aspectRatio: '4/3' }}>
-                <img src={img.url} alt={img.alt || `Studio ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
+                <img src={img.url} alt={img.alt || `الاستوديو ${i + 1}`} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
               </motion.div>
             ))}
           </div>

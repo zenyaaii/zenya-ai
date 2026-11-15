@@ -47,13 +47,13 @@ type Form = {
 
 const CATEGORY_OPTIONS = [
   'نسائي عصري', 'رجالي عصري', 'للجنسين',
-  'فاخر / كوتور', 'ستريت وير', 'ملابس رياضية', 'عبايات', 'أوشحة وحجاب',
-  'إكسسوارات', 'أحذية', 'ملابس أطفال', 'أزياء زفاف', 'دينيم', 'تريكو', 'أخرى',
+  'فاخر / خياطة رفيعة', 'أزياء الشارع', 'ملابس رياضية', 'عبايات', 'أوشحة وحجاب',
+  'مكمّلات', 'أحذية', 'ملابس أطفال', 'أزياء زفاف', 'الجينز', 'تريكو', 'أخرى',
 ]
 
-const PRODUCT_CATEGORIES = ['فساتين', 'قطع علوية', 'قطع سفلية', 'ملابس خارجية', 'تريكو', 'إكسسوارات', 'أحذية', 'حقائب', 'عبايات', 'ملابس رياضية', 'أخرى']
+const PRODUCT_CATEGORIES = ['فساتين', 'قطع علوية', 'قطع سفلية', 'ملابس خارجية', 'تريكو', 'مكمّلات', 'أحذية', 'حقائب', 'عبايات', 'ملابس رياضية', 'أخرى']
 
-const SEASONS = ['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'ريزورت 2025', 'أعياد 2025']
+const SEASONS = ['ربيع/صيف 25', 'خريف/شتاء 25', 'ربيع/صيف 26', 'خريف/شتاء 26', 'ما قبل الخريف 2025', 'أزياء المنتجعات 2025', 'أعياد 2025']
 
 function buildSampleForm(): Form {
   return {
@@ -67,7 +67,7 @@ function buildSampleForm(): Form {
     products: [
       { id: uid(), name: 'عباية حريرية · عاجية', price: '345$', category: 'عبايات' },
       { id: uid(), name: 'بنطال كتّاني مفصّل', price: '245$', category: 'قطع سفلية' },
-      { id: uid(), name: 'بليزر صوفي', price: '595$', category: 'ملابس خارجية' },
+      { id: uid(), name: 'سترة صوفية', price: '595$', category: 'ملابس خارجية' },
       { id: uid(), name: 'كنزة كشمير', price: '285$', category: 'تريكو' },
     ],
     brand_story: 'بدأت «وَقار» عام 2021 بسؤال واحد: لماذا لا تزال الخزانة المدروسة جيّدة الصنع نادرة؟ نعمل مباشرةً مع مشاغل صغيرة، ونشحن من ستوديو واحد، ولا نُقيم تخفيضات أبدًا — السعر هو السعر.',
@@ -167,7 +167,7 @@ export default function LookbookWizardPage() {
     if (form.brand_category.trim().length < 2) return 'يرجى اختيار فئة العلامة.'
     if (form.style_direction.trim().length < 10) return 'صِف توجّهك التصميمي (10 أحرف على الأقل).'
     if (form.target_customer.trim().length < 10) return 'صِف عميلك المستهدف (10 أحرف على الأقل).'
-    if (validProducts.length < 1) return 'أضف منتجًا واحدًا على الأقل لملء اللوك بوك.'
+    if (validProducts.length < 1) return 'أضف منتجًا واحدًا على الأقل لملء دفتر الإطلالات.'
     return null
   }
 
@@ -302,7 +302,7 @@ export default function LookbookWizardPage() {
     {
       id: 'products',
       title: 'المنتجات',
-      sub: 'حتى منتج واحد يكفي — أضف حتى 8. ستظهر في اللوك بوك وشبكة الأكثر مبيعًا.',
+      sub: 'حتى منتج واحد يكفي — أضف حتى 8. ستظهر في دفتر الإطلالات وشبكة الأكثر مبيعًا.',
       complete: validProducts.length >= 1,
       note: 'أضف منتجًا واحدًا على الأقل.',
       body: (
@@ -344,7 +344,7 @@ export default function LookbookWizardPage() {
             <p className="zb-note">كل ما ترفعه يُحفَظ أيضًا في معرضك لإعادة استخدامه لاحقًا.</p>
             <ImageUploadField label="الصورة الرئيسية" value={form.hero_image_url} onChange={(url) => update('hero_image_url', url)} aspect="wide" helper="الصورة الكبيرة أعلى الصفحة." />
           </Block>
-          <Block title="معرض اللوك بوك (حتى 8)">
+          <Block title="معرض دفتر الإطلالات (حتى 8)">
             <Uploads>
               {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
                 <ImageUploadField key={'lg-' + i} value={form.gallery_image_urls[i] || ''} onChange={(url) => setGalleryAt(i, url)} aspect="square" />
@@ -417,7 +417,7 @@ export default function LookbookWizardPage() {
               { label: 'المنتجات', value: validProducts.map((p) => p.name).join('، ') },
             ]}
           >
-            <Handoff title="جاهز لتوليد موقع اللوك بوك." body="تصوغ بينون نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
+            <Handoff title="جاهز لتوليد موقع دفتر الإطلالات." body="تصوغ بينون نصوصك التحريرية وتشكيلتك — نحو 15 إلى 20 ثانية، ثم ننقلك إلى المعاينة." />
           </Review>
         </Grid>
       ),
@@ -433,16 +433,16 @@ export default function LookbookWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
-        eyebrow="لوك بوك · قالب الأزياء المحتشمة"
+        eyebrow="دفتر إطلالات · قالب الأزياء المحتشمة"
         title="ابنِ موقع أزياء فاخرًا."
-        sub="أخبرنا عن علامتك وتشكيلتك. تولّد بينون موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة لوك بوك ومتجر منتجات وقصة العلامة."
+        sub="أخبرنا عن علامتك وتشكيلتك. تولّد بينون موقعًا تحريريًا كاملًا — واجهة رئيسية وشبكة دفتر إطلالات ومتجر منتجات وقصة العلامة."
         steps={steps}
         step={step}
         onStep={setStep}
         progress={{ pct }}
         scrollKey={errorKey || undefined}
         notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
-        final={{ label: loading ? 'جارٍ توليد موقعك…' : 'ولّد موقع اللوك بوك', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
+        final={{ label: loading ? 'جارٍ توليد موقعك…' : 'ولّد موقع دفتر الإطلالات', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
       />
       <AiContentDisclaimer
         open={disclaimerOpen}

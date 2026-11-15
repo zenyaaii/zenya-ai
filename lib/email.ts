@@ -183,7 +183,7 @@ export function domainPurchasedEmail(args: {
     `تم تسجيل نطاقك ${domain} بنجاح وربطه بموقعك على بينون.`,
     `المدة: ${yearWord} · ينتهي في: ${expiry}`,
     ``,
-    `قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.`,
+    `قد يستغرق تفعيل شهادة الأمان بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.`,
     `أدِر نطاقاتك من: ${manageUrl}`,
     ``,
     `— بينون`,
@@ -191,7 +191,7 @@ export function domainPurchasedEmail(args: {
 
   const bodyHtml = `
     <p style="margin:0 0 20px; font-size:16px; line-height:1.85; color:#CFC6B8;">
-      شكرًا لك! تم تسجيل نطاقك <strong style="color:#F4EFE6;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان (SSL) بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
+      شكرًا لك! تم تسجيل نطاقك <strong style="color:#F4EFE6;">${domain}</strong> بنجاح وربطه بموقعك. قد يستغرق تفعيل شهادة الأمان بضع دقائق، وبعدها يصبح موقعك مباشرًا على نطاقك الجديد.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
@@ -346,11 +346,11 @@ export function paymentReceiptEmail(args: {
   const taxLabel = taxCents > 0 ? `ضريبة القيمة المضافة (${rate}% شامل)` : ''
 
   const itemName = {
-    onetime: 'بينون برو — وصول مدى الحياة',
+    onetime: 'بينون، الخطة الاحترافية — وصول مدى الحياة',
     hosting: 'الاستضافة الكاملة — اشتراك شهري',
-    starter: 'بينون Starter — اشتراك شهري',
-    pro: 'بينون Pro — اشتراك شهري مع الاستضافة',
-    entry: 'بينون Entry — فتح التوليد (دفعة واحدة)',
+    starter: 'بينون، الخطة الأساسية — اشتراك شهري',
+    pro: 'بينون، الخطة الاحترافية — اشتراك شهري مع الاستضافة',
+    entry: 'بينون، خطة الدخول — فتح التوليد (دفعة واحدة)',
   }[plan]
 
   let dateStr = ''
@@ -363,8 +363,8 @@ export function paymentReceiptEmail(args: {
   const intro = {
     onetime: 'شكرًا لك! تم استلام دفعتك وتفعيل خطتك مدى الحياة. هذا إيصال رسمي بعمليتك.',
     hosting: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الاستضافة الكاملة. هذا إيصال رسمي بعمليتك.',
-    starter: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Starter. هذا إيصال رسمي بعمليتك.',
-    pro: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك Pro. هذا إيصال رسمي بعمليتك.',
+    starter: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الخطة الأساسية. هذا إيصال رسمي بعمليتك.',
+    pro: 'شكرًا لك! تم استلام دفعتك وتفعيل اشتراك الخطة الاحترافية. هذا إيصال رسمي بعمليتك.',
     entry: 'شكرًا لك! تم استلام دفعتك وفتح التوليد في حسابك. هذا إيصال رسمي بعمليتك.',
   }[plan]
 
@@ -433,11 +433,11 @@ export function paymentReceiptEmail(args: {
     ctaLabel: 'الذهاب إلى لوحة التحكم',
     footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">${
       {
-        onetime: 'هذا إيصال عن شرائك خطة بينون برو مدى الحياة.',
+        onetime: 'هذا إيصال عن شرائك خطة بينون الاحترافية مدى الحياة.',
         hosting: 'هذا إيصال عن اشتراكك الشهري في الاستضافة الكاملة.',
-        starter: 'هذا إيصال عن اشتراكك الشهري في خطة Starter.',
-        pro: 'هذا إيصال عن اشتراكك الشهري في خطة Pro.',
-        entry: 'هذا إيصال عن فتح التوليد (خطة Entry، دفعة واحدة).',
+        starter: 'هذا إيصال عن اشتراكك الشهري في الخطة الأساسية.',
+        pro: 'هذا إيصال عن اشتراكك الشهري في الخطة الاحترافية.',
+        entry: 'هذا إيصال عن فتح التوليد (خطة الدخول، دفعة واحدة).',
       }[plan]
     } لأي استفسار بخصوص هذه العملية، راسلنا على <a href="mailto:team@beynoun.com" style="color:#F4EFE6;text-decoration:none;">team@beynoun.com</a>.</p>`,
   })
@@ -569,7 +569,7 @@ export function welcomeEmail(args: {
       يسعدنا انضمامك إلى <strong style="color:#F4EFE6;">بينون</strong> — منشئ المواقع. حسابك جاهز، ولديك <strong style="color:#F4EFE6;">${genWord}</strong> لتبدأ بها فورًا.
     </p>
     <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
-      اكتب فكرتك، أو ابدأ من <strong style="color:#F4EFE6;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا كود.
+      اكتب فكرتك، أو ابدأ من <strong style="color:#F4EFE6;">مثال جاهز</strong>، وعدّله، وولّد موقعًا احترافيًا في ثوانٍ — بلا صفحة فارغة ولا برمجة.
     </p>`
 
   const html = emailShell({
@@ -671,12 +671,12 @@ export function reviewReceivedEmail(args: {
   const manageUrl = args.manageUrl || 'https://dashboard.beynoun.com/reviews'
   const greeting = args.firstName ? `أهلًا ${args.firstName}،` : 'أهلًا بك،'
   const what = args.count === 1 ? 'تقييم جديد' : args.count === 2 ? 'تقييمان جديدان' : `${args.count} تقييمات جديدة`
-  const subject = `${what} على Google — ${args.siteName}`
+  const subject = `${what} على جوجل — ${args.siteName}`
 
   const text = [
     greeting,
     '',
-    `كتب أحد زبائنك على Google عن «${args.siteName}». وصلك ${what}، وهو مخفي في موقعك حتى تختار إظهاره.`,
+    `كتب أحد زبائنك على جوجل عن «${args.siteName}». وصلك ${what}، وهو مخفي في موقعك حتى تختار إظهاره.`,
     '',
     `التقييمات: ${manageUrl}`,
     '',
@@ -686,7 +686,7 @@ export function reviewReceivedEmail(args: {
   const bodyHtml = `
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
     <p style="margin:0 0 22px; font-size:16px; line-height:1.85; color:#CFC6B8;">
-      وصلك <strong style="color:#F4EFE6;">${what}</strong> على Google عن «${esc(args.siteName)}». يبقى مخفيًا في موقعك حتى تختار إظهاره من صفحة التقييمات.
+      وصلك <strong style="color:#F4EFE6;">${what}</strong> على جوجل عن «${esc(args.siteName)}». يبقى مخفيًا في موقعك حتى تختار إظهاره من صفحة التقييمات.
     </p>`
 
   const html = emailShell({
@@ -743,7 +743,7 @@ export function trialReminderEmail(args: {
     bodyHtml,
     ctaHref: manageUrl,
     ctaLabel: 'أكمل إنشاء موقعك',
-    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة مرة واحدة فقط. مع خطة Starter أو Pro تولّد مواقع بلا حدود.</p>`,
+    footnoteHtml: `<p style="margin:0;font-size:13px;line-height:1.8;color:#A39A8D;">تصلك هذه الرسالة مرة واحدة فقط. مع الخطة الأساسية أو الاحترافية تولّد مواقع بلا حدود.</p>`,
   })
 
   return { subject, text, html }
@@ -770,7 +770,7 @@ export function quotaReachedEmail(args: {
     greeting,
     '',
     `لقد استخدمت ${genWord} بالكامل — نأمل أن تكون النتائج أعجبتك!`,
-    'مع خطة Starter أو Pro تولّد مواقع بلا حدود، وتربط نطاقك الخاص، وتستقبل الحجوزات.',
+    'مع الخطة الأساسية أو الاحترافية تولّد مواقع بلا حدود، وتربط نطاقك الخاص، وتستقبل الحجوزات.',
     '',
     `طالع الخطط: ${upgradeUrl}`,
     '',
@@ -781,7 +781,7 @@ export function quotaReachedEmail(args: {
   const bodyHtml = `
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">${greeting}</p>
     <p style="margin:0 0 18px; font-size:16px; line-height:1.85; color:#CFC6B8;">
-      لقد استخدمت <strong style="color:#F4EFE6;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! مع خطة Starter أو Pro تولّد مواقع <strong style="color:#F4EFE6;">بلا حدود</strong>، وتربط نطاقك الخاص، وتستقبل الحجوزات.
+      لقد استخدمت <strong style="color:#F4EFE6;">${genWord}</strong> بالكامل — نأمل أن تكون النتائج أعجبتك! مع الخطة الأساسية أو الاحترافية تولّد مواقع <strong style="color:#F4EFE6;">بلا حدود</strong>، وتربط نطاقك الخاص، وتستقبل الحجوزات.
     </p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 26px;background:#221E19;border:1px solid #2E2922;border-radius:12px;">
       <tr><td style="padding:16px 18px;text-align:right;">
@@ -1050,7 +1050,7 @@ export function sitePublishedEmail(args: {
     `موقع «${args.siteName}» منشور الآن، ويستطيع أي شخص فتحه:`,
     args.siteUrl,
     '',
-    'أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط Google.',
+    'أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط جوجل.',
     '',
     `عدّل موقعك في أي وقت من: ${manageUrl}`,
     '',
@@ -1065,7 +1065,7 @@ export function sitePublishedEmail(args: {
         <a href="${args.siteUrl}" style="font-size:17px;font-weight:700;color:#F4EFE6;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${host}</a>
       </td></tr>
     </table>
-    <p style="${P}">أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط Google.</p>`
+    <p style="${P}">أرسل الرابط لزبائنك على واتساب، وضعه في حساباتك على إنستغرام وفيسبوك وخرائط جوجل.</p>`
 
   const html = emailShell({
     title: subject,
@@ -1099,7 +1099,7 @@ export function domainLiveEmail(args: {
     `نطاقك ${args.domain} يعمل الآن، وموقعك يفتح عليه بأمان (https).`,
     url,
     '',
-    'حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.',
+    'حدّث الرابط في واتساب وإنستغرام وخرائط جوجل إلى العنوان الجديد.',
     '',
     '— بينون',
   ].join('\n')
@@ -1111,7 +1111,7 @@ export function domainLiveEmail(args: {
         <a href="${url}" style="font-size:17px;font-weight:700;color:#F4EFE6;text-decoration:none;direction:ltr;unicode-bidi:isolate;">${args.domain}</a>
       </td></tr>
     </table>
-    <p style="${P}">حدّث الرابط في واتساب وإنستغرام وخرائط Google إلى العنوان الجديد.</p>`
+    <p style="${P}">حدّث الرابط في واتساب وإنستغرام وخرائط جوجل إلى العنوان الجديد.</p>`
 
   const html = emailShell({
     title: subject,

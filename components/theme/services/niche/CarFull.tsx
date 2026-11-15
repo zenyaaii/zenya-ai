@@ -56,7 +56,7 @@ function Hero({ n, content, promises }: { n: N; content: ServiceContent; promise
         ) : null}
       </div>
       <div className="c-gauge n-w">
-        {n.rating ? <span><b><CountUp to={n.rating} dec={1} /></b><small>{n.count ? `من ${ar(n.count)} تقييم على Google` : 'على Google'}</small></span> : null}
+        {n.rating ? <span><b><CountUp to={n.rating} dec={1} /></b><small>{n.count ? `من ${ar(n.count)} تقييم على جوجل` : 'على جوجل'}</small></span> : null}
         {n.st ? <span><b className={n.st.open ? 'ok' : 'no'}>{n.st.open ? 'مفتوح' : 'مغلق'}</b><small>{n.st.text}</small></span> : null}
         {n.services.length ? <span><b><CountUp to={n.services.length} /></b><small>خدمة لسيارتك</small></span> : null}
       </div>
@@ -164,7 +164,7 @@ function Crew({ n }: { n: N }) {
             <small>{m.role || 'فني'}</small>
             <h3>{m.name}</h3>
             {m.tags?.length ? <ul>{m.tags.map((t) => <li key={t}><Icon of={t} size={13} />{t}</li>)}</ul> : null}
-            {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على Google</cite> : null}</blockquote> : null}
+            {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على جوجل</cite> : null}</blockquote> : null}
           </div>
         </article>
       ))}

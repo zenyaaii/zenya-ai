@@ -121,7 +121,7 @@ export default function CartDrawer({
                   {content?.cart_drawer?.checkout_cta || 'إتمام الشراء الآن'}
                 </button>
                 <p className="text-center text-xs text-slate-400">
-                  {content?.cart_drawer?.secure_line || 'دفع آمن — مشفّر بشهادة SSL'}
+                  {content?.cart_drawer?.secure_line || 'دفع آمن — مشفّر بشهادة أمان'}
                 </p>
                 {Array.isArray(content?.cart_drawer?.reassurance_lines) && content?.cart_drawer?.reassurance_lines?.length ? (
                   <div className="text-center text-xs text-slate-500 space-y-1">

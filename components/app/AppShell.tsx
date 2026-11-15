@@ -92,7 +92,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return (
       <div className={`zy-app ${dashFont.variable} flex min-h-screen items-center justify-center text-[var(--stone)]`}>
         <style dangerouslySetInnerHTML={{ __html: DASHBOARD_CSS }} />
-        Loading…
+        جارٍ التحميل…
       </div>
     )
   }

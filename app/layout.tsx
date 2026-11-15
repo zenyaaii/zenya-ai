@@ -210,16 +210,16 @@ const structuredData = [
       'توليد نصوص الموقع بالعربية',
       '8 قوالب احترافية جاهزة',
       'محرّر مباشر بدون برمجة',
-      'استضافة داخل الاتحاد الأوروبي مع شهادة SSL',
+      'استضافة داخل الاتحاد الأوروبي مع شهادة أمان',
       'ربط نطاق مخصّص',
       'تصدير قالب شوبيفاي',
-      'تحليلات زوّار بدون كوكيز',
-      'أدوات تحسين محركات البحث وربط Search Console',
+      'تحليلات زوّار دون ملفات تعريف الارتباط',
+      'أدوات تحسين محركات البحث وربط أداة جوجل لمشرفي المواقع',
     ],
     offers: [
       {
         '@type': 'Offer',
-        name: 'Starter',
+        name: 'الخطة الأساسية',
         price: COMPANY.STARTER_PRICE_USD.toFixed(2),
         priceCurrency: 'USD',
         priceSpecification: {
@@ -233,7 +233,7 @@ const structuredData = [
       },
       {
         '@type': 'Offer',
-        name: 'Pro',
+        name: 'الخطة الاحترافية',
         price: COMPANY.PRO_PRICE_USD.toFixed(2),
         priceCurrency: 'USD',
         priceSpecification: {
@@ -244,7 +244,7 @@ const structuredData = [
           unitText: 'MONTH',
         },
         description:
-          'اشتراك شهري. تستضيف بينون مواقعك، مع نطاق مخصّص وشهادة SSL وتحليلات. يشمل كل ما في باقة Starter.',
+          'اشتراك شهري. تستضيف بينون مواقعك، مع نطاق مخصّص وشهادة أمان وتحليلات. يشمل كل ما في الباقة الأساسية.',
       },
       {
         '@type': 'Offer',

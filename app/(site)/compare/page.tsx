@@ -106,10 +106,10 @@ export default function CompareHubPage() {
       <section className="zx-sum" data-reveal>
         <h2 className="zx-h2">الخلاصة في سطر</h2>
         <ul className="zx-sumlist">
-          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>عربية أولًا:</b> تخطيط RTL وخطوط ومحتوى مصمّم للعربية — لا ترجمة لاحقة.</span></li>
+          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>عربية أولًا:</b> تخطيط من اليمين إلى اليسار وخطوط ومحتوى مصمّم للعربية — لا ترجمة لاحقة.</span></li>
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>بينون تكتب لك:</b> من نبذة قصيرة إلى موقع كامل بالنصوص والتصميم.</span></li>
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>جاهز خلال دقائق:</b> لا أسابيع انتظار ولا صيانة.</span></li>
-          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>مُدار بالكامل:</b> استضافة أوروبية + SSL + GDPR، ونطاق مخصّص على Pro.</span></li>
+          <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>مُدار بالكامل:</b> استضافة أوروبية + شهادة أمان + حماية البيانات، ونطاق مخصّص على الخطة الاحترافية.</span></li>
           <li className="zx-sumitem"><span className="zx-summark" aria-hidden /><span className="zx-sumtext"><b>بسعر معقول:</b> مجانًا للتجربة، ثم {usdTrailing(COMPANY.STARTER_PRICE_USD)}–{usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا.</span></li>
         </ul>
       </section>

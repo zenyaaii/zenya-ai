@@ -124,7 +124,7 @@ export default function ThemePreview({
   const guarantee = content?.guarantee || { title: "ضمان 30 يومًا", text: "جرّبه دون مخاطرة. غير راضٍ؟ استرداد كامل.", days: 30 }
   const newsletter = content?.newsletter || { title: "انضمّ إلى قائمتنا", text: "عروض حصرية ووصول مبكر." }
   const collectionPage = content?.collection_page || { headline: "تسوّق تشكيلتنا", subheadline: "تصفّح تشكيلتنا المميّزة.", why_buy_heading: "لماذا تشتري منّا", why_buy_points: [] }
-  const cartDrawer = content?.cart_drawer || { headline: "سلّتك", free_shipping_before: "يفصلك {amount} عن الشحن المجاني!", checkout_cta: "أكمل الشراء", secure_line: "دفع آمن — مشفّر بـ SSL" }
+  const cartDrawer = content?.cart_drawer || { headline: "سلّتك", free_shipping_before: "يفصلك {amount} عن الشحن المجاني!", checkout_cta: "أكمل الشراء", secure_line: "دفع آمن — مشفّر بشهادة أمان" }
   const cartPage = content?.cart_page || { headline: "سلّتك", subheadline: "راجع أصنافك وأكمل الشراء بأمان.", checkout_cta: "أكمل الشراء" }
   const aboutPage = content?.pages?.about || {}
   const contactPage = content?.pages?.contact || {}
@@ -135,7 +135,7 @@ export default function ThemePreview({
   const trustBadges: { title: string; desc: string }[] = (content?.trust_badges?.badges || [
     { title: "شحن مجاني", desc: "على كل الطلبات" },
     { title: "إرجاع خلال 30 يومًا", desc: "دون تعقيد" },
-    { title: "دفع آمن", desc: "مشفّر بـ SSL" },
+    { title: "دفع آمن", desc: "مشفّر بشهادة أمان" },
     { title: "دعم 24/7", desc: "نحن هنا دائمًا" },
   ])
 
@@ -1042,7 +1042,7 @@ export default function ThemePreview({
                   <button onClick={() => goTo("collection")} className="mt-3 w-full rounded-full border border-slate-200 bg-white py-3 text-sm font-bold text-slate-900">
                     متابعة التسوّق
                   </button>
-                  <p className="mt-4 text-center text-xs text-slate-500">{cartDrawer.secure_line || "🔒 دفع آمن — مشفّر بـ SSL"}</p>
+                  <p className="mt-4 text-center text-xs text-slate-500">{cartDrawer.secure_line || "🔒 دفع آمن — مشفّر بشهادة أمان"}</p>
                   <div className="mt-4 flex justify-center gap-2">
                     {["💳", "📱", "🔒"].map((icon, i) => (
                       <div key={i} className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm">{icon}</div>
@@ -1062,9 +1062,9 @@ export default function ThemePreview({
             <h2 className="text-2xl font-black">{shopBrand}</h2>
             <p className="mt-3 max-w-md text-sm leading-7 text-slate-300">{content?.rich_text?.text || heroSubheading}</p>
             <div className="mt-5 flex gap-3 text-sm font-semibold text-slate-400">
-              <span className="hover:text-white cursor-pointer transition">Instagram</span>
-              <span className="hover:text-white cursor-pointer transition">TikTok</span>
-              <span className="hover:text-white cursor-pointer transition">Facebook</span>
+              <span className="hover:text-white cursor-pointer transition">إنستغرام</span>
+              <span className="hover:text-white cursor-pointer transition">تيك توك</span>
+              <span className="hover:text-white cursor-pointer transition">فيسبوك</span>
             </div>
           </div>
           <div>

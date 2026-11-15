@@ -82,7 +82,7 @@ export default function ReviewOffer() {
               شاركنا رأيك، واحصل على خصم <span className="gradient-text">{REVIEW_REWARD_AR_SHORT}.</span>
             </h3>
             <p className="mx-auto mt-2 max-w-xs text-[13px] leading-[1.8] text-muted">
-              بينما نجهّز موقعك، أخبرنا بتجربتك بصراحة — رأيك يساعدنا على التحسّن. نشكرك بكود خصم فورًا،
+              بينما نجهّز موقعك، أخبرنا بتجربتك بصراحة — رأيك يساعدنا على التحسّن. نشكرك برمز خصم فورًا،
               مهما كان رأيك.
             </p>
             <button
@@ -96,11 +96,11 @@ export default function ReviewOffer() {
           </motion.div>
         ) : (
           <motion.div key="code" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <h3 className="text-[15.5px] font-bold text-foreground">شكرًا لك 💛 هذا كودك:</h3>
+            <h3 className="text-[15.5px] font-bold text-foreground">شكرًا لك 💛 هذا رمزك:</h3>
             <button
               type="button"
               onClick={copy}
-              aria-label="نسخ كود الخصم"
+              aria-label="نسخ رمز الخصم"
               className="mx-auto mt-3 flex items-center gap-3 rounded-xl border border-dashed px-4 py-2.5 transition-colors hover:bg-[rgba(94,106,210,0.04)]"
               style={{ borderColor: 'rgba(94,106,210,0.5)' }}
             >

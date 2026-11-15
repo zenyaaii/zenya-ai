@@ -199,7 +199,7 @@ function LiveHome({ p, site, now }: { p: V6HomeProps; site: V6Site; now: Date | 
         </article>
         <A to={p.links.domains} className="card lift h-w wcard rv" style={{ ['--i' as string]: 7 }}>
           <div className="w-top"><span className="tile ok"><Ic n="lock" /></span><span className="pill ok"><Ic n="check" />آمن</span></div>
-          <p>{p.domain?.own && p.domain.live ? 'نطاقك متصل، وشهادة الأمان تعمل.' : p.domain?.own ? 'نطاقك يُربط الآن، وقد يأخذ ذلك بعض الوقت. عنوانك المجاني يعمل حتى ذلك الحين.' : 'عنوانك المجاني يعمل، وشهادة الأمان تعمل. Pro يعطيك نطاقًا خاصًا مجانًا لسنة.'}</p>
+          <p>{p.domain?.own && p.domain.live ? 'نطاقك متصل، وشهادة الأمان تعمل.' : p.domain?.own ? 'نطاقك يُربط الآن، وقد يأخذ ذلك بعض الوقت. عنوانك المجاني يعمل حتى ذلك الحين.' : 'عنوانك المجاني يعمل، وشهادة الأمان تعمل. الخطة الاحترافية تعطيك نطاقًا خاصًا مجانًا لسنة.'}</p>
           <div className="w-v"><b className="ltr" style={{ fontSize: p.domain?.own ? 18 : 14, fontWeight: 800, overflowWrap: 'anywhere' }}>{p.domain?.host || site.host}</b></div>
         </A>
         <GoogleCard p={p} />
@@ -397,7 +397,7 @@ function GoogleCard({ p }: { p: V6HomeProps }) {
   return (
     <A to={p.links.analyticsSearch} className="card lift h-w wcard rv" style={{ ['--i' as string]: 8 }}>
       <div className="w-top"><span className="tile blue"><Ic n="g" /></span><span className="pill">غير مربوط</span></div>
-      <p>اربط Google Search Console لترى كم مرة ظهر موقعك في جوجل، وبأي كلمات.</p>
+      <p>اربط أداة جوجل لمشرفي المواقع لترى كم مرة ظهر موقعك في جوجل، وبأي كلمات.</p>
       <div className="w-v"><span className="t-small"><b style={{ color: 'var(--ink)' }}>اربط الآن</b> · خطوة واحدة</span></div>
     </A>
   )
@@ -410,7 +410,7 @@ function ReviewsCard({ p }: { p: V6HomeProps }) {
     return (
       <A to={p.links.reviews} className="card lift h-w wcard rv" style={{ ['--i' as string]: 9 }}>
         <div className="w-top"><span className="tile warn"><Ic n="star" /></span></div>
-        <p>اعرض تقييماتك من Google في موقعك. الصق رابط نشاطك على الخريطة ونجلبها لك.</p>
+        <p>اعرض تقييماتك من جوجل في موقعك. الصق رابط نشاطك على الخريطة ونجلبها لك.</p>
         <div className="w-v"><span className="t-small"><b style={{ color: 'var(--ink)' }}>أضف تقييماتك</b></span></div>
       </A>
     )
@@ -418,7 +418,7 @@ function ReviewsCard({ p }: { p: V6HomeProps }) {
   return (
     <A to={p.links.reviews} className="card lift h-w wcard rv" style={{ ['--i' as string]: 9 }}>
       <div className="w-top"><span className="tile warn"><Ic n="star" /></span>{r.fresh > 0 && <span className="pill acc">{r.fresh} جديد</span>}</div>
-      <p>تقييمك على Google من <span className="num">{fmt(r.count)}</span> تقييمًا</p>
+      <p>تقييمك على جوجل من <span className="num">{fmt(r.count)}</span> تقييمًا</p>
       <div className="w-v"><span className="t-big num">{r.rating}</span><Stars n={r.rating} lg /></div>
     </A>
   )
@@ -454,7 +454,7 @@ function DraftHome({ p, site, now }: { p: V6HomeProps; site: V6Site; now: Date |
           <div className="rows">
             <div className="r"><span className="tile acc"><Ic n="cal" /></span><span className="tx"><b>الحجوزات</b><span>تصلك هنا فور أن يرسلها الزوار</span></span></div>
             <div className="r"><span className="tile blue"><Ic n="chart" /></span><span className="tx"><b>الزيارات</b><span>تعرف كم شخصًا زارك ومن أين</span></span></div>
-            <div className="r"><span className="tile warn"><Ic n="star" /></span><span className="tx"><b>التقييمات</b><span>اعرض تقييمات Google في موقعك</span></span></div>
+            <div className="r"><span className="tile warn"><Ic n="star" /></span><span className="tx"><b>التقييمات</b><span>اعرض تقييمات جوجل في موقعك</span></span></div>
           </div>
         </article>
         <article className="card h-site rv" style={{ ['--i' as string]: 5 }}>

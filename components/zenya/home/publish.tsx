@@ -108,9 +108,9 @@ const TLDS = [
    TYPE measures under AA, so the text step is a lifted stop of it and the
    fill keeps the exact product value. */
 const LADDER = [
-  { id: "dns", label: "بانتظار DNS", icon: Clock, tone: "wait" },
-  { id: "ssl", label: "جارٍ إصدار SSL…", icon: RefreshCw, tone: "work" },
-  { id: "live", label: "منشور · SSL مفعّل", icon: CheckCircle2, tone: "live" },
+  { id: "dns", label: "بانتظار سجلات النطاق", icon: Clock, tone: "wait" },
+  { id: "ssl", label: "جارٍ إصدار شهادة الأمان…", icon: RefreshCw, tone: "work" },
+  { id: "live", label: "منشور · شهادة الأمان مفعّلة", icon: CheckCircle2, tone: "live" },
 ] as const
 
 export const domains: SurfaceDef = {
@@ -128,7 +128,7 @@ export const domains: SurfaceDef = {
       <div className="zn4-screen-in">
         <div className="zn4-head">
           <h2><Globe className="ic" /> النطاقات</h2>
-          <p>اربط نطاقًا مخصصًا تملكه بالفعل، أو ابحث عن نطاق جديد. شهادة SSL تلقائية.</p>
+          <p>اربط نطاقًا مخصصًا تملكه بالفعل، أو ابحث عن نطاق جديد. شهادة أمان تلقائية.</p>
         </div>
 
         <div className="zn4-card">
@@ -137,7 +137,7 @@ export const domains: SurfaceDef = {
             <h3>ابحث عن نطاق جديد</h3>
           </div>
           <p className="zn4-sub">
-            اكتب اسمًا، وشاهد المتاح، واشترِه بنقرة واحدة — التسجيل وDNS وSSL تُجهَّز لك تلقائيًا.
+            اكتب اسمًا، وشاهد المتاح، واشترِه بنقرة واحدة — التسجيل وسجلات النطاق وشهادة الأمان تُجهَّز لك تلقائيًا.
           </p>
 
           {/* The entitlement banner the real screen shows a Pro account that
@@ -146,7 +146,7 @@ export const domains: SurfaceDef = {
               rows are on exactly the list this sentence names. */}
           <div className="zn4-gift">
             <Sparkles className="ic" />
-            <span>🎁 نطاقك المجاني بانتظارك — سنة كاملة مجانًا مع Pro على الامتدادات الاقتصادية.</span>
+            <span>🎁 نطاقك المجاني بانتظارك — سنة كاملة مجانًا مع الخطة الاحترافية على الامتدادات الاقتصادية.</span>
           </div>
 
           <div className="zn4-search">
@@ -203,7 +203,7 @@ export const domains: SurfaceDef = {
                 </div>
               ))}
               <div className="zn4-tf">
-                شراء نطاق عبر بينون يجهّزه تلقائيًا — التسجيل وDNS وSSL. لا سجلّات يدوية للنسخ.
+                شراء نطاق عبر بينون يجهّزه تلقائيًا — التسجيل وسجلات النطاق وشهادة الأمان. لا سجلّات يدوية للنسخ.
               </div>
             </div>
           )}
@@ -402,7 +402,7 @@ export const publish: SurfaceDef = {
 
         <div className="zn4-note">
           <Lock className="ic" />
-          كل موقع منشور يحصل على نطاق <span dir="ltr">اسمك.beynoun.com</span> مجانًا، بشهادة SSL.
+          كل موقع منشور يحصل على نطاق <span dir="ltr">اسمك.beynoun.com</span> مجانًا، بشهادة أمان.
         </div>
       </div>
     )

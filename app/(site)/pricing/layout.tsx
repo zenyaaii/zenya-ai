@@ -16,9 +16,9 @@ import { share } from '@/lib/site-share'
 const SITE = 'https://beynoun.com'
 
 export const metadata: Metadata = {
-  title: `الأسعار — باقة مجانية، Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، Pro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
+  title: `الأسعار — باقة مجانية، الخطة الأساسية بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، الخطة الاحترافية بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)}`,
   description:
-    `ابدأ مجانًا بقالبين، ثم Starter بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، وPro بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
+    `ابدأ مجانًا بقالبين، ثم الخطة الأساسية بـ ${usdTrailing(COMPANY.STARTER_PRICE_USD)} شهريًا، والخطة الاحترافية بـ ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع نطاق مجاني لسنة. ألغِ متى شئت.`,
   keywords: [
     'أسعار منشئ المواقع',
     'كم تكلفة إنشاء موقع',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   ...share({
     title: `أسعار بينون — من باقة مجانية إلى ${usdTrailing(COMPANY.PRO_PRICE_USD)} شهريًا مع الاستضافة`,
     description:
-      'ثلاث خطط واضحة: باقة مجانية للبداية، Starter للتوليد غير المحدود، Pro مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
+      'ثلاث خطط واضحة: باقة مجانية للبداية، الخطة الأساسية للتوليد غير المحدود، الخطة الاحترافية مع الاستضافة والنطاق المجاني. لا عقود، والإلغاء في أي وقت.',
     url: `${SITE}/pricing`,
   }),
 }
@@ -74,7 +74,7 @@ const PRICING_OFFER_SCHEMA = {
     },
     {
       '@type': 'Offer',
-      name: 'Starter',
+      name: 'الخطة الأساسية',
       price: String(COMPANY.STARTER_PRICE_USD),
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
@@ -83,12 +83,12 @@ const PRICING_OFFER_SCHEMA = {
     },
     {
       '@type': 'Offer',
-      name: 'Pro',
+      name: 'الخطة الاحترافية',
       price: String(COMPANY.PRO_PRICE_USD),
       priceCurrency: 'USD',
       url: `${SITE}/pricing`,
       availability: 'https://schema.org/InStock',
-      description: 'كل ما في Starter، مع نطاق مخصّص مجاني لسنة وإزالة شارة بينون.',
+      description: 'كل ما في الخطة الأساسية، مع نطاق مخصّص مجاني لسنة وإزالة شارة بينون.',
     },
   ],
 }

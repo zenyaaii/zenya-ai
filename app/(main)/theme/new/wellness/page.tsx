@@ -86,7 +86,7 @@ function buildSampleForm(): Form {
   return {
     niche: 'center',
     brand_name: 'سَكينة للعافية',
-    brand_type: 'سبا شامل ويوغا',
+    brand_type: 'منتجع صحي شامل ويوغا',
     city: 'جدة',
     region: 'منطقة مكة المكرمة',
     founded_year: '2018',
@@ -341,7 +341,7 @@ function WellnessWizard({ niche: startNiche, onBack }: { niche?: string; onBack?
 
   function validate(): string | null {
     if (form.brand_name.trim().length < 2) return 'يرجى إدخال اسم الاستوديو.'
-    if (form.brand_type.trim().length < 2) return 'يرجى إدخال نوع الاستوديو (مثلاً: سبا شامل، استوديو يوغا).'
+    if (form.brand_type.trim().length < 2) return 'يرجى إدخال نوع الاستوديو (مثلاً: منتجع صحي شامل، استوديو يوغا).'
     if (form.city.trim().length < 2) return 'يرجى إدخال المدينة.'
     if (form.phone.trim().length < 4) return 'يرجى إدخال رقم هاتف.'
     if (!EMAIL_RE.test(form.email.trim())) return 'يرجى إدخال بريد إلكتروني صحيح.'
@@ -486,7 +486,7 @@ function WellnessWizard({ niche: startNiche, onBack }: { niche?: string; onBack?
             <Input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="سَكينة للعافية" />
           </Field>
           <Field label="نوع الاستوديو" required>
-            <Input value={form.brand_type} onChange={(e) => update('brand_type', e.target.value)} placeholder="سبا شامل، استوديو يوغا، مركز عافية..." />
+            <Input value={form.brand_type} onChange={(e) => update('brand_type', e.target.value)} placeholder="منتجع صحي شامل، استوديو يوغا، مركز عافية..." />
           </Field>
           <Field label="المدينة" required>
             <Input value={form.city} onChange={(e) => update('city', e.target.value)} placeholder="جدة" />
@@ -520,7 +520,7 @@ function WellnessWizard({ niche: startNiche, onBack }: { niche?: string; onBack?
           <Field label="رقم واتساب للحجز" hint="اتركه فارغًا وسنستخدم رقم الهاتف. يظهر زر «احجز على واتساب» بجانب الحجز.">
             <Input dir="ltr" value={form.whatsapp || ''} onChange={(e) => update('whatsapp', e.target.value)} placeholder="+966 55 555 0182" />
           </Field>
-          <Field label="رابط الموقع على خرائط Google (اختياري)" hint="إن تركته فارغًا نضع الخريطة من العنوان.">
+          <Field label="رابط الموقع على خرائط جوجل (اختياري)" hint="إن تركته فارغًا نضع الخريطة من العنوان.">
             <Input dir="ltr" value={form.map_url || ''} onChange={(e) => update('map_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Field label="سياسة الإلغاء" wide>
@@ -678,19 +678,19 @@ function WellnessWizard({ niche: startNiche, onBack }: { niche?: string; onBack?
       complete: true,
       body: (
         <Grid>
-          <Field label="رابط نشاطك على خرائط Google (أو Trustpilot أو Facebook)" wide hint="الصق رابط Google واضغط «اجلب تقييماتي». الرابط يظهر أيضًا كزر «اقرأ كل التقييمات» في موقعك.">
+          <Field label="رابط نشاطك على خرائط جوجل (أو ترست بايلوت أو فيسبوك)" wide hint="الصق رابط جوجل واضغط «اجلب تقييماتي». الرابط يظهر أيضًا كزر «اقرأ كل التقييمات» في موقعك.">
             <Input dir="ltr" value={form.reviews_url || ''} onChange={(e) => update('reviews_url', e.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
           <Block>
             <GoogleReviewsImport url={form.reviews_url || ''} name={form.brand_name} city={form.city} onPlace={placeGoogle} onImport={importGoogle} />
           </Block>
-          <Field label="متوسط التقييم" hint="كما يظهر على Google، مثلًا 4.8">
+          <Field label="متوسط التقييم" hint="كما يظهر على جوجل، مثلًا 4.8">
             <Input value={form.review_rating} onChange={(e) => update('review_rating', e.target.value)} placeholder="4.8" />
           </Field>
           <Field label="عدد التقييمات">
             <Input value={form.review_count} onChange={(e) => update('review_count', e.target.value)} placeholder="120" />
           </Field>
-          <Block title="تقييمات تريد عرضها" hint={(form.reviews || []).length === 0 ? 'انسخ تقييمات من Google والصقها هنا. تقدر تعدّلها لاحقًا من لوحة التحكم.' : undefined}>
+          <Block title="تقييمات تريد عرضها" hint={(form.reviews || []).length === 0 ? 'انسخ تقييمات من جوجل والصقها هنا. تقدر تعدّلها لاحقًا من لوحة التحكم.' : undefined}>
             <div className="zb-list">
               {(form.reviews || []).map((r, i) => (
                 <Card key={r.id} title={'التقييم ' + (i + 1)} onRemove={() => removeReview(r.id)} removeLabel={'حذف التقييم ' + (i + 1)}>

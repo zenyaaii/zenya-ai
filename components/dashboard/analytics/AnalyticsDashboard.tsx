@@ -299,7 +299,7 @@ export default function AnalyticsDashboard({ isAdmin }: { isAdmin: boolean }) {
 
       <p className="mt-10 text-center text-[14.5px] font-medium leading-[1.8] text-[#66666e]">
         آخر تحديث {new Date(data.generated_at).toLocaleString('ar')} · التوقيت {data.tz}
-        {!data.include_bots && ' · زيارات الروبوتات مستبعدة'}
+        {!data.include_bots && ' · زيارات البرامج الآلية مستبعدة'}
       </p>
     </div>
   )
@@ -374,10 +374,10 @@ function ControlBar({
       <Toggle
         active={includeBots}
         onClick={() => setIncludeBots(!includeBots)}
-        title="تضمين زيارات محركات البحث والروبوتات"
+        title="تضمين زيارات محركات البحث والبرامج الآلية"
       >
         <Bot className="h-3 w-3" />
-        {includeBots ? 'الروبوتات مُضمَّنة' : 'بلا روبوتات'}
+        {includeBots ? 'البرامج الآلية مُضمَّنة' : 'بلا برامج آلية'}
       </Toggle>
 
       {/* export */}
@@ -409,7 +409,7 @@ function ControlBar({
               </a>
             ))}
             <p className="mt-1 border-t border-[rgba(17,17,17,0.07)] px-2.5 pb-1 pt-2 text-[14.5px] font-medium leading-[1.7] text-[#66666e]">
-              ملف CSV يفتح مباشرة في Excel بالعربية.
+              ملف CSV يفتح مباشرة في إكسل بالعربية.
             </p>
           </div>
         )}

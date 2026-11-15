@@ -132,12 +132,12 @@ export default function DashboardDemoView() {
           tools={
             <TopTools
               user={null}
-              plan={{ label: 'Pro', tone: 'ok' }}
+              plan={{ label: 'الاحترافية', tone: 'ok' }}
               demo={{
                 name: 'نادية العامري',
                 email: 'nadia@almadina.co',
                 go,
-                bell: [{ id: 'r1', title: 'تقييمان جديدان من Google', site: 'واحة العافية', when: 'اليوم 9:12 ص', onOpen: () => { setSiteId('s3'); go('reviews') } }],
+                bell: [{ id: 'r1', title: 'تقييمان جديدان من جوجل', site: 'واحة العافية', when: 'اليوم 9:12 ص', onOpen: () => { setSiteId('s3'); go('reviews') } }],
               }}
             />
           }

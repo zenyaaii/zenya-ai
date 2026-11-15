@@ -300,7 +300,7 @@ function BuildReport({ r }: { r: Report }) {
       {r.missing.length > 0 && <><div className="lbl">ما لم نجده</div><ul className="why miss">{r.missing.map((w, i) => <li key={i}>{w}</li>)}</ul></>}
       {(r.social || r.photos) && (
         <dl className="kv">
-          {r.photos && <><dt>الصور</dt><dd className="num">{r.photos.used} صور في الموقع · {r.photos.google} من Google</dd></>}
+          {r.photos && <><dt>الصور</dt><dd className="num">{r.photos.used} صور في الموقع · {r.photos.google} من جوجل</dd></>}
           {r.social && <><dt>التواصل</dt><dd className="ltr">{[r.social.instagram && '@' + r.social.instagram, r.social.facebook?.replace(/^https?:\/\/(www\.)?/, '')].filter(Boolean).join(' · ') || <span dir="rtl">لم نجد حساباً</span>}</dd></>}
         </dl>
       )}
@@ -385,7 +385,7 @@ function Sheet({ lead: l, onClose, patch, sendGift, openChat, build, building }:
           <dt>المكان</dt><dd>{place(l)}{l.area ? ' · ' + l.area : ''}</dd>
           <dt>التقييم</dt><dd className="num">★ {l.rating} ({l.reviews})</dd>
           <dt>الرقم</dt><dd className="ltr">{l.phone}</dd>
-          {l.maps && <><dt>الخريطة</dt><dd><a href={l.maps} target="_blank" rel="noreferrer">افتح في Google</a></dd></>}
+          {l.maps && <><dt>الخريطة</dt><dd><a href={l.maps} target="_blank" rel="noreferrer">افتح في جوجل</a></dd></>}
           {l.social && <><dt>تواصل</dt><dd><a href={l.social} target="_blank" rel="noreferrer" className="ltr">{l.social.replace(/^https?:\/\/(www\.)?/, '').slice(0, 40)}</a></dd></>}
         </dl>
         {l.build && <BuildReport r={l.build} />}

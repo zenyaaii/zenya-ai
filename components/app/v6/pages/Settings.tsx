@@ -88,7 +88,7 @@ export default function V6Settings(p: V6SettingsProps) {
       title: 'حذف الحساب نهائيًا؟',
       body: (
         <>
-          <p className="t-body">تُحذف مواقعك (<span className="num">{p.sites}</span>) وكل الحجوزات والصور، ويُلغى اشتراكك في Stripe. لا يمكن التراجع عن هذا.</p>
+          <p className="t-body">تُحذف مواقعك (<span className="num">{p.sites}</span>) وكل الحجوزات والصور، ويُلغى اشتراكك في سترايب. لا يمكن التراجع عن هذا.</p>
           <div className="field" style={{ marginTop: 16 }}>
             <label htmlFor="delIn">اكتب كلمة «احذف» للتأكيد</label>
             <input className="inp" id="delIn" autoComplete="off" autoFocus onChange={(e) => st.set({ ok: e.target.value.trim() === 'احذف' })} />

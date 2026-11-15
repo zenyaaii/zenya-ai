@@ -1353,7 +1353,7 @@ function AreasSection() {
               </dl>
               {maps ? (
                 <div className="mt-5">
-                  <Btn kind="outline" size="md" href={maps} external icon={<Navigation className="h-4 w-4" aria-hidden />} full>افتح في خرائط Google</Btn>
+                  <Btn kind="outline" size="md" href={maps} external icon={<Navigation className="h-4 w-4" aria-hidden />} full>افتح في خرائط جوجل</Btn>
                 </div>
               ) : null}
             </motion.div>

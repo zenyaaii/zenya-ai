@@ -21,7 +21,7 @@ export default function Posts({ layout = 'grid', say }: { layout?: 'days' | 'gri
   const Actions = ({ p }: { p: SocialPost }) => (
     <div className="acts">
       <a className="btn sm" href={p.post} download={`beynoun-${p.n}-post.jpg`}>{DL}المنشور</a>
-      <a className="btn sm ghost" href={p.story} download={`beynoun-${p.n}-story.jpg`}>{DL}الستوري</a>
+      <a className="btn sm ghost" href={p.story} download={`beynoun-${p.n}-story.jpg`}>{DL}القصص</a>
       <button className="btn sm ghost" onClick={() => copy(p)}>نسخ النص</button>
     </div>
   )

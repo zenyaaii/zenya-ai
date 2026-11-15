@@ -59,7 +59,7 @@ export function GscConnect({
     <div className="flex min-w-0 items-center gap-2.5">
       {G}
       <div className="min-w-0">
-        <h3 className="zy-h3">Google Search Console</h3>
+        <h3 className="zy-h3">أداة جوجل لمشرفي المواقع</h3>
         {status === 'connected' ? (
           <p className="zy-sub mt-0.5 flex min-w-0 flex-wrap items-baseline gap-x-1">
             <span className="shrink-0">مربوط بحساب</span>
@@ -108,7 +108,7 @@ export function GscConnect({
 function siteLine(name: string, state: GscSiteState, error?: string) {
   switch (state) {
     case 'added':
-      return { tone: 'ok', pill: 'مُضاف', body: `${name} مُضاف في Search Console، وجوجل يرسل أرقامه.` }
+      return { tone: 'ok', pill: 'مُضاف', body: `${name} مُضاف في أداة جوجل لمشرفي المواقع، وجوجل يرسل أرقامه.` }
     case 'missing':
       return { tone: 'warn', pill: 'غير مُضاف', body: `${name} غير مُضاف بعد. نضيفه ونرسل خريطة الموقع بنقرة واحدة.` }
     case 'not_published':
@@ -157,8 +157,8 @@ export function GscNumbers({
   let body: React.ReactNode
   if (status === 'disconnected' || status === 'missing' || status === 'not_published' || status === 'error') {
     const text = {
-      disconnected: 'اربط حسابك في جوجل من صفحة السيو بزر واحد، وستظهر هنا مرات ظهور موقعك في البحث والنقرات والكلمات.',
-      missing: 'هذا الموقع غير مُضاف في Search Console بعد. أضِفه بنقرة من صفحة السيو.',
+      disconnected: 'اربط حسابك في جوجل من صفحة الظهور في البحث بزر واحد، وستظهر هنا مرات ظهور موقعك في البحث والنقرات والكلمات.',
+      missing: 'هذا الموقع غير مُضاف في أداة جوجل لمشرفي المواقع بعد. أضِفه بنقرة من صفحة الظهور في البحث.',
       not_published: 'هذا الموقع غير منشور، فلا يراه جوجل بعد.',
       error: 'تعذّر جلب الأرقام من جوجل الآن. أعد تحميل الصفحة بعد لحظات.',
     }[status]
@@ -166,7 +166,7 @@ export function GscNumbers({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="zb-small max-w-[60ch]">{text}</p>
         {(status === 'disconnected' || status === 'missing') && (
-          <Act action={toSeo} className="zb-btn zb-btn-ink">{status === 'disconnected' ? 'اربط من صفحة السيو' : 'أضِفه من صفحة السيو'}</Act>
+          <Act action={toSeo} className="zb-btn zb-btn-ink">{status === 'disconnected' ? 'اربط من صفحة الظهور في البحث' : 'أضِفه من صفحة الظهور في البحث'}</Act>
         )}
       </div>
     )
@@ -221,7 +221,7 @@ export function GscNumbers({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="min-w-0">
           <h2 className="zb-h2 flex items-center gap-2">{G}<span>بحث جوجل</span></h2>
-          <p className="zb-small">آخر 28 يومًا · أرقام حقيقية من Google Search Console</p>
+          <p className="zb-small">آخر 28 يومًا · أرقام حقيقية من أداة جوجل لمشرفي المواقع</p>
         </div>
         {picker}
       </div>

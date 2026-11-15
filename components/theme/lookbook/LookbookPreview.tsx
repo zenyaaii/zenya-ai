@@ -91,7 +91,7 @@ function ownPhoto(content: LookbookContent, i: number): string | undefined {
 function LookbookNav({ content, colors, headingFont, bodyFont, view, setView }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; view: LookbookView; setView: (v: LookbookView) => void }) {
   const leftLinks: { label: string; view: LookbookView }[] = [
     { label: 'المتجر', view: 'shop' },
-    { label: 'لوك بوك', view: 'lookbook' },
+    { label: 'دفتر إطلالات', view: 'lookbook' },
     { label: 'من نحن', view: 'about' },
   ]
   const [menuOpen, setMenuOpen] = useState(false)
@@ -769,7 +769,7 @@ function LookbookNewsletter({ content, colors, headingFont, bodyFont }: { conten
 // ─── Footer ────────────────────────────────────────────────────────────────────
 function LookbookFooter({ content, colors, headingFont, bodyFont, go }: { content: LookbookContent; colors: Colors; headingFont: string; bodyFont: string; go: (v: LookbookView) => void }) {
   const links = {
-    'التسوّق': ['وصل حديثًا', 'فساتين', 'بلوزات', 'تنانير', 'معاطف', 'إكسسوارات'],
+    'التسوّق': ['وصل حديثًا', 'فساتين', 'بلوزات', 'تنانير', 'معاطف', 'مكمّلات'],
     'المساعدة': ['دليل المقاسات', 'الشحن', 'الإرجاع', 'الأسئلة الشائعة', 'تواصل'],
     'العلامة': ['قصتنا', 'الاستدامة', 'الصحافة', 'الوظائف', 'المتاجر']
   }
@@ -785,7 +785,7 @@ function LookbookFooter({ content, colors, headingFont, bodyFont, go }: { conten
   }
   const actionFor = (item: string): (() => void) | null => {
     switch (item) {
-      case 'وصل حديثًا': case 'فساتين': case 'بلوزات': case 'تنانير': case 'معاطف': case 'إكسسوارات':
+      case 'وصل حديثًا': case 'فساتين': case 'بلوزات': case 'تنانير': case 'معاطف': case 'مكمّلات':
       case 'دليل المقاسات':
         return () => go('shop')
       case 'قصتنا':

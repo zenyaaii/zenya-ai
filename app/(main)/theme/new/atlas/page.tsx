@@ -50,12 +50,12 @@ function buildSampleForm(): Form {
     brand_tagline: 'أداة المشاريع التي سيستخدمها فريقك فعلًا.',
     brand_category: 'إدارة المشاريع',
     target_audience: 'فرق المنتجات في الشركات الناشئة بمراحل التمويل A–C، من 10 إلى 80 شخصًا، يطلقون أسبوعيًا.',
-    problem_solved: 'تهدر الفرق ساعات في إعادة كتابة تحديثات الحالة على Slack وJira وLinear. يجمع «تدفّق» كل إشارة — الالتزامات وطلبات الدمج وملفات التصميم — في خط زمني واحد، فيتوقّف مديرو المنتجات عن المطاردة ويتوقّف المهندسون عن الترجمة.',
+    problem_solved: 'تهدر الفرق ساعات في إعادة كتابة تحديثات الحالة على سلاك وجيرا ولينير. يجمع «تدفّق» كل إشارة — الالتزامات وطلبات الدمج وملفات التصميم — في خط زمني واحد، فيتوقّف مديرو المنتجات عن المطاردة ويتوقّف المهندسون عن الترجمة.',
     features: [
-      { id: uid(), title: 'خارطة طريق مدعومة بالذكاء الاصطناعي', description: 'تخطيط بالسحب والإفلات يستمدّ السرعة الحقيقية من سجلّ Git.' },
+      { id: uid(), title: 'خارطة طريق مدعومة بالذكاء الاصطناعي', description: 'تخطيط بالسحب والإفلات يستمدّ السرعة الحقيقية من سجلّ جِت.' },
       { id: uid(), title: 'سجلّ تغييرات لحظي', description: 'كل طلب دمج مُدمَج يُصنَّف تلقائيًا في ملاحظة إصدار موجّهة للعملاء.' },
-      { id: uid(), title: 'اجتماعات يومية داخل Slack', description: 'اجتماعات يومية غير متزامنة داخل المحادثات — دون تطبيق إضافي.' },
-      { id: uid(), title: 'مؤشّر صحّة السبرنت', description: 'رقم واحد يخبرك إن كان هذا السبرنت متعثّرًا قبل المراجعة.' },
+      { id: uid(), title: 'اجتماعات يومية داخل سلاك', description: 'اجتماعات يومية غير متزامنة داخل المحادثات — دون تطبيق إضافي.' },
+      { id: uid(), title: 'مؤشّر صحّة دورة العمل', description: 'رقم واحد يخبرك إن كان هذه الدورة متعثّرة قبل المراجعة.' },
       { id: uid(), title: 'الاعتماديات بين الفرق', description: 'اعرف من يعيق من، تلقائيًا، عبر الفرق والمستودعات.' },
     ],
     integrations: 'Slack, GitHub, Figma, Notion, Linear, Vercel, Sentry',
@@ -66,7 +66,7 @@ function buildSampleForm(): Form {
     review_rating: '4.9',
     review_count: '+620 تقييم',
     reviews: [
-      { id: uid(), name: 'ريم ع.', text: 'نقلنا تخطيط السبرنت كله إلى «تدفّق» في أسبوع. صرنا نعرف من يعيق من قبل الاجتماع لا بعده.', detail: 'مديرة منتج', rating: '5' },
+      { id: uid(), name: 'ريم ع.', text: 'نقلنا تخطيط دورة العمل كله إلى «تدفّق» في أسبوع. صرنا نعرف من يعيق من قبل الاجتماع لا بعده.', detail: 'مديرة منتج', rating: '5' },
     ],
     reviews_url: '',
     notable_customers: 'Vercel, Stripe, Notion, Linear, Anthropic',
@@ -300,7 +300,7 @@ export default function AtlasWizardPage() {
       body: (
         <Grid>
           <Field label="شركاء التكامل" wide hint="مفصولة بفواصل. اتركها فارغة وستختار بينون قيمًا مناسبة.">
-            <Input value={form.integrations} onChange={(e) => update('integrations', e.target.value)} placeholder="Slack, GitHub, Figma, Notion, Jira, Stripe" dir="ltr" />
+            <Input value={form.integrations} onChange={(e) => update('integrations', e.target.value)} placeholder="سلاك، جيت هب، فيجما، نوشن، جيرا، سترايب" />
           </Field>
           <Field label="سعر الباقة الاحترافية">
             <Input value={form.pro_price} onChange={(e) => update('pro_price', e.target.value)} placeholder="49$ شهريًا" />
@@ -327,7 +327,7 @@ export default function AtlasWizardPage() {
             <Input value={form.user_count} onChange={(e) => update('user_count', e.target.value)} placeholder="مثلاً: +4,200 فريق" />
           </Field>
           <Field label="عملاء بارزون" hint="اتركها فارغة إن لم يكن لديك عملاء تذكرهم.">
-            <Input value={form.notable_customers} onChange={(e) => update('notable_customers', e.target.value)} placeholder="مثلاً: Vercel, Stripe, Notion" />
+            <Input value={form.notable_customers} onChange={(e) => update('notable_customers', e.target.value)} placeholder="مثلاً: فيرسل، سترايب، نوشن" />
           </Field>
         </Grid>
       ),
@@ -380,9 +380,9 @@ export default function AtlasWizardPage() {
       <DevFillButton onFill={() => setForm(buildSampleForm())} />
       <ExampleFillButton onFill={() => setForm(buildSampleForm())} />
       <WizardShell
-        eyebrow="أطلس · قالب SaaS"
-        title="ابنِ صفحة هبوط SaaS فاخرة."
-        sub="أخبرنا عن منتجك وتولّد بينون موقع SaaS متكاملًا مُحسَّنًا للتحويل — واجهة رئيسية ومزايا وتسعير وتكاملات وأسئلة شائعة."
+        eyebrow="أطلس · قالب البرمجيات"
+        title="ابنِ صفحة هبوط لمنتج برمجي فاخرة."
+        sub="أخبرنا عن منتجك وتولّد بينون موقعًا لمنتج برمجي متكاملًا مُحسَّنًا للتحويل — واجهة رئيسية ومزايا وتسعير وتكاملات وأسئلة شائعة."
         steps={steps}
         step={step}
         onStep={setStep}

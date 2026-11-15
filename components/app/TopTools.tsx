@@ -94,7 +94,7 @@ export default function TopTools({
 
   const bellItems: BellItem[] = demo ? demo.bell : [...handoverItems, ...noticeItems, ...news.map((s) => ({
     id: s.id,
-    title: s.count === 1 ? 'تقييم جديد من Google' : s.count === 2 ? 'تقييمان جديدان من Google' : `${s.count} تقييمات جديدة من Google`,
+    title: s.count === 1 ? 'تقييم جديد من جوجل' : s.count === 2 ? 'تقييمان جديدان من جوجل' : `${s.count} تقييمات جديدة من جوجل`,
     site: s.name,
     when: whenLabel(s.at || undefined, ''),
     href: linkTo(`/dashboard/reviews?site=${s.id}`),

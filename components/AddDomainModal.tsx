@@ -135,7 +135,7 @@ function EnterStep({
         اربط نطاقًا مخصصًا
       </h2>
       <p style={{ margin: '6px 0 18px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        اكتب النطاق الذي تملكه — وسنعرض لك سجلَّي DNS لإضافتهما. تتحقّق بينون وتُصدِر شهادة SSL تلقائيًا.
+        اكتب النطاق الذي تملكه — وسنعرض لك سجلَّي سجلات النطاق لإضافتهما. تتحقّق بينون وتُصدِر شهادة شهادة أمان تلقائيةًا.
       </p>
 
       <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6b6b6b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.4 }}>
@@ -209,7 +209,7 @@ function EnterStep({
             boxShadow: '0 4px 14px rgba(94,106,210,0.25)',
           }}
         >
-          {submitting ? 'جارٍ الربط…' : 'التالي: سجلات DNS ←'}
+          {submitting ? 'جارٍ الربط…' : 'التالي: سجلات النطاق ←'}
         </button>
       </div>
     </>
@@ -240,13 +240,13 @@ function DnsStep({
   return (
     <>
       <h2 style={{ margin: 0, fontSize: 22, fontWeight: 600, color: '#1c1c1c' }}>
-        أوشكت على الانتهاء — أضف سجلات DNS هذه
+        أوشكت على الانتهاء — أضف سجلات النطاق هذه
       </h2>
       <p style={{ margin: '6px 0 14px', fontSize: 13.5, color: '#6b6b6b', lineHeight: 1.55 }}>
-        افتح لوحة DNS لدى مُسجِّل نطاقك وأضف السجلات أدناه.
+        افتح لوحة إعدادات النطاق لدى مُسجِّل نطاقك وأضف السجلات أدناه.
         تتحقّق بينون تلقائيًا — عادةً خلال 5 إلى 15 دقيقة. الحالة:{' '}
         <strong style={{ color: status === 'live' ? '#15803d' : '#5e6ad2' }}>
-          {status === 'live' ? '🔒 منشور' : 'بانتظار DNS'}
+          {status === 'live' ? '🔒 منشور' : 'بانتظار سجلات النطاق'}
         </strong>
       </p>
 
@@ -258,7 +258,7 @@ function DnsStep({
 
       <div style={{ marginTop: 16, border: '1px solid rgba(17,17,17,0.10)', borderRadius: 16, overflow: 'hidden' }}>
         <div style={{ background: '#f4f4f6', padding: '8px 12px', fontSize: 11, fontWeight: 700, color: '#56565a', letterSpacing: 0.4, textTransform: 'uppercase' }}>
-          سجلات DNS لإضافتها للنطاق {domain}
+          سجلات النطاق لإضافتها للنطاق {domain}
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>

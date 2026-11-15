@@ -558,7 +558,7 @@ function ReviewsCard({ content, path }: { content: any; path: string }) {
       </div>
       <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.8, color: '#56565a', fontWeight: 500 }}>
         يظهر في موقعك <b style={{ color: '#171717' }}>{shown.length}</b>{hidden.length > 0 ? <>، ومخفي <b style={{ color: '#171717' }}>{hidden.length}</b></> : null}.
-        {' '}اختر ما يظهر، ورتّبها، واجلبها من Google، واحذفها من صفحة التقييمات. ويمكنك تعديل نصوص تقييماتك هنا في الأسفل.
+        {' '}اختر ما يظهر، ورتّبها، واجلبها من جوجل، واحذفها من صفحة التقييمات. ويمكنك تعديل نصوص تقييماتك هنا في الأسفل.
       </p>
       <a
         href={themeId ? `/dashboard/reviews?site=${encodeURIComponent(themeId)}` : '/dashboard/reviews'}

@@ -10,7 +10,7 @@ import { useSite } from '@/components/app/v6/site'
 
 const SUB: Record<keyof NotificationPrefs, string> = {
   booking: 'بريد فور وصول كل حجز',
-  review: 'عندما يكتب أحد تقييمًا على Google',
+  review: 'عندما يكتب أحد تقييمًا على جوجل',
   product: 'مزايا جديدة، مرة في الشهر',
   offers: 'خصومات على الباقات والنطاقات',
 }
@@ -47,7 +47,7 @@ export default function SettingsClient() {
   const hasPassword = providers.includes('email')
   // Set when the password changes here; older accounts have no date to show.
   const changed = user.user_metadata?.pw_changed_at
-  const pwNote = !hasPassword ? 'تدخل بحساب Google. يمكنك إضافة كلمة مرور' : changed ? 'غيّرتها ' + since(changed) : 'غيّرها متى شئت'
+  const pwNote = !hasPassword ? 'تدخل بحساب جوجل. يمكنك إضافة كلمة مرور' : changed ? 'غيّرتها ' + since(changed) : 'غيّرها متى شئت'
 
   return (
     <V6Settings

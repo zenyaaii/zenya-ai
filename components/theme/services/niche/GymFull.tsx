@@ -78,7 +78,7 @@ function Hero({ n, content, x }: { n: N; content: ServiceContent; x: NicheExtra 
           </div>
         </div>
         <div className="g-hero-facts">
-          {n.rating ? <span><b>{n.rating.toFixed(1)}</b><small>{n.count ? `من ${ar(n.count)} تقييم` : 'على Google'}</small></span> : null}
+          {n.rating ? <span><b>{n.rating.toFixed(1)}</b><small>{n.count ? `من ${ar(n.count)} تقييم` : 'على جوجل'}</small></span> : null}
           {n.st ? <span><b className={n.st.open ? 'ok' : 'no'}>{n.st.open ? 'مفتوح' : 'مغلق'}</b><small>{n.st.text}</small></span> : null}
           {n.members.length ? <span><b>{ar(n.members.length)}</b><small>{n.members.length > 2 ? 'مدربين' : n.members.length === 2 ? 'مدربان' : 'مدرب'}</small></span> : null}
           {up ? (
@@ -108,7 +108,7 @@ function Manifesto({ n, x, content }: { n: N; x: NicheExtra; content: ServiceCon
   const text = x.story || content.story?.body || ''
   const years = typeof x.since === 'number' ? new Date().getFullYear() - x.since : 0
   const stats = [
-    n.rating ? { v: <CountUp to={n.rating} dec={1} />, l: 'تقييمنا على Google' } : null,
+    n.rating ? { v: <CountUp to={n.rating} dec={1} />, l: 'تقييمنا على جوجل' } : null,
     n.count ? { v: <CountUp to={n.count} />, l: 'تقييم كتبه أعضاؤنا' } : null,
     years > 0 ? { v: <CountUp to={years} />, l: years > 10 ? 'سنة ونحن هنا' : 'سنوات ونحن هنا' } : null,
     (x.classes || []).length ? { v: <CountUp to={(x.classes || []).reduce((a, c) => a + c.items.length, 0)} />, l: 'حصة كل أسبوع' } : null,
@@ -223,7 +223,7 @@ function Coaches({ n, limit }: { n: N; limit?: number }) {
           </div>
           <h3>{m.name}</h3>
           {m.tags?.length ? <ul>{m.tags.map((t) => <li key={t}><Icon of={t} size={14} />{t}</li>)}</ul> : null}
-          {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على Google</cite> : null}</blockquote> : null}
+          {m.quote ? <blockquote>«{m.quote}»{m.quote_by ? <cite>{m.quote_by}، على جوجل</cite> : null}</blockquote> : null}
         </article>
       ))}
     </div>

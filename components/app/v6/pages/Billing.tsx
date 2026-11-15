@@ -18,8 +18,8 @@ export type V6Plan = { id: string; t: string; p: string; inc: string[] }
 /** The three plans as the v6 design words them: the same promises as PLAN_BILLING, shorter. */
 export const V6_PLANS: V6Plan[] = [
   { id: 'entry', t: 'المجانية', p: '0$', inc: ['توليد موقعين', 'كل القوالب الثمانية للمعاينة', 'انشر على عنوان مجاني من بينون', 'شهر تجربة للحجوزات والتحليلات'] },
-  { id: 'starter', t: 'Starter', p: '14.99$', inc: ['توليد غير محدود', 'انشر على نطاقك الخاص', 'شهادة SSL تلقائية', 'الحجوزات والتحليلات كاملة', 'ملف ثيم شوبيفاي جاهز'] },
-  { id: 'pro', t: 'Pro', p: '24.99$', inc: ['كل ما في Starter', 'نطاق مجاني لسنة', 'خصم 30% على النطاقات', 'إزالة شارة «صُنع ببينون»', 'دعم بأولوية قصوى'] },
+  { id: 'starter', t: 'الأساسية', p: '14.99$', inc: ['توليد غير محدود', 'انشر على نطاقك الخاص', 'شهادة أمان تلقائية', 'الحجوزات والتحليلات كاملة', 'ملف قالب شوبيفاي جاهز'] },
+  { id: 'pro', t: 'الاحترافية', p: '24.99$', inc: ['كل ما في الخطة الأساسية', 'نطاق مجاني لسنة', 'خصم 30% على النطاقات', 'إزالة شارة «صُنع ببينون»', 'دعم بأولوية قصوى'] },
 ]
 
 export type V6Invoice = { id: string; date: string; amount: string; status: string; tone: string; pdf: string | null }
@@ -108,7 +108,7 @@ export default function V6Billing(p: V6BillingProps) {
               {p.portal && <button className="btn sm press" style={{ marginTop: 16 }} onClick={p.portal}><Ic n="card" />حدّث البطاقة</button>}
             </>
           ) : (
-            <div className="rows"><div className="r"><span className="tile"><Ic n="card" /></span><span className="tx"><b>لا توجد بطاقة محفوظة</b><span>تُحفظ بطاقتك عند أول اشتراك، في Stripe وحده.</span></span></div></div>
+            <div className="rows"><div className="r"><span className="tile"><Ic n="card" /></span><span className="tx"><b>لا توجد بطاقة محفوظة</b><span>تُحفظ بطاقتك عند أول اشتراك، في سترايب وحده.</span></span></div></div>
           )}
         </section>
       </div>
@@ -132,7 +132,7 @@ export default function V6Billing(p: V6BillingProps) {
             </tbody>
           </table>
         ) : (
-          <div className="empty"><Ic n="card" /><b>لا فواتير بعد</b><span>تظهر هنا فواتيرك من Stripe بعد أول دفعة.</span></div>
+          <div className="empty"><Ic n="card" /><b>لا فواتير بعد</b><span>تظهر هنا فواتيرك من سترايب بعد أول دفعة.</span></div>
         )}
       </section>
       <h2 className="sec-title rv" id="plansT" ref={plansT} style={{ ...at(6), marginTop: 28 }}>الباقات</h2>

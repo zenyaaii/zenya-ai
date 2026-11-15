@@ -148,7 +148,7 @@ function DashboardMockup({ colors, brandName }: { colors: ReturnType<typeof getA
               className="h-7 w-20 rounded-lg text-[10px] font-bold flex items-center justify-center text-white"
               style={{ background: colors.primary }}
             >
-              + New task
+              + مهمة جديدة
             </div>
           </div>
 
@@ -172,9 +172,9 @@ function DashboardMockup({ colors, brandName }: { colors: ReturnType<typeof getA
           {/* Task list */}
           <div className="space-y-1.5">
             {[
-              { title: 'Design new onboarding flow', priority: '#ef4444', status: 'In Progress' },
-              { title: 'Integrate Stripe webhooks', priority: '#f59e0b', status: 'In Review' },
-              { title: 'Write API documentation', priority: '#22c55e', status: 'Todo' },
+              { title: 'تصميم مسار تسجيل جديد', priority: '#ef4444', status: 'قيد التنفيذ' },
+              { title: 'ربط إشعارات الدفع من سترايب', priority: '#f59e0b', status: 'قيد المراجعة' },
+              { title: 'كتابة دليل الربط البرمجي', priority: '#22c55e', status: 'للتنفيذ' },
             ].map((task, i) => (
               <div
                 key={i}

@@ -15,7 +15,7 @@ export default function CollectivePreviewPage() {
   const supabase = createClient()
   const [content, setContent] = useState<CollectiveContent | null>(null)
   const [presetId, setPresetId] = useState<string>('jade')
-  const [name, setName] = useState<string>('متجر كتالوج')
+  const [name, setName] = useState<string>('متجر متعدد المنتجات')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [celebrate, setCelebrate] = useState(false)
@@ -45,14 +45,14 @@ export default function CollectivePreviewPage() {
 
       const stored = data.content as any
       if (stored?.business_type !== 'collective' || !stored?.collective) {
-        setError('هذا القالب ليس قالب كتالوج.')
+        setError('هذا القالب ليس قالب متجر متعدد المنتجات.')
         setLoading(false)
         return
       }
 
       setContent(stored.collective as CollectiveContent)
       setPresetId(stored.style_preset || 'jade')
-      setName(data.product_name || 'متجر كتالوج')
+      setName(data.product_name || 'متجر متعدد المنتجات')
       setLoading(false)
     }
     load()

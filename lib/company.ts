@@ -24,8 +24,8 @@ export const COMPANY = {
   // identity is on file with the KvK and publicly retrievable by KvK number.
   LEGAL_NAME: 'Musannef',
   TRADE_NAME: 'Musannef',
-  ENTITY_TYPE: 'مؤسسة فردية هولندية (eenmanszaak)',
-  OWNER_DISCLOSURE: 'الشخص الطبيعي الذي يدير Musannef يمكن التعرّف عليه عبر السجل العام للغرفة التجارية الهولندية (KvK) باستخدام رقم KvK أدناه. المالك هو المتحكّم في البيانات لأغراض اللائحة العامة لحماية البيانات (GDPR).',
+  ENTITY_TYPE: 'مؤسسة فردية هولندية',
+  OWNER_DISCLOSURE: 'الشخص الطبيعي الذي يدير Musannef يمكن التعرّف عليه عبر السجل العام للغرفة التجارية الهولندية باستخدام رقم السجل أدناه. المالك هو المتحكّم في البيانات لأغراض اللائحة العامة لحماية البيانات.',
   COUNTRY: 'هولندا',
   JURISDICTION: 'هولندا',
   GOVERNING_LAW: 'القانون الهولندي',
@@ -33,7 +33,7 @@ export const COMPANY = {
 
   // Registrations
   KVK_NUMBER: '42070030',
-  VAT_NUMBER: 'قيد التسجيل (ضريبة القيمة المضافة BTW)',       // Update once BTW arrives
+  VAT_NUMBER: 'قيد التسجيل (ضريبة القيمة المضافة)',       // Update once BTW arrives
 
   // Address — Musannef's registered KvK address. Only the postcode is
   // disclosed publicly; the full street is available via the KvK public
@@ -70,7 +70,7 @@ export const COMPANY = {
   ENTRY_PRICE_USD: 0,
   STARTER_PRICE_DISPLAY: '14.99 دولارًا شهريًا',
   PRO_PRICE_DISPLAY: '24.99 دولارًا شهريًا',
-  PRICE_DISPLAY: 'اشتراك شهري — 14.99 دولارًا لخطة Starter أو 24.99 دولارًا لخطة Pro',
+  PRICE_DISPLAY: 'اشتراك شهري — 14.99 دولارًا لالخطة الأساسية أو 24.99 دولارًا لالخطة الاحترافية',
   FREE_GENERATIONS: 2,
   TRIAL_DAYS: 0,
   CURRENCY: 'USD',

@@ -219,9 +219,9 @@ function SourceBlock({
       <div className="grid gap-2">
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-[#d6453d]" strokeWidth={2.25} />
-          <h3 className="zy-h3">اربط تقييمات Google</h3>
+          <h3 className="zy-h3">اربط تقييمات جوجل</h3>
         </div>
-        <p className="text-[14px] font-medium leading-[1.8] text-[#66666e]">ألصق رابط نشاطك على خرائط Google، ونجلب تقييمك وآخر التقييمات.</p>
+        <p className="text-[14px] font-medium leading-[1.8] text-[#66666e]">ألصق رابط نشاطك على خرائط جوجل، ونجلب تقييمك وآخر التقييمات.</p>
         <div className="flex flex-col gap-2 sm:flex-row">
           <input
             id="reviews-google-link"
@@ -231,7 +231,7 @@ function SourceBlock({
             dir="ltr"
             placeholder="https://maps.app.goo.gl/..."
             className="min-w-0 flex-1 px-3 py-2.5 text-[14.5px] font-medium"
-            aria-label="رابط نشاطك على خرائط Google"
+            aria-label="رابط نشاطك على خرائط جوجل"
           />
           <Act action={onFetch} className="zy-btn justify-center">
             <RefreshCw className={`h-3.5 w-3.5 ${fetching ? 'animate-spin' : ''}`} strokeWidth={2.25} />
@@ -248,7 +248,7 @@ function SourceBlock({
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 text-[14px] font-bold text-[#171717]">
-          مربوط بخرائط Google
+          مربوط بخرائط جوجل
           <span className="zy-pill" data-tone="ok" style={{ fontSize: 12.5, padding: '0.125rem 0.5rem' }}>متصل</span>
         </div>
         <a href={source.link} target="_blank" rel="noreferrer" className="flex items-center gap-1 truncate text-[13px] font-medium text-[#66666e] hover:text-[#5e6ad2]">
@@ -256,7 +256,7 @@ function SourceBlock({
           <span className="truncate" dir="ltr">{source.link.replace(/^https?:\/\//, '')}</span>
         </a>
       </div>
-      <Act action={onFetch} className="zy-btn-q shrink-0" title="اجلب آخر التقييمات من Google">
+      <Act action={onFetch} className="zy-btn-q shrink-0" title="اجلب آخر التقييمات من جوجل">
         <RefreshCw className={`h-3.5 w-3.5 ${fetching ? 'animate-spin' : ''}`} strokeWidth={2.25} />
         <span className="hidden sm:inline">{fetching ? 'جارٍ التحديث…' : 'حدّث'}</span>
       </Act>
@@ -309,7 +309,7 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
                   </div>
                   <div className="mt-2"><Stars n={source?.rating ?? 0} size={16} /></div>
                   <div className="mt-1.5 text-[13.5px] font-medium text-[#66666e]">
-                    {source?.count != null ? `${source.count} تقييم على Google` : 'لم يُربط Google بعد'}
+                    {source?.count != null ? `${source.count} تقييم على جوجل` : 'لم يُربط جوجل بعد'}
                   </div>
                 </div>
                 <div className="ms-auto text-end sm:hidden">
@@ -393,7 +393,7 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
                   )
                 ))}
               </ul>
-              {reviews.length === 0 && editing !== 'new' && <EmptyHint>لا تقييمات بعد. اربط Google أو أضف تقييمًا بنفسك.</EmptyHint>}
+              {reviews.length === 0 && editing !== 'new' && <EmptyHint>لا تقييمات بعد. اربط جوجل أو أضف تقييمًا بنفسك.</EmptyHint>}
             </div>
 
             {/* What the visitor sees: the site's reviews section, drawn small. */}
@@ -423,7 +423,7 @@ export function ReviewsScreen(p: ReviewsScreenProps) {
             </aside>
           </div>
           <p className="mt-4 px-1 text-[13px] font-medium leading-[1.8] text-[#8a8a92]">
-            Google يعطي آخر 5 تقييمات فقط، ونصها يبقى كما كتبه أصحابها. التقييمات التي تضيفها أنت يمكنك تعديلها. ويمكنك حذف أي تقييم.
+            جوجل يعطي آخر 5 تقييمات فقط، ونصها يبقى كما كتبه أصحابها. التقييمات التي تضيفها أنت يمكنك تعديلها. ويمكنك حذف أي تقييم.
           </p>
         </>
       )}

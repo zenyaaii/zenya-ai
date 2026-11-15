@@ -106,7 +106,7 @@ function buildSampleForm(): Form {
     review_rating: '4.9',
     review_count: '+320',
     reviews: [
-      { id: newId(), name: 'سلطان ح.', text: 'اتصلت الصبح على تسريب تحت المغسلة، ووصل الفني قبل الظهر. السعر نفس اللي قالوه بالتلفون.', detail: 'إصلاح التسريبات الطارئ', rating: '5' },
+      { id: newId(), name: 'سلطان ح.', text: 'اتصلت الصبح على تسريب تحت المغسلة، ووصل الفني قبل الظهر. والسعر هو نفسه الذي ذكروه في الهاتف.', detail: 'إصلاح التسريبات الطارئ', rating: '5' },
     ],
     reviews_url: '',
     licenses: 'رخصة سباكة احترافية رقم M-39817\nشهادة اعتماد فنّي',
@@ -451,22 +451,22 @@ function GeneralServicesWizard({ category, onBack }: { category?: string; onBack
             <Input value={form.response_time} onChange={(e) => update('response_time', e.target.value)} placeholder="استجابة في نفس اليوم لمعظم المناطق" />
           </Field>
           <Field label="إنستغرام">
-            <Input dir="ltr" value={form.instagram} onChange={(e) => update('instagram', e.target.value)} placeholder="@yourbusiness" />
+            <Input dir="ltr" value={form.instagram} onChange={(e) => update('instagram', e.target.value)} placeholder="@darnoor" />
           </Field>
           <Field label="تيك توك">
-            <Input dir="ltr" value={form.tiktok} onChange={(e) => update('tiktok', e.target.value)} placeholder="@yourbusiness" />
+            <Input dir="ltr" value={form.tiktok} onChange={(e) => update('tiktok', e.target.value)} placeholder="@darnoor" />
           </Field>
           <Field label="سناب شات">
-            <Input dir="ltr" value={form.snapchat} onChange={(e) => update('snapchat', e.target.value)} placeholder="yourbusiness" />
+            <Input dir="ltr" value={form.snapchat} onChange={(e) => update('snapchat', e.target.value)} placeholder="darnoor" />
           </Field>
           <Field label="فيسبوك">
-            <Input dir="ltr" value={form.facebook} onChange={(e) => update('facebook', e.target.value)} placeholder="facebook.com/yourbusiness" />
+            <Input dir="ltr" value={form.facebook} onChange={(e) => update('facebook', e.target.value)} placeholder="facebook.com/darnoor" />
           </Field>
           <Field label="إكس (تويتر)">
-            <Input dir="ltr" value={form.x} onChange={(e) => update('x', e.target.value)} placeholder="@yourbusiness" />
+            <Input dir="ltr" value={form.x} onChange={(e) => update('x', e.target.value)} placeholder="@darnoor" />
           </Field>
           <Field label="يوتيوب">
-            <Input dir="ltr" value={form.youtube} onChange={(e) => update('youtube', e.target.value)} placeholder="youtube.com/@yourbusiness" />
+            <Input dir="ltr" value={form.youtube} onChange={(e) => update('youtube', e.target.value)} placeholder="youtube.com/@darnoor" />
           </Field>
           <Block>
             <Toggle on={form.emergency_service} onChange={(v) => update('emergency_service', v)}>

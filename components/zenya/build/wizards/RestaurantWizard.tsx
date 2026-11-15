@@ -48,9 +48,9 @@ const RESTAURANT_TYPES: Array<{ id: RestaurantTypeId; label: string }> = [
   { id: "coffee_takeaway", label: "قهوة · سفري" },
   { id: "bakery", label: "مخبز" },
   { id: "pizzeria", label: "بيتزا" },
-  { id: "bar", label: "لاونج · عصائر" },
+  { id: "bar", label: "مجلس · عصائر" },
   { id: "brunch", label: "فطور متأخّر · طوال اليوم" },
-  { id: "cafeteria", label: "كافيتيريا" },
+  { id: "cafeteria", label: "مقصف" },
   { id: "food_truck", label: "عربة طعام" },
   { id: "dessert", label: "حلويات وباتيسري" },
   { id: "other", label: "أخرى" },
@@ -162,9 +162,9 @@ function buildSampleForm(): Form {
         items: [{ id: newId(), name: "كنافة بالجبن", description: "عجينة ذهبية، قطر بماء الزهر.", price: "$14", badge: "", image_url: "" }],
       },
     ],
-    story_brief: "افتُتح «دار نُور» عام 2019 في منزل قديم بحي الجميزة. أمضى الشيف سامي خوري عشر سنوات بين دمشق وبيروت قبل أن يقدّم مطبخه الدقيق القائم على المكوّن الطازج. القاعة مضاءة بالشموع، وقائمة العصائر الطازجة قصيرة وشخصية، والموسيقى عودٌ شرقي.",
-    chef_name: "الشيف سامي خوري",
-    chef_title: "الشيف · المالك",
+    story_brief: "افتُتح «دار نُور» عام 2019 في منزل قديم بحي الجميزة. أمضى الطاهي سامي خوري عشر سنوات بين دمشق وبيروت قبل أن يقدّم مطبخه الدقيق القائم على المكوّن الطازج. القاعة مضاءة بالشموع، وقائمة العصائر الطازجة قصيرة وشخصية، والموسيقى عودٌ شرقي.",
+    chef_name: "الطاهي سامي خوري",
+    chef_title: "رئيس الطهاة · المالك",
     chef_bio_brief: "تدرّب في كبرى مطابخ الشام. يؤمن بأن أفضل طبق هو الذي يبقى صادقًا لنكهته.",
     booking: "",
     reservation_note: "للمناسبات الخاصة أو المجموعات من 8 أشخاص فأكثر، يُرجى المراسلة على events@darnoor.com.",
@@ -486,7 +486,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
       if (!res.ok) {
         setIgState("fail")
         setIgMsg(j?.error === "not_found" ? "لم نجد هذا الحساب. تأكد من الاسم، أو تابع بدونه."
-          : j?.error === "not_instagram" ? "اكتب اسم الحساب مثل @yourname أو الصق رابطه."
+          : j?.error === "not_instagram" ? "اكتب اسم الحساب مثل @اسم_حسابك أو الصق رابطه."
           : "تعذّر قراءة الحساب الآن. تابع بدونه.")
         return
       }
@@ -983,7 +983,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             <div className="rw-flip" role="status" aria-live="polite">
               <span className="rw-flip-book" aria-hidden><i /><i /><i /></span>
               <div>
-                <b>جاري قلب المنيو…</b>
+                <b>جاري قلب قائمة الطعام…</b>
                 <small>{tidying ? "نجمع الصفحات في قائمة واحدة ونحذف المكرر…" : reading ? "نقرأ روابطك أولًا…" : flipCount ? `وجدنا صفحات القائمة في جوجل (العدد: ${flipCount.toLocaleString("ar")}). نقرؤها كلها، وقد يأخذ هذا دقيقة…` : FLIP_PHASES[flipPhase]}</small>
               </div>
             </div>
@@ -1056,7 +1056,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             </Notice>
           ) : flip.state === "filled" ? (
             <Notice action={<button type="button" onClick={() => setFlip((f) => ({ ...f, state: "ask" }))}>اختر صورًا أخرى</button>}>
-              <strong>قلبنا المنيو.</strong> ملأنا الأصناف تحت (العدد: {flip.items.toLocaleString("ar")}). راجعها وعدّل ما يلزم.
+              <strong>قلبنا قائمة الطعام.</strong> ملأنا الأصناف تحت (العدد: {flip.items.toLocaleString("ar")}). راجعها وعدّل ما يلزم.
             </Notice>
           ) : flip.state === "declined" ? (
             <Notice action={flip.pages.length || flip.captions.length ? <button type="button" onClick={() => setFlip((f) => ({ ...f, state: "ask" }))}>اعرض ما وجدناه مرة أخرى</button> : undefined}>
@@ -1066,7 +1066,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             <Notice>لم نجد قائمتك بين صور روابطك. صوّرها وارفعها هنا فنقرؤها، أو اكتب الأصناف بنفسك.</Notice>
           ) : flip.state === "fail" ? (
             <Notice tone="bad" action={<button type="button" onClick={() => void flipMenu(flipKey(), foundPhotos.slice(0, 22))}>أعد المحاولة</button>}>
-              تعذّر قلب المنيو الآن. أعد المحاولة، أو ارفع صورة قائمتك، أو اكتب الأصناف.
+              تعذّر قلب قائمة الطعام الآن. أعد المحاولة، أو ارفع صورة قائمتك، أو اكتب الأصناف.
             </Notice>
           ) : null}
           <Block>
@@ -1154,7 +1154,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
     },
     {
       id: "story",
-      title: "قصتك والشيف",
+      title: "قصتك ورئيس الطهاة",
       sub: "جملتان أو ثلاث تكفي. نحوّلها إلى نص للموقع، وتبقى قابلة للتعديل.",
       complete: ok.story,
       note: `أخبرنا جملةً أو جملتين عن قصة ${place}.`,
@@ -1164,13 +1164,13 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             <Textarea rows={4} value={form.story_brief} onChange={(e) => update("story_brief", e.target.value)} placeholder="متى افتتحت، وما الذي يميّز أكلك، ومن أين تشتري، وما أجواء المكان؟" />
             <Example text={ex.story} on={!form.story_brief.trim()} onUse={(v) => update("story_brief", v)} />
           </Field>
-          <Field label="اسم الشيف">
-            <Input value={form.chef_name} onChange={(e) => update("chef_name", e.target.value)} placeholder="الشيف سامي خوري" />
+          <Field label="اسم رئيس الطهاة">
+            <Input value={form.chef_name} onChange={(e) => update("chef_name", e.target.value)} placeholder="الطاهي سامي خوري" />
           </Field>
-          <Field label="لقب الشيف">
-            <Input value={form.chef_title} onChange={(e) => update("chef_title", e.target.value)} placeholder="الشيف · المالك" />
+          <Field label="لقب رئيس الطهاة">
+            <Input value={form.chef_title} onChange={(e) => update("chef_title", e.target.value)} placeholder="رئيس الطهاة · المالك" />
           </Field>
-          <Field label="نبذة عن الشيف" wide>
+          <Field label="نبذة عن رئيس الطهاة" wide>
             <Textarea value={form.chef_bio_brief} onChange={(e) => update("chef_bio_brief", e.target.value)} placeholder="أين تعلّم، وما الذي أتى به إلى هنا." />
             <Example text={ex.chef} on={!form.chef_bio_brief.trim()} onUse={(v) => update("chef_bio_brief", v)} />
           </Field>
@@ -1226,7 +1226,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
             </Block>
           ) : null}
           {demo ? (
-            <Block hint="رفع الصور يحتاج حسابًا، ويتم داخل المنشئ الحقيقي: الصورة الرئيسية، وصورة الشيف، ومعرض حتى 8 صور، وصور الأطباق المميّزة حتى 4.">
+            <Block hint="رفع الصور يحتاج حسابًا، ويتم داخل المنشئ الحقيقي: الصورة الرئيسية، وصورة رئيس الطهاة، ومعرض حتى 8 صور، وصور الأطباق المميّزة حتى 4.">
               <p className="zb-note">لا صور؟ اترك أي خانة فارغة ونملؤها بصور خالية من الحقوق تناسب نوع مطعمك.</p>
             </Block>
           ) : (
@@ -1237,8 +1237,8 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
                 </p>
                 <ImageUploadField label="الصورة الرئيسية" value={form.hero_image_url} onChange={(url) => update("hero_image_url", url)} aspect="wide" helper="الصورة الكبيرة أعلى صفحتك." />
                 <Uploads cols={2}>
-                  <ImageUploadField label="صورة الشيف" value={form.chef_photo_url} onChange={(url) => update("chef_photo_url", url)} aspect="square" />
-                  <ImageUploadField label="صورة مرافقة للقصة" value={form.accent_image_url} onChange={(url) => update("accent_image_url", url)} aspect="square" helper="تظهر بجانب قصة الشيف." />
+                  <ImageUploadField label="صورة رئيس الطهاة" value={form.chef_photo_url} onChange={(url) => update("chef_photo_url", url)} aspect="square" />
+                  <ImageUploadField label="صورة مرافقة للقصة" value={form.accent_image_url} onChange={(url) => update("accent_image_url", url)} aspect="square" helper="تظهر بجانب قصة رئيس الطهاة." />
                 </Uploads>
               </Block>
               <Block title="المعرض (حتى 8)">
@@ -1332,7 +1332,7 @@ export default function RestaurantWizard({ demo = false, kind, onBack }: { demo?
               { label: "الهاتف", value: form.phone },
               { label: "البريد الإلكتروني", value: form.email },
               { label: `عن ${place}`, value: form.story_brief },
-              { label: "الشيف", value: [form.chef_name, form.chef_title].filter(Boolean).join(" · ") },
+              { label: "رئيس الطهاة", value: [form.chef_name, form.chef_title].filter(Boolean).join(" · ") },
               { label: "الصحافة والجوائز", value: form.press_outlets },
             ]}
           >

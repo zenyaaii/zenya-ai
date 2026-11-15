@@ -92,7 +92,7 @@ export default function V6Reviews(p: V6ReviewsProps) {
     const r = await p.fetchGoogle(link)
     set(false)
     if (r.error) toast(r.error, { ok: false })
-    else toast(r.added ? (r.added === 1 ? 'وصل تقييم جديد من Google' : `وصلت ${r.added} تقييمات جديدة من Google`) : btn === 'fetch' ? 'تم جلب التقييمات' : 'لا تقييمات جديدة على Google')
+    else toast(r.added ? (r.added === 1 ? 'وصل تقييم جديد من جوجل' : `وصلت ${r.added} تقييمات جديدة من جوجل`) : btn === 'fetch' ? 'تم جلب التقييمات' : 'لا تقييمات جديدة على جوجل')
   }
 
   function form(r?: V6Review) {
@@ -160,8 +160,8 @@ export default function V6Reviews(p: V6ReviewsProps) {
         {head}
         <div className="card rv" style={at(3)}>
           <div className="stack">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span className="tile bad"><Ic n="pin" /></span><h2 className="t-h3">اربط تقييمات Google</h2></div>
-            <p className="t-small">ألصق رابط «{name}» على خرائط Google، ونجلب تقييمك وآخر التقييمات.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}><span className="tile bad"><Ic n="pin" /></span><h2 className="t-h3">اربط تقييمات جوجل</h2></div>
+            <p className="t-small">ألصق رابط «{name}» على خرائط جوجل، ونجلب تقييمك وآخر التقييمات.</p>
             {connect}
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function V6Reviews(p: V6ReviewsProps) {
             <div>
               {score != null ? <Stars n={score} lg /> : null}
               <div className="t-small" style={{ marginTop: 6 }}>
-                {score != null && g?.count != null ? <><span className="num">{g.count}</span> تقييمًا على Google</> : `${words(shown.length)} في موقعك`}
+                {score != null && g?.count != null ? <><span className="num">{g.count}</span> تقييمًا على جوجل</> : `${words(shown.length)} في موقعك`}
               </div>
             </div>
           </div>
@@ -189,14 +189,14 @@ export default function V6Reviews(p: V6ReviewsProps) {
               <div className="rv-src">
                 <span className="tile bad"><Ic n="pin" /></span>
                 <span className="trunc" style={{ flex: 1 }}>
-                  <b style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', fontSize: 14.5 }}>مربوط بخرائط Google <span className="pill ok">متصل</span></b>
+                  <b style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 8px', fontSize: 14.5 }}>مربوط بخرائط جوجل <span className="pill ok">متصل</span></b>
                   <span className="t-small ltr trunc" style={{ display: 'block', textAlign: 'end' }}>{g.link.replace(/^https?:\/\//, '')}</span>
                 </span>
                 <button className="btn sm press" disabled={refreshing} onClick={() => fetchFrom(g.link, 'refresh')}><Ic n="refresh" className={refreshing ? 'spin' : ''} /><span>حدّث</span></button>
               </div>
             ) : (
               <>
-                <b style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14.5 }}><Ic n="pin" />اربط خرائط Google لتجلب تقييماتك</b>
+                <b style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14.5 }}><Ic n="pin" />اربط خرائط جوجل لتجلب تقييماتك</b>
                 {connect}
               </>
             )}
@@ -242,7 +242,7 @@ export default function V6Reviews(p: V6ReviewsProps) {
                   </div>
                 </div>
               )
-            }) : <div className="empty"><Ic n="reviews" /><b>لا تقييمات بعد</b><span>أضف تقييمًا بنفسك أو حدّث من Google.</span></div>}
+            }) : <div className="empty"><Ic n="reviews" /><b>لا تقييمات بعد</b><span>أضف تقييمًا بنفسك أو حدّث من جوجل.</span></div>}
           </div>
         </section>
         <aside className="rv" style={at(5)}>
@@ -262,7 +262,7 @@ export default function V6Reviews(p: V6ReviewsProps) {
           </div>
         </aside>
       </div>
-      <p className="t-small rv" style={{ ...at(6), margin: '16px 4px 0' }}>Google يعطي آخر 5 تقييمات فقط، ونصّها يبقى كما كتبه أصحابها. التقييمات التي تضيفها أنت يمكنك تعديلها. ويمكنك حذف أي تقييم.</p>
+      <p className="t-small rv" style={{ ...at(6), margin: '16px 4px 0' }}>جوجل يعطي آخر 5 تقييمات فقط، ونصّها يبقى كما كتبه أصحابها. التقييمات التي تضيفها أنت يمكنك تعديلها. ويمكنك حذف أي تقييم.</p>
     </>
   )
 }
