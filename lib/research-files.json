@@ -66,6 +66,17 @@
   "size": 17237
  },
  {
+  "p": "1-reports/2026-11-19-book-1-page-marketing-plan.md",
+  "group": "1-reports",
+  "sub": null,
+  "name": "2026-11-19-book-1-page-marketing-plan.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "book-1-page-marketing-plan",
+  "heading": "كتاب «خطة التسويق في صفحة واحدة» — شرح بسيط خطوة بخطوة",
+  "size": 12393
+ },
+ {
   "p": "2-plans/2026-11-12-new-build-system-spec.md",
   "group": "2-plans",
   "sub": null,
@@ -97,6 +108,28 @@
   "kind": "niche-questions-v2",
   "heading": "أسئلة البناء — النسخة الثانية (١٢ نوفمبر ٢٠٢٦)",
   "size": 14377
+ },
+ {
+  "p": "2-plans/2026-11-19-one-page-marketing-plan.md",
+  "group": "2-plans",
+  "sub": null,
+  "name": "2026-11-19-one-page-marketing-plan.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "one-page-marketing-plan",
+  "heading": "خطة بينون التسويقية في ورقة واحدة — ١٩ نوفمبر ٢٠٢٦",
+  "size": 9939
+ },
+ {
+  "p": "2-plans/2026-11-19-posts-2-weeks.md",
+  "group": "2-plans",
+  "sub": null,
+  "name": "2026-11-19-posts-2-weeks.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "posts-2-weeks",
+  "heading": "بوستات الأسبوعين + خطة الإعلان — ٢٢ نوفمبر إلى ٤ ديسمبر ٢٠٢٦",
+  "size": 19807
  },
  {
   "p": "2-plans/2026-12-plan.md",
@@ -297,6 +330,17 @@
   "size": 5621
  },
  {
+  "p": "3-niches/barber/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "barber",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «صالون الحلاقة» — 2026-11-19",
+  "size": 97039
+ },
+ {
   "p": "3-niches/beauty/2026-11-12-build-questions.json",
   "group": "3-niches",
   "sub": "beauty",
@@ -330,6 +374,17 @@
   "size": 12010
  },
  {
+  "p": "3-niches/beauty/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "beauty",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «مركز التجميل» — 2026-11-19",
+  "size": 66088
+ },
+ {
   "p": "3-niches/car/2026-11-12-build-questions.json",
   "group": "3-niches",
   "sub": "car",
@@ -361,6 +416,17 @@
   "kind": "sites",
   "heading": "",
   "size": 24467
+ },
+ {
+  "p": "3-niches/car/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "car",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «ورشة السيارات» — 2026-11-19",
+  "size": 56120
  },
  {
   "p": "3-niches/carwash/2026-11-12-build-questions.json",
@@ -493,6 +559,17 @@
   "kind": "sites",
   "heading": "",
   "size": 21948
+ },
+ {
+  "p": "3-niches/gym/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "gym",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «النادي الرياضي» — 2026-11-19",
+  "size": 61175
  },
  {
   "p": "3-niches/laundry/2026-11-12-build-questions.json",
@@ -660,6 +737,17 @@
   "size": 8639
  },
  {
+  "p": "3-niches/photo/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "photo",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «استوديو التصوير» — 2026-11-19",
+  "size": 51417
+ },
+ {
   "p": "3-niches/physio/2026-11-12-build-questions.json",
   "group": "3-niches",
   "sub": "physio",
@@ -691,6 +779,17 @@
   "kind": "sites",
   "heading": "",
   "size": 20625
+ },
+ {
+  "p": "3-niches/restaurant/2026-11-19-report.md",
+  "group": "3-niches",
+  "sub": "restaurant",
+  "name": "2026-11-19-report.md",
+  "date": "2026-11-19",
+  "ext": "md",
+  "kind": "report",
+  "heading": "تحليل نشاط «المطعم» — 2026-11-19",
+  "size": 64565
  },
  {
   "p": "3-niches/spa/2026-11-12-build-questions.json",
