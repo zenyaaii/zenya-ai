@@ -22,9 +22,9 @@ export const GROUPS: Record<string, { t: string; note: string }> = {
 
 export const NICHES: Record<string, string> = {
   barber: 'صالون الحلاقة', beauty: 'صالون التجميل', car: 'خدمات السيارات', carwash: 'غسيل السيارات',
-  dental: 'عيادة الأسنان', derma: 'الجلدية والتجميل', florist: 'محل الورد', gym: 'النادي الرياضي', laundry: 'المغسلة',
+  dental: 'عيادة الأسنان', derma: 'الجلدية والتجميل', florist: 'محل الورد', laundry: 'المغسلة',
   massage: 'المساج', nails: 'الأظافر', pet: 'الحيوانات الأليفة', photo: 'استوديو التصوير',
-  physio: 'العلاج الطبيعي', restaurant: 'المطعم', spa: 'السبا', tailor: 'الخياط',
+  physio: 'العلاج الطبيعي', spa: 'السبا', tailor: 'الخياط', gym: 'النادي الرياضي', restaurant: 'المطعم',
 }
 
 /** Data types: one label per kind, in the order they are listed. */
