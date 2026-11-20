@@ -96,6 +96,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   const [readMsg, setReadMsg] = useState('')
   const [readKey, setReadKey] = useState('')
   const [found, setFound] = useState<string[]>([])
+  const [siteLogo, setSiteLogo] = useState('')
   const [igPhotos, setIgPhotos] = useState<string[]>([])
   const [own, setOwn] = useState<BrandLook | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -165,6 +166,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
         gallery: p.gallery,
         checked: false,
       }))
+      if (j.logo) setSiteLogo(j.logo)
       setFound([...(j.images || []), ...ig].filter((u: string, i: number, all: string[]) => all.indexOf(u) === i))
       const got = [
         S(a.name) && 'الاسم', S(a.tagline) && 'جملتك', a.story?.paragraphs?.length && 'قصتك', prods.length && `${prods.length.toLocaleString('ar')} منتجات`,
@@ -206,6 +208,11 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   const looks = own ? [own, ...BRAND_LOOKS] : BRAND_LOOKS
   const look = looks.find((l) => l.id === f.look) || looks[0]
 
+  const channels = [
+    f.whatsapp.trim() && { id: 'whatsapp', label: 'رسالة واتساب' }, f.phone.trim() && { id: 'call', label: 'اتصال' },
+    f.store.trim() && { id: 'store', label: 'متجري الإلكتروني' }, f.email.trim() && { id: 'email', label: 'البريد' },
+  ].filter(Boolean) as { id: string; label: string }[]
+  const buyNow = (channels.some((c) => c.id === f.buy) ? f.buy : channels[0]?.id || '') as Form['buy']
   const contactOk = !!(f.phone.trim() || f.whatsapp.trim() || f.email.trim() || f.store.trim())
   const ok = {
     brand: f.name.trim().length >= 2 && contactOk && (!f.whatsapp.trim() || intl(f.whatsapp)) && (read !== 'ok' || f.checked),
@@ -228,7 +235,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
       press: f.press.filter((x) => x.name.trim() && /^https?:\/\//.test(x.url.trim())).map((x) => ({ name: x.name.trim(), url: x.url.trim() })),
       contact: { phone: T(f.phone), whatsapp: T(f.whatsapp), email: T(f.email), address: T(f.address) },
       links: { instagram: T(f.instagram), tiktok: T(f.tiktok), facebook: T(f.facebook), website: T(f.website), store: T(f.store) },
-      buy: f.buy || undefined,
+      buy: buyNow || undefined,
       photos: { hero: T(f.hero), story: T(f.story_photo), gallery },
       logo: T(f.logo),
     }
@@ -327,20 +334,23 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
           <Field label="جملتك" wide hint="العنوان الكبير أعلى الموقع. جملة واحدة يتذكرها الزائر."><Input value={f.tagline} onChange={(e) => up('tagline', e.target.value)} placeholder="صُنع باليد، ليبقى." /></Field>
           <Field label="سطران عنك" wide><Textarea rows={2} value={f.intro} onChange={(e) => up('intro', e.target.value)} placeholder="ما الذي تصنعه، ولمن." /></Field>
           <Field label="المدينة"><Input value={f.city} onChange={(e) => up('city', e.target.value)} placeholder="اختياري" /></Field>
-          <Block title="الشعار" optional hint={f.logo && found.includes(f.logo) ? 'وجدناه في موقعك. غيّره إن لم يكن هو.' : 'إن رفعته نأخذ منه ألوان موقعك.'}>
+          <Block title="الشعار" optional hint={f.logo && f.logo === siteLogo ? 'وجدناه في موقعك. غيّره إن لم يكن هو.' : 'إن رفعته نأخذ منه ألوان موقعك.'}>
             <div className="bw-logo"><ImageUploadField local={demo} value={f.logo} onChange={(u) => up('logo', u)} aspect="square" /></div>
           </Block>
-          <Block title="كيف يشتري الناس منك؟" hint="هذا هو الزر الرئيسي في موقعك وفي شريط الجوال.">
-            <Chips allowNone={false} value={f.buy || (f.whatsapp ? 'whatsapp' : f.store ? 'store' : f.phone ? 'call' : f.email ? 'email' : '')} onChange={(v) => up('buy', v as Form['buy'])}
-              options={[{ id: 'whatsapp', label: 'رسالة واتساب' }, { id: 'call', label: 'اتصال' }, { id: 'store', label: 'متجري الإلكتروني' }, { id: 'email', label: 'البريد' }]} />
+          <Block title="كيف يصل إليك الناس؟" hint="طريقة واحدة على الأقل. واتساب بمفتاح الدولة.">
             <Grid>
-              <Field label="واتساب" hint="بمفتاح الدولة"><Input dir="ltr" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+966…" /></Field>
+              <Field label="واتساب"><Input dir="ltr" value={f.whatsapp} onChange={(e) => up('whatsapp', e.target.value)} placeholder="+966…" /></Field>
               <Field label="الهاتف"><Input dir="ltr" value={f.phone} onChange={(e) => up('phone', e.target.value)} placeholder="+90…" /></Field>
               <Field label="البريد"><Input dir="ltr" value={f.email} onChange={(e) => up('email', e.target.value)} placeholder="hello@…" /></Field>
               <Field label="رابط المتجر"><Input dir="ltr" value={f.store} onChange={(e) => up('store', e.target.value)} placeholder="متجر سلة، زد، أمازون…" /></Field>
               <Field label="العنوان" wide><Input value={f.address} onChange={(e) => up('address', e.target.value)} placeholder="اختياري، إن كان لك مكان يزوره الناس" /></Field>
             </Grid>
           </Block>
+          {channels.length > 1 ? (
+            <Block title="أيّها الزر الرئيسي في موقعك؟" hint="يظهر أعلى الموقع وفي شريط الجوال. الباقي يظهر في قسم التواصل.">
+              <Chips allowNone={false} value={buyNow} onChange={(v) => up('buy', v as Form['buy'])} options={channels} />
+            </Block>
+          ) : null}
           <Block title="حساباتك" optional>
             <Grid>
               <Field label="إنستغرام"><Input dir="ltr" value={f.instagram} onChange={(e) => up('instagram', e.target.value)} placeholder="@" /></Field>
@@ -532,7 +542,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
               { label: 'الصور', value: `${(photos.length).toLocaleString('ar')}${f.hero ? ' · الواجهة مختارة' : ' · بلا صورة واجهة'}` },
             ]}
             recap={[
-              { label: 'الاسم', value: f.name }, { label: 'جملتك', value: f.tagline }, { label: 'الزر الرئيسي', value: { whatsapp: 'رسالة واتساب', call: 'اتصال', store: 'المتجر', email: 'البريد', '': '' }[f.buy || (f.whatsapp ? 'whatsapp' : f.store ? 'store' : f.phone ? 'call' : f.email ? 'email' : '')] || '' },
+              { label: 'الاسم', value: f.name }, { label: 'جملتك', value: f.tagline }, { label: 'الزر الرئيسي', value: channels.find((c) => c.id === buyNow)?.label || '' },
               { label: 'التواصل', value: [f.whatsapp, f.phone, f.email].filter(Boolean).join(' · ') },
             ]}
           />
@@ -579,6 +589,7 @@ const BW_CSS = `
 .bw-roles button[data-on]{background:var(--violet,#5e6ad2);border-color:var(--violet,#5e6ad2);color:#fff}
 .bw-roles .bw-hide{color:#b42318;margin-inline-start:auto}
 .bw-logo{max-width:160px}
+.bw-logo img{object-fit:contain!important;background:#fff;padding:6px}
 .bw-looks{display:flex;flex-wrap:wrap;gap:10px}
 .bw-looks button{font:inherit;font-size:14px;display:grid;gap:6px;justify-items:start;border:1px solid #e1e1e1;background:#fff;border-radius:12px;padding:10px;cursor:pointer;min-width:132px}
 .bw-looks button[data-on]{border-color:var(--violet,#5e6ad2);box-shadow:0 0 0 2px rgba(94,106,210,.25)}

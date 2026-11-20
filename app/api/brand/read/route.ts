@@ -110,10 +110,12 @@ async function copyImage(u: string, dir: string, logo: boolean): Promise<string 
     const meta = await sharp(out).metadata()
     if (!logo && ((meta.width || 0) < 500 || (meta.height || 0) < 400)) return null
     const path = `${dir}/${createHash('sha1').update(u).digest('hex').slice(0, 16)}.${logo ? 'png' : 'jpg'}`
-    const sb = serviceClient().storage.from('theme-uploads')
-    const { error } = await sb.upload(path, out, { contentType: logo ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
-    if (error) return null
-    return sb.getPublicUrl(path).data.publicUrl
+    try {
+      const sb = serviceClient().storage.from('theme-uploads')
+      const { error } = await sb.upload(path, out, { contentType: logo ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
+      if (!error) return sb.getPublicUrl(path).data.publicUrl
+    } catch { /* storage down: the brand's own address still shows the picture */ }
+    return u
   } catch { return null }
 }
 
