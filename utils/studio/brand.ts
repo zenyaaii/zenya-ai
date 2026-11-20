@@ -88,14 +88,15 @@ export function buildBrandContent(i: BrandInput): BrandContent {
   const name = i.name.trim()
   const paragraphs = (i.story.paragraphs || []).map((p) => p.trim()).filter(Boolean)
   const photos = [i.photos.hero, i.photos.story, ...(i.photos.gallery || [])].map(clean).filter((u): u is string => !!u)
-  const used = new Set<string>([i.photos.hero, i.photos.story, ...i.steps.map((x) => x.photo), ...i.products.map((x) => x.photo)].map(clean).filter((u): u is string => !!u))
+  const hero = clean(i.photos.hero) || photos[0]
+  const used = new Set<string>([hero, i.photos.story, ...i.steps.map((x) => x.photo), ...i.products.map((x) => x.photo)].map(clean).filter((u): u is string => !!u))
   const buy = i.buy
     || (i.contact.whatsapp ? 'whatsapp' : i.links.store ? 'store' : i.contact.phone ? 'call' : i.contact.email ? 'email' : 'none')
   const intro = clean(i.intro)
   return {
     v: 2,
     brand: { name, kind: clean(i.kind), tagline: clean(i.tagline), intro, city: clean(i.city), logo: clean(i.logo) },
-    hero: { photo: clean(i.photos.hero) || photos[0] },
+    hero: { photo: hero },
     story: {
       heading: clean(i.story.heading) || `كيف بدأت ${name}`,
       paragraphs,
