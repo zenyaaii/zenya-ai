@@ -162,7 +162,9 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
         values: p.values.length ? p.values : list(a.values),
         steps: p.steps.length ? p.steps : list(a.steps),
         benefits: p.benefits.length ? p.benefits : list(a.benefits),
-        products: p.products.some((x) => x.name.trim()) ? p.products : prods.length ? prods : p.products,
+        // The catalogue's product picture goes on every product still without one; the owner changes it per size.
+        products: (p.products.some((x) => x.name.trim()) ? p.products : prods.length ? prods : p.products)
+          .map((x: Product) => (x.photo || !j.product_images?.[0] ? x : { ...x, photo: j.product_images[0] })),
         products_note: p.products_note || S(a.products_note),
         hero: p.hero || j.hero || '',
         checked: false,

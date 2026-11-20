@@ -4,6 +4,7 @@ import * as cheerio from 'cheerio'
 import sharp from 'sharp'
 import { createHash } from 'crypto'
 import { serviceClient } from '@/lib/handover'
+import { pdfImages } from '@/lib/pdf-images'
 import { createClient } from '@/utils/supabase/server'
 import { aiKey } from '@/lib/ai-client'
 import { AI_MODEL, AI_MODEL_FAST } from '@/lib/ai'
@@ -98,7 +99,7 @@ async function readSite(u: URL): Promise<Site | null> {
 }
 
 /** One picture from the brand's site, resized, with a small copy for looking at. */
-type Pic = { src: string; buf: Buffer; png: Buffer; w: number; h: number; thumb: string }
+type Pic = { src: string; buf: Buffer; png: Buffer; w: number; h: number; thumb: string; alpha?: boolean; fromPdf?: boolean }
 async function fetchPic(u: string): Promise<Pic | null> {
   try {
     const r = await fetch(u, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) })
@@ -115,19 +116,45 @@ async function fetchPic(u: string): Promise<Pic | null> {
   } catch { return null }
 }
 
-/** Into theme-uploads. Storage down: the brand's own address still shows it. */
-async function store(p: Pic, dir: string, logo: boolean): Promise<string> {
+/** The catalogue's own pictures (product packs, the farm, the fruit), read from
+    the PDF itself. Cut-outs keep their transparency. */
+async function pdfPics(u: URL): Promise<Pic[]> {
   try {
-    const path = `${dir}/${createHash('sha1').update(p.src).digest('hex').slice(0, 16)}.${logo ? 'png' : 'jpg'}`
-    const sb = serviceClient().storage.from('theme-uploads')
-    const { error } = await sb.upload(path, logo ? p.png : p.buf, { contentType: logo ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
-    if (!error) return sb.getPublicUrl(path).data.publicUrl
-  } catch { /* fall through */ }
-  return p.src
+    const r = await fetch(u, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(20000) })
+    if (!r.ok) return []
+    const pdf = Buffer.from(await r.arrayBuffer())
+    if (pdf.length > 40_000_000) return []
+    const imgs = await pdfImages(pdf, { min: 300, max: 16 })
+    return (await Promise.all(imgs.map(async (m, i): Promise<Pic | null> => {
+      try {
+        const base = sharp(m.buf)
+        const meta = await base.metadata()
+        const alpha = !!meta.hasAlpha
+        const buf = await base.clone().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 84 }).toBuffer()
+        const png = await base.clone().resize({ width: 1400, height: 1400, fit: 'inside', withoutEnlargement: true }).png().toBuffer()
+        const thumb = (await base.clone().resize({ width: 320, height: 320, fit: 'inside' }).flatten({ background: '#ffffff' }).jpeg({ quality: 70 }).toBuffer()).toString('base64')
+        return { src: `${u}#img${i}`, buf, png, w: m.w, h: m.h, thumb, alpha, fromPdf: true }
+      } catch { return null }
+    }))).filter((p): p is Pic => !!p)
+  } catch { return [] }
 }
 
-const LOOK = `Each numbered picture comes from a brand's own website. Say what each one is:
-"logo" (the brand's mark), "photo" (a real photograph: product, place, people, nature), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, decorations).
+/** Into theme-uploads. Storage down: the brand's own address still shows it. */
+async function store(p: Pic, dir: string, logo: boolean): Promise<string> {
+  const asPng = logo || !!p.alpha
+  try {
+    const path = `${dir}/${createHash('sha1').update(p.src).digest('hex').slice(0, 16)}.${asPng ? 'png' : 'jpg'}`
+    const sb = serviceClient().storage.from('theme-uploads')
+    const { error } = await sb.upload(path, asPng ? p.png : p.buf, { contentType: asPng ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
+    if (!error) return sb.getPublicUrl(path).data.publicUrl
+  } catch { /* fall through */ }
+  // Storage down: a site picture still has its own address; a catalogue one has none.
+  return p.fromPdf ? `data:image/${asPng ? 'png' : 'jpeg'};base64,${(asPng ? p.png : p.buf).toString('base64')}` : p.src
+}
+
+const LOOK = `Each numbered picture comes from a brand's own website or catalogue. Say what each one is:
+"logo" (the brand's mark), "product" (the brand's own product or its packaging, shown clearly), "photo" (a real photograph or rich picture: place, people, nature, ingredients), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, QR codes, maps, decorations, other companies' logos).
+Mark a picture that repeats an earlier one (same picture, other size) as "other".
 Then pick the best "hero": a wide, clean photo that would look good at the top of the brand's site, or -1.
 Answer with JSON only: {"kinds":["photo","logo",...],"hero":2}`
 
@@ -142,9 +169,11 @@ async function lookAt(client: Anthropic, pics: Pic[]): Promise<{ kinds: string[]
       content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: p.thumb } })
     })
     content.push({ type: 'text', text: LOOK })
-    const res = await client.messages.create({ model: AI_MODEL_FAST, max_tokens: 600, messages: [{ role: 'user', content }] })
+    const res = await client.messages.create({ model: AI_MODEL_FAST, max_tokens: 1500, messages: [{ role: 'user', content }] })
     const t = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join('')
-    const j = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1))
+    const a = t.indexOf('{'), z = t.lastIndexOf('}')
+    if (a < 0 || z < a) { console.error('[brand/read] look said', t.slice(0, 300)); return null }
+    const j = JSON.parse(t.slice(a, z + 1))
     console.log('[brand/read] look tokens', res.usage.input_tokens, res.usage.output_tokens)
     return { kinds: Array.isArray(j.kinds) ? j.kinds.map(String) : [], hero: typeof j.hero === 'number' ? j.hero : -1 }
   } catch (e) {
@@ -213,7 +242,11 @@ export async function POST(req: NextRequest) {
   const client = new Anthropic({ apiKey: aiKey(), maxRetries: 1, timeout: 80_000 })
   // The pictures are fetched and looked at while the words are read.
   const picsJob = (async () => {
-    const pics = (await Promise.all((read?.images || []).slice(0, 20).map((m) => fetchPic(m.url)))).filter((p): p is Pic => !!p)
+    const [site, cat] = await Promise.all([
+      Promise.all((read?.images || []).slice(0, 20).map((m) => fetchPic(m.url))),
+      pdf ? pdfPics(pdf) : Promise.resolve([] as Pic[]),
+    ])
+    const pics = [...site.filter((p): p is Pic => !!p), ...cat].slice(0, 30)
     return { pics, look: await lookAt(client, pics) }
   })()
   let out: Record<string, any> = {}
@@ -240,7 +273,8 @@ export async function POST(req: NextRequest) {
   if (logoAt < 0 && !look && typeof out.logo_index === 'number') logoAt = pics.findIndex((p) => p.src === read?.images[out.logo_index]?.url)
   const dir = `${user ? 'owners/' + user.id : 'demo'}/brand/${(site || pdf)!.host.replace(/[^A-Za-z0-9.-]/g, '')}`
   const urls = await Promise.all(pics.map((p, i) => store(p, dir, i === logoAt)))
-  const photos = urls.filter((_, i) => i !== logoAt && kind(i) === 'photo')
+  const productPics = urls.filter((_, i) => i !== logoAt && kind(i) === 'product')
+  const photos = urls.filter((_, i) => i !== logoAt && (kind(i) === 'photo' || kind(i) === 'product'))
   const others = urls.filter((_, i) => i !== logoAt && kind(i) === 'text')
   const heroAt = look && look.hero >= 0 && kind(look.hero) === 'photo' ? look.hero : pics.findIndex((_, i) => kind(i) === 'photo' && pics[i].w >= pics[i].h)
   return NextResponse.json({
@@ -249,6 +283,7 @@ export async function POST(req: NextRequest) {
     hero: heroAt >= 0 ? urls[heroAt] : undefined,
     images: photos,
     other_images: others,
+    product_images: productPics,
     socials: read?.socials || {},
     pdf: pdf ? pdf.toString() : undefined,
     pdf_from_site: !!pdfFromSite,
