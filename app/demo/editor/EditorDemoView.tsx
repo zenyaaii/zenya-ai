@@ -30,6 +30,9 @@ import { LOOKBOOK_EDITOR_CONFIG } from '@/utils/lookbook/editor-config'
 import { RESTAURANT_EDITOR_CONFIG } from '@/utils/restaurant/editor-config'
 import { SERVICES_EDITOR_CONFIG } from '@/utils/services/editor-config'
 import { STUDIO_EDITOR_CONFIG } from '@/utils/studio/editor-config'
+import { BRAND_EDITOR_CONFIG } from '@/utils/studio/brand-editor-config'
+import { BRAND_LOOKS } from '@/utils/studio/brand-looks'
+import { BRAND_SAMPLE_INPUT, buildBrandContent } from '@/utils/studio/brand'
 import { WELLNESS_EDITOR_CONFIG } from '@/utils/wellness/editor-config'
 import { ATLAS_MOCK_CONTENT } from '@/utils/atlas/mock-content'
 import { LOOKBOOK_MOCK_CONTENT } from '@/utils/lookbook/mock-content'
@@ -64,17 +67,20 @@ const THEMES: Record<DemoType, Theme> = {
   beauty:     { config: nicheEditorConfig('beauty'), Preview: ServicesPreview as any, content: nicheDemoContent('beauty') },
   car:        { config: nicheEditorConfig('car'), Preview: ServicesPreview as any, content: nicheDemoContent('car') },
   photo:      { config: nicheEditorConfig('photo'), Preview: ServicesPreview as any, content: nicheDemoContent('photo') },
+  // The brand-story questions (/demo/brand-build) open here.
+  brand:      { config: BRAND_EDITOR_CONFIG, Preview: StudioPreview as any, content: buildBrandContent(BRAND_SAMPLE_INPUT) },
 }
 
 /** A store that lives exactly as long as the page. */
 function memoryStore(contentKey: string, content: unknown, type: DemoType): EditorStore {
   let saved: any = { [contentKey]: structuredClone(content) }
+  if (type === 'brand') saved = { business_type: 'studio', color_overrides: BRAND_LOOKS[0].colors, ...saved }
   if (NICHE_DEMO.includes(type)) saved = { business_type: 'services', niche: type, style_preset: 'graphite', color_overrides: KIND[type as NicheKind].looks[0].colors, ...saved }
   let first = true
   return {
     load: async () => {
       // The wizard's demo leaves the site it built here; open that one, once.
-      if (first && NICHE_DEMO.includes(type) && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
+      if (first && (NICHE_DEMO.includes(type) || type === 'brand') && typeof window !== 'undefined' && new URLSearchParams(location.search).get('built')) {
         try { const s = sessionStorage.getItem(DEMO_BUILT_KEY); if (s) saved = JSON.parse(s) } catch { /* keep the sample */ }
       }
       first = false
@@ -101,6 +107,7 @@ const NAMES: Record<DemoType, string> = {
   beauty: 'موقع مركز تجميل',
   car: 'موقع ورشة سيارات',
   photo: 'موقع استوديو تصوير',
+  brand: 'موقع علامة تجارية وقصة (جديد)',
 }
 
 export default function EditorDemoView({ type }: { type: DemoType }) {
