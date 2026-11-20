@@ -46,7 +46,7 @@ type Form = {
   heading: string; story: string; quote: string; signature: string; role: string
   values: Item[]; steps: Item[]; benefits: Item[]
   products: Product[]; products_note: string
-  hero: string; story_photo: string; gallery: string[]; uploads: string[]; hidden: string[]
+  hero: string; story_photo: string; noGallery: string[]; uploads: string[]; hidden: string[]
   reviews: Rev[]; press: Press[]; timeline: Mile[]; team: Person[]
   look: string; checked: boolean; scrape_issue: string
 }
@@ -58,7 +58,7 @@ const empty = (): Form => ({
   heading: '', story: '', quote: '', signature: '', role: '',
   values: [], steps: [], benefits: [],
   products: [{ id: nid(), name: '', text: '', size: '', price: '', photo: '' }], products_note: '',
-  hero: '', story_photo: '', gallery: [], uploads: [], hidden: [],
+  hero: '', story_photo: '', noGallery: [], uploads: [], hidden: [],
   reviews: [], press: [], timeline: [], team: [],
   look: 'own', checked: false, scrape_issue: '',
 })
@@ -73,10 +73,10 @@ function PickField({ label, children }: { label: string; children: React.ReactNo
 }
 
 /** Tap a picture to use it here. The chosen one carries a ring. */
-function Pick({ photos, value, onChange, none = 'بدون صورة' }: { photos: string[]; value: string; onChange: (u: string) => void; none?: string }) {
-  if (!photos.length) return <p className="zb-hint">لا صور بعد. ارجع إلى خطوة «الصور» وارفعها هناك.</p>
+function Pick({ photos, value, onChange, onUpload, demo, none = 'بدون صورة' }: { photos: string[]; value: string; onChange: (u: string) => void; onUpload: (u: string) => void; demo: boolean; none?: string }) {
   return (
     <div className="bw-pick" role="listbox">
+      <div className="bw-up"><ImageUploadField local={demo} value="" aspect="thumb" onChange={(u) => { if (u) { onUpload(u); onChange(u) } }} /></div>
       <button type="button" className="bw-none" data-on={!value || undefined} onClick={() => onChange('')}>{none}</button>
       {photos.map((u) => (
         <button key={u} type="button" data-on={value === u || undefined} aria-pressed={value === u} onClick={() => onChange(value === u ? '' : u)}>
@@ -97,6 +97,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   const [readKey, setReadKey] = useState('')
   const [found, setFound] = useState<string[]>([])
   const [siteLogo, setSiteLogo] = useState('')
+  const [others, setOthers] = useState<string[]>([])
   const [igPhotos, setIgPhotos] = useState<string[]>([])
   const [own, setOwn] = useState<BrandLook | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -105,6 +106,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   const moves = useRef<{ step: string; at: number }[]>([])
   const started = useRef(Date.now())
 
+  const addUpload = (u: string) => setF((p) => (p.uploads.includes(u) ? p : { ...p, uploads: [...p.uploads, u] }))
   const up = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }))
   type ListKey = 'values' | 'steps' | 'benefits' | 'products' | 'reviews' | 'press' | 'timeline' | 'team'
   const patch = <T extends { id: string }>(k: ListKey, id: string, v: Partial<T>) =>
@@ -163,10 +165,10 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
         products: p.products.some((x) => x.name.trim()) ? p.products : prods.length ? prods : p.products,
         products_note: p.products_note || S(a.products_note),
         hero: p.hero || j.hero || '',
-        gallery: p.gallery,
         checked: false,
       }))
       if (j.logo) setSiteLogo(j.logo)
+      setOthers(Array.isArray(j.other_images) ? j.other_images : [])
       setFound([...(j.images || []), ...ig].filter((u: string, i: number, all: string[]) => all.indexOf(u) === i))
       const got = [
         S(a.name) && 'الاسم', S(a.tagline) && 'جملتك', a.story?.paragraphs?.length && 'قصتك', prods.length && `${prods.length.toLocaleString('ar')} منتجات`,
@@ -222,7 +224,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   function input(): BrandInput {
     const T = (v: string) => v.trim() || undefined
     const items = (xs: Item[]) => xs.filter((x) => x.title.trim()).map((x) => ({ title: x.title.trim(), text: T(x.text), photo: T(x.photo) }))
-    const gallery = photos.filter((u) => u !== f.hero && u !== f.story_photo && f.gallery.includes(u))
+    const gallery = photos.filter((u) => u !== f.hero && u !== f.story_photo && !f.noGallery.includes(u))
     return {
       name: f.name.trim(), kind: T(f.kind), tagline: T(f.tagline), intro: T(f.intro), city: T(f.city),
       story: { heading: T(f.heading), paragraphs: paras(f.story), quote: T(f.quote), signature: T(f.signature), role: T(f.role) },
@@ -292,7 +294,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
           <Grid>
             <Field label="العنوان"><Input value={x.title} onChange={(e) => patch<Item>(k, x.id, { title: e.target.value })} placeholder={ph[0]} /></Field>
             <Field label="سطر يشرحه" wide><Input value={x.text} onChange={(e) => patch<Item>(k, x.id, { text: e.target.value })} placeholder={ph[1]} /></Field>
-            {withPhoto ? <PickField label="صورة لهذه الخطوة (اختياري)"><Pick photos={photos} value={x.photo} onChange={(u) => patch<Item>(k, x.id, { photo: u })} /></PickField> : null}
+            {withPhoto ? <PickField label="صورة لهذه الخطوة (اختياري)"><Pick photos={photos} demo={demo} onUpload={addUpload} value={x.photo} onChange={(u) => patch<Item>(k, x.id, { photo: u })} /></PickField> : null}
           </Grid>
         </Card>
       ))}
@@ -368,8 +370,8 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
       ),
     },
     {
-      id: 'photos', title: 'الصور', optional: true, complete: !!f.hero,
-      sub: found.length ? 'هذه الصور من روابطك. اختر صورة الواجهة وصورة القصة، وعلّم ما تريده في المعرض، وأخفِ ما لا يناسب. ارفع صورًا من عندك أيضًا.' : 'ارفع صور منتجك وعلامتك. أول صورة تصبح الواجهة، وتغيّرها متى شئت.',
+      id: 'photos', title: 'الصور', optional: true, complete: true,
+      sub: found.length ? 'هذه الصور من روابطك. اختر صورة الواجهة وصورة القصة. كل صورة تظهر في المعرض إلا ما تُخرجه منه أو تخفيه.' : 'ارفع صور منتجك وعلامتك. أول صورة تصبح الواجهة، وتغيّرها متى شئت.',
       body: (
         <Grid>
           {photos.length ? (
@@ -381,13 +383,22 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
                     <div className="bw-roles">
                       <button type="button" data-on={f.hero === u || undefined} onClick={() => up('hero', f.hero === u ? '' : u)}>الواجهة</button>
                       <button type="button" data-on={f.story_photo === u || undefined} onClick={() => up('story_photo', f.story_photo === u ? '' : u)}>القصة</button>
-                      <button type="button" data-on={f.gallery.includes(u) || undefined} onClick={() => up('gallery', f.gallery.includes(u) ? f.gallery.filter((x) => x !== u) : [...f.gallery, u])}>المعرض</button>
-                      {found.includes(u) ? <button type="button" className="bw-hide" onClick={() => setF((p) => ({ ...p, hidden: [...p.hidden, u], hero: p.hero === u ? '' : p.hero, story_photo: p.story_photo === u ? '' : p.story_photo, gallery: p.gallery.filter((x) => x !== u) }))}>إخفاء</button> : null}
+                      <button type="button" data-on={!f.noGallery.includes(u) || undefined} onClick={() => up('noGallery', f.noGallery.includes(u) ? f.noGallery.filter((x) => x !== u) : [...f.noGallery, u])}>في المعرض</button>
+                      {found.includes(u) ? <button type="button" className="bw-hide" onClick={() => setF((p) => ({ ...p, hidden: [...p.hidden, u], hero: p.hero === u ? '' : p.hero, story_photo: p.story_photo === u ? '' : p.story_photo }))}>إخفاء</button> : null}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          ) : null}
+          {others.length ? (
+            <Block title={`صور أخرى من موقعك (${others.length.toLocaleString('ar')})`} optional hint="فيها كتابة أو رسوم، فأبعدناها عن المعرض. اضغط على صورة لتضيفها.">
+              <div className="bw-pick">
+                {others.map((u) => (
+                  <button key={u} type="button" onClick={() => { setOthers((o) => o.filter((x) => x !== u)); setFound((x) => [...x, u]) }}><img src={u} alt="" loading="lazy" /></button>
+                ))}
+              </div>
+            </Block>
           ) : null}
           <Block title="صور من عندك" optional hint="صور منتجك على خلفية نظيفة تبدو أفضل في فصل المنتجات.">
             <Uploads>
@@ -441,7 +452,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
                     <Field label="الحجم أو النوع"><Input value={x.size} onChange={(e) => patch<Product>('products', x.id, { size: e.target.value })} placeholder="330 مل" /></Field>
                     <Field label="سطر عنه" wide><Input value={x.text} onChange={(e) => patch<Product>('products', x.id, { text: e.target.value })} placeholder="انتعاش في كل مكان" /></Field>
                     <Field label="السعر"><Input value={x.price} onChange={(e) => patch<Product>('products', x.id, { price: e.target.value })} placeholder="اختياري" /></Field>
-                    <PickField label="صورته"><Pick photos={photos} value={x.photo} onChange={(u) => patch<Product>('products', x.id, { photo: u })} /></PickField>
+                    <PickField label="صورته"><Pick photos={photos} demo={demo} onUpload={addUpload} value={x.photo} onChange={(u) => patch<Product>('products', x.id, { photo: u })} /></PickField>
                   </Grid>
                 </Card>
               ))}
@@ -518,7 +529,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
     },
     {
       id: 'review', title: 'الألوان والمراجعة', complete: ok.brand && ok.products,
-      sub: 'ألوان علامتك أولًا: أخذناها من شعارك وصورك. ثم راجع ما سيظهر في موقعك.',
+      sub: own ? 'ألوان علامتك أولًا: أخذناها من شعارك وصورك. ثم راجع ما سيظهر في موقعك.' : 'اختر ألوان موقعك، ثم راجع ما سيظهر فيه. إن رفعت شعارك أو صورك أخذنا منها ألوانك.',
       body: (
         <Grid>
           <Block title="الألوان">
@@ -577,21 +588,23 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
 
 const BW_CSS = `
 .bw-pick{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
-.bw-pick button{flex:none;width:72px;height:72px;border-radius:10px;border:2px solid transparent;padding:0;background:#f1f1f1;overflow:hidden;cursor:pointer}
+.bw-pick{align-items:center}
+.bw-pick button{flex:none;width:72px;height:72px;border-radius:10px;border:2px solid transparent;padding:0;background:var(--card2,#f1f1f1);color:inherit;overflow:hidden;cursor:pointer}
+.bw-up{flex:none;width:80px}
 .bw-pick button img{width:100%;height:100%;object-fit:cover}
 .bw-pick button[data-on]{border-color:var(--violet,#5e6ad2);box-shadow:0 0 0 2px rgba(94,106,210,.25)}
-.bw-pick .bw-none{font:inherit;font-size:12px;color:#56565a;width:72px}
+.bw-pick .bw-none{font:inherit;font-size:12px;color:var(--stone,#56565a);width:72px;box-shadow:inset 0 0 0 1px var(--line2,#e1e1e1)}
 .bw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
-.bw-ph{border:1px solid #e6e6e6;border-radius:12px;overflow:hidden;background:#fff}
+.bw-ph{border:1px solid var(--line2,#e6e6e6);border-radius:12px;overflow:hidden;background:var(--card2,#fff)}
 .bw-ph img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#f3f3f3}
 .bw-roles{display:flex;flex-wrap:wrap;gap:4px;padding:6px}
-.bw-roles button{font:inherit;font-size:12.5px;border:1px solid #e1e1e1;background:#fff;border-radius:99px;padding:4px 9px;cursor:pointer;min-height:30px}
+.bw-roles button{font:inherit;font-size:12.5px;color:inherit;border:1px solid var(--line2,#e1e1e1);background:transparent;border-radius:99px;padding:4px 9px;cursor:pointer;min-height:30px}
 .bw-roles button[data-on]{background:var(--violet,#5e6ad2);border-color:var(--violet,#5e6ad2);color:#fff}
-.bw-roles .bw-hide{color:#b42318;margin-inline-start:auto}
+.bw-roles .bw-hide{color:#e5484d;margin-inline-start:auto}
 .bw-logo{max-width:160px}
 .bw-logo img{object-fit:contain!important;background:#fff;padding:6px}
 .bw-looks{display:flex;flex-wrap:wrap;gap:10px}
-.bw-looks button{font:inherit;font-size:14px;display:grid;gap:6px;justify-items:start;border:1px solid #e1e1e1;background:#fff;border-radius:12px;padding:10px;cursor:pointer;min-width:132px}
+.bw-looks button{font:inherit;font-size:14px;color:inherit;display:grid;gap:6px;justify-items:start;border:1px solid var(--line2,#e1e1e1);background:var(--card2,#fff);border-radius:12px;padding:10px;cursor:pointer;min-width:132px}
 .bw-looks button[data-on]{border-color:var(--violet,#5e6ad2);box-shadow:0 0 0 2px rgba(94,106,210,.25)}
 .bw-sw{display:flex;gap:4px;border:1px solid;border-radius:8px;padding:8px;width:100%}
 .bw-sw i{width:18px;height:18px;border-radius:50%}

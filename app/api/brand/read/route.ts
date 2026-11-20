@@ -6,7 +6,7 @@ import { createHash } from 'crypto'
 import { serviceClient } from '@/lib/handover'
 import { createClient } from '@/utils/supabase/server'
 import { aiKey } from '@/lib/ai-client'
-import { AI_MODEL } from '@/lib/ai'
+import { AI_MODEL, AI_MODEL_FAST } from '@/lib/ai'
 import { anthropicOutage, noteDown, noteUp } from '@/lib/service-health'
 
 export const dynamic = 'force-dynamic'
@@ -97,26 +97,60 @@ async function readSite(u: URL): Promise<Site | null> {
   return { title: $('title').text().trim(), text, images: images.slice(0, 40), pdfs, socials, phones, emails }
 }
 
-/** One picture from the brand's site into theme-uploads. Logos keep their
-    transparency and may be small; photos under 500px wide are dropped. */
-async function copyImage(u: string, dir: string, logo: boolean): Promise<string | null> {
+/** One picture from the brand's site, resized, with a small copy for looking at. */
+type Pic = { src: string; buf: Buffer; png: Buffer; w: number; h: number; thumb: string }
+async function fetchPic(u: string): Promise<Pic | null> {
   try {
     const r = await fetch(u, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(10000) })
     if (!r.ok || !(r.headers.get('content-type') || '').startsWith('image/')) return null
-    const buf = Buffer.from(await r.arrayBuffer())
-    if (buf.length > 15_000_000) return null
-    const img = sharp(buf).rotate().resize({ width: logo ? 800 : 1600, height: logo ? 800 : 1600, fit: 'inside', withoutEnlargement: true })
-    const out = logo ? await img.png().toBuffer() : await img.jpeg({ quality: 82 }).toBuffer()
-    const meta = await sharp(out).metadata()
-    if (!logo && ((meta.width || 0) < 500 || (meta.height || 0) < 400)) return null
-    const path = `${dir}/${createHash('sha1').update(u).digest('hex').slice(0, 16)}.${logo ? 'png' : 'jpg'}`
-    try {
-      const sb = serviceClient().storage.from('theme-uploads')
-      const { error } = await sb.upload(path, out, { contentType: logo ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
-      if (!error) return sb.getPublicUrl(path).data.publicUrl
-    } catch { /* storage down: the brand's own address still shows the picture */ }
-    return u
+    const raw = Buffer.from(await r.arrayBuffer())
+    if (raw.length > 15_000_000) return null
+    const base = sharp(raw).rotate()
+    const meta = await base.metadata()
+    if ((meta.width || 0) < 120 || (meta.height || 0) < 120) return null
+    const buf = await base.clone().resize({ width: 1600, height: 1600, fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 82 }).toBuffer()
+    const png = await base.clone().resize({ width: 800, height: 800, fit: 'inside', withoutEnlargement: true }).png().toBuffer()
+    const thumb = (await base.clone().resize({ width: 320, height: 320, fit: 'inside' }).flatten({ background: '#ffffff' }).jpeg({ quality: 70 }).toBuffer()).toString('base64')
+    return { src: u, buf, png, w: meta.width || 0, h: meta.height || 0, thumb }
   } catch { return null }
+}
+
+/** Into theme-uploads. Storage down: the brand's own address still shows it. */
+async function store(p: Pic, dir: string, logo: boolean): Promise<string> {
+  try {
+    const path = `${dir}/${createHash('sha1').update(p.src).digest('hex').slice(0, 16)}.${logo ? 'png' : 'jpg'}`
+    const sb = serviceClient().storage.from('theme-uploads')
+    const { error } = await sb.upload(path, logo ? p.png : p.buf, { contentType: logo ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
+    if (!error) return sb.getPublicUrl(path).data.publicUrl
+  } catch { /* fall through */ }
+  return p.src
+}
+
+const LOOK = `Each numbered picture comes from a brand's own website. Say what each one is:
+"logo" (the brand's mark), "photo" (a real photograph: product, place, people, nature), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, decorations).
+Then pick the best "hero": a wide, clean photo that would look good at the top of the brand's site, or -1.
+Answer with JSON only: {"kinds":["photo","logo",...],"hero":2}`
+
+/** A quick look at the thumbnails, so text graphics and the logo stay out of
+    the photo list. Cheap model, small pictures. */
+async function lookAt(client: Anthropic, pics: Pic[]): Promise<{ kinds: string[]; hero: number } | null> {
+  if (!pics.length) return null
+  try {
+    const content: Anthropic.ContentBlockParam[] = []
+    pics.forEach((p, i) => {
+      content.push({ type: 'text', text: `${i}:` })
+      content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: p.thumb } })
+    })
+    content.push({ type: 'text', text: LOOK })
+    const res = await client.messages.create({ model: AI_MODEL_FAST, max_tokens: 600, messages: [{ role: 'user', content }] })
+    const t = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join('')
+    const j = JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1))
+    console.log('[brand/read] look tokens', res.usage.input_tokens, res.usage.output_tokens)
+    return { kinds: Array.isArray(j.kinds) ? j.kinds.map(String) : [], hero: typeof j.hero === 'number' ? j.hero : -1 }
+  } catch (e) {
+    console.error('[brand/read] look', e instanceof Error ? e.message : e)
+    return null
+  }
 }
 
 const PROMPT = `You read a brand's own website text and its catalogue, and fill a website builder's questions for that brand.
@@ -177,6 +211,11 @@ export async function POST(req: NextRequest) {
   })
 
   const client = new Anthropic({ apiKey: aiKey(), maxRetries: 1, timeout: 80_000 })
+  // The pictures are fetched and looked at while the words are read.
+  const picsJob = (async () => {
+    const pics = (await Promise.all((read?.images || []).slice(0, 20).map((m) => fetchPic(m.url)))).filter((p): p is Pic => !!p)
+    return { pics, look: await lookAt(client, pics) }
+  })()
   let out: Record<string, any> = {}
   try {
     const res = await client.messages.create({ model: AI_MODEL, max_tokens: 4000, messages: [{ role: 'user', content: parts }] })
@@ -195,16 +234,21 @@ export async function POST(req: NextRequest) {
 
   // The brand's own pictures are copied to our storage: the site keeps working
   // if the old host goes, and the colour reader only measures our own host.
-  const imgs = read?.images || []
-  const logoAt = typeof out.logo_index === 'number' ? out.logo_index : -1
+  const { pics, look } = await picsJob
+  const kind = (i: number) => look?.kinds[i] || 'photo'
+  let logoAt = pics.findIndex((_, i) => kind(i) === 'logo')
+  if (logoAt < 0 && !look && typeof out.logo_index === 'number') logoAt = pics.findIndex((p) => p.src === read?.images[out.logo_index]?.url)
   const dir = `${user ? 'owners/' + user.id : 'demo'}/brand/${(site || pdf)!.host.replace(/[^A-Za-z0-9.-]/g, '')}`
-  const copied = await Promise.all(imgs.slice(0, 24).map((m, i) => copyImage(m.url, dir, i === logoAt)))
-  const at = (i: unknown) => (typeof i === 'number' && i >= 0 && i < copied.length ? copied[i] || undefined : undefined)
+  const urls = await Promise.all(pics.map((p, i) => store(p, dir, i === logoAt)))
+  const photos = urls.filter((_, i) => i !== logoAt && kind(i) === 'photo')
+  const others = urls.filter((_, i) => i !== logoAt && kind(i) === 'text')
+  const heroAt = look && look.hero >= 0 && kind(look.hero) === 'photo' ? look.hero : pics.findIndex((_, i) => kind(i) === 'photo' && pics[i].w >= pics[i].h)
   return NextResponse.json({
     answers: out,
-    logo: at(out.logo_index),
-    hero: at(out.hero_index),
-    images: copied.filter((u, i): u is string => !!u && i !== logoAt),
+    logo: logoAt >= 0 ? urls[logoAt] : undefined,
+    hero: heroAt >= 0 ? urls[heroAt] : undefined,
+    images: photos,
+    other_images: others,
     socials: read?.socials || {},
     pdf: pdf ? pdf.toString() : undefined,
     pdf_from_site: !!pdfFromSite,
