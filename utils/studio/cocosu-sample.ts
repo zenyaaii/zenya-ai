@@ -132,3 +132,21 @@ export const COCOSU_SAMPLE_INPUT: BrandInput = {
   },
   "logo": "https://static.wixstatic.com/media/78c648_40726f7621df4a25bb9808262219a96a~mv2.jpg/v1/fit/w_1600,h_1600,q_85/78c648_40726f7621df4a25bb9808262219a96a~mv2.jpg"
 }
+
+/**
+ * The same build with the pictures the reader now takes out of the CocoSu
+ * catalogue PDF (lib/pdf-images.ts), placed where the photo step would put
+ * them. The three cartons are cut from the catalogue's own packshot. Served
+ * from public/demo/cocosu for the multi-page sample (2026-11-21).
+ */
+const C = '/demo/cocosu/'
+export const COCOSU_PHOTOS_INPUT: BrandInput = {
+  ...COCOSU_SAMPLE_INPUT,
+  logo: C + 'logo.webp',
+  photos: { hero: C + 'tree.webp', story: C + 'farmer.webp', gallery: [C + 'road.webp', C + 'leaf.webp', C + 'halves.webp', C + 'split.webp', C + 'palms.webp', C + 'pieces.webp'] },
+  steps: COCOSU_SAMPLE_INPUT.steps.map((s, i) => ({ ...s, photo: [C + 'palms.webp', undefined, C + 'ship.webp'][i] })),
+  products: COCOSU_SAMPLE_INPUT.products.map((p, i) => ({ ...p, photo: C + ['pack-330.webp', 'pack-500.webp', 'pack-1l.webp'][i] })),
+}
+
+/** CocoSu's own colours: the logo's palm green, the cartons' sea blue, the catalogue's cream. */
+export const COCOSU_COLORS = { background: '#FBF3E2', surface: '#F1E3C3', text: '#14261A', muted: '#55615A', accent: '#1F6A2E', primary: '#0F7C8C', border: '#E6D9BC' }
