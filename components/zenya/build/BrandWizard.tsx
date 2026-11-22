@@ -237,7 +237,9 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
   function input(): BrandInput {
     const T = (v: string) => v.trim() || undefined
     const items = (xs: Item[]) => xs.filter((x) => x.title.trim()).map((x) => ({ title: x.title.trim(), text: T(x.text), photo: T(x.photo) }))
-    const gallery = photos.filter((u) => u !== f.hero && u !== f.story_photo && !f.noGallery.includes(u))
+    // A product's own picture is already on its card; the gallery holds the rest, at most the 16 a site shows.
+    const onProducts = new Set(f.products.map((p) => p.photo).filter(Boolean))
+    const gallery = photos.filter((u) => u !== f.hero && u !== f.story_photo && !f.noGallery.includes(u) && !onProducts.has(u)).slice(0, 16)
     return {
       name: f.name.trim(), kind: T(f.kind), tagline: T(f.tagline), intro: T(f.intro), city: T(f.city),
       story: { heading: T(f.heading), paragraphs: paras(f.story), quote: T(f.quote), signature: T(f.signature), role: T(f.role) },
@@ -268,7 +270,18 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
     if (read === 'ok' && !f.checked) return fail('راجع ما قرأناه من روابطك، ثم أكّد أنه صحيح.', at('brand'))
     if (!ok.products) return fail('أضف منتجًا واحدًا على الأقل.', at('products'))
     const parsed = brandInputSchema.safeParse(input())
-    if (!parsed.success) return fail('بعض الإجابات أطول من اللازم أو ناقصة. راجع الخطوات.')
+    if (!parsed.success) {
+      // Point at the answer that broke, not at "the steps".
+      const path = parsed.error.issues[0]?.path || []
+      const top = String(path[0] || '')
+      const where = ['story'].includes(top) ? 'story' : ['values', 'steps'].includes(top) ? 'make' : ['products', 'products_note', 'benefits'].includes(top) ? 'products'
+        : ['photos', 'logo'].includes(top) ? 'photos' : ['reviews', 'press', 'team', 'timeline'].includes(top) ? 'trust' : 'brand'
+      const what = top === 'photos' && path[1] === 'gallery' ? 'صور المعرض كثيرة: اختر ١٦ صورة على الأكثر.'
+        : top === 'products' && typeof path[1] === 'number' ? `المنتج رقم ${(path[1] + 1).toLocaleString('ar')} فيه إجابة أطول من اللازم.`
+        : 'إحدى الإجابات هنا أطول من اللازم.'
+      if (process.env.NODE_ENV === 'development') console.warn('[brand wizard]', parsed.error.issues.slice(0, 3))
+      return fail(what, at(where))
+    }
     setLoading(true)
     try {
       const studio = buildBrandContent(parsed.data)

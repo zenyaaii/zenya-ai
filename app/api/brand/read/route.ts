@@ -103,10 +103,13 @@ async function readSite(u: URL): Promise<Site | null> {
   const [about, listed] = await Promise.all([aboutHref ? pageText(aboutHref) : Promise.resolve(''), storeList(new URL(res.url))])
   // The store's own product shots go after the page's first pictures, each named
   // by its product, so the reader can give every product its own picture.
-  const shots: Img[] = listed.filter((x) => x.img && !seen.has(x.img.split('?')[0])).slice(0, 12).map((x) => ({ url: x.img!, alt: x.line.split(' — ')[0].slice(0, 120) }))
-  const pics = [...images.slice(0, 12), ...shots, ...images.slice(12)].slice(0, 40)
+  const shots: Img[] = listed.filter((x, i, all) => x.img && all.findIndex((y) => y.img === x.img) === i).slice(0, 18).map((x) => ({ url: x.img!, alt: x.line.split(' — ')[0].slice(0, 120) }))
+  const pics = [...images.slice(0, 8), ...shots, ...images.slice(8)].slice(0, 40)
+  // Each listed product names its own picture, so the reader cannot pair it with the wrong one.
+  const at = (u?: string) => (u ? pics.findIndex((m) => m.url === u) : -1)
+  const catalogue = listed.map((x) => (at(x.img) >= 0 && at(x.img) < 28 ? `${x.line} [IMAGE ${at(x.img)}]` : x.line))
   const sells = listed.length > 0 || /(أضف إلى السلة|أضف للسلة|add to (cart|bag|basket)|checkout|السلة)/i.test(text)
-  return { title: $('title').text().trim(), text, images: pics, pdfs, socials, phones, emails, about, catalogue: listed.map((x) => x.line), sells }
+  return { title: $('title').text().trim(), text, images: pics, pdfs, socials, phones, emails, about, catalogue, sells }
 }
 
 function sameSite(h: string, base: string) {
@@ -273,7 +276,7 @@ Rules:
 - Short and plain. No marketing filler that is not in the source.
 - Instagram bio and captions are the owner's own words: products, sizes, prices, scents and how things are made that the captions name count. Ignore hashtags, giveaways and greetings.
 - products: what the brand sells, up to 24, the most representative first (use the STORE PRODUCT LIST when given). Different sizes of the same product are ONE item: put the sizes in "size" ("100 مل · 50 مل") and the prices in "price" as written with the currency ("من 690 ر.س"). Never invent a price.
-- photo_index: the index in IMAGES whose alt names this product, or -1. Never guess from the file name alone.
+- photo_index: the product's picture: the [IMAGE n] its store line names, else the index in IMAGES whose alt names this product, else -1. Never guess.
 - products_note: anything else the brand offers that is not a product (workshops, wholesale, gift boxes, subscriptions), one short line.
 - steps: how the product is made or reaches the customer, in order, only if described.
 - values: what the brand says it stands for (2–4).
@@ -336,10 +339,10 @@ export async function POST(req: NextRequest) {
   // The pictures are fetched and looked at while the words are read.
   const picsJob = (async () => {
     const [site, cat] = await Promise.all([
-      Promise.all((read?.images || []).slice(0, 24).map((m) => fetchPic(m.url))),
+      Promise.all((read?.images || []).slice(0, 28).map((m) => fetchPic(m.url))),
       pdf ? pdfPics(pdf) : Promise.resolve([] as Pic[]),
     ])
-    const pics = [...site.filter((p): p is Pic => !!p), ...cat].slice(0, 30)
+    const pics = [...site.filter((p): p is Pic => !!p), ...cat].slice(0, 34)
     return { pics, look: await lookAt(client, pics) }
   })()
   let out: Record<string, any> = {}
