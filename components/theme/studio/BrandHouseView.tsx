@@ -435,7 +435,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
         </div>
         <div className="plinth" data-r>
           {P.some((p) => p.photo)
-            ? [...P].reverse().filter((p) => p.photo).slice(0, 3).map((p, i, a) => <img key={i} src={p.photo} alt={p.name} style={{ height: `${100 - (a.length - 1 - i) * 18}%` }} />)
+            ? [...P].reverse().filter((p, i, all) => p.photo && all.findIndex((q) => q.photo === p.photo) === i).slice(0, 3).map((p, i, a) => <img key={i} src={p.photo} alt={p.name} style={{ height: `${100 - (a.length - 1 - i) * 18}%`, maxWidth: a.length === 1 ? '84%' : undefined }} />)
             : c.hero.photo ? <img className="ph" src={c.hero.photo} alt="" /> : null}
         </div>
       </div></div>
