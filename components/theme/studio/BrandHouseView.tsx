@@ -291,9 +291,13 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
     if (c.buy === 'whatsapp' && wa) return { href: `https://wa.me/${wa.replace('+', '')}`, label: 'اطلب على واتساب', ask: 'اطلبه على واتساب' }
     if (c.buy === 'store' && c.links.store) return { href: profileUrl('website', c.links.store)!, label: 'تسوّق الآن', ask: 'اطلبه من المتجر' }
     if (c.buy === 'email' && c.contact.email) return { href: `mailto:${c.contact.email}`, label: 'راسلنا', ask: 'اسأل عنه بالبريد' }
+    if (c.buy === 'instagram' && c.links.instagram) return { href: profileUrl('instagram', c.links.instagram)!, label: 'راسلنا على إنستغرام', ask: 'اطلبه برسالة على إنستغرام' }
     if (tel) return { href: `tel:${tel}`, label: 'اتصل بنا', ask: 'اطلبه بالهاتف' }
     if (wa) return { href: `https://wa.me/${wa.replace('+', '')}`, label: 'تواصل على واتساب', ask: 'اطلبه على واتساب' }
     if (c.contact.email) return { href: `mailto:${c.contact.email}`, label: 'راسلنا', ask: 'اسأل عنه بالبريد' }
+    // A brand that sells by Instagram messages.
+    const ig = profileUrl('instagram', c.links.instagram)
+    if (ig) return { href: ig, label: 'راسلنا على إنستغرام', ask: 'اطلبه برسالة على إنستغرام' }
     return null
   }, [c, wa, tel])
   const social = NETS.map((n) => ({ ...n, href: profileUrl(n.key, c.links[n.key]) })).filter((n) => n.href)
@@ -431,7 +435,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
             {has.products ? <a className="btn" href="#/products">تصفّح المنتجات</a> : null}
             {action ? <a className="btn ghost" href={action.href}>{action.label}</a> : null}
           </div>
-          {P.some((p) => p.size) ? <div className="sizes">{P.map((p, i) => p.size ? <a key={i} href={`#/p/${i}`}>{p.size}</a> : null)}</div> : null}
+          {P.some((p) => p.size) ? <div className="sizes">{P.map((p, i) => p.size ? <a key={i} href={`#/p/${i}`}>{p.size.length <= 14 ? p.size : p.name}</a> : null)}</div> : null}
         </div>
         <div className="plinth" data-r>
           {P.some((p) => p.photo)
@@ -547,7 +551,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
       <>
         <div className="in crumb"><a href="#/products">{c.products.heading}</a> · {p.name}{p.size ? ` ${p.size}` : ''}</div>
         <div className="in pd">
-          <div className="st" data-r>{p.size ? <span className="big" aria-hidden>{p.size}</span> : null}{p.photo ? <img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={p.name} /> : <span className="pc"><span className="mono">{name.slice(0, 1)}</span></span>}</div>
+          <div className="st" data-r>{p.size && p.size.length <= 10 ? <span className="big" aria-hidden>{p.size}</span> : null}{p.photo ? <img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={p.name} /> : <span className="pc"><span className="mono">{name.slice(0, 1)}</span></span>}</div>
           <div data-r>
             <span className="eb">{c.brand.kind || name}</span>
             <h1 style={{ marginTop: 8 }}>{p.name}</h1>
@@ -616,7 +620,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
         <div className="cols">
           <div><a className="lg" href="#/">{c.brand.logo ? <img src={c.brand.logo} alt={name} /> : name}</a>{c.footer.tagline ? <p style={{ marginTop: 14, opacity: .8, maxWidth: '32ch' }}>{c.footer.tagline}</p> : null}</div>
           <div><h4>الصفحات</h4><ul>{nav.map((n) => <li key={n.id}><a href={n.href}>{n.label}</a></li>)}</ul></div>
-          {has.products ? <div><h4>{c.products.heading}</h4><ul>{P.slice(0, 6).map((p, i) => <li key={i}><a href={`#/p/${i}`}>{p.size || p.name}</a></li>)}</ul></div> : null}
+          {has.products ? <div><h4>{c.products.heading}</h4><ul>{P.slice(0, 6).map((p, i) => <li key={i}><a href={`#/p/${i}`}>{p.name}</a></li>)}</ul></div> : null}
           {social.length > 0 ? <div><h4>تابعنا</h4><ul>{social.map((s) => <li key={s.key}><a href={s.href} target="_blank" rel="noreferrer">{s.label}</a></li>)}</ul></div> : null}
         </div>
         <p className="base">© {name}{c.brand.city ? ` · ${c.brand.city}` : ''}</p>

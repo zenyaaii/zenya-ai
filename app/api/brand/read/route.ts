@@ -54,7 +54,8 @@ function sized(u: string): string {
 }
 
 type Img = { url: string; alt: string }
-type Site = { title: string; text: string; images: Img[]; pdfs: string[]; socials: Record<string, string>; phones: string[]; emails: string[] }
+type Site = { title: string; text: string; images: Img[]; pdfs: string[]; socials: Record<string, string>; phones: string[]; emails: string[]; about: string; catalogue: string[]; sells: boolean }
+type Listed = { line: string; img?: string }
 
 async function readSite(u: URL): Promise<Site | null> {
   const ctl = AbortSignal.timeout(15000)
@@ -91,11 +92,71 @@ async function readSite(u: URL): Promise<Site | null> {
     else if (/youtube\.com\/(@|channel|c\/)/i.test(h) && !socials.youtube) socials.youtube = h
     else if (/(wa\.me|api\.whatsapp\.com)/i.test(h) && !socials.whatsapp) socials.whatsapp = h
   }
+  // The story usually lives on its own page («من نحن», «قصتنا», About).
+  const ABOUT = /(من نحن|قصتنا|قصة|عن (?:العلامة|الشركة|المتجر)|about|our story)/i
+  const aboutHref = $('a[href]').map((_, el) => ({ h: abs($(el).attr('href')), t: `${$(el).text()} ${$(el).attr('aria-label') || ''}` })).get()
+    .find((a) => ABOUT.test(a.t) && sameSite(a.h, res.url) && a.h.split('#')[0] !== res.url.split('#')[0])?.h
   const phones = links.filter((h) => h.startsWith('tel:')).map((h) => decodeURIComponent(h.slice(4)))
   const emails = links.filter((h) => h.startsWith('mailto:')).map((h) => h.slice(7).split('?')[0])
   $('script,style,noscript,svg,iframe').remove()
   const text = $('body').text().replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim().slice(0, 12000)
-  return { title: $('title').text().trim(), text, images: images.slice(0, 40), pdfs, socials, phones, emails }
+  const [about, listed] = await Promise.all([aboutHref ? pageText(aboutHref) : Promise.resolve(''), storeList(new URL(res.url))])
+  // The store's own product shots go after the page's first pictures, each named
+  // by its product, so the reader can give every product its own picture.
+  const shots: Img[] = listed.filter((x) => x.img && !seen.has(x.img.split('?')[0])).slice(0, 12).map((x) => ({ url: x.img!, alt: x.line.split(' — ')[0].slice(0, 120) }))
+  const pics = [...images.slice(0, 12), ...shots, ...images.slice(12)].slice(0, 40)
+  const sells = listed.length > 0 || /(أضف إلى السلة|أضف للسلة|add to (cart|bag|basket)|checkout|السلة)/i.test(text)
+  return { title: $('title').text().trim(), text, images: pics, pdfs, socials, phones, emails, about, catalogue: listed.map((x) => x.line), sells }
+}
+
+function sameSite(h: string, base: string) {
+  try { return new URL(h).host.replace(/^www\./, '') === new URL(base).host.replace(/^www\./, '') } catch { return false }
+}
+
+async function pageText(u: string): Promise<string> {
+  const res = await fetch(u, { headers: { 'User-Agent': UA, 'Accept-Language': 'ar,en;q=0.8' }, signal: AbortSignal.timeout(10000) }).catch(() => null)
+  if (!res || !res.ok) return ''
+  const $ = cheerio.load((await res.text()).slice(0, 2_000_000))
+  $('script,style,noscript,svg,iframe,header,nav,footer').remove()
+  return $('body').text().replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim().slice(0, 5000)
+}
+
+/**
+ * Most brands sell from a Shopify, Salla or Zid store whose product grid is
+ * drawn by script, so the home page text holds few products. The store's own
+ * product list is read instead: Shopify's products.json, else the sitemap.
+ */
+async function storeList(u: URL): Promise<Listed[]> {
+  const get = (p: string) => fetch(new URL(p, u.origin), { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(8000) }).then((r) => (r.ok ? r.text() : '')).catch(() => '')
+  try {
+    const j = JSON.parse(await get('/products.json?limit=60'))
+    if (Array.isArray(j.products) && j.products.length) {
+      return j.products.slice(0, 60).map((p: any) => {
+        const sizes = (p.variants || []).map((v: any) => `${v.title === 'Default Title' ? '' : v.title} ${v.price}`.trim()).slice(0, 6).join(' | ')
+        return { line: `${p.title}${p.product_type ? ` (${p.product_type})` : ''}${sizes ? ` — ${sizes}` : ''}`, img: p.images?.[0]?.src ? String(p.images[0].src).split('?')[0] + '?width=1200' : undefined }
+      })
+    }
+  } catch { /* not Shopify */ }
+  const lang = /^\/(ar|en)\b/.exec(u.pathname)?.[1] || 'ar'
+  const index = await get('/sitemap.xml')
+  const maps = [...index.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]).filter((l) => /\.xml$/.test(l) && !/blog|page|categor/i.test(l)).slice(0, 4)
+  const blocks: string[] = []
+  const split = (x: string) => x.split(/<\/url>/).filter((b) => b.includes('<loc>'))
+  for (const x of maps) blocks.push(...split(await get(x)))
+  if (!maps.length) blocks.push(...split(index))
+  const out = new Map<string, Listed>()
+  for (const b of blocks) {
+    const l = /<loc>([^<]+)<\/loc>/.exec(b)?.[1] || ''
+    let path = ''
+    try { path = decodeURIComponent(new URL(l).pathname) } catch { continue }
+    if (new RegExp(`^/(?!${lang}/)(ar|en)/`).test(path)) continue
+    const m = /\/([^/]+)\/p\d+\/?$/.exec(path) || /\/products?\/([^/]+)\/?$/.exec(path)
+    if (!m) continue
+    const name = m[1].replace(/[-+_]+/g, ' ').trim()
+    if (!out.has(name)) out.set(name, { line: name, img: /<image:loc>([^<]+)<\/image:loc>/.exec(b)?.[1] })
+    if (out.size >= 60) break
+  }
+  return [...out.values()]
 }
 
 /** One picture from the brand's site, resized, with a small copy for looking at. */
@@ -166,7 +227,7 @@ async function store(p: Pic, dir: string, logo: boolean): Promise<string> {
 const LOOK = `Each numbered picture comes from a brand's own website or catalogue. Say what each one is:
 "logo" (the brand's mark), "product" (the brand's own packaged product: a bottle, carton, box, jar or bag with its label, shown clearly; raw ingredients or fruit are "photo"), "photo" (a real photograph or rich picture: place, people, nature, ingredients), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, QR codes, maps, decorations, other companies' logos).
 Mark a picture that repeats an earlier one (same picture, other size) as "other".
-Then pick the best "hero": a wide, sharp photo with a clear subject that would look good at the top of the brand's site (not a blurred or empty background, not a cut-out on plain colour), or -1.
+Then pick the best "hero": a wide, sharp photo with a clear subject that would look good at the top of the brand's site (not a blurred or empty background, not a cut-out on plain colour, and with NO words, prices or sale banners written over it: our own headline goes on top), or -1.
 Answer with JSON only: {"kinds":["photo","logo",...],"hero":2}`
 
 /** A quick look at the thumbnails, so text graphics and the logo stay out of
@@ -193,6 +254,16 @@ async function lookAt(client: Anthropic, pics: Pic[]): Promise<{ kinds: string[]
   }
 }
 
+/** A stray quote in a long answer breaks JSON.parse; the small model mends it rather than losing the whole read. */
+async function parseOrMend(client: Anthropic, t: string): Promise<Record<string, any>> {
+  try { return JSON.parse(t) } catch (e) {
+    console.error('[brand/read] mending JSON:', e instanceof Error ? e.message : e)
+    const r = await client.messages.create({ model: AI_MODEL_FAST, max_tokens: 4000, messages: [{ role: 'user', content: `Fix this so it is valid JSON. Change nothing else. Answer with the JSON only.\n\n${t}` }] })
+    const f = r.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join('')
+    return JSON.parse(f.slice(f.indexOf('{'), f.lastIndexOf('}') + 1))
+  }
+}
+
 const PROMPT = `You read a brand's own website text and its catalogue, and fill a website builder's questions for that brand.
 
 Rules:
@@ -200,7 +271,10 @@ Rules:
 - Write every value in clear Modern Standard Arabic (translate from any language). Keep brand and product names as the brand writes them, in Arabic letters if the brand uses an Arabic form, otherwise transliterate naturally (CocoSu → كوكوسو).
 - The brand's own claims about its product (health, quality, origin) are kept as the brand states them, written as features. Do not soften or judge them.
 - Short and plain. No marketing filler that is not in the source.
-- products: what the brand sells. Different sizes of the same product are separate items (name the size in "size").
+- Instagram bio and captions are the owner's own words: products, sizes, prices, scents and how things are made that the captions name count. Ignore hashtags, giveaways and greetings.
+- products: what the brand sells, up to 24, the most representative first (use the STORE PRODUCT LIST when given). Different sizes of the same product are ONE item: put the sizes in "size" ("100 مل · 50 مل") and the prices in "price" as written with the currency ("من 690 ر.س"). Never invent a price.
+- photo_index: the index in IMAGES whose alt names this product, or -1. Never guess from the file name alone.
+- products_note: anything else the brand offers that is not a product (workshops, wholesale, gift boxes, subscriptions), one short line.
 - steps: how the product is made or reaches the customer, in order, only if described.
 - values: what the brand says it stands for (2–4).
 - benefits: what the product does for the customer, if the material lists it.
@@ -212,12 +286,12 @@ Rules:
 Answer with one JSON object:
 {"name":"","kind":"","tagline":"","intro":"","city":"","story":{"heading":"","paragraphs":[],"quote":""},
 "values":[{"title":"","text":""}],"steps":[{"title":"","text":""}],"benefits":[{"title":"","text":""}],
-"products":[{"name":"","text":"","size":""}],"products_note":"",
+"products":[{"name":"","text":"","size":"","price":"","photo_index":-1}],"products_note":"",
 "contact":{"phone":"","whatsapp":"","email":"","address":""},"logo_index":-1,"hero_index":-1,
 "found":{"website":"what you used from the site, in Arabic, one short line","pdf":"what you used from the catalogue, one short line"}}`
 
 export async function POST(req: NextRequest) {
-  let body: { website?: unknown; pdf?: unknown; instagram_bio?: unknown; demo?: unknown }
+  let body: { website?: unknown; pdf?: unknown; instagram_bio?: unknown; instagram_captions?: unknown; instagram_name?: unknown; demo?: unknown }
   try { body = await req.json() } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }) }
   const { data: { user } } = await createClient().auth.getUser().catch(() => ({ data: { user: null } }))
   const demo = !user && body.demo === true
@@ -225,7 +299,11 @@ export async function POST(req: NextRequest) {
   if (!aiKey()) return NextResponse.json({ error: 'not_configured' }, { status: 503 })
   const site = asUrl(body.website)
   let pdf = asUrl(body.pdf)
-  if (!site && !pdf) return NextResponse.json({ error: 'nothing_to_read' }, { status: 400 })
+  // A brand on Instagram alone: its bio and post captions are the material.
+  const caps = (Array.isArray(body.instagram_captions) ? body.instagram_captions : []).filter((x): x is string => typeof x === 'string').map((x) => x.slice(0, 600)).slice(0, 12)
+  const igName = typeof body.instagram_name === 'string' ? body.instagram_name.slice(0, 80) : ''
+  const hasIg = caps.length > 0 || (typeof body.instagram_bio === 'string' && body.instagram_bio.trim().length > 0)
+  if (!site && !pdf && !hasIg) return NextResponse.json({ error: 'nothing_to_read' }, { status: 400 })
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown'
   if (throttled(user ? user.id : 'demo:' + ip, demo ? DEMO_PER_HOUR : MAX_PER_HOUR)) return NextResponse.json({ error: 'too_many' }, { status: 429 })
 
@@ -242,9 +320,13 @@ export async function POST(req: NextRequest) {
     type: 'text',
     text: [
       read ? `WEBSITE ${site}\nTITLE: ${read.title}\nTEXT:\n${read.text}` : '',
+      read?.about ? `ABOUT PAGE:\n${read.about}` : '',
+      read?.catalogue.length ? `STORE PRODUCT LIST (from the brand's own store; name — size price):\n${read.catalogue.join('\n')}` : '',
       read?.phones.length ? `PHONE LINKS: ${read.phones.join(', ')}` : '',
       read?.emails.length ? `EMAIL LINKS: ${read.emails.join(', ')}` : '',
+      igName ? `INSTAGRAM NAME: ${igName}` : '',
       bio ? `INSTAGRAM BIO: ${bio}` : '',
+      caps.length ? `INSTAGRAM POST CAPTIONS (newest first):\n${caps.map((c, i) => `${i + 1}. ${c}`).join('\n')}` : '',
       read?.images.length ? `IMAGES:\n${read.images.map((m, i) => `${i}: ${m.url.split('/').pop()?.slice(0, 60)} alt="${m.alt}"`).join('\n')}` : 'IMAGES: none',
       PROMPT,
     ].filter(Boolean).join('\n\n'),
@@ -254,7 +336,7 @@ export async function POST(req: NextRequest) {
   // The pictures are fetched and looked at while the words are read.
   const picsJob = (async () => {
     const [site, cat] = await Promise.all([
-      Promise.all((read?.images || []).slice(0, 20).map((m) => fetchPic(m.url))),
+      Promise.all((read?.images || []).slice(0, 24).map((m) => fetchPic(m.url))),
       pdf ? pdfPics(pdf) : Promise.resolve([] as Pic[]),
     ])
     const pics = [...site.filter((p): p is Pic => !!p), ...cat].slice(0, 30)
@@ -262,11 +344,11 @@ export async function POST(req: NextRequest) {
   })()
   let out: Record<string, any> = {}
   try {
-    const res = await client.messages.create({ model: AI_MODEL, max_tokens: 4000, messages: [{ role: 'user', content: parts }] })
+    const res = await client.messages.create({ model: AI_MODEL, max_tokens: 6000, messages: [{ role: 'user', content: parts }] })
     void noteUp('anthropic')
     const t = res.content.filter((b): b is Anthropic.TextBlock => b.type === 'text').map((b) => b.text).join('')
     const a = t.indexOf('{'), z = t.lastIndexOf('}')
-    out = JSON.parse(t.slice(a, z + 1))
+    out = await parseOrMend(client, t.slice(a, z + 1))
     console.log('[brand/read] tokens', res.usage.input_tokens, res.usage.output_tokens)
   } catch (e) {
     const o = anthropicOutage(e)
@@ -282,12 +364,19 @@ export async function POST(req: NextRequest) {
   const kind = (i: number) => look?.kinds[i] || 'photo'
   let logoAt = pics.findIndex((_, i) => kind(i) === 'logo')
   if (logoAt < 0 && !look && typeof out.logo_index === 'number') logoAt = pics.findIndex((p) => p.src === read?.images[out.logo_index]?.url)
-  const dir = `${user ? 'owners/' + user.id : 'demo'}/brand/${(site || pdf)!.host.replace(/[^A-Za-z0-9.-]/g, '')}`
+  const dir = `${user ? 'owners/' + user.id : 'demo'}/brand/${site || pdf ? (site || pdf)!.host.replace(/[^A-Za-z0-9.-]/g, '') : 'instagram'}`
   const urls = await Promise.all(pics.map((p, i) => store(p, dir, i === logoAt)))
   const kept = (u: string) => !!u
   const productPics = urls.filter((u, i) => kept(u) && i !== logoAt && kind(i) === 'product')
   const photos = urls.filter((u, i) => kept(u) && i !== logoAt && (kind(i) === 'photo' || kind(i) === 'product'))
   const others = urls.filter((u, i) => kept(u) && i !== logoAt && kind(i) === 'text')
+  // Each product gets the picture the reader matched to it, when that picture survived.
+  const urlOf = (idx: unknown) => {
+    const src = typeof idx === 'number' ? read?.images[idx]?.url : undefined
+    const k = src ? pics.findIndex((p) => p.src === src) : -1
+    return k >= 0 && k !== logoAt ? urls[k] || '' : ''
+  }
+  if (Array.isArray(out.products)) out.products = out.products.slice(0, 24).map((p: any) => { const { photo_index, ...rest } = p || {}; return { ...rest, photo: urlOf(photo_index) } })
   const heroAt = look && look.hero >= 0 && kind(look.hero) === 'photo' ? look.hero : pics.findIndex((_, i) => kind(i) === 'photo' && pics[i].w >= pics[i].h)
   return NextResponse.json({
     answers: out,
@@ -297,6 +386,7 @@ export async function POST(req: NextRequest) {
     other_images: others,
     product_images: productPics,
     socials: read?.socials || {},
+    sells: !!read?.sells,
     pdf: pdf ? pdf.toString() : undefined,
     pdf_from_site: !!pdfFromSite,
   })

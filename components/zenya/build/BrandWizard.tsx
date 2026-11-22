@@ -42,7 +42,7 @@ type Form = {
   website: string; instagram: string; tiktok: string; facebook: string; pdf: string
   name: string; kind: string; tagline: string; intro: string; city: string; logo: string
   phone: string; whatsapp: string; email: string; address: string; store: string
-  buy: '' | 'whatsapp' | 'call' | 'store' | 'email'
+  buy: '' | 'whatsapp' | 'call' | 'store' | 'email' | 'instagram'
   heading: string; story: string; quote: string; signature: string; role: string
   values: Item[]; steps: Item[]; benefits: Item[]
   products: Product[]; products_note: string
@@ -128,21 +128,24 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
     setRead('busy'); setReadMsg(''); setReadKey(linkKey)
     let bio = ''
     let ig: string[] = []
+    let caps: string[] = []
+    let igName = ''
     if (f.instagram.trim().length >= 2) {
       try {
         const r = await fetch('/api/niche/social', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ instagram: f.instagram.trim(), demo }) })
         const j = await r.json().catch(() => ({}))
-        if (r.ok) { bio = j.bio || ''; ig = j.photos || []; setIgPhotos(ig) }
+        if (r.ok) { bio = j.bio || ''; ig = j.photos || []; caps = Array.isArray(j.captions) ? j.captions : []; igName = j.name || ''; setIgPhotos(ig) }
       } catch { /* Instagram is a bonus; the site and catalogue carry on */ }
     }
-    if (!f.website.trim() && !f.pdf.trim()) {
+    // Instagram alone: its bio and captions still fill the questions.
+    if (!f.website.trim() && !f.pdf.trim() && !bio && !caps.length) {
       setRead(ig.length || bio ? 'ok' : 'fail')
       setFound(ig.length ? [`${ig.length.toLocaleString('ar')} صور من إنستغرام`] : [])
       setReadMsg(ig.length || bio ? '' : 'لم نستطع قراءة حساب إنستغرام. اكتب بياناتك تحت.')
       return
     }
     try {
-      const r = await fetch('/api/brand/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ website: f.website.trim(), pdf: f.pdf.trim(), instagram_bio: bio, demo }) })
+      const r = await fetch('/api/brand/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ website: f.website.trim(), pdf: f.pdf.trim(), instagram_bio: bio, instagram_captions: caps, instagram_name: igName, demo }) })
       const j = await r.json().catch(() => ({}))
       if (!r.ok) {
         setRead('fail')
@@ -155,22 +158,24 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
       const a = j.answers || {}
       const S = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
       const list = (v: unknown) => (Array.isArray(v) ? v : []).filter((x) => x && S(x.title)).map((x) => item(S(x.title), S(x.text)))
-      const prods = (Array.isArray(a.products) ? a.products : []).filter((x: any) => x && S(x.name)).map((x: any) => ({ id: nid(), name: S(x.name), text: S(x.text), size: S(x.size), price: '', photo: '' }))
+      const prods = (Array.isArray(a.products) ? a.products : []).filter((x: any) => x && S(x.name)).map((x: any) => ({ id: nid(), name: S(x.name), text: S(x.text), size: S(x.size).slice(0, 40), price: S(x.price).slice(0, 40), photo: S(x.photo) }))
       const socials = j.socials || {}
       setF((p) => ({
         ...p,
-        name: p.name || S(a.name), kind: p.kind || S(a.kind), tagline: p.tagline || S(a.tagline), intro: p.intro || S(a.intro), city: p.city || S(a.city),
+        name: p.name || S(a.name).slice(0, 60), kind: p.kind || S(a.kind).slice(0, 60), tagline: p.tagline || S(a.tagline).slice(0, 140), intro: p.intro || S(a.intro).slice(0, 400), city: p.city || S(a.city).slice(0, 80),
         logo: p.logo || j.logo || '',
         phone: p.phone || S(a.contact?.phone), whatsapp: p.whatsapp || S(a.contact?.whatsapp), email: p.email || S(a.contact?.email), address: p.address || S(a.contact?.address),
         instagram: p.instagram || socials.instagram || '', tiktok: p.tiktok || socials.tiktok || '', facebook: p.facebook || socials.facebook || '',
         pdf: p.pdf || j.pdf || '',
+        // A brand that already sells online: its own site is where people buy.
+        store: p.store || (j.sells && f.website.trim() ? f.website.trim() : ''),
         heading: p.heading || S(a.story?.heading), story: p.story || (Array.isArray(a.story?.paragraphs) ? a.story.paragraphs.map(S).filter(Boolean).join('\n\n') : ''), quote: p.quote || S(a.story?.quote),
         values: p.values.length ? p.values : list(a.values),
         steps: p.steps.length ? p.steps : list(a.steps),
         benefits: p.benefits.length ? p.benefits : list(a.benefits),
-        // The catalogue's product picture goes on every product still without one; the owner changes it per size.
+        // When the reader matched no picture to any product (one catalogue shot), that shot goes on each; never a wrong picture beside matched ones.
         products: (p.products.some((x) => x.name.trim()) ? p.products : prods.length ? prods : p.products)
-          .map((x: Product) => (x.photo || !j.product_images?.[0] ? x : { ...x, photo: j.product_images[0] })),
+          .map((x: Product) => (x.photo || !j.product_images?.[0] || prods.some((q: Product) => q.photo) ? x : { ...x, photo: j.product_images[0] })),
         products_note: p.products_note || S(a.products_note),
         hero: p.hero || j.hero || '',
         checked: false,
@@ -220,10 +225,10 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
 
   const channels = [
     f.whatsapp.trim() && { id: 'whatsapp', label: 'رسالة واتساب' }, f.phone.trim() && { id: 'call', label: 'اتصال' },
-    f.store.trim() && { id: 'store', label: 'متجري الإلكتروني' }, f.email.trim() && { id: 'email', label: 'البريد' },
+    f.store.trim() && { id: 'store', label: 'متجري الإلكتروني' }, f.email.trim() && { id: 'email', label: 'البريد' }, f.instagram.trim() && { id: 'instagram', label: 'رسالة إنستغرام' },
   ].filter(Boolean) as { id: string; label: string }[]
   const buyNow = (channels.some((c) => c.id === f.buy) ? f.buy : channels[0]?.id || '') as Form['buy']
-  const contactOk = !!(f.phone.trim() || f.whatsapp.trim() || f.email.trim() || f.store.trim())
+  const contactOk = !!(f.phone.trim() || f.whatsapp.trim() || f.email.trim() || f.store.trim() || f.instagram.trim())
   const ok = {
     brand: f.name.trim().length >= 2 && contactOk && (!f.whatsapp.trim() || intl(f.whatsapp)) && (read !== 'ok' || f.checked),
     products: f.products.some((p) => p.name.trim()),
@@ -258,7 +263,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
     setError(null)
     const at = (id: string) => Math.max(0, steps.findIndex((x) => x.id === id))
     if (f.name.trim().length < 2) return fail('اكتب اسم علامتك.', at('brand'))
-    if (!contactOk) return fail('أضف طريقة واحدة على الأقل يصل بها الناس إليك: واتساب، هاتف، بريد، أو رابط متجر.', at('brand'))
+    if (!contactOk) return fail('أضف طريقة واحدة على الأقل يصل بها الناس إليك: واتساب، هاتف، بريد، رابط متجر، أو إنستغرام.', at('brand'))
     if (f.whatsapp.trim() && !intl(f.whatsapp)) return fail('اكتب رقم واتساب بمفتاح الدولة، مثل ‎+90…', at('brand'))
     if (read === 'ok' && !f.checked) return fail('راجع ما قرأناه من روابطك، ثم أكّد أنه صحيح.', at('brand'))
     if (!ok.products) return fail('أضف منتجًا واحدًا على الأقل.', at('products'))

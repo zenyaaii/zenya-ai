@@ -51,7 +51,7 @@ export const brandInputSchema = z.object({
     instagram: opt(200), tiktok: opt(200), facebook: opt(200), snapchat: opt(200), x: opt(200), youtube: opt(200), website: opt(300), store: opt(300),
   }).default({}),
   /** What the visitor's main button does: message on WhatsApp, call, or open the store. */
-  buy: z.enum(['whatsapp', 'call', 'store', 'email']).optional(),
+  buy: z.enum(['whatsapp', 'call', 'store', 'email', 'instagram']).optional(),
   photos: z.object({ hero: opt(600), story: opt(600), gallery: z.array(s(600)).max(16).default([]) }).default({ gallery: [] }),
   logo: opt(600),
   /** The site's design: «موسم» (tropic, photos first) or «رفّ» (shelf, products first). */
@@ -76,7 +76,7 @@ export type BrandContent = {
   gallery: { heading: string; images: string[] }
   contact: { heading: string; phone?: string; whatsapp?: string; email?: string; address?: string }
   links: BrandInput['links']
-  buy: 'whatsapp' | 'call' | 'store' | 'email' | 'none'
+  buy: 'whatsapp' | 'call' | 'store' | 'email' | 'instagram' | 'none'
   design: 'tropic' | 'shelf'
   footer: { tagline?: string }
   seo: { title: string; description: string }
@@ -94,7 +94,7 @@ export function buildBrandContent(i: BrandInput): BrandContent {
   const hero = clean(i.photos.hero) || photos[0]
   const used = new Set<string>([hero, i.photos.story, ...i.steps.map((x) => x.photo), ...i.products.map((x) => x.photo)].map(clean).filter((u): u is string => !!u))
   const buy = i.buy
-    || (i.contact.whatsapp ? 'whatsapp' : i.links.store ? 'store' : i.contact.phone ? 'call' : i.contact.email ? 'email' : 'none')
+    || (i.contact.whatsapp ? 'whatsapp' : i.links.store ? 'store' : i.contact.phone ? 'call' : i.contact.email ? 'email' : i.links.instagram ? 'instagram' : 'none')
   const intro = clean(i.intro)
   return {
     v: 2,

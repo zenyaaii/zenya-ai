@@ -132,7 +132,7 @@ export const BRAND_EDITOR_CONFIG: EditorConfig = {
       fields: [
         { type: 'text', path: 'contact.heading', label: 'العنوان' },
         { type: 'choice', path: 'buy', label: 'الزر الرئيسي', fallback: 'whatsapp', options: [
-          { value: 'whatsapp', label: 'رسالة واتساب' }, { value: 'call', label: 'اتصال' }, { value: 'store', label: 'المتجر' }, { value: 'email', label: 'البريد' },
+          { value: 'whatsapp', label: 'رسالة واتساب' }, { value: 'call', label: 'اتصال' }, { value: 'store', label: 'المتجر' }, { value: 'email', label: 'البريد' }, { value: 'instagram', label: 'رسالة إنستغرام' },
         ] },
         { type: 'tel', path: 'contact.whatsapp', label: 'واتساب', placeholderFrom: 'contact.phone' },
         { type: 'tel', path: 'contact.phone', label: 'الهاتف' },
