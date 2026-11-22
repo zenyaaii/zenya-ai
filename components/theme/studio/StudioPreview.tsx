@@ -12,7 +12,7 @@ import type {
 import { getStudioPreset } from '@/utils/studio/presets'
 import { getTypographyPreset } from '@/utils/theme-editor-typography'
 import BookingSection from '@/components/site/BookingSection'
-import BrandStoryView from './BrandStoryView'
+import BrandHouseView from './BrandHouseView'
 import { isBrandV2, type BrandContent } from '@/utils/studio/brand'
 
 type Props = {
@@ -113,9 +113,9 @@ function Stars({ value, color, size = 12 }: { value: number; color: string; size
 const HERO_IMG = 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=1400&q=85'
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
-/** A v2 site (the rebuilt brand-story template, 2026-11-20) draws «فصول»; older sites keep the editorial page below. */
+/** A v2 site (the rebuilt brand-story template) draws the multi-page «بيت العلامة» in the owner's chosen look (Anas, 2026-11-22: both looks, «موسم» first); older sites keep the editorial page below. */
 export default function StudioPreview(props: Omit<Props, 'content'> & { content: StudioContent | BrandContent }) {
-  if (isBrandV2(props.content)) return <BrandStoryView content={props.content} colorOverrides={props.colorOverrides} className={props.className} />
+  if (isBrandV2(props.content)) return <BrandHouseView content={props.content} look={props.content.design === 'shelf' ? 'shelf' : 'tropic'} colorOverrides={props.colorOverrides} className={props.className} />
   return <LegacyStudio {...props} content={props.content as StudioContent} />
 }
 

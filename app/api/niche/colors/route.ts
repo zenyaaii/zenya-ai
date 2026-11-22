@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { measure, identityFromPixels, paletteOf } from '@/lib/restaurant-build/palette'
+import { measure, identityFromPixels, logoInk, paletteOf } from '@/lib/restaurant-build/palette'
 
 /**
  * The owner's own colours, for the build wizard's colour list.
@@ -23,8 +23,12 @@ function throttled(key: string): boolean {
   return false
 }
 
+/** Local dev only: pictures the brand reader kept under public/_dev-uploads (no storage key there). */
+const devFile = (u: string) => process.env.NODE_ENV === 'development' && /^\/_dev-uploads\/[0-9a-f]{16}\.(png|jpg)$/.test(u)
+
 function ours(u: unknown): u is string {
   if (typeof u !== 'string') return false
+  if (devFile(u)) return true
   try {
     const url = new URL(u)
     const store = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://invalid.invalid')
@@ -36,6 +40,7 @@ function ours(u: unknown): u is string {
 
 async function fetchImage(u: string): Promise<Buffer | null> {
   try {
+    if (devFile(u)) return await (await import('fs/promises')).readFile(`${process.cwd()}/public${u}`)
     const r = await fetch(u, { signal: AbortSignal.timeout(8000) })
     if (!r.ok || !(r.headers.get('content-type') || '').startsWith('image/')) return null
     const len = Number(r.headers.get('content-length') || 0)
@@ -50,7 +55,7 @@ async function fetchImage(u: string): Promise<Buffer | null> {
 export async function POST(req: NextRequest) {
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'anon'
   if (throttled(ip)) return NextResponse.json({ error: 'busy' }, { status: 429 })
-  let body: { photos?: unknown }
+  let body: { photos?: unknown; logo?: unknown }
   try { body = await req.json() } catch { return NextResponse.json({ error: 'bad' }, { status: 400 }) }
   const urls = (Array.isArray(body.photos) ? body.photos : []).filter(ours).slice(0, 4)
   if (!urls.length) return NextResponse.json({ error: 'no_photos' }, { status: 400 })
@@ -58,6 +63,12 @@ export async function POST(req: NextRequest) {
   const bufs = (await Promise.all(urls.map(fetchImage))).filter((b): b is Buffer => !!b)
   const measured = (await Promise.all(bufs.map((b) => measure(b).catch(() => [])))).flat()
   const { identity, seconds } = identityFromPixels(measured)
+  // A brand's logo colour is its identity: it leads when there is one (brand-story template).
+  if (ours(body.logo)) {
+    const lb = await fetchImage(body.logo)
+    const ink = lb ? await logoInk(lb).catch(() => null) : null
+    if (ink) identity.splice(1, identity.length, ink)
+  }
   if (!identity.length) return NextResponse.json({ error: 'no_colour' }, { status: 422 })
   return NextResponse.json({ day: paletteOf(identity, 'light'), night: paletteOf(identity, 'dark'), seconds })
 }

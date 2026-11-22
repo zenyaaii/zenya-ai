@@ -148,14 +148,25 @@ async function store(p: Pic, dir: string, logo: boolean): Promise<string> {
     const { error } = await sb.upload(path, asPng ? p.png : p.buf, { contentType: asPng ? 'image/png' : 'image/jpeg', upsert: true, cacheControl: '31536000' })
     if (!error) return sb.getPublicUrl(path).data.publicUrl
   } catch { /* fall through */ }
-  // Storage down: a site picture still has its own address; a catalogue one has none.
-  return p.fromPdf ? `data:image/${asPng ? 'png' : 'jpeg'};base64,${(asPng ? p.png : p.buf).toString('base64')}` : p.src
+  // No storage on a local dev server (no service key): keep the file under public/ so the whole flow can be tried.
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const { mkdir, writeFile } = await import('fs/promises')
+      const name = `${createHash('sha1').update(p.src).digest('hex').slice(0, 16)}.${asPng ? 'png' : 'jpg'}`
+      await mkdir(`${process.cwd()}/public/_dev-uploads`, { recursive: true })
+      await writeFile(`${process.cwd()}/public/_dev-uploads/${name}`, asPng ? p.png : p.buf)
+      return `/_dev-uploads/${name}`
+    } catch { /* fall through */ }
+  }
+  // Storage down: a site picture still has its own address; a catalogue one has none and is left out
+  // (a data: URL would not fit the build's 600-character photo fields).
+  return p.fromPdf ? '' : p.src
 }
 
 const LOOK = `Each numbered picture comes from a brand's own website or catalogue. Say what each one is:
-"logo" (the brand's mark), "product" (the brand's own product or its packaging, shown clearly), "photo" (a real photograph or rich picture: place, people, nature, ingredients), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, QR codes, maps, decorations, other companies' logos).
+"logo" (the brand's mark), "product" (the brand's own packaged product: a bottle, carton, box, jar or bag with its label, shown clearly; raw ingredients or fruit are "photo"), "photo" (a real photograph or rich picture: place, people, nature, ingredients), "text" (a graphic, banner or page that is mostly writing), or "other" (icons, badges, QR codes, maps, decorations, other companies' logos).
 Mark a picture that repeats an earlier one (same picture, other size) as "other".
-Then pick the best "hero": a wide, clean photo that would look good at the top of the brand's site, or -1.
+Then pick the best "hero": a wide, sharp photo with a clear subject that would look good at the top of the brand's site (not a blurred or empty background, not a cut-out on plain colour), or -1.
 Answer with JSON only: {"kinds":["photo","logo",...],"hero":2}`
 
 /** A quick look at the thumbnails, so text graphics and the logo stay out of
@@ -273,14 +284,15 @@ export async function POST(req: NextRequest) {
   if (logoAt < 0 && !look && typeof out.logo_index === 'number') logoAt = pics.findIndex((p) => p.src === read?.images[out.logo_index]?.url)
   const dir = `${user ? 'owners/' + user.id : 'demo'}/brand/${(site || pdf)!.host.replace(/[^A-Za-z0-9.-]/g, '')}`
   const urls = await Promise.all(pics.map((p, i) => store(p, dir, i === logoAt)))
-  const productPics = urls.filter((_, i) => i !== logoAt && kind(i) === 'product')
-  const photos = urls.filter((_, i) => i !== logoAt && (kind(i) === 'photo' || kind(i) === 'product'))
-  const others = urls.filter((_, i) => i !== logoAt && kind(i) === 'text')
+  const kept = (u: string) => !!u
+  const productPics = urls.filter((u, i) => kept(u) && i !== logoAt && kind(i) === 'product')
+  const photos = urls.filter((u, i) => kept(u) && i !== logoAt && (kind(i) === 'photo' || kind(i) === 'product'))
+  const others = urls.filter((u, i) => kept(u) && i !== logoAt && kind(i) === 'text')
   const heroAt = look && look.hero >= 0 && kind(look.hero) === 'photo' ? look.hero : pics.findIndex((_, i) => kind(i) === 'photo' && pics[i].w >= pics[i].h)
   return NextResponse.json({
     answers: out,
-    logo: logoAt >= 0 ? urls[logoAt] : undefined,
-    hero: heroAt >= 0 ? urls[heroAt] : undefined,
+    logo: logoAt >= 0 ? urls[logoAt] || undefined : undefined,
+    hero: heroAt >= 0 ? urls[heroAt] || undefined : undefined,
     images: photos,
     other_images: others,
     product_images: productPics,

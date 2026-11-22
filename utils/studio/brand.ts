@@ -10,7 +10,7 @@ import { z } from 'zod'
  *
  * Stored as content.studio with `v: 2`, so the editor, the preview page and
  * the public renderer keep finding the studio template where they always
- * did; StudioPreview draws the new design (BrandStoryView) when it sees v 2.
+ * did; StudioPreview draws the new design (BrandHouseView) when it sees v 2.
  *
  * Every list may be empty, hold one item, or many. A section with nothing in
  * it is left out of the site, never filled with a stand-in.
@@ -54,6 +54,8 @@ export const brandInputSchema = z.object({
   buy: z.enum(['whatsapp', 'call', 'store', 'email']).optional(),
   photos: z.object({ hero: opt(600), story: opt(600), gallery: z.array(s(600)).max(16).default([]) }).default({ gallery: [] }),
   logo: opt(600),
+  /** The site's design: «موسم» (tropic, photos first) or «رفّ» (shelf, products first). */
+  design: z.enum(['tropic', 'shelf']).optional(),
 })
 
 export type BrandInput = z.infer<typeof brandInputSchema>
@@ -75,6 +77,7 @@ export type BrandContent = {
   contact: { heading: string; phone?: string; whatsapp?: string; email?: string; address?: string }
   links: BrandInput['links']
   buy: 'whatsapp' | 'call' | 'store' | 'email' | 'none'
+  design: 'tropic' | 'shelf'
   footer: { tagline?: string }
   seo: { title: string; description: string }
   /** Kept so the old studio panels that read these paths never crash on a v2 site. */
@@ -117,6 +120,7 @@ export function buildBrandContent(i: BrandInput): BrandContent {
     contact: { heading: `تواصل مع ${name}`, phone: clean(i.contact.phone), whatsapp: clean(i.contact.whatsapp), email: clean(i.contact.email), address: clean(i.contact.address) },
     links: i.links,
     buy,
+    design: i.design || 'tropic',
     footer: { tagline: clean(i.tagline) },
     seo: {
       title: [name, clean(i.kind)].filter(Boolean).join(' · ').slice(0, 70),

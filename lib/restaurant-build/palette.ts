@@ -54,6 +54,30 @@ export async function measure(buf: Buffer, k = 5): Promise<{ c: RGB; share: numb
   return cs.map((c, j) => ({ c, share: as.filter((a) => a === j).length / pts.length }))
 }
 
+/**
+ * The ink of a logo: the main colour of its opaque, coloured pixels (a logo is
+ * mostly background, so its own colour never wins a share count over a
+ * photo). Null when the logo is black, white or grey.
+ */
+export async function logoInk(buf: Buffer): Promise<RGB | null> {
+  const { data, info } = await sharp(buf).resize(64, 64, { fit: 'inside' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  const pts: RGB[] = []
+  for (let i = 0; i < info.width * info.height; i++) {
+    const c: RGB = [data[i * 4], data[i * 4 + 1], data[i * 4 + 2]]
+    const [, s, l] = toHsl(c)
+    if (data[i * 4 + 3] > 128 && s > 0.25 && l > 0.12 && l < 0.8) pts.push(c)
+  }
+  if (pts.length < 24) return null
+  let cs: RGB[] = [pts[0], pts[Math.floor(pts.length / 2)], pts[pts.length - 1]]
+  let as: number[] = []
+  for (let it = 0; it < 8; it++) {
+    as = pts.map((p) => { let bi = 0, bd = Infinity; cs.forEach((c, j) => { const d = (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2; if (d < bd) { bd = d; bi = j } }); return bi })
+    cs = cs.map((c, j) => { const m = pts.filter((_, i) => as[i] === j); return m.length ? m.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]).map((v) => v / m.length) as RGB : c })
+  }
+  const share = cs.map((_, j) => as.filter((a) => a === j).length)
+  return cs[share.indexOf(Math.max(...share))]
+}
+
 /** The AI's hex snapped to the nearest colour really measured in the photos (the AI's eye guides; the pixels decide). */
 export function snap(aiHex: string[], measured: { c: RGB; share: number }[]): RGB[] {
   const out: RGB[] = []

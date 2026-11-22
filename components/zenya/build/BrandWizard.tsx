@@ -48,7 +48,7 @@ type Form = {
   products: Product[]; products_note: string
   hero: string; story_photo: string; noGallery: string[]; uploads: string[]; hidden: string[]
   reviews: Rev[]; press: Press[]; timeline: Mile[]; team: Person[]
-  look: string; checked: boolean; scrape_issue: string
+  look: string; design: 'tropic' | 'shelf'; checked: boolean; scrape_issue: string
 }
 
 const empty = (): Form => ({
@@ -60,8 +60,14 @@ const empty = (): Form => ({
   products: [{ id: nid(), name: '', text: '', size: '', price: '', photo: '' }], products_note: '',
   hero: '', story_photo: '', noGallery: [], uploads: [], hidden: [],
   reviews: [], press: [], timeline: [], team: [],
-  look: 'own', checked: false, scrape_issue: '',
+  look: 'own', design: 'tropic', checked: false, scrape_issue: '',
 })
+
+/** The two looks of the brand site (Anas, 2026-11-22: both, «موسم» first). */
+const DESIGNS: { id: Form['design']; name: string; note: string }[] = [
+  { id: 'tropic', name: 'موسم', note: 'صورة واجهة تملأ الشاشة وخط عريض. أجمل إن كانت عندك صور كثيرة.' },
+  { id: 'shelf', name: 'رفّ', note: 'منتجاتك وأحجامها في الأعلى. أوضح للتجار، وجميل حتى بصور قليلة.' },
+]
 
 const item = (title = '', text = ''): Item => ({ id: nid(), title, text, photo: '' })
 const intl = (v: string) => /^(\+|00)\d[\d\s-]{6,}$/.test(v.trim())
@@ -201,7 +207,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
     if (!measure) return
     const ctl = new AbortController()
     const t = setTimeout(() => {
-      fetch('/api/niche/colors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photos: measure.split('|') }), signal: ctl.signal })
+      fetch('/api/niche/colors', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photos: measure.split('|').filter((u, i, a) => u !== f.logo || a.length === 1), logo: f.logo || undefined }), signal: ctl.signal })
         .then((r) => (r.ok ? r.json() : null))
         .then((j) => { if (j?.day) setOwn({ id: 'own', name: 'ألوان علامتك', colors: j.day }) })
         .catch(() => { /* the fixed looks stay */ })
@@ -240,6 +246,7 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
       contact: { phone: T(f.phone), whatsapp: T(f.whatsapp), email: T(f.email), address: T(f.address) },
       links: { instagram: T(f.instagram), tiktok: T(f.tiktok), facebook: T(f.facebook), website: T(f.website), store: T(f.store) },
       buy: buyNow || undefined,
+      design: f.design,
       photos: { hero: T(f.hero), story: T(f.story_photo), gallery },
       logo: T(f.logo),
     }
@@ -530,10 +537,20 @@ export default function BrandWizard({ demo = false, onBack }: { demo?: boolean; 
       ),
     },
     {
-      id: 'review', title: 'الألوان والمراجعة', complete: ok.brand && ok.products,
-      sub: own ? 'ألوان علامتك أولًا: أخذناها من شعارك وصورك. ثم راجع ما سيظهر في موقعك.' : 'اختر ألوان موقعك، ثم راجع ما سيظهر فيه. إن رفعت شعارك أو صورك أخذنا منها ألوانك.',
+      id: 'review', title: 'الشكل والألوان', complete: ok.brand && ok.products,
+      sub: own ? 'اختر شكل موقعك. ألوان علامتك أولًا: أخذناها من شعارك وصورك. ثم راجع ما سيظهر في موقعك.' : 'اختر شكل موقعك وألوانه، ثم راجع ما سيظهر فيه. إن رفعت شعارك أو صورك أخذنا منها ألوانك.',
       body: (
         <Grid>
+          <Block title="شكل الموقع" hint="الصفحات والمحتوى نفسها في الاثنين. تستطيع تغييره لاحقًا من المحرر.">
+            <div className="bw-looks">
+              {DESIGNS.map((d) => (
+                <button key={d.id} type="button" data-on={f.design === d.id || undefined} onClick={() => up('design', d.id)} style={{ maxWidth: 260 }}>
+                  <b style={{ fontSize: 15 }}>{d.name}</b>
+                  <span style={{ fontSize: 13, opacity: .75, textAlign: 'start' }}>{d.note}</span>
+                </button>
+              ))}
+            </div>
+          </Block>
           <Block title="الألوان">
             <div className="bw-looks">
               {looks.map((l) => (

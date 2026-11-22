@@ -22,6 +22,9 @@ import { digits, profileUrl } from '@/utils/studio/brand'
  *
  * Every word and picture comes from the build answers; nothing is written
  * here except the fixed labels.
+ *
+ * Anas, 2026-11-22: both looks ship, «موسم» first; the owner picks one in the
+ * review step and can switch in the editor (content.studio.design).
  */
 
 const lalezar = Lalezar({ subsets: ['arabic'], weight: ['400'], display: 'swap' })
@@ -94,6 +97,7 @@ const CSS = `
 .bh .pc:hover{transform:translateY(-4px)}
 .bh .pc .st{position:relative;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;padding:28px}
 .bh .pc .st img{position:absolute;inset:28px;width:calc(100% - 56px);height:calc(100% - 56px);object-fit:contain;filter:drop-shadow(0 18px 22px rgb(0 0 0/.18))}
+.bh .pc .st img.cov,.bh .pd .st img.cov{inset:0;width:100%;height:100%;object-fit:cover;filter:none}
 .bh .pc .mono{font-family:var(--d);font-size:72px;color:var(--brand);opacity:.35}
 .bh .pc .tx{padding:18px 20px 22px;display:grid;gap:4px}
 .bh .pc h3{font-size:20px}
@@ -166,6 +170,7 @@ const CSS = `
 .bh.t .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,color-mix(in srgb,var(--deep) 92%,transparent) 0%,rgb(0 0 0/.18) 55%,rgb(0 0 0/.05))}
 .bh.t .hero .in{position:relative;z-index:1;width:100%;padding-bottom:40px;display:grid;gap:18px}
 .bh.t .hero h1{font-size:clamp(52px,15vw,132px);line-height:.98;max-width:9ch;font-weight:400}
+.bh.t .hero h1[data-long]{font-size:clamp(38px,9vw,76px);max-width:16ch;line-height:1.15}
 .bh.t .hero p{font-size:17px;max-width:40ch;opacity:.9}
 .bh.t .hero .eb{color:var(--sun)}
 .bh.t .hero .btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -245,6 +250,9 @@ const CSS = `
 }
 `
 
+/** A cut-out (PNG, kept with its transparency) stands on the stage; a photograph fills it. */
+const cut = (u?: string) => !!u && /\.(png|webp)(\?|$)/i.test(u)
+
 const AR_NUM = ['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠']
 
 export default function BrandHouseView({ content: c, colorOverrides, look = 'tropic', className }: { content: BrandContent; colorOverrides?: Record<string, string>; look?: HouseLook; className?: string }) {
@@ -311,7 +319,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
 
   const prodCard = (p: (typeof P)[number], i: number) => (
     <a key={i} href={`#/p/${i}`} className="pc" data-r>
-      <div className="st">{p.photo ? <img src={p.photo} alt={`${p.name}${p.size ? ' ' + p.size : ''}`} loading="lazy" /> : <span className="mono">{name.slice(0, 1)}</span>}</div>
+      <div className="st">{p.photo ? <img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={`${p.name}${p.size ? ' ' + p.size : ''}`} loading="lazy" /> : <span className="mono">{name.slice(0, 1)}</span>}</div>
       <div className="tx">
         {look === 'shelf' && p.size ? <span className="sz">{p.size}</span> : null}
         <h3>{p.name}</h3>
@@ -359,7 +367,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
         {c.hero.photo ? <img src={c.hero.photo} alt="" /> : null}
         <div className="in">
           {c.brand.kind ? <span className="eb">{c.brand.kind}{c.brand.city ? ` · ${c.brand.city}` : ''}</span> : null}
-          <h1>{c.brand.tagline || name}</h1>
+          <h1 data-long={(c.brand.tagline || name).length > 34 || undefined}>{c.brand.tagline || name}</h1>
           {c.brand.intro ? <p>{c.brand.intro}</p> : null}
           <div className="btns">
             {has.products ? <a className="btn" href="#/products">منتجاتنا</a> : action ? <a className="btn" href={action.href}>{action.label}</a> : null}
@@ -397,12 +405,16 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
       {has.make && (
         <section style={{ paddingTop: 0 }}><div className="in">
           <div className="sh"><h2>{c.steps.heading}</h2><a className="lnk" href="#/make">الرحلة كاملة</a></div>
-          <div className="prods rail">{c.steps.items.map((s, i) => (
+          {c.steps.items.some((s) => s.photo) ? (
+            <div className="prods rail">{c.steps.items.map((s, i) => (
             <a key={i} href="#/make" className="pc" data-r style={{ background: 'transparent' }}>
               {s.photo ? <img src={s.photo} alt="" loading="lazy" style={{ aspectRatio: '4/3', objectFit: 'cover', borderRadius: 24, width: '100%' }} /> : <div style={{ aspectRatio: '4/3', borderRadius: 24, background: 'var(--shelf)', display: 'grid', placeItems: 'center', fontFamily: 'var(--d)', fontSize: 64, color: 'var(--brand)' }}>{AR_NUM[i]}</div>}
               <div className="tx" style={{ paddingInline: 4 }}><span className="sz">{AR_NUM[i]}</span><h3>{s.title}</h3></div>
             </a>
           ))}</div>
+          ) : (
+            <div className="vals">{c.steps.items.map((s, i) => <div className="val" key={i} data-r><span className="eb">{AR_NUM[i]}</span><h3 style={{ marginTop: 4 }}>{s.title}</h3>{s.text ? <p>{s.text}</p> : null}</div>)}</div>
+          )}
         </div></section>
       )}
       {galleryBlock}
@@ -413,7 +425,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
       <div className="hero"><div className="in grid">
         <div data-r>
           {c.brand.kind ? <span className="eb">{c.brand.kind}{c.brand.city ? ` · ${c.brand.city}` : ''}</span> : null}
-          <h1 style={{ marginTop: 10 }}>{c.brand.tagline || name}</h1>
+          <h1 style={{ marginTop: 10, fontSize: (c.brand.tagline || name).length > 34 ? 'clamp(32px,7vw,54px)' : undefined }}>{c.brand.tagline || name}</h1>
           {c.brand.intro ? <p>{c.brand.intro}</p> : null}
           <div className="btns">
             {has.products ? <a className="btn" href="#/products">تصفّح المنتجات</a> : null}
@@ -498,7 +510,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
 
   const make = (
     <>
-      {pageHero(c.steps.heading, `من المزرعة إليك`, c.steps.items.find((s) => s.photo)?.photo || gallery[1])}
+      {pageHero(c.steps.heading, name, c.steps.items.find((s) => s.photo)?.photo || gallery[1])}
       <section><div className="in steps">
         {c.steps.items.map((s, i) => (
           <div key={i} className={`step${s.photo ? '' : ' np'}`} data-r>
@@ -535,7 +547,7 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
       <>
         <div className="in crumb"><a href="#/products">{c.products.heading}</a> · {p.name}{p.size ? ` ${p.size}` : ''}</div>
         <div className="in pd">
-          <div className="st" data-r>{p.size ? <span className="big" aria-hidden>{p.size}</span> : null}{p.photo ? <img src={p.photo} alt={p.name} /> : <span className="pc"><span className="mono">{name.slice(0, 1)}</span></span>}</div>
+          <div className="st" data-r>{p.size ? <span className="big" aria-hidden>{p.size}</span> : null}{p.photo ? <img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={p.name} /> : <span className="pc"><span className="mono">{name.slice(0, 1)}</span></span>}</div>
           <div data-r>
             <span className="eb">{c.brand.kind || name}</span>
             <h1 style={{ marginTop: 8 }}>{p.name}</h1>

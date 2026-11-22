@@ -30,6 +30,7 @@ export const BRAND_EDITOR_CONFIG: EditorConfig = {
     {
       id: 'brand', label: 'العلامة والواجهة', icon: Sparkles, ic: 'home',
       fields: [
+        { type: 'choice', path: 'design', label: 'شكل الموقع', fallback: 'tropic', options: [{ value: 'tropic', label: 'موسم: الصور أولًا' }, { value: 'shelf', label: 'رفّ: المنتجات أولًا' }], hints: { tropic: 'صورة واجهة تملأ الشاشة وخط عريض. أجمل مع صور كثيرة.', shelf: 'العبوات والأحجام في الأعلى. أوضح للتجار، وجميل حتى بصور قليلة.' } },
         { type: 'text', path: 'brand.name', label: 'اسم العلامة' },
         { type: 'text', path: 'brand.kind', label: 'ماذا تبيع، في كلمات' },
         { type: 'text', path: 'brand.tagline', label: 'جملتك (العنوان الكبير)' },
