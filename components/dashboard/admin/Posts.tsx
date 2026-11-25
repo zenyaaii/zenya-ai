@@ -20,12 +20,12 @@ export default function Posts({ layout = 'grid', say }: { layout?: 'days' | 'gri
 
   const Actions = ({ p }: { p: SocialPost }) => (
     <div className="acts">
-      <a className="btn sm" href={p.post} download={`beynoun-${p.n}-post.jpg`}>{DL}المنشور</a>
-      <a className="btn sm ghost" href={p.story} download={`beynoun-${p.n}-story.jpg`}>{DL}الستوري</a>
-      <button className="btn sm ghost" onClick={() => copy(p)}>نسخ النص</button>
+      {p.post !== p.story && <a className="btn sm" href={p.post} download={`beynoun-${p.n}-post.jpg`}>{DL}المنشور</a>}
+      <a className={`btn sm${p.post !== p.story ? ' ghost' : ''}`} href={p.story} download={`beynoun-${p.n}-story.jpg`}>{DL}الستوري</a>
+      {p.caption && <button className="btn sm ghost" onClick={() => copy(p)}>نسخ النص</button>}
     </div>
   )
-  const Why = ({ p }: { p: SocialPost }) => (
+  const Why = ({ p }: { p: SocialPost }) => !p.goal ? null : (
     <dl className="why">
       <dt>الهدف</dt><dd>{p.goal}</dd><dt>لمن</dt><dd>{p.who}</dd><dt>الألم</dt><dd>{p.pain}</dd><dt>إعلان ممول؟</dt><dd>{p.boost}</dd>
     </dl>
@@ -36,7 +36,7 @@ export default function Posts({ layout = 'grid', say }: { layout?: 'days' | 'gri
     <div className={`sp2 ${layout}`}>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       {SOCIAL_SETS.map((s) => (
-        <section key={s.id} className="set">
+        <section key={s.id} className={`set${s.stories ? ' s9' : ''}`}>
           <div className="sh">
             <div><h2>{s.title}</h2><p className="lead">{s.note}</p></div>
             {s.zip && <a className="btn sm" href={s.zip} download>{DL}تحميل الكل</a>}
@@ -48,9 +48,9 @@ export default function Posts({ layout = 'grid', say }: { layout?: 'days' | 'gri
                 <div className="bd">
                   <div className="hd"><b>{p.n}. {p.title}</b><Status p={p} /></div>
                   <p className="mt">{when(p.date)} · فيسبوك وانستغرام</p>
-                  <p className="cap">{p.caption}</p>
+                  {p.caption && <p className="cap">{p.caption}</p>}
                   <Actions p={p} />
-                  <button className="more" aria-expanded={why === p.n} onClick={() => setWhy(why === p.n ? null : p.n)}>{why === p.n ? 'إخفاء السبب' : 'لماذا هذا المنشور؟'}</button>
+                  {p.goal && <button className="more" aria-expanded={why === p.n} onClick={() => setWhy(why === p.n ? null : p.n)}>{why === p.n ? 'إخفاء السبب' : 'لماذا هذا المنشور؟'}</button>}
                   {why === p.n && <Why p={p} />}
                 </div>
               </li>
@@ -66,7 +66,7 @@ export default function Posts({ layout = 'grid', say }: { layout?: 'days' | 'gri
                 <div key={p.n} className="sheet">
                   <div className="hd"><b>{p.n}. {p.title}</b><Status p={p} /></div>
                   <p className="mt">{when(p.date)} · فيسبوك وانستغرام</p>
-                  <p className="cap">{p.caption}</p>
+                  {p.caption && <p className="cap">{p.caption}</p>}
                   <Actions p={p} />
                   <Why p={p} />
                 </div>
@@ -106,5 +106,7 @@ const CSS = `
 .sp2 .tile .st{position:absolute;top:6px;inset-inline-start:6px}
 .sp2 .tile[aria-pressed=true]{outline:3px solid var(--acc);outline-offset:-3px}
 .sp2 .sheet{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;max-width:520px}
+.sp2 .s9 .tile img,.sp2 .s9 .th{aspect-ratio:9/16}
+.sp2 .s9 .g3{grid-template-columns:repeat(4,minmax(0,1fr));max-width:560px}
 @media(max-width:520px){.sp2 .row{grid-template-columns:88px minmax(0,1fr)}.sp2 .why{grid-template-columns:1fr}.sp2 .sh{flex-direction:column}}
 `

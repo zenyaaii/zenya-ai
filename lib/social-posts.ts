@@ -10,9 +10,201 @@ export type SocialPost = {
   goal: string; who: string; pain: string; boost: string
   post: string; story: string
 }
-export type SocialSet = { id: string; title: string; note: string; zip?: string; posts: SocialPost[] }
+/** `stories`: a set of 9:16 stories only (no caption, no feed post) — post and story point at the same file. */
+export type SocialSet = { id: string; title: string; note: string; zip?: string; stories?: boolean; posts: SocialPost[] }
 
 export const SOCIAL_SETS: SocialSet[] = [
+{
+  "id": "2026-11-23-stories",
+  "title": "ستوريز الأسبوع · ٢٣–٢٩ نوفمبر",
+  "stories": true,
+  "note": "ستوري مرتين يوميًا، ١٢ ظهرًا و٨ مساءً بتوقيت السعودية، على إنستغرام وفيسبوك. نصائح تسويق، ترتيب الموقع، وأسرع معنا.",
+  "zip": "/social/2026-11-23-stories/beynoun-stories-23-29.zip",
+  "posts": [
+    {
+      "n": 1,
+      "title": "كيف نعمل · موقعك في ثلاث خطوات",
+      "onImage": "موقعك في ثلاث خطوات",
+      "caption": "",
+      "date": "2026-11-23T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s01.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s01.jpg"
+    },
+    {
+      "n": 2,
+      "title": "نصيحة اليوم · زبونك يقرأ أول ثلاث ثوانٍ فقط",
+      "onImage": "زبونك يقرأ أول ثلاث ثوانٍ فقط",
+      "caption": "",
+      "date": "2026-11-23T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s02.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s02.jpg"
+    },
+    {
+      "n": 3,
+      "title": "نصيحة اليوم · صورة واحدة واضحة",
+      "onImage": "صورة واحدة واضحة",
+      "caption": "",
+      "date": "2026-11-24T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s03.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s03.jpg"
+    },
+    {
+      "n": 4,
+      "title": "أسرع معنا · أرسل رابط محلك في خرائط جوجل",
+      "onImage": "أرسل رابط محلك في خرائط جوجل",
+      "caption": "",
+      "date": "2026-11-24T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s04.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s04.jpg"
+    },
+    {
+      "n": 5,
+      "title": "من الجوال · هل محلك واضح على الجوال؟",
+      "onImage": "هل محلك واضح على الجوال؟",
+      "caption": "",
+      "date": "2026-11-25T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s05.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s05.jpg"
+    },
+    {
+      "n": 6,
+      "title": "رتّب موقعك · زر واحد واضح: اتصل أو احجز",
+      "onImage": "زر واحد واضح: اتصل أو احجز",
+      "caption": "",
+      "date": "2026-11-25T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s06.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s06.jpg"
+    },
+    {
+      "n": 7,
+      "title": "قبل أن تنام · موقعك لا يغلق",
+      "onImage": "موقعك لا يغلق",
+      "caption": "",
+      "date": "2026-11-26T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s07.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s07.jpg"
+    },
+    {
+      "n": 8,
+      "title": "أسرع معنا · ألوان موقعك من صور محلك",
+      "onImage": "ألوان موقعك من صور محلك",
+      "caption": "",
+      "date": "2026-11-26T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s08.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s08.jpg"
+    },
+    {
+      "n": 9,
+      "title": "نصيحة تسويق · ضع رابط موقعك في البايو وفي كل رد",
+      "onImage": "ضع رابط موقعك في البايو وفي كل رد",
+      "caption": "",
+      "date": "2026-11-27T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s09.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s09.jpg"
+    },
+    {
+      "n": 10,
+      "title": "رتّب موقعك · أفضل ثلاثة تقييمات في الصفحة الأولى",
+      "onImage": "أفضل ثلاثة تقييمات في الصفحة الأولى",
+      "caption": "",
+      "date": "2026-11-27T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s10.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s10.jpg"
+    },
+    {
+      "n": 11,
+      "title": "أسرع معنا · صوّر القائمة فقط",
+      "onImage": "صوّر القائمة فقط",
+      "caption": "",
+      "date": "2026-11-28T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s11.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s11.jpg"
+    },
+    {
+      "n": 12,
+      "title": "نصيحة تسويق · اكتب أسعارك بوضوح",
+      "onImage": "اكتب أسعارك بوضوح",
+      "caption": "",
+      "date": "2026-11-28T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s12.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s12.jpg"
+    },
+    {
+      "n": 13,
+      "title": "رتّب موقعك · صورة حقيقية لمحلك أنت",
+      "onImage": "صورة حقيقية لمحلك أنت",
+      "caption": "",
+      "date": "2026-11-29T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s13.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s13.jpg"
+    },
+    {
+      "n": 14,
+      "title": "أسرع معنا · اضغط على النص، عدّله، وانشر",
+      "onImage": "اضغط على النص، عدّله، وانشر",
+      "caption": "",
+      "date": "2026-11-29T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-23-stories/beynoun-s14.jpg",
+      "story": "/social/2026-11-23-stories/beynoun-s14.jpg"
+    }
+  ]
+},
 {
   "id": "2026-11-questions",
   "title": "منشورات الأسئلة · خمسة (كاروسيل)",
