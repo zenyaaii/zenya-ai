@@ -15,6 +15,106 @@ export type SocialSet = { id: string; title: string; note: string; zip?: string;
 
 export const SOCIAL_SETS: SocialSet[] = [
 {
+  "id": "2026-11-30-stories",
+  "title": "ستوريز الأسبوع · ٣٠ نوفمبر – ٣ ديسمبر",
+  "stories": true,
+  "note": "ستوري مرتين يوميًا، ١٢ ظهرًا و٨ مساءً بتوقيت السعودية، على إنستغرام وفيسبوك. تُصنع وتُنشر تلقائيًا كل أسبوع.",
+  "zip": "/social/2026-11-30-stories/beynoun-stories-30nov-3dec.zip",
+  "posts": [
+    {
+      "n": 1,
+      "title": "نصيحة تسويق · نفس الاسم في كل مكان",
+      "onImage": "نفس الاسم في كل مكان",
+      "caption": "",
+      "date": "2026-11-30T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s01.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s01.jpg"
+    },
+    {
+      "n": 2,
+      "title": "رتّب موقعك · جملة واحدة لكل قسم",
+      "onImage": "جملة واحدة لكل قسم",
+      "caption": "",
+      "date": "2026-11-30T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s02.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s02.jpg"
+    },
+    {
+      "n": 3,
+      "title": "أسرع معنا · أجب عن أسئلة قصيرة",
+      "onImage": "أجب عن أسئلة قصيرة",
+      "caption": "",
+      "date": "2026-12-01T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s03.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s03.jpg"
+    },
+    {
+      "n": 4,
+      "title": "نصيحة تسويق · اكتب أوقاتك في أعلى الصفحة",
+      "onImage": "اكتب أوقاتك في أعلى الصفحة",
+      "caption": "",
+      "date": "2026-12-01T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s04.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s04.jpg"
+    },
+    {
+      "n": 5,
+      "title": "رتّب موقعك · ضع محلك على الخريطة",
+      "onImage": "ضع محلك على الخريطة",
+      "caption": "",
+      "date": "2026-12-02T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s05.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s05.jpg"
+    },
+    {
+      "n": 6,
+      "title": "أسرع معنا · اختر قالب نشاطك وابدأ",
+      "onImage": "اختر قالب نشاطك وابدأ",
+      "caption": "",
+      "date": "2026-12-02T17:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s06.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s06.jpg"
+    },
+    {
+      "n": 7,
+      "title": "نصيحة تسويق · اطلب من الزبون الراضي تقييمًا",
+      "onImage": "اطلب من الزبون الراضي تقييمًا",
+      "caption": "",
+      "date": "2026-12-03T09:00:00Z",
+      "goal": "",
+      "who": "",
+      "pain": "",
+      "boost": "",
+      "post": "/social/2026-11-30-stories/beynoun-s07.jpg",
+      "story": "/social/2026-11-30-stories/beynoun-s07.jpg"
+    }
+  ]
+},
+{
   "id": "2026-11-problems",
   "title": "منشورات المشكلة ← الحل ← القسم · اثنا عشر",
   "note": "منشور كل يوم من ٢٩ نوفمبر إلى ١١ ديسمبر (السبت راحة)، ٢ ظهرًا بتوقيت السعودية. تسعة منها كاروسيل بشريحتين، والصورة هنا هي الشريحة الأولى، وكل الشرائح في «تحميل الكل».",
