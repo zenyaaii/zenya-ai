@@ -13,10 +13,11 @@ const sample = buildBrandContent(COCOSU_PHOTOS_INPUT)
  * The multi-page brand site on its own, no account needed.
  *  ?look=tropic | shelf   the CocoSu sample in either look
  *  ?built=1               the site the brand questions just built in this tab (/demo/brand-build)
+ *  ?np=label | text      sample: how a product with no picture looks
  *  ?built=cocosu          CocoSu as the questions built it on 2026-11-22, defaults kept
  */
 export default function Demo() {
-  const [state, setState] = useState<{ c: BrandContent; colors: Record<string, string>; look: HouseLook }>({ c: sample, colors: COCOSU_COLORS, look: 'tropic' })
+  const [state, setState] = useState<{ c: BrandContent; colors: Record<string, string>; look: HouseLook; bare?: 'mono' | 'label' | 'text' }>({ c: sample, colors: COCOSU_COLORS, look: 'tropic' })
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
     let c = sample, colors: Record<string, string> = COCOSU_COLORS
@@ -28,7 +29,8 @@ export default function Demo() {
       } catch { /* keep the sample */ }
     }
     const l = q.get('look')
-    setState({ c, colors, look: l === 'shelf' || l === 'tropic' ? l : c.design === 'shelf' ? 'shelf' : 'tropic' })
+    const np = q.get('np')
+    setState({ c, colors, look: l === 'shelf' || l === 'tropic' ? l : c.design === 'shelf' ? 'shelf' : 'tropic', bare: np === 'label' || np === 'text' ? np : 'mono' })
   }, [])
-  return <BrandHouseView content={state.c} colorOverrides={state.colors} look={state.look} />
+  return <BrandHouseView content={state.c} colorOverrides={state.colors} look={state.look} bare={state.bare} />
 }

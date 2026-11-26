@@ -377,7 +377,8 @@ export async function POST(req: NextRequest) {
   const urlOf = (idx: unknown) => {
     const src = typeof idx === 'number' ? read?.images[idx]?.url : undefined
     const k = src ? pics.findIndex((p) => p.src === src) : -1
-    return k >= 0 && k !== logoAt ? urls[k] || '' : ''
+    // A sale banner or a page of writing is not the product's picture.
+    return k >= 0 && k !== logoAt && kind(k) !== 'text' ? urls[k] || '' : ''
   }
   if (Array.isArray(out.products)) out.products = out.products.slice(0, 24).map((p: any) => { const { photo_index, ...rest } = p || {}; return { ...rest, photo: urlOf(photo_index) } })
   const heroAt = look && look.hero >= 0 && kind(look.hero) === 'photo' ? look.hero : pics.findIndex((_, i) => kind(i) === 'photo' && pics[i].w >= pics[i].h)

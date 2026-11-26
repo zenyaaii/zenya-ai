@@ -99,6 +99,15 @@ const CSS = `
 .bh .pc .st img{position:absolute;inset:28px;width:calc(100% - 56px);height:calc(100% - 56px);object-fit:contain;filter:drop-shadow(0 18px 22px rgb(0 0 0/.18))}
 .bh .pc .st img.cov,.bh .pd .st img.cov{inset:0;width:100%;height:100%;object-fit:cover;filter:none}
 .bh .pc .mono{font-family:var(--d);font-size:72px;color:var(--brand);opacity:.35}
+/* a product without a picture: «ملصق» = a label in the brand colour; «نص» = a short card with no picture area */
+.bh .pc.nl .st,.bh.t .pc.nl .st,.bh.s .pc.nl .st{background:var(--brand);color:var(--on);align-items:flex-end;justify-content:flex-start;padding:26px;margin:0;border-radius:0}
+.bh .pc.nl .st .lbl{font-family:var(--d);font-size:clamp(26px,7vw,34px);line-height:1.15;text-wrap:balance;max-width:12ch;position:relative}
+.bh .pc.nl .st .lbl small{display:block;font-family:inherit;font-size:13px;opacity:.75;margin-top:10px}
+.bh .pc.nl .st::before{content:"";position:absolute;inset:12px;border:1.5px solid color-mix(in srgb,var(--on) 45%,transparent);border-radius:14px;pointer-events:none}
+.bh .pc.nl .tx h3{display:none}
+.bh .pc.nt{border-top:4px solid var(--brand)}
+.bh .pc.nt .tx{padding-top:22px}
+.bh .prods .pc.nt,.bh .rail .pc.nt{align-self:start}
 .bh .pc .tx{padding:18px 20px 22px;display:grid;gap:4px}
 .bh .pc h3{font-size:20px}
 .bh .pc .sz{font-family:var(--d);font-size:15px;color:var(--sea)}
@@ -255,7 +264,7 @@ const cut = (u?: string) => !!u && /\.(png|webp)(\?|$)/i.test(u)
 
 const AR_NUM = ['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠']
 
-export default function BrandHouseView({ content: c, colorOverrides, look = 'tropic', className }: { content: BrandContent; colorOverrides?: Record<string, string>; look?: HouseLook; className?: string }) {
+export default function BrandHouseView({ content: c, colorOverrides, look = 'tropic', className, bare = 'mono' }: { content: BrandContent; colorOverrides?: Record<string, string>; look?: HouseLook; className?: string; bare?: 'mono' | 'label' | 'text' }) {
   const k = { ...BASE, ...(colorOverrides || {}) }
   const vars = {
     '--paper': k.background, '--ink': k.text, '--soft': k.muted, '--brand': k.accent, '--sea': k.primary, '--shelf': k.surface, '--rule': k.border,
@@ -322,8 +331,11 @@ export default function BrandHouseView({ content: c, colorOverrides, look = 'tro
   const name = c.brand.name
 
   const prodCard = (p: (typeof P)[number], i: number) => (
-    <a key={i} href={`#/p/${i}`} className="pc" data-r>
-      <div className="st">{p.photo ? <img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={`${p.name}${p.size ? ' ' + p.size : ''}`} loading="lazy" /> : <span className="mono">{name.slice(0, 1)}</span>}</div>
+    <a key={i} href={`#/p/${i}`} className={'pc' + (!p.photo && bare === 'label' ? ' nl' : !p.photo && bare === 'text' ? ' nt' : '')} data-r>
+      {p.photo ? <div className="st"><img className={cut(p.photo) ? undefined : 'cov'} src={p.photo} alt={`${p.name}${p.size ? ' ' + p.size : ''}`} loading="lazy" /></div>
+        : bare === 'label' ? <div className="st"><span className="lbl">{p.name}<small>{name}</small></span></div>
+        : bare === 'text' ? null
+        : <div className="st"><span className="mono">{name.slice(0, 1)}</span></div>}
       <div className="tx">
         {look === 'shelf' && p.size ? <span className="sz">{p.size}</span> : null}
         <h3>{p.name}</h3>
