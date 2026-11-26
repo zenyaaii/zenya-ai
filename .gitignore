@@ -85,3 +85,4 @@ leads/
 # Scheduled-task outputs (auto-generated; committed on demand if needed)
 weekly-*.md
 revenue-brief-*.md
+/public/_dev-uploads

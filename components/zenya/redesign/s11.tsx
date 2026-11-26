@@ -13,6 +13,7 @@
  * Plus the templates and contact pages, with every section the live ones
  * have. No section ends on a hard edge: the light fades out before it.
  */
+import AdminSwap from './AdminSwap'
 import NotifyMe from '@/components/zenya/chrome/NotifyMe'
 import { Fragment } from 'react'
 import {
@@ -943,8 +944,16 @@ export function Pricing() {
   )
 }
 
+/** Finished but not yet open to the public: admins see these live, to try them as a real user would. */
+const ADMIN_PREVIEW = ['studio']
+
 function Tile({ t, lead }: { t: (typeof TEMPLATE_META)[number]; lead?: boolean }) {
   const soon = 'soon' in t && t.soon
+  if (soon && ADMIN_PREVIEW.includes(t.id)) return <AdminSwap admin={<TileBody t={t} lead={lead} soon={false} />} others={<TileBody t={t} lead={lead} soon />} />
+  return <TileBody t={t} lead={lead} soon={!!soon} />
+}
+
+function TileBody({ t, lead, soon }: { t: (typeof TEMPLATE_META)[number]; lead?: boolean; soon: boolean }) {
   return (
     <article className={'s11-tile glass' + (lead ? ' big' : '')} data-r>
       <div className="s11-shot">
