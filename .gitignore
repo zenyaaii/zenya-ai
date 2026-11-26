@@ -86,3 +86,7 @@ leads/
 weekly-*.md
 revenue-brief-*.md
 /public/_dev-uploads
+
+# «فاحص بينون» — run output and the bundled reference layer
+qa-report/
+scripts/qa/.cache/
