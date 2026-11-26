@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
   try {
     const ig = await instagramOf(link)
     if (!ig.data) return NextResponse.json({ error: 'not_found' }, { status: 404 })
-    const sb = serviceClient().storage.from('theme-uploads')
+    let sb: ReturnType<ReturnType<typeof serviceClient>['storage']['from']>
+    try { sb = serviceClient().storage.from('theme-uploads') } catch { sb = { upload: async () => ({ error: true }), getPublicUrl: () => ({ data: { publicUrl: '' } }) } as any }
     const dir = `${user ? 'owners/' + user.id : 'demo'}/instagram/${ig.data.handle.replace(/[^A-Za-z0-9._-]/g, '')}`
     const posts = ig.photos.filter((p) => !p.logoHint)
     const up = await Promise.all(posts.map(async (r) => {
@@ -64,9 +65,16 @@ export async function POST(req: NextRequest) {
         const meta = await sharp(jpeg).metadata()
         if ((meta.width || 0) < 500 || (meta.height || 0) < 400) return null
         const path = `${dir}/${r.id}.jpg`
-        const { error } = await sb.upload(path, jpeg, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' })
-        if (error) return null
-        return sb.getPublicUrl(path).data.publicUrl
+        const { error } = await sb.upload(path, jpeg, { contentType: 'image/jpeg', upsert: true, cacheControl: '31536000' }).catch(() => ({ error: true }))
+        if (!error) return sb.getPublicUrl(path).data.publicUrl
+        // No storage on a local dev server (no service key): keep the file under public/ so the flow can be tried.
+        if (process.env.NODE_ENV !== 'development') return null
+        const { mkdir, writeFile } = await import('fs/promises')
+        const { createHash } = await import('crypto')
+        const name = `${createHash('sha1').update(path).digest('hex').slice(0, 16)}.jpg`
+        await mkdir(`${process.cwd()}/public/_dev-uploads`, { recursive: true })
+        await writeFile(`${process.cwd()}/public/_dev-uploads/${name}`, jpeg)
+        return `/_dev-uploads/${name}`
       } catch { return null }
     }))
     return NextResponse.json({

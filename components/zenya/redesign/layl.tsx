@@ -197,6 +197,14 @@ export const LAYL_PRODUCT_CSS = `
 .rd .zb-root .zb-in{background:var(--card2);box-shadow:0 0 0 1px var(--line2)}
 .rd .zb-root .zb-in:focus{background:var(--card)}
 .rd .zb-root :is(.zb-chip[data-on],.zb-step[data-on] .zb-step-n,.zb-preset-on){color:#FFFBF7}
+/* the shell paints chips, the back button and the tick box near-white for paper;
+   on the night that left light text on a light pill (2026-11-20) */
+.rd .zb-root :is(.zb-chip:not([data-on]),.zb-hclosed:not([data-on]),.zb-back){background:var(--card2);color:var(--ink);box-shadow:0 0 0 1px var(--line2)}
+.rd .zb-root .zb-back:hover:not(:disabled){background:var(--card)}
+.rd .zb-root .zb-box{background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line2)}
+.rd .zb-root :is(.zb-cat,.zb-sum-row,.zb-mi){background:var(--card2);box-shadow:0 0 0 1px var(--line2)}
+.rd .zb-root .zb-notice button{background:var(--card2);color:var(--ink);box-shadow:0 0 0 1px var(--line2)}
+.rd .zb-root .zb-cat .zb-in{background:var(--card)}
 .rd .zb-root :is(.zb-next,.zb-back){border-radius:999px}
 .rd .zb-root .zb-handoff{background:var(--card2);border:1px solid var(--line2)}
 .rd.lyp .ly-prod .sb,.rd .zb-root .sb{border-radius:999px;font-size:17px;padding:.3rem 1.5rem;box-shadow:none}
