@@ -9,6 +9,10 @@ type Review = { name: string; rating: number; text: string; when?: string }
 type Wall = { photos: string[]; reviews: Review[] }
 type Item = { photo?: string; review?: Review }
 
+// Set as HTML, not as a text child: React escapes text, and inside <style> the
+// browser keeps the escape, so content:'' reached the page as content:&#x27;&#x27;,
+// the server's CSS and the browser's differed, and React threw #425 and drew
+// the whole site again on every restaurant page with a wall. Static: no input.
 const CSS = `
 @keyframes gw-x { from { transform: translate3d(0,0,0) } to { transform: translate3d(-50%,0,0) } }
 @keyframes gw-y { from { transform: translate3d(0,-50%,0) } to { transform: translate3d(0,0,0) } }
@@ -117,7 +121,7 @@ export default function GoogleWall({ wall, variant, rating, count, brand }: { wa
     )
     return (
       <section data-section="google_wall" className="gw py-24 md:py-32 overflow-hidden" style={{ ['--gw-gap' as any]: '14px' }}>
-        <style>{CSS}</style>
+        <style dangerouslySetInnerHTML={{ __html: CSS }} />
         <Head rating={rating} count={count} eyebrow="من خرائط جوجل" title="صور ضيوفنا وآراؤهم" />
         <div style={{ WebkitMaskImage: fade, maskImage: fade, direction: 'ltr', display: 'grid', gap: 14 }}>
           <Row items={row1} dur="80s" />
@@ -136,7 +140,7 @@ export default function GoogleWall({ wall, variant, rating, count, brand }: { wa
   const fadeY = 'linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%)'
   return (
     <section data-section="google_wall" className="gw pt-24 md:pt-32 pb-10 overflow-hidden" style={{ ['--gw-gap' as any]: '14px' }}>
-      <style>{CSS}</style>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <Head rating={rating} count={count} eyebrow="من خرائط جوجل" title={brand ? `لحظات من ${brand}` : "لحظات من ضيوفنا"} />
       <div className="mx-auto max-w-[1280px] px-4 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-[14px]"
         style={{ height: 'min(760px, 120vw)', overflow: 'hidden', WebkitMaskImage: fadeY, maskImage: fadeY }}>

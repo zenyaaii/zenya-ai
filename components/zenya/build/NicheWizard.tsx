@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import ImageUploadField from '@/components/ImageUploadField'
 import GenerationOverlay from '@/components/GenerationOverlay'
 import { useNotify } from '@/components/ui/Notify'
+import { createClient } from '@/utils/supabase/client'
 import WizardShell, {
   AddButton, Block, Card, Chips, Field, Grid, Handoff, Input, Notice, Review, Select, Textarea, Toggle, Uploads,
   type WizardStep,
@@ -105,6 +106,40 @@ function initial(k: KindText): Form {
   }
 }
 
+/**
+ * The owner's answers outlive a reload. A phone drops the page for a call or
+ * another app, and without a draft he starts again from nothing (site checker,
+ * 2026-11-26). Kept in this browser per account and kind, like the restaurant
+ * wizard's; never on the public demo. What Google and Instagram gave is kept
+ * with it, so a reload does not read (and pay for) his links a second time.
+ */
+const DRAFT_PREFIX = 'beynoun:niche-form:v1:'
+type Read = 'idle' | 'busy' | 'ok' | 'fail'
+type Draft = { f: Form; g: GoogleFound | null; gState: Read; gMsg: string; igState: Read; igMsg: string; own: unknown; touched: boolean; step: number }
+
+function loadDraft(key: string, k: KindText): Draft | null {
+  try {
+    const d = JSON.parse(localStorage.getItem(key) || 'null')
+    if (!d?.f || !Array.isArray(d.f.services) || !Array.isArray(d.f.hours)) return null
+    const base = initial(k)
+    // Over the defaults: a draft saved before a field existed still loads.
+    const f: Form = { ...base, ...d.f, nx: { ...base.nx, ...d.f.nx } }
+    const g: GoogleFound | null = d.g && typeof d.g === 'object' ? d.g : null
+    // A read the reload cut off is read again; one that finished stays as it ended.
+    const ended = (s: unknown): Read => (s === 'ok' || s === 'fail' ? s : 'idle')
+    const gState = ended(d.gState) === 'ok' && !g ? 'idle' : ended(d.gState)
+    const igState = ended(d.igState)
+    return {
+      f, g, gState, gMsg: gState === 'idle' ? '' : String(d.gMsg || ''), igState, igMsg: igState === 'idle' ? '' : String(d.igMsg || ''),
+      own: d.own?.day && d.own?.night ? d.own : null,
+      touched: d.touched === true,
+      step: Number.isInteger(d.step) && d.step > 0 ? d.step : 0,
+    }
+  } catch {
+    return null
+  }
+}
+
 const intl = (v: string) => /^(\+|00)\d[\d\s-]{6,}$/.test(v.trim())
 
 /**
@@ -129,7 +164,7 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
     return f.accent2 ? { ...l.colors, accent2: f.accent2 } : l.colors
   }
   const router = useRouter()
-  const { toast } = useNotify()
+  const { toast, confirm } = useNotify()
   const [f, setF] = useState<Form>(() => initial(k))
   const [step, setStep] = useState(0)
   const [g, setG] = useState<GoogleFound | null>(null)
@@ -145,6 +180,50 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
   // How the owner moves through the questions: first visit and time spent per step.
   const moves = useRef<{ step: string; at: number }[]>([])
   const started = useRef(Date.now())
+  // The draft: restored once the account is known, then saved on every change.
+  const [draftKey, setDraftKey] = useState<string | null>(null)
+  const [restored, setRestored] = useState(false)
+  // The form the wizard opened with: no draft is kept until it changes.
+  const blank = useRef(f)
+  useEffect(() => {
+    if (demo) return
+    let cancelled = false
+    createClient().auth.getSession().then(({ data: { session } }) => {
+      const uid = session?.user?.id
+      if (cancelled || !uid) return
+      const key = DRAFT_PREFIX + kind + ':' + uid
+      const d = loadDraft(key, k)
+      if (d) {
+        setF(d.f); setG(d.g); setGState(d.gState); setGMsg(d.gMsg); setIgState(d.igState); setIgMsg(d.igMsg)
+        if (d.own) setOwn(d.own as typeof own)
+        lookTouched.current = d.touched
+        setStep(Math.min(d.step, steps.length - 1))
+        setRestored(true)
+      }
+      setDraftKey(key)
+    }).catch(() => { /* no session: the page sends him to sign in */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demo, kind])
+  useEffect(() => {
+    if (!draftKey || f === blank.current) return
+    const d: Draft = { f, g, gState, gMsg, igState, igMsg, own, touched: lookTouched.current, step }
+    try { localStorage.setItem(draftKey, JSON.stringify(d)) } catch { /* storage full or blocked: the answers stay on the page */ }
+  }, [draftKey, f, g, gState, gMsg, igState, igMsg, own, step])
+  function dropDraft() {
+    if (!draftKey) return
+    try { localStorage.removeItem(draftKey) } catch { /* nothing was kept */ }
+  }
+  async function startFresh() {
+    const { confirmed } = await confirm({ title: 'مسح النموذج والبدء من جديد؟', message: 'ستُحذف مسوّدتك الحالية.', confirmText: 'ابدأ من جديد', tone: 'danger' })
+    if (!confirmed) return
+    dropDraft()
+    const fresh = initial(k)
+    blank.current = fresh
+    lookTouched.current = false
+    setF(fresh); setG(null); setGState('idle'); setGMsg(''); setIgState('idle'); setIgMsg(''); setOwn(null)
+    setRestored(false); setError(null); setStep(0)
+  }
 
   const up = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }))
   const upx = <K extends keyof Nx>(key: K, v: Nx[K]) => setF((p) => ({ ...p, nx: { ...p.nx, [key]: v } }))
@@ -388,6 +467,8 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
       if (res.status === 401) { router.push('/login?mode=signup&next=/theme/new/services?kind=' + kind); return }
       if (res.status === 402) { toast({ type: 'warning', message: 'لقد بلغت حدّ القوالب المجانية. يرجى الترقية للمتابعة.' }); router.push('/pricing'); return }
       if (!res.ok || !j?.id) throw new Error(j?.error || 'فشل الحفظ')
+      // The site holds the answers now; the next visit starts a new one.
+      dropDraft(); setDraftKey(null)
       router.push(`/preview/services/${j.id}?created=1`)
     } catch (e: any) {
       setLoading(false)
@@ -981,7 +1062,16 @@ export default function NicheWizard({ kind = 'barber', onBack, demo = false }: {
         onStep={setStep}
         progress={{ pct: done.pct, label: 'اكتمال موقعك' }}
         scrollKey={errorKey || undefined}
-        notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
+        notice={error || restored ? (
+          <>
+            {restored ? (
+              <Notice action={<button type="button" onClick={startFresh}>ابدأ من جديد</button>}>
+                <strong>حفظنا مسوّدتك.</strong> نُكمل من حيث توقّفت.
+              </Notice>
+            ) : null}
+            {error ? <Notice tone="bad">{error}</Notice> : null}
+          </>
+        ) : undefined}
         final={{ label: loading ? 'نبني موقعك…' : demo ? 'ابنِ وافتح المحرر' : `ابنِ موقع ${k.place}`, slide: 'هيا بنا', onClick: build, busy: loading }}
       />
       <GenerationOverlay open={loading} />
