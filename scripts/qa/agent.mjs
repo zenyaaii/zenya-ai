@@ -132,11 +132,14 @@ async function visit(ctx, url, width, opts) {
       const n = await page.evaluate(() => {
         const ok = (b) => {
           const t = (b.innerText || '').trim()
-          if (!t || t.length > 30 || b.type === 'submit' || b.closest('form,dialog,[role=dialog],nav,header,footer') || b.getAttribute('aria-haspopup')) return false
+          // (a <button> with no type is type=submit by default; only one inside a form submits anything)
+          if (!t || t.length > 30 || b.closest('form,dialog,[role=dialog],header,footer') || b.getAttribute('aria-haspopup')) return false
           const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0
         }
         const groups = new Set()
-        for (const b of document.querySelectorAll('main button, main [role=tab], [role=tablist] [role=tab]')) {
+        // customer sites have no <main>; any short button group outside the header, footer, forms and dialogs
+        for (const b of document.querySelectorAll('button, [role=tab]')) {
+          if (b.closest('nav') && !b.closest('[role=tablist]')) continue
           const sib = [...b.parentElement.children].filter((x) => (x.tagName === 'BUTTON' || x.getAttribute('role') === 'tab') && ok(x))
           if (sib.length >= 2 && ok(b)) groups.add(b.parentElement)
         }

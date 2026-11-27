@@ -91,9 +91,11 @@ up to twelve examples; the penalty grows with distinct offenders and is capped.
 10. **Tabs draw their panel only when pressed.** The restaurant menu shows one
     category and renders the others on tap, so their dishes are in the props but
     not in the DOM. Before facts are compared, the agent presses every in-page
-    button group (two or more short buttons under `main`, outside forms, dialogs,
-    the header and the footer) and counts what each one shows. Without this, 12
-    of 14 restaurants were reported as hiding their own menu.
+    button group (two or more short sibling buttons outside forms, dialogs, the
+    header, the footer and navigation) and counts what each one shows. Customer
+    sites have no `<main>`, and a `<button>` with no `type` reports `submit`, so
+    neither can be part of the test. Without this, 12 of 14 restaurants were
+    reported as hiding their own menu.
 11. **A wizard can open on a «مشروعك أيّ واحد؟» sheet.** The walker answers it with
     the first choice that keeps the visitor in the wizard and records where the
     others go. Restaurant stays (`?kind=restaurant`); every wellness choice leads
@@ -107,8 +109,9 @@ up to twelve examples; the penalty grows with distinct offenders and is capped.
 
 Checks that only a person had caught before they were added: a word broken
 across two lines inside a button («اح / جز» when a long shop name squeezes the
-header), empty photo frames for dishes without a photo, and a kind picker whose
-every choice leaves the wizard.
+restaurant header; «احج / ز / جلس / تك» when it squeezes the wellness one into
+a circle), empty photo frames for dishes without a photo, and a kind picker
+whose every choice leaves the wizard.
 
 ## Competitors
 

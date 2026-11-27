@@ -88,6 +88,17 @@
   "size": 6236
  },
  {
+  "p": "1-reports/2026-11-26-site-checker-report.md",
+  "group": "1-reports",
+  "sub": null,
+  "name": "2026-11-26-site-checker-report.md",
+  "date": "2026-11-26",
+  "ext": "md",
+  "kind": "site-checker-report",
+  "heading": "فاحص بينون: موقعنا و١١٦ موقع عميل ومنصّتي",
+  "size": 20501
+ },
+ {
   "p": "2-plans/2026-11-12-new-build-system-spec.md",
   "group": "2-plans",
   "sub": null,
