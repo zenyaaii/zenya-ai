@@ -62,6 +62,12 @@ function targets() {
     const list = JSON.parse(fs.readFileSync(arg('sites'), 'utf8'))
     let t = list.map((x) => ({ id: x.slug || x.id, url: (x.url || `https://${x.slug}.beynoun.com`).replace(/\/$/, ''), meta: x, facts: x.facts || null }))
     if (arg('only')) { const only = String(arg('only')).split(','); t = t.filter((x) => only.includes(x.id)) }
+    // sites on a template the site still marks «قريبًا» are left out unless asked for (Anas, 2026-11-27)
+    if (!argv.includes('--soon')) {
+      const soon = t.filter((x) => Q.SOON_TEMPLATES.includes(x.meta.template))
+      if (soon.length) console.log(`تُرك ${soon.length} موقع على قوالب «قريبًا» (${soon.map((x) => x.id).join('، ')}). أضف --soon لفحصها.`)
+      t = t.filter((x) => !soon.includes(x))
+    }
     if (arg('limit')) t = t.slice(0, Number(arg('limit')))
     return { mode: t.length && t.every((x) => x.facts) ? 'external' : 'customer', list: t }
   }
@@ -296,10 +302,12 @@ function judge(site, ref, visits, mode, google) {
     const fams = Object.entries(p.fonts).filter(([, n]) => n > 30).map(([f]) => f)
     if (fams.length > 3) issue('fonts', where, fams.map((f) => ({ key: f, label: f })))
     if (mode === 'own') {
-      const bad = (p.boxes || []).map((b) => ({ b, probs: Q.boxProblems(b) })).filter((x) => x.probs.length)
+      // the boxes as they stood on 2026-11-27 are kept by decision (Q.ACCEPTED_OWN_BOXES); only new or changed ones count
+      const bad = (p.boxes || []).map((b) => ({ b, probs: Q.boxProblems(b) })).filter((x) => x.probs.length && !Q.acceptedOwnBox(x.b.sel, x.probs))
       if (bad.length) issue('boxes', where, bad.map((x) => ({ key: x.b.sel + x.probs[0], label: `${x.b.sel.split(' > ').pop()}: ${x.probs[0]}`, sel: x.b.sel })),
         { boxes: bad.slice(0, 40).map((x) => ({ page: where, sel: x.b.sel, w: x.b.w, h: x.b.h, y: x.b.y, radius: x.b.radius, bg: x.b.bg, problems: x.probs })) })
-      if (p.gradients.length) issue('gradients', where, p.gradients.map((g) => ({ key: g.sel, label: g.sel.split(' > ').pop(), sel: g.sel })))
+      const grads = p.gradients.filter((g) => !Q.acceptedOwnGradient(g.sel))
+      if (grads.length) issue('gradients', where, grads.map((g) => ({ key: g.sel, label: g.sel.split(' > ').pop(), sel: g.sel })))
     }
   }
   for (const it of issues.values()) {

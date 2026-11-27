@@ -41,6 +41,17 @@ findings and the pages it opened, `summary.json`, and JPEG screenshots under
 open/closed) using `GOOGLE_PLACES_API_KEY` or `google_places_api_key`, whichever
 answers — in the cloud environment the upper-case one is refused by Places (New).
 
+Two decisions of Anas (2026-11-27) are built in:
+
+- **beynoun.com keeps its boxes as they are.** The boxes and night lights that
+  were on the site that day are accepted (`ACCEPTED_OWN_BOXES`,
+  `ACCEPTED_OWN_GRADIENTS` in `design-system.ts`). Own mode reports a box only
+  when its class is new or it no longer measures what it did then.
+- **Templates marked «قريبًا» are not wanted now.** Sites and wizards on them
+  (`SOON_TEMPLATES`, read from the live template list in
+  `components/zenya/redesign/data.ts`) are left out and named in the log. Add
+  `--soon` to check them anyway.
+
 ## The gates
 
 | Gate | What it measures | Reference |

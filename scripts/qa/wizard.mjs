@@ -43,9 +43,12 @@ const WIZARDS = [
     { id: 'new-photo', path: '/theme/new/services?kind=photo', label: 'التصوير' },
     { id: 'new-services', path: '/theme/new/services?kind=other', label: 'الخدمات العامة' },
     { id: 'new-wellness', path: '/theme/new/wellness', label: 'العافية' },
-    { id: 'new-studio', path: '/theme/new/studio', label: 'العلامة التجارية' },
+    { id: 'new-studio', path: '/theme/new/studio', label: 'العلامة التجارية', template: 'studio' },
   ] : []),
-].filter((w) => !arg('only') || String(arg('only')).split(',').includes(w.id))
+]
+  .filter((w) => !arg('only') || String(arg('only')).split(',').includes(w.id))
+  // a wizard for a template the site still marks «قريبًا» is left out unless asked for (Anas, 2026-11-27)
+  .filter((w) => argv.includes('--soon') || !w.template || !Q.SOON_TEMPLATES.includes(w.template))
 
 /** A plain test answer for a field, from its label — or null to leave it empty. */
 function answerFor(label, type, tag) {

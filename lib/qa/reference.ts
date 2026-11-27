@@ -29,7 +29,16 @@ import { WELLNESS_PRESETS } from '@/utils/wellness/presets'
 import { RESTAURANT_PRESETS } from '@/utils/restaurant/presets'
 import { STUDIO_PRESETS } from '@/utils/studio/presets'
 import { BRAND_LOOKS } from '@/utils/studio/brand-looks'
+import { TEMPLATES } from '@/components/zenya/redesign/data'
 import { dE, parseColor } from './color'
+
+/**
+ * Templates the site still marks «قريبًا» (read from the live template list, so
+ * one that opens drops out of here by itself). Anas, 2026-11-27: they are not
+ * wanted now and none of them is rebuilt or fixed, so the agent leaves sites and
+ * wizards on them out unless it is run with --soon.
+ */
+export const SOON_TEMPLATES: string[] = TEMPLATES.filter((t) => 'soon' in t && t.soon).map((t) => t.id)
 
 export type SiteProps = {
   businessType: string

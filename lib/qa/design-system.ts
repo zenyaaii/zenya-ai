@@ -67,6 +67,45 @@ export const BOX_SYSTEM: Record<BoxKind, BoxSpec> = {
 export const CONTAINER_RADII = [28, 24, 22, 20, 18, 16]
 
 /**
+ * beynoun.com's own boxes as they stand on 2026-11-27. Anas looked at the
+ * sample that moved them onto the dashboard's box system and decided to keep
+ * them as they are, so these exact measurements are accepted: a box is only
+ * reported when its class is new, or when it no longer measures what it did
+ * that day (a different radius, a new border). Keyed by the last step of the
+ * box's selector; the values are the problems boxProblems() gave it then.
+ */
+export const ACCEPTED_OWN_BOXES: Record<string, string[]> = {
+  'article.s1-card.glass': ['زاوية 30px (النظام: 24 للمربع، 20 لمربع الرقم)', 'حد صلب غامق (النظام: خط شفاف بلون الحبر 8%)'],
+  'article.s11-dc.glass': ['زاوية 26px (النظام: 24 للمربع، 20 لمربع الرقم)', 'حد صلب غامق (النظام: خط شفاف بلون الحبر 8%)'],
+  'article.s11-tile.glass': ['زاوية 26px (النظام: 24 للمربع، 20 لمربع الرقم)'],
+  'div.s1-fbase': ['قسم مفصول بخط بدل أن يكون في مربع'],
+  'div.s11-band': ['زاوية 36px (النظام: 24 للمربع، 20 لمربع الرقم)'],
+  'div.s11-floor.glass': ['زاوية 32px (النظام: 24 للمربع، 20 لمربع الرقم)'],
+  'li.zx-fitem': ['قسم مفصول بخط بدل أن يكون في مربع'],
+  'li.zx-pitem': ['قسم مفصول بخط بدل أن يكون في مربع'],
+  'section.zx-band': ['زاوية 32px (النظام: 24 للمربع، 20 لمربع الرقم)'],
+  'section.zx-close': ['زاوية 32px (النظام: 24 للمربع، 20 لمربع الرقم)'],
+  'section.zx-mirror': ['قسم مفصول بخط بدل أن يكون في مربع'],
+  'span.b': ['حد صلب غامق (النظام: خط شفاف بلون الحبر 8%)'],
+}
+
+/** The night's lights and glows that were on the same pages that day, accepted with the boxes. */
+export const ACCEPTED_OWN_GRADIENTS = ['div.dv-base', 'i.b1', 'i.b2', 'i.b3', 'i.g1', 'i.g2', 'i.g3', 'i.o1', 'i.o2', 'i.o3', 'span.lab']
+
+const lastStep = (sel: string) => sel.split(' > ').pop() || sel
+
+/** True when a box on beynoun.com is one of the accepted ones, measuring exactly what it did. */
+export function acceptedOwnBox(sel: string, problems: string[]): boolean {
+  const ok = ACCEPTED_OWN_BOXES[lastStep(sel)]
+  return !!ok && problems.every((p) => ok.includes(p))
+}
+
+/** True when a gradient on beynoun.com is one of the accepted lights. */
+export function acceptedOwnGradient(sel: string): boolean {
+  return ACCEPTED_OWN_GRADIENTS.includes(lastStep(sel))
+}
+
+/**
  * Classify a measured box. A container (bigger than a control) must be a card
  * or a stat: one of the system radii, the 1px ring edge, no hard border, no
  * gradient. Returns what is wrong in Arabic, or [] when it conforms.
