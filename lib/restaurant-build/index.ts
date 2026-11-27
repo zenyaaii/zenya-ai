@@ -7,7 +7,9 @@ import { analyzeOne, mergeResults, parseJsonSafe, type Category } from '@/lib/me
 import type { RestaurantColors, RestaurantContent } from '@/utils/restaurant/types'
 import type { ServiceContent } from '@/utils/services/types'
 import { KIND, type NicheKind } from '@/utils/services/kinds'
-import { placeOf, googlePhotos, instagramOf, facebookOf, type Place, type Social } from './sources'
+import { placeOf, googlePhotos, googleMenuPhotos, instagramOf, facebookOf, type Place, type Social } from './sources'
+import { findMenu } from './find-menu'
+import { withTimeout } from '@/lib/menu-ocr'
 import { findSocial, type Who, type Found } from './find-social'
 import { cleanPhotos, contactSheet, applyVerdicts, choose, judgePrompt, type Judged, type Picks, type Niche } from './photos'
 import { measure, snap, paletteOf } from './palette'
@@ -50,7 +52,7 @@ export type BuildFile = {
   sources: { google: { photos: number; reviews: number }; instagram?: string; facebook?: string; found_by_search?: string }
   photos: { id: string; src: string; kind: string; quality: number; appetite: number; dish?: string; alt?: string; used?: string; rejected?: string; author?: string }[]
   colors: { identity: string[]; mood: 'dark' | 'light'; from: number[] }
-  menu: { from: 'photo' | 'reviews'; items: number }
+  menu: { from: 'menu-tab' | 'photo' | 'reviews'; items: number; pages?: number }
   missing: string[]
   visitor: { round: number; score: number; notes: string[] }[]
   published: boolean
@@ -60,6 +62,28 @@ const aiClient = () => {
   const apiKey = aiKey()
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY missing')
   return new AiClient({ apiKey })
+}
+
+/**
+ * Menu-tab pages read for a lead build. The wizard reads up to 40 because the
+ * owner is paying attention to his own menu; a lead build runs for hundreds of
+ * leads, so it reads the newest 12 (one read each, about $0.03).
+ */
+const LEAD_MENU_PAGES = 12
+
+/**
+ * The tab holds every menu the place ever had, often in two languages: merging
+ * them all mixed English and Arabic and 2023 prices with 2025 ones («لبش»).
+ * Keep the Arabic pages when there are any (the site is Arabic), then only the
+ * pages put up within 60 days of the newest one: one menu, at today's prices.
+ */
+function newestMenu<T extends { date?: string; categories: Category[] }>(pages: T[]): T[] {
+  const arabic = (p: T) => /[\u0600-\u06FF]/.test(p.categories.map((c) => c.name + c.items.map((i) => i.name).join('')).join(''))
+  const pool = pages.some(arabic) ? pages.filter(arabic) : pages
+  const newest = pool.map((p) => p.date || '').sort().pop() || ''
+  if (!newest) return pool.slice(0, 1)
+  const floor = new Date(Date.parse(newest) - 60 * 86_400_000).toISOString().slice(0, 10)
+  return pool.filter((p) => (p.date || '') >= floor)
 }
 
 async function vision(prompt: string, images: Buffer[], op: string, maxTokens = 3000): Promise<any> {
@@ -90,6 +114,13 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
   // 1b — no saved account for a network: search for the place's own (find-social.ts).
   // The search takes the longest (~1 min): Google's details and photos load meanwhile.
   const placeP = placeOf(placeId)
+  // 1c — the «Menu» tab on Google Maps (Apify), fetched alongside: the Places
+  // API stops at 10 photos and has no menu tab, so without it most lead
+  // builds fell back to a menu guessed from reviews, with no prices
+  // («لبش», 2026-11-25). Never blocks the build: [] on any failure.
+  const menuTabP = niche === 'restaurant'
+    ? googleMenuPhotos(placeId, LEAD_MENU_PAGES).catch(() => [] as { url: string; date?: string }[])
+    : Promise.resolve([] as { url: string; date?: string }[])
   const [place, gPhotos, found] = await Promise.all([
     placeP,
     placeP.then(googlePhotos),
@@ -112,13 +143,29 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
   const judged = applyVerdicts(pics, ai)
   const picks = choose(judged, Number(ai?.hero) || 0)
 
-  // 4a — the menu, read from the place's own menu photo.
+  // 4a — the menu. First the Maps «Menu» tab, read the way the wizard reads
+  // it (find-menu.ts), newest page first. No owner is here to confirm a page,
+  // so only pages read in full (every name and price clear) are used.
   let menu: Category[] = []
-  if (picks.menus.length) {
+  let menuFrom: BuildFile['menu']['from'] = 'reviews'
+  let menuPages = 0
+  const menuTab = await menuTabP
+  if (menuTab.length) {
+    const found = await withTimeout(findMenu(aiClient(), { photos: [], menuTab, userId: null }), 100_000, 'lead_menu_tab').catch(() => null)
+    const clear = newestMenu((found?.pages || []).filter((p) => p.clear))
+    if (clear.length) {
+      menu = mergeResults(clear.map((p) => p.categories))
+      menuFrom = 'menu-tab'
+      menuPages = clear.length
+    }
+  }
+  // Else the place's own menu photo among the photos we already have.
+  if (!menu.length && picks.menus.length) {
     const client = aiClient()
     const reads = await Promise.all(picks.menus.slice(0, 3).map((m) =>
       analyzeOne(client, `data:image/jpeg;base64,${m.jpeg.toString('base64')}`, undefined, null)))
     menu = mergeResults(reads.map((r) => r.categories))
+    if (menu.length) menuFrom = 'photo'
   }
 
   // 4b — colours: the AI names them, the pixels decide them.
@@ -157,7 +204,7 @@ export async function prepare(placeId: string, socialLink: string | null, who?: 
     sources: { google: { photos: gPhotos.length, reviews: place.reviews.length }, instagram: social.instagram?.handle, facebook: social.facebook?.url, found_by_search: found.why },
     photos: judged.map((j) => ({ id: j.id, src: j.src, kind: j.v.kind, quality: j.v.quality, appetite: j.v.appetite, dish: j.v.dish || undefined, alt: j.v.alt || undefined, used: roleOf(j.id), rejected: j.why, author: j.author })),
     colors: { identity: identity.map((c) => '#' + c.map((x) => Math.round(x).toString(16).padStart(2, '0')).join('')), mood, from },
-    menu: { from: menu.length ? 'photo' : 'reviews', items: menu.reduce((n, c) => n + c.items.length, 0) },
+    menu: { from: menuFrom, items: menu.reduce((n, c) => n + c.items.length, 0), ...(menuPages ? { pages: menuPages } : {}) },
     missing, visitor: [], published: false,
   }
   return { place, social, picks, judged, urls, colors, mood, menu, file, found }
