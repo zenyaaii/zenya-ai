@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ratingOf } from '@/lib/rating'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -159,6 +159,20 @@ const INITIAL_FORM: Form = {
 
 const EMAIL_RE = /^\S+@\S+\.\S+$/
 
+/**
+ * The general wizard's answers outlive a reload (a call, another app), kept in
+ * this browser per account like the niche and restaurant wizards' drafts.
+ */
+const DRAFT_PREFIX = 'beynoun:services-form:v1:'
+function loadDraft(userId: string): Form | null {
+  try {
+    const d = JSON.parse(localStorage.getItem(DRAFT_PREFIX + userId) || 'null')
+    // Over the defaults: a draft saved before a field existed still loads.
+    if (d && Array.isArray(d.services) && Array.isArray(d.reviews)) return { ...INITIAL_FORM, ...d } as Form
+  } catch { /* unreadable: start empty */ }
+  return null
+}
+
 /** What the general wizard's category starts as, for a kind picked in the sheet. */
 const KIND_CATEGORY: Record<string, string> = {}
 
@@ -204,9 +218,13 @@ export default function ServicesWizardPage() {
 
 function GeneralServicesWizard({ category, onBack }: { category?: string; onBack?: () => void }) {
   const router = useRouter()
-  const { toast } = useNotify()
+  const { toast, confirm } = useNotify()
   const [authReady, setAuthReady] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [restored, setRestored] = useState(false)
   const [form, setForm] = useState<Form>(() => ({ ...INITIAL_FORM, category: category || '' }))
+  // The form the wizard opened with: no draft is kept until it changes.
+  const blank = useRef(form)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorKey, setErrorKey] = useState(0)
@@ -222,10 +240,37 @@ function GeneralServicesWizard({ category, onBack }: { category?: string; onBack
         router.push('/login?mode=signup&next=/theme/new/services')
         return
       }
+      setUserId(user.id)
+      const draft = loadDraft(user.id)
+      if (draft) {
+        setForm(draft)
+        setRestored(true)
+      }
       setAuthReady(true)
     })
     return () => { cancelled = true }
   }, [router])
+
+  useEffect(() => {
+    if (!userId || form === blank.current) return
+    try { localStorage.setItem(DRAFT_PREFIX + userId, JSON.stringify(form)) } catch { /* storage full or blocked: the answers stay on the page */ }
+  }, [userId, form])
+
+  function dropDraft() {
+    if (!userId) return
+    try { localStorage.removeItem(DRAFT_PREFIX + userId) } catch { /* nothing was kept */ }
+  }
+  async function startFresh() {
+    const { confirmed } = await confirm({ title: 'مسح النموذج والبدء من جديد؟', message: 'ستُحذف مسوّدتك الحالية.', confirmText: 'ابدأ من جديد', tone: 'danger' })
+    if (!confirmed) return
+    dropDraft()
+    const fresh = { ...INITIAL_FORM, category: category || '' }
+    blank.current = fresh
+    setForm(fresh)
+    setRestored(false)
+    setError(null)
+    setStep(0)
+  }
 
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -386,6 +431,8 @@ function GeneralServicesWizard({ category, onBack }: { category?: string; onBack
         return
       }
       if (!saveRes.ok || !saveJson?.id) throw new Error(saveJson?.error || 'فشل الحفظ')
+      // The site holds the answers now; the next visit starts a new one.
+      dropDraft(); setUserId(null)
       router.push(`/preview/services/${saveJson.id}?created=1`)
     } catch (err: any) {
       setError(err?.message || 'حدث خطأ ما أثناء توليد موقعك.')
@@ -652,7 +699,16 @@ function GeneralServicesWizard({ category, onBack }: { category?: string; onBack
         onStep={setStep}
         progress={{ pct }}
         scrollKey={errorKey || undefined}
-        notice={error ? <Notice tone="bad">{error}</Notice> : undefined}
+        notice={error || restored ? (
+          <>
+            {restored ? (
+              <Notice action={<button type="button" onClick={startFresh}>ابدأ من جديد</button>}>
+                <strong>حفظنا مسوّدتك.</strong> نُكمل من حيث توقّفت.
+              </Notice>
+            ) : null}
+            {error ? <Notice tone="bad">{error}</Notice> : null}
+          </>
+        ) : undefined}
         final={{ label: loading ? 'جارٍ توليد موقعك…' : 'ولّد قالب الحِرَف', slide: 'هيا بنا', onClick: startGenerate, busy: loading }}
       />
       <AiContentDisclaimer

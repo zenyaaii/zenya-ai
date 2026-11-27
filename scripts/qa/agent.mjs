@@ -17,7 +17,7 @@
  *
  * Gates (each 0–100, and each finding names the element and the page):
  *   1 الألوان           every painted colour explained by the site's palette; palette from the business, not ours
- *   2 التصميم والستايل   overflow, type floor, Arabic tracking, tap targets, text covered by something, fonts, boxes
+ *   2 التصميم والستايل   overflow, type floor, Arabic tracking, tap targets, text covered by something, fonts, boxes, text lost to Reduce Motion
  *   3 السكشنز والمعلومات  every fact shown, no section without data, no placeholder, no empty box, no duplicate page
  *   4 الطلبات            no failed request, no console error, no broken image, no preview host
  *   5 الأزرار والروابط    WhatsApp / call / map / email go to the right place, internal links open
@@ -43,6 +43,7 @@ const WIDTHS = String(arg('widths', '390,1440')).split(',').map(Number)
 const CONC = Number(arg('concurrency', 3))
 const SHOTS = !argv.includes('--no-shots')
 const GOOGLE = argv.includes('--google')
+const MOTION = !argv.includes('--no-motion')
 fs.mkdirSync(path.join(OUT, 'shots'), { recursive: true })
 
 /* ── the reference layer, bundled from lib/qa (real app code, not a copy) ── */
@@ -178,9 +179,10 @@ async function visit(ctx, url, width, opts) {
   return { url, width, status, html, loadMs, probe, net: { ...net, hosts: [...net.hosts] }, shot }
 }
 
-async function newContext(browser, width) {
+async function newContext(browser, width, extra = {}) {
   const phone = width < 900
   const ctx = await browser.newContext({
+    ...extra,
     viewport: { width, height: phone ? 844 : 900 },
     deviceScaleFactor: 1, locale: 'ar', timezoneId: 'Asia/Riyadh',
     isMobile: phone, hasTouch: phone,
@@ -192,6 +194,55 @@ async function newContext(browser, width) {
   await ctx.addInitScript(() => { try { Object.defineProperty(window, 'outerWidth', { get: () => window.innerWidth }) } catch { /* sealed */ } })
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort())
   return ctx
+}
+
+/* ── Reduce Motion: the page as a visitor who turned motion off sees it (docs/qa-agent.md, trap 13) ── */
+// What a visitor could read on one page: every block of text that was opaque at some point of a slow
+// sweep (in view), or at the end of it (reveals that run once stay revealed).
+async function readable() {
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const H = () => document.documentElement.scrollHeight
+  const blocks = [...document.querySelectorAll('h1,h2,h3,h4,p,li,blockquote,dt,dd,figcaption')]
+    .filter((e) => (e.innerText || '').trim().length >= 3 && !e.closest('header,nav,footer,dialog,[role=dialog]'))
+  const shown = (e) => { for (let n = e; n && n.nodeType === 1; n = n.parentElement) { const cs = getComputedStyle(n); if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false } return true }
+  const seen = new Set()
+  const look = (inView) => {
+    for (const e of blocks) {
+      if (seen.has(e)) continue
+      const r = e.getBoundingClientRect()
+      if (r.width < 1 || r.height < 1 || (inView && (r.bottom < 0 || r.top > innerHeight))) continue
+      if (shown(e)) seen.add(e)
+    }
+  }
+  for (let y = 0; y <= H(); y += Math.round(innerHeight * 0.5)) {
+    window.scrollTo(0, y)
+    // smooth scroll glides: wait until it arrives (trap 5)
+    const t = Date.now(), to = Math.min(y, H() - innerHeight)
+    while (Math.abs(scrollY - to) > 4 && Date.now() - t < 900) await wait(50)
+    await wait(250); look(true)
+  }
+  await wait(1200); look(false)
+  const key = (e) => e.innerText.trim().replace(/\s+/g, ' ').slice(0, 70)
+  return [...new Set([...seen].map(key))]
+}
+// The first page at phone width twice, with and without Reduce Motion: text that only the first
+// visitor can read is content the second one never sees.
+async function motionPass(browser, url) {
+  const read = async (reducedMotion) => {
+    const ctx = await newContext(browser, WIDTHS[0], { reducedMotion })
+    try {
+      const page = await ctx.newPage()
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
+      await page.waitForLoadState('load', { timeout: 20000 }).catch(() => {})
+      await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {})
+      return await page.evaluate(readable)
+    } catch { return null } finally { await ctx.close().catch(() => {}) }
+  }
+  const moving = await read('no-preference')
+  const still = await read('reduce')
+  if (!moving || !still) return null
+  const got = new Set(still)
+  return { url, lost: moving.filter((t) => !got.has(t)), moving: moving.length, still: still.length }
 }
 
 /* ── Google: the outside truth for a place ── */
@@ -277,6 +328,7 @@ function judge(site, ref, visits, mode, google) {
     boxes: { severity: 'high', title: 'مربعات خارج نظام مربعات الإحصائيات', base: 4, per: 0.5, cap: 25 },
     gradients: { severity: 'medium', title: 'تدرجات لونية', base: 3, per: 0.5, cap: 6 },
     broken: { severity: 'high', title: 'كلمة مكسورة على سطرين داخل زر أو رابط', base: 5, per: 1, cap: 10 },
+    still: { severity: 'high', title: 'نصوص لا تظهر لمن فعّل «تقليل الحركة» في جهازه', base: 15, per: 0.5, cap: 25 },
   }
   const issue = (kind, page, items, extra = {}) => {
     const K = KINDS[kind]
@@ -310,6 +362,8 @@ function judge(site, ref, visits, mode, google) {
       if (grads.length) issue('gradients', where, grads.map((g) => ({ key: g.sel, label: g.sel.split(' > ').pop(), sel: g.sel })))
     }
   }
+  // iPhone: الإعدادات ← تسهيلات الاستخدام ← الحركة ← تقليل الحركة. A few lost lines can be a rotating set; a section is not
+  if (site._still?.lost?.length >= 3) issue('still', `${new URL(site._still.url).pathname} @${WIDTHS[0]} مع «تقليل الحركة»`, site._still.lost.map((t) => ({ key: t, label: `«${t}»` })))
   for (const it of issues.values()) {
     const K = KINDS[it.kind], n = it.items.size
     const items = [...it.items.values()]
@@ -519,6 +573,7 @@ async function auditSite(browser, site, mode) {
   }
   for (const p of pages) visits.push(await visit(phoneCtx, site.url + p, WIDTHS[0], { shot: mode === 'own', shotName: safe(site.id + p) }))
   await phoneCtx.close()
+  site._still = MOTION ? await motionPass(browser, site.url + firstPath) : null
   for (const w of WIDTHS.slice(1)) {
     const ctx = await newContext(browser, w)
     visits.push(await visit(ctx, site.url + firstPath, w, { shot: true, shotName: safe(site.id) }))
@@ -539,6 +594,7 @@ async function auditSite(browser, site, mode) {
     ...res,
     pages: visits.map((v) => ({ url: v.url, width: v.width, status: v.status, loadMs: v.loadMs, words: v.probe?.words || 0, shot: v.shot, fixed: v.probe?.fixed, fonts: v.probe?.fonts })),
     google: google ? { name: google.displayName?.text, rating: google.rating, count: google.userRatingCount, status: google.businessStatus } : null,
+    reduceMotion: site._still ? { lost: site._still.lost.length, readable: site._still.moving, sample: site._still.lost.slice(0, 6) } : null,
     ms: Date.now() - started,
   }
 }

@@ -57,7 +57,7 @@ Two decisions of Anas (2026-11-27) are built in:
 | Gate | What it measures | Reference |
 |---|---|---|
 | 1 Colours | Every painted colour, weighted by area, explained by the site's palette (exactly, or as a blend towards its grounds/ink). Whether the palette is the business's own (`colorOverrides` measured from its photos) or one of ours (stock preset, template default). | `reference.ts` STOCK, `design-system.ts` |
-| 2 Design | Horizontal scroll, text under 12 rendered px, Arabic letter-spacing, tap targets (32 coarse / 24 fine), a word broken across two lines inside a button, covered text, contrast (4.5 / 3 large), fixed bars covering the phone screen, font count. In own mode also: boxes outside the v6 box system, gradients. | `docs/zenya-theme-check.md` floors |
+| 2 Design | Horizontal scroll, text under 12 rendered px, Arabic letter-spacing, tap targets (32 coarse / 24 fine), a word broken across two lines inside a button, covered text, contrast (4.5 / 3 large), fixed bars covering the phone screen, font count, text a visitor with Reduce Motion never sees (trap 13). In own mode also: boxes outside the v6 box system, gradients. | `docs/zenya-theme-check.md` floors |
 | 3 Information | Each fact in the data (name, phone, services, menu items, prices, reviews…) shows on the site; sections that exist without data; forbidden copy; numbers no source backs; content a phone visitor never sees; duplicate pages; template English. Optional Google truth. | `reference.ts` |
 | 4 Requests | Pages that do not open, failed requests (ours high, third party low), page errors, hydration mismatches, broken images, preview-host requests, mixed content. | — |
 | 5 Actions | WhatsApp/call/map/email links exist and go to the number/address in the data; dead links; unlabelled buttons; every internal link opens. | `reference.ts` actions |
@@ -117,12 +117,24 @@ up to twelve examples; the penalty grows with distinct offenders and is capped.
     section that is not in a box («قسم مفصول بخط»), not as a box with radius 0. A
     capsule (header pill, chip) is the pill shape; its accent edge is how it shows
     it is selected, so its border is not judged.
+13. **Reduce Motion is a different visitor.** Every pass above runs with motion
+    on, so a page that reveals its sections only by animating them can be blank
+    for someone who turned motion off (iPhone: الإعدادات ← تسهيلات الاستخدام ←
+    الحركة ← تقليل الحركة) and still score well. It happened: the wellness
+    template's `revealAnim` dropped its start and end states under
+    `useReducedMotion()`, the server had already painted every section at
+    `opacity: 0`, and nothing ever revealed them. The agent now reads the first
+    page twice at phone width, with `reducedMotion: 'no-preference'` and
+    `'reduce'`, the same slow sweep both times, and reports the lines only the
+    first visitor could read. Three or more lost lines is a finding; fewer can be
+    a rotating set that stops when motion is off. `--no-motion` skips the pass.
 
 Checks that only a person had caught before they were added: a word broken
 across two lines inside a button («اح / جز» when a long shop name squeezes the
 restaurant header; «احج / ز / جلس / تك» when it squeezes the wellness one into
-a circle), empty photo frames for dishes without a photo, and a kind picker
-whose every choice leaves the wizard.
+a circle), empty photo frames for dishes without a photo, a kind picker whose
+every choice leaves the wizard, and sections that never appear with Reduce
+Motion on.
 
 ## Competitors
 

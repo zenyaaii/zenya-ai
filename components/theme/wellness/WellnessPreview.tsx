@@ -26,21 +26,29 @@ type WellnessView = 'home' | 'treatments' | 'team' | 'space' | 'about' | 'contac
 // callbacks and conditional `view === '…'` branches without violating the
 // rules of hooks. Every component that uses them calls `useReducedMotion()`
 // once at the top to get `rm`, then threads it through.
+//
+// Start and end are the same for every visitor; only the travel time depends
+// on `rm`. The server cannot know the visitor's setting, so it always paints
+// the hidden start. When `initial`/`whileInView` were `{}` for reduced motion,
+// nothing ever moved that paint to visible, and a visitor with "Reduce Motion"
+// on saw only the header and the hero.
+const STILL = { duration: 0 }
+
 function revealAnim(rm: boolean, delay = 0) {
   return {
-    initial: rm ? {} : { opacity: 0, y: 28 },
-    whileInView: rm ? {} : { opacity: 1, y: 0 },
+    initial: { opacity: 0, y: 28 },
+    whileInView: { opacity: 1, y: 0 },
     viewport: { once: true, amount: 0.15 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }
+    transition: rm ? STILL : { duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }
   }
 }
 
 function fadeAnim(rm: boolean, delay = 0) {
   return {
-    initial: rm ? {} : { opacity: 0 },
-    whileInView: rm ? {} : { opacity: 1 },
+    initial: { opacity: 0 },
+    whileInView: { opacity: 1 },
     viewport: { once: true, amount: 0.15 },
-    transition: { duration: 0.7, ease: 'easeOut', delay }
+    transition: rm ? STILL : { duration: 0.7, ease: 'easeOut', delay }
   }
 }
 
@@ -216,11 +224,11 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
       }}
     >
       <div className="flex items-center justify-between gap-4">
-        <button onClick={() => go('home')} style={{ fontFamily: 'var(--wl-heading)' }}>
+        <button onClick={() => go('home')} className="min-w-0" style={{ fontFamily: 'var(--wl-heading)' }}>
           <span className="text-xl font-semibold" style={{ color: 'var(--wl-text)' }}>
             {content.brand.name}
           </span>
-          <span className="ml-2 hidden text-xs uppercase opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
+          <span className="ms-2 hidden text-xs uppercase opacity-50 sm:inline" style={{ color: 'var(--wl-muted)' }}>
             {content.brand.type}
           </span>
         </button>
@@ -232,15 +240,19 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
+          {/* Beside a long name on a phone the full label was squeezed into a
+              circle of word pieces («احج / ز / جلس / تك»). There the button
+              says only the verb; the full label stays on the hero and from sm. */}
           <motion.button
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => go('contact')}
-            className="rounded-full px-5 py-2.5 text-xs font-bold uppercase shadow-sm"
+            className="whitespace-nowrap rounded-full px-5 py-2.5 text-xs font-bold uppercase shadow-sm"
             style={{ background: 'var(--wl-accent)', color: isDark ? '#0e0e0e' : 'var(--wl-primary)' }}
           >
-            {content.hero.cta_primary}
+            <span className="sm:hidden">{bookVerb(content)}</span>
+            <span className="hidden sm:inline">{content.hero.cta_primary}</span>
           </motion.button>
           {/* Hamburger — only below sm, where the inline nav is hidden. */}
           <button
@@ -248,7 +260,7 @@ function NavBar({ content, isDark, view, setView }: { content: WellnessContent; 
             aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-9 w-9 items-center justify-center rounded-full sm:hidden"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full sm:hidden"
             style={{ border: '1px solid var(--wl-border)', color: 'var(--wl-text)' }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -305,9 +317,9 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
           {/* Badge */}
           {content.hero.badge && (
             <motion.div
-              initial={rm ? {} : { opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={rm ? STILL : { duration: 0.5 }}
               className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium uppercase text-white backdrop-blur-sm"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -317,9 +329,9 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 
           {/* Eyebrow */}
           <motion.p
-            initial={rm ? {} : { opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.08 }}
+            transition={rm ? STILL : { duration: 0.55, delay: 0.08 }}
             className="mb-4 text-xs uppercase text-white/70"
           >
             {content.hero.eyebrow}
@@ -327,9 +339,9 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 
           {/* Headline */}
           <motion.h1
-            initial={rm ? {} : { opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            transition={rm ? STILL : { duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="mb-6 text-5xl font-light leading-[1.1] text-white sm:text-6xl lg:text-7xl"
             style={{ fontFamily: 'var(--wl-heading)' }}
           >
@@ -340,9 +352,9 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 
           {/* Subheadline */}
           <motion.p
-            initial={rm ? {} : { opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={rm ? STILL : { duration: 0.6, delay: 0.3 }}
             className="mt-6 max-w-lg text-base font-light leading-relaxed text-white/80"
           >
             {content.hero.subheadline}
@@ -350,9 +362,9 @@ function HeroSection({ content, isDark, onBook }: { content: WellnessContent; is
 
           {/* CTAs */}
           <motion.div
-            initial={rm ? {} : { opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.42 }}
+            transition={rm ? STILL : { duration: 0.55, delay: 0.42 }}
             className="mt-10 flex flex-wrap gap-4"
           >
             <motion.button
@@ -850,10 +862,13 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
             }}
           >
             <BookingForm type="appointment" palette={wellnessPalette(isDark)} />
-            {whatsappHref(content.links?.whatsapp) ? (
+            {whatsappHref(content.links?.whatsapp) || telHref(content) ? (
               <div className="mt-4 flex flex-col items-center gap-3">
                 <span className="text-xs" style={{ color: isDark ? 'rgba(255,255,255,0.55)' : '#6b6b6b' }}>أو</span>
-                <WhatsAppBookButton content={content} />
+                <div className="flex flex-wrap justify-center gap-3">
+                  <WhatsAppBookButton content={content} />
+                  <CallBookButton content={content} />
+                </div>
               </div>
             ) : null}
             {content.booking_cta.note && (
@@ -889,6 +904,17 @@ function BookingCtaSection({ content, isDark }: { content: WellnessContent; isDa
 function contactHref(content: WellnessContent): string {
   const phone = (content.footer.phone || '').replace(/[^\d+]/g, '')
   return phone ? `tel:${phone}` : `mailto:${content.footer.email}`
+}
+
+/** The owner's number as a tel: link, or '' when there is no usable number. */
+function telHref(content: WellnessContent): string {
+  const phone = (content.footer.phone || '').replace(/[^\d+]/g, '')
+  return phone.replace(/\D/g, '').length >= 6 ? `tel:${phone}` : ''
+}
+
+/** «اتصل» or «اتصلي», following the verb the site already books with. */
+function callVerb(content: WellnessContent): string {
+  return bookVerb(content) === 'احجزي' ? 'اتصلي' : 'اتصل'
 }
 
 function wellnessPalette(isDark: boolean) {
@@ -972,7 +998,11 @@ function FooterSection({ content, isDark, onBook }: { content: WellnessContent; 
               تواصل
             </p>
             <div className="space-y-2 text-sm font-light" style={{ color: isDark ? 'var(--wl-muted)' : 'rgba(255,255,255,0.7)' }}>
-              {content.footer.phone ? <p><bdi dir="ltr">{content.footer.phone}</bdi></p> : null}
+              {content.footer.phone ? (
+                <p>{telHref(content)
+                  ? <a href={telHref(content)} className="inline-flex min-h-[44px] -my-3 items-center underline underline-offset-4 hover:opacity-80"><bdi dir="ltr">{content.footer.phone}</bdi></a>
+                  : <bdi dir="ltr">{content.footer.phone}</bdi>}</p>
+              ) : null}
               <p>{content.footer.email}</p>
               {content.footer.address && <p>{content.footer.address}</p>}
             </div>
@@ -1076,12 +1106,31 @@ function WhatsAppBookButton({ content, onDark = false }: { content: WellnessCont
   )
 }
 
+/** "Call to book", beside "Book on WhatsApp" under the booking form. Nothing when there is no number. */
+function CallBookButton({ content }: { content: WellnessContent }) {
+  const href = telHref(content)
+  if (!href) return null
+  return (
+    <motion.a
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.97 }}
+      href={href}
+      className="inline-flex items-center justify-center gap-2 rounded-full border px-8 py-4 text-sm font-bold"
+      style={{ borderColor: 'var(--wl-border)', color: 'var(--wl-text)', background: 'var(--wl-surface)' }}
+    >
+      <Icon name="phone" size={18} animation="none" hover={false} static />
+      {callVerb(content)} للحجز
+    </motion.a>
+  )
+}
+
 // ─── Location ─────────────────────────────────────────────────────────────────
 function LocationSection({ content, isDark }: { content: WellnessContent; isDark: boolean }) {
   const rm = !!useReducedMotion()
   const links = mapLinks(content)
   if (!links) return null
   const wa = whatsappHref(content.links?.whatsapp)
+  const tel = telHref(content)
   const details = (
     <div className="flex flex-col gap-5">
       <div>
@@ -1098,7 +1147,14 @@ function LocationSection({ content, isDark }: { content: WellnessContent; isDark
           <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>ساعات العمل</dt><dd style={{ color: 'var(--wl-text)' }}>{content.footer.hours}</dd></div>
         ) : null}
         {content.footer.phone ? (
-          <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>الهاتف</dt><dd dir="ltr" className="text-right" style={{ color: 'var(--wl-text)' }}>{content.footer.phone}</dd></div>
+          <div><dt className="mb-1 text-xs" style={{ color: 'var(--wl-muted)' }}>الهاتف</dt><dd dir="ltr" className="text-right" style={{ color: 'var(--wl-text)' }}>
+            {tel ? (
+              <a href={tel} className="inline-flex min-h-[44px] -my-[11px] items-center gap-2 font-semibold underline decoration-2 underline-offset-[6px]" style={{ textDecorationColor: 'var(--wl-accent)' }}>
+                <Icon name="phone" size={16} animation="none" hover={false} static />
+                {content.footer.phone}
+              </a>
+            ) : content.footer.phone}
+          </dd></div>
         ) : null}
       </dl>
       <div className="flex flex-wrap gap-3">
@@ -1112,6 +1168,14 @@ function LocationSection({ content, isDark }: { content: WellnessContent; isDark
             className="rounded-full border px-6 py-3 text-sm font-semibold"
             style={{ borderColor: 'var(--wl-border)', color: 'var(--wl-text)' }}>
             اسأل عن الطريق
+          </a>
+        ) : null}
+        {tel ? (
+          <a href={tel}
+            className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold"
+            style={{ borderColor: 'var(--wl-border)', color: 'var(--wl-text)' }}>
+            <Icon name="phone" size={16} animation="none" hover={false} static />
+            {callVerb(content)} بنا
           </a>
         ) : null}
       </div>

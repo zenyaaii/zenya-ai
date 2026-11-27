@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import {
   motion,
   AnimatePresence,
@@ -281,13 +281,17 @@ function Reveal({
 }
 
 function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boolean }) {
-  const todayLabel = useMemo(() => {
+  // Today's hours depend on the visitor's day, and the page may have been
+  // rendered and cached on another day. Read during render, the day made the
+  // server's text and the browser's differ (React #425), and React threw the
+  // server's page away and drew the whole site again in the browser. So the
+  // label is read after mount, in the visitor's own day.
+  const [todayLabel, setTodayLabel] = useState('')
+  useEffect(() => {
     const idx = new Date().getDay()
     const map = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
     const today = content.hours_location.hours.find((h) => h.day === map[idx])
-    if (!today) return ''
-    if (today.closed) return `مغلق اليوم`
-    return `اليوم · ${today.open} – ${today.close}`
+    setTodayLabel(!today ? '' : today.closed ? 'مغلق اليوم' : `اليوم · ${today.open} – ${today.close}`)
   }, [content.hours_location.hours])
 
   return (
@@ -298,8 +302,7 @@ function TopBar({ content, isDark }: { content: RestaurantContent; isDark: boole
     >
       <Container className="flex items-center justify-between py-2.5" >
         <div className="flex items-center gap-6" style={{ color: 'var(--rb-muted)' }}>
-          <span>{todayLabel}</span>
-          <span>·</span>
+          {todayLabel ? <><span>{todayLabel}</span><span>·</span></> : null}
           <span>{content.hours_location.address}</span>
         </div>
         <div className="flex items-center gap-6" style={{ color: 'var(--rb-muted)' }}>
@@ -350,7 +353,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
       transition={{ duration: 0.5, ease: EASE_OUT }}
     >
       <Container className="flex items-center justify-between py-5">
-        <button onClick={() => setView('home')} className="flex items-baseline gap-2">
+        <button onClick={() => setView('home')} className="flex min-w-0 items-baseline gap-2">
           <span
             style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: '1.45rem', fontWeight: 500 }}
           >
@@ -369,10 +372,12 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
             </button>
           ))}
         </nav>
-        <div className="flex items-center gap-2.5">
+        {/* A long name used to squeeze «احجز» into «اح / جز». The button and the
+            menu keep their width; the name takes what is left. */}
+        <div className="flex shrink-0 items-center gap-2.5">
           <motion.button
             onClick={() => setView('visit')}
-            className="inline-flex items-center px-5 py-2.5 text-[0.72rem] uppercase"
+            className="inline-flex items-center whitespace-nowrap px-5 py-2.5 text-[0.72rem] uppercase"
             style={{
               background: 'var(--rb-accent)',
               color: isDark ? '#0a0a0c' : '#ffffff',
@@ -390,7 +395,7 @@ function NavBar({ content, isDark, view, setView }: { content: RestaurantContent
             aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center md:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center md:hidden"
             style={{ border: '1px solid var(--rb-border)', color: 'var(--rb-text)' }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
@@ -619,25 +624,40 @@ function SignatureDishes({ content, isDark }: { content: RestaurantContent; isDa
           viewport={viewport}
         >
           {content.signature_dishes.slice(0, 4).map((dish, i) => {
-            // A photo only if it shows this dish. Without one the card keeps
-            // its shape as a panel in the accent, so the row still lines up.
+            // A photo only if it shows this dish. Without one the frame keeps
+            // its shape, so the row still lines up, and holds the dish itself:
+            // its name and description set like a printed menu card, inside a
+            // thin rule in the accent. It is never an empty panel.
             const photo = shownDishPhoto(dish)
-            return (
+            if (!photo) return (
             <motion.div key={i} variants={staggerChild} className="group">
               <div
-                className="relative aspect-[3/4] overflow-hidden mb-5"
-                style={photo ? undefined : { background: 'color-mix(in srgb, var(--rb-accent) 16%, transparent)' }}
+                className="relative aspect-[3/4] overflow-hidden mb-5 flex flex-col items-center justify-center gap-3.5 px-[12%] py-[14%] text-center"
+                style={{ background: 'color-mix(in srgb, var(--rb-accent) 16%, transparent)' }}
               >
-                {photo && (
-                  <>
-                    <img
-                      src={photo}
-                      alt={dish.name}
-                      className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 transition" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%)' }} />
-                  </>
-                )}
+                <span aria-hidden className="pointer-events-none absolute inset-2.5" style={{ border: '1px solid color-mix(in srgb, var(--rb-accent) 45%, transparent)' }} />
+                <h3 style={{ fontFamily: 'var(--rb-heading-font)', color: 'var(--rb-text)', fontSize: 'clamp(1.15rem, 4.4vw, 1.7rem)', lineHeight: 1.25 }}>
+                  {dish.name}
+                </h3>
+                <span aria-hidden className="block h-px w-7 shrink-0" style={{ background: 'var(--rb-accent)' }} />
+                {dish.description ? (
+                  <p className="line-clamp-5" style={{ color: 'var(--rb-muted)', fontSize: 'clamp(0.8rem, 2.6vw, 0.92rem)', lineHeight: 1.6 }}>{dish.description}</p>
+                ) : null}
+                {dish.price ? (
+                  <p style={{ color: 'var(--rb-accent)', fontFamily: 'var(--rb-heading-font)', fontSize: '1.1rem' }}>{dish.price}</p>
+                ) : null}
+              </div>
+            </motion.div>
+            )
+            return (
+            <motion.div key={i} variants={staggerChild} className="group">
+              <div className="relative aspect-[3/4] overflow-hidden mb-5">
+                <img
+                  src={photo}
+                  alt={dish.name}
+                  className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 transition" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%)' }} />
                 <p
                   className="absolute bottom-4 right-4 text-[0.78rem]"
                   style={{ color: 'var(--rb-accent)', fontFamily: 'var(--rb-heading-font)', fontSize: '1.1rem' }}
