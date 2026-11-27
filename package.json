@@ -22,7 +22,10 @@
     "test:e2e:authed": "playwright test --project=authed",
     "test:e2e:money": "playwright test authed/checkout authed/webhook authed/domain",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "qa:site": "node scripts/qa/agent.mjs --url",
+    "qa:own": "node scripts/qa/agent.mjs --own",
+    "qa:wizards": "node scripts/qa/wizard.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
