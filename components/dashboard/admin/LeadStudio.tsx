@@ -83,6 +83,8 @@ export default function LeadStudio() {
   const { dark, toggle } = useDashTheme()
   // New reports from visitors (shake / corner button), shown on the «الزوار» tab.
   const [newReports, setNewReports] = useState(0)
+  // A link back from a research page (#research) opens on «البحوث».
+  useEffect(() => { if (window.location.hash === '#research') setTab('research') }, [])
   useEffect(() => {
     fetch('/api/admin/visitors?days=1', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
       .then((j) => { if (j) setNewReports(j.reports.filter((x: { status: string }) => x.status === 'new').length) }).catch(() => {})
